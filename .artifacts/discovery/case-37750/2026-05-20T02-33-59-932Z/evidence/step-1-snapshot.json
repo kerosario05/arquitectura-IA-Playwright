@@ -1,0 +1,104 @@
+{
+  "version": "1.0",
+  "url": "https://172.27.4.50/",
+  "title": "Kiosco de Autogestión - Banco Santa Cruz",
+  "capturedAt": "2026-05-20T02:34:12.299Z",
+  "elements": [
+    {
+      "id": "el-5",
+      "type": "button",
+      "text": "Iniciar",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "Iniciar",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Iniciar",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-2",
+      "type": "image",
+      "tagName": "img",
+      "visible": true,
+      "candidateLocators": [],
+      "dataHints": []
+    },
+    {
+      "id": "el-3",
+      "type": "heading",
+      "text": "¡Hola!",
+      "tagName": "h1",
+      "visible": true,
+      "nearbyText": "¡Hola!Bienvenido al kiosco de autogestión de Banco Santa Cruz",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "¡Hola!",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-4",
+      "type": "text",
+      "text": "Bienvenido al kiosco de autogestión de Banco Santa Cruz",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "¡Hola!Bienvenido al kiosco de autogestión de Banco Santa Cruz",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Bienvenido al kiosco de autogestión de Banco Santa Cruz",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-6",
+      "type": "text",
+      "text": "Iniciar",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Iniciar",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Iniciar",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-7",
+      "type": "text",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Iniciar",
+      "candidateLocators": [],
+      "dataHints": []
+    }
+  ],
+  "summary": {
+    "totalElements": 6,
+    "buttons": 1,
+    "links": 0,
+    "inputs": 0,
+    "selects": 0,
+    "tables": 0,
+    "dialogs": 0,
+    "headings": 1
+  }
+}

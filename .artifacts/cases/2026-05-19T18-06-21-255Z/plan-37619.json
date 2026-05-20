@@ -1,0 +1,58 @@
+{
+  "version": "1.0",
+  "source": "rule_based",
+  "status": "draft",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37619",
+    "caseId": 37619,
+    "title": "C37375 - Visualizar detalle de Tarjeta Visa Gold"
+  },
+  "requiredData": [
+    {
+      "key": "otp",
+      "required": true,
+      "resolved": false,
+      "reason": "Detected from TestRail scenario dataHints"
+    }
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "target": "APP_BASE_URL",
+      "description": "Navigate to base URL",
+      "evidence": true
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Apply configured login strategy",
+      "evidence": true
+    },
+    {
+      "index": 3,
+      "action": "noop",
+      "description": "1. Desde el listado de tarjetas de crédito, seleccionar 'Tarjeta Crédito Visa Gold'.",
+      "evidence": true
+    },
+    {
+      "index": 4,
+      "action": "noop",
+      "description": "Validar detalle de producto.",
+      "evidence": true
+    },
+    {
+      "index": 5,
+      "action": "noop",
+      "description": "Volver al listado si se requiere continuar.",
+      "expected": "Validar que la pantalla final muestre señales esperadas: - Tarjeta Crédito Visa Gold - Solicitar",
+      "evidence": true
+    }
+  ],
+  "notes": [
+    "This is an initial rule_based plan.",
+    "NOOP steps must be converted into executable actions by a future discovery/AI phase."
+  ],
+  "createdAt": "2026-05-19T18:06:28.055Z"
+}

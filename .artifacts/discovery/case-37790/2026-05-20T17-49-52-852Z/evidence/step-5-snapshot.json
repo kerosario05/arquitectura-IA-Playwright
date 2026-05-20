@@ -1,0 +1,332 @@
+{
+  "version": "1.0",
+  "url": "https://www.saucedemo.com/cart.html",
+  "title": "Swag Labs",
+  "capturedAt": "2026-05-20T17:49:58.495Z",
+  "elements": [
+    {
+      "id": "el-1",
+      "type": "button",
+      "text": "Open Menu",
+      "tagName": "button",
+      "inputType": "button",
+      "visible": true,
+      "nearbyText": "Open Menu",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Open Menu",
+          "exact": false,
+          "confidence": 0.75
+        },
+        {
+          "strategy": "css",
+          "value": "#react-burger-menu-btn",
+          "confidence": 0.55
+        }
+      ],
+      "dataHints": [],
+      "domId": "react-burger-menu-btn"
+    },
+    {
+      "id": "el-11",
+      "type": "link",
+      "text": "Sauce Labs Backpack",
+      "tagName": "a",
+      "visible": true,
+      "nearbyText": "Sauce Labs Backpackcarry.allTheThings() with the sleek, streamlined Sly Pack that melds uncompromising style with unequaled laptop and tablet protection.$29.99Remove",
+      "candidateLocators": [
+        {
+          "strategy": "testId",
+          "value": "item-4-title-link",
+          "confidence": 0.95
+        },
+        {
+          "strategy": "text",
+          "value": "Sauce Labs Backpack",
+          "exact": false,
+          "confidence": 0.75
+        },
+        {
+          "strategy": "css",
+          "value": "#item_4_title_link",
+          "confidence": 0.55
+        }
+      ],
+      "dataHints": [],
+      "href": "https://www.saucedemo.com/cart.html#",
+      "dataTestid": "item-4-title-link",
+      "domId": "item_4_title_link"
+    },
+    {
+      "id": "el-12",
+      "type": "button",
+      "text": "Remove",
+      "name": "remove-sauce-labs-backpack",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "$29.99Remove",
+      "candidateLocators": [
+        {
+          "strategy": "testId",
+          "value": "remove-sauce-labs-backpack",
+          "confidence": 0.95
+        },
+        {
+          "strategy": "text",
+          "value": "Remove",
+          "exact": false,
+          "confidence": 0.75
+        },
+        {
+          "strategy": "css",
+          "value": "#remove-sauce-labs-backpack",
+          "confidence": 0.55
+        },
+        {
+          "strategy": "css",
+          "value": "[name=\"remove-sauce-labs-backpack\"]",
+          "confidence": 0.5
+        }
+      ],
+      "dataHints": [],
+      "dataTestid": "remove-sauce-labs-backpack",
+      "className": "btn btn_secondary btn_small cart_button",
+      "domId": "remove-sauce-labs-backpack"
+    },
+    {
+      "id": "el-13",
+      "type": "button",
+      "text": "[REDACTED]",
+      "name": "[REDACTED]",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "[REDACTED]",
+      "candidateLocators": [
+        {
+          "strategy": "testId",
+          "value": "continue-shopping",
+          "confidence": 0.95
+        },
+        {
+          "strategy": "text",
+          "value": "[REDACTED]",
+          "exact": false,
+          "confidence": 0.75
+        },
+        {
+          "strategy": "css",
+          "value": "#continue-shopping",
+          "confidence": 0.55
+        },
+        {
+          "strategy": "css",
+          "value": "[name=\"[REDACTED]\"]",
+          "confidence": 0.5
+        }
+      ],
+      "dataHints": [],
+      "dataTestid": "continue-shopping",
+      "className": "btn btn_secondary back btn_medium",
+      "domId": "continue-shopping"
+    },
+    {
+      "id": "el-15",
+      "type": "button",
+      "text": "Checkout",
+      "name": "checkout",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "[REDACTED]",
+      "candidateLocators": [
+        {
+          "strategy": "testId",
+          "value": "checkout",
+          "confidence": 0.95
+        },
+        {
+          "strategy": "text",
+          "value": "Checkout",
+          "exact": false,
+          "confidence": 0.75
+        },
+        {
+          "strategy": "css",
+          "value": "#checkout",
+          "confidence": 0.55
+        },
+        {
+          "strategy": "css",
+          "value": "[name=\"checkout\"]",
+          "confidence": 0.5
+        }
+      ],
+      "dataHints": [],
+      "dataTestid": "checkout",
+      "className": "btn btn_action btn_medium checkout_button ",
+      "domId": "checkout"
+    },
+    {
+      "id": "el-16",
+      "type": "link",
+      "text": "Twitter",
+      "tagName": "a",
+      "visible": true,
+      "nearbyText": "Twitter",
+      "candidateLocators": [
+        {
+          "strategy": "testId",
+          "value": "social-twitter",
+          "confidence": 0.95
+        },
+        {
+          "strategy": "text",
+          "value": "Twitter",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "href": "https://twitter.com/saucelabs",
+      "dataTestid": "social-twitter"
+    },
+    {
+      "id": "el-17",
+      "type": "link",
+      "text": "Facebook",
+      "tagName": "a",
+      "visible": true,
+      "nearbyText": "Facebook",
+      "candidateLocators": [
+        {
+          "strategy": "testId",
+          "value": "social-facebook",
+          "confidence": 0.95
+        },
+        {
+          "strategy": "text",
+          "value": "Facebook",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "href": "https://www.facebook.com/saucelabs",
+      "dataTestid": "social-facebook"
+    },
+    {
+      "id": "el-18",
+      "type": "link",
+      "text": "LinkedIn",
+      "tagName": "a",
+      "visible": true,
+      "nearbyText": "LinkedIn",
+      "candidateLocators": [
+        {
+          "strategy": "testId",
+          "value": "social-linkedin",
+          "confidence": 0.95
+        },
+        {
+          "strategy": "text",
+          "value": "LinkedIn",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "href": "https://www.linkedin.com/company/sauce-labs/",
+      "dataTestid": "social-linkedin"
+    },
+    {
+      "id": "el-2",
+      "type": "image",
+      "tagName": "img",
+      "visible": true,
+      "nearbyText": "Open Menu",
+      "candidateLocators": [
+        {
+          "strategy": "testId",
+          "value": "open-menu",
+          "confidence": 0.95
+        }
+      ],
+      "dataHints": [],
+      "alt": "Open Menu",
+      "dataTestid": "open-menu",
+      "className": "bm-icon"
+    },
+    {
+      "id": "el-9",
+      "type": "text",
+      "text": "1",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "1",
+      "candidateLocators": [
+        {
+          "strategy": "testId",
+          "value": "shopping-cart-badge",
+          "confidence": 0.95
+        },
+        {
+          "strategy": "text",
+          "value": "1",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "dataTestid": "shopping-cart-badge",
+      "className": "shopping_cart_badge"
+    },
+    {
+      "id": "el-10",
+      "type": "text",
+      "text": "Your Cart",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Your Cart",
+      "candidateLocators": [
+        {
+          "strategy": "testId",
+          "value": "title",
+          "confidence": 0.95
+        },
+        {
+          "strategy": "text",
+          "value": "Your Cart",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "dataTestid": "title",
+      "className": "title"
+    },
+    {
+      "id": "el-14",
+      "type": "image",
+      "tagName": "img",
+      "visible": true,
+      "nearbyText": "[REDACTED]",
+      "candidateLocators": [],
+      "dataHints": [],
+      "alt": "Go back",
+      "className": "back-image"
+    }
+  ],
+  "summary": {
+    "totalElements": 12,
+    "buttons": 4,
+    "links": 4,
+    "inputs": 0,
+    "selects": 0,
+    "tables": 0,
+    "dialogs": 0,
+    "headings": 0
+  }
+}

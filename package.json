@@ -1,0 +1,41 @@
+{
+  "name": "web-ai-automation-runner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Generic web automation runner foundation with Playwright and TypeScript",
+  "scripts": {
+    "dev": "tsx src/main.ts",
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:framework": "playwright test --config playwright.config.framework.ts",
+    "test:generated": "playwright test tests/generated",
+    "test:all": "playwright test",
+    "install:browsers": "playwright install",
+    "typecheck": "tsc --noEmit",
+    "data:inspect": "tsx src/cli/data-inspect.ts",
+    "testrail:inspect": "tsx src/cli/testrail-inspect.ts",
+    "plans:generate": "tsx src/cli/plans-generate.ts",
+    "plans:enrich": "tsx src/cli/plans-enrich.ts",
+    "plans:execute": "tsx src/cli/plans-execute.ts",
+    "agent:prepare": "tsx src/cli/agent-prepare.ts",
+    "agent:validate": "tsx src/cli/agent-validate.ts",
+    "registry:inspect": "tsx src/cli/registry-inspect.ts",
+    "registry:promote": "tsx src/cli/registry-promote.ts",
+    "explorer:scan": "tsx src/cli/explorer-scan.ts",
+    "plans:promote": "tsx src/cli/plans-promote.ts",
+    "testrail:report": "tsx src/cli/testrail-report.ts",
+    "cases:list": "tsx src/cli/cases-list.ts",
+    "cases:start": "tsx src/cli/cases-start.ts",
+    "discovery:scan": "tsx src/cli/discovery-scan.ts",
+    "discovery:case": "tsx src/cli/discovery-case.ts"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.54.2",
+    "dotenv": "^16.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "version": "1.0",
+  "updatedAt": "2026-05-20T04:07:37.571Z",
+  "automations": [
+    {
+      "id": "c10002-test-automation-plan",
+      "externalId": "C10002",
+      "title": "Test automation plan",
+      "planPath": "C:\\MisProyectos\\MCP\\.tmp-test-debug3/automations/plans/c10002-test-automation-plan.plan.json",
+      "specPath": "C:\\MisProyectos\\MCP\\.tmp-test-debug3/tests/generated/c10002-test-automation-plan.spec.ts",
+      "status": "active",
+      "source": "manual",
+      "createdAt": "2026-05-19T16:22:52.738Z",
+      "updatedAt": "2026-05-19T16:22:52.739Z"
+    },
+    {
+      "id": "c37616-c37372-acceso-al-modulo-informacion-de-productos",
+      "externalId": "C37616",
+      "caseId": 37749,
+      "title": "C37372 - Acceso al modulo Informacion de productos",
+      "planPath": "./automations/plans/c37616-c37372-acceso-al-modulo-informacion-de-productos.plan.json",
+      "specPath": "./tests/generated/c37616-c37372-acceso-al-modulo-informacion-de-productos.spec.ts",
+      "status": "active",
+      "source": "manual",
+      "createdAt": "2026-05-19T16:32:15.443Z",
+      "updatedAt": "2026-05-20T01:51:26.402Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\cases\\2026-05-20T01-51-19-184Z\\plan-37749.json",
+      "lastExecutionResultPath": "C:\\MisProyectos\\MCP\\.artifacts\\cases\\2026-05-20T01-51-19-184Z\\results-37749.json"
+    },
+    {
+      "id": "c37750-consulta-listado-de-tarjetas-de-credito",
+      "externalId": "C37750",
+      "caseId": 37750,
+      "title": "Consulta listado de tarjetas de credito",
+      "planPath": "./automations/plans/c37750-consulta-listado-de-tarjetas-de-credito.plan.json",
+      "specPath": "./tests/generated/c37750-consulta-listado-de-tarjetas-de-credito.spec.ts",
+      "status": "active",
+      "source": "manual",
+      "createdAt": "2026-05-20T04:03:37.187Z",
+      "updatedAt": "2026-05-20T04:07:37.571Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\cases\\2026-05-20T04-07-22-715Z\\plan-37750.json",
+      "lastExecutionResultPath": "C:\\MisProyectos\\MCP\\.artifacts\\cases\\2026-05-20T04-07-22-715Z\\results-37750.json"
+    }
+  ]
+}

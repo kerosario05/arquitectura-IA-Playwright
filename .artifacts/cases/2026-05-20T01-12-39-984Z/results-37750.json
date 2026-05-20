@@ -1,0 +1,53 @@
+{
+  "generatedAt": "2026-05-20T01:13:10.015Z",
+  "total": 1,
+  "passed": 0,
+  "failed": 1,
+  "partial": 0,
+  "skipped": 0,
+  "results": [
+    {
+      "scenario": {
+        "source": "testrail",
+        "externalId": "C37750",
+        "caseId": 37750,
+        "title": "Consulta listado de tarjetas de credito"
+      },
+      "status": "failed",
+      "startedAt": "2026-05-20T01:12:47.123Z",
+      "finishedAt": "2026-05-20T01:13:10.014Z",
+      "durationMs": 22891,
+      "evidenceDir": "C:\\MisProyectos\\MCP\\.artifacts\\cases\\2026-05-20T01-12-39-984Z\\evidence",
+      "steps": [
+        {
+          "index": 1,
+          "action": "navigate",
+          "status": "failed",
+          "startedAt": "2026-05-20T01:12:47.123Z",
+          "finishedAt": "2026-05-20T01:13:08.180Z",
+          "durationMs": 21057,
+          "error": "page.goto: net::ERR_CONNECTION_TIMED_OUT at https://172.27.4.50/\nCall log:\n\u001b[2m  - navigating to \"https://172.27.4.50/\", waiting until \"domcontentloaded\"\u001b[22m\n",
+          "screenshotPath": "C:\\MisProyectos\\MCP\\.artifacts\\cases\\2026-05-20T01-12-39-984Z\\evidence\\step-001-navigate-failed.png"
+        },
+        {
+          "index": 2,
+          "action": "login",
+          "status": "skipped",
+          "startedAt": "2026-05-20T01:13:10.014Z",
+          "finishedAt": "2026-05-20T01:13:10.014Z",
+          "durationMs": 0,
+          "error": "Skipped because previous step failed."
+        },
+        {
+          "index": 3,
+          "action": "noop",
+          "status": "skipped",
+          "startedAt": "2026-05-20T01:13:10.014Z",
+          "finishedAt": "2026-05-20T01:13:10.014Z",
+          "durationMs": 0,
+          "error": "Skipped because previous step failed."
+        }
+      ]
+    }
+  ]
+}

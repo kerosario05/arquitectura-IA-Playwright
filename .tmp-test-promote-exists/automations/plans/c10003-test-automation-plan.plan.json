@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "source": "manual",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C10003",
+    "title": "Test automation plan"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "target": "APP_BASE_URL"
+    }
+  ],
+  "createdAt": "2026-05-19T16:29:18.054Z"
+}

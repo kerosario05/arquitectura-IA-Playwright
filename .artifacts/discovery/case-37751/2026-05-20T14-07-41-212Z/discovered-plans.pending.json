@@ -1,0 +1,29 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37751",
+    "caseId": 37751,
+    "title": "C37374 - Visualizar detalle de Tarjeta Visa Clasica"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    }
+  ],
+  "notes": [
+    "Discovery failed at step 1: target_not_found - \"Tarjeta Crédito Visa Clásica\""
+  ],
+  "createdAt": "2026-05-20T14:07:55.851Z"
+}

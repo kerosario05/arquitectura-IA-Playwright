@@ -1,0 +1,77 @@
+import { config } from "../config/env";
+import { buildDataContext } from "../data";
+import type { DataContextEntry } from "../data/data-context";
+
+function isConfiguredJsonLike(rawValue: string | undefined): boolean {
+  if (!rawValue) {
+    return false;
+  }
+
+  const trimmed = rawValue.trim();
+  if (!trimmed) {
+    return false;
+  }
+
+  return trimmed !== "{}";
+}
+
+function countBySource(entries: DataContextEntry[]): Record<DataContextEntry["source"], number> {
+  const counts: Record<DataContextEntry["source"], number> = {
+    app_username: 0,
+    app_password: 0,
+    extra_login_field: 0,
+    test_data: 0,
+    environment_variable: 0
+  };
+
+  for (const entry of entries) {
+    counts[entry.source] += 1;
+  }
+
+  return counts;
+}
+
+function formatConfigured(value: boolean): string {
+  return value ? "configured" : "not configured";
+}
+
+function runInspection(): void {
+  const dataContext = buildDataContext(config);
+  const sourceCounts = countBySource(dataContext.entries);
+
+  const extraLoginConfigured = isConfiguredJsonLike(process.env.APP_EXTRA_LOGIN_FIELDS_JSON);
+  const testDataConfigured = isConfiguredJsonLike(process.env.APP_TEST_DATA_JSON);
+  const aliasesConfigured = isConfiguredJsonLike(process.env.APP_TEST_DATA_ALIASES_JSON);
+
+  console.log("DataContext inspection");
+  console.log("----------------------");
+  console.log(`Total entries: ${dataContext.counts.total}`);
+  console.log(`Sensitive entries: ${dataContext.counts.sensitive}`);
+  console.log(`Non-sensitive entries: ${dataContext.counts.nonSensitive}`);
+  console.log("");
+  console.log("Sources:");
+  console.log(`- app_username: ${sourceCounts.app_username}`);
+  console.log(`- app_password: ${sourceCounts.app_password}`);
+  console.log(`- extra_login_field: ${sourceCounts.extra_login_field}`);
+  console.log(`- test_data: ${sourceCounts.test_data}`);
+  console.log(`- environment_variable: ${sourceCounts.environment_variable}`);
+  console.log("");
+  console.log(`Dynamic aliases groups: ${Object.keys(config.app.testDataAliases).length}`);
+  console.log(`Missing input behavior: ${config.app.missingInputBehavior}`);
+  console.log("");
+  console.log("Config parsing:");
+  console.log(`- APP_EXTRA_LOGIN_FIELDS_JSON: ${formatConfigured(extraLoginConfigured)}`);
+  console.log(`- APP_TEST_DATA_JSON: ${formatConfigured(testDataConfigured)}`);
+  console.log(`- APP_TEST_DATA_ALIASES_JSON: ${formatConfigured(aliasesConfigured)}`);
+  console.log("");
+  console.log("No sensitive values were printed.");
+}
+
+try {
+  runInspection();
+  process.exitCode = 0;
+} catch (error) {
+  const message = error instanceof Error ? error.message : String(error);
+  console.error(`[data:inspect] Configuration error: ${message}`);
+  process.exitCode = 1;
+}

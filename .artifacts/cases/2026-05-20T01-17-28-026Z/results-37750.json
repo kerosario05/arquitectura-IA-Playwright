@@ -1,0 +1,51 @@
+{
+  "generatedAt": "2026-05-20T01:17:40.115Z",
+  "total": 1,
+  "passed": 1,
+  "failed": 0,
+  "partial": 0,
+  "skipped": 0,
+  "results": [
+    {
+      "scenario": {
+        "source": "testrail",
+        "externalId": "C37750",
+        "caseId": 37750,
+        "title": "Consulta listado de tarjetas de credito"
+      },
+      "status": "passed",
+      "startedAt": "2026-05-20T01:17:29.548Z",
+      "finishedAt": "2026-05-20T01:17:40.114Z",
+      "durationMs": 10566,
+      "evidenceDir": "C:\\MisProyectos\\MCP\\.artifacts\\cases\\2026-05-20T01-17-28-026Z\\evidence",
+      "steps": [
+        {
+          "index": 1,
+          "action": "navigate",
+          "status": "passed",
+          "startedAt": "2026-05-20T01:17:29.548Z",
+          "finishedAt": "2026-05-20T01:17:39.537Z",
+          "durationMs": 9989,
+          "screenshotPath": "C:\\MisProyectos\\MCP\\.artifacts\\cases\\2026-05-20T01-17-28-026Z\\evidence\\step-001-navigate-passed.png"
+        },
+        {
+          "index": 2,
+          "action": "login",
+          "status": "passed",
+          "startedAt": "2026-05-20T01:17:40.036Z",
+          "finishedAt": "2026-05-20T01:17:40.036Z",
+          "durationMs": 0,
+          "screenshotPath": "C:\\MisProyectos\\MCP\\.artifacts\\cases\\2026-05-20T01-17-28-026Z\\evidence\\step-002-login-passed.png"
+        },
+        {
+          "index": 3,
+          "action": "noop",
+          "status": "skipped",
+          "startedAt": "2026-05-20T01:17:40.114Z",
+          "finishedAt": "2026-05-20T01:17:40.114Z",
+          "durationMs": 0
+        }
+      ]
+    }
+  ]
+}

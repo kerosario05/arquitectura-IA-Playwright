@@ -1,0 +1,392 @@
+[
+  {
+    "source": "testrail",
+    "externalId": "C4117",
+    "caseId": 4117,
+    "title": "Transacción compra Aprobada USD",
+    "preconditions": "Usuarios con acceso al VTS\nusuarios con acceso al echelon",
+    "steps": [
+      {
+        "index": 1,
+        "action": "ACceder al VTS\nSeleccionar la tarjeta de prueba\nSeleccionar el caso de prueba manual entry",
+        "expected": "LA transacción debe aprobar, en las transacciones del echelon",
+        "dataHints": [
+          "usuario"
+        ]
+      }
+    ]
+  },
+  {
+    "source": "testrail",
+    "externalId": "C4118",
+    "caseId": 4118,
+    "title": "Transacción Tarjeta vencida",
+    "preconditions": "Usuario con acceso al VTS\nusuario con acceso al echelon",
+    "steps": [
+      {
+        "index": 1,
+        "action": "ACceder al VTS\nSeleccionar la tarjeta de prueba\nSeleccionar el caso de prueba manual entry\nModificar el campo 14",
+        "expected": "La transaccion debe ser rechazada por tarjeta vencida",
+        "dataHints": [
+          "usuario"
+        ]
+      }
+    ]
+  },
+  {
+    "source": "testrail",
+    "externalId": "C4119",
+    "caseId": 4119,
+    "title": "Transacción Tarjeta Fecha erronea",
+    "preconditions": "usuarios con acceso al VTS\nusuario con acceso al echelon",
+    "steps": [
+      {
+        "index": 1,
+        "action": "ACceder al VTS\nSeleccionar la tarjeta de prueba\nSeleccionar el caso de prueba manual entry\nModificar el campo 14",
+        "expected": "la transaccion debe rechazar 54 fecha vencida",
+        "dataHints": [
+          "usuario"
+        ]
+      }
+    ]
+  },
+  {
+    "source": "testrail",
+    "externalId": "C4120",
+    "caseId": 4120,
+    "title": "Transacción Billetera Electronica",
+    "preconditions": "usuarios con acceso al VTS\nusuario con acceso al echelon",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Acceder al VTS\nSeleccionar la tarjeta de prueba\nSeleccionar el caso de prueba manual entry\ncolocar en el campo 60.6 el cual debe ser igual a 4 (Chip transacción indicador)",
+        "expected": "La transacción debe ser aprobada",
+        "dataHints": [
+          "usuario"
+        ]
+      }
+    ]
+  },
+  {
+    "source": "testrail",
+    "externalId": "C4121",
+    "caseId": 4121,
+    "title": "Transacción Contacless",
+    "preconditions": "usuarios con acceso al VTS\nusuario con acceso al echelon",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Acceder al VTS\nSeleccionar la tarjeta de prueba\nSeleccionar el caso de prueba manual entry\nModificar el campo 22.1 07 - Contactless device-read VSDC Chip",
+        "expected": "La transacción debe ser aprobada",
+        "dataHints": [
+          "usuario"
+        ]
+      }
+    ]
+  },
+  {
+    "source": "testrail",
+    "externalId": "C4122",
+    "caseId": 4122,
+    "title": "TransacciónAutorización Parcial",
+    "preconditions": "usuarios con acceso al VTS\nusuario con acceso al echelon",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Acceder al VTS\nSeleccionar la tarjeta de prueba\nSeleccionar el caso de prueba de compra \nmodificar el campo 60.10 en 02",
+        "expected": "La transaccion debe aprobar con 10",
+        "dataHints": [
+          "usuario"
+        ]
+      }
+    ]
+  },
+  {
+    "source": "testrail",
+    "externalId": "C4123",
+    "caseId": 4123,
+    "title": "Transacción Reverso de  Autorizacion parcial",
+    "preconditions": "usuarios con acceso al VTS\nusuario con acceso al echelon",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Acceder al VTS\nSeleccionar la tarjeta de prueba\nSeleccionar el caso de prueba Authorization partial reversal \nmodificar el campo 60.10 en 02",
+        "expected": "la transaccion debe se aprobada asi com el reverso",
+        "dataHints": [
+          "usuario"
+        ]
+      }
+    ]
+  },
+  {
+    "source": "testrail",
+    "externalId": "C4124",
+    "caseId": 4124,
+    "title": "Reverso compra",
+    "preconditions": "usuarios con acceso al VTS\nusuario con acceso al echelon",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Acceder al VTS\nSeleccionar la tarjeta de prueba\nSeleccionar el caso de Authorization Reversal",
+        "expected": "la transaccion debe ser aprobada asi como el reverso",
+        "dataHints": [
+          "usuario"
+        ]
+      }
+    ]
+  },
+  {
+    "source": "testrail",
+    "externalId": "C4125",
+    "caseId": 4125,
+    "title": "Transacción compra Aprobada DOP",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Transacción compra Aprobada DOP",
+        "dataHints": []
+      }
+    ]
+  },
+  {
+    "source": "testrail",
+    "externalId": "C4126",
+    "caseId": 4126,
+    "title": "Transacción OCT typo 26",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Transacción OCT typo 26",
+        "dataHints": []
+      }
+    ]
+  },
+  {
+    "source": "testrail",
+    "externalId": "C4127",
+    "caseId": 4127,
+    "title": "Transación Typo 20",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Transación Typo 20",
+        "dataHints": []
+      }
+    ]
+  },
+  {
+    "source": "testrail",
+    "externalId": "C4128",
+    "caseId": 4128,
+    "title": "Transacción Tarjeta cancelada",
+    "preconditions": "usuarios con acceso al VTS\nusuario con acceso al echelon",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Acceder al VTS\nSeleccionar la tarjeta de prueba\nSeleccionar el caso de prueba \nenviar la trasaccion",
+        "expected": "la transacción debe rechazar 46",
+        "dataHints": [
+          "usuario"
+        ]
+      }
+    ]
+  },
+  {
+    "source": "testrail",
+    "externalId": "C4129",
+    "caseId": 4129,
+    "title": "Transacción Tarjeta inactiva",
+    "preconditions": "usuarios con acceso al VTS\nusuario con acceso al echelon",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Acceder al VTS\nSeleccionar la tarjeta de prueba\nSeleccionar el caso de prueba \nenviar la transaccion",
+        "expected": "La transaccion debe rechazar 78",
+        "dataHints": [
+          "usuario"
+        ]
+      }
+    ]
+  },
+  {
+    "source": "testrail",
+    "externalId": "C4130",
+    "caseId": 4130,
+    "title": "Transacción Tarjeta Suspendida",
+    "preconditions": "usuarios con acceso al VTS\nusuario con acceso al echelon",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Acceder al VTS\nSeleccionar la tarjeta SUspendida para la prueba \nSeleccionar el caso de prueba manual entry",
+        "expected": "la transaccion debe rechazar 59",
+        "dataHints": [
+          "usuario"
+        ]
+      }
+    ]
+  },
+  {
+    "source": "testrail",
+    "externalId": "C4198",
+    "caseId": 4198,
+    "title": "GDI-5316-Actualización de Extreme - Realizar los ajustes a varios códigos de respuesta internos",
+    "preconditions": "Usuarios con acceso al VT",
+    "references": "GDI-5316",
+    "steps": [
+      {
+        "index": 1,
+        "action": "GDI-5316-Actualización de Extreme - Realizar los ajustes a varios códigos de respuesta internos",
+        "dataHints": [
+          "codigo",
+          "usuario"
+        ]
+      }
+    ]
+  },
+  {
+    "source": "testrail",
+    "externalId": "C4700",
+    "caseId": 4700,
+    "title": "Transacción domestica articulo 2.12",
+    "preconditions": "Ambiente conectado a la estacion de Visa",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Visa envia las transaciiones \nvalidarlas en el echelon",
+        "expected": "confirmar que la transaccion es recibida y aprobada en extreme",
+        "dataHints": []
+      }
+    ]
+  },
+  {
+    "source": "testrail",
+    "externalId": "C4701",
+    "caseId": 4701,
+    "title": "Transacción AFT ARTICULO 3.5",
+    "preconditions": "Ambiente conectado a la estacion de Visa",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Visa envia las transaciiones \nvalidarlas en el echelon",
+        "expected": "confirmar que la transaccion es recibida y aprobada en extreme",
+        "dataHints": []
+      }
+    ]
+  },
+  {
+    "source": "testrail",
+    "externalId": "C4702",
+    "caseId": 4702,
+    "title": "Transacción 3DS 3.6",
+    "preconditions": "confirmar que la transaccion es recibida y aprobada en extreme",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Visa envia las transaciiones \nvalidarlas en el echelon",
+        "expected": "confirmar que la transaccion es recibida y aprobada en extreme",
+        "dataHints": []
+      }
+    ]
+  },
+  {
+    "source": "testrail",
+    "externalId": "C4703",
+    "caseId": 4703,
+    "title": "Transacción 3Ds 3.7",
+    "preconditions": "Ambiente conectado a la estacion de Visa",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Visa envia las transaciiones \nvalidarlas en el echelon",
+        "expected": "confirmar que la transaccion es recibida y aprobada en extreme",
+        "dataHints": []
+      }
+    ]
+  },
+  {
+    "source": "testrail",
+    "externalId": "C4704",
+    "caseId": 4704,
+    "title": "Transaccion 3Ds Articulo 3.8",
+    "preconditions": "Ambiente conectado a la estacion de Visa",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Visa envia las transaciiones \nvalidarlas en el echelon",
+        "expected": "confirmar que la transaccion es recibida y aprobada en extreme",
+        "dataHints": []
+      }
+    ]
+  },
+  {
+    "source": "testrail",
+    "externalId": "C10095",
+    "caseId": 10095,
+    "title": "Transaccion ANI tipo Y= devolver el nombre",
+    "preconditions": "Usuarios con acceso al VTS",
+    "steps": [
+      {
+        "index": 1,
+        "action": "La transaccion ANI debe contener\n\nMonto= 0\ncampo 4.25 = 51\ncampo 34 encendido 030003C001E8\ncampo 45= apagado\ncampo 55= apagado",
+        "expected": "La transaccion debe responderse 85",
+        "dataHints": [
+          "monto",
+          "usuario"
+        ]
+      }
+    ]
+  },
+  {
+    "source": "testrail",
+    "externalId": "C10096",
+    "caseId": 10096,
+    "title": "Transaccion ANI tipo I= Validar el nombre",
+    "preconditions": "Usuarios con acceso al VTS",
+    "steps": [
+      {
+        "index": 1,
+        "action": "La transaccion ANI debe contener\n\nMonto= 0\ncampo 4.25 = 51\ncampo 34 encendido 030003C001E8\ncampo 45= apagado\ncampo 55= apagado",
+        "expected": "Debe Responder  85",
+        "dataHints": [
+          "monto",
+          "usuario"
+        ]
+      }
+    ]
+  },
+  {
+    "source": "testrail",
+    "externalId": "C11144",
+    "caseId": 11144,
+    "title": "Transacción tarjeta inactiva por fraude",
+    "preconditions": "Tarjeta debe estar bloqueada por fraude\nusuario con acceso al VTS",
+    "steps": [
+      {
+        "index": 1,
+        "action": "enviar transaccción por el VTS",
+        "expected": "Validar que la transacción rechaze con 46 1041",
+        "dataHints": [
+          "usuario"
+        ]
+      }
+    ]
+  },
+  {
+    "source": "testrail",
+    "externalId": "C11878",
+    "caseId": 11878,
+    "title": "Transaccion Compra Aprobada 999 B$C",
+    "preconditions": "Usuarios con acceso al VTS\nUsuarios con acceso al Echelon",
+    "references": "Compras VTS nuevo producto 999 B$C",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Acceder al VTS\nSeleccionar la tarjeta de prueba\nSeleccionar el caso de prueba manual entry",
+        "expected": "La transacción debe aprobar, en las transacciones del echelon",
+        "dataHints": [
+          "usuario"
+        ]
+      }
+    ]
+  }
+]

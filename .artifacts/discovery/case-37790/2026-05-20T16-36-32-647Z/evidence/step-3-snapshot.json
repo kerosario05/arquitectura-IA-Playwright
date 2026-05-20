@@ -1,0 +1,213 @@
+{
+  "version": "1.0",
+  "url": "https://www.saucedemo.com/inventory-item.html?id=4",
+  "title": "Swag Labs",
+  "capturedAt": "2026-05-20T16:36:40.529Z",
+  "elements": [
+    {
+      "id": "el-1",
+      "type": "button",
+      "text": "Open Menu",
+      "tagName": "button",
+      "inputType": "button",
+      "visible": true,
+      "nearbyText": "Open Menu",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Open Menu",
+          "exact": false,
+          "confidence": 0.75
+        },
+        {
+          "strategy": "css",
+          "value": "#react-burger-menu-btn",
+          "confidence": 0.55
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-9",
+      "type": "button",
+      "text": "Back to products",
+      "name": "back-to-products",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "Back to products",
+      "candidateLocators": [
+        {
+          "strategy": "testId",
+          "value": "back-to-products",
+          "confidence": 0.95
+        },
+        {
+          "strategy": "text",
+          "value": "Back to products",
+          "exact": false,
+          "confidence": 0.75
+        },
+        {
+          "strategy": "css",
+          "value": "#back-to-products",
+          "confidence": 0.55
+        },
+        {
+          "strategy": "css",
+          "value": "[name=\"back-to-products\"]",
+          "confidence": 0.5
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-12",
+      "type": "button",
+      "text": "Add to cart",
+      "name": "add-to-cart",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "Sauce Labs Backpackcarry.allTheThings() with the sleek, streamlined Sly Pack that melds uncompromising style with unequaled laptop and tablet protection.$29.99Add to cart",
+      "candidateLocators": [
+        {
+          "strategy": "testId",
+          "value": "add-to-cart",
+          "confidence": 0.95
+        },
+        {
+          "strategy": "text",
+          "value": "Add to cart",
+          "exact": false,
+          "confidence": 0.75
+        },
+        {
+          "strategy": "css",
+          "value": "#add-to-cart",
+          "confidence": 0.55
+        },
+        {
+          "strategy": "css",
+          "value": "[name=\"add-to-cart\"]",
+          "confidence": 0.5
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-13",
+      "type": "link",
+      "text": "Twitter",
+      "tagName": "a",
+      "visible": true,
+      "nearbyText": "Twitter",
+      "candidateLocators": [
+        {
+          "strategy": "testId",
+          "value": "social-twitter",
+          "confidence": 0.95
+        },
+        {
+          "strategy": "text",
+          "value": "Twitter",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-14",
+      "type": "link",
+      "text": "Facebook",
+      "tagName": "a",
+      "visible": true,
+      "nearbyText": "Facebook",
+      "candidateLocators": [
+        {
+          "strategy": "testId",
+          "value": "social-facebook",
+          "confidence": 0.95
+        },
+        {
+          "strategy": "text",
+          "value": "Facebook",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-15",
+      "type": "link",
+      "text": "LinkedIn",
+      "tagName": "a",
+      "visible": true,
+      "nearbyText": "LinkedIn",
+      "candidateLocators": [
+        {
+          "strategy": "testId",
+          "value": "social-linkedin",
+          "confidence": 0.95
+        },
+        {
+          "strategy": "text",
+          "value": "LinkedIn",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-2",
+      "type": "image",
+      "tagName": "img",
+      "visible": true,
+      "nearbyText": "Open Menu",
+      "candidateLocators": [
+        {
+          "strategy": "testId",
+          "value": "open-menu",
+          "confidence": 0.95
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-10",
+      "type": "image",
+      "tagName": "img",
+      "visible": true,
+      "nearbyText": "Back to products",
+      "candidateLocators": [],
+      "dataHints": []
+    },
+    {
+      "id": "el-11",
+      "type": "image",
+      "tagName": "img",
+      "visible": true,
+      "candidateLocators": [
+        {
+          "strategy": "testId",
+          "value": "item-sauce-labs-backpack-img",
+          "confidence": 0.95
+        }
+      ],
+      "dataHints": []
+    }
+  ],
+  "summary": {
+    "totalElements": 9,
+    "buttons": 3,
+    "links": 3,
+    "inputs": 0,
+    "selects": 0,
+    "tables": 0,
+    "dialogs": 0,
+    "headings": 0
+  }
+}

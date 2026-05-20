@@ -1,0 +1,112 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37754",
+    "caseId": 37754,
+    "title": "C37377 - Visualizar detalle de Tarjeta Visa Infinite"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Click en iniciarClick en Informacion de productos Click en tarjetasClick en tarjetas de creditoClick en  'Tarjeta de Crédito Visa Infinite'.Validar detalle de producto.Opcional: validar botón 'Solicitar'.",
+      "target": {
+        "strategy": "text",
+        "value": "iniciar",
+        "exact": false
+      }
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Click en iniciarClick en Informacion de productos Click en tarjetasClick en tarjetas de creditoClick en  'Tarjeta de Crédito Visa Infinite'.Validar detalle de producto.Opcional: validar botón 'Solicitar'.",
+      "target": {
+        "strategy": "text",
+        "value": "Informacion de productos",
+        "exact": false
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Click en iniciarClick en Informacion de productos Click en tarjetasClick en tarjetas de creditoClick en  'Tarjeta de Crédito Visa Infinite'.Validar detalle de producto.Opcional: validar botón 'Solicitar'.",
+      "target": {
+        "strategy": "text",
+        "value": "tarjetas",
+        "exact": false
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Click en iniciarClick en Informacion de productos Click en tarjetasClick en tarjetas de creditoClick en  'Tarjeta de Crédito Visa Infinite'.Validar detalle de producto.Opcional: validar botón 'Solicitar'.",
+      "target": {
+        "strategy": "text",
+        "value": "tarjetas de credito",
+        "exact": false
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Click en iniciarClick en Informacion de productos Click en tarjetasClick en tarjetas de creditoClick en  'Tarjeta de Crédito Visa Infinite'.Validar detalle de producto.Opcional: validar botón 'Solicitar'.",
+      "target": {
+        "strategy": "text",
+        "value": "Tarjeta de Crédito Visa Infinite",
+        "exact": false
+      }
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Click en iniciarClick en Informacion de productos Click en tarjetasClick en tarjetas de creditoClick en  'Tarjeta de Crédito Visa Infinite'.Validar detalle de producto.Opcional: validar botón 'Solicitar'.",
+      "target": {
+        "strategy": "text",
+        "value": "Solicitar",
+        "exact": false
+      }
+    },
+    {
+      "index": 9,
+      "action": "assertText",
+      "description": "Assert: detalle de producto",
+      "target": {
+        "strategy": "text",
+        "value": "detalle de producto",
+        "exact": false
+      },
+      "expected": "detalle de producto"
+    },
+    {
+      "index": 10,
+      "action": "assertText",
+      "description": "Assert: Tarjeta de Crédito Visa InfiniteSolicitar",
+      "target": {
+        "strategy": "text",
+        "value": "Tarjeta de Crédito Visa InfiniteSolicitar",
+        "exact": false
+      },
+      "expected": "Tarjeta de Crédito Visa InfiniteSolicitar"
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed.",
+    "Semantic assertion resolved: Validar que la pantalla final muestre señales esperadas:"
+  ],
+  "createdAt": "2026-05-20T14:52:15.983Z"
+}

@@ -1,0 +1,65 @@
+{
+  "version": "1.0",
+  "appName": "generic",
+  "objects": [
+    {
+      "key": "button_iniciar",
+      "name": "Iniciar",
+      "type": "button",
+      "locator": {
+        "strategy": "text",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "aliases": [
+        "iniciar"
+      ],
+      "stable": true,
+      "tags": [
+        "promoted",
+        "discovery",
+        "confidence:0.75"
+      ]
+    },
+    {
+      "key": "button_tarjetas",
+      "name": "Tarjetas",
+      "type": "button",
+      "locator": {
+        "strategy": "text",
+        "value": "Tarjetas",
+        "exact": false
+      },
+      "aliases": [
+        "tarjetas"
+      ],
+      "stable": true,
+      "tags": [
+        "promoted",
+        "discovery",
+        "confidence:0.75"
+      ]
+    },
+    {
+      "key": "button_tarjeta_credito",
+      "name": "Tarjeta de Crédito",
+      "type": "button",
+      "locator": {
+        "strategy": "text",
+        "value": "Tarjeta de Crédito",
+        "exact": false
+      },
+      "aliases": [
+        "tarjeta de crédito"
+      ],
+      "stable": true,
+      "tags": [
+        "promoted",
+        "discovery",
+        "confidence:0.75"
+      ]
+    }
+  ],
+  "createdAt": "",
+  "updatedAt": "2026-05-20T04:03:37.163Z"
+}

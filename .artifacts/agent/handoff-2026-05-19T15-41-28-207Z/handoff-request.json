@@ -1,0 +1,224 @@
+{
+  "version": "1.0",
+  "kind": "plan_repair",
+  "createdAt": "2026-05-19T15:41:28.205Z",
+  "goal": "Convert unresolved noop steps into executable ExecutionPlan steps for this single TestRail case using only the snapshot, available data keys, allowed actions, and schema. Do not modify stable registry.",
+  "currentPlan": {
+    "version": "1.0",
+    "source": "rule_based",
+    "status": "needs_data",
+    "scenario": {
+      "source": "testrail",
+      "externalId": "C37616",
+      "caseId": 37616,
+      "title": "C37372 - Acceso al modulo Informacion de productos"
+    },
+    "requiredData": [
+      {
+        "key": "cuenta",
+        "required": true,
+        "resolved": false,
+        "reason": "Detected from TestRail scenario dataHints"
+      },
+      {
+        "key": "otp",
+        "required": true,
+        "resolved": false,
+        "reason": "Detected from TestRail scenario dataHints"
+      },
+      {
+        "key": "prestamo",
+        "required": true,
+        "resolved": false,
+        "reason": "Detected from TestRail scenario dataHints"
+      }
+    ],
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "target": "APP_BASE_URL",
+        "description": "Navigate to base URL",
+        "evidence": true
+      },
+      {
+        "index": 2,
+        "action": "login",
+        "description": "Apply configured login strategy",
+        "evidence": true
+      },
+      {
+        "index": 3,
+        "action": "noop",
+        "description": "1. Abrir URL del Kiosko.",
+        "evidence": true
+      },
+      {
+        "index": 4,
+        "action": "noop",
+        "description": "Hacer clic en 'Iniciar'.",
+        "evidence": true
+      },
+      {
+        "index": 5,
+        "action": "noop",
+        "description": "Hacer clic en 'Información de productos'.",
+        "evidence": true
+      },
+      {
+        "index": 6,
+        "action": "noop",
+        "description": "Validar que se muestre el menú de familias de productos: Tarjetas, Cuentas, Préstamos y Depósitos a plazo.",
+        "expected": "Validar que la pantalla final muestre señales esperadas: - Información de productos - Tarjetas - Cuentas - Préstamos - Depósitos a plazo",
+        "evidence": true
+      }
+    ],
+    "notes": [
+      "This is an initial rule_based plan.",
+      "NOOP steps must be converted into executable actions by a future discovery/AI phase."
+    ],
+    "createdAt": "2026-05-19T15:40:34.094Z"
+  },
+  "snapshot": {
+    "version": "1.0",
+    "url": "https://172.27.4.50/",
+    "title": "Kiosco de Autogestión - Banco Santa Cruz",
+    "capturedAt": "2026-05-19T15:41:10.018Z",
+    "elements": [
+      {
+        "id": "el-5",
+        "type": "button",
+        "text": "Iniciar",
+        "tagName": "button",
+        "inputType": "submit",
+        "visible": true,
+        "nearbyText": "Iniciar",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Iniciar",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": []
+      },
+      {
+        "id": "el-2",
+        "type": "image",
+        "tagName": "img",
+        "visible": true,
+        "candidateLocators": [],
+        "dataHints": []
+      },
+      {
+        "id": "el-3",
+        "type": "heading",
+        "text": "¡Hola!",
+        "tagName": "h1",
+        "visible": true,
+        "nearbyText": "¡Hola!Bienvenido al kiosco de autogestión de Banco Santa Cruz",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "¡Hola!",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": []
+      },
+      {
+        "id": "el-4",
+        "type": "text",
+        "text": "Bienvenido al kiosco de autogestión de Banco Santa Cruz",
+        "tagName": "p",
+        "visible": true,
+        "nearbyText": "¡Hola!Bienvenido al kiosco de autogestión de Banco Santa Cruz",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Bienvenido al kiosco de autogestión de Banco Santa Cruz",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": []
+      },
+      {
+        "id": "el-6",
+        "type": "text",
+        "text": "Iniciar",
+        "tagName": "span",
+        "visible": true,
+        "nearbyText": "Iniciar",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Iniciar",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": []
+      },
+      {
+        "id": "el-7",
+        "type": "text",
+        "tagName": "span",
+        "visible": true,
+        "nearbyText": "Iniciar",
+        "candidateLocators": [],
+        "dataHints": []
+      }
+    ],
+    "summary": {
+      "totalElements": 6,
+      "buttons": 1,
+      "links": 0,
+      "inputs": 0,
+      "selects": 0,
+      "tables": 0,
+      "dialogs": 0,
+      "headings": 1
+    }
+  },
+  "objectRegistry": {
+    "version": "1.0",
+    "appName": "generic",
+    "objects": [],
+    "createdAt": "",
+    "updatedAt": ""
+  },
+  "actionRegistry": {
+    "supportedActions": [
+      "navigate",
+      "login",
+      "click",
+      "fill",
+      "select",
+      "check",
+      "uncheck",
+      "press",
+      "waitFor",
+      "assertVisible",
+      "assertText",
+      "assertUrl",
+      "screenshot",
+      "noop"
+    ]
+  },
+  "dataContextSummary": {
+    "totalEntries": 0,
+    "sensitiveEntries": 0,
+    "nonSensitiveEntries": 0,
+    "availableKeys": []
+  },
+  "constraints": {
+    "noApiKey": true,
+    "noPlaywrightExecution": true,
+    "doNotModifyStableRegistry": true,
+    "useOnlyAvailableDataKeys": true,
+    "outputMustMatchSchema": true
+  }
+}

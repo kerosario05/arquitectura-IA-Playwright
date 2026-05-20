@@ -1,0 +1,105 @@
+{
+  "generatedAt": "2026-05-20T04:06:59.193Z",
+  "total": 1,
+  "passed": 1,
+  "failed": 0,
+  "partial": 0,
+  "skipped": 0,
+  "results": [
+    {
+      "scenario": {
+        "source": "testrail",
+        "externalId": "C37750",
+        "caseId": 37750,
+        "title": "Consulta listado de tarjetas de credito"
+      },
+      "status": "passed",
+      "startedAt": "2026-05-20T04:06:47.351Z",
+      "finishedAt": "2026-05-20T04:06:59.192Z",
+      "durationMs": 11841,
+      "evidenceDir": "C:\\MisProyectos\\MCP\\.artifacts\\cases\\2026-05-20T04-06-40-942Z\\evidence",
+      "steps": [
+        {
+          "index": 1,
+          "action": "navigate",
+          "status": "passed",
+          "startedAt": "2026-05-20T04:06:47.351Z",
+          "finishedAt": "2026-05-20T04:06:57.073Z",
+          "durationMs": 9722
+        },
+        {
+          "index": 2,
+          "action": "login",
+          "status": "passed",
+          "startedAt": "2026-05-20T04:06:57.073Z",
+          "finishedAt": "2026-05-20T04:06:57.073Z",
+          "durationMs": 0
+        },
+        {
+          "index": 3,
+          "action": "click",
+          "status": "passed",
+          "startedAt": "2026-05-20T04:06:57.073Z",
+          "finishedAt": "2026-05-20T04:06:57.445Z",
+          "durationMs": 372
+        },
+        {
+          "index": 4,
+          "action": "click",
+          "status": "passed",
+          "startedAt": "2026-05-20T04:06:57.445Z",
+          "finishedAt": "2026-05-20T04:06:57.860Z",
+          "durationMs": 415
+        },
+        {
+          "index": 5,
+          "action": "click",
+          "status": "passed",
+          "startedAt": "2026-05-20T04:06:57.860Z",
+          "finishedAt": "2026-05-20T04:06:58.561Z",
+          "durationMs": 701
+        },
+        {
+          "index": 6,
+          "action": "click",
+          "status": "passed",
+          "startedAt": "2026-05-20T04:06:58.561Z",
+          "finishedAt": "2026-05-20T04:06:58.992Z",
+          "durationMs": 431
+        },
+        {
+          "index": 7,
+          "action": "assertText",
+          "status": "passed",
+          "startedAt": "2026-05-20T04:06:58.992Z",
+          "finishedAt": "2026-05-20T04:06:59.124Z",
+          "durationMs": 132
+        },
+        {
+          "index": 8,
+          "action": "assertText",
+          "status": "passed",
+          "startedAt": "2026-05-20T04:06:59.124Z",
+          "finishedAt": "2026-05-20T04:06:59.155Z",
+          "durationMs": 31
+        },
+        {
+          "index": 9,
+          "action": "assertText",
+          "status": "passed",
+          "startedAt": "2026-05-20T04:06:59.155Z",
+          "finishedAt": "2026-05-20T04:06:59.172Z",
+          "durationMs": 17
+        },
+        {
+          "index": 10,
+          "action": "assertText",
+          "status": "passed",
+          "startedAt": "2026-05-20T04:06:59.172Z",
+          "finishedAt": "2026-05-20T04:06:59.192Z",
+          "durationMs": 20
+        }
+      ]
+    }
+  ]
+}

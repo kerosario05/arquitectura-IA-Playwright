@@ -1,0 +1,51 @@
+{
+  "generatedAt": "2026-05-20T00:48:23.284Z",
+  "total": 1,
+  "passed": 1,
+  "failed": 0,
+  "partial": 0,
+  "skipped": 0,
+  "results": [
+    {
+      "scenario": {
+        "source": "testrail",
+        "externalId": "C37749",
+        "caseId": 37749,
+        "title": "C37372 - Acceso al modulo Informacion de productos"
+      },
+      "status": "passed",
+      "startedAt": "2026-05-20T00:48:15.114Z",
+      "finishedAt": "2026-05-20T00:48:23.284Z",
+      "durationMs": 8170,
+      "evidenceDir": "C:\\MisProyectos\\MCP\\.artifacts\\cases\\2026-05-20T00-48-13-405Z\\evidence",
+      "steps": [
+        {
+          "index": 1,
+          "action": "navigate",
+          "status": "passed",
+          "startedAt": "2026-05-20T00:48:15.114Z",
+          "finishedAt": "2026-05-20T00:48:22.739Z",
+          "durationMs": 7625,
+          "screenshotPath": "C:\\MisProyectos\\MCP\\.artifacts\\cases\\2026-05-20T00-48-13-405Z\\evidence\\step-001-navigate-passed.png"
+        },
+        {
+          "index": 2,
+          "action": "login",
+          "status": "passed",
+          "startedAt": "2026-05-20T00:48:23.189Z",
+          "finishedAt": "2026-05-20T00:48:23.189Z",
+          "durationMs": 0,
+          "screenshotPath": "C:\\MisProyectos\\MCP\\.artifacts\\cases\\2026-05-20T00-48-13-405Z\\evidence\\step-002-login-passed.png"
+        },
+        {
+          "index": 3,
+          "action": "noop",
+          "status": "skipped",
+          "startedAt": "2026-05-20T00:48:23.284Z",
+          "finishedAt": "2026-05-20T00:48:23.284Z",
+          "durationMs": 0
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "generatedAt": "2026-05-19T17:25:07.038Z",
+  "total": 1,
+  "passed": 1,
+  "failed": 0,
+  "partial": 0,
+  "skipped": 0,
+  "results": [
+    {
+      "scenario": {
+        "source": "testrail",
+        "externalId": "C37617",
+        "caseId": 37617,
+        "title": "Consulta listado de tarjetas de credito"
+      },
+      "status": "passed",
+      "startedAt": "2026-05-19T17:24:56.697Z",
+      "finishedAt": "2026-05-19T17:25:07.037Z",
+      "durationMs": 10340,
+      "evidenceDir": "C:\\MisProyectos\\MCP\\.artifacts\\cases\\2026-05-19T17-24-49-257Z\\evidence",
+      "steps": [
+        {
+          "index": 1,
+          "action": "navigate",
+          "status": "passed",
+          "startedAt": "2026-05-19T17:24:56.697Z",
+          "finishedAt": "2026-05-19T17:25:06.442Z",
+          "durationMs": 9745,
+          "screenshotPath": "C:\\MisProyectos\\MCP\\.artifacts\\cases\\2026-05-19T17-24-49-257Z\\evidence\\step-001-navigate-passed.png"
+        },
+        {
+          "index": 2,
+          "action": "login",
+          "status": "passed",
+          "startedAt": "2026-05-19T17:25:06.976Z",
+          "finishedAt": "2026-05-19T17:25:06.976Z",
+          "durationMs": 0,
+          "screenshotPath": "C:\\MisProyectos\\MCP\\.artifacts\\cases\\2026-05-19T17-24-49-257Z\\evidence\\step-002-login-passed.png"
+        },
+        {
+          "index": 3,
+          "action": "noop",
+          "status": "skipped",
+          "startedAt": "2026-05-19T17:25:07.037Z",
+          "finishedAt": "2026-05-19T17:25:07.037Z",
+          "durationMs": 0
+        },
+        {
+          "index": 4,
+          "action": "noop",
+          "status": "skipped",
+          "startedAt": "2026-05-19T17:25:07.037Z",
+          "finishedAt": "2026-05-19T17:25:07.037Z",
+          "durationMs": 0
+        },
+        {
+          "index": 5,
+          "action": "noop",
+          "status": "skipped",
+          "startedAt": "2026-05-19T17:25:07.037Z",
+          "finishedAt": "2026-05-19T17:25:07.037Z",
+          "durationMs": 0
+        },
+        {
+          "index": 6,
+          "action": "noop",
+          "status": "skipped",
+          "startedAt": "2026-05-19T17:25:07.037Z",
+          "finishedAt": "2026-05-19T17:25:07.037Z",
+          "durationMs": 0
+        },
+        {
+          "index": 7,
+          "action": "noop",
+          "status": "skipped",
+          "startedAt": "2026-05-19T17:25:07.037Z",
+          "finishedAt": "2026-05-19T17:25:07.037Z",
+          "durationMs": 0
+        },
+        {
+          "index": 8,
+          "action": "noop",
+          "status": "skipped",
+          "startedAt": "2026-05-19T17:25:07.037Z",
+          "finishedAt": "2026-05-19T17:25:07.037Z",
+          "durationMs": 0
+        }
+      ]
+    }
+  ]
+}

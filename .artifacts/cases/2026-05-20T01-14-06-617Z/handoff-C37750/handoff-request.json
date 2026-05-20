@@ -1,0 +1,236 @@
+{
+  "version": "1.0",
+  "kind": "plan_repair",
+  "createdAt": "2026-05-20T01:14:33.913Z",
+  "goal": "Repair the ExecutionPlan for case C37750 (\"Consulta listado de tarjetas de credito\"). The plan has 1 unresolved NOOP steps that need to be converted into executable actions. Use the snapshot, data context, and action registry to resolve targets and values. Return a valid ExecutionPlan JSON with all steps executable.",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37750",
+    "caseId": 37750,
+    "title": "Consulta listado de tarjetas de credito",
+    "preconditions": "Kiosko disponible y accesible.\nRuta de entrada esperada: Información de productos.\nOTP de pruebas permitido: 0000 cuando aplique.",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Abrir URL del Kiosko.\nClic en 'Iniciar'.\nClic en 'Información de productos'.\nClic en 'Tarjetas'.\nClic en 'Tarjeta de Crédito'.\nValidar listado de tarjetas de crédito.",
+        "expected": "Validar que la pantalla final muestre señales esperadas:\n\nTarjeta de Crédito\nVisa Clásica\nVisa Gold\nVisa Platinum\nVisa Infinite",
+        "dataHints": [
+          "otp"
+        ]
+      }
+    ],
+    "raw": {
+      "id": 37750,
+      "title": "Consulta listado de tarjetas de credito",
+      "section_id": 4761,
+      "template_id": 5,
+      "type_id": 6,
+      "priority_id": 2,
+      "milestone_id": null,
+      "refs": null,
+      "created_by": 24,
+      "created_on": 1779237710,
+      "updated_by": 24,
+      "updated_on": 1779237710,
+      "estimate": null,
+      "estimate_forecast": null,
+      "suite_id": 1731,
+      "display_order": 1,
+      "is_deleted": 0,
+      "custom_ai_type": null,
+      "custom_ai_model": null,
+      "custom_preconds": "<ol>\n<li>Kiosko disponible y accesible.</li>\n<li>Ruta de entrada esperada: Información de productos.</li>\n<li>OTP de pruebas permitido: 0000 cuando aplique.</li>\n</ol>",
+      "custom_goals": null,
+      "custom_steps": "<ol>\n<li>Abrir URL del Kiosko.</li>\n<li>Clic en 'Iniciar'.</li>\n<li>Clic en 'Información de productos'.</li>\n<li>Clic en 'Tarjetas'.</li>\n<li>Clic en 'Tarjeta de Crédito'.</li>\n<li>Validar listado de tarjetas de crédito.</li>\n</ol>",
+      "custom_case_custom": null,
+      "custom_expected": "Validar que la pantalla final muestre señales esperadas:\n\n<ul>\n<li>Tarjeta de Crédito</li>\n<li>Visa Clásica</li>\n<li>Visa Gold</li>\n<li>Visa Platinum</li>\n<li>Visa Infinite</li>\n</ul>",
+      "custom_case_oracle": "QA",
+      "custom_mission": null,
+      "custom_case_core": null,
+      "refs_data": [],
+      "ai_automated_test": null,
+      "labels": []
+    }
+  },
+  "currentPlan": {
+    "version": "1.0",
+    "source": "rule_based",
+    "status": "needs_data",
+    "scenario": {
+      "source": "testrail",
+      "externalId": "C37750",
+      "caseId": 37750,
+      "title": "Consulta listado de tarjetas de credito"
+    },
+    "requiredData": [
+      {
+        "key": "otp",
+        "required": true,
+        "resolved": false,
+        "reason": "Detected from TestRail scenario dataHints"
+      }
+    ],
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "target": "APP_BASE_URL",
+        "description": "Navigate to base URL",
+        "evidence": true
+      },
+      {
+        "index": 2,
+        "action": "login",
+        "description": "Apply configured login strategy",
+        "evidence": true
+      },
+      {
+        "index": 3,
+        "action": "noop",
+        "description": "Abrir URL del Kiosko. Clic en 'Iniciar'. Clic en 'Información de productos'. Clic en 'Tarjetas'. Clic en 'Tarjeta de Crédito'. Validar listado de tarjetas de crédito.",
+        "expected": "Validar que la pantalla final muestre señales esperadas: Tarjeta de Crédito Visa Clásica Visa Gold Visa Platinum Visa Infinite",
+        "evidence": true
+      }
+    ],
+    "notes": [
+      "This is an initial rule_based plan.",
+      "NOOP steps must be converted into executable actions by a future discovery/AI phase."
+    ],
+    "createdAt": "2026-05-20T01:14:12.675Z"
+  },
+  "snapshot": {
+    "version": "1.0",
+    "url": "https://172.27.4.50/",
+    "title": "Kiosco de Autogestión - Banco Santa Cruz",
+    "capturedAt": "2026-05-19T14:55:05.281Z",
+    "elements": [
+      {
+        "id": "el-5",
+        "type": "button",
+        "text": "Iniciar",
+        "tagName": "button",
+        "inputType": "submit",
+        "visible": true,
+        "nearbyText": "Iniciar",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Iniciar",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": []
+      },
+      {
+        "id": "el-2",
+        "type": "image",
+        "tagName": "img",
+        "visible": true,
+        "candidateLocators": [],
+        "dataHints": []
+      },
+      {
+        "id": "el-3",
+        "type": "heading",
+        "text": "¡Hola!",
+        "tagName": "h1",
+        "visible": true,
+        "nearbyText": "¡Hola!Bienvenido al kiosco de autogestión de Banco Santa Cruz",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "¡Hola!",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": []
+      },
+      {
+        "id": "el-4",
+        "type": "text",
+        "text": "Bienvenido al kiosco de autogestión de Banco Santa Cruz",
+        "tagName": "p",
+        "visible": true,
+        "nearbyText": "¡Hola!Bienvenido al kiosco de autogestión de Banco Santa Cruz",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Bienvenido al kiosco de autogestión de Banco Santa Cruz",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": []
+      },
+      {
+        "id": "el-6",
+        "type": "text",
+        "text": "Iniciar",
+        "tagName": "span",
+        "visible": true,
+        "nearbyText": "Iniciar",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Iniciar",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": []
+      },
+      {
+        "id": "el-7",
+        "type": "text",
+        "tagName": "span",
+        "visible": true,
+        "nearbyText": "Iniciar",
+        "candidateLocators": [],
+        "dataHints": []
+      }
+    ],
+    "summary": {
+      "totalElements": 6,
+      "buttons": 1,
+      "links": 0,
+      "inputs": 0,
+      "selects": 0,
+      "tables": 0,
+      "dialogs": 0,
+      "headings": 1
+    }
+  },
+  "actionRegistry": {
+    "supportedActions": [
+      "navigate",
+      "login",
+      "click",
+      "fill",
+      "select",
+      "check",
+      "uncheck",
+      "press",
+      "waitFor",
+      "assertVisible",
+      "assertText",
+      "assertUrl",
+      "screenshot",
+      "noop"
+    ]
+  },
+  "dataContextSummary": {
+    "totalEntries": 0,
+    "sensitiveEntries": 0,
+    "nonSensitiveEntries": 0,
+    "availableKeys": []
+  },
+  "constraints": {
+    "noApiKey": true,
+    "noPlaywrightExecution": true,
+    "doNotModifyStableRegistry": true,
+    "useOnlyAvailableDataKeys": true,
+    "outputMustMatchSchema": true
+  }
+}

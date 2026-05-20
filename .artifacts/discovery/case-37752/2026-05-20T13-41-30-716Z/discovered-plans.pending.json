@@ -1,0 +1,30 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37752",
+    "caseId": 37752,
+    "title": "C37375 - Visualizar detalle de Tarjeta Visa Gold"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    }
+  ],
+  "notes": [
+    "Discovery partial: 1/2 navigations/assertions satisfied.",
+    "Semantic assertion resolved: Click en iniciarClick en Informacion de productos Click en tarjetasClick en tarjetas de creditoClick 'Tarjeta Crédito Visa Gold'.Validar detalle de producto.Opcional: validar botón 'Solicitar'."
+  ],
+  "createdAt": "2026-05-20T13:41:34.145Z"
+}

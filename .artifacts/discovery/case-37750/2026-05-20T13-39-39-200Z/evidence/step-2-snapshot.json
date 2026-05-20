@@ -1,0 +1,235 @@
+{
+  "version": "1.0",
+  "url": "https://172.27.4.50/success",
+  "title": "Kiosco de Autogestión - Banco Santa Cruz",
+  "capturedAt": "2026-05-20T13:39:54.294Z",
+  "elements": [
+    {
+      "id": "el-6",
+      "type": "button",
+      "text": "Información de productosExplora nuestros productos bancarios",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "Información de productosExplora nuestros productos bancariosTransacciones y serviciosRealiza operaciones con tus cuentas",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Información de productosExplora nuestros productos bancarios",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta"
+      ]
+    },
+    {
+      "id": "el-9",
+      "type": "button",
+      "text": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "Información de productosExplora nuestros productos bancariosTransacciones y serviciosRealiza operaciones con tus cuentas",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta"
+      ]
+    },
+    {
+      "id": "el-12",
+      "type": "button",
+      "text": "Salir",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "¡Hola!¡Nos alegra que estés con nosotros!¿Qué deseas realizar hoy?Información de productosExplora nuestros productos bancariosTransacciones y serviciosRealiza operaciones con tus cuentasSalir",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Salir",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta"
+      ]
+    },
+    {
+      "id": "el-2",
+      "type": "image",
+      "tagName": "img",
+      "visible": true,
+      "candidateLocators": [],
+      "dataHints": []
+    },
+    {
+      "id": "el-3",
+      "type": "heading",
+      "text": "¡Hola!",
+      "tagName": "h1",
+      "visible": true,
+      "nearbyText": "¡Hola!¡Nos alegra que estés con nosotros!¿Qué deseas realizar hoy?",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "¡Hola!",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-4",
+      "type": "heading",
+      "text": "¡Nos alegra que estés con nosotros!",
+      "tagName": "h2",
+      "visible": true,
+      "nearbyText": "¡Hola!¡Nos alegra que estés con nosotros!¿Qué deseas realizar hoy?",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "¡Nos alegra que estés con nosotros!",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-5",
+      "type": "text",
+      "text": "¿Qué deseas realizar hoy?",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "¡Hola!¡Nos alegra que estés con nosotros!¿Qué deseas realizar hoy?",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "¿Qué deseas realizar hoy?",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-7",
+      "type": "heading",
+      "text": "Información de productos",
+      "tagName": "h3",
+      "visible": true,
+      "nearbyText": "Información de productosExplora nuestros productos bancarios",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Información de productos",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-8",
+      "type": "text",
+      "text": "Explora nuestros productos bancarios",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "Información de productosExplora nuestros productos bancarios",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Explora nuestros productos bancarios",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-10",
+      "type": "heading",
+      "text": "Transacciones y servicios",
+      "tagName": "h3",
+      "visible": true,
+      "nearbyText": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Transacciones y servicios",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta"
+      ]
+    },
+    {
+      "id": "el-11",
+      "type": "text",
+      "text": "Realiza operaciones con tus cuentas",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Realiza operaciones con tus cuentas",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta"
+      ]
+    },
+    {
+      "id": "el-13",
+      "type": "text",
+      "text": "Salir",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Salir",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Salir",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-14",
+      "type": "text",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Salir",
+      "candidateLocators": [],
+      "dataHints": []
+    }
+  ],
+  "summary": {
+    "totalElements": 13,
+    "buttons": 3,
+    "links": 0,
+    "inputs": 0,
+    "selects": 0,
+    "tables": 0,
+    "dialogs": 0,
+    "headings": 4
+  }
+}

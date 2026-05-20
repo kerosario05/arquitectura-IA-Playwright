@@ -1,0 +1,67 @@
+{
+  "generatedAt": "2026-05-19T18:06:10.747Z",
+  "total": 1,
+  "passed": 1,
+  "failed": 0,
+  "partial": 0,
+  "skipped": 0,
+  "results": [
+    {
+      "scenario": {
+        "source": "testrail",
+        "externalId": "C37618",
+        "caseId": 37618,
+        "title": "C37374 - Visualizar detalle de Tarjeta Visa Clasica"
+      },
+      "status": "passed",
+      "startedAt": "2026-05-19T18:06:08.840Z",
+      "finishedAt": "2026-05-19T18:06:10.746Z",
+      "durationMs": 1906,
+      "evidenceDir": "C:\\MisProyectos\\MCP\\.artifacts\\cases\\2026-05-19T18-06-05-498Z\\evidence",
+      "steps": [
+        {
+          "index": 1,
+          "action": "navigate",
+          "status": "passed",
+          "startedAt": "2026-05-19T18:06:08.840Z",
+          "finishedAt": "2026-05-19T18:06:09.785Z",
+          "durationMs": 945,
+          "screenshotPath": "C:\\MisProyectos\\MCP\\.artifacts\\cases\\2026-05-19T18-06-05-498Z\\evidence\\step-001-navigate-passed.png"
+        },
+        {
+          "index": 2,
+          "action": "login",
+          "status": "passed",
+          "startedAt": "2026-05-19T18:06:10.645Z",
+          "finishedAt": "2026-05-19T18:06:10.645Z",
+          "durationMs": 0,
+          "screenshotPath": "C:\\MisProyectos\\MCP\\.artifacts\\cases\\2026-05-19T18-06-05-498Z\\evidence\\step-002-login-passed.png"
+        },
+        {
+          "index": 3,
+          "action": "noop",
+          "status": "skipped",
+          "startedAt": "2026-05-19T18:06:10.746Z",
+          "finishedAt": "2026-05-19T18:06:10.746Z",
+          "durationMs": 0
+        },
+        {
+          "index": 4,
+          "action": "noop",
+          "status": "skipped",
+          "startedAt": "2026-05-19T18:06:10.746Z",
+          "finishedAt": "2026-05-19T18:06:10.746Z",
+          "durationMs": 0
+        },
+        {
+          "index": 5,
+          "action": "noop",
+          "status": "skipped",
+          "startedAt": "2026-05-19T18:06:10.746Z",
+          "finishedAt": "2026-05-19T18:06:10.746Z",
+          "durationMs": 0
+        }
+      ]
+    }
+  ]
+}

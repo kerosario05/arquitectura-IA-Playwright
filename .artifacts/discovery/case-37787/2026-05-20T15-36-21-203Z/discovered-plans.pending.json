@@ -1,0 +1,29 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37787",
+    "caseId": 37787,
+    "title": "Iniciar sesión con credenciales válidas en tienda web"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://www.saucedemo.com/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    }
+  ],
+  "notes": [
+    "Discovery failed at step 3: target_not_found - \"usuario_valido\""
+  ],
+  "createdAt": "2026-05-20T15:36:25.265Z"
+}

@@ -1,0 +1,157 @@
+{
+  "version": "1.0",
+  "url": "https://www.saucedemo.com/",
+  "title": "Swag Labs",
+  "capturedAt": "2026-05-20T17:41:40.959Z",
+  "elements": [
+    {
+      "id": "el-1",
+      "type": "input",
+      "placeholder": "Username",
+      "name": "user-name",
+      "tagName": "input",
+      "inputType": "text",
+      "visible": true,
+      "candidateLocators": [
+        {
+          "strategy": "testId",
+          "value": "username",
+          "confidence": 0.95
+        },
+        {
+          "strategy": "placeholder",
+          "value": "Username",
+          "exact": false,
+          "confidence": 0.8
+        },
+        {
+          "strategy": "css",
+          "value": "#user-name",
+          "confidence": 0.55
+        },
+        {
+          "strategy": "css",
+          "value": "[name=\"user-name\"]",
+          "confidence": 0.5
+        }
+      ],
+      "dataHints": [
+        "usuario"
+      ],
+      "dataTestid": "username",
+      "className": "input_error form_input",
+      "domId": "user-name"
+    },
+    {
+      "id": "el-2",
+      "type": "input",
+      "placeholder": "[REDACTED]",
+      "name": "[REDACTED]",
+      "tagName": "input",
+      "inputType": "password",
+      "visible": true,
+      "candidateLocators": [
+        {
+          "strategy": "testId",
+          "value": "password",
+          "confidence": 0.95
+        },
+        {
+          "strategy": "placeholder",
+          "value": "[REDACTED]",
+          "exact": false,
+          "confidence": 0.8
+        },
+        {
+          "strategy": "css",
+          "value": "#password",
+          "confidence": 0.55
+        },
+        {
+          "strategy": "css",
+          "value": "[name=\"[REDACTED]\"]",
+          "confidence": 0.5
+        }
+      ],
+      "dataHints": [],
+      "dataTestid": "password",
+      "className": "input_error form_input",
+      "domId": "password"
+    },
+    {
+      "id": "el-3",
+      "type": "input",
+      "name": "login-button",
+      "tagName": "input",
+      "inputType": "submit",
+      "visible": true,
+      "candidateLocators": [
+        {
+          "strategy": "testId",
+          "value": "login-button",
+          "confidence": 0.95
+        },
+        {
+          "strategy": "css",
+          "value": "#login-button",
+          "confidence": 0.55
+        },
+        {
+          "strategy": "css",
+          "value": "[name=\"login-button\"]",
+          "confidence": 0.5
+        }
+      ],
+      "dataHints": [],
+      "dataTestid": "login-button",
+      "className": "submit-button btn_action",
+      "domId": "login-button"
+    },
+    {
+      "id": "el-4",
+      "type": "heading",
+      "text": "Accepted usernames are:",
+      "tagName": "h4",
+      "visible": true,
+      "nearbyText": "Accepted usernames are:standard_userlocked_out_userproblem_userperformance_glitch_usererror_uservisual_user",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Accepted usernames are:",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "usuario"
+      ]
+    },
+    {
+      "id": "el-5",
+      "type": "heading",
+      "text": "[REDACTED]",
+      "tagName": "h4",
+      "visible": true,
+      "nearbyText": "[REDACTED]",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "[REDACTED]",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": []
+    }
+  ],
+  "summary": {
+    "totalElements": 5,
+    "buttons": 0,
+    "links": 0,
+    "inputs": 3,
+    "selects": 0,
+    "tables": 0,
+    "dialogs": 0,
+    "headings": 2
+  }
+}

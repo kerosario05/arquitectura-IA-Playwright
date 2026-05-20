@@ -1,0 +1,149 @@
+{
+  "version": "1.0",
+  "url": "https://172.27.4.50/product-subcategory?category=cards",
+  "title": "Kiosco de Autogestión - Banco Santa Cruz",
+  "capturedAt": "2026-05-20T03:46:36.168Z",
+  "elements": [
+    {
+      "id": "el-3",
+      "type": "button",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "Selecciona un productoElige el tipo de producto que deseas conocer:",
+      "candidateLocators": [],
+      "dataHints": []
+    },
+    {
+      "id": "el-6",
+      "type": "button",
+      "text": "Tarjeta de Crédito",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "Tarjeta de Crédito",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Tarjeta de Crédito",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-8",
+      "type": "button",
+      "text": "Volver",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "Volver",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Volver",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-2",
+      "type": "image",
+      "tagName": "img",
+      "visible": true,
+      "candidateLocators": [],
+      "dataHints": []
+    },
+    {
+      "id": "el-4",
+      "type": "heading",
+      "text": "Selecciona un producto",
+      "tagName": "h1",
+      "visible": true,
+      "nearbyText": "Selecciona un productoElige el tipo de producto que deseas conocer:",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Selecciona un producto",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-5",
+      "type": "text",
+      "text": "Elige el tipo de producto que deseas conocer:",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "Selecciona un productoElige el tipo de producto que deseas conocer:",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Elige el tipo de producto que deseas conocer:",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-7",
+      "type": "heading",
+      "text": "Tarjeta de Crédito",
+      "tagName": "h3",
+      "visible": true,
+      "nearbyText": "Tarjeta de Crédito",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Tarjeta de Crédito",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-9",
+      "type": "text",
+      "text": "Volver",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Volver",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Volver",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-10",
+      "type": "text",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Volver",
+      "candidateLocators": [],
+      "dataHints": []
+    }
+  ],
+  "summary": {
+    "totalElements": 9,
+    "buttons": 3,
+    "links": 0,
+    "inputs": 0,
+    "selects": 0,
+    "tables": 0,
+    "dialogs": 0,
+    "headings": 2
+  }
+}

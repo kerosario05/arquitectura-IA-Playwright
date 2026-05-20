@@ -1,0 +1,140 @@
+export const agentHandoffResponseJsonSchema = {
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+  type: "object",
+  additionalProperties: false,
+  required: ["version", "generatedAt", "plans", "proposedObjects", "unresolvedQuestions", "rationale"],
+  properties: {
+    version: { const: "1.0" },
+    generatedAt: { type: "string" },
+    rationale: { type: "array", items: { type: "string" } },
+    proposedObjects: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["key", "name", "type", "locator", "reason", "confidence"],
+        properties: {
+          key: { type: "string", minLength: 1 },
+          name: { type: "string", minLength: 1 },
+          description: { type: "string" },
+          type: { type: "string", minLength: 1 },
+          locator: {},
+          aliases: { type: "array", items: { type: "string" } },
+          reason: { type: "string", minLength: 1 },
+          confidence: { type: "number", minimum: 0, maximum: 1 }
+        }
+      }
+    },
+    unresolvedQuestions: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["type", "message"],
+        properties: {
+          type: { enum: ["missing_data", "missing_element", "ambiguous_step", "unsupported", "needs_user_approval"] },
+          message: { type: "string", minLength: 1 },
+          suggestedAction: { type: "string" }
+        }
+      }
+    },
+    plans: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["version", "source", "status", "scenario", "requiredData", "steps", "createdAt"],
+        properties: {
+          version: { const: "1.0" },
+          source: { enum: ["manual", "rule_based", "ai_generated", "discovery_generated"] },
+          status: { enum: ["draft", "validated", "invalid", "needs_data", "needs_discovery", "unsupported"] },
+          createdAt: { type: "string" },
+          notes: { type: "array", items: { type: "string" } },
+          scenario: {
+            type: "object",
+            additionalProperties: false,
+            required: ["source", "title"],
+            properties: {
+              source: { enum: ["testrail", "manual"] },
+              externalId: { type: "string" },
+              caseId: { type: "number" },
+              title: { type: "string", minLength: 1 }
+            }
+          },
+          requiredData: {
+            type: "array",
+            items: {
+              type: "object",
+              additionalProperties: false,
+              required: ["key", "required", "resolved"],
+              properties: {
+                key: { type: "string", minLength: 1 },
+                required: { type: "boolean" },
+                resolved: { type: "boolean" },
+                sensitive: { type: "boolean" },
+                source: { type: "string" },
+                reason: { type: "string" }
+              }
+            }
+          },
+          steps: {
+            type: "array",
+            items: {
+              type: "object",
+              additionalProperties: false,
+              required: ["index", "action"],
+              properties: {
+                index: { type: "number" },
+                action: {
+                  enum: [
+                    "navigate",
+                    "login",
+                    "click",
+                    "fill",
+                    "select",
+                    "check",
+                    "uncheck",
+                    "press",
+                    "waitFor",
+                    "assertVisible",
+                    "assertText",
+                    "assertUrl",
+                    "screenshot",
+                    "noop"
+                  ]
+                },
+                description: { type: "string" },
+                target: {
+                  oneOf: [
+                    { const: "APP_BASE_URL" },
+                    {
+                      type: "object",
+                      additionalProperties: false,
+                      required: ["strategy"],
+                      properties: {
+                        strategy: {
+                          enum: ["role", "text", "label", "placeholder", "testId", "css", "xpath", "semantic", "registry"]
+                        },
+                        value: { type: "string" },
+                        hint: { type: "string" },
+                        role: { type: "string" },
+                        name: { type: "string" },
+                        exact: { type: "boolean" }
+                      }
+                    }
+                  ]
+                },
+                value: { type: "string" },
+                valueKey: { type: "string" },
+                expected: { type: "string" },
+                timeoutMs: { type: "number" },
+                optional: { type: "boolean" },
+                evidence: { type: "boolean" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+} as const;

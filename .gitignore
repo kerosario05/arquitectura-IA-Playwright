@@ -1,0 +1,9 @@
+node_modules/
+.env
+evidence/*
+!evidence/.gitkeep
+test-results/
+playwright-report/
+playwright/.auth/
+dist/
+*.log

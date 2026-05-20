@@ -1,0 +1,29 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37754",
+    "caseId": 37754,
+    "title": "C37377 - Visualizar detalle de Tarjeta Visa Infinite"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    }
+  ],
+  "notes": [
+    "Discovery partial: 0/3 navigations/assertions satisfied."
+  ],
+  "createdAt": "2026-05-20T04:05:45.799Z"
+}

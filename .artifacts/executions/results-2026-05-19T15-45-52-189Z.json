@@ -1,0 +1,78 @@
+{
+  "generatedAt": "2026-05-19T15:46:11.312Z",
+  "total": 1,
+  "passed": 1,
+  "failed": 0,
+  "partial": 0,
+  "skipped": 0,
+  "results": [
+    {
+      "scenario": {
+        "source": "testrail",
+        "externalId": "C37616",
+        "caseId": 37616,
+        "title": "C37372 - Acceso al modulo Informacion de productos"
+      },
+      "status": "passed",
+      "startedAt": "2026-05-19T15:46:06.152Z",
+      "finishedAt": "2026-05-19T15:46:09.996Z",
+      "durationMs": 3844,
+      "evidenceDir": "C:\\MisProyectos\\MCP\\.artifacts\\executions\\2026-05-19T15-45-52-189Z\\C37616-c37372-acceso-al-modulo-informacion-de-productos",
+      "steps": [
+        {
+          "index": 1,
+          "action": "navigate",
+          "status": "passed",
+          "startedAt": "2026-05-19T15:46:06.152Z",
+          "finishedAt": "2026-05-19T15:46:06.278Z",
+          "durationMs": 126,
+          "screenshotPath": "C:\\MisProyectos\\MCP\\.artifacts\\executions\\2026-05-19T15-45-52-189Z\\C37616-c37372-acceso-al-modulo-informacion-de-productos\\step-001-navigate-passed.png"
+        },
+        {
+          "index": 2,
+          "action": "login",
+          "status": "passed",
+          "startedAt": "2026-05-19T15:46:08.885Z",
+          "finishedAt": "2026-05-19T15:46:08.885Z",
+          "durationMs": 0,
+          "screenshotPath": "C:\\MisProyectos\\MCP\\.artifacts\\executions\\2026-05-19T15-45-52-189Z\\C37616-c37372-acceso-al-modulo-informacion-de-productos\\step-002-login-passed.png"
+        },
+        {
+          "index": 3,
+          "action": "noop",
+          "status": "skipped",
+          "startedAt": "2026-05-19T15:46:08.988Z",
+          "finishedAt": "2026-05-19T15:46:08.989Z",
+          "durationMs": 1
+        },
+        {
+          "index": 4,
+          "action": "click",
+          "status": "passed",
+          "startedAt": "2026-05-19T15:46:08.989Z",
+          "finishedAt": "2026-05-19T15:46:09.087Z",
+          "durationMs": 98,
+          "screenshotPath": "C:\\MisProyectos\\MCP\\.artifacts\\executions\\2026-05-19T15-45-52-189Z\\C37616-c37372-acceso-al-modulo-informacion-de-productos\\step-004-click-passed.png"
+        },
+        {
+          "index": 5,
+          "action": "click",
+          "status": "passed",
+          "startedAt": "2026-05-19T15:46:09.303Z",
+          "finishedAt": "2026-05-19T15:46:09.516Z",
+          "durationMs": 213,
+          "screenshotPath": "C:\\MisProyectos\\MCP\\.artifacts\\executions\\2026-05-19T15-45-52-189Z\\C37616-c37372-acceso-al-modulo-informacion-de-productos\\step-005-click-passed.png"
+        },
+        {
+          "index": 6,
+          "action": "assertVisible",
+          "status": "passed",
+          "startedAt": "2026-05-19T15:46:09.674Z",
+          "finishedAt": "2026-05-19T15:46:09.697Z",
+          "durationMs": 23,
+          "screenshotPath": "C:\\MisProyectos\\MCP\\.artifacts\\executions\\2026-05-19T15-45-52-189Z\\C37616-c37372-acceso-al-modulo-informacion-de-productos\\step-006-assertvisible-passed.png"
+        }
+      ]
+    }
+  ]
+}

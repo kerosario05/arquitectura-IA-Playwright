@@ -1,0 +1,92 @@
+{
+  "version": "1.0",
+  "source": "ai_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37616",
+    "caseId": 37749,
+    "title": "C37372 - Acceso al modulo Informacion de productos"
+  },
+  "requiredData": [
+    {
+      "key": "cuenta",
+      "required": false,
+      "resolved": false,
+      "reason": "Not used in this simple navigation test case"
+    },
+    {
+      "key": "otp",
+      "required": false,
+      "resolved": false,
+      "reason": "Not used in this simple navigation test case"
+    },
+    {
+      "key": "prestamo",
+      "required": false,
+      "resolved": false,
+      "reason": "Not used in this simple navigation test case"
+    }
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "target": "APP_BASE_URL",
+      "description": "Navigate to base URL",
+      "evidence": true
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Apply configured login strategy (skips on no_login)",
+      "evidence": true
+    },
+    {
+      "index": 3,
+      "action": "noop",
+      "description": "1. Abrir URL del Kiosko.",
+      "evidence": true
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Iniciar",
+        "exact": true
+      },
+      "description": "Hacer clic en 'Iniciar'.",
+      "evidence": true
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "target": {
+        "strategy": "text",
+        "value": "Información de productos",
+        "exact": false
+      },
+      "description": "Hacer clic en 'Información de productos'.",
+      "evidence": true
+    },
+    {
+      "index": 6,
+      "action": "assertVisible",
+      "target": {
+        "strategy": "text",
+        "value": "Tarjetas",
+        "exact": true
+      },
+      "description": "Validar que se muestre el menú de familias de productos: Tarjetas, Cuentas, Préstamos y Depósitos a plazo.",
+      "evidence": true
+    }
+  ],
+  "createdAt": "2026-05-19T15:40:34.094Z",
+  "notes": [
+    "Repaired unresolved plan by mapping actions using text and role selectors.",
+    "Verified button 'Iniciar' and product categories on the catalog page.",
+    "Reused from automation: c37616-c37372-acceso-al-modulo-informacion-de-productos"
+  ]
+}

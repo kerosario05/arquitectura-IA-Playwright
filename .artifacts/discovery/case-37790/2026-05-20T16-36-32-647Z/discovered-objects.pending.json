@@ -1,0 +1,516 @@
+[
+  {
+    "key": "input_username",
+    "name": "Username",
+    "type": "input",
+    "locator": {
+      "strategy": "testId",
+      "value": "username"
+    },
+    "aliases": [
+      "username"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.210Z",
+    "sourceStep": 0,
+    "confidence": 0.95
+  },
+  {
+    "key": "input_redacted",
+    "name": "[REDACTED]",
+    "type": "input",
+    "locator": {
+      "strategy": "testId",
+      "value": "password"
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.210Z",
+    "sourceStep": 0,
+    "confidence": 0.95
+  },
+  {
+    "key": "input_login_button",
+    "name": "login-button",
+    "type": "input",
+    "locator": {
+      "strategy": "testId",
+      "value": "login-button"
+    },
+    "aliases": [
+      "login-button"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.210Z",
+    "sourceStep": 0,
+    "confidence": 0.95
+  },
+  {
+    "key": "section_accepted_usernames",
+    "name": "Accepted usernames are:",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Accepted usernames are:",
+      "exact": false
+    },
+    "aliases": [
+      "accepted usernames are:"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.210Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_redacted",
+    "name": "[REDACTED]",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.210Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_open_menu",
+    "name": "Open Menu",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Open Menu",
+      "exact": false
+    },
+    "aliases": [
+      "open menu"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.944Z",
+    "sourceStep": 2,
+    "confidence": 0.75
+  },
+  {
+    "key": "select_name_name_price",
+    "name": "Name (A to Z)Name (Z to A)Price (low to high)Price (high to low)",
+    "type": "select",
+    "locator": {
+      "strategy": "testId",
+      "value": "product-sort-container"
+    },
+    "aliases": [
+      "name (a to z)name (z to a)price (low to high)price (high to low)"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.944Z",
+    "sourceStep": 2,
+    "confidence": 0.95
+  },
+  {
+    "key": "link_a",
+    "name": "Link",
+    "type": "link",
+    "locator": {
+      "strategy": "testId",
+      "value": "item-4-img-link"
+    },
+    "aliases": [
+      "link"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.944Z",
+    "sourceStep": 2,
+    "confidence": 0.95
+  },
+  {
+    "key": "link_sauce_labs_backpack",
+    "name": "Sauce Labs Backpack",
+    "type": "link",
+    "locator": {
+      "strategy": "testId",
+      "value": "item-4-title-link"
+    },
+    "aliases": [
+      "sauce labs backpack"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.944Z",
+    "sourceStep": 2,
+    "confidence": 0.95
+  },
+  {
+    "key": "button_add_cart",
+    "name": "Add to cart",
+    "type": "button",
+    "locator": {
+      "strategy": "testId",
+      "value": "add-to-cart-sauce-labs-backpack"
+    },
+    "aliases": [
+      "add to cart"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.944Z",
+    "sourceStep": 2,
+    "confidence": 0.95
+  },
+  {
+    "key": "link_a_1",
+    "name": "Link",
+    "type": "link",
+    "locator": {
+      "strategy": "testId",
+      "value": "item-0-img-link"
+    },
+    "aliases": [
+      "link"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.944Z",
+    "sourceStep": 2,
+    "confidence": 0.95
+  },
+  {
+    "key": "link_sauce_labs_bike",
+    "name": "Sauce Labs Bike Light",
+    "type": "link",
+    "locator": {
+      "strategy": "testId",
+      "value": "item-0-title-link"
+    },
+    "aliases": [
+      "sauce labs bike light"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.944Z",
+    "sourceStep": 2,
+    "confidence": 0.95
+  },
+  {
+    "key": "button_add_cart_1",
+    "name": "Add to cart",
+    "type": "button",
+    "locator": {
+      "strategy": "testId",
+      "value": "add-to-cart-sauce-labs-bike-light"
+    },
+    "aliases": [
+      "add to cart"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.944Z",
+    "sourceStep": 2,
+    "confidence": 0.95
+  },
+  {
+    "key": "link_a_2",
+    "name": "Link",
+    "type": "link",
+    "locator": {
+      "strategy": "testId",
+      "value": "item-1-img-link"
+    },
+    "aliases": [
+      "link"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.944Z",
+    "sourceStep": 2,
+    "confidence": 0.95
+  },
+  {
+    "key": "link_sauce_labs_bolt",
+    "name": "Sauce Labs Bolt T-Shirt",
+    "type": "link",
+    "locator": {
+      "strategy": "testId",
+      "value": "item-1-title-link"
+    },
+    "aliases": [
+      "sauce labs bolt t-shirt"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.944Z",
+    "sourceStep": 2,
+    "confidence": 0.95
+  },
+  {
+    "key": "button_add_cart_2",
+    "name": "Add to cart",
+    "type": "button",
+    "locator": {
+      "strategy": "testId",
+      "value": "add-to-cart-sauce-labs-bolt-t-shirt"
+    },
+    "aliases": [
+      "add to cart"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.944Z",
+    "sourceStep": 2,
+    "confidence": 0.95
+  },
+  {
+    "key": "link_a_3",
+    "name": "Link",
+    "type": "link",
+    "locator": {
+      "strategy": "testId",
+      "value": "item-5-img-link"
+    },
+    "aliases": [
+      "link"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.944Z",
+    "sourceStep": 2,
+    "confidence": 0.95
+  },
+  {
+    "key": "link_sauce_labs_fleece",
+    "name": "Sauce Labs Fleece Jacket",
+    "type": "link",
+    "locator": {
+      "strategy": "testId",
+      "value": "item-5-title-link"
+    },
+    "aliases": [
+      "sauce labs fleece jacket"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.944Z",
+    "sourceStep": 2,
+    "confidence": 0.95
+  },
+  {
+    "key": "button_add_cart_3",
+    "name": "Add to cart",
+    "type": "button",
+    "locator": {
+      "strategy": "testId",
+      "value": "add-to-cart-sauce-labs-fleece-jacket"
+    },
+    "aliases": [
+      "add to cart"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.944Z",
+    "sourceStep": 2,
+    "confidence": 0.95
+  },
+  {
+    "key": "link_a_4",
+    "name": "Link",
+    "type": "link",
+    "locator": {
+      "strategy": "testId",
+      "value": "item-2-img-link"
+    },
+    "aliases": [
+      "link"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.944Z",
+    "sourceStep": 2,
+    "confidence": 0.95
+  },
+  {
+    "key": "link_sauce_labs_onesie",
+    "name": "Sauce Labs Onesie",
+    "type": "link",
+    "locator": {
+      "strategy": "testId",
+      "value": "item-2-title-link"
+    },
+    "aliases": [
+      "sauce labs onesie"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.944Z",
+    "sourceStep": 2,
+    "confidence": 0.95
+  },
+  {
+    "key": "button_add_cart_4",
+    "name": "Add to cart",
+    "type": "button",
+    "locator": {
+      "strategy": "testId",
+      "value": "add-to-cart-sauce-labs-onesie"
+    },
+    "aliases": [
+      "add to cart"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.944Z",
+    "sourceStep": 2,
+    "confidence": 0.95
+  },
+  {
+    "key": "link_a_5",
+    "name": "Link",
+    "type": "link",
+    "locator": {
+      "strategy": "testId",
+      "value": "item-3-img-link"
+    },
+    "aliases": [
+      "link"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.944Z",
+    "sourceStep": 2,
+    "confidence": 0.95
+  },
+  {
+    "key": "link_test_allthethings_shirt",
+    "name": "Test.allTheThings() T-Shirt (Red)",
+    "type": "link",
+    "locator": {
+      "strategy": "testId",
+      "value": "item-3-title-link"
+    },
+    "aliases": [
+      "test.allthethings() t-shirt (red)"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.944Z",
+    "sourceStep": 2,
+    "confidence": 0.95
+  },
+  {
+    "key": "button_add_cart_5",
+    "name": "Add to cart",
+    "type": "button",
+    "locator": {
+      "strategy": "testId",
+      "value": "add-to-cart-test.allthethings()-t-shirt-(red)"
+    },
+    "aliases": [
+      "add to cart"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.944Z",
+    "sourceStep": 2,
+    "confidence": 0.95
+  },
+  {
+    "key": "link_twitter",
+    "name": "Twitter",
+    "type": "link",
+    "locator": {
+      "strategy": "testId",
+      "value": "social-twitter"
+    },
+    "aliases": [
+      "twitter"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.944Z",
+    "sourceStep": 2,
+    "confidence": 0.95
+  },
+  {
+    "key": "link_facebook",
+    "name": "Facebook",
+    "type": "link",
+    "locator": {
+      "strategy": "testId",
+      "value": "social-facebook"
+    },
+    "aliases": [
+      "facebook"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.944Z",
+    "sourceStep": 2,
+    "confidence": 0.95
+  },
+  {
+    "key": "link_linkedin",
+    "name": "LinkedIn",
+    "type": "link",
+    "locator": {
+      "strategy": "testId",
+      "value": "social-linkedin"
+    },
+    "aliases": [
+      "linkedin"
+    ],
+    "discoveredAt": "2026-05-20T16:36:39.944Z",
+    "sourceStep": 2,
+    "confidence": 0.95
+  },
+  {
+    "key": "button_open_menu",
+    "name": "Open Menu",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Open Menu",
+      "exact": false
+    },
+    "aliases": [
+      "open menu"
+    ],
+    "discoveredAt": "2026-05-20T16:36:40.529Z",
+    "sourceStep": 3,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_back_products",
+    "name": "Back to products",
+    "type": "button",
+    "locator": {
+      "strategy": "testId",
+      "value": "back-to-products"
+    },
+    "aliases": [
+      "back to products"
+    ],
+    "discoveredAt": "2026-05-20T16:36:40.529Z",
+    "sourceStep": 3,
+    "confidence": 0.95
+  },
+  {
+    "key": "button_add_cart",
+    "name": "Add to cart",
+    "type": "button",
+    "locator": {
+      "strategy": "testId",
+      "value": "add-to-cart"
+    },
+    "aliases": [
+      "add to cart"
+    ],
+    "discoveredAt": "2026-05-20T16:36:40.529Z",
+    "sourceStep": 3,
+    "confidence": 0.95
+  },
+  {
+    "key": "link_twitter",
+    "name": "Twitter",
+    "type": "link",
+    "locator": {
+      "strategy": "testId",
+      "value": "social-twitter"
+    },
+    "aliases": [
+      "twitter"
+    ],
+    "discoveredAt": "2026-05-20T16:36:40.529Z",
+    "sourceStep": 3,
+    "confidence": 0.95
+  },
+  {
+    "key": "link_facebook",
+    "name": "Facebook",
+    "type": "link",
+    "locator": {
+      "strategy": "testId",
+      "value": "social-facebook"
+    },
+    "aliases": [
+      "facebook"
+    ],
+    "discoveredAt": "2026-05-20T16:36:40.529Z",
+    "sourceStep": 3,
+    "confidence": 0.95
+  },
+  {
+    "key": "link_linkedin",
+    "name": "LinkedIn",
+    "type": "link",
+    "locator": {
+      "strategy": "testId",
+      "value": "social-linkedin"
+    },
+    "aliases": [
+      "linkedin"
+    ],
+    "discoveredAt": "2026-05-20T16:36:40.529Z",
+    "sourceStep": 3,
+    "confidence": 0.95
+  }
+]
