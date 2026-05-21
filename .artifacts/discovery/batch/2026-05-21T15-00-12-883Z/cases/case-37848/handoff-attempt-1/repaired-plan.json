@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "source": "ai_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "title": "Route recovery"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "click",
+      "target": {
+        "strategy": "text",
+        "value": "Tarjetas"
+      }
+    }
+  ],
+  "createdAt": "2026-05-21T15:00:38.077Z"
+}

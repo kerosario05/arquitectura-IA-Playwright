@@ -1,0 +1,18 @@
+{
+  "id": "route-recovery",
+  "title": "Route recovery",
+  "planPath": "automations\\apps\\default\\cases\\route-recovery\\plan.json",
+  "specPath": "automations\\apps\\default\\cases\\route-recovery\\spec.ts",
+  "appSlug": "default",
+  "appConfigPath": "automations\\apps\\default\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "default",
+  "baseUrlHash": "74df3c0e992c",
+  "createdAt": "2026-05-21T15:09:19.055Z",
+  "updatedAt": "2026-05-21T15:09:19.055Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T15-08-44-925Z\\cases\\case-37848\\discovered-plans.pending.json",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T15-08-44-925Z\\cases\\case-37848"
+  }
+}

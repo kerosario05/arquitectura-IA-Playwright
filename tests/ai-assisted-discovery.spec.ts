@@ -90,34 +90,57 @@ test("IA no se invoca si el resolver deterministico resuelve", () => {
   expect(result.shouldInvoke).toBe(false);
 });
 
-test("IA se invoca si resolver retorna ambiguous", () => {
+test("IA no se invoca si AI_DISCOVERY_ENABLED=false aunque resolver haya fallado", () => {
+  const result = shouldInvokeAiAssistedDiscovery({
+    resolution: makeResolution({ status: "not_found", confidence: 0 }),
+    confidenceThreshold: 0.85,
+    enabled: false
+  });
+
+  expect(result.shouldInvoke).toBe(false);
+});
+
+test("IA no se invoca si deterministico resuelve con alta confianza y AI habilitado", () => {
+  const result = shouldInvokeAiAssistedDiscovery({
+    resolution: makeResolution({ status: "resolved", confidence: 0.95 }),
+    confidenceThreshold: 0.85,
+    enabled: true
+  });
+
+  expect(result.shouldInvoke).toBe(false);
+});
+
+test("IA se invoca si resolver retorna ambiguous y AI habilitado", () => {
   const result = shouldInvokeAiAssistedDiscovery({
     resolution: makeResolution({ status: "ambiguous", confidence: 0.82 }),
-    confidenceThreshold: 0.85
+    confidenceThreshold: 0.85,
+    enabled: true
   });
 
   expect(result.shouldInvoke).toBe(true);
   expect(result.reason).toBe("resolver_ambiguous");
 });
 
-test("IA se invoca si resolver retorna not_found", () => {
+test("IA se invoca si resolver retorna not_found y AI habilitado", () => {
   const result = shouldInvokeAiAssistedDiscovery({
     resolution: makeResolution({ status: "not_found", confidence: 0 }),
-    confidenceThreshold: 0.85
+    confidenceThreshold: 0.85,
+    enabled: true
   });
 
   expect(result.shouldInvoke).toBe(true);
   expect(result.reason).toBe("resolver_not_found");
 });
 
-test("locator_resolution_failed activa AI-assisted discovery si esta habilitado", () => {
+test("locator_resolution_failed activa AI-assisted discovery si habilitado", () => {
   const result = shouldInvokeAiAssistedDiscovery({
     resolution: makeResolution({
       status: "locator_resolution_failed",
       confidence: 0.92,
       attemptedLocators: ["getByRole(button, candidateText:Continue)"]
     }),
-    confidenceThreshold: 0.85
+    confidenceThreshold: 0.85,
+    enabled: true
   });
 
   expect(result.shouldInvoke).toBe(true);

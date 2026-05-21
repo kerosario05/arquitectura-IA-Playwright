@@ -1,0 +1,30 @@
+{
+  "id": "c37845-visualizar-detalle-de-tarjeta-visa-platinum",
+  "externalId": "C37845",
+  "caseId": 37845,
+  "title": "Visualizar detalle de Tarjeta Visa Platinum",
+  "planPath": "automations\\apps\\default\\cases\\c37845-visualizar-detalle-de-tarjeta-visa-platinum\\plan.json",
+  "specPath": "automations\\apps\\default\\cases\\c37845-visualizar-detalle-de-tarjeta-visa-platinum\\spec.ts",
+  "appSlug": "default",
+  "appConfigPath": "automations\\apps\\default\\app.config.json",
+  "status": "blocked_missing_pom",
+  "source": "discovery",
+  "appProfile": "default",
+  "baseUrlHash": "74df3c0e992c",
+  "createdAt": "2026-05-21T16:37:58.350Z",
+  "updatedAt": "2026-05-21T16:37:58.350Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37845\\2026-05-21T16-37-44-655Z\\discovered-plans.pending.json",
+  "pomStatus": "needs_page_method",
+  "inlineDebugMode": false,
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37845\\2026-05-21T16-37-44-655Z",
+    "pomDiagnostics": {
+      "missingPageObjects": [],
+      "missingMethods": [
+        "navigate: navigate APP_BASE_URL",
+        "login: login"
+      ],
+      "generatedCandidates": 1
+    }
+  }
+}

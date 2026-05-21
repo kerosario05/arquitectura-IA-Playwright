@@ -30,6 +30,18 @@ export type TargetCandidate = {
   matchedSignal?: string;
 };
 
+export type AmbiguityDiagnostics = {
+  target: string;
+  semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "unknown";
+  relationContext?: string;
+  candidateCount: number;
+  candidateTexts: string[];
+  candidateRoles: string[];
+  candidateStrategies: string[];
+  suggestedExactTargetPattern?: string;
+  suggestedAssociatedActionPattern?: string;
+};
+
 export type TargetResolutionResult = {
   status: "resolved" | "not_found" | "ambiguous" | "locator_resolution_failed";
   target: string;
@@ -44,11 +56,14 @@ export type TargetResolutionResult = {
   clickableCandidates?: Array<{ text: string; normalizedText: string; type: string; role?: string; tagName?: string }>;
   closestCandidates?: TargetCandidate[];
   attemptedLocators?: string[];
+  ambiguityDiagnostics?: AmbiguityDiagnostics;
 };
 
 export type ResolveActionTargetOptions = {
   minConfidence?: number;
   ambiguousThreshold?: number;
+  semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "unknown";
+  relationContext?: string;
 };
 
 export type AiAssistanceTriggerReason =
@@ -66,7 +81,9 @@ export type AiAssistanceDecision = {
 
 const DEFAULT_OPTIONS: Required<ResolveActionTargetOptions> = {
   minConfidence: 0.4,
-  ambiguousThreshold: 0.15
+  ambiguousThreshold: 0.15,
+  semanticRole: "unknown",
+  relationContext: ""
 };
 
 export function normalizeText(text: string): string {
@@ -437,6 +454,54 @@ export async function resolveActionTarget(
   const opts: Required<ResolveActionTargetOptions> = { ...DEFAULT_OPTIONS, ...options };
 
   const snapshotCandidates = buildSnapshotCandidates(snapshot, target);
+
+  // Apply semanticRole-based ranking and relationContext boost
+  const containerRoles = new Set(["listitem", "group", "region", "card", "article", "row", "tab"]);
+  const containerTags = new Set(["article", "li", "tr", "fieldset"]);
+  const navRoles = new Set(["tab", "menuitem", "treeitem", "option"]);
+  const navTags = new Set(["button", "a"]);
+
+  for (const c of snapshotCandidates) {
+    const el = snapshot.elements.find(e => e.id === c.elementId);
+    if (!el) continue;
+
+    const isContainer = containerRoles.has(el.role ?? "") || containerTags.has(el.tagName?.toLowerCase() ?? "") || el.type === "card";
+    const isNavElement = navRoles.has(el.role ?? "") || (navTags.has(el.tagName?.toLowerCase() ?? "") && el.role !== "button");
+
+    // === product/card/item: prefer actionable containers ===
+    if (opts.semanticRole === "product" || opts.semanticRole === "card" || opts.semanticRole === "item") {
+      if (isContainer && c.isClickable) {
+        c.matchScore = Math.min(1.0, c.matchScore + 0.25);
+        c.matchReason += " +container_rank";
+      } else if (isContainer) {
+        c.matchScore = Math.min(1.0, c.matchScore + 0.15);
+        c.matchReason += " +container_context";
+      }
+    }
+
+    // === category/option: prefer navigation/selection elements ===
+    if (opts.semanticRole === "category" || opts.semanticRole === "option") {
+      if (isNavElement) {
+        c.matchScore = Math.min(1.0, c.matchScore + 0.25);
+        c.matchReason += " +nav_rank";
+      }
+      if (el.role === "tab" || el.role === "menuitem") {
+        c.matchScore = Math.min(1.0, c.matchScore + 0.20);
+        c.matchReason += " +selectable_rank";
+      }
+    }
+
+    // === relationContext boost: prefer elements whose context contains the relation ===
+    if (opts.relationContext && el.nearbyText) {
+      const ctxNormalized = normalizeText(opts.relationContext);
+      const nearbyNormalized = normalizeText(el.nearbyText);
+      if (nearbyNormalized.includes(ctxNormalized) || ctxNormalized.includes(nearbyNormalized)) {
+        c.matchScore = Math.min(1.0, c.matchScore + 0.15);
+        c.matchReason += " +context_boost";
+      }
+    }
+  }
+
   const dedupedCandidates = deduplicateCandidates(snapshotCandidates);
 
   const highConfidence = dedupedCandidates.filter((c) => c.matchScore >= opts.minConfidence);
@@ -478,6 +543,15 @@ export async function resolveActionTarget(
         } as TargetResolutionResult & { semanticTokens?: string[]; expandedTokens?: string[]; matchedSignals?: string[] };
       }
       if (semanticResult.status === "ambiguous_semantic_target") {
+        const ambiguityDiagnostics: AmbiguityDiagnostics = {
+          target,
+          semanticRole: opts.semanticRole !== "unknown" ? opts.semanticRole : undefined,
+          relationContext: opts.relationContext || undefined,
+          candidateCount: semanticResult.candidates.length,
+          candidateTexts: semanticResult.candidates.slice(0, 5).map(c => c.text || c.signalValue || ""),
+          candidateRoles: [...new Set(semanticResult.candidates.slice(0, 5).map(c => c.role ?? c.tagName ?? "unknown"))],
+          candidateStrategies: semanticResult.matchedSignals ? [...new Set(semanticResult.matchedSignals)] : []
+        };
         return {
           status: "ambiguous",
           target,
@@ -499,7 +573,8 @@ export async function resolveActionTarget(
           })),
           semanticTokens: semanticResult.targetTokens,
           expandedTokens: semanticResult.expandedTokens,
-          matchedSignals: semanticResult.matchedSignals
+          matchedSignals: semanticResult.matchedSignals,
+          ambiguityDiagnostics
         } as TargetResolutionResult & { semanticTokens?: string[]; expandedTokens?: string[]; matchedSignals?: string[] };
       }
     } catch {
@@ -565,13 +640,30 @@ export async function resolveActionTarget(
       const semanticResult = await trySemanticFallback(page, target, opts);
       if (semanticResult) return semanticResult;
 
+      const ambiguityDiagnostics: AmbiguityDiagnostics = {
+        target,
+        semanticRole: opts.semanticRole !== "unknown" ? opts.semanticRole : undefined,
+        relationContext: opts.relationContext || undefined,
+        candidateCount: sorted.length,
+        candidateTexts: sorted.slice(0, 5).map(c => c.text),
+        candidateRoles: [...new Set(sorted.slice(0, 5).map(c => c.role ?? c.tagName ?? "unknown"))],
+        candidateStrategies: [...new Set(sorted.slice(0, 5).map(c => c.locatorStrategy))],
+        suggestedExactTargetPattern: sorted.length <= 3
+          ? `Try a more specific target matching one of: ${sorted.slice(0, 3).map(c => `"${c.text.length > 40 ? c.text.slice(0, 40) + "..." : c.text}"`).join(", ")}`
+          : `Multiple candidates found (${sorted.length}). Consider narrowing the target with additional context.`,
+        suggestedAssociatedActionPattern: opts.semanticRole && opts.semanticRole !== "unknown"
+          ? `Try using associated entity: clic en '${target}' relacionado con '${opts.semanticRole === "product" ? "producto" : opts.semanticRole === "card" ? "card" : opts.semanticRole === "category" ? "categoría" : "entidad"}'.`
+          : undefined
+      };
+
       return {
         status: "ambiguous",
         target,
         confidence: best.matchScore,
         matchReason: `multiple_similar_candidates (${sorted.length} with score >= ${opts.minConfidence})`,
         candidateText: best.text,
-        candidates: sorted.slice(0, 5)
+        candidates: sorted.slice(0, 5),
+        ambiguityDiagnostics
       };
     }
   }
@@ -690,8 +782,17 @@ export function shouldInvokeAiAssistedDiscovery(input: {
   resolution: TargetResolutionResult;
   confidenceThreshold: number;
   missingNavigationStep?: boolean;
+  enabled?: boolean;
 }): AiAssistanceDecision {
-  const { resolution, confidenceThreshold, missingNavigationStep } = input;
+  const { resolution, confidenceThreshold, missingNavigationStep, enabled } = input;
+
+  if (enabled === false) {
+    return { shouldInvoke: false };
+  }
+
+  if (resolution.status === "resolved" && resolution.confidence >= confidenceThreshold && resolution.locator) {
+    return { shouldInvoke: false };
+  }
 
   if (missingNavigationStep) {
     return { shouldInvoke: true, reason: "missing_navigation_step" };
@@ -709,16 +810,20 @@ export function shouldInvokeAiAssistedDiscovery(input: {
     return { shouldInvoke: true, reason: "locator_resolution_failed" };
   }
 
-  if (resolution.confidence < confidenceThreshold) {
-    return { shouldInvoke: true, reason: "confidence_below_threshold" };
+  if ((resolution as any).status === "needs_discovery") {
+    return { shouldInvoke: true, reason: "needs_discovery" as any };
   }
 
-  const semanticallyCloseCandidates = resolution.candidates.filter(
-    (candidate) => candidate.matchScore >= Math.max(confidenceThreshold - 0.1, 0.5)
-  );
+  if ((resolution as any).status === "needs_associated_target_resolution") {
+    return { shouldInvoke: true, reason: "needs_associated_target_resolution" as any };
+  }
 
-  if (semanticallyCloseCandidates.length > 1) {
-    return { shouldInvoke: true, reason: "multiple_semantic_matches" };
+  if ((resolution as any).status === "needs_assertion_resolution") {
+    return { shouldInvoke: true, reason: "needs_assertion_resolution" as any };
+  }
+
+  if (resolution.confidence < confidenceThreshold) {
+    return { shouldInvoke: true, reason: "confidence_below_threshold" };
   }
 
   return { shouldInvoke: false };

@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-05-21T12:53:54.522Z",
+  "attemptNumber": 1,
+  "repairStatus": "timeout",
+  "success": false,
+  "error": "Codex CLI timed out after 0.5 minutes (timeoutMs: 30000).\nCwd: C:\\MisProyectos\\MCP\nHandoff directory: C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T12-53-09-326Z\\cases\\case-37848\\handoff-attempt-1\nExpected response path: C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T12-53-09-326Z\\cases\\case-37848\\handoff-attempt-1\\agent-response.json\nStdout log: C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T12-53-09-326Z\\cases\\case-37848\\handoff-attempt-1\\codex.stdout.log\nStderr log: C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T12-53-09-326Z\\cases\\case-37848\\handoff-attempt-1\\codex.stderr.log\n\nSuggestions:\n  - Increase AGENT_AUTO_REPAIR_TIMEOUT_MS / CODEX_AUTO_REPAIR_TIMEOUT_MS (current: 30000ms, recommended: 1800000ms / 30 min)\n  - Run manually:\n    C:\\Users\\radames\\AppData\\Roaming\\npm\\codex.cmd exec --skip-git-repo-check --sandbox workspace-write \"You are repairing a...\n  - Check handoff files in: C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T12-53-09-326Z\\cases\\case-37848\\handoff-attempt-1\n  - After manual repair, run: npm run agent:validate",
+  "responsePath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T12-53-09-326Z\\cases\\case-37848\\handoff-attempt-1\\agent-response.json",
+  "selectedSkill": "navigation-recovery",
+  "diagnostics": {
+    "exitCode": -1,
+    "timedOut": true,
+    "durationMs": 30047,
+    "stdoutLogPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T12-53-09-326Z\\cases\\case-37848\\handoff-attempt-1\\codex.stdout.log",
+    "stderrLogPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T12-53-09-326Z\\cases\\case-37848\\handoff-attempt-1\\codex.stderr.log",
+    "agentResponseExists": false,
+    "agentResponseValid": false,
+    "nextAction": "auto_repair_timeout"
+  }
+}

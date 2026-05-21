@@ -8,6 +8,7 @@ const browser = process.env.BROWSER ?? "chromium";
 
 export default defineConfig({
   testDir: "./tests",
+  testIgnore: ["tests/generated/**"],
   timeout: Number(process.env.DEFAULT_TIMEOUT_MS ?? 30000),
   outputDir: "test-results",
   reporter: [["list"], ["html", { open: "never" }]],

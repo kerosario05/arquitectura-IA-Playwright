@@ -1,0 +1,25 @@
+{
+  "timestamp": "2026-05-21T15:20:28.312Z",
+  "attemptNumber": 1,
+  "repairStatus": "invalid_proposal",
+  "success": false,
+  "error": "Codex finished but route-recovery-decision.json was not produced.",
+  "responsePath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T15-20-00-955Z\\cases\\case-37868\\handoff-attempt-1\\agent-response.json",
+  "selectedSkill": "navigation-recovery",
+  "diagnostics": {
+    "exitCode": 0,
+    "timedOut": false,
+    "durationMs": 13951,
+    "stdoutLogPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T15-20-00-955Z\\cases\\case-37868\\handoff-attempt-1\\codex.stdout.log",
+    "stderrLogPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T15-20-00-955Z\\cases\\case-37868\\handoff-attempt-1\\codex.stderr.log",
+    "promptMode": "compact-route-recovery",
+    "compactPrompt": true,
+    "preferredResponseSeconds": 30,
+    "promptBudgetSeconds": 60,
+    "routeRecoveryPackPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T15-20-00-955Z\\cases\\case-37868\\handoff-attempt-1\\route-recovery-pack.json",
+    "agentResponseExists": false,
+    "agentResponseValid": false,
+    "routeRecoveryDecisionValid": false,
+    "nextAction": "auto_repair_invalid_response"
+  }
+}

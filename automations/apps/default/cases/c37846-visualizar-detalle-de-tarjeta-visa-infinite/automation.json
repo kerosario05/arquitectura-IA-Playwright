@@ -1,0 +1,37 @@
+{
+  "id": "c37846-visualizar-detalle-de-tarjeta-visa-infinite",
+  "externalId": "C37846",
+  "caseId": 37846,
+  "title": "Visualizar detalle de Tarjeta Visa Infinite",
+  "planPath": "automations\\apps\\default\\cases\\c37846-visualizar-detalle-de-tarjeta-visa-infinite\\plan.json",
+  "specPath": "automations\\apps\\default\\cases\\c37846-visualizar-detalle-de-tarjeta-visa-infinite\\spec.ts",
+  "appSlug": "default",
+  "appConfigPath": "automations\\apps\\default\\app.config.json",
+  "status": "blocked_missing_pom",
+  "source": "discovery",
+  "appProfile": "default",
+  "baseUrlHash": "74df3c0e992c",
+  "createdAt": "2026-05-21T16:57:02.432Z",
+  "updatedAt": "2026-05-21T16:57:02.432Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37846\\2026-05-21T16-56-46-120Z\\discovered-plans.pending.json",
+  "pomStatus": "needs_page_object",
+  "inlineDebugMode": false,
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37846\\2026-05-21T16-56-46-120Z",
+    "pomDiagnostics": {
+      "missingPageObjects": [],
+      "missingMethods": [
+        "navigate: navigate APP_BASE_URL",
+        "login: login",
+        "click: click Iniciar",
+        "click: click Información de productos",
+        "click: click tarjetas",
+        "click: click tarjeta de credito visa infinite"
+      ],
+      "generatedCandidates": 0
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\default\\cases\\c37846-visualizar-detalle-de-tarjeta-visa-infinite\\plan.json",
+    "previousStatus": "active"
+  }
+}

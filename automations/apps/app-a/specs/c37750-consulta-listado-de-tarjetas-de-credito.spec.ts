@@ -1,0 +1,33 @@
+import { test } from '@playwright/test';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { config } from '../../../../src/config/env';
+import { buildDataContext } from '../../../../src/data';
+import { executeExecutionPlan } from '../../../../src/runner/execution-plan-executor';
+import { loadPromotedAppConfigSync, buildMergedConfig } from '../../../../src/automations/app-profile';
+import type { ExecutionPlan } from '../../../../src/types/execution-plan.types';
+
+const SPEC_APP_PROFILE = 'app-a';
+const SPEC_APP_CONFIG_PATH = 'automations/apps/app-a/app.config.json';
+const SPEC_PLAN_PATH = 'automations/apps/app-a/plans/c37750-consulta-listado-de-tarjetas-de-credito.plan.json';
+
+const __appConfig = loadPromotedAppConfigSync({
+  appSlug: SPEC_APP_PROFILE,
+  configPath: resolve(process.cwd(), SPEC_APP_CONFIG_PATH)
+});
+const __runtimeConfig = __appConfig ? buildMergedConfig(__appConfig, config) : config;
+
+const planPath = resolve(process.cwd(), SPEC_PLAN_PATH);
+const plan = JSON.parse(readFileSync(planPath, 'utf8')) as ExecutionPlan;
+
+test('Consulta listado de tarjetas de credito', async ({ page }) => {
+  const dataContext = buildDataContext(__runtimeConfig);
+  await executeExecutionPlan({
+    page,
+    plan,
+    dataContext,
+    appBaseUrl: __runtimeConfig.app.baseUrl,
+    runtimeConfig: __runtimeConfig,
+    evidenceDir: resolve(process.cwd(), 'automations/apps/app-a/runs/c37750-consulta-listado-de-tarjetas-de-credito')
+  });
+});

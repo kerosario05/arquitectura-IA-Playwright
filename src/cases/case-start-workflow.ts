@@ -11,10 +11,12 @@ import { executeExecutionPlan, writePlanExecutionResults } from "../runner";
 import { reportToTestRail } from "../testrail/testrail-reporter";
 import { promoteExecutionPlan } from "../automations/promote-plan";
 import { findAndCloneReusablePlan } from "../automations/automation-reuse";
-import { buildAgentHandoffRequest, writeAgentHandoffPackage, runCodexAutoRepair, validateAgentHandoffResponse } from "../agent";
+import { buildAgentHandoffRequest, writeAgentHandoffPackage, runCodexAutoRepair, validateAgentHandoffResponse, resolveAgentAutoRepairConfig, runAgentAutoRepairAttempt, buildAgentContextPack } from "../agent";
 import { analyzeSnapshotGaps, formatGapDiagnosis } from "../agent/snapshot-gap-detector";
 import { runPostExecutionReporting } from "../reporting/post-execution-reporting";
 import { buildPlanRepairGoal } from "./plan-repair-goal";
+import { scanCurrentPage } from "../explorer/page-scanner";
+import { listSupportedActions } from "../registry";
 import type { CaseStartWorkflowInput, CaseStartWorkflowResult, PromotionResult, HandoffResult, AutoRepairResult, ReuseResult } from "../types/case-start.types";
 import type { TestScenario } from "../types/testrail.types";
 import type { ExecutionPlan } from "../types/execution-plan.types";
@@ -126,7 +128,8 @@ export async function startCaseAutomationWorkflow(
       dataContext,
       evidenceDir: path.join(artifactsDir, "evidence"),
       continueOnFailure: input.continueOnFailure,
-      appBaseUrl: config.app.baseUrl
+      appBaseUrl: config.app.baseUrl,
+      runtimeConfig: config
     });
 
     const planResult: PlanExecutionResult = {
@@ -186,6 +189,52 @@ export async function startCaseAutomationWorkflow(
     let finalExecutionPassed = executionPassed;
     let finalIsPlanValidated = isPlanValidated;
 
+    const agentCfg = resolveAgentAutoRepairConfig(config);
+
+    const hasSensitivePlanSteps = (p: ExecutionPlan): boolean => {
+      return p.steps.some((step) => {
+        const meta = step as typeof step & {
+          requiresApproval?: boolean;
+          isSensitive?: boolean;
+          riskLevel?: string;
+          actionCategory?: string;
+        };
+        return Boolean(
+          meta.requiresApproval ||
+          meta.isSensitive ||
+          meta.riskLevel === "high" ||
+          (meta.actionCategory && ["destructive", "financial", "submit_final", "irreversible"].includes(meta.actionCategory))
+        );
+      });
+    };
+
+    const isRecoverableExecutionFailure = (result: PlanExecutionResult): boolean => {
+      if (result.status === "passed" || result.status === "skipped") return false;
+      const failed = result.steps.filter((s) => s.status === "failed");
+      if (failed.length === 0) return false;
+
+      const allErrors = failed.map((s) => (s.error ?? "")).join(" | ").toLowerCase();
+      // Hard blockers: missing data/config issues should not trigger auto repair.
+      if (allErrors.includes("requires value or valuekey")) return false;
+      if (allErrors.includes("valuekey") && allErrors.includes("not") && allErrors.includes("available")) return false;
+      if (allErrors.includes("requires appbaseurl") || allErrors.includes("missing required environment")) return false;
+
+      // Generic recoverables: locator/timeouts/visibility/assertions issues.
+      if (
+        allErrors.includes("timeout") ||
+        allErrors.includes("waiting for") ||
+        allErrors.includes("no element") ||
+        allErrors.includes("strict mode") ||
+        allErrors.includes("to be visible") ||
+        allErrors.includes("contain text") ||
+        allErrors.includes("to have url")
+      ) {
+        return true;
+      }
+
+      return true;
+    };
+
     if (input.autoHandoff && !isPlanValidated && !reusedPlan) {
       const gapAnalysis = analyzeSnapshotGaps(enrichedPlan, snapshot);
       const noPlaywright = true;
@@ -227,9 +276,28 @@ export async function startCaseAutomationWorkflow(
           pendingSteps: enrichedPlan.steps.filter((s) => s.action === "noop")
         });
 
+        const contextPackPath = path.join(handoffDir, "context-pack.json");
+        try {
+          const { pack } = await buildAgentContextPack({
+            fullConfig: config,
+            outputDir: artifactsDir,
+            evidenceDir: path.join(artifactsDir, "evidence"),
+            snapshot,
+            candidatePlanPath: planPath,
+            currentPlan: enrichedPlan,
+            failedReason: "plan_needs_repair",
+            supportedActions: listSupportedActions()
+          });
+          await mkdir(handoffDir, { recursive: true });
+          await writeFile(contextPackPath, JSON.stringify(pack, null, 2), "utf-8");
+        } catch {
+          // best-effort; handoff continues
+        }
+
         const request = buildAgentHandoffRequest({
           kind: "plan_repair",
           goal,
+          contextPackPath,
           scenario,
           currentPlan: enrichedPlan,
           snapshot,
@@ -262,6 +330,7 @@ export async function startCaseAutomationWorkflow(
             instructionsPath: handoffResult.instructionsPath,
             responsePath: handoffResult.responsePath,
             schemaPath: handoffResult.schemaPath,
+            contextPackPath,
             projectRoot: process.cwd(),
             timeoutMs,
             codexCommand,
@@ -358,6 +427,103 @@ export async function startCaseAutomationWorkflow(
             };
           }
         }
+      }
+    }
+
+    // Auto-repair for recoverable execution failures (deterministic execution first, Codex fallback)
+    if (
+      input.autoRepair &&
+      agentCfg.enabled &&
+      !finalExecutionPassed &&
+      finalPlan.status === "validated" &&
+      !hasSensitivePlanSteps(finalPlan) &&
+      isRecoverableExecutionFailure(executionResult) &&
+      !input.dryRun
+    ) {
+      console.log("[cases:start] Auto-repair enabled. Preparing Codex handoff...");
+      const liveSnapshot = await scanCurrentPage(page);
+
+      for (let attempt = 1; attempt <= agentCfg.maxAttempts; attempt += 1) {
+        console.log(`[cases:start] Running Codex CLI (attempt ${attempt}/${agentCfg.maxAttempts})...`);
+        const attemptResult = await runAgentAutoRepairAttempt({
+          fullConfig: config,
+          outputDir: artifactsDir,
+          attemptNumber: attempt,
+          kind: "plan_repair",
+          failureSummary: `execution_failed status=${executionResult.status} failedSteps=${executionResult.steps.filter((s) => s.status === "failed").map((s) => `#${s.index}:${s.action}`).join(",")}`,
+          scenario,
+          currentPlan: finalPlan,
+          snapshot: liveSnapshot
+        });
+
+        autoRepair = {
+          attempted: true,
+          success: attemptResult.success,
+          dryRun: false,
+          responsePath: attemptResult.responsePath,
+          error: attemptResult.success ? undefined : attemptResult.reason,
+          timedOut: attemptResult.status === "timeout"
+        };
+
+        if (!attemptResult.success) {
+          if (attemptResult.status === "no_proposal") {
+            console.log("[cases:start] AI explorer did not return a proposal.");
+            break;
+          }
+          if (attempt === agentCfg.maxAttempts) {
+            console.log("[cases:start] Auto-repair attempts exhausted.");
+            break;
+          }
+          continue;
+        }
+
+        console.log("[cases:start] Codex response validated.");
+        console.log("[cases:start] Retrying execution with repaired plan...");
+
+        const repairedPlan = attemptResult.repairedPlan;
+        const repairedExec = await executeExecutionPlan({
+          page,
+          plan: repairedPlan,
+          dataContext,
+          evidenceDir: path.join(artifactsDir, `evidence-auto-repaired-attempt-${attempt}`),
+          continueOnFailure: input.continueOnFailure,
+          appBaseUrl: config.app.baseUrl,
+          runtimeConfig: config
+        });
+
+        finalPlan = repairedPlan;
+        finalIsPlanValidated = finalPlan.status === "validated";
+        finalExecutionPassed = repairedExec.status === "passed";
+
+        if (finalExecutionPassed && finalIsPlanValidated) {
+          console.log("[cases:start] Retry passed.");
+
+          const repairedPlanResult: PlanExecutionResult = {
+            scenario: finalPlan.scenario,
+            status: repairedExec.status,
+            startedAt: repairedExec.startedAt,
+            finishedAt: repairedExec.finishedAt,
+            durationMs: repairedExec.durationMs,
+            evidenceDir: repairedExec.evidenceDir,
+            steps: repairedExec.steps
+          };
+
+          finalSummary = {
+            generatedAt: new Date().toISOString(),
+            total: 1,
+            passed: 1,
+            failed: 0,
+            partial: 0,
+            skipped: 0,
+            results: [repairedPlanResult]
+          };
+
+          finalResultPath = path.join(artifactsDir, `results-${input.caseId}-auto-repaired.json`);
+          await writePlanExecutionResults(finalSummary, finalResultPath);
+          break;
+        }
+
+        console.log(`[cases:start] Retry failed with status ${repairedExec.status}.`);
       }
     }
 

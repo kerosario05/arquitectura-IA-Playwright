@@ -1,0 +1,29 @@
+{
+  "id": "c30000-generic-reusable-automation",
+  "externalId": "C30000",
+  "caseId": 30000,
+  "title": "Generic reusable automation",
+  "planPath": "automations\\apps\\default\\cases\\c30000-generic-reusable-automation\\plan.json",
+  "specPath": "automations\\apps\\default\\cases\\c30000-generic-reusable-automation\\spec.ts",
+  "appSlug": "default",
+  "appConfigPath": "automations\\apps\\default\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "default",
+  "createdAt": "2026-05-21T17:26:23.425Z",
+  "updatedAt": "2026-05-21T17:26:23.425Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.tmp-test-automation-promoter\\discovery\\discovered-plans.pending.json",
+  "inlineDebugMode": false,
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\MCP\\.tmp-test-automation-promoter\\discovery",
+    "confidenceSummary": {
+      "promotedCount": 2,
+      "averageConfidence": 0.8500000000000001,
+      "minConfidence": 0.8
+    },
+    "promotedObjects": [
+      "button_primary_cta",
+      "button_secondary_cta"
+    ]
+  }
+}

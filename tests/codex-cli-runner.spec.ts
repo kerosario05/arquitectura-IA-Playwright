@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
-import { buildCommand, formatCodexCliError, formatCodexTimeoutError, escapeDoubleQuotes, buildErrorSuggestions } from "../src/agent/codex-cli-runner";
+import { buildCommand, formatCodexCliError, formatCodexTimeoutError, escapeDoubleQuotes, buildErrorSuggestions, runCodexCli, __setSpawnForTesting, __setPlatformForTesting, needsCmdExe, resolveSpawnCommand } from "../src/agent/codex-cli-runner";
 import type { CodexCliRunnerInput, CodexCliRunnerResult } from "../src/types/codex-auto-repair.types";
+import { EventEmitter } from "node:events";
 
 test("escapeDoubleQuotes escapes double quotes in prompt", () => {
   expect(escapeDoubleQuotes('say "hello"')).toBe('say \\"hello\\"');
@@ -95,7 +96,8 @@ test("formatCodexCliError includes exitCode, command, cwd", () => {
     exitCode: 1,
     stdout: "some output",
     stderr: "some error",
-    timedOut: false
+    timedOut: false,
+    durationMs: 10
   };
 
   const message = formatCodexCliError(result, input);
@@ -117,7 +119,8 @@ test("formatCodexCliError includes stdout when present", () => {
     exitCode: 1,
     stdout: "codex-cli 0.131.0\nProcessing...",
     stderr: "",
-    timedOut: false
+    timedOut: false,
+    durationMs: 10
   };
 
   const message = formatCodexCliError(result, input);
@@ -138,7 +141,8 @@ test("formatCodexCliError includes stderr when present", () => {
     exitCode: 1,
     stdout: "",
     stderr: "Error: Not inside a trusted directory",
-    timedOut: false
+    timedOut: false,
+    durationMs: 10
   };
 
   const message = formatCodexCliError(result, input);
@@ -160,7 +164,8 @@ test("formatCodexCliError includes signal when present", () => {
     stdout: "",
     stderr: "",
     timedOut: false,
-    signal: "SIGTERM"
+    signal: "SIGTERM",
+    durationMs: 10
   };
 
   const message = formatCodexCliError(result, input);
@@ -180,7 +185,8 @@ test("formatCodexCliError suggests --skip-git-repo-check when stderr contains tr
     exitCode: 1,
     stdout: "",
     stderr: "Error: Not inside a trusted directory. Run with --skip-git-repo-check.",
-    timedOut: false
+    timedOut: false,
+    durationMs: 10
   };
 
   const message = formatCodexCliError(result, input);
@@ -201,7 +207,8 @@ test("formatCodexCliError suggests --sandbox workspace-write when stderr contain
     exitCode: 1,
     stdout: "",
     stderr: "Error: Cannot write to read-only sandbox.",
-    timedOut: false
+    timedOut: false,
+    durationMs: 10
   };
 
   const message = formatCodexCliError(result, input);
@@ -221,7 +228,8 @@ test("formatCodexCliError suggests absolute path when command not found", () => 
     exitCode: 1,
     stdout: "",
     stderr: "'codex' is not recognized as an internal or external command",
-    timedOut: false
+    timedOut: false,
+    durationMs: 10
   };
 
   const message = formatCodexCliError(result, input);
@@ -243,7 +251,8 @@ test("formatCodexCliError truncates long stdout", () => {
     exitCode: 1,
     stdout: longOutput,
     stderr: "",
-    timedOut: false
+    timedOut: false,
+    durationMs: 10
   };
 
   const message = formatCodexCliError(result, input);
@@ -296,6 +305,285 @@ test("formatCodexTimeoutError includes timeoutMs", () => {
 
   expect(message).toContain("300000");
   expect(message).toContain("timed out");
+});
+
+// --- Windows cmd.exe resolution tests ---
+
+test("needsCmdExe returns true for .cmd on win32", () => {
+  expect(needsCmdExe("codex.cmd", "win32")).toBe(true);
+  expect(needsCmdExe("C:\\npm\\codex.cmd", "win32")).toBe(true);
+});
+
+test("needsCmdExe returns true for .bat on win32", () => {
+  expect(needsCmdExe("runner.bat", "win32")).toBe(true);
+});
+
+test("needsCmdExe returns false for plain command on win32", () => {
+  expect(needsCmdExe("codex", "win32")).toBe(false);
+  expect(needsCmdExe("node", "win32")).toBe(false);
+});
+
+test("needsCmdExe returns false on non-win32 regardless of extension", () => {
+  expect(needsCmdExe("codex.cmd", "linux")).toBe(false);
+  expect(needsCmdExe("codex.bat", "darwin")).toBe(false);
+  expect(needsCmdExe("codex", "linux")).toBe(false);
+});
+
+test("needsCmdExe defaults to currentPlatform seam", () => {
+  __setPlatformForTesting("win32");
+  try {
+    expect(needsCmdExe("codex.cmd")).toBe(true);
+    expect(needsCmdExe("codex")).toBe(false);
+  } finally {
+    __setPlatformForTesting(undefined);
+  }
+});
+
+test("resolveSpawnCommand wraps .cmd in cmd.exe on win32", () => {
+  const input: CodexCliRunnerInput = {
+    command: "C:\\Users\\radames\\AppData\\Roaming\\npm\\codex.cmd",
+    extraArgs: ["--skip-git-repo-check", "--sandbox", "workspace-write"],
+    prompt: "Read context-pack.json and fix targets",
+    cwd: "C:\\MisProyectos\\MCP",
+    timeoutMs: 5000
+  };
+
+  const resolved = resolveSpawnCommand(input, "win32");
+  expect(resolved.spawnCommand).toBe("cmd.exe");
+  expect(resolved.spawnArgs[0]).toBe("/d");
+  expect(resolved.spawnArgs[1]).toBe("/s");
+  expect(resolved.spawnArgs[2]).toBe("/c");
+  expect(resolved.spawnArgs[3]).toContain("codex.cmd");
+  expect(resolved.spawnArgs).toContain("--skip-git-repo-check");
+  expect(resolved.spawnArgs).toContain("--sandbox");
+  expect(resolved.spawnArgs).toContain("workspace-write");
+  expect(resolved.spawnArgs).toContain("Read context-pack.json and fix targets");
+});
+
+test("resolveSpawnCommand does not wrap plain command on win32", () => {
+  const input: CodexCliRunnerInput = {
+    command: "codex",
+    extraArgs: [],
+    prompt: "Task",
+    cwd: process.cwd(),
+    timeoutMs: 5000
+  };
+
+  const resolved = resolveSpawnCommand(input, "win32");
+  expect(resolved.spawnCommand).toBe("codex");
+  expect(resolved.spawnArgs[0]).toBe("exec");
+  expect(resolved.spawnArgs[1]).toBe("Task");
+  expect(resolved.spawnCommand).not.toBe("cmd.exe");
+});
+
+test("resolveSpawnCommand does not wrap on linux even with .cmd", () => {
+  const input: CodexCliRunnerInput = {
+    command: "codex.cmd",
+    extraArgs: [],
+    prompt: "Task",
+    cwd: process.cwd(),
+    timeoutMs: 5000
+  };
+
+  const resolved = resolveSpawnCommand(input, "linux");
+  expect(resolved.spawnCommand).toBe("codex.cmd");
+  expect(resolved.spawnCommand).not.toBe("cmd.exe");
+});
+
+test("resolveSpawnCommand displayCommand matches buildCommand output", () => {
+  const input: CodexCliRunnerInput = {
+    command: "codex",
+    extraArgs: ["--skip-git-repo-check"],
+    prompt: "Fix the issue",
+    cwd: process.cwd(),
+    timeoutMs: 5000
+  };
+
+  const resolved = resolveSpawnCommand(input, "win32");
+  expect(resolved.displayCommand).toBe(buildCommand(input));
+  expect(resolved.displayCommand).toContain("codex");
+  expect(resolved.displayCommand).toContain("Fix the issue");
+});
+
+test("runCodexCli spawns cmd.exe for codex.cmd on win32", async () => {
+  __setPlatformForTesting("win32");
+  let capturedCommand: string | undefined;
+  let capturedArgs: string[] | undefined;
+  let capturedStdio: unknown;
+
+  __setSpawnForTesting(((cmd: string, args: string[], opts: any) => {
+    capturedCommand = cmd;
+    capturedArgs = args;
+    capturedStdio = opts.stdio;
+    const child = new EventEmitter() as any;
+    child.stdout = new EventEmitter();
+    child.stderr = new EventEmitter();
+    setTimeout(() => child.emit("close", 0, null), 10);
+    return child;
+  }) as any);
+
+  try {
+    const input: CodexCliRunnerInput = {
+      command: "C:\\npm\\codex.cmd",
+      extraArgs: [],
+      prompt: "win32 test",
+      cwd: process.cwd(),
+      timeoutMs: 5000
+    };
+
+    await runCodexCli(input);
+    expect(capturedCommand).toBe("cmd.exe");
+    expect(capturedArgs?.[0]).toBe("/d");
+    expect(capturedArgs?.[1]).toBe("/s");
+    expect(capturedArgs?.[2]).toBe("/c");
+    expect(capturedArgs?.[3]).toContain("codex.cmd");
+    expect(capturedStdio).toEqual(["ignore", "pipe", "pipe"]);
+  } finally {
+    __setPlatformForTesting(undefined);
+    __setSpawnForTesting(undefined as any);
+  }
+});
+
+test("runCodexCli spawns command directly on non-win32", async () => {
+  __setPlatformForTesting("linux");
+  let capturedCommand: string | undefined;
+  let capturedStdio: unknown;
+
+  __setSpawnForTesting(((cmd: string, _args: string[], opts: any) => {
+    capturedCommand = cmd;
+    capturedStdio = opts.stdio;
+    const child = new EventEmitter() as any;
+    child.stdout = new EventEmitter();
+    child.stderr = new EventEmitter();
+    setTimeout(() => child.emit("close", 0, null), 10);
+    return child;
+  }) as any);
+
+  try {
+    const input: CodexCliRunnerInput = {
+      command: "codex",
+      extraArgs: [],
+      prompt: "linux test",
+      cwd: process.cwd(),
+      timeoutMs: 5000
+    };
+
+    await runCodexCli(input);
+    expect(capturedCommand).toBe("codex");
+    expect(capturedStdio).toEqual(["ignore", "pipe", "pipe"]);
+  } finally {
+    __setPlatformForTesting(undefined);
+    __setSpawnForTesting(undefined as any);
+  }
+});
+
+test("runCodexCli heartbeat still works after spawn resolution change", async () => {
+  const logs: string[] = [];
+  const orig = console.log;
+  console.log = (msg?: unknown, ...rest: unknown[]) => {
+    logs.push([String(msg ?? ""), ...rest.map(String)].join(" "));
+  };
+
+  try {
+    __setSpawnForTesting(((cmd: string, args: string[], opts: any) => {
+      const child = new EventEmitter() as any;
+      child.stdout = new EventEmitter();
+      child.stderr = new EventEmitter();
+      setTimeout(() => child.emit("close", 0, null), 120);
+      return child;
+    }) as any);
+
+    const input: CodexCliRunnerInput = {
+      command: "codex",
+      extraArgs: [],
+      prompt: "Task",
+      cwd: process.cwd(),
+      timeoutMs: 5000,
+      heartbeatMs: 50,
+      attempt: 1,
+      handoffDir: process.cwd(),
+      showAgentLog: false
+    };
+
+    await runCodexCli(input);
+    expect(logs.some((l) => l.includes("Codex still running"))).toBe(true);
+  } finally {
+    console.log = orig;
+  }
+});
+
+test("runCodexCli showAgentLog includes spawnCommand on win32", async () => {
+  __setPlatformForTesting("win32");
+  const logs: string[] = [];
+  const orig = console.log;
+  console.log = (msg?: unknown, ...rest: unknown[]) => {
+    logs.push([String(msg ?? ""), ...rest.map(String)].join(" "));
+  };
+
+  try {
+    __setSpawnForTesting(((cmd: string, args: string[], opts: any) => {
+      const child = new EventEmitter() as any;
+      child.stdout = new EventEmitter();
+      child.stderr = new EventEmitter();
+      setTimeout(() => child.emit("close", 0, null), 10);
+      return child;
+    }) as any);
+
+    const input: CodexCliRunnerInput = {
+      command: "C:\\npm\\codex.cmd",
+      extraArgs: [],
+      prompt: "test",
+      cwd: process.cwd(),
+      timeoutMs: 5000,
+      showAgentLog: true
+    };
+
+    await runCodexCli(input);
+    expect(logs.some((l) => l.includes("displayCommand:"))).toBe(true);
+    expect(logs.some((l) => l.includes("spawnCommand:"))).toBe(true);
+    expect(logs.some((l) => l.includes("cmd.exe"))).toBe(true);
+  } finally {
+    __setPlatformForTesting(undefined);
+    __setSpawnForTesting(undefined as any);
+    console.log = orig;
+  }
+});
+
+test("runCodexCli emits heartbeat when no output", async () => {
+  const logs: string[] = [];
+  const orig = console.log;
+  console.log = (msg?: unknown, ...rest: unknown[]) => {
+    logs.push([String(msg ?? ""), ...rest.map(String)].join(" "));
+  };
+
+  try {
+    __setSpawnForTesting(((command: string, args: string[], options: any) => {
+      const child = new EventEmitter() as any;
+      child.stdout = new EventEmitter();
+      child.stderr = new EventEmitter();
+      child.kill = () => { /* noop */ };
+      // No output, close after a short delay.
+      setTimeout(() => child.emit("close", 0, null), 120);
+      return child;
+    }) as any);
+
+    const input: CodexCliRunnerInput = {
+      command: "codex",
+      extraArgs: [],
+      prompt: "Task",
+      cwd: process.cwd(),
+      timeoutMs: 5000,
+      heartbeatMs: 50,
+      attempt: 1,
+      handoffDir: process.cwd(),
+      showAgentLog: false
+    };
+
+    await runCodexCli(input);
+    expect(logs.some((l) => l.includes("Codex still running"))).toBe(true);
+  } finally {
+    console.log = orig;
+  }
 });
 
 test("formatCodexTimeoutError includes suggestion to increase timeout", () => {

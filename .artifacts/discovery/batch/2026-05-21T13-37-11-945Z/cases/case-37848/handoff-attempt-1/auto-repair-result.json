@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-05-21T13:37:37.717Z",
+  "attemptNumber": 1,
+  "repairStatus": "no_proposal",
+  "success": false,
+  "error": "Agent response contains no plans.",
+  "responsePath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T13-37-11-945Z\\cases\\case-37848\\handoff-attempt-1\\agent-response.json",
+  "selectedSkill": "navigation-recovery",
+  "diagnostics": {
+    "exitCode": 0,
+    "timedOut": false,
+    "durationMs": 11722,
+    "stdoutLogPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T13-37-11-945Z\\cases\\case-37848\\handoff-attempt-1\\codex.stdout.log",
+    "stderrLogPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T13-37-11-945Z\\cases\\case-37848\\handoff-attempt-1\\codex.stderr.log",
+    "agentResponseExists": true,
+    "agentResponseValid": false,
+    "nextAction": "auto_repair_no_plan"
+  }
+}

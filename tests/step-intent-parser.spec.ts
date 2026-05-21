@@ -3,7 +3,8 @@ import {
   parseStepIntent,
   parseSingleIntent,
   classifyStepSet,
-  normalizeText
+  normalizeText,
+  cleanActionTarget
 } from "../src/discovery/step-intent-parser";
 
 test("parse 'Abrir Información de productos > Tarjetas > Tarjeta de Crédito' as navigation_path", () => {
@@ -828,4 +829,126 @@ test("classifyStepSet pone composite_action en actionIntents", () => {
   expect(classified.actionIntents[0].type).toBe("composite_action");
   expect(classified.assertionIntents.length).toBe(0);
   expect(classified.setupIntents.length).toBe(0);
+});
+
+test("assertion con slash no se clasifica como navigation_path", () => {
+  const intents = parseStepIntent("Validar detalle/listado de productos");
+  expect(intents.length).toBe(1);
+  expect(intents[0].type).toBe("assertion");
+  expect(intents[0].type).not.toBe("navigation_path");
+});
+
+test("esperar con slash se clasifica como assertion", () => {
+  const intents = parseStepIntent("Esperar pantalla/resumen final");
+  expect(intents[0].type).toBe("assertion");
+});
+
+test("click pegado con ruta se divide en click + navigation_path", () => {
+  const intents = parseStepIntent("clic en iniciar>Abrir A > B > C");
+  expect(intents.length).toBe(2);
+  expect(intents[0].type).toBe("action_click");
+  expect(intents[0].actionTarget).toBe("iniciar");
+  expect(intents[1].type).toBe("navigation_path");
+  expect(intents[1].path).toEqual(["A", "B", "C"]);
+});
+
+test("click con separador residual limpia target", () => {
+  const intents = parseStepIntent("clic en iniciar>");
+  expect(intents[0].type).toBe("action_click");
+  expect(intents[0].actionTarget).toBe("iniciar");
+});
+
+test("cleanActionTarget limpia separadores residuales en extremos", () => {
+  expect(cleanActionTarget(" Información de productos > ")).toBe("Información de productos");
+  expect(cleanActionTarget("> iniciar")).toBe("iniciar");
+  expect(cleanActionTarget("Solicitar.")).toBe("Solicitar");
+});
+
+test("no divide emails y dominios por puntos", () => {
+  const intents = parseStepIntent("Ingresar correo de prueba usando teclado virtual: correo@empresa.com.do o equivalente configurado.");
+  expect(intents.length).toBe(1);
+  expect(intents[0].type).toBe("action_fill");
+  expect(intents[0].actionTarget).toContain("correo@empresa.com.do");
+});
+
+test("no divide urls por puntos", () => {
+  const intents = parseStepIntent("Verificar https://example.com/path");
+  expect(intents.length).toBe(1);
+  expect(intents[0].type).toBe("assertion");
+});
+
+// --- Semantic Roles & Relation Contexts ---
+
+test("'Clic en el producto visible relacionado con 'X'' extrae semanticRole 'product' y actionTarget 'X'", () => {
+  const intents = parseStepIntent("Clic en el producto visible relacionado con 'X'.");
+  expect(intents.length).toBe(1);
+  expect(intents[0].type).toBe("action_click");
+  expect(intents[0].actionTarget).toBe("X");
+  expect(intents[0].semanticRole).toBe("product");
+});
+
+test("'Clic en la opción relacionada con 'Préstamo' dentro de la categoría actual' extrae semanticRole y relationContext", () => {
+  const intents = parseStepIntent("Clic en la opción relacionada con 'Préstamo' dentro de la categoría actual.");
+  expect(intents.length).toBe(1);
+  expect(intents[0].type).toBe("action_click");
+  expect(intents[0].actionTarget).toBe("Préstamo");
+  expect(intents[0].semanticRole).toBe("option");
+  expect(intents[0].relationContext).toBe("categoría actual");
+});
+
+test("'Hacer clic en la card asociada a 'Visa'' extrae semanticRole 'card'", () => {
+  const intents = parseStepIntent("Hacer clic en la card asociada a 'Visa'.");
+  expect(intents.length).toBe(1);
+  expect(intents[0].type).toBe("action_click");
+  expect(intents[0].actionTarget).toBe("Visa");
+  expect(intents[0].semanticRole).toBe("card");
+});
+
+test("'Clic en la categoría relacionada con 'Préstamo'' extrae semanticRole 'category'", () => {
+  const intents = parseStepIntent("Clic en la categoría relacionada con 'Préstamo'.");
+  expect(intents.length).toBe(1);
+  expect(intents[0].type).toBe("action_click");
+  expect(intents[0].actionTarget).toBe("Préstamo");
+  expect(intents[0].semanticRole).toBe("category");
+});
+
+test("'Clic en el ítem relacionado con 'X'' extrae semanticRole 'item'", () => {
+  const intents = parseStepIntent("Clic en el ítem asociado a 'X'.");
+  expect(intents.length).toBe(1);
+  expect(intents[0].type).toBe("action_click");
+  expect(intents[0].actionTarget).toBe("X");
+  expect(intents[0].semanticRole).toBe("item");
+});
+
+test("'Clic en la sección relacionada con 'Ahorros'' extrae semanticRole 'section'", () => {
+  const intents = parseStepIntent("Clic en la sección relacionada con 'Ahorros'.");
+  expect(intents.length).toBe(1);
+  expect(intents[0].type).toBe("action_click");
+  expect(intents[0].actionTarget).toBe("Ahorros");
+  expect(intents[0].semanticRole).toBe("section");
+});
+
+test("targets repetidos con mismo texto pero roles distintos no se deduplican en parseo", () => {
+  const text = "Clic en el producto relacionado con 'A'. Clic en la card asociada a 'A'.";
+  const intents = parseStepIntent(text);
+  expect(intents.length).toBe(2);
+  const product = intents.find(i => i.semanticRole === "product");
+  const card = intents.find(i => i.semanticRole === "card");
+  expect(product).toBeDefined();
+  expect(card).toBeDefined();
+  expect(product!.actionTarget).toBe(card!.actionTarget);
+  expect(product!.semanticRole).not.toBe(card!.semanticRole);
+});
+
+test("no hardcodear textos de productos específicos en step-intent-parser", () => {
+  const fs = require("fs");
+  const path = require("path");
+  const content = fs.readFileSync(path.join(__dirname, "../src/discovery/step-intent-parser.ts"), "utf-8");
+  expect(content).not.toContain("Sauce Labs");
+  expect(content).not.toContain("Préstamo");
+  expect(content).not.toContain("Visa");
+  expect(content).not.toContain("Ahorros");
+  expect(content).not.toContain("Kiosko");
+  expect(content).not.toContain("C37753");
+  expect(content).not.toContain("C37853");
 });

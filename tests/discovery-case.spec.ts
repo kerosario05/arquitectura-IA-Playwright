@@ -2,17 +2,33 @@ import { test, expect } from "@playwright/test";
 import type { CaseDiscoveryResult, DiscoveryStepResult, DiscoveredObject } from "../src/types/discovery.types";
 import type { ExecutionPlan } from "../src/types/execution-plan.types";
 import type { TestScenario } from "../src/types/testrail.types";
-import { extractCleanTarget, parseScenarioStepsForDiscovery } from "../src/discovery/case-discovery";
+import { extractCleanTarget, parseScenarioStepsForDiscovery, evaluateEarlyCompletion } from "../src/discovery/case-discovery";
 import { expandSemanticTokens, tokenizeWithStopwords, computeSemanticScore, normalizeSemanticText, buildSnapshotCandidates } from "../src/discovery/target-resolver";
+import { resolveAssertionTargets, type AssertionTargetInput } from "../src/discovery/assertion-resolver";
+import type { ActionTargetItem } from "../src/discovery/step-intent-parser";
+import type { PageSnapshot, SnapshotElement } from "../src/types/page-snapshot.types";
 
 type CliArgs = {
   caseId: number;
   headed: boolean;
   output?: string;
+  autoPromote: boolean;
+  promotionDryRun: boolean;
+  promotionStrict: boolean;
+  requirePromotionApproval: boolean;
+  overwrite: boolean;
 };
 
 function parseDiscoveryCaseArgs(argv: string[]): CliArgs {
-  const args: CliArgs = { caseId: 0, headed: false };
+  const args: CliArgs = {
+    caseId: 0,
+    headed: false,
+    autoPromote: false,
+    promotionDryRun: false,
+    promotionStrict: false,
+    requirePromotionApproval: false,
+    overwrite: false
+  };
 
   for (let i = 0; i < argv.length; i += 1) {
     const token = argv[i];
@@ -20,6 +36,26 @@ function parseDiscoveryCaseArgs(argv: string[]): CliArgs {
 
     if (token === "--headed") {
       args.headed = true;
+      continue;
+    }
+    if (token === "--auto-promote") {
+      args.autoPromote = true;
+      continue;
+    }
+    if (token === "--promotion-dry-run") {
+      args.promotionDryRun = true;
+      continue;
+    }
+    if (token === "--promotion-strict") {
+      args.promotionStrict = true;
+      continue;
+    }
+    if (token === "--require-promotion-approval") {
+      args.requirePromotionApproval = true;
+      continue;
+    }
+    if (token === "--overwrite") {
+      args.overwrite = true;
       continue;
     }
     if (token === "--case-id") {
@@ -50,6 +86,37 @@ function parseDiscoveryCaseArgs(argv: string[]): CliArgs {
   }
 
   return args;
+}
+
+function makeSnapshotElement(overrides: Partial<SnapshotElement>): SnapshotElement {
+  return {
+    id: `el-${Math.random().toString(36).slice(2, 8)}`,
+    type: "text",
+    visible: true,
+    candidateLocators: [],
+    dataHints: [],
+    ...overrides
+  };
+}
+
+function makeAssertionSnapshot(elements: SnapshotElement[]): PageSnapshot {
+  return {
+    version: "1.0",
+    url: "https://example.com",
+    title: "Example",
+    capturedAt: new Date().toISOString(),
+    elements,
+    summary: {
+      totalElements: elements.length,
+      buttons: elements.filter((element) => element.type === "button").length,
+      links: elements.filter((element) => element.type === "link").length,
+      inputs: elements.filter((element) => element.type === "input").length,
+      selects: elements.filter((element) => element.type === "select").length,
+      tables: elements.filter((element) => element.type === "table").length,
+      dialogs: elements.filter((element) => element.type === "dialog").length,
+      headings: elements.filter((element) => element.type === "heading").length
+    }
+  };
 }
 
 function simulateCaseDiscovery(
@@ -253,6 +320,22 @@ test("discovery:case CLI parses --output flag", () => {
   expect(args.output).toBe(".artifacts/discovery/test");
 });
 
+test("discovery:case CLI parses --auto-promote", () => {
+  const args = parseDiscoveryCaseArgs(["--case-id", "37750", "--auto-promote"]);
+  expect(args.autoPromote).toBe(true);
+});
+
+test("discovery:case CLI parses --promotion-dry-run", () => {
+  const args = parseDiscoveryCaseArgs(["--case-id", "37750", "--promotion-dry-run"]);
+  expect(args.promotionDryRun).toBe(true);
+});
+
+test("discovery:case CLI parses --promotion-strict and --require-promotion-approval", () => {
+  const args = parseDiscoveryCaseArgs(["--case-id", "37750", "--promotion-strict", "--require-promotion-approval"]);
+  expect(args.promotionStrict).toBe(true);
+  expect(args.requirePromotionApproval).toBe(true);
+});
+
 test("discovery:case CLI requires --case-id", () => {
   expect(() => parseDiscoveryCaseArgs([])).toThrow("--case-id is required");
 });
@@ -264,6 +347,16 @@ test("discovery:case CLI rejects invalid --case-id", () => {
 
 test("discovery:case CLI rejects unknown arguments", () => {
   expect(() => parseDiscoveryCaseArgs(["--case-id", "37750", "--unknown"])).toThrow("Unknown argument");
+});
+
+test("discovery:case CLI parses --overwrite", () => {
+  const args = parseDiscoveryCaseArgs(["--case-id", "37750", "--overwrite"]);
+  expect(args.overwrite).toBe(true);
+});
+
+test("discovery:case CLI default overwrite is false", () => {
+  const args = parseDiscoveryCaseArgs(["--case-id", "37750"]);
+  expect(args.overwrite).toBe(false);
 });
 
 test("extractCleanTarget parses Clic en 'Iniciar'", () => {
@@ -1201,6 +1294,84 @@ test("parseScenarioStepsForDiscovery preserva associatedEntity en click actions"
   expect(addToCartTarget!.associatedEntity).toBe("Sauce Labs Backpack");
 });
 
+test("navigation_path y accion en el mismo step preservan orden ejecutable base", () => {
+  const scenario = makeScenario({
+    externalId: "ORDER-NAV-ACTION",
+    caseId: 99101,
+    title: "Order navigation then action",
+    steps: [
+      { index: 1, action: "Abrir A > B > C. Seleccionar X. Clic en Y.", expected: undefined, dataHints: [] }
+    ]
+  });
+
+  const parsed = parseScenarioStepsForDiscovery(scenario);
+  const nav = parsed.setupIntents.find((i) => i.type === "navigation_path");
+  expect(nav).toBeDefined();
+  expect(nav!.path).toEqual(["A", "B", "C"]);
+  expect(parsed.actionTargets.map((a) => a.target)).toEqual(["X", "Y"]);
+});
+
+test("assertion con slash no entra en setupIntents", () => {
+  const scenario = makeScenario({
+    externalId: "ASSERTION-SLASH",
+    caseId: 99102,
+    title: "Assertion slash",
+    steps: [
+      { index: 1, action: "Validar detalle/listado de productos", expected: undefined, dataHints: [] }
+    ]
+  });
+
+  const parsed = parseScenarioStepsForDiscovery(scenario);
+  expect(parsed.setupIntents.length).toBe(0);
+  expect(parsed.assertionTargets.map((a) => a.target)).toContain("detalle/listado de productos");
+});
+
+test("assertion semantica no se valida como texto literal completo", () => {
+  const snapshot = makeAssertionSnapshot([
+    makeSnapshotElement({ text: "Depositos a plazo en dolares" }),
+    makeSnapshotElement({ type: "section", text: "Listado disponible" })
+  ]);
+  const targets: AssertionTargetInput[] = [{
+    index: 1,
+    action: "Validar detalle/listado de depósitos a plazo en dólares",
+    target: "detalle/listado de depósitos a plazo en dólares",
+    source: "action"
+  }];
+
+  const [result] = resolveAssertionTargets(snapshot, targets);
+  expect(result.classification).toBe("semantic_descriptor");
+  expect(result.status).toBe("passed");
+  expect(result.reason.toLowerCase()).not.toContain("literal");
+});
+
+test("assertion semantica sin señales queda needs_assertion_resolution", () => {
+  const snapshot = makeAssertionSnapshot([
+    makeSnapshotElement({ text: "Bienvenido" })
+  ]);
+  const targets: AssertionTargetInput[] = [{
+    index: 1,
+    action: "Validar detalle/listado de productos",
+    target: "detalle/listado de productos",
+    source: "action"
+  }];
+  const [result] = resolveAssertionTargets(snapshot, targets);
+  expect(result.status).toBe("needs_assertion_resolution");
+});
+
+test("candidate plan evita assertText literal débil para descriptor semántico", () => {
+  const scenario = makeScenario({
+    externalId: "SEM-PLAN-01",
+    caseId: 99103,
+    title: "Semantic assertion plan",
+    steps: [
+      { index: 1, action: "Validar detalle/listado de productos", expected: undefined, dataHints: [] }
+    ]
+  });
+  const parsed = parseScenarioStepsForDiscovery(scenario);
+  const expectedTargets = parsed.assertionTargets.map((target) => target.target);
+  expect(expectedTargets).toContain("detalle/listado de productos");
+});
+
 test("parseScenarioStepsForDiscovery expected lines con prefijo '-' se limpian correctamente", () => {
   const scenario = makeScenario({
     externalId: "TEST-004",
@@ -1299,4 +1470,331 @@ test("computeSemanticScore puntua alto aria-label con 'Shopping cart' y devuelve
   expect(result.score).toBeGreaterThan(0.4);
   expect(result.matchedSignal).toBe("aria-label");
   expect(result.signalValue).toBe("Shopping cart");
+});
+
+// --- Early Completion Tests ---
+
+test("evaluateEarlyCompletion returns satisfied=true when mandatory assertions are satisfied", () => {
+  const snapshot = makeAssertionSnapshot([
+    makeSnapshotElement({ type: "text", text: "Expected Result", visible: true })
+  ]);
+  const assertionTargets: AssertionTargetInput[] = [
+    { index: 5, action: "Validar 'Expected Result'", target: "Expected Result", source: "expected" }
+  ];
+  const remainingActions: ActionTargetItem[] = [
+    { index: 3, action: "Clic en 'Optional Step'", target: "Optional Step" }
+  ];
+
+  const result = evaluateEarlyCompletion(snapshot, assertionTargets, remainingActions);
+  expect(result.checked).toBe(true);
+  expect(result.satisfied).toBe(true);
+  expect(result.skippedRemainingActions).toBe(1);
+  expect(result.pendingAssertions).toEqual([]);
+  expect(result.satisfiedAssertions).toContain("Expected Result");
+});
+
+test("evaluateEarlyCompletion returns satisfied=false when mandatory assertions are pending", () => {
+  const snapshot = makeAssertionSnapshot([]);
+  const assertionTargets: AssertionTargetInput[] = [
+    { index: 5, action: "Validar 'Missing Text'", target: "Missing Text", source: "expected" }
+  ];
+  const remainingActions: ActionTargetItem[] = [
+    { index: 3, action: "Clic en 'Continue'", target: "Continue" }
+  ];
+
+  const result = evaluateEarlyCompletion(snapshot, assertionTargets, remainingActions);
+  expect(result.checked).toBe(true);
+  expect(result.satisfied).toBe(false);
+  expect(result.pendingAssertions.length).toBeGreaterThan(0);
+  expect(result.pendingAssertions).toContain("Missing Text");
+});
+
+test("evaluateEarlyCompletion returns satisfied=false when no assertion targets exist", () => {
+  const snapshot = makeAssertionSnapshot([
+    makeSnapshotElement({ type: "text", text: "Some text", visible: true })
+  ]);
+  const assertionTargets: AssertionTargetInput[] = [];
+  const remainingActions: ActionTargetItem[] = [
+    { index: 1, action: "Clic en 'Continue'", target: "Continue" }
+  ];
+
+  const result = evaluateEarlyCompletion(snapshot, assertionTargets, remainingActions);
+  expect(result.checked).toBe(false);
+  expect(result.satisfied).toBe(false);
+});
+
+test("evaluateEarlyCompletion marks completion parcial correctamente con pendingAssertions", () => {
+  const snapshot = makeAssertionSnapshot([
+    makeSnapshotElement({ type: "text", text: "Visible Text", visible: true })
+  ]);
+  const assertionTargets: AssertionTargetInput[] = [
+    { index: 5, action: "Validar 'Visible Text'", target: "Visible Text", source: "expected" },
+    { index: 6, action: "Validar 'Hidden Text'", target: "Hidden Text", source: "expected" }
+  ];
+  const remainingActions: ActionTargetItem[] = [
+    { index: 3, action: "Clic en 'Next'", target: "Next" }
+  ];
+
+  const result = evaluateEarlyCompletion(snapshot, assertionTargets, remainingActions);
+  expect(result.checked).toBe(true);
+  expect(result.satisfied).toBe(false);
+  expect(result.satisfiedAssertions).toContain("Visible Text");
+  expect(result.pendingAssertions).toContain("Hidden Text");
+});
+
+test("descriptor sintetico expected-only no bloquea early completion", () => {
+  const snapshot = makeAssertionSnapshot([
+    makeSnapshotElement({ type: "text", text: "Concrete Text", visible: true })
+  ]);
+  const assertionTargets: AssertionTargetInput[] = [
+    { index: 5, action: "Validar 'Concrete Text'", target: "Concrete Text", source: "action" },
+    { index: 6, action: "Validar listado de productos", target: "Validar listado de productos", source: "expected" }
+  ];
+  const remainingActions: ActionTargetItem[] = [
+    { index: 3, action: "Clic en 'Continue'", target: "Continue" }
+  ];
+
+  const result = evaluateEarlyCompletion(snapshot, assertionTargets, remainingActions);
+  expect(result.checked).toBe(true);
+  expect(result.satisfied).toBe(true);
+  expect(result.satisfiedAssertions).toContain("Concrete Text");
+  expect(result.pendingAssertions).toEqual([]);
+});
+
+test("literal obligatorio pendiente si bloquea early completion incluso con expected descriptors", () => {
+  const snapshot = makeAssertionSnapshot([
+    makeSnapshotElement({ type: "text", text: "Other Text", visible: true })
+  ]);
+  const assertionTargets: AssertionTargetInput[] = [
+    { index: 5, action: "Validar 'Pending Literal'", target: "Pending Literal", source: "action" },
+    { index: 6, action: "Validar listado de productos", target: "Validar listado de productos", source: "expected" }
+  ];
+  const remainingActions: ActionTargetItem[] = [
+    { index: 3, action: "Clic en 'Next'", target: "Next" }
+  ];
+
+  const result = evaluateEarlyCompletion(snapshot, assertionTargets, remainingActions);
+  expect(result.checked).toBe(true);
+  expect(result.satisfied).toBe(false);
+  expect(result.pendingAssertions).toContain("Pending Literal");
+});
+
+test("satisfied assertions aparecen exactamente en diagnostics", () => {
+  const snapshot = makeAssertionSnapshot([
+    makeSnapshotElement({ type: "text", text: "Result A", visible: true }),
+    makeSnapshotElement({ type: "text", text: "Result B", visible: true })
+  ]);
+  const assertionTargets: AssertionTargetInput[] = [
+    { index: 5, action: "Validar 'Result A'", target: "Result A", source: "expected" },
+    { index: 6, action: "Validar 'Result B'", target: "Result B", source: "expected" }
+  ];
+  const remainingActions: ActionTargetItem[] = [
+    { index: 3, action: "Clic en 'Done'", target: "Done" }
+  ];
+
+  const result = evaluateEarlyCompletion(snapshot, assertionTargets, remainingActions);
+  expect(result.checked).toBe(true);
+  expect(result.satisfied).toBe(true);
+  expect(result.satisfiedAssertions).toEqual(["Result A", "Result B"]);
+  expect(result.pendingAssertions).toEqual([]);
+  expect(result.skippedRemainingActions).toBe(1);
+});
+
+test("pending assertions aparecen exactamente en diagnostics con texto completo", () => {
+  const snapshot = makeAssertionSnapshot([]);
+  const assertionTargets: AssertionTargetInput[] = [
+    { index: 5, action: "Validar 'Missing A'", target: "Missing A", source: "expected" },
+    { index: 6, action: "Validar 'Missing B'", target: "Missing B", source: "expected" }
+  ];
+  const remainingActions: ActionTargetItem[] = [
+    { index: 3, action: "Clic en 'Continue'", target: "Continue" }
+  ];
+
+  const result = evaluateEarlyCompletion(snapshot, assertionTargets, remainingActions);
+  expect(result.checked).toBe(true);
+  expect(result.satisfied).toBe(false);
+  expect(result.pendingAssertions).toEqual(["Missing A", "Missing B"]);
+  expect(result.satisfiedAssertions).toEqual([]);
+});
+
+test("descriptor genérico sintético expected no bloquea early completion con señales fuertes", () => {
+  const snapshot = makeAssertionSnapshot([
+    makeSnapshotElement({ type: "text", text: "Préstamo personal", visible: true })
+  ]);
+  const assertionTargets: AssertionTargetInput[] = [
+    { index: 5, action: "Assert: Préstamo personal", target: "Préstamo personal", source: "action" },
+    { index: 7, action: "Assert: Información principal del producto visible", target: "Información principal del producto visible", source: "expected" }
+  ];
+  const remainingActions: ActionTargetItem[] = [
+    { index: 3, action: "Clic en 'Next'", target: "Next" }
+  ];
+
+  const result = evaluateEarlyCompletion(snapshot, assertionTargets, remainingActions);
+  expect(result.checked).toBe(true);
+  expect(result.satisfied).toBe(true);
+  expect(result.satisfiedAssertions).toContain("Préstamo personal");
+  expect(result.pendingAssertions).toEqual([]);
+  expect(result.blockingAssertions).toEqual([]);
+  expect(result.skippedAssertions).toContain("Información principal del producto visible");
+  expect(result.skippedReason).toBe("synthetic_generic_descriptor");
+});
+
+test("descriptor genérico sintético expected no bloquea si literales están satisfechos", () => {
+  const snapshot = makeAssertionSnapshot([
+    makeSnapshotElement({ type: "text", text: "Préstamo personal", visible: true }),
+    makeSnapshotElement({ type: "text", text: "Tasa de interés", visible: true })
+  ]);
+  const assertionTargets: AssertionTargetInput[] = [
+    { index: 5, action: "Assert: Préstamo personal", target: "Préstamo personal", source: "action" },
+    { index: 6, action: "Assert: Tasa de interés", target: "Tasa de interés", source: "action" },
+    { index: 7, action: "Assert: Información principal del producto visible", target: "Información principal del producto visible", source: "expected" }
+  ];
+  const remainingActions: ActionTargetItem[] = [
+    { index: 3, action: "Clic en 'Next'", target: "Next" }
+  ];
+
+  const result = evaluateEarlyCompletion(snapshot, assertionTargets, remainingActions);
+  expect(result.checked).toBe(true);
+  expect(result.satisfied).toBe(true);
+  expect(result.satisfiedAssertions).toContain("Préstamo personal");
+  expect(result.pendingAssertions).toEqual([]);
+  expect(result.blockingAssertions).toEqual([]);
+  expect(result.skippedAssertions).toContain("Información principal del producto visible");
+});
+
+test("descriptor genérico sintético expected no bloquea si solo quedan weak signals", () => {
+  const snapshot = makeAssertionSnapshot([
+    makeSnapshotElement({ type: "text", text: "Préstamo personal", visible: true }),
+    makeSnapshotElement({ type: "text", text: "Detalle de prestamo personal visible", visible: true })
+  ]);
+  const assertionTargets: AssertionTargetInput[] = [
+    { index: 5, action: "Assert: Préstamo personal", target: "Préstamo personal", source: "expected" },
+    { index: 6, action: "Assert: Información principal del producto visible", target: "Información principal del producto visible", source: "expected" }
+  ];
+  const remainingActions: ActionTargetItem[] = [
+    { index: 3, action: "Clic en 'View'", target: "View" }
+  ];
+
+  const result = evaluateEarlyCompletion(snapshot, assertionTargets, remainingActions);
+  expect(result.checked).toBe(true);
+  expect(result.satisfied).toBe(true);
+  expect(result.weakSignals).toContain("Información principal del producto visible");
+});
+
+test("early completion no pasa cuando queda literal obligatorio aunque haya weak signals", () => {
+  const snapshot = makeAssertionSnapshot([
+    makeSnapshotElement({ type: "text", text: "Préstamo personal", visible: true })
+  ]);
+  const assertionTargets: AssertionTargetInput[] = [
+    { index: 5, action: "Assert: Préstamo personal", target: "Préstamo personal", source: "expected" },
+    { index: 6, action: "Validar 'Monto mínimo'", target: "Monto mínimo", source: "action" },
+    { index: 7, action: "Assert: Información principal del producto visible", target: "Información principal del producto visible", source: "expected" }
+  ];
+  const remainingActions: ActionTargetItem[] = [
+    { index: 3, action: "Clic en 'Next'", target: "Next" }
+  ];
+
+  const result = evaluateEarlyCompletion(snapshot, assertionTargets, remainingActions);
+  expect(result.checked).toBe(true);
+  expect(result.satisfied).toBe(false);
+  expect(result.pendingAssertions).toContain("Monto mínimo");
+  expect(result.blockingAssertions).toContain("Monto mínimo");
+  expect(result.skippedAssertions).toContain("Información principal del producto visible");
+  expect(result.satisfiedAssertions).toContain("Préstamo personal");
+});
+
+test("early completion incluye diagnostics de skippedAssertions y weakSignals", () => {
+  const snapshot = makeAssertionSnapshot([
+    makeSnapshotElement({ type: "text", text: "Resultado visible", visible: true })
+  ]);
+  const assertionTargets: AssertionTargetInput[] = [
+    { index: 5, action: "Assert: Resultado visible", target: "Resultado visible", source: "expected" },
+    { index: 6, action: "Assert: Datos principales visibles", target: "Datos principales visibles", source: "expected" },
+    { index: 7, action: "Assert: Acciones disponibles según producto", target: "Acciones disponibles según producto", source: "expected" }
+  ];
+  const remainingActions: ActionTargetItem[] = [
+    { index: 3, action: "Clic en 'Done'", target: "Done" }
+  ];
+
+  const result = evaluateEarlyCompletion(snapshot, assertionTargets, remainingActions);
+  expect(result.checked).toBe(true);
+  expect(result.satisfied).toBe(true);
+  expect(result.blockingAssertions).toEqual([]);
+  expect(result.skippedAssertions.length).toBe(2);
+  expect(result.weakSignals.length).toBe(2);
+  expect(result.skippedReason).toBe("synthetic_generic_descriptor");
+});
+
+// --- Detail descriptor early completion tests ---
+
+test("'Detalle de X visible' como expected detail descriptor no bloquea early completion si X no está visible", () => {
+  const snapshot = makeAssertionSnapshot([
+    makeSnapshotElement({ type: "heading", text: "Bienvenido", visible: true })
+  ]);
+  const assertionTargets: AssertionTargetInput[] = [
+    { index: 3, action: "Assert: Detalle de Préstamo Personal visible", target: "Detalle de Préstamo Personal visible", source: "expected" }
+  ];
+  const remainingActions: ActionTargetItem[] = [
+    { index: 2, action: "Clic en 'Préstamo personal'", target: "Préstamo personal" }
+  ];
+
+  const result = evaluateEarlyCompletion(snapshot, assertionTargets, remainingActions);
+  expect(result.checked).toBe(true);
+  // Expected-source detail descriptor without subject match -> skipped, so not pending
+  expect(result.pendingAssertions.length).toBe(0);
+  expect(result.skippedAssertions.length).toBe(1);
+  expect(result.weakSignals.length).toBe(1);
+  expect(result.satisfied).toBe(false);
+});
+
+test("'Detalle de X visible' expected no bloquea si un literal está satisfecho y solo queda detail descriptor", () => {
+  const snapshot = makeAssertionSnapshot([
+    makeSnapshotElement({ type: "text", text: "Préstamo Personal", visible: true }),
+    makeSnapshotElement({ type: "heading", text: "Resultado visible", visible: true })
+  ]);
+  const assertionTargets: AssertionTargetInput[] = [
+    { index: 2, action: "Assert: Resultado visible", target: "Resultado visible", source: "expected" },
+    { index: 3, action: "Assert: Detalle de Préstamo Personal visible", target: "Detalle de Préstamo Personal visible", source: "expected" }
+  ];
+  const remainingActions: ActionTargetItem[] = [
+    { index: 1, action: "Clic en 'Préstamo personal'", target: "Préstamo personal" }
+  ];
+
+  const result = evaluateEarlyCompletion(snapshot, assertionTargets, remainingActions);
+  expect(result.checked).toBe(true);
+  expect(result.satisfied).toBe(true);
+  expect(result.satisfiedAssertions.length).toBe(2);
+  expect(result.satisfiedAssertions).toContain("Detalle de Préstamo Personal visible");
+});
+
+test("detail descriptor from action source is satisfied when subject visible with section signal", () => {
+  const snapshot = makeAssertionSnapshot([
+    makeSnapshotElement({ type: "heading", text: "Tarjeta Visa Gold", visible: true }),
+    makeSnapshotElement({ type: "section", text: "Detalle de tarjeta", visible: true })
+  ]);
+  const assertionTargets: AssertionTargetInput[] = [
+    { index: 3, action: "Assert: Detalle de Tarjeta Visa Gold visible", target: "Detalle de Tarjeta Visa Gold visible", source: "action" }
+  ];
+  const remainingActions: ActionTargetItem[] = [];
+
+  const result = evaluateEarlyCompletion(snapshot, assertionTargets, remainingActions);
+  expect(result.checked).toBe(true);
+  expect(result.satisfied).toBe(true);
+  expect(result.satisfiedAssertions.length).toBe(1);
+});
+
+test("detail descriptor isWeakSignal true es tratado como skippable por evaluateEarlyCompletion", () => {
+  const snapshot = makeAssertionSnapshot([
+    makeSnapshotElement({ type: "text", text: "Bienvenido", visible: true })
+  ]);
+  const assertionTargets: AssertionTargetInput[] = [
+    { index: 3, action: "Assert: Detalle de Producto visible", target: "Detalle de Producto visible", source: "action" }
+  ];
+  const remainingActions: ActionTargetItem[] = [];
+
+  const result = evaluateEarlyCompletion(snapshot, assertionTargets, remainingActions);
+  // isWeakSignal=true from DETAIL_DESCRIPTOR_PATTERNS match makes it skippable regardless of source
+  expect(result.pendingAssertions.length).toBe(0);
+  expect(result.skippedAssertions.length).toBe(1);
+  expect(result.weakSignals.length).toBe(1);
 });

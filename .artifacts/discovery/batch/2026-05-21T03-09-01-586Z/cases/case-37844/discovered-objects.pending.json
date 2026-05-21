@@ -1,0 +1,146 @@
+[
+  {
+    "key": "button_iniciar",
+    "name": "Iniciar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Iniciar",
+      "exact": false
+    },
+    "aliases": [
+      "iniciar"
+    ],
+    "discoveredAt": "2026-05-21T03:09:16.493Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_hola",
+    "name": "¡Hola!",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "¡Hola!",
+      "exact": false
+    },
+    "aliases": [
+      "¡hola!"
+    ],
+    "discoveredAt": "2026-05-21T03:09:16.493Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_informacion_productosexplora_nuestros",
+    "name": "Información de productosExplora nuestros productos bancarios",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Información de productosExplora nuestros productos bancarios",
+      "exact": false
+    },
+    "aliases": [
+      "información de productosexplora nuestros productos bancarios"
+    ],
+    "discoveredAt": "2026-05-21T03:09:17.235Z",
+    "sourceStep": 2,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_transacciones_serviciosrealiza_operaciones",
+    "name": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+      "exact": false
+    },
+    "aliases": [
+      "transacciones y serviciosrealiza operaciones con tus cuentas"
+    ],
+    "discoveredAt": "2026-05-21T03:09:17.235Z",
+    "sourceStep": 2,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_salir",
+    "name": "Salir",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Salir",
+      "exact": false
+    },
+    "aliases": [
+      "salir"
+    ],
+    "discoveredAt": "2026-05-21T03:09:17.235Z",
+    "sourceStep": 2,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_hola",
+    "name": "¡Hola!",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "¡Hola!",
+      "exact": false
+    },
+    "aliases": [
+      "¡hola!"
+    ],
+    "discoveredAt": "2026-05-21T03:09:17.235Z",
+    "sourceStep": 2,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_nos_alegra_que",
+    "name": "¡Nos alegra que estés con nosotros!",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "¡Nos alegra que estés con nosotros!",
+      "exact": false
+    },
+    "aliases": [
+      "¡nos alegra que estés con nosotros!"
+    ],
+    "discoveredAt": "2026-05-21T03:09:17.235Z",
+    "sourceStep": 2,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_informacion_productos",
+    "name": "Información de productos",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Información de productos",
+      "exact": false
+    },
+    "aliases": [
+      "información de productos"
+    ],
+    "discoveredAt": "2026-05-21T03:09:17.235Z",
+    "sourceStep": 2,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_transacciones_servicios",
+    "name": "Transacciones y servicios",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Transacciones y servicios",
+      "exact": false
+    },
+    "aliases": [
+      "transacciones y servicios"
+    ],
+    "discoveredAt": "2026-05-21T03:09:17.235Z",
+    "sourceStep": 2,
+    "confidence": 0.75
+  }
+]

@@ -34,6 +34,8 @@ export type ParsedStepIntent = {
   valueKeys?: string[];
   valueSource?: string;
   associatedEntity?: string;
+  semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "unknown";
+  relationContext?: string;
 };
 
 export type StepSetIntent = {
@@ -54,6 +56,8 @@ export type ActionTargetItem = {
   valueSource?: FillValueSource;
   associatedEntity?: string;
   actionType?: StepIntentType;
+  semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "unknown";
+  relationContext?: string;
 };
 
 export type FillValueSource = "literal" | "test_data" | "unknown";
@@ -74,6 +78,9 @@ const MODIFIER_PATTERNS = [
   /^de\s+preferencia\s+/i,
   /^por\s+ejemplo\s+/i
 ];
+
+const ASSERTION_PREFIX_PATTERN = /^(?:validar|verificar|comprobar|confirmar|esperar|observar|revisar|should see|verify|validate|check|assert|wait for)\b/i;
+const NAVIGATION_PREFIX_PATTERN = /^(?:abrir|ir a|navegar a|navegar hacia|acceder a|ingresar a|open|go to|navigate to|access)\b/i;
 
 export function normalizeText(text: string): string {
   return text
@@ -99,17 +106,25 @@ export function parseStepIntent(stepText: string, _context?: Record<string, unkn
   for (const fragment of fragments) {
     const subFragments = splitByIntentBoundaries(fragment.text);
 
-    for (const subText of subFragments) {
-      const parsed = parseSingleIntent(subText);
-      if (parsed) {
-        intents.push({ ...parsed, originalText: subText });
-      } else {
-        intents.push({
-          type: "unknown",
-          originalText: subText,
-          normalizedText: normalizeText(subText),
-          priority: 0
-        });
+    for (let idx = 0; idx < subFragments.length; idx += 1) {
+      let subText = subFragments[idx];
+      if (/^(?:Opcional|Optional):\s*$/i.test(subText) && idx + 1 < subFragments.length) {
+        subText = `${subText} ${subFragments[idx + 1]}`.trim();
+        idx += 1;
+      }
+      const mixedParts = splitMixedActionNavigation(subText);
+      for (const part of mixedParts) {
+        const parsed = parseSingleIntent(part);
+        if (parsed) {
+          intents.push({ ...parsed, originalText: part });
+        } else {
+          intents.push({
+            type: "unknown",
+            originalText: part,
+            normalizedText: normalizeText(part),
+            priority: 0
+          });
+        }
       }
     }
   }
@@ -132,7 +147,10 @@ export function parseSingleIntent(text: string): ParsedStepIntent | null {
   const precondResult = tryParsePreconditionContext(trimmed, normalized);
   if (precondResult) return precondResult;
 
-  const pathResult = tryParseNavigationPath(trimmed, normalized);
+  const assertionResult = tryParseAssertion(trimmed, normalized);
+  if (assertionResult) return assertionResult;
+
+  const pathResult = tryParseNavigationPathEnhanced(trimmed, normalized);
   if (pathResult) return pathResult;
 
   const optionalResult = tryParseOptionalAction(trimmed, normalized);
@@ -152,9 +170,6 @@ export function parseSingleIntent(text: string): ParsedStepIntent | null {
 
   const fillResult = tryParseFillAction(trimmed, normalized);
   if (fillResult) return fillResult;
-
-  const assertionResult = tryParseAssertion(trimmed, normalized);
-  if (assertionResult) return assertionResult;
 
   return null;
 }
@@ -249,14 +264,16 @@ function isInsideQuotes(text: string, position: number): boolean {
 }
 
 function splitStepText(text: string): SplitFragment[] {
+  const protectedTokens = protectSplitSensitiveTokens(text);
+  const sourceText = protectedTokens.protectedText;
   const fragments: SplitFragment[] = [];
   let current = "";
   let inQuote = false;
   let quoteChar: string | null = null;
   let order = 0;
 
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
+  for (let i = 0; i < sourceText.length; i++) {
+    const ch = sourceText[i];
 
     if ((ch === "'" || ch === '"') && (quoteChar === null || quoteChar === ch)) {
       if (inQuote && quoteChar === ch) {
@@ -274,7 +291,7 @@ function splitStepText(text: string): SplitFragment[] {
       }
       current = "";
     } else if (ch === "," && !inQuote) {
-      const restTrimmed = text.slice(i + 1).trim();
+      const restTrimmed = sourceText.slice(i + 1).trim();
       const isModifier = MODIFIER_PATTERNS.some((mp) => mp.test(restTrimmed));
       if (isModifier) {
         current += ch;
@@ -295,7 +312,10 @@ function splitStepText(text: string): SplitFragment[] {
     fragments.push({ text: trimmed, order: order++ });
   }
 
-  return fragments;
+  return fragments.map((fragment) => ({
+    ...fragment,
+    text: restoreProtectedTokens(fragment.text, protectedTokens.tokenMap)
+  }));
 }
 
 function tryParseSetupRoute(text: string, normalized: string): ParsedStepIntent | null {
@@ -421,6 +441,30 @@ function tryParseNavigationPath(text: string, normalized: string): ParsedStepInt
   return null;
 }
 
+function tryParseNavigationPathEnhanced(text: string, normalized: string): ParsedStepIntent | null {
+  if (isAssertionLike(normalized)) return null;
+  if (/^.+@.+\..+/i.test(text) || /https?:\/\/|www\./i.test(text)) return null;
+
+  const parsed = tryParseNavigationPath(text, normalized);
+  if (!parsed) return null;
+
+  if (parsed.type === "navigation_path" && parsed.path) {
+    return {
+      ...parsed,
+      path: parsed.path.map((segment) => cleanActionTarget(segment)).filter(Boolean)
+    };
+  }
+
+  if (parsed.type === "action_click" && parsed.actionTarget) {
+    return {
+      ...parsed,
+      actionTarget: cleanActionTarget(parsed.actionTarget)
+    };
+  }
+
+  return parsed;
+}
+
 function tryParseOptionalAction(text: string, normalized: string): ParsedStepIntent | null {
   const optionalPatterns = [
     /^seleccionar\s+(?:una\s+)?(?:tarjeta|opcion|elemento|item)?,?\s*(?:preferiblemente|idealmente|de\s+preferencia)\s+(?:['""])?(.+?)(?:['""])?$/i,
@@ -469,7 +513,7 @@ function tryParseClickAction(text: string, normalized: string): ParsedStepIntent
     /^(?:clic en|hacer clic en|click en|click on|click|presionar|tocar)\s+['""]([^'""]+)['""]\s+(?:asociado|associat\w*|relacionado|related)\s+(?:a|al|con|to|with|the)?\s*(?:\w+\s+)*\s*['""]([^'""]+)['""]/i
   );
   if (associatedPattern) {
-    const target = associatedPattern[1].trim();
+    const target = cleanActionTarget(associatedPattern[1]);
     const entity = associatedPattern[2].trim();
     return {
       type: "action_click",
@@ -482,19 +526,48 @@ function tryParseClickAction(text: string, normalized: string): ParsedStepIntent
     };
   }
 
+  // Pattern: producto visible relacionado con 'X' dentro de la categoría 'Y'
+  const relationalPattern = text.match(
+    /^(?:clic en|hacer clic en|click en|click on|click|presionar|tocar)\s+(?:el|la|los|las)?\s*(producto|card|opci[oó]n|elemento|secci[oó]n|categor[ií]a|[ií]tem)\s*(?:visible\s+)?(?:relacionad[oa]|asociad[oa]|vinculad[oa])\s*(?:con|a)\s*['""]([^'""]+)['""](?:\s+(?:dentro\s+de|en)\s+(?:la\s+)?(categor[ií]a\s+seleccionada|secci[oó]n\s+actual|contexto\s+actual|[^'""]+))?/i
+  );
+  if (relationalPattern) {
+    const rawRole = relationalPattern[1].toLowerCase().replace(/[óo]/g, "o").replace(/[ií]/g, "i");
+    let semanticRole: "product" | "card" | "option" | "category" | "item" | "section" | "unknown" = "unknown";
+    if (rawRole.includes("product")) semanticRole = "product";
+    else if (rawRole.includes("card")) semanticRole = "card";
+    else if (rawRole.includes("opcion")) semanticRole = "option";
+    else if (rawRole.includes("categoria")) semanticRole = "category";
+    else if (rawRole.includes("seccion")) semanticRole = "section";
+    else if (rawRole.includes("elemento") || rawRole.includes("item")) semanticRole = "item";
+
+    const target = cleanActionTarget(relationalPattern[2]);
+    const relationContext = relationalPattern[3]?.trim();
+
+    return {
+      type: "action_click",
+      originalText: text,
+      normalizedText: normalized,
+      actionTarget: target,
+      semanticRole,
+      relationContext,
+      actionVerb: verbMatch[0].trim().toLowerCase(),
+      priority: 5
+    };
+  }
+
   const quoted = extractQuotedTarget(afterVerb);
   if (quoted) {
     return {
       type: "action_click",
       originalText: text,
       normalizedText: normalized,
-      actionTarget: quoted,
+      actionTarget: cleanActionTarget(quoted),
       actionVerb: verbMatch[0].trim().toLowerCase(),
       priority: 5
     };
   }
 
-  const raw = stripTrailingPeriod(afterVerb);
+  const raw = cleanActionTarget(stripTrailingPeriod(afterVerb));
   if (raw && raw.length < 100) {
     return {
       type: "action_click",
@@ -530,13 +603,13 @@ function tryParseSelectAction(text: string, normalized: string): ParsedStepInten
       type: "action_select",
       originalText: text,
       normalizedText: normalized,
-      actionTarget: quoted,
+      actionTarget: cleanActionTarget(quoted),
       actionVerb: verbMatch[0].trim().toLowerCase(),
       priority: 5
     };
   }
 
-  const raw = stripTrailingPeriod(afterVerb);
+  const raw = cleanActionTarget(stripTrailingPeriod(afterVerb));
   if (raw && raw.length < 100) {
     return {
       type: "action_select",
@@ -781,7 +854,7 @@ function tryParseFillAction(text: string, normalized: string): ParsedStepIntent 
     };
   }
 
-  const raw = stripTrailingPeriod(afterVerb);
+  const raw = cleanActionTarget(stripTrailingPeriod(afterVerb));
   if (raw && raw.length < 100) {
     return {
       type: "action_fill",
@@ -800,6 +873,7 @@ function tryParseFillAction(text: string, normalized: string): ParsedStepIntent 
 function tryParseAssertion(text: string, normalized: string): ParsedStepIntent | null {
   const assertPatterns = [
     /^(?:validar|verificar|comprobar|confirmar|revisar)\s+(.+)/i,
+    /^(?:esperar|observar|wait\s+for|should\s+see|verify|validate|check|assert)\s+(.+)/i,
     /^(?:debe\s+mostrar|se\s+debe\s+mostrar|se\s+muestra|deberia\s+mostrar)\s+(.+)/i,
     /^(?:asegurar\s+que|chequear\s+que)\s+(.+)/i,
     /^(?:esperar\s+que\s+est[eé]\s+visible|esperar\s+visible|wait\s+for\s+visible|expect\s+visible)\s+(.+)/i,
@@ -826,6 +900,61 @@ function tryParseAssertion(text: string, normalized: string): ParsedStepIntent |
   }
 
   return null;
+}
+
+export function isAssertionLike(text: string): boolean {
+  return ASSERTION_PREFIX_PATTERN.test(normalizeText(text));
+}
+
+export function cleanActionTarget(target: string): string {
+  return target
+    .replace(/\u00a0/g, " ")
+    .replace(/^[\s>.:;\-–—]+/, "")
+    .replace(/[\s>.:;\-–—]+$/, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function splitMixedActionNavigation(text: string): string[] {
+  const match = text.match(/^(.*?(?:clic en|hacer clic en|click en|click on|click|presionar|tocar)\s+.+?)\s*(?:>|->)\s*(.+)$/i);
+  if (!match) return [text];
+
+  const actionPart = cleanActionTarget(match[1] ?? "");
+  const navigationPart = (match[2] ?? "").trim();
+  if (!actionPart || !navigationPart) return [text];
+  if (!NAVIGATION_PREFIX_PATTERN.test(normalizeText(navigationPart))) return [text];
+
+  return [actionPart, navigationPart];
+}
+
+function protectSplitSensitiveTokens(text: string): { protectedText: string; tokenMap: Map<string, string> } {
+  const tokenMap = new Map<string, string>();
+  let index = 0;
+  const patterns = [
+    /https?:\/\/[^\s,;]+/gi,
+    /www\.[^\s,;]+/gi,
+    /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi,
+    /\b(?:[a-z0-9-]+\.)+[a-z]{2,}\b/gi
+  ];
+
+  let protectedText = text;
+  for (const pattern of patterns) {
+    protectedText = protectedText.replace(pattern, (value) => {
+      const key = `__TOKEN_${index++}__`;
+      tokenMap.set(key, value);
+      return key;
+    });
+  }
+
+  return { protectedText, tokenMap };
+}
+
+function restoreProtectedTokens(text: string, tokenMap: Map<string, string>): string {
+  let restored = text;
+  for (const [key, value] of tokenMap.entries()) {
+    restored = restored.replaceAll(key, value);
+  }
+  return restored;
 }
 
 export function classifyStepSet(steps: ParsedStepIntent[]): StepSetIntent {

@@ -8,7 +8,8 @@
     "test": "playwright test",
     "test:headed": "playwright test --headed",
     "test:framework": "playwright test --config playwright.config.framework.ts",
-    "test:generated": "playwright test tests/generated",
+    "test:apps": "playwright test --config playwright.config.apps.ts",
+    "test:generated": "playwright test --config playwright.config.apps.ts",
     "test:all": "playwright test",
     "install:browsers": "playwright install",
     "typecheck": "tsc --noEmit",
@@ -27,7 +28,8 @@
     "cases:list": "tsx src/cli/cases-list.ts",
     "cases:start": "tsx src/cli/cases-start.ts",
     "discovery:scan": "tsx src/cli/discovery-scan.ts",
-    "discovery:case": "tsx src/cli/discovery-case.ts"
+    "discovery:case": "tsx src/cli/discovery-case.ts",
+    "discovery:batch": "tsx src/cli/discovery-batch.ts"
   },
   "dependencies": {
     "@playwright/test": "^1.54.2",

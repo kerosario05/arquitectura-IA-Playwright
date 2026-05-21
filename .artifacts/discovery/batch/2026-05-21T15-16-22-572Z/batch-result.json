@@ -1,0 +1,49 @@
+{
+  "batchId": "2026-05-21T15-16-22-572Z",
+  "timestamp": "2026-05-21T15:16:38.029Z",
+  "args": {
+    "mode": "by-ids",
+    "caseIds": [
+      37846
+    ],
+    "headed": true,
+    "autoPromote": true,
+    "promotionDryRun": false,
+    "promotionStrict": false,
+    "requirePromotionApproval": false,
+    "dryRun": false,
+    "includeActive": true,
+    "stopOnFail": false,
+    "concurrency": 1,
+    "autoRepair": true,
+    "repairTimeoutMs": 120000,
+    "showAgentLog": true,
+    "continueOnAgentTimeout": true
+  },
+  "cases": [
+    {
+      "caseId": 37846,
+      "title": "Visualizar detalle de Tarjeta Visa Infinite",
+      "selected": true,
+      "status": "promoted",
+      "promoted": true,
+      "promotionStatus": "promoted",
+      "outputDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T15-16-22-572Z\\cases\\case-37846",
+      "evidenceDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T15-16-22-572Z\\cases\\case-37846\\evidence",
+      "specPath": "automations\\apps\\default\\cases\\c37846-visualizar-detalle-de-tarjeta-visa-infinite\\spec.ts",
+      "durationMs": 15451
+    }
+  ],
+  "summary": {
+    "selected": 1,
+    "executed": 1,
+    "skipped": 0,
+    "passed": 0,
+    "failed": 0,
+    "promoted": 1,
+    "alreadyActiveSkipped": 0,
+    "promotionFailed": 0,
+    "notPromoted": 0,
+    "totalDurationMs": 15452
+  }
+}

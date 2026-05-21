@@ -1,0 +1,183 @@
+{
+  "version": "1.0",
+  "updatedAt": "2026-05-21T16:57:02.432Z",
+  "automations": [
+    {
+      "id": "c37757-consulta-depositos-a-plazo-en-dolares",
+      "externalId": "C37757",
+      "caseId": 37757,
+      "title": "Consulta depositos a plazo en dolares",
+      "planPath": "automations\\apps\\default\\cases\\c37757-consulta-depositos-a-plazo-en-dolares\\plan.json",
+      "specPath": "automations\\apps\\default\\cases\\c37757-consulta-depositos-a-plazo-en-dolares\\spec.ts",
+      "appSlug": "default",
+      "appConfigPath": "automations\\apps\\default\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "default",
+      "baseUrlHash": "74df3c0e992c",
+      "createdAt": "2026-05-20T19:46:17.185Z",
+      "updatedAt": "2026-05-20T19:46:17.185Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37757\\2026-05-20T19-46-01-956Z\\discovered-plans.pending.json",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37757\\2026-05-20T19-46-01-956Z"
+      }
+    },
+    {
+      "id": "c37758-c37381-visualizar-detalle-de-cuenta-de-ahorro-en-pesos",
+      "externalId": "C37758",
+      "caseId": 37758,
+      "title": "C37381 - Visualizar detalle de cuenta de ahorro en pesos",
+      "planPath": "automations\\apps\\default\\cases\\c37758-c37381-visualizar-detalle-de-cuenta-de-ahorro-en-pesos\\plan.json",
+      "specPath": "automations\\apps\\default\\cases\\c37758-c37381-visualizar-detalle-de-cuenta-de-ahorro-en-pesos\\spec.ts",
+      "appSlug": "default",
+      "appConfigPath": "automations\\apps\\default\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "default",
+      "baseUrlHash": "74df3c0e992c",
+      "createdAt": "2026-05-20T19:54:34.497Z",
+      "updatedAt": "2026-05-20T19:54:34.497Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37758\\2026-05-20T19-54-18-947Z\\discovered-plans.pending.json",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37758\\2026-05-20T19-54-18-947Z"
+      }
+    },
+    {
+      "id": "c37853-consulta-detalle-de-prestamo-personal",
+      "externalId": "C37853",
+      "caseId": 37853,
+      "title": "Consulta detalle de prestamo personal",
+      "planPath": "automations\\apps\\default\\cases\\c37853-consulta-detalle-de-prestamo-personal\\plan.json",
+      "specPath": "automations\\apps\\default\\cases\\c37853-consulta-detalle-de-prestamo-personal\\spec.ts",
+      "appSlug": "default",
+      "appConfigPath": "automations\\apps\\default\\app.config.json",
+      "status": "inline_debug_only",
+      "source": "discovery",
+      "appProfile": "default",
+      "baseUrlHash": "74df3c0e992c",
+      "createdAt": "2026-05-21T02:12:12.100Z",
+      "updatedAt": "2026-05-21T15:41:45.881Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37853\\2026-05-21T15-41-29-746Z\\discovered-plans.pending.json",
+      "pomStatus": "inline_debug_only",
+      "inlineDebugMode": true,
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37853\\2026-05-21T15-41-29-746Z"
+      }
+    },
+    {
+      "id": "c37844-visualizar-detalle-de-tarjeta-visa-gold",
+      "externalId": "C37844",
+      "caseId": 37844,
+      "title": "Visualizar detalle de Tarjeta Visa Gold",
+      "planPath": "automations\\apps\\default\\cases\\c37844-visualizar-detalle-de-tarjeta-visa-gold\\plan.json",
+      "specPath": "automations\\apps\\default\\cases\\c37844-visualizar-detalle-de-tarjeta-visa-gold\\spec.ts",
+      "appSlug": "default",
+      "appConfigPath": "automations\\apps\\default\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "default",
+      "baseUrlHash": "74df3c0e992c",
+      "createdAt": "2026-05-21T03:09:17.322Z",
+      "updatedAt": "2026-05-21T16:50:33.972Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37844\\2026-05-21T16-50-18-738Z\\discovered-plans.pending.json",
+      "pomStatus": "page_object_candidate_created",
+      "inlineDebugMode": false,
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37844\\2026-05-21T16-50-18-738Z",
+        "pomDiagnostics": {
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 6
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\default\\cases\\c37844-visualizar-detalle-de-tarjeta-visa-gold\\plan.json",
+        "previousStatus": "blocked_missing_pom"
+      }
+    },
+    {
+      "id": "c37845-visualizar-detalle-de-tarjeta-visa-platinum",
+      "externalId": "C37845",
+      "caseId": 37845,
+      "title": "Visualizar detalle de Tarjeta Visa Platinum",
+      "planPath": "automations\\apps\\default\\cases\\c37845-visualizar-detalle-de-tarjeta-visa-platinum\\plan.json",
+      "specPath": "automations\\apps\\default\\cases\\c37845-visualizar-detalle-de-tarjeta-visa-platinum\\spec.ts",
+      "appSlug": "default",
+      "appConfigPath": "automations\\apps\\default\\app.config.json",
+      "status": "blocked_missing_pom",
+      "source": "discovery",
+      "appProfile": "default",
+      "baseUrlHash": "74df3c0e992c",
+      "createdAt": "2026-05-21T03:09:22.764Z",
+      "updatedAt": "2026-05-21T16:37:58.350Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37845\\2026-05-21T16-37-44-655Z\\discovered-plans.pending.json",
+      "pomStatus": "needs_page_method",
+      "inlineDebugMode": false,
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37845\\2026-05-21T16-37-44-655Z",
+        "pomDiagnostics": {
+          "missingPageObjects": [],
+          "missingMethods": [
+            "navigate: navigate APP_BASE_URL",
+            "login: login"
+          ],
+          "generatedCandidates": 1
+        }
+      }
+    },
+    {
+      "id": "c37846-visualizar-detalle-de-tarjeta-visa-infinite",
+      "externalId": "C37846",
+      "caseId": 37846,
+      "title": "Visualizar detalle de Tarjeta Visa Infinite",
+      "planPath": "automations\\apps\\default\\cases\\c37846-visualizar-detalle-de-tarjeta-visa-infinite\\plan.json",
+      "specPath": "automations\\apps\\default\\cases\\c37846-visualizar-detalle-de-tarjeta-visa-infinite\\spec.ts",
+      "appSlug": "default",
+      "appConfigPath": "automations\\apps\\default\\app.config.json",
+      "status": "blocked_missing_pom",
+      "source": "discovery",
+      "appProfile": "default",
+      "baseUrlHash": "74df3c0e992c",
+      "createdAt": "2026-05-21T03:10:25.931Z",
+      "updatedAt": "2026-05-21T16:57:02.432Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37846\\2026-05-21T16-56-46-120Z\\discovered-plans.pending.json",
+      "pomStatus": "needs_page_object",
+      "inlineDebugMode": false,
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37846\\2026-05-21T16-56-46-120Z",
+        "pomDiagnostics": {
+          "missingPageObjects": [],
+          "missingMethods": [
+            "navigate: navigate APP_BASE_URL",
+            "login: login",
+            "click: click Iniciar",
+            "click: click Información de productos",
+            "click: click tarjetas",
+            "click: click tarjeta de credito visa infinite"
+          ],
+          "generatedCandidates": 0
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\default\\cases\\c37846-visualizar-detalle-de-tarjeta-visa-infinite\\plan.json",
+        "previousStatus": "active"
+      }
+    },
+    {
+      "id": "route-recovery",
+      "title": "Route recovery",
+      "planPath": "automations\\apps\\default\\cases\\route-recovery\\plan.json",
+      "specPath": "automations\\apps\\default\\cases\\route-recovery\\spec.ts",
+      "appSlug": "default",
+      "appConfigPath": "automations\\apps\\default\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "default",
+      "baseUrlHash": "74df3c0e992c",
+      "createdAt": "2026-05-21T15:09:19.055Z",
+      "updatedAt": "2026-05-21T15:09:19.055Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T15-08-44-925Z\\cases\\case-37848\\discovered-plans.pending.json",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T15-08-44-925Z\\cases\\case-37848"
+      }
+    }
+  ]
+}

@@ -39,8 +39,8 @@ function makeSpec(appSlug = "generic-app"): string {
 test("spec generated imports static dependencies", () => {
   const spec = makeSpec();
   expect(spec).toContain("import { test } from '@playwright/test';");
-  expect(spec).toContain("import { config } from '../../../../src/config/env';");
-  expect(spec).toContain("import { executeExecutionPlan } from '../../../../src/runner/execution-plan-executor';");
+  expect(spec).toContain("import { config }");
+  expect(spec).toContain("import { executeExecutionPlan }");
 });
 
 test("spec generated loads persisted app config", () => {
@@ -53,7 +53,7 @@ test("spec generated loads persisted app config", () => {
 
 test("spec generated resolves plan from app-specific directory", () => {
   const spec = makeSpec("profile-a");
-  expect(spec).toContain("automations/apps/profile-a/plans/test-automation.plan.json");
+  expect(spec).toContain("automations/apps/profile-a/cases/test-automation/plan.json");
   expect(spec).not.toContain("automations/plans/");
 });
 

@@ -1,0 +1,15 @@
+{
+  "exitCode": -1,
+  "timedOut": true,
+  "durationMs": 120050,
+  "stdoutLogPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T14-51-24-470Z\\cases\\case-37848\\segment-1\\codex.stdout.log",
+  "stderrLogPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T14-51-24-470Z\\cases\\case-37848\\segment-1\\codex.stderr.log",
+  "promptMode": "compact",
+  "compactPrompt": false,
+  "routeRecoveryPackPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T14-51-24-470Z\\cases\\case-37848\\segment-1\\route-recovery-pack.json",
+  "agentResponseExists": false,
+  "agentResponseValid": false,
+  "nextAction": "auto_repair_timeout",
+  "timestamp": "2026-05-21T14:54:23.620Z",
+  "segmentIndex": 1
+}

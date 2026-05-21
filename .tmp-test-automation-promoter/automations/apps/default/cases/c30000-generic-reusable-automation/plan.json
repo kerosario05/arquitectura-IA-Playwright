@@ -1,0 +1,29 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C30000",
+    "caseId": 30000,
+    "title": "Generic reusable automation"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "target": {
+        "strategy": "text",
+        "value": "Primary CTA",
+        "exact": false
+      }
+    }
+  ],
+  "createdAt": "2026-05-21T17:26:23.285Z"
+}

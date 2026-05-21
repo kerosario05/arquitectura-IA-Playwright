@@ -1,0 +1,91 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37759",
+    "caseId": 37759,
+    "title": "C37382 - Visualizar detalle de cuenta de ahorro en dolares"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "clic en iniciarclic en informacion de productosclic en cuentasclic en cuentas de ahorro Cuenta de Ahorros Personal en DólaresValidar detalle de cuenta de ahorro en dólares.",
+      "target": {
+        "strategy": "text",
+        "value": "iniciar",
+        "exact": false
+      }
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "clic en iniciarclic en informacion de productosclic en cuentasclic en cuentas de ahorro Cuenta de Ahorros Personal en DólaresValidar detalle de cuenta de ahorro en dólares.",
+      "target": {
+        "strategy": "text",
+        "value": "informacion de productos",
+        "exact": false
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "clic en iniciarclic en informacion de productosclic en cuentasclic en cuentas de ahorro Cuenta de Ahorros Personal en DólaresValidar detalle de cuenta de ahorro en dólares.",
+      "target": {
+        "strategy": "text",
+        "value": "cuentas",
+        "exact": false
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "clic en iniciarclic en informacion de productosclic en cuentasclic en cuentas de ahorro Cuenta de Ahorros Personal en DólaresValidar detalle de cuenta de ahorro en dólares.",
+      "target": {
+        "strategy": "text",
+        "value": "cuentas de ahorro Cuenta de Ahorros Personal en Dólares",
+        "exact": false
+      }
+    },
+    {
+      "index": 7,
+      "action": "assertText",
+      "description": "Assert: detalle de cuenta de ahorro en dólares",
+      "target": {
+        "strategy": "text",
+        "value": "detalle de cuenta de ahorro en dólares",
+        "exact": false
+      },
+      "expected": "detalle de cuenta de ahorro en dólares"
+    },
+    {
+      "index": 8,
+      "action": "assertText",
+      "description": "Assert: Cuenta de Ahorros Personal en DólaresSolicitar",
+      "target": {
+        "strategy": "text",
+        "value": "Cuenta de Ahorros Personal en DólaresSolicitar",
+        "exact": false
+      },
+      "expected": "Cuenta de Ahorros Personal en DólaresSolicitar"
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-05-20T19:16:15.213Z"
+}

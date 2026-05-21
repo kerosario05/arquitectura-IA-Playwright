@@ -50,3 +50,14 @@ test.describe("AI-assisted discovery environment variables", () => {
     expect(config.integrations.ai?.discoveryMaxAttempts).toBeGreaterThan(0);
   });
 });
+
+test.describe("App profile environment variables", () => {
+  test("APP_PROFILE and APP_NAME are loaded when present", () => {
+    if (process.env.APP_PROFILE) {
+      expect(config.app.appProfile).toBeDefined();
+    }
+    if (process.env.APP_NAME) {
+      expect(config.app.name).toBe(process.env.APP_NAME);
+    }
+  });
+});

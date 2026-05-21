@@ -1,0 +1,14 @@
+{
+  "timestamp": "2026-05-20T19:54:34.473Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c37758-c37381-visualizar-detalle-de-cuenta-de-ahorro-en-pesos",
+  "appSlug": "default",
+  "specPath": "automations\\apps\\default\\cases\\c37758-c37381-visualizar-detalle-de-cuenta-de-ahorro-en-pesos\\spec.ts",
+  "planPath": "automations\\apps\\default\\cases\\c37758-c37381-visualizar-detalle-de-cuenta-de-ahorro-en-pesos\\plan.json",
+  "caseFolder": "c37758-c37381-visualizar-detalle-de-cuenta-de-ahorro-en-pesos"
+}

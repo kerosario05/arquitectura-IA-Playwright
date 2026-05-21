@@ -65,12 +65,24 @@ export type FutureIntegrationsConfig = {
     discoveryRequireApprovalThreshold?: number;
     discoveryMaxAttempts?: number;
   };
+  agent?: {
+    provider?: "codex" | "copilot" | "custom";
+    command?: string;
+    extraArgs?: string;
+    autoRepairTimeoutMs?: number;
+    autoRepairEnabled?: boolean;
+    autoRepairPromptMode?: "compact" | "verbose" | "compact-route-recovery";
+    compactPrompt?: boolean;
+    promptBudgetSeconds?: number;
+    maxCandidates?: number;
+    maxProposedActions?: number;
+  };
   codex?: {
     command?: string;
     extraArgs?: string;
     autoRepairTimeoutMs?: number;
     autoRepairEnabled?: boolean;
-    autoRepairPromptMode?: "compact" | "verbose";
+    autoRepairPromptMode?: "compact" | "verbose" | "compact-route-recovery";
   };
 };
 

@@ -1,0 +1,8 @@
+{
+  "id": "route-recovery",
+  "title": "Route recovery",
+  "source": "discovery",
+  "appSlug": "default",
+  "appConfigPath": "automations\\apps\\default\\app.config.json",
+  "createdAt": "2026-05-21T15:09:19.040Z"
+}

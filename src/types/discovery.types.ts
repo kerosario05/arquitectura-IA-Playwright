@@ -52,7 +52,9 @@ export type DiscoveryStepResult = {
     | "needs_setup_resolution"
     | "needs_associated_target_resolution"
     | "ai_candidate_rejected"
-    | "needs_approval";
+    | "needs_approval"
+    | "skipped_after_completion"
+    | "skipped_redundant";
   targetText?: string;
   snapshotUrl?: string;
   snapshotTitle?: string;
@@ -69,9 +71,57 @@ export type DiscoveryStepResult = {
   confidence?: number;
   closestCandidates?: Array<{ text: string; score: number; type: string }>;
   visibleTexts?: string[];
+  descriptorTypes?: string[];
+  subject?: string;
+  matchedTokens?: string[];
+  structuralSignals?: string[];
+  childAssertionsUsed?: string[];
   aiAssisted?: boolean;
   aiProposal?: AiExplorerOutput;
   aiReason?: string;
+  ambiguityDiagnostics?: {
+    target: string;
+    semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "unknown";
+    relationContext?: string;
+    candidateCount: number;
+    candidateTexts: string[];
+    candidateRoles: string[];
+    candidateStrategies: string[];
+    suggestedExactTargetPattern?: string;
+    suggestedAssociatedActionPattern?: string;
+  };
+  aiDiagnostics?: {
+    attempted: boolean;
+    result: string;
+    proposal?: AiExplorerOutput;
+  };
+  // Recovery metadata — set when segmented route recovery resolves a failed step
+  originalStatus?: string;
+  recoveryStatus?: "recovered" | "repaired";
+  recoveredBy?: "segmented_route_recovery";
+  recoveryMetadata?: {
+    selectedCandidateId: string;
+    selectedCandidateText?: string;
+    semanticRelation?: string;
+    score?: number;
+    segmentIndex: number;
+    transitionDetected: boolean;
+    executedAction: string;
+    rationale?: string;
+  };
+  earlyCompletionDiagnostics?: {
+    checked: boolean;
+    satisfied: boolean;
+    satisfiedAssertions: string[];
+    pendingAssertions: string[];
+    blockingAssertions: string[];
+    skippedAssertions: string[];
+    weakSignals: string[];
+    skippedReason?: string;
+    skippedRemainingActions: number;
+  };
+  semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "unknown";
+  relationContext?: string;
 };
 
 export type DiscoveredObject = {
@@ -92,7 +142,10 @@ export type CaseDiscoveryResult = {
   discoveredAt: string;
   status:
     | "discovered_passed"
+    | "repaired_passed"
     | "discovered_partial"
+    | "needs_agent"
+    | "auto_repair_exhausted"
     | "needs_assertion_resolution"
     | "needs_setup_resolution"
     | "needs_associated_target_resolution"

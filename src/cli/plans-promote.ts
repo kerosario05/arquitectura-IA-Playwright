@@ -6,6 +6,7 @@ import type { ExecutionPlan } from "../types/execution-plan.types";
 
 interface CliArgs {
   plan: string;
+  from?: string;
   result?: string;
   source?: "agent_handoff" | "manual" | "rule_based" | "discovery";
   overwrite: boolean;
@@ -14,6 +15,7 @@ interface CliArgs {
 
 function parseArgs(argv: string[]): CliArgs {
   let plan = "";
+  let from: string | undefined;
   let result: string | undefined;
   let source: CliArgs["source"];
   let overwrite = false;
@@ -41,6 +43,11 @@ function parseArgs(argv: string[]): CliArgs {
       i += 1;
       continue;
     }
+    if (token === "--from") {
+      from = next;
+      i += 1;
+      continue;
+    }
     if (token === "--result") {
       result = next;
       i += 1;
@@ -61,11 +68,11 @@ function parseArgs(argv: string[]): CliArgs {
     throw new Error(`Unknown argument: ${token}`);
   }
 
-  if (!plan) {
-    throw new Error("--plan is required. Usage: npm run plans:promote -- --plan <path>");
+  if (!plan && !from) {
+    throw new Error("--plan or --from is required. Usage: npm run plans:promote -- --plan <path> OR --from <discovery-output-dir>");
   }
 
-  return { plan, result, source, overwrite, allowDraft };
+  return { plan, from, result, source, overwrite, allowDraft };
 }
 
 interface ParsedPlanInput {
@@ -93,6 +100,12 @@ async function loadPlanInput(planArg: string): Promise<ParsedPlanInput> {
   }
 
   return { plans, sourcePlanPath: resolved };
+}
+
+async function loadPlanFromDiscoveryOutput(fromArg: string): Promise<ParsedPlanInput> {
+  const discoveryDir = path.resolve(fromArg);
+  const pendingPath = path.join(discoveryDir, "discovered-plans.pending.json");
+  return loadPlanInput(pendingPath);
 }
 
 async function promoteAll(
@@ -128,6 +141,9 @@ async function promoteAll(
       );
       promoted.push(`${label} -> ${entry.id}`);
       console.log(`  [OK] ${label}`);
+      if (entry.appSlug) {
+        console.log(`       app:     ${entry.appSlug}`);
+      }
       console.log(`       plan:    ${entry.planPath}`);
       console.log(`       spec:    ${entry.specPath}`);
     } catch (error) {
@@ -164,9 +180,12 @@ async function promoteAll(
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
 
-  console.log("Loading plan(s) from:", args.plan);
+  const sourceRef = args.plan ? path.resolve(args.plan) : path.resolve(args.from ?? ".");
+  console.log("Loading plan(s) from:", sourceRef);
 
-  const { plans, sourcePlanPath } = await loadPlanInput(args.plan);
+  const { plans, sourcePlanPath } = args.plan
+    ? await loadPlanInput(args.plan)
+    : await loadPlanFromDiscoveryOutput(args.from ?? ".");
 
   console.log(`Found ${plans.length} plan(s)\n`);
 

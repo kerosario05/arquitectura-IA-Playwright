@@ -1,0 +1,29 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37755",
+    "caseId": 37755,
+    "title": "C37378 - Generar turno para tarjeta de credito"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    }
+  ],
+  "notes": [
+    "Discovery failed at step 1: target_not_found - \"Solicitar\""
+  ],
+  "createdAt": "2026-05-20T19:14:46.876Z"
+}

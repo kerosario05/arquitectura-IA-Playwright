@@ -1,0 +1,49 @@
+{
+  "batchId": "2026-05-21T14-51-24-470Z",
+  "timestamp": "2026-05-21T14:54:24.490Z",
+  "args": {
+    "mode": "by-ids",
+    "caseIds": [
+      37848
+    ],
+    "headed": true,
+    "autoPromote": true,
+    "promotionDryRun": false,
+    "promotionStrict": false,
+    "requirePromotionApproval": false,
+    "dryRun": false,
+    "includeActive": true,
+    "stopOnFail": false,
+    "concurrency": 1,
+    "autoRepair": true,
+    "repairTimeoutMs": 120000,
+    "showAgentLog": true,
+    "continueOnAgentTimeout": true
+  },
+  "cases": [
+    {
+      "caseId": 37848,
+      "title": "Enviar solicitud digital de tarjeta por correo",
+      "selected": true,
+      "status": "failed",
+      "promoted": false,
+      "promotionStatus": "not_applicable",
+      "outputDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T14-51-24-470Z\\cases\\case-37848",
+      "evidenceDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T14-51-24-470Z\\cases\\case-37848\\evidence",
+      "failureReason": "Codex CLI timed out after 2.0 minutes (timeoutMs: 120000).\nCwd: C:\\MisProyectos\\MCP\nHandoff directory: C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T14-51-24-470Z\\cases\\case-37848\\segment-1\nExpected response path: C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T14-51-24-470Z\\cases\\case-37848\\segment-1\\agent-response.json\nStdout log: C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T14-51-24-470Z\\cases\\case-37848\\segment-1\\codex.stdout.log\nStderr log: C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T14-51-24-470Z\\cases\\case-37848\\segment-1\\codex.stderr.log\n\nSuggestions:\n  - Increase AGENT_AUTO_REPAIR_TIMEOUT_MS / CODEX_AUTO_REPAIR_TIMEOUT_MS (current: 120000ms, recommended: 1800000ms / 30 min)\n  - Run manually:\n    C:\\Users\\radames\\AppData\\Roaming\\npm\\codex.cmd exec --skip-git-repo-check --sandbox workspace-write \"You are repairing a...\n  - Check handoff files in: C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T14-51-24-470Z\\cases\\case-37848\\segment-1\n  - After manual repair, run: npm run agent:validate",
+      "durationMs": 180014
+    }
+  ],
+  "summary": {
+    "selected": 1,
+    "executed": 1,
+    "skipped": 0,
+    "passed": 0,
+    "failed": 1,
+    "promoted": 0,
+    "alreadyActiveSkipped": 0,
+    "promotionFailed": 0,
+    "notPromoted": 0,
+    "totalDurationMs": 180014
+  }
+}

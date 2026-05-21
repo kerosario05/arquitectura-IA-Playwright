@@ -1,0 +1,29 @@
+{
+  "appProfile": {
+    "appSlug": "profile-c",
+    "name": "Generic App",
+    "baseUrl": "https://app-a.example.test",
+    "baseUrlHash": "d30a52391fe1",
+    "createdAt": "2026-05-20T19:07:51.711Z",
+    "updatedAt": "2026-05-20T19:07:51.712Z"
+  },
+  "baseUrl": "https://app-a.example.test",
+  "loginMode": "password",
+  "testData": {
+    "key1": "value1"
+  },
+  "testDataAliases": {
+    "key1": [
+      "alias1"
+    ]
+  },
+  "testDataRefs": {
+    "key1": "APP_TEST_DATA_JSON.key1"
+  },
+  "username": "user-a",
+  "password": "pass-a",
+  "usernameRef": "APP_USERNAME",
+  "passwordRef": "APP_PASSWORD",
+  "missingInputBehavior": "fail",
+  "updatedAt": "2026-05-20T19:07:51.712Z"
+}

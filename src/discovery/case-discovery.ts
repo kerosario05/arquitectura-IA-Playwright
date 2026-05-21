@@ -159,7 +159,9 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
           target: targetText,
           isOptional: intent.isOptional,
           associatedEntity,
-          actionType: intent.type
+          actionType: intent.type,
+          semanticRole: intent.semanticRole,
+          relationContext: intent.relationContext
         };
         if (intent.valueSource === "test_data" || intent.valueSource === "literal") {
           item.valueSource = intent.valueSource;
@@ -224,6 +226,100 @@ async function capturePageState(page: Page): Promise<PageState> {
   });
   const elementCount = await page.evaluate(() => document.querySelectorAll("*").length);
   return { url, bodyText, elementCount };
+}
+
+export function evaluateEarlyCompletion(
+  snapshot: PageSnapshot,
+  assertionTargets: AssertionTargetInput[],
+  remainingActionTargets: ActionTargetItem[]
+): {
+  checked: boolean;
+  satisfied: boolean;
+  satisfiedAssertions: string[];
+  pendingAssertions: string[];
+  blockingAssertions: string[];
+  skippedAssertions: string[];
+  weakSignals: string[];
+  skippedReason?: string;
+  skippedRemainingActions: number;
+} {
+  if (assertionTargets.length === 0) {
+    return { checked: false, satisfied: false, satisfiedAssertions: [], pendingAssertions: [], blockingAssertions: [], skippedAssertions: [], weakSignals: [], skippedRemainingActions: 0 };
+  }
+
+  const resolutionResults = resolveAssertionTargets(snapshot, assertionTargets);
+  
+  const satisfiedAssertions: string[] = [];
+  const pendingAssertions: string[] = [];
+  const skippedAssertions: string[] = [];
+  const weakSignals: string[] = [];
+
+  for (let i = 0; i < resolutionResults.length; i++) {
+    const res = resolutionResults[i];
+    const input = assertionTargets[i];
+    const isExpectedSource = input?.source === "expected";
+
+    const isWeakDescriptor = (isExpectedSource && (
+      res.classification === "semantic_descriptor" ||
+      res.classification === "expected_only" ||
+      res.classification === "ambiguous_assertion" ||
+      res.classification === "composite_assertion"
+    )) || res.isWeakSignal === true;
+
+    const isSkippable = (res.status === "skipped_semantic_descriptor") || isWeakDescriptor;
+
+    const isMandatory = !isSkippable && (
+      res.classification === "literal_observable" ||
+      res.classification === "structural_assertion" ||
+      res.classification === "composite_assertion" ||
+      res.classification === "semantic_descriptor"
+    );
+
+    if (res.status === "passed" || res.status === "satisfied_by_children") {
+      satisfiedAssertions.push(res.assertionText);
+    } else if (isSkippable) {
+      skippedAssertions.push(res.assertionText);
+      if ((res as any).isWeakSignal) {
+        weakSignals.push(res.assertionText);
+      }
+    } else if (isMandatory) {
+      pendingAssertions.push(res.assertionText);
+    }
+  }
+
+  const SENSITIVE_VERBS = ["pagar", "comprar", "submit", "enviar", "confirmar", "delete", "eliminar", "borrar", "guardar", "save", "finalizar", "completar"];
+  const hasSensitiveActionsRemaining = remainingActionTargets.some(a => 
+    SENSITIVE_VERBS.some(v => a.action.toLowerCase().includes(v))
+  );
+
+  let satisfied = pendingAssertions.length === 0 && satisfiedAssertions.length > 0;
+  
+  if (hasSensitiveActionsRemaining && satisfied) {
+    const explicitMandatorySatisfied = resolutionResults.some(res => 
+      (res.classification === "literal_observable" || res.classification === "structural_assertion" || res.classification === "composite_assertion" || res.classification === "semantic_descriptor") &&
+      (res.status === "passed" || res.status === "satisfied_by_children")
+    );
+    if (!explicitMandatorySatisfied) {
+      satisfied = false;
+    }
+  }
+
+  const allSkippedAreWeak = skippedAssertions.length > 0 && weakSignals.length === skippedAssertions.length;
+  const skippedReason = skippedAssertions.length > 0
+    ? allSkippedAreWeak ? "synthetic_generic_descriptor" : "mixed_descriptors"
+    : undefined;
+
+  return {
+    checked: true,
+    satisfied,
+    satisfiedAssertions,
+    pendingAssertions,
+    blockingAssertions: pendingAssertions,
+    skippedAssertions,
+    weakSignals,
+    skippedReason,
+    skippedRemainingActions: remainingActionTargets.length
+  };
 }
 
 function hasPageTransition(before: PageState, after: PageState, targetText: string): boolean {
@@ -394,6 +490,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   let failedAtStep: number | undefined;
   let failedTarget: string | undefined;
   let failedReason: string | undefined;
+  let earlyCompletionSatisfied = false;
 
   await mkdir(evidenceDir, { recursive: true });
 
@@ -745,19 +842,35 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
       const resolutionResults = resolveAssertionTargets(currentSnapshot, assertionTargetInputs);
       for (const assertionResult of resolutionResults) {
+        const mappedStatus: DiscoveryStepResult["status"] =
+          assertionResult.status === "passed"
+            ? "found"
+            : assertionResult.status === "satisfied_by_children"
+              ? "satisfied_by_children"
+              : assertionResult.status === "skipped_semantic_descriptor"
+                ? "skipped_semantic_descriptor"
+                : assertionResult.status === "needs_assertion_resolution"
+                  ? "needs_assertion_resolution"
+                  : "not_found";
+
         steps.push({
           index: es.stepIndex,
           action: es.originalText,
-          status: assertionResult.status === "passed" ? "found" : es.source === "expected" ? "skipped" : "not_found",
+          status: mappedStatus,
           targetText: assertionResult.assertionText,
           evidencePath: path.join(evidenceDir, `step-${es.stepIndex}-assertion.json`),
           assertionClassification: assertionResult.classification,
           assertionStatus: assertionResult.status,
           matchedText: assertionResult.matchedText,
           confidence: assertionResult.confidence,
-          error: assertionResult.status === "failed" ? assertionResult.reason : undefined,
+          error: assertionResult.status === "failed" || assertionResult.status === "needs_assertion_resolution" ? assertionResult.reason : undefined,
           closestCandidates: assertionResult.closestCandidates,
-          visibleTexts: assertionResult.visibleTexts
+          visibleTexts: assertionResult.visibleTexts,
+          descriptorTypes: assertionResult.descriptorTypes,
+          subject: assertionResult.subject,
+          matchedTokens: assertionResult.matchedTokens,
+          structuralSignals: assertionResult.structuralSignals,
+          childAssertionsUsed: assertionResult.childAssertionsUsed
         });
 
         if (assertionResult.status === "passed" && assertionResult.classification === "literal_observable") {
@@ -768,11 +881,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             target: { strategy: "text", value: assertionResult.assertionText, exact: false },
             expected: assertionResult.assertionText
           });
-        } else if (assertionResult.status === "failed") {
+        } else if (assertionResult.status === "failed" || assertionResult.status === "needs_assertion_resolution") {
           if (!failedAtStep && es.source === "action") {
             failedAtStep = es.stepIndex;
             failedTarget = assertionResult.assertionText;
-            failedReason = "assertion_not_found";
+            failedReason = assertionResult.status === "needs_assertion_resolution"
+              ? "needs_assertion_resolution"
+              : "assertion_not_found";
           }
         }
       }
@@ -1022,7 +1137,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         snapshotUrl: scan.url,
         snapshotTitle: scan.title,
         elementsFound: scan.elementsCount,
-        evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`)
+        evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+        semanticRole: actionTarget.semanticRole,
+        relationContext: actionTarget.relationContext
       });
 
       planSteps.push({
@@ -1180,7 +1297,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         snapshotUrl: scan.url,
         snapshotTitle: scan.title,
         elementsFound: scan.elementsCount,
-        evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`)
+        evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+        semanticRole: actionTarget.semanticRole,
+        relationContext: actionTarget.relationContext
       });
 
       planSteps.push({
@@ -1243,7 +1362,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           snapshotUrl: scan.url,
           snapshotTitle: scan.title,
           elementsFound: scan.elementsCount,
-          evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`)
+          evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+          semanticRole: actionTarget.semanticRole,
+          relationContext: actionTarget.relationContext
         });
 
         planSteps.push({
@@ -1296,13 +1417,68 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
     console.log(`[discovery:case] Resolving target: ${actionTarget.target}`);
 
-    const resolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target);
-    const aiDecision = shouldInvokeAiAssistedDiscovery({
-      resolution,
-      confidenceThreshold: aiConfig.confidenceThreshold
+    const resolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target, {
+      semanticRole: actionTarget.semanticRole,
+      relationContext: actionTarget.relationContext
     });
 
+    if (resolution.status === "resolved" && resolution.confidence >= aiConfig.confidenceThreshold && resolution.locator) {
+      console.log(`[discovery:case] Deterministic target resolved: ${actionTarget.target} (confidence: ${resolution.confidence.toFixed(2)})`);
+    }
+
+    const remainingActionTargets = parsed.actionTargets.filter(a => a.index >= actionTarget.index);
+    const needsEarlyCompletionCheck =
+      resolution.status === "not_found" ||
+      resolution.status === "ambiguous" ||
+      resolution.status === "locator_resolution_failed" ||
+      resolution.confidence < aiConfig.confidenceThreshold;
+
+    const earlyCompletion = evaluateEarlyCompletion(currentSnapshot, parsed.assertionTargets, remainingActionTargets);
+
+    if (earlyCompletion.satisfied) {
+      earlyCompletionSatisfied = true;
+      console.log(`[discovery:case] Early completion satisfied at step ${actionTarget.index}. Skipping remaining actions.`);
+      for (const rem of remainingActionTargets) {
+        if (rem.index === actionTarget.index) {
+          steps.push({
+            index: rem.index,
+            action: rem.action,
+            status: "skipped_after_completion",
+            targetText: rem.target,
+            earlyCompletionDiagnostics: earlyCompletion,
+            semanticRole: rem.semanticRole,
+            relationContext: rem.relationContext,
+            error: "Action skipped because early completion validated final assertions."
+          });
+        } else {
+          steps.push({
+            index: rem.index,
+            action: rem.action,
+            status: "skipped_after_completion",
+            targetText: rem.target,
+            error: "Skipped due to early completion validation passing."
+          });
+        }
+      }
+      break;
+    }
+
+    if (needsEarlyCompletionCheck && earlyCompletion.pendingAssertions.length > 0) {
+      console.log(`[discovery:case] Early completion not satisfied at step ${actionTarget.index}. Pending: [${earlyCompletion.pendingAssertions.map(a => `"${a}"`).join(", ")}]. Satisfied: [${earlyCompletion.satisfiedAssertions.map(a => `"${a}"`).join(", ")}].`);
+    }
+
+    const aiDecision = shouldInvokeAiAssistedDiscovery({
+      resolution,
+      confidenceThreshold: aiConfig.confidenceThreshold,
+      enabled: aiConfig.enabled
+    });
+
+    if (!aiDecision.shouldInvoke && resolution.status === "resolved" && resolution.confidence >= aiConfig.confidenceThreshold) {
+      console.log(`[discovery:case] AI-assisted discovery skipped because deterministic confidence is sufficient.`);
+    }
+
     if (aiDecision.shouldInvoke && aiDecision.reason) {
+      console.log(`[discovery:case] AI-assisted discovery enabled. Trying AI fallback...`);
       const aiOutcome = await runAiAssistedDiscovery(
         {
           currentGoal: scenario.title,
@@ -1417,7 +1593,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           evidencePath: aiOutcome.execution.evidencePath ?? path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
           aiAssisted: true,
           aiProposal: aiOutcome.proposal,
-          aiReason: aiDecision.reason
+          aiReason: aiDecision.reason,
+          semanticRole: actionTarget.semanticRole,
+          relationContext: actionTarget.relationContext
         });
 
         planSteps.push({
@@ -1431,27 +1609,190 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       }
 
       if (aiOutcome.status === "ai_candidate_rejected" || aiOutcome.status === "needs_approval") {
+        if (aiOutcome.reason && aiOutcome.reason.includes("did not return a proposal")) {
+          console.log(`[discovery:case] AI explorer did not return a proposal.`);
+        } else {
+          console.log(`[discovery:case] AI explorer returned invalid proposal: ${aiOutcome.reason}`);
+        }
+
+        const originalReason = resolution.status === "not_found" ? "target_not_found" : resolution.status === "ambiguous" ? "ambiguous_target" : resolution.status;
+        console.log(`[discovery:case] Keeping original failure reason: ${originalReason}.`);
+
+        (resolution as any).aiDiagnostics = {
+          attempted: true,
+          result: aiOutcome.reason && aiOutcome.reason.includes("did not return a proposal") ? "no_proposal" : "invalid_proposal",
+          proposal: aiOutcome.proposal
+        };
+
+        if (resolution.status === "resolved" && resolution.locator) {
+          console.log(`[discovery:case] AI failed but deterministic locator exists. Using deterministic resolution.`);
+          (resolution as any)._aiFailedDeterministicAvailable = true;
+        }
+      }
+    }
+
+    if (!(resolution as any)._aiFailedDeterministicAvailable) {
+      if (resolution.status === "not_found") {
+        if (actionTarget.isOptional) {
+          console.log(`[discovery:case] Optional target not found, skipping: ${actionTarget.target}`);
+          steps.push({
+            index: actionTarget.index,
+            action: actionTarget.action,
+            status: "skipped",
+            targetText: actionTarget.target,
+            error: `Optional target "${actionTarget.target}" not found on current page. ${resolution.candidates?.length ?? 0} candidates evaluated.`
+          });
+          continue;
+        }
+
+        const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+        currentSnapshot = scan.snapshot;
+
+        const diagnosis = (resolution as any)._diagnosis;
+        let errorMsg = `Target "${actionTarget.target}" not found on current page. ${resolution.candidates?.length ?? 0} candidates evaluated.`;
+        if (diagnosis && Array.isArray(diagnosis) && diagnosis.length > 0) {
+          errorMsg += " Diagnosis: " + JSON.stringify(diagnosis);
+        }
+
+        steps.push({
+          index: actionTarget.index,
+          action: actionTarget.action,
+          status: "not_found",
+          targetText: actionTarget.target,
+          snapshotUrl: scan.url,
+          snapshotTitle: scan.title,
+          elementsFound: scan.elementsCount,
+          error: errorMsg,
+          evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+          resolutionDiagnosis: diagnosis,
+          aiDiagnostics: (resolution as any).aiDiagnostics,
+          semanticRole: actionTarget.semanticRole,
+          relationContext: actionTarget.relationContext,
+          earlyCompletionDiagnostics: earlyCompletion
+        } as any);
+
+        failedAtStep = actionTarget.index;
+        failedTarget = actionTarget.target;
+        failedReason = "target_not_found";
+
+        await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
+        await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
+          scenario, steps, allDiscoveredObjects, planSteps,
+          pendingObjectsPath, pendingPlansPath, evidenceDir,
+          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+        ).candidatePlan ?? {}, null, 2), "utf-8");
+
+        return buildFailureResult(
+          scenario, steps, allDiscoveredObjects, planSteps,
+          pendingObjectsPath, pendingPlansPath, evidenceDir,
+          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+        );
+      }
+
+      if (resolution.status === "ambiguous") {
+        const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+        currentSnapshot = scan.snapshot;
+
+        const ambiguousReason = actionTarget.associatedEntity
+          ? `Ambiguous target: ${resolution.matchReason} (${resolution.candidates?.length ?? 0} matches). Target has associated entity "${actionTarget.associatedEntity}" that could disambiguate context.`
+          : `Ambiguous target: ${resolution.matchReason} (${resolution.candidates?.length ?? 0} matches).`;
+
+        steps.push({
+          index: actionTarget.index,
+          action: actionTarget.action,
+          status: "not_found",
+          targetText: actionTarget.target,
+          snapshotUrl: scan.url,
+          snapshotTitle: scan.title,
+          elementsFound: scan.elementsCount,
+          error: ambiguousReason,
+          evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+          aiDiagnostics: (resolution as any).aiDiagnostics,
+          semanticRole: actionTarget.semanticRole,
+          relationContext: actionTarget.relationContext,
+          earlyCompletionDiagnostics: earlyCompletion
+        } as any);
+
+        failedAtStep = actionTarget.index;
+        failedTarget = actionTarget.target;
+        failedReason = actionTarget.associatedEntity ? "needs_associated_target_resolution" : "ambiguous_target";
+
+        await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
+        await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
+          scenario, steps, allDiscoveredObjects, planSteps,
+          pendingObjectsPath, pendingPlansPath, evidenceDir,
+          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+        ).candidatePlan ?? {}, null, 2), "utf-8");
+
+        return buildFailureResult(
+          scenario, steps, allDiscoveredObjects, planSteps,
+          pendingObjectsPath, pendingPlansPath, evidenceDir,
+          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+        );
+      }
+
+      if (resolution.status === "locator_resolution_failed") {
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
 
         steps.push({
           index: actionTarget.index,
           action: actionTarget.action,
-          status: aiOutcome.status,
+          status: "locator_resolution_failed",
           targetText: actionTarget.target,
           snapshotUrl: scan.url,
           snapshotTitle: scan.title,
           elementsFound: scan.elementsCount,
-          error: aiOutcome.reason,
+          error: `Semantic target matched, but DOM locator resolution failed. Attempted locators: ${(resolution.attemptedLocators ?? []).join(" | ")}`,
           evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
-          aiAssisted: true,
-          aiProposal: aiOutcome.proposal,
-          aiReason: aiDecision.reason
-        });
+          resolutionDiagnosis: (resolution as typeof resolution & { _diagnosis?: unknown[] })._diagnosis,
+          attemptedLocators: resolution.attemptedLocators,
+          candidateId: resolution.candidateId,
+          semanticRole: actionTarget.semanticRole,
+          relationContext: actionTarget.relationContext,
+          earlyCompletionDiagnostics: earlyCompletion,
+          candidateText: resolution.candidateText,
+          aiDiagnostics: (resolution as any).aiDiagnostics
+        } as any);
 
         failedAtStep = actionTarget.index;
         failedTarget = actionTarget.target;
-        failedReason = aiOutcome.status;
+        failedReason = "locator_resolution_failed";
+
+        await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
+        await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
+          scenario, steps, allDiscoveredObjects, planSteps,
+          pendingObjectsPath, pendingPlansPath, evidenceDir,
+          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+        ).candidatePlan ?? {}, null, 2), "utf-8");
+
+        return buildFailureResult(
+          scenario, steps, allDiscoveredObjects, planSteps,
+          pendingObjectsPath, pendingPlansPath, evidenceDir,
+          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+        );
+      }
+
+      if (!resolution.locator) {
+        const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+        currentSnapshot = scan.snapshot;
+
+        steps.push({
+          index: actionTarget.index,
+          action: actionTarget.action,
+          status: "not_found",
+          targetText: actionTarget.target,
+          snapshotUrl: scan.url,
+          snapshotTitle: scan.title,
+          elementsFound: scan.elementsCount,
+          error: `Target resolved but no locator found in DOM. Match reason: ${resolution.matchReason}`,
+          evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+          aiDiagnostics: (resolution as any).aiDiagnostics
+        } as any);
+
+        failedAtStep = actionTarget.index;
+        failedTarget = actionTarget.target;
+        failedReason = "locator_not_found";
 
         await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
         await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
@@ -1468,169 +1809,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       }
     }
 
-    if (resolution.status === "not_found") {
-      if (actionTarget.isOptional) {
-        console.log(`[discovery:case] Optional target not found, skipping: ${actionTarget.target}`);
-        steps.push({
-          index: actionTarget.index,
-          action: actionTarget.action,
-          status: "skipped",
-          targetText: actionTarget.target,
-          error: `Optional target "${actionTarget.target}" not found on current page. ${resolution.candidates?.length ?? 0} candidates evaluated.`
-        });
-        continue;
-      }
-
-      const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
-      currentSnapshot = scan.snapshot;
-
-      const diagnosis = (resolution as any)._diagnosis;
-      let errorMsg = `Target "${actionTarget.target}" not found on current page. ${resolution.candidates?.length ?? 0} candidates evaluated.`;
-      if (diagnosis && Array.isArray(diagnosis) && diagnosis.length > 0) {
-        errorMsg += " Diagnosis: " + JSON.stringify(diagnosis);
-      }
-
-      steps.push({
-        index: actionTarget.index,
-        action: actionTarget.action,
-        status: "not_found",
-        targetText: actionTarget.target,
-        snapshotUrl: scan.url,
-        snapshotTitle: scan.title,
-        elementsFound: scan.elementsCount,
-        error: errorMsg,
-        evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
-        resolutionDiagnosis: diagnosis
-      });
-
-      failedAtStep = actionTarget.index;
-      failedTarget = actionTarget.target;
-      failedReason = "target_not_found";
-
-      await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
-      await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
-        scenario, steps, allDiscoveredObjects, planSteps,
-        pendingObjectsPath, pendingPlansPath, evidenceDir,
-        failedAtStep, failedTarget, failedReason, allDiscoveredObjects
-      ).candidatePlan ?? {}, null, 2), "utf-8");
-
-      return buildFailureResult(
-        scenario, steps, allDiscoveredObjects, planSteps,
-        pendingObjectsPath, pendingPlansPath, evidenceDir,
-        failedAtStep, failedTarget, failedReason, allDiscoveredObjects
-      );
-    }
-
-    if (resolution.status === "ambiguous") {
-      const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
-      currentSnapshot = scan.snapshot;
-
-      // If target has an associated entity, the ambiguity could be resolved
-      // with context narrowing - flag as needs_associated_target_resolution
-      const ambiguousReason = actionTarget.associatedEntity
-        ? `Ambiguous target: ${resolution.matchReason} (${resolution.candidates?.length ?? 0} matches). Target has associated entity "${actionTarget.associatedEntity}" that could disambiguate context.`
-        : `Ambiguous target: ${resolution.matchReason} (${resolution.candidates?.length ?? 0} matches).`;
-
-      steps.push({
-        index: actionTarget.index,
-        action: actionTarget.action,
-        status: "not_found",
-        targetText: actionTarget.target,
-        snapshotUrl: scan.url,
-        snapshotTitle: scan.title,
-        elementsFound: scan.elementsCount,
-        error: ambiguousReason,
-        evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`)
-      });
-
-      failedAtStep = actionTarget.index;
-      failedTarget = actionTarget.target;
-      failedReason = actionTarget.associatedEntity ? "needs_associated_target_resolution" : "ambiguous_target";
-
-      await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
-      await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
-        scenario, steps, allDiscoveredObjects, planSteps,
-        pendingObjectsPath, pendingPlansPath, evidenceDir,
-        failedAtStep, failedTarget, failedReason, allDiscoveredObjects
-      ).candidatePlan ?? {}, null, 2), "utf-8");
-
-      return buildFailureResult(
-        scenario, steps, allDiscoveredObjects, planSteps,
-        pendingObjectsPath, pendingPlansPath, evidenceDir,
-        failedAtStep, failedTarget, failedReason, allDiscoveredObjects
-      );
-    }
-
-    if (resolution.status === "locator_resolution_failed") {
-      const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
-      currentSnapshot = scan.snapshot;
-
-      steps.push({
-        index: actionTarget.index,
-        action: actionTarget.action,
-        status: "locator_resolution_failed",
-        targetText: actionTarget.target,
-        snapshotUrl: scan.url,
-        snapshotTitle: scan.title,
-        elementsFound: scan.elementsCount,
-        error: `Semantic target matched, but DOM locator resolution failed. Attempted locators: ${(resolution.attemptedLocators ?? []).join(" | ")}`,
-        evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
-        resolutionDiagnosis: (resolution as typeof resolution & { _diagnosis?: unknown[] })._diagnosis,
-        attemptedLocators: resolution.attemptedLocators,
-        candidateId: resolution.candidateId,
-        candidateText: resolution.candidateText
-      });
-
-      failedAtStep = actionTarget.index;
-      failedTarget = actionTarget.target;
-      failedReason = "locator_resolution_failed";
-
-      await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
-      await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
-        scenario, steps, allDiscoveredObjects, planSteps,
-        pendingObjectsPath, pendingPlansPath, evidenceDir,
-        failedAtStep, failedTarget, failedReason, allDiscoveredObjects
-      ).candidatePlan ?? {}, null, 2), "utf-8");
-
-      return buildFailureResult(
-        scenario, steps, allDiscoveredObjects, planSteps,
-        pendingObjectsPath, pendingPlansPath, evidenceDir,
-        failedAtStep, failedTarget, failedReason, allDiscoveredObjects
-      );
-    }
-
-    if (!resolution.locator) {
-      const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
-      currentSnapshot = scan.snapshot;
-
-      steps.push({
-        index: actionTarget.index,
-        action: actionTarget.action,
-        status: "not_found",
-        targetText: actionTarget.target,
-        snapshotUrl: scan.url,
-        snapshotTitle: scan.title,
-        elementsFound: scan.elementsCount,
-        error: `Target resolved but no locator found in DOM. Match reason: ${resolution.matchReason}`,
-        evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`)
-      });
-
-      failedAtStep = actionTarget.index;
-      failedTarget = actionTarget.target;
-      failedReason = "locator_not_found";
-
-      await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
-      await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
-        scenario, steps, allDiscoveredObjects, planSteps,
-        pendingObjectsPath, pendingPlansPath, evidenceDir,
-        failedAtStep, failedTarget, failedReason, allDiscoveredObjects
-      ).candidatePlan ?? {}, null, 2), "utf-8");
-
-      return buildFailureResult(
-        scenario, steps, allDiscoveredObjects, planSteps,
-        pendingObjectsPath, pendingPlansPath, evidenceDir,
-        failedAtStep, failedTarget, failedReason, allDiscoveredObjects
-      );
+    if (resolution.status !== "resolved" || !resolution.locator) {
+      continue;
     }
 
     console.log(`[discovery:case] Clicking target: ${actionTarget.target} (strategy: ${resolution.locatorStrategy}, confidence: ${resolution.confidence.toFixed(2)})`);
@@ -1656,8 +1836,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           snapshotTitle: scan.title,
           elementsFound: scan.elementsCount,
           error: `Click failed: ${err instanceof Error ? err.message : String(err)}`,
-          evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`)
-        });
+          evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+          aiDiagnostics: (resolution as any).aiDiagnostics
+        } as any);
 
         failedAtStep = actionTarget.index;
         failedTarget = actionTarget.target;
@@ -1712,8 +1893,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             snapshotTitle: scan.title,
             elementsFound: scan.elementsCount,
             error: "Click completed but no page transition or DOM change was detected.",
-            evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`)
-          });
+            evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+            aiDiagnostics: (resolution as any).aiDiagnostics
+          } as any);
 
           await writeFile(
             path.join(evidenceDir, `step-${actionTarget.index}-before.json`),
@@ -1760,7 +1942,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       snapshotUrl: scan.url,
       snapshotTitle: scan.title,
       elementsFound: scan.elementsCount,
-      evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`)
+      evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+      semanticRole: actionTarget.semanticRole,
+      relationContext: actionTarget.relationContext
     });
 
     planSteps.push({
@@ -1771,10 +1955,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     });
   }
 
-  const foundSteps = steps.filter((s) => s.status === "found" || s.status === "satisfied_by_children").length;
+  const foundSteps = steps.filter((s) => s.status === "found" || s.status === "satisfied_by_children" || (s.status === "skipped_after_completion" && earlyCompletionSatisfied)).length;
   const totalSteps = steps.filter((s) => s.status !== "skipped").length;
-  const allFound = foundSteps === totalSteps && totalSteps > 0 && !failedReason;
-  const someFound = foundSteps > 0;
+  const allFound = (foundSteps === totalSteps && totalSteps > 0 && !failedReason) || earlyCompletionSatisfied;
+  const someFound = foundSteps > 0 || earlyCompletionSatisfied;
 
   const status: CaseDiscoveryResult["status"] = failedReason === "needs_approval"
     ? "needs_approval"

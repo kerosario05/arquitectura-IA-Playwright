@@ -1,0 +1,49 @@
+{
+  "batchId": "2026-05-21T15-20-00-955Z",
+  "timestamp": "2026-05-21T15:20:28.571Z",
+  "args": {
+    "mode": "by-ids",
+    "caseIds": [
+      37868
+    ],
+    "headed": true,
+    "autoPromote": true,
+    "promotionDryRun": false,
+    "promotionStrict": false,
+    "requirePromotionApproval": false,
+    "dryRun": false,
+    "includeActive": true,
+    "stopOnFail": false,
+    "concurrency": 1,
+    "autoRepair": true,
+    "repairTimeoutMs": 120000,
+    "showAgentLog": true,
+    "continueOnAgentTimeout": true
+  },
+  "cases": [
+    {
+      "caseId": 37868,
+      "title": "Ingreso al modulo Generar cartas",
+      "selected": true,
+      "status": "failed",
+      "promoted": false,
+      "promotionStatus": "not_applicable",
+      "outputDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T15-20-00-955Z\\cases\\case-37868",
+      "evidenceDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T15-20-00-955Z\\cases\\case-37868\\evidence",
+      "failureReason": "target_not_found",
+      "durationMs": 27613
+    }
+  ],
+  "summary": {
+    "selected": 1,
+    "executed": 1,
+    "skipped": 0,
+    "passed": 0,
+    "failed": 1,
+    "promoted": 0,
+    "alreadyActiveSkipped": 0,
+    "promotionFailed": 0,
+    "notPromoted": 0,
+    "totalDurationMs": 27614
+  }
+}

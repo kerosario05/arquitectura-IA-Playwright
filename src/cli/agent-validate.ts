@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { normalizeAgentHandoffResponse, validateAgentHandoffResponse } from "../agent";
+import { validateAgentHandoffResponse } from "../agent";
 import { assertValidExecutionPlan, writeExecutionPlansToFile } from "../plans";
 import type { AgentHandoffRequest, AgentHandoffResponse } from "../types/agent-handoff.types";
 
@@ -92,8 +92,7 @@ async function run(): Promise<number> {
     throw new Error("--response or --handoff-dir is required.");
   }
 
-  const rawResponse = JSON.parse(await readFile(path.resolve(responsePath), "utf-8")) as unknown;
-  const response = normalizeAgentHandoffResponse(rawResponse);
+  const response = JSON.parse(await readFile(path.resolve(responsePath), "utf-8")) as unknown;
   let availableDataKeys: string[] | undefined;
 
   if (requestPath) {

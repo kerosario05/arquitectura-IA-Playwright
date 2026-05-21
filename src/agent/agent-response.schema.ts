@@ -2,10 +2,11 @@ export const agentHandoffResponseJsonSchema = {
   $schema: "https://json-schema.org/draft/2020-12/schema",
   type: "object",
   additionalProperties: false,
-  required: ["version", "generatedAt", "plans", "proposedObjects", "unresolvedQuestions", "rationale"],
+  required: ["version", "generatedAt", "recoveryDecision", "plans", "proposedObjects", "unresolvedQuestions", "rationale"],
   properties: {
     version: { const: "1.0" },
-    generatedAt: { type: "string" },
+    generatedAt: { type: "string", minLength: 1 },
+    recoveryDecision: { enum: ["repaired_plan", "no_safe_action", "needs_more_context"] },
     rationale: { type: "array", items: { type: "string" } },
     proposedObjects: {
       type: "array",

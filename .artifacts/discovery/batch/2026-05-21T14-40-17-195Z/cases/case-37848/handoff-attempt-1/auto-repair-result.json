@@ -1,0 +1,35 @@
+{
+  "timestamp": "2026-05-21T14:40:51.453Z",
+  "attemptNumber": 1,
+  "repairStatus": "validated",
+  "success": true,
+  "responsePath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T14-40-17-195Z\\cases\\case-37848\\handoff-attempt-1\\agent-response.json",
+  "selectedSkill": "navigation-recovery",
+  "diagnostics": {
+    "exitCode": 0,
+    "timedOut": false,
+    "durationMs": 19785,
+    "stdoutLogPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T14-40-17-195Z\\cases\\case-37848\\handoff-attempt-1\\codex.stdout.log",
+    "stderrLogPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T14-40-17-195Z\\cases\\case-37848\\handoff-attempt-1\\codex.stderr.log",
+    "promptMode": "compact-route-recovery",
+    "compactPrompt": true,
+    "preferredResponseSeconds": 30,
+    "promptBudgetSeconds": 60,
+    "routeRecoveryPackPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T14-40-17-195Z\\cases\\case-37848\\handoff-attempt-1\\route-recovery-pack.json",
+    "topCandidateRecommendation": {
+      "candidateId": "el-6",
+      "text": "Tarjetas",
+      "relation": "parent_category",
+      "score": 0.76,
+      "actionability": "clickable"
+    },
+    "agentResponseExists": true,
+    "agentResponseValid": true,
+    "routeRecoveryDecisionValid": false,
+    "finalAgentResponseBuiltBy": "deterministic_fallback",
+    "selectedCandidateId": "el-6",
+    "recoveryDecision": "repaired_plan",
+    "rawRecoveryDecision": "repaired_plan",
+    "nextAction": "repaired_plan"
+  }
+}

@@ -1,20 +1,34 @@
-import path from "node:path";
-import { chromium, firefox, webkit } from "@playwright/test";
-import { createAIExplorer } from "../ai/ai-explorer";
-import { config, requireTestRailConfig } from "../config/env";
-import { TestRailClient } from "../clients/testrail.client";
-import { normalizeTestRailCases } from "../testrail/testrail-normalizer";
-import { getLoginStrategy } from "../auth/login-strategy.factory";
-import { runCaseDiscovery, printCaseDiscoverySummary } from "../discovery/case-discovery";
+import { config } from "../config/env";
+import { runCaseDiscoveryWorkflow, printCaseDiscoverySummary } from "../discovery/case-discovery-workflow";
+import type { CaseDiscoveryWorkflowOptions } from "../discovery/case-discovery-workflow";
 
 type CliArgs = {
   caseId: number;
   headed: boolean;
   output?: string;
+  autoPromote: boolean;
+  promotionDryRun: boolean;
+  promotionStrict: boolean;
+  requirePromotionApproval: boolean;
+  pageObjectMode: boolean;
+  inlineDebugSpec: boolean;
+  allowPageObjectCandidates: boolean;
+  overwrite: boolean;
 };
 
-function parseArgs(argv: string[]): CliArgs {
-  const args: CliArgs = { caseId: 0, headed: false };
+export function parseDiscoveryCaseArgs(argv: string[]): CliArgs {
+  const args: CliArgs = {
+    caseId: 0,
+    headed: false,
+    autoPromote: false,
+    promotionDryRun: false,
+    promotionStrict: false,
+    requirePromotionApproval: false,
+    pageObjectMode: true,
+    inlineDebugSpec: false,
+    allowPageObjectCandidates: true,
+    overwrite: false
+  };
 
   for (let i = 0; i < argv.length; i += 1) {
     const token = argv[i];
@@ -22,6 +36,46 @@ function parseArgs(argv: string[]): CliArgs {
 
     if (token === "--headed") {
       args.headed = true;
+      continue;
+    }
+    if (token === "--auto-promote") {
+      args.autoPromote = true;
+      continue;
+    }
+    if (token === "--promotion-dry-run") {
+      args.promotionDryRun = true;
+      continue;
+    }
+    if (token === "--promotion-strict") {
+      args.promotionStrict = true;
+      continue;
+    }
+    if (token === "--require-promotion-approval") {
+      args.requirePromotionApproval = true;
+      continue;
+    }
+    if (token === "--overwrite") {
+      args.overwrite = true;
+      continue;
+    }
+    if (token === "--page-object-mode") {
+      args.pageObjectMode = true;
+      continue;
+    }
+    if (token === "--inline-debug-spec") {
+      args.inlineDebugSpec = true;
+      continue;
+    }
+    if (token === "--allow-page-object-candidates") {
+      args.allowPageObjectCandidates = true;
+      continue;
+    }
+    if (token === "--no-page-object-mode") {
+      args.pageObjectMode = false;
+      continue;
+    }
+    if (token === "--no-page-object-candidates") {
+      args.allowPageObjectCandidates = false;
       continue;
     }
     if (token === "--case-id") {
@@ -54,96 +108,47 @@ function parseArgs(argv: string[]): CliArgs {
   return args;
 }
 
-function getDefaultOutputDir(caseId: number): string {
-  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-  return path.resolve(`./.artifacts/discovery/case-${caseId}/${stamp}`);
-}
-
 async function main(): Promise<void> {
-  const args = parseArgs(process.argv.slice(2));
-
-  const outputDir = args.output ? path.resolve(args.output) : getDefaultOutputDir(args.caseId);
-  const evidenceDir = path.join(outputDir, "evidence");
-  const pendingObjectsPath = path.join(outputDir, "discovered-objects.pending.json");
-  const pendingPlansPath = path.join(outputDir, "discovered-plans.pending.json");
+  const args = parseDiscoveryCaseArgs(process.argv.slice(2));
 
   console.log(`[discovery:case] Starting case-driven discovery for C${args.caseId}...`);
-  console.log(`[discovery:case] Output directory: ${outputDir}`);
+  console.log(`[discovery:case] Overwrite enabled: ${args.overwrite}`);
 
-  const testRailRuntimeConfig = requireTestRailConfig(config);
-  const client = new TestRailClient(testRailRuntimeConfig);
+  const workflowOptions: CaseDiscoveryWorkflowOptions = {
+    caseId: args.caseId,
+    headed: args.headed,
+    outputDir: args.output,
+    autoPromote: args.autoPromote,
+    promotionDryRun: args.promotionDryRun,
+    promotionStrict: args.promotionStrict,
+    requirePromotionApproval: args.requirePromotionApproval,
+    pageObjectMode: args.pageObjectMode,
+    inlineDebugSpec: args.inlineDebugSpec,
+    allowPageObjectCandidates: args.allowPageObjectCandidates,
+    overwrite: args.overwrite,
+    config
+  };
 
-  console.log(`[discovery:case] Fetching case C${args.caseId} from TestRail...`);
-  const rawCase = await client.getCase(args.caseId);
-  const scenarios = normalizeTestRailCases([rawCase]);
+  const workflowResult = await runCaseDiscoveryWorkflow(workflowOptions);
 
-  if (scenarios.length === 0) {
-    throw new Error(`No scenario could be generated for case C${args.caseId}.`);
-  }
+  const { caseResult } = workflowResult;
 
-  const scenario = scenarios[0];
-  console.log(`[discovery:case] Case title: ${scenario.title}`);
-  console.log(`[discovery:case] Steps: ${scenario.steps.length}`);
-  for (const step of scenario.steps) {
-    console.log(`  ${step.index}. ${step.action}`);
-  }
+  printCaseDiscoverySummary(caseResult, workflowResult);
 
-  const browserType = { chromium, firefox, webkit }[config.execution.browser];
-  const headless = !args.headed;
-
-  let browser;
-  try {
-    browser = await browserType.launch({ headless });
-    const context = await browser.newContext();
-    const page = await context.newPage();
-    page.setDefaultTimeout(config.execution.defaultTimeoutMs);
-
-    const loginStrategy = getLoginStrategy(config.app.loginMode);
-
-    console.log(`[discovery:case] Starting discovery with login mode: ${config.app.loginMode}`);
-
-    const result = await runCaseDiscovery({
-      page,
-      scenario,
-      evidenceDir,
-      pendingObjectsPath,
-      pendingPlansPath,
-      appBaseUrl: config.app.baseUrl,
-      testData: config.app.testData,
-      loginAction: async () => {
-        await loginStrategy.execute(page, config);
-      },
-      aiAssistedDiscovery: {
-        explorer: createAIExplorer({
-          provider: config.integrations.ai?.agentProvider ?? "custom"
-        }),
-        config: {
-          enabled: config.integrations.ai?.discoveryEnabled ?? false,
-          confidenceThreshold: config.integrations.ai?.discoveryConfidenceThreshold ?? 0.85,
-          requireApprovalThreshold: config.integrations.ai?.discoveryRequireApprovalThreshold ?? 0.7,
-          maxAttempts: config.integrations.ai?.discoveryMaxAttempts ?? 3
-        }
-      }
-    });
-
-    printCaseDiscoverySummary(result);
-
-    if (result.status === "exploration_failed") {
-      process.exitCode = 1;
-    }
-  } finally {
-    if (browser) {
-      await browser.close();
-    }
+  if (caseResult.status === "exploration_failed") {
+    process.exitCode = 1;
   }
 }
 
-main()
-  .then(() => {
-    process.exitCode = 0;
-  })
-  .catch((error) => {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error(`[discovery:case] ${message}`);
-    process.exitCode = 1;
-  });
+const isMainModule = process.argv[1]?.replace(/\\/g, "/").endsWith("discovery-case.ts");
+if (isMainModule) {
+  main()
+    .then(() => {
+      process.exitCode = 0;
+    })
+    .catch((error) => {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`[discovery:case] ${message}`);
+      process.exitCode = 1;
+    });
+}

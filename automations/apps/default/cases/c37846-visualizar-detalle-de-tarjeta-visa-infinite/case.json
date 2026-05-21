@@ -1,0 +1,10 @@
+{
+  "id": "c37846-visualizar-detalle-de-tarjeta-visa-infinite",
+  "externalId": "C37846",
+  "caseId": 37846,
+  "title": "Visualizar detalle de Tarjeta Visa Infinite",
+  "source": "discovery",
+  "appSlug": "default",
+  "appConfigPath": "automations\\apps\\default\\app.config.json",
+  "createdAt": "2026-05-21T16:57:02.413Z"
+}

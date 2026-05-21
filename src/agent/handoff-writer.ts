@@ -29,6 +29,7 @@ export async function writeAgentHandoffPackage(input: {
       {
         version: "1.0",
         generatedAt: "",
+        recoveryDecision: "needs_more_context",
         plans: [],
         proposedObjects: [],
         unresolvedQuestions: [],

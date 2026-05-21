@@ -1,0 +1,29 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37762",
+    "caseId": 37762,
+    "title": "C37385 - Solicitud digital de prestamo personal"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    }
+  ],
+  "notes": [
+    "Discovery failed at step 1: ai_candidate_rejected - \"iniciar\""
+  ],
+  "createdAt": "2026-05-20T20:42:41.663Z"
+}

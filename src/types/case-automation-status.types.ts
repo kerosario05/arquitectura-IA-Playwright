@@ -3,7 +3,13 @@ export type CaseAutomationStatus =
   | "draft"
   | "active"
   | "disabled"
-  | "different_profile";
+  | "different_profile"
+  | "inline_debug_only"
+  | "needs_page_object"
+  | "needs_page_method"
+  | "needs_component_object"
+  | "needs_flow"
+  | "blocked_missing_pom";
 
 export type CaseAutomationSummary = {
   caseId: number;

@@ -1,0 +1,10 @@
+{
+  "id": "c37845-visualizar-detalle-de-tarjeta-visa-platinum",
+  "externalId": "C37845",
+  "caseId": 37845,
+  "title": "Visualizar detalle de Tarjeta Visa Platinum",
+  "source": "discovery",
+  "appSlug": "default",
+  "appConfigPath": "automations\\apps\\default\\app.config.json",
+  "createdAt": "2026-05-21T16:37:58.309Z"
+}

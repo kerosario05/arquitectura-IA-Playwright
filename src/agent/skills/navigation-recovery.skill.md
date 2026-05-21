@@ -1,0 +1,60 @@
+# Skill: navigation-recovery
+
+## id
+navigation-recovery
+
+## purpose
+Proponer la siguiente acción segura cuando no se encuentra el target del step actual. Elegir entre candidatos visibles del snapshot actual.
+
+## allowedFailureReasons
+- target_not_found
+- locator_resolution_failed (cuando no existan candidatos en el snapshot)
+- click_no_transition
+
+## inputContract
+- snapshotCandidates del context-pack.json (elementos visibles actuales)
+- failedTarget: target que no se encontró
+- failedAtStep: índice del paso donde falló
+- candidatePlan: plan con steps restantes
+- failedReason: razón exacta del fallo
+- knownRoutes del context-pack (rutas conocidas de otros planes)
+
+## outputContract
+- agent-response.json con skillId="navigation-recovery"
+- proposedAction.type: "click_candidate" | "update_plan"
+- proposedAction.candidateId: ID del candidato visible a clickear (si existe)
+- diagnosis: explicación de por qué ese candidato es la siguiente acción segura
+- confidence: 0.0–1.0
+- shouldRetryExecution: true si hay candidato clickeable
+- evidenceUsed: elementos del snapshot que respaldan la decisión
+- risks: riesgos como "clic sin cambio de DOM esperado"
+
+## forbiddenActions
+- Inventar rutas o URLs de navegación
+- Proponer candidateId que no existe en snapshotCandidates
+- Inventar selectores CSS/XPath
+- Modificar registry estable
+- Generar código Playwright
+- Asumir estado de la aplicación no verificado
+
+## validationRules
+- Solo puede elegir entre candidatos visibles del snapshot actual
+- Si no hay candidato clickeable con confidence >= 0.5, status debe ser "no_safe_action"
+- Si confidence < 0.6, marcar como "needs_agent_review"
+- No puede ejecutar navegación (Playwright)
+- No puede proponer acciones no presentes en supportedActions
+- No puede modificar archivos fuera del directorio handoff
+
+## examples
+
+### Ejemplo 1: Target no encontrado, candidato alternativo visible
+- scenario: failedTarget="Tarjeta de Crédito" no encontrado, pero hay un link "Ver tarjetas" visible
+- input: failedTarget="Tarjeta de Crédito", candidates=[{id:"el5",text:"Ver tarjetas",role:"link",tagName:"a"}]
+- output: {"candidateId":"el5","reason":"El target original 'Tarjeta de Crédito' no está visible. 'Ver tarjetas' es un enlace visible con la misma intención semántica y es el candidate clickeable más cercano.","confidence":0.72,"risks":["El texto no coincide exactamente con el target original"]}
+- reasoning: Aunque no es el target exacto, el candidato tiene relación semántica y es clickeable.
+
+### Ejemplo 2: Sin candidato clickeable
+- scenario: failedTarget="Iniciar sesión", pero no hay botones o links visibles
+- input: failedTarget="Iniciar sesión", candidates=[{id:"el1",text:"Cargando...",role:"status"}]
+- output: {"status":"no_safe_action","reason":"No hay candidatos clickeables en el snapshot actual. Único elemento visible es 'Cargando...' (status).","confidence":0.0,"shouldRetryExecution":false}
+- reasoning: Sin elementos interactivos visibles, no se puede recuperar. Se requiere revisión.

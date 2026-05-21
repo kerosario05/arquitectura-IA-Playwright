@@ -1,0 +1,30 @@
+{
+  "id": "c37844-visualizar-detalle-de-tarjeta-visa-gold",
+  "externalId": "C37844",
+  "caseId": 37844,
+  "title": "Visualizar detalle de Tarjeta Visa Gold",
+  "planPath": "automations\\apps\\default\\cases\\c37844-visualizar-detalle-de-tarjeta-visa-gold\\plan.json",
+  "specPath": "automations\\apps\\default\\cases\\c37844-visualizar-detalle-de-tarjeta-visa-gold\\spec.ts",
+  "appSlug": "default",
+  "appConfigPath": "automations\\apps\\default\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "default",
+  "baseUrlHash": "74df3c0e992c",
+  "createdAt": "2026-05-21T16:50:33.971Z",
+  "updatedAt": "2026-05-21T16:50:33.971Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37844\\2026-05-21T16-50-18-738Z\\discovered-plans.pending.json",
+  "pomStatus": "page_object_candidate_created",
+  "inlineDebugMode": false,
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37844\\2026-05-21T16-50-18-738Z",
+    "pomDiagnostics": {
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 6
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\default\\cases\\c37844-visualizar-detalle-de-tarjeta-visa-gold\\plan.json",
+    "previousStatus": "blocked_missing_pom"
+  }
+}

@@ -1,0 +1,480 @@
+{
+  "version": "1.0",
+  "kind": "plan_repair",
+  "createdAt": "2026-05-21T15:08:59.923Z",
+  "goal": "Repair plan_repair for C37848 - Enviar solicitud digital de tarjeta por correo. Failure: target_not_found at step 4 target \"tarjeta por correo\"",
+  "contextPackPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T15-08-44-925Z\\cases\\case-37848\\handoff-attempt-1\\context-pack.json",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37848",
+    "caseId": 37848,
+    "title": "Enviar solicitud digital de tarjeta por correo",
+    "preconditions": "1. Portal web disponible y accesible.\n2. Usuario o sesión de pruebas disponible cuando el flujo lo requiera.\n3. Datos de prueba requeridos disponibles para el producto o consulta del caso.\n4. Menú principal y módulos funcionales cargados correctamente.",
+    "steps": [
+      {
+        "index": 1,
+        "action": "1. Abrir URL del portal web.",
+        "dataHints": [
+          "usuario"
+        ]
+      },
+      {
+        "index": 2,
+        "action": "Clic en 'Iniciar'.",
+        "dataHints": [
+          "usuario"
+        ]
+      },
+      {
+        "index": 3,
+        "action": "Clic en 'Información de productos'.",
+        "dataHints": [
+          "usuario"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "Seleccionar opción relacionada con 'tarjeta por correo'.",
+        "dataHints": [
+          "correo",
+          "usuario"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "Clic en 'Solicitar' si la acción está disponible.",
+        "dataHints": [
+          "usuario"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "Completar los datos requeridos de la solicitud con datos de prueba válidos.",
+        "dataHints": [
+          "usuario"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "Clic en la acción visible para enviar la solicitud.",
+        "dataHints": [
+          "usuario"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "Validar que se muestre confirmación de solicitud procesada.",
+        "expected": "Validar que la pantalla final muestre señales esperadas:\n- Solicitud digital de tarjeta por correo procesada\n- Confirmación visible\n- Número o mensaje de referencia visible cuando aplique",
+        "dataHints": [
+          "correo",
+          "usuario"
+        ]
+      }
+    ],
+    "raw": {
+      "id": 37848,
+      "title": "Enviar solicitud digital de tarjeta por correo",
+      "section_id": 4761,
+      "template_id": 5,
+      "type_id": 6,
+      "priority_id": 2,
+      "milestone_id": null,
+      "refs": null,
+      "created_by": 24,
+      "created_on": 1779312719,
+      "updated_by": 24,
+      "updated_on": 1779335467,
+      "estimate": null,
+      "estimate_forecast": null,
+      "suite_id": 1731,
+      "display_order": 1,
+      "is_deleted": 0,
+      "custom_ai_type": null,
+      "custom_ai_model": null,
+      "custom_preconds": "<p>1. Portal web disponible y accesible.\r\n2. Usuario o sesión de pruebas disponible cuando el flujo lo requiera.\r\n3. Datos de prueba requeridos disponibles para el producto o consulta del caso.\r\n4. Menú principal y módulos funcionales cargados correctamente.</p>",
+      "custom_goals": null,
+      "custom_steps": "<p>1. Abrir URL del portal web.\r\n2. Clic en 'Iniciar'.\r\n3. Clic en 'Información de productos'.\r\n4. Seleccionar opción relacionada con 'tarjeta por correo'.\r\n5. Clic en 'Solicitar' si la acción está disponible.\r\n6. Completar los datos requeridos de la solicitud con datos de prueba válidos.\r\n7. Clic en la acción visible para enviar la solicitud.\r\n8. Validar que se muestre confirmación de solicitud procesada.</p>",
+      "custom_case_custom": null,
+      "custom_expected": "<p>Validar que la pantalla final muestre señales esperadas:\r\n- Solicitud digital de tarjeta por correo procesada\r\n- Confirmación visible\r\n- Número o mensaje de referencia visible cuando aplique</p>",
+      "custom_case_oracle": "<p>QA</p>",
+      "custom_mission": null,
+      "custom_case_core": null,
+      "refs_data": [],
+      "ai_automated_test": null,
+      "labels": []
+    }
+  },
+  "currentPlan": {
+    "version": "1.0",
+    "source": "discovery_generated",
+    "status": "needs_discovery",
+    "scenario": {
+      "source": "testrail",
+      "externalId": "C37848",
+      "caseId": 37848,
+      "title": "Enviar solicitud digital de tarjeta por correo"
+    },
+    "requiredData": [],
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "Navigate to https://172.27.4.50/",
+        "target": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "login",
+        "description": "Execute login"
+      },
+      {
+        "index": 3,
+        "action": "click",
+        "description": "Clic en 'Iniciar'.",
+        "target": {
+          "strategy": "text",
+          "value": "Iniciar",
+          "exact": false
+        }
+      },
+      {
+        "index": 4,
+        "action": "click",
+        "description": "Clic en 'Información de productos'.",
+        "target": {
+          "strategy": "text",
+          "value": "Información de productos",
+          "exact": false
+        }
+      }
+    ],
+    "notes": [
+      "Discovery failed at step 4: target_not_found - \"tarjeta por correo\""
+    ],
+    "createdAt": "2026-05-21T15:08:59.876Z"
+  },
+  "snapshot": {
+    "version": "1.0",
+    "url": "https://172.27.4.50/product-catalog",
+    "title": "Kiosco de Autogestión - Banco Santa Cruz",
+    "capturedAt": "2026-05-21T15:08:59.869Z",
+    "elements": [
+      {
+        "id": "el-3",
+        "type": "button",
+        "tagName": "button",
+        "inputType": "submit",
+        "visible": true,
+        "nearbyText": "Conoce nuestros productos",
+        "candidateLocators": [],
+        "dataHints": [],
+        "className": "absolute left-0 top-1/2 -translate-y-1/2 p-3 hover:bg-primary/10 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 border-2 border-transparent hover:border-primary/20"
+      },
+      {
+        "id": "el-6",
+        "type": "button",
+        "text": "Tarjetas",
+        "tagName": "button",
+        "inputType": "submit",
+        "visible": true,
+        "nearbyText": "TarjetasCuentasPréstamosDepósitos a plazo",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Tarjetas",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [
+          "cuenta",
+          "prestamo"
+        ],
+        "className": "group relative bg-white rounded-2xl shadow-xl hover:shadow-2xl border-[3px] hover:scale-[1.02] transition-all duration-300 overflow-hidden min-h-[160px] border-primary/40"
+      },
+      {
+        "id": "el-8",
+        "type": "button",
+        "text": "Cuentas",
+        "tagName": "button",
+        "inputType": "submit",
+        "visible": true,
+        "nearbyText": "TarjetasCuentasPréstamosDepósitos a plazo",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Cuentas",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [
+          "cuenta",
+          "prestamo"
+        ],
+        "className": "group relative bg-white rounded-2xl shadow-xl hover:shadow-2xl border-[3px] hover:scale-[1.02] transition-all duration-300 overflow-hidden min-h-[160px] border-kiosk-success/40"
+      },
+      {
+        "id": "el-10",
+        "type": "button",
+        "text": "Préstamos",
+        "tagName": "button",
+        "inputType": "submit",
+        "visible": true,
+        "nearbyText": "TarjetasCuentasPréstamosDepósitos a plazo",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Préstamos",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [
+          "cuenta",
+          "prestamo"
+        ],
+        "className": "group relative bg-white rounded-2xl shadow-xl hover:shadow-2xl border-[3px] hover:scale-[1.02] transition-all duration-300 overflow-hidden min-h-[160px] border-primary/40"
+      },
+      {
+        "id": "el-12",
+        "type": "button",
+        "text": "Depósitos a plazo",
+        "tagName": "button",
+        "inputType": "submit",
+        "visible": true,
+        "nearbyText": "TarjetasCuentasPréstamosDepósitos a plazo",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Depósitos a plazo",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [
+          "cuenta",
+          "prestamo"
+        ],
+        "className": "group relative bg-white rounded-2xl shadow-xl hover:shadow-2xl border-[3px] hover:scale-[1.02] transition-all duration-300 overflow-hidden min-h-[160px] border-kiosk-success/40"
+      },
+      {
+        "id": "el-14",
+        "type": "button",
+        "text": "Salir",
+        "tagName": "button",
+        "inputType": "submit",
+        "visible": true,
+        "nearbyText": "Selecciona una categoría:TarjetasCuentasPréstamosDepósitos a plazoSalir",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Salir",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [
+          "cuenta",
+          "prestamo"
+        ],
+        "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary hover:bg-primary/90 h-10 min-h-[70px] font-semibold rounded-2xl transition-all duration-200 ease-out shadow-card hover:shadow-card-hover disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden select-none transform-gpu bg-gradient-to-br from-white to-gray-50 text-foreground border-2 border-border hover:border-border/80 hover:from-muted/50 hover:to-muted active:shadow-inner hover:scale-[1.02] px-20 py-6 text-lg"
+      },
+      {
+        "id": "el-2",
+        "type": "image",
+        "tagName": "img",
+        "visible": true,
+        "candidateLocators": [],
+        "dataHints": [],
+        "alt": "Banco Santa Cruz",
+        "className": "h-10 object-contain"
+      },
+      {
+        "id": "el-4",
+        "type": "heading",
+        "text": "Conoce nuestros productos",
+        "tagName": "h1",
+        "visible": true,
+        "nearbyText": "Conoce nuestros productos",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Conoce nuestros productos",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [],
+        "className": "text-3xl font-bold text-foreground text-center"
+      },
+      {
+        "id": "el-5",
+        "type": "text",
+        "text": "Selecciona una categoría:",
+        "tagName": "p",
+        "visible": true,
+        "nearbyText": "Selecciona una categoría:",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Selecciona una categoría:",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [],
+        "className": "text-xl text-muted-foreground"
+      },
+      {
+        "id": "el-7",
+        "type": "heading",
+        "text": "Tarjetas",
+        "tagName": "h3",
+        "visible": true,
+        "nearbyText": "Tarjetas",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Tarjetas",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [],
+        "className": "text-2xl font-bold transition-colors text-primary"
+      },
+      {
+        "id": "el-9",
+        "type": "heading",
+        "text": "Cuentas",
+        "tagName": "h3",
+        "visible": true,
+        "nearbyText": "Cuentas",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Cuentas",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [
+          "cuenta"
+        ],
+        "className": "text-2xl font-bold transition-colors text-kiosk-success"
+      },
+      {
+        "id": "el-11",
+        "type": "heading",
+        "text": "Préstamos",
+        "tagName": "h3",
+        "visible": true,
+        "nearbyText": "Préstamos",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Préstamos",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [
+          "prestamo"
+        ],
+        "className": "text-2xl font-bold transition-colors text-primary"
+      },
+      {
+        "id": "el-13",
+        "type": "heading",
+        "text": "Depósitos a plazo",
+        "tagName": "h3",
+        "visible": true,
+        "nearbyText": "Depósitos a plazo",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Depósitos a plazo",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [],
+        "className": "text-2xl font-bold transition-colors text-kiosk-success"
+      },
+      {
+        "id": "el-15",
+        "type": "text",
+        "text": "Salir",
+        "tagName": "span",
+        "visible": true,
+        "nearbyText": "Salir",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Salir",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [],
+        "className": "relative z-10 flex items-center justify-center gap-2"
+      },
+      {
+        "id": "el-16",
+        "type": "text",
+        "tagName": "span",
+        "visible": true,
+        "nearbyText": "Salir",
+        "candidateLocators": [],
+        "dataHints": [],
+        "className": "absolute inset-0 bg-gradient-to-t from-transparent via-white/5 to-white/10 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+      }
+    ],
+    "summary": {
+      "totalElements": 15,
+      "buttons": 6,
+      "links": 0,
+      "inputs": 0,
+      "selects": 0,
+      "tables": 0,
+      "dialogs": 0,
+      "headings": 5
+    }
+  },
+  "actionRegistry": {
+    "supportedActions": [
+      "navigate",
+      "login",
+      "click",
+      "fill",
+      "select",
+      "check",
+      "uncheck",
+      "press",
+      "waitFor",
+      "assertVisible",
+      "assertText",
+      "assertUrl",
+      "screenshot",
+      "noop"
+    ]
+  },
+  "dataContextSummary": {
+    "totalEntries": 0,
+    "sensitiveEntries": 0,
+    "nonSensitiveEntries": 0,
+    "availableKeys": []
+  },
+  "selectedSkill": {
+    "skillId": "navigation-recovery",
+    "skillPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T15-08-44-925Z\\cases\\case-37848\\handoff-attempt-1\\selected-skill.md"
+  },
+  "constraints": {
+    "noApiKey": true,
+    "noPlaywrightExecution": true,
+    "doNotModifyStableRegistry": true,
+    "useOnlyAvailableDataKeys": true,
+    "outputMustMatchSchema": true
+  }
+}

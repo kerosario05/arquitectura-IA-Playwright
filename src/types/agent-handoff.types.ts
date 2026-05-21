@@ -3,6 +3,7 @@ import type { TestScenario } from "./testrail.types";
 import type { PageSnapshot } from "./page-snapshot.types";
 import type { ObjectRegistry } from "./object-registry.types";
 import type { SafeDataContextSummary } from "./agent-safe-context.types";
+import type { SkillId } from "./agent-skill.types";
 
 export type AgentHandoffKind = "plan_generation" | "plan_repair" | "discovery_assistance" | "object_proposal";
 
@@ -11,6 +12,7 @@ export type AgentHandoffRequest = {
   kind: AgentHandoffKind;
   createdAt: string;
   goal: string;
+  contextPackPath?: string;
   scenario?: TestScenario;
   currentPlan?: ExecutionPlan;
   snapshot?: PageSnapshot;
@@ -19,6 +21,10 @@ export type AgentHandoffRequest = {
     supportedActions: string[];
   };
   dataContextSummary: SafeDataContextSummary;
+  selectedSkill?: {
+    skillId: SkillId;
+    skillPath?: string;
+  };
   constraints: {
     noApiKey: true;
     noPlaywrightExecution: true;
@@ -48,6 +54,7 @@ export type AgentProposedRegistryObject = {
 export type AgentHandoffResponse = {
   version: "1.0";
   generatedAt: string;
+  recoveryDecision: "repaired_plan" | "no_safe_action" | "needs_more_context";
   plans: ExecutionPlan[];
   proposedObjects: AgentProposedRegistryObject[];
   unresolvedQuestions: AgentUnresolvedQuestion[];

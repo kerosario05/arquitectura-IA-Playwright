@@ -1,20 +1,23 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-05-20T18:09:52.906Z",
+  "updatedAt": "2026-05-21T17:26:23.457Z",
   "automations": [
     {
       "id": "c30000-generic-reusable-automation",
       "externalId": "C30000",
       "caseId": 30000,
       "title": "Generic reusable automation",
-      "planPath": "./automations/plans/c30000-generic-reusable-automation.plan.json",
-      "specPath": "./tests/generated/c30000-generic-reusable-automation.spec.ts",
+      "planPath": "automations\\apps\\default\\cases\\c30000-generic-reusable-automation\\plan.json",
+      "specPath": "automations\\apps\\default\\cases\\c30000-generic-reusable-automation\\spec.ts",
+      "appSlug": "default",
+      "appConfigPath": "automations\\apps\\default\\app.config.json",
       "status": "active",
       "source": "discovery",
       "appProfile": "default",
-      "createdAt": "2026-05-20T18:09:52.905Z",
-      "updatedAt": "2026-05-20T18:09:52.906Z",
+      "createdAt": "2026-05-21T17:26:23.425Z",
+      "updatedAt": "2026-05-21T17:26:23.457Z",
       "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.tmp-test-automation-promoter\\discovery\\discovered-plans.pending.json",
+      "inlineDebugMode": false,
       "metadata": {
         "discoveryDir": "C:\\MisProyectos\\MCP\\.tmp-test-automation-promoter\\discovery",
         "confidenceSummary": {

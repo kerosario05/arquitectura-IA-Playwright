@@ -6,6 +6,8 @@ export type AssertionClassification =
   | "semantic_descriptor"
   | "composite_assertion"
   | "structural_assertion"
+  | "expected_only"
+  | "optional_assertion"
   | "ambiguous_assertion";
 
 export type AssertionResolutionStatus =
@@ -37,6 +39,12 @@ export type AssertionResolutionResult = {
     type: string;
   }>;
   visibleTexts: string[];
+  descriptorTypes?: string[];
+  subject?: string;
+  matchedTokens?: string[];
+  structuralSignals?: string[];
+  childAssertionsUsed?: string[];
+  isWeakSignal?: boolean;
 };
 
 export type AssertionContext = {
@@ -51,7 +59,41 @@ const DESCRIPTOR_PATTERNS = [
   /\bconsultar listado\b/,
   /\bver pantalla\b/,
   /\bvalidar informacion\b/,
-  /\bconfirmar resultados?\b/
+  /\bconfirmar resultados?\b/,
+  /\bdetalle\s+(?:de\s+)?/i,
+  /\bresumen\s+(?:de\s+)?/i,
+  /\binformacion\s+de\s+detalle\b/i,
+  /\bpantalla de detalle\b/i,
+  /\bvista de detalle\b/i
+];
+
+const DESCRIPTOR_TYPE_KEYWORDS: Record<string, string[]> = {
+  detail: ["detalle", "detail", "details"],
+  listing: ["listado", "lista", "list", "listing", "grid", "table"],
+  screen: ["pantalla", "screen", "page", "pagina", "página"],
+  summary: ["resumen", "summary"],
+  confirmation: ["confirmacion", "confirmación", "confirmation"],
+  receipt: ["ticket", "comprobante", "receipt"],
+  result: ["resultado", "result"],
+  form: ["form", "formulario"],
+  modal: ["modal", "dialog"]
+};
+
+const GENERIC_DESCRIPTOR_PATTERNS = [
+  /\binformacion\s+principal\b.*\bvisible\b/,
+  /\binformacion\s+general\b.*\bvisible\b/,
+  /\bdatos\s+principales\b.*\bvisibles?\b/,
+  /\bcontenido\s+principal\b.*\bvisible\b/,
+  /\bseccion\s+principal\b.*\bvisible\b/,
+  /\bacciones\s+disponibles\b/,
+  /\bopciones\s+disponibles\b.*\bvisibles?\b/
+];
+
+const DETAIL_DESCRIPTOR_PATTERNS = [
+  /\bdetalle\s+(?:de\s+)?/i,
+  /\bresumen\s+(?:de\s+)?/i,
+  /\binformacion\s+de\s+detalle\b/i,
+  /\bpantalla de detalle\b/i
 ];
 
 const STRUCTURAL_KEYWORDS = [
@@ -71,6 +113,19 @@ const STRUCTURAL_KEYWORDS = [
   "estado",
   "url"
 ];
+
+const ASSERTION_LEADING_VERBS = [
+  "validar", "verificar", "comprobar", "confirmar", "revisar",
+  "esperar", "observar", "validate", "verify", "check", "assert", "wait for", "should see"
+];
+
+const WEAK_TOKENS = new Set([
+  "de", "del", "la", "el", "los", "las", "en", "para", "con", "y", "a",
+  "the", "of", "in", "on", "to", "for", "and",
+  "detalle", "detalles", "detail", "details", "listado", "lista", "list", "listing",
+  "pantalla", "screen", "page", "pagina", "página", "resumen", "summary",
+  "confirmacion", "confirmación", "confirmation", "ticket", "receipt", "resultado", "result"
+]);
 
 function uniqueVisibleTexts(snapshot: PageSnapshot): string[] {
   const values = new Set<string>();
@@ -162,11 +217,95 @@ function resolveStructuralAssertion(snapshot: PageSnapshot, assertionText: strin
   };
 }
 
+function extractDescriptorTypes(assertionText: string): string[] {
+  const normalized = normalizeText(assertionText);
+  const types: string[] = [];
+  for (const [type, keywords] of Object.entries(DESCRIPTOR_TYPE_KEYWORDS)) {
+    if (keywords.some((keyword) => normalized.includes(normalizeText(keyword)))) {
+      types.push(type);
+    }
+  }
+  return types;
+}
+
+function extractSubject(assertionText: string): string {
+  let text = normalizeText(assertionText);
+  for (const verb of ASSERTION_LEADING_VERBS) {
+    const pattern = new RegExp(`^${verb}\\s+`, "i");
+    text = text.replace(pattern, "");
+  }
+  text = text
+    .replace(/\b(?:que se visualice|que se muestre|que aparezca)\b/g, "")
+    .replace(/\b(?:de|del|la|el|los|las)\b/g, " ")
+    .replace(/\s*\/\s*/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const descriptorTokens = Object.values(DESCRIPTOR_TYPE_KEYWORDS).flat().map((t) => normalizeText(t));
+  const cleanedTokens = text
+    .split(" ")
+    .map((token) => token.trim())
+    .filter(Boolean)
+    .filter((token) => !descriptorTokens.includes(token));
+
+  return cleanedTokens.join(" ").trim();
+}
+
+function tokenizeStrongSubject(subject: string): string[] {
+  return normalizeText(subject)
+    .split(/\s+/)
+    .filter(Boolean)
+    .filter((token) => token.length > 2 && !WEAK_TOKENS.has(token));
+}
+
+function matchSubjectSignals(snapshot: PageSnapshot, subject: string): { matchedTexts: string[]; matchedTokens: string[]; confidence: number } {
+  const visible = uniqueVisibleTexts(snapshot);
+  const strongTokens = tokenizeStrongSubject(subject);
+  if (strongTokens.length === 0) {
+    return { matchedTexts: [], matchedTokens: [], confidence: 0 };
+  }
+
+  const matchedTexts: string[] = [];
+  const matchedTokenSet = new Set<string>();
+  for (const text of visible) {
+    const normalizedVisible = normalizeText(text);
+    const matchedInThisText = strongTokens.filter((token) => normalizedVisible.includes(token));
+    if (matchedInThisText.length > 0) {
+      matchedTexts.push(text);
+      matchedInThisText.forEach((token) => matchedTokenSet.add(token));
+    }
+  }
+
+  const matchedTokens = Array.from(matchedTokenSet);
+  const tokenRatio = matchedTokens.length / strongTokens.length;
+  const confidence = Math.min(0.95, tokenRatio * 0.9);
+  return { matchedTexts: matchedTexts.slice(0, 5), matchedTokens, confidence };
+}
+
 export function classifyAssertion(assertionText: string, context?: AssertionContext): AssertionClassification {
   const normalized = normalizeText(assertionText);
   const hasChildren = (context?.childSignals?.length ?? 0) > 0;
   const hasDescriptor = DESCRIPTOR_PATTERNS.some((pattern) => pattern.test(normalized));
   const hasStructuralKeyword = STRUCTURAL_KEYWORDS.some((keyword) => normalized.includes(keyword));
+  const hasOptionalPrefix = /^(optional|opcional)\b/i.test(normalized);
+  const isExpectedOnly = /^(?:(?:señales?|senales?)\s+esperadas?|expected\s+signals?)\b/i.test(normalized);
+  const hasQuotedText = /['"][^'"]+['"]/.test(assertionText);
+  const explicitLiteralIntent = /^(?:validar|verificar|comprobar|confirmar|esperar|wait for)\s+(?:que\s+se\s+muestre|que\s+este\s+visible|visible)/i.test(normalized);
+  const tokenCount = normalized.split(/\s+/).filter(Boolean).length;
+
+  if (hasQuotedText || explicitLiteralIntent) {
+    return "literal_observable";
+  }
+
+  if (hasOptionalPrefix) {
+    return "optional_assertion";
+  }
+  if (isExpectedOnly) {
+    return "expected_only";
+  }
+  if (!hasDescriptor && !hasStructuralKeyword && tokenCount <= 2) {
+    return "literal_observable";
+  }
 
   if (hasDescriptor) {
     return hasChildren ? "composite_assertion" : "semantic_descriptor";
@@ -174,6 +313,11 @@ export function classifyAssertion(assertionText: string, context?: AssertionCont
 
   if (hasStructuralKeyword) {
     return "structural_assertion";
+  }
+
+  const isGenericDescriptor = GENERIC_DESCRIPTOR_PATTERNS.some((pattern) => pattern.test(normalized));
+  if (isGenericDescriptor) {
+    return "semantic_descriptor";
   }
 
   if (normalized.split(/\s+/).length <= 1) {
@@ -212,8 +356,16 @@ export function resolveAssertionTargets(
   return assertionTargets.map((assertion) => {
     const childSignals = options?.childSignalsByIndex?.[assertion.index] ?? [];
     const classification = classifyAssertion(assertion.target, { childSignals });
+    const normalized = normalizeText(assertion.target);
+    const descriptorTypes = extractDescriptorTypes(assertion.target);
+    const matchesGeneric = GENERIC_DESCRIPTOR_PATTERNS.some((pattern) => pattern.test(normalized));
+    const matchesDetail = DETAIL_DESCRIPTOR_PATTERNS.some((pattern) => pattern.test(normalized)) && (descriptorTypes.includes("detail") || descriptorTypes.includes("screen") || descriptorTypes.includes("summary"));
+    const isWeakSignal = matchesGeneric || matchesDetail;
     const closestCandidates = buildClosestCandidates(snapshot, assertion.target);
     const literalMatch = isTextVisible(snapshot, assertion.target);
+    const subject = extractSubject(assertion.target);
+    const subjectSignal = matchSubjectSignals(snapshot, subject);
+    const structuralSignals: string[] = [];
 
     if (classification === "literal_observable") {
       if (literalMatch.confidence >= 0.6 && literalMatch.matchedText) {
@@ -226,7 +378,12 @@ export function resolveAssertionTargets(
           confidence: literalMatch.confidence,
           reason: "Observable text matched in the snapshot.",
           closestCandidates,
-          visibleTexts
+          visibleTexts,
+          descriptorTypes,
+          subject,
+          matchedTokens: subjectSignal.matchedTokens,
+          structuralSignals,
+          ...(isWeakSignal && { isWeakSignal })
         };
       }
 
@@ -238,12 +395,20 @@ export function resolveAssertionTargets(
         confidence: literalMatch.confidence,
         reason: "Concrete observable text was not found in the snapshot.",
         closestCandidates,
-        visibleTexts
+        visibleTexts,
+        descriptorTypes,
+        subject,
+        matchedTokens: subjectSignal.matchedTokens,
+        structuralSignals,
+        ...(isWeakSignal && { isWeakSignal })
       };
     }
 
     if (classification === "structural_assertion") {
       const structural = resolveStructuralAssertion(snapshot, assertion.target);
+      if (structural.passed) {
+        structuralSignals.push(structural.reason);
+      }
       return {
         assertionText: assertion.target,
         normalizedAssertion: normalizeText(assertion.target),
@@ -253,7 +418,29 @@ export function resolveAssertionTargets(
         confidence: structural.confidence,
         reason: structural.reason,
         closestCandidates,
-        visibleTexts
+        visibleTexts,
+        descriptorTypes,
+        subject,
+        matchedTokens: subjectSignal.matchedTokens,
+        structuralSignals,
+        ...(isWeakSignal && { isWeakSignal })
+      };
+    }
+
+    if (classification === "optional_assertion" || classification === "expected_only") {
+      return {
+        assertionText: assertion.target,
+        normalizedAssertion: normalizeText(assertion.target),
+        classification,
+        status: "skipped_semantic_descriptor",
+        confidence: 0.7,
+        reason: "Optional/expected-only assertion treated as informational.",
+        closestCandidates,
+        visibleTexts,
+        descriptorTypes,
+        subject,
+        matchedTokens: subjectSignal.matchedTokens,
+        structuralSignals
       };
     }
 
@@ -267,7 +454,71 @@ export function resolveAssertionTargets(
           confidence: 0.85,
           reason: "Semantic descriptor resolved through concrete child signals.",
           closestCandidates,
-          visibleTexts
+          visibleTexts,
+          descriptorTypes,
+          subject,
+          matchedTokens: subjectSignal.matchedTokens,
+          structuralSignals,
+          childAssertionsUsed: childSignals,
+          ...(isWeakSignal && { isWeakSignal })
+        };
+      }
+
+      const structural = resolveStructuralAssertion(snapshot, assertion.target);
+      if (structural.passed) {
+        structuralSignals.push(structural.reason);
+        return {
+          assertionText: assertion.target,
+          normalizedAssertion: normalizeText(assertion.target),
+          classification,
+          status: "passed",
+          matchedText: structural.matchedText,
+          confidence: Math.max(0.75, structural.confidence),
+          reason: "Semantic descriptor satisfied by structural signals.",
+          closestCandidates,
+          visibleTexts,
+          descriptorTypes,
+          subject,
+          matchedTokens: subjectSignal.matchedTokens,
+          structuralSignals,
+          ...(isWeakSignal && { isWeakSignal })
+        };
+      }
+
+      if (subjectSignal.matchedTokens.length >= Math.max(1, Math.ceil(tokenizeStrongSubject(subject).length * 0.5))) {
+        return {
+          assertionText: assertion.target,
+          normalizedAssertion: normalizeText(assertion.target),
+          classification,
+          status: "passed",
+          matchedText: subjectSignal.matchedTexts[0],
+          confidence: Math.max(0.7, subjectSignal.confidence),
+          reason: "Semantic descriptor satisfied by strong subject token evidence.",
+          closestCandidates,
+          visibleTexts,
+          descriptorTypes,
+          subject,
+          matchedTokens: subjectSignal.matchedTokens,
+          structuralSignals,
+          ...(isWeakSignal && { isWeakSignal })
+        };
+      }
+
+      if (assertion.source === "expected") {
+        return {
+          assertionText: assertion.target,
+          normalizedAssertion: normalizeText(assertion.target),
+          classification,
+          status: "skipped_semantic_descriptor",
+          confidence: 0.5,
+          reason: "Expected-only semantic descriptor has insufficient direct evidence; skipped as non-blocking.",
+          closestCandidates,
+          visibleTexts,
+          descriptorTypes,
+          subject,
+          matchedTokens: subjectSignal.matchedTokens,
+          structuralSignals,
+          ...(isWeakSignal && { isWeakSignal })
         };
       }
 
@@ -276,10 +527,15 @@ export function resolveAssertionTargets(
         normalizedAssertion: normalizeText(assertion.target),
         classification,
         status: "needs_assertion_resolution",
-        confidence: 0.4,
-        reason: "Semantic descriptor has no concrete child signals to validate with confidence.",
+        confidence: Math.max(0.35, subjectSignal.confidence),
+        reason: "Semantic descriptor has insufficient evidence from child signals, subject tokens, and structural indicators.",
         closestCandidates,
-        visibleTexts
+        visibleTexts,
+        descriptorTypes,
+        subject,
+        matchedTokens: subjectSignal.matchedTokens,
+        structuralSignals,
+        ...(isWeakSignal && { isWeakSignal })
       };
     }
 
@@ -291,7 +547,12 @@ export function resolveAssertionTargets(
       confidence: 0.3,
       reason: "Assertion could not be resolved confidently from snapshot evidence.",
       closestCandidates,
-      visibleTexts
+      visibleTexts,
+      descriptorTypes,
+      subject,
+      matchedTokens: subjectSignal.matchedTokens,
+      structuralSignals,
+      ...(isWeakSignal && { isWeakSignal })
     };
   });
 }

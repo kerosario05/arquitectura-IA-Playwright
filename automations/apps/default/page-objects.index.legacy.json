@@ -1,0 +1,84 @@
+{
+  "version": "1.0",
+  "appSlug": "default",
+  "pageObjects": [
+    {
+      "id": "po_1779381386914_vpwhvb",
+      "className": "VisualizarDetalleDeTarjetaVisaGoldPage",
+      "filePath": "pages\\visualizardetalledetarjetavisagold.page.ts",
+      "screenSignature": "screen:c37844-visualizar-detalle-de-tarjeta-visa-gold",
+      "methods": [
+        {
+          "name": "clickIniciar",
+          "intent": "click",
+          "parameters": [],
+          "available": false,
+          "source": "candidate,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-3,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-4,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-5,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-6",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "candidate"
+        },
+        {
+          "name": "clickInformacinDeProductos",
+          "intent": "click",
+          "parameters": [],
+          "available": false,
+          "source": "candidate",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "candidate"
+        },
+        {
+          "name": "clickTarjetas",
+          "intent": "click",
+          "parameters": [],
+          "available": false,
+          "source": "candidate",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "candidate"
+        },
+        {
+          "name": "clickTarjetaDeCreditoVisaGold",
+          "intent": "click",
+          "parameters": [],
+          "available": false,
+          "source": "candidate",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "candidate"
+        },
+        {
+          "name": "navigatenavigateAPPBASEURL",
+          "intent": "navigate",
+          "parameters": [],
+          "available": false,
+          "source": "c37845-visualizar-detalle-de-tarjeta-visa-platinum-missing-navigate",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "candidate"
+        },
+        {
+          "name": "loginlogin",
+          "intent": "login",
+          "parameters": [],
+          "available": false,
+          "source": "c37845-visualizar-detalle-de-tarjeta-visa-platinum-missing-login",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "candidate"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "candidate",
+      "sourcePlanIds": [
+        "c37844-visualizar-detalle-de-tarjeta-visa-gold"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-05-21T16:36:26.914Z",
+      "updatedAt": "2026-05-21T16:37:58.326Z"
+    }
+  ],
+  "componentCandidates": [],
+  "updatedAt": "2026-05-21T16:54:55.241Z"
+}

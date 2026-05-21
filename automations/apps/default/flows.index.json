@@ -1,0 +1,107 @@
+{
+  "version": "1.0",
+  "appSlug": "default",
+  "flows": [
+    {
+      "id": "flow_1779381386915_mltyum",
+      "name": "Visualizar detalle de Tarjeta Visa Gold",
+      "filePath": "flows\\visualizar-detalle-de-tarjeta-visa-gold.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "",
+          "methodName": "navigateStep1"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "",
+          "methodName": "loginStep2"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar",
+          "pageObjectId": "",
+          "methodName": "clickIniciar"
+        },
+        {
+          "action": "click",
+          "target": "Información de productos",
+          "pageObjectId": "",
+          "methodName": "clickInformacinDeProductos"
+        },
+        {
+          "action": "click",
+          "target": "tarjetas",
+          "pageObjectId": "",
+          "methodName": "clickTarjetas"
+        },
+        {
+          "action": "click",
+          "target": "tarjeta de credito visa gold",
+          "pageObjectId": "",
+          "methodName": "clickTarjetaDeCreditoVisaGold"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-21T16:36:26.915Z",
+      "updatedAt": "2026-05-21T16:36:26.915Z"
+    },
+    {
+      "id": "flow_1779382622422_9sncwp",
+      "name": "Visualizar detalle de Tarjeta Visa Infinite",
+      "filePath": "flows\\visualizar-detalle-de-tarjeta-visa-infinite.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar",
+          "pageObjectId": "ProductListPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Información de productos",
+          "pageObjectId": "ProductDetailPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "tarjetas",
+          "pageObjectId": "CategoryPage",
+          "methodName": "selectCategory"
+        },
+        {
+          "action": "click",
+          "target": "tarjeta de credito visa infinite",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-21T16:57:02.422Z",
+      "updatedAt": "2026-05-21T16:57:02.422Z"
+    }
+  ],
+  "updatedAt": "2026-05-21T16:57:02.424Z"
+}

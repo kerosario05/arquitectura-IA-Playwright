@@ -1,0 +1,297 @@
+{
+  "version": "1.0",
+  "kind": "plan_repair",
+  "createdAt": "2026-05-21T14:52:23.552Z",
+  "goal": "Route recovery segment 1: target_not_found at \"tarjeta por correo\"",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37848",
+    "caseId": 37848,
+    "title": "Enviar solicitud digital de tarjeta por correo",
+    "preconditions": "1. Portal web disponible y accesible.\n2. Usuario o sesión de pruebas disponible cuando el flujo lo requiera.\n3. Datos de prueba requeridos disponibles para el producto o consulta del caso.\n4. Menú principal y módulos funcionales cargados correctamente.",
+    "steps": [
+      {
+        "index": 1,
+        "action": "1. Abrir URL del portal web.",
+        "dataHints": [
+          "usuario"
+        ]
+      },
+      {
+        "index": 2,
+        "action": "Clic en 'Iniciar'.",
+        "dataHints": [
+          "usuario"
+        ]
+      },
+      {
+        "index": 3,
+        "action": "Clic en 'Información de productos'.",
+        "dataHints": [
+          "usuario"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "Seleccionar opción relacionada con 'tarjeta por correo'.",
+        "dataHints": [
+          "correo",
+          "usuario"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "Clic en 'Solicitar' si la acción está disponible.",
+        "dataHints": [
+          "usuario"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "Completar los datos requeridos de la solicitud con datos de prueba válidos.",
+        "dataHints": [
+          "usuario"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "Clic en la acción visible para enviar la solicitud.",
+        "dataHints": [
+          "usuario"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "Validar que se muestre confirmación de solicitud procesada.",
+        "expected": "Validar que la pantalla final muestre señales esperadas:\n- Solicitud digital de tarjeta por correo procesada\n- Confirmación visible\n- Número o mensaje de referencia visible cuando aplique",
+        "dataHints": [
+          "correo",
+          "usuario"
+        ]
+      }
+    ],
+    "raw": {
+      "id": 37848,
+      "title": "Enviar solicitud digital de tarjeta por correo",
+      "section_id": 4761,
+      "template_id": 5,
+      "type_id": 6,
+      "priority_id": 2,
+      "milestone_id": null,
+      "refs": null,
+      "created_by": 24,
+      "created_on": 1779312719,
+      "updated_by": 24,
+      "updated_on": 1779335467,
+      "estimate": null,
+      "estimate_forecast": null,
+      "suite_id": 1731,
+      "display_order": 1,
+      "is_deleted": 0,
+      "custom_ai_type": null,
+      "custom_ai_model": null,
+      "custom_preconds": "<p>1. Portal web disponible y accesible.\r\n2. Usuario o sesión de pruebas disponible cuando el flujo lo requiera.\r\n3. Datos de prueba requeridos disponibles para el producto o consulta del caso.\r\n4. Menú principal y módulos funcionales cargados correctamente.</p>",
+      "custom_goals": null,
+      "custom_steps": "<p>1. Abrir URL del portal web.\r\n2. Clic en 'Iniciar'.\r\n3. Clic en 'Información de productos'.\r\n4. Seleccionar opción relacionada con 'tarjeta por correo'.\r\n5. Clic en 'Solicitar' si la acción está disponible.\r\n6. Completar los datos requeridos de la solicitud con datos de prueba válidos.\r\n7. Clic en la acción visible para enviar la solicitud.\r\n8. Validar que se muestre confirmación de solicitud procesada.</p>",
+      "custom_case_custom": null,
+      "custom_expected": "<p>Validar que la pantalla final muestre señales esperadas:\r\n- Solicitud digital de tarjeta por correo procesada\r\n- Confirmación visible\r\n- Número o mensaje de referencia visible cuando aplique</p>",
+      "custom_case_oracle": "<p>QA</p>",
+      "custom_mission": null,
+      "custom_case_core": null,
+      "refs_data": [],
+      "ai_automated_test": null,
+      "labels": []
+    }
+  },
+  "currentPlan": {
+    "version": "1.0",
+    "source": "discovery_generated",
+    "status": "needs_discovery",
+    "scenario": {
+      "source": "testrail",
+      "externalId": "C37848",
+      "caseId": 37848,
+      "title": "Enviar solicitud digital de tarjeta por correo"
+    },
+    "requiredData": [],
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "Navigate to https://172.27.4.50/",
+        "target": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "login",
+        "description": "Execute login"
+      },
+      {
+        "index": 3,
+        "action": "click",
+        "description": "Clic en 'Iniciar'.",
+        "target": {
+          "strategy": "text",
+          "value": "Iniciar",
+          "exact": false
+        }
+      },
+      {
+        "index": 4,
+        "action": "click",
+        "description": "Clic en 'Información de productos'.",
+        "target": {
+          "strategy": "text",
+          "value": "Información de productos",
+          "exact": false
+        }
+      }
+    ],
+    "notes": [
+      "Discovery failed at step 4: target_not_found - \"tarjeta por correo\""
+    ],
+    "createdAt": "2026-05-21T14:51:38.857Z"
+  },
+  "snapshot": {
+    "version": "1.0",
+    "url": "https://172.27.4.50/",
+    "title": "Kiosco de Autogestión - Banco Santa Cruz",
+    "capturedAt": "2026-05-21T14:52:23.536Z",
+    "elements": [
+      {
+        "id": "el-5",
+        "type": "button",
+        "text": "Iniciar",
+        "tagName": "button",
+        "inputType": "submit",
+        "visible": true,
+        "nearbyText": "Iniciar",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Iniciar",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [],
+        "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary hover:bg-primary/90 h-10 min-h-[70px] transition-all duration-200 ease-out shadow-card hover:shadow-card-hover disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden select-none transform-gpu bg-gradient-to-br from-primary to-primary/90 text-primary-foreground hover:from-primary/95 hover:to-primary/85 border-2 border-primary/20 hover:border-primary/30 active:shadow-inner hover:scale-[1.02] px-16 py-8 text-2xl font-bold rounded-xl"
+      },
+      {
+        "id": "el-2",
+        "type": "image",
+        "tagName": "img",
+        "visible": true,
+        "candidateLocators": [],
+        "dataHints": [],
+        "alt": "Banco Santa Cruz",
+        "className": "h-10 object-contain"
+      },
+      {
+        "id": "el-3",
+        "type": "heading",
+        "text": "¡Hola!",
+        "tagName": "h1",
+        "visible": true,
+        "nearbyText": "¡Hola!Bienvenido al kiosco de autogestión de Banco Santa Cruz",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "¡Hola!",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [],
+        "className": "text-6xl font-bold text-foreground mb-4"
+      },
+      {
+        "id": "el-4",
+        "type": "text",
+        "text": "Bienvenido al kiosco de autogestión de Banco Santa Cruz",
+        "tagName": "p",
+        "visible": true,
+        "nearbyText": "¡Hola!Bienvenido al kiosco de autogestión de Banco Santa Cruz",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Bienvenido al kiosco de autogestión de Banco Santa Cruz",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [],
+        "className": "text-2xl text-muted-foreground"
+      },
+      {
+        "id": "el-6",
+        "type": "text",
+        "text": "Iniciar",
+        "tagName": "span",
+        "visible": true,
+        "nearbyText": "Iniciar",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Iniciar",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [],
+        "className": "relative z-10 flex items-center justify-center gap-2"
+      },
+      {
+        "id": "el-7",
+        "type": "text",
+        "tagName": "span",
+        "visible": true,
+        "nearbyText": "Iniciar",
+        "candidateLocators": [],
+        "dataHints": [],
+        "className": "absolute inset-0 bg-gradient-to-t from-transparent via-white/5 to-white/10 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+      }
+    ],
+    "summary": {
+      "totalElements": 6,
+      "buttons": 1,
+      "links": 0,
+      "inputs": 0,
+      "selects": 0,
+      "tables": 0,
+      "dialogs": 0,
+      "headings": 1
+    }
+  },
+  "actionRegistry": {
+    "supportedActions": [
+      "navigate",
+      "login",
+      "click",
+      "fill",
+      "select",
+      "check",
+      "uncheck",
+      "press",
+      "waitFor",
+      "assertVisible",
+      "assertText",
+      "assertUrl",
+      "screenshot",
+      "noop"
+    ]
+  },
+  "dataContextSummary": {
+    "totalEntries": 0,
+    "sensitiveEntries": 0,
+    "nonSensitiveEntries": 0,
+    "availableKeys": []
+  },
+  "constraints": {
+    "noApiKey": true,
+    "noPlaywrightExecution": true,
+    "doNotModifyStableRegistry": true,
+    "useOnlyAvailableDataKeys": true,
+    "outputMustMatchSchema": true
+  }
+}

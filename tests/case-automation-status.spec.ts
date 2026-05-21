@@ -160,6 +160,55 @@ test("returns different_profile when entry appProfile does not match current APP
   }
 });
 
+test("automation from another app is not ACTIVE in current profile", async () => {
+  const cases = createMockCases(1);
+  const indexPath = await createTempIndex([
+    createEntry({ caseId: 1000, appSlug: "app-a", appProfile: "app-a" })
+  ]);
+  process.env.APP_PROFILE = "app-b";
+  try {
+    const result = await getCaseAutomationStatus(cases, indexPath);
+    expect(result.cases[0].automationStatus).toBe("different_profile");
+  } finally {
+    delete process.env.APP_PROFILE;
+  }
+});
+
+test("--all-apps style lookup can find app index entries", async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "case-status-all-apps-"));
+  const globalIndexPath = path.join(tmpDir, "automations", "index.json");
+  const appIndexDir = path.join(tmpDir, "automations", "apps", "app-a");
+  await fs.mkdir(path.dirname(globalIndexPath), { recursive: true });
+  await fs.mkdir(appIndexDir, { recursive: true });
+  await fs.writeFile(globalIndexPath, JSON.stringify({ version: "1.0", updatedAt: "", automations: [] }, null, 2), "utf-8");
+  await fs.writeFile(
+    path.join(appIndexDir, "index.json"),
+    JSON.stringify({
+      version: "1.0",
+      updatedAt: "",
+      automations: [createEntry({ caseId: 1000, appSlug: "app-a", appProfile: "app-a" })]
+    }, null, 2),
+    "utf-8"
+  );
+  const originalCwd = process.cwd();
+  process.chdir(tmpDir);
+  try {
+    const result = await getCaseAutomationStatus(createMockCases(1), globalIndexPath, { allApps: true, currentProfile: "app-a" });
+    expect(result.cases[0].automationStatus).toBe("active");
+  } finally {
+    process.chdir(originalCwd);
+    await fs.rm(tmpDir, { recursive: true, force: true }).catch(() => {});
+  }
+});
+
+test("explicit app filter returns NOT AUTOMATED when case not present in selected app", async () => {
+  const indexPath = await createTempIndex([
+    createEntry({ caseId: 1000, appSlug: "app-a", appProfile: "app-a" })
+  ]);
+  const result = await getCaseAutomationStatus(createMockCases(1), indexPath, { appSlug: "app-b", currentProfile: "app-b" });
+  expect(result.cases[0].automationStatus).toBe("not_automated");
+});
+
 test("returns active when entry appProfile matches current APP_PROFILE", async () => {
   const cases = createMockCases(1);
   const indexPath = await createTempIndex([

@@ -1,0 +1,211 @@
+{
+  "version": "1.0",
+  "createdAt": "2026-05-21T13:50:44.322Z",
+  "failedAction": {
+    "stepIndex": 4,
+    "actionType": "click",
+    "target": "tarjeta por correo",
+    "failureReason": "target_not_found"
+  },
+  "semanticGoal": {
+    "intent": "1. abrir url del portal web._clic en 'iniciar'._clic en 'información de productos'._seleccionar opción relacionada con 'tarjeta por correo'.",
+    "targetConcept": "tarjeta por correo",
+    "requiredCapabilities": [
+      "1. abrir url del portal web.",
+      "clic en 'iniciar'.",
+      "clic en 'información de productos'.",
+      "seleccionar opción relacionada con 'tarjeta por correo'.",
+      "clic en 'solicitar' si la acción está disponible.",
+      "completar los datos requeridos de la solicitud con datos de prueba válidos."
+    ],
+    "sensitive": true
+  },
+  "currentScreen": {
+    "visibleElementCount": 15
+  },
+  "topVisibleCandidates": [
+    {
+      "id": "el-6",
+      "type": "button",
+      "text": "Tarjetas",
+      "score": 0.76,
+      "actionability": "clickable",
+      "semanticRelation": "parent_category",
+      "source": "current_snapshot",
+      "nearbyText": "TarjetasCuentasPréstamosDepósitos a plazo"
+    },
+    {
+      "id": "el-3",
+      "type": "button",
+      "score": 0.48,
+      "actionability": "clickable",
+      "semanticRelation": "near_match",
+      "source": "current_snapshot",
+      "nearbyText": "Conoce nuestros productos"
+    },
+    {
+      "id": "el-7",
+      "type": "heading",
+      "text": "Tarjetas",
+      "score": 0.41,
+      "actionability": "static",
+      "semanticRelation": "parent_category",
+      "source": "current_snapshot",
+      "nearbyText": "Tarjetas"
+    },
+    {
+      "id": "el-8",
+      "type": "button",
+      "text": "Cuentas",
+      "score": 0.2,
+      "actionability": "clickable",
+      "semanticRelation": "unrelated",
+      "source": "current_snapshot",
+      "nearbyText": "TarjetasCuentasPréstamosDepósitos a plazo"
+    },
+    {
+      "id": "el-10",
+      "type": "button",
+      "text": "Préstamos",
+      "score": 0.2,
+      "actionability": "clickable",
+      "semanticRelation": "unrelated",
+      "source": "current_snapshot",
+      "nearbyText": "TarjetasCuentasPréstamosDepósitos a plazo"
+    },
+    {
+      "id": "el-12",
+      "type": "button",
+      "text": "Depósitos a plazo",
+      "score": 0.2,
+      "actionability": "clickable",
+      "semanticRelation": "unrelated",
+      "source": "current_snapshot",
+      "nearbyText": "TarjetasCuentasPréstamosDepósitos a plazo"
+    },
+    {
+      "id": "el-14",
+      "type": "button",
+      "text": "Salir",
+      "score": 0.2,
+      "actionability": "clickable",
+      "semanticRelation": "unrelated",
+      "source": "current_snapshot",
+      "nearbyText": "Selecciona una categoría:TarjetasCuentasPréstamosDepósitos a plazoSalir"
+    },
+    {
+      "id": "el-2",
+      "type": "image",
+      "score": 0.05,
+      "actionability": "static",
+      "semanticRelation": "near_match",
+      "source": "current_snapshot"
+    },
+    {
+      "id": "el-16",
+      "type": "text",
+      "score": 0.05,
+      "actionability": "readable",
+      "semanticRelation": "near_match",
+      "source": "current_snapshot",
+      "nearbyText": "Salir"
+    },
+    {
+      "id": "el-4",
+      "type": "heading",
+      "text": "Conoce nuestros productos",
+      "score": -0.07,
+      "actionability": "static",
+      "semanticRelation": "unrelated",
+      "source": "current_snapshot",
+      "nearbyText": "Conoce nuestros productos"
+    },
+    {
+      "id": "el-5",
+      "type": "text",
+      "text": "Selecciona una categoría:",
+      "score": -0.15,
+      "actionability": "readable",
+      "semanticRelation": "unrelated",
+      "source": "current_snapshot",
+      "nearbyText": "Selecciona una categoría:"
+    },
+    {
+      "id": "el-9",
+      "type": "heading",
+      "text": "Cuentas",
+      "score": -0.15,
+      "actionability": "static",
+      "semanticRelation": "unrelated",
+      "source": "current_snapshot",
+      "nearbyText": "Cuentas"
+    }
+  ],
+  "topKnownObjects": [],
+  "topKnownRoutes": [],
+  "topKnownPlans": [],
+  "priorSuccessfulSteps": [
+    {
+      "index": 1,
+      "action": "navigate"
+    },
+    {
+      "index": 2,
+      "action": "login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "target": "Iniciar"
+    }
+  ],
+  "pendingSteps": [
+    {
+      "index": 4,
+      "action": "click",
+      "target": "Información de productos",
+      "failureReason": "target_not_found"
+    }
+  ],
+  "finalAssertions": [],
+  "actionHistorySummary": [
+    {
+      "action": "navigate",
+      "status": "unknown"
+    },
+    {
+      "action": "login",
+      "status": "unknown"
+    },
+    {
+      "action": "click",
+      "target": "Iniciar",
+      "status": "unknown"
+    },
+    {
+      "action": "click",
+      "target": "Información de productos",
+      "status": "unknown"
+    }
+  ],
+  "failedRoutePaths": [],
+  "budget": {
+    "preferredResponseSeconds": 30,
+    "maxPromptBudgetSeconds": 60,
+    "maxCandidates": 12,
+    "maxKnownObjects": 20,
+    "maxKnownRoutes": 10,
+    "maxKnownPlans": 5,
+    "maxProposedActions": 5,
+    "maxRationaleChars": 1200,
+    "maxUnresolvedQuestions": 5
+  },
+  "constraints": {
+    "codexMustOnlyWriteAgentResponseJson": true,
+    "doNotRunPlaywright": true,
+    "doNotModifyStableRegistry": true,
+    "doNotApproveObjectsAutomatically": true,
+    "doNotInventData": true,
+    "useOnlyIdsPresentInThisPack": true
+  }
+}

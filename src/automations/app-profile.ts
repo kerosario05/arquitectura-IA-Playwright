@@ -36,6 +36,17 @@ export type AppAutomationPaths = {
   configPath: string;
   testDataRefsPath: string;
   indexPath: string;
+  pageObjectsIndexPath: string;
+  flowsIndexPath: string;
+  pagesDir: string;
+  componentsDir: string;
+  flowsDir: string;
+  casesDir: string;
+  caseDir?: string;
+  caseConfigPath?: string;
+  caseAutomationPath?: string;
+  caseEvidenceDir?: string;
+  caseRunsDir?: string;
   plansDir: string;
   specsDir: string;
   evidenceDir: string;
@@ -122,21 +133,37 @@ export function getPromotedAppDirectory(appProfile: AppProfile, outputRoot?: str
 
 export function buildAppAutomationPaths(appProfile: AppProfile, automationId?: string, outputRoot?: string): AppAutomationPaths {
   const appDir = getPromotedAppDirectory(appProfile, outputRoot);
+  const casesDir = path.join(appDir, "cases");
   const plansDir = path.join(appDir, "plans");
   const specsDir = path.join(appDir, "specs");
   const evidenceDir = path.join(appDir, "evidence");
   const runsDir = path.join(appDir, "runs");
+  const pagesDir = path.join(appDir, "pages");
+  const componentsDir = path.join(appDir, "components");
+  const flowsDir = path.join(appDir, "flows");
+  const caseDir = automationId ? path.join(casesDir, automationId) : undefined;
   return {
     appDir,
     configPath: path.join(appDir, "app.config.json"),
     testDataRefsPath: path.join(appDir, "test-data.refs.json"),
     indexPath: path.join(appDir, "index.json"),
+    pageObjectsIndexPath: path.join(appDir, "page-objects.index.json"),
+    flowsIndexPath: path.join(appDir, "flows.index.json"),
+    pagesDir,
+    componentsDir,
+    flowsDir,
+    casesDir,
+    caseDir,
+    caseConfigPath: caseDir ? path.join(caseDir, "case.json") : undefined,
+    caseAutomationPath: caseDir ? path.join(caseDir, "automation.json") : undefined,
+    caseEvidenceDir: caseDir ? path.join(caseDir, "evidence") : undefined,
+    caseRunsDir: caseDir ? path.join(caseDir, "runs") : undefined,
     plansDir,
     specsDir,
     evidenceDir,
     runsDir,
-    planPath: automationId ? path.join(plansDir, `${automationId}.plan.json`) : undefined,
-    specPath: automationId ? path.join(specsDir, `${automationId}.spec.ts`) : undefined
+    planPath: caseDir ? path.join(caseDir, "plan.json") : undefined,
+    specPath: caseDir ? path.join(caseDir, "spec.ts") : undefined
   };
 }
 
@@ -223,9 +250,13 @@ export function loadPromotedAppConfigSync(options: { appSlug: string; configPath
   }
 }
 
-export async function savePromotedAppConfig(config: PromotedAppConfig): Promise<void> {
-  const paths = buildAppAutomationPaths(config.appProfile);
+export async function savePromotedAppConfig(config: PromotedAppConfig, outputRoot?: string): Promise<void> {
+  const paths = buildAppAutomationPaths(config.appProfile, undefined, outputRoot);
   await fsp.mkdir(paths.appDir, { recursive: true });
+  await fsp.mkdir(paths.pagesDir, { recursive: true });
+  await fsp.mkdir(paths.componentsDir, { recursive: true });
+  await fsp.mkdir(paths.flowsDir, { recursive: true });
+  await fsp.mkdir(paths.casesDir, { recursive: true });
   await fsp.mkdir(paths.plansDir, { recursive: true });
   await fsp.mkdir(paths.specsDir, { recursive: true });
   await fsp.mkdir(paths.evidenceDir, { recursive: true });

@@ -1,0 +1,69 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37853",
+    "caseId": 37853,
+    "title": "Consulta detalle de prestamo personal"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "1. Clic en 'Iniciar'.",
+      "target": {
+        "strategy": "text",
+        "value": "Iniciar",
+        "exact": false
+      }
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en 'Información de productos'.",
+      "target": {
+        "strategy": "text",
+        "value": "Información de productos",
+        "exact": false
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Clic en 'Prestamos'.",
+      "target": {
+        "strategy": "text",
+        "value": "Prestamos",
+        "exact": false
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Clic en la categoría visible relacionada con 'Préstamos personales'.",
+      "target": {
+        "strategy": "text",
+        "value": "Préstamos personales",
+        "exact": false
+      }
+    }
+  ],
+  "notes": [
+    "Discovery failed at step 5: ambiguous_target - \"Préstamo personal\""
+  ],
+  "createdAt": "2026-05-21T01:47:50.245Z"
+}

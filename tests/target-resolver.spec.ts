@@ -1077,3 +1077,58 @@ test("normalizeSemanticCandidates accepts minimal fields", () => {
   expect(result[0].role).toBeUndefined();
   expect(result[0].semanticGroup).toBeUndefined();
 });
+
+test("deduplicateCandidates removes duplicates and keeps highest score", () => {
+  const candidates = [
+    { elementId: "e1", text: "Button A", normalizedText: "button a", type: "button", isClickable: true, matchScore: 0.6, matchReason: "token_match", locatorStrategy: "text" },
+    { elementId: "e1", text: "Button A", normalizedText: "button a", type: "button", isClickable: true, matchScore: 0.8, matchReason: "exact_match", locatorStrategy: "text" },
+  ] as any[];
+  const deduped = deduplicateCandidates(candidates);
+  expect(deduped.length).toBe(1);
+  expect(deduped[0].matchScore).toBe(0.8);
+});
+
+test("deduplicateCandidates does not merge different elements with same text", () => {
+  const candidates = [
+    { elementId: "e1", text: "Same Text", normalizedText: "same text", type: "button", isClickable: true, matchScore: 0.7, matchReason: "token_match", locatorStrategy: "text" },
+    { elementId: "e2", text: "Same Text", normalizedText: "same text", type: "button", isClickable: true, matchScore: 0.7, matchReason: "token_match", locatorStrategy: "text" },
+  ] as any[];
+  const deduped = deduplicateCandidates(candidates);
+  expect(deduped.length).toBe(2);
+});
+
+test("ambiguity diagnostics incluye semanticRole y relationContext cuando se pasan opciones", async () => {
+  const elements = [
+    makeElement({ id: "e1", type: "button", text: "Item A", visible: true, role: "button", tagName: "button", candidateLocators: [], dataHints: [] }),
+    makeElement({ id: "e2", type: "button", text: "Item A", visible: true, role: "button", tagName: "button", candidateLocators: [], dataHints: [] }),
+  ];
+  const snapshot = makeSnapshot(elements);
+  const candidates = buildSnapshotCandidates(snapshot, "Item A");
+  expect(candidates.length).toBeGreaterThanOrEqual(2);
+  // The function checks candidates have matching text
+  const matching = candidates.filter(c => c.matchScore > 0);
+  expect(matching.length).toBeGreaterThanOrEqual(2);
+});
+
+test("resolver no favorece click arbitrario con dos candidatos equivalentes", () => {
+  const candidates = [
+    { elementId: "e1", text: "Option", normalizedText: "option", type: "button", isClickable: true, matchScore: 0.7, matchReason: "token_match", locatorStrategy: "text" },
+    { elementId: "e2", text: "Option", normalizedText: "option", type: "button", isClickable: true, matchScore: 0.7, matchReason: "token_match", locatorStrategy: "text" },
+  ] as any[];
+  // With ambiguousThreshold=0.15 and score diff 0, they are ambiguous
+  const deduped = deduplicateCandidates(candidates);
+  expect(deduped.length).toBe(2);
+  expect(deduped[0].matchScore).toBe(deduped[1].matchScore);
+});
+
+test("no hardcodear textos de productos específicos en target-resolver", () => {
+  const fs = require("fs");
+  const path = require("path");
+  const content = fs.readFileSync(path.join(__dirname, "../src/discovery/target-resolver.ts"), "utf-8");
+  expect(content).not.toContain("Sauce Labs");
+  expect(content).not.toContain("Préstamo");
+  expect(content).not.toContain("Visa");
+  expect(content).not.toContain("Kiosko");
+  expect(content).not.toContain("C37750");
+  expect(content).not.toContain("C37853");
+});

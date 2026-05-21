@@ -1,0 +1,70 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37874",
+    "caseId": 37874,
+    "title": "Consulta listado de cuentas de ahorro"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Clic en 'Iniciar'.",
+      "target": {
+        "strategy": "text",
+        "value": "Iniciar",
+        "exact": false
+      }
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en 'Información de productos'.",
+      "target": {
+        "strategy": "text",
+        "value": "Información de productos",
+        "exact": false
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Seleccionar categoría relacionada con 'cuentas de ahorro'.",
+      "target": {
+        "strategy": "text",
+        "value": "cuentas de ahorro",
+        "exact": false
+      }
+    },
+    {
+      "index": 6,
+      "action": "assertText",
+      "description": "Assert: cuentas de ahorro",
+      "target": {
+        "strategy": "text",
+        "value": "cuentas de ahorro",
+        "exact": false
+      },
+      "expected": "cuentas de ahorro"
+    }
+  ],
+  "notes": [
+    "Discovery partial: 4/6 navigations/assertions satisfied."
+  ],
+  "createdAt": "2026-05-21T15:18:42.374Z"
+}

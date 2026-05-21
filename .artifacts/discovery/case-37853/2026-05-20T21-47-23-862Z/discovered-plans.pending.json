@@ -1,0 +1,69 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37853",
+    "caseId": 37853,
+    "title": "Consulta detalle de prestamo personal"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Clic en 'Iniciar'.",
+      "target": {
+        "strategy": "text",
+        "value": "Iniciar",
+        "exact": false
+      }
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en 'Información de productos'. 4.Clic en prestamos 5. Seleccionar categoría relacionada con 'prestamo personal'. 6. Seleccionar el producto visible relacionado con 'prestamo personal'. 7. Validar llegada a la pantalla de detalle del producto.",
+      "target": {
+        "strategy": "text",
+        "value": "Información de productos",
+        "exact": false
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Clic en 'Información de productos'. 4.Clic en prestamos 5. Seleccionar categoría relacionada con 'prestamo personal'. 6. Seleccionar el producto visible relacionado con 'prestamo personal'. 7. Validar llegada a la pantalla de detalle del producto.",
+      "target": {
+        "strategy": "text",
+        "value": "prestamos 5",
+        "exact": false
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Clic en 'Información de productos'. 4.Clic en prestamos 5. Seleccionar categoría relacionada con 'prestamo personal'. 6. Seleccionar el producto visible relacionado con 'prestamo personal'. 7. Validar llegada a la pantalla de detalle del producto.",
+      "target": {
+        "strategy": "text",
+        "value": "prestamo personal",
+        "exact": false
+      }
+    }
+  ],
+  "notes": [
+    "Discovery failed at step 3: ambiguous_target - \"prestamo personal\""
+  ],
+  "createdAt": "2026-05-20T21:47:39.095Z"
+}

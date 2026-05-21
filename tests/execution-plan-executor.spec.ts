@@ -71,3 +71,67 @@ test("noop step is skipped", async ({ page }) => {
   expect(result.status).toBe("skipped");
   expect(result.steps[0].status).toBe("skipped");
 });
+
+test("executor uses explicit runtimeConfig baseUrl when provided", async ({ page }) => {
+  const plan: ExecutionPlan = {
+    version: "1.0",
+    source: "manual",
+    status: "validated",
+    scenario: { source: "manual", title: "runtime-config-url" },
+    requiredData: [],
+    steps: [{ index: 1, action: "navigate", target: "APP_BASE_URL" }],
+    createdAt: new Date().toISOString()
+  };
+
+  const result = await executeExecutionPlan({
+    page,
+    plan,
+    dataContext,
+    evidenceDir: evidenceDir("executor-runtime-config"),
+    appBaseUrl: "about:blank",
+    runtimeConfig: {
+      app: {
+        name: "Profile A",
+        baseUrl: "data:text/html,<h1>runtime</h1>",
+        loginMode: "manual",
+        testData: {},
+        testDataAliases: {},
+        missingInputBehavior: "fail",
+        appProfile: "profile-a"
+      },
+      execution: {
+        browser: "chromium",
+        headless: true,
+        evidenceDir: ".artifacts",
+        defaultTimeoutMs: 30000
+      },
+      integrations: {}
+    }
+  });
+
+  expect(result.status).toBe("passed");
+  await expect(page.locator("h1")).toContainText("runtime");
+});
+
+test("executor falls back to appBaseUrl when runtimeConfig is not provided", async ({ page }) => {
+  const plan: ExecutionPlan = {
+    version: "1.0",
+    source: "manual",
+    status: "validated",
+    scenario: { source: "manual", title: "fallback-global-url" },
+    requiredData: [],
+    steps: [{ index: 1, action: "navigate", target: "APP_BASE_URL" }],
+    createdAt: new Date().toISOString()
+  };
+
+  const result = await executeExecutionPlan({
+    page,
+    plan,
+    dataContext,
+    evidenceDir: evidenceDir("executor-fallback-config"),
+    appBaseUrl: "data:text/html,<h1>fallback</h1>"
+  });
+
+  expect(result.status).toBe("passed");
+  await expect(page.locator("h1")).toContainText("fallback");
+});

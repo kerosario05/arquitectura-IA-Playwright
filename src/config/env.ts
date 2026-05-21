@@ -89,6 +89,11 @@ function parseAgentProvider(rawValue?: string): "codex" | "copilot" | "custom" |
   throw new Error("Invalid AGENT_PROVIDER value. Allowed values: codex, copilot, custom.");
 }
 
+function parseOptionalString(rawValue: string | undefined): string | undefined {
+  const trimmed = rawValue?.trim();
+  return trimmed ? trimmed : undefined;
+}
+
 function parseExtraLoginFields(rawValue?: string): Record<string, string> | undefined {
   if (!rawValue || !rawValue.trim()) {
     return undefined;
@@ -255,6 +260,18 @@ export const config: FullConfig = {
         process.env.AI_DISCOVERY_MAX_ATTEMPTS,
         "AI_DISCOVERY_MAX_ATTEMPTS"
       ) ?? 3
+    },
+    agent: {
+      provider: parseAgentProvider(process.env.AGENT_PROVIDER),
+      command: parseOptionalString(process.env.AGENT_CLI_COMMAND) ?? parseOptionalString(process.env.CODEX_CLI_COMMAND),
+      extraArgs: parseOptionalString(process.env.AGENT_CLI_ARGS) ?? parseOptionalString(process.env.CODEX_CLI_EXTRA_ARGS),
+      autoRepairTimeoutMs: process.env.AGENT_AUTO_REPAIR_TIMEOUT_MS
+        ? Number(process.env.AGENT_AUTO_REPAIR_TIMEOUT_MS)
+        : (process.env.CODEX_AUTO_REPAIR_TIMEOUT_MS ? Number(process.env.CODEX_AUTO_REPAIR_TIMEOUT_MS) : undefined),
+      autoRepairEnabled: process.env.AGENT_AUTO_REPAIR_ENABLED
+        ? (process.env.AGENT_AUTO_REPAIR_ENABLED ?? "false").toLowerCase() === "true"
+        : (process.env.CODEX_AUTO_REPAIR_ENABLED ?? "false").toLowerCase() === "true",
+      autoRepairPromptMode: (process.env.CODEX_AUTO_REPAIR_PROMPT_MODE?.trim().toLowerCase() as "compact" | "verbose") || "compact"
     },
     codex: {
       command: process.env.CODEX_CLI_COMMAND?.trim() || undefined,

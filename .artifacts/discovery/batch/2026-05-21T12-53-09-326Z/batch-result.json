@@ -1,0 +1,49 @@
+{
+  "batchId": "2026-05-21T12-53-09-326Z",
+  "timestamp": "2026-05-21T12:53:54.898Z",
+  "args": {
+    "mode": "by-ids",
+    "caseIds": [
+      37848
+    ],
+    "headed": true,
+    "autoPromote": true,
+    "promotionDryRun": false,
+    "promotionStrict": false,
+    "requirePromotionApproval": false,
+    "dryRun": false,
+    "includeActive": true,
+    "stopOnFail": false,
+    "concurrency": 1,
+    "autoRepair": true,
+    "repairTimeoutMs": 30000,
+    "showAgentLog": true,
+    "continueOnAgentTimeout": true
+  },
+  "cases": [
+    {
+      "caseId": 37848,
+      "title": "Enviar solicitud digital de tarjeta por correo",
+      "selected": true,
+      "status": "failed",
+      "promoted": false,
+      "promotionStatus": "not_applicable",
+      "outputDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T12-53-09-326Z\\cases\\case-37848",
+      "evidenceDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T12-53-09-326Z\\cases\\case-37848\\evidence",
+      "failureReason": "auto_repair_timeout",
+      "durationMs": 45569
+    }
+  ],
+  "summary": {
+    "selected": 1,
+    "executed": 1,
+    "skipped": 0,
+    "passed": 0,
+    "failed": 1,
+    "promoted": 0,
+    "alreadyActiveSkipped": 0,
+    "promotionFailed": 0,
+    "notPromoted": 0,
+    "totalDurationMs": 45570
+  }
+}

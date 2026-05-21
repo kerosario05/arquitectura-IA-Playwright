@@ -1,0 +1,10 @@
+{
+  "id": "c37853-consulta-detalle-de-prestamo-personal",
+  "externalId": "C37853",
+  "caseId": 37853,
+  "title": "Consulta detalle de prestamo personal",
+  "source": "discovery",
+  "appSlug": "default",
+  "appConfigPath": "automations\\apps\\default\\app.config.json",
+  "createdAt": "2026-05-21T15:41:45.868Z"
+}

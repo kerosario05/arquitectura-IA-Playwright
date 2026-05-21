@@ -1,0 +1,102 @@
+{
+  "version": "1.0",
+  "appSlug": "default",
+  "pageObjects": [
+    {
+      "id": "po_1779382622421_gejnj0",
+      "className": "ProductListPage",
+      "filePath": "pages\\productlist.page.ts",
+      "screenSignature": "screen:default-product_list",
+      "methods": [
+        {
+          "name": "start",
+          "intent": "start_session",
+          "parameters": [],
+          "available": false,
+          "source": "candidate,c37846-visualizar-detalle-de-tarjeta-visa-infinite-step-3",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "candidate"
+        },
+        {
+          "name": "selectProduct",
+          "intent": "select_product",
+          "parameters": [
+            "productName"
+          ],
+          "available": false,
+          "source": "candidate,c37846-visualizar-detalle-de-tarjeta-visa-infinite-step-6",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "candidate"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "candidate",
+      "sourcePlanIds": [
+        "c37846-visualizar-detalle-de-tarjeta-visa-infinite"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-05-21T16:57:02.421Z",
+      "updatedAt": "2026-05-21T16:57:02.421Z"
+    },
+    {
+      "id": "po_1779382622422_kgshle",
+      "className": "ProductDetailPage",
+      "filePath": "pages\\productdetail.page.ts",
+      "screenSignature": "screen:default-product_detail",
+      "methods": [
+        {
+          "name": "selectProduct",
+          "intent": "select_product",
+          "parameters": [
+            "productName"
+          ],
+          "available": false,
+          "source": "candidate,c37846-visualizar-detalle-de-tarjeta-visa-infinite-step-4",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "candidate"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "candidate",
+      "sourcePlanIds": [
+        "c37846-visualizar-detalle-de-tarjeta-visa-infinite"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-05-21T16:57:02.422Z",
+      "updatedAt": "2026-05-21T16:57:02.422Z"
+    },
+    {
+      "id": "po_1779382622422_zhpgoi",
+      "className": "CategoryPage",
+      "filePath": "pages\\category.page.ts",
+      "screenSignature": "screen:default-category",
+      "methods": [
+        {
+          "name": "selectCategory",
+          "intent": "select_category",
+          "parameters": [
+            "categoryName"
+          ],
+          "available": false,
+          "source": "candidate,c37846-visualizar-detalle-de-tarjeta-visa-infinite-step-5",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "candidate"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "candidate",
+      "sourcePlanIds": [
+        "c37846-visualizar-detalle-de-tarjeta-visa-infinite"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-05-21T16:57:02.422Z",
+      "updatedAt": "2026-05-21T16:57:02.422Z"
+    }
+  ],
+  "componentCandidates": [],
+  "updatedAt": "2026-05-21T16:57:02.422Z"
+}
