@@ -14,6 +14,9 @@ type CliArgs = {
   inlineDebugSpec: boolean;
   allowPageObjectCandidates: boolean;
   overwrite: boolean;
+  autoPom: boolean;
+  autoPomThreshold?: number;
+  noAutoPomValidation: boolean;
 };
 
 export function parseDiscoveryCaseArgs(argv: string[]): CliArgs {
@@ -27,7 +30,10 @@ export function parseDiscoveryCaseArgs(argv: string[]): CliArgs {
     pageObjectMode: true,
     inlineDebugSpec: false,
     allowPageObjectCandidates: true,
-    overwrite: false
+    overwrite: false,
+    autoPom: false,
+    autoPomThreshold: undefined,
+    noAutoPomValidation: false
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -78,6 +84,25 @@ export function parseDiscoveryCaseArgs(argv: string[]): CliArgs {
       args.allowPageObjectCandidates = false;
       continue;
     }
+    if (token === "--auto-pom") {
+      args.autoPom = true;
+      continue;
+    }
+    if (token === "--auto-pom-threshold") {
+      if (!nextValue || nextValue.startsWith("--")) {
+        throw new Error("Missing value for --auto-pom-threshold");
+      }
+      args.autoPomThreshold = Number(nextValue);
+      if (!Number.isFinite(args.autoPomThreshold) || args.autoPomThreshold < 0 || args.autoPomThreshold > 1) {
+        throw new Error(`Invalid --auto-pom-threshold value: ${nextValue}. Expected a number between 0 and 1.`);
+      }
+      i += 1;
+      continue;
+    }
+    if (token === "--no-auto-pom-validation") {
+      args.noAutoPomValidation = true;
+      continue;
+    }
     if (token === "--case-id") {
       if (!nextValue || nextValue.startsWith("--")) {
         throw new Error("Missing value for --case-id");
@@ -126,6 +151,9 @@ async function main(): Promise<void> {
     inlineDebugSpec: args.inlineDebugSpec,
     allowPageObjectCandidates: args.allowPageObjectCandidates,
     overwrite: args.overwrite,
+    autoPom: args.autoPom,
+    autoPomThreshold: args.autoPomThreshold,
+    noAutoPomValidation: args.noAutoPomValidation,
     config
   };
 

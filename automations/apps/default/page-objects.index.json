@@ -3,75 +3,85 @@
   "appSlug": "default",
   "pageObjects": [
     {
-      "id": "po_1779382622421_gejnj0",
-      "className": "ProductListPage",
-      "filePath": "pages\\productlist.page.ts",
-      "screenSignature": "screen:default-product_list",
+      "id": "po_1779393007991_hfbma1",
+      "className": "HomePage",
+      "filePath": "automations/apps/default/pages/home.page.ts",
+      "screenSignature": "screen:default-home",
       "methods": [
         {
           "name": "start",
           "intent": "start_session",
           "parameters": [],
-          "available": false,
-          "source": "candidate,c37846-visualizar-detalle-de-tarjeta-visa-infinite-step-3",
+          "available": true,
+          "source": "candidate,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-3",
           "sensitive": false,
           "confidence": 0.5,
-          "status": "candidate"
-        },
-        {
-          "name": "selectProduct",
-          "intent": "select_product",
-          "parameters": [
-            "productName"
-          ],
-          "available": false,
-          "source": "candidate,c37846-visualizar-detalle-de-tarjeta-visa-infinite-step-6",
-          "sensitive": false,
-          "confidence": 0.5,
-          "status": "candidate"
+          "status": "active"
         }
       ],
       "confidence": 0.5,
-      "status": "candidate",
+      "status": "active",
       "sourcePlanIds": [
-        "c37846-visualizar-detalle-de-tarjeta-visa-infinite"
+        "c37844-visualizar-detalle-de-tarjeta-visa-gold"
       ],
       "caseIds": [],
-      "createdAt": "2026-05-21T16:57:02.421Z",
-      "updatedAt": "2026-05-21T16:57:02.421Z"
+      "createdAt": "2026-05-21T19:50:07.991Z",
+      "updatedAt": "2026-05-21T19:50:07.991Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-05-21T19:50:08.030Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/default/pages/home.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-05-21T19:50:08.070Z",
+        "approvedFrom": "automations/apps/default/pages/home.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
     },
     {
-      "id": "po_1779382622422_kgshle",
-      "className": "ProductDetailPage",
-      "filePath": "pages\\productdetail.page.ts",
-      "screenSignature": "screen:default-product_detail",
+      "id": "po_1779393007993_znwb8r",
+      "className": "ProductInformationPage",
+      "filePath": "automations/apps/default/pages/productinformation.page.ts",
+      "screenSignature": "screen:default-product_information",
       "methods": [
         {
-          "name": "selectProduct",
-          "intent": "select_product",
-          "parameters": [
-            "productName"
-          ],
-          "available": false,
-          "source": "candidate,c37846-visualizar-detalle-de-tarjeta-visa-infinite-step-4",
+          "name": "openProductInformation",
+          "intent": "open_product_information",
+          "parameters": [],
+          "available": true,
+          "source": "candidate,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-4",
           "sensitive": false,
           "confidence": 0.5,
-          "status": "candidate"
+          "status": "active"
         }
       ],
       "confidence": 0.5,
-      "status": "candidate",
+      "status": "active",
       "sourcePlanIds": [
-        "c37846-visualizar-detalle-de-tarjeta-visa-infinite"
+        "c37844-visualizar-detalle-de-tarjeta-visa-gold"
       ],
       "caseIds": [],
-      "createdAt": "2026-05-21T16:57:02.422Z",
-      "updatedAt": "2026-05-21T16:57:02.422Z"
+      "createdAt": "2026-05-21T19:50:07.993Z",
+      "updatedAt": "2026-05-21T19:50:07.993Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-05-21T19:50:08.036Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/default/pages/productinformation.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-05-21T19:50:08.077Z",
+        "approvedFrom": "automations/apps/default/pages/productinformation.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
     },
     {
-      "id": "po_1779382622422_zhpgoi",
+      "id": "po_1779393007994_9sihmr",
       "className": "CategoryPage",
-      "filePath": "pages\\category.page.ts",
+      "filePath": "automations/apps/default/pages/category.page.ts",
       "screenSignature": "screen:default-category",
       "methods": [
         {
@@ -80,23 +90,75 @@
           "parameters": [
             "categoryName"
           ],
-          "available": false,
-          "source": "candidate,c37846-visualizar-detalle-de-tarjeta-visa-infinite-step-5",
+          "available": true,
+          "source": "candidate,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-5",
           "sensitive": false,
           "confidence": 0.5,
-          "status": "candidate"
+          "status": "active"
         }
       ],
       "confidence": 0.5,
-      "status": "candidate",
+      "status": "active",
       "sourcePlanIds": [
-        "c37846-visualizar-detalle-de-tarjeta-visa-infinite"
+        "c37844-visualizar-detalle-de-tarjeta-visa-gold"
       ],
       "caseIds": [],
-      "createdAt": "2026-05-21T16:57:02.422Z",
-      "updatedAt": "2026-05-21T16:57:02.422Z"
+      "createdAt": "2026-05-21T19:50:07.994Z",
+      "updatedAt": "2026-05-21T19:50:07.994Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-05-21T19:50:08.042Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/default/pages/category.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-05-21T19:50:08.086Z",
+        "approvedFrom": "automations/apps/default/pages/category.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
+    },
+    {
+      "id": "po_1779393007994_kjp7o9",
+      "className": "ProductListPage",
+      "filePath": "automations/apps/default/pages/productlist.page.ts",
+      "screenSignature": "screen:default-product_list",
+      "methods": [
+        {
+          "name": "selectProduct",
+          "intent": "select_product",
+          "parameters": [
+            "productName"
+          ],
+          "available": true,
+          "source": "candidate,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-6",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "active",
+      "sourcePlanIds": [
+        "c37844-visualizar-detalle-de-tarjeta-visa-gold"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-05-21T19:50:07.994Z",
+      "updatedAt": "2026-05-21T19:50:07.994Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-05-21T19:50:08.049Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/default/pages/productlist.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-05-21T19:50:08.094Z",
+        "approvedFrom": "automations/apps/default/pages/productlist.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
     }
   ],
   "componentCandidates": [],
-  "updatedAt": "2026-05-21T16:57:02.422Z"
+  "updatedAt": "2026-05-21T19:50:08.094Z"
 }

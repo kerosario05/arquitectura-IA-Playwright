@@ -11,20 +11,20 @@
   "source": "discovery",
   "appProfile": "default",
   "baseUrlHash": "74df3c0e992c",
-  "createdAt": "2026-05-21T16:50:33.971Z",
-  "updatedAt": "2026-05-21T16:50:33.971Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37844\\2026-05-21T16-50-18-738Z\\discovered-plans.pending.json",
-  "pomStatus": "page_object_candidate_created",
+  "createdAt": "2026-05-21T20:01:30.154Z",
+  "updatedAt": "2026-05-21T20:01:30.154Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37844\\2026-05-21T20-01-12-741Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
   "inlineDebugMode": false,
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37844\\2026-05-21T16-50-18-738Z",
+    "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37844\\2026-05-21T20-01-12-741Z",
     "pomDiagnostics": {
       "missingPageObjects": [],
       "missingMethods": [],
-      "generatedCandidates": 6
+      "generatedCandidates": 0
     },
     "overwritten": true,
     "previousAutomationPath": "automations\\apps\\default\\cases\\c37844-visualizar-detalle-de-tarjeta-visa-gold\\plan.json",
-    "previousStatus": "blocked_missing_pom"
+    "previousStatus": "active"
   }
 }

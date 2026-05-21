@@ -1,21 +1,19 @@
 import { test } from '@playwright/test';
 
-import { VisualizarDetalleDeTarjetaVisaGoldPage } from '../../../../../pages/visualizardetalledetarjetavisagold.page';
+import { HomePage } from '../../pages/home.page';
+import { ProductInformationPage } from '../../pages/productinformation.page';
+import { CategoryPage } from '../../pages/category.page';
+import { ProductListPage } from '../../pages/productlist.page';
 
 test('Visualizar detalle de Tarjeta Visa Gold', async ({ page }) => {
 
-  const visualizarDetalleDeTarjetaVisaGoldPage = new VisualizarDetalleDeTarjetaVisaGoldPage(page);
+  const homePage = new HomePage(page);
+  const productInformationPage = new ProductInformationPage(page);
+  const categoryPage = new CategoryPage(page);
+  const productListPage = new ProductListPage(page);
 
-  await visualizarDetalleDeTarjetaVisaGoldPage.navigatenavigateAPPBASEURL(); // candidate method
-  // [candidate] navigate APP_BASE_URL
-  await visualizarDetalleDeTarjetaVisaGoldPage.loginlogin(); // candidate method
-  // [candidate] login
-  await visualizarDetalleDeTarjetaVisaGoldPage.clickIniciar(); // candidate method
-  // [candidate] click Iniciar
-  await visualizarDetalleDeTarjetaVisaGoldPage.clickIniciar(); // candidate method
-  // [candidate] click Información de productos
-  await visualizarDetalleDeTarjetaVisaGoldPage.clickIniciar(); // candidate method
-  // [candidate] click tarjetas
-  await visualizarDetalleDeTarjetaVisaGoldPage.clickIniciar(); // candidate method
-  // [candidate] click tarjeta de credito visa gold
+  await homePage.start();
+  await productInformationPage.openProductInformation();
+  await categoryPage.selectCategory('tarjetas');
+  await productListPage.selectProduct('tarjeta de credito visa gold');
 });

@@ -10,6 +10,9 @@ import type {
   PageObjectCandidateStatus,
   PageMethodCandidateStatus
 } from "../types/page-object.types";
+import type { ExecutionPlanStep } from "../types/execution-plan.types";
+import type { SemanticMethodIntent } from "../types/pom-ownership";
+import { INTENT_PREFERRED_OWNER, INTENT_CLASS_OWNERSHIP } from "../types/pom-ownership";
 import { buildAppAutomationPaths } from "./app-profile";
 import type { AppProfile } from "./app-profile";
 
@@ -92,6 +95,37 @@ export function findReusableMethod(
     const method = po.methods.find((m) => m.intent === intent && m.available);
     if (method) return { pageObject: po, method };
   }
+  return undefined;
+}
+
+export function findMethodBySemanticIntent(
+  registry: PageObjectRegistry,
+  intent: SemanticMethodIntent,
+  step?: ExecutionPlanStep
+): { pageObject: PageObjectEntry; method: PageObjectMethod } | undefined {
+  const preferredOwner = INTENT_PREFERRED_OWNER[intent];
+
+  if (preferredOwner) {
+    const ownerPO = registry.pageObjects.find(
+      (po) => po.className === preferredOwner && po.status === "active"
+    );
+    if (ownerPO) {
+      const method = ownerPO.methods.find(
+        (m) => m.intent === intent && m.status === "active" && m.available
+      );
+      if (method) return { pageObject: ownerPO, method };
+    }
+  }
+
+  const allowedClasses = INTENT_CLASS_OWNERSHIP[intent];
+  for (const po of registry.pageObjects.filter((p) => p.status === "active")) {
+    if (allowedClasses && !allowedClasses.includes(po.className)) continue;
+    const method = po.methods.find(
+      (m) => m.intent === intent && m.status === "active" && m.available
+    );
+    if (method) return { pageObject: po, method };
+  }
+
   return undefined;
 }
 

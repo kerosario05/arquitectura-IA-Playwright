@@ -42,6 +42,9 @@ export type CaseDiscoveryWorkflowOptions = {
   agentMaxCandidates?: number;
   agentMaxProposedActions?: number;
   agentMaxAttempts?: number;
+  autoPom?: boolean;
+  autoPomThreshold?: number;
+  noAutoPomValidation?: boolean;
 };
 
 export type CaseDiscoveryWorkflowResult = {
@@ -419,7 +422,10 @@ export async function runCaseDiscoveryWorkflow(
     const promotionPolicy: PromotionPolicy = {
       ...DEFAULT_PROMOTION_POLICY,
       specMode: options.inlineDebugSpec ? "inline-debug" : (options.pageObjectMode !== false ? "page-object" : "inline-debug"),
-      allowCandidateGeneration: options.allowPageObjectCandidates !== false
+      allowCandidateGeneration: options.allowPageObjectCandidates !== false,
+      autoPom: options.autoPom === true,
+      autoApproveConfidenceThreshold: options.autoPomThreshold ?? DEFAULT_PROMOTION_POLICY.autoApproveConfidenceThreshold,
+      autoRunPomValidation: options.noAutoPomValidation !== true
     };
 
     console.log(`[discovery:workflow] Overwrite enabled: ${options.overwrite === true}`);

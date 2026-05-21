@@ -1,16 +1,19 @@
 import { test } from '@playwright/test';
 
-import { VisualizarDetalleDeTarjetaVisaGoldPage } from '../../../../../pages/visualizardetalledetarjetavisagold.page';
+import { HomePage } from '../../pages/home.page';
+import { ProductInformationPage } from '../../pages/productinformation.page';
+import { CategoryPage } from '../../pages/category.page';
+import { ProductListPage } from '../../pages/productlist.page';
 
 test('Visualizar detalle de Tarjeta Visa Platinum', async ({ page }) => {
 
-  const visualizarDetalleDeTarjetaVisaGoldPage = new VisualizarDetalleDeTarjetaVisaGoldPage(page);
-  // WARNING: Missing page object methods:
-  // - navigate: navigate APP_BASE_URL
-  // - login: login
+  const homePage = new HomePage(page);
+  const productInformationPage = new ProductInformationPage(page);
+  const categoryPage = new CategoryPage(page);
+  const productListPage = new ProductListPage(page);
 
-
-  await visualizarDetalleDeTarjetaVisaGoldPage.clickIniciar(); // candidate method
-  // [candidate] click Iniciar
-  // Fallthrough: execute remaining plan steps via executor
+  await homePage.start();
+  await productInformationPage.openProductInformation();
+  await categoryPage.selectCategory('tarjetas');
+  await productListPage.selectProduct('tarjeta de credito visa platinum');
 });

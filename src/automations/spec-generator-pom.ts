@@ -3,7 +3,9 @@ import type { ExecutionPlan, ExecutionPlanStep, PlanTarget } from "../types/exec
 import type { AppAutomationPaths, AppProfile } from "./app-profile";
 import type { PromotionPolicy, POMPromotionStatus } from "../types/automation-promotion.types";
 import type { PageObjectEntry, PageObjectMethod, PageObjectRegistry } from "../types/page-object.types";
-import { findReusableMethod } from "./page-object-registry";
+import { findReusableMethod, findMethodBySemanticIntent } from "./page-object-registry";
+import { deriveMethodIntentFromStep, deriveExpectedOwnerForStep } from "./pom-classification";
+import type { SemanticMethodIntent } from "../types/pom-ownership";
 
 export type POMSpecResult = {
   specContent: string;
@@ -22,7 +24,7 @@ function getTarget(t: PlanTarget | "APP_BASE_URL" | undefined): PlanTarget | und
 function getTargetValue(t: PlanTarget | "APP_BASE_URL" | undefined): string {
   if (!t) return "";
   if (t === "APP_BASE_URL") return "APP_BASE_URL";
-  return t.value ?? t.name ?? t.role ?? "";
+  return t.name ?? t.value ?? t.role ?? "";
 }
 
 function escapeSpecString(value: string): string {
@@ -77,18 +79,24 @@ export function generatePOMSpecFromPlan(
 
   for (const step of plan.steps) {
     const description = makeDescription(step);
-    const intent = step.action;
+
+    if (step.action === "navigate" || step.action === "login") {
+      continue;
+    }
+
+    const semanticIntent = deriveMethodIntentFromStep(step);
 
     const resolved = pageObjectRegistry
-      ? findReusableMethod(pageObjectRegistry, intent, undefined)
+      ? findMethodBySemanticIntent(pageObjectRegistry, semanticIntent, step)
       : undefined;
 
     if (resolved) {
       const varName = ensurePageObject(resolved.pageObject.className, resolved.pageObject.filePath);
       const method = resolved.method;
       if (method.parameters.length > 0) {
+        const targetValue = getTargetValue(step.target);
         const args = method.parameters.map((p) => {
-          return step.value ?? p;
+          return `'${escapeSpecString(targetValue || p)}'`;
         }).join(", ");
         actionLines.push(`await ${varName}.${method.name}(${args});`);
       } else {
@@ -101,10 +109,19 @@ export function generatePOMSpecFromPlan(
     }
 
     if (policy.allowCandidateGeneration && pageObjectRegistry) {
-      const candidateResult = findCandidateMethod(pageObjectRegistry, intent, description);
+      const candidateResult = findCandidateMethod(pageObjectRegistry, semanticIntent, description);
       if (candidateResult) {
         const varName = ensurePageObject(candidateResult.pageObject.className, candidateResult.pageObject.filePath);
-        actionLines.push(`await ${varName}.${candidateResult.method.name}(); // candidate method`);
+        const method = candidateResult.method;
+        if (method.parameters.length > 0) {
+          const targetValue = getTargetValue(step.target);
+          const args = method.parameters.map((p) => {
+            return `'${escapeSpecString(targetValue || p)}'`;
+          }).join(", ");
+          actionLines.push(`await ${varName}.${method.name}(${args}); // candidate method`);
+        } else {
+          actionLines.push(`await ${varName}.${method.name}(); // candidate method`);
+        }
         actionLines.push(`// [candidate] ${description}`);
         generatedCandidates += 1;
         continue;
@@ -119,7 +136,16 @@ export function generatePOMSpecFromPlan(
     }
 
     if (resolved === undefined) {
-      missingMethods.push(`${intent}: ${description}`);
+      const expectedOwner = deriveExpectedOwnerForStep(step);
+      const ownerPO = pageObjectRegistry?.pageObjects.find((po) => po.className === expectedOwner);
+      const availableMethods = ownerPO
+        ? ownerPO.methods.filter((m) => m.status === "active" && m.available).map((m) => m.name)
+        : [];
+      missingMethods.push(
+        `step=${plan.steps.indexOf(step)} target="${getTargetValue(step.target)}" ` +
+        `derivedIntent="${semanticIntent}" expectedOwner="${expectedOwner}" ` +
+        `availableMethods=[${availableMethods.join(", ")}]`
+      );
     }
   }
 
@@ -191,7 +217,7 @@ export function generatePOMSpecFromPlan(
 
 function findCandidateMethod(
   registry: PageObjectRegistry,
-  intent: string,
+  intent: SemanticMethodIntent,
   _description: string
 ): { pageObject: PageObjectEntry; method: PageObjectMethod } | undefined {
   for (const po of registry.pageObjects) {

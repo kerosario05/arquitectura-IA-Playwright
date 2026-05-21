@@ -23,9 +23,30 @@ import {
   buildAppAutomationPaths,
   type AppProfile
 } from "./app-profile";
-import { loadPageObjectRegistry, ensurePageObjectRegistry, registerPageObjectCandidate, registerMethodCandidate, savePageObjectRegistry, findCandidatePageObjectByScreenSignature } from "./page-object-registry";
+import {
+  INTENT_CLASS_OWNERSHIP,
+  INTENT_PREFERRED_OWNER,
+  SCREEN_TYPE_CLASS_MAP,
+  METHOD_INTENT_NAME_MAP,
+  METHOD_INTENT_PARAMS,
+  type SemanticScreenType,
+  type SemanticMethodIntent
+} from "../types/pom-ownership";
+import {
+  loadPageObjectRegistry,
+  savePageObjectRegistry,
+  ensurePageObjectRegistry,
+  registerPageObjectCandidate,
+  registerMethodCandidate,
+  findCandidatePageObjectByScreenSignature
+} from "./page-object-registry";
 import { ensureFlowRegistry, registerFlowCandidate, saveFlowRegistry } from "./flow-registry";
 import type { PageObjectEntry, PageObjectRegistry } from "../types/page-object.types";
+import {
+  shouldRunAutoPom,
+  runAutoPomPipeline,
+  type AutoPomDiagnostics
+} from "./auto-pom";
 
 interface PromoteInput {
   plan: ExecutionPlan;
@@ -80,33 +101,6 @@ function deriveScreenSignatureFromPlan(plan: ExecutionPlan): string {
     .substring(0, 60);
   return `screen:c${caseId}-${titleSlug}`;
 }
-
-type SemanticScreenType =
-  | "home"
-  | "main_menu"
-  | "product_information"
-  | "category"
-  | "product_list"
-  | "product_detail"
-  | "selection"
-  | "form"
-  | "confirmation"
-  | "login"
-  | "otp"
-  | "unknown";
-
-type SemanticMethodIntent =
-  | "open_home"
-  | "start_session"
-  | "open_product_information"
-  | "select_category"
-  | "select_product"
-  | "click_primary_action"
-  | "expect_loaded"
-  | "fill_form_field"
-  | "submit_form"
-  | "confirm_action"
-  | "unknown";
 
 const SCREEN_TYPE_KEYWORDS: Record<string, SemanticScreenType> = {
   "iniciar sesion": "login",
@@ -283,49 +277,6 @@ function classifyMethodIntent(step: ExecutionPlanStep, screenType: SemanticScree
   return "unknown";
 }
 
-const SCREEN_TYPE_CLASS_MAP: Record<SemanticScreenType, string> = {
-  home: "HomePage",
-  main_menu: "MainMenuPage",
-  product_information: "ProductInformationPage",
-  category: "CategoryPage",
-  product_list: "ProductListPage",
-  product_detail: "ProductDetailPage",
-  selection: "SelectionPage",
-  form: "FormPage",
-  confirmation: "ConfirmationPage",
-  login: "LoginPage",
-  otp: "OtpPage",
-  unknown: "GenericPage"
-};
-
-const METHOD_INTENT_NAME_MAP: Record<SemanticMethodIntent, string> = {
-  open_home: "open",
-  start_session: "start",
-  open_product_information: "openProductInformation",
-  select_category: "selectCategory",
-  select_product: "selectProduct",
-  click_primary_action: "clickPrimaryAction",
-  expect_loaded: "expectLoaded",
-  fill_form_field: "fillField",
-  submit_form: "submit",
-  confirm_action: "confirm",
-  unknown: "executeAction"
-};
-
-const METHOD_INTENT_PARAMS: Record<SemanticMethodIntent, string[]> = {
-  open_home: [],
-  start_session: [],
-  open_product_information: [],
-  select_category: ["categoryName"],
-  select_product: ["productName"],
-  click_primary_action: ["actionName"],
-  expect_loaded: [],
-  fill_form_field: ["fieldName", "value"],
-  submit_form: [],
-  confirm_action: [],
-  unknown: []
-};
-
 function deriveSemanticScreenType(step: ExecutionPlanStep, allSteps: ExecutionPlanStep[]): SemanticScreenType {
   return classifyScreenType(step, allSteps);
 }
@@ -372,82 +323,123 @@ async function registerPOMCandidatesForBlockedPromotion(
     s.action !== "navigate" && s.action !== "login"
   );
 
-  const screenTypeMap = new Map<SemanticScreenType, ExecutionPlanStep[]>();
+  type RoutedMethod = {
+    name: string;
+    intent: string;
+    parameters: string[];
+    sensitive: boolean;
+    confidence: number;
+    sourceActionId: string;
+    ownerClassName: string;
+    screenSignature: string;
+  };
+
+  const routedMethods: RoutedMethod[] = [];
+
   for (const step of nonNavigationSteps) {
     const screenType = deriveSemanticScreenType(step, plan.steps);
-    const existing = screenTypeMap.get(screenType) ?? [];
-    existing.push(step);
-    screenTypeMap.set(screenType, existing);
+    const intent = deriveSemanticMethodIntent(step, screenType);
+    const recoveryMeta = (step as any).recoveryMetadata;
+
+    const ownerClassName = INTENT_PREFERRED_OWNER[intent] ?? SCREEN_TYPE_CLASS_MAP[screenType] ?? "GenericPage";
+    const screenSignature = `screen:${appProfile.appSlug}-${screenType}`;
+
+    routedMethods.push({
+      name: deriveMethodNameFromIntent(intent),
+      intent,
+      parameters: deriveMethodParameters(intent),
+      sensitive: step.action === "fill" && step.valueKey !== undefined,
+      confidence: recoveryMeta?.score ?? 0.5,
+      sourceActionId: `${sourcePlanId}-step-${step.index}`,
+      ownerClassName,
+      screenSignature
+    });
   }
 
-  for (const [screenType, steps] of screenTypeMap.entries()) {
-    if (screenType === "login" || screenType === "otp") continue;
+  for (const step of nonNavigationSteps) {
+    if (step.action.startsWith("assert")) {
+      const screenType = deriveSemanticScreenType(step, plan.steps);
+      const detailScreenType: SemanticScreenType = screenType === "product_detail" ? screenType : "product_detail";
+      const intent: SemanticMethodIntent = "expect_loaded";
+      const recoveryMeta = (step as any).recoveryMetadata;
 
-    const className = derivePageObjectClassNameFromScreenType(screenType);
-    const screenSignature = deriveScreenSignatureFromScreenType(screenType, appProfile.appSlug);
+      const ownerClassName = INTENT_PREFERRED_OWNER[intent] ?? SCREEN_TYPE_CLASS_MAP[detailScreenType] ?? "ProductDetailPage";
+      const screenSignature = `screen:${appProfile.appSlug}-${detailScreenType}`;
 
-    const existingPO = registry.pageObjects.find((po) => po.screenSignature === screenSignature);
-
-    const actionOnlySteps = steps.filter((s) => !s.action.startsWith("assert"));
-    const assertionSteps = steps.filter((s) => s.action.startsWith("assert"));
-
-    const methodCandidates = actionOnlySteps.map((s) => {
-      const intent = deriveSemanticMethodIntent(s, screenType);
-      return {
+      routedMethods.push({
         name: deriveMethodNameFromIntent(intent),
         intent,
-        parameters: deriveMethodParameters(intent)
-      };
-    });
-
-    if (assertionSteps.length > 0 && screenType !== "product_detail") {
-      const detailIntent: SemanticMethodIntent = "expect_loaded";
-      methodCandidates.push({
-        name: deriveMethodNameFromIntent(detailIntent),
-        intent: detailIntent,
-        parameters: deriveMethodParameters(detailIntent)
+        parameters: deriveMethodParameters(intent),
+        sensitive: false,
+        confidence: recoveryMeta?.score ?? 0.5,
+        sourceActionId: `${sourcePlanId}-step-${step.index}`,
+        ownerClassName,
+        screenSignature
       });
     }
+  }
 
-    if (!existingPO && methodCandidates.length > 0) {
+  const methodsByOwner = new Map<string, RoutedMethod[]>();
+  for (const method of routedMethods) {
+    const existing = methodsByOwner.get(method.ownerClassName) ?? [];
+    existing.push(method);
+    methodsByOwner.set(method.ownerClassName, existing);
+  }
+
+  for (const [ownerClassName, methods] of methodsByOwner.entries()) {
+    if (ownerClassName === "LoginPage" || ownerClassName === "OtpPage") continue;
+
+    const primaryScreenType = Object.entries(SCREEN_TYPE_CLASS_MAP).find(
+      ([, cls]) => cls === ownerClassName
+    )?.[0] as SemanticScreenType | undefined;
+
+    const screenSignature = primaryScreenType
+      ? `screen:${appProfile.appSlug}-${primaryScreenType}`
+      : `screen:${appProfile.appSlug}-${ownerClassName.toLowerCase().replace(/page$/, "")}`;
+
+    let existingPO = registry.pageObjects.find((po) => po.className === ownerClassName);
+
+    if (!existingPO) {
+      existingPO = registry.pageObjects.find((po) => po.screenSignature === screenSignature);
+    }
+
+    const uniqueMethods = new Map<string, RoutedMethod>();
+    for (const m of methods) {
+      if (!uniqueMethods.has(m.intent)) {
+        uniqueMethods.set(m.intent, m);
+      }
+    }
+
+    if (!existingPO && uniqueMethods.size > 0) {
       const regResult = registerPageObjectCandidate(registry, {
-        name: className.replace("Page", ""),
-        className,
+        name: ownerClassName.replace("Page", ""),
+        className: ownerClassName,
         screenSignature,
         confidence: 0.5,
         sourcePlanId,
-        methods: methodCandidates.map((m) => ({ name: m.name, intent: m.intent, parameters: m.parameters }))
+        methods: Array.from(uniqueMethods.values()).map((m) => ({
+          name: m.name,
+          intent: m.intent,
+          parameters: m.parameters
+        }))
       });
 
       if (regResult.created) {
         candidatesRegistered += 1;
       }
+
+      existingPO = registry.pageObjects.find((po) => po.className === ownerClassName);
     }
 
-    const poEntry = existingPO ?? registry.pageObjects.find((po) => po.screenSignature === screenSignature);
-    if (poEntry) {
-      for (const step of actionOnlySteps) {
-        const intent = deriveSemanticMethodIntent(step, screenType);
-        const recoveryMeta = (step as any).recoveryMetadata;
-
-        registerMethodCandidate(registry, poEntry.id, {
-          name: deriveMethodNameFromIntent(intent),
-          intent,
-          parameters: deriveMethodParameters(intent),
-          sensitive: step.action === "fill" && step.valueKey !== undefined,
-          confidence: recoveryMeta?.score ?? 0.5,
-          sourceActionId: `${sourcePlanId}-step-${step.index}`
-        });
-      }
-
-      for (const step of assertionSteps) {
-        const detailIntent: SemanticMethodIntent = "expect_loaded";
-        registerMethodCandidate(registry, poEntry.id, {
-          name: deriveMethodNameFromIntent(detailIntent),
-          intent: detailIntent,
-          parameters: deriveMethodParameters(detailIntent),
-          confidence: 0.5,
-          sourceActionId: `${sourcePlanId}-step-${step.index}`
+    if (existingPO) {
+      for (const m of uniqueMethods.values()) {
+        registerMethodCandidate(registry, existingPO.id, {
+          name: m.name,
+          intent: m.intent,
+          parameters: m.parameters,
+          sensitive: m.sensitive,
+          confidence: m.confidence,
+          sourceActionId: m.sourceActionId
         });
       }
     }
@@ -480,17 +472,15 @@ async function registerPOMCandidatesForBlockedPromotion(
       const colonIdx = missingMethod.indexOf(":");
       const intent = colonIdx > 0 ? missingMethod.substring(0, colonIdx).trim() : missingMethod.trim();
 
-      const candidatePO = registry.pageObjects.find((po) => po.status === "candidate");
-      if (candidatePO) {
-        registerMethodCandidate(registry, candidatePO.id, {
-          name: `${intent}Method`,
-          intent,
-          confidence: 0.5,
-          sourceActionId: `${sourcePlanId}-missing-${intent}`
-        });
-      } else if (registry.pageObjects.length > 0) {
-        const firstPO = registry.pageObjects[0];
-        registerMethodCandidate(registry, firstPO.id, {
+      const ownerClassName = INTENT_PREFERRED_OWNER[intent] ?? "GenericPage";
+      let ownerPO = registry.pageObjects.find((po) => po.className === ownerClassName);
+
+      if (!ownerPO && registry.pageObjects.length > 0) {
+        ownerPO = registry.pageObjects.find((po) => po.status === "candidate") ?? registry.pageObjects[0];
+      }
+
+      if (ownerPO) {
+        registerMethodCandidate(registry, ownerPO.id, {
           name: `${intent}Method`,
           intent,
           confidence: 0.5,
@@ -609,7 +599,12 @@ export async function promoteExecutionPlan(
   const promotionPolicy = input.promotionPolicy;
   const inlineDebugMode = input.inlineDebugMode ?? false;
   let pomStatus: POMPromotionStatus | undefined;
-  let pomDiagnostics: { missingPageObjects: string[]; missingMethods: string[]; generatedCandidates: number } | undefined;
+  let pomDiagnostics: {
+    missingPageObjects: string[];
+    missingMethods: string[];
+    generatedCandidates: number;
+    autoPom?: AutoPomDiagnostics;
+  } | undefined;
 
   if (promotionPolicy && promotionPolicy.specMode === "page-object") {
     const registry = await loadPageObjectRegistry(appProfile, input.outputRoot).catch(() => undefined);
@@ -650,6 +645,37 @@ export async function promoteExecutionPlan(
       missingMethods: specResult.missingMethods,
       generatedCandidates: specResult.generatedCandidates
     };
+
+    // --- Auto-POM Pipeline ---
+    if (shouldRunAutoPom(specResult.pomStatus, promotionPolicy)) {
+      console.log(`[promote-plan] Auto-POM triggered for status: ${specResult.pomStatus}`);
+      const autoPomResult = await runAutoPomPipeline({
+        plan,
+        automationId,
+        appProfile,
+        appPaths,
+        outputRoot: input.outputRoot,
+        promotionPolicy,
+        inlineDebugMode: input.inlineDebugMode ?? false,
+        initialPomStatus: specResult.pomStatus,
+        initialMissingMethods: specResult.missingMethods
+      });
+
+      pomStatus = autoPomResult.pomStatus;
+
+      if (autoPomResult.diagnostics.finalPomStatus === "promoted") {
+        await fs.writeFile(appPaths.specPath, autoPomResult.specContent, "utf-8");
+        console.log(`[promote-plan] Auto-POM succeeded, spec regenerated and promoted.`);
+      } else {
+        await fs.writeFile(appPaths.specPath, autoPomResult.specContent, "utf-8");
+        console.log(`[promote-plan] Auto-POM completed but promotion still blocked: ${autoPomResult.diagnostics.finalPomStatus}`);
+      }
+
+      pomDiagnostics = {
+        ...pomDiagnostics,
+        autoPom: autoPomResult.diagnostics
+      };
+    }
   } else {
     const specContent = generateSpecFromPlan(plan, automationId, appProfile, appPaths);
     await fs.writeFile(appPaths.specPath, specContent, "utf-8");
@@ -679,7 +705,9 @@ export async function promoteExecutionPlan(
     ? "inline_debug_only"
     : pomStatus === "needs_page_object" || pomStatus === "needs_page_method"
       ? "blocked_missing_pom"
-      : rawAutomationStatus;
+      : pomStatus === "needs_manual_review"
+        ? "blocked_missing_pom"
+        : rawAutomationStatus;
 
   const now = new Date().toISOString();
 

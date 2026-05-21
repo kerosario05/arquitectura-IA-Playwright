@@ -59,24 +59,23 @@ test("POM spec without registry returns needs_page_object", () => {
 test("POM spec with active PO and method uses POM call", () => {
   const reg = makeRegistry();
   const r1 = registerPageObjectCandidate(reg, {
-    name: "LoginPage", className: "LoginPage", screenSignature: "sig:login", confidence: 0.9, sourcePlanId: "plan_1",
-    methods: [{ name: "clickLogin", intent: "click" }]
+    name: "HomePage", className: "HomePage", screenSignature: "sig:home", confidence: 0.9, sourcePlanId: "plan_1",
+    methods: [{ name: "start", intent: "start_session" }]
   });
   const poId = r1.registry.pageObjects[0].id;
   markPageObjectActive(r1.registry, poId);
-  markMethodActive(r1.registry, poId, "clickLogin");
+  markMethodActive(r1.registry, poId, "start");
 
-  // Single-step plan that matches the registered method
   const singleStepPlan: ExecutionPlan = {
     ...mockPlan,
-    steps: [{ index: 1, action: "click", target: { strategy: "role", value: "button", name: "Login" } }]
+    steps: [{ index: 1, action: "click", target: { strategy: "role", value: "button", name: "Iniciar" } }]
   };
   const result = generatePOMSpecFromPlan(singleStepPlan, "test-001", mockProfile, mockPaths, r1.registry, DEFAULT_PROMOTION_POLICY, false);
   expect(result.pomStatus).toBe("promoted");
-  expect(result.usedPageObjects).toContain("LoginPage");
-  expect(result.specContent).toContain("import { LoginPage } from");
-  expect(result.specContent).toContain("const loginPage = new LoginPage(page);");
-  expect(result.specContent).toContain("await loginPage.clickLogin();");
+  expect(result.usedPageObjects).toContain("HomePage");
+  expect(result.specContent).toContain("import { HomePage } from");
+  expect(result.specContent).toContain("const homePage = new HomePage(page);");
+  expect(result.specContent).toContain("await homePage.start();");
 });
 
 test("POM spec with inline debug mode marks inline_debug_only", () => {
@@ -88,61 +87,69 @@ test("POM spec with inline debug mode marks inline_debug_only", () => {
 test("POM spec generates imports and instantiations for each PO", () => {
   const reg = makeRegistry();
   const r1 = registerPageObjectCandidate(reg, {
-    name: "MenuPage", className: "MenuPage", screenSignature: "sig:menu", confidence: 0.8, sourcePlanId: "plan_1",
-    methods: [{ name: "selectOption", intent: "click" }]
+    name: "CategoryPage", className: "CategoryPage", screenSignature: "sig:category", confidence: 0.8, sourcePlanId: "plan_1",
+    methods: [{ name: "selectCategory", intent: "select_category", parameters: ["categoryName"] }]
   });
   const r1b = registerPageObjectCandidate(r1.registry, {
     name: "FormPage", className: "FormPage", screenSignature: "sig:form", confidence: 0.8, sourcePlanId: "plan_1",
-    methods: [{ name: "fillField", intent: "fill" }]
+    methods: [{ name: "fillField", intent: "fill_form_field", parameters: ["fieldName", "value"] }]
   });
   const r2 = r1b.registry;
   markPageObjectActive(r2, r2.pageObjects[0].id);
-  markMethodActive(r2, r2.pageObjects[0].id, "selectOption");
+  markMethodActive(r2, r2.pageObjects[0].id, "selectCategory");
   markPageObjectActive(r2, r2.pageObjects[1].id);
   markMethodActive(r2, r2.pageObjects[1].id, "fillField");
 
-  const result = generatePOMSpecFromPlan(mockPlan, "test-001", mockProfile, mockPaths, r2, DEFAULT_PROMOTION_POLICY, false);
+  const planWithSemanticSteps: ExecutionPlan = {
+    ...mockPlan,
+    steps: [
+      { index: 1, action: "click", target: { strategy: "role", value: "button", name: "tarjetas" } },
+      { index: 2, action: "fill", target: { strategy: "text", value: "username" }, value: "testuser" }
+    ]
+  };
+
+  const result = generatePOMSpecFromPlan(planWithSemanticSteps, "test-001", mockProfile, mockPaths, r2, DEFAULT_PROMOTION_POLICY, false);
   expect(result.pomStatus).toBe("promoted");
-  expect(result.specContent).toContain("import { MenuPage } from");
+  expect(result.specContent).toContain("import { CategoryPage } from");
   expect(result.specContent).toContain("import { FormPage } from");
-  expect(result.specContent).toContain("const menuPage = new MenuPage(page);");
+  expect(result.specContent).toContain("const categoryPage = new CategoryPage(page);");
   expect(result.specContent).toContain("const formPage = new FormPage(page);");
 });
 
 test("POM spec avoids duplicate imports", () => {
   const reg = makeRegistry();
   const r1 = registerPageObjectCandidate(reg, {
-    name: "MenuPage", className: "MenuPage", screenSignature: "sig:menu", confidence: 0.8, sourcePlanId: "plan_1",
+    name: "HomePage", className: "HomePage", screenSignature: "sig:home", confidence: 0.8, sourcePlanId: "plan_1",
     methods: [
-      { name: "selectOption", intent: "click" },
-      { name: "navigateTo", intent: "navigate" }
+      { name: "start", intent: "start_session" },
+      { name: "open", intent: "open_home" }
     ]
   });
   const poId = r1.registry.pageObjects[0].id;
   markPageObjectActive(r1.registry, poId);
-  markMethodActive(r1.registry, poId, "selectOption");
-  markMethodActive(r1.registry, poId, "navigateTo");
+  markMethodActive(r1.registry, poId, "start");
+  markMethodActive(r1.registry, poId, "open");
 
   const planWithTwoActions: ExecutionPlan = {
     ...mockPlan,
     steps: [
-      { index: 1, action: "click", target: { strategy: "role", value: "button", name: "Login" } },
+      { index: 1, action: "click", target: { strategy: "role", value: "button", name: "Iniciar" } },
       { index: 2, action: "navigate", target: { strategy: "text", value: "home" } }
     ]
   };
   const result = generatePOMSpecFromPlan(planWithTwoActions, "test-001", mockProfile, mockPaths, r1.registry, DEFAULT_PROMOTION_POLICY, false);
-  const importCount = (result.specContent.match(/import { MenuPage } from/g) || []).length;
+  const importCount = (result.specContent.match(/import { HomePage } from/g) || []).length;
   expect(importCount).toBe(1);
 });
 
 test("POM spec without method returns needs_page_method", () => {
   const reg = makeRegistry();
   const r1 = registerPageObjectCandidate(reg, {
-    name: "LoginPage", className: "LoginPage", screenSignature: "sig:login", confidence: 0.9, sourcePlanId: "plan_1",
-    methods: [{ name: "doOther", intent: "select" }]
+    name: "HomePage", className: "HomePage", screenSignature: "sig:home", confidence: 0.9, sourcePlanId: "plan_1",
+    methods: [{ name: "open", intent: "open_home" }]
   });
   markPageObjectActive(r1.registry, r1.registry.pageObjects[0].id);
-  markMethodActive(r1.registry, r1.registry.pageObjects[0].id, "doOther");
+  markMethodActive(r1.registry, r1.registry.pageObjects[0].id, "open");
 
   const result = generatePOMSpecFromPlan(mockPlan, "test-001", mockProfile, mockPaths, r1.registry, DEFAULT_PROMOTION_POLICY, false);
   expect(result.pomStatus).toBe("needs_page_method");
@@ -152,11 +159,16 @@ test("POM spec without method returns needs_page_method", () => {
 test("POM spec with candidate generation creates candidate entries", () => {
   const reg = makeRegistry();
   const r1 = registerPageObjectCandidate(reg, {
-    name: "GenericPage", className: "GenericPage", screenSignature: "sig:generic", confidence: 0.6, sourcePlanId: "plan_1",
-    methods: [{ name: "candidateClick", intent: "click" }]
+    name: "CategoryPage", className: "CategoryPage", screenSignature: "sig:category", confidence: 0.6, sourcePlanId: "plan_1",
+    methods: [{ name: "selectCategory", intent: "select_category", parameters: ["categoryName"] }]
   });
 
-  const result = generatePOMSpecFromPlan(mockPlan, "test-001", mockProfile, mockPaths, r1.registry, DEFAULT_PROMOTION_POLICY, false);
+  const planWithCategoryStep: ExecutionPlan = {
+    ...mockPlan,
+    steps: [{ index: 1, action: "click", target: { strategy: "role", value: "button", name: "tarjetas" } }]
+  };
+
+  const result = generatePOMSpecFromPlan(planWithCategoryStep, "test-001", mockProfile, mockPaths, r1.registry, DEFAULT_PROMOTION_POLICY, false);
   expect(result.generatedCandidates).toBe(1);
   expect(result.specContent).toContain("// candidate method");
 });

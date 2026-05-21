@@ -11,6 +11,12 @@ export type PromotionPolicy = {
   allowInlineDebugMode: boolean;
   allowCandidateGeneration: boolean;
   blockPromotionWhenPageObjectMissing: boolean;
+  autoPom?: boolean;
+  autoGeneratePageObjectCandidates?: boolean;
+  autoApproveSafePageObjects?: boolean;
+  autoApproveConfidenceThreshold?: number;
+  autoRunPomValidation?: boolean;
+  blockSensitiveAutoApproval?: boolean;
 };
 
 export const DEFAULT_PROMOTION_POLICY: PromotionPolicy = {
@@ -19,7 +25,13 @@ export const DEFAULT_PROMOTION_POLICY: PromotionPolicy = {
   allowInlineFallback: false,
   allowInlineDebugMode: true,
   allowCandidateGeneration: true,
-  blockPromotionWhenPageObjectMissing: true
+  blockPromotionWhenPageObjectMissing: true,
+  autoPom: false,
+  autoGeneratePageObjectCandidates: true,
+  autoApproveSafePageObjects: true,
+  autoApproveConfidenceThreshold: 0.50,
+  autoRunPomValidation: true,
+  blockSensitiveAutoApproval: true
 };
 
 export type POMPromotionStatus =
@@ -30,7 +42,8 @@ export type POMPromotionStatus =
   | "needs_component_object"
   | "needs_flow"
   | "page_object_candidate_created"
-  | "blocked_missing_pom";
+  | "blocked_missing_pom"
+  | "needs_manual_review";
 
 export type PromotedAutomationIndexEntry = {
   id: string;
@@ -64,6 +77,18 @@ export type PromotedAutomationIndexEntry = {
       missingPageObjects: string[];
       missingMethods: string[];
       generatedCandidates: number;
+      autoPom?: {
+        enabled: boolean;
+        initialPomStatus: string;
+        generatedCandidateFiles: string[];
+        autoApprovedPageObjects: string[];
+        autoApprovedMethods: string[];
+        blockedAutoApprovals: string[];
+        approvalThreshold: number;
+        regeneratedSpec: boolean;
+        validationStatus: "passed" | "failed" | "skipped";
+        finalPomStatus: "promoted" | "blocked_missing_pom" | "needs_page_method" | "needs_manual_review";
+      };
     };
     overwritten?: boolean;
     previousAutomationPath?: string;

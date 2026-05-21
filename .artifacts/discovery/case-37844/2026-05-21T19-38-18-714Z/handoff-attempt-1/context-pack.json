@@ -1,0 +1,412 @@
+{
+  "version": "1.0",
+  "createdAt": "2026-05-21T19:38:27.203Z",
+  "app": {
+    "appSlug": "default",
+    "profileName": "default",
+    "baseUrl": "https://172.27.4.50/",
+    "baseUrlHash": "74df3c0e992c"
+  },
+  "case": {
+    "caseId": 37844,
+    "title": "Visualizar detalle de Tarjeta Visa Gold",
+    "source": "testrail"
+  },
+  "failure": {
+    "failedReason": "target_not_found",
+    "failedTarget": "tarjetas",
+    "failedAtStep": 3
+  },
+  "currentRun": {
+    "outputDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37844\\2026-05-21T19-38-18-714Z",
+    "evidenceDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37844\\2026-05-21T19-38-18-714Z\\evidence",
+    "snapshotPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37844\\2026-05-21T19-38-18-714Z\\evidence\\step-3-snapshot.json",
+    "candidatePlanPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37844\\2026-05-21T19-38-18-714Z\\discovered-plans.pending.json",
+    "pendingObjectsPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37844\\2026-05-21T19-38-18-714Z\\discovered-objects.pending.json",
+    "pendingPlansPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37844\\2026-05-21T19-38-18-714Z\\discovered-plans.pending.json"
+  },
+  "knownObjects": [
+    {
+      "key": "button_iniciar",
+      "name": "Iniciar",
+      "type": "button",
+      "aliases": [
+        "iniciar"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_hola",
+      "name": "¡Hola!",
+      "type": "section",
+      "aliases": [
+        "¡hola!"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "¡Hola!",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_informacion_productosexplora_nuestros",
+      "name": "Información de productosExplora nuestros productos bancarios",
+      "type": "button",
+      "aliases": [
+        "información de productosexplora nuestros productos bancarios"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Información de productosExplora nuestros productos bancarios",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_transacciones_serviciosrealiza_operaciones",
+      "name": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+      "type": "button",
+      "aliases": [
+        "transacciones y serviciosrealiza operaciones con tus cuentas"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_salir",
+      "name": "Salir",
+      "type": "button",
+      "aliases": [
+        "salir"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Salir",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_hola",
+      "name": "¡Hola!",
+      "type": "section",
+      "aliases": [
+        "¡hola!"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "¡Hola!",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_nos_alegra_que",
+      "name": "¡Nos alegra que estés con nosotros!",
+      "type": "section",
+      "aliases": [
+        "¡nos alegra que estés con nosotros!"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "¡Nos alegra que estés con nosotros!",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_informacion_productos",
+      "name": "Información de productos",
+      "type": "section",
+      "aliases": [
+        "información de productos"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Información de productos",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_transacciones_servicios",
+      "name": "Transacciones y servicios",
+      "type": "section",
+      "aliases": [
+        "transacciones y servicios"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Transacciones y servicios",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_conoce_nuestros_productos",
+      "name": "Conoce nuestros productos",
+      "type": "section",
+      "aliases": [
+        "conoce nuestros productos"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Conoce nuestros productos",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    }
+  ],
+  "knownPlans": [
+    {
+      "id": "c37844-visualizar-detalle-de-tarjeta-visa-gold",
+      "caseId": 37844,
+      "externalId": "C37844",
+      "title": "Visualizar detalle de Tarjeta Visa Gold",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37844-visualizar-detalle-de-tarjeta-visa-gold\\plan.json",
+      "createdAt": "2026-05-21T03:09:17.322Z",
+      "updatedAt": "2026-05-21T18:58:55.393Z",
+      "score": 0
+    },
+    {
+      "id": "c37757-consulta-depositos-a-plazo-en-dolares",
+      "caseId": 37757,
+      "externalId": "C37757",
+      "title": "Consulta depositos a plazo en dolares",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37757-consulta-depositos-a-plazo-en-dolares\\plan.json",
+      "createdAt": "2026-05-20T19:46:17.185Z",
+      "updatedAt": "2026-05-20T19:46:17.185Z",
+      "score": 0
+    },
+    {
+      "id": "c37758-c37381-visualizar-detalle-de-cuenta-de-ahorro-en-pesos",
+      "caseId": 37758,
+      "externalId": "C37758",
+      "title": "C37381 - Visualizar detalle de cuenta de ahorro en pesos",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37758-c37381-visualizar-detalle-de-cuenta-de-ahorro-en-pesos\\plan.json",
+      "createdAt": "2026-05-20T19:54:34.497Z",
+      "updatedAt": "2026-05-20T19:54:34.497Z",
+      "score": 0
+    },
+    {
+      "id": "c37845-visualizar-detalle-de-tarjeta-visa-platinum",
+      "caseId": 37845,
+      "externalId": "C37845",
+      "title": "Visualizar detalle de Tarjeta Visa Platinum",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37845-visualizar-detalle-de-tarjeta-visa-platinum\\plan.json",
+      "createdAt": "2026-05-21T03:09:22.764Z",
+      "updatedAt": "2026-05-21T19:01:42.330Z",
+      "score": 0,
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa platinum"
+      ]
+    },
+    {
+      "id": "c37846-visualizar-detalle-de-tarjeta-visa-infinite",
+      "caseId": 37846,
+      "externalId": "C37846",
+      "title": "Visualizar detalle de Tarjeta Visa Infinite",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37846-visualizar-detalle-de-tarjeta-visa-infinite\\plan.json",
+      "createdAt": "2026-05-21T03:10:25.931Z",
+      "updatedAt": "2026-05-21T19:03:28.889Z",
+      "score": 0,
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa infinite"
+      ]
+    },
+    {
+      "id": "route-recovery",
+      "title": "Route recovery",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\route-recovery\\plan.json",
+      "createdAt": "2026-05-21T15:09:19.055Z",
+      "updatedAt": "2026-05-21T15:09:19.055Z",
+      "score": 0,
+      "route": [
+        "Tarjetas"
+      ]
+    },
+    {
+      "id": "c37853-consulta-detalle-de-prestamo-personal",
+      "caseId": 37853,
+      "externalId": "C37853",
+      "title": "Consulta detalle de prestamo personal",
+      "status": "inline_debug_only",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37853-consulta-detalle-de-prestamo-personal\\plan.json",
+      "createdAt": "2026-05-21T02:12:12.100Z",
+      "updatedAt": "2026-05-21T15:41:45.881Z",
+      "score": 0,
+      "route": [
+        "Iniciar",
+        "Información de productos"
+      ]
+    }
+  ],
+  "knownRoutes": [
+    {
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa platinum"
+      ],
+      "sourcePlanId": "c37845-visualizar-detalle-de-tarjeta-visa-platinum",
+      "score": 1
+    },
+    {
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa infinite"
+      ],
+      "sourcePlanId": "c37846-visualizar-detalle-de-tarjeta-visa-infinite",
+      "score": 1
+    },
+    {
+      "route": [
+        "Tarjetas"
+      ],
+      "sourcePlanId": "route-recovery",
+      "score": 1
+    },
+    {
+      "route": [
+        "Iniciar",
+        "Información de productos"
+      ],
+      "sourcePlanId": "c37853-consulta-detalle-de-prestamo-personal",
+      "score": 0
+    }
+  ],
+  "snapshotCandidates": [
+    {
+      "id": "el-4",
+      "type": "heading",
+      "text": "Conoce nuestros productos",
+      "tagName": "h1",
+      "className": "text-3xl font-bold text-foreground text-center",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-5",
+      "type": "text",
+      "text": "Selecciona una categoría:",
+      "tagName": "p",
+      "className": "text-base text-muted-foreground text-center mt-2",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-3",
+      "type": "button",
+      "tagName": "button",
+      "className": "absolute left-0 top-1/2 -translate-y-1/2 p-3 hover:bg-primary/10 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 border-2 border-transparent hover:border-primary/20",
+      "candidateLocatorsCount": 0
+    },
+    {
+      "id": "el-2",
+      "type": "image",
+      "tagName": "img",
+      "className": "h-10 object-contain",
+      "candidateLocatorsCount": 0
+    }
+  ],
+  "supportedActions": [
+    "navigate",
+    "login",
+    "click",
+    "fill",
+    "select",
+    "check",
+    "uncheck",
+    "press",
+    "waitFor",
+    "assertVisible",
+    "assertText",
+    "assertUrl",
+    "screenshot",
+    "noop"
+  ],
+  "safeData": {
+    "availableKeys": [],
+    "redacted": true
+  },
+  "constraints": {
+    "codexMustOnlyWriteAgentResponseJson": true,
+    "doNotRunPlaywright": true,
+    "doNotModifyStableRegistry": true,
+    "doNotApproveObjectsAutomatically": true,
+    "doNotInventData": true
+  },
+  "warnings": [
+    "Context file not found: automations\\apps\\default\\cases\\c37844-visualizar-detalle-de-tarjeta-visa-gold\\plan.json",
+    "Context file not found: automations\\apps\\default\\cases\\c37757-consulta-depositos-a-plazo-en-dolares\\plan.json",
+    "Context file not found: automations\\apps\\default\\cases\\c37758-c37381-visualizar-detalle-de-cuenta-de-ahorro-en-pesos\\plan.json"
+  ],
+  "appConfig": {
+    "appProfile": {
+      "appSlug": "default",
+      "name": "4",
+      "baseUrl": "https://172.27.4.50/",
+      "baseUrlHash": "74df3c0e992c",
+      "createdAt": "2026-05-21T19:03:28.873Z",
+      "updatedAt": "2026-05-21T19:03:28.874Z"
+    },
+    "baseUrl": "https://172.27.4.50/",
+    "loginMode": "no_login",
+    "testDataKeys": [],
+    "testDataAliases": {},
+    "hasUsername": false,
+    "hasPassword": false,
+    "missingInputBehavior": "fail",
+    "updatedAt": "2026-05-21T19:03:28.874Z"
+  }
+}

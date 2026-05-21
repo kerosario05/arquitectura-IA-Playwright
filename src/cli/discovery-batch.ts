@@ -36,6 +36,9 @@ export type BatchCliArgs = {
   inlineDebugSpec: boolean;
   allowPageObjectCandidates: boolean;
   overwrite: boolean;
+  autoPom: boolean;
+  autoPomThreshold?: number;
+  noAutoPomValidation: boolean;
 };
 
 export type BatchCaseState =
@@ -126,7 +129,10 @@ export function parseBatchArgs(argv: string[]): BatchCliArgs {
     pageObjectMode: true,
     inlineDebugSpec: false,
     allowPageObjectCandidates: true,
-    overwrite: false
+    overwrite: false,
+    autoPom: false,
+    autoPomThreshold: undefined,
+    noAutoPomValidation: false
   };
 
   let modeSet = false;
@@ -201,6 +207,25 @@ export function parseBatchArgs(argv: string[]): BatchCliArgs {
     }
     if (token === "--overwrite") {
       args.overwrite = true;
+      continue;
+    }
+    if (token === "--auto-pom") {
+      args.autoPom = true;
+      continue;
+    }
+    if (token === "--auto-pom-threshold") {
+      if (!nextValue || nextValue.startsWith("--")) {
+        throw new Error("Missing value for --auto-pom-threshold");
+      }
+      args.autoPomThreshold = Number(nextValue);
+      if (!Number.isFinite(args.autoPomThreshold) || args.autoPomThreshold < 0 || args.autoPomThreshold > 1) {
+        throw new Error(`Invalid --auto-pom-threshold value: ${nextValue}. Expected a number between 0 and 1.`);
+      }
+      i += 1;
+      continue;
+    }
+    if (token === "--no-auto-pom-validation") {
+      args.noAutoPomValidation = true;
       continue;
     }
 
@@ -503,6 +528,9 @@ export async function executeBatch(
         inlineDebugSpec: args.inlineDebugSpec,
         allowPageObjectCandidates: args.allowPageObjectCandidates,
         overwrite: args.overwrite,
+        autoPom: args.autoPom,
+        autoPomThreshold: args.autoPomThreshold,
+        noAutoPomValidation: args.noAutoPomValidation,
         config,
         testRailClient: sharedClient,
         autoRepair: args.autoRepair,

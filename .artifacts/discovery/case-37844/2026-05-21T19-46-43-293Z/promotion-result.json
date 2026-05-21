@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-21T19:47:07.992Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c37844-visualizar-detalle-de-tarjeta-visa-gold",
+  "appSlug": "default",
+  "specPath": "automations\\apps\\default\\cases\\c37844-visualizar-detalle-de-tarjeta-visa-gold\\spec.ts",
+  "planPath": "automations\\apps\\default\\cases\\c37844-visualizar-detalle-de-tarjeta-visa-gold\\plan.json",
+  "caseFolder": "c37844-visualizar-detalle-de-tarjeta-visa-gold",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false
+}

@@ -29,7 +29,9 @@
     "cases:start": "tsx src/cli/cases-start.ts",
     "discovery:scan": "tsx src/cli/discovery-scan.ts",
     "discovery:case": "tsx src/cli/discovery-case.ts",
-    "discovery:batch": "tsx src/cli/discovery-batch.ts"
+    "discovery:batch": "tsx src/cli/discovery-batch.ts",
+    "page-objects:generate": "tsx src/cli/page-objects-generate.ts",
+    "page-objects:approve": "tsx src/cli/page-objects-approve.ts"
   },
   "dependencies": {
     "@playwright/test": "^1.54.2",

@@ -7,24 +7,24 @@
   "specPath": "automations\\apps\\default\\cases\\c37845-visualizar-detalle-de-tarjeta-visa-platinum\\spec.ts",
   "appSlug": "default",
   "appConfigPath": "automations\\apps\\default\\app.config.json",
-  "status": "blocked_missing_pom",
+  "status": "active",
   "source": "discovery",
   "appProfile": "default",
   "baseUrlHash": "74df3c0e992c",
-  "createdAt": "2026-05-21T16:37:58.350Z",
-  "updatedAt": "2026-05-21T16:37:58.350Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37845\\2026-05-21T16-37-44-655Z\\discovered-plans.pending.json",
-  "pomStatus": "needs_page_method",
+  "createdAt": "2026-05-21T19:42:47.563Z",
+  "updatedAt": "2026-05-21T19:42:47.563Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37845\\2026-05-21T19-42-21-571Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
   "inlineDebugMode": false,
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37845\\2026-05-21T16-37-44-655Z",
+    "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37845\\2026-05-21T19-42-21-571Z",
     "pomDiagnostics": {
       "missingPageObjects": [],
-      "missingMethods": [
-        "navigate: navigate APP_BASE_URL",
-        "login: login"
-      ],
-      "generatedCandidates": 1
-    }
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\default\\cases\\c37845-visualizar-detalle-de-tarjeta-visa-platinum\\plan.json",
+    "previousStatus": "active"
   }
 }
