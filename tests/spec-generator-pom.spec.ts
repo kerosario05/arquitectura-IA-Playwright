@@ -8,6 +8,7 @@ import { registerPageObjectCandidate, markPageObjectActive, markMethodActive } f
 
 const mockProfile: AppProfile = {
   appSlug: "test",
+  source: "default",
   name: "Test",
   baseUrl: "https://test.com",
   baseUrlHash: "abc123",
@@ -362,5 +363,456 @@ test("C37869: AuthFlow is inserted between pre-auth and post-auth steps with mul
   expect(authFlowLine).toBeLessThan(selectProductLine);
 
   // Pre-auth steps are now preserved correctly, so no validation errors
+  expect(result.validationErrors).toHaveLength(0);
+});
+
+// --- Submit-like vs selection-like priority tests ---
+
+test("submit-like target 'continuar' mapped to clickPrimaryAction => no validation error", () => {
+  const reg = makeRegistry();
+  const r1 = registerPageObjectCandidate(reg, {
+    name: "ProductDetailPage", className: "ProductDetailPage", screenSignature: "sig:detail", confidence: 0.9, sourcePlanId: "plan_1",
+    methods: [{ name: "clickPrimaryAction", intent: "click_primary_action", parameters: ["actionText"] }]
+  });
+  markPageObjectActive(r1.registry, r1.registry.pageObjects[0].id);
+  markMethodActive(r1.registry, r1.registry.pageObjects[0].id, "clickPrimaryAction");
+
+  const plan: ExecutionPlan = {
+    version: "1.0",
+    source: "discovery_generated",
+    status: "validated",
+    scenario: { source: "testrail", caseId: 1, title: "Test" },
+    requiredData: [],
+    steps: [
+      { index: 1, action: "click", target: { strategy: "text", value: "continuar", exact: false } }
+    ],
+    createdAt: new Date().toISOString()
+  };
+
+  const result = generatePOMSpecFromPlan(plan, "test-001", mockProfile, mockPaths, r1.registry, DEFAULT_PROMOTION_POLICY, false);
+  expect(result.validationErrors).toHaveLength(0);
+  expect(result.specContent).toContain("clickPrimaryAction('continuar')");
+});
+
+test("submit-like target 'confirmar' mapped to clickPrimaryAction => no validation error", () => {
+  const reg = makeRegistry();
+  const r1 = registerPageObjectCandidate(reg, {
+    name: "ProductDetailPage", className: "ProductDetailPage", screenSignature: "sig:detail", confidence: 0.9, sourcePlanId: "plan_1",
+    methods: [{ name: "clickPrimaryAction", intent: "click_primary_action", parameters: ["actionText"] }]
+  });
+  markPageObjectActive(r1.registry, r1.registry.pageObjects[0].id);
+  markMethodActive(r1.registry, r1.registry.pageObjects[0].id, "clickPrimaryAction");
+
+  const plan: ExecutionPlan = {
+    version: "1.0",
+    source: "discovery_generated",
+    status: "validated",
+    scenario: { source: "testrail", caseId: 1, title: "Test" },
+    requiredData: [],
+    steps: [
+      { index: 1, action: "click", target: { strategy: "text", value: "confirmar", exact: false } }
+    ],
+    createdAt: new Date().toISOString()
+  };
+
+  const result = generatePOMSpecFromPlan(plan, "test-001", mockProfile, mockPaths, r1.registry, DEFAULT_PROMOTION_POLICY, false);
+  expect(result.validationErrors).toHaveLength(0);
+  expect(result.specContent).toContain("clickPrimaryAction('confirmar')");
+});
+
+test("submit-like target 'enviar' mapped to clickPrimaryAction => no validation error", () => {
+  const reg = makeRegistry();
+  const r1 = registerPageObjectCandidate(reg, {
+    name: "ProductDetailPage", className: "ProductDetailPage", screenSignature: "sig:detail", confidence: 0.9, sourcePlanId: "plan_1",
+    methods: [{ name: "clickPrimaryAction", intent: "click_primary_action", parameters: ["actionText"] }]
+  });
+  markPageObjectActive(r1.registry, r1.registry.pageObjects[0].id);
+  markMethodActive(r1.registry, r1.registry.pageObjects[0].id, "clickPrimaryAction");
+
+  const plan: ExecutionPlan = {
+    version: "1.0",
+    source: "discovery_generated",
+    status: "validated",
+    scenario: { source: "testrail", caseId: 1, title: "Test" },
+    requiredData: [],
+    steps: [
+      { index: 1, action: "click", target: { strategy: "text", value: "enviar", exact: false } }
+    ],
+    createdAt: new Date().toISOString()
+  };
+
+  const result = generatePOMSpecFromPlan(plan, "test-001", mockProfile, mockPaths, r1.registry, DEFAULT_PROMOTION_POLICY, false);
+  expect(result.validationErrors).toHaveLength(0);
+  expect(result.specContent).toContain("clickPrimaryAction('enviar')");
+});
+
+test("selection-like target 'A quien pueda interesar' requires select method, not clickPrimaryAction", () => {
+  const reg = makeRegistry();
+  const r1 = registerPageObjectCandidate(reg, {
+    name: "ProductListPage", className: "ProductListPage", screenSignature: "sig:list", confidence: 0.9, sourcePlanId: "plan_1",
+    methods: [
+      { name: "clickPrimaryAction", intent: "click_primary_action", parameters: ["actionText"] }
+    ]
+  });
+  markPageObjectActive(r1.registry, r1.registry.pageObjects[0].id);
+  markMethodActive(r1.registry, r1.registry.pageObjects[0].id, "clickPrimaryAction");
+
+  const plan: ExecutionPlan = {
+    version: "1.0",
+    source: "discovery_generated",
+    status: "validated",
+    scenario: { source: "testrail", caseId: 1, title: "Test" },
+    requiredData: [],
+    steps: [
+      {
+        index: 1,
+        action: "click",
+        target: { strategy: "text", value: "A quien pueda interesar", exact: false },
+        selectionDiagnostics: { selectionLike: true, reason: "selection_no_transition_next_action_enabled" }
+      } as any
+    ],
+    createdAt: new Date().toISOString()
+  };
+
+  const result = generatePOMSpecFromPlan(plan, "test-001", mockProfile, mockPaths, r1.registry, DEFAULT_PROMOTION_POLICY, false);
+  expect(result.specContent).not.toContain("clickPrimaryAction('A quien pueda interesar')");
+  expect(result.missingMethods.length).toBeGreaterThan(0);
+  expect(result.missingMethods[0]).toContain("select_product");
+});
+
+test("submit-like wins even when discovery marked selectionLike by context", () => {
+  const reg = makeRegistry();
+  const r1 = registerPageObjectCandidate(reg, {
+    name: "ProductDetailPage", className: "ProductDetailPage", screenSignature: "sig:detail", confidence: 0.9, sourcePlanId: "plan_1",
+    methods: [{ name: "clickPrimaryAction", intent: "click_primary_action", parameters: ["actionText"] }]
+  });
+  markPageObjectActive(r1.registry, r1.registry.pageObjects[0].id);
+  markMethodActive(r1.registry, r1.registry.pageObjects[0].id, "clickPrimaryAction");
+
+  const plan: ExecutionPlan = {
+    version: "1.0",
+    source: "discovery_generated",
+    status: "validated",
+    scenario: { source: "testrail", caseId: 1, title: "Test" },
+    requiredData: [],
+    steps: [
+      {
+        index: 1,
+        action: "click",
+        target: { strategy: "text", value: "continuar", exact: false },
+        selectionDiagnostics: { selectionLike: true, reason: "selection_no_transition_next_action_enabled" }
+      } as any
+    ],
+    createdAt: new Date().toISOString()
+  };
+
+  const result = generatePOMSpecFromPlan(plan, "test-001", mockProfile, mockPaths, r1.registry, DEFAULT_PROMOTION_POLICY, false);
+  expect(result.validationErrors).toHaveLength(0);
+  expect(result.specContent).toContain("clickPrimaryAction('continuar')");
+});
+
+test("C37869 promotion validation does not fail for continuar clickPrimaryAction", () => {
+  const reg = makeRegistry();
+  const r1 = registerPageObjectCandidate(reg, {
+    name: "ProductDetailPage", className: "ProductDetailPage", screenSignature: "sig:detail", confidence: 0.9, sourcePlanId: "plan_1",
+    methods: [{ name: "clickPrimaryAction", intent: "click_primary_action", parameters: ["actionText"] }]
+  });
+  markPageObjectActive(r1.registry, r1.registry.pageObjects[0].id);
+  markMethodActive(r1.registry, r1.registry.pageObjects[0].id, "clickPrimaryAction");
+
+  const plan: ExecutionPlan = {
+    version: "1.0",
+    source: "discovery_generated",
+    status: "validated",
+    scenario: { source: "testrail", caseId: 37869, title: "Generar carta de referencia" },
+    requiredData: [],
+    steps: [
+      { index: 1, action: "click", target: { strategy: "text", value: "continuar", exact: false } },
+      { index: 2, action: "click", target: { strategy: "text", value: "continuar", exact: false } }
+    ],
+    createdAt: new Date().toISOString()
+  };
+
+  const result = generatePOMSpecFromPlan(plan, "c37869", mockProfile, mockPaths, r1.registry, DEFAULT_PROMOTION_POLICY, false);
+  expect(result.validationErrors).toHaveLength(0);
+});
+
+test("C37869 fails promotion if 'A quien pueda interesar' has no select method available", () => {
+  const reg = makeRegistry();
+  const r1 = registerPageObjectCandidate(reg, {
+    name: "ProductListPage", className: "ProductListPage", screenSignature: "sig:list", confidence: 0.9, sourcePlanId: "plan_1",
+    methods: [
+      { name: "clickPrimaryAction", intent: "click_primary_action", parameters: ["actionText"] }
+    ]
+  });
+  markPageObjectActive(r1.registry, r1.registry.pageObjects[0].id);
+  markMethodActive(r1.registry, r1.registry.pageObjects[0].id, "clickPrimaryAction");
+
+  const plan: ExecutionPlan = {
+    version: "1.0",
+    source: "discovery_generated",
+    status: "validated",
+    scenario: { source: "testrail", caseId: 37869, title: "Generar carta de referencia" },
+    requiredData: [],
+    steps: [
+      {
+        index: 1,
+        action: "click",
+        target: { strategy: "text", value: "A quien pueda interesar", exact: false },
+        selectionDiagnostics: { selectionLike: true, reason: "selection_no_transition_next_action_enabled" }
+      } as any
+    ],
+    createdAt: new Date().toISOString()
+  };
+
+  const result = generatePOMSpecFromPlan(plan, "c37869", mockProfile, mockPaths, r1.registry, DEFAULT_PROMOTION_POLICY, false);
+  expect(result.pomStatus).toBe("needs_page_method");
+  expect(result.missingMethods.length).toBeGreaterThan(0);
+  expect(result.missingMethods[0]).toContain("select_product");
+});
+
+// --- Fallback and diagnostics tests ---
+
+test("open_home falls back to selectProduct when ProductListPage exists but has no open_home method", () => {
+  const reg = makeRegistry();
+  const r1 = registerPageObjectCandidate(reg, {
+    name: "ProductListPage", className: "ProductListPage", screenSignature: "sig:list", confidence: 0.9, sourcePlanId: "plan_1",
+    methods: [
+      { name: "selectProduct", intent: "select_product", parameters: ["productName"] }
+    ]
+  });
+  markPageObjectActive(r1.registry, r1.registry.pageObjects[0].id);
+  markMethodActive(r1.registry, r1.registry.pageObjects[0].id, "selectProduct");
+
+  const plan: ExecutionPlan = {
+    version: "1.0",
+    source: "discovery_generated",
+    status: "validated",
+    scenario: { source: "testrail", caseId: 1, title: "Test" },
+    requiredData: [],
+    steps: [
+      { index: 1, action: "click", target: { strategy: "text", value: "Generar cartas", exact: false } }
+    ],
+    createdAt: new Date().toISOString()
+  };
+
+  const result = generatePOMSpecFromPlan(plan, "test-001", mockProfile, mockPaths, r1.registry, DEFAULT_PROMOTION_POLICY, false);
+  expect(result.specContent).toContain("selectProduct('Generar cartas')");
+  expect(result.validationErrors).toHaveLength(0);
+});
+
+test("click_primary_action falls back to clickPrimaryAction when ProductDetailPage exists as candidate", () => {
+  const reg = makeRegistry();
+  const r1 = registerPageObjectCandidate(reg, {
+    name: "ProductDetailPage", className: "ProductDetailPage", screenSignature: "sig:detail", confidence: 0.5, sourcePlanId: "plan_1",
+    methods: [
+      { name: "clickPrimaryAction", intent: "click_primary_action", parameters: ["actionText"] }
+    ]
+  });
+  markPageObjectActive(r1.registry, r1.registry.pageObjects[0].id);
+  markMethodActive(r1.registry, r1.registry.pageObjects[0].id, "clickPrimaryAction");
+
+  const plan: ExecutionPlan = {
+    version: "1.0",
+    source: "discovery_generated",
+    status: "validated",
+    scenario: { source: "testrail", caseId: 1, title: "Test" },
+    requiredData: [],
+    steps: [
+      { index: 1, action: "click", target: { strategy: "text", value: "continuar", exact: false } }
+    ],
+    createdAt: new Date().toISOString()
+  };
+
+  const result = generatePOMSpecFromPlan(plan, "test-001", mockProfile, mockPaths, r1.registry, DEFAULT_PROMOTION_POLICY, false);
+  expect(result.specContent).toContain("clickPrimaryAction('continuar')");
+  expect(result.validationErrors).toHaveLength(0);
+});
+
+test("start_session falls back to start when HomePage exists as candidate", () => {
+  const reg = makeRegistry();
+  const r1 = registerPageObjectCandidate(reg, {
+    name: "HomePage", className: "HomePage", screenSignature: "sig:home", confidence: 0.5, sourcePlanId: "plan_1",
+    methods: [
+      { name: "start", intent: "start_session" }
+    ]
+  });
+  markPageObjectActive(r1.registry, r1.registry.pageObjects[0].id);
+  markMethodActive(r1.registry, r1.registry.pageObjects[0].id, "start");
+
+  const plan: ExecutionPlan = {
+    version: "1.0",
+    source: "discovery_generated",
+    status: "validated",
+    scenario: { source: "testrail", caseId: 1, title: "Test" },
+    requiredData: [],
+    steps: [
+      { index: 1, action: "click", target: { strategy: "text", value: "iniciar", exact: false } }
+    ],
+    createdAt: new Date().toISOString()
+  };
+
+  const result = generatePOMSpecFromPlan(plan, "test-001", mockProfile, mockPaths, r1.registry, DEFAULT_PROMOTION_POLICY, false);
+  expect(result.specContent).toContain("homePage.start()");
+  expect(result.validationErrors).toHaveLength(0);
+});
+
+test("multi-select of two product_condition before continuar is valid", () => {
+  const reg = makeRegistry();
+  const r1 = registerPageObjectCandidate(reg, {
+    name: "ProductListPage", className: "ProductListPage", screenSignature: "sig:list", confidence: 0.9, sourcePlanId: "plan_1",
+    methods: [
+      { name: "selectProduct", intent: "select_product", parameters: ["productName"] }
+    ]
+  });
+  const r2 = registerPageObjectCandidate(r1.registry, {
+    name: "ProductDetailPage", className: "ProductDetailPage", screenSignature: "sig:detail", confidence: 0.9, sourcePlanId: "plan_1",
+    methods: [
+      { name: "clickPrimaryAction", intent: "click_primary_action", parameters: ["actionText"] }
+    ]
+  });
+  markPageObjectActive(r2.registry, r2.registry.pageObjects[0].id);
+  markMethodActive(r2.registry, r2.registry.pageObjects[0].id, "selectProduct");
+  markPageObjectActive(r2.registry, r2.registry.pageObjects[1].id);
+  markMethodActive(r2.registry, r2.registry.pageObjects[1].id, "clickPrimaryAction");
+
+  const plan: ExecutionPlan = {
+    version: "1.0",
+    source: "discovery_generated",
+    status: "validated",
+    scenario: { source: "testrail", caseId: 1, title: "Test" },
+    requiredData: [],
+    steps: [
+      { index: 1, action: "click", target: { strategy: "text", value: "Depósito a plazo", exact: false }, selectionDiagnostics: { selectionLike: true, reason: "selection_no_transition_next_action_enabled" } } as any,
+      { index: 2, action: "click", target: { strategy: "text", value: "cuenta de ahorros", exact: false }, selectionDiagnostics: { selectionLike: true, reason: "selection_no_transition_next_action_enabled" } } as any,
+      { index: 3, action: "click", target: { strategy: "text", value: "continuar", exact: false } }
+    ],
+    createdAt: new Date().toISOString()
+  };
+
+  const result = generatePOMSpecFromPlan(plan, "test-001", mockProfile, mockPaths, r2.registry, DEFAULT_PROMOTION_POLICY, false);
+  expect(result.specContent).toContain("selectProduct('Depósito a plazo')");
+  expect(result.specContent).toContain("selectProduct('cuenta de ahorros')");
+  expect(result.specContent).toContain("clickPrimaryAction('continuar')");
+  expect(result.validationErrors).toHaveLength(0);
+});
+
+// --- Candidate import prevention tests ---
+
+test("active .page wins over .candidate when both exist in registry", () => {
+  const reg = makeRegistry();
+
+  const r1 = registerPageObjectCandidate(reg, {
+    name: "HomePage", className: "HomePage", screenSignature: "sig:home-active", confidence: 0.9, sourcePlanId: "plan_1",
+    methods: [{ name: "start", intent: "start_session" }]
+  });
+  markPageObjectActive(r1.registry, r1.registry.pageObjects[0].id);
+  markMethodActive(r1.registry, r1.registry.pageObjects[0].id, "start");
+  r1.registry.pageObjects[0].filePath = "/apps/test/pages/home.page.ts";
+
+  const r2 = registerPageObjectCandidate(r1.registry, {
+    name: "HomePage", className: "HomePage", screenSignature: "sig:home-candidate", confidence: 0.5, sourcePlanId: "plan_2",
+    methods: [{ name: "start", intent: "start_session" }]
+  });
+  r2.registry.pageObjects[1].status = "candidate";
+  r2.registry.pageObjects[1].filePath = "/apps/test/pages/home.page.candidate.ts";
+
+  const plan: ExecutionPlan = {
+    version: "1.0",
+    source: "discovery_generated",
+    status: "validated",
+    scenario: { source: "testrail", caseId: 1, title: "Test" },
+    requiredData: [],
+    steps: [{ index: 1, action: "click", target: { strategy: "text", value: "iniciar", exact: false } }],
+    createdAt: new Date().toISOString()
+  };
+
+  const result = generatePOMSpecFromPlan(plan, "test-001", mockProfile, mockPaths, r2.registry, DEFAULT_PROMOTION_POLICY, false);
+  expect(result.specContent).toContain("from '../../pages/home.page'");
+  expect(result.specContent).not.toContain(".candidate");
+});
+
+test("candidate-only Page Object without approval still generates import but normalized to .page path", () => {
+  const reg = makeRegistry();
+
+  const r1 = registerPageObjectCandidate(reg, {
+    name: "HomePage", className: "HomePage", screenSignature: "sig:home", confidence: 0.5, sourcePlanId: "plan_1",
+    methods: [{ name: "start", intent: "start_session" }]
+  });
+  r1.registry.pageObjects[0].status = "candidate";
+  r1.registry.pageObjects[0].filePath = "/apps/test/pages/home.page.candidate.ts";
+  markMethodActive(r1.registry, r1.registry.pageObjects[0].id, "start");
+
+  const plan: ExecutionPlan = {
+    version: "1.0",
+    source: "discovery_generated",
+    status: "validated",
+    scenario: { source: "testrail", caseId: 1, title: "Test" },
+    requiredData: [],
+    steps: [{ index: 1, action: "click", target: { strategy: "text", value: "iniciar", exact: false } }],
+    createdAt: new Date().toISOString()
+  };
+
+  const result = generatePOMSpecFromPlan(plan, "test-001", mockProfile, mockPaths, r1.registry, DEFAULT_PROMOTION_POLICY, false);
+  expect(result.specContent).not.toContain(".candidate");
+  expect(result.specContent).toContain("from '../../pages/home.page'");
+});
+
+test("C37844 regression: after Auto-POM approves ProductInformationPage and CategoryPage, spec imports active pages", () => {
+  const reg = makeRegistry();
+
+  const r1 = registerPageObjectCandidate(reg, {
+    name: "HomePage", className: "HomePage", screenSignature: "sig:home", confidence: 0.9, sourcePlanId: "plan_1",
+    methods: [{ name: "start", intent: "start_session" }]
+  });
+  markPageObjectActive(r1.registry, r1.registry.pageObjects[0].id);
+  markMethodActive(r1.registry, r1.registry.pageObjects[0].id, "start");
+  r1.registry.pageObjects[0].filePath = "/apps/test/pages/home.page.ts";
+
+  const r2 = registerPageObjectCandidate(r1.registry, {
+    name: "ProductInformationPage", className: "ProductInformationPage", screenSignature: "sig:productinfo", confidence: 0.9, sourcePlanId: "plan_1",
+    methods: [{ name: "openProductInformation", intent: "open_product_information" }]
+  });
+  markPageObjectActive(r2.registry, r2.registry.pageObjects[1].id);
+  markMethodActive(r2.registry, r2.registry.pageObjects[1].id, "openProductInformation");
+  r2.registry.pageObjects[1].filePath = "/apps/test/pages/productinformation.page.ts";
+
+  const r3 = registerPageObjectCandidate(r2.registry, {
+    name: "CategoryPage", className: "CategoryPage", screenSignature: "sig:category", confidence: 0.9, sourcePlanId: "plan_1",
+    methods: [{ name: "selectCategory", intent: "select_category", parameters: ["categoryName"] }]
+  });
+  markPageObjectActive(r3.registry, r3.registry.pageObjects[2].id);
+  markMethodActive(r3.registry, r3.registry.pageObjects[2].id, "selectCategory");
+  r3.registry.pageObjects[2].filePath = "/apps/test/pages/category.page.ts";
+
+  const r4 = registerPageObjectCandidate(r3.registry, {
+    name: "ProductListPage", className: "ProductListPage", screenSignature: "sig:productlist", confidence: 0.9, sourcePlanId: "plan_1",
+    methods: [{ name: "selectProduct", intent: "select_product", parameters: ["productName"] }]
+  });
+  markPageObjectActive(r4.registry, r4.registry.pageObjects[3].id);
+  markMethodActive(r4.registry, r4.registry.pageObjects[3].id, "selectProduct");
+  r4.registry.pageObjects[3].filePath = "/apps/test/pages/productlist.page.ts";
+
+  const plan: ExecutionPlan = {
+    version: "1.0",
+    source: "discovery_generated",
+    status: "validated",
+    scenario: { source: "testrail", caseId: 37844, title: "Visualizar detalle de tarjeta Visa Gold" },
+    requiredData: [],
+    steps: [
+      { index: 1, action: "click", target: { strategy: "text", value: "Iniciar", exact: false } },
+      { index: 2, action: "click", target: { strategy: "text", value: "Información de productos", exact: false } },
+      { index: 3, action: "click", target: { strategy: "text", value: "tarjetas", exact: false } },
+      { index: 4, action: "click", target: { strategy: "text", value: "Tarjeta de Credito Visa Gold", exact: false } }
+    ],
+    createdAt: new Date().toISOString()
+  };
+
+  const result = generatePOMSpecFromPlan(plan, "c37844", mockProfile, mockPaths, r4.registry, DEFAULT_PROMOTION_POLICY, false);
+  expect(result.specContent).toContain("from '../../pages/home.page'");
+  expect(result.specContent).toContain("from '../../pages/productinformation.page'");
+  expect(result.specContent).toContain("from '../../pages/category.page'");
+  expect(result.specContent).toContain("from '../../pages/productlist.page'");
+  expect(result.specContent).not.toContain(".candidate");
   expect(result.validationErrors).toHaveLength(0);
 });

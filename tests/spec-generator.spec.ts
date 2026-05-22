@@ -27,6 +27,7 @@ const basePlan: ExecutionPlan = {
 function makeSpec(appSlug = "generic-app"): string {
   const appProfile = {
     appSlug,
+    source: "default" as const,
     name: "Generic App",
     baseUrl: "https://example.test",
     createdAt: new Date().toISOString(),

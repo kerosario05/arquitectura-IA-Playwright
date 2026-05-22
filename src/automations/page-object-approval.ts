@@ -200,6 +200,7 @@ export async function approvePageObjectCandidates(
 ): Promise<ApprovalResult> {
   const appProfile: AppProfile = {
     appSlug,
+    source: "default",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
@@ -330,6 +331,7 @@ export async function autoApproveSafePageObjects(
 ): Promise<AutoApprovalResult> {
   const appProfile: AppProfile = {
     appSlug,
+    source: "default",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
@@ -406,9 +408,9 @@ export async function autoApproveSafePageObjects(
 
       const now = new Date().toISOString();
 
+      candidate.filePath = activeFilePath.replace(/\\/g, "/");
       if (!hasActiveFile) {
         candidate.status = "active";
-        candidate.filePath = activeFilePath.replace(/\\/g, "/");
       }
 
       for (const method of approvableMethods) {

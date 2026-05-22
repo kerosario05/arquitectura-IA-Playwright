@@ -1,0 +1,235 @@
+{
+  "version": "1.0",
+  "appSlug": "arquitectura-automatizacion",
+  "flows": [
+    {
+      "id": "flow_1779485446059_fc86md",
+      "name": "Generar carta de referencia con cuenta de ahorro",
+      "filePath": "flows\\generar-carta-de-referencia-con-cuenta-de-ahorro.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "transacciones y servicio",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Cédula de identidad dominicana",
+          "pageObjectId": "LoginPage",
+          "methodName": "clickPrimaryAction"
+        },
+        {
+          "action": "click",
+          "target": "continuar",
+          "pageObjectId": "LoginPage",
+          "methodName": "clickPrimaryAction"
+        },
+        {
+          "action": "click",
+          "target": "Generar cartas",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Carta de referencia",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "cuenta de ahorros",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "continuar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "A quien pueda interesar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "continuar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-22T21:30:46.059Z",
+      "updatedAt": "2026-05-22T21:30:46.059Z"
+    },
+    {
+      "id": "flow_1779485748983_0z9jsh",
+      "name": "Generar carta de referencia con certificado",
+      "filePath": "flows\\generar-carta-de-referencia-con-certificado.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "transacciones y servicio",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Cédula de identidad dominicana",
+          "pageObjectId": "LoginPage",
+          "methodName": "clickPrimaryAction"
+        },
+        {
+          "action": "click",
+          "target": "continuar",
+          "pageObjectId": "LoginPage",
+          "methodName": "clickPrimaryAction"
+        },
+        {
+          "action": "click",
+          "target": "Generar cartas",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Carta de referencia",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Depósito a plazo",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "cuenta de ahorros",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "continuar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "A quien pueda interesar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "continuar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-22T21:35:48.983Z",
+      "updatedAt": "2026-05-22T21:35:48.983Z"
+    },
+    {
+      "id": "flow_1779487111133_9jbp9p",
+      "name": "Visualizar detalle de Tarjeta Visa Gold",
+      "filePath": "flows\\visualizar-detalle-de-tarjeta-visa-gold.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Información de productos",
+          "pageObjectId": "ProductInformationPage",
+          "methodName": "openProductInformation"
+        },
+        {
+          "action": "click",
+          "target": "tarjetas",
+          "pageObjectId": "CategoryPage",
+          "methodName": "selectCategory"
+        },
+        {
+          "action": "click",
+          "target": "tarjeta de credito visa gold",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-22T21:58:31.133Z",
+      "updatedAt": "2026-05-22T21:58:31.133Z"
+    }
+  ],
+  "updatedAt": "2026-05-22T21:58:31.135Z"
+}

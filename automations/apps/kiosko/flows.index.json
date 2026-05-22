@@ -1,0 +1,57 @@
+{
+  "version": "1.0",
+  "appSlug": "kiosko",
+  "flows": [
+    {
+      "id": "flow_1779477398495_ubit5v",
+      "name": "Visualizar detalle de Tarjeta Visa Gold",
+      "filePath": "flows\\visualizar-detalle-de-tarjeta-visa-gold.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Información de productos",
+          "pageObjectId": "ProductInformationPage",
+          "methodName": "openProductInformation"
+        },
+        {
+          "action": "click",
+          "target": "tarjetas",
+          "pageObjectId": "CategoryPage",
+          "methodName": "selectCategory"
+        },
+        {
+          "action": "click",
+          "target": "tarjeta de credito visa gold",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-22T19:16:38.494Z",
+      "updatedAt": "2026-05-22T19:16:38.494Z"
+    }
+  ],
+  "updatedAt": "2026-05-22T19:16:38.497Z"
+}

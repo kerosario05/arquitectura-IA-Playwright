@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import fsSync from "node:fs";
 import path from "node:path";
 import type { ExecutionPlan } from "../types/execution-plan.types";
 import type { AppProfile, AppAutomationPaths } from "./app-profile";
@@ -136,6 +137,16 @@ export async function runAutoPomPipeline(input: AutoPomInput): Promise<AutoPomRe
   // Step 3: Regenerate spec with updated registry
   console.log(`[auto-pom] Regenerating POM spec...`);
   const registry = await loadPageObjectRegistry(input.appProfile, input.outputRoot);
+
+  const hasAuthConsumedSteps = input.plan.steps.some(s => {
+    const desc = (s.description ?? "").toLowerCase();
+    return desc.startsWith("authflow handled") || desc.includes("step consumed by authflow");
+  });
+  const authFlowOptions = hasAuthConsumedSteps ? {
+    alias: "defaultClient",
+    landing: "transactions_menu"
+  } : undefined;
+
   const specResult = await generateSpecFromPlanWithPolicy({
     plan: input.plan,
     automationId: input.automationId,
@@ -143,7 +154,8 @@ export async function runAutoPomPipeline(input: AutoPomInput): Promise<AutoPomRe
     appPaths: input.appPaths,
     promotionPolicy: policy,
     inlineDebugMode: input.inlineDebugMode,
-    pageObjectRegistry: registry
+    pageObjectRegistry: registry,
+    authFlowOptions
   });
 
   diagnostics.regeneratedSpec = true;
@@ -220,10 +232,27 @@ export function validatePomSpec(
     importedClasses.push(className);
 
     if (importPath.includes(".candidate")) {
-      errors.push(`Import '${className}' points to candidate file: ${importPath}`);
+      const baseName = importPath.replace(/\.candidate(\.ts)?$/, "$1").replace(/\.ts$/, ".ts");
+      const pagesDir = path.dirname(appPaths.specPath ?? "").replace(/cases\/[^/]+$/, "pages");
+      const activeFileExists = fsSync.existsSync(path.join(pagesDir, baseName.replace(/^\.\.\//, "")));
+      const candidateFileExists = fsSync.existsSync(path.join(pagesDir, importPath.replace(/^\.\.\//, "")));
+
+      let registryStatus = "unknown";
+      if (registry) {
+        const po = registry.pageObjects.find((p) => p.className === className);
+        if (po) {
+          registryStatus = po.status;
+        }
+      }
+
+      errors.push(
+        `Invalid candidate import: className=${className} importPath=${importPath} ` +
+        `activeFileExists=${activeFileExists} candidateFileExists=${candidateFileExists} ` +
+        `registryStatus=${registryStatus} suggestedRepair=use ${baseName}`
+      );
     }
 
-    if (!importPath.endsWith(".page") && !importPath.endsWith(".page.ts")) {
+    if (!importPath.endsWith(".page") && !importPath.endsWith(".page.ts") && !importPath.includes(".flow")) {
       errors.push(`Import '${className}' does not point to a .page file: ${importPath}`);
     }
   }

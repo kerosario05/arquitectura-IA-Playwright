@@ -1,0 +1,10 @@
+{
+  "id": "c37844-visualizar-detalle-de-tarjeta-visa-gold",
+  "externalId": "C37844",
+  "caseId": 37844,
+  "title": "Visualizar detalle de Tarjeta Visa Gold",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-05-22T22:13:56.388Z"
+}

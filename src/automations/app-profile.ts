@@ -8,12 +8,289 @@ const SENSITIVE_KEY_HINTS = ["password", "secret", "token", "key", "pass"];
 
 export type AppProfile = {
   appSlug: string;
+  source: "cli" | "env" | "testrail_project" | "default";
   name?: string;
   baseUrl?: string;
   baseUrlHash?: string;
+  projectId?: string | number;
+  projectName?: string;
   createdAt: string;
   updatedAt: string;
 };
+
+export type AppProfileResolveOptions = {
+  cliAppSlug?: string;
+  envAppSlug?: string;
+  testRailProjectId?: string | number;
+  testRailBaseUrl?: string;
+  testRailEmail?: string;
+  testRailApiKey?: string;
+  baseUrl?: string;
+  appName?: string;
+};
+
+export type AppProfileResult = {
+  profile: AppProfile;
+  baseDir: string;
+};
+
+const APPS_ROOT = path.join("automations", "apps");
+const APP_SUBDIRS = ["pages", "flows", "cases", "lib", "components"];
+const FRAMEWORK_AUTH_FLOW_FILES = {
+  flows: ["auth.flow.ts", "auth.flow.js", "auth.flow.helpers.ts"],
+  pages: ["identification.page.ts", "phoneconfirmation.page.ts", "operationsmenu.page.ts", "productlist.page.ts"],
+  components: ["otp.component.ts", "virtual-keyboard.component.ts"]
+};
+
+function normalizeText(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+export function normalizeAppSlug(input?: string): string {
+  if (!input || !input.trim()) return "default";
+
+  const raw = input.trim();
+
+  const sanitized = raw.replace(/\.\./g, "").replace(/[\\/]/g, "-");
+
+  const normalized = normalizeText(sanitized)
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  if (!normalized || normalized === "default") return "default";
+
+  return normalized;
+}
+
+export async function resolveProjectNameFromTestRail(options: {
+  projectId: string | number;
+  baseUrl: string;
+  email: string;
+  apiKey: string;
+}): Promise<string | null> {
+  try {
+    const baseApiUrl = `${options.baseUrl}/index.php?/api/v2`;
+    const authHeader = `Basic ${Buffer.from(`${options.email}:${options.apiKey}`).toString("base64")}`;
+    const response = await fetch(`${baseApiUrl}/get_project/${options.projectId}`, {
+      headers: { Authorization: authHeader }
+    });
+    if (!response.ok) return null;
+    const project = await response.json() as { name?: string };
+    return project.name || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function resolveAppProfile(options: AppProfileResolveOptions): Promise<AppProfileResult> {
+  const now = new Date().toISOString();
+  let appSlug: string;
+  let source: AppProfile["source"];
+  let projectId: string | number | undefined;
+  let projectName: string | undefined;
+
+  if (options.cliAppSlug?.trim()) {
+    appSlug = normalizeAppSlug(options.cliAppSlug);
+    source = "cli";
+  } else if (options.envAppSlug?.trim()) {
+    appSlug = normalizeAppSlug(options.envAppSlug);
+    source = "env";
+  } else if (options.testRailProjectId) {
+    const projectNameResolved = await resolveProjectNameFromTestRail({
+      projectId: options.testRailProjectId,
+      baseUrl: options.testRailBaseUrl || "",
+      email: options.testRailEmail || "",
+      apiKey: options.testRailApiKey || ""
+    });
+    if (projectNameResolved) {
+      appSlug = normalizeAppSlug(projectNameResolved);
+      source = "testrail_project";
+      projectId = options.testRailProjectId;
+      projectName = projectNameResolved;
+    } else {
+      appSlug = "default";
+      source = "default";
+    }
+  } else {
+    appSlug = "default";
+    source = "default";
+  }
+
+  const baseDir = path.join(APPS_ROOT, appSlug);
+
+  const profile: AppProfile = {
+    appSlug,
+    source,
+    name: options.appName || projectName || undefined,
+    baseUrl: options.baseUrl,
+    baseUrlHash: options.baseUrl ? crypto.createHash("sha256").update(options.baseUrl).digest("hex").slice(0, 12) : undefined,
+    projectId,
+    projectName,
+    createdAt: now,
+    updatedAt: now
+  };
+
+  return { profile, baseDir };
+}
+
+export async function ensureAppStructure(baseDir: string): Promise<string[]> {
+  const created: string[] = [];
+
+  await fsp.mkdir(baseDir, { recursive: true });
+
+  for (const subdir of APP_SUBDIRS) {
+    const dirPath = path.join(baseDir, subdir);
+    try {
+      await fsp.access(dirPath);
+    } catch {
+      await fsp.mkdir(dirPath, { recursive: true });
+      created.push(subdir);
+    }
+  }
+
+  const defaultAppDir = path.resolve(__dirname, "../../automations/apps/default");
+
+  for (const fileName of FRAMEWORK_AUTH_FLOW_FILES.flows) {
+    const targetPath = path.join(baseDir, "flows", fileName);
+    const sourcePath = path.join(defaultAppDir, "flows", fileName);
+    try {
+      await fsp.access(targetPath);
+    } catch {
+      try {
+        await fsp.copyFile(sourcePath, targetPath);
+        created.push(`flows/${fileName}`);
+      } catch {
+        console.warn(`[ensureAppStructure] Missing framework flow file: ${sourcePath}`);
+      }
+    }
+  }
+
+  for (const fileName of FRAMEWORK_AUTH_FLOW_FILES.pages) {
+    const targetPath = path.join(baseDir, "pages", fileName);
+    const sourcePath = path.join(defaultAppDir, "pages", fileName);
+    try {
+      await fsp.access(targetPath);
+    } catch {
+      try {
+        await fsp.copyFile(sourcePath, targetPath);
+        created.push(`pages/${fileName}`);
+      } catch {
+        console.warn(`[ensureAppStructure] Missing framework page file: ${sourcePath}`);
+      }
+    }
+  }
+
+  for (const fileName of FRAMEWORK_AUTH_FLOW_FILES.components) {
+    const targetPath = path.join(baseDir, "components", fileName);
+    const sourcePath = path.join(defaultAppDir, "components", fileName);
+    try {
+      await fsp.access(targetPath);
+    } catch {
+      try {
+        await fsp.copyFile(sourcePath, targetPath);
+        created.push(`components/${fileName}`);
+      } catch {
+        console.warn(`[ensureAppStructure] Missing framework component file: ${sourcePath}`);
+      }
+    }
+  }
+
+  await registerFrameworkPageObjects(baseDir);
+
+  return created;
+}
+
+async function registerFrameworkPageObjects(baseDir: string): Promise<void> {
+  const normalizedBase = baseDir.replace(/\\/g, "/").toLowerCase();
+  if (normalizedBase.includes(".tmp-test") || normalizedBase.includes("test-results") || normalizedBase.includes("tmpdir") || normalizedBase.includes(".artifacts/tmp")) {
+    return;
+  }
+
+  const indexPath = path.join(baseDir, "page-objects.index.json");
+  let registry: any;
+  try {
+    const raw = await fsp.readFile(indexPath, "utf-8");
+    registry = JSON.parse(raw);
+  } catch {
+    registry = { version: "1.0", appSlug: path.basename(baseDir), pageObjects: [], componentCandidates: [], updatedAt: new Date().toISOString() };
+  }
+
+  const appSlug = path.basename(baseDir);
+  const frameworkPageObjects = [
+    {
+      id: "po_framework_productlistpage",
+      className: "ProductListPage",
+      filePath: `automations/apps/${appSlug}/pages/productlist.page.ts`,
+      screenSignature: `screen:${appSlug}-product_list`,
+      methods: [
+        { name: "selectProduct", intent: "select_product", parameters: ["productName"], available: true, status: "active", sensitive: false, confidence: 1.0, source: "" }
+      ],
+      confidence: 1.0,
+      status: "active",
+      sourcePlanIds: [],
+      caseIds: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+  ];
+
+  for (const po of frameworkPageObjects) {
+    const existing = registry.pageObjects.find((p: any) => p.className === po.className);
+    if (!existing) {
+      registry.pageObjects.push(po);
+    }
+  }
+
+  registry.updatedAt = new Date().toISOString();
+  await fsp.writeFile(indexPath, JSON.stringify(registry, null, 2), "utf-8");
+}
+
+export function validateAuthFlowDependencies(baseDir: string): { valid: boolean; missing: string[] } {
+  const missing: string[] = [];
+
+  for (const fileName of FRAMEWORK_AUTH_FLOW_FILES.flows) {
+    const targetPath = path.join(baseDir, "flows", fileName);
+    try {
+      fs.accessSync(targetPath);
+    } catch {
+      missing.push(`flows/${fileName}`);
+    }
+  }
+
+  for (const fileName of FRAMEWORK_AUTH_FLOW_FILES.pages) {
+    const targetPath = path.join(baseDir, "pages", fileName);
+    try {
+      fs.accessSync(targetPath);
+    } catch {
+      missing.push(`pages/${fileName}`);
+    }
+  }
+
+  for (const fileName of FRAMEWORK_AUTH_FLOW_FILES.components) {
+    const targetPath = path.join(baseDir, "components", fileName);
+    try {
+      fs.accessSync(targetPath);
+    } catch {
+      missing.push(`components/${fileName}`);
+    }
+  }
+
+  return { valid: missing.length === 0, missing };
+}
+
+export function logAppProfile(profile: AppProfile, baseDir: string, ensured?: string[]): void {
+  const ensuredStr = ensured ? ensured.join(", ") : "pages, flows, cases, lib";
+  console.log(`[app-profile] appSlug=${profile.appSlug} source=${profile.source} baseDir=${baseDir}`);
+  if (profile.source === "testrail_project" && profile.projectId) {
+    console.log(`[app-profile] projectId=${profile.projectId} projectName="${profile.projectName || ""}"`);
+  }
+  console.log(`[app-profile] ensured structure: ${ensuredStr}`);
+}
 
 export type PromotedAppConfig = {
   appProfile: AppProfile;
@@ -55,22 +332,6 @@ export type AppAutomationPaths = {
   specPath?: string;
 };
 
-function normalizeText(value: string): string {
-  return value
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-}
-
-export function normalizeAppSlug(value: string): string {
-  const normalized = normalizeText(value)
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-  return normalized || "default";
-}
-
 function inferNameFromBaseUrl(baseUrl?: string): string | undefined {
   if (!baseUrl) return undefined;
   try {
@@ -98,11 +359,6 @@ function deriveSlugFromBaseUrl(baseUrl?: string): string {
   }
 }
 
-function hashBaseUrl(baseUrl?: string): string | undefined {
-  if (!baseUrl) return undefined;
-  return crypto.createHash("sha256").update(baseUrl).digest("hex").slice(0, 12);
-}
-
 export function deriveAppProfile(input: {
   appProfile?: string;
   appName?: string;
@@ -119,9 +375,10 @@ export function deriveAppProfile(input: {
   const resolvedName = input.appName?.trim() || inferNameFromBaseUrl(input.baseUrl);
   return {
     appSlug: slug || "default",
+    source: "default",
     name: resolvedName,
     baseUrl: input.baseUrl,
-    baseUrlHash: hashBaseUrl(input.baseUrl),
+    baseUrlHash: input.baseUrl ? crypto.createHash("sha256").update(input.baseUrl).digest("hex").slice(0, 12) : undefined,
     createdAt: now,
     updatedAt: now
   };
@@ -237,6 +494,7 @@ export function buildMergedConfig(appConfig: PromotedAppConfig, globalConfig: Fu
 export function loadPromotedAppConfigSync(options: { appSlug: string; configPath?: string }): PromotedAppConfig | undefined {
   const appProfile: AppProfile = {
     appSlug: normalizeAppSlug(options.appSlug),
+    source: "default",
     createdAt: "",
     updatedAt: ""
   };

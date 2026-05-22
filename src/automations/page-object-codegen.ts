@@ -270,6 +270,7 @@ export async function generatePageObjectCandidateFiles(
 ): Promise<PageObjectCodegenResult> {
   const appProfile: AppProfile = {
     appSlug: options.appSlug,
+    source: "default",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };

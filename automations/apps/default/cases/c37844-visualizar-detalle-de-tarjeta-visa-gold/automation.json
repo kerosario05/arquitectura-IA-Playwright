@@ -11,14 +11,14 @@
   "source": "discovery",
   "appProfile": "default",
   "baseUrlHash": "74df3c0e992c",
-  "createdAt": "2026-05-22T18:44:23.468Z",
-  "updatedAt": "2026-05-22T18:44:23.468Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37844\\2026-05-22T18-43-57-253Z\\discovered-plans.pending.json",
+  "createdAt": "2026-05-22T19:14:37.309Z",
+  "updatedAt": "2026-05-22T19:14:37.309Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37844\\2026-05-22T19-14-08-219Z\\discovered-plans.pending.json",
   "pomStatus": "promoted",
   "inlineDebugMode": false,
   "specVerificationStatus": "passed",
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37844\\2026-05-22T18-43-57-253Z",
+    "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37844\\2026-05-22T19-14-08-219Z",
     "pomDiagnostics": {
       "missingPageObjects": [],
       "missingMethods": [],

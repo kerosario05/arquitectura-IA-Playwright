@@ -1,0 +1,131 @@
+{
+  "version": "1.0",
+  "updatedAt": "2026-05-22T22:14:12.582Z",
+  "automations": [
+    {
+      "id": "c37869-generar-carta-de-referencia-con-cuenta-de-ahorro",
+      "externalId": "C37869",
+      "caseId": 37869,
+      "title": "Generar carta de referencia con cuenta de ahorro",
+      "planPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37869-generar-carta-de-referencia-con-cuenta-de-ahorro\\plan.json",
+      "specPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37869-generar-carta-de-referencia-con-cuenta-de-ahorro\\case.spec.ts",
+      "appSlug": "arquitectura-automatizacion",
+      "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+      "status": "blocked_missing_pom",
+      "source": "discovery",
+      "appProfile": "arquitectura-automatizacion",
+      "baseUrlHash": "74df3c0e992c",
+      "createdAt": "2026-05-22T21:30:46.092Z",
+      "updatedAt": "2026-05-22T21:30:46.092Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-22T21-29-35-970Z\\discovered-plans.pending.json",
+      "pomStatus": "needs_page_method",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-22T21-29-35-970Z",
+        "pomDiagnostics": {
+          "missingPageObjects": [],
+          "missingMethods": [
+            "step=2 target=\"iniciar\" derivedIntent=\"start_session\" expectedOwner=\"HomePage\" availableMethods=[]",
+            "step=3 target=\"transacciones y servicio\" derivedIntent=\"open_home\" expectedOwner=\"ProductListPage\" availableMethods=[selectProduct]",
+            "step=6 target=\"Generar cartas\" derivedIntent=\"open_home\" expectedOwner=\"ProductListPage\" availableMethods=[selectProduct]",
+            "step=9 target=\"continuar\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]",
+            "step=11 target=\"continuar\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]"
+          ],
+          "generatedCandidates": 0,
+          "autoPom": {
+            "enabled": true,
+            "initialPomStatus": "needs_page_method",
+            "generatedCandidateFiles": [
+              "automations\\apps\\arquitectura-automatizacion\\pages\\home.page.candidate.ts",
+              "automations\\apps\\arquitectura-automatizacion\\pages\\productdetail.page.candidate.ts"
+            ],
+            "autoApprovedPageObjects": [
+              "HomePage",
+              "ProductDetailPage"
+            ],
+            "autoApprovedMethods": [
+              "HomePage.start()",
+              "HomePage.step=2 target=\"iniciar\" derivedIntent=\"start_session\" expectedOwner=\"HomePage\" availableMethods=[]Method()",
+              "HomePage.step=3 target=\"transacciones y servicio\" derivedIntent=\"open_home\" expectedOwner=\"ProductListPage\" availableMethods=[selectProduct]Method()",
+              "HomePage.step=6 target=\"Generar cartas\" derivedIntent=\"open_home\" expectedOwner=\"ProductListPage\" availableMethods=[selectProduct]Method()",
+              "HomePage.step=9 target=\"continuar\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]Method()",
+              "HomePage.step=11 target=\"continuar\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]Method()",
+              "ProductDetailPage.clickPrimaryAction()"
+            ],
+            "blockedAutoApprovals": [],
+            "approvalThreshold": 0.5,
+            "regeneratedSpec": true,
+            "validationStatus": "passed",
+            "finalPomStatus": "needs_page_method"
+          }
+        }
+      }
+    },
+    {
+      "id": "c37870-generar-carta-de-referencia-con-certificado",
+      "externalId": "C37870",
+      "caseId": 37870,
+      "title": "Generar carta de referencia con certificado",
+      "planPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37870-generar-carta-de-referencia-con-certificado\\plan.json",
+      "specPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37870-generar-carta-de-referencia-con-certificado\\case.spec.ts",
+      "appSlug": "arquitectura-automatizacion",
+      "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "arquitectura-automatizacion",
+      "baseUrlHash": "74df3c0e992c",
+      "createdAt": "2026-05-22T21:35:49.007Z",
+      "updatedAt": "2026-05-22T21:57:15.851Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37870\\2026-05-22T21-55-12-034Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37870\\2026-05-22T21-55-12-034Z",
+        "pomDiagnostics": {
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37870-generar-carta-de-referencia-con-certificado\\plan.json",
+        "previousStatus": "blocked_missing_pom",
+        "specVerification": {
+          "status": "passed"
+        }
+      }
+    },
+    {
+      "id": "c37844-visualizar-detalle-de-tarjeta-visa-gold",
+      "externalId": "C37844",
+      "caseId": 37844,
+      "title": "Visualizar detalle de Tarjeta Visa Gold",
+      "planPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37844-visualizar-detalle-de-tarjeta-visa-gold\\plan.json",
+      "specPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37844-visualizar-detalle-de-tarjeta-visa-gold\\case.spec.ts",
+      "appSlug": "arquitectura-automatizacion",
+      "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "arquitectura-automatizacion",
+      "baseUrlHash": "74df3c0e992c",
+      "createdAt": "2026-05-22T21:58:31.176Z",
+      "updatedAt": "2026-05-22T22:14:12.582Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37844\\2026-05-22T22-13-34-423Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37844\\2026-05-22T22-13-34-423Z",
+        "pomDiagnostics": {
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specVerification": {
+          "status": "passed"
+        }
+      }
+    }
+  ]
+}

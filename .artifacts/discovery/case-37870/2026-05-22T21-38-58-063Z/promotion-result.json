@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-22T21:40:15.309Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c37870-generar-carta-de-referencia-con-certificado",
+  "appSlug": "arquitectura-automatizacion",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37870-generar-carta-de-referencia-con-certificado\\case.spec.ts",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37870-generar-carta-de-referencia-con-certificado\\plan.json",
+  "caseFolder": "c37870-generar-carta-de-referencia-con-certificado",
+  "pomStatus": "needs_page_method",
+  "inlineDebugMode": false
+}

@@ -1,0 +1,10 @@
+{
+  "id": "c37870-generar-carta-de-referencia-con-certificado",
+  "externalId": "C37870",
+  "caseId": 37870,
+  "title": "Generar carta de referencia con certificado",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-05-22T21:56:28.191Z"
+}

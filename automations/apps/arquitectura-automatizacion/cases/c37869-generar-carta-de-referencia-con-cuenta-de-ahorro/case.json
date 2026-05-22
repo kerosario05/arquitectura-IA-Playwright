@@ -1,0 +1,10 @@
+{
+  "id": "c37869-generar-carta-de-referencia-con-cuenta-de-ahorro",
+  "externalId": "C37869",
+  "caseId": 37869,
+  "title": "Generar carta de referencia con cuenta de ahorro",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-05-22T21:30:46.040Z"
+}

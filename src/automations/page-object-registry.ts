@@ -196,8 +196,9 @@ export function registerMethodCandidate(
 
   const existing = po.methods.find((m) => m.intent === candidate.intent);
   if (existing) {
-    if (!existing.source.includes(candidate.sourceActionId)) {
-      existing.source += `,${candidate.sourceActionId}`;
+    const existingSource = existing.source ?? "";
+    if (!existingSource.includes(candidate.sourceActionId)) {
+      existing.source = existingSource ? `${existingSource},${candidate.sourceActionId}` : candidate.sourceActionId;
     }
     if (candidate.parameters && candidate.parameters.length > 0 && existing.parameters.length === 0) {
       existing.parameters = [...candidate.parameters];

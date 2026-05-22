@@ -39,6 +39,11 @@ function buildPageObjectImport(className: string, filePath: string, specPath: st
   return `import { ${className} } from '${importPath}';`;
 }
 
+function normalizePageObjectFilePath(filePath: string, _appDir: string): string {
+  if (!filePath.includes(".candidate")) return filePath;
+  return filePath.replace(/\.candidate\.ts$/, ".ts");
+}
+
 function isSelectionLikeStep(step: ExecutionPlanStep): boolean {
   const recoveryMeta = (step as any).recoveryMetadata;
   const selectionDiagnostics = (step as any).selectionDiagnostics;
@@ -206,7 +211,8 @@ export function generatePOMSpecFromPlan(
     const key = className;
     if (!importedClasses.has(key)) {
       importedClasses.add(key);
-      importLines.push(buildPageObjectImport(className, filePath, appPaths.specPath ?? ""));
+      const normalizedPath = normalizePageObjectFilePath(filePath, appPaths.appDir);
+      importLines.push(buildPageObjectImport(className, normalizedPath, appPaths.specPath ?? ""));
       const varName = className.charAt(0).toLowerCase() + className.slice(1);
       instantiatedVars.set(key, varName);
       instantiationLines.push(`const ${varName} = new ${className}(page);`);
@@ -250,13 +256,17 @@ export function generatePOMSpecFromPlan(
 
     const isPreAuth = authGateDetected && stepIndex < authGateStepIndex;
 
-    const selectionLike = isSelectionLikeStep(step);
-    const moduleNav = !selectionLike && isModuleNavigationStep(step);
-    const submitLike = !selectionLike && !moduleNav && isSubmitLikeStep(step);
+    const moduleNav = isModuleNavigationStep(step);
+    const submitLike = !moduleNav && isSubmitLikeStep(step);
+    const selectionLike = !moduleNav && !submitLike && isSelectionLikeStep(step);
 
     let semanticIntent: SemanticMethodIntent;
 
-    if (selectionLike) {
+    if (moduleNav) {
+      semanticIntent = "open_home";
+    } else if (submitLike) {
+      semanticIntent = "click_primary_action";
+    } else if (selectionLike) {
       const recoveryMeta = (step as any).recoveryMetadata;
       const semanticRole = recoveryMeta?.semanticRole;
       const actionType = recoveryMeta?.actionType;
@@ -273,10 +283,6 @@ export function generatePOMSpecFromPlan(
       } else {
         semanticIntent = deriveMethodIntentFromStep(step);
       }
-    } else if (moduleNav) {
-      semanticIntent = "open_home";
-    } else if (submitLike) {
-      semanticIntent = "click_primary_action";
     } else {
       semanticIntent = deriveMethodIntentFromStep(step);
     }
@@ -285,9 +291,97 @@ export function generatePOMSpecFromPlan(
       semanticIntent = "open_home";
     }
 
-    const resolved = pageObjectRegistry
+    let resolved = pageObjectRegistry
       ? findMethodBySemanticIntent(pageObjectRegistry, semanticIntent, step)
       : undefined;
+
+    let fallbackUsed = false;
+    let fallbackInfo: string | undefined;
+
+    if (!resolved && pageObjectRegistry) {
+      const targetValue = getTargetValue(step.target);
+      const expectedOwner = deriveExpectedOwnerForStep(step);
+
+      if (semanticIntent === "open_home" && expectedOwner === "ProductListPage") {
+        const productListPO = pageObjectRegistry.pageObjects.find(
+          (po) => po.className === "ProductListPage" && po.status === "active"
+        ) ?? pageObjectRegistry.pageObjects.find(
+          (po) => po.className === "ProductListPage" && po.status === "candidate"
+        );
+        if (productListPO) {
+          const selectMethod = productListPO.methods.find(
+            (m) => m.name === "selectProduct" && m.status === "active" && m.available
+          ) ?? productListPO.methods.find(
+            (m) => m.name === "selectProduct" && m.status === "candidate" && m.available
+          );
+          if (selectMethod) {
+            resolved = { pageObject: productListPO, method: selectMethod };
+            fallbackUsed = true;
+            fallbackInfo = `open_home->selectProduct fallback for "${targetValue}"`;
+          }
+        }
+      }
+
+      if (!resolved && (semanticIntent === "select_product" || semanticIntent === "select_category")) {
+        const productListPO = pageObjectRegistry.pageObjects.find(
+          (po) => po.className === "ProductListPage" && po.status === "active"
+        ) ?? pageObjectRegistry.pageObjects.find(
+          (po) => po.className === "ProductListPage" && po.status === "candidate"
+        );
+        if (productListPO) {
+          const selectMethod = productListPO.methods.find(
+            (m) => m.name === "selectProduct" && m.status === "active" && m.available
+          ) ?? productListPO.methods.find(
+            (m) => m.name === "selectProduct" && m.status === "candidate" && m.available
+          );
+          if (selectMethod) {
+            resolved = { pageObject: productListPO, method: selectMethod };
+            fallbackUsed = true;
+            fallbackInfo = `select fallback for "${targetValue}"`;
+          }
+        }
+      }
+
+      if (!resolved && semanticIntent === "click_primary_action") {
+        const detailPO = pageObjectRegistry.pageObjects.find(
+          (po) => po.className === "ProductDetailPage" && po.status === "active"
+        ) ?? pageObjectRegistry.pageObjects.find(
+          (po) => po.className === "ProductDetailPage" && po.status === "candidate"
+        );
+        if (detailPO) {
+          const clickMethod = detailPO.methods.find(
+            (m) => m.name === "clickPrimaryAction" && m.status === "active" && m.available
+          ) ?? detailPO.methods.find(
+            (m) => m.name === "clickPrimaryAction" && m.status === "candidate" && m.available
+          );
+          if (clickMethod) {
+            resolved = { pageObject: detailPO, method: clickMethod };
+            fallbackUsed = true;
+            fallbackInfo = `click_primary_action fallback for "${targetValue}"`;
+          }
+        }
+      }
+
+      if (!resolved && semanticIntent === "start_session") {
+        const homePO = pageObjectRegistry.pageObjects.find(
+          (po) => po.className === "HomePage" && po.status === "active"
+        ) ?? pageObjectRegistry.pageObjects.find(
+          (po) => po.className === "HomePage" && po.status === "candidate"
+        );
+        if (homePO) {
+          const startMethod = homePO.methods.find(
+            (m) => m.name === "start" && m.status === "active" && m.available
+          ) ?? homePO.methods.find(
+            (m) => m.name === "start" && m.status === "candidate" && m.available
+          );
+          if (startMethod) {
+            resolved = { pageObject: homePO, method: startMethod };
+            fallbackUsed = true;
+            fallbackInfo = `start_session fallback for "${targetValue}"`;
+          }
+        }
+      }
+    }
 
     let actionLine = "";
 
@@ -336,13 +430,40 @@ export function generatePOMSpecFromPlan(
     }
 
     if (!actionLine && resolved === undefined) {
+      const targetValue = getTargetValue(step.target);
       const expectedOwner = deriveExpectedOwnerForStep(step);
       const ownerPO = pageObjectRegistry?.pageObjects.find((po) => po.className === expectedOwner);
       const availableMethods = ownerPO
         ? ownerPO.methods.filter((m) => m.status === "active" && m.available).map((m) => m.name)
         : [];
+
+      const recoveryMeta = (step as any).recoveryMetadata;
+      const selectionDiagnostics = (step as any).selectionDiagnostics;
+      const strategy = recoveryMeta?.strategy || selectionDiagnostics?.strategy || "unknown";
+      const classification = moduleNav ? "moduleNav" : submitLike ? "submitLike" : selectionLike ? "selectionLike" : "default";
+
+      let reason = "method_not_registered";
+      if (!ownerPO) {
+        reason = "owner_page_missing";
+      } else if (availableMethods.length > 0) {
+        reason = "method_missing";
+      }
+
+      const missingInfo = {
+        target: targetValue,
+        stepIndex: stepIndex,
+        ownerPage: expectedOwner,
+        expectedMethod: semanticIntent,
+        classification,
+        strategy,
+        availableMethods,
+        reason
+      };
+
+      console.log(`[spec-generator-pom] Missing page method: target="${missingInfo.target}" stepIndex=${missingInfo.stepIndex} ownerPage="${missingInfo.ownerPage}" expectedMethod="${missingInfo.expectedMethod}" classification="${missingInfo.classification}" strategy="${missingInfo.strategy}" availableMethods=[${missingInfo.availableMethods.join(", ")}] reason="${missingInfo.reason}"`);
+
       missingMethods.push(
-        `step=${stepIndex} target="${getTargetValue(step.target)}" ` +
+        `step=${stepIndex} target="${targetValue}" ` +
         `derivedIntent="${semanticIntent}" expectedOwner="${expectedOwner}" ` +
         `availableMethods=[${availableMethods.join(", ")}]`
       );
@@ -545,6 +666,7 @@ function validateSelectionMapping(plan: ExecutionPlan, actionLines: string[]): s
 
   for (const step of plan.steps) {
     if (!isSelectionLikeStep(step)) continue;
+    if (isSubmitLikeStep(step)) continue;
 
     const stepDesc = (step.description ?? "").toLowerCase();
     if (stepDesc.startsWith("authflow handled") || stepDesc.includes("step consumed by authflow")) continue;

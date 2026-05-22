@@ -21,6 +21,8 @@ import {
   serializeRuntimeConfigForPromotion,
   savePromotedAppConfig,
   buildAppAutomationPaths,
+  ensureAppStructure,
+  validateAuthFlowDependencies,
   type AppProfile
 } from "./app-profile";
 import {
@@ -56,6 +58,7 @@ interface PromoteInput {
   source?: "agent_handoff" | "manual" | "rule_based" | "discovery";
   overwrite?: boolean;
   appProfile?: string;
+  appProfileObject?: AppProfile;
   appName?: string;
   baseUrl?: string;
   fullConfig?: FullConfig;
@@ -513,20 +516,28 @@ async function registerPOMCandidatesForBlockedPromotion(
 
   if (pomStatus === "needs_page_method" && specResultMissingMethods.length > 0) {
     for (const missingMethod of specResultMissingMethods) {
-      const colonIdx = missingMethod.indexOf(":");
-      const intent = colonIdx > 0 ? missingMethod.substring(0, colonIdx).trim() : missingMethod.trim();
+      const derivedIntentMatch = missingMethod.match(/derivedIntent="([^"]+)"/);
+      const intent = derivedIntentMatch ? derivedIntentMatch[1] : missingMethod.trim();
 
-      const ownerClassName = INTENT_PREFERRED_OWNER[intent] ?? "GenericPage";
+      const expectedOwnerMatch = missingMethod.match(/expectedOwner="([^"]+)"/);
+      const ownerClassName = expectedOwnerMatch ? expectedOwnerMatch[1] : (INTENT_PREFERRED_OWNER[intent] ?? "GenericPage");
+
       let ownerPO = registry.pageObjects.find((po) => po.className === ownerClassName);
+
+      if (!ownerPO) {
+        ownerPO = registry.pageObjects.find((po) => po.className === "ProductListPage" && po.status === "active");
+      }
 
       if (!ownerPO && registry.pageObjects.length > 0) {
         ownerPO = registry.pageObjects.find((po) => po.status === "candidate") ?? registry.pageObjects[0];
       }
 
       if (ownerPO) {
+        const methodName = deriveMethodNameFromIntent(intent as SemanticMethodIntent);
         registerMethodCandidate(registry, ownerPO.id, {
-          name: `${intent}Method`,
+          name: methodName,
           intent,
+          parameters: deriveMethodParameters(intent as SemanticMethodIntent),
           confidence: 0.5,
           sourceActionId: `${sourcePlanId}-missing-${intent}`
         });
@@ -570,14 +581,38 @@ export async function promoteExecutionPlan(
   });
 
   const runtimeConfig = input.fullConfig;
-  const appProfile = deriveAppProfile({
-    appProfile: input.appProfile ?? runtimeConfig?.app.appProfile,
-    appName: input.appName ?? runtimeConfig?.app.name,
-    baseUrl: input.baseUrl ?? runtimeConfig?.app.baseUrl
-  });
+
+  let appProfile: AppProfile;
+  if (input.appProfileObject) {
+    appProfile = input.appProfileObject;
+  } else {
+    appProfile = deriveAppProfile({
+      appProfile: input.appProfile ?? runtimeConfig?.app.appProfile,
+      appName: input.appName ?? runtimeConfig?.app.name,
+      baseUrl: input.baseUrl ?? runtimeConfig?.app.baseUrl
+    });
+  }
+
   const appPaths = buildAppAutomationPaths(appProfile, automationId, input.outputRoot);
+
+  const planHasAuthConsumedSteps = plan.steps.some(s => {
+    const desc = (s.description ?? "").toLowerCase();
+    return desc.startsWith("authflow handled") || desc.includes("step consumed by authflow");
+  });
+
+  await ensureAppStructure(appPaths.appDir);
   if (!appPaths.planPath || !appPaths.specPath) {
     throw new Error("Unable to resolve promoted automation paths.");
+  }
+
+  if (planHasAuthConsumedSteps) {
+    const authValidation = validateAuthFlowDependencies(appPaths.appDir);
+    if (!authValidation.valid) {
+      throw new Error(
+        `AuthFlow is required but dependencies are missing: ${authValidation.missing.join(", ")}. ` +
+        `Run ensureAppStructure or copy framework files from default app.`
+      );
+    }
   }
 
   try {

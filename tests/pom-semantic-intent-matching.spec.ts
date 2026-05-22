@@ -9,6 +9,7 @@ import { deriveMethodIntentFromStep, deriveExpectedOwnerForStep } from "../src/a
 
 const mockProfile: AppProfile = {
   appSlug: "test",
+  source: "default",
   name: "Test",
   baseUrl: "https://test.com",
   baseUrlHash: "abc123",

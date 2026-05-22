@@ -1,0 +1,3394 @@
+[
+  {
+    "key": "button_iniciar",
+    "name": "Iniciar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Iniciar",
+      "exact": false
+    },
+    "aliases": [
+      "iniciar"
+    ],
+    "discoveredAt": "2026-05-22T21:06:08.123Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_hola",
+    "name": "¡Hola!",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "¡Hola!",
+      "exact": false
+    },
+    "aliases": [
+      "¡hola!"
+    ],
+    "discoveredAt": "2026-05-22T21:06:08.123Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_informacion_productosexplora_nuestros",
+    "name": "Información de productosExplora nuestros productos bancarios",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Información de productosExplora nuestros productos bancarios",
+      "exact": false
+    },
+    "aliases": [
+      "información de productosexplora nuestros productos bancarios"
+    ],
+    "discoveredAt": "2026-05-22T21:06:09.386Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_transacciones_serviciosrealiza_operaciones",
+    "name": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+      "exact": false
+    },
+    "aliases": [
+      "transacciones y serviciosrealiza operaciones con tus cuentas"
+    ],
+    "discoveredAt": "2026-05-22T21:06:09.386Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_salir",
+    "name": "Salir",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Salir",
+      "exact": false
+    },
+    "aliases": [
+      "salir"
+    ],
+    "discoveredAt": "2026-05-22T21:06:09.386Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_hola",
+    "name": "¡Hola!",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "¡Hola!",
+      "exact": false
+    },
+    "aliases": [
+      "¡hola!"
+    ],
+    "discoveredAt": "2026-05-22T21:06:09.386Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_nos_alegra_que",
+    "name": "¡Nos alegra que estés con nosotros!",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "¡Nos alegra que estés con nosotros!",
+      "exact": false
+    },
+    "aliases": [
+      "¡nos alegra que estés con nosotros!"
+    ],
+    "discoveredAt": "2026-05-22T21:06:09.386Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_informacion_productos",
+    "name": "Información de productos",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Información de productos",
+      "exact": false
+    },
+    "aliases": [
+      "información de productos"
+    ],
+    "discoveredAt": "2026-05-22T21:06:09.386Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_transacciones_servicios",
+    "name": "Transacciones y servicios",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Transacciones y servicios",
+      "exact": false
+    },
+    "aliases": [
+      "transacciones y servicios"
+    ],
+    "discoveredAt": "2026-05-22T21:06:09.386Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_informacion_productosexplora_nuestros",
+    "name": "Información de productosExplora nuestros productos bancarios",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Información de productosExplora nuestros productos bancarios",
+      "exact": false
+    },
+    "aliases": [
+      "información de productosexplora nuestros productos bancarios"
+    ],
+    "discoveredAt": "2026-05-22T21:06:09.919Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_transacciones_serviciosrealiza_operaciones",
+    "name": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+      "exact": false
+    },
+    "aliases": [
+      "transacciones y serviciosrealiza operaciones con tus cuentas"
+    ],
+    "discoveredAt": "2026-05-22T21:06:09.919Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_salir",
+    "name": "Salir",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Salir",
+      "exact": false
+    },
+    "aliases": [
+      "salir"
+    ],
+    "discoveredAt": "2026-05-22T21:06:09.919Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_hola",
+    "name": "¡Hola!",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "¡Hola!",
+      "exact": false
+    },
+    "aliases": [
+      "¡hola!"
+    ],
+    "discoveredAt": "2026-05-22T21:06:09.919Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_nos_alegra_que",
+    "name": "¡Nos alegra que estés con nosotros!",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "¡Nos alegra que estés con nosotros!",
+      "exact": false
+    },
+    "aliases": [
+      "¡nos alegra que estés con nosotros!"
+    ],
+    "discoveredAt": "2026-05-22T21:06:09.919Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_informacion_productos",
+    "name": "Información de productos",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Información de productos",
+      "exact": false
+    },
+    "aliases": [
+      "información de productos"
+    ],
+    "discoveredAt": "2026-05-22T21:06:09.919Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_transacciones_servicios",
+    "name": "Transacciones y servicios",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Transacciones y servicios",
+      "exact": false
+    },
+    "aliases": [
+      "transacciones y servicios"
+    ],
+    "discoveredAt": "2026-05-22T21:06:09.919Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_cedula_identidad_dominicana",
+    "name": "Cédula de identidad dominicana",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Cédula de identidad dominicana",
+      "exact": false
+    },
+    "aliases": [
+      "cédula de identidad dominicana"
+    ],
+    "discoveredAt": "2026-05-22T21:06:11.096Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_pasaporte_extranjero",
+    "name": "Pasaporte extranjero",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Pasaporte extranjero",
+      "exact": false
+    },
+    "aliases": [
+      "pasaporte extranjero"
+    ],
+    "discoveredAt": "2026-05-22T21:06:11.096Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_cancelar",
+    "name": "Cancelar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Cancelar",
+      "exact": false
+    },
+    "aliases": [
+      "cancelar"
+    ],
+    "discoveredAt": "2026-05-22T21:06:11.096Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_continuar",
+    "name": "Continuar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Continuar",
+      "exact": false
+    },
+    "aliases": [
+      "continuar"
+    ],
+    "discoveredAt": "2026-05-22T21:06:11.096Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_identificacion_cliente",
+    "name": "Identificación del cliente",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Identificación del cliente",
+      "exact": false
+    },
+    "aliases": [
+      "identificación del cliente"
+    ],
+    "discoveredAt": "2026-05-22T21:06:11.096Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_seleccione_tipo_identificacion",
+    "name": "Seleccione su tipo de identificación",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Seleccione su tipo de identificación",
+      "exact": false
+    },
+    "aliases": [
+      "seleccione su tipo de identificación"
+    ],
+    "discoveredAt": "2026-05-22T21:06:11.096Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_cedula_identidad_dominicana",
+    "name": "Cédula de identidad dominicana",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Cédula de identidad dominicana",
+      "exact": false
+    },
+    "aliases": [
+      "cédula de identidad dominicana"
+    ],
+    "discoveredAt": "2026-05-22T21:06:11.096Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_pasaporte_extranjero",
+    "name": "Pasaporte extranjero",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Pasaporte extranjero",
+      "exact": false
+    },
+    "aliases": [
+      "pasaporte extranjero"
+    ],
+    "discoveredAt": "2026-05-22T21:06:11.096Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_cedula_identidad_dominicana",
+    "name": "Cédula de identidad dominicana",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Cédula de identidad dominicana",
+      "exact": false
+    },
+    "aliases": [
+      "cédula de identidad dominicana"
+    ],
+    "discoveredAt": "2026-05-22T21:06:11.633Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_pasaporte_extranjero",
+    "name": "Pasaporte extranjero",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Pasaporte extranjero",
+      "exact": false
+    },
+    "aliases": [
+      "pasaporte extranjero"
+    ],
+    "discoveredAt": "2026-05-22T21:06:11.633Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_cancelar",
+    "name": "Cancelar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Cancelar",
+      "exact": false
+    },
+    "aliases": [
+      "cancelar"
+    ],
+    "discoveredAt": "2026-05-22T21:06:11.633Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_continuar",
+    "name": "Continuar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Continuar",
+      "exact": false
+    },
+    "aliases": [
+      "continuar"
+    ],
+    "discoveredAt": "2026-05-22T21:06:11.633Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_identificacion_cliente",
+    "name": "Identificación del cliente",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Identificación del cliente",
+      "exact": false
+    },
+    "aliases": [
+      "identificación del cliente"
+    ],
+    "discoveredAt": "2026-05-22T21:06:11.633Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_seleccione_tipo_identificacion",
+    "name": "Seleccione su tipo de identificación",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Seleccione su tipo de identificación",
+      "exact": false
+    },
+    "aliases": [
+      "seleccione su tipo de identificación"
+    ],
+    "discoveredAt": "2026-05-22T21:06:11.633Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_cedula_identidad_dominicana",
+    "name": "Cédula de identidad dominicana",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Cédula de identidad dominicana",
+      "exact": false
+    },
+    "aliases": [
+      "cédula de identidad dominicana"
+    ],
+    "discoveredAt": "2026-05-22T21:06:11.633Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_pasaporte_extranjero",
+    "name": "Pasaporte extranjero",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Pasaporte extranjero",
+      "exact": false
+    },
+    "aliases": [
+      "pasaporte extranjero"
+    ],
+    "discoveredAt": "2026-05-22T21:06:11.633Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_estado_cuentaconsulta_descarga",
+    "name": "Estado de cuentaConsulta y descarga estados de cuenta",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Estado de cuentaConsulta y descarga estados de cuenta",
+      "exact": false
+    },
+    "aliases": [
+      "estado de cuentaconsulta y descarga estados de cuenta"
+    ],
+    "discoveredAt": "2026-05-22T21:06:30.013Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_consulta_balanceverifica_saldos",
+    "name": "Consulta de balanceVerifica saldos de tus productos",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Consulta de balanceVerifica saldos de tus productos",
+      "exact": false
+    },
+    "aliases": [
+      "consulta de balanceverifica saldos de tus productos"
+    ],
+    "discoveredAt": "2026-05-22T21:06:30.013Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_pago_productosrealiza_pagos",
+    "name": "Pago de productosRealiza pagos de tarjetas y préstamos",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Pago de productosRealiza pagos de tarjetas y préstamos",
+      "exact": false
+    },
+    "aliases": [
+      "pago de productosrealiza pagos de tarjetas y préstamos"
+    ],
+    "discoveredAt": "2026-05-22T21:06:30.013Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_generar_cartasgenera_cartas",
+    "name": "Generar cartasGenera cartas y certificaciones bancarias",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Generar cartasGenera cartas y certificaciones bancarias",
+      "exact": false
+    },
+    "aliases": [
+      "generar cartasgenera cartas y certificaciones bancarias"
+    ],
+    "discoveredAt": "2026-05-22T21:06:30.013Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_salir",
+    "name": "Salir",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Salir",
+      "exact": false
+    },
+    "aliases": [
+      "salir"
+    ],
+    "discoveredAt": "2026-05-22T21:06:30.013Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_transacciones_servicios",
+    "name": "Transacciones y Servicios",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Transacciones y Servicios",
+      "exact": false
+    },
+    "aliases": [
+      "transacciones y servicios"
+    ],
+    "discoveredAt": "2026-05-22T21:06:30.013Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_hola_xiomara",
+    "name": "¡Hola, XIOMARA!",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "¡Hola, XIOMARA!",
+      "exact": false
+    },
+    "aliases": [
+      "¡hola, xiomara!"
+    ],
+    "discoveredAt": "2026-05-22T21:06:30.013Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_selecciona_operacion_que",
+    "name": "Selecciona la operación que deseas realizar",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Selecciona la operación que deseas realizar",
+      "exact": false
+    },
+    "aliases": [
+      "selecciona la operación que deseas realizar"
+    ],
+    "discoveredAt": "2026-05-22T21:06:30.013Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_estado_cuenta",
+    "name": "Estado de cuenta",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Estado de cuenta",
+      "exact": false
+    },
+    "aliases": [
+      "estado de cuenta"
+    ],
+    "discoveredAt": "2026-05-22T21:06:30.013Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_consulta_balance",
+    "name": "Consulta de balance",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Consulta de balance",
+      "exact": false
+    },
+    "aliases": [
+      "consulta de balance"
+    ],
+    "discoveredAt": "2026-05-22T21:06:30.013Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_pago_productos",
+    "name": "Pago de productos",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Pago de productos",
+      "exact": false
+    },
+    "aliases": [
+      "pago de productos"
+    ],
+    "discoveredAt": "2026-05-22T21:06:30.013Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_generar_cartas",
+    "name": "Generar cartas",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Generar cartas",
+      "exact": false
+    },
+    "aliases": [
+      "generar cartas"
+    ],
+    "discoveredAt": "2026-05-22T21:06:30.013Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_carta_referenciacarta_certificar",
+    "name": "Carta de referenciaCarta para certificar tu relación bancaria",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Carta de referenciaCarta para certificar tu relación bancaria",
+      "exact": false
+    },
+    "aliases": [
+      "carta de referenciacarta para certificar tu relación bancaria"
+    ],
+    "discoveredAt": "2026-05-22T21:06:31.258Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_carta_consularcarta_dirigida",
+    "name": "Carta consularCarta dirigida a embajadas y consulados",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Carta consularCarta dirigida a embajadas y consulados",
+      "exact": false
+    },
+    "aliases": [
+      "carta consularcarta dirigida a embajadas y consulados"
+    ],
+    "discoveredAt": "2026-05-22T21:06:31.258Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_generar_cartas",
+    "name": "Generar cartas",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Generar cartas",
+      "exact": false
+    },
+    "aliases": [
+      "generar cartas"
+    ],
+    "discoveredAt": "2026-05-22T21:06:31.258Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_carta_referencia",
+    "name": "Carta de referencia",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Carta de referencia",
+      "exact": false
+    },
+    "aliases": [
+      "carta de referencia"
+    ],
+    "discoveredAt": "2026-05-22T21:06:31.258Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_carta_consular",
+    "name": "Carta consular",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Carta consular",
+      "exact": false
+    },
+    "aliases": [
+      "carta consular"
+    ],
+    "discoveredAt": "2026-05-22T21:06:31.258Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_carta_referenciacarta_certificar",
+    "name": "Carta de referenciaCarta para certificar tu relación bancaria",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Carta de referenciaCarta para certificar tu relación bancaria",
+      "exact": false
+    },
+    "aliases": [
+      "carta de referenciacarta para certificar tu relación bancaria"
+    ],
+    "discoveredAt": "2026-05-22T21:06:31.802Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_carta_consularcarta_dirigida",
+    "name": "Carta consularCarta dirigida a embajadas y consulados",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Carta consularCarta dirigida a embajadas y consulados",
+      "exact": false
+    },
+    "aliases": [
+      "carta consularcarta dirigida a embajadas y consulados"
+    ],
+    "discoveredAt": "2026-05-22T21:06:31.802Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_generar_cartas",
+    "name": "Generar cartas",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Generar cartas",
+      "exact": false
+    },
+    "aliases": [
+      "generar cartas"
+    ],
+    "discoveredAt": "2026-05-22T21:06:31.802Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_carta_referencia",
+    "name": "Carta de referencia",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Carta de referencia",
+      "exact": false
+    },
+    "aliases": [
+      "carta de referencia"
+    ],
+    "discoveredAt": "2026-05-22T21:06:31.802Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_carta_consular",
+    "name": "Carta consular",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Carta consular",
+      "exact": false
+    },
+    "aliases": [
+      "carta consular"
+    ],
+    "discoveredAt": "2026-05-22T21:06:31.802Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_volver",
+    "name": "Volver",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Volver",
+      "exact": false
+    },
+    "aliases": [
+      "volver"
+    ],
+    "discoveredAt": "2026-05-22T21:06:32.956Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_continuar_productos",
+    "name": "Continuar (0 productos)",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Continuar (0 productos)",
+      "exact": false
+    },
+    "aliases": [
+      "continuar (0 productos)"
+    ],
+    "discoveredAt": "2026-05-22T21:06:32.956Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_generar_cartas",
+    "name": "Generar cartas",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Generar cartas",
+      "exact": false
+    },
+    "aliases": [
+      "generar cartas"
+    ],
+    "discoveredAt": "2026-05-22T21:06:32.956Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_seleccionar_todos_productos",
+    "name": "Seleccionar todos los productos(0 de 61 seleccionados)",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Seleccionar todos los productos(0 de 61 seleccionados)",
+      "exact": false
+    },
+    "aliases": [
+      "seleccionar todos los productos(0 de 61 seleccionados)"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_1",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_2",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_3",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_4",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_5",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_6",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_7",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_8",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_9",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_10",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_11",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_12",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_13",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_14",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_15",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_16",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_17",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_18",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_19",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_20",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_21",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_22",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_23",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_24",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_25",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_26",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_27",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_28",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_29",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_30",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_31",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_32",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_33",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_34",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_35",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_36",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_37",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_38",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_39",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_40",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_41",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_42",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_43",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_44",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_45",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_46",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_47",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_48",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_49",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_50",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_51",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_52",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_53",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_54",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_55",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_56",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_57",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_58",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_59",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_60",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_volver",
+    "name": "Volver",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Volver",
+      "exact": false
+    },
+    "aliases": [
+      "volver"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_continuar_productos",
+    "name": "Continuar (0 productos)",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Continuar (0 productos)",
+      "exact": false
+    },
+    "aliases": [
+      "continuar (0 productos)"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_generar_cartas",
+    "name": "Generar cartas",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Generar cartas",
+      "exact": false
+    },
+    "aliases": [
+      "generar cartas"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_cuenta_ahorros",
+    "name": "Cuenta de Ahorros ****0989",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Cuenta de Ahorros ****0989",
+      "exact": false
+    },
+    "aliases": [
+      "cuenta de ahorros ****0989"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_cuenta_ahorros_1",
+    "name": "Cuenta de Ahorros ****3918",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Cuenta de Ahorros ****3918",
+      "exact": false
+    },
+    "aliases": [
+      "cuenta de ahorros ****3918"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_cuenta_ahorros_2",
+    "name": "Cuenta de Ahorros ****5203",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Cuenta de Ahorros ****5203",
+      "exact": false
+    },
+    "aliases": [
+      "cuenta de ahorros ****5203"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_cuenta_ahorros_3",
+    "name": "Cuenta de Ahorros ****0809",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Cuenta de Ahorros ****0809",
+      "exact": false
+    },
+    "aliases": [
+      "cuenta de ahorros ****0809"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.224Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_cuenta_ahorros_4",
+    "name": "Cuenta de Ahorros ****9662",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Cuenta de Ahorros ****9662",
+      "exact": false
+    },
+    "aliases": [
+      "cuenta de ahorros ****9662"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_cuenta_ahorros_5",
+    "name": "Cuenta de Ahorros ****9368",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Cuenta de Ahorros ****9368",
+      "exact": false
+    },
+    "aliases": [
+      "cuenta de ahorros ****9368"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_cuenta_ahorros_6",
+    "name": "Cuenta de Ahorros ****3292",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Cuenta de Ahorros ****3292",
+      "exact": false
+    },
+    "aliases": [
+      "cuenta de ahorros ****3292"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_cuenta_ahorros_7",
+    "name": "Cuenta de Ahorros ****5889",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Cuenta de Ahorros ****5889",
+      "exact": false
+    },
+    "aliases": [
+      "cuenta de ahorros ****5889"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_cuenta_ahorros_8",
+    "name": "Cuenta de Ahorros ****8431",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Cuenta de Ahorros ****8431",
+      "exact": false
+    },
+    "aliases": [
+      "cuenta de ahorros ****8431"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_cuenta_ahorros_9",
+    "name": "Cuenta de Ahorros ****3899",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Cuenta de Ahorros ****3899",
+      "exact": false
+    },
+    "aliases": [
+      "cuenta de ahorros ****3899"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo",
+    "name": "Depósito a plazo ****2170",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****2170",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****2170"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_1",
+    "name": "Depósito a plazo ****2324",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****2324",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****2324"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_2",
+    "name": "Depósito a plazo ****2251",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****2251",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****2251"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_3",
+    "name": "Depósito a plazo ****0263",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****0263",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****0263"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_4",
+    "name": "Depósito a plazo ****2848",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****2848",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****2848"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_5",
+    "name": "Depósito a plazo ****3002",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****3002",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****3002"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_6",
+    "name": "Depósito a plazo ****3283",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****3283",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****3283"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_7",
+    "name": "Depósito a plazo ****3610",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****3610",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****3610"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_8",
+    "name": "Depósito a plazo ****3888",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****3888",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****3888"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_9",
+    "name": "Depósito a plazo ****0343",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****0343",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****0343"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_10",
+    "name": "Depósito a plazo ****1713",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****1713",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****1713"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_11",
+    "name": "Depósito a plazo ****1378",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****1378",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****1378"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_12",
+    "name": "Depósito a plazo ****1368",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****1368",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****1368"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_13",
+    "name": "Depósito a plazo ****1169",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****1169",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****1169"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_14",
+    "name": "Depósito a plazo ****1259",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****1259",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****1259"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_15",
+    "name": "Depósito a plazo ****1187",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****1187",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****1187"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_16",
+    "name": "Depósito a plazo ****1117",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****1117",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****1117"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_17",
+    "name": "Depósito a plazo ****0938",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****0938",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****0938"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_18",
+    "name": "Depósito a plazo ****0962",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****0962",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****0962"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_19",
+    "name": "Depósito a plazo ****0771",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****0771",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****0771"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_20",
+    "name": "Depósito a plazo ****0399",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****0399",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****0399"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_21",
+    "name": "Depósito a plazo ****7668",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****7668",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****7668"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_22",
+    "name": "Depósito a plazo ****7348",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****7348",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****7348"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_23",
+    "name": "Depósito a plazo ****5747",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****5747",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****5747"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_24",
+    "name": "Depósito a plazo ****4821",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****4821",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****4821"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_25",
+    "name": "Depósito a plazo ****0342",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****0342",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****0342"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_cuentas_cobrar",
+    "name": "Cuentas por cobrar ****1082",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Cuentas por cobrar ****1082",
+      "exact": false
+    },
+    "aliases": [
+      "cuentas por cobrar ****1082"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_cuentas_cobrar_1",
+    "name": "Cuentas por cobrar ****9007",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Cuentas por cobrar ****9007",
+      "exact": false
+    },
+    "aliases": [
+      "cuentas por cobrar ****9007"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_cuentas_cobrar_2",
+    "name": "Cuentas por cobrar ****9159",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Cuentas por cobrar ****9159",
+      "exact": false
+    },
+    "aliases": [
+      "cuentas por cobrar ****9159"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_cuentas_cobrar_3",
+    "name": "Cuentas por cobrar ****3005",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Cuentas por cobrar ****3005",
+      "exact": false
+    },
+    "aliases": [
+      "cuentas por cobrar ****3005"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_cuentas_cobrar_4",
+    "name": "Cuentas por cobrar ****9542",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Cuentas por cobrar ****9542",
+      "exact": false
+    },
+    "aliases": [
+      "cuentas por cobrar ****9542"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_prestamo",
+    "name": "Préstamo ****0279",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Préstamo ****0279",
+      "exact": false
+    },
+    "aliases": [
+      "préstamo ****0279"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_prestamo_1",
+    "name": "Préstamo ****6060",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Préstamo ****6060",
+      "exact": false
+    },
+    "aliases": [
+      "préstamo ****6060"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_prestamo_2",
+    "name": "Préstamo ****2282",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Préstamo ****2282",
+      "exact": false
+    },
+    "aliases": [
+      "préstamo ****2282"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_prestamo_3",
+    "name": "Préstamo ****2490",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Préstamo ****2490",
+      "exact": false
+    },
+    "aliases": [
+      "préstamo ****2490"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_prestamo_4",
+    "name": "Préstamo ****6780",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Préstamo ****6780",
+      "exact": false
+    },
+    "aliases": [
+      "préstamo ****6780"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_prestamo_5",
+    "name": "Préstamo ****2488",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Préstamo ****2488",
+      "exact": false
+    },
+    "aliases": [
+      "préstamo ****2488"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_tarjeta_credito",
+    "name": "Tarjeta de Crédito ****4153",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Tarjeta de Crédito ****4153",
+      "exact": false
+    },
+    "aliases": [
+      "tarjeta de crédito ****4153"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_tarjeta_credito_1",
+    "name": "Tarjeta de Crédito ****0044",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Tarjeta de Crédito ****0044",
+      "exact": false
+    },
+    "aliases": [
+      "tarjeta de crédito ****0044"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_tarjeta_credito_2",
+    "name": "Tarjeta de Crédito ****0311",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Tarjeta de Crédito ****0311",
+      "exact": false
+    },
+    "aliases": [
+      "tarjeta de crédito ****0311"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_tarjeta_credito_3",
+    "name": "Tarjeta de Crédito ****9894",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Tarjeta de Crédito ****9894",
+      "exact": false
+    },
+    "aliases": [
+      "tarjeta de crédito ****9894"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_tarjeta_credito_4",
+    "name": "Tarjeta de Crédito ****2343",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Tarjeta de Crédito ****2343",
+      "exact": false
+    },
+    "aliases": [
+      "tarjeta de crédito ****2343"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_tarjeta_credito_5",
+    "name": "Tarjeta de Crédito ****9570",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Tarjeta de Crédito ****9570",
+      "exact": false
+    },
+    "aliases": [
+      "tarjeta de crédito ****9570"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_tarjeta_credito_6",
+    "name": "Tarjeta de Crédito ****6187",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Tarjeta de Crédito ****6187",
+      "exact": false
+    },
+    "aliases": [
+      "tarjeta de crédito ****6187"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_tarjeta_credito_7",
+    "name": "Tarjeta de Crédito ****4959",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Tarjeta de Crédito ****4959",
+      "exact": false
+    },
+    "aliases": [
+      "tarjeta de crédito ****4959"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_tarjeta_credito_8",
+    "name": "Tarjeta de Crédito ****1357",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Tarjeta de Crédito ****1357",
+      "exact": false
+    },
+    "aliases": [
+      "tarjeta de crédito ****1357"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_tarjeta_credito_9",
+    "name": "Tarjeta de Crédito ****9516",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Tarjeta de Crédito ****9516",
+      "exact": false
+    },
+    "aliases": [
+      "tarjeta de crédito ****9516"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_tarjeta_credito_10",
+    "name": "Tarjeta de Crédito ****5301",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Tarjeta de Crédito ****5301",
+      "exact": false
+    },
+    "aliases": [
+      "tarjeta de crédito ****5301"
+    ],
+    "discoveredAt": "2026-05-22T21:06:37.225Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_quien_pueda_interesar",
+    "name": "A quien pueda interesar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "A quien pueda interesar",
+      "exact": false
+    },
+    "aliases": [
+      "a quien pueda interesar"
+    ],
+    "discoveredAt": "2026-05-22T21:06:52.340Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_empresas_mas_frecuentes",
+    "name": "Empresas más frecuentes",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Empresas más frecuentes",
+      "exact": false
+    },
+    "aliases": [
+      "empresas más frecuentes"
+    ],
+    "discoveredAt": "2026-05-22T21:06:52.340Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "input_escriba_destinatario_carta",
+    "name": "Escriba el destinatario de la carta",
+    "type": "input",
+    "locator": {
+      "strategy": "placeholder",
+      "value": "Escriba el destinatario de la carta",
+      "exact": false
+    },
+    "aliases": [
+      "escriba el destinatario de la carta"
+    ],
+    "discoveredAt": "2026-05-22T21:06:52.340Z",
+    "sourceStep": 1,
+    "confidence": 0.8
+  },
+  {
+    "key": "input_ingrese_rnc_buscar",
+    "name": "Ingrese RNC para buscar empresa",
+    "type": "input",
+    "locator": {
+      "strategy": "placeholder",
+      "value": "Ingrese RNC para buscar empresa",
+      "exact": false
+    },
+    "aliases": [
+      "ingrese rnc para buscar empresa"
+    ],
+    "discoveredAt": "2026-05-22T21:06:52.340Z",
+    "sourceStep": 1,
+    "confidence": 0.8
+  },
+  {
+    "key": "button_buscar",
+    "name": "Buscar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Buscar",
+      "exact": false
+    },
+    "aliases": [
+      "buscar"
+    ],
+    "discoveredAt": "2026-05-22T21:06:52.340Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_volver",
+    "name": "Volver",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Volver",
+      "exact": false
+    },
+    "aliases": [
+      "volver"
+    ],
+    "discoveredAt": "2026-05-22T21:06:52.340Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_continuar",
+    "name": "Continuar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Continuar",
+      "exact": false
+    },
+    "aliases": [
+      "continuar"
+    ],
+    "discoveredAt": "2026-05-22T21:06:52.340Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_generar_cartas",
+    "name": "Generar cartas",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Generar cartas",
+      "exact": false
+    },
+    "aliases": [
+      "generar cartas"
+    ],
+    "discoveredAt": "2026-05-22T21:06:52.340Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_quien_dirigida_carta",
+    "name": "¿A quién va dirigida la carta?",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "¿A quién va dirigida la carta?",
+      "exact": false
+    },
+    "aliases": [
+      "¿a quién va dirigida la carta?"
+    ],
+    "discoveredAt": "2026-05-22T21:06:52.340Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_quien_pueda_interesar",
+    "name": "A quien pueda interesar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "A quien pueda interesar",
+      "exact": false
+    },
+    "aliases": [
+      "a quien pueda interesar"
+    ],
+    "discoveredAt": "2026-05-22T21:06:52.873Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_empresas_mas_frecuentes",
+    "name": "Empresas más frecuentes",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Empresas más frecuentes",
+      "exact": false
+    },
+    "aliases": [
+      "empresas más frecuentes"
+    ],
+    "discoveredAt": "2026-05-22T21:06:52.873Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "input_escriba_destinatario_carta",
+    "name": "Escriba el destinatario de la carta",
+    "type": "input",
+    "locator": {
+      "strategy": "placeholder",
+      "value": "Escriba el destinatario de la carta",
+      "exact": false
+    },
+    "aliases": [
+      "escriba el destinatario de la carta"
+    ],
+    "discoveredAt": "2026-05-22T21:06:52.873Z",
+    "sourceStep": 1,
+    "confidence": 0.8
+  },
+  {
+    "key": "input_ingrese_rnc_buscar",
+    "name": "Ingrese RNC para buscar empresa",
+    "type": "input",
+    "locator": {
+      "strategy": "placeholder",
+      "value": "Ingrese RNC para buscar empresa",
+      "exact": false
+    },
+    "aliases": [
+      "ingrese rnc para buscar empresa"
+    ],
+    "discoveredAt": "2026-05-22T21:06:52.873Z",
+    "sourceStep": 1,
+    "confidence": 0.8
+  },
+  {
+    "key": "button_buscar",
+    "name": "Buscar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Buscar",
+      "exact": false
+    },
+    "aliases": [
+      "buscar"
+    ],
+    "discoveredAt": "2026-05-22T21:06:52.873Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_volver",
+    "name": "Volver",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Volver",
+      "exact": false
+    },
+    "aliases": [
+      "volver"
+    ],
+    "discoveredAt": "2026-05-22T21:06:52.873Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_continuar",
+    "name": "Continuar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Continuar",
+      "exact": false
+    },
+    "aliases": [
+      "continuar"
+    ],
+    "discoveredAt": "2026-05-22T21:06:52.873Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_generar_cartas",
+    "name": "Generar cartas",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Generar cartas",
+      "exact": false
+    },
+    "aliases": [
+      "generar cartas"
+    ],
+    "discoveredAt": "2026-05-22T21:06:52.873Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_quien_dirigida_carta",
+    "name": "¿A quién va dirigida la carta?",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "¿A quién va dirigida la carta?",
+      "exact": false
+    },
+    "aliases": [
+      "¿a quién va dirigida la carta?"
+    ],
+    "discoveredAt": "2026-05-22T21:06:52.873Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_quien_pueda_interesar",
+    "name": "A quien pueda interesar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "A quien pueda interesar",
+      "exact": false
+    },
+    "aliases": [
+      "a quien pueda interesar"
+    ],
+    "discoveredAt": "2026-05-22T21:06:56.920Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_empresas_mas_frecuentes",
+    "name": "Empresas más frecuentes",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Empresas más frecuentes",
+      "exact": false
+    },
+    "aliases": [
+      "empresas más frecuentes"
+    ],
+    "discoveredAt": "2026-05-22T21:06:56.920Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "input_escriba_destinatario_carta",
+    "name": "Escriba el destinatario de la carta",
+    "type": "input",
+    "locator": {
+      "strategy": "placeholder",
+      "value": "Escriba el destinatario de la carta",
+      "exact": false
+    },
+    "aliases": [
+      "escriba el destinatario de la carta"
+    ],
+    "discoveredAt": "2026-05-22T21:06:56.920Z",
+    "sourceStep": 1,
+    "confidence": 0.8
+  },
+  {
+    "key": "input_ingrese_rnc_buscar",
+    "name": "Ingrese RNC para buscar empresa",
+    "type": "input",
+    "locator": {
+      "strategy": "placeholder",
+      "value": "Ingrese RNC para buscar empresa",
+      "exact": false
+    },
+    "aliases": [
+      "ingrese rnc para buscar empresa"
+    ],
+    "discoveredAt": "2026-05-22T21:06:56.920Z",
+    "sourceStep": 1,
+    "confidence": 0.8
+  },
+  {
+    "key": "button_buscar",
+    "name": "Buscar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Buscar",
+      "exact": false
+    },
+    "aliases": [
+      "buscar"
+    ],
+    "discoveredAt": "2026-05-22T21:06:56.920Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_volver",
+    "name": "Volver",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Volver",
+      "exact": false
+    },
+    "aliases": [
+      "volver"
+    ],
+    "discoveredAt": "2026-05-22T21:06:56.920Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_generando_carta_referencia",
+    "name": "Generando carta de referencia...",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Generando carta de referencia...",
+      "exact": false
+    },
+    "aliases": [
+      "generando carta de referencia..."
+    ],
+    "discoveredAt": "2026-05-22T21:06:56.920Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_generar_cartas",
+    "name": "Generar cartas",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Generar cartas",
+      "exact": false
+    },
+    "aliases": [
+      "generar cartas"
+    ],
+    "discoveredAt": "2026-05-22T21:06:56.920Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_quien_dirigida_carta",
+    "name": "¿A quién va dirigida la carta?",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "¿A quién va dirigida la carta?",
+      "exact": false
+    },
+    "aliases": [
+      "¿a quién va dirigida la carta?"
+    ],
+    "discoveredAt": "2026-05-22T21:06:56.920Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_volver",
+    "name": "Volver",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Volver",
+      "exact": false
+    },
+    "aliases": [
+      "volver"
+    ],
+    "discoveredAt": "2026-05-22T21:07:08.020Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_continuar",
+    "name": "Continuar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Continuar",
+      "exact": false
+    },
+    "aliases": [
+      "continuar"
+    ],
+    "discoveredAt": "2026-05-22T21:07:08.020Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_generar_cartas",
+    "name": "Generar cartas",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Generar cartas",
+      "exact": false
+    },
+    "aliases": [
+      "generar cartas"
+    ],
+    "discoveredAt": "2026-05-22T21:07:08.020Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_vista_previa_carta",
+    "name": "Vista previa de la carta",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Vista previa de la carta",
+      "exact": false
+    },
+    "aliases": [
+      "vista previa de la carta"
+    ],
+    "discoveredAt": "2026-05-22T21:07:08.020Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_carta_referencia",
+    "name": "Carta de Referencia",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Carta de Referencia",
+      "exact": false
+    },
+    "aliases": [
+      "carta de referencia"
+    ],
+    "discoveredAt": "2026-05-22T21:07:08.020Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  }
+]

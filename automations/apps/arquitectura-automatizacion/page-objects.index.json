@@ -1,0 +1,190 @@
+{
+  "version": "1.0",
+  "appSlug": "arquitectura-automatizacion",
+  "pageObjects": [
+    {
+      "id": "po_framework_productlistpage",
+      "className": "ProductListPage",
+      "filePath": "automations/apps/arquitectura-automatizacion/pages/productlist.page.ts",
+      "screenSignature": "screen:arquitectura-automatizacion-product_list",
+      "methods": [
+        {
+          "name": "selectProduct",
+          "intent": "select_product",
+          "parameters": [
+            "productName"
+          ],
+          "available": true,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": "c37844-visualizar-detalle-de-tarjeta-visa-gold-step-6"
+        }
+      ],
+      "confidence": 1,
+      "status": "active",
+      "sourcePlanIds": [],
+      "caseIds": [],
+      "createdAt": "2026-05-22T21:47:00.237Z",
+      "updatedAt": "2026-05-22T21:47:00.237Z"
+    },
+    {
+      "id": "po_1779486492742_agn82s",
+      "className": "HomePage",
+      "filePath": "automations/apps/arquitectura-automatizacion/pages/home.page.candidate.ts",
+      "screenSignature": "screen:arquitectura-automatizacion-home",
+      "methods": [
+        {
+          "name": "start",
+          "intent": "start_session",
+          "parameters": [],
+          "available": true,
+          "source": "candidate,c37870-generar-carta-de-referencia-con-certificado-step-3,c37870-generar-carta-de-referencia-con-certificado-missing-start_session,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-3",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "candidate",
+      "sourcePlanIds": [
+        "c37870-generar-carta-de-referencia-con-certificado"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-05-22T21:48:12.742Z",
+      "updatedAt": "2026-05-22T21:48:12.742Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-05-22T21:48:12.754Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/arquitectura-automatizacion/pages/home.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-05-22T21:48:12.761Z",
+        "approvedFrom": "automations/apps/arquitectura-automatizacion/pages/home.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
+    },
+    {
+      "id": "po_1779486492742_yvtxg4",
+      "className": "ProductDetailPage",
+      "filePath": "automations/apps/arquitectura-automatizacion/pages/productdetail.page.candidate.ts",
+      "screenSignature": "screen:arquitectura-automatizacion-product_detail",
+      "methods": [
+        {
+          "name": "clickPrimaryAction",
+          "intent": "click_primary_action",
+          "parameters": [
+            "actionName"
+          ],
+          "available": true,
+          "source": "candidate,c37870-generar-carta-de-referencia-con-certificado-step-5,c37870-generar-carta-de-referencia-con-certificado-missing-click_primary_action",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "candidate",
+      "sourcePlanIds": [
+        "c37870-generar-carta-de-referencia-con-certificado"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-05-22T21:48:12.742Z",
+      "updatedAt": "2026-05-22T21:48:12.742Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-05-22T21:48:12.756Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/arquitectura-automatizacion/pages/productdetail.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-05-22T21:48:12.764Z",
+        "approvedFrom": "automations/apps/arquitectura-automatizacion/pages/productdetail.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
+    },
+    {
+      "id": "po_1779487111132_qfse43",
+      "className": "ProductInformationPage",
+      "filePath": "automations/apps/arquitectura-automatizacion/pages/productinformation.page.ts",
+      "screenSignature": "screen:arquitectura-automatizacion-product_information",
+      "methods": [
+        {
+          "name": "openProductInformation",
+          "intent": "open_product_information",
+          "parameters": [],
+          "available": true,
+          "source": "candidate,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-4,c37844-visualizar-detalle-de-tarjeta-visa-gold-missing-open_product_information",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "active",
+      "sourcePlanIds": [
+        "c37844-visualizar-detalle-de-tarjeta-visa-gold"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-05-22T21:58:31.132Z",
+      "updatedAt": "2026-05-22T21:58:31.132Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-05-22T21:58:31.145Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/arquitectura-automatizacion/pages/productinformation.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-05-22T21:58:31.157Z",
+        "approvedFrom": "automations/apps/arquitectura-automatizacion/pages/productinformation.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
+    },
+    {
+      "id": "po_1779487111132_w5kkx2",
+      "className": "CategoryPage",
+      "filePath": "automations/apps/arquitectura-automatizacion/pages/category.page.ts",
+      "screenSignature": "screen:arquitectura-automatizacion-category",
+      "methods": [
+        {
+          "name": "selectCategory",
+          "intent": "select_category",
+          "parameters": [
+            "categoryName"
+          ],
+          "available": true,
+          "source": "candidate,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-5",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "active",
+      "sourcePlanIds": [
+        "c37844-visualizar-detalle-de-tarjeta-visa-gold"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-05-22T21:58:31.132Z",
+      "updatedAt": "2026-05-22T21:58:31.132Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-05-22T21:58:31.147Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/arquitectura-automatizacion/pages/category.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-05-22T21:58:31.160Z",
+        "approvedFrom": "automations/apps/arquitectura-automatizacion/pages/category.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
+    }
+  ],
+  "componentCandidates": [],
+  "updatedAt": "2026-05-22T22:13:56.385Z"
+}

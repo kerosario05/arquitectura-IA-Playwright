@@ -18,6 +18,7 @@ import { runSegmentedRouteRecovery } from "../agent/segment-route-recovery";
 import type { PageSnapshot } from "../types/page-snapshot.types";
 import type { FullConfig } from "../types/env.types";
 import type { CaseDiscoveryResult } from "../types/discovery.types";
+import type { AppProfile } from "../automations/app-profile";
 
 export type CaseDiscoveryWorkflowOptions = {
   caseId: number;
@@ -47,6 +48,7 @@ export type CaseDiscoveryWorkflowOptions = {
   noAutoPomValidation?: boolean;
   verifyPromotedSpec?: boolean;
   promotedSpecTimeoutMs?: number;
+  appProfile?: AppProfile;
 };
 
 export type CaseDiscoveryWorkflowResult = {
@@ -484,7 +486,8 @@ export async function runCaseDiscoveryWorkflow(
           promotionPolicy,
           inlineDebugMode: options.inlineDebugSpec ?? false,
           verifySpec: options.verifyPromotedSpec ?? false,
-          specVerificationTimeoutMs: options.promotedSpecTimeoutMs
+          specVerificationTimeoutMs: options.promotedSpecTimeoutMs,
+          appProfileObject: options.appProfile
         },
         false,
         {

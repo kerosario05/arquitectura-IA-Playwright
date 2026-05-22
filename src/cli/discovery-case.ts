@@ -1,9 +1,12 @@
 import { config } from "../config/env";
 import { runCaseDiscoveryWorkflow, printCaseDiscoverySummary } from "../discovery/case-discovery-workflow";
 import type { CaseDiscoveryWorkflowOptions } from "../discovery/case-discovery-workflow";
+import { resolveAppProfile, ensureAppStructure, logAppProfile } from "../automations/app-profile";
+import type { AppProfile } from "../automations/app-profile";
 
 type CliArgs = {
   caseId: number;
+  app?: string;
   headed: boolean;
   output?: string;
   autoPromote: boolean;
@@ -24,6 +27,7 @@ type CliArgs = {
 export function parseDiscoveryCaseArgs(argv: string[]): CliArgs {
   const args: CliArgs = {
     caseId: 0,
+    app: undefined,
     headed: false,
     autoPromote: false,
     promotionDryRun: false,
@@ -46,6 +50,14 @@ export function parseDiscoveryCaseArgs(argv: string[]): CliArgs {
 
     if (token === "--headed") {
       args.headed = true;
+      continue;
+    }
+    if (token === "--app") {
+      if (!nextValue || nextValue.startsWith("--")) {
+        throw new Error("Missing value for --app");
+      }
+      args.app = nextValue;
+      i += 1;
       continue;
     }
     if (token === "--auto-promote") {
@@ -152,11 +164,39 @@ export function parseDiscoveryCaseArgs(argv: string[]): CliArgs {
   return args;
 }
 
+async function resolveAndEnsureApp(args: CliArgs): Promise<AppProfile> {
+  const envAppSlug = process.env.APP_SLUG;
+
+  const testRailProjectId = config.integrations?.testRail?.projectId;
+  const testRailBaseUrl = config.integrations?.testRail?.url;
+  const testRailEmail = config.integrations?.testRail?.email;
+  const testRailApiKey = config.integrations?.testRail?.apiKey;
+
+  const { profile, baseDir } = await resolveAppProfile({
+    cliAppSlug: args.app,
+    envAppSlug,
+    testRailProjectId,
+    testRailBaseUrl,
+    testRailEmail,
+    testRailApiKey,
+    baseUrl: config.app.baseUrl,
+    appName: config.app.name
+  });
+
+  const ensured = await ensureAppStructure(baseDir);
+
+  logAppProfile(profile, baseDir, ensured.length > 0 ? ensured : undefined);
+
+  return profile;
+}
+
 async function main(): Promise<void> {
   const args = parseDiscoveryCaseArgs(process.argv.slice(2));
 
   console.log(`[discovery:case] Starting case-driven discovery for C${args.caseId}...`);
   console.log(`[discovery:case] Overwrite enabled: ${args.overwrite}`);
+
+  const appProfile = await resolveAndEnsureApp(args);
 
   const workflowOptions: CaseDiscoveryWorkflowOptions = {
     caseId: args.caseId,
@@ -175,7 +215,8 @@ async function main(): Promise<void> {
     noAutoPomValidation: args.noAutoPomValidation,
     verifyPromotedSpec: args.verifyPromotedSpec,
     promotedSpecTimeoutMs: args.promotedSpecTimeoutMs,
-    config
+    config,
+    appProfile
   };
 
   const workflowResult = await runCaseDiscoveryWorkflow(workflowOptions);
