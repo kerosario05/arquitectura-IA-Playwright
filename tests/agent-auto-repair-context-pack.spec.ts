@@ -6,8 +6,9 @@ import { runAgentAutoRepairAttempt } from "../src/agent/agent-auto-repair";
 import type { FullConfig } from "../src/types/env.types";
 import { EventEmitter } from "node:events";
 import type { ExecOptions } from "node:child_process";
+import { getTestTempDir, ensureTestTempDir, cleanTestTempDir } from "./helpers/test-temp-dir";
 
-const tmpDir = path.resolve("./.tmp-test-agent-auto-repair-context-pack");
+const tmpDir = getTestTempDir("test-agent-auto-repair-context-pack");
 
 function mockSpawnExit(input: { exitCode: number; stderr?: string; stdout?: string }) {
   const fn = (command: string, args: string[], options: any) => {
@@ -56,12 +57,12 @@ function configWithAgentEnabled(): FullConfig {
 }
 
 test.beforeAll(async () => {
-  await fs.mkdir(tmpDir, { recursive: true });
+  await ensureTestTempDir("test-agent-auto-repair-context-pack");
 });
 
 test.afterAll(async () => {
   try {
-    await fs.rm(tmpDir, { recursive: true, force: true });
+    await cleanTestTempDir("test-agent-auto-repair-context-pack");
   } catch {
   }
 });

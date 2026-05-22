@@ -4,8 +4,9 @@ import path from "node:path";
 import { buildAgentContextPack } from "../src/agent/agent-context-pack";
 import type { FullConfig } from "../src/types/env.types";
 import type { ExecutionPlan } from "../src/types/execution-plan.types";
+import { getTestTempDir, ensureTestTempDir, cleanTestTempDir } from "./helpers/test-temp-dir";
 
-const tmpDir = path.resolve("./.tmp-test-agent-context-pack");
+const tmpDir = getTestTempDir("test-agent-context-pack");
 
 function baseConfig(overrides?: Partial<FullConfig>): FullConfig {
   return {
@@ -40,12 +41,12 @@ function baseConfig(overrides?: Partial<FullConfig>): FullConfig {
 }
 
 test.beforeAll(async () => {
-  await fs.mkdir(tmpDir, { recursive: true });
+  await ensureTestTempDir("test-agent-context-pack");
 });
 
 test.afterAll(async () => {
   try {
-    await fs.rm(tmpDir, { recursive: true, force: true });
+    await cleanTestTempDir("test-agent-context-pack");
   } catch {
   }
 });

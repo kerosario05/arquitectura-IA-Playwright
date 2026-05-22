@@ -163,7 +163,7 @@ export function buildAppAutomationPaths(appProfile: AppProfile, automationId?: s
     evidenceDir,
     runsDir,
     planPath: caseDir ? path.join(caseDir, "plan.json") : undefined,
-    specPath: caseDir ? path.join(caseDir, "spec.ts") : undefined
+    specPath: caseDir ? path.join(caseDir, "case.spec.ts") : undefined
   };
 }
 

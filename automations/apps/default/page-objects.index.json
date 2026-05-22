@@ -17,6 +17,16 @@
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
+        },
+        {
+          "name": "open",
+          "intent": "open_home",
+          "parameters": ["moduleName"],
+          "available": true,
+          "source": "c37869-generar-carta-de-referencia-con-cuenta-de-ahorro",
+          "sensitive": false,
+          "confidence": 0.9,
+          "status": "active"
         }
       ],
       "confidence": 0.5,
@@ -217,6 +227,40 @@
         "autoApproved": true,
         "blockedMethods": []
       }
+    },
+    {
+      "id": "po_1779458400000_ops1",
+      "className": "OperationsMenuPage",
+      "filePath": "automations/apps/default/pages/operationsmenu.page.ts",
+      "screenSignature": "screen:operations-menu",
+      "methods": [
+        {
+          "name": "selectOperation",
+          "intent": "open_home",
+          "parameters": ["operationName"],
+          "available": true,
+          "source": "c37869-generar-carta-de-referencia-con-cuenta-de-ahorro",
+          "sensitive": false,
+          "confidence": 0.9,
+          "status": "active"
+        },
+        {
+          "name": "expectLoaded",
+          "intent": "expect_loaded",
+          "parameters": [],
+          "available": true,
+          "source": "c37869-generar-carta-de-referencia-con-cuenta-de-ahorro",
+          "sensitive": false,
+          "confidence": 0.9,
+          "status": "active"
+        }
+      ],
+      "confidence": 0.9,
+      "status": "active",
+      "sourcePlanIds": ["c37869-generar-carta-de-referencia-con-cuenta-de-ahorro"],
+      "caseIds": [],
+      "createdAt": "2026-05-22T14:10:00.000Z",
+      "updatedAt": "2026-05-22T14:10:00.000Z"
     }
   ],
   "componentCandidates": [],

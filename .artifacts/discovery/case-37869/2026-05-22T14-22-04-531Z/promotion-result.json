@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-22T14:23:14.276Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c37869-generar-carta-de-referencia-con-cuenta-de-ahorro",
+  "appSlug": "default",
+  "specPath": "automations\\apps\\default\\cases\\c37869-generar-carta-de-referencia-con-cuenta-de-ahorro\\spec.ts",
+  "planPath": "automations\\apps\\default\\cases\\c37869-generar-carta-de-referencia-con-cuenta-de-ahorro\\plan.json",
+  "caseFolder": "c37869-generar-carta-de-referencia-con-cuenta-de-ahorro",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false
+}

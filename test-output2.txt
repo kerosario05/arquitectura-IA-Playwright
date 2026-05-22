@@ -1,0 +1,115 @@
+
+Running 11 tests using 1 worker
+
+  ok  1 tests\spec-generator-pom.spec.ts:53:5 › POM spec without registry returns needs_page_object (14ms)
+  ok  2 tests\spec-generator-pom.spec.ts:59:5 › POM spec with active PO and method uses POM call (4ms)
+  ok  3 tests\spec-generator-pom.spec.ts:81:5 › POM spec with inline debug mode marks inline_debug_only (3ms)
+  ok  4 tests\spec-generator-pom.spec.ts:87:5 › POM spec generates imports and instantiations for each PO (3ms)
+  ok  5 tests\spec-generator-pom.spec.ts:119:5 › POM spec avoids duplicate imports (3ms)
+  ok  6 tests\spec-generator-pom.spec.ts:145:5 › POM spec without method returns needs_page_method (3ms)
+  ok  7 tests\spec-generator-pom.spec.ts:159:5 › POM spec with candidate generation creates candidate entries (6ms)
+  ok  8 tests\spec-generator-pom.spec.ts:176:5 › POM spec contains test title from plan (2ms)
+=== SPEC CONTENT ===
+import { test } from '@playwright/test';
+
+import { HomePage } from '../../../../MisProyectos/MCP/pages/home.page';
+import { AuthFlow, setAuthFlowTestData } from '../../flows/auth.flow';
+
+test('Test', async ({ page }) => {
+
+  const homePage = new HomePage(page);
+    const authFlow = new AuthFlow(page);
+
+  await homePage.start();
+  
+    await authFlow.ensureAuthenticated({
+      alias: 'defaultClient',
+      landing: 'transactions_menu',
+    });
+  
+  await homePage.open();
+});
+=== END SPEC ===
+  ok  9 tests\spec-generator-pom.spec.ts:185:5 › C37869: contaminated description does not cause all steps to derive start_session (7ms)
+=== VALIDATION TEST SPEC ===
+import { test } from '@playwright/test';
+
+import { AuthFlow, setAuthFlowTestData } from '../../flows/auth.flow';
+
+test('Test', async ({ page }) => {
+
+    const authFlow = new AuthFlow(page);
+  // WARNING: Missing page object methods:
+  // - step=2 target="iniciar" derivedIntent="start_session" expectedOwner="HomePage" availableMethods=[]
+  // - step=4 target="Generar cartas" derivedIntent="open_home" expectedOwner="HomePage" availableMethods=[]
+
+
+    await authFlow.ensureAuthenticated({
+      alias: 'defaultClient',
+      landing: 'transactions_menu',
+    });
+  // Fallthrough: execute remaining plan steps via executor
+});
+=== ERRORS ===
+[]
+=== END ===
+  x  10 tests\spec-generator-pom.spec.ts:257:5 › C37869: validation fails if pre-auth functional steps are lost (3ms)
+  x  11 tests\spec-generator-pom.spec.ts:302:5 › C37869: AuthFlow is inserted between pre-auth and post-auth steps with multiple actions (20ms)
+
+
+  1) tests\spec-generator-pom.spec.ts:257:5 › C37869: validation fails if pre-auth functional steps are lost 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32mtrue[39m
+    Received: [31mfalse[39m
+
+      297 |
+      298 |   // Should have validation error for missing pre-auth step
+    > 299 |   expect(result.validationErrors.some(e => e.includes("iniciar") && e.includes("Pre-auth"))).toBe(true);
+          |                                                                                              ^
+      300 | });
+      301 |
+      302 | test("C37869: AuthFlow is inserted between pre-auth and post-auth steps with multiple actions", () => {
+        at C:\MisProyectos\MCP\tests\spec-generator-pom.spec.ts:299:94
+
+    Error Context: test-results\spec-generator-pom-C37869--ef7ab-h-functional-steps-are-lost\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\spec-generator-pom-C37869--ef7ab-h-functional-steps-are-lost\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\spec-generator-pom-C37869--ef7ab-h-functional-steps-are-lost\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) tests\spec-generator-pom.spec.ts:302:5 › C37869: AuthFlow is inserted between pre-auth and post-auth steps with multiple actions 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoHaveLength[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected length: [32m0[39m
+    Received length: [31m2[39m
+    Received array:  [31m["Pre-auth functional step \"iniciar\" is missing from spec. AuthFlow insertion must not remove navigation steps before the auth gate.", "Pre-auth functional step \"transacciones y servicio\" is missing from spec. AuthFlow insertion must not remove navigation steps before the auth gate."][39m
+
+      369 |
+      370 |   // No validation errors when pre-auth steps are preserved
+    > 371 |   expect(result.validationErrors).toHaveLength(0);
+          |                                   ^
+      372 | });
+      373 |
+        at C:\MisProyectos\MCP\tests\spec-generator-pom.spec.ts:371:35
+
+    Error Context: test-results\spec-generator-pom-C37869--dad86-steps-with-multiple-actions\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\spec-generator-pom-C37869--dad86-steps-with-multiple-actions\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\spec-generator-pom-C37869--dad86-steps-with-multiple-actions\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    tests\spec-generator-pom.spec.ts:257:5 › C37869: validation fails if pre-auth functional steps are lost 
+    tests\spec-generator-pom.spec.ts:302:5 › C37869: AuthFlow is inserted between pre-auth and post-auth steps with multiple actions 
+  9 passed (2.0s)

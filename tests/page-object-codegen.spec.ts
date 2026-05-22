@@ -4,15 +4,16 @@ import path from "node:path";
 import { generatePageObjectCandidateFiles, buildPageObjectClassSource, sanitizeClassName, sanitizeMethodName } from "../src/automations/page-object-codegen";
 import { loadPageObjectRegistry, savePageObjectRegistry, ensurePageObjectRegistry, registerPageObjectCandidate } from "../src/automations/page-object-registry";
 import type { PageObjectEntry } from "../src/types/page-object.types";
+import { getTestTempDir, ensureTestTempDir, cleanTestTempDir } from "./helpers/test-temp-dir";
 
-const tmpDir = path.resolve("./.tmp-test-page-object-codegen");
+const tmpDir = getTestTempDir("test-page-object-codegen");
 
 test.beforeAll(async () => {
-  await fs.mkdir(tmpDir, { recursive: true });
+  await ensureTestTempDir("test-page-object-codegen");
 });
 
 test.afterAll(async () => {
-  await fs.rm(tmpDir, { recursive: true, force: true }).catch(() => {});
+  await cleanTestTempDir("test-page-object-codegen").catch(() => {});
 });
 
 function makeCandidateEntry(overrides: Partial<PageObjectEntry> & { className: string }): PageObjectEntry {

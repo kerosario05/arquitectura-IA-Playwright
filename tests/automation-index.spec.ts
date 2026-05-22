@@ -7,8 +7,9 @@ import {
   upsertAutomationIndexEntry
 } from "../src/automations/automation-index";
 import type { PromotedAutomationIndex, PromotedAutomationIndexEntry } from "../src/types/automation-promotion.types";
+import { getTestTempDir, ensureTestTempDir, cleanTestTempDir } from "./helpers/test-temp-dir";
 
-const tmpDir = path.resolve("./.tmp-test-automation-index");
+const tmpDir = getTestTempDir("test-automation-index");
 
 function makeEntry(id: string, overrides?: Partial<PromotedAutomationIndexEntry>): PromotedAutomationIndexEntry {
   return {
@@ -27,12 +28,12 @@ function makeEntry(id: string, overrides?: Partial<PromotedAutomationIndexEntry>
 }
 
 test.beforeAll(async () => {
-  await fs.mkdir(tmpDir, { recursive: true });
+  await ensureTestTempDir("test-automation-index");
 });
 
 test.afterAll(async () => {
   try {
-    await fs.rm(tmpDir, { recursive: true, force: true });
+    await cleanTestTempDir("test-automation-index");
   } catch {
   }
 });

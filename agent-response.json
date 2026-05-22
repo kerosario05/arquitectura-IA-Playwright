@@ -1,34 +1,22 @@
 {
   "version": "1.0",
-  "generatedAt": "2026-05-22T04:04:23.019Z",
-  "recoveryDecision": "repaired_plan",
-  "plans": [
+  "source": "ai_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "caseId": 1,
+    "title": "Recovered scenario"
+  },
+  "requiredData": [],
+  "steps": [
     {
-      "version": "1.0",
-      "source": "ai_generated",
-      "status": "validated",
-      "scenario": {
-        "source": "testrail",
-        "caseId": 1,
-        "title": "Recovered scenario"
-      },
-      "requiredData": [],
-      "steps": [
-        {
-          "index": 1,
-          "action": "click",
-          "target": {
-            "strategy": "text",
-            "value": "Continue"
-          }
-        }
-      ],
-      "createdAt": "2026-05-22T04:04:23.019Z"
+      "index": 1,
+      "action": "click",
+      "target": {
+        "strategy": "text",
+        "value": "Continue"
+      }
     }
   ],
-  "proposedObjects": [],
-  "unresolvedQuestions": [],
-  "rationale": [
-    "Wrapped the repaired ExecutionPlan in a valid AgentHandoffResponse."
-  ]
+  "createdAt": "2026-05-22T18:35:38.121Z"
 }

@@ -7,3 +7,12 @@ playwright-report/
 playwright/.auth/
 dist/
 *.log
+
+# Temporary test/debug artifacts (consolidated under .artifacts/tmp/)
+.artifacts/tmp/
+
+# Legacy temp folders in root (to be removed)
+.tmp-*/
+.tmp*/
+codex-test.txt
+codex-runner-test.txt

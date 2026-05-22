@@ -28,29 +28,93 @@ export type PageObjectCodegenResult = {
 };
 
 const INTENT_LOCATOR_TEMPLATES: Record<string, string> = {
-  start_session: "await this.page.goto('/'); await this.page.getByRole('button', { name: /iniciar sesión|iniciar|start|comenzar/i }).click();",
+  start_session: [
+    "await this.page.goto('/');",
+    "await this.page.waitForLoadState('networkidle');",
+    "await this.page.waitForTimeout(1000);",
+    "const button = this.page.getByRole('button', { name: /iniciar sesión|iniciar|start|comenzar/i });",
+    "await button.waitFor({ state: 'visible', timeout: 10000 });",
+    "await button.click({ force: true });",
+    "await this.page.waitForLoadState('networkidle');",
+    "await this.page.waitForTimeout(3000);"
+  ].join("\n"),
   open_home: "await this.page.goto('/');",
-  open_product_information: "await this.page.getByRole('button', { name: /información de productos|product information/i }).click();",
-  select_category: "await this.page.getByRole('button', { name: categoryName }).or(this.page.getByRole('link', { name: categoryName })).click();",
-  select_product: `const normalize = (s: string) => s.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase();
-    const keywords = normalize(productName).split(/\\s+/).filter(k => k.length > 2);
-    const headings = this.page.locator('h1, h2, h3, h4, h5, h6');
-    const count = await headings.count();
-    for (let i = 0; i < count; i++) {
-      const heading = headings.nth(i);
-      const text = await heading.textContent();
-      if (text) {
-        const normalizedText = normalize(text);
-        const matchCount = keywords.filter(k => normalizedText.includes(k)).length;
-        if (matchCount >= Math.min(keywords.length - 1, 2)) {
-          const card = heading.locator('xpath=ancestor::button|ancestor::a|ancestor::*[contains(@class, "card")][1]');
-          await card.click();
-          return;
-        }
-      }
-    }
-    await this.page.getByText(new RegExp(productName.split(/\\s+/).join('|'), 'i')).first().click();`,
-  click_primary_action: "await this.page.getByRole('button', { name: actionName }).click();",
+  open_product_information: [
+    "const previousUrl = this.page.url();",
+    "await this.page.getByRole('button', { name: /información de productos|product information/i }).click();",
+    "await waitForPromotedSpecStepReady(this.page, { previousUrl, expectEntityList: false });"
+  ].join("\n"),
+  select_category: [
+    "const previousUrl = this.page.url();",
+    "await this.page.getByRole('button', { name: categoryName }).or(this.page.getByRole('link', { name: categoryName })).click();",
+    "await waitForPromotedSpecStepReady(this.page, { previousUrl, expectEntityList: true });"
+  ].join("\n"),
+  select_product: [
+    "await waitForListReadiness(this.page, { timeoutMs: 10000, pollMs: 500, minCards: 1 });",
+    "const normalize = (s: string) => s.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase().trim();",
+    "const target = normalize(productName);",
+    "const allTokens = target.split(/\\s+/).filter(t => t.length > 2);",
+    "const stopWords = new Set(['de','del','la','el','los','las','un','una','con','sin','por','para','the','a','an','in','on','at','to','for']);",
+    "const strongTokens = allTokens.filter(t => !stopWords.has(t));",
+    "const tokensToMatch = strongTokens.length > 0 ? strongTokens : allTokens;",
+    "if (tokensToMatch.length === 0) throw new Error('Product target \"' + productName + '\" has no meaningful tokens.');",
+    "const checkboxRegex = new RegExp(tokensToMatch.map(t => t.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')).join('.*'), 'i');",
+    "const checkbox = this.page.getByRole('checkbox', { name: checkboxRegex, exact: false });",
+    "if (await checkbox.count() > 0) {",
+    "  const isChecked = await checkbox.first().isChecked().catch(() => false);",
+    "  if (!isChecked) { await checkbox.first().click({ timeout: 10000 }); }",
+    "  return;",
+    "}",
+    "const roleRegex = new RegExp(tokensToMatch.map(t => t.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')).join('.*'), 'i');",
+    "const rolesToTry = ['button', 'link', 'option', 'radio', 'menuitem'];",
+    "for (const role of rolesToTry) {",
+    "  const locator = this.page.getByRole(role as any, { name: roleRegex, exact: false });",
+    "  if (await locator.count() > 0) { await locator.first().click({ timeout: 10000 }); return; }",
+    "}",
+    "const headingRegex = new RegExp(tokensToMatch.map(t => t.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')).join('.*'), 'i');",
+    "const headingLocator = this.page.locator('h1, h2, h3, h4, h5, h6').filter({ hasText: headingRegex }).first();",
+    "try {",
+    "  if (await headingLocator.count() > 0) {",
+    "    const headingHandle = await headingLocator.elementHandle({ timeout: 5000 });",
+    "    if (headingHandle) {",
+    "      const ancestor = await headingHandle.evaluateHandle((el) => {",
+    "        let current = el as HTMLElement; let depth = 0;",
+    "        const clickableTags = ['button', 'a', 'input', 'label'];",
+    "        const clickableRoles = ['button', 'link', 'option', 'radio', 'checkbox', 'tab', 'menuitem'];",
+    "        const clickableClassPatterns = ['card', 'cursor-pointer', 'clickable', 'btn', 'interactive', 'selectable'];",
+    "        while (current && depth < 5) {",
+    "          const tagName = current.tagName.toLowerCase();",
+    "          const role = current.getAttribute('role');",
+    "          const hasOnClick = !!(current as any).onclick || current.getAttribute('onclick');",
+    "          const hasClickableClass = clickableClassPatterns.some(p => typeof current.className === 'string' && current.className.includes(p));",
+    "          if (clickableTags.includes(tagName) || clickableRoles.includes(role || '') || hasOnClick || hasClickableClass) return current;",
+    "          current = current.parentElement; depth++;",
+    "        }",
+    "        return null;",
+    "      });",
+    "      const ancestorElement = ancestor.asElement();",
+    "      if (ancestorElement) { await ancestorElement.click({ timeout: 10000 }); return; }",
+    "      await headingLocator.click({ timeout: 10000 }); return;",
+    "    }",
+    "  }",
+    "} catch { /* continue */ }",
+    "const fallbackLocator = this.page.locator(':has-text(\"' + productName.replace(/\"/g, '\\\\\"') + '\")').first();",
+    "if (await fallbackLocator.count() > 0) { await fallbackLocator.click({ timeout: 10000 }); return; }",
+    "throw new Error('Could not find product matching \"' + productName + '\". Strategies tried: checkbox, role, text, heading, semantic_tokens, product_condition');"
+  ].join("\n"),
+  click_primary_action: [
+    "const button = this.page.getByRole('button', { name: new RegExp(actionName, 'i') });",
+    "await button.waitFor({ state: 'visible', timeout: 10000 });",
+    "const isEnabled = await button.isEnabled({ timeout: 15000 }).catch(() => false);",
+    "if (!isEnabled) {",
+    "  const buttonText = await button.textContent().catch(() => '(unknown)');",
+    "  throw new Error('Cannot click primary action \"' + actionName + '\": button is not enabled. Text: \"' + buttonText + '\". This usually means required selections or form fields have not been completed.');",
+    "}",
+    "await button.click({ timeout: 10000 });",
+    "await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});",
+    "await this.page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});",
+    "await this.page.waitForTimeout(1000);"
+  ].join("\n"),
   expect_loaded: "await expect(this.page.locator('body')).toBeVisible();",
   fill_form_field: "await this.page.getByLabel(fieldName).or(this.page.getByPlaceholder(fieldName)).fill(value);",
   submit_form: "await this.page.getByRole('button', { name: /submit|enviar|confirmar/i }).click();",
@@ -140,8 +204,16 @@ export function buildPageObjectClassSource(candidate: PageObjectEntry): { source
     return true;
   });
 
+  const needsPromotedSpecHelpers = filteredMethods.some((m) =>
+    ["open_product_information", "select_category", "select_operation", "start_session"].includes(m.intent) ||
+    ["select_product"].includes(m.intent)
+  );
+
   const lines: string[] = [];
   lines.push("import { Page, expect } from '@playwright/test';");
+  if (needsPromotedSpecHelpers) {
+    lines.push("import { waitForPromotedSpecStepReady, waitForListReadiness } from '../../../browser/promoted-spec-helpers';");
+  }
   lines.push("");
   lines.push(`// Page Object candidate: ${className}`);
   lines.push(`// Generated by page-object-codegen`);

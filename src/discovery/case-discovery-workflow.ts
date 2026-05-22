@@ -45,6 +45,8 @@ export type CaseDiscoveryWorkflowOptions = {
   autoPom?: boolean;
   autoPomThreshold?: number;
   noAutoPomValidation?: boolean;
+  verifyPromotedSpec?: boolean;
+  promotedSpecTimeoutMs?: number;
 };
 
 export type CaseDiscoveryWorkflowResult = {
@@ -54,6 +56,7 @@ export type CaseDiscoveryWorkflowResult = {
   automationId?: string;
   appSlug?: string;
   specPath?: string;
+  specVerificationStatus?: string;
   outputDir: string;
   evidenceDir: string;
   durationMs: number;
@@ -479,7 +482,9 @@ export async function runCaseDiscoveryWorkflow(
           overwrite: options.overwrite === true,
           fullConfig: activeConfig,
           promotionPolicy,
-          inlineDebugMode: options.inlineDebugSpec ?? false
+          inlineDebugMode: options.inlineDebugSpec ?? false,
+          verifySpec: options.verifyPromotedSpec ?? false,
+          specVerificationTimeoutMs: options.promotedSpecTimeoutMs
         },
         false,
         {
@@ -491,6 +496,10 @@ export async function runCaseDiscoveryWorkflow(
         promotionStatus = promotedEntry.pomStatus;
       } else if (promotedEntry.pomStatus === "inline_debug_only") {
         promotionStatus = "inline_debug_only";
+      } else if (promotedEntry.specVerificationStatus === "failed") {
+        promotionStatus = "spec_failed";
+      } else if (promotedEntry.status === "spec_failed" || promotedEntry.status === "promoted_but_verification_failed") {
+        promotionStatus = "spec_failed";
       } else {
         promotionStatus = "promoted";
       }

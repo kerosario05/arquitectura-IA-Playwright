@@ -1,0 +1,205 @@
+{
+  "version": "1.0",
+  "url": "https://172.27.4.50/generate-letters",
+  "title": "Kiosco de Autogestión - Banco Santa Cruz",
+  "capturedAt": "2026-05-22T14:07:32.760Z",
+  "elements": [
+    {
+      "id": "el-3",
+      "type": "button",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "Generar cartas",
+      "candidateLocators": [],
+      "dataHints": [],
+      "className": "absolute left-0 top-1/2 -translate-y-1/2 p-3 hover:bg-primary/10 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 border-2 border-transparent hover:border-primary/20"
+    },
+    {
+      "id": "el-8",
+      "type": "button",
+      "text": "Volver",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "VolverContinuar",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Volver",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary hover:bg-primary/90 h-10 min-h-[70px] text-lg font-semibold rounded-2xl py-5 transition-all duration-200 ease-out shadow-card hover:shadow-card-hover disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden select-none transform-gpu bg-gradient-to-br from-white to-gray-50 text-foreground border-2 border-border hover:border-border/80 hover:from-muted/50 hover:to-muted active:shadow-inner hover:scale-[1.02] px-12"
+    },
+    {
+      "id": "el-11",
+      "type": "button",
+      "text": "Continuar",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "VolverContinuar",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Continuar",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary hover:bg-primary/90 h-10 min-h-[70px] text-lg font-semibold rounded-2xl py-5 transition-all duration-200 ease-out shadow-card hover:shadow-card-hover disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden select-none transform-gpu bg-gradient-to-br from-kiosk-success to-green-600 text-white hover:from-kiosk-success/95 hover:to-green-600/95 border-2 border-green-700/20 hover:border-green-700/30 active:shadow-inner hover:scale-[1.02] px-12"
+    },
+    {
+      "id": "el-2",
+      "type": "image",
+      "tagName": "img",
+      "visible": true,
+      "candidateLocators": [],
+      "dataHints": [],
+      "alt": "Banco Santa Cruz",
+      "className": "h-10 object-contain"
+    },
+    {
+      "id": "el-4",
+      "type": "heading",
+      "text": "Generar cartas",
+      "tagName": "h1",
+      "visible": true,
+      "nearbyText": "Generar cartas",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Generar cartas",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-3xl font-bold text-foreground text-center"
+    },
+    {
+      "id": "el-5",
+      "type": "text",
+      "text": "⚠️ Una vez generada la carta no podrá ser modificada.",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "⚠️ Una vez generada la carta no podrá ser modificada.",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "⚠️ Una vez generada la carta no podrá ser modificada.",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-amber-900 text-center text-lg font-semibold"
+    },
+    {
+      "id": "el-6",
+      "type": "heading",
+      "text": "Vista previa de la carta",
+      "tagName": "h2",
+      "visible": true,
+      "nearbyText": "Vista previa de la carta",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Vista previa de la carta",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-2xl font-bold text-foreground"
+    },
+    {
+      "id": "el-7",
+      "type": "heading",
+      "text": "Carta de Referencia",
+      "tagName": "h2",
+      "visible": true,
+      "nearbyText": "Carta de Referencia",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Carta de Referencia",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-2xl font-bold text-primary"
+    },
+    {
+      "id": "el-9",
+      "type": "text",
+      "text": "Volver",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Volver",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Volver",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "relative z-10 flex items-center justify-center gap-2"
+    },
+    {
+      "id": "el-10",
+      "type": "text",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Volver",
+      "candidateLocators": [],
+      "dataHints": [],
+      "className": "absolute inset-0 bg-gradient-to-t from-transparent via-white/5 to-white/10 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+    },
+    {
+      "id": "el-12",
+      "type": "text",
+      "text": "Continuar",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Continuar",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Continuar",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "relative z-10 flex items-center justify-center gap-2"
+    },
+    {
+      "id": "el-13",
+      "type": "text",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Continuar",
+      "candidateLocators": [],
+      "dataHints": [],
+      "className": "absolute inset-0 bg-gradient-to-t from-transparent via-white/5 to-white/10 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+    }
+  ],
+  "summary": {
+    "totalElements": 12,
+    "buttons": 3,
+    "links": 0,
+    "inputs": 0,
+    "selects": 0,
+    "tables": 0,
+    "dialogs": 0,
+    "headings": 3
+  }
+}

@@ -4,15 +4,16 @@ import path from "node:path";
 import { generatePageObjectCandidateFiles } from "../src/automations/page-object-codegen";
 import { ensurePageObjectRegistry, savePageObjectRegistry, registerPageObjectCandidate } from "../src/automations/page-object-registry";
 import { INTENT_PREFERRED_OWNER, INTENT_CLASS_OWNERSHIP } from "../src/types/pom-ownership";
+import { getTestTempDir, ensureTestTempDir, cleanTestTempDir } from "./helpers/test-temp-dir";
 
-const tmpDir = path.resolve("./.tmp-test-pom-ownership");
+const tmpDir = getTestTempDir("test-pom-ownership");
 
 test.beforeAll(async () => {
-  await fs.mkdir(tmpDir, { recursive: true });
+  await ensureTestTempDir("test-pom-ownership");
 });
 
 test.afterAll(async () => {
-  await fs.rm(tmpDir, { recursive: true, force: true }).catch(() => {});
+  await cleanTestTempDir("test-pom-ownership").catch(() => {});
 });
 
 test("start_session preferred owner es HomePage", () => {

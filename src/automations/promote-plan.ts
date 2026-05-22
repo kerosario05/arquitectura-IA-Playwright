@@ -61,6 +61,8 @@ interface PromoteInput {
   fullConfig?: FullConfig;
   promotionPolicy?: PromotionPolicy;
   inlineDebugMode?: boolean;
+  verifySpec?: boolean;
+  specVerificationTimeoutMs?: number;
 }
 
 function assertPromotable(status: string, allowDraft: boolean): void {
@@ -88,6 +90,48 @@ async function ensureDirectories(paths: {
   if (paths.caseRunsDir) await fs.mkdir(paths.caseRunsDir, { recursive: true });
   await fs.mkdir(paths.plansDir, { recursive: true });
   await fs.mkdir(paths.specsDir, { recursive: true });
+}
+
+async function verifyPromotedSpec(
+  specPath: string,
+  timeoutMs: number = 90000
+): Promise<{
+  status: "passed" | "failed" | "skipped";
+  error?: string;
+  tracePath?: string;
+  screenshotPath?: string;
+}> {
+  try {
+    const { exec } = await import("node:child_process");
+    const { promisify } = await import("node:util");
+    const execAsync = promisify(exec);
+
+    const specPathNormalized = specPath.replace(/\\/g, "/");
+    const cmd = `npx playwright test "${specPathNormalized}" --config=playwright.config.ts --timeout=${timeoutMs}`;
+    console.log(`[promote-plan] Verifying promoted spec: ${cmd}`);
+
+    const { stdout, stderr } = await execAsync(cmd, { timeout: timeoutMs + 30000, cwd: process.cwd() });
+
+    if (stderr && !stderr.includes("passed")) {
+      console.warn(`[promote-plan] Spec verification warnings: ${stderr}`);
+    }
+
+    console.log(`[promote-plan] Spec verification passed`);
+    return { status: "passed" };
+  } catch (error: any) {
+    const errorMsg = error.message || error.stderr || String(error);
+    console.error(`[promote-plan] Spec verification failed: ${errorMsg}`);
+
+    const traceMatch = errorMsg.match(/(.*trace\.zip)/);
+    const screenshotMatch = errorMsg.match(/(.*test-failed.*\.png)/);
+
+    return {
+      status: "failed",
+      error: errorMsg,
+      tracePath: traceMatch ? traceMatch[1] : undefined,
+      screenshotPath: screenshotMatch ? screenshotMatch[1] : undefined
+    };
+  }
 }
 
 function deriveScreenSignatureFromPlan(plan: ExecutionPlan): string {
@@ -608,6 +652,17 @@ export async function promoteExecutionPlan(
 
   if (promotionPolicy && promotionPolicy.specMode === "page-object") {
     const registry = await loadPageObjectRegistry(appProfile, input.outputRoot).catch(() => undefined);
+
+    // Detect if plan has auth-consumed steps to enable AuthFlow in spec generation
+    const hasAuthConsumedSteps = plan.steps.some(s => {
+      const desc = (s.description ?? "").toLowerCase();
+      return desc.startsWith("authflow handled") || desc.includes("step consumed by authflow");
+    });
+    const authFlowOptions = hasAuthConsumedSteps ? {
+      alias: "defaultClient",
+      landing: "transactions_menu"
+    } : undefined;
+
     const specResult = await generateSpecFromPlanWithPolicy({
       plan,
       automationId,
@@ -615,10 +670,22 @@ export async function promoteExecutionPlan(
       appPaths,
       promotionPolicy,
       inlineDebugMode,
-      pageObjectRegistry: registry
+      pageObjectRegistry: registry,
+      authFlowOptions
     });
     await fs.writeFile(appPaths.specPath, specResult.specContent, "utf-8");
     pomStatus = specResult.pomStatus;
+
+    // Fail promotion if spec validation found critical issues
+    if (specResult.validationErrors && specResult.validationErrors.length > 0) {
+      for (const err of specResult.validationErrors) {
+        console.error(`[promote-plan] Spec validation error: ${err}`);
+      }
+      throw new Error(
+        `Spec validation failed: ${specResult.validationErrors.join("; ")}. ` +
+        "Promotion blocked to prevent degraded spec from being promoted."
+      );
+    }
 
     // Register POM candidates if any were generated
     if (specResult.generatedCandidates > 0 && registry) {
@@ -730,6 +797,7 @@ export async function promoteExecutionPlan(
     lastExecutionResultPath: input.lastExecutionResultPath,
     pomStatus,
     inlineDebugMode,
+    specVerificationStatus: "not_run",
     metadata: pomDiagnostics || wasOverwritten ? {
       ...metadata,
       ...(pomDiagnostics ? { pomDiagnostics } : {}),
@@ -740,6 +808,39 @@ export async function promoteExecutionPlan(
       } : {})
     } : metadata
   };
+
+  // --- Verify promoted spec if requested ---
+  if (input.verifySpec && appPaths.specPath && automationStatus === "active") {
+    console.log(`[promote-plan] Running spec verification for ${appPaths.specPath}`);
+    const verificationResult = await verifyPromotedSpec(
+      appPaths.specPath,
+      input.specVerificationTimeoutMs ?? 90000
+    );
+
+    appIndexEntry.specVerificationStatus = verificationResult.status;
+
+    if (verificationResult.status === "failed") {
+      console.error(`[promote-plan] Spec verification FAILED. Promotion marked as spec_failed.`);
+      appIndexEntry.status = "spec_failed";
+      appIndexEntry.metadata = {
+        ...appIndexEntry.metadata,
+        specVerification: {
+          status: "failed",
+          error: verificationResult.error,
+          tracePath: verificationResult.tracePath,
+          screenshotPath: verificationResult.screenshotPath
+        }
+      };
+    } else if (verificationResult.status === "passed") {
+      console.log(`[promote-plan] Spec verification PASSED`);
+      appIndexEntry.metadata = {
+        ...appIndexEntry.metadata,
+        specVerification: {
+          status: "passed"
+        }
+      };
+    }
+  }
 
   const updatedAppIndex = upsertAutomationIndexEntry(appIndex, appIndexEntry);
   await saveAutomationIndex(updatedAppIndex, appIndexPath);

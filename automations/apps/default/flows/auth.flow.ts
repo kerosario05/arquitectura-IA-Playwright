@@ -29,16 +29,57 @@ export class AuthFlow {
     const resolvedAlias = alias || defaults?.client || 'defaultClient';
 
     if (!clients || !clients[resolvedAlias]) {
-      throw new Error(`Auth client '${resolvedAlias}' not found in APP_TEST_DATA_JSON. Available clients: ${clients ? Object.keys(clients).join(', ') : 'none'}`);
+      const fallbackClient: AuthClientProfile = {
+        identificationType: 'cedula',
+        identificationNumber: process.env.Identity_Provider || '',
+        otp: process.env.OTP_SECRET || '',
+      };
+
+      if (process.env.APP_USERNAME) {
+        (fallbackClient as any).username = process.env.APP_USERNAME;
+      }
+      if (process.env.APP_PASSWORD) {
+        (fallbackClient as any).password = process.env.APP_PASSWORD;
+      }
+      if (process.env.APP_EXTRA_LOGIN_FIELDS_JSON) {
+        try {
+          (fallbackClient as any).extraLoginFields = JSON.parse(process.env.APP_EXTRA_LOGIN_FIELDS_JSON);
+        } catch { /* ignore */ }
+      }
+
+      if (!fallbackClient.identificationNumber) {
+        throw new Error(`Auth client '${resolvedAlias}' not found in APP_TEST_DATA_JSON and Identity_Provider env var is not set. Available clients: ${clients ? Object.keys(clients).join(', ') : 'none'}`);
+      }
+      if (!fallbackClient.otp) {
+        throw new Error(`Auth client '${resolvedAlias}' is missing 'otp'. Set APP_TEST_DATA_JSON.clients[${resolvedAlias}].otp or OTP_SECRET env var.`);
+      }
+
+      return fallbackClient;
     }
 
-    const client = clients[resolvedAlias];
+    const client = { ...clients[resolvedAlias] };
+
+    if (!client.identificationNumber && typeof process.env.Identity_Provider === "string" && process.env.Identity_Provider) {
+      client.identificationNumber = process.env.Identity_Provider;
+    }
+    if (!client.otp && typeof process.env.OTP_SECRET === "string" && process.env.OTP_SECRET) {
+      client.otp = process.env.OTP_SECRET;
+    }
+    if (!client.identificationType) {
+      client.identificationType = 'cedula';
+    }
+    if (!(client as any).username && typeof process.env.APP_USERNAME === "string" && process.env.APP_USERNAME) {
+      (client as any).username = process.env.APP_USERNAME;
+    }
+    if (!(client as any).password && typeof process.env.APP_PASSWORD === "string" && process.env.APP_PASSWORD) {
+      (client as any).password = process.env.APP_PASSWORD;
+    }
 
     if (!client.identificationNumber) {
-      throw new Error(`Auth client '${resolvedAlias}' is missing 'identificationNumber'.`);
+      throw new Error(`Auth client '${resolvedAlias}' is missing 'identificationNumber'. Set APP_TEST_DATA_JSON.clients[${resolvedAlias}].identificationNumber or Identity_Provider env var.`);
     }
     if (!client.otp) {
-      throw new Error(`Auth client '${resolvedAlias}' is missing 'otp'.`);
+      throw new Error(`Auth client '${resolvedAlias}' is missing 'otp'. Set APP_TEST_DATA_JSON.clients[${resolvedAlias}].otp or OTP_SECRET env var.`);
     }
 
     return client;

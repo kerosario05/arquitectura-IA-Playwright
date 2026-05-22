@@ -6,8 +6,9 @@ import { __setSpawnForTesting, __getLastRunnerInputForTesting } from "../src/age
 import { runAgentAutoRepairAttempt } from "../src/agent/agent-auto-repair";
 import { normalizeAgentHandoffResponse } from "../src/agent/agent-response-validator";
 import type { FullConfig } from "../src/types/env.types";
+import { getTestTempDir, ensureTestTempDir, cleanTestTempDir } from "./helpers/test-temp-dir";
 
-const tmpDir = path.resolve("./.tmp-test-agent-auto-repair");
+const tmpDir = getTestTempDir("test-agent-auto-repair");
 
 function configEnabled(timeoutMs = 900000): FullConfig {
   return {
@@ -54,11 +55,11 @@ function spawnExit(exitCode: number) {
 }
 
 test.beforeAll(async () => {
-  await fs.mkdir(tmpDir, { recursive: true });
+  await ensureTestTempDir("test-agent-auto-repair");
 });
 
 test.afterAll(async () => {
-  try { await fs.rm(tmpDir, { recursive: true, force: true }); } catch { }
+  try { await cleanTestTempDir("test-agent-auto-repair"); } catch { }
 });
 
 test("agent-auto-repair forwards timeout override to codex-cli-runner", async () => {

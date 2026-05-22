@@ -16,10 +16,6 @@ const METHOD_INTENT_KEYWORDS: Record<string, SemanticMethodIntent> = {
   cuentas: "select_category",
   categoria: "select_category",
   category: "select_category",
-  "tarjeta de credito": "select_product",
-  "tarjeta de crédito": "select_product",
-  visa: "select_product",
-  prestamo: "select_product",
   solicitar: "click_primary_action",
   "solicitar tarjeta": "click_primary_action",
   apply: "click_primary_action",
@@ -42,7 +38,9 @@ const METHOD_INTENT_KEYWORDS: Record<string, SemanticMethodIntent> = {
   confirmar: "confirm_action",
   confirm: "confirm_action",
   pay: "confirm_action",
-  pagar: "confirm_action"
+  pagar: "confirm_action",
+  continuar: "click_primary_action",
+  siguiente: "click_primary_action"
 };
 
 export function deriveSemanticMethodIntent(
@@ -53,15 +51,39 @@ export function deriveSemanticMethodIntent(
     ? `${step.target.value ?? ""} ${step.target.name ?? ""} ${step.target.role ?? ""}`.toLowerCase().trim()
     : "";
   const action = step.action.toLowerCase();
-  const description = (step.description ?? "").toLowerCase();
   const recoveryMeta = (step as any).recoveryMetadata;
   const recoveredText = recoveryMeta?.selectedCandidateText?.toLowerCase() ?? "";
   const semanticRelation = recoveryMeta?.semanticRelation?.toLowerCase() ?? "";
+  const selectionDiagnostics = (step as any).selectionDiagnostics;
+  const actionType = recoveryMeta?.actionType;
+  const semanticRole = recoveryMeta?.semanticRole;
 
-  const combinedText = `${target} ${action} ${description} ${recoveredText} ${semanticRelation}`;
+  if (selectionDiagnostics?.selectionLike && selectionDiagnostics?.success) {
+    if (screenType === "category" || semanticRole === "category") return "select_category";
+    if (screenType === "product_list" || ["product", "card", "item", "entity"].includes(semanticRole)) return "select_product";
+    return "select_product";
+  }
+
+  if (actionType === "action_select") {
+    if (screenType === "category" || semanticRole === "category") return "select_category";
+    return "select_product";
+  }
+
+  if (["option", "card", "item", "entity", "product", "recipient", "list_item"].includes(semanticRole)) {
+    if (semanticRole === "category") return "select_category";
+    return "select_product";
+  }
+
+  if (selectionDiagnostics?.reason === "selection_no_transition_next_action_enabled") {
+    if (screenType === "category") return "select_category";
+    return "select_product";
+  }
+
+  const combinedText = `${target} ${action} ${recoveredText} ${semanticRelation}`;
 
   for (const [keyword, intent] of Object.entries(METHOD_INTENT_KEYWORDS)) {
-    if (combinedText.includes(keyword)) {
+    const regex = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
+    if (regex.test(combinedText)) {
       return intent;
     }
   }
@@ -85,12 +107,11 @@ export function deriveSemanticScreenType(step: ExecutionPlanStep, _allSteps: Exe
     ? `${step.target.value ?? ""} ${step.target.name ?? ""} ${step.target.role ?? ""}`.toLowerCase().trim()
     : "";
   const action = step.action.toLowerCase();
-  const description = (step.description ?? "").toLowerCase();
   const recoveryMeta = (step as any).recoveryMetadata;
   const recoveredText = recoveryMeta?.selectedCandidateText?.toLowerCase() ?? "";
   const semanticRelation = recoveryMeta?.semanticRelation?.toLowerCase() ?? "";
 
-  const combinedText = `${target} ${action} ${description} ${recoveredText} ${semanticRelation}`;
+  const combinedText = `${target} ${action} ${recoveredText} ${semanticRelation}`;
 
   const SCREEN_TYPE_KEYWORDS: Record<string, SemanticScreenType> = {
     "iniciar sesion": "login",

@@ -5,8 +5,9 @@ import { buildRegistryPromotionReport, applyRegistryPromotion } from "../src/reg
 import { loadObjectRegistry } from "../src/registry/object-registry-loader";
 import type { ExecutionPlan } from "../src/types/execution-plan.types";
 import type { PendingDiscoveredObject } from "../src/types/registry-promotion.types";
+import { getTestTempDir, ensureTestTempDir, cleanTestTempDir } from "./helpers/test-temp-dir";
 
-const tmpRoot = path.resolve(".tmp-test-registry-promote");
+const tmpRoot = getTestTempDir("test-registry-promote");
 
 function makePlan(status: ExecutionPlan["status"] = "validated"): ExecutionPlan {
   return {
@@ -72,8 +73,8 @@ async function writeRegistry(registryPath: string, objects: Array<{ key: string;
 }
 
 test.beforeEach(async () => {
-  await fs.rm(tmpRoot, { recursive: true, force: true }).catch(() => {});
-  await fs.mkdir(tmpRoot, { recursive: true });
+  await cleanTestTempDir("test-registry-promote").catch(() => {});
+  await ensureTestTempDir("test-registry-promote");
 });
 
 test("dry-run no escribe cambios", async () => {

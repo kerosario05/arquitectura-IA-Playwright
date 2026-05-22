@@ -9,7 +9,9 @@ export type CaseAutomationStatus =
   | "needs_page_method"
   | "needs_component_object"
   | "needs_flow"
-  | "blocked_missing_pom";
+  | "blocked_missing_pom"
+  | "spec_failed"
+  | "promoted_but_verification_failed";
 
 export type CaseAutomationSummary = {
   caseId: number;

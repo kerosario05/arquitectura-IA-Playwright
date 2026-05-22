@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-05-22T12:53:20.387Z",
+  "updatedAt": "2026-05-22T18:48:36.358Z",
   "automations": [
     {
       "id": "c10002-test-automation-plan",
@@ -112,7 +112,7 @@
       "caseId": 37844,
       "title": "Visualizar detalle de Tarjeta Visa Gold",
       "planPath": "automations\\apps\\default\\cases\\c37844-visualizar-detalle-de-tarjeta-visa-gold\\plan.json",
-      "specPath": "automations\\apps\\default\\cases\\c37844-visualizar-detalle-de-tarjeta-visa-gold\\spec.ts",
+      "specPath": "automations\\apps\\default\\cases\\c37844-visualizar-detalle-de-tarjeta-visa-gold\\case.spec.ts",
       "appSlug": "default",
       "appConfigPath": "automations\\apps\\default\\app.config.json",
       "status": "active",
@@ -120,12 +120,13 @@
       "appProfile": "default",
       "baseUrlHash": "74df3c0e992c",
       "createdAt": "2026-05-21T03:09:17.322Z",
-      "updatedAt": "2026-05-21T20:01:30.165Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37844\\2026-05-21T20-01-12-741Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-05-22T18:44:46.531Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37844\\2026-05-22T18-43-57-253Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37844\\2026-05-21T20-01-12-741Z",
+        "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37844\\2026-05-22T18-43-57-253Z",
         "pomDiagnostics": {
           "missingPageObjects": [],
           "missingMethods": [],
@@ -133,7 +134,10 @@
         },
         "overwritten": true,
         "previousAutomationPath": "automations\\apps\\default\\cases\\c37844-visualizar-detalle-de-tarjeta-visa-gold\\plan.json",
-        "previousStatus": "active"
+        "previousStatus": "active",
+        "specVerification": {
+          "status": "passed"
+        }
       }
     },
     {
@@ -220,7 +224,7 @@
       "caseId": 37869,
       "title": "Generar carta de referencia con cuenta de ahorro",
       "planPath": "automations\\apps\\default\\cases\\c37869-generar-carta-de-referencia-con-cuenta-de-ahorro\\plan.json",
-      "specPath": "automations\\apps\\default\\cases\\c37869-generar-carta-de-referencia-con-cuenta-de-ahorro\\spec.ts",
+      "specPath": "automations\\apps\\default\\cases\\c37869-generar-carta-de-referencia-con-cuenta-de-ahorro\\case.spec.ts",
       "appSlug": "default",
       "appConfigPath": "automations\\apps\\default\\app.config.json",
       "status": "active",
@@ -228,12 +232,13 @@
       "appProfile": "default",
       "baseUrlHash": "74df3c0e992c",
       "createdAt": "2026-05-22T01:47:27.888Z",
-      "updatedAt": "2026-05-22T12:53:20.387Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-22T12-52-13-832Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-05-22T18:48:36.358Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-22T18-46-14-926Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-22T12-52-13-832Z",
+        "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-22T18-46-14-926Z",
         "pomDiagnostics": {
           "missingPageObjects": [],
           "missingMethods": [],
@@ -241,7 +246,44 @@
         },
         "overwritten": true,
         "previousAutomationPath": "automations\\apps\\default\\cases\\c37869-generar-carta-de-referencia-con-cuenta-de-ahorro\\plan.json",
-        "previousStatus": "active"
+        "previousStatus": "active",
+        "specVerification": {
+          "status": "passed"
+        }
+      }
+    },
+    {
+      "id": "c37870-generar-carta-de-referencia-con-certificado",
+      "externalId": "C37870",
+      "caseId": 37870,
+      "title": "Generar carta de referencia con certificado",
+      "planPath": "automations\\apps\\default\\cases\\c37870-generar-carta-de-referencia-con-certificado\\plan.json",
+      "specPath": "automations\\apps\\default\\cases\\c37870-generar-carta-de-referencia-con-certificado\\case.spec.ts",
+      "appSlug": "default",
+      "appConfigPath": "automations\\apps\\default\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "default",
+      "baseUrlHash": "74df3c0e992c",
+      "createdAt": "2026-05-22T16:48:53.157Z",
+      "updatedAt": "2026-05-22T18:43:16.892Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37870\\2026-05-22T18-40-49-683Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37870\\2026-05-22T18-40-49-683Z",
+        "pomDiagnostics": {
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\default\\cases\\c37870-generar-carta-de-referencia-con-certificado\\plan.json",
+        "previousStatus": "active",
+        "specVerification": {
+          "status": "passed"
+        }
       }
     }
   ]

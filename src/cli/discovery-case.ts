@@ -17,6 +17,8 @@ type CliArgs = {
   autoPom: boolean;
   autoPomThreshold?: number;
   noAutoPomValidation: boolean;
+  verifyPromotedSpec: boolean;
+  promotedSpecTimeoutMs?: number;
 };
 
 export function parseDiscoveryCaseArgs(argv: string[]): CliArgs {
@@ -33,7 +35,9 @@ export function parseDiscoveryCaseArgs(argv: string[]): CliArgs {
     overwrite: false,
     autoPom: false,
     autoPomThreshold: undefined,
-    noAutoPomValidation: false
+    noAutoPomValidation: false,
+    verifyPromotedSpec: false,
+    promotedSpecTimeoutMs: undefined
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -103,6 +107,21 @@ export function parseDiscoveryCaseArgs(argv: string[]): CliArgs {
       args.noAutoPomValidation = true;
       continue;
     }
+    if (token === "--verify-promoted-spec") {
+      args.verifyPromotedSpec = true;
+      continue;
+    }
+    if (token === "--promoted-spec-timeout-ms") {
+      if (!nextValue || nextValue.startsWith("--")) {
+        throw new Error("Missing value for --promoted-spec-timeout-ms");
+      }
+      args.promotedSpecTimeoutMs = Number(nextValue);
+      if (!Number.isFinite(args.promotedSpecTimeoutMs) || args.promotedSpecTimeoutMs <= 0) {
+        throw new Error(`Invalid --promoted-spec-timeout-ms value: ${nextValue}. Expected a positive number.`);
+      }
+      i += 1;
+      continue;
+    }
     if (token === "--case-id") {
       if (!nextValue || nextValue.startsWith("--")) {
         throw new Error("Missing value for --case-id");
@@ -154,6 +173,8 @@ async function main(): Promise<void> {
     autoPom: args.autoPom,
     autoPomThreshold: args.autoPomThreshold,
     noAutoPomValidation: args.noAutoPomValidation,
+    verifyPromotedSpec: args.verifyPromotedSpec,
+    promotedSpecTimeoutMs: args.promotedSpecTimeoutMs,
     config
   };
 

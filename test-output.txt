@@ -1,0 +1,43 @@
+
+Running 9 tests using 1 worker
+
+  ok 1 tests\spec-generator-pom.spec.ts:53:5 › POM spec without registry returns needs_page_object (12ms)
+  ok 2 tests\spec-generator-pom.spec.ts:59:5 › POM spec with active PO and method uses POM call (4ms)
+  ok 3 tests\spec-generator-pom.spec.ts:81:5 › POM spec with inline debug mode marks inline_debug_only (3ms)
+  ok 4 tests\spec-generator-pom.spec.ts:87:5 › POM spec generates imports and instantiations for each PO (3ms)
+  ok 5 tests\spec-generator-pom.spec.ts:119:5 › POM spec avoids duplicate imports (2ms)
+  ok 6 tests\spec-generator-pom.spec.ts:145:5 › POM spec without method returns needs_page_method (3ms)
+  ok 7 tests\spec-generator-pom.spec.ts:159:5 › POM spec with candidate generation creates candidate entries (6ms)
+  ok 8 tests\spec-generator-pom.spec.ts:176:5 › POM spec contains test title from plan (1ms)
+  x  9 tests\spec-generator-pom.spec.ts:185:5 › C37869: contaminated description does not cause all steps to derive start_session (4ms)
+
+
+  1) tests\spec-generator-pom.spec.ts:185:5 › C37869: contaminated description does not cause all steps to derive start_session 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: > [32m-1[39m
+    Received:   [31m-1[39m
+
+      244 |   expect(homePageStartLine).toBeGreaterThan(-1);
+      245 |   expect(authFlowLine).toBeGreaterThan(-1);
+    > 246 |   expect(generarCartasLine).toBeGreaterThan(-1);
+          |                             ^
+      247 |
+      248 |   // Order should be: homePage.start() -> authFlow -> Generar cartas
+      249 |   expect(homePageStartLine).toBeLessThan(authFlowLine);
+        at C:\MisProyectos\MCP\tests\spec-generator-pom.spec.ts:246:29
+
+    Error Context: test-results\spec-generator-pom-C37869--2e186-eps-to-derive-start-session\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\spec-generator-pom-C37869--2e186-eps-to-derive-start-session\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\spec-generator-pom-C37869--2e186-eps-to-derive-start-session\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests\spec-generator-pom.spec.ts:185:5 › C37869: contaminated description does not cause all steps to derive start_session 
+  8 passed (1.1s)

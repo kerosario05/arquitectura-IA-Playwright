@@ -68,12 +68,12 @@ export function buildPromotedAutomationPaths(appSlug: string, automationId: stri
   specPath: string;
 } {
   const planDir = `automations/apps/${appSlug}/plans`;
-  const specDir = `automations/apps/${appSlug}/specs`;
+  const specDir = `automations/apps/${appSlug}/cases/${automationId}`;
   return {
     planDir,
     specDir,
     planPath: `${planDir}/${automationId}.plan.json`,
-    specPath: `${specDir}/${automationId}.spec.ts`
+    specPath: `${specDir}/case.spec.ts`
   };
 }
 

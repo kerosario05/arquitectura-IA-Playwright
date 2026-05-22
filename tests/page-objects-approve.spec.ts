@@ -4,15 +4,16 @@ import path from "node:path";
 import { approvePageObjectCandidates, parseArgs } from "../src/cli/page-objects-approve";
 import { ensurePageObjectRegistry, savePageObjectRegistry, registerPageObjectCandidate, registerMethodCandidate } from "../src/automations/page-object-registry";
 import { loadPageObjectRegistry } from "../src/automations/page-object-registry";
+import { getTestTempDir, ensureTestTempDir, cleanTestTempDir } from "./helpers/test-temp-dir";
 
-const tmpDir = path.resolve("./.tmp-test-page-object-approve");
+const tmpDir = getTestTempDir("test-page-object-approve");
 
 test.beforeAll(async () => {
-  await fs.mkdir(tmpDir, { recursive: true });
+  await ensureTestTempDir("test-page-object-approve");
 });
 
 test.afterAll(async () => {
-  await fs.rm(tmpDir, { recursive: true, force: true }).catch(() => {});
+  await cleanTestTempDir("test-page-object-approve").catch(() => {});
 });
 
 test("CLI parsea --only", () => {

@@ -6,8 +6,9 @@ import { loadAutomationIndex } from "../src/automations/automation-index";
 import { findReusableAutomation } from "../src/automations/automation-reuse";
 import type { ExecutionPlan } from "../src/types/execution-plan.types";
 import type { RegistryObject } from "../src/types/object-registry.types";
+import { getTestTempDir, ensureTestTempDir, cleanTestTempDir } from "./helpers/test-temp-dir";
 
-const tmpRoot = path.resolve(".tmp-test-automation-promoter");
+const tmpRoot = getTestTempDir("test-automation-promoter");
 
 function makePlan(): ExecutionPlan {
   return {
@@ -40,7 +41,7 @@ function makeObject(key: string, confidence: number): RegistryObject {
 }
 
 test.beforeEach(async () => {
-  await fs.rm(tmpRoot, { recursive: true, force: true }).catch(() => {});
+  await cleanTestTempDir("test-automation-promoter").catch(() => {});
   await fs.mkdir(path.join(tmpRoot, "automations", "plans"), { recursive: true });
   await fs.mkdir(path.join(tmpRoot, "tests", "generated"), { recursive: true });
   await fs.mkdir(path.join(tmpRoot, "discovery"), { recursive: true });

@@ -1,4 +1,4 @@
-export type PromotedAutomationStatus = "active" | "disabled" | "draft" | "inline_debug_only" | "needs_page_object" | "needs_page_method" | "needs_component_object" | "needs_flow" | "blocked_missing_pom";
+export type PromotedAutomationStatus = "active" | "disabled" | "draft" | "inline_debug_only" | "needs_page_object" | "needs_page_method" | "needs_component_object" | "needs_flow" | "blocked_missing_pom" | "spec_failed" | "promoted_but_verification_failed";
 
 export type PromotedAutomationSource = "agent_handoff" | "manual" | "rule_based" | "discovery";
 
@@ -45,6 +45,8 @@ export type POMPromotionStatus =
   | "blocked_missing_pom"
   | "needs_manual_review";
 
+export type SpecVerificationStatus = "passed" | "failed" | "skipped" | "not_run";
+
 export type PromotedAutomationIndexEntry = {
   id: string;
   externalId?: string;
@@ -65,6 +67,7 @@ export type PromotedAutomationIndexEntry = {
   tags?: string[];
   pomStatus?: POMPromotionStatus;
   inlineDebugMode?: boolean;
+  specVerificationStatus?: SpecVerificationStatus;
   metadata?: {
     discoveryDir?: string;
     confidenceSummary?: {
@@ -93,6 +96,12 @@ export type PromotedAutomationIndexEntry = {
     overwritten?: boolean;
     previousAutomationPath?: string;
     previousStatus?: string;
+    specVerification?: {
+      status: SpecVerificationStatus;
+      error?: string;
+      tracePath?: string;
+      screenshotPath?: string;
+    };
   };
 };
 

@@ -4,20 +4,21 @@
   "caseId": 37869,
   "title": "Generar carta de referencia con cuenta de ahorro",
   "planPath": "automations\\apps\\default\\cases\\c37869-generar-carta-de-referencia-con-cuenta-de-ahorro\\plan.json",
-  "specPath": "automations\\apps\\default\\cases\\c37869-generar-carta-de-referencia-con-cuenta-de-ahorro\\spec.ts",
+  "specPath": "automations\\apps\\default\\cases\\c37869-generar-carta-de-referencia-con-cuenta-de-ahorro\\case.spec.ts",
   "appSlug": "default",
   "appConfigPath": "automations\\apps\\default\\app.config.json",
   "status": "active",
   "source": "discovery",
   "appProfile": "default",
   "baseUrlHash": "74df3c0e992c",
-  "createdAt": "2026-05-22T12:53:20.383Z",
-  "updatedAt": "2026-05-22T12:53:20.383Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-22T12-52-13-832Z\\discovered-plans.pending.json",
+  "createdAt": "2026-05-22T18:47:28.528Z",
+  "updatedAt": "2026-05-22T18:47:28.528Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-22T18-46-14-926Z\\discovered-plans.pending.json",
   "pomStatus": "promoted",
   "inlineDebugMode": false,
+  "specVerificationStatus": "passed",
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-22T12-52-13-832Z",
+    "discoveryDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-22T18-46-14-926Z",
     "pomDiagnostics": {
       "missingPageObjects": [],
       "missingMethods": [],
@@ -25,6 +26,9 @@
     },
     "overwritten": true,
     "previousAutomationPath": "automations\\apps\\default\\cases\\c37869-generar-carta-de-referencia-con-cuenta-de-ahorro\\plan.json",
-    "previousStatus": "active"
+    "previousStatus": "active",
+    "specVerification": {
+      "status": "passed"
+    }
   }
 }

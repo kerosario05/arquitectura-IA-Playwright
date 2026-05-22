@@ -7,8 +7,9 @@ import { buildAgentHandoffInstructions } from "../src/agent/handoff-instructions
 import { validateAgentHandoffResponse } from "../src/agent/agent-response-validator";
 import type { FullConfig } from "../src/types/env.types";
 import { buildDataContext } from "../src/data/data-context";
+import { getTestTempDir, ensureTestTempDir, cleanTestTempDir } from "./helpers/test-temp-dir";
 
-const tmpDir = path.resolve("./.tmp-test-handoff-context-pack");
+const tmpDir = getTestTempDir("test-handoff-context-pack");
 
 function minimalConfig(): FullConfig {
   return {
@@ -31,12 +32,12 @@ function minimalConfig(): FullConfig {
 }
 
 test.beforeAll(async () => {
-  await fs.mkdir(tmpDir, { recursive: true });
+  await ensureTestTempDir("test-handoff-context-pack");
 });
 
 test.afterAll(async () => {
   try {
-    await fs.rm(tmpDir, { recursive: true, force: true });
+    await cleanTestTempDir("test-handoff-context-pack");
   } catch {
   }
 });

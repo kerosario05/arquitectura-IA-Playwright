@@ -38,6 +38,7 @@ export type GenerateSpecResult = {
   missingMethods: string[];
   generatedCandidates: number;
   usedAuthFlow?: boolean;
+  validationErrors: string[];
 };
 
 export function generateSpecFromPlan(
@@ -70,7 +71,8 @@ export async function generateSpecFromPlanWithPolicy(
       missingPageObjects: [],
       missingMethods: [],
       generatedCandidates: 0,
-      usedAuthFlow: false
+      usedAuthFlow: false,
+      validationErrors: []
     };
   }
 
@@ -111,7 +113,8 @@ export async function generateSpecFromPlanWithPolicy(
       missingPageObjects: pomResult.missingPageObjects,
       missingMethods: pomResult.missingMethods,
       generatedCandidates: pomResult.generatedCandidates,
-      usedAuthFlow: pomResult.usedAuthFlow
+      usedAuthFlow: pomResult.usedAuthFlow,
+      validationErrors: pomResult.validationErrors
     };
   }
 
@@ -124,7 +127,8 @@ export async function generateSpecFromPlanWithPolicy(
       missingPageObjects: pomResult.missingPageObjects,
       missingMethods: pomResult.missingMethods,
       generatedCandidates: pomResult.generatedCandidates,
-      usedAuthFlow: pomResult.usedAuthFlow
+      usedAuthFlow: pomResult.usedAuthFlow,
+      validationErrors: pomResult.validationErrors
     };
   }
 
@@ -143,7 +147,8 @@ export async function generateSpecFromPlanWithPolicy(
       missingPageObjects: [],
       missingMethods: [],
       generatedCandidates: 0,
-      usedAuthFlow: false
+      usedAuthFlow: false,
+      validationErrors: []
     };
   }
 
@@ -154,7 +159,8 @@ export async function generateSpecFromPlanWithPolicy(
     missingPageObjects: pomResult.missingPageObjects,
     missingMethods: pomResult.missingMethods,
     generatedCandidates: pomResult.generatedCandidates,
-    usedAuthFlow: pomResult.usedAuthFlow
+    usedAuthFlow: pomResult.usedAuthFlow,
+    validationErrors: pomResult.validationErrors
   };
 }
 

@@ -17,6 +17,22 @@ export class HomePage {
   constructor(private readonly page: Page) {}
 
   async start(): Promise<void> {
-    await this.page.goto('/'); await this.page.getByRole('button', { name: /iniciar sesión|iniciar|start|comenzar/i }).click();
+    await this.page.goto('/');
+    // Wait for page to be stable before clicking
+    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForTimeout(1000);
+    const button = this.page.getByRole('button', { name: /iniciar sesión|iniciar|start|comenzar/i });
+    await button.waitFor({ state: 'visible', timeout: 10000 });
+    // Use force click to bypass any overlays
+    await button.click({ force: true });
+    // Wait for navigation to complete
+    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForTimeout(3000); // Additional wait for SPA navigation
+  }
+
+  async open(moduleName?: string): Promise<void> {
+    if (moduleName) {
+      await this.page.getByRole('button', { name: new RegExp(moduleName, 'i') }).click();
+    }
   }
 }

@@ -8,8 +8,9 @@ import { loadFlowRegistry } from "../src/automations/flow-registry";
 import type { ExecutionPlan } from "../src/types/execution-plan.types";
 import type { FullConfig } from "../src/types/env.types";
 import { DEFAULT_PROMOTION_POLICY } from "../src/types/automation-promotion.types";
+import { getTestTempDir, ensureTestTempDir, cleanTestTempDir } from "./helpers/test-temp-dir";
 
-const tmpDir = path.resolve("./.tmp-test-promote");
+const tmpDir = getTestTempDir("test-promote");
 
 function makePlan(overrides: {
   externalId?: string;
@@ -64,11 +65,11 @@ function makeConfig(appProfile = "profile-a", baseUrl = "https://app-a.example.t
 }
 
 test.beforeAll(async () => {
-  await fs.mkdir(tmpDir, { recursive: true });
+  await ensureTestTempDir("test-promote");
 });
 
 test.afterAll(async () => {
-  await fs.rm(tmpDir, { recursive: true, force: true }).catch(() => {});
+  await cleanTestTempDir("test-promote").catch(() => {});
 });
 
 test("promotes validated plan into app package", async () => {
@@ -79,7 +80,7 @@ test("promotes validated plan into app package", async () => {
   expect(entry.id).toBe("c99999-generic-automation");
   expect(entry.appSlug).toBe("profile-a");
   expect(normalizedPlanPath).toContain("automations/apps/profile-a/cases/c99999-generic-automation/plan.json");
-  expect(normalizedSpecPath).toContain("automations/apps/profile-a/cases/c99999-generic-automation/spec.ts");
+  expect(normalizedSpecPath).toContain("automations/apps/profile-a/cases/c99999-generic-automation/case.spec.ts");
 });
 
 test("plans:promote saves app.config.json", async () => {
@@ -96,7 +97,7 @@ test("creates app-specific plan and spec files", async () => {
   const plan = makePlan({ externalId: "C10001" });
   await promoteExecutionPlan({ plan, outputRoot: tmpDir, fullConfig: makeConfig("profile-c") }, false);
   const planPath = path.join(tmpDir, "automations/apps/profile-c/cases/c10001-generic-automation/plan.json");
-  const specPath = path.join(tmpDir, "automations/apps/profile-c/cases/c10001-generic-automation/spec.ts");
+  const specPath = path.join(tmpDir, "automations/apps/profile-c/cases/c10001-generic-automation/case.spec.ts");
   const casePath = path.join(tmpDir, "automations/apps/profile-c/cases/c10001-generic-automation/case.json");
   const automationPath = path.join(tmpDir, "automations/apps/profile-c/cases/c10001-generic-automation/automation.json");
   await expect(fs.readFile(planPath, "utf-8")).resolves.toContain("\"version\": \"1.0\"");
@@ -134,7 +135,7 @@ test("automation existing + overwrite=true replaces plan and spec", async () => 
 
   const caseDir = path.dirname(entry1.planPath);
   const planPath = path.join(caseDir, "plan.json");
-  const specPath = path.join(caseDir, "spec.ts");
+  const specPath = path.join(caseDir, "case.spec.ts");
 
   const planContent1 = await fs.readFile(planPath, "utf-8");
   expect(planContent1).toContain("\"externalId\": \"C20002\"");

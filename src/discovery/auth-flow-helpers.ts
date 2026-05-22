@@ -38,6 +38,10 @@ export function buildAuthFlowInstantiation(): string {
   return "  const authFlow = new AuthFlow(page);";
 }
 
+export function buildSetTestDataCallFromEnv(): string {
+  return `  setAuthFlowTestData(resolvePromotedSpecAuthDataFromEnv());`;
+}
+
 export function buildAuthFlowCall(options: AuthFlowOptions): string {
   const parts: string[] = [];
   parts.push("  await authFlow.ensureAuthenticated({");
