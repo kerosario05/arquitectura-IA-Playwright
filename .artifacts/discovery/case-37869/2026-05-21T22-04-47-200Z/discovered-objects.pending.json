@@ -1,0 +1,610 @@
+[
+  {
+    "key": "button_iniciar",
+    "name": "Iniciar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Iniciar",
+      "exact": false
+    },
+    "aliases": [
+      "iniciar"
+    ],
+    "discoveredAt": "2026-05-21T22:05:01.753Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_hola",
+    "name": "¡Hola!",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "¡Hola!",
+      "exact": false
+    },
+    "aliases": [
+      "¡hola!"
+    ],
+    "discoveredAt": "2026-05-21T22:05:01.753Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_informacion_productosexplora_nuestros",
+    "name": "Información de productosExplora nuestros productos bancarios",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Información de productosExplora nuestros productos bancarios",
+      "exact": false
+    },
+    "aliases": [
+      "información de productosexplora nuestros productos bancarios"
+    ],
+    "discoveredAt": "2026-05-21T22:05:02.436Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_transacciones_serviciosrealiza_operaciones",
+    "name": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+      "exact": false
+    },
+    "aliases": [
+      "transacciones y serviciosrealiza operaciones con tus cuentas"
+    ],
+    "discoveredAt": "2026-05-21T22:05:02.436Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_salir",
+    "name": "Salir",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Salir",
+      "exact": false
+    },
+    "aliases": [
+      "salir"
+    ],
+    "discoveredAt": "2026-05-21T22:05:02.436Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_hola",
+    "name": "¡Hola!",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "¡Hola!",
+      "exact": false
+    },
+    "aliases": [
+      "¡hola!"
+    ],
+    "discoveredAt": "2026-05-21T22:05:02.436Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_nos_alegra_que",
+    "name": "¡Nos alegra que estés con nosotros!",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "¡Nos alegra que estés con nosotros!",
+      "exact": false
+    },
+    "aliases": [
+      "¡nos alegra que estés con nosotros!"
+    ],
+    "discoveredAt": "2026-05-21T22:05:02.436Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_informacion_productos",
+    "name": "Información de productos",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Información de productos",
+      "exact": false
+    },
+    "aliases": [
+      "información de productos"
+    ],
+    "discoveredAt": "2026-05-21T22:05:02.436Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_transacciones_servicios",
+    "name": "Transacciones y servicios",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Transacciones y servicios",
+      "exact": false
+    },
+    "aliases": [
+      "transacciones y servicios"
+    ],
+    "discoveredAt": "2026-05-21T22:05:02.436Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_cedula_identidad_dominicana",
+    "name": "Cédula de identidad dominicana",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Cédula de identidad dominicana",
+      "exact": false
+    },
+    "aliases": [
+      "cédula de identidad dominicana"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.072Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_pasaporte_extranjero",
+    "name": "Pasaporte extranjero",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Pasaporte extranjero",
+      "exact": false
+    },
+    "aliases": [
+      "pasaporte extranjero"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.072Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_cancelar",
+    "name": "Cancelar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Cancelar",
+      "exact": false
+    },
+    "aliases": [
+      "cancelar"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.072Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_continuar",
+    "name": "Continuar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Continuar",
+      "exact": false
+    },
+    "aliases": [
+      "continuar"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.072Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_identificacion_cliente",
+    "name": "Identificación del cliente",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Identificación del cliente",
+      "exact": false
+    },
+    "aliases": [
+      "identificación del cliente"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.072Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_seleccione_tipo_identificacion",
+    "name": "Seleccione su tipo de identificación",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Seleccione su tipo de identificación",
+      "exact": false
+    },
+    "aliases": [
+      "seleccione su tipo de identificación"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.072Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_cedula_identidad_dominicana",
+    "name": "Cédula de identidad dominicana",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Cédula de identidad dominicana",
+      "exact": false
+    },
+    "aliases": [
+      "cédula de identidad dominicana"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.072Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_pasaporte_extranjero",
+    "name": "Pasaporte extranjero",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Pasaporte extranjero",
+      "exact": false
+    },
+    "aliases": [
+      "pasaporte extranjero"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.072Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_cedula_identidad_dominicana",
+    "name": "Cédula de identidad dominicana",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Cédula de identidad dominicana",
+      "exact": false
+    },
+    "aliases": [
+      "cédula de identidad dominicana"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.965Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_pasaporte_extranjero",
+    "name": "Pasaporte extranjero",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Pasaporte extranjero",
+      "exact": false
+    },
+    "aliases": [
+      "pasaporte extranjero"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.965Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_button_1",
+    "name": "1",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "1",
+      "exact": false
+    },
+    "aliases": [
+      "1"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.965Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_button_2",
+    "name": "2",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "2",
+      "exact": false
+    },
+    "aliases": [
+      "2"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.965Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_button_3",
+    "name": "3",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "3",
+      "exact": false
+    },
+    "aliases": [
+      "3"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.965Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_button_4",
+    "name": "4",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "4",
+      "exact": false
+    },
+    "aliases": [
+      "4"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.965Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_button_5",
+    "name": "5",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "5",
+      "exact": false
+    },
+    "aliases": [
+      "5"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.965Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_button_6",
+    "name": "6",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "6",
+      "exact": false
+    },
+    "aliases": [
+      "6"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.965Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_button_7",
+    "name": "7",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "7",
+      "exact": false
+    },
+    "aliases": [
+      "7"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.965Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_button_8",
+    "name": "8",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "8",
+      "exact": false
+    },
+    "aliases": [
+      "8"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.965Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_button_9",
+    "name": "9",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "9",
+      "exact": false
+    },
+    "aliases": [
+      "9"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.965Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_button_10",
+    "name": "0",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "0",
+      "exact": false
+    },
+    "aliases": [
+      "0"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.965Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_borrar",
+    "name": "← Borrar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "← Borrar",
+      "exact": false
+    },
+    "aliases": [
+      "← borrar"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.965Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_limpiar",
+    "name": "Limpiar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Limpiar",
+      "exact": false
+    },
+    "aliases": [
+      "limpiar"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.965Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_cancelar",
+    "name": "Cancelar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Cancelar",
+      "exact": false
+    },
+    "aliases": [
+      "cancelar"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.965Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_continuar",
+    "name": "Continuar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Continuar",
+      "exact": false
+    },
+    "aliases": [
+      "continuar"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.965Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_identificacion_cliente",
+    "name": "Identificación del cliente",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Identificación del cliente",
+      "exact": false
+    },
+    "aliases": [
+      "identificación del cliente"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.965Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_seleccione_tipo_identificacion",
+    "name": "Seleccione su tipo de identificación",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Seleccione su tipo de identificación",
+      "exact": false
+    },
+    "aliases": [
+      "seleccione su tipo de identificación"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.965Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_cedula_identidad_dominicana",
+    "name": "Cédula de identidad dominicana",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Cédula de identidad dominicana",
+      "exact": false
+    },
+    "aliases": [
+      "cédula de identidad dominicana"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.965Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_pasaporte_extranjero",
+    "name": "Pasaporte extranjero",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Pasaporte extranjero",
+      "exact": false
+    },
+    "aliases": [
+      "pasaporte extranjero"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.965Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_numero_identificacion_digitos",
+    "name": "Número de identificación(11 dígitos)",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Número de identificación(11 dígitos)",
+      "exact": false
+    },
+    "aliases": [
+      "número de identificación(11 dígitos)"
+    ],
+    "discoveredAt": "2026-05-21T22:05:03.965Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  }
+]

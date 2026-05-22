@@ -5,5 +5,5 @@ export function buildPlanRepairGoal(input: {
   scenarioTitle: string;
   pendingSteps: ExecutionPlanStep[];
 }): string {
-  return `Repair the ExecutionPlan for case C${input.caseId} ("${input.scenarioTitle}"). The plan has ${input.pendingSteps.length} unresolved NOOP steps that need to be converted into executable actions. Use the snapshot, data context, and action registry to resolve targets and values. Return a valid AgentHandoffResponse JSON object with the repaired plan in the top-level plans array and all steps executable.`;
+  return `Repair the ExecutionPlan for case C${input.caseId} ("${input.scenarioTitle}"). The plan has ${input.pendingSteps.length} unresolved NOOP steps that need to be converted into executable actions. Use the snapshot, data context, and action registry to resolve targets and values. Return a valid AgentHandoffResponse JSON object with the repaired ExecutionPlan in the top-level plans array and all steps executable.`;
 }

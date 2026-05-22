@@ -1,0 +1,1698 @@
+[
+  {
+    "key": "button_iniciar",
+    "name": "Iniciar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Iniciar",
+      "exact": false
+    },
+    "aliases": [
+      "iniciar"
+    ],
+    "discoveredAt": "2026-05-22T03:21:13.401Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_hola",
+    "name": "¡Hola!",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "¡Hola!",
+      "exact": false
+    },
+    "aliases": [
+      "¡hola!"
+    ],
+    "discoveredAt": "2026-05-22T03:21:13.402Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_informacion_productosexplora_nuestros",
+    "name": "Información de productosExplora nuestros productos bancarios",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Información de productosExplora nuestros productos bancarios",
+      "exact": false
+    },
+    "aliases": [
+      "información de productosexplora nuestros productos bancarios"
+    ],
+    "discoveredAt": "2026-05-22T03:21:14.653Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_transacciones_serviciosrealiza_operaciones",
+    "name": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+      "exact": false
+    },
+    "aliases": [
+      "transacciones y serviciosrealiza operaciones con tus cuentas"
+    ],
+    "discoveredAt": "2026-05-22T03:21:14.653Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_salir",
+    "name": "Salir",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Salir",
+      "exact": false
+    },
+    "aliases": [
+      "salir"
+    ],
+    "discoveredAt": "2026-05-22T03:21:14.653Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_hola",
+    "name": "¡Hola!",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "¡Hola!",
+      "exact": false
+    },
+    "aliases": [
+      "¡hola!"
+    ],
+    "discoveredAt": "2026-05-22T03:21:14.653Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_nos_alegra_que",
+    "name": "¡Nos alegra que estés con nosotros!",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "¡Nos alegra que estés con nosotros!",
+      "exact": false
+    },
+    "aliases": [
+      "¡nos alegra que estés con nosotros!"
+    ],
+    "discoveredAt": "2026-05-22T03:21:14.653Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_informacion_productos",
+    "name": "Información de productos",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Información de productos",
+      "exact": false
+    },
+    "aliases": [
+      "información de productos"
+    ],
+    "discoveredAt": "2026-05-22T03:21:14.653Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_transacciones_servicios",
+    "name": "Transacciones y servicios",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Transacciones y servicios",
+      "exact": false
+    },
+    "aliases": [
+      "transacciones y servicios"
+    ],
+    "discoveredAt": "2026-05-22T03:21:14.653Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_cedula_identidad_dominicana",
+    "name": "Cédula de identidad dominicana",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Cédula de identidad dominicana",
+      "exact": false
+    },
+    "aliases": [
+      "cédula de identidad dominicana"
+    ],
+    "discoveredAt": "2026-05-22T03:21:15.822Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_pasaporte_extranjero",
+    "name": "Pasaporte extranjero",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Pasaporte extranjero",
+      "exact": false
+    },
+    "aliases": [
+      "pasaporte extranjero"
+    ],
+    "discoveredAt": "2026-05-22T03:21:15.822Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_cancelar",
+    "name": "Cancelar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Cancelar",
+      "exact": false
+    },
+    "aliases": [
+      "cancelar"
+    ],
+    "discoveredAt": "2026-05-22T03:21:15.822Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_continuar",
+    "name": "Continuar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Continuar",
+      "exact": false
+    },
+    "aliases": [
+      "continuar"
+    ],
+    "discoveredAt": "2026-05-22T03:21:15.822Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_identificacion_cliente",
+    "name": "Identificación del cliente",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Identificación del cliente",
+      "exact": false
+    },
+    "aliases": [
+      "identificación del cliente"
+    ],
+    "discoveredAt": "2026-05-22T03:21:15.822Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_seleccione_tipo_identificacion",
+    "name": "Seleccione su tipo de identificación",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Seleccione su tipo de identificación",
+      "exact": false
+    },
+    "aliases": [
+      "seleccione su tipo de identificación"
+    ],
+    "discoveredAt": "2026-05-22T03:21:15.822Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_cedula_identidad_dominicana",
+    "name": "Cédula de identidad dominicana",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Cédula de identidad dominicana",
+      "exact": false
+    },
+    "aliases": [
+      "cédula de identidad dominicana"
+    ],
+    "discoveredAt": "2026-05-22T03:21:15.822Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_pasaporte_extranjero",
+    "name": "Pasaporte extranjero",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Pasaporte extranjero",
+      "exact": false
+    },
+    "aliases": [
+      "pasaporte extranjero"
+    ],
+    "discoveredAt": "2026-05-22T03:21:15.822Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_estado_cuentaconsulta_descarga",
+    "name": "Estado de cuentaConsulta y descarga estados de cuenta",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Estado de cuentaConsulta y descarga estados de cuenta",
+      "exact": false
+    },
+    "aliases": [
+      "estado de cuentaconsulta y descarga estados de cuenta"
+    ],
+    "discoveredAt": "2026-05-22T03:21:34.293Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_consulta_balanceverifica_saldos",
+    "name": "Consulta de balanceVerifica saldos de tus productos",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Consulta de balanceVerifica saldos de tus productos",
+      "exact": false
+    },
+    "aliases": [
+      "consulta de balanceverifica saldos de tus productos"
+    ],
+    "discoveredAt": "2026-05-22T03:21:34.293Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_pago_productosrealiza_pagos",
+    "name": "Pago de productosRealiza pagos de tarjetas y préstamos",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Pago de productosRealiza pagos de tarjetas y préstamos",
+      "exact": false
+    },
+    "aliases": [
+      "pago de productosrealiza pagos de tarjetas y préstamos"
+    ],
+    "discoveredAt": "2026-05-22T03:21:34.293Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_generar_cartasgenera_cartas",
+    "name": "Generar cartasGenera cartas y certificaciones bancarias",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Generar cartasGenera cartas y certificaciones bancarias",
+      "exact": false
+    },
+    "aliases": [
+      "generar cartasgenera cartas y certificaciones bancarias"
+    ],
+    "discoveredAt": "2026-05-22T03:21:34.293Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_salir",
+    "name": "Salir",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Salir",
+      "exact": false
+    },
+    "aliases": [
+      "salir"
+    ],
+    "discoveredAt": "2026-05-22T03:21:34.293Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_transacciones_servicios",
+    "name": "Transacciones y Servicios",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Transacciones y Servicios",
+      "exact": false
+    },
+    "aliases": [
+      "transacciones y servicios"
+    ],
+    "discoveredAt": "2026-05-22T03:21:34.293Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_hola_roque",
+    "name": "¡Hola, ROQUE!",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "¡Hola, ROQUE!",
+      "exact": false
+    },
+    "aliases": [
+      "¡hola, roque!"
+    ],
+    "discoveredAt": "2026-05-22T03:21:34.293Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_selecciona_operacion_que",
+    "name": "Selecciona la operación que deseas realizar",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Selecciona la operación que deseas realizar",
+      "exact": false
+    },
+    "aliases": [
+      "selecciona la operación que deseas realizar"
+    ],
+    "discoveredAt": "2026-05-22T03:21:34.293Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_estado_cuenta",
+    "name": "Estado de cuenta",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Estado de cuenta",
+      "exact": false
+    },
+    "aliases": [
+      "estado de cuenta"
+    ],
+    "discoveredAt": "2026-05-22T03:21:34.293Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_consulta_balance",
+    "name": "Consulta de balance",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Consulta de balance",
+      "exact": false
+    },
+    "aliases": [
+      "consulta de balance"
+    ],
+    "discoveredAt": "2026-05-22T03:21:34.293Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_pago_productos",
+    "name": "Pago de productos",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Pago de productos",
+      "exact": false
+    },
+    "aliases": [
+      "pago de productos"
+    ],
+    "discoveredAt": "2026-05-22T03:21:34.293Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_generar_cartas",
+    "name": "Generar cartas",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Generar cartas",
+      "exact": false
+    },
+    "aliases": [
+      "generar cartas"
+    ],
+    "discoveredAt": "2026-05-22T03:21:34.293Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_carta_referenciacarta_certificar",
+    "name": "Carta de referenciaCarta para certificar tu relación bancaria",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Carta de referenciaCarta para certificar tu relación bancaria",
+      "exact": false
+    },
+    "aliases": [
+      "carta de referenciacarta para certificar tu relación bancaria"
+    ],
+    "discoveredAt": "2026-05-22T03:21:35.462Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_carta_consularcarta_dirigida",
+    "name": "Carta consularCarta dirigida a embajadas y consulados",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Carta consularCarta dirigida a embajadas y consulados",
+      "exact": false
+    },
+    "aliases": [
+      "carta consularcarta dirigida a embajadas y consulados"
+    ],
+    "discoveredAt": "2026-05-22T03:21:35.462Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_generar_cartas",
+    "name": "Generar cartas",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Generar cartas",
+      "exact": false
+    },
+    "aliases": [
+      "generar cartas"
+    ],
+    "discoveredAt": "2026-05-22T03:21:35.462Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_carta_referencia",
+    "name": "Carta de referencia",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Carta de referencia",
+      "exact": false
+    },
+    "aliases": [
+      "carta de referencia"
+    ],
+    "discoveredAt": "2026-05-22T03:21:35.462Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_carta_consular",
+    "name": "Carta consular",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Carta consular",
+      "exact": false
+    },
+    "aliases": [
+      "carta consular"
+    ],
+    "discoveredAt": "2026-05-22T03:21:35.462Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_volver",
+    "name": "Volver",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Volver",
+      "exact": false
+    },
+    "aliases": [
+      "volver"
+    ],
+    "discoveredAt": "2026-05-22T03:21:36.605Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_continuar_productos",
+    "name": "Continuar (0 productos)",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Continuar (0 productos)",
+      "exact": false
+    },
+    "aliases": [
+      "continuar (0 productos)"
+    ],
+    "discoveredAt": "2026-05-22T03:21:36.605Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_generar_cartas",
+    "name": "Generar cartas",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Generar cartas",
+      "exact": false
+    },
+    "aliases": [
+      "generar cartas"
+    ],
+    "discoveredAt": "2026-05-22T03:21:36.605Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_seleccionar_todos_productos",
+    "name": "Seleccionar todos los productos(1 de 12 seleccionados)",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Seleccionar todos los productos(1 de 12 seleccionados)",
+      "exact": false
+    },
+    "aliases": [
+      "seleccionar todos los productos(1 de 12 seleccionados)"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_1",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_2",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_3",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_4",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_5",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_6",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_7",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_8",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_9",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_10",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_redacted_11",
+    "name": "[REDACTED]",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "[REDACTED]",
+      "exact": false
+    },
+    "aliases": [
+      "[redacted]"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_volver",
+    "name": "Volver",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Volver",
+      "exact": false
+    },
+    "aliases": [
+      "volver"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_continuar_producto",
+    "name": "Continuar (1 producto)",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Continuar (1 producto)",
+      "exact": false
+    },
+    "aliases": [
+      "continuar (1 producto)"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_generar_cartas",
+    "name": "Generar cartas",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Generar cartas",
+      "exact": false
+    },
+    "aliases": [
+      "generar cartas"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_cuenta_ahorros",
+    "name": "Cuenta de Ahorros ****4962",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Cuenta de Ahorros ****4962",
+      "exact": false
+    },
+    "aliases": [
+      "cuenta de ahorros ****4962"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_cuenta_ahorros_1",
+    "name": "Cuenta de Ahorros ****2855",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Cuenta de Ahorros ****2855",
+      "exact": false
+    },
+    "aliases": [
+      "cuenta de ahorros ****2855"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo",
+    "name": "Depósito a plazo ****6323",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****6323",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****6323"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_deposito_plazo_1",
+    "name": "Depósito a plazo ****4979",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Depósito a plazo ****4979",
+      "exact": false
+    },
+    "aliases": [
+      "depósito a plazo ****4979"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_prestamo",
+    "name": "Préstamo ****5163",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Préstamo ****5163",
+      "exact": false
+    },
+    "aliases": [
+      "préstamo ****5163"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_tarjeta_credito",
+    "name": "Tarjeta de Crédito ****1581",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Tarjeta de Crédito ****1581",
+      "exact": false
+    },
+    "aliases": [
+      "tarjeta de crédito ****1581"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_tarjeta_credito_1",
+    "name": "Tarjeta de Crédito ****0578",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Tarjeta de Crédito ****0578",
+      "exact": false
+    },
+    "aliases": [
+      "tarjeta de crédito ****0578"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_tarjeta_credito_2",
+    "name": "Tarjeta de Crédito ****3306",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Tarjeta de Crédito ****3306",
+      "exact": false
+    },
+    "aliases": [
+      "tarjeta de crédito ****3306"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_tarjeta_credito_3",
+    "name": "Tarjeta de Crédito ****6128",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Tarjeta de Crédito ****6128",
+      "exact": false
+    },
+    "aliases": [
+      "tarjeta de crédito ****6128"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_tarjeta_credito_4",
+    "name": "Tarjeta de Crédito ****7333",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Tarjeta de Crédito ****7333",
+      "exact": false
+    },
+    "aliases": [
+      "tarjeta de crédito ****7333"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_tarjeta_credito_5",
+    "name": "Tarjeta de Crédito ****5205",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Tarjeta de Crédito ****5205",
+      "exact": false
+    },
+    "aliases": [
+      "tarjeta de crédito ****5205"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_tarjeta_credito_6",
+    "name": "Tarjeta de Crédito ****0323",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Tarjeta de Crédito ****0323",
+      "exact": false
+    },
+    "aliases": [
+      "tarjeta de crédito ****0323"
+    ],
+    "discoveredAt": "2026-05-22T03:21:47.508Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "input_escriba_buscar",
+    "name": "Escriba para buscar...",
+    "type": "input",
+    "locator": {
+      "strategy": "placeholder",
+      "value": "Escriba para buscar...",
+      "exact": false
+    },
+    "aliases": [
+      "escriba para buscar..."
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.8
+  },
+  {
+    "key": "button_embajada_estados_unidos",
+    "name": "Embajada de los Estados Unidos",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de los Estados Unidos",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de los estados unidos"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_espana",
+    "name": "Embajada de España",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de España",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de españa"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_italia",
+    "name": "Embajada de Italia",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Italia",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de italia"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_francia",
+    "name": "Embajada de Francia",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Francia",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de francia"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_canada",
+    "name": "Embajada de Canadá",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Canadá",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de canadá"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_alemania",
+    "name": "Embajada de Alemania",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Alemania",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de alemania"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_argentina",
+    "name": "Embajada de Argentina",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Argentina",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de argentina"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_bahamas",
+    "name": "Embajada de Bahamas",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Bahamas",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de bahamas"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_belgica",
+    "name": "Embajada de Bélgica",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Bélgica",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de bélgica"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_belice",
+    "name": "Embajada de Belice",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Belice",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de belice"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_republica_benin",
+    "name": "Embajada de la República de Benin",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de la República de Benin",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de la república de benin"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_brasil",
+    "name": "Embajada del Brasil",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada del Brasil",
+      "exact": false
+    },
+    "aliases": [
+      "embajada del brasil"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_chile",
+    "name": "Embajada de Chile",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Chile",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de chile"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_chipre",
+    "name": "Embajada de Chipre",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Chipre",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de chipre"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_colombia",
+    "name": "Embajada de Colombia",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Colombia",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de colombia"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_costa_rica",
+    "name": "Embajada de Costa Rica",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Costa Rica",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de costa rica"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_cuba",
+    "name": "Embajada de Cuba",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Cuba",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de cuba"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_ecuador",
+    "name": "Embajada de Ecuador",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Ecuador",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de ecuador"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_delegacion_union_europea",
+    "name": "Delegación Unión Europea",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Delegación Unión Europea",
+      "exact": false
+    },
+    "aliases": [
+      "delegación unión europea"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_salvador",
+    "name": "Embajada de El Salvador",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de El Salvador",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de el salvador"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_finlandia",
+    "name": "Embajada de Finlandia",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Finlandia",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de finlandia"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_haiti",
+    "name": "Embajada de Haití",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Haití",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de haití"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_honduras",
+    "name": "Embajada de Honduras",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Honduras",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de honduras"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_jamaica",
+    "name": "Embajada de Jamaica",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Jamaica",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de jamaica"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_japon",
+    "name": "Embajada del Japón",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada del Japón",
+      "exact": false
+    },
+    "aliases": [
+      "embajada del japón"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_mexico",
+    "name": "Embajada de México",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de México",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de méxico"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_nicaragua",
+    "name": "Embajada de Nicaragua",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Nicaragua",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de nicaragua"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_orden_militar",
+    "name": "Embajada de la Orden Militar de Malta",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de la Orden Militar de Malta",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de la orden militar de malta"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_panama",
+    "name": "Embajada de Panamá",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Panamá",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de panamá"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_peru",
+    "name": "Embajada de Perú",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Perú",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de perú"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_qatar",
+    "name": "Embajada de Qatar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Qatar",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de qatar"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_reino_unido",
+    "name": "Embajada de Reino Unido",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Reino Unido",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de reino unido"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_santa_sede",
+    "name": "Embajada de la Santa Sede",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de la Santa Sede",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de la santa sede"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_china_taiwan",
+    "name": "Embajada de China (Taiwan)",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de China (Taiwan)",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de china (taiwan)"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_uruguay",
+    "name": "Embajada de Uruguay",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Uruguay",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de uruguay"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_embajada_venezuela",
+    "name": "Embajada de Venezuela",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Embajada de Venezuela",
+      "exact": false
+    },
+    "aliases": [
+      "embajada de venezuela"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_volver",
+    "name": "Volver",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Volver",
+      "exact": false
+    },
+    "aliases": [
+      "volver"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_continuar",
+    "name": "Continuar",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Continuar",
+      "exact": false
+    },
+    "aliases": [
+      "continuar"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_generar_cartas",
+    "name": "Generar cartas",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Generar cartas",
+      "exact": false
+    },
+    "aliases": [
+      "generar cartas"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_selecciona_embajada",
+    "name": "Selecciona la embajada:",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Selecciona la embajada:",
+      "exact": false
+    },
+    "aliases": [
+      "selecciona la embajada:"
+    ],
+    "discoveredAt": "2026-05-22T03:21:48.689Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  }
+]

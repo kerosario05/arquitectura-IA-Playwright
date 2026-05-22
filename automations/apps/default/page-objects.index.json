@@ -13,7 +13,7 @@
           "intent": "start_session",
           "parameters": [],
           "available": true,
-          "source": "candidate,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-3",
+          "source": "candidate,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-3,c37869-generar-carta-de-referencia-con-cuenta-de-ahorro-step-3",
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
@@ -157,8 +157,68 @@
         "autoApproved": true,
         "blockedMethods": []
       }
+    },
+    {
+      "id": "po_1779414447790_pl0cbz",
+      "className": "ProductDetailPage",
+      "filePath": "automations/apps/default/pages/productdetail.page.ts",
+      "screenSignature": "screen:default-product_detail",
+      "methods": [
+        {
+          "name": "clickPrimaryAction",
+          "intent": "click_primary_action",
+          "parameters": [
+            "actionName"
+          ],
+          "available": true,
+          "source": "candidate,c37869-generar-carta-de-referencia-con-cuenta-de-ahorro-step-5",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        },
+        {
+          "name": "step=4 target=\"Cédula de identidad dominicana\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]Method",
+          "intent": "step=4 target=\"Cédula de identidad dominicana\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]",
+          "parameters": [],
+          "available": true,
+          "source": "c37869-generar-carta-de-referencia-con-cuenta-de-ahorro-missing-step=4 target=\"Cédula de identidad dominicana\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        },
+        {
+          "name": "step=5 target=\"continuar\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]Method",
+          "intent": "step=5 target=\"continuar\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]",
+          "parameters": [],
+          "available": true,
+          "source": "c37869-generar-carta-de-referencia-con-cuenta-de-ahorro-missing-step=5 target=\"continuar\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "active",
+      "sourcePlanIds": [
+        "c37869-generar-carta-de-referencia-con-cuenta-de-ahorro"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-05-22T01:47:27.790Z",
+      "updatedAt": "2026-05-22T01:47:27.792Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-05-22T01:47:27.818Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/default/pages/productdetail.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-05-22T01:47:27.851Z",
+        "approvedFrom": "automations/apps/default/pages/productdetail.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
     }
   ],
   "componentCandidates": [],
-  "updatedAt": "2026-05-21T19:50:08.094Z"
+  "updatedAt": "2026-05-22T01:47:27.852Z"
 }

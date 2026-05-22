@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "kind": "plan_repair",
+  "createdAt": "2026-05-22T12:46:52.522Z",
+  "goal": "repair",
+  "actionRegistry": {
+    "supportedActions": [
+      "click"
+    ]
+  },
+  "dataContextSummary": {
+    "availableKeys": []
+  },
+  "constraints": {
+    "noApiKey": true,
+    "noPlaywrightExecution": true,
+    "doNotModifyStableRegistry": true,
+    "useOnlyAvailableDataKeys": true,
+    "outputMustMatchSchema": true
+  }
+}

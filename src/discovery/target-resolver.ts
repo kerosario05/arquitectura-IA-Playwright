@@ -2,6 +2,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import type { Page, Locator } from "@playwright/test";
 import type { PageSnapshot, SnapshotElement } from "../types/page-snapshot.types";
+import { parseProductConditionTarget, resolveProductConditionAgainstSnapshot, type ProductCondition } from "./product-condition-parser";
 
 let evaluateCodeCache: string | undefined;
 function readEvaluateCode(): string {
@@ -452,6 +453,53 @@ export async function resolveActionTarget(
   options?: ResolveActionTargetOptions
 ): Promise<TargetResolutionResult> {
   const opts: Required<ResolveActionTargetOptions> = { ...DEFAULT_OPTIONS, ...options };
+
+  const productCondition = parseProductConditionTarget(target);
+  if (productCondition) {
+    const resolution = resolveProductConditionAgainstSnapshot(snapshot, productCondition, target);
+    if (resolution.status === "resolved" || resolution.status === "multiple") {
+      const selectedMatch = resolution.matches[resolution.selectedIndex];
+      if (selectedMatch) {
+        const element = snapshot.elements.find(e => e.id === selectedMatch.elementId);
+        if (element) {
+          const resolved = await resolveSnapshotElementLocator(page, {
+            element,
+            target,
+            candidateText: selectedMatch.text,
+            type: "card",
+            tagName: element.tagName,
+            confidence: selectedMatch.score,
+            matchReason: `product_condition:${productCondition.type}${productCondition.status ? `:${productCondition.status}` : ""}`
+          });
+          if (resolved.locator) {
+            return {
+              status: "resolved",
+              target,
+              locator: resolved.locator,
+              locatorStrategy: "product_condition",
+              confidence: selectedMatch.score,
+              matchReason: `product_condition:${productCondition.type}${productCondition.status ? `:${productCondition.status}` : ""}`,
+              candidateText: selectedMatch.text,
+              candidateId: selectedMatch.elementId,
+              candidates: resolution.matches.map(m => ({
+                elementId: m.elementId,
+                text: m.text,
+                normalizedText: m.normalizedText,
+                type: "card",
+                role: "listitem",
+                tagName: "div",
+                isClickable: m.isClickable,
+                matchScore: m.score,
+                matchReason: `product_condition_match:${m.matchedType}`,
+                locatorStrategy: "product_condition"
+              })),
+              productConditionDiagnostics: resolution.diagnostics
+            } as TargetResolutionResult & { productConditionDiagnostics?: any };
+          }
+        }
+      }
+    }
+  }
 
   const snapshotCandidates = buildSnapshotCandidates(snapshot, target);
 

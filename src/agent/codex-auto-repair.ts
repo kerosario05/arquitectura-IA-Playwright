@@ -2,7 +2,7 @@ import path from "node:path";
 import { runCodexCli, formatCodexCliError, formatCodexTimeoutError } from "./codex-cli-runner";
 import type { CodexAutoRepairInput, CodexAutoRepairResult, TopCandidateRecommendation, RouteRecoveryPack } from "../types/codex-auto-repair.types";
 import type { RouteRecoveryDecision } from "../types/route-recovery-decision.types";
-import { validateAgentHandoffResponse } from "./agent-response-validator";
+import { normalizeAgentHandoffResponse, validateAgentHandoffResponse } from "./agent-response-validator";
 import { validateRouteRecoveryDecision } from "./route-recovery-decision-validator";
 import type { PlanAction } from "../types/execution-plan.types";
 import type { AgentHandoffRequest, AgentHandoffResponse } from "../types/agent-handoff.types";
@@ -186,7 +186,7 @@ export function buildCompactPrompt(input: CodexAutoRepairInput): string {
     `- Do not generate Playwright code.`,
     `- The file must contain an AgentHandoffResponse object, not a bare ExecutionPlan.`,
     `- Always set recoveryDecision to repaired_plan, no_safe_action, or needs_more_context.`,
-    `- Put repaired plans inside the top-level plans array.`,
+    `- Put repaired ExecutionPlan objects inside the top-level plans array.`,
     `- Do not modify Object Registry.`,
     `- Do not run tests.`,
     `- Do not run Playwright.`,
@@ -219,7 +219,7 @@ function buildVerbosePrompt(input: CodexAutoRepairInput): string {
     `- Do NOT generate Playwright code.`,
     `- Write an AgentHandoffResponse object to agent-response.json.`,
     `- Always include recoveryDecision and keep it consistent with the response body.`,
-    `- Put repaired plans inside the top-level plans array.`,
+    `- Put repaired ExecutionPlan objects inside the top-level plans array.`,
     `- Do NOT invent sensitive data.`,
     `- If data is missing, mark it as requiredData/missing in the plan.`,
     `- The response must match agent-response.schema.json exactly.`,
@@ -383,6 +383,31 @@ async function tryDeterministicFallback(
   return result;
 }
 
+function canUseDeterministicFallback(decisionContent: string | undefined, decisionErrors: string[]): boolean {
+  if (!decisionContent) {
+    return true;
+  }
+
+  if (decisionErrors.length === 0) {
+    return false;
+  }
+
+  const blockingCodes = new Set([
+    "INVALID_ACTION",
+    "CANDIDATE_NOT_IN_PACK",
+    "INVALID_RECOVERY_DECISION"
+  ]);
+
+  for (const error of decisionErrors) {
+    const code = error.split(":")[0]?.trim();
+    if (code && blockingCodes.has(code)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 export async function runCodexAutoRepair(input: CodexAutoRepairInput): Promise<CodexAutoRepairResult> {
   const isCompactRecovery = input.promptMode === "compact-route-recovery";
 
@@ -506,7 +531,7 @@ export async function runCodexAutoRepair(input: CodexAutoRepairInput): Promise<C
       }
 
       // If Codex decision is missing or invalid, try deterministic fallback
-      if (!routeDecision && topCandidateRecommendation) {
+      if (!routeDecision && topCandidateRecommendation && canUseDeterministicFallback(decisionContent, decisionErrors)) {
         const fallback = await tryDeterministicFallback(topCandidateRecommendation, pack);
         if (fallback) {
           routeDecision = fallback.decision;
@@ -542,10 +567,35 @@ export async function runCodexAutoRepair(input: CodexAutoRepairInput): Promise<C
 
       // Validate the final AgentHandoffResponse
       const finalValidation = validateAgentHandoffResponse(agentResponse, { promptMode: "compact-route-recovery" });
-      const finalErrors = finalValidation.issues.filter((i) => i.level === "error").map((i) => `${i.code}: ${i.message}`);
+      const finalErrors = [
+        ...transformErrors.map((error) => `TRANSFORM_ERROR: ${error}`),
+        ...finalValidation.issues.filter((i) => i.level === "error").map((i) => `${i.code}: ${i.message}`)
+      ];
 
       // Write final agent-response.json
       await writeFile(input.responsePath, JSON.stringify(agentResponse, null, 2), "utf-8");
+
+      if (finalErrors.length > 0) {
+        return {
+          success: false,
+          responsePath: input.responsePath,
+          diagnostics: {
+            ...baseDiagnostics,
+            agentResponseExists: true,
+            agentResponseValid: false,
+            routeRecoveryDecisionValid: finalAgentResponseBuiltBy === "codex_decision",
+            routeRecoveryDecisionErrors: decisionErrors.length > 0 ? decisionErrors : undefined,
+            finalAgentResponseBuiltBy,
+            selectedCandidateId: routeDecision.recoveryDecision === "repaired_plan" ? routeDecision.selectedCandidateId : undefined,
+            transformationErrors: transformErrors.length > 0 ? transformErrors : undefined,
+            recoveryDecision: agentResponse.recoveryDecision,
+            rawRecoveryDecision: agentResponse.recoveryDecision,
+            validationErrors: finalErrors,
+            nextAction: "auto_repair_invalid_response"
+          } as CodexAutoRepairResult["diagnostics"],
+          error: `Final agent response validation failed: ${finalErrors.join("; ")}`
+        };
+      }
 
       const recoveryDecision = agentResponse.recoveryDecision;
       const isNonPlan = recoveryDecision === "no_safe_action" || recoveryDecision === "needs_more_context";
@@ -603,8 +653,13 @@ export async function runCodexAutoRepair(input: CodexAutoRepairInput): Promise<C
 
     const responseContent = await readFile(input.responsePath, "utf-8");
     const parsedResponse = JSON.parse(responseContent) as unknown;
-    const response = parsedResponse as AgentHandoffResponse;
+    const normalizedResponse = normalizeAgentHandoffResponse(parsedResponse);
+    const response = normalizedResponse as AgentHandoffResponse;
     const recoveryDecision = response.recoveryDecision;
+
+    if (normalizedResponse !== parsedResponse) {
+      await writeFile(input.responsePath, JSON.stringify(normalizedResponse, null, 2), "utf-8");
+    }
 
     const requestContent = await readFile(input.requestPath, "utf-8");
     const request = JSON.parse(requestContent) as AgentHandoffRequest;
@@ -646,7 +701,8 @@ export async function runCodexAutoRepair(input: CodexAutoRepairInput): Promise<C
       };
     }
 
-    if (!response.plans || response.plans.length === 0) {
+    const isNonPlanDecision = recoveryDecision === "no_safe_action" || recoveryDecision === "needs_more_context";
+    if (!isNonPlanDecision && (!response.plans || response.plans.length === 0)) {
       return {
         success: false,
         responsePath: input.responsePath,
@@ -665,7 +721,7 @@ export async function runCodexAutoRepair(input: CodexAutoRepairInput): Promise<C
       diagnostics: {
         ...diagnosticsBase,
         agentResponseValid: true,
-        nextAction: "retry_execution",
+        nextAction: isNonPlanDecision ? recoveryDecision : "retry_execution",
         recoveryDecision: recoveryDecision ?? "repaired_plan"
       } as CodexAutoRepairResult["diagnostics"]
     };

@@ -6,6 +6,7 @@ import type { PageObjectEntry, PageObjectMethod, PageObjectRegistry } from "../t
 import { findReusableMethod, findMethodBySemanticIntent } from "./page-object-registry";
 import { deriveMethodIntentFromStep, deriveExpectedOwnerForStep } from "./pom-classification";
 import type { SemanticMethodIntent } from "../types/pom-ownership";
+import { isLikelyAuthGate, buildAuthFlowSpecImport, buildAuthFlowInstantiation, buildAuthFlowCall } from "../discovery/auth-flow-helpers";
 
 export type POMSpecResult = {
   specContent: string;
@@ -14,6 +15,7 @@ export type POMSpecResult = {
   missingPageObjects: string[];
   missingMethods: string[];
   generatedCandidates: number;
+  usedAuthFlow: boolean;
 };
 
 function getTarget(t: PlanTarget | "APP_BASE_URL" | undefined): PlanTarget | undefined {
@@ -43,7 +45,8 @@ export function generatePOMSpecFromPlan(
   appPaths: AppAutomationPaths,
   pageObjectRegistry: PageObjectRegistry | undefined,
   policy: PromotionPolicy,
-  inlineDebugMode: boolean
+  inlineDebugMode: boolean,
+  authFlowOptions?: { alias?: string; landing?: string; testDataJson?: string }
 ): POMSpecResult {
   const escapedTitle = escapeSpecString(plan.scenario.title);
 
@@ -51,10 +54,12 @@ export function generatePOMSpecFromPlan(
   const missingPageObjects: string[] = [];
   const missingMethods: string[] = [];
   let generatedCandidates = 0;
+  let usedAuthFlow = false;
 
   const importLines: string[] = [];
   const instantiationLines: string[] = [];
   const actionLines: string[] = [];
+  const preambleLines: string[] = [];
 
   const importedClasses = new Set<string>();
   const instantiatedVars = new Map<string, string>();
@@ -77,11 +82,47 @@ export function generatePOMSpecFromPlan(
     return `${step.action} ${target}`.trim();
   }
 
+  let authGateDetected = false;
+  let authGateStepIndex = -1;
+
   for (const step of plan.steps) {
     const description = makeDescription(step);
 
     if (step.action === "navigate" || step.action === "login") {
       continue;
+    }
+
+    const targetValue = getTargetValue(step.target);
+    const stepIsAuthGate = isLikelyAuthGate(targetValue) || isLikelyAuthGate(description);
+
+    if (stepIsAuthGate && authFlowOptions && !authGateDetected) {
+      authGateDetected = true;
+      authGateStepIndex = plan.steps.indexOf(step);
+      usedAuthFlow = true;
+
+      const authImport = buildAuthFlowSpecImport(appProfile.appSlug);
+      if (!importLines.includes(authImport)) {
+        importLines.push(authImport);
+      }
+
+      const authInstantiation = buildAuthFlowInstantiation();
+      if (!instantiationLines.includes(authInstantiation)) {
+        instantiationLines.push(authInstantiation);
+      }
+
+      const authCall = buildAuthFlowCall({
+        alias: authFlowOptions.alias || 'defaultClient',
+        landing: authFlowOptions.landing || 'transactions_menu'
+      });
+      preambleLines.push(authCall);
+      continue;
+    }
+
+    if (authGateDetected && authGateStepIndex >= 0 && plan.steps.indexOf(step) <= authGateStepIndex + 3) {
+      const isNavToAuth = targetValue.includes("transacciones") || targetValue.includes("iniciar");
+      if (isNavToAuth) {
+        continue;
+      }
     }
 
     const semanticIntent = deriveMethodIntentFromStep(step);
@@ -169,6 +210,11 @@ export function generatePOMSpecFromPlan(
     lines.push(...instantiationLines.map((l) => `  ${l}`));
   }
 
+  if (preambleLines.length > 0) {
+    lines.push("");
+    lines.push(...preambleLines.map((l) => `  ${l}`));
+  }
+
   if (missingMethods.length > 0 && policy.requirePageObjects) {
     lines.push(`  // WARNING: Missing page object methods:`);
     for (const mm of missingMethods) {
@@ -211,7 +257,8 @@ export function generatePOMSpecFromPlan(
     usedPageObjects,
     missingPageObjects,
     missingMethods,
-    generatedCandidates
+    generatedCandidates,
+    usedAuthFlow
   };
 }
 

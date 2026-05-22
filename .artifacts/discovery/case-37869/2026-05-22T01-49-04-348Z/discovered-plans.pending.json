@@ -1,0 +1,79 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37869",
+    "caseId": 37869,
+    "title": "Generar carta de referencia con cuenta de ahorro"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "clic en iniciarclic en transacciones y servicioclic en Cédula de identidad dominicanaclic en continuar  Acceder al módulo \"Generar cartas\".Seleccionar \"Carta de referencia\".Seleccionar el producto \"cuenta de ahorros\".clic en continuarSeleccionar \"A quien pueda interesar\".clic en continuar",
+      "target": {
+        "strategy": "text",
+        "value": "iniciar",
+        "exact": false
+      }
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "clic en iniciarclic en transacciones y servicioclic en Cédula de identidad dominicanaclic en continuar  Acceder al módulo \"Generar cartas\".Seleccionar \"Carta de referencia\".Seleccionar el producto \"cuenta de ahorros\".clic en continuarSeleccionar \"A quien pueda interesar\".clic en continuar",
+      "target": {
+        "strategy": "text",
+        "value": "transacciones y servicio",
+        "exact": false
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "AuthFlow handled: Cédula de identidad dominicana",
+      "target": {
+        "strategy": "text",
+        "value": "Cédula de identidad dominicana",
+        "exact": false
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "AuthFlow handled: continuar",
+      "target": {
+        "strategy": "text",
+        "value": "continuar",
+        "exact": false
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "clic en iniciarclic en transacciones y servicioclic en Cédula de identidad dominicanaclic en continuar  Acceder al módulo \"Generar cartas\".Seleccionar \"Carta de referencia\".Seleccionar el producto \"cuenta de ahorros\".clic en continuarSeleccionar \"A quien pueda interesar\".clic en continuar",
+      "target": {
+        "strategy": "text",
+        "value": "Generar cartas",
+        "exact": false
+      }
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-05-22T01:49:41.997Z"
+}

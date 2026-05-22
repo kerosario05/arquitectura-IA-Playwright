@@ -34,7 +34,20 @@ import type {
 import type { TestScenario, TestScenarioStep } from "../types/testrail.types";
 import type { ExecutionPlan, ExecutionPlanStep } from "../types/execution-plan.types";
 import type { PageSnapshot } from "../types/page-snapshot.types";
-import type { TestDataMap, TestDataValue } from "../types/env.types";
+import type { TestDataMap, TestDataValue, MissingInputBehavior } from "../types/env.types";
+import { detectAuthGate, type AuthGateDetection } from "./auth-gate-detector";
+import { resolveAuthInputs, validateRequiredInputs, logAuthResolution, type AuthInputResolverConfig } from "./auth-input-resolver";
+import {
+  createAuthGateState,
+  shouldSkipStepAsAuthConsumed,
+  markFunctionalStepAfterAuth,
+  type AuthGateState
+} from "./auth-step-classifier";
+import { waitForStablePageState, type PageStabilityOptions } from "./page-stability-detector";
+import { parseProductConditionTarget, matchesProductCondition, type ProductCondition } from "./product-condition-parser";
+import { detectTransientScreen } from "./transient-screen-detector";
+import { evaluateEarlyCompletionPolicy, type EarlyCompletionPolicyResult } from "./early-completion-policy";
+import { detectSelectionSuccess, isSelectionLikeTarget, isSubmitLikeTarget, promoteToClickableAncestor, type SelectionDiagnostics } from "./selection-state-detector";
 
 function normalizeText(text: string): string {
   return text
@@ -410,6 +423,8 @@ export type CaseDiscoveryOptions = {
     explorer?: AIExplorer;
     config?: Partial<AiAssistedDiscoveryConfig>;
   };
+  env?: Record<string, unknown>;
+  missingInputBehavior?: MissingInputBehavior;
 };
 
 const DEFAULT_AI_ASSISTED_DISCOVERY_CONFIG: AiAssistedDiscoveryConfig = {
@@ -476,6 +491,126 @@ function buildFailureResult(
   };
 }
 
+async function tryAuthGateRecovery(
+  page: Page,
+  snapshot: PageSnapshot,
+  options: CaseDiscoveryOptions
+): Promise<{ recovered: boolean; error?: string; diagnostics?: any; authGateState?: AuthGateState }> {
+  const { env, missingInputBehavior = "fail" } = options;
+
+  if (!env) {
+    return { recovered: false, error: "No env data provided for auth resolution" };
+  }
+
+  const detection = detectAuthGate(snapshot);
+
+  if (!detection.detected) {
+    return { recovered: false };
+  }
+
+  console.log(`[auth-gate] Detected auth gate: ${detection.gateType} at stage: ${detection.stage} (confidence: ${detection.confidence})`);
+  console.log(`[auth-gate] Evidence: ${detection.evidence.join(", ")}`);
+  console.log(`[auth-gate] Required inputs: ${detection.requiredInputs.join(", ")}`);
+  console.log(`[auth-gate] Virtual keyboard: ${detection.hasVirtualKeyboard}, Native input: ${detection.hasNativeInput}`);
+
+  const resolverConfig: AuthInputResolverConfig = {
+    env,
+    missingInputBehavior,
+    alias: "defaultClient"
+  };
+
+  const resolution = resolveAuthInputs(resolverConfig);
+  logAuthResolution(resolution);
+
+  const validation = validateRequiredInputs(resolution, detection.requiredInputs, missingInputBehavior);
+
+  if (!validation.valid) {
+    console.log(`[auth-gate] Auth input resolution failed: ${validation.errors.join("; ")}`);
+    return { recovered: false, error: validation.errors.join("; ") };
+  }
+
+  const inputMethod = detection.hasVirtualKeyboard ? "virtual_keyboard" : "native_input";
+  const maskedInputs: Record<string, string> = {};
+  if (resolution.data.identificationNumber) {
+    maskedInputs.identificationNumber = maskValue(resolution.data.identificationNumber);
+  }
+  if (resolution.data.otp) {
+    maskedInputs.otp = "******";
+  }
+
+  const inputSource = resolution.sources.identificationNumber || resolution.sources.otp || "unknown";
+
+  console.log(`[auth-gate] Attempting to resolve auth flow...`);
+
+  try {
+    const { AuthFlow } = await import("../../automations/apps/default/flows/auth.flow");
+
+    const globalThisWithTestData = globalThis as typeof globalThis & {
+      __authFlowTestData?: Record<string, unknown>;
+    };
+
+    const testDataJson = env.APP_TEST_DATA_JSON;
+    const hasTestDataClients = testDataJson && typeof testDataJson === "object" && (testDataJson as any).clients && Object.keys((testDataJson as any).clients).length > 0;
+
+    if (hasTestDataClients) {
+      globalThisWithTestData.__authFlowTestData = testDataJson as Record<string, unknown>;
+    } else {
+      globalThisWithTestData.__authFlowTestData = {
+        clients: {
+          defaultClient: {
+            identificationType: resolution.data.identificationType || "cedula",
+            identificationNumber: resolution.data.identificationNumber || "",
+            otp: resolution.data.otp || "",
+            expectedPhoneLast4: resolution.data.expectedPhoneLast4
+          }
+        },
+        defaults: { client: "defaultClient" }
+      };
+    }
+
+    const authFlow = new AuthFlow(page);
+    const result = await authFlow.ensureAuthenticated({
+      alias: "defaultClient",
+      landing: "transactions_menu"
+    });
+
+    if (result.success) {
+      console.log(`[auth-gate] Auth flow completed successfully. Stages: ${result.stagesCompleted.join(", ")}`);
+      const authGateState = createAuthGateState(
+        "transacciones y servicio",
+        0,
+        result.stagesCompleted
+      );
+      return {
+        recovered: true,
+        diagnostics: {
+          detected: true,
+          stage: detection.stage,
+          requiredInputs: detection.requiredInputs,
+          inputSource,
+          completedBy: "AuthFlowRunner",
+          inputMethod,
+          maskedInputs
+        },
+        authGateState
+      };
+    } else {
+      console.log(`[auth-gate] Auth flow failed: ${result.error}`);
+      return { recovered: false, error: result.error };
+    }
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.log(`[auth-gate] Auth flow failed: ${errorMsg}`);
+    return { recovered: false, error: errorMsg };
+  }
+}
+
+function maskValue(value: string | undefined, visibleChars = 4): string {
+  if (!value) return "";
+  if (value.length <= visibleChars) return "****";
+  return "*".repeat(value.length - visibleChars) + value.slice(-visibleChars);
+}
+
 export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<CaseDiscoveryResult> {
   const { page, scenario, evidenceDir, pendingObjectsPath, pendingPlansPath, appBaseUrl, testData, loginAction } = options;
   const aiConfig: AiAssistedDiscoveryConfig = {
@@ -487,10 +622,14 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   const steps: DiscoveryStepResult[] = [];
   const allDiscoveredObjects: DiscoveredObject[] = [];
   const planSteps: ExecutionPlanStep[] = [];
+  const executedStepIndices = new Set<number>();
+  const executedActionOrders = new Set<number>();
+  const skippedActionOrders = new Set<number>();
   let failedAtStep: number | undefined;
   let failedTarget: string | undefined;
   let failedReason: string | undefined;
   let earlyCompletionSatisfied = false;
+  let authGateState: AuthGateState | undefined;
 
   await mkdir(evidenceDir, { recursive: true });
 
@@ -516,6 +655,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   allDiscoveredObjects.push(...initialScan.objects);
 
   const parsed = parseScenarioStepsForDiscovery(scenario);
+  const actionOrderIndexByTarget = new WeakMap<ActionTargetItem, number>();
+  parsed.actionTargets.forEach((target, order) => {
+    actionOrderIndexByTarget.set(target, order);
+  });
   console.log(`[discovery:case] Parsed action targets: ${parsed.actionTargets.map((t) => t.target).join(", ")}`);
   console.log(`[discovery:case] Parsed assertion targets: ${parsed.assertionTargets.map((t) => t.target).join(", ")}`);
 
@@ -585,6 +728,74 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   orderedItems.sort((a, b) => a.index - b.index || 0);
 
   let currentSnapshot = initialScan.snapshot;
+  const evaluateAndApplyEarlyCompletionAfterAction = (
+    currentIndex: number,
+    currentTarget: string,
+    currentActionOrder?: number
+  ): boolean => {
+    const remainingActionTargets = typeof currentActionOrder === "number"
+      ? parsed.actionTargets.filter((a) => {
+          const order = actionOrderIndexByTarget.get(a);
+          return typeof order === "number" && order > currentActionOrder;
+        })
+      : parsed.actionTargets.filter(a => a.index > currentIndex);
+    const policyPendingActions = remainingActionTargets.map((a) => ({
+      ...a,
+      index: (() => {
+        const order = actionOrderIndexByTarget.get(a);
+        return typeof order === "number" ? order : a.index;
+      })()
+    }));
+    const earlyCompletion = evaluateEarlyCompletion(currentSnapshot, parsed.assertionTargets, remainingActionTargets);
+    const earlyCompletionPolicy = evaluateEarlyCompletionPolicy({
+      pendingActions: policyPendingActions,
+      executedStepIndices: executedActionOrders,
+      authGateState,
+      skippedSteps: Array.from(skippedActionOrders).map((order) => ({
+        targetText: "",
+        status: "skipped" as const,
+        recoveredBy: "auth_flow",
+        index: order
+      })),
+      satisfiedAssertions: earlyCompletion.satisfiedAssertions,
+      pendingAssertions: earlyCompletion.pendingAssertions
+    });
+
+    const policyDiag = earlyCompletionPolicy.diagnostics;
+    console.log(
+      `[discovery:case] Early completion evaluation: currentTarget="${currentTarget}", currentIndex=${currentIndex}, executedStepIndices=[${Array.from(executedStepIndices).sort((a, b) => a - b).join(", ")}], pendingActions=[${remainingActionTargets.map(a => `${a.index}:${a.target}`).join(" | ")}], authConsumed=[${policyDiag.classifications.authConsumed.map(t => `"${t}"`).join(", ")}], optional=[${policyDiag.classifications.optional.map(t => `"${t}"`).join(", ")}], duplicateAlreadyExecuted=[${policyDiag.classifications.duplicateAlreadyExecuted.map(t => `"${t}"`).join(", ")}], functionalRequired=[${policyDiag.classifications.functionalRequired.map(t => `"${t}"`).join(", ")}].`
+    );
+
+    if (earlyCompletion.satisfied && earlyCompletionPolicy.allowed) {
+      earlyCompletionSatisfied = true;
+      console.log(`[discovery:case] Early completion allowed: ${earlyCompletionPolicy.reason}. Skipping remaining actions.`);
+      for (const rem of remainingActionTargets) {
+        steps.push({
+          index: rem.index,
+          action: rem.action,
+          status: "skipped_after_completion",
+          targetText: rem.target,
+          error: "Skipped due to early completion validation passing.",
+          earlyCompletionPolicyDiagnostics: policyDiag
+        } as any);
+      }
+      return true;
+    }
+
+    if (earlyCompletion.satisfied && !earlyCompletionPolicy.allowed) {
+      console.log(
+        `[discovery:case] Early completion blocked: ${earlyCompletionPolicy.reason}. Pending functional actions: ${earlyCompletionPolicy.pendingFunctionalTargets.join(", ")}`
+      );
+    }
+
+    if (!earlyCompletion.satisfied && earlyCompletion.pendingAssertions.length > 0) {
+      console.log(
+        `[discovery:case] Early completion not satisfied at step ${currentIndex}. Pending: [${earlyCompletion.pendingAssertions.map(a => `"${a}"`).join(", ")}]. Satisfied: [${earlyCompletion.satisfiedAssertions.map(a => `"${a}"`).join(", ")}].`
+      );
+    }
+
+    return false;
+  };
 
   // --- Execute setup_authentication (login) intents ---
   for (const si of parsed.setupIntents) {
@@ -819,6 +1030,71 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   }
 
   for (const orderedItem of orderedItems) {
+    const currentActionOrder = orderedItem.type === "action" && orderedItem.actionTarget
+      ? actionOrderIndexByTarget.get(orderedItem.actionTarget)
+      : undefined;
+
+    if (!authGateState) {
+      const proactiveAuthCheck = await tryAuthGateRecovery(page, currentSnapshot, options);
+      if (proactiveAuthCheck.recovered) {
+        console.log(`[discovery:case] Proactive auth gate recovery completed before step: ${orderedItem.type}`);
+        authGateState = proactiveAuthCheck.authGateState;
+        console.log(`[discovery:case] Waiting for stable page after AuthFlow...`);
+        const stabilityResult = await waitForStablePageState(page, {
+          timeoutMs: 20000,
+          pollMs: 500,
+          stableForMs: 1000,
+          expectedLandingHints: [
+            "transacciones y servicios",
+            "transacciones y services",
+            "selecciona la operación",
+            "selecciona la operacion",
+            "generar cartas"
+          ]
+        });
+        console.log(`[discovery:case] Page stability: waited=${stabilityResult.waited}, reason=${stabilityResult.reason}, duration=${stabilityResult.durationMs}ms, url=${stabilityResult.finalUrl}`);
+        const scan = await scanAndCollectObjects(page, orderedItem.index, evidenceDir);
+        currentSnapshot = scan.snapshot;
+        allDiscoveredObjects.push(...scan.objects);
+      }
+    }
+
+    const currentActionTarget = orderedItem.actionTarget;
+    if (currentActionTarget && authGateState && shouldSkipStepAsAuthConsumed(currentActionTarget.target, authGateState)) {
+      console.log(`[discovery:case] Skipping auth-consumed step: ${currentActionTarget.target}`);
+      authGateState.skippedAuthSteps.push({
+        target: currentActionTarget.target,
+        reason: "consumed_by_auth_flow"
+      });
+      steps.push({
+        index: currentActionTarget.index,
+        action: currentActionTarget.action,
+        status: "skipped",
+        targetText: currentActionTarget.target,
+        error: `Step consumed by AuthFlow authentication.`,
+        recoveryStatus: "recovered",
+        recoveredBy: "auth_flow",
+        authGateDiagnostics: {
+          detected: true,
+          detectedBeforeStep: currentActionTarget.target,
+          stage: authGateState.stagesCompleted[0],
+          requiredInputs: authGateState.consumedAuthTargets,
+          completedBy: "AuthFlowRunner",
+          maskedInputs: {}
+        }
+      } as any);
+      if (typeof currentActionOrder === "number") {
+        skippedActionOrders.add(currentActionOrder);
+      }
+      planSteps.push({
+        index: planSteps.length + 1,
+        action: "click",
+        description: `AuthFlow handled: ${currentActionTarget.target}`,
+        target: { strategy: "text", value: currentActionTarget.target, exact: false }
+      });
+      continue;
+    }
+
     if (orderedItem.type === "assertion") {
       const es = orderedItem.executableStep!;
       if (es.isOptional) {
@@ -896,16 +1172,105 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
     if (orderedItem.type === "nav_segment") {
       const nav = orderedItem.navTarget!;
+      if (authGateState && shouldSkipStepAsAuthConsumed(nav.target, authGateState)) {
+        console.log(`[discovery:case] Skipping auth-consumed nav segment: ${nav.target}`);
+        authGateState.skippedAuthSteps.push({
+          target: nav.target,
+          reason: "consumed_by_auth_flow"
+        });
+        steps.push({
+          index: orderedItem.index,
+          action: nav.action,
+          status: "skipped",
+          targetText: nav.target,
+          error: `Nav segment consumed by AuthFlow authentication.`,
+          recoveryStatus: "recovered",
+          recoveredBy: "auth_flow",
+          authGateDiagnostics: {
+            detected: true,
+            detectedBeforeStep: nav.target,
+            stage: authGateState.stagesCompleted[0],
+            requiredInputs: authGateState.consumedAuthTargets,
+            completedBy: "AuthFlowRunner",
+            maskedInputs: {}
+          }
+        } as any);
+        planSteps.push({
+          index: planSteps.length + 1,
+          action: "click",
+          description: `AuthFlow handled: ${nav.target}`,
+          target: { strategy: "text", value: nav.target, exact: false }
+        });
+        continue;
+      }
       console.log(`[discovery:case] Resolving nav segment: ${nav.target}`);
+      const navStability = await waitForStablePageState(page, { timeoutMs: 10000, pollMs: 500, stableForMs: 800 });
+      if (navStability.waited) {
+        console.log(`[discovery:case] Page stability wait before nav: reason=${navStability.reason}, duration=${navStability.durationMs}ms`);
+        const scan = await scanAndCollectObjects(page, orderedItem.index, evidenceDir);
+        currentSnapshot = scan.snapshot;
+      }
       const resolution = await resolveActionTarget(page, currentSnapshot, nav.target);
       if (resolution.status !== "resolved" || !resolution.locator) {
         console.log(`[discovery:case] Nav segment not found: ${nav.target}`);
+
+        const scan = await scanAndCollectObjects(page, orderedItem.index, evidenceDir);
+        currentSnapshot = scan.snapshot;
+
+        const authRecovery = await tryAuthGateRecovery(page, currentSnapshot, options);
+        if (authRecovery.recovered) {
+          console.log(`[discovery:case] Auth gate recovery successful, retrying nav segment...`);
+          if (authRecovery.authGateState) {
+            authGateState = authRecovery.authGateState;
+          }
+          await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+          const retryScan = await scanAndCollectObjects(page, orderedItem.index, evidenceDir);
+          currentSnapshot = retryScan.snapshot;
+          allDiscoveredObjects.push(...retryScan.objects);
+
+          const retryResolution = await resolveActionTarget(page, currentSnapshot, nav.target);
+          if (retryResolution.status === "resolved" && retryResolution.locator) {
+            await clickResolvedTarget(retryResolution.locator, false);
+            await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+            const postClickScan = await scanAndCollectObjects(page, orderedItem.index, evidenceDir);
+            currentSnapshot = postClickScan.snapshot;
+            allDiscoveredObjects.push(...postClickScan.objects);
+
+            if (authGateState?.completed) {
+              markFunctionalStepAfterAuth(nav.target, authGateState);
+            }
+
+            executedStepIndices.add(orderedItem.index);
+
+            steps.push({
+              index: orderedItem.index,
+              action: nav.action,
+              status: "found",
+              targetText: nav.target,
+              snapshotUrl: postClickScan.url,
+              snapshotTitle: postClickScan.title,
+              elementsFound: postClickScan.elementsCount,
+              evidencePath: path.join(evidenceDir, `step-${orderedItem.index}-snapshot.json`)
+            });
+
+            planSteps.push({
+              index: planSteps.length + 1,
+              action: "click",
+              description: nav.action,
+              target: { strategy: "text", value: nav.target, exact: false }
+            });
+            continue;
+          }
+        }
+
         steps.push({
           index: orderedItem.index,
           action: nav.action,
           status: "not_found",
           targetText: nav.target,
-          error: `Nav segment target "${nav.target}" not found`
+          error: authRecovery.error
+            ? `Nav segment target "${nav.target}" not found. Auth gate recovery attempted but failed: ${authRecovery.error}`
+            : `Nav segment target "${nav.target}" not found`
         });
         failedAtStep = orderedItem.index;
         failedTarget = nav.target;
@@ -930,6 +1295,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       const scan = await scanAndCollectObjects(page, orderedItem.index, evidenceDir);
       currentSnapshot = scan.snapshot;
       allDiscoveredObjects.push(...scan.objects);
+
+      if (authGateState?.completed) {
+        markFunctionalStepAfterAuth(nav.target, authGateState);
+      }
+
+      executedStepIndices.add(orderedItem.index);
 
       steps.push({
         index: orderedItem.index,
@@ -996,6 +1367,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       const rawValue = testDataMap[actionTarget.valueKey] as TestDataValue;
       const fillValue = String(rawValue);
 
+      const fillStability = await waitForStablePageState(page, { timeoutMs: 10000, pollMs: 500, stableForMs: 800 });
+      if (fillStability.waited) {
+        console.log(`[discovery:case] Page stability wait before fill: reason=${fillStability.reason}, duration=${fillStability.durationMs}ms`);
+        const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+        currentSnapshot = scan.snapshot;
+      }
+
       const resolution = await resolveFillTarget(page, currentSnapshot, actionTarget.target);
 
       if (resolution.status === "not_found") {
@@ -1014,7 +1392,86 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
 
-        const errorMsg = `Fill target "${actionTarget.target}" not found on current page. ${resolution.editableCandidatesCount} editable candidates evaluated.`;
+        const authRecovery = await tryAuthGateRecovery(page, currentSnapshot, options);
+        if (authRecovery.recovered) {
+          console.log(`[discovery:case] Auth gate recovery successful, retrying fill target...`);
+          if (authRecovery.authGateState) {
+            authGateState = authRecovery.authGateState;
+          }
+          await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+          const retryScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+          currentSnapshot = retryScan.snapshot;
+          allDiscoveredObjects.push(...retryScan.objects);
+
+          const retryResolution = await resolveFillTarget(page, currentSnapshot, actionTarget.target);
+          if (retryResolution.status === "resolved" && retryResolution.locator) {
+            console.log(`[discovery:case] Filling target after auth recovery: ${actionTarget.target}`);
+            try {
+              await retryResolution.locator.fill(fillValue);
+            } catch (err) {
+              const errorMsg = `Fill failed after auth recovery: ${err instanceof Error ? err.message : String(err)}`;
+              steps.push({
+                index: actionTarget.index,
+                action: actionTarget.action,
+                status: "not_found",
+                targetText: actionTarget.target,
+                snapshotUrl: retryScan.url,
+                snapshotTitle: retryScan.title,
+                elementsFound: retryScan.elementsCount,
+                error: errorMsg,
+                evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`)
+              });
+              failedAtStep = actionTarget.index;
+              failedTarget = actionTarget.target;
+              failedReason = "fill_failed";
+              await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
+              await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
+                scenario, steps, allDiscoveredObjects, planSteps,
+                pendingObjectsPath, pendingPlansPath, evidenceDir,
+                failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+              ).candidatePlan ?? {}, null, 2), "utf-8");
+              return buildFailureResult(
+                scenario, steps, allDiscoveredObjects, planSteps,
+                pendingObjectsPath, pendingPlansPath, evidenceDir,
+                failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+              );
+            }
+
+            const postFillScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+            currentSnapshot = postFillScan.snapshot;
+            allDiscoveredObjects.push(...postFillScan.objects);
+
+            if (authGateState?.completed) {
+              markFunctionalStepAfterAuth(actionTarget.target, authGateState);
+            }
+
+            executedStepIndices.add(actionTarget.index);
+
+            steps.push({
+              index: actionTarget.index,
+              action: actionTarget.action,
+              status: "found",
+              targetText: actionTarget.target,
+              snapshotUrl: postFillScan.url,
+              snapshotTitle: postFillScan.title,
+              elementsFound: postFillScan.elementsCount,
+              evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+              semanticRole: actionTarget.semanticRole,
+              relationContext: actionTarget.relationContext
+            });
+
+            planSteps.push({
+              index: planSteps.length + 1,
+              action: "fill",
+              description: actionTarget.action,
+              target: { strategy: "text", value: actionTarget.target, exact: false }
+            });
+            continue;
+          }
+        }
+
+        const editableCandidatesCount = (resolution as any).editableCandidatesCount ?? 0;
+        const errorMsg = `Fill target "${actionTarget.target}" not found on current page. ${editableCandidatesCount} editable candidates evaluated.`;
 
         steps.push({
           index: actionTarget.index,
@@ -1050,10 +1507,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
 
-        const nonEditable = resolution.nonEditableMatch;
+        const nonEditable = (resolution as any).nonEditableMatch;
         const errorMsg = nonEditable
-          ? `Fill target "${actionTarget.target}" matched non-editable element <${nonEditable.tag}>: "${nonEditable.text}". ${resolution.editableCandidatesCount} editable candidates evaluated.`
-          : `Fill target "${actionTarget.target}" matched non-editable element. ${resolution.editableCandidatesCount} editable candidates evaluated.`;
+          ? `Fill target "${actionTarget.target}" matched non-editable element <${nonEditable.tag}>: "${nonEditable.text}". ${(resolution as any).editableCandidatesCount ?? 0} editable candidates evaluated.`
+          : `Fill target "${actionTarget.target}" matched non-editable element. ${(resolution as any).editableCandidatesCount ?? 0} editable candidates evaluated.`;
 
         steps.push({
           index: actionTarget.index,
@@ -1065,7 +1522,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           elementsFound: scan.elementsCount,
           error: errorMsg,
           evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
-          attemptedLocators: resolution.attemptedLocators,
+          attemptedLocators: (resolution as any).attemptedLocators,
           matchedText: nonEditable?.text
         });
 
@@ -1129,6 +1586,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       currentSnapshot = scan.snapshot;
       allDiscoveredObjects.push(...scan.objects);
 
+      if (authGateState?.completed) {
+        markFunctionalStepAfterAuth(actionTarget.target, authGateState);
+      }
+
+      executedStepIndices.add(actionTarget.index);
+
       steps.push({
         index: actionTarget.index,
         action: actionTarget.action,
@@ -1156,6 +1619,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       console.log(`[discovery:case] Resolving fill target: ${actionTarget.target}`);
       console.log(`[discovery:case] Using literal value: ${actionTarget.value}`);
 
+      const fillStability2 = await waitForStablePageState(page, { timeoutMs: 10000, pollMs: 500, stableForMs: 800 });
+      if (fillStability2.waited) {
+        console.log(`[discovery:case] Page stability wait before fill: reason=${fillStability2.reason}, duration=${fillStability2.durationMs}ms`);
+        const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+        currentSnapshot = scan.snapshot;
+      }
+
       const resolution = await resolveFillTarget(page, currentSnapshot, actionTarget.target);
 
       if (resolution.status === "not_found") {
@@ -1174,7 +1644,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
 
-        const errorMsg = `Fill target "${actionTarget.target}" not found on current page. ${resolution.editableCandidatesCount} editable candidates evaluated.`;
+        const errorMsg = `Fill target "${actionTarget.target}" not found on current page. ${(resolution as any).editableCandidatesCount ?? 0} editable candidates evaluated.`;
 
         steps.push({
           index: actionTarget.index,
@@ -1210,10 +1680,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
 
-        const nonEditable = resolution.nonEditableMatch;
+        const nonEditable = (resolution as any).nonEditableMatch;
         const errorMsg = nonEditable
-          ? `Fill target "${actionTarget.target}" matched non-editable element <${nonEditable.tag}>: "${nonEditable.text}". ${resolution.editableCandidatesCount} editable candidates evaluated.`
-          : `Fill target "${actionTarget.target}" matched non-editable element. ${resolution.editableCandidatesCount} editable candidates evaluated.`;
+          ? `Fill target "${actionTarget.target}" matched non-editable element <${nonEditable.tag}>: "${nonEditable.text}". ${(resolution as any).editableCandidatesCount ?? 0} editable candidates evaluated.`
+          : `Fill target "${actionTarget.target}" matched non-editable element. ${(resolution as any).editableCandidatesCount ?? 0} editable candidates evaluated.`;
 
         steps.push({
           index: actionTarget.index,
@@ -1225,7 +1695,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           elementsFound: scan.elementsCount,
           error: errorMsg,
           evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
-          attemptedLocators: resolution.attemptedLocators,
+          attemptedLocators: (resolution as any).attemptedLocators,
           matchedText: nonEditable?.text
         });
 
@@ -1288,6 +1758,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
       currentSnapshot = scan.snapshot;
       allDiscoveredObjects.push(...scan.objects);
+
+      if (authGateState?.completed) {
+        markFunctionalStepAfterAuth(actionTarget.target, authGateState);
+      }
+
+      executedStepIndices.add(actionTarget.index);
 
       steps.push({
         index: actionTarget.index,
@@ -1417,52 +1893,48 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
     console.log(`[discovery:case] Resolving target: ${actionTarget.target}`);
 
+    const stabilityResult = await waitForStablePageState(page, {
+      timeoutMs: 10000,
+      pollMs: 500,
+      stableForMs: 800
+    });
+    if (stabilityResult.waited) {
+      console.log(`[discovery:case] Page stability wait: reason=${stabilityResult.reason}, duration=${stabilityResult.durationMs}ms`);
+      const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+      currentSnapshot = scan.snapshot;
+    }
+
     const resolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target, {
       semanticRole: actionTarget.semanticRole,
       relationContext: actionTarget.relationContext
     });
 
-    if (resolution.status === "resolved" && resolution.confidence >= aiConfig.confidenceThreshold && resolution.locator) {
+    let finalLocator = resolution.locator;
+    let promotedToAncestor = false;
+
+    if (resolution.locator && isSelectionLikeTarget(actionTarget.target, { action: actionTarget.action, actionType: actionTarget.actionType, snapshot: currentSnapshot })) {
+      console.log(`[discovery:case] Selection-like target detected: action=${actionTarget.action} target="${actionTarget.target}"`);
+      const promotion = await promoteToClickableAncestor(resolution.locator);
+      if (promotion.promoted) {
+        console.log(`[discovery:case] Promoted locator to clickable ancestor: ${promotion.fromTag} -> ${promotion.toTag}`);
+        finalLocator = promotion.locator;
+        promotedToAncestor = true;
+      } else {
+        console.log(`[discovery:case] No clickable ancestor found for selection-like target: ${actionTarget.target}`);
+      }
+    }
+
+    if (resolution.status === "resolved" && resolution.confidence >= aiConfig.confidenceThreshold && finalLocator) {
       console.log(`[discovery:case] Deterministic target resolved: ${actionTarget.target} (confidence: ${resolution.confidence.toFixed(2)})`);
     }
 
-    const remainingActionTargets = parsed.actionTargets.filter(a => a.index >= actionTarget.index);
     const needsEarlyCompletionCheck =
       resolution.status === "not_found" ||
       resolution.status === "ambiguous" ||
       resolution.status === "locator_resolution_failed" ||
       resolution.confidence < aiConfig.confidenceThreshold;
 
-    const earlyCompletion = evaluateEarlyCompletion(currentSnapshot, parsed.assertionTargets, remainingActionTargets);
-
-    if (earlyCompletion.satisfied) {
-      earlyCompletionSatisfied = true;
-      console.log(`[discovery:case] Early completion satisfied at step ${actionTarget.index}. Skipping remaining actions.`);
-      for (const rem of remainingActionTargets) {
-        if (rem.index === actionTarget.index) {
-          steps.push({
-            index: rem.index,
-            action: rem.action,
-            status: "skipped_after_completion",
-            targetText: rem.target,
-            earlyCompletionDiagnostics: earlyCompletion,
-            semanticRole: rem.semanticRole,
-            relationContext: rem.relationContext,
-            error: "Action skipped because early completion validated final assertions."
-          });
-        } else {
-          steps.push({
-            index: rem.index,
-            action: rem.action,
-            status: "skipped_after_completion",
-            targetText: rem.target,
-            error: "Skipped due to early completion validation passing."
-          });
-        }
-      }
-      break;
-    }
-
+    const earlyCompletion = evaluateEarlyCompletion(currentSnapshot, parsed.assertionTargets, parsed.actionTargets.filter(a => a.index > actionTarget.index));
     if (needsEarlyCompletionCheck && earlyCompletion.pendingAssertions.length > 0) {
       console.log(`[discovery:case] Early completion not satisfied at step ${actionTarget.index}. Pending: [${earlyCompletion.pendingAssertions.map(a => `"${a}"`).join(", ")}]. Satisfied: [${earlyCompletion.satisfiedAssertions.map(a => `"${a}"`).join(", ")}].`);
     }
@@ -1605,6 +2077,17 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           target: { strategy: "text", value: actionTarget.target, exact: false }
         });
 
+        if (authGateState?.completed) {
+          markFunctionalStepAfterAuth(actionTarget.target, authGateState);
+        }
+        executedStepIndices.add(actionTarget.index);
+        if (typeof currentActionOrder === "number") {
+          executedActionOrders.add(currentActionOrder);
+        }
+        if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
+          break;
+        }
+
         continue;
       }
 
@@ -1648,10 +2131,67 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
 
+        const authRecovery = await tryAuthGateRecovery(page, currentSnapshot, options);
+        if (authRecovery.recovered) {
+          console.log(`[discovery:case] Auth gate recovery successful, retrying click target...`);
+          if (authRecovery.authGateState) {
+            authGateState = authRecovery.authGateState;
+          }
+          await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+          const retryScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+          currentSnapshot = retryScan.snapshot;
+          allDiscoveredObjects.push(...retryScan.objects);
+
+          const retryResolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target);
+          if (retryResolution.status === "resolved" && retryResolution.locator) {
+            await clickResolvedTarget(retryResolution.locator, false);
+            await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+            const postClickScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+            currentSnapshot = postClickScan.snapshot;
+            allDiscoveredObjects.push(...postClickScan.objects);
+
+            if (authGateState?.completed) {
+              markFunctionalStepAfterAuth(actionTarget.target, authGateState);
+            }
+
+            executedStepIndices.add(actionTarget.index);
+            if (typeof currentActionOrder === "number") {
+              executedActionOrders.add(currentActionOrder);
+            }
+
+            steps.push({
+              index: actionTarget.index,
+              action: actionTarget.action,
+              status: "found",
+              targetText: actionTarget.target,
+              snapshotUrl: postClickScan.url,
+              snapshotTitle: postClickScan.title,
+              elementsFound: postClickScan.elementsCount,
+              evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+              semanticRole: actionTarget.semanticRole,
+              relationContext: actionTarget.relationContext
+            });
+
+            planSteps.push({
+              index: planSteps.length + 1,
+              action: "click",
+              description: actionTarget.action,
+              target: { strategy: "text", value: actionTarget.target, exact: false }
+            });
+            if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
+              break;
+            }
+            continue;
+          }
+        }
+
         const diagnosis = (resolution as any)._diagnosis;
         let errorMsg = `Target "${actionTarget.target}" not found on current page. ${resolution.candidates?.length ?? 0} candidates evaluated.`;
         if (diagnosis && Array.isArray(diagnosis) && diagnosis.length > 0) {
           errorMsg += " Diagnosis: " + JSON.stringify(diagnosis);
+        }
+        if (authRecovery.error) {
+          errorMsg += ` Auth gate recovery attempted but failed: ${authRecovery.error}`;
         }
 
         steps.push({
@@ -1743,10 +2283,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           snapshotUrl: scan.url,
           snapshotTitle: scan.title,
           elementsFound: scan.elementsCount,
-          error: `Semantic target matched, but DOM locator resolution failed. Attempted locators: ${(resolution.attemptedLocators ?? []).join(" | ")}`,
+          error: `Semantic target matched, but DOM locator resolution failed. Attempted locators: ${((resolution as any).attemptedLocators ?? []).join(" | ")}`,
           evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
           resolutionDiagnosis: (resolution as typeof resolution & { _diagnosis?: unknown[] })._diagnosis,
-          attemptedLocators: resolution.attemptedLocators,
+          attemptedLocators: (resolution as any).attemptedLocators,
           candidateId: resolution.candidateId,
           semanticRole: actionTarget.semanticRole,
           relationContext: actionTarget.relationContext,
@@ -1809,7 +2349,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       }
     }
 
-    if (resolution.status !== "resolved" || !resolution.locator) {
+    if (resolution.status !== "resolved" || !finalLocator) {
       continue;
     }
 
@@ -1818,11 +2358,11 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     const beforeState = await capturePageState(page);
 
     try {
-      await clickResolvedTarget(resolution.locator, false);
+      await clickResolvedTarget(finalLocator, false);
     } catch {
       try {
         console.log(`[discovery:case] Retrying with force click...`);
-        await clickResolvedTarget(resolution.locator, true);
+        await clickResolvedTarget(finalLocator, true);
       } catch (err) {
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
@@ -1870,7 +2410,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     if (!transitionDetected) {
       console.log(`[discovery:case] Retrying with force click...`);
       try {
-        await clickResolvedTarget(resolution.locator, true);
+        await clickResolvedTarget(finalLocator, true);
         await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
 
         const afterRetryState = await capturePageState(page);
@@ -1881,8 +2421,238 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         if (!retryTransition) {
           console.log("[discovery:case] Click did not change page state.");
 
-          const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
-          currentSnapshot = scan.snapshot;
+          // Try JavaScript-native click as last resort before selection evaluation
+          try {
+            console.log("[discovery:case] Trying JavaScript-native click...");
+            await finalLocator.evaluate((el) => {
+              if (el instanceof HTMLElement) {
+                el.click();
+              }
+            });
+            await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+
+            const afterJsClickState = await capturePageState(page);
+            const jsClickTransition = hasPageTransition(beforeState, afterJsClickState, actionTarget.target);
+            console.log(`[discovery:case] Transition after JS click: ${jsClickTransition ? "yes" : "no"}`);
+
+            if (jsClickTransition) {
+              console.log("[discovery:case] JavaScript click succeeded with transition.");
+              const postClickScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+              currentSnapshot = postClickScan.snapshot;
+              allDiscoveredObjects.push(...postClickScan.objects);
+
+              steps.push({
+                index: actionTarget.index,
+                action: actionTarget.action,
+                status: "found",
+                targetText: actionTarget.target,
+                snapshotUrl: postClickScan.url,
+                snapshotTitle: postClickScan.title,
+                elementsFound: postClickScan.elementsCount,
+                evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+                semanticRole: actionTarget.semanticRole,
+                relationContext: actionTarget.relationContext
+              });
+
+              planSteps.push({
+                index: planSteps.length + 1,
+                action: "click",
+                description: actionTarget.action,
+                target: { strategy: "text", value: actionTarget.target, exact: false }
+              });
+              if (typeof currentActionOrder === "number") {
+                executedActionOrders.add(currentActionOrder);
+              }
+              if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
+                break;
+              }
+              continue;
+            }
+          } catch (jsClickErr) {
+            console.log(`[discovery:case] JavaScript click failed: ${jsClickErr instanceof Error ? jsClickErr.message : String(jsClickErr)}`);
+          }
+
+        const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+        currentSnapshot = scan.snapshot;
+
+        const stabilityRetry = await waitForStablePageState(page, { timeoutMs: 15000, pollMs: 500, stableForMs: 1000 });
+        if (stabilityRetry.waited && stabilityRetry.finalStable) {
+          console.log(`[discovery:case] Stability retry after wait: reason=${stabilityRetry.reason}, duration=${stabilityRetry.durationMs}ms`);
+          const retryScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+          currentSnapshot = retryScan.snapshot;
+          allDiscoveredObjects.push(...retryScan.objects);
+
+          const retryResolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target, {
+            semanticRole: actionTarget.semanticRole,
+            relationContext: actionTarget.relationContext
+          });
+          if (retryResolution.status === "resolved" && retryResolution.locator) {
+            console.log(`[discovery:case] Target found after stability retry: ${actionTarget.target}`);
+            await clickResolvedTarget(retryResolution.locator, false);
+            await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+            const afterState = await capturePageState(page);
+            const transitionDetected = hasPageTransition(beforeState, afterState, actionTarget.target);
+
+            const postClickScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+            currentSnapshot = postClickScan.snapshot;
+            allDiscoveredObjects.push(...postClickScan.objects);
+
+            steps.push({
+              index: actionTarget.index,
+              action: actionTarget.action,
+              status: "found",
+              targetText: actionTarget.target,
+              snapshotUrl: postClickScan.url,
+              snapshotTitle: postClickScan.title,
+              elementsFound: postClickScan.elementsCount,
+              evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+              semanticRole: actionTarget.semanticRole,
+              relationContext: actionTarget.relationContext
+            });
+
+            planSteps.push({
+              index: planSteps.length + 1,
+              action: "click",
+              description: actionTarget.action,
+              target: { strategy: "text", value: actionTarget.target, exact: false }
+            });
+            if (typeof currentActionOrder === "number") {
+              executedActionOrders.add(currentActionOrder);
+            }
+            if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
+              break;
+            }
+            continue;
+          }
+        }
+
+        const authRecovery = await tryAuthGateRecovery(page, currentSnapshot, options);
+          if (authRecovery.recovered) {
+            console.log(`[discovery:case] Auth gate recovery after click_no_transition successful, retrying...`);
+            if (authRecovery.authGateState) {
+              authGateState = authRecovery.authGateState;
+            }
+            await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+            const retryScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+            currentSnapshot = retryScan.snapshot;
+            allDiscoveredObjects.push(...retryScan.objects);
+
+            const retryResolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target);
+            if (retryResolution.status === "resolved" && retryResolution.locator) {
+              await clickResolvedTarget(retryResolution.locator, false);
+              await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+              const postClickScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+              currentSnapshot = postClickScan.snapshot;
+              allDiscoveredObjects.push(...postClickScan.objects);
+
+              steps.push({
+                index: actionTarget.index,
+                action: actionTarget.action,
+                status: "found",
+                targetText: actionTarget.target,
+                snapshotUrl: postClickScan.url,
+                snapshotTitle: postClickScan.title,
+                elementsFound: postClickScan.elementsCount,
+                evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+                semanticRole: actionTarget.semanticRole,
+                relationContext: actionTarget.relationContext
+              });
+
+              planSteps.push({
+                index: planSteps.length + 1,
+                action: "click",
+                description: actionTarget.action,
+                target: { strategy: "text", value: actionTarget.target, exact: false }
+              });
+              if (typeof currentActionOrder === "number") {
+                executedActionOrders.add(currentActionOrder);
+              }
+              if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
+                break;
+              }
+              continue;
+            }
+          }
+
+          const selectionDiagnostics = await detectSelectionSuccess({
+            page,
+            snapshot: currentSnapshot,
+            target: actionTarget.target,
+            locator: finalLocator,
+            beforeSnapshot: beforeState as any,
+            afterSnapshot: afterState as any,
+            nextTarget: parsed.actionTargets.find(a => a.index > actionTarget.index)?.target,
+            action: actionTarget.action,
+            actionType: actionTarget.actionType
+          });
+
+          if (promotedToAncestor) {
+            selectionDiagnostics.promotedToClickableAncestor = true;
+          }
+
+          console.log(`[discovery:case] Selection evaluation after no-transition: target="${actionTarget.target}", selectionLike=${selectionDiagnostics.selectionLike}, success=${selectionDiagnostics.success}, reason=${selectionDiagnostics.reason}, evidence=[${selectionDiagnostics.evidence.join(", ")}]`);
+
+          if (selectionDiagnostics.selectionLike && selectionDiagnostics.success) {
+            console.log(`[discovery:case] Selection click accepted without transition: ${actionTarget.target}. Reason: ${selectionDiagnostics.reason}. Evidence: [${selectionDiagnostics.evidence.join(", ")}]`);
+
+            executedStepIndices.add(actionTarget.index);
+            if (typeof currentActionOrder === "number") {
+              executedActionOrders.add(currentActionOrder);
+            }
+
+            steps.push({
+              index: actionTarget.index,
+              action: actionTarget.action,
+              status: "found",
+              targetText: actionTarget.target,
+              snapshotUrl: scan.url,
+              snapshotTitle: scan.title,
+              elementsFound: scan.elementsCount,
+              evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+              semanticRole: actionTarget.semanticRole,
+              relationContext: actionTarget.relationContext,
+              selectionDiagnostics
+            } as any);
+
+            planSteps.push({
+              index: planSteps.length + 1,
+              action: "click",
+              description: actionTarget.action,
+              target: { strategy: "text", value: actionTarget.target, exact: false }
+            });
+            continue;
+          }
+
+          if (selectionDiagnostics.selectionLike && !isSubmitLikeTarget(actionTarget.target, actionTarget.action)) {
+            console.log(`[discovery:case] Selection-like target accepted without clear transition: ${actionTarget.target}. Continuing to next step.`);
+
+            executedStepIndices.add(actionTarget.index);
+            if (typeof currentActionOrder === "number") {
+              executedActionOrders.add(currentActionOrder);
+            }
+
+            steps.push({
+              index: actionTarget.index,
+              action: actionTarget.action,
+              status: "found",
+              targetText: actionTarget.target,
+              snapshotUrl: scan.url,
+              snapshotTitle: scan.title,
+              elementsFound: scan.elementsCount,
+              evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+              semanticRole: actionTarget.semanticRole,
+              relationContext: actionTarget.relationContext,
+              selectionDiagnostics: { ...selectionDiagnostics, noTransitionAccepted: true }
+            } as any);
+
+            planSteps.push({
+              index: planSteps.length + 1,
+              action: "click",
+              description: actionTarget.action,
+              target: { strategy: "text", value: actionTarget.target, exact: false }
+            });
+            continue;
+          }
 
           steps.push({
             index: actionTarget.index,
@@ -1892,9 +2662,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             snapshotUrl: scan.url,
             snapshotTitle: scan.title,
             elementsFound: scan.elementsCount,
-            error: "Click completed but no page transition or DOM change was detected.",
+            error: authRecovery.error
+              ? `Click completed but no page transition. Auth gate recovery attempted but failed: ${authRecovery.error}`
+              : "Click completed but no page transition or DOM change was detected.",
             evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
-            aiDiagnostics: (resolution as any).aiDiagnostics
+            aiDiagnostics: (resolution as any).aiDiagnostics,
+            selectionDiagnostics: selectionDiagnostics.selectionLike ? selectionDiagnostics : undefined
           } as any);
 
           await writeFile(
@@ -1934,6 +2707,35 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     currentSnapshot = scan.snapshot;
     allDiscoveredObjects.push(...scan.objects);
 
+    // Wait for server-side loading states to complete (e.g., "Generando...")
+    if (transitionDetected) {
+      try {
+        const loadingDone = await page.waitForFunction(() => {
+          const bodyText = document.body.textContent || "";
+          const loadingPatterns = ["generando", "cargando", "procesando", "loading", "preparando"];
+          return !loadingPatterns.some(p => bodyText.toLowerCase().includes(p));
+        }, { timeout: 30000 });
+        if (loadingDone) {
+          console.log("[discovery:case] Loading state completed, re-scanning...");
+          await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+          const postLoadScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+          currentSnapshot = postLoadScan.snapshot;
+          allDiscoveredObjects.push(...postLoadScan.objects);
+        }
+      } catch {
+        console.log("[discovery:case] Loading state wait timed out, continuing with current snapshot.");
+      }
+    }
+
+    if (authGateState?.completed) {
+      markFunctionalStepAfterAuth(actionTarget.target, authGateState);
+    }
+
+    executedStepIndices.add(actionTarget.index);
+    if (typeof currentActionOrder === "number") {
+      executedActionOrders.add(currentActionOrder);
+    }
+
     steps.push({
       index: actionTarget.index,
       action: actionTarget.action,
@@ -1953,6 +2755,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       description: actionTarget.action,
       target: { strategy: "text", value: actionTarget.target, exact: false }
     });
+
+    if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
+      break;
+    }
   }
 
   const foundSteps = steps.filter((s) => s.status === "found" || s.status === "satisfied_by_children" || (s.status === "skipped_after_completion" && earlyCompletionSatisfied)).length;

@@ -101,7 +101,63 @@
       "status": "candidate",
       "createdAt": "2026-05-21T16:57:02.422Z",
       "updatedAt": "2026-05-21T16:57:02.422Z"
+    },
+    {
+      "id": "flow_1779414447792_f5u2s9",
+      "name": "Generar carta de referencia con cuenta de ahorro",
+      "filePath": "flows\\generar-carta-de-referencia-con-cuenta-de-ahorro.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "transacciones y servicio",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Cédula de identidad dominicana",
+          "pageObjectId": "LoginPage",
+          "methodName": "clickPrimaryAction"
+        },
+        {
+          "action": "click",
+          "target": "continuar",
+          "pageObjectId": "LoginPage",
+          "methodName": "clickPrimaryAction"
+        },
+        {
+          "action": "click",
+          "target": "Generar cartas",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-22T01:47:27.792Z",
+      "updatedAt": "2026-05-22T01:47:27.792Z"
     }
   ],
-  "updatedAt": "2026-05-21T19:50:08.007Z"
+  "updatedAt": "2026-05-22T01:47:27.798Z"
 }

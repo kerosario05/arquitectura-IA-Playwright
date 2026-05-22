@@ -1,0 +1,29 @@
+{
+  "timestamp": "2026-05-22T04:07:25.276Z",
+  "attemptNumber": 1,
+  "repairStatus": "cli_error",
+  "success": false,
+  "error": "Agent response validation failed: generatedAt is required.; generatedAt must not be empty.",
+  "responsePath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-22T04-05-25-003Z\\handoff-attempt-1\\agent-response.json",
+  "selectedSkill": "navigation-recovery",
+  "diagnostics": {
+    "exitCode": 0,
+    "timedOut": false,
+    "durationMs": 67002,
+    "stdoutLogPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-22T04-05-25-003Z\\handoff-attempt-1\\codex.stdout.log",
+    "stderrLogPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-22T04-05-25-003Z\\handoff-attempt-1\\codex.stderr.log",
+    "promptMode": "compact",
+    "compactPrompt": false,
+    "agentResponseExists": true,
+    "recoveryDecision": "needs_more_context",
+    "rawRecoveryDecision": "needs_more_context",
+    "generatedAtPresent": false,
+    "generatedAtValid": false,
+    "validationErrors": [
+      "RESPONSE_GENERATED_AT_REQUIRED: generatedAt is required.",
+      "GENERATED_AT_EMPTY: generatedAt must not be empty."
+    ],
+    "agentResponseValid": false,
+    "nextAction": "auto_repair_no_plan"
+  }
+}

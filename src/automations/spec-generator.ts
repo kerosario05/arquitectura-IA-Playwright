@@ -27,6 +27,7 @@ export type GenerateSpecOptions = {
   promotionPolicy?: PromotionPolicy;
   inlineDebugMode?: boolean;
   pageObjectRegistry?: PageObjectRegistry;
+  authFlowOptions?: { alias?: string; landing?: string; testDataJson?: string };
 };
 
 export type GenerateSpecResult = {
@@ -36,6 +37,7 @@ export type GenerateSpecResult = {
   missingPageObjects: string[];
   missingMethods: string[];
   generatedCandidates: number;
+  usedAuthFlow?: boolean;
 };
 
 export function generateSpecFromPlan(
@@ -67,7 +69,8 @@ export async function generateSpecFromPlanWithPolicy(
       usedPageObjects: [],
       missingPageObjects: [],
       missingMethods: [],
-      generatedCandidates: 0
+      generatedCandidates: 0,
+      usedAuthFlow: false
     };
   }
 
@@ -95,7 +98,8 @@ export async function generateSpecFromPlanWithPolicy(
     options.appPaths,
     registry,
     policy,
-    inlineDebug
+    inlineDebug,
+    options.authFlowOptions
   );
 
   // If POM spec is sufficient, return it
@@ -106,7 +110,8 @@ export async function generateSpecFromPlanWithPolicy(
       usedPageObjects: pomResult.usedPageObjects,
       missingPageObjects: pomResult.missingPageObjects,
       missingMethods: pomResult.missingMethods,
-      generatedCandidates: pomResult.generatedCandidates
+      generatedCandidates: pomResult.generatedCandidates,
+      usedAuthFlow: pomResult.usedAuthFlow
     };
   }
 
@@ -118,7 +123,8 @@ export async function generateSpecFromPlanWithPolicy(
       usedPageObjects: pomResult.usedPageObjects,
       missingPageObjects: pomResult.missingPageObjects,
       missingMethods: pomResult.missingMethods,
-      generatedCandidates: pomResult.generatedCandidates
+      generatedCandidates: pomResult.generatedCandidates,
+      usedAuthFlow: pomResult.usedAuthFlow
     };
   }
 
@@ -136,7 +142,8 @@ export async function generateSpecFromPlanWithPolicy(
       usedPageObjects: [],
       missingPageObjects: [],
       missingMethods: [],
-      generatedCandidates: 0
+      generatedCandidates: 0,
+      usedAuthFlow: false
     };
   }
 
@@ -146,7 +153,8 @@ export async function generateSpecFromPlanWithPolicy(
     usedPageObjects: pomResult.usedPageObjects,
     missingPageObjects: pomResult.missingPageObjects,
     missingMethods: pomResult.missingMethods,
-    generatedCandidates: pomResult.generatedCandidates
+    generatedCandidates: pomResult.generatedCandidates,
+    usedAuthFlow: pomResult.usedAuthFlow
   };
 }
 

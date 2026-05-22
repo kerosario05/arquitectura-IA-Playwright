@@ -4,6 +4,7 @@ import path from "node:path";
 import { EventEmitter } from "node:events";
 import { __setSpawnForTesting, __getLastRunnerInputForTesting } from "../src/agent/codex-cli-runner";
 import { runAgentAutoRepairAttempt } from "../src/agent/agent-auto-repair";
+import { normalizeAgentHandoffResponse } from "../src/agent/agent-response-validator";
 import type { FullConfig } from "../src/types/env.types";
 
 const tmpDir = path.resolve("./.tmp-test-agent-auto-repair");
@@ -269,4 +270,70 @@ test("no agent-response.json produces no_response status", async () => {
   if (!res.success) {
     expect(["no_response", "cli_error", "no_proposal"]).toContain((res as any).status);
   }
+});
+
+test("runAgentAutoRepairAttempt normalizes bare ExecutionPlan responses before validation", async () => {
+  __setSpawnForTesting(((command: string, args: string[], options: any) => {
+    const child = new EventEmitter() as any;
+    child.stdout = new EventEmitter();
+    child.stderr = new EventEmitter();
+    child.kill = () => { /* noop */ };
+
+    queueMicrotask(async () => {
+      try {
+        const cwd = String(options?.cwd ?? process.cwd());
+        const responsePath = path.join(cwd, "agent-response.json");
+        const barePlan = {
+          version: "1.0",
+          source: "ai_generated",
+          status: "validated",
+          scenario: { source: "testrail", caseId: 1, title: "Recovered scenario" },
+          requiredData: [],
+          steps: [
+            { index: 1, action: "click", target: { strategy: "text", value: "Continue" } }
+          ],
+          createdAt: new Date().toISOString()
+        };
+        await fs.writeFile(responsePath, JSON.stringify(barePlan, null, 2), "utf-8");
+      } catch {
+      }
+      child.emit("close", 0, null);
+    });
+
+    return child;
+  }) as any);
+
+  const outputDir = path.join(tmpDir, "run-normalize-bare-plan");
+  await fs.mkdir(outputDir, { recursive: true });
+
+  const result = await runAgentAutoRepairAttempt({
+    fullConfig: configEnabled(),
+    outputDir,
+    attemptNumber: 1,
+    kind: "plan_repair",
+    failureSummary: "recoverable_failure",
+    failedReason: "target_not_found"
+  });
+
+  if (result.success) {
+    expect(result.repairedPlan.scenario.title).toBe("Recovered scenario");
+    const written = JSON.parse(await fs.readFile(path.join(outputDir, "handoff-attempt-1", "agent-response.json"), "utf-8")) as any;
+    expect(written.recoveryDecision).toBe("repaired_plan");
+    expect(written.plans).toHaveLength(1);
+  } else {
+    expect(["no_response", "invalid_proposal", "cli_error"]).toContain((result as any).status);
+  }
+
+  const normalized = normalizeAgentHandoffResponse({
+    version: "1.0",
+    source: "ai_generated",
+    status: "validated",
+    scenario: { source: "testrail", caseId: 1, title: "Recovered scenario" },
+    requiredData: [],
+    steps: [{ index: 1, action: "click", target: { strategy: "text", value: "Continue" } }],
+    createdAt: new Date().toISOString()
+  }) as any;
+  expect(normalized.recoveryDecision).toBe("repaired_plan");
+  expect(Array.isArray(normalized.plans)).toBe(true);
+  expect(normalized.plans).toHaveLength(1);
 });

@@ -33,7 +33,7 @@ ${request.selectedSkill ? `- Selected Skill: \`${request.selectedSkill.skillId}\
 5. Do not invent data.
 6. Use only available data keys from \`dataContextSummary.availableKeys\` for \`valueKey\`.
 7. Do not write secrets.
-8. Do not generate Playwright code; write an AgentHandoffResponse JSON object, include \`recoveryDecision\`, and put repaired plans in the top-level \`plans\` array.
+8. Do not generate Playwright code; write an AgentHandoffResponse JSON object, include \`recoveryDecision\`, and put repaired ExecutionPlan objects in the top-level \`plans\` array.
 9. Use \`recoveryDecision: "repaired_plan"\` when you repaired or returned executable plans.
 10. Use \`recoveryDecision: "no_safe_action"\` when no safe repair is possible.
 11. Use \`recoveryDecision: "needs_more_context"\` when missing data or UI ambiguity blocks a safe repair.

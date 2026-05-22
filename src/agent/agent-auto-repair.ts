@@ -5,7 +5,7 @@ import { buildDataContext } from "../data/data-context";
 import { buildAgentHandoffRequest } from "./handoff-builder";
 import { writeAgentHandoffPackage } from "./handoff-writer";
 import { runCodexAutoRepair } from "./codex-auto-repair";
-import { validateAgentHandoffResponse } from "./agent-response-validator";
+import { normalizeAgentHandoffResponse, validateAgentHandoffResponse } from "./agent-response-validator";
 import { validateExecutionPlan } from "../plans";
 import type { ExecutionPlan } from "../types/execution-plan.types";
 import type { AgentHandoffKind, AgentHandoffResponse } from "../types/agent-handoff.types";
@@ -420,7 +420,13 @@ export async function runAgentAutoRepairAttempt(input: {
       };
     }
 
-    const responseRaw = JSON.parse(await readFile(responsePath, "utf-8")) as AgentHandoffResponse;
+    const parsedResponse = JSON.parse(await readFile(responsePath, "utf-8")) as unknown;
+    const normalizedResponse = normalizeAgentHandoffResponse(parsedResponse);
+    const responseRaw = normalizedResponse as AgentHandoffResponse;
+
+    if (normalizedResponse !== parsedResponse) {
+      await writeFile(responsePath, JSON.stringify(normalizedResponse, null, 2), "utf-8");
+    }
 
     const availableKeys = request.dataContextSummary?.availableKeys?.map((k) => (typeof k === "string" ? k : k.key)) ?? [];
     const validation = validateAgentHandoffResponse(responseRaw, { availableDataKeys: availableKeys });

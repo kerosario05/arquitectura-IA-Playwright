@@ -1,0 +1,1469 @@
+{
+  "version": "1.0",
+  "createdAt": "2026-05-22T03:21:58.617Z",
+  "app": {
+    "appSlug": "default",
+    "profileName": "default",
+    "baseUrl": "https://172.27.4.50/",
+    "baseUrlHash": "74df3c0e992c"
+  },
+  "case": {
+    "caseId": 37872,
+    "title": "Generar carta consular con cuenta de ahorro",
+    "source": "testrail"
+  },
+  "failure": {
+    "failedReason": "click_no_transition",
+    "failedTarget": "Embajada de España",
+    "failedAtStep": 1
+  },
+  "currentRun": {
+    "outputDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37872\\2026-05-22T03-21-00-300Z",
+    "evidenceDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37872\\2026-05-22T03-21-00-300Z\\evidence",
+    "snapshotPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37872\\2026-05-22T03-21-00-300Z\\evidence\\step-1-snapshot.json",
+    "candidatePlanPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37872\\2026-05-22T03-21-00-300Z\\discovered-plans.pending.json",
+    "pendingObjectsPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37872\\2026-05-22T03-21-00-300Z\\discovered-objects.pending.json",
+    "pendingPlansPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37872\\2026-05-22T03-21-00-300Z\\discovered-plans.pending.json"
+  },
+  "knownObjects": [
+    {
+      "key": "button_embajada_espana",
+      "name": "Embajada de España",
+      "type": "button",
+      "aliases": [
+        "embajada de españa"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de España",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 1
+    },
+    {
+      "key": "button_embajada_estados_unidos",
+      "name": "Embajada de los Estados Unidos",
+      "type": "button",
+      "aliases": [
+        "embajada de los estados unidos"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de los Estados Unidos",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_italia",
+      "name": "Embajada de Italia",
+      "type": "button",
+      "aliases": [
+        "embajada de italia"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Italia",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_francia",
+      "name": "Embajada de Francia",
+      "type": "button",
+      "aliases": [
+        "embajada de francia"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Francia",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_canada",
+      "name": "Embajada de Canadá",
+      "type": "button",
+      "aliases": [
+        "embajada de canadá"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Canadá",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_alemania",
+      "name": "Embajada de Alemania",
+      "type": "button",
+      "aliases": [
+        "embajada de alemania"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Alemania",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_argentina",
+      "name": "Embajada de Argentina",
+      "type": "button",
+      "aliases": [
+        "embajada de argentina"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Argentina",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_bahamas",
+      "name": "Embajada de Bahamas",
+      "type": "button",
+      "aliases": [
+        "embajada de bahamas"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Bahamas",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_belgica",
+      "name": "Embajada de Bélgica",
+      "type": "button",
+      "aliases": [
+        "embajada de bélgica"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Bélgica",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_belice",
+      "name": "Embajada de Belice",
+      "type": "button",
+      "aliases": [
+        "embajada de belice"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Belice",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_republica_benin",
+      "name": "Embajada de la República de Benin",
+      "type": "button",
+      "aliases": [
+        "embajada de la república de benin"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de la República de Benin",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_brasil",
+      "name": "Embajada del Brasil",
+      "type": "button",
+      "aliases": [
+        "embajada del brasil"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada del Brasil",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_chile",
+      "name": "Embajada de Chile",
+      "type": "button",
+      "aliases": [
+        "embajada de chile"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Chile",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_chipre",
+      "name": "Embajada de Chipre",
+      "type": "button",
+      "aliases": [
+        "embajada de chipre"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Chipre",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_colombia",
+      "name": "Embajada de Colombia",
+      "type": "button",
+      "aliases": [
+        "embajada de colombia"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Colombia",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_costa_rica",
+      "name": "Embajada de Costa Rica",
+      "type": "button",
+      "aliases": [
+        "embajada de costa rica"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Costa Rica",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_cuba",
+      "name": "Embajada de Cuba",
+      "type": "button",
+      "aliases": [
+        "embajada de cuba"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Cuba",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_ecuador",
+      "name": "Embajada de Ecuador",
+      "type": "button",
+      "aliases": [
+        "embajada de ecuador"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Ecuador",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_salvador",
+      "name": "Embajada de El Salvador",
+      "type": "button",
+      "aliases": [
+        "embajada de el salvador"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de El Salvador",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_finlandia",
+      "name": "Embajada de Finlandia",
+      "type": "button",
+      "aliases": [
+        "embajada de finlandia"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Finlandia",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_haiti",
+      "name": "Embajada de Haití",
+      "type": "button",
+      "aliases": [
+        "embajada de haití"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Haití",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_honduras",
+      "name": "Embajada de Honduras",
+      "type": "button",
+      "aliases": [
+        "embajada de honduras"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Honduras",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_jamaica",
+      "name": "Embajada de Jamaica",
+      "type": "button",
+      "aliases": [
+        "embajada de jamaica"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Jamaica",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_japon",
+      "name": "Embajada del Japón",
+      "type": "button",
+      "aliases": [
+        "embajada del japón"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada del Japón",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_mexico",
+      "name": "Embajada de México",
+      "type": "button",
+      "aliases": [
+        "embajada de méxico"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de México",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_nicaragua",
+      "name": "Embajada de Nicaragua",
+      "type": "button",
+      "aliases": [
+        "embajada de nicaragua"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Nicaragua",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_orden_militar",
+      "name": "Embajada de la Orden Militar de Malta",
+      "type": "button",
+      "aliases": [
+        "embajada de la orden militar de malta"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de la Orden Militar de Malta",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_panama",
+      "name": "Embajada de Panamá",
+      "type": "button",
+      "aliases": [
+        "embajada de panamá"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Panamá",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_peru",
+      "name": "Embajada de Perú",
+      "type": "button",
+      "aliases": [
+        "embajada de perú"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Perú",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_qatar",
+      "name": "Embajada de Qatar",
+      "type": "button",
+      "aliases": [
+        "embajada de qatar"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Qatar",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_reino_unido",
+      "name": "Embajada de Reino Unido",
+      "type": "button",
+      "aliases": [
+        "embajada de reino unido"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Reino Unido",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_santa_sede",
+      "name": "Embajada de la Santa Sede",
+      "type": "button",
+      "aliases": [
+        "embajada de la santa sede"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de la Santa Sede",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_china_taiwan",
+      "name": "Embajada de China (Taiwan)",
+      "type": "button",
+      "aliases": [
+        "embajada de china (taiwan)"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de China (Taiwan)",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_uruguay",
+      "name": "Embajada de Uruguay",
+      "type": "button",
+      "aliases": [
+        "embajada de uruguay"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Uruguay",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "button_embajada_venezuela",
+      "name": "Embajada de Venezuela",
+      "type": "button",
+      "aliases": [
+        "embajada de venezuela"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Embajada de Venezuela",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "section_selecciona_embajada",
+      "name": "Selecciona la embajada:",
+      "type": "section",
+      "aliases": [
+        "selecciona la embajada:"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Selecciona la embajada:",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.5
+    },
+    {
+      "key": "input_escriba_buscar",
+      "name": "Escriba para buscar...",
+      "type": "input",
+      "aliases": [
+        "escriba para buscar..."
+      ],
+      "locator": {
+        "strategy": "placeholder",
+        "value": "Escriba para buscar...",
+        "exact": false
+      },
+      "confidence": 0.8,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_iniciar",
+      "name": "Iniciar",
+      "type": "button",
+      "aliases": [
+        "iniciar"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_hola",
+      "name": "¡Hola!",
+      "type": "section",
+      "aliases": [
+        "¡hola!"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "¡Hola!",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_informacion_productosexplora_nuestros",
+      "name": "Información de productosExplora nuestros productos bancarios",
+      "type": "button",
+      "aliases": [
+        "información de productosexplora nuestros productos bancarios"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Información de productosExplora nuestros productos bancarios",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_transacciones_serviciosrealiza_operaciones",
+      "name": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+      "type": "button",
+      "aliases": [
+        "transacciones y serviciosrealiza operaciones con tus cuentas"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_salir",
+      "name": "Salir",
+      "type": "button",
+      "aliases": [
+        "salir"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Salir",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_hola",
+      "name": "¡Hola!",
+      "type": "section",
+      "aliases": [
+        "¡hola!"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "¡Hola!",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_nos_alegra_que",
+      "name": "¡Nos alegra que estés con nosotros!",
+      "type": "section",
+      "aliases": [
+        "¡nos alegra que estés con nosotros!"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "¡Nos alegra que estés con nosotros!",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_informacion_productos",
+      "name": "Información de productos",
+      "type": "section",
+      "aliases": [
+        "información de productos"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Información de productos",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_transacciones_servicios",
+      "name": "Transacciones y servicios",
+      "type": "section",
+      "aliases": [
+        "transacciones y servicios"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Transacciones y servicios",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_cedula_identidad_dominicana",
+      "name": "Cédula de identidad dominicana",
+      "type": "button",
+      "aliases": [
+        "cédula de identidad dominicana"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Cédula de identidad dominicana",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_pasaporte_extranjero",
+      "name": "Pasaporte extranjero",
+      "type": "button",
+      "aliases": [
+        "pasaporte extranjero"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Pasaporte extranjero",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_cancelar",
+      "name": "Cancelar",
+      "type": "button",
+      "aliases": [
+        "cancelar"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Cancelar",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_continuar",
+      "name": "Continuar",
+      "type": "button",
+      "aliases": [
+        "continuar"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Continuar",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    }
+  ],
+  "knownPlans": [
+    {
+      "id": "c37757-consulta-depositos-a-plazo-en-dolares",
+      "caseId": 37757,
+      "externalId": "C37757",
+      "title": "Consulta depositos a plazo en dolares",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37757-consulta-depositos-a-plazo-en-dolares\\plan.json",
+      "createdAt": "2026-05-20T19:46:17.185Z",
+      "updatedAt": "2026-05-20T19:46:17.185Z",
+      "score": 0
+    },
+    {
+      "id": "c37758-c37381-visualizar-detalle-de-cuenta-de-ahorro-en-pesos",
+      "caseId": 37758,
+      "externalId": "C37758",
+      "title": "C37381 - Visualizar detalle de cuenta de ahorro en pesos",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37758-c37381-visualizar-detalle-de-cuenta-de-ahorro-en-pesos\\plan.json",
+      "createdAt": "2026-05-20T19:54:34.497Z",
+      "updatedAt": "2026-05-20T19:54:34.497Z",
+      "score": 0
+    },
+    {
+      "id": "c37844-visualizar-detalle-de-tarjeta-visa-gold",
+      "caseId": 37844,
+      "externalId": "C37844",
+      "title": "Visualizar detalle de Tarjeta Visa Gold",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37844-visualizar-detalle-de-tarjeta-visa-gold\\plan.json",
+      "createdAt": "2026-05-21T03:09:17.322Z",
+      "updatedAt": "2026-05-21T20:01:30.155Z",
+      "score": 0,
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa gold"
+      ]
+    },
+    {
+      "id": "c37845-visualizar-detalle-de-tarjeta-visa-platinum",
+      "caseId": 37845,
+      "externalId": "C37845",
+      "title": "Visualizar detalle de Tarjeta Visa Platinum",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37845-visualizar-detalle-de-tarjeta-visa-platinum\\plan.json",
+      "createdAt": "2026-05-21T03:09:22.764Z",
+      "updatedAt": "2026-05-21T19:42:47.564Z",
+      "score": 0,
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa platinum"
+      ]
+    },
+    {
+      "id": "c37846-visualizar-detalle-de-tarjeta-visa-infinite",
+      "caseId": 37846,
+      "externalId": "C37846",
+      "title": "Visualizar detalle de Tarjeta Visa Infinite",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37846-visualizar-detalle-de-tarjeta-visa-infinite\\plan.json",
+      "createdAt": "2026-05-21T03:10:25.931Z",
+      "updatedAt": "2026-05-21T19:43:29.840Z",
+      "score": 0,
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa infinite"
+      ]
+    },
+    {
+      "id": "route-recovery",
+      "title": "Route recovery",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\route-recovery\\plan.json",
+      "createdAt": "2026-05-21T15:09:19.055Z",
+      "updatedAt": "2026-05-21T15:09:19.055Z",
+      "score": 0,
+      "route": [
+        "Tarjetas"
+      ]
+    },
+    {
+      "id": "c37869-generar-carta-de-referencia-con-cuenta-de-ahorro",
+      "caseId": 37869,
+      "externalId": "C37869",
+      "title": "Generar carta de referencia con cuenta de ahorro",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37869-generar-carta-de-referencia-con-cuenta-de-ahorro\\plan.json",
+      "createdAt": "2026-05-22T01:47:27.888Z",
+      "updatedAt": "2026-05-22T02:44:23.692Z",
+      "score": 0,
+      "route": [
+        "iniciar",
+        "transacciones y servicio",
+        "Cédula de identidad dominicana",
+        "continuar",
+        "Generar cartas"
+      ]
+    },
+    {
+      "id": "c37853-consulta-detalle-de-prestamo-personal",
+      "caseId": 37853,
+      "externalId": "C37853",
+      "title": "Consulta detalle de prestamo personal",
+      "status": "inline_debug_only",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37853-consulta-detalle-de-prestamo-personal\\plan.json",
+      "createdAt": "2026-05-21T02:12:12.100Z",
+      "updatedAt": "2026-05-21T15:41:45.881Z",
+      "score": 0,
+      "route": [
+        "Iniciar",
+        "Información de productos"
+      ]
+    }
+  ],
+  "knownRoutes": [
+    {
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa gold"
+      ],
+      "sourcePlanId": "c37844-visualizar-detalle-de-tarjeta-visa-gold",
+      "score": 0
+    },
+    {
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa platinum"
+      ],
+      "sourcePlanId": "c37845-visualizar-detalle-de-tarjeta-visa-platinum",
+      "score": 0
+    },
+    {
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa infinite"
+      ],
+      "sourcePlanId": "c37846-visualizar-detalle-de-tarjeta-visa-infinite",
+      "score": 0
+    },
+    {
+      "route": [
+        "Tarjetas"
+      ],
+      "sourcePlanId": "route-recovery",
+      "score": 0
+    },
+    {
+      "route": [
+        "iniciar",
+        "transacciones y servicio",
+        "Cédula de identidad dominicana",
+        "continuar",
+        "Generar cartas"
+      ],
+      "sourcePlanId": "c37869-generar-carta-de-referencia-con-cuenta-de-ahorro",
+      "score": 0
+    },
+    {
+      "route": [
+        "Iniciar",
+        "Información de productos"
+      ],
+      "sourcePlanId": "c37853-consulta-detalle-de-prestamo-personal",
+      "score": 0
+    }
+  ],
+  "snapshotCandidates": [
+    {
+      "id": "el-9",
+      "type": "button",
+      "text": "Embajada de España",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-10",
+      "type": "text",
+      "text": "Embajada de España",
+      "tagName": "span",
+      "className": "text-base font-medium flex-1 text-left text-foreground group-hover:text-kiosk-success",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-7",
+      "type": "button",
+      "text": "Embajada de los Estados Unidos",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-11",
+      "type": "button",
+      "text": "Embajada de Italia",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-13",
+      "type": "button",
+      "text": "Embajada de Francia",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-15",
+      "type": "button",
+      "text": "Embajada de Canadá",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-17",
+      "type": "button",
+      "text": "Embajada de Alemania",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-19",
+      "type": "button",
+      "text": "Embajada de Argentina",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-21",
+      "type": "button",
+      "text": "Embajada de Bahamas",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-23",
+      "type": "button",
+      "text": "Embajada de Bélgica",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-25",
+      "type": "button",
+      "text": "Embajada de Belice",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-27",
+      "type": "button",
+      "text": "Embajada de la República de Benin",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-29",
+      "type": "button",
+      "text": "Embajada del Brasil",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-31",
+      "type": "button",
+      "text": "Embajada de Chile",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-33",
+      "type": "button",
+      "text": "Embajada de Chipre",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-35",
+      "type": "button",
+      "text": "Embajada de Colombia",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-37",
+      "type": "button",
+      "text": "Embajada de Costa Rica",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-39",
+      "type": "button",
+      "text": "Embajada de Cuba",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-41",
+      "type": "button",
+      "text": "Embajada de Ecuador",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-45",
+      "type": "button",
+      "text": "Embajada de El Salvador",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-47",
+      "type": "button",
+      "text": "Embajada de Finlandia",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-49",
+      "type": "button",
+      "text": "Embajada de Haití",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-51",
+      "type": "button",
+      "text": "Embajada de Honduras",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-53",
+      "type": "button",
+      "text": "Embajada de Jamaica",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-55",
+      "type": "button",
+      "text": "Embajada del Japón",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-57",
+      "type": "button",
+      "text": "Embajada de México",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-59",
+      "type": "button",
+      "text": "Embajada de Nicaragua",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-61",
+      "type": "button",
+      "text": "Embajada de la Orden Militar de Malta",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-63",
+      "type": "button",
+      "text": "Embajada de Panamá",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-65",
+      "type": "button",
+      "text": "Embajada de Perú",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-67",
+      "type": "button",
+      "text": "Embajada de Qatar",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-69",
+      "type": "button",
+      "text": "Embajada de Reino Unido",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-71",
+      "type": "button",
+      "text": "Embajada de la Santa Sede",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-73",
+      "type": "button",
+      "text": "Embajada de China (Taiwan)",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-75",
+      "type": "button",
+      "text": "Embajada de Uruguay",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-77",
+      "type": "button",
+      "text": "Embajada de Venezuela",
+      "tagName": "button",
+      "className": "group w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success bg-white hover:bg-kiosk-success/5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-5",
+      "type": "heading",
+      "text": "Selecciona la embajada:",
+      "tagName": "h2",
+      "className": "text-xl font-bold text-kiosk-success",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-8",
+      "type": "text",
+      "text": "Embajada de los Estados Unidos",
+      "tagName": "span",
+      "className": "text-base font-medium flex-1 text-left text-foreground group-hover:text-kiosk-success",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-12",
+      "type": "text",
+      "text": "Embajada de Italia",
+      "tagName": "span",
+      "className": "text-base font-medium flex-1 text-left text-foreground group-hover:text-kiosk-success",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-14",
+      "type": "text",
+      "text": "Embajada de Francia",
+      "tagName": "span",
+      "className": "text-base font-medium flex-1 text-left text-foreground group-hover:text-kiosk-success",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-16",
+      "type": "text",
+      "text": "Embajada de Canadá",
+      "tagName": "span",
+      "className": "text-base font-medium flex-1 text-left text-foreground group-hover:text-kiosk-success",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-18",
+      "type": "text",
+      "text": "Embajada de Alemania",
+      "tagName": "span",
+      "className": "text-base font-medium flex-1 text-left text-foreground group-hover:text-kiosk-success",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-20",
+      "type": "text",
+      "text": "Embajada de Argentina",
+      "tagName": "span",
+      "className": "text-base font-medium flex-1 text-left text-foreground group-hover:text-kiosk-success",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-22",
+      "type": "text",
+      "text": "Embajada de Bahamas",
+      "tagName": "span",
+      "className": "text-base font-medium flex-1 text-left text-foreground group-hover:text-kiosk-success",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-24",
+      "type": "text",
+      "text": "Embajada de Bélgica",
+      "tagName": "span",
+      "className": "text-base font-medium flex-1 text-left text-foreground group-hover:text-kiosk-success",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-26",
+      "type": "text",
+      "text": "Embajada de Belice",
+      "tagName": "span",
+      "className": "text-base font-medium flex-1 text-left text-foreground group-hover:text-kiosk-success",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-28",
+      "type": "text",
+      "text": "Embajada de la República de Benin",
+      "tagName": "span",
+      "className": "text-base font-medium flex-1 text-left text-foreground group-hover:text-kiosk-success",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-30",
+      "type": "text",
+      "text": "Embajada del Brasil",
+      "tagName": "span",
+      "className": "text-base font-medium flex-1 text-left text-foreground group-hover:text-kiosk-success",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-32",
+      "type": "text",
+      "text": "Embajada de Chile",
+      "tagName": "span",
+      "className": "text-base font-medium flex-1 text-left text-foreground group-hover:text-kiosk-success",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-34",
+      "type": "text",
+      "text": "Embajada de Chipre",
+      "tagName": "span",
+      "className": "text-base font-medium flex-1 text-left text-foreground group-hover:text-kiosk-success",
+      "candidateLocatorsCount": 1
+    }
+  ],
+  "supportedActions": [
+    "navigate",
+    "login",
+    "click",
+    "fill",
+    "select",
+    "check",
+    "uncheck",
+    "press",
+    "waitFor",
+    "assertVisible",
+    "assertText",
+    "assertUrl",
+    "screenshot",
+    "noop"
+  ],
+  "safeData": {
+    "availableKeys": [],
+    "redacted": true
+  },
+  "constraints": {
+    "codexMustOnlyWriteAgentResponseJson": true,
+    "doNotRunPlaywright": true,
+    "doNotModifyStableRegistry": true,
+    "doNotApproveObjectsAutomatically": true,
+    "doNotInventData": true
+  },
+  "warnings": [
+    "knownObjects limited to 50 (had 106).",
+    "Context file not found: automations\\apps\\default\\cases\\c37757-consulta-depositos-a-plazo-en-dolares\\plan.json",
+    "Context file not found: automations\\apps\\default\\cases\\c37758-c37381-visualizar-detalle-de-cuenta-de-ahorro-en-pesos\\plan.json",
+    "snapshotCandidates limited to 50 (had 82)."
+  ],
+  "appConfig": {
+    "appProfile": {
+      "appSlug": "default",
+      "name": "4",
+      "baseUrl": "https://172.27.4.50/",
+      "baseUrlHash": "74df3c0e992c",
+      "createdAt": "2026-05-22T02:44:23.671Z",
+      "updatedAt": "2026-05-22T02:44:23.672Z"
+    },
+    "baseUrl": "https://172.27.4.50/",
+    "loginMode": "no_login",
+    "testDataKeys": [],
+    "testDataAliases": {},
+    "hasUsername": false,
+    "hasPassword": false,
+    "missingInputBehavior": "fail",
+    "updatedAt": "2026-05-22T02:44:23.671Z"
+  }
+}

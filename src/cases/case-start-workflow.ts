@@ -11,7 +11,7 @@ import { executeExecutionPlan, writePlanExecutionResults } from "../runner";
 import { reportToTestRail } from "../testrail/testrail-reporter";
 import { promoteExecutionPlan } from "../automations/promote-plan";
 import { findAndCloneReusablePlan } from "../automations/automation-reuse";
-import { buildAgentHandoffRequest, writeAgentHandoffPackage, runCodexAutoRepair, validateAgentHandoffResponse, resolveAgentAutoRepairConfig, runAgentAutoRepairAttempt, buildAgentContextPack } from "../agent";
+import { buildAgentHandoffRequest, writeAgentHandoffPackage, runCodexAutoRepair, validateAgentHandoffResponse, resolveAgentAutoRepairConfig, runAgentAutoRepairAttempt, buildAgentContextPack, normalizeAgentHandoffResponse } from "../agent";
 import { analyzeSnapshotGaps, formatGapDiagnosis } from "../agent/snapshot-gap-detector";
 import { runPostExecutionReporting } from "../reporting/post-execution-reporting";
 import { buildPlanRepairGoal } from "./plan-repair-goal";
@@ -343,7 +343,13 @@ export async function startCaseAutomationWorkflow(
 
             try {
               const responseContent = await readFile(repairResult.responsePath, "utf-8");
-              const response = JSON.parse(responseContent) as AgentHandoffResponse;
+              const parsedResponse = JSON.parse(responseContent) as unknown;
+              const normalizedResponse = normalizeAgentHandoffResponse(parsedResponse);
+              const response = normalizedResponse as AgentHandoffResponse;
+
+              if (normalizedResponse !== parsedResponse) {
+                await writeFile(repairResult.responsePath, JSON.stringify(normalizedResponse, null, 2), "utf-8");
+              }
 
               const availableKeys = request.dataContextSummary?.availableKeys?.map((k) => (typeof k === "string" ? k : k.key)) ?? [];
               const validation = validateAgentHandoffResponse(response, {

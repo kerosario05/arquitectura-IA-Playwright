@@ -1,5 +1,6 @@
 import type { RouteRecoveryDecision } from "../types/route-recovery-decision.types";
 import type { RouteRecoveryPack } from "../types/codex-auto-repair.types";
+import { getActionCapability } from "../registry/action-registry";
 
 export type RouteRecoveryDecisionValidationIssue = {
   code: string;
@@ -53,6 +54,11 @@ export function validateRouteRecoveryDecision(
     }
     if (!obj.action || typeof obj.action !== "string" || obj.action.length === 0) {
       issues.push({ code: "MISSING_ACTION", message: "repaired_plan requires action." });
+    } else if (!getActionCapability(obj.action as never)) {
+      issues.push({
+        code: "INVALID_ACTION",
+        message: `repaired_plan action '${obj.action}' is not a supported ExecutionPlan action.`
+      });
     }
     if (typeof obj.confidence !== "number") {
       issues.push({ code: "MISSING_CONFIDENCE", message: "repaired_plan requires confidence (number)." });

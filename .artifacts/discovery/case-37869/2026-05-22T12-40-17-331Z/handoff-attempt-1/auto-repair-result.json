@@ -1,0 +1,25 @@
+{
+  "timestamp": "2026-05-22T12:47:04.507Z",
+  "attemptNumber": 1,
+  "repairStatus": "no_proposal",
+  "success": false,
+  "error": "AI determined more context is needed to propose a safe action.",
+  "responsePath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-22T12-40-17-331Z\\handoff-attempt-1\\agent-response.json",
+  "selectedSkill": "assertion-resolution",
+  "diagnostics": {
+    "exitCode": 0,
+    "timedOut": false,
+    "durationMs": 353036,
+    "stdoutLogPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-22T12-40-17-331Z\\handoff-attempt-1\\codex.stdout.log",
+    "stderrLogPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-22T12-40-17-331Z\\handoff-attempt-1\\codex.stderr.log",
+    "promptMode": "compact",
+    "compactPrompt": false,
+    "agentResponseExists": true,
+    "recoveryDecision": "needs_more_context",
+    "rawRecoveryDecision": "needs_more_context",
+    "generatedAtPresent": true,
+    "generatedAtValid": true,
+    "agentResponseValid": true,
+    "nextAction": "needs_more_context"
+  }
+}

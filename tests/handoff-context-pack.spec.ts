@@ -4,6 +4,7 @@ import path from "node:path";
 import { buildAgentHandoffRequest } from "../src/agent/handoff-builder";
 import { writeAgentHandoffPackage } from "../src/agent/handoff-writer";
 import { buildAgentHandoffInstructions } from "../src/agent/handoff-instructions";
+import { validateAgentHandoffResponse } from "../src/agent/agent-response-validator";
 import type { FullConfig } from "../src/types/env.types";
 import { buildDataContext } from "../src/data/data-context";
 
@@ -65,3 +66,22 @@ test("handoff-request references contextPackPath and instructions mention it", a
   expect(instructions).toContain("context-pack.json");
 });
 
+test("handoff writer seeds agent-response.json with a valid needs_more_context response", async () => {
+  const config = minimalConfig();
+  const dataContext = buildDataContext(config);
+  const out = path.join(tmpDir, "handoff-seeded-response");
+  await fs.mkdir(out, { recursive: true });
+
+  const request = buildAgentHandoffRequest({
+    kind: "plan_repair",
+    goal: "Seed a valid response template",
+    dataContext
+  });
+
+  const pkg = await writeAgentHandoffPackage({ request, outputDir: out });
+  const response = JSON.parse(await fs.readFile(pkg.responsePath, "utf-8")) as unknown;
+  const validation = validateAgentHandoffResponse(response, { promptMode: "compact-route-recovery" });
+
+  expect(validation.valid).toBe(true);
+  expect((response as { recoveryDecision: string }).recoveryDecision).toBe("needs_more_context");
+});

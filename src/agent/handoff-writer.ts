@@ -19,6 +19,7 @@ export async function writeAgentHandoffPackage(input: {
   const instructionsPath = path.join(input.outputDir, "handoff-instructions.md");
   const schemaPath = path.join(input.outputDir, "agent-response.schema.json");
   const responsePath = path.join(input.outputDir, "agent-response.json");
+  const generatedAt = new Date().toISOString();
 
   await writeFile(requestPath, JSON.stringify(input.request, null, 2), "utf-8");
   await writeFile(instructionsPath, buildAgentHandoffInstructions(input.request), "utf-8");
@@ -28,12 +29,19 @@ export async function writeAgentHandoffPackage(input: {
     JSON.stringify(
       {
         version: "1.0",
-        generatedAt: "",
+        generatedAt,
         recoveryDecision: "needs_more_context",
         plans: [],
         proposedObjects: [],
-        unresolvedQuestions: [],
-        rationale: []
+        unresolvedQuestions: [
+          {
+            type: "missing_data",
+            message: "Pending agent repair. Replace this placeholder after evaluating the handoff inputs."
+          }
+        ],
+        rationale: [
+          "Template response created by handoff writer. Replace this placeholder with the final agent rationale."
+        ]
       },
       null,
       2

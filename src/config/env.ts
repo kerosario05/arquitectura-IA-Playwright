@@ -147,13 +147,28 @@ function parseTestData(rawValue?: string): TestDataMap {
   const result: TestDataMap = {};
 
   for (const [key, value] of Object.entries(parsed)) {
+    if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+      for (const [subKey, subValue] of Object.entries(value as Record<string, unknown>)) {
+        if (typeof subValue === "string" || typeof subValue === "number" || typeof subValue === "boolean") {
+          result[`${key}.${subKey}`] = subValue as TestDataValue;
+        }
+      }
+      continue;
+    }
     if (typeof value !== "string" && typeof value !== "number" && typeof value !== "boolean") {
-      throw new Error("Invalid APP_TEST_DATA_JSON. Values must be string, number or boolean.");
+      continue;
     }
     result[key] = value as TestDataValue;
   }
 
   return result;
+}
+
+export function parseRawTestData(rawValue?: string): Record<string, unknown> {
+  if (!rawValue || !rawValue.trim()) {
+    return {};
+  }
+  return parseFlatJsonObject(rawValue, "APP_TEST_DATA_JSON");
 }
 
 function parseTestDataAliases(rawValue?: string): TestDataAliasesMap {
@@ -165,10 +180,13 @@ function parseTestDataAliases(rawValue?: string): TestDataAliasesMap {
   const result: TestDataAliasesMap = {};
 
   for (const [key, value] of Object.entries(parsed)) {
-    if (!Array.isArray(value) || value.some((item) => typeof item !== "string")) {
-      throw new Error("Invalid APP_TEST_DATA_ALIASES_JSON. Every value must be an array of strings.");
+    if (Array.isArray(value) && value.every((item) => typeof item === "string")) {
+      result[key] = value;
+    } else if (typeof value === "string") {
+      result[key] = [value];
+    } else {
+      throw new Error("Invalid APP_TEST_DATA_ALIASES_JSON. Every value must be an array of strings or a single string.");
     }
-    result[key] = value;
   }
 
   return result;
@@ -212,6 +230,7 @@ export const config: FullConfig = {
     password: process.env.APP_PASSWORD?.trim() || undefined,
     extraLoginFields: parseExtraLoginFields(process.env.APP_EXTRA_LOGIN_FIELDS_JSON),
     testData: parseTestData(process.env.APP_TEST_DATA_JSON),
+    rawTestData: parseRawTestData(process.env.APP_TEST_DATA_JSON),
     testDataAliases: parseTestDataAliases(process.env.APP_TEST_DATA_ALIASES_JSON),
     missingInputBehavior: parseMissingInputBehavior(process.env.MISSING_INPUT_BEHAVIOR),
     appProfile: normalizeAppProfile(process.env.APP_PROFILE)

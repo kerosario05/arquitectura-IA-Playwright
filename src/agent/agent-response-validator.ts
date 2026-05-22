@@ -23,6 +23,15 @@ function hasText(value: unknown): boolean {
   return typeof value === "string" && value.trim().length > 0;
 }
 
+function isRecoveryDecision(
+  value: unknown
+): value is "repaired_plan" | "no_safe_action" | "needs_more_context" {
+  return (
+    typeof value === "string" &&
+    ["repaired_plan", "no_safe_action", "needs_more_context"].includes(value)
+  );
+}
+
 function looksSensitiveLiteral(value: string): boolean {
   const normalized = value.toLowerCase();
   return (
@@ -49,7 +58,102 @@ function looksLikeExecutionPlan(value: unknown): value is ExecutionPlan {
   );
 }
 
+function looksLikeExecutionPlanArray(value: unknown): value is ExecutionPlan[] {
+  return Array.isArray(value) && value.length > 0 && value.every((item) => looksLikeExecutionPlan(item));
+}
+
+function normalizeWrappedPlanResponse(response: Record<string, unknown>): AgentHandoffResponse | undefined {
+  const singletonPlans: ExecutionPlan[] = [];
+
+  if (looksLikeExecutionPlan(response.plan)) {
+    singletonPlans.push(response.plan);
+  }
+
+  if (looksLikeExecutionPlan(response.plans)) {
+    singletonPlans.push(response.plans);
+  }
+
+  if (singletonPlans.length === 0) {
+    return undefined;
+  }
+
+  const existingPlans = Array.isArray(response.plans)
+    ? response.plans.filter((item): item is ExecutionPlan => looksLikeExecutionPlan(item))
+    : [];
+  const plans = existingPlans.length > 0 ? existingPlans : singletonPlans;
+  const generatedAt =
+    hasText(response.generatedAt)
+      ? String(response.generatedAt)
+      : plans.find((plan) => hasText(plan.createdAt))?.createdAt ?? new Date().toISOString();
+  const recoveryDecision =
+    isRecoveryDecision(response.recoveryDecision)
+      ? response.recoveryDecision
+      : "repaired_plan";
+  const rationale = Array.isArray(response.rationale) && response.rationale.every((item) => typeof item === "string")
+    ? (response.rationale as string[])
+    : ["Normalized legacy single-plan response into AgentHandoffResponse."];
+
+  return {
+    version: response.version === "1.0" ? "1.0" : "1.0",
+    generatedAt,
+    recoveryDecision,
+    plans,
+    proposedObjects: Array.isArray(response.proposedObjects) ? response.proposedObjects as AgentHandoffResponse["proposedObjects"] : [],
+    unresolvedQuestions: Array.isArray(response.unresolvedQuestions) ? response.unresolvedQuestions as AgentHandoffResponse["unresolvedQuestions"] : [],
+    rationale
+  };
+}
+
+function normalizeLegacyPlansArrayResponse(response: Record<string, unknown>): AgentHandoffResponse | undefined {
+  if (!Array.isArray(response.plans)) {
+    return undefined;
+  }
+
+  const plans = response.plans.filter((item): item is ExecutionPlan => looksLikeExecutionPlan(item));
+  if (plans.length === 0) {
+    return undefined;
+  }
+
+  const generatedAt =
+    hasText(response.generatedAt)
+      ? String(response.generatedAt)
+      : plans.find((plan) => hasText(plan.createdAt))?.createdAt ?? new Date().toISOString();
+  const recoveryDecision =
+    isRecoveryDecision(response.recoveryDecision)
+      ? response.recoveryDecision
+      : "repaired_plan";
+  const rationale = Array.isArray(response.rationale) && response.rationale.every((item) => typeof item === "string")
+    ? (response.rationale as string[])
+    : ["Normalized legacy plans[] response into AgentHandoffResponse."];
+
+  return {
+    version: response.version === "1.0" ? "1.0" : "1.0",
+    generatedAt,
+    recoveryDecision,
+    plans,
+    proposedObjects: Array.isArray(response.proposedObjects) ? response.proposedObjects as AgentHandoffResponse["proposedObjects"] : [],
+    unresolvedQuestions: Array.isArray(response.unresolvedQuestions) ? response.unresolvedQuestions as AgentHandoffResponse["unresolvedQuestions"] : [],
+    rationale
+  };
+}
+
 export function normalizeAgentHandoffResponse(response: unknown): AgentHandoffResponse | unknown {
+  if (looksLikeExecutionPlanArray(response)) {
+    const generatedAt =
+      response.find((plan) => typeof plan.createdAt === "string" && plan.createdAt.trim().length > 0)?.createdAt
+      ?? new Date().toISOString();
+
+    return {
+      version: "1.0",
+      generatedAt,
+      recoveryDecision: "repaired_plan",
+      plans: response,
+      proposedObjects: [],
+      unresolvedQuestions: [],
+      rationale: ["Normalized legacy ExecutionPlan[] response into AgentHandoffResponse."]
+    };
+  }
+
   if (looksLikeExecutionPlan(response)) {
     return {
       version: "1.0",
@@ -65,7 +169,18 @@ export function normalizeAgentHandoffResponse(response: unknown): AgentHandoffRe
     };
   }
 
+  if (isObject(response)) {
+    const normalized = normalizeWrappedPlanResponse(response) ?? normalizeLegacyPlansArrayResponse(response);
+    if (normalized) {
+      return normalized;
+    }
+  }
+
   return response;
+}
+
+export function repairAgentHandoffResponse(response: unknown): AgentHandoffResponse | unknown {
+  return normalizeAgentHandoffResponse(response);
 }
 
 export function validateAgentHandoffResponse(

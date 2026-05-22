@@ -171,6 +171,9 @@ export function parseSingleIntent(text: string): ParsedStepIntent | null {
   const fillResult = tryParseFillAction(trimmed, normalized);
   if (fillResult) return fillResult;
 
+  const standaloneResult = tryParseStandaloneAction(trimmed, normalized);
+  if (standaloneResult) return standaloneResult;
+
   return null;
 }
 
@@ -442,8 +445,48 @@ function tryParseNavigationPath(text: string, normalized: string): ParsedStepInt
 }
 
 function tryParseNavigationPathEnhanced(text: string, normalized: string): ParsedStepIntent | null {
-  if (isAssertionLike(normalized)) return null;
   if (/^.+@.+\..+/i.test(text) || /https?:\/\/|www\./i.test(text)) return null;
+
+  const normalizedForMatch = normalized
+    .replace(/["\u201C\u201D]/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const moduleAccessPattern = /^(?:acceder|ingresar|abrir|entrar|ir)\s+(?:al|a\s+el|a\s+la|a\s+los|a\s+las|a|el|la|los|las)\s+(?:modulo|seccion|menu|aplicacion|pantalla)\s+['"]?([^'"]+?)['"]?\s*\.?$/i;
+  const moduleMatch = normalizedForMatch.match(moduleAccessPattern);
+  if (moduleMatch) {
+    const target = moduleMatch[1].trim();
+    if (target && target.length < 150 && !/[>\/]/.test(target)) {
+      const originalTarget = extractQuotedTarget(text) || target;
+      return {
+        type: "action_click",
+        originalText: text,
+        normalizedText: normalized,
+        actionTarget: originalTarget,
+        actionVerb: "acceder",
+        priority: 5
+      };
+    }
+  }
+
+  const directAccessPattern = /^(?:acceder|ingresar|abrir|entrar|ir)\s+(?:a|al)\s+['"]?([^'"]+?)['"]?\s*\.?$/i;
+  const directMatch = normalizedForMatch.match(directAccessPattern);
+  if (directMatch) {
+    const target = directMatch[1].trim();
+    if (target && target.length < 150 && !isAssertionLike(target) && !/[>\/]/.test(target)) {
+      const originalTarget = extractQuotedTarget(text) || target;
+      return {
+        type: "action_click",
+        originalText: text,
+        normalizedText: normalized,
+        actionTarget: originalTarget,
+        actionVerb: "acceder",
+        priority: 5
+      };
+    }
+  }
+
+  if (isAssertionLike(normalized)) return null;
 
   const parsed = tryParseNavigationPath(text, normalized);
   if (!parsed) return null;
@@ -955,6 +998,54 @@ function restoreProtectedTokens(text: string, tokenMap: Map<string, string>): st
     restored = restored.replaceAll(key, value);
   }
   return restored;
+}
+
+const STANDALONE_ACTION_VERBS = [
+  "continuar",
+  "confirmar",
+  "siguiente",
+  "atrás",
+  "atras",
+  "cancelar",
+  "guardar",
+  "enviar",
+  "aceptar",
+  "rechazar",
+  "salir",
+  "cerrar",
+  "buscar",
+  "filtrar",
+  "limpiar",
+  "resetear",
+  "continue",
+  "submit",
+  "cancel",
+  "save",
+  "back",
+  "next",
+  "search",
+  "apply"
+];
+
+function tryParseStandaloneAction(text: string, normalized: string): ParsedStepIntent | null {
+  const normalizedLower = normalized.toLowerCase();
+  const trimmed = text.trim().replace(/\.$/, "").trim();
+  const trimmedNormalized = normalizeText(trimmed).toLowerCase();
+
+  for (const verb of STANDALONE_ACTION_VERBS) {
+    if (trimmedNormalized === verb || trimmedNormalized === verb.toLowerCase()) {
+      return {
+        type: "action_click",
+        originalText: trimmed,
+        normalizedText: normalized,
+        actionTarget: trimmed.charAt(0).toUpperCase() + trimmed.slice(1),
+        actionVerb: verb,
+        priority: 5
+      };
+    }
+  }
+
+  return null;
 }
 
 export function classifyStepSet(steps: ParsedStepIntent[]): StepSetIntent {

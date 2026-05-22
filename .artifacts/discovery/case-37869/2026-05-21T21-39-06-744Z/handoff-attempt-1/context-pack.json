@@ -1,0 +1,1082 @@
+{
+  "version": "1.0",
+  "createdAt": "2026-05-21T21:39:43.114Z",
+  "app": {
+    "appSlug": "default",
+    "profileName": "default",
+    "baseUrl": "https://172.27.4.50/",
+    "baseUrlHash": "74df3c0e992c"
+  },
+  "case": {
+    "caseId": 37869,
+    "title": "Generar carta de referencia con cuenta de ahorro",
+    "source": "testrail"
+  },
+  "failure": {
+    "failedReason": "click_no_transition",
+    "failedTarget": "continuar",
+    "failedAtStep": 1
+  },
+  "currentRun": {
+    "outputDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-21T21-39-06-744Z",
+    "evidenceDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-21T21-39-06-744Z\\evidence",
+    "snapshotPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-21T21-39-06-744Z\\evidence\\step-1-snapshot.json",
+    "candidatePlanPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-21T21-39-06-744Z\\discovered-plans.pending.json",
+    "pendingObjectsPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-21T21-39-06-744Z\\discovered-objects.pending.json",
+    "pendingPlansPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-21T21-39-06-744Z\\discovered-plans.pending.json"
+  },
+  "knownObjects": [
+    {
+      "key": "button_continuar",
+      "name": "Continuar",
+      "type": "button",
+      "aliases": [
+        "continuar"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Continuar",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 1
+    },
+    {
+      "key": "button_continuar",
+      "name": "Continuar",
+      "type": "button",
+      "aliases": [
+        "continuar"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Continuar",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 1
+    },
+    {
+      "key": "button_iniciar",
+      "name": "Iniciar",
+      "type": "button",
+      "aliases": [
+        "iniciar"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_hola",
+      "name": "¡Hola!",
+      "type": "section",
+      "aliases": [
+        "¡hola!"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "¡Hola!",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_informacion_productosexplora_nuestros",
+      "name": "Información de productosExplora nuestros productos bancarios",
+      "type": "button",
+      "aliases": [
+        "información de productosexplora nuestros productos bancarios"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Información de productosExplora nuestros productos bancarios",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_transacciones_serviciosrealiza_operaciones",
+      "name": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+      "type": "button",
+      "aliases": [
+        "transacciones y serviciosrealiza operaciones con tus cuentas"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_salir",
+      "name": "Salir",
+      "type": "button",
+      "aliases": [
+        "salir"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Salir",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_hola",
+      "name": "¡Hola!",
+      "type": "section",
+      "aliases": [
+        "¡hola!"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "¡Hola!",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_nos_alegra_que",
+      "name": "¡Nos alegra que estés con nosotros!",
+      "type": "section",
+      "aliases": [
+        "¡nos alegra que estés con nosotros!"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "¡Nos alegra que estés con nosotros!",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_informacion_productos",
+      "name": "Información de productos",
+      "type": "section",
+      "aliases": [
+        "información de productos"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Información de productos",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_transacciones_servicios",
+      "name": "Transacciones y servicios",
+      "type": "section",
+      "aliases": [
+        "transacciones y servicios"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Transacciones y servicios",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_cedula_identidad_dominicana",
+      "name": "Cédula de identidad dominicana",
+      "type": "button",
+      "aliases": [
+        "cédula de identidad dominicana"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Cédula de identidad dominicana",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_pasaporte_extranjero",
+      "name": "Pasaporte extranjero",
+      "type": "button",
+      "aliases": [
+        "pasaporte extranjero"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Pasaporte extranjero",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_cancelar",
+      "name": "Cancelar",
+      "type": "button",
+      "aliases": [
+        "cancelar"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Cancelar",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_identificacion_cliente",
+      "name": "Identificación del cliente",
+      "type": "section",
+      "aliases": [
+        "identificación del cliente"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Identificación del cliente",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_seleccione_tipo_identificacion",
+      "name": "Seleccione su tipo de identificación",
+      "type": "section",
+      "aliases": [
+        "seleccione su tipo de identificación"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Seleccione su tipo de identificación",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_cedula_identidad_dominicana",
+      "name": "Cédula de identidad dominicana",
+      "type": "section",
+      "aliases": [
+        "cédula de identidad dominicana"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Cédula de identidad dominicana",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_pasaporte_extranjero",
+      "name": "Pasaporte extranjero",
+      "type": "section",
+      "aliases": [
+        "pasaporte extranjero"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Pasaporte extranjero",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_cedula_identidad_dominicana",
+      "name": "Cédula de identidad dominicana",
+      "type": "button",
+      "aliases": [
+        "cédula de identidad dominicana"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Cédula de identidad dominicana",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_pasaporte_extranjero",
+      "name": "Pasaporte extranjero",
+      "type": "button",
+      "aliases": [
+        "pasaporte extranjero"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Pasaporte extranjero",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_button_1",
+      "name": "1",
+      "type": "button",
+      "aliases": [
+        "1"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "1",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_button_2",
+      "name": "2",
+      "type": "button",
+      "aliases": [
+        "2"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "2",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_button_3",
+      "name": "3",
+      "type": "button",
+      "aliases": [
+        "3"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "3",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_button_4",
+      "name": "4",
+      "type": "button",
+      "aliases": [
+        "4"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "4",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_button_5",
+      "name": "5",
+      "type": "button",
+      "aliases": [
+        "5"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "5",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_button_6",
+      "name": "6",
+      "type": "button",
+      "aliases": [
+        "6"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "6",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_button_7",
+      "name": "7",
+      "type": "button",
+      "aliases": [
+        "7"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "7",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_button_8",
+      "name": "8",
+      "type": "button",
+      "aliases": [
+        "8"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "8",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_button_9",
+      "name": "9",
+      "type": "button",
+      "aliases": [
+        "9"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "9",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_button_10",
+      "name": "0",
+      "type": "button",
+      "aliases": [
+        "0"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "0",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_borrar",
+      "name": "← Borrar",
+      "type": "button",
+      "aliases": [
+        "← borrar"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "← Borrar",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_limpiar",
+      "name": "Limpiar",
+      "type": "button",
+      "aliases": [
+        "limpiar"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Limpiar",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_cancelar",
+      "name": "Cancelar",
+      "type": "button",
+      "aliases": [
+        "cancelar"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Cancelar",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_identificacion_cliente",
+      "name": "Identificación del cliente",
+      "type": "section",
+      "aliases": [
+        "identificación del cliente"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Identificación del cliente",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_seleccione_tipo_identificacion",
+      "name": "Seleccione su tipo de identificación",
+      "type": "section",
+      "aliases": [
+        "seleccione su tipo de identificación"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Seleccione su tipo de identificación",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_cedula_identidad_dominicana",
+      "name": "Cédula de identidad dominicana",
+      "type": "section",
+      "aliases": [
+        "cédula de identidad dominicana"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Cédula de identidad dominicana",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_pasaporte_extranjero",
+      "name": "Pasaporte extranjero",
+      "type": "section",
+      "aliases": [
+        "pasaporte extranjero"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Pasaporte extranjero",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_numero_identificacion_digitos",
+      "name": "Número de identificación(11 dígitos)",
+      "type": "section",
+      "aliases": [
+        "número de identificación(11 dígitos)"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Número de identificación(11 dígitos)",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    }
+  ],
+  "knownPlans": [
+    {
+      "id": "c37757-consulta-depositos-a-plazo-en-dolares",
+      "caseId": 37757,
+      "externalId": "C37757",
+      "title": "Consulta depositos a plazo en dolares",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37757-consulta-depositos-a-plazo-en-dolares\\plan.json",
+      "createdAt": "2026-05-20T19:46:17.185Z",
+      "updatedAt": "2026-05-20T19:46:17.185Z",
+      "score": 0
+    },
+    {
+      "id": "c37758-c37381-visualizar-detalle-de-cuenta-de-ahorro-en-pesos",
+      "caseId": 37758,
+      "externalId": "C37758",
+      "title": "C37381 - Visualizar detalle de cuenta de ahorro en pesos",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37758-c37381-visualizar-detalle-de-cuenta-de-ahorro-en-pesos\\plan.json",
+      "createdAt": "2026-05-20T19:54:34.497Z",
+      "updatedAt": "2026-05-20T19:54:34.497Z",
+      "score": 0
+    },
+    {
+      "id": "c37844-visualizar-detalle-de-tarjeta-visa-gold",
+      "caseId": 37844,
+      "externalId": "C37844",
+      "title": "Visualizar detalle de Tarjeta Visa Gold",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37844-visualizar-detalle-de-tarjeta-visa-gold\\plan.json",
+      "createdAt": "2026-05-21T03:09:17.322Z",
+      "updatedAt": "2026-05-21T20:01:30.155Z",
+      "score": 0,
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa gold"
+      ]
+    },
+    {
+      "id": "c37845-visualizar-detalle-de-tarjeta-visa-platinum",
+      "caseId": 37845,
+      "externalId": "C37845",
+      "title": "Visualizar detalle de Tarjeta Visa Platinum",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37845-visualizar-detalle-de-tarjeta-visa-platinum\\plan.json",
+      "createdAt": "2026-05-21T03:09:22.764Z",
+      "updatedAt": "2026-05-21T19:42:47.564Z",
+      "score": 0,
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa platinum"
+      ]
+    },
+    {
+      "id": "c37846-visualizar-detalle-de-tarjeta-visa-infinite",
+      "caseId": 37846,
+      "externalId": "C37846",
+      "title": "Visualizar detalle de Tarjeta Visa Infinite",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37846-visualizar-detalle-de-tarjeta-visa-infinite\\plan.json",
+      "createdAt": "2026-05-21T03:10:25.931Z",
+      "updatedAt": "2026-05-21T19:43:29.840Z",
+      "score": 0,
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa infinite"
+      ]
+    },
+    {
+      "id": "route-recovery",
+      "title": "Route recovery",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\route-recovery\\plan.json",
+      "createdAt": "2026-05-21T15:09:19.055Z",
+      "updatedAt": "2026-05-21T15:09:19.055Z",
+      "score": 0,
+      "route": [
+        "Tarjetas"
+      ]
+    },
+    {
+      "id": "c37853-consulta-detalle-de-prestamo-personal",
+      "caseId": 37853,
+      "externalId": "C37853",
+      "title": "Consulta detalle de prestamo personal",
+      "status": "inline_debug_only",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37853-consulta-detalle-de-prestamo-personal\\plan.json",
+      "createdAt": "2026-05-21T02:12:12.100Z",
+      "updatedAt": "2026-05-21T15:41:45.881Z",
+      "score": 0,
+      "route": [
+        "Iniciar",
+        "Información de productos"
+      ]
+    }
+  ],
+  "knownRoutes": [
+    {
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa gold"
+      ],
+      "sourcePlanId": "c37844-visualizar-detalle-de-tarjeta-visa-gold",
+      "score": 0
+    },
+    {
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa platinum"
+      ],
+      "sourcePlanId": "c37845-visualizar-detalle-de-tarjeta-visa-platinum",
+      "score": 0
+    },
+    {
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa infinite"
+      ],
+      "sourcePlanId": "c37846-visualizar-detalle-de-tarjeta-visa-infinite",
+      "score": 0
+    },
+    {
+      "route": [
+        "Tarjetas"
+      ],
+      "sourcePlanId": "route-recovery",
+      "score": 0
+    },
+    {
+      "route": [
+        "Iniciar",
+        "Información de productos"
+      ],
+      "sourcePlanId": "c37853-consulta-detalle-de-prestamo-personal",
+      "score": 0
+    }
+  ],
+  "snapshotCandidates": [
+    {
+      "id": "el-30",
+      "type": "button",
+      "text": "Continuar",
+      "tagName": "button",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary hover:bg-primary/90 h-10 min-h-[70px] text-lg font-semibold rounded-2xl px-8 py-5 transition-all duration-200 ease-out shadow-card hover:shadow-card-hover disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden select-none transform-gpu bg-gradient-to-br from-kiosk-success to-green-600 text-white hover:from-kiosk-success/95 hover:to-green-600/95 border-2 border-green-700/20 hover:border-green-700/30 active:shadow-inner hover:scale-[1.02] min-w-[280px]",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-5",
+      "type": "text",
+      "text": "Para continuar, ingrese su información:",
+      "tagName": "p",
+      "className": "text-base text-muted-foreground text-center mt-2",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-31",
+      "type": "text",
+      "text": "Continuar",
+      "tagName": "span",
+      "className": "relative z-10 flex items-center justify-center gap-2",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-7",
+      "type": "button",
+      "text": "Cédula de identidad dominicana",
+      "tagName": "button",
+      "className": "\n                        group relative bg-white rounded-xl shadow-md border-2 transition-all duration-300 overflow-hidden min-h-[140px]\n                        border-primary shadow-card-hover bg-gradient-to-br from-primary/10 to-primary/5\n                      ",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-9",
+      "type": "button",
+      "text": "Pasaporte extranjero",
+      "tagName": "button",
+      "className": "\n                        group relative bg-white rounded-xl shadow-md border-2 transition-all duration-300 overflow-hidden min-h-[140px]\n                        border-border hover:border-primary/50 hover:shadow-lg\n                      ",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-15",
+      "type": "button",
+      "text": "1",
+      "tagName": "button",
+      "className": "min-w-[90px] h-20 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl text-3xl font-bold transition-smooth shadow-card hover:shadow-card-hover active:scale-95",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-16",
+      "type": "button",
+      "text": "2",
+      "tagName": "button",
+      "className": "min-w-[90px] h-20 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl text-3xl font-bold transition-smooth shadow-card hover:shadow-card-hover active:scale-95",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-17",
+      "type": "button",
+      "text": "3",
+      "tagName": "button",
+      "className": "min-w-[90px] h-20 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl text-3xl font-bold transition-smooth shadow-card hover:shadow-card-hover active:scale-95",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-18",
+      "type": "button",
+      "text": "4",
+      "tagName": "button",
+      "className": "min-w-[90px] h-20 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl text-3xl font-bold transition-smooth shadow-card hover:shadow-card-hover active:scale-95",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-19",
+      "type": "button",
+      "text": "5",
+      "tagName": "button",
+      "className": "min-w-[90px] h-20 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl text-3xl font-bold transition-smooth shadow-card hover:shadow-card-hover active:scale-95",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-20",
+      "type": "button",
+      "text": "6",
+      "tagName": "button",
+      "className": "min-w-[90px] h-20 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl text-3xl font-bold transition-smooth shadow-card hover:shadow-card-hover active:scale-95",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-21",
+      "type": "button",
+      "text": "7",
+      "tagName": "button",
+      "className": "min-w-[90px] h-20 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl text-3xl font-bold transition-smooth shadow-card hover:shadow-card-hover active:scale-95",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-22",
+      "type": "button",
+      "text": "8",
+      "tagName": "button",
+      "className": "min-w-[90px] h-20 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl text-3xl font-bold transition-smooth shadow-card hover:shadow-card-hover active:scale-95",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-23",
+      "type": "button",
+      "text": "9",
+      "tagName": "button",
+      "className": "min-w-[90px] h-20 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl text-3xl font-bold transition-smooth shadow-card hover:shadow-card-hover active:scale-95",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-24",
+      "type": "button",
+      "text": "0",
+      "tagName": "button",
+      "className": "min-w-[90px] h-20 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl text-3xl font-bold transition-smooth shadow-card hover:shadow-card-hover active:scale-95",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-25",
+      "type": "button",
+      "text": "← Borrar",
+      "tagName": "button",
+      "className": "min-w-[135px] h-16 bg-muted text-foreground hover:bg-muted/80 rounded-xl text-base font-semibold transition-smooth shadow-card hover:shadow-card-hover active:scale-95",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-26",
+      "type": "button",
+      "text": "Limpiar",
+      "tagName": "button",
+      "className": "min-w-[135px] h-16 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl text-base font-semibold transition-smooth shadow-card hover:shadow-card-hover active:scale-95",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-27",
+      "type": "button",
+      "text": "Cancelar",
+      "tagName": "button",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary hover:bg-primary/90 h-10 min-h-[70px] text-lg font-semibold rounded-2xl px-8 py-5 transition-all duration-200 ease-out shadow-card hover:shadow-card-hover disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden select-none transform-gpu bg-gradient-to-br from-white to-gray-50 text-primary border-2 border-primary/40 hover:border-primary/60 hover:from-primary/10 hover:to-primary/20 hover:text-primary-foreground active:shadow-inner hover:scale-[1.02] min-w-[200px]",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-4",
+      "type": "heading",
+      "text": "Identificación del cliente",
+      "tagName": "h1",
+      "className": "text-3xl font-bold text-foreground text-center",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-6",
+      "type": "heading",
+      "text": "Seleccione su tipo de identificación",
+      "tagName": "h2",
+      "className": "text-xl font-bold text-primary text-center",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-8",
+      "type": "heading",
+      "text": "Cédula de identidad dominicana",
+      "tagName": "h3",
+      "className": "\n                          text-xl font-bold transition-colors\n                          text-primary\n                        ",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-10",
+      "type": "heading",
+      "text": "Pasaporte extranjero",
+      "tagName": "h3",
+      "className": "\n                          text-xl font-bold transition-colors\n                          text-foreground group-hover:text-primary\n                        ",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-11",
+      "type": "heading",
+      "text": "Número de identificación(11 dígitos)",
+      "tagName": "h2",
+      "className": "text-xl font-bold text-primary",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-12",
+      "type": "text",
+      "text": "(11 dígitos)",
+      "tagName": "span",
+      "className": "text-sm text-primary/70 ml-2",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-13",
+      "type": "text",
+      "text": "Ingrese el número",
+      "tagName": "p",
+      "className": "text-4xl font-mono tracking-wider text-foreground font-bold",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-14",
+      "type": "text",
+      "text": "Ingrese el número",
+      "tagName": "span",
+      "className": "text-muted-foreground text-2xl",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-28",
+      "type": "text",
+      "text": "Cancelar",
+      "tagName": "span",
+      "className": "relative z-10 flex items-center justify-center gap-2",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-3",
+      "type": "button",
+      "tagName": "button",
+      "className": "absolute left-0 top-1/2 -translate-y-1/2 p-3 hover:bg-primary/10 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 border-2 border-transparent hover:border-primary/20",
+      "candidateLocatorsCount": 0
+    },
+    {
+      "id": "el-2",
+      "type": "image",
+      "tagName": "img",
+      "className": "h-10 object-contain",
+      "candidateLocatorsCount": 0
+    },
+    {
+      "id": "el-29",
+      "type": "text",
+      "tagName": "span",
+      "className": "absolute inset-0 bg-gradient-to-t from-transparent via-white/5 to-white/10 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none",
+      "candidateLocatorsCount": 0
+    }
+  ],
+  "supportedActions": [
+    "navigate",
+    "login",
+    "click",
+    "fill",
+    "select",
+    "check",
+    "uncheck",
+    "press",
+    "waitFor",
+    "assertVisible",
+    "assertText",
+    "assertUrl",
+    "screenshot",
+    "noop"
+  ],
+  "safeData": {
+    "availableKeys": [],
+    "redacted": true
+  },
+  "constraints": {
+    "codexMustOnlyWriteAgentResponseJson": true,
+    "doNotRunPlaywright": true,
+    "doNotModifyStableRegistry": true,
+    "doNotApproveObjectsAutomatically": true,
+    "doNotInventData": true
+  },
+  "warnings": [
+    "Context file not found: automations\\apps\\default\\cases\\c37757-consulta-depositos-a-plazo-en-dolares\\plan.json",
+    "Context file not found: automations\\apps\\default\\cases\\c37758-c37381-visualizar-detalle-de-cuenta-de-ahorro-en-pesos\\plan.json"
+  ],
+  "appConfig": {
+    "appProfile": {
+      "appSlug": "default",
+      "name": "4",
+      "baseUrl": "https://172.27.4.50/",
+      "baseUrlHash": "74df3c0e992c",
+      "createdAt": "2026-05-21T20:01:30.137Z",
+      "updatedAt": "2026-05-21T20:01:30.138Z"
+    },
+    "baseUrl": "https://172.27.4.50/",
+    "loginMode": "no_login",
+    "testDataKeys": [],
+    "testDataAliases": {},
+    "hasUsername": false,
+    "hasPassword": false,
+    "missingInputBehavior": "fail",
+    "updatedAt": "2026-05-21T20:01:30.138Z"
+  }
+}

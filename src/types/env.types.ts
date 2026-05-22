@@ -18,6 +18,7 @@ export type AppConfig = {
   password?: string;
   extraLoginFields?: Record<string, string>;
   testData: TestDataMap;
+  rawTestData?: Record<string, unknown>;
   testDataAliases: TestDataAliasesMap;
   missingInputBehavior: MissingInputBehavior;
   appProfile?: string;

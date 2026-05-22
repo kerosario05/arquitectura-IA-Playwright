@@ -1,0 +1,1201 @@
+{
+  "version": "1.0",
+  "createdAt": "2026-05-22T03:25:16.623Z",
+  "app": {
+    "appSlug": "default",
+    "profileName": "default",
+    "baseUrl": "https://172.27.4.50/",
+    "baseUrlHash": "74df3c0e992c"
+  },
+  "case": {
+    "caseId": 37869,
+    "title": "Generar carta de referencia con cuenta de ahorro",
+    "source": "testrail"
+  },
+  "failure": {
+    "failedReason": "click_no_transition",
+    "failedTarget": "A quien pueda interesar",
+    "failedAtStep": 1
+  },
+  "currentRun": {
+    "outputDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-22T03-24-26-270Z",
+    "evidenceDir": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-22T03-24-26-270Z\\evidence",
+    "snapshotPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-22T03-24-26-270Z\\evidence\\step-1-snapshot.json",
+    "candidatePlanPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-22T03-24-26-270Z\\discovered-plans.pending.json",
+    "pendingObjectsPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-22T03-24-26-270Z\\discovered-objects.pending.json",
+    "pendingPlansPath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\case-37869\\2026-05-22T03-24-26-270Z\\discovered-plans.pending.json"
+  },
+  "knownObjects": [
+    {
+      "key": "button_quien_pueda_interesar",
+      "name": "A quien pueda interesar",
+      "type": "button",
+      "aliases": [
+        "a quien pueda interesar"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "A quien pueda interesar",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 1
+    },
+    {
+      "key": "section_quien_dirigida_carta",
+      "name": "¿A quién va dirigida la carta?",
+      "type": "section",
+      "aliases": [
+        "¿a quién va dirigida la carta?"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "¿A quién va dirigida la carta?",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0.3333333333333333
+    },
+    {
+      "key": "input_escriba_destinatario_carta",
+      "name": "Escriba el destinatario de la carta",
+      "type": "input",
+      "aliases": [
+        "escriba el destinatario de la carta"
+      ],
+      "locator": {
+        "strategy": "placeholder",
+        "value": "Escriba el destinatario de la carta",
+        "exact": false
+      },
+      "confidence": 0.8,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "input_ingrese_rnc_buscar",
+      "name": "Ingrese RNC para buscar empresa",
+      "type": "input",
+      "aliases": [
+        "ingrese rnc para buscar empresa"
+      ],
+      "locator": {
+        "strategy": "placeholder",
+        "value": "Ingrese RNC para buscar empresa",
+        "exact": false
+      },
+      "confidence": 0.8,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_iniciar",
+      "name": "Iniciar",
+      "type": "button",
+      "aliases": [
+        "iniciar"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_hola",
+      "name": "¡Hola!",
+      "type": "section",
+      "aliases": [
+        "¡hola!"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "¡Hola!",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_informacion_productosexplora_nuestros",
+      "name": "Información de productosExplora nuestros productos bancarios",
+      "type": "button",
+      "aliases": [
+        "información de productosexplora nuestros productos bancarios"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Información de productosExplora nuestros productos bancarios",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_transacciones_serviciosrealiza_operaciones",
+      "name": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+      "type": "button",
+      "aliases": [
+        "transacciones y serviciosrealiza operaciones con tus cuentas"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_salir",
+      "name": "Salir",
+      "type": "button",
+      "aliases": [
+        "salir"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Salir",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_hola",
+      "name": "¡Hola!",
+      "type": "section",
+      "aliases": [
+        "¡hola!"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "¡Hola!",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_nos_alegra_que",
+      "name": "¡Nos alegra que estés con nosotros!",
+      "type": "section",
+      "aliases": [
+        "¡nos alegra que estés con nosotros!"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "¡Nos alegra que estés con nosotros!",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_informacion_productos",
+      "name": "Información de productos",
+      "type": "section",
+      "aliases": [
+        "información de productos"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Información de productos",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_transacciones_servicios",
+      "name": "Transacciones y servicios",
+      "type": "section",
+      "aliases": [
+        "transacciones y servicios"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Transacciones y servicios",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_cedula_identidad_dominicana",
+      "name": "Cédula de identidad dominicana",
+      "type": "button",
+      "aliases": [
+        "cédula de identidad dominicana"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Cédula de identidad dominicana",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_pasaporte_extranjero",
+      "name": "Pasaporte extranjero",
+      "type": "button",
+      "aliases": [
+        "pasaporte extranjero"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Pasaporte extranjero",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_cancelar",
+      "name": "Cancelar",
+      "type": "button",
+      "aliases": [
+        "cancelar"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Cancelar",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_continuar",
+      "name": "Continuar",
+      "type": "button",
+      "aliases": [
+        "continuar"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Continuar",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_identificacion_cliente",
+      "name": "Identificación del cliente",
+      "type": "section",
+      "aliases": [
+        "identificación del cliente"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Identificación del cliente",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_seleccione_tipo_identificacion",
+      "name": "Seleccione su tipo de identificación",
+      "type": "section",
+      "aliases": [
+        "seleccione su tipo de identificación"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Seleccione su tipo de identificación",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_cedula_identidad_dominicana",
+      "name": "Cédula de identidad dominicana",
+      "type": "section",
+      "aliases": [
+        "cédula de identidad dominicana"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Cédula de identidad dominicana",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_pasaporte_extranjero",
+      "name": "Pasaporte extranjero",
+      "type": "section",
+      "aliases": [
+        "pasaporte extranjero"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Pasaporte extranjero",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_estado_cuentaconsulta_descarga",
+      "name": "Estado de cuentaConsulta y descarga estados de cuenta",
+      "type": "button",
+      "aliases": [
+        "estado de cuentaconsulta y descarga estados de cuenta"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Estado de cuentaConsulta y descarga estados de cuenta",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_consulta_balanceverifica_saldos",
+      "name": "Consulta de balanceVerifica saldos de tus productos",
+      "type": "button",
+      "aliases": [
+        "consulta de balanceverifica saldos de tus productos"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Consulta de balanceVerifica saldos de tus productos",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_pago_productosrealiza_pagos",
+      "name": "Pago de productosRealiza pagos de tarjetas y préstamos",
+      "type": "button",
+      "aliases": [
+        "pago de productosrealiza pagos de tarjetas y préstamos"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Pago de productosRealiza pagos de tarjetas y préstamos",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_generar_cartasgenera_cartas",
+      "name": "Generar cartasGenera cartas y certificaciones bancarias",
+      "type": "button",
+      "aliases": [
+        "generar cartasgenera cartas y certificaciones bancarias"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Generar cartasGenera cartas y certificaciones bancarias",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_salir",
+      "name": "Salir",
+      "type": "button",
+      "aliases": [
+        "salir"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Salir",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_transacciones_servicios",
+      "name": "Transacciones y Servicios",
+      "type": "section",
+      "aliases": [
+        "transacciones y servicios"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Transacciones y Servicios",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_hola_roque",
+      "name": "¡Hola, ROQUE!",
+      "type": "section",
+      "aliases": [
+        "¡hola, roque!"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "¡Hola, ROQUE!",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_selecciona_operacion_que",
+      "name": "Selecciona la operación que deseas realizar",
+      "type": "section",
+      "aliases": [
+        "selecciona la operación que deseas realizar"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Selecciona la operación que deseas realizar",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_estado_cuenta",
+      "name": "Estado de cuenta",
+      "type": "section",
+      "aliases": [
+        "estado de cuenta"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Estado de cuenta",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_consulta_balance",
+      "name": "Consulta de balance",
+      "type": "section",
+      "aliases": [
+        "consulta de balance"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Consulta de balance",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_pago_productos",
+      "name": "Pago de productos",
+      "type": "section",
+      "aliases": [
+        "pago de productos"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Pago de productos",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_generar_cartas",
+      "name": "Generar cartas",
+      "type": "section",
+      "aliases": [
+        "generar cartas"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Generar cartas",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_carta_referenciacarta_certificar",
+      "name": "Carta de referenciaCarta para certificar tu relación bancaria",
+      "type": "button",
+      "aliases": [
+        "carta de referenciacarta para certificar tu relación bancaria"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Carta de referenciaCarta para certificar tu relación bancaria",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_carta_consularcarta_dirigida",
+      "name": "Carta consularCarta dirigida a embajadas y consulados",
+      "type": "button",
+      "aliases": [
+        "carta consularcarta dirigida a embajadas y consulados"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Carta consularCarta dirigida a embajadas y consulados",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_generar_cartas",
+      "name": "Generar cartas",
+      "type": "section",
+      "aliases": [
+        "generar cartas"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Generar cartas",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_carta_referencia",
+      "name": "Carta de referencia",
+      "type": "section",
+      "aliases": [
+        "carta de referencia"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Carta de referencia",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_carta_consular",
+      "name": "Carta consular",
+      "type": "section",
+      "aliases": [
+        "carta consular"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Carta consular",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_volver",
+      "name": "Volver",
+      "type": "button",
+      "aliases": [
+        "volver"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Volver",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_continuar_productos",
+      "name": "Continuar (0 productos)",
+      "type": "button",
+      "aliases": [
+        "continuar (0 productos)"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Continuar (0 productos)",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_generar_cartas",
+      "name": "Generar cartas",
+      "type": "section",
+      "aliases": [
+        "generar cartas"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Generar cartas",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_seleccionar_todos_productos",
+      "name": "Seleccionar todos los productos(1 de 12 seleccionados)",
+      "type": "button",
+      "aliases": [
+        "seleccionar todos los productos(1 de 12 seleccionados)"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Seleccionar todos los productos(1 de 12 seleccionados)",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_redacted",
+      "name": "[REDACTED]",
+      "type": "button",
+      "aliases": [
+        "[redacted]"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "[REDACTED]",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_redacted_1",
+      "name": "[REDACTED]",
+      "type": "button",
+      "aliases": [
+        "[redacted]"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "[REDACTED]",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_redacted_2",
+      "name": "[REDACTED]",
+      "type": "button",
+      "aliases": [
+        "[redacted]"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "[REDACTED]",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_redacted_3",
+      "name": "[REDACTED]",
+      "type": "button",
+      "aliases": [
+        "[redacted]"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "[REDACTED]",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_redacted_4",
+      "name": "[REDACTED]",
+      "type": "button",
+      "aliases": [
+        "[redacted]"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "[REDACTED]",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_redacted_5",
+      "name": "[REDACTED]",
+      "type": "button",
+      "aliases": [
+        "[redacted]"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "[REDACTED]",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_redacted_6",
+      "name": "[REDACTED]",
+      "type": "button",
+      "aliases": [
+        "[redacted]"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "[REDACTED]",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_redacted_7",
+      "name": "[REDACTED]",
+      "type": "button",
+      "aliases": [
+        "[redacted]"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "[REDACTED]",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    }
+  ],
+  "knownPlans": [
+    {
+      "id": "c37869-generar-carta-de-referencia-con-cuenta-de-ahorro",
+      "caseId": 37869,
+      "externalId": "C37869",
+      "title": "Generar carta de referencia con cuenta de ahorro",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37869-generar-carta-de-referencia-con-cuenta-de-ahorro\\plan.json",
+      "createdAt": "2026-05-22T01:47:27.888Z",
+      "updatedAt": "2026-05-22T02:44:23.692Z",
+      "score": 0,
+      "route": [
+        "iniciar",
+        "transacciones y servicio",
+        "Cédula de identidad dominicana",
+        "continuar",
+        "Generar cartas"
+      ]
+    },
+    {
+      "id": "c37757-consulta-depositos-a-plazo-en-dolares",
+      "caseId": 37757,
+      "externalId": "C37757",
+      "title": "Consulta depositos a plazo en dolares",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37757-consulta-depositos-a-plazo-en-dolares\\plan.json",
+      "createdAt": "2026-05-20T19:46:17.185Z",
+      "updatedAt": "2026-05-20T19:46:17.185Z",
+      "score": 0
+    },
+    {
+      "id": "c37758-c37381-visualizar-detalle-de-cuenta-de-ahorro-en-pesos",
+      "caseId": 37758,
+      "externalId": "C37758",
+      "title": "C37381 - Visualizar detalle de cuenta de ahorro en pesos",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37758-c37381-visualizar-detalle-de-cuenta-de-ahorro-en-pesos\\plan.json",
+      "createdAt": "2026-05-20T19:54:34.497Z",
+      "updatedAt": "2026-05-20T19:54:34.497Z",
+      "score": 0
+    },
+    {
+      "id": "c37844-visualizar-detalle-de-tarjeta-visa-gold",
+      "caseId": 37844,
+      "externalId": "C37844",
+      "title": "Visualizar detalle de Tarjeta Visa Gold",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37844-visualizar-detalle-de-tarjeta-visa-gold\\plan.json",
+      "createdAt": "2026-05-21T03:09:17.322Z",
+      "updatedAt": "2026-05-21T20:01:30.155Z",
+      "score": 0,
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa gold"
+      ]
+    },
+    {
+      "id": "c37845-visualizar-detalle-de-tarjeta-visa-platinum",
+      "caseId": 37845,
+      "externalId": "C37845",
+      "title": "Visualizar detalle de Tarjeta Visa Platinum",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37845-visualizar-detalle-de-tarjeta-visa-platinum\\plan.json",
+      "createdAt": "2026-05-21T03:09:22.764Z",
+      "updatedAt": "2026-05-21T19:42:47.564Z",
+      "score": 0,
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa platinum"
+      ]
+    },
+    {
+      "id": "c37846-visualizar-detalle-de-tarjeta-visa-infinite",
+      "caseId": 37846,
+      "externalId": "C37846",
+      "title": "Visualizar detalle de Tarjeta Visa Infinite",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37846-visualizar-detalle-de-tarjeta-visa-infinite\\plan.json",
+      "createdAt": "2026-05-21T03:10:25.931Z",
+      "updatedAt": "2026-05-21T19:43:29.840Z",
+      "score": 0,
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa infinite"
+      ]
+    },
+    {
+      "id": "route-recovery",
+      "title": "Route recovery",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\route-recovery\\plan.json",
+      "createdAt": "2026-05-21T15:09:19.055Z",
+      "updatedAt": "2026-05-21T15:09:19.055Z",
+      "score": 0,
+      "route": [
+        "Tarjetas"
+      ]
+    },
+    {
+      "id": "c37853-consulta-detalle-de-prestamo-personal",
+      "caseId": 37853,
+      "externalId": "C37853",
+      "title": "Consulta detalle de prestamo personal",
+      "status": "inline_debug_only",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37853-consulta-detalle-de-prestamo-personal\\plan.json",
+      "createdAt": "2026-05-21T02:12:12.100Z",
+      "updatedAt": "2026-05-21T15:41:45.881Z",
+      "score": 0,
+      "route": [
+        "Iniciar",
+        "Información de productos"
+      ]
+    }
+  ],
+  "knownRoutes": [
+    {
+      "route": [
+        "iniciar",
+        "transacciones y servicio",
+        "Cédula de identidad dominicana",
+        "continuar",
+        "Generar cartas"
+      ],
+      "sourcePlanId": "c37869-generar-carta-de-referencia-con-cuenta-de-ahorro",
+      "score": 0
+    },
+    {
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa gold"
+      ],
+      "sourcePlanId": "c37844-visualizar-detalle-de-tarjeta-visa-gold",
+      "score": 0
+    },
+    {
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa platinum"
+      ],
+      "sourcePlanId": "c37845-visualizar-detalle-de-tarjeta-visa-platinum",
+      "score": 0
+    },
+    {
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa infinite"
+      ],
+      "sourcePlanId": "c37846-visualizar-detalle-de-tarjeta-visa-infinite",
+      "score": 0
+    },
+    {
+      "route": [
+        "Tarjetas"
+      ],
+      "sourcePlanId": "route-recovery",
+      "score": 0
+    },
+    {
+      "route": [
+        "Iniciar",
+        "Información de productos"
+      ],
+      "sourcePlanId": "c37853-consulta-detalle-de-prestamo-personal",
+      "score": 0
+    }
+  ],
+  "snapshotCandidates": [
+    {
+      "id": "el-6",
+      "type": "button",
+      "text": "A quien pueda interesar",
+      "tagName": "button",
+      "className": "w-full flex items-center gap-4 p-5 rounded-xl border-2 transition-all duration-200 border-border hover:border-kiosk-success/50 bg-white",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-7",
+      "type": "text",
+      "text": "A quien pueda interesar",
+      "tagName": "span",
+      "className": "text-lg font-medium text-foreground",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-5",
+      "type": "heading",
+      "text": "¿A quién va dirigida la carta?",
+      "tagName": "h2",
+      "className": "text-2xl font-bold text-primary",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-8",
+      "type": "button",
+      "text": "Empresas más frecuentes",
+      "tagName": "button",
+      "className": "w-full flex items-center gap-4 p-5 rounded-xl border-2 transition-all duration-200 border-border hover:border-primary/50 bg-white",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-11",
+      "type": "input",
+      "placeholder": "Escriba el destinatario de la carta",
+      "tagName": "input",
+      "className": "flex w-full rounded-md border-input bg-background px-3 py-2 ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm text-lg h-14 border-2",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-12",
+      "type": "input",
+      "placeholder": "Ingrese RNC para buscar empresa",
+      "tagName": "input",
+      "className": "flex rounded-md border-input bg-background px-3 py-2 ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm h-12 text-base border-2 w-full pr-24",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-13",
+      "type": "button",
+      "text": "Buscar",
+      "tagName": "button",
+      "className": "absolute right-1 top-1/2 -translate-y-1/2 h-10 px-5 rounded-lg bg-primary text-white font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-14",
+      "type": "button",
+      "text": "Volver",
+      "tagName": "button",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary hover:bg-primary/90 h-10 min-h-[70px] text-lg font-semibold rounded-2xl py-5 transition-all duration-200 ease-out shadow-card hover:shadow-card-hover disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden select-none transform-gpu bg-gradient-to-br from-white to-gray-50 text-foreground border-2 border-border hover:border-border/80 hover:from-muted/50 hover:to-muted active:shadow-inner hover:scale-[1.02] px-12",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-17",
+      "type": "button",
+      "text": "Continuar",
+      "tagName": "button",
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary hover:bg-primary/90 h-10 min-h-[70px] text-lg font-semibold rounded-2xl py-5 transition-all duration-200 ease-out shadow-card hover:shadow-card-hover disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden select-none transform-gpu bg-gradient-to-br from-kiosk-success to-green-600 text-white hover:from-kiosk-success/95 hover:to-green-600/95 border-2 border-green-700/20 hover:border-green-700/30 active:shadow-inner hover:scale-[1.02] px-12",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-4",
+      "type": "heading",
+      "text": "Generar cartas",
+      "tagName": "h1",
+      "className": "text-3xl font-bold text-foreground text-center",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-9",
+      "type": "text",
+      "text": "Empresas más frecuentes",
+      "tagName": "span",
+      "className": "text-lg font-medium text-foreground",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-10",
+      "type": "text",
+      "text": "o especifique el destinatario",
+      "tagName": "span",
+      "className": "bg-white px-4 text-sm text-muted-foreground",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-15",
+      "type": "text",
+      "text": "Volver",
+      "tagName": "span",
+      "className": "relative z-10 flex items-center justify-center gap-2",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-18",
+      "type": "text",
+      "text": "Continuar",
+      "tagName": "span",
+      "className": "relative z-10 flex items-center justify-center gap-2",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-3",
+      "type": "button",
+      "tagName": "button",
+      "className": "absolute left-0 top-1/2 -translate-y-1/2 p-3 hover:bg-primary/10 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 border-2 border-transparent hover:border-primary/20",
+      "candidateLocatorsCount": 0
+    },
+    {
+      "id": "el-2",
+      "type": "image",
+      "tagName": "img",
+      "className": "h-10 object-contain",
+      "candidateLocatorsCount": 0
+    },
+    {
+      "id": "el-16",
+      "type": "text",
+      "tagName": "span",
+      "className": "absolute inset-0 bg-gradient-to-t from-transparent via-white/5 to-white/10 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none",
+      "candidateLocatorsCount": 0
+    }
+  ],
+  "supportedActions": [
+    "navigate",
+    "login",
+    "click",
+    "fill",
+    "select",
+    "check",
+    "uncheck",
+    "press",
+    "waitFor",
+    "assertVisible",
+    "assertText",
+    "assertUrl",
+    "screenshot",
+    "noop"
+  ],
+  "safeData": {
+    "availableKeys": [],
+    "redacted": true
+  },
+  "constraints": {
+    "codexMustOnlyWriteAgentResponseJson": true,
+    "doNotRunPlaywright": true,
+    "doNotModifyStableRegistry": true,
+    "doNotApproveObjectsAutomatically": true,
+    "doNotInventData": true
+  },
+  "warnings": [
+    "knownObjects limited to 50 (had 74).",
+    "Context file not found: automations\\apps\\default\\cases\\c37757-consulta-depositos-a-plazo-en-dolares\\plan.json",
+    "Context file not found: automations\\apps\\default\\cases\\c37758-c37381-visualizar-detalle-de-cuenta-de-ahorro-en-pesos\\plan.json"
+  ],
+  "appConfig": {
+    "appProfile": {
+      "appSlug": "default",
+      "name": "4",
+      "baseUrl": "https://172.27.4.50/",
+      "baseUrlHash": "74df3c0e992c",
+      "createdAt": "2026-05-22T02:44:23.671Z",
+      "updatedAt": "2026-05-22T02:44:23.672Z"
+    },
+    "baseUrl": "https://172.27.4.50/",
+    "loginMode": "no_login",
+    "testDataKeys": [],
+    "testDataAliases": {},
+    "hasUsername": false,
+    "hasPassword": false,
+    "missingInputBehavior": "fail",
+    "updatedAt": "2026-05-22T02:44:23.671Z"
+  }
+}

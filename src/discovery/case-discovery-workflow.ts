@@ -232,7 +232,18 @@ export async function runCaseDiscoveryWorkflow(
           requireApprovalThreshold: activeConfig.integrations.ai?.discoveryRequireApprovalThreshold ?? 0.7,
           maxAttempts: activeConfig.integrations.ai?.discoveryMaxAttempts ?? 3
         }
-      }
+      },
+      env: {
+        APP_TEST_DATA_JSON: activeConfig.app.rawTestData,
+        APP_TEST_DATA_ALIASES_JSON: activeConfig.app.testDataAliases,
+        Identity_Provider: process.env.Identity_Provider,
+        OTP_SECRET: process.env.OTP_SECRET,
+        APP_USERNAME: activeConfig.app.username,
+        APP_PASSWORD: activeConfig.app.password,
+        APP_EXTRA_LOGIN_FIELDS_JSON: activeConfig.app.extraLoginFields,
+        MISSING_INPUT_BEHAVIOR: activeConfig.app.missingInputBehavior
+      },
+      missingInputBehavior: activeConfig.app.missingInputBehavior
     });
 
     const agentCfg = resolveAgentAutoRepairConfig(activeConfig);

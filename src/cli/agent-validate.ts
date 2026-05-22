@@ -1,6 +1,6 @@
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { validateAgentHandoffResponse } from "../agent";
+import { repairAgentHandoffResponse, validateAgentHandoffResponse } from "../agent";
 import { assertValidExecutionPlan, writeExecutionPlansToFile } from "../plans";
 import type { AgentHandoffRequest, AgentHandoffResponse } from "../types/agent-handoff.types";
 
@@ -11,6 +11,17 @@ type CliArgs = {
   handoffDir?: string;
   help: boolean;
 };
+
+function extractAvailableDataKeys(request: AgentHandoffRequest): string[] {
+  const entries = request.dataContextSummary?.availableKeys;
+  if (!Array.isArray(entries)) {
+    return [];
+  }
+
+  return entries
+    .map((entry) => (typeof entry === "string" ? entry : entry?.key))
+    .filter((key): key is string => typeof key === "string" && key.trim().length > 0);
+}
 
 function printHelp(): void {
   console.log(`Usage: agent:validate [options]
@@ -92,13 +103,18 @@ async function run(): Promise<number> {
     throw new Error("--response or --handoff-dir is required.");
   }
 
-  const response = JSON.parse(await readFile(path.resolve(responsePath), "utf-8")) as unknown;
+  const absoluteResponsePath = path.resolve(responsePath);
+  const responseRaw = JSON.parse(await readFile(absoluteResponsePath, "utf-8")) as unknown;
+  const response = repairAgentHandoffResponse(responseRaw);
+  if (response !== responseRaw) {
+    await writeFile(absoluteResponsePath, JSON.stringify(response, null, 2), "utf-8");
+  }
   let availableDataKeys: string[] | undefined;
 
   if (requestPath) {
     try {
       const request = JSON.parse(await readFile(path.resolve(requestPath), "utf-8")) as AgentHandoffRequest;
-      availableDataKeys = request.dataContextSummary.availableKeys.map((entry) => entry.key);
+      availableDataKeys = extractAvailableDataKeys(request);
     } catch {
       // Request file may not exist, that's OK
     }

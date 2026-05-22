@@ -150,7 +150,7 @@ test("validateRouteRecoveryPlan rejects non-object response", () => {
 
 // --- validateAgentHandoffResponse with recoveryDecision ---
 
-import { validateAgentHandoffResponse } from "../src/agent/agent-response-validator";
+import { normalizeAgentHandoffResponse, validateAgentHandoffResponse } from "../src/agent/agent-response-validator";
 
 test("validateAgentHandoffResponse accepts no_safe_action with empty plans", () => {
   const result = validateAgentHandoffResponse({
@@ -396,4 +396,87 @@ test("validateAgentHandoffResponse detects <iso timestamp> placeholder in genera
   }, { promptMode: "compact-route-recovery" });
   expect(result.valid).toBe(false);
   expect(result.issues.some((i) => i.code === "PLACEHOLDER_NOT_REPLACED")).toBe(true);
+});
+
+test("normalizeAgentHandoffResponse wraps legacy single plan field", () => {
+  const normalized = normalizeAgentHandoffResponse({
+    version: "1.0",
+    generatedAt: new Date().toISOString(),
+    plan: {
+      version: "1.0",
+      source: "ai_generated",
+      status: "validated",
+      scenario: { source: "testrail", caseId: 1, title: "Test" },
+      requiredData: [],
+      steps: [{ index: 1, action: "click", target: { strategy: "text", value: "Continue" } }],
+      createdAt: new Date().toISOString()
+    }
+  });
+
+  expect((normalized as { recoveryDecision: string }).recoveryDecision).toBe("repaired_plan");
+  expect((normalized as { plans: unknown[] }).plans).toHaveLength(1);
+});
+
+test("normalizeAgentHandoffResponse wraps legacy singleton plans object", () => {
+  const normalized = normalizeAgentHandoffResponse({
+    version: "1.0",
+    generatedAt: new Date().toISOString(),
+    plans: {
+      version: "1.0",
+      source: "ai_generated",
+      status: "validated",
+      scenario: { source: "testrail", caseId: 1, title: "Test" },
+      requiredData: [],
+      steps: [{ index: 1, action: "click", target: { strategy: "text", value: "Continue" } }],
+      createdAt: new Date().toISOString()
+    }
+  });
+
+  expect((normalized as { recoveryDecision: string }).recoveryDecision).toBe("repaired_plan");
+  expect((normalized as { plans: unknown[] }).plans).toHaveLength(1);
+});
+
+test("normalizeAgentHandoffResponse fills missing recoveryDecision for legacy plans array response", () => {
+  const createdAt = new Date().toISOString();
+  const normalized = normalizeAgentHandoffResponse({
+    version: "1.0",
+    generatedAt: "",
+    plans: [
+      {
+        version: "1.0",
+        source: "ai_generated",
+        status: "validated",
+        scenario: { source: "testrail", caseId: 1, title: "Test" },
+        requiredData: [],
+        steps: [{ index: 1, action: "click", target: { strategy: "text", value: "Continue" } }],
+        createdAt
+      }
+    ],
+    proposedObjects: [],
+    unresolvedQuestions: [],
+    rationale: ["Recovered plan"]
+  });
+
+  expect((normalized as { recoveryDecision: string }).recoveryDecision).toBe("repaired_plan");
+  expect((normalized as { generatedAt: string }).generatedAt).toBe(createdAt);
+  expect((normalized as { plans: unknown[] }).plans).toHaveLength(1);
+});
+
+test("normalizeAgentHandoffResponse wraps legacy top-level ExecutionPlan array", () => {
+  const createdAt = new Date().toISOString();
+  const normalized = normalizeAgentHandoffResponse([
+    {
+      version: "1.0",
+      source: "ai_generated",
+      status: "validated",
+      scenario: { source: "testrail", caseId: 1, title: "Test array" },
+      requiredData: [],
+      steps: [{ index: 1, action: "click", target: { strategy: "text", value: "Continue" } }],
+      createdAt
+    }
+  ]);
+
+  expect((normalized as { recoveryDecision: string }).recoveryDecision).toBe("repaired_plan");
+  expect((normalized as { generatedAt: string }).generatedAt).toBe(createdAt);
+  expect((normalized as { plans: unknown[] }).plans).toHaveLength(1);
 });

@@ -122,6 +122,16 @@ export type DiscoveryStepResult = {
   };
   semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "unknown";
   relationContext?: string;
+  authGateDiagnostics?: {
+    detected: boolean;
+    detectedBeforeStep?: string;
+    stage?: string;
+    requiredInputs?: string[];
+    inputSource?: string;
+    completedBy?: string;
+    inputMethod?: string;
+    maskedInputs?: Record<string, string>;
+  };
 };
 
 export type DiscoveredObject = {

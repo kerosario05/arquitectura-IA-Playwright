@@ -112,6 +112,138 @@ test("runCodexAutoRepair fails on validation error", async () => {
   expect(result.error).toContain("validation failed");
 });
 
+test("runCodexAutoRepair accepts no_safe_action without plans in compact mode", async () => {
+  const { paths } = await createTempHandoffDir();
+
+  __setSpawnForTesting(mockSpawnExit({ exitCode: 0 }));
+
+  const nonPlanResponse = {
+    version: "1.0",
+    generatedAt: new Date().toISOString(),
+    recoveryDecision: "no_safe_action",
+    plans: [],
+    proposedObjects: [],
+    unresolvedQuestions: [],
+    rationale: ["No safe repair is possible from the available context."]
+  };
+  await fs.writeFile(paths.responsePath, JSON.stringify(nonPlanResponse, null, 2), "utf-8");
+
+  const { runCodexAutoRepair } = await import("../src/agent/codex-auto-repair");
+  const result = await runCodexAutoRepair({ ...paths, promptMode: "compact" });
+
+  expect(result.success).toBe(true);
+  expect(result.responsePath).toBe(paths.responsePath);
+  expect(result.diagnostics?.recoveryDecision).toBe("no_safe_action");
+  expect(result.diagnostics?.nextAction).toBe("no_safe_action");
+});
+
+test("runCodexAutoRepair normalizes bare ExecutionPlan responses", async () => {
+  const { paths } = await createTempHandoffDir();
+
+  __setSpawnForTesting(mockSpawnExit({ exitCode: 0 }));
+
+  const barePlan = {
+    version: "1.0",
+    source: "ai_generated",
+    status: "validated",
+    scenario: { source: "testrail", caseId: 1, title: "Test scenario" },
+    requiredData: [],
+    steps: [
+      { index: 1, action: "click", target: { strategy: "label", value: "Continue" } }
+    ],
+    createdAt: new Date().toISOString()
+  };
+  await fs.writeFile(paths.responsePath, JSON.stringify(barePlan, null, 2), "utf-8");
+
+  const { runCodexAutoRepair } = await import("../src/agent/codex-auto-repair");
+  const result = await runCodexAutoRepair({ ...paths, promptMode: "compact" });
+
+  expect(result.success).toBe(true);
+  expect(result.diagnostics?.recoveryDecision).toBe("repaired_plan");
+  expect(result.diagnostics?.nextAction).toBe("retry_execution");
+
+  const written = JSON.parse(await fs.readFile(paths.responsePath, "utf-8"));
+  expect(written.recoveryDecision).toBe("repaired_plan");
+  expect(written.plans).toHaveLength(1);
+  expect(written.plans[0].scenario.title).toBe("Test scenario");
+});
+
+test("runCodexAutoRepair normalizes legacy plans array responses missing recoveryDecision", async () => {
+  const { paths } = await createTempHandoffDir();
+
+  __setSpawnForTesting(mockSpawnExit({ exitCode: 0 }));
+
+  const createdAt = new Date().toISOString();
+  const wrappedPlanResponse = {
+    version: "1.0",
+    generatedAt: "",
+    plans: [
+      {
+        version: "1.0",
+        source: "ai_generated",
+        status: "validated",
+        scenario: { source: "testrail", caseId: 1, title: "Test scenario" },
+        requiredData: [],
+        steps: [
+          { index: 1, action: "click", target: { strategy: "label", value: "Continue" } }
+        ],
+        createdAt
+      }
+    ],
+    proposedObjects: [],
+    unresolvedQuestions: [],
+    rationale: ["Recovered plan"]
+  };
+  await fs.writeFile(paths.responsePath, JSON.stringify(wrappedPlanResponse, null, 2), "utf-8");
+
+  const { runCodexAutoRepair } = await import("../src/agent/codex-auto-repair");
+  const result = await runCodexAutoRepair({ ...paths, promptMode: "compact" });
+
+  expect(result.success).toBe(true);
+  expect(result.diagnostics?.recoveryDecision).toBe("repaired_plan");
+  expect(result.diagnostics?.nextAction).toBe("retry_execution");
+
+  const written = JSON.parse(await fs.readFile(paths.responsePath, "utf-8"));
+  expect(written.recoveryDecision).toBe("repaired_plan");
+  expect(written.generatedAt).toBe(createdAt);
+  expect(written.plans).toHaveLength(1);
+});
+
+test("runCodexAutoRepair normalizes top-level ExecutionPlan array responses", async () => {
+  const { paths } = await createTempHandoffDir();
+
+  __setSpawnForTesting(mockSpawnExit({ exitCode: 0 }));
+
+  const createdAt = new Date().toISOString();
+  const planArray = [
+    {
+      version: "1.0",
+      source: "ai_generated",
+      status: "validated",
+      scenario: { source: "testrail", caseId: 1, title: "Array scenario" },
+      requiredData: [],
+      steps: [
+        { index: 1, action: "click", target: { strategy: "label", value: "Continue" } }
+      ],
+      createdAt
+    }
+  ];
+  await fs.writeFile(paths.responsePath, JSON.stringify(planArray, null, 2), "utf-8");
+
+  const { runCodexAutoRepair } = await import("../src/agent/codex-auto-repair");
+  const result = await runCodexAutoRepair({ ...paths, promptMode: "compact" });
+
+  expect(result.success).toBe(true);
+  expect(result.diagnostics?.recoveryDecision).toBe("repaired_plan");
+  expect(result.diagnostics?.nextAction).toBe("retry_execution");
+
+  const written = JSON.parse(await fs.readFile(paths.responsePath, "utf-8"));
+  expect(written.recoveryDecision).toBe("repaired_plan");
+  expect(written.generatedAt).toBe(createdAt);
+  expect(written.plans).toHaveLength(1);
+  expect(written.plans[0].scenario.title).toBe("Array scenario");
+});
+
 test("runCodexAutoRepair fails when Codex CLI exits with error", async () => {
   const { paths } = await createTempHandoffDir();
 
@@ -929,6 +1061,48 @@ test("compact-route-recovery: final agent-response passes validateAgentHandoffRe
   const { validateAgentHandoffResponse } = await import("../src/agent/agent-response-validator");
   const validation = validateAgentHandoffResponse(written, { promptMode: "compact-route-recovery" });
   expect(validation.valid).toBe(true);
+});
+
+test("compact-route-recovery: invalid repaired_plan action fails instead of reporting success", async () => {
+  const { paths, dir } = await createTempHandoffDir();
+  const packPath = path.join(dir, "route-recovery-pack.json");
+  await fs.writeFile(packPath, JSON.stringify(minPack(), null, 2), "utf-8");
+
+  const decisionPath = path.join(dir, "route-recovery-decision.json");
+  await fs.writeFile(decisionPath, JSON.stringify({
+    recoveryDecision: "repaired_plan",
+    selectedCandidateId: "candidate-123",
+    action: "hover",
+    confidence: 0.85,
+    sensitive: false,
+    rationale: "test"
+  }, null, 2), "utf-8");
+
+  __setSpawnForTesting(mockSpawnExit({ exitCode: 0 }));
+
+  const { runCodexAutoRepair } = await import("../src/agent/codex-auto-repair");
+  const result = await runCodexAutoRepair({
+    ...paths,
+    promptMode: "compact-route-recovery",
+    routeRecoveryPackPath: packPath,
+    routeRecoveryDecisionPath: decisionPath,
+    planningBudget: {
+      preferredResponseSeconds: 30,
+      maxPromptBudgetSeconds: 60,
+      maxCandidates: 12,
+      maxKnownObjects: 20,
+      maxKnownRoutes: 10,
+      maxKnownPlans: 5,
+      maxProposedActions: 5,
+      maxRationaleChars: 1200,
+      maxUnresolvedQuestions: 5
+    }
+  });
+
+  expect(result.success).toBe(false);
+  expect(result.diagnostics?.routeRecoveryDecisionValid).toBe(false);
+  expect(result.diagnostics?.nextAction).toBe("auto_repair_invalid_response");
+  expect(result.error).toContain("INVALID_ACTION");
 });
 
 test("compact route recovery prompt contains JSON examples for each decision type", async () => {
