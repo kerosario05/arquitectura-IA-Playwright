@@ -18,7 +18,7 @@ test.describe("Codex auto-repair environment variables", () => {
   test("CODEX_AUTO_REPAIR_PROMPT_MODE is loaded from env", () => {
     const mode = config.integrations.codex?.autoRepairPromptMode;
     expect(mode).toBeDefined();
-    expect(["compact", "verbose"]).toContain(mode);
+    expect(["compact", "verbose", "disabled"]).toContain(mode);
   });
 
   test("CODEX_AUTO_REPAIR_TIMEOUT_MS is loaded from env", () => {

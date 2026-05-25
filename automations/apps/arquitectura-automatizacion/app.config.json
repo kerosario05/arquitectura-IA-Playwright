@@ -2,11 +2,11 @@
   "appProfile": {
     "appSlug": "arquitectura-automatizacion",
     "source": "default",
-    "name": "Arquitectura automatización",
+    "name": "demoblaze",
     "baseUrl": "https://www.demoblaze.com",
     "baseUrlHash": "f1bffa09d02f",
-    "createdAt": "2026-05-25T12:51:50.070Z",
-    "updatedAt": "2026-05-25T12:51:50.070Z"
+    "createdAt": "2026-05-25T16:43:24.616Z",
+    "updatedAt": "2026-05-25T16:43:24.616Z"
   },
   "baseUrl": "https://www.demoblaze.com",
   "loginMode": "no_login",
@@ -18,5 +18,5 @@
   "usernameRef": "APP_USERNAME",
   "passwordRef": "APP_PASSWORD",
   "missingInputBehavior": "auto_generate",
-  "updatedAt": "2026-05-25T12:51:50.070Z"
+  "updatedAt": "2026-05-25T16:43:24.616Z"
 }

@@ -22,6 +22,7 @@ type CliArgs = {
   noAutoPomValidation: boolean;
   verifyPromotedSpec: boolean;
   promotedSpecTimeoutMs?: number;
+  requirePomRuntime: boolean;
 };
 
 export function parseDiscoveryCaseArgs(argv: string[]): CliArgs {
@@ -42,6 +43,7 @@ export function parseDiscoveryCaseArgs(argv: string[]): CliArgs {
     noAutoPomValidation: false,
     verifyPromotedSpec: false,
     promotedSpecTimeoutMs: undefined
+    ,requirePomRuntime: false
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -134,6 +136,10 @@ export function parseDiscoveryCaseArgs(argv: string[]): CliArgs {
       i += 1;
       continue;
     }
+    if (token === "--require-pom-runtime") {
+      args.requirePomRuntime = true;
+      continue;
+    }
     if (token === "--case-id") {
       if (!nextValue || nextValue.startsWith("--")) {
         throw new Error("Missing value for --case-id");
@@ -215,6 +221,7 @@ async function main(): Promise<void> {
     noAutoPomValidation: args.noAutoPomValidation,
     verifyPromotedSpec: args.verifyPromotedSpec,
     promotedSpecTimeoutMs: args.promotedSpecTimeoutMs,
+    requirePomRuntime: args.requirePomRuntime,
     config,
     appProfile
   };

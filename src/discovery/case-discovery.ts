@@ -16,6 +16,7 @@ import {
 } from "./target-resolver";
 import { resolveLoginForm, type LoginFormResolution } from "./login-resolver";
 import { runAiAssistedDiscovery, type AiAssistedDiscoveryConfig } from "./ai-assisted-discovery";
+import { runAiRepairOrchestrator } from "../ai/repair/ai-repair-orchestrator";
 import { detectPostClickUiChange, type PostClickUiChangeResult } from "./post-click-ui-change-detector";
 import {
   buildConcreteAssertionsFromExpected,
@@ -60,6 +61,12 @@ function normalizeText(text: string): string {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function envTrue(name: string, fallback = false): boolean {
+  const raw = process.env[name];
+  if (!raw) return fallback;
+  return raw.trim().toLowerCase() === "true";
 }
 
 export function extractCleanTarget(action: string): { type: "click" | "assert" | "setup_route" | "skip" | "unknown"; target: string } {
@@ -2693,6 +2700,103 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           errorMsg += ` Auth gate recovery attempted but failed: ${authRecovery.error}`;
         }
 
+        // AI repair orchestration (phase 1): target_not_found only, after all local resolvers fail.
+        if (envTrue("AI_REPAIR_ENABLED", false) && envTrue("AI_REPAIR_USE_CONTEXT_PACK", true)) {
+          const aiCandidates = currentSnapshot.elements.map((el) => ({
+            candidateId: el.id,
+            role: el.role,
+            name: el.name,
+            text: el.text,
+            visible: Boolean(el.visible),
+            enabled: undefined,
+            clickable: Boolean(el.visible && (el.type === "button" || el.type === "link" || el.role === "button" || el.role === "link")),
+            editable: Boolean(el.type === "input" || el.type === "textarea" || el.role === "textbox"),
+            semanticRelation: undefined,
+            score: resolution.candidates.find((c) => c.elementId === el.id)?.matchScore,
+            sensitive: false
+          }));
+
+          const aiRepair = await runAiRepairOrchestrator({
+            appSlug: String((options.env as any)?.APP_SLUG ?? "default"),
+            failure: "target_not_found",
+            currentStep: actionTarget.action,
+            currentUrl: page.url(),
+            snapshotSummary: {
+              title: currentSnapshot.title,
+              url: currentSnapshot.url,
+              summary: currentSnapshot.summary
+            },
+            candidates: aiCandidates,
+            runtimeEvidenceTrace: { attemptedLocators: resolution.attemptedLocators, matchReason: resolution.matchReason },
+            structuralEvidence: diagnosis,
+            feedbackEvidence: steps.slice(-5).map((s) => ({ index: s.index, status: s.status, targetText: s.targetText })),
+            pendingAssertions: parsed.assertionTargets.map((a) => a.target),
+            previousActions: steps.filter((s) => s.targetText).map((s) => `${s.action}: ${s.targetText}`),
+            previousFills: planSteps.filter((s) => s.action === "fill").map((s) => `${s.description ?? "fill"}:${(s as any).valueKey ?? ""}`),
+            constraints: [
+              "forbid_action:fill",
+              "forbid_action:select",
+              "must_return_existing_candidate_id",
+              "no_selector_invention"
+            ]
+          });
+
+          (resolution as any).aiRepairDiagnostics = aiRepair.diagnostics;
+
+          if (aiRepair.status === "repaired_plan" && aiRepair.decision?.candidateId) {
+            const selected = currentSnapshot.elements.find((el) => el.id === aiRepair.decision!.candidateId);
+            if (selected) {
+              const resolvedFromAi = await resolveSnapshotElementLocator(page, {
+                element: selected,
+                target: actionTarget.target,
+                candidateText: selected.text ?? selected.label ?? selected.name ?? selected.placeholder ?? actionTarget.target,
+                type: selected.type,
+                tagName: selected.tagName,
+                confidence: aiRepair.decision.confidence ?? 0.5,
+                matchReason: `ai_repair:${aiRepair.decision.repairType ?? "target_resolution"}`
+              });
+              if (resolvedFromAi.locator) {
+                await clickResolvedTarget(resolvedFromAi.locator, false).catch(async () => {
+                  await clickResolvedTarget(resolvedFromAi.locator!, true);
+                });
+                await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+                const aiRecoveredScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+                currentSnapshot = aiRecoveredScan.snapshot;
+                allDiscoveredObjects.push(...aiRecoveredScan.objects);
+
+                steps.push({
+                  index: actionTarget.index,
+                  action: actionTarget.action,
+                  status: "found",
+                  targetText: actionTarget.target,
+                  snapshotUrl: aiRecoveredScan.url,
+                  snapshotTitle: aiRecoveredScan.title,
+                  elementsFound: aiRecoveredScan.elementsCount,
+                  evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+                  aiAssisted: true,
+                  aiReason: "ai_repair_orchestrator",
+                  semanticRole: actionTarget.semanticRole,
+                  relationContext: actionTarget.relationContext
+                });
+
+                planSteps.push({
+                  index: planSteps.length + 1,
+                  action: "click",
+                  description: actionTarget.action,
+                  target: { strategy: "text", value: actionTarget.target, exact: false }
+                });
+
+                executedStepIndices.add(actionTarget.index);
+                if (typeof currentActionOrder === "number") executedActionOrders.add(currentActionOrder);
+                if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
+                  break;
+                }
+                continue;
+              }
+            }
+          }
+        }
+
         steps.push({
           index: actionTarget.index,
           action: actionTarget.action,
@@ -2705,6 +2809,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
           resolutionDiagnosis: diagnosis,
           aiDiagnostics: (resolution as any).aiDiagnostics,
+          aiRepairDiagnostics: (resolution as any).aiRepairDiagnostics,
           semanticRole: actionTarget.semanticRole,
           relationContext: actionTarget.relationContext,
           earlyCompletionDiagnostics: earlyCompletion

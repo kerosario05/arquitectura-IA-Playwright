@@ -1,0 +1,10 @@
+{
+  "id": "c37947-completar-orden-de-compra-con-datos-validos-generados-para-ambiente-demo",
+  "externalId": "C37947",
+  "caseId": 37947,
+  "title": "Completar orden de compra con datos válidos generados para ambiente demo",
+  "source": "discovery",
+  "appSlug": "default",
+  "appConfigPath": "automations\\apps\\default\\app.config.json",
+  "createdAt": "2026-05-25T14:22:15.807Z"
+}

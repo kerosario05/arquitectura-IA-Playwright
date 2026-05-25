@@ -49,6 +49,7 @@ export type CaseDiscoveryWorkflowOptions = {
   verifyPromotedSpec?: boolean;
   promotedSpecTimeoutMs?: number;
   appProfile?: AppProfile;
+  requirePomRuntime?: boolean;
 };
 
 export type CaseDiscoveryWorkflowResult = {
@@ -956,6 +957,10 @@ export async function runCaseDiscoveryWorkflow(
 
     const loginStrategy = getLoginStrategy(activeConfig.app.loginMode);
 
+    const aiExplorerProvider = activeConfig.integrations.ai?.agentProvider === "none"
+      ? "custom"
+      : (activeConfig.integrations.ai?.agentProvider ?? "custom");
+
     caseResult = await runCaseDiscovery({
       page,
       scenario,
@@ -969,7 +974,7 @@ export async function runCaseDiscoveryWorkflow(
       },
       aiAssistedDiscovery: {
         explorer: createAIExplorer({
-          provider: activeConfig.integrations.ai?.agentProvider ?? "custom"
+          provider: aiExplorerProvider
         }),
         config: {
           enabled: activeConfig.integrations.ai?.discoveryEnabled ?? false,
@@ -1442,6 +1447,7 @@ export async function runCaseDiscoveryWorkflow(
           verifySpec: options.verifyPromotedSpec ?? false,
           specVerificationTimeoutMs: options.promotedSpecTimeoutMs,
           appProfileObject: options.appProfile
+          ,requirePomRuntime: options.requirePomRuntime === true
         },
         false,
         {

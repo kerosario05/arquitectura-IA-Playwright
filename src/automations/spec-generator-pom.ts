@@ -7,6 +7,7 @@ import { findReusableMethod, findMethodBySemanticIntent } from "./page-object-re
 import { deriveMethodIntentFromStepWithContext, deriveExpectedOwnerForStep } from "./pom-classification";
 import type { SemanticMethodIntent } from "../types/pom-ownership";
 import { isLikelyAuthGate, buildAuthFlowSpecImport, buildAuthFlowInstantiation, buildAuthFlowCall } from "../discovery/auth-flow-helpers";
+import { buildDataKeyVariableMap } from "../data/promoted-data";
 
 export type POMSpecResult = {
   specContent: string;
@@ -38,6 +39,19 @@ function escapeSpecString(value: string): string {
 
 function buildPortablePathFromSpec(specPath: string, absoluteTargetPath: string): string {
   return path.relative(path.dirname(specPath), absoluteTargetPath).replace(/\\/g, "/");
+}
+
+function buildPortablePathFromCwd(absolutePath: string): string {
+  return path.relative(process.cwd(), absolutePath).replace(/\\/g, "/");
+}
+
+function inferExpectedEffect(step: ExecutionPlanStep, semanticIntent: SemanticMethodIntent): "none" | "navigation" | "modal_or_form_or_navigation" | "ui_change" {
+  if (step.action.startsWith("assert")) return "none";
+  if (semanticIntent === "open_login_modal" || semanticIntent === "submit_login" || semanticIntent === "submit_form") {
+    return "modal_or_form_or_navigation";
+  }
+  if (step.action === "click" || step.action === "select") return "ui_change";
+  return "none";
 }
 
 function buildPageObjectImport(className: string, filePath: string, specPath: string): string {
@@ -237,6 +251,12 @@ export function generatePOMSpecFromPlan(
   const importedClasses = new Set<string>();
   const instantiatedVars = new Map<string, string>();
   const declaredValueVars = new Set<string>();
+  const dataVarMap = buildDataKeyVariableMap(
+    plan.steps
+      .filter((step) => Boolean(step.valueKey))
+      .map((step) => String(step.valueKey))
+  );
+  const usesPromotedRuntime = plan.steps.some((step) => step.action !== "navigate" && step.action !== "login");
 
   function ensurePageObject(className: string, filePath: string): string {
     const key = className;
@@ -261,12 +281,14 @@ export function generatePOMSpecFromPlan(
     if (!step.valueKey) {
       return step.value ? `'${escapeSpecString(step.value)}'` : "''";
     }
-    const rawVarName = step.valueKey.replace(/[^a-zA-Z0-9_$]/g, "_");
-    const varName = rawVarName.match(/^[A-Za-z_$]/) ? rawVarName : `data_${rawVarName}`;
+    const varName = dataVarMap.get(step.valueKey) ?? "dataValue";
     requiredDataUsed.add(step.valueKey);
     if (!declaredValueVars.has(varName)) {
       declaredValueVars.add(varName);
-      dataHelperLines.push(`const ${varName} = requirePromotedData(dataContext, '${escapeSpecString(step.valueKey)}');`);
+      const fieldName = getTargetValue(step.target);
+      dataHelperLines.push(
+        `const ${varName} = requirePromotedData(dataContext, '${escapeSpecString(step.valueKey)}', { fieldName: '${escapeSpecString(fieldName)}', stepIndex: ${step.index} });`
+      );
     }
     return varName;
   }
@@ -458,11 +480,41 @@ export function generatePOMSpecFromPlan(
           if (resolvedValueExpr && method.parameters.length === 1) {
             return resolvedValueExpr;
           }
+          if (resolvedValueExpr && method.parameters.length > 1) {
+            const paramName = parameter.toLowerCase();
+            const isLastParameter = index === method.parameters.length - 1;
+            if (paramName.includes("value") || paramName.includes("text") || paramName.includes("input") || paramName === "v") {
+              return resolvedValueExpr;
+            }
+            if (isLastParameter && step.action === "fill") {
+              return resolvedValueExpr;
+            }
+          }
           return `'${escapeSpecString(targetValue || parameter)}'`;
         }).join(", ");
-        actionLine = `await ${varName}.${method.name}(${args});`;
+        const methodCall = `${varName}.${method.name}(${args})`;
+        if (step.action === "fill") {
+          actionLine = `await promotedRuntime.fillPromotedField({ stepIndex: ${step.index}, field: '${escapeSpecString(targetValue)}', value: String(${resolvedValueExpr ?? "''"}), sensitive: ${String(Boolean(method.sensitive))}, fill: async () => { await ${methodCall}; } });`;
+        } else if (step.action.startsWith("assert")) {
+          actionLine = `await promotedRuntime.expectPromotedVisible({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', assertion: async () => { await ${methodCall}; } });`;
+        } else if (step.action === "select") {
+          actionLine = `await promotedRuntime.selectPromotedItem({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: '${inferExpectedEffect(step, semanticIntent)}', sensitive: ${String(Boolean(method.sensitive))}, action: async () => { await ${methodCall}; } });`;
+        } else {
+          actionLine = `await promotedRuntime.clickPromotedTarget({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: '${inferExpectedEffect(step, semanticIntent)}', sensitive: ${String(Boolean(method.sensitive))}, action: async () => { await ${methodCall}; } });`;
+        }
       } else {
-        actionLine = `await ${varName}.${method.name}();`;
+        const methodCall = `${varName}.${method.name}()`;
+        const targetValue = getTargetValue(step.target);
+        if (step.action.startsWith("assert")) {
+          actionLine = `await promotedRuntime.expectPromotedVisible({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', assertion: async () => { await ${methodCall}; } });`;
+        } else if (step.action === "fill") {
+          const resolvedValueExpr = ensureDataValue(step);
+          actionLine = `await promotedRuntime.fillPromotedField({ stepIndex: ${step.index}, field: '${escapeSpecString(targetValue)}', value: String(${resolvedValueExpr}), sensitive: ${String(Boolean(method.sensitive))}, fill: async () => { await ${methodCall}; } });`;
+        } else if (step.action === "select") {
+          actionLine = `await promotedRuntime.selectPromotedItem({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: '${inferExpectedEffect(step, semanticIntent)}', sensitive: ${String(Boolean(method.sensitive))}, action: async () => { await ${methodCall}; } });`;
+        } else {
+          actionLine = `await promotedRuntime.clickPromotedTarget({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: '${inferExpectedEffect(step, semanticIntent)}', sensitive: ${String(Boolean(method.sensitive))}, action: async () => { await ${methodCall}; } });`;
+        }
         const tv = getTargetValue(step.target);
         if (tv) {
           actionLine += ` // [target: ${tv}]`;
@@ -487,9 +539,11 @@ export function generatePOMSpecFromPlan(
               if (resolvedValueExpr && method.parameters.length === 1) return resolvedValueExpr;
               return `'${escapeSpecString(targetValue || parameter)}'`;
             }).join(", ");
-            actionLine = `await ${varName}.${method.name}(${args}); // candidate method`;
+            const methodCall = `${varName}.${method.name}(${args})`;
+            actionLine = `await promotedRuntime.clickPromotedTarget({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: '${inferExpectedEffect(step, semanticIntent)}', action: async () => { await ${methodCall}; } }); // candidate method`;
           } else {
-            actionLine = `await ${varName}.${method.name}(); // candidate method`;
+            const methodCall = `${varName}.${method.name}()`;
+            actionLine = `await promotedRuntime.clickPromotedTarget({ stepIndex: ${step.index}, target: '${escapeSpecString(getTargetValue(step.target))}', actionIntent: '${semanticIntent}', expectedEffect: '${inferExpectedEffect(step, semanticIntent)}', action: async () => { await ${methodCall}; } }); // candidate method`;
           }
           actionLine += `\n  // [candidate] ${description}`;
           generatedCandidates += 1;
@@ -589,16 +643,26 @@ export function generatePOMSpecFromPlan(
   }
 
   const lines: string[] = [];
+  const promotedManifestPath = escapeSpecString(buildPortablePathFromCwd(path.join(appPaths.caseDir ?? path.dirname(appPaths.specPath ?? ""), "promoted-data.json")));
 
   lines.push("import { test } from '@playwright/test';");
+  if (usesPromotedRuntime) {
+    const runtimeImportPath = escapeSpecString(buildPortablePathFromSpec(appPaths.specPath ?? "", path.resolve(process.cwd(), "src/automations/runtime/promoted-spec-runtime.ts")));
+    lines.push(`import { createPromotedSpecRuntime } from '${runtimeImportPath.replace(/\.ts$/, "")}';`);
+  }
+  if (requiredDataUsed.size > 0) {
+    lines.push("import { resolve } from 'node:path';");
+  }
 
   if (requiredDataUsed.size > 0) {
     const envImportPath = escapeSpecString(buildPortablePathFromSpec(appPaths.specPath ?? "", path.resolve(process.cwd(), "src/config/env.ts")));
     const dataImportPath = escapeSpecString(buildPortablePathFromSpec(appPaths.specPath ?? "", path.resolve(process.cwd(), "src/data/index.ts")));
     const appProfileImportPath = escapeSpecString(buildPortablePathFromSpec(appPaths.specPath ?? "", path.resolve(process.cwd(), "src/automations/app-profile.ts")));
+    const promotedDataImportPath = escapeSpecString(buildPortablePathFromSpec(appPaths.specPath ?? "", path.resolve(process.cwd(), "src/data/promoted-data.ts")));
     lines.push(`import { config } from '${envImportPath.replace(/\.ts$/, "")}';`);
     lines.push(`import { buildDataContext } from '${dataImportPath.replace(/\/index\.ts$/, "").replace(/\.ts$/, "")}';`);
     lines.push(`import { loadPromotedAppConfigSync, buildMergedConfig } from '${appProfileImportPath.replace(/\.ts$/, "")}';`);
+    lines.push(`import { loadPromotedDataManifestSync, buildPromotedDataContext, requirePromotedData } from '${promotedDataImportPath.replace(/\.ts$/, "")}';`);
   }
 
   if (importLines.length > 0) {
@@ -611,6 +675,8 @@ export function generatePOMSpecFromPlan(
   }
 
   lines.push("");
+  lines.push(`export const PROMOTED_SPEC_STRATEGY = "pom_runtime";`);
+  lines.push("");
   const testName = inlineDebugMode
     ? `test('[INLINE DEBUG] ${escapedTitle}', async ({ page }) => {`
     : `test('${escapedTitle}', async ({ page }) => {`;
@@ -620,25 +686,25 @@ export function generatePOMSpecFromPlan(
     lines.push("");
     lines.push(`  const __appConfig = loadPromotedAppConfigSync({ appSlug: '${escapeSpecString(appProfile.appSlug)}', configPath: '${escapeSpecString(appPaths.configPath.replace(/\\/g, "/"))}' });`);
     lines.push("  const __runtimeConfig = __appConfig ? buildMergedConfig(__appConfig, config) : config;");
-    lines.push("  const dataContext = buildDataContext(__runtimeConfig);");
-    lines.push("  const requirePromotedData = (ctx: { entries: Array<{ key: string; value: string }> }, key: string): string => {");
-    lines.push("    const normalizedKey = key.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').trim();");
-    lines.push("    const directMatch = ctx.entries.find((entry) => entry.key === key) ?? ctx.entries.find((entry) => entry.key.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').trim() === normalizedKey);");
-    lines.push("    const aliasKey = normalizedKey.includes('usuario') || normalizedKey.includes('username') || normalizedKey.includes('user')");
-    lines.push("      ? 'APP_USERNAME'");
-    lines.push("      : normalizedKey.includes('contrasena') || normalizedKey.includes('password') || normalizedKey.includes('pass')");
-    lines.push("        ? 'APP_PASSWORD'");
-    lines.push("        : undefined;");
-    lines.push("    const aliasMatch = aliasKey ? ctx.entries.find((entry) => entry.key === aliasKey) : undefined;");
-    lines.push("    const match = directMatch ?? aliasMatch;");
-    lines.push("    if (!match || !match.value) throw new Error(`Missing required promoted data key '${key}'.`);");
-    lines.push("    return match.value;");
-    lines.push("  };");
+    lines.push("  const __baseDataContext = buildDataContext(__runtimeConfig);");
+    lines.push(`  const __promotedManifest = loadPromotedDataManifestSync(resolve(process.cwd(), '${promotedManifestPath}'));`);
+    lines.push("  const dataContext = buildPromotedDataContext({");
+    lines.push("    baseDataContext: __baseDataContext,");
+    lines.push("    manifest: __promotedManifest,");
+    lines.push("    testDataProfile: __runtimeConfig.app.testDataProfile,");
+    lines.push("    autoGenerateTestData: __runtimeConfig.app.autoGenerateTestData,");
+    lines.push("    autoGenerateSensitiveData: __runtimeConfig.app.autoGenerateSensitiveData");
+    lines.push("  });");
   }
 
   if (instantiationLines.length > 0) {
     lines.push("");
     lines.push(...instantiationLines.map((l) => `  ${l}`));
+  }
+
+  if (usesPromotedRuntime) {
+    lines.push("");
+    lines.push("  const promotedRuntime = createPromotedSpecRuntime(page);");
   }
 
   if (preambleLines.length > 0) {

@@ -21,6 +21,10 @@ function countBySource(entries: DataContextEntry[]): Record<DataContextEntry["so
     app_password: 0,
     extra_login_field: 0,
     test_data: 0,
+    test_data_alias: 0,
+    promoted_manifest: 0,
+    auto_generated: 0,
+    fixture: 0,
     environment_variable: 0
   };
 
@@ -54,6 +58,10 @@ function runInspection(): void {
   console.log(`- app_password: ${sourceCounts.app_password}`);
   console.log(`- extra_login_field: ${sourceCounts.extra_login_field}`);
   console.log(`- test_data: ${sourceCounts.test_data}`);
+  console.log(`- test_data_alias: ${sourceCounts.test_data_alias}`);
+  console.log(`- promoted_manifest: ${sourceCounts.promoted_manifest}`);
+  console.log(`- auto_generated: ${sourceCounts.auto_generated}`);
+  console.log(`- fixture: ${sourceCounts.fixture}`);
   console.log(`- environment_variable: ${sourceCounts.environment_variable}`);
   console.log("");
   console.log(`Dynamic aliases groups: ${Object.keys(config.app.testDataAliases).length}`);

@@ -32,6 +32,9 @@ export type GenerateSpecOptions = {
 
 export type GenerateSpecResult = {
   specContent: string;
+  selectedStrategy: "pom" | "inline";
+  fallbackUsed: boolean;
+  fallbackReason?: string;
   pomStatus?: POMPromotionStatus;
   usedPageObjects: string[];
   missingPageObjects: string[];
@@ -68,6 +71,8 @@ export async function generateSpecFromPlanWithPolicy(
     );
     return {
       specContent: content,
+      selectedStrategy: "inline",
+      fallbackUsed: false,
       pomStatus: "inline_debug_only",
       usedPageObjects: [],
       missingPageObjects: [],
@@ -110,6 +115,8 @@ export async function generateSpecFromPlanWithPolicy(
   if (pomResult.pomStatus === "promoted" || pomResult.pomStatus === "page_object_candidate_created") {
     return {
       specContent: pomResult.specContent,
+      selectedStrategy: "pom",
+      fallbackUsed: false,
       pomStatus: pomResult.pomStatus,
       usedPageObjects: pomResult.usedPageObjects,
       missingPageObjects: pomResult.missingPageObjects,
@@ -126,6 +133,8 @@ export async function generateSpecFromPlanWithPolicy(
   if (policy.requirePageObjects && !policy.allowInlineFallback) {
     return {
       specContent: pomResult.specContent,
+      selectedStrategy: "pom",
+      fallbackUsed: false,
       pomStatus: pomResult.pomStatus,
       usedPageObjects: pomResult.usedPageObjects,
       missingPageObjects: pomResult.missingPageObjects,
@@ -148,6 +157,9 @@ export async function generateSpecFromPlanWithPolicy(
     );
     return {
       specContent: content,
+      selectedStrategy: "inline",
+      fallbackUsed: true,
+      fallbackReason: `pom_unavailable:${pomResult.pomStatus ?? "unknown"}`,
       pomStatus: undefined,
       usedPageObjects: [],
       missingPageObjects: [],
@@ -160,6 +172,8 @@ export async function generateSpecFromPlanWithPolicy(
 
   return {
     specContent: pomResult.specContent,
+    selectedStrategy: "pom",
+    fallbackUsed: false,
     pomStatus: pomResult.pomStatus,
     usedPageObjects: pomResult.usedPageObjects,
     missingPageObjects: pomResult.missingPageObjects,
@@ -199,6 +213,8 @@ function _generateInlineSpec(
     `import { executeExecutionPlan } from '${executorImportPath.replace(/\.ts$/, "")}';`,
     `import { loadPromotedAppConfigSync, buildMergedConfig } from '${appProfileImportPath.replace(/\.ts$/, "")}';`,
     `import type { ExecutionPlan } from '${execPlanTypeImportPath.replace(/\.ts$/, "")}';`,
+    "",
+    `export const PROMOTED_SPEC_STRATEGY = "inline_executor";`,
     "",
     `const SPEC_APP_PROFILE = '${escapedProfile}';`,
     `const SPEC_APP_CONFIG_PATH = '${escapedConfigPath}';`,

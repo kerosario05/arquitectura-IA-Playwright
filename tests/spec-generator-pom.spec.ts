@@ -930,13 +930,119 @@ test("login modal uses LoginPage methods and required data keys without inline f
   expect(result.requiredDataUsed).toEqual(["usuario_valido", "contrasena_valida"]);
   expect(result.specContent).toContain("await homePage.openLoginModal();");
   expect(result.specContent).toContain("await loginPage.expectLoginFormVisible();");
-  expect(result.specContent).toContain("await loginPage.fillUsername(usuario_valido);");
-  expect(result.specContent).toContain("await loginPage.fillPassword(contrasena_valida);");
+  expect(result.specContent).toContain("await loginPage.fillUsername(usuarioValido);");
+  expect(result.specContent).toContain("await loginPage.fillPassword(contrasenaValida);");
   expect(result.specContent).toContain("await loginPage.submitLogin();");
-  expect(result.specContent).toContain("const usuario_valido = requirePromotedData(dataContext, 'usuario_valido');");
-  expect(result.specContent).toContain("const contrasena_valida = requirePromotedData(dataContext, 'contrasena_valida');");
+  expect(result.specContent).toContain("const usuarioValido = requirePromotedData(dataContext, 'usuario_valido'");
+  expect(result.specContent).toContain("const contrasenaValida = requirePromotedData(dataContext, 'contrasena_valida'");
   expect(result.specContent).not.toContain("[inline]");
   expect(result.specContent).not.toContain("fill('')");
   expect(result.specContent).not.toContain("getByText('Username').fill");
   expect(result.specContent).not.toContain("getByText('Password').fill");
+});
+
+test("fill with valueKey generates variable and uses it in callback", () => {
+  const reg = makeRegistry();
+  const form = registerPageObjectCandidate(reg, {
+    name: "FormPage", className: "FormPage", screenSignature: "sig:form", confidence: 0.9, sourcePlanId: "plan_form",
+    methods: [
+      { name: "fillField", intent: "fill_form_field", parameters: ["fieldName", "value"] }
+    ]
+  });
+  markPageObjectActive(form.registry, form.registry.pageObjects[0].id);
+  markMethodActive(form.registry, form.registry.pageObjects[0].id, "fillField");
+
+  const plan: ExecutionPlan = {
+    version: "1.0",
+    source: "discovery_generated",
+    status: "validated",
+    scenario: { source: "testrail", caseId: 1, title: "Fill form with promoted data" },
+    requiredData: [
+      { key: "orden_nombre", required: true, resolved: true, source: "test_data" }
+    ],
+    steps: [
+      { index: 1, action: "fill", target: { strategy: "text", value: "Name", exact: false }, valueKey: "orden_nombre" }
+    ],
+    createdAt: new Date().toISOString()
+  };
+
+  const result = generatePOMSpecFromPlan(plan, "test-001", mockProfile, mockPaths, form.registry, DEFAULT_PROMOTION_POLICY, false);
+
+  expect(result.pomStatus).toBe("promoted");
+  expect(result.requiredDataUsed).toEqual(["orden_nombre"]);
+  expect(result.specContent).toContain("const ordenNombre = requirePromotedData(dataContext, 'orden_nombre'");
+  expect(result.specContent).toContain("value: String(ordenNombre)");
+  expect(result.specContent).toContain("fillField('Name', ordenNombre)");
+  expect(result.specContent).not.toContain("fillField('Name', 'Name')");
+});
+
+test("same valueKey used multiple times declares variable once", () => {
+  const reg = makeRegistry();
+  const form = registerPageObjectCandidate(reg, {
+    name: "FormPage", className: "FormPage", screenSignature: "sig:form", confidence: 0.9, sourcePlanId: "plan_form",
+    methods: [
+      { name: "fillField", intent: "fill_form_field", parameters: ["fieldName", "value"] }
+    ]
+  });
+  markPageObjectActive(form.registry, form.registry.pageObjects[0].id);
+  markMethodActive(form.registry, form.registry.pageObjects[0].id, "fillField");
+
+  const plan: ExecutionPlan = {
+    version: "1.0",
+    source: "discovery_generated",
+    status: "validated",
+    scenario: { source: "testrail", caseId: 1, title: "Fill multiple fields with same data" },
+    requiredData: [
+      { key: "shared_value", required: true, resolved: true, source: "test_data" }
+    ],
+    steps: [
+      { index: 1, action: "fill", target: { strategy: "text", value: "Field1", exact: false }, valueKey: "shared_value" },
+      { index: 2, action: "fill", target: { strategy: "text", value: "Field2", exact: false }, valueKey: "shared_value" }
+    ],
+    createdAt: new Date().toISOString()
+  };
+
+  const result = generatePOMSpecFromPlan(plan, "test-001", mockProfile, mockPaths, form.registry, DEFAULT_PROMOTION_POLICY, false);
+
+  const declareCount = (result.specContent.match(/const sharedValue = requirePromotedData/g) || []).length;
+  expect(declareCount).toBe(1);
+  expect(result.specContent).toContain("fillField('Field1', sharedValue)");
+  expect(result.specContent).toContain("fillField('Field2', sharedValue)");
+  expect(result.specContent).not.toContain("fillField('Field1', 'Field1')");
+  expect(result.specContent).not.toContain("fillField('Field2', 'Field2')");
+});
+
+test("fill with valueKey does not generate fillField(fieldName, fieldName) anti-pattern", () => {
+  const reg = makeRegistry();
+  const form = registerPageObjectCandidate(reg, {
+    name: "FormPage", className: "FormPage", screenSignature: "sig:form", confidence: 0.9, sourcePlanId: "plan_form",
+    methods: [
+      { name: "fillField", intent: "fill_form_field", parameters: ["fieldName", "value"] }
+    ]
+  });
+  markPageObjectActive(form.registry, form.registry.pageObjects[0].id);
+  markMethodActive(form.registry, form.registry.pageObjects[0].id, "fillField");
+
+  const plan: ExecutionPlan = {
+    version: "1.0",
+    source: "discovery_generated",
+    status: "validated",
+    scenario: { source: "testrail", caseId: 37948, title: "Complete order" },
+    requiredData: [
+      { key: "orden_nombre", required: true, resolved: true, source: "test_data" },
+      { key: "orden_pais", required: true, resolved: true, source: "test_data" }
+    ],
+    steps: [
+      { index: 1, action: "fill", target: { strategy: "text", value: "Name", exact: false }, valueKey: "orden_nombre" },
+      { index: 2, action: "fill", target: { strategy: "text", value: "Country", exact: false }, valueKey: "orden_pais" }
+    ],
+    createdAt: new Date().toISOString()
+  };
+
+  const result = generatePOMSpecFromPlan(plan, "c37948", mockProfile, mockPaths, form.registry, DEFAULT_PROMOTION_POLICY, false);
+
+  expect(result.specContent).not.toContain("fillField('Name', 'Name')");
+  expect(result.specContent).not.toContain("fillField('Country', 'Country')");
+  expect(result.specContent).toContain("fillField('Name', ordenNombre)");
+  expect(result.specContent).toContain("fillField('Country', ordenPais)");
 });

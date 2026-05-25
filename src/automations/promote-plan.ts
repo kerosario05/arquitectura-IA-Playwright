@@ -49,6 +49,9 @@ import {
   runAutoPomPipeline,
   type AutoPomDiagnostics
 } from "./auto-pom";
+import { buildDataContext } from "../data/data-context";
+import { buildPromotedDataManifest, savePromotedDataManifestSync } from "../data/promoted-data";
+import { validatePromotedSpecRuntimeContract } from "./runtime/promoted-runtime-contract";
 
 interface PromoteInput {
   plan: ExecutionPlan;
@@ -66,6 +69,7 @@ interface PromoteInput {
   inlineDebugMode?: boolean;
   verifySpec?: boolean;
   specVerificationTimeoutMs?: number;
+  requirePomRuntime?: boolean;
 }
 
 function assertPromotable(status: string, allowDraft: boolean): void {
@@ -753,10 +757,31 @@ export async function promoteExecutionPlan(
     );
   }
 
+  if (appPaths.caseDir) {
+    const runtimeForData = input.fullConfig ?? envConfig;
+    const dataContext = buildDataContext(runtimeForData);
+    const promotedDataManifest = buildPromotedDataManifest(plan, dataContext);
+    savePromotedDataManifestSync(path.join(appPaths.caseDir, "promoted-data.json"), promotedDataManifest);
+  }
+
   // Generate spec — POM-aware when policy provided
   const promotionPolicy = input.promotionPolicy;
   const inlineDebugMode = input.inlineDebugMode ?? false;
   let pomStatus: POMPromotionStatus | undefined;
+  let strategyDiagnostics: {
+    requestedStrategy: "pom" | "inline" | "auto";
+    autoPomEnabled: boolean;
+    selectedStrategy: "pom" | "inline";
+    reason: string;
+    blockers: string[];
+    availablePageObjects: string[];
+    requiredPageMethods: string[];
+    missingPageMethods: string[];
+    autoPomAttempted: boolean;
+    autoPomCreatedMethods: string[];
+    fallbackUsed: boolean;
+    requirePomRuntime: boolean;
+  } | undefined;
   let pomDiagnostics: {
     status?: "needs_page_object" | "promoted";
     inlineFallbackUsed?: boolean;
@@ -795,6 +820,38 @@ export async function promoteExecutionPlan(
     });
     await fs.writeFile(appPaths.specPath, specResult.specContent, "utf-8");
     pomStatus = specResult.pomStatus;
+
+    const requirePomRuntime = input.requirePomRuntime === true || process.env.PROMOTION_REQUIRE_POM_RUNTIME === "true";
+    const selectedStrategy = specResult.selectedStrategy;
+    const blockers = [
+      ...(specResult.missingPageObjects ?? []).map((m) => `missing_page_object:${m}`),
+      ...(specResult.missingMethods ?? []).map((m) => `missing_method:${m}`),
+      ...(specResult.validationErrors ?? []).map((e) => `validation_error:${e}`),
+      ...(specResult.fallbackReason ? [specResult.fallbackReason] : [])
+    ];
+    strategyDiagnostics = {
+      requestedStrategy: promotionPolicy?.autoPom ? "auto" : "pom",
+      autoPomEnabled: promotionPolicy?.autoPom === true,
+      selectedStrategy,
+      reason: selectedStrategy === "pom" ? (pomStatus ?? "promoted") : (specResult.fallbackReason ?? "inline_fallback"),
+      blockers,
+      availablePageObjects: registry?.pageObjects?.map((po) => po.className) ?? [],
+      requiredPageMethods: [],
+      missingPageMethods: specResult.missingMethods ?? [],
+      autoPomAttempted: false,
+      autoPomCreatedMethods: [],
+      fallbackUsed: specResult.fallbackUsed,
+      requirePomRuntime
+    };
+
+    if (requirePomRuntime) {
+      const hasRuntime = specResult.specContent.includes("createPromotedSpecRuntime(") && specResult.specContent.includes(`PROMOTED_SPEC_STRATEGY = "pom_runtime"`);
+      if (selectedStrategy !== "pom" || !hasRuntime) {
+        throw new Error(
+          `POM_RUNTIME_REQUIRED_BUT_UNAVAILABLE: blockers=${blockers.join(" | ") || "unknown"}`
+        );
+      }
+    }
 
     // Fail promotion if spec validation found critical issues
     if (specResult.validationErrors && specResult.validationErrors.length > 0) {
@@ -874,11 +931,47 @@ export async function promoteExecutionPlan(
         missingMethods: autoPomResult.diagnostics.finalPomStatus === "promoted" ? [] : (pomDiagnostics?.missingMethods ?? []),
         autoPom: autoPomResult.diagnostics
       };
+      if (strategyDiagnostics) {
+        strategyDiagnostics.autoPomAttempted = true;
+        strategyDiagnostics.autoPomCreatedMethods = autoPomResult.diagnostics.autoApprovedMethods ?? [];
+        strategyDiagnostics.selectedStrategy = autoPomResult.diagnostics.finalPomStatus === "promoted" ? "pom" : strategyDiagnostics.selectedStrategy;
+        strategyDiagnostics.reason = autoPomResult.diagnostics.finalPomStatus;
+        strategyDiagnostics.fallbackUsed = strategyDiagnostics.selectedStrategy !== "pom";
+      }
     }
   } else {
     const specContent = generateSpecFromPlan(plan, automationId, appProfile, appPaths);
     await fs.writeFile(appPaths.specPath, specContent, "utf-8");
     pomStatus = inlineDebugMode ? "inline_debug_only" : undefined;
+    strategyDiagnostics = {
+      requestedStrategy: "inline",
+      autoPomEnabled: false,
+      selectedStrategy: "inline",
+      reason: "inline_mode_requested",
+      blockers: [],
+      availablePageObjects: [],
+      requiredPageMethods: [],
+      missingPageMethods: [],
+      autoPomAttempted: false,
+      autoPomCreatedMethods: [],
+      fallbackUsed: false,
+      requirePomRuntime: input.requirePomRuntime === true || process.env.PROMOTION_REQUIRE_POM_RUNTIME === "true"
+    };
+  }
+
+  if (appPaths.caseDir && strategyDiagnostics) {
+    await fs.writeFile(path.join(appPaths.caseDir, "promotion-diagnostics.json"), JSON.stringify(strategyDiagnostics, null, 2), "utf-8");
+  }
+
+  const requirePomRuntimeContract = input.requirePomRuntime === true || process.env.PROMOTION_REQUIRE_POM_RUNTIME === "true";
+  if (requirePomRuntimeContract && appPaths.specPath) {
+    const diagnosticsPath = appPaths.caseDir ? path.join(appPaths.caseDir, "promotion-diagnostics.json") : undefined;
+    const contractResult = await validatePromotedSpecRuntimeContract(appPaths.specPath, diagnosticsPath);
+    if (!contractResult.valid) {
+      throw new Error(
+        `PROMOTED_SPEC_RUNTIME_CONTRACT_INVALID: ${contractResult.errors.join(" | ")}`
+      );
+    }
   }
 
   const appConfig = serializeRuntimeConfigForPromotion(input.fullConfig ?? envConfig);
@@ -933,6 +1026,7 @@ export async function promoteExecutionPlan(
     metadata: pomDiagnostics || wasOverwritten ? {
       ...metadata,
       ...(pomDiagnostics ? { pomDiagnostics } : {}),
+      ...(strategyDiagnostics ? { promotionStrategyDiagnostics: strategyDiagnostics } : {}),
       ...(wasOverwritten ? {
         overwritten: true,
         previousAutomationPath,
@@ -979,6 +1073,9 @@ export async function promoteExecutionPlan(
 
   if (appPaths.caseAutomationPath) {
     await fs.writeFile(appPaths.caseAutomationPath, JSON.stringify(appIndexEntry, null, 2), "utf-8");
+  }
+  if (appPaths.caseDir && strategyDiagnostics) {
+    await fs.writeFile(path.join(appPaths.caseDir, "promotion-diagnostics.json"), JSON.stringify(strategyDiagnostics, null, 2), "utf-8");
   }
 
   // --- Update global index too ---

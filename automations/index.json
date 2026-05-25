@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-05-25T12:51:50.074Z",
+  "updatedAt": "2026-05-25T16:43:24.620Z",
   "automations": [
     {
       "id": "c10002-test-automation-plan",
@@ -602,55 +602,23 @@
       "externalId": "C37947",
       "caseId": 37947,
       "title": "Completar orden de compra con datos válidos generados para ambiente demo",
-      "planPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37947-completar-orden-de-compra-con-datos-validos-generados-para-ambiente-demo\\plan.json",
-      "specPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37947-completar-orden-de-compra-con-datos-validos-generados-para-ambiente-demo\\case.spec.ts",
-      "appSlug": "arquitectura-automatizacion",
-      "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
-      "status": "blocked_missing_pom",
+      "planPath": "automations\\apps\\default\\cases\\c37947-completar-orden-de-compra-con-datos-validos-generados-para-ambiente-demo\\plan.json",
+      "specPath": "automations\\apps\\default\\cases\\c37947-completar-orden-de-compra-con-datos-validos-generados-para-ambiente-demo\\case.spec.ts",
+      "appSlug": "default",
+      "appConfigPath": "automations\\apps\\default\\app.config.json",
+      "status": "active",
       "source": "discovery",
-      "appProfile": "arquitectura-automatizacion",
+      "appProfile": "default",
       "baseUrlHash": "f1bffa09d02f",
       "createdAt": "2026-05-25T00:38:06.974Z",
-      "updatedAt": "2026-05-25T02:09:22.958Z",
-      "lastPromotedFrom": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-25T01-56-22-700Z\\cases\\case-37947\\discovered-plans.pending.json",
-      "pomStatus": "needs_page_method",
+      "updatedAt": "2026-05-25T14:22:15.811Z",
+      "lastPromotedFrom": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\automations\\apps\\default\\cases\\c37947-completar-orden-de-compra-con-datos-validos-generados-para-ambiente-demo\\plan.json",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-25T01-56-22-700Z\\cases\\case-37947",
-        "pomDiagnostics": {
-          "status": "needs_page_object",
-          "inlineFallbackUsed": false,
-          "reason": "needs_manual_review",
-          "requiredDataUsed": [
-            "orden_nombre",
-            "orden_pais",
-            "orden_ciudad",
-            "orden_tarjeta",
-            "orden_mes",
-            "orden_anio"
-          ],
-          "generatedPageObjects": [],
-          "generatedMethods": [],
-          "missingPageObjects": [],
-          "missingMethods": [],
-          "generatedCandidates": 3,
-          "autoPom": {
-            "enabled": true,
-            "initialPomStatus": "page_object_candidate_created",
-            "generatedCandidateFiles": [],
-            "autoApprovedPageObjects": [],
-            "autoApprovedMethods": [],
-            "blockedAutoApprovals": [],
-            "approvalThreshold": 0.5,
-            "regeneratedSpec": true,
-            "validationStatus": "failed",
-            "finalPomStatus": "needs_manual_review"
-          }
-        },
         "overwritten": true,
-        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37947-completar-orden-de-compra-con-datos-validos-generados-para-ambiente-demo\\plan.json",
-        "previousStatus": "blocked_missing_pom"
+        "previousAutomationPath": "automations\\apps\\default\\cases\\c37947-completar-orden-de-compra-con-datos-validos-generados-para-ambiente-demo\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -704,13 +672,13 @@
       "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "f1bffa09d02f",
       "createdAt": "2026-05-25T01:49:18.929Z",
-      "updatedAt": "2026-05-25T12:51:50.074Z",
-      "lastPromotedFrom": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\case-37945\\2026-05-25T12-49-17-567Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-05-25T14:48:52.467Z",
+      "lastPromotedFrom": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\case-37945\\2026-05-25T14-46-19-657Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\case-37945\\2026-05-25T12-49-17-567Z",
+        "discoveryDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\case-37945\\2026-05-25T14-46-19-657Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -721,6 +689,27 @@
           "missingPageObjects": [],
           "missingMethods": [],
           "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "ProductDetailPage",
+            "FormPage",
+            "HomePage",
+            "LoginPage",
+            "CategoryPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": true
         },
         "overwritten": true,
         "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37945-visualizar-carrito-con-producto-agregado-durante-la-sesion-actual\\plan.json",
@@ -785,22 +774,22 @@
       "specPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37948-cerrar-confirmacion-de-compra-exitosa-con-la-opcion-ok\\case.spec.ts",
       "appSlug": "arquitectura-automatizacion",
       "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
-      "status": "blocked_missing_pom",
+      "status": "active",
       "source": "discovery",
       "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "f1bffa09d02f",
       "createdAt": "2026-05-25T01:56:14.867Z",
-      "updatedAt": "2026-05-25T02:13:28.809Z",
-      "lastPromotedFrom": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-25T01-56-22-700Z\\cases\\case-37948\\discovered-plans.pending.json",
-      "pomStatus": "needs_page_method",
+      "updatedAt": "2026-05-25T16:43:24.620Z",
+      "lastPromotedFrom": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\case-37948\\2026-05-25T16-39-18-643Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-25T01-56-22-700Z\\cases\\case-37948",
+        "discoveryDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\case-37948\\2026-05-25T16-39-18-643Z",
         "pomDiagnostics": {
-          "status": "needs_page_object",
+          "status": "promoted",
           "inlineFallbackUsed": false,
-          "reason": "needs_manual_review",
+          "reason": "promoted",
           "requiredDataUsed": [
             "orden_nombre",
             "orden_pais",
@@ -813,23 +802,32 @@
           "generatedMethods": [],
           "missingPageObjects": [],
           "missingMethods": [],
-          "generatedCandidates": 3,
-          "autoPom": {
-            "enabled": true,
-            "initialPomStatus": "page_object_candidate_created",
-            "generatedCandidateFiles": [],
-            "autoApprovedPageObjects": [],
-            "autoApprovedMethods": [],
-            "blockedAutoApprovals": [],
-            "approvalThreshold": 0.5,
-            "regeneratedSpec": true,
-            "validationStatus": "failed",
-            "finalPomStatus": "needs_manual_review"
-          }
+          "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "ProductDetailPage",
+            "FormPage",
+            "HomePage",
+            "LoginPage",
+            "CategoryPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": true
         },
         "overwritten": true,
         "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37948-cerrar-confirmacion-de-compra-exitosa-con-la-opcion-ok\\plan.json",
-        "previousStatus": "blocked_missing_pom"
+        "previousStatus": "active"
       }
     }
   ]

@@ -11,14 +11,14 @@
   "source": "discovery",
   "appProfile": "arquitectura-automatizacion",
   "baseUrlHash": "f1bffa09d02f",
-  "createdAt": "2026-05-25T12:51:50.073Z",
-  "updatedAt": "2026-05-25T12:51:50.073Z",
-  "lastPromotedFrom": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\case-37945\\2026-05-25T12-49-17-567Z\\discovered-plans.pending.json",
+  "createdAt": "2026-05-25T14:48:52.465Z",
+  "updatedAt": "2026-05-25T14:48:52.465Z",
+  "lastPromotedFrom": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\case-37945\\2026-05-25T14-46-19-657Z\\discovered-plans.pending.json",
   "pomStatus": "promoted",
   "inlineDebugMode": false,
   "specVerificationStatus": "not_run",
   "metadata": {
-    "discoveryDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\case-37945\\2026-05-25T12-49-17-567Z",
+    "discoveryDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\case-37945\\2026-05-25T14-46-19-657Z",
     "pomDiagnostics": {
       "status": "promoted",
       "inlineFallbackUsed": false,
@@ -29,6 +29,27 @@
       "missingPageObjects": [],
       "missingMethods": [],
       "generatedCandidates": 0
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [],
+      "availablePageObjects": [
+        "ProductListPage",
+        "ProductDetailPage",
+        "FormPage",
+        "HomePage",
+        "LoginPage",
+        "CategoryPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": true
     },
     "overwritten": true,
     "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37945-visualizar-carrito-con-producto-agregado-durante-la-sesion-actual\\plan.json",

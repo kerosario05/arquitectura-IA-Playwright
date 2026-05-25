@@ -77,17 +77,17 @@ function parseOptionalThreshold(rawValue: string | undefined, name: string): num
   return parsed;
 }
 
-function parseAgentProvider(rawValue?: string): "codex" | "copilot" | "custom" | undefined {
+function parseAgentProvider(rawValue?: string): "codex" | "copilot" | "custom" | "none" | undefined {
   if (!rawValue || !rawValue.trim()) {
     return undefined;
   }
 
   const normalized = rawValue.trim().toLowerCase();
-  if (normalized === "codex" || normalized === "copilot" || normalized === "custom") {
+  if (normalized === "codex" || normalized === "copilot" || normalized === "custom" || normalized === "none") {
     return normalized;
   }
 
-  throw new Error("Invalid AGENT_PROVIDER value. Allowed values: codex, copilot, custom.");
+  throw new Error("Invalid AGENT_PROVIDER value. Allowed values: codex, copilot, custom, none.");
 }
 
 function parseOptionalString(rawValue: string | undefined): string | undefined {

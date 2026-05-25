@@ -11,6 +11,7 @@ interface CliArgs {
   source?: "agent_handoff" | "manual" | "rule_based" | "discovery";
   overwrite: boolean;
   allowDraft: boolean;
+  requirePomRuntime: boolean;
 }
 
 function parseArgs(argv: string[]): CliArgs {
@@ -20,6 +21,7 @@ function parseArgs(argv: string[]): CliArgs {
   let source: CliArgs["source"];
   let overwrite = false;
   let allowDraft = false;
+  let requirePomRuntime = false;
 
   for (let i = 0; i < argv.length; i += 1) {
     const token = argv[i];
@@ -31,6 +33,10 @@ function parseArgs(argv: string[]): CliArgs {
     }
     if (token === "--allow-draft") {
       allowDraft = true;
+      continue;
+    }
+    if (token === "--require-pom-runtime") {
+      requirePomRuntime = true;
       continue;
     }
 
@@ -72,7 +78,7 @@ function parseArgs(argv: string[]): CliArgs {
     throw new Error("--plan or --from is required. Usage: npm run plans:promote -- --plan <path> OR --from <discovery-output-dir>");
   }
 
-  return { plan, from, result, source, overwrite, allowDraft };
+  return { plan, from, result, source, overwrite, allowDraft, requirePomRuntime };
 }
 
 interface ParsedPlanInput {
@@ -115,6 +121,7 @@ async function promoteAll(
   source: CliArgs["source"],
   overwrite: boolean,
   allowDraft: boolean
+  ,requirePomRuntime: boolean
 ): Promise<void> {
   const promoted: string[] = [];
   const skipped: string[] = [];
@@ -136,6 +143,7 @@ async function promoteAll(
           source,
           overwrite,
           fullConfig: config
+          ,requirePomRuntime
         },
         allowDraft
       );
@@ -196,6 +204,7 @@ async function main(): Promise<void> {
     args.source,
     args.overwrite,
     args.allowDraft
+    ,args.requirePomRuntime
   );
 
   console.log("\nAutomation index: automations/index.json");

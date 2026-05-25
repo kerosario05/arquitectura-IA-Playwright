@@ -64,7 +64,7 @@ export type FutureIntegrationsConfig = {
   };
   ai?: {
     provider?: string;
-    agentProvider?: "codex" | "copilot" | "custom";
+    agentProvider?: "codex" | "copilot" | "custom" | "none";
     model?: string;
     discoveryMode?: boolean;
     autoApproveDiscoveredObjects?: boolean;
@@ -74,7 +74,7 @@ export type FutureIntegrationsConfig = {
     discoveryMaxAttempts?: number;
   };
   agent?: {
-    provider?: "codex" | "copilot" | "custom";
+    provider?: "codex" | "copilot" | "custom" | "none";
     command?: string;
     extraArgs?: string;
     autoRepairTimeoutMs?: number;

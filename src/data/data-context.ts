@@ -3,7 +3,16 @@ import type { FullConfig } from "../types/env.types";
 export type DataContextEntry = {
   key: string;
   value: string;
-  source: "app_username" | "app_password" | "extra_login_field" | "test_data" | "environment_variable";
+  source:
+    | "app_username"
+    | "app_password"
+    | "extra_login_field"
+    | "test_data"
+    | "test_data_alias"
+    | "promoted_manifest"
+    | "auto_generated"
+    | "fixture"
+    | "environment_variable";
   sensitive: boolean;
 };
 
@@ -100,6 +109,14 @@ export function buildDataContext(config: FullConfig): DataContext {
 
   for (const [key, value] of Object.entries(config.app.testData)) {
     addEntry(entriesMap, key, value, "test_data");
+  }
+
+  for (const [canonicalKey, aliases] of Object.entries(config.app.testDataAliases ?? {})) {
+    const canonical = entriesMap.get(normalize(canonicalKey));
+    if (!canonical) continue;
+    for (const alias of aliases) {
+      addEntry(entriesMap, alias, canonical.value, "test_data_alias", canonical.sensitive);
+    }
   }
 
   const entries = Array.from(entriesMap.values());

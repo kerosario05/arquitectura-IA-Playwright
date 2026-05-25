@@ -17,6 +17,7 @@ export type PromotionPolicy = {
   autoApproveConfidenceThreshold?: number;
   autoRunPomValidation?: boolean;
   blockSensitiveAutoApproval?: boolean;
+  requirePomRuntime?: boolean;
 };
 
 export const DEFAULT_PROMOTION_POLICY: PromotionPolicy = {
@@ -32,6 +33,7 @@ export const DEFAULT_PROMOTION_POLICY: PromotionPolicy = {
   autoApproveConfidenceThreshold: 0.50,
   autoRunPomValidation: true,
   blockSensitiveAutoApproval: true
+  ,requirePomRuntime: false
 };
 
 export type POMPromotionStatus =
@@ -98,6 +100,20 @@ export type PromotedAutomationIndexEntry = {
         validationStatus: "passed" | "failed" | "skipped";
         finalPomStatus: "promoted" | "blocked_missing_pom" | "needs_page_method" | "needs_manual_review";
       };
+    };
+    promotionStrategyDiagnostics?: {
+      requestedStrategy: "pom" | "inline" | "auto";
+      autoPomEnabled: boolean;
+      selectedStrategy: "pom" | "inline";
+      reason: string;
+      blockers: string[];
+      availablePageObjects: string[];
+      requiredPageMethods: string[];
+      missingPageMethods: string[];
+      autoPomAttempted: boolean;
+      autoPomCreatedMethods: string[];
+      fallbackUsed: boolean;
+      requirePomRuntime: boolean;
     };
     overwritten?: boolean;
     previousAutomationPath?: string;

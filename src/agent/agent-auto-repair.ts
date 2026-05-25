@@ -23,7 +23,7 @@ import { resolveCodexCliPath } from "./codex-cli-resolver";
 
 export type AgentAutoRepairConfig = {
   enabled: boolean;
-  provider?: "codex" | "copilot" | "custom";
+  provider?: "codex" | "copilot" | "custom" | "none";
   command: string;
   extraArgs: string[];
   timeoutMs: number;

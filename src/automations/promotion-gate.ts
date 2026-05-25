@@ -4,6 +4,31 @@ import type { CaseDiscoveryResult, DiscoveryStepResult } from "../types/discover
 import type { PromotionPolicy, POMPromotionStatus } from "../types/automation-promotion.types";
 import { DEFAULT_PROMOTION_POLICY } from "../types/automation-promotion.types";
 
+function detectFillValueLiteralFieldNameAntiPattern(specContent: string): string[] {
+  const errors: string[] = [];
+  
+  const fillPromotedFieldRegex = /fillPromotedField\(\{\s*stepIndex:\s*\d+,\s*field:\s*'([^']+)',\s*value:\s*String\(([^)]+)\),[^}]*fill:\s*async\s*\(\)\s*=>\s*\{\s*await\s+\w+\.\w+\([^}]+\}\s*\}\)/g;
+  
+  let match: RegExpExecArray | null;
+  while ((match = fillPromotedFieldRegex.exec(specContent)) !== null) {
+    const fieldName = match[1];
+    const valueVar = match[2];
+    const fullCall = match[0];
+    
+    const fillMethodMatch = fullCall.match(/await\s+\w+\.\w+\(\s*'([^']+)',\s*'([^']+)'\s*\)/);
+    if (fillMethodMatch) {
+      const firstArg = fillMethodMatch[1];
+      const secondArg = fillMethodMatch[2];
+      
+      if (firstArg === fieldName && secondArg === fieldName) {
+        errors.push(`PROMOTED_FILL_VALUE_LITERAL_FIELD_NAME: fillPromotedField field="${fieldName}" has callback fill('${firstArg}', '${secondArg}') where second arg equals field name instead of using value variable "${valueVar}"`);
+      }
+    }
+  }
+  
+  return errors;
+}
+
 export type PromotionGateStatus = "passed" | "blocked" | "not_applicable";
 
 export type PromotionGateInput = {
@@ -15,6 +40,7 @@ export type PromotionGateInput = {
   pomStatus?: POMPromotionStatus;
   missingPageObjects?: string[];
   missingMethods?: string[];
+  specContent?: string;
 };
 
 export type PromotionGateResult = {
@@ -167,6 +193,15 @@ export function evaluatePromotionGate(input: PromotionGateInput): PromotionGateR
     if (input.pomStatus === "inline_debug_only") {
       pomStatus = "inline_debug_only";
       warnings.push("Spec generated in inline-debug mode. It is NOT a stable automation.");
+    }
+  }
+
+  // --- Promoted Fill Value Contract Check ---
+  if (input.specContent) {
+    const fillValueErrors = detectFillValueLiteralFieldNameAntiPattern(input.specContent);
+    if (fillValueErrors.length > 0) {
+      reasons.push(...fillValueErrors);
+      pomStatus = "needs_manual_review";
     }
   }
 
