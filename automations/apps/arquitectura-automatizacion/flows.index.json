@@ -229,7 +229,275 @@
       "status": "candidate",
       "createdAt": "2026-05-22T21:58:31.133Z",
       "updatedAt": "2026-05-22T21:58:31.133Z"
+    },
+    {
+      "id": "flow_1779554786989_26j8qa",
+      "name": "Visualizar catálogo principal de productos disponi",
+      "filePath": "flows\\visualizar-catálogo-principal-de-productos-disponi.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "assertText",
+          "target": "Phones",
+          "pageObjectId": "ProductDetailPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "assertText",
+          "target": "Laptops",
+          "pageObjectId": "ProductDetailPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "assertText",
+          "target": "Monitors",
+          "pageObjectId": "ProductDetailPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "assertText",
+          "target": "Categorías visibles: Phones, Laptops y Monitors.",
+          "pageObjectId": "ProductDetailPage",
+          "methodName": "expectLoaded"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-23T16:46:26.989Z",
+      "updatedAt": "2026-05-23T16:46:26.989Z"
+    },
+    {
+      "id": "flow_1779561102827_j0grla",
+      "name": "Validar agregar producto al carrito desde detalle",
+      "filePath": "flows\\validar-agregar-producto-al-carrito-desde-detalle.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Phones",
+          "pageObjectId": "SelectionPage",
+          "methodName": "clickPrimaryAction"
+        },
+        {
+          "action": "click",
+          "target": "la primera tarjeta visible del listado de productos",
+          "pageObjectId": "ProductListPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "assertText",
+          "target": "Add to cart",
+          "pageObjectId": "ProductDetailPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "click",
+          "target": "Add to cart",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-23T18:31:42.827Z",
+      "updatedAt": "2026-05-23T18:31:42.827Z"
+    },
+    {
+      "id": "flow_1779598043805_gztkek",
+      "name": "Validar inicio de sesión con credenciales válidas",
+      "filePath": "flows\\validar-inicio-de-sesión-con-credenciales-válidas.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Log in",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "assertText",
+          "target": "Username",
+          "pageObjectId": "ProductDetailPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "fill",
+          "target": "Username",
+          "pageObjectId": "FormPage",
+          "methodName": "fillField"
+        },
+        {
+          "action": "fill",
+          "target": "Password",
+          "pageObjectId": "FormPage",
+          "methodName": "fillField"
+        },
+        {
+          "action": "click",
+          "target": "Log in",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-24T04:47:23.805Z",
+      "updatedAt": "2026-05-24T04:47:23.805Z"
+    },
+    {
+      "id": "flow_1779651131531_aa9hw5",
+      "name": "Agregar producto al carrito desde el detalle del p",
+      "filePath": "flows\\agregar-producto-al-carrito-desde-el-detalle-del-p.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Phones",
+          "pageObjectId": "SelectionPage",
+          "methodName": "selectCategory"
+        },
+        {
+          "action": "click",
+          "target": "la primera tarjeta visible del listado de productos",
+          "pageObjectId": "ProductListPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "click",
+          "target": "Add to cart",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-24T19:32:11.531Z",
+      "updatedAt": "2026-05-24T19:32:11.531Z"
+    },
+    {
+      "id": "flow_1779711823211_2bg1wr",
+      "name": "Visualizar carrito con producto agregado durante l",
+      "filePath": "flows\\visualizar-carrito-con-producto-agregado-durante-l.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Phones",
+          "pageObjectId": "SelectionPage",
+          "methodName": "selectCategory"
+        },
+        {
+          "action": "click",
+          "target": "la primera tarjeta visible del listado de productos",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectFirstVisibleCard"
+        },
+        {
+          "action": "click",
+          "target": "Add to cart",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "Cart",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "assertText",
+          "target": "que se muestre el producto agregado en el carrito",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "assertText",
+          "target": "que se muestre el total de la compra",
+          "pageObjectId": "ProductDetailPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "assertText",
+          "target": "Total de compra visible.",
+          "pageObjectId": "ProductDetailPage",
+          "methodName": "expectLoaded"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-25T12:23:43.211Z",
+      "updatedAt": "2026-05-25T12:23:43.211Z"
     }
   ],
-  "updatedAt": "2026-05-22T21:58:31.135Z"
+  "updatedAt": "2026-05-25T12:23:43.212Z"
 }

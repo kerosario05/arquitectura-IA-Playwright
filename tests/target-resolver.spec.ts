@@ -30,6 +30,10 @@ class FakeLocator {
     return this;
   }
 
+  nth(_index: number): FakeLocator {
+    return this;
+  }
+
   async fill(_value: string): Promise<void> {
     return;
   }
@@ -39,6 +43,14 @@ class FakeLocator {
       return fn({ tagName: this.tagName });
     }
     return this.tagName;
+  }
+
+  async isVisible(): Promise<boolean> {
+    return this.matches > 0;
+  }
+
+  async isEnabled(): Promise<boolean> {
+    return this.matches > 0;
   }
 }
 
@@ -721,7 +733,7 @@ test("resolveFillTarget retorna not_editable si hay texto parecido en elemento n
 
   const result = await resolveFillTarget(fakePage as any, snapshot, "Username");
 
-  expect(result.status).toBe("not_editable");
+  expect(result.status).toBe("fill_target_not_editable");
   expect(result.matchReason).toBe("fill_target_not_editable");
   expect(result.nonEditableMatch).toBeDefined();
   expect(result.nonEditableMatch!.tag).toBe("h4");
@@ -1131,4 +1143,300 @@ test("no hardcodear textos de productos específicos en target-resolver", () => 
   expect(content).not.toContain("Kiosko");
   expect(content).not.toContain("C37750");
   expect(content).not.toContain("C37853");
+});
+
+test("resolveFillTarget elige input en lugar de link cuando ambos coinciden", async () => {
+  const fakePage = new FakePage({
+    "label:Username": 1
+  });
+  const snapshot = makeSnapshot([
+    makeElement({
+      id: "link-1",
+      type: "link",
+      tagName: "a",
+      text: "Username",
+      visible: true
+    }),
+    makeElement({
+      id: "input-1",
+      type: "input",
+      tagName: "input",
+      label: "Username",
+      visible: true
+    })
+  ]);
+
+  const result = await resolveFillTarget(fakePage as any, snapshot, "Username");
+
+  expect(result.status).toBe("resolved");
+  expect(result.matchedTag).toBe("input");
+  expect(result.autoRepairSkippedReason).toBe("local_diagnostic_sufficient");
+});
+
+test("resolveFillTarget prioriza contenedor activo (modal)", async () => {
+  const fakePage = new FakePage({
+    "label:Email": 1
+  });
+  const snapshot = makeSnapshot([
+    makeElement({
+      id: "input-global",
+      type: "input",
+      tagName: "input",
+      label: "Email",
+      className: "global-field",
+      visible: true
+    })
+  ]);
+
+  const activeContainer: any = {
+    type: "modal",
+    reason: "modal_opened",
+    containerElement: {
+      id: "modal-1",
+      className: "modal-dialog"
+    }
+  };
+
+  const result = await resolveFillTarget(fakePage as any, snapshot, "Email", activeContainer);
+
+  expect(result.status).toBe("resolved");
+  expect(result.fillDiagnostics?.activeContainerUsed).toBeDefined();
+  expect(result.fillDiagnostics?.activeContainerType).toBe("modal");
+});
+
+test("resolveFillTarget elige elemento visible sobre oculto", async () => {
+  const fakePage = new FakePage({});
+  const snapshot = makeSnapshot([
+    makeElement({
+      id: "input-hidden",
+      type: "input",
+      tagName: "input",
+      name: "Password",
+      visible: false
+    })
+  ]);
+
+  const result = await resolveFillTarget(fakePage as any, snapshot, "Password");
+
+  expect(result.status).toBe("not_found");
+  expect(result.autoRepairSkippedReason).toBe("local_diagnostic_sufficient");
+});
+
+test("resolveFillTarget falla fill_target_not_editable si solo hay elementos no editables", async () => {
+  const fakePage = new FakePage({});
+  const snapshot = makeSnapshot([
+    makeElement({
+      id: "div-1",
+      type: "text",
+      tagName: "div",
+      text: "Username",
+      visible: true
+    }),
+    makeElement({
+      id: "span-1",
+      type: "text",
+      tagName: "span",
+      text: "Enter your username",
+      visible: true
+    })
+  ]);
+
+  const result = await resolveFillTarget(fakePage as any, snapshot, "Username");
+
+  expect(result.status).toBe("fill_target_not_editable");
+  expect(result.matchReason).toBe("fill_target_not_editable");
+  expect(result.nonEditableMatch).toBeDefined();
+  expect(result.autoRepairSkippedReason).toBe("local_diagnostic_sufficient");
+});
+
+test("fillDiagnostics incluye detalles de candidatos evaluados", async () => {
+  const fakePage = new FakePage({
+    "label:Username": 1
+  });
+  const snapshot = makeSnapshot([]);
+
+  const result = await resolveFillTarget(fakePage as any, snapshot, "Username");
+
+  expect(result.fillDiagnostics).toBeDefined();
+  expect(result.fillDiagnostics?.field).toBe("Username");
+  expect(result.fillDiagnostics?.candidatesEvaluated).toBeGreaterThanOrEqual(1);
+  expect(result.fillDiagnostics?.selectedCandidate).toBeDefined();
+  expect(result.fillDiagnostics?.selectedCandidate?.editable).toBe(true);
+});
+
+test("resolveFillTarget no rompe con formulario normal sin modal", async () => {
+  const fakePage = new FakePage({
+    "label:Email": 1,
+    "label:Password": 1
+  });
+  const snapshot = makeSnapshot([
+    makeElement({
+      id: "input-email",
+      type: "input",
+      tagName: "input",
+      label: "Email",
+      visible: true
+    }),
+    makeElement({
+      id: "input-password",
+      type: "input",
+      tagName: "input",
+      label: "Password",
+      visible: true
+    })
+  ]);
+
+  const emailResult = await resolveFillTarget(fakePage as any, snapshot, "Email");
+  const passwordResult = await resolveFillTarget(fakePage as any, snapshot, "Password");
+
+  expect(emailResult.status).toBe("resolved");
+  expect(emailResult.matchedTag).toBe("input");
+  expect(passwordResult.status).toBe("resolved");
+  expect(passwordResult.matchedTag).toBe("input");
+});
+
+test("resolveFillTarget con activeContainer undefined funciona correctamente", async () => {
+  const fakePage = new FakePage({
+    "label:Search": 1
+  });
+  const snapshot = makeSnapshot([
+    makeElement({
+      id: "input-search",
+      type: "input",
+      tagName: "input",
+      label: "Search",
+      visible: true
+    })
+  ]);
+
+  const result = await resolveFillTarget(fakePage as any, snapshot, "Search", undefined);
+
+  expect(result.status).toBe("resolved");
+  expect(result.fillDiagnostics?.activeContainerUsed).toBe(false);
+});
+
+test("resolveFillTarget nunca devuelve resolved sin locator", async () => {
+  const fakePage = new FakePage({});
+  const snapshot = makeSnapshot([
+    makeElement({
+      id: "div-1",
+      type: "text",
+      tagName: "div",
+      text: "Username",
+      visible: true
+    })
+  ]);
+
+  const result = await resolveFillTarget(fakePage as any, snapshot, "Username");
+
+  expect(result.status).not.toBe("resolved");
+  expect(result.locator).toBeUndefined();
+  expect(result.autoRepairSkippedReason).toBe("local_diagnostic_sufficient");
+});
+
+test("resolveFillTarget nunca devuelve resolved con strategy undefined", async () => {
+  const fakePage = new FakePage({
+    "label:Email": 1
+  });
+  const snapshot = makeSnapshot([]);
+
+  const result = await resolveFillTarget(fakePage as any, snapshot, "Email");
+
+  if (result.status === "resolved") {
+    expect(result.locatorStrategy).toBeDefined();
+    expect(result.locatorStrategy).not.toBeUndefined();
+  }
+});
+
+test("resolveFillTarget con solo elementos no editables devuelve fill_target_not_editable", async () => {
+  const fakePage = new FakePage({});
+  const snapshot = makeSnapshot([
+    makeElement({
+      id: "link-1",
+      type: "link",
+      tagName: "a",
+      text: "About us",
+      visible: true
+    }),
+    makeElement({
+      id: "span-1",
+      type: "text",
+      tagName: "span",
+      text: "Username",
+      visible: true
+    })
+  ]);
+
+  const result = await resolveFillTarget(fakePage as any, snapshot, "Username");
+
+  expect(result.status).toBe("fill_target_not_editable");
+  expect(result.locator).toBeUndefined();
+  expect(result.nonEditableMatch).toBeDefined();
+  expect(result.autoRepairSkippedReason).toBe("local_diagnostic_sufficient");
+});
+
+test("fillDiagnostics incluye rejectedCandidates cuando hay elementos no editables", async () => {
+  const fakePage = new FakePage({
+    "label:Password": 1
+  });
+  const snapshot = makeSnapshot([
+    makeElement({
+      id: "link-1",
+      type: "link",
+      tagName: "a",
+      text: "Password",
+      visible: true
+    })
+  ]);
+
+  const result = await resolveFillTarget(fakePage as any, snapshot, "Password");
+
+  expect(result.status).toBe("resolved");
+  expect(result.fillDiagnostics).toBeDefined();
+  expect(result.fillDiagnostics?.rejectedCandidates).toBeDefined();
+});
+
+test("validateFillResolutionContract verifica contrato de resolución", () => {
+  const { validateFillResolutionContract } = require("../src/discovery/target-resolver");
+  
+  const validResult = {
+    status: "resolved" as const,
+    target: "Username",
+    locator: {},
+    locatorStrategy: "getByLabel",
+    confidence: 1.0,
+    matchReason: "test",
+    candidateText: "Username",
+    attemptedLocators: [],
+    editableCandidatesCount: 1,
+    fillDiagnostics: {
+      field: "Username",
+      activeContainerUsed: false,
+      candidatesEvaluated: 1,
+      rejectedCandidates: [],
+      selectedCandidate: {
+        strategy: "getByLabel",
+        tagName: "input",
+        visible: true,
+        enabled: true,
+        editable: true,
+        insideActiveContainer: false
+      }
+    }
+  };
+
+  const invalidResult = {
+    status: "resolved" as const,
+    target: "Username",
+    locator: undefined,
+    locatorStrategy: undefined,
+    confidence: 1.0,
+    matchReason: "test",
+    candidateText: "Username",
+    attemptedLocators: [],
+    editableCandidatesCount: 0
+  };
+
+  expect(validateFillResolutionContract(validResult)).toEqual({ valid: true });
+  expect(validateFillResolutionContract(invalidResult)).toEqual({ valid: false, error: "resolved_without_locator" });
 });

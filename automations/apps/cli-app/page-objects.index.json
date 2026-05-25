@@ -1,0 +1,34 @@
+{
+  "version": "1.0",
+  "appSlug": "cli-app",
+  "pageObjects": [
+    {
+      "id": "po_framework_productlistpage",
+      "className": "ProductListPage",
+      "filePath": "automations/apps/cli-app/pages/productlist.page.ts",
+      "screenSignature": "screen:cli-app-product_list",
+      "methods": [
+        {
+          "name": "selectProduct",
+          "intent": "select_product",
+          "parameters": [
+            "productName"
+          ],
+          "available": true,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        }
+      ],
+      "confidence": 1,
+      "status": "active",
+      "sourcePlanIds": [],
+      "caseIds": [],
+      "createdAt": "2026-05-24T16:56:45.743Z",
+      "updatedAt": "2026-05-24T16:56:45.743Z"
+    }
+  ],
+  "componentCandidates": [],
+  "updatedAt": "2026-05-25T01:46:40.454Z"
+}

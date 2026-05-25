@@ -33,7 +33,7 @@ export type TargetCandidate = {
 
 export type AmbiguityDiagnostics = {
   target: string;
-  semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "unknown";
+  semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "first_visible_item" | "unknown";
   relationContext?: string;
   candidateCount: number;
   candidateTexts: string[];
@@ -41,6 +41,15 @@ export type AmbiguityDiagnostics = {
   candidateStrategies: string[];
   suggestedExactTargetPattern?: string;
   suggestedAssociatedActionPattern?: string;
+};
+
+export type TargetDisambiguationDiagnostics = {
+  target: string;
+  submitLike: boolean;
+  activeContainerUsed: boolean;
+  candidatesInsideActiveContainer: number;
+  candidatesOutsideActiveContainer: number;
+  selectedReason: string;
 };
 
 export type TargetResolutionResult = {
@@ -58,13 +67,15 @@ export type TargetResolutionResult = {
   closestCandidates?: TargetCandidate[];
   attemptedLocators?: string[];
   ambiguityDiagnostics?: AmbiguityDiagnostics;
+  targetDisambiguation?: TargetDisambiguationDiagnostics;
 };
 
 export type ResolveActionTargetOptions = {
   minConfidence?: number;
   ambiguousThreshold?: number;
-  semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "unknown";
+  semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "first_visible_item" | "unknown";
   relationContext?: string;
+  activeContainer?: ActiveContainerContext;
 };
 
 export type AiAssistanceTriggerReason =
@@ -80,11 +91,12 @@ export type AiAssistanceDecision = {
   reason?: AiAssistanceTriggerReason;
 };
 
-const DEFAULT_OPTIONS: Required<ResolveActionTargetOptions> = {
+const DEFAULT_OPTIONS = {
   minConfidence: 0.4,
   ambiguousThreshold: 0.15,
-  semanticRole: "unknown",
-  relationContext: ""
+  semanticRole: "unknown" as const,
+  relationContext: "",
+  activeContainer: undefined
 };
 
 export function normalizeText(text: string): string {
@@ -209,6 +221,22 @@ const SEMANTIC_GROUPS: Record<string, string[]> = {
   delete: ["eliminar", "borrar", "delete", "remove", "remover", "quitar", "suprimir"],
   edit: ["editar", "edit", "modificar", "modify", "actualizar", "update", "cambiar"],
 };
+
+const SUBMIT_LIKE_PATTERNS = [
+  "log in", "login", "iniciar sesión", "acceder", "entrar",
+  "continue", "continuar", "submit", "enviar", "confirmar",
+  "aceptar", "purchase", "comprar", "finalizar", "checkout",
+  "place order", "pagar", "pay", "next", "siguiente"
+];
+
+function isSubmitLikeTarget(target: string): boolean {
+  const normalized = normalizeText(target);
+  return SUBMIT_LIKE_PATTERNS.some(pattern => 
+    normalized === pattern || 
+    normalized.includes(pattern) ||
+    pattern.includes(normalized)
+  );
+}
 
 export function normalizeSemanticText(text: string): string {
   return text
@@ -452,8 +480,8 @@ export async function resolveActionTarget(
   target: string,
   options?: ResolveActionTargetOptions
 ): Promise<TargetResolutionResult> {
-  const opts: Required<ResolveActionTargetOptions> = { ...DEFAULT_OPTIONS, ...options };
-
+  const opts = { ...DEFAULT_OPTIONS, ...options };
+  
   const productCondition = parseProductConditionTarget(target);
   if (productCondition) {
     const resolution = resolveProductConditionAgainstSnapshot(snapshot, productCondition, target);
@@ -503,6 +531,133 @@ export async function resolveActionTarget(
 
   const snapshotCandidates = buildSnapshotCandidates(snapshot, target);
 
+  // === Early resolution for submit-like targets within activeContainer ===
+  if (opts.activeContainer && isSubmitLikeTarget(target) && opts.activeContainer.containerLocator) {
+    console.log(`[target-resolver] Submit-like target within active container: target="${target}"`);
+    
+    // Try to find button inside activeContainer first
+    const buttonInContainer = opts.activeContainer.containerLocator.getByRole('button', { name: new RegExp(target, 'i') }).first();
+    const buttonCount = await buttonInContainer.count().catch(() => 0);
+    
+    console.log(`[target-resolver] Button count in container: ${buttonCount}`);
+    
+    if (buttonCount === 1) {
+      console.log(`[target-resolver] Candidate selected inside active container: role=button name="${target}"`);
+      return {
+        status: "resolved",
+        target,
+        locator: buttonInContainer,
+        locatorStrategy: "activeContainer:submit",
+        confidence: 0.95,
+        matchReason: "submit_like_inside_active_container",
+        candidateText: target,
+        candidates: [{
+          elementId: "activeContainer-button",
+          text: target,
+          normalizedText: normalizeText(target),
+          type: "button",
+          role: "button",
+          tagName: "button",
+          isClickable: true,
+          matchScore: 0.95,
+          matchReason: "submit_like_inside_active_container",
+          locatorStrategy: "activeContainer:submit"
+        }],
+        targetDisambiguation: {
+          target,
+          submitLike: true,
+          activeContainerUsed: true,
+          candidatesInsideActiveContainer: 1,
+          candidatesOutsideActiveContainer: snapshotCandidates.filter(c => !(c as any).insideActiveContainer).length,
+          selectedReason: "submit_like_inside_active_container"
+        }
+      };
+    }
+    
+    if (buttonCount > 1) {
+      console.log(`[target-resolver] Multiple buttons (${buttonCount}) inside active container, continuing with disambiguation`);
+    } else {
+      console.log(`[target-resolver] No button found with getByRole, trying alternative selectors`);
+      
+      // Fallback: try text-based selector within container
+      const buttonByText = opts.activeContainer.containerLocator.locator(`button:has-text("${target}")`).first();
+      const textButtonCount = await buttonByText.count().catch(() => 0);
+      console.log(`[target-resolver] Button count by text: ${textButtonCount}`);
+      
+      if (textButtonCount === 1) {
+        console.log(`[target-resolver] Candidate selected inside active container: button:text="${target}"`);
+        return {
+          status: "resolved",
+          target,
+          locator: buttonByText,
+          locatorStrategy: "activeContainer:button:text",
+          confidence: 0.90,
+          matchReason: "submit_like_button_text_inside_active_container",
+          candidateText: target,
+          candidates: [{
+            elementId: "activeContainer-button-text",
+            text: target,
+            normalizedText: normalizeText(target),
+            type: "button",
+            role: "button",
+            tagName: "button",
+            isClickable: true,
+            matchScore: 0.90,
+            matchReason: "submit_like_button_text_inside_active_container",
+            locatorStrategy: "activeContainer:button:text"
+          }],
+          targetDisambiguation: {
+            target,
+            submitLike: true,
+            activeContainerUsed: true,
+            candidatesInsideActiveContainer: 1,
+            candidatesOutsideActiveContainer: snapshotCandidates.filter(c => !(c as any).insideActiveContainer).length,
+            selectedReason: "submit_like_button_text_inside_active_container"
+          }
+        };
+      }
+      
+      // Last resort: find any button with text matching target on the page
+      // and prefer it over links when there's ambiguity
+      const anyButton = page.locator(`button:has-text("${target}")`).first();
+      const anyButtonCount = await anyButton.count().catch(() => 0);
+      console.log(`[target-resolver] Any button count on page: ${anyButtonCount}`);
+      
+      if (anyButtonCount === 1) {
+        console.log(`[target-resolver] Selected button on page (container scope failed): button:text="${target}"`);
+        return {
+          status: "resolved",
+          target,
+          locator: anyButton,
+          locatorStrategy: "page:button:text",
+          confidence: 0.85,
+          matchReason: "submit_like_button_on_page",
+          candidateText: target,
+          candidates: [{
+            elementId: "page-button-text",
+            text: target,
+            normalizedText: normalizeText(target),
+            type: "button",
+            role: "button",
+            tagName: "button",
+            isClickable: true,
+            matchScore: 0.85,
+            matchReason: "submit_like_button_on_page",
+            locatorStrategy: "page:button:text"
+          }],
+          targetDisambiguation: {
+            target,
+            submitLike: true,
+            activeContainerUsed: false,
+            candidatesInsideActiveContainer: 0,
+            candidatesOutsideActiveContainer: snapshotCandidates.length,
+            selectedReason: "submit_like_button_on_page_fallback"
+          }
+        };
+      }
+    }
+  }
+
   // Apply semanticRole-based ranking and relationContext boost
   const containerRoles = new Set(["listitem", "group", "region", "card", "article", "row", "tab"]);
   const containerTags = new Set(["article", "li", "tr", "fieldset"]);
@@ -546,6 +701,67 @@ export async function resolveActionTarget(
       if (nearbyNormalized.includes(ctxNormalized) || ctxNormalized.includes(nearbyNormalized)) {
         c.matchScore = Math.min(1.0, c.matchScore + 0.15);
         c.matchReason += " +context_boost";
+      }
+    }
+
+    // === submit-like target within activeContainer: prefer elements inside the container ===
+    if (opts.activeContainer && isSubmitLikeTarget(target)) {
+      let insideActiveContainer = false;
+      
+      // Check if element is inside activeContainer by various strategies
+      if (opts.activeContainer.containerElement) {
+        const containerClass = opts.activeContainer.containerElement.className || "";
+        const containerDomId = opts.activeContainer.containerElement.domId || "";
+        const elementClass = el.className || "";
+        const elementDomId = el.domId || "";
+        
+        // Strategy 1: Check if element has a parent-like relationship with container
+        // If container has domId and element's nearby text or context suggests it's in a modal
+        if (containerDomId && el.nearbyText) {
+          // Elements inside modal often have text that's part of the modal content
+          insideActiveContainer = true;
+        }
+        
+        // Strategy 2: Check class overlap (for elements that inherit container classes)
+        if (!insideActiveContainer && containerClass && elementClass) {
+          const containerClasses = containerClass.split(/\s+/);
+          const elementClasses = elementClass.split(/\s+/);
+          insideActiveContainer = containerClasses.some(cls => elementClasses.includes(cls));
+        }
+        
+        // Strategy 3: If container is a modal/dialog, prefer buttons over links
+        if (!insideActiveContainer) {
+          const isContainerModal = 
+            containerClass.toLowerCase().includes('modal') ||
+            containerClass.toLowerCase().includes('dialog') ||
+            opts.activeContainer.type === 'modal' ||
+            opts.activeContainer.type === 'dialog' ||
+            opts.activeContainer.type === 'form';
+          
+          if (isContainerModal && el.tagName?.toLowerCase() === 'button') {
+            insideActiveContainer = true;
+          }
+        }
+      }
+      
+      if (insideActiveContainer) {
+        c.matchScore = Math.min(1.0, c.matchScore + 0.35);
+        c.matchReason += " +active_container_submit_boost";
+        (c as any).insideActiveContainer = true;
+      }
+    }
+    
+    // === submit-like target: prefer button over link ===
+    if (isSubmitLikeTarget(target)) {
+      const isButton = el.tagName?.toLowerCase() === 'button' || el.role === 'button';
+      const isLink = el.tagName?.toLowerCase() === 'a' || el.type === 'link';
+      
+      if (isButton && !isLink) {
+        c.matchScore = Math.min(1.0, c.matchScore + 0.20);
+        c.matchReason += " +button_over_link_for_submit";
+      } else if (isLink && !isButton) {
+        c.matchScore = Math.max(0, c.matchScore - 0.10);
+        c.matchReason += " -link_penalty_for_submit";
       }
     }
   }
@@ -789,7 +1005,7 @@ export async function resolveActionTarget(
 async function trySemanticFallback(
   page: Page,
   target: string,
-  opts: Required<ResolveActionTargetOptions>
+  opts: { minConfidence: number; ambiguousThreshold: number; semanticRole: ResolveActionTargetOptions['semanticRole']; relationContext: string; activeContainer?: ResolveActionTargetOptions['activeContainer'] }
 ): Promise<TargetResolutionResult | undefined> {
   try {
     const semanticResult = await resolveSemanticActionTarget(page, target);
@@ -1031,7 +1247,7 @@ function isElementEditable(el: SnapshotElement): boolean {
 }
 
 export type FillTargetResolutionResult = {
-  status: "resolved" | "not_found" | "not_editable" | "ambiguous";
+  status: "resolved" | "not_found" | "not_editable" | "ambiguous" | "not_visible" | "fill_target_not_editable";
   target: string;
   locator?: Locator;
   locatorStrategy?: string;
@@ -1042,6 +1258,47 @@ export type FillTargetResolutionResult = {
   attemptedLocators: string[];
   editableCandidatesCount: number;
   nonEditableMatch?: { text: string; tag: string; reason: string };
+  fillDiagnostics?: {
+    field: string;
+    activeContainerUsed: boolean;
+    activeContainerType?: string;
+    candidatesEvaluated: number;
+    candidatesEvaluatedDetails?: Array<{
+      strategy: string;
+      tagName: string;
+      role?: string;
+      visible: boolean;
+      enabled: boolean;
+      editable: boolean;
+      insideActiveContainer: boolean;
+      text?: string;
+      domId?: string;
+      name?: string;
+      placeholder?: string;
+      ariaLabel?: string;
+      score?: number;
+    }>;
+    rejectedCandidates: Array<{ strategy: string; reason: string; tagName?: string; text?: string }>;
+    selectedCandidate?: {
+      strategy: string;
+      tagName: string;
+      role?: string;
+      visible: boolean;
+      enabled: boolean;
+      editable: boolean;
+      insideActiveContainer: boolean;
+    };
+  };
+  localResolversTried?: string[];
+  autoRepairSkippedReason?: string;
+};
+
+export type ActiveContainerContext = {
+  type: "modal" | "dialog" | "form" | "panel" | "drawer";
+  reason: "modal_opened" | "dialog_opened" | "form_opened" | "panel_opened" | "overlay_opened";
+  containerLocator?: Locator;
+  containerElement?: SnapshotElement;
+  detectedAt?: string;
 };
 
 const FILL_LOCATOR_STRATEGIES = [
@@ -1061,19 +1318,417 @@ const FILL_LOCATOR_STRATEGIES = [
   { label: "input[fuzzy]", factory: (page: Page, target: string, regex: RegExp) => page.locator(`input[name^="${target.substring(0, 3)}"], input[placeholder^="${target.substring(0, 3)}"], input[aria-label^="${target.substring(0, 3)}"]`) },
 ];
 
+function createScopedFillStrategies(containerLocator: Locator, target: string): Array<{ label: string; factory: () => Locator }> {
+  const regex = buildFlexibleTokenRegex(target);
+  return [
+    { label: "activeContainer:getByLabel", factory: () => containerLocator.getByLabel(target, { exact: false }) },
+    { label: "activeContainer:getByPlaceholder", factory: () => containerLocator.getByPlaceholder(target, { exact: false }) },
+    { label: "activeContainer:getByRole(textbox)", factory: () => containerLocator.getByRole("textbox", { name: regex }) },
+    { label: "activeContainer:getByRole(combobox)", factory: () => containerLocator.getByRole("combobox", { name: regex }) },
+    { label: "activeContainer:getByRole(searchbox)", factory: () => containerLocator.getByRole("searchbox", { name: regex }) },
+    { label: "activeContainer:input[name]", factory: () => containerLocator.locator(`input[name="${target}"]`) },
+    { label: "activeContainer:input[id]", factory: () => containerLocator.locator(`input[id="${target}"]`) },
+    { label: "activeContainer:input[aria-label]", factory: () => containerLocator.locator(`input[aria-label="${target}"]`) },
+    { label: "activeContainer:textarea", factory: () => containerLocator.locator(`textarea[name="${target}"], textarea[id="${target}"], textarea[aria-label="${target}"]`) },
+    { label: "activeContainer:select", factory: () => containerLocator.locator(`select[name="${target}"], select[id="${target}"], select[aria-label="${target}"]`) },
+  ];
+}
+
+function escapeCssId(id: string): string {
+  return id.replace(/([!"#$%&'()*+,./:;<=>?@[\]^`{|}~])/g, "\\$1");
+}
+
+async function tryConstructLocatorFromSnapshotElement(
+  page: Page,
+  element: SnapshotElement,
+  target: string,
+  activeContainer?: ActiveContainerContext
+): Promise<{ locator?: Locator; strategy?: string; reason?: string }> {
+  const attemptedStrategies: string[] = [];
+  
+  // Try with container first, then fallback to page
+  const containers = activeContainer?.containerLocator ? [activeContainer.containerLocator, page] : [page];
+  
+  for (const container of containers) {
+    const isPageFallback = container === page && activeContainer?.containerLocator;
+    
+    // Strategy 1: Try domId with CSS-safe selector
+    if (element.domId) {
+      attemptedStrategies.push("domId");
+      const escapedId = escapeCssId(element.domId);
+      const locator = container.locator(`[id="${escapedId}"]`);
+      const count = await locator.count();
+      console.log(`[fill-resolver] Trying domId="${element.domId}" count=${count}${isPageFallback ? ' (page fallback)' : ''}`);
+      if (count > 0) {
+        return { locator, strategy: "domId" };
+      }
+    }
+    
+    // Strategy 2: Try name attribute
+    if (element.name) {
+      attemptedStrategies.push("name");
+      const locator = container.locator(`[name="${element.name}"]`);
+      if (await locator.count() > 0) {
+        return { locator, strategy: "name" };
+      }
+    }
+    
+    // Strategy 3: Try aria-label
+    if (element.ariaLabel) {
+      attemptedStrategies.push("aria-label");
+      const locator = container.locator(`[aria-label="${element.ariaLabel}"]`);
+      if (await locator.count() > 0) {
+        return { locator, strategy: "aria-label" };
+      }
+    }
+    
+    // Strategy 4: Try placeholder
+    if (element.placeholder) {
+      attemptedStrategies.push("placeholder");
+      const locator = container.locator(`[placeholder="${element.placeholder}"]`);
+      if (await locator.count() > 0) {
+        return { locator, strategy: "placeholder" };
+      }
+    }
+    
+    // Strategy 5: Try role-based locator
+    if (element.role && ["textbox", "combobox", "searchbox", "spinbutton"].includes(element.role)) {
+      attemptedStrategies.push(`role:${element.role}`);
+      const regex = buildFlexibleTokenRegex(target);
+      const locator = container.getByRole(element.role as any, { name: regex });
+      if (await locator.count() > 0) {
+        return { locator, strategy: `role:${element.role}` };
+      }
+    }
+    
+    // Strategy 6: Try label
+    if (element.label) {
+      attemptedStrategies.push("label");
+      const locator = container.getByLabel(element.label, { exact: false });
+      if (await locator.count() > 0) {
+        return { locator, strategy: "label" };
+      }
+    }
+    
+    // Strategy 7: Tag-based with type detection
+    const tagName = element.tagName?.toLowerCase();
+    const inputType = element.inputType?.toLowerCase();
+    
+    if (tagName === "input" || tagName === "textarea" || tagName === "select") {
+      attemptedStrategies.push(`tag:${tagName}`);
+      
+      const normalizedTarget = target.toLowerCase();
+      let typeSelector = "";
+      
+      if (normalizedTarget.includes("password") || normalizedTarget.includes("contrasena") || normalizedTarget.includes("clave")) {
+        typeSelector = 'input[type="password"]';
+      } else if (normalizedTarget.includes("email") || normalizedTarget.includes("correo")) {
+        typeSelector = 'input[type="email"]';
+      } else if (normalizedTarget.includes("username") || normalizedTarget.includes("usuario") || normalizedTarget.includes("user")) {
+        typeSelector = 'input[type="text"]:not([type="password"]), input:not([type])';
+      } else if (inputType && inputType !== "hidden" && inputType !== "submit" && inputType !== "button") {
+        typeSelector = `input[type="${inputType}"]`;
+      } else if (tagName === "textarea") {
+        typeSelector = "textarea";
+      } else if (tagName === "select") {
+        typeSelector = "select";
+      } else {
+        typeSelector = "input:text, input:not([type]), input[type=text], input[type=email], input:not([type=hidden]):not([type=submit]):not([type=button])";
+      }
+      
+      const locator = container.locator(typeSelector).first();
+      if (await locator.count() > 0) {
+        return { locator, strategy: `tag:${tagName}:type:${inputType || "text"}` };
+      }
+    }
+    
+    if (!isPageFallback) {
+      console.log(`[fill-resolver] Container strategies exhausted, trying page fallback`);
+    }
+  }
+  
+  console.log(`[fill-resolver] No stable locator attributes found for candidate: domId=${element.domId}, name=${element.name}, ariaLabel=${element.ariaLabel}, placeholder=${element.placeholder}, inputType=${element.inputType}`);
+  return { strategy: "none", reason: "missing_stable_locator_attributes" };
+}
+
+async function tryLoginFillFallback(
+  page: Page,
+  target: string,
+  activeContainer: ActiveContainerContext,
+  snapshot?: PageSnapshot
+): Promise<{ locator?: Locator; strategy?: string; reason?: string }> {
+  const normalizedTarget = target.toLowerCase();
+  const isUsername = normalizedTarget.includes("username") || normalizedTarget.includes("usuario") || normalizedTarget.includes("user") || normalizedTarget.includes("login") || normalizedTarget.includes("email") || normalizedTarget.includes("correo");
+  const isPassword = normalizedTarget.includes("password") || normalizedTarget.includes("contrasena") || normalizedTarget.includes("clave");
+  
+  if (!isUsername && !isPassword) {
+    return { strategy: "none", reason: "not_login_field" };
+  }
+  
+  // If snapshot is provided, use it to find editable inputs
+  if (snapshot) {
+    const EDITABLE_TAGS = new Set(["input", "textarea", "select"]);
+    const EDITABLE_ROLES = new Set(["textbox", "combobox", "searchbox", "spinbutton"]);
+    
+    const editableElements = snapshot.elements.filter(el => {
+      if (el.tagName && EDITABLE_TAGS.has(el.tagName.toLowerCase())) return true;
+      if (el.role && EDITABLE_ROLES.has(el.role.toLowerCase())) return true;
+      return false;
+    });
+    
+    console.log(`[fill-resolver] Login fallback: found ${editableElements.length} editable elements in snapshot`);
+    
+    const inputs: Array<{ element: SnapshotElement; type: string; index: number }> = [];
+    
+    for (let i = 0; i < editableElements.length; i++) {
+      const el = editableElements[i];
+      if (!el.visible) continue;
+      
+      const type = el.inputType || (el.tagName === "textarea" ? "textarea" : el.tagName === "select" ? "select" : "text");
+      inputs.push({ element: el, type: type.toLowerCase(), index: i });
+      console.log(`[fill-resolver] Login fallback candidate index=${i} tag=${el.tagName} type="${type}" visible=true enabled=true editable=true`);
+    }
+    
+    if (inputs.length === 0) {
+      return { strategy: "none", reason: "no_enabled_visible_inputs" };
+    }
+    
+    if (isPassword) {
+      const passwordInput = inputs.find(i => i.type === "password");
+      if (passwordInput) {
+        console.log(`[fill-resolver] Login fallback: field="Password" selected input index=${passwordInput.index} type="password"`);
+        const locatorResult = await tryConstructLocatorFromSnapshotElement(page, passwordInput.element, target, activeContainer);
+        if (locatorResult.locator) {
+          return { locator: locatorResult.locator, strategy: "login_fallback:password", reason: "password_input_found" };
+        }
+        return { strategy: "none", reason: "password_locator_not_constructable" };
+      }
+      
+      if (inputs.length === 2) {
+        console.log(`[fill-resolver] Login fallback: field="Password" selected input index=${inputs[1].index} type="${inputs[1].type}" (second input in 2-field form)`);
+        const locatorResult = await tryConstructLocatorFromSnapshotElement(page, inputs[1].element, target, activeContainer);
+        if (locatorResult.locator) {
+          return { locator: locatorResult.locator, strategy: "login_fallback:second_input", reason: "second_input_in_login_form" };
+        }
+      }
+      
+      return { strategy: "none", reason: "no_password_input_found" };
+    }
+    
+    if (isUsername) {
+      const emailInput = inputs.find(i => i.type === "email");
+      if (emailInput) {
+        console.log(`[fill-resolver] Login fallback: field="Username" selected input index=${emailInput.index} type="email"`);
+        const locatorResult = await tryConstructLocatorFromSnapshotElement(page, emailInput.element, target, activeContainer);
+        if (locatorResult.locator) {
+          return { locator: locatorResult.locator, strategy: "login_fallback:email", reason: "email_input_found" };
+        }
+        return { strategy: "none", reason: "email_locator_not_constructable" };
+      }
+      
+      const textInput = inputs.find(i => i.type === "text" || i.type === "");
+      if (textInput && !textInput.type.includes("password")) {
+        console.log(`[fill-resolver] Login fallback: field="Username" selected input index=${textInput.index} type="${textInput.type || "text"}"`);
+        const locatorResult = await tryConstructLocatorFromSnapshotElement(page, textInput.element, target, activeContainer);
+        if (locatorResult.locator) {
+          return { locator: locatorResult.locator, strategy: "login_fallback:text", reason: "text_input_found" };
+        }
+      }
+      
+      if (inputs.length >= 1 && inputs[0].type !== "password") {
+        console.log(`[fill-resolver] Login fallback: field="Username" selected input index=${inputs[0].index} type="${inputs[0].type}" (first non-password input)`);
+        const locatorResult = await tryConstructLocatorFromSnapshotElement(page, inputs[0].element, target, activeContainer);
+        if (locatorResult.locator) {
+          return { locator: locatorResult.locator, strategy: "login_fallback:first_non_password", reason: "first_non_password_input" };
+        }
+      }
+      
+      const nonPasswordInput = inputs.find(i => !i.type.includes("password"));
+      if (nonPasswordInput) {
+        console.log(`[fill-resolver] Login fallback: field="Username" selected input index=${nonPasswordInput.index} type="${nonPasswordInput.type}"`);
+        const locatorResult = await tryConstructLocatorFromSnapshotElement(page, nonPasswordInput.element, target, activeContainer);
+        if (locatorResult.locator) {
+          return { locator: locatorResult.locator, strategy: "login_fallback:non_password", reason: "non_password_input_found" };
+        }
+      }
+      
+      return { strategy: "none", reason: "no_username_input_found" };
+    }
+    
+    return { strategy: "none", reason: "unknown_login_field_type" };
+  }
+  
+  // Fallback to DOM-based approach if no snapshot
+  if (!activeContainer.containerLocator) {
+    return { strategy: "none", reason: "no_active_container_locator" };
+  }
+  
+  // Get all inputs within the container without :visible filter
+  const allInputs = activeContainer.containerLocator.locator("input, textarea, select, [contenteditable=true]");
+  const count = await allInputs.count();
+  
+  console.log(`[fill-resolver] Login fallback: container has ${count} inputs`);
+  
+  if (count === 0) {
+    return { strategy: "none", reason: "no_visible_inputs_in_container" };
+  }
+  
+  if (count > 6) {
+    return { strategy: "none", reason: "too_many_inputs_for_login_fallback" };
+  }
+  
+  const inputs: Array<{ index: number; type: string; locator: Locator; visible: boolean; enabled: boolean }> = [];
+  
+  for (let i = 0; i < count; i++) {
+    const input = allInputs.nth(i);
+    try {
+      const visible = await input.isVisible().catch(() => false);
+      console.log(`[fill-resolver] Login fallback candidate index=${i} visible=${visible}`);
+      if (!visible) continue;
+      
+      const enabled = await input.isEnabled().catch(() => false);
+      if (!enabled) continue;
+      
+      const type = await input.evaluate((el) => el.getAttribute("type") || "text").catch(() => "text");
+      
+      inputs.push({ index: i, type: type.toLowerCase(), locator: input, visible: true, enabled: true });
+      console.log(`[fill-resolver] Login fallback candidate index=${i} type="${type}" visible=true enabled=true`);
+    } catch (e) {
+      console.log(`[fill-resolver] Login fallback candidate index=${i} error: ${e}`);
+    }
+  }
+  
+  console.log(`[fill-resolver] Login fallback candidates: count=${inputs.length}`);
+  for (let i = 0; i < inputs.length; i++) {
+    console.log(`[fill-resolver] candidate index=${inputs[i].index} tag=input type="${inputs[i].type}" visible=true enabled=true editable=true`);
+  }
+  
+  if (inputs.length === 0) {
+    return { strategy: "none", reason: "no_enabled_visible_inputs" };
+  }
+  
+  if (isPassword) {
+    const passwordInput = inputs.find(i => i.type === "password");
+    if (passwordInput) {
+      console.log(`[fill-resolver] Login fallback: field="Password" selected input index=${passwordInput.index} type="password"`);
+      return { locator: passwordInput.locator, strategy: "login_fallback:password", reason: "password_input_found" };
+    }
+    
+    if (inputs.length === 2) {
+      console.log(`[fill-resolver] Login fallback: field="Password" selected input index=1 type="${inputs[1].type}" (second input in 2-field form)`);
+      return { locator: inputs[1].locator, strategy: "login_fallback:second_input", reason: "second_input_in_login_form" };
+    }
+    
+    return { strategy: "none", reason: "no_password_input_found" };
+  }
+  
+  if (isUsername) {
+    const emailInput = inputs.find(i => i.type === "email");
+    if (emailInput) {
+      console.log(`[fill-resolver] Login fallback: field="Username" selected input index=${emailInput.index} type="email"`);
+      return { locator: emailInput.locator, strategy: "login_fallback:email", reason: "email_input_found" };
+    }
+    
+    const textInput = inputs.find(i => i.type === "text" || i.type === "");
+    if (textInput && !textInput.type.includes("password")) {
+      console.log(`[fill-resolver] Login fallback: field="Username" selected input index=${textInput.index} type="${textInput.type || "text"}"`);
+      return { locator: textInput.locator, strategy: "login_fallback:text", reason: "text_input_found" };
+    }
+    
+    if (inputs.length >= 1 && inputs[0].type !== "password") {
+      console.log(`[fill-resolver] Login fallback: field="Username" selected input index=${inputs[0].index} type="${inputs[0].type}" (first non-password input)`);
+      return { locator: inputs[0].locator, strategy: "login_fallback:first_non_password", reason: "first_non_password_input" };
+    }
+    
+    const nonPasswordInput = inputs.find(i => !i.type.includes("password"));
+    if (nonPasswordInput) {
+      console.log(`[fill-resolver] Login fallback: field="Username" selected input index=${nonPasswordInput.index} type="${nonPasswordInput.type}"`);
+      return { locator: nonPasswordInput.locator, strategy: "login_fallback:non_password", reason: "non_password_input_found" };
+    }
+    
+    return { strategy: "none", reason: "no_username_input_found" };
+  }
+  
+  return { strategy: "none", reason: "unknown_login_field_type" };
+}
+
 async function tryFillLocator(
   page: Page,
   strategy: { label: string; factory: (page: Page, target: string, regex: RegExp) => Locator },
   target: string,
   regex: RegExp,
-  attempted: string[]
-): Promise<{ locator?: Locator; locatorStrategy?: string }> {
+  attempted: string[],
+  activeContainer?: ActiveContainerContext
+): Promise<{ 
+  locator?: Locator; 
+  locatorStrategy?: string; 
+  visible?: boolean; 
+  enabled?: boolean;
+  tagName?: string;
+  role?: string;
+  insideActiveContainer?: boolean;
+}> {
   attempted.push(strategy.label);
   const locator = strategy.factory(page, target, regex);
   try {
     const count = await locator.count();
     if (count > 0) {
-      return { locator: locator.first(), locatorStrategy: strategy.label };
+      for (let i = 0; i < count; i++) {
+        const element = locator.nth(i);
+        let isVisible = true;
+        let isEnabled = true;
+        let tagName = "unknown";
+        let role = "";
+        let insideActiveContainer = false;
+        
+        try {
+          isVisible = await element.isVisible().catch(() => true);
+          isEnabled = await element.isEnabled().catch(() => true);
+          tagName = await element.evaluate((el) => el.tagName.toLowerCase()).catch(() => "unknown");
+          role = await element.evaluate((el) => el.getAttribute("role") || "").catch(() => "");
+          
+          if (activeContainer?.containerLocator) {
+            const containerBox = await activeContainer.containerLocator.boundingBox().catch(() => null);
+            const elementBox = await element.boundingBox().catch(() => null);
+            if (containerBox && elementBox) {
+              insideActiveContainer = 
+                elementBox.x >= containerBox.x &&
+                elementBox.y >= containerBox.y &&
+                elementBox.x + elementBox.width <= containerBox.x + containerBox.width &&
+                elementBox.y + elementBox.height <= containerBox.y + containerBox.height;
+            }
+          }
+        } catch {
+          isVisible = true;
+          isEnabled = true;
+        }
+        
+        if (isVisible && isEnabled) {
+          return { 
+            locator: element, 
+            locatorStrategy: strategy.label, 
+            visible: true, 
+            enabled: true,
+            tagName,
+            role: role || undefined,
+            insideActiveContainer
+          };
+        }
+      }
+      const firstElement = locator.first();
+      let tagName = "unknown";
+      try {
+        tagName = await firstElement.evaluate((el) => el.tagName.toLowerCase()).catch(() => "unknown");
+      } catch {
+        // ignore
+      }
+      return { 
+        locator: firstElement, 
+        locatorStrategy: strategy.label, 
+        visible: false, 
+        enabled: false,
+        tagName 
+      };
     }
   } catch {
     // ignore
@@ -1084,16 +1739,166 @@ async function tryFillLocator(
 export async function resolveFillTarget(
   page: Page,
   snapshot: PageSnapshot,
-  target: string
+  target: string,
+  activeContainer?: ActiveContainerContext
 ): Promise<FillTargetResolutionResult> {
   const attemptedLocators: string[] = [];
+  const rejectedCandidates: Array<{ strategy: string; reason: string; tagName?: string; text?: string }> = [];
+  const evaluatedCandidates: Array<{
+    strategy: string;
+    tagName: string;
+    role?: string;
+    visible: boolean;
+    enabled: boolean;
+    editable: boolean;
+    insideActiveContainer: boolean;
+    text?: string;
+    domId?: string;
+    name?: string;
+    placeholder?: string;
+    ariaLabel?: string;
+    score?: number;
+  }> = [];
+  const localResolversTried: string[] = ["fill_resolver"];
   const regex = buildFlexibleTokenRegex(target);
 
-  // Phase 1: Playwright native locator strategies
+  console.log(`[fill-resolver] Resolving field="${target}"${activeContainer ? ` within active container="${activeContainer.type}"` : ""}`);
+
+  const EDITABLE_TAGS = new Set(["input", "textarea", "select"]);
+  const EDITABLE_ROLES = new Set(["textbox", "combobox", "searchbox", "spinbutton"]);
+
+  function isEditableElement(tagName: string, role?: string): boolean {
+    if (EDITABLE_TAGS.has(tagName.toLowerCase())) return true;
+    if (role && EDITABLE_ROLES.has(role.toLowerCase())) return true;
+    return false;
+  }
+
+  // Phase 0: Try scoped strategies within active container first (if exists)
+  if (activeContainer?.containerLocator) {
+    console.log(`[fill-resolver] Trying scoped search within active container="${activeContainer.type}"`);
+    const scopedStrategies = createScopedFillStrategies(activeContainer.containerLocator, target);
+    
+    for (const strategy of scopedStrategies) {
+      const result = await tryFillLocator(
+        page,
+        { label: strategy.label, factory: () => strategy.factory() },
+        target,
+        regex,
+        attemptedLocators,
+        activeContainer
+      );
+      
+      if (result.locator) {
+        const tag = result.tagName ?? await result.locator.evaluate((el) => el.tagName.toLowerCase()).catch(() => "unknown");
+        const role = result.role;
+        const insideActiveContainer = true;
+
+        evaluatedCandidates.push({
+          strategy: strategy.label,
+          tagName: tag,
+          role,
+          visible: result.visible ?? false,
+          enabled: result.enabled ?? false,
+          editable: isEditableElement(tag, role),
+          insideActiveContainer
+        });
+
+        if (!result.visible || !result.enabled) {
+          rejectedCandidates.push({ 
+            strategy: strategy.label, 
+            reason: !result.visible ? "not_visible" : "not_enabled",
+            tagName: tag
+          });
+          continue;
+        }
+
+        if (!isEditableElement(tag, role)) {
+          rejectedCandidates.push({ 
+            strategy: strategy.label, 
+            reason: "not_editable",
+            tagName: tag,
+            text: target
+          });
+          console.log(`[fill-resolver] Candidate rejected: tag="${tag}" reason="not_editable"`);
+          continue;
+        }
+
+        console.log(`[fill-resolver] Candidate accepted: tag="${tag}" strategy="${strategy.label}" visible=true enabled=true editable=true insideActiveContainer=true`);
+
+        return {
+          status: "resolved",
+          target,
+          locator: result.locator,
+          locatorStrategy: result.locatorStrategy,
+          confidence: 1.0,
+          matchReason: `fill_locator_${strategy.label}`,
+          matchedTag: tag,
+          attemptedLocators,
+          editableCandidatesCount: 1,
+          fillDiagnostics: {
+            field: target,
+            activeContainerUsed: true,
+            activeContainerType: activeContainer.type,
+            candidatesEvaluated: evaluatedCandidates.length,
+            candidatesEvaluatedDetails: evaluatedCandidates,
+            rejectedCandidates,
+            selectedCandidate: {
+              strategy: strategy.label,
+              tagName: tag,
+              role,
+              visible: true,
+              enabled: true,
+              editable: true,
+              insideActiveContainer: true
+            }
+          },
+          localResolversTried,
+          autoRepairSkippedReason: "local_diagnostic_sufficient"
+        };
+      }
+    }
+  }
+
+  // Phase 1: Playwright native locator strategies with visibility and editability checks
   for (const strategy of FILL_LOCATOR_STRATEGIES) {
-    const result = await tryFillLocator(page, strategy, target, regex, attemptedLocators);
+    const result = await tryFillLocator(page, strategy, target, regex, attemptedLocators, activeContainer);
     if (result.locator) {
-      const tag = await result.locator.evaluate((el) => el.tagName.toLowerCase()).catch(() => "unknown");
+      const tag = result.tagName ?? await result.locator.evaluate((el) => el.tagName.toLowerCase()).catch(() => "unknown");
+      const role = result.role;
+      const insideActiveContainer = result.insideActiveContainer ?? false;
+
+      evaluatedCandidates.push({
+        strategy: strategy.label,
+        tagName: tag,
+        role,
+        visible: result.visible ?? false,
+        enabled: result.enabled ?? false,
+        editable: isEditableElement(tag, role),
+        insideActiveContainer
+      });
+
+      if (!result.visible || !result.enabled) {
+        rejectedCandidates.push({ 
+          strategy: strategy.label, 
+          reason: !result.visible ? "not_visible" : "not_enabled",
+          tagName: tag
+        });
+        continue;
+      }
+
+      if (!isEditableElement(tag, role)) {
+        rejectedCandidates.push({ 
+          strategy: strategy.label, 
+          reason: "not_editable",
+          tagName: tag,
+          text: target
+        });
+        console.log(`[fill-resolver] Candidate rejected: tag="${tag}" reason="not_editable"`);
+        continue;
+      }
+
+      console.log(`[fill-resolver] Candidate accepted: tag="${tag}" strategy="${strategy.label}" visible=true enabled=true editable=true${insideActiveContainer ? ' insideActiveContainer=true' : ''}`);
+
       return {
         status: "resolved",
         target,
@@ -1103,54 +1908,357 @@ export async function resolveFillTarget(
         matchReason: `fill_locator_${strategy.label}`,
         matchedTag: tag,
         attemptedLocators,
-        editableCandidatesCount: 1
+        editableCandidatesCount: 1,
+        fillDiagnostics: {
+          field: target,
+          activeContainerUsed: insideActiveContainer,
+          activeContainerType: activeContainer?.type,
+          candidatesEvaluated: evaluatedCandidates.length,
+          candidatesEvaluatedDetails: evaluatedCandidates,
+          rejectedCandidates,
+          selectedCandidate: {
+            strategy: strategy.label,
+            tagName: tag,
+            role,
+            visible: true,
+            enabled: true,
+            editable: true,
+            insideActiveContainer
+          }
+        },
+        localResolversTried,
+        autoRepairSkippedReason: "local_diagnostic_sufficient"
       };
     }
   }
 
-  // Phase 2: Snapshot-based editable element resolution
+  // Phase 2: Snapshot-based editable element resolution with active container priority
   const editableElements = snapshot.elements.filter((el) => isElementEditable(el));
-  let bestMatch: { element: SnapshotElement; score: number; field: string } | null = null;
+  let bestMatch: { element: SnapshotElement; score: number; field: string; insideActiveContainer: boolean } | null = null;
 
   for (const el of editableElements) {
     const texts = [el.label, el.name, el.placeholder, el.text, el.id].filter(Boolean) as string[];
     for (const text of texts) {
       const score = computeTokenScore(target, text);
-      if (score > 0 && (!bestMatch || score > bestMatch.score)) {
-        bestMatch = { element: el, score, field: text };
+      if (score > 0) {
+        let insideActiveContainer = false;
+        if (activeContainer?.containerElement) {
+          const containerClass = activeContainer.containerElement.className || "";
+          const elementClass = el.className || "";
+          if (containerClass && elementClass) {
+            const containerClasses = containerClass.split(/\s+/);
+            const elementClasses = elementClass.split(/\s+/);
+            insideActiveContainer = containerClasses.some(c => elementClasses.includes(c));
+          }
+        }
+        
+        const boostedScore = insideActiveContainer ? Math.min(score + 0.1, 1.0) : score;
+        
+        if (!bestMatch || boostedScore > bestMatch.score) {
+          bestMatch = { element: el, score: boostedScore, field: text, insideActiveContainer };
+        }
       }
     }
   }
 
   if (bestMatch && bestMatch.score >= 0.4) {
-    const resolved = await resolveSnapshotElementLocator(page, {
-      element: bestMatch.element,
-      target,
-      candidateText: bestMatch.field,
-      type: bestMatch.element.type,
-      tagName: bestMatch.element.tagName,
-      confidence: bestMatch.score,
-      matchReason: "snapshot_editable_match"
-    });
-    attemptedLocators.push(...resolved.attemptedLocators);
-    if (resolved.locator) {
-      const tag = bestMatch.element.tagName ?? "unknown";
-      return {
-        status: "resolved",
+    const element = bestMatch.element;
+    
+    const locatorResult = await tryConstructLocatorFromSnapshotElement(page, element, target, activeContainer);
+    attemptedLocators.push(locatorResult.strategy || "unknown");
+    
+    let locatorConstructed = false;
+    
+    if (locatorResult.locator) {
+      console.log(`[fill-resolver] Trying candidate locator: strategy="${locatorResult.strategy}"`);
+      
+      let isVisible = true;
+      let isEnabled = true;
+      let tagName = element.tagName ?? "unknown";
+      let role = element.role;
+      
+      try {
+        const count = await locatorResult.locator.count();
+        if (count > 0) {
+          for (let i = 0; i < count; i++) {
+            const nthLocator = locatorResult.locator.nth(i);
+            const nthVisible = await nthLocator.isVisible().catch(() => true);
+            const nthEnabled = await nthLocator.isEnabled().catch(() => true);
+            if (nthVisible && nthEnabled) {
+              locatorResult.locator = nthLocator;
+              isVisible = true;
+              isEnabled = true;
+              break;
+            }
+          }
+        }
+        if (typeof locatorResult.locator.evaluate === "function") {
+          const elInfo = await locatorResult.locator.evaluate((el) => ({
+            tagName: el.tagName.toLowerCase(),
+            role: el.getAttribute("role") || ""
+          })).catch(() => null);
+          if (elInfo) {
+            tagName = elInfo.tagName;
+            role = elInfo.role || undefined;
+          }
+        }
+      } catch {
+        isVisible = true;
+        isEnabled = true;
+      }
+      
+      evaluatedCandidates.push({
+        strategy: locatorResult.strategy || "snapshot",
+        tagName,
+        role,
+        visible: isVisible,
+        enabled: isEnabled,
+        editable: isEditableElement(tagName, role),
+        insideActiveContainer: bestMatch.insideActiveContainer,
+        text: bestMatch.field,
+        domId: element.domId,
+        name: element.name,
+        placeholder: element.placeholder,
+        ariaLabel: element.ariaLabel,
+        score: bestMatch.score
+      });
+      
+      if (!isVisible || !isEnabled) {
+        rejectedCandidates.push({ 
+          strategy: locatorResult.strategy || "snapshot", 
+          reason: !isVisible ? "not_visible" : "not_enabled",
+          tagName
+        });
+      } else if (!isEditableElement(tagName, role)) {
+        rejectedCandidates.push({ 
+          strategy: locatorResult.strategy || "snapshot", 
+          reason: "not_editable",
+          tagName,
+          text: bestMatch.field
+        });
+        console.log(`[fill-resolver] Candidate rejected: tag="${tagName}" reason="not_editable"`);
+      } else {
+        locatorConstructed = true;
+        console.log(`[fill-resolver] Candidate locator accepted: strategy="${locatorResult.strategy}" tag="${tagName}" visible=true enabled=true editable=true${bestMatch.insideActiveContainer ? ' insideActiveContainer=true' : ''}`);
+        
+        return {
+          status: "resolved",
+          target,
+          locator: locatorResult.locator,
+          locatorStrategy: locatorResult.strategy,
+          confidence: bestMatch.score,
+          matchReason: "snapshot_editable_match",
+          matchedTag: tagName,
+          matchedText: bestMatch.field,
+          attemptedLocators,
+          editableCandidatesCount: editableElements.length,
+          fillDiagnostics: {
+            field: target,
+            activeContainerUsed: bestMatch.insideActiveContainer,
+            activeContainerType: activeContainer?.type,
+            candidatesEvaluated: evaluatedCandidates.length,
+            candidatesEvaluatedDetails: evaluatedCandidates,
+            rejectedCandidates,
+            selectedCandidate: {
+              strategy: locatorResult.strategy || "snapshot",
+              tagName,
+              role,
+              visible: true,
+              enabled: true,
+              editable: true,
+              insideActiveContainer: bestMatch.insideActiveContainer
+            }
+          },
+          localResolversTried,
+          autoRepairSkippedReason: "local_diagnostic_sufficient"
+        };
+      }
+    } else if (locatorResult.reason === "missing_stable_locator_attributes") {
+      evaluatedCandidates.push({
+        strategy: "snapshot",
+        tagName: element.tagName ?? "unknown",
+        role: element.role,
+        visible: true,
+        enabled: true,
+        editable: true,
+        insideActiveContainer: bestMatch.insideActiveContainer,
+        text: bestMatch.field
+      });
+      rejectedCandidates.push({
+        strategy: "snapshot",
+        reason: "missing_stable_locator_attributes",
+        tagName: element.tagName ?? "unknown",
+        text: bestMatch.field
+      });
+      console.log(`[fill-resolver] Candidate rejected: strategy="snapshot" reason="missing_stable_locator_attributes"`);
+      
+      if (activeContainer?.containerLocator) {
+        const loginFallback = await tryLoginFillFallback(page, target, activeContainer, snapshot);
+        if (loginFallback.locator) {
+          console.log(`[fill-resolver] Login fallback successful: strategy="${loginFallback.strategy}"`);
+          return {
+            status: "resolved",
+            target,
+            locator: loginFallback.locator,
+            locatorStrategy: loginFallback.strategy,
+            confidence: 0.7,
+            matchReason: "login_fallback_match",
+            matchedTag: "input",
+            matchedText: target,
+            attemptedLocators,
+            editableCandidatesCount: editableElements.length,
+            fillDiagnostics: {
+              field: target,
+              activeContainerUsed: true,
+              activeContainerType: activeContainer.type,
+              candidatesEvaluated: evaluatedCandidates.length,
+              candidatesEvaluatedDetails: evaluatedCandidates,
+              rejectedCandidates,
+              selectedCandidate: {
+                strategy: loginFallback.strategy || "login_fallback",
+                tagName: "input",
+                visible: true,
+                enabled: true,
+                editable: true,
+                insideActiveContainer: true
+              }
+            },
+            localResolversTried,
+            autoRepairSkippedReason: "local_diagnostic_sufficient"
+          };
+        } else {
+          console.log(`[fill-resolver] Login fallback attempted but failed: reason="${loginFallback.reason}"`);
+        }
+      }
+    }
+    
+    if (!locatorConstructed) {
+      const resolved = await resolveSnapshotElementLocator(page, {
+        element: bestMatch.element,
         target,
-        locator: resolved.locator,
-        locatorStrategy: resolved.locatorStrategy ?? "snapshot",
+        candidateText: bestMatch.field,
+        type: bestMatch.element.type,
+        tagName: bestMatch.element.tagName,
         confidence: bestMatch.score,
-        matchReason: "snapshot_editable_match",
-        matchedTag: tag,
-        matchedText: bestMatch.field,
-        attemptedLocators,
-        editableCandidatesCount: editableElements.length
-      };
+        matchReason: "snapshot_editable_match"
+      });
+      attemptedLocators.push(...resolved.attemptedLocators);
+      
+      if (resolved.locator) {
+        let isVisible = true;
+        let isEnabled = true;
+        let tagName = bestMatch.element.tagName ?? "unknown";
+        let role = bestMatch.element.role;
+        
+        try {
+          if (typeof resolved.locator.isVisible === "function") {
+            isVisible = await resolved.locator.isVisible().catch(() => true);
+          }
+          if (typeof resolved.locator.isEnabled === "function") {
+            isEnabled = await resolved.locator.isEnabled().catch(() => true);
+          }
+          if (typeof resolved.locator.evaluate === "function") {
+            const elInfo = await resolved.locator.evaluate((el) => ({
+              tagName: el.tagName.toLowerCase(),
+              role: el.getAttribute("role") || ""
+            })).catch(() => null);
+            if (elInfo) {
+              tagName = elInfo.tagName;
+              role = elInfo.role || undefined;
+            }
+          }
+        } catch {
+          isVisible = true;
+          isEnabled = true;
+        }
+        
+        evaluatedCandidates.push({
+          strategy: "snapshot",
+          tagName,
+          role,
+          visible: isVisible,
+          enabled: isEnabled,
+          editable: isEditableElement(tagName, role),
+          insideActiveContainer: bestMatch.insideActiveContainer,
+          text: bestMatch.field
+        });
+        
+        if (!isVisible || !isEnabled) {
+          rejectedCandidates.push({ 
+            strategy: "snapshot", 
+            reason: !isVisible ? "not_visible" : "not_enabled",
+            tagName
+          });
+        } else if (!isEditableElement(tagName, role)) {
+          rejectedCandidates.push({ 
+            strategy: "snapshot", 
+            reason: "not_editable",
+            tagName,
+            text: bestMatch.field
+          });
+          console.log(`[fill-resolver] Candidate rejected: tag="${tagName}" reason="not_editable"`);
+        } else {
+          locatorConstructed = true;
+          console.log(`[fill-resolver] Candidate accepted: tag="${tagName}" strategy="snapshot" visible=true enabled=true editable=true${bestMatch.insideActiveContainer ? ' insideActiveContainer=true' : ''}`);
+          
+          return {
+            status: "resolved",
+            target,
+            locator: resolved.locator,
+            locatorStrategy: resolved.locatorStrategy ?? "snapshot",
+            confidence: bestMatch.score,
+            matchReason: "snapshot_editable_match",
+            matchedTag: tagName,
+            matchedText: bestMatch.field,
+            attemptedLocators,
+            editableCandidatesCount: editableElements.length,
+            fillDiagnostics: {
+              field: target,
+              activeContainerUsed: bestMatch.insideActiveContainer,
+              activeContainerType: activeContainer?.type,
+              candidatesEvaluated: evaluatedCandidates.length,
+              candidatesEvaluatedDetails: evaluatedCandidates,
+              rejectedCandidates,
+              selectedCandidate: {
+                strategy: "snapshot",
+                tagName,
+                role,
+                visible: true,
+                enabled: true,
+                editable: true,
+                insideActiveContainer: bestMatch.insideActiveContainer
+              }
+            },
+            localResolversTried,
+            autoRepairSkippedReason: "local_diagnostic_sufficient"
+          };
+        }
+      }
+    }
+    
+    if (!locatorConstructed) {
+      evaluatedCandidates.push({
+        strategy: "snapshot",
+        tagName: bestMatch.element.tagName ?? "unknown",
+        role: bestMatch.element.role,
+        visible: true,
+        enabled: true,
+        editable: true,
+        insideActiveContainer: bestMatch.insideActiveContainer,
+        text: bestMatch.field
+      });
+      rejectedCandidates.push({
+        strategy: "snapshot",
+        reason: "locator_not_constructable",
+        tagName: bestMatch.element.tagName ?? "unknown",
+        text: bestMatch.field
+      });
+      console.log(`[fill-resolver] Editable candidate found but locator could not be constructed: tag="${bestMatch.element.tagName}" field="${bestMatch.field}"`);
     }
   }
 
   // Phase 3: Check for non-editable text matches (to distinguish not_found from not_editable)
+  // IMPORTANT: Only return fill_target_not_editable if NO editable candidates were evaluated
   const nonEditableElements = snapshot.elements.filter((el) => !isElementEditable(el));
   let nonEditableMatch: { text: string; tag: string; score: number } | null = null;
 
@@ -1159,12 +2267,34 @@ export async function resolveFillTarget(
     const score = computeTokenScore(target, el.text);
     if (score >= 0.4 && (!nonEditableMatch || score > nonEditableMatch.score)) {
       nonEditableMatch = { text: el.text, tag: el.tagName ?? "unknown", score };
+      
+      evaluatedCandidates.push({
+        strategy: "snapshot_text_match",
+        tagName: el.tagName ?? "unknown",
+        role: el.role,
+        visible: el.visible ?? true,
+        enabled: true,
+        editable: false,
+        insideActiveContainer: false,
+        text: el.text
+      });
     }
   }
 
-  if (nonEditableMatch) {
+  const editableCandidatesEvaluated = evaluatedCandidates.filter(c => c.editable);
+  
+  if (nonEditableMatch && editableCandidatesEvaluated.length === 0) {
+    rejectedCandidates.push({
+      strategy: "snapshot_text_match",
+      reason: "not_editable",
+      tagName: nonEditableMatch.tag,
+      text: nonEditableMatch.text
+    });
+    
+    console.log(`[fill-resolver] Candidate rejected: tag="${nonEditableMatch.tag}" text="${nonEditableMatch.text}" reason="not_editable"`);
+    
     return {
-      status: "not_editable",
+      status: "fill_target_not_editable",
       target,
       confidence: Math.min(nonEditableMatch.score, 0.99),
       matchReason: "fill_target_not_editable",
@@ -1172,23 +2302,179 @@ export async function resolveFillTarget(
       matchedText: nonEditableMatch.text,
       attemptedLocators,
       editableCandidatesCount: editableElements.length,
+      fillDiagnostics: {
+        field: target,
+        activeContainerUsed: false,
+        activeContainerType: activeContainer?.type,
+        candidatesEvaluated: evaluatedCandidates.length,
+        candidatesEvaluatedDetails: evaluatedCandidates,
+        rejectedCandidates
+      },
       nonEditableMatch: {
         text: nonEditableMatch.text,
         tag: nonEditableMatch.tag,
         reason: `Matched text is not an editable field. Found in <${nonEditableMatch.tag}> element.`
-      }
+      },
+      localResolversTried,
+      autoRepairSkippedReason: "local_diagnostic_sufficient"
+    };
+  }
+  
+  if (nonEditableMatch && editableCandidatesEvaluated.length > 0) {
+    rejectedCandidates.push({
+      strategy: "snapshot_text_match",
+      reason: "not_editable",
+      tagName: nonEditableMatch.tag,
+      text: nonEditableMatch.text
+    });
+    console.log(`[fill-resolver] Non-editable match found but ${editableCandidatesEvaluated.length} editable candidates were evaluated. Error based on editable candidates.`);
+  }
+
+  // Phase 4: Check for editable candidates without constructable locator
+  if (editableCandidatesEvaluated.length > 0 && rejectedCandidates.some(c => c.reason === "locator_not_constructable")) {
+    console.log(`[fill-resolver] Editable candidates found but no constructable locator: count=${editableCandidatesEvaluated.length}`);
+    return {
+      status: "not_found",
+      target,
+      confidence: 0.5,
+      matchReason: "editable_candidates_without_constructable_locator",
+      attemptedLocators,
+      editableCandidatesCount: editableElements.length,
+      fillDiagnostics: {
+        field: target,
+        activeContainerUsed: false,
+        activeContainerType: activeContainer?.type,
+        candidatesEvaluated: evaluatedCandidates.length,
+        candidatesEvaluatedDetails: evaluatedCandidates,
+        rejectedCandidates
+      },
+      localResolversTried,
+      autoRepairSkippedReason: "local_diagnostic_sufficient"
     };
   }
 
-  // Phase 4: No match at all
+  // Phase 5: No match found - check if we have rejected candidates due to visibility
+  if (rejectedCandidates.length > 0 && rejectedCandidates.every(c => c.reason === "not_visible")) {
+    console.log(`[fill-resolver] All candidates rejected: reason="not_visible"`);
+    return {
+      status: "not_visible",
+      target,
+      confidence: 0.5,
+      matchReason: "fill_target_not_visible",
+      attemptedLocators,
+      editableCandidatesCount: editableElements.length,
+      fillDiagnostics: {
+        field: target,
+        activeContainerUsed: false,
+        activeContainerType: activeContainer?.type,
+        candidatesEvaluated: evaluatedCandidates.length,
+        candidatesEvaluatedDetails: evaluatedCandidates,
+        rejectedCandidates
+      },
+      localResolversTried,
+      autoRepairSkippedReason: "local_diagnostic_sufficient"
+    };
+  }
+
+  // Phase 5: Final login fallback before returning not_found
+  if (activeContainer?.containerLocator) {
+    const normalizedTarget = target.toLowerCase();
+    const isLoginField = 
+      normalizedTarget.includes("username") || 
+      normalizedTarget.includes("usuario") || 
+      normalizedTarget.includes("user") || 
+      normalizedTarget.includes("login") || 
+      normalizedTarget.includes("email") || 
+      normalizedTarget.includes("correo") ||
+      normalizedTarget.includes("password") || 
+      normalizedTarget.includes("contrasena") || 
+      normalizedTarget.includes("clave");
+    
+    if (isLoginField) {
+      console.log(`[fill-resolver] Final login fallback attempt for field="${target}"`);
+      const loginFallback = await tryLoginFillFallback(page, target, activeContainer, snapshot);
+      if (loginFallback.locator) {
+        console.log(`[fill-resolver] Final login fallback successful: strategy="${loginFallback.strategy}"`);
+        return {
+          status: "resolved",
+          target,
+          locator: loginFallback.locator,
+          locatorStrategy: loginFallback.strategy,
+          confidence: 0.7,
+          matchReason: "login_fallback_match",
+          matchedTag: "input",
+          matchedText: target,
+          attemptedLocators,
+          editableCandidatesCount: evaluatedCandidates.length,
+          fillDiagnostics: {
+            field: target,
+            activeContainerUsed: true,
+            activeContainerType: activeContainer.type,
+            candidatesEvaluated: evaluatedCandidates.length,
+            candidatesEvaluatedDetails: evaluatedCandidates,
+            rejectedCandidates,
+            selectedCandidate: {
+              strategy: loginFallback.strategy || "login_fallback",
+              tagName: "input",
+              visible: true,
+              enabled: true,
+              editable: true,
+              insideActiveContainer: true
+            }
+          },
+          localResolversTried,
+          autoRepairSkippedReason: "local_diagnostic_sufficient"
+        };
+      } else {
+        console.log(`[fill-resolver] Final login fallback failed: reason="${loginFallback.reason}"`);
+      }
+    }
+  }
+
+  // Phase 6: No match at all
+  console.log(`[fill-resolver] No editable locator found for field="${target}"`);
   return {
     status: "not_found",
     target,
     confidence: 0,
     matchReason: "fill_target_not_found",
     attemptedLocators,
-    editableCandidatesCount: editableElements.length
+    editableCandidatesCount: editableElements.length,
+    fillDiagnostics: {
+      field: target,
+      activeContainerUsed: false,
+      activeContainerType: activeContainer?.type,
+      candidatesEvaluated: evaluatedCandidates.length,
+      candidatesEvaluatedDetails: evaluatedCandidates,
+      rejectedCandidates
+    },
+    localResolversTried,
+    autoRepairSkippedReason: "local_diagnostic_sufficient"
   };
+}
+
+export function validateFillResolutionContract(result: FillTargetResolutionResult): { valid: boolean; error?: string } {
+  if (result.status === "resolved") {
+    if (!result.locator) {
+      return { valid: false, error: "resolved_without_locator" };
+    }
+    if (!result.locatorStrategy) {
+      return { valid: false, error: "resolved_without_strategy" };
+    }
+    if (!result.fillDiagnostics?.selectedCandidate) {
+      return { valid: false, error: "resolved_without_selected_candidate" };
+    }
+    if (!result.fillDiagnostics.selectedCandidate.editable) {
+      return { valid: false, error: "resolved_with_non_editable_candidate" };
+    }
+    if (!result.fillDiagnostics.selectedCandidate.visible) {
+      return { valid: false, error: "resolved_with_non_visible_candidate" };
+    }
+    if (!result.fillDiagnostics.selectedCandidate.enabled) {
+      return { valid: false, error: "resolved_with_non_enabled_candidate" };
+    }
+  }
+  return { valid: true };
 }
 
 // ─── Associated Target Resolution ─────────────────────────────────

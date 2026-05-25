@@ -19,6 +19,7 @@ import { buildRouteRecoveryPack, computeRouteRecoveryPackStats } from "./route-r
 import { validateRouteRecoveryPlan } from "./agent-response-validator";
 import type { CodexAutoRepairInput, PlanningBudget, SemanticGoal, RecoveryDecision } from "../types/codex-auto-repair.types";
 import { DEFAULT_PLANNING_BUDGET } from "../types/codex-auto-repair.types";
+import { resolveCodexCliPath } from "./codex-cli-resolver";
 
 export type AgentAutoRepairConfig = {
   enabled: boolean;
@@ -46,7 +47,7 @@ export type AgentAutoRepairAttemptResult =
     }
   | {
       attempted: true;
-      status: "invalid_proposal" | "cli_error" | "timeout" | "exception" | "no_response";
+      status: "invalid_proposal" | "cli_error" | "timeout" | "exception" | "no_response" | "unavailable";
       success: false;
       reason: string;
       handoffDir: string;
@@ -318,6 +319,53 @@ export async function runAgentAutoRepairAttempt(input: {
   };
 
   try {
+    const codexCli = await resolveCodexCliPath({
+      env: {
+        ...process.env,
+        ...(cfg.command && (cfg.command.includes("\\") || cfg.command.includes("/") || cfg.command.endsWith(".cmd") || cfg.command.endsWith(".exe"))
+          ? { CODEX_CLI_PATH: cfg.command }
+          : {})
+      },
+      platform: process.platform,
+      cwd: process.cwd(),
+      logger: { log: (message: string) => console.log(message) },
+      commandHint: cfg.command
+    });
+
+    if (!codexCli.found) {
+      console.log(`[auto-repair] Codex CLI not found. Set CODEX_CLI_PATH or install Codex CLI globally.`);
+      console.log(`[auto-repair] Auto-repair skipped: reason="${codexCli.reason}"`);
+      await writeAttemptResult({
+        timestamp: new Date().toISOString(),
+        attemptNumber: attempt,
+        repairStatus: "auto_repair_unavailable",
+        success: false,
+        error: codexCli.message,
+        responsePath,
+        selectedSkill: selectedSkillId,
+        diagnostics: {
+          autoRepairSkippedReason: codexCli.reason,
+          codexCli: {
+            found: false,
+            reason: codexCli.reason,
+            attempted: codexCli.attempted,
+            recommendation: codexCli.recommendation
+          }
+        }
+      });
+      return {
+        attempted: true,
+        status: "unavailable",
+        success: false,
+        reason: codexCli.reason,
+        handoffDir,
+        responsePath,
+        error: codexCli.message
+      };
+    }
+
+    console.log(`[auto-repair] Codex CLI resolved: source=${codexCli.source} command=${codexCli.displayCommand}`);
+
     // For compact-route-recovery, buildCodexPrompt dispatches to
     // buildCompactRouteRecoveryPrompt which already references selected-skill.md.
     // Do not override with skillAwarePromptOverride.
@@ -342,7 +390,7 @@ export async function runAgentAutoRepairAttempt(input: {
       contextPackPath,
       projectRoot: process.cwd(),
       timeoutMs: cfg.timeoutMs,
-      codexCommand: cfg.command,
+      codexCommand: codexCli.command,
       codexExtraArgs: cfg.extraArgs,
       promptMode: cfg.promptMode,
       skillId: selectedSkillId,
@@ -361,6 +409,16 @@ export async function runAgentAutoRepairAttempt(input: {
       routeRecoveryPackPath,
       planningBudget: cfg.planningBudget
     } as CodexAutoRepairInput & { skillAwarePromptOverride?: string });
+
+    if (repair.diagnostics) {
+      (repair.diagnostics as Record<string, unknown>).autoRepairDiagnostics = {
+        codexCli: {
+          found: true,
+          source: codexCli.source,
+          displayCommand: codexCli.displayCommand
+        }
+      };
+    }
 
     if (!repair.success) {
       const error = repair.error ?? "Codex auto-repair failed.";

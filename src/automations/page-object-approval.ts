@@ -118,6 +118,14 @@ const SENSITIVE_PARAM_PATTERNS = [
   /pin/i
 ];
 
+const BLOCKED_LOGIN_SOURCE_PATTERNS = [
+  /admin123/i,
+  /['"`]admin['"`]/i,
+  /\botp\b/i,
+  /\bpin\b/i,
+  /\btoken\b/i
+];
+
 export function isMethodAutoApprovable(
   method: PageObjectMethod,
   options: {
@@ -377,6 +385,17 @@ export async function autoApproveSafePageObjects(
         continue;
       }
 
+      if (candidate.className === "LoginPage") {
+        const candidateSource = await fs.readFile(candidateFilePath, "utf-8");
+        const blockedPattern = BLOCKED_LOGIN_SOURCE_PATTERNS.find((pattern) => pattern.test(candidateSource));
+        if (blockedPattern) {
+          result.blockedAutoApprovals.push(`${candidate.className}: source blocked by pattern ${blockedPattern}`);
+          result.skipped += 1;
+          result.files.push({ className: candidate.className, status: "skipped" });
+          continue;
+        }
+      }
+
       const { approvableMethods, blockedMethods } = isPageObjectAutoApprovable(candidate, {
         confidenceThreshold,
         blockSensitive,
@@ -388,7 +407,11 @@ export async function autoApproveSafePageObjects(
         result.blockedAutoApprovals.push(`${candidate.className}.${method.name}(): ${reason}`);
       }
 
-      if (approvableMethods.length === 0 && candidate.methods.every((m) => m.status === "active" && m.available)) {
+      if (
+        approvableMethods.length === 0 &&
+        candidate.status === "active" &&
+        candidate.methods.every((m) => m.status === "active" && m.available)
+      ) {
         result.skipped += 1;
         result.files.push({ className: candidate.className, status: "skipped" });
         continue;
@@ -409,9 +432,7 @@ export async function autoApproveSafePageObjects(
       const now = new Date().toISOString();
 
       candidate.filePath = activeFilePath.replace(/\\/g, "/");
-      if (!hasActiveFile) {
-        candidate.status = "active";
-      }
+      candidate.status = "active";
 
       for (const method of approvableMethods) {
         method.status = "active";

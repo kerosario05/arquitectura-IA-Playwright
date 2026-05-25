@@ -88,6 +88,7 @@ export function validateExecutionPlan(plan: unknown): PlanValidationResult {
   const issues: PlanValidationIssue[] = [];
 
   if (!isObject(plan)) {
+    console.log(`[plan-validator] Plan is not an object`);
     return {
       valid: false,
       status: "invalid",
@@ -101,6 +102,8 @@ export function validateExecutionPlan(plan: unknown): PlanValidationResult {
   const scenario = plan.scenario;
   const requiredData = plan.requiredData;
   const steps = plan.steps;
+
+  console.log(`[plan-validator] Validating plan: version=${version}, source=${source}, status=${status}, steps=${Array.isArray(steps) ? steps.length : 0}`);
 
   if (version !== "1.0") {
     pushError(issues, "PLAN_VERSION_INVALID", "Plan version must be '1.0'.");
@@ -197,6 +200,16 @@ export function validateExecutionPlan(plan: unknown): PlanValidationResult {
       "PLAN_DRAFT_WITH_UNRESOLVED_DATA",
       "Draft plan has unresolved required data and may later require status 'needs_data'."
     );
+  }
+
+  // Log validation issues
+  if (issues.length > 0) {
+    console.log(`[plan-validator] Validation issues found: ${issues.length}`);
+    for (const issue of issues) {
+      console.log(`[plan-validator] ${issue.level.toUpperCase()}: ${issue.code} - ${issue.message}${issue.stepIndex ? ` (step ${issue.stepIndex})` : ''}`);
+    }
+  } else {
+    console.log(`[plan-validator] Validation passed`);
   }
 
   const derivedStatus = deriveStatus(status, issues);

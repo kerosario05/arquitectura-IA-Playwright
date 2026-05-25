@@ -11,10 +11,12 @@ import {
   clickResolvedTarget,
   resolveSnapshotElementLocator,
   shouldInvokeAiAssistedDiscovery,
-  resolveFillTarget
+  resolveFillTarget,
+  type ActiveContainerContext
 } from "./target-resolver";
 import { resolveLoginForm, type LoginFormResolution } from "./login-resolver";
 import { runAiAssistedDiscovery, type AiAssistedDiscoveryConfig } from "./ai-assisted-discovery";
+import { detectPostClickUiChange, type PostClickUiChangeResult } from "./post-click-ui-change-detector";
 import {
   buildConcreteAssertionsFromExpected,
   resolveAssertionTargets,
@@ -32,7 +34,7 @@ import type {
   DiscoveredObject
 } from "../types/discovery.types";
 import type { TestScenario, TestScenarioStep } from "../types/testrail.types";
-import type { ExecutionPlan, ExecutionPlanStep } from "../types/execution-plan.types";
+import type { ExecutionPlan, ExecutionPlanStep, RequiredDataRef } from "../types/execution-plan.types";
 import type { PageSnapshot } from "../types/page-snapshot.types";
 import type { TestDataMap, TestDataValue, MissingInputBehavior } from "../types/env.types";
 import { detectAuthGate, type AuthGateDetection } from "./auth-gate-detector";
@@ -48,6 +50,8 @@ import { parseProductConditionTarget, matchesProductCondition, type ProductCondi
 import { detectTransientScreen } from "./transient-screen-detector";
 import { evaluateEarlyCompletionPolicy, type EarlyCompletionPolicyResult } from "./early-completion-policy";
 import { detectSelectionSuccess, isSelectionLikeTarget, isSubmitLikeTarget, promoteToClickableAncestor, type SelectionDiagnostics } from "./selection-state-detector";
+import { resolveDataKey, formatDataKeyForLog, type DataKeyResolution } from "../data/data-key-resolver";
+import { type AutoGenerateConfig } from "../data/auto-test-data-generator";
 
 function normalizeText(text: string): string {
   return text
@@ -166,6 +170,12 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
           associatedEntity = intent.associatedEntity ?? intent.actionTarget;
         }
 
+        // select_first_visible_item: use context/category as target, mark semantic role
+        if (intent.type === "select_first_visible_item") {
+          targetText = intent.context || "first visible item";
+          associatedEntity = intent.associatedEntity;
+        }
+
         const item: ActionTargetItem = {
           index: step.index,
           action: step.action,
@@ -185,7 +195,7 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
         orderedSteps.push({
           stepIndex: step.index,
           originalText: step.action,
-          type: intent.isOptional ? "optional_action" : (intent.type === "action_fill" ? "action_fill" : intent.type === "action_select" ? "action_select" : "action_click"),
+          type: intent.isOptional ? "optional_action" : (intent.type === "action_fill" ? "action_fill" : intent.type === "action_select" || intent.type === "select_first_visible_item" ? "action_select" : "action_click"),
           target: targetText,
           valueKey: intent.valueKey,
           value: intent.value,
@@ -250,20 +260,118 @@ export function evaluateEarlyCompletion(
   satisfied: boolean;
   satisfiedAssertions: string[];
   pendingAssertions: string[];
+  deferredAssertions: string[];
   blockingAssertions: string[];
   skippedAssertions: string[];
   weakSignals: string[];
   skippedReason?: string;
   skippedRemainingActions: number;
 } {
+  const GENERIC_DESCRIPTOR_PATTERNS = [
+    /informacion principal del producto visible/i,
+    /informacion del producto visible/i,
+    /detalle visible/i,
+    /detalle de producto visible/i,
+    /detalle de [a-z0-9 ]+ visible/i,
+    /vista de detalle visible/i,
+    /datos principales visibles/i
+  ];
+
+  function isGenericDescriptorText(text: string): boolean {
+    const normalized = normalizeText(text);
+    return GENERIC_DESCRIPTOR_PATTERNS.some((p) => p.test(normalized));
+  }
+
+  function isDetailDescriptorText(text: string): boolean {
+    const normalized = normalizeText(text);
+    return /detalle|detail|resumen|informacion/.test(normalized);
+  }
+
+  function hasConcreteSubject(text: string): boolean {
+    const normalized = normalizeText(text)
+      .replace(/informacion|principal|producto|visible|detalle|vista|de|del|la|el|los|las|detail|summary/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    return normalized.split(" ").filter(Boolean).length >= 1;
+  }
+
+  function detailSubjectAppearsInSnapshot(text: string): boolean {
+    const normalized = normalizeText(text)
+      .replace(/detalle|detail|visible|vista|de|del|la|el|los|las/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    const subjectTokens = normalized.split(" ").filter(Boolean).filter((t) => t.length > 2 && t !== "producto" && t !== "product");
+    if (subjectTokens.length === 0) return false;
+    const visibleBlob = normalizeText(`${snapshot.title} ${snapshot.elements.map((el) => `${el.text ?? ""} ${el.label ?? ""} ${el.name ?? ""}`).join(" ")}`);
+    const normalizedMatch = subjectTokens.every((t) => visibleBlob.includes(t));
+    if (normalizedMatch) return true;
+
+    const rawSubjectTokens = text
+      .toLowerCase()
+      .replace(/detalle|detail|visible|vista|de|del|la|el|los|las/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .split(" ")
+      .filter(Boolean)
+      .filter((t) => t.length > 2 && t !== "producto" && t !== "product");
+    const rawVisibleBlob = `${snapshot.title} ${snapshot.elements.map((el) => `${el.text ?? ""} ${el.label ?? ""} ${el.name ?? ""}`).join(" ")}`.toLowerCase();
+    return rawSubjectTokens.length > 0 && rawSubjectTokens.every((t) => rawVisibleBlob.includes(t));
+  }
+
+  function inferRequiredContextFromAssertion(text: string): "catalog" | "filtered_list" | "detail" | "cart" | "form" | "confirmation" | "unknown" {
+    const normalized = normalizeText(text);
+    if (/\bcarrito\b|\bcart\b|\bcheckout\b|\bsubtotal\b|\btotal\b/.test(normalized)) return "cart";
+    if (/\bmodal\b|\bdialog\b|\bform\b|\bformulario\b|\bcampo\b|\bfield\b/.test(normalized)) return "form";
+    if (/\bconfirm\w*\b|\bsuccess\b|\bexito\b|\bfinaliz\w*\b|\bcompletad\w*\b/.test(normalized)) return "confirmation";
+    if (/\bdetalle\b|\bdetail\b|\bdescripcion\b|\bdescription\b|\bimagen\b|\bimage\b|\bprecio\b|\bprice\b/.test(normalized)) return "detail";
+    if (/\bfiltro\b|\bfilter\b|\bcategoria\b|\bcategory\b|\bbusqueda\b|\bsearch\b|\bresultad\w*\b/.test(normalized)) return "filtered_list";
+    if (/\blistado\b|\bcatalog\w*\b|\bproductos?\b|\bitems?\b|\bcards?\b/.test(normalized)) return "catalog";
+    return "unknown";
+  }
+
+  function inferCurrentContextFromSnapshot(): "catalog" | "filtered_list" | "detail" | "cart" | "form" | "confirmation" | "unknown" {
+    const visibleTexts = snapshot.elements
+      .map((el) => normalizeText(`${el.text ?? ""} ${el.label ?? ""} ${el.name ?? ""}`))
+      .filter(Boolean);
+    const hasCards = snapshot.elements.some((el) => (el.type ?? "").toLowerCase() === "card");
+    const hasRows = snapshot.elements.some((el) => ["tr", "li"].includes((el.tagName ?? "").toLowerCase()) || (el.role ?? "").toLowerCase() === "row");
+    const hasDialog = snapshot.summary.dialogs > 0 || snapshot.elements.some((el) => ["dialog", "modal"].includes((el.type ?? "").toLowerCase()));
+    const hasInputs = snapshot.summary.inputs > 0 || snapshot.elements.some((el) => ["input", "select", "textarea"].includes((el.type ?? "").toLowerCase()));
+    const hasHeading = snapshot.elements.some((el) => ["heading", "h1", "h2", "h3"].includes((el.type ?? "").toLowerCase()) || ["h1", "h2", "h3"].includes((el.tagName ?? "").toLowerCase()));
+    const hasImage = snapshot.elements.some((el) => (el.tagName ?? "").toLowerCase() === "img" || (el.role ?? "").toLowerCase() === "img");
+    const hasMoney = snapshot.elements.some((el) => /(?:USD?\$|EUR|RD\$|\$)\s*\d[\d,.]*|\d[\d,.]*\s*(?:USD|EUR|RD\$)/i.test(`${el.text ?? ""} ${el.label ?? ""} ${el.name ?? ""}`));
+    const hasAddToCart = visibleTexts.some((t) => /\badd to cart\b|\bagregar al carrito\b/.test(t));
+    const hasCartPageSignal = hasRows || visibleTexts.some((t) => /\bcheckout\b|\bsubtotal\b|\btotal\b|\bshopping cart\b|\bcarrito de compras\b/.test(t));
+    const hasSuccessSignal = visibleTexts.some((t) => /\bsuccess\b|\bconfirm\w*\b|\bgracias\b|\bcompletad\w*\b|\bfinalizad\w*\b/.test(t));
+
+    if (hasSuccessSignal) return "confirmation";
+    if ((hasDialog && hasInputs) || (hasInputs && snapshot.summary.buttons > 0)) return "form";
+    if (hasCartPageSignal) return "cart";
+    if (hasAddToCart || (hasHeading && (hasImage || hasMoney))) return "detail";
+    if (hasCards || hasRows) return "catalog";
+    return "unknown";
+  }
+
+  function remainingActionsCanReachContext(requiredContext: string): boolean {
+    const blob = remainingActionTargets.map((a) => normalizeText(`${a.action} ${a.target}`)).join(" ");
+    if (!blob) return false;
+    if (requiredContext === "cart") return /\bcart\b|\bcarrito\b|\bcheckout\b/.test(blob);
+    if (requiredContext === "form") return /\babrir\b.*\bform\b|\bopen\b.*\bform\b|\bmodal\b|\bdialog\b|\blogin\b|\bregistr\w*\b/.test(blob);
+    if (requiredContext === "confirmation") return /\bsubmit\b|\benviar\b|\bconfirm\w*\b|\bfinaliz\w*\b|\bcompr\w*\b|\bpag\w*\b/.test(blob);
+    if (requiredContext === "detail") return /\bview\b|\bdetalle\b|\bdetail\b|\bselect\b|\bseleccionar\b|\bclick\b.*\b(item|producto|card)\b/.test(blob);
+    if (requiredContext === "filtered_list") return /\bfiltro\b|\bfilter\b|\bcategoria\b|\bcategory\b|\bbusqueda\b|\bsearch\b/.test(blob);
+    return false;
+  }
+
   if (assertionTargets.length === 0) {
-    return { checked: false, satisfied: false, satisfiedAssertions: [], pendingAssertions: [], blockingAssertions: [], skippedAssertions: [], weakSignals: [], skippedRemainingActions: 0 };
+    return { checked: false, satisfied: false, satisfiedAssertions: [], pendingAssertions: [], deferredAssertions: [], blockingAssertions: [], skippedAssertions: [], weakSignals: [], skippedRemainingActions: 0 };
   }
 
   const resolutionResults = resolveAssertionTargets(snapshot, assertionTargets);
   
   const satisfiedAssertions: string[] = [];
   const pendingAssertions: string[] = [];
+  const deferredAssertions: string[] = [];
   const skippedAssertions: string[] = [];
   const weakSignals: string[] = [];
 
@@ -279,7 +387,43 @@ export function evaluateEarlyCompletion(
       res.classification === "composite_assertion"
     )) || res.isWeakSignal === true;
 
-    const isSkippable = (res.status === "skipped_semantic_descriptor") || isWeakDescriptor;
+    const isExpectedDescriptor =
+      isExpectedSource &&
+      (res.classification === "semantic_descriptor" ||
+        res.classification === "composite_assertion" ||
+        res.classification === "expected_only" ||
+        res.classification === "ambiguous_assertion");
+    const isDetailDescriptor = isDetailDescriptorText(res.assertionText);
+    const isGenericDescriptor = isGenericDescriptorText(res.assertionText);
+    const detailWithConcreteSubject = isDetailDescriptor && hasConcreteSubject(res.assertionText);
+    const hasConcreteDetailEvidence = (res.matchedTokens?.length ?? 0) > 0 || Boolean(res.matchedText);
+    const detailEvidenceSatisfied = hasConcreteDetailEvidence || detailSubjectAppearsInSnapshot(res.assertionText);
+    const keepAsSatisfiedDetail =
+      detailWithConcreteSubject &&
+      detailEvidenceSatisfied &&
+      (
+        // Expected detail descriptors with concrete subject become structurally satisfied
+        // once equivalent detail evidence is present, even if parser classified them weak.
+        (isExpectedSource && (isExpectedDescriptor || res.classification === "structural_assertion")) ||
+        (!isExpectedSource && isDetailDescriptor && res.status === "passed")
+      );
+
+    // Optional/precondition statuses are skippable
+    const isOptionalStatus = 
+      res.status === "optional_confirmation_detail_missing" ||
+      res.status === "satisfied_by_previous_assertion" ||
+      res.status === "precondition_unresolved";
+
+    const isSkippable = (res.status === "skipped_semantic_descriptor") || isWeakDescriptor || isOptionalStatus;
+    const contextDecision = (res.assertionDiagnostics as any)?.assertionContextDiagnostics?.decision;
+    const inferredRequiredContext = inferRequiredContextFromAssertion(res.assertionText);
+    const inferredCurrentContext = inferCurrentContextFromSnapshot();
+    const inferredDeferredContext =
+      inferredRequiredContext !== "unknown" &&
+      inferredCurrentContext !== inferredRequiredContext &&
+      remainingActionsCanReachContext(inferredRequiredContext);
+    const isDeferredContext = res.reason === "assertion_context_not_reached" || contextDecision === "deferred_until_context" || inferredDeferredContext;
+    const isStructurallySatisfied = res.reason === "structurally_satisfied" || contextDecision === "structurally_satisfied";
 
     const isMandatory = !isSkippable && (
       res.classification === "literal_observable" ||
@@ -287,12 +431,34 @@ export function evaluateEarlyCompletion(
       res.classification === "composite_assertion" ||
       res.classification === "semantic_descriptor"
     );
+    const isPreconditionUnresolved = res.status === "precondition_unresolved";
+    const shouldTreatPreconditionAsPending =
+      isPreconditionUnresolved &&
+      !isWeakDescriptor &&
+      inferredRequiredContext !== "unknown" &&
+      inferredCurrentContext !== inferredRequiredContext &&
+      remainingActionTargets.length === 0;
 
-    if (res.status === "passed" || res.status === "satisfied_by_children") {
+    if (isStructurallySatisfied || keepAsSatisfiedDetail) {
+      satisfiedAssertions.push(res.assertionText);
+    } else if (shouldTreatPreconditionAsPending) {
+      pendingAssertions.push(res.assertionText);
+    } else if (isDeferredContext) {
+      if (remainingActionTargets.length > 0) {
+        deferredAssertions.push(res.assertionText);
+      } else if (isMandatory) {
+        pendingAssertions.push(res.assertionText);
+      } else {
+        skippedAssertions.push(res.assertionText);
+      }
+    } else if ((isExpectedDescriptor || isGenericDescriptor) && !keepAsSatisfiedDetail) {
+      skippedAssertions.push(res.assertionText);
+      weakSignals.push(res.assertionText);
+    } else if (res.status === "passed" || res.status === "satisfied_by_children" || isOptionalStatus) {
       satisfiedAssertions.push(res.assertionText);
     } else if (isSkippable) {
       skippedAssertions.push(res.assertionText);
-      if ((res as any).isWeakSignal) {
+      if ((res as any).isWeakSignal || isExpectedDescriptor) {
         weakSignals.push(res.assertionText);
       }
     } else if (isMandatory) {
@@ -327,6 +493,7 @@ export function evaluateEarlyCompletion(
     satisfied,
     satisfiedAssertions,
     pendingAssertions,
+    deferredAssertions,
     blockingAssertions: pendingAssertions,
     skippedAssertions,
     weakSignals,
@@ -419,6 +586,7 @@ export type CaseDiscoveryOptions = {
   appBaseUrl: string;
   testData?: TestDataMap;
   loginAction?: () => Promise<void>;
+  loginMode?: "password" | "no_login" | "manual";
   aiAssistedDiscovery?: {
     explorer?: AIExplorer;
     config?: Partial<AiAssistedDiscoveryConfig>;
@@ -496,7 +664,12 @@ async function tryAuthGateRecovery(
   snapshot: PageSnapshot,
   options: CaseDiscoveryOptions
 ): Promise<{ recovered: boolean; error?: string; diagnostics?: any; authGateState?: AuthGateState }> {
-  const { env, missingInputBehavior = "fail" } = options;
+  const { env, missingInputBehavior = "fail", loginMode } = options;
+
+  if (loginMode === "no_login") {
+    console.log(`[auth-gate] Skipped because APP_LOGIN_MODE=no_login`);
+    return { recovered: false };
+  }
 
   if (!env) {
     return { recovered: false, error: "No env data provided for auth resolution" };
@@ -630,6 +803,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   let failedReason: string | undefined;
   let earlyCompletionSatisfied = false;
   let authGateState: AuthGateState | undefined;
+  let activeContainer: ActiveContainerContext | undefined;
+  const resolvedDataKeys = new Set<string>();
 
   await mkdir(evidenceDir, { recursive: true });
 
@@ -661,6 +836,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   });
   console.log(`[discovery:case] Parsed action targets: ${parsed.actionTargets.map((t) => t.target).join(", ")}`);
   console.log(`[discovery:case] Parsed assertion targets: ${parsed.assertionTargets.map((t) => t.target).join(", ")}`);
+  console.log(`[discovery:case] Action targets details: ${parsed.actionTargets.map((t) => `${t.target}(valueSource=${t.valueSource ?? 'none'},valueKey=${t.valueKey ?? 'none'})`).join(", ")}`);
+  console.log(`[discovery:case] Setup intents: ${parsed.setupIntents.map((si) => `${si.type}(valueKey=${si.valueKey ?? 'none'},valueKeys=${si.valueKeys?.join(",") ?? 'none'})`).join(", ")}`);
 
   if (parsed.setupIntents.length > 0) {
     for (const si of parsed.setupIntents) {
@@ -932,7 +1109,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         index: planSteps.length + 1,
         action: "fill",
         description: `Login: fill user field (key: ${key1})`,
-        target: { strategy: "login_resolver" as any, value: loginForm.userField.matchedText, exact: false }
+        target: { strategy: "login_resolver" as any, value: loginForm.userField.matchedText, exact: false },
+        valueKey: key1
       });
     }
 
@@ -969,7 +1147,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         index: planSteps.length + 1,
         action: "fill",
         description: `Login: fill password field (key: ${key2})`,
-        target: { strategy: "login_resolver" as any, value: "password", exact: false }
+        target: { strategy: "login_resolver" as any, value: "password", exact: false },
+        valueKey: key2
       });
     }
 
@@ -1027,6 +1206,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     });
 
     console.log(`[discovery:case] Setup authentication completed successfully.`);
+    console.log(`[discovery:case] authGateState after setupIntents: ${authGateState ? 'set' : 'not set'}`);
   }
 
   for (const orderedItem of orderedItems) {
@@ -1116,7 +1296,21 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         source: "action"
       }];
 
-      const resolutionResults = resolveAssertionTargets(currentSnapshot, assertionTargetInputs);
+      const executedActionsForAssertions = steps
+        .filter((step) =>
+          step.status === "found" ||
+          step.status === "satisfied_by_children" ||
+          step.status === "satisfied_by_previous_assertion"
+        )
+        .map((step) => ({
+          action: step.action,
+          target: step.targetText ?? "",
+          status: "found" as const
+        }));
+
+      const resolutionResults = resolveAssertionTargets(currentSnapshot, assertionTargetInputs, {
+        executedActions: executedActionsForAssertions
+      });
       for (const assertionResult of resolutionResults) {
         const mappedStatus: DiscoveryStepResult["status"] =
           assertionResult.status === "passed"
@@ -1127,7 +1321,23 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
                 ? "skipped_semantic_descriptor"
                 : assertionResult.status === "needs_assertion_resolution"
                   ? "needs_assertion_resolution"
-                  : "not_found";
+                  : assertionResult.status === "optional_confirmation_detail_missing"
+                    ? "optional_confirmation_detail_missing"
+                    : assertionResult.status === "satisfied_by_previous_assertion"
+                      ? "satisfied_by_previous_assertion"
+                      : assertionResult.status === "precondition_unresolved"
+                        ? "precondition_unresolved"
+                        : "not_found";
+
+        // Determine error message based on status
+        let errorMessage: string | undefined = undefined;
+        if (assertionResult.status === "failed" || assertionResult.status === "needs_assertion_resolution") {
+          errorMessage = assertionResult.reason;
+        } else if (assertionResult.status === "optional_confirmation_detail_missing") {
+          errorMessage = `Optional confirmation detail: ${assertionResult.reason}`;
+        } else if (assertionResult.status === "precondition_unresolved") {
+          errorMessage = `Precondition not met: ${assertionResult.reason}`;
+        }
 
         steps.push({
           index: es.stepIndex,
@@ -1139,14 +1349,15 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           assertionStatus: assertionResult.status,
           matchedText: assertionResult.matchedText,
           confidence: assertionResult.confidence,
-          error: assertionResult.status === "failed" || assertionResult.status === "needs_assertion_resolution" ? assertionResult.reason : undefined,
+          error: errorMessage,
           closestCandidates: assertionResult.closestCandidates,
           visibleTexts: assertionResult.visibleTexts,
           descriptorTypes: assertionResult.descriptorTypes,
           subject: assertionResult.subject,
           matchedTokens: assertionResult.matchedTokens,
           structuralSignals: assertionResult.structuralSignals,
-          childAssertionsUsed: assertionResult.childAssertionsUsed
+          childAssertionsUsed: assertionResult.childAssertionsUsed,
+          assertionDiagnostics: assertionResult.assertionDiagnostics
         });
 
         if (assertionResult.status === "passed" && assertionResult.classification === "literal_observable") {
@@ -1325,15 +1536,51 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     const actionTarget = orderedItem.actionTarget!;
     if (actionTarget.valueSource === "test_data" && actionTarget.valueKey) {
       console.log(`[discovery:case] Resolving fill target: ${actionTarget.target}`);
-      console.log(`[discovery:case] Using test data key: ${actionTarget.valueKey}`);
-
+      
+      // Build auto-generate config from env/config
+      const env = options.env ?? {};
+      const missingInputBehavior = options.missingInputBehavior ?? "fail";
+      const autoGenerateTestData = env.AUTO_GENERATE_TEST_DATA === true || env.AUTO_GENERATE_TEST_DATA === "true";
+      const autoGenerateSensitiveData = env.AUTO_GENERATE_SENSITIVE_DATA === true || env.AUTO_GENERATE_SENSITIVE_DATA === "true";
+      const testDataProfile = (env.APP_TEST_DATA_PROFILE as "demo" | "qa" | "staging" | "production_like") || "qa";
+      const autoGenerateConfig: AutoGenerateConfig = {
+        enabled: autoGenerateTestData,
+        generateSensitiveData: autoGenerateSensitiveData,
+        profile: testDataProfile
+      };
+      
+      console.log(`[data-resolver] config: missingInputBehavior=${missingInputBehavior}, autoGenerateTestData=${autoGenerateTestData}, profile=${testDataProfile}, autoGenerateSensitiveData=${autoGenerateSensitiveData}`);
+      console.log(`[data-resolver] resolving key="${actionTarget.valueKey}" field="${actionTarget.target}"`);
+      
       const testDataMap = testData ?? {};
-      if (!(actionTarget.valueKey in testDataMap)) {
+      const testDataAliases = (env.APP_TEST_DATA_ALIASES_JSON as Record<string, string[]>) ?? {};
+      const envVars: Record<string, string> = {};
+      for (const [k, v] of Object.entries(env)) {
+        if (typeof v === "string") {
+          envVars[k] = v;
+        }
+      }
+      
+      const dataResolution = resolveDataKey(actionTarget.valueKey, {
+        testData: testDataMap,
+        testDataAliases,
+        env: envVars,
+        missingInputBehavior,
+        autoGenerateConfig,
+        field: actionTarget.target,
+        context: scenario.title
+      });
+      
+      console.log(formatDataKeyForLog(dataResolution));
+      
+      if (dataResolution.status === "missing" || dataResolution.status === "missing_sensitive") {
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
-
-        const errorMsg = `Missing test data value for key "${actionTarget.valueKey}"`;
-
+        
+        const errorMsg = dataResolution.status === "missing_sensitive"
+          ? `Missing sensitive test data value for key "${actionTarget.valueKey}". Set APP_TEST_DATA_JSON.${actionTarget.valueKey} or enable AUTO_GENERATE_SENSITIVE_DATA for test data.`
+          : `Missing test data value for key "${actionTarget.valueKey}". Set APP_TEST_DATA_JSON.${actionTarget.valueKey} or APP_${actionTarget.valueKey.toUpperCase()}`;
+        
         steps.push({
           index: actionTarget.index,
           action: actionTarget.action,
@@ -1345,27 +1592,43 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           error: errorMsg,
           evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`)
         });
-
+        
         failedAtStep = actionTarget.index;
         failedTarget = actionTarget.target;
-        failedReason = "missing_test_data";
-
+        failedReason = dataResolution.status === "missing_sensitive" ? "missing_sensitive_test_data" : "missing_test_data";
+        
         await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
         await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
           scenario, steps, allDiscoveredObjects, planSteps,
           pendingObjectsPath, pendingPlansPath, evidenceDir,
           failedAtStep, failedTarget, failedReason, allDiscoveredObjects
         ).candidatePlan ?? {}, null, 2), "utf-8");
-
+        
         return buildFailureResult(
           scenario, steps, allDiscoveredObjects, planSteps,
           pendingObjectsPath, pendingPlansPath, evidenceDir,
           failedAtStep, failedTarget, failedReason, allDiscoveredObjects
         );
       }
-
-      const rawValue = testDataMap[actionTarget.valueKey] as TestDataValue;
-      const fillValue = String(rawValue);
+      
+      if (dataResolution.status === "skipped") {
+        console.log(`[discovery:case] Skipping fill due to missingInputBehavior=skip: ${actionTarget.valueKey}`);
+        steps.push({
+          index: actionTarget.index,
+          action: actionTarget.action,
+          status: "skipped",
+          targetText: actionTarget.target,
+          error: dataResolution.error
+        });
+        continue;
+      }
+      
+      // Track resolved data keys
+      if (actionTarget.valueKey) {
+        resolvedDataKeys.add(actionTarget.valueKey);
+      }
+      
+      const fillValue = dataResolution.value!;
 
       const fillStability = await waitForStablePageState(page, { timeoutMs: 10000, pollMs: 500, stableForMs: 800 });
       if (fillStability.waited) {
@@ -1374,7 +1637,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         currentSnapshot = scan.snapshot;
       }
 
-      const resolution = await resolveFillTarget(page, currentSnapshot, actionTarget.target);
+      const resolution = await resolveFillTarget(page, currentSnapshot, actionTarget.target, activeContainer);
 
       if (resolution.status === "not_found") {
         if (actionTarget.isOptional) {
@@ -1403,7 +1666,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           currentSnapshot = retryScan.snapshot;
           allDiscoveredObjects.push(...retryScan.objects);
 
-          const retryResolution = await resolveFillTarget(page, currentSnapshot, actionTarget.target);
+          const retryResolution = await resolveFillTarget(page, currentSnapshot, actionTarget.target, activeContainer);
           if (retryResolution.status === "resolved" && retryResolution.locator) {
             console.log(`[discovery:case] Filling target after auth recovery: ${actionTarget.target}`);
             try {
@@ -1464,7 +1727,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
               index: planSteps.length + 1,
               action: "fill",
               description: actionTarget.action,
-              target: { strategy: "text", value: actionTarget.target, exact: false }
+              target: { strategy: "text", value: actionTarget.target, exact: false },
+              valueKey: actionTarget.valueKey
             });
             continue;
           }
@@ -1503,7 +1767,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         );
       }
 
-      if (resolution.status === "not_editable") {
+      if (resolution.status === "not_editable" || resolution.status === "fill_target_not_editable") {
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
 
@@ -1544,10 +1808,126 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         );
       }
 
+      if (resolution.status === "not_visible") {
+        const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+        currentSnapshot = scan.snapshot;
+
+        const errorMsg = `Fill target "${actionTarget.target}" is not visible on current page. ${(resolution as any).editableCandidatesCount ?? 0} editable candidates evaluated.`;
+
+        steps.push({
+          index: actionTarget.index,
+          action: actionTarget.action,
+          status: "fill_target_not_visible",
+          targetText: actionTarget.target,
+          snapshotUrl: scan.url,
+          snapshotTitle: scan.title,
+          elementsFound: scan.elementsCount,
+          error: errorMsg,
+          evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+          attemptedLocators: (resolution as any).attemptedLocators
+        });
+
+        failedAtStep = actionTarget.index;
+        failedTarget = actionTarget.target;
+        failedReason = "fill_target_not_visible";
+
+        await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
+        await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
+          scenario, steps, allDiscoveredObjects, planSteps,
+          pendingObjectsPath, pendingPlansPath, evidenceDir,
+          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+        ).candidatePlan ?? {}, null, 2), "utf-8");
+
+        return buildFailureResult(
+          scenario, steps, allDiscoveredObjects, planSteps,
+          pendingObjectsPath, pendingPlansPath, evidenceDir,
+          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+        );
+      }
+
+      if (resolution.status !== "resolved") {
+        const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+        currentSnapshot = scan.snapshot;
+
+        const errorMsg = `Fill resolution failed: status="${resolution.status}" reason="${resolution.matchReason}". ${(resolution as any).editableCandidatesCount ?? 0} editable candidates evaluated.`;
+
+        console.log(`[discovery:case] Fill resolution failed: ${errorMsg}`);
+
+        steps.push({
+          index: actionTarget.index,
+          action: actionTarget.action,
+          status: "fill_resolution_failed",
+          targetText: actionTarget.target,
+          snapshotUrl: scan.url,
+          snapshotTitle: scan.title,
+          elementsFound: scan.elementsCount,
+          error: errorMsg,
+          evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+          attemptedLocators: (resolution as any).attemptedLocators
+        });
+
+        failedAtStep = actionTarget.index;
+        failedTarget = actionTarget.target;
+        failedReason = "fill_resolution_failed";
+
+        await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
+        await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
+          scenario, steps, allDiscoveredObjects, planSteps,
+          pendingObjectsPath, pendingPlansPath, evidenceDir,
+          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+        ).candidatePlan ?? {}, null, 2), "utf-8");
+
+        return buildFailureResult(
+          scenario, steps, allDiscoveredObjects, planSteps,
+          pendingObjectsPath, pendingPlansPath, evidenceDir,
+          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+        );
+      }
+
+      if (!resolution.locator) {
+        const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+        currentSnapshot = scan.snapshot;
+
+        const errorMsg = `Fill resolution invalid: status="resolved" but locator is missing. This is a contract violation.`;
+
+        console.log(`[discovery:case] ${errorMsg}`);
+
+        steps.push({
+          index: actionTarget.index,
+          action: actionTarget.action,
+          status: "fill_resolution_invalid",
+          targetText: actionTarget.target,
+          snapshotUrl: scan.url,
+          snapshotTitle: scan.title,
+          elementsFound: scan.elementsCount,
+          error: errorMsg,
+          evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+          attemptedLocators: (resolution as any).attemptedLocators,
+          locatorStrategy: resolution.locatorStrategy
+        });
+
+        failedAtStep = actionTarget.index;
+        failedTarget = actionTarget.target;
+        failedReason = "fill_resolution_invalid";
+
+        await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
+        await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
+          scenario, steps, allDiscoveredObjects, planSteps,
+          pendingObjectsPath, pendingPlansPath, evidenceDir,
+          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+        ).candidatePlan ?? {}, null, 2), "utf-8");
+
+        return buildFailureResult(
+          scenario, steps, allDiscoveredObjects, planSteps,
+          pendingObjectsPath, pendingPlansPath, evidenceDir,
+          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+        );
+      }
+
       console.log(`[discovery:case] Filling target: ${actionTarget.target} (strategy: ${resolution.locatorStrategy}, confidence: ${resolution.confidence.toFixed(2)})`);
 
       try {
-        await resolution.locator!.fill(fillValue);
+        await resolution.locator.fill(fillValue);
       } catch (err) {
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
@@ -1609,7 +1989,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         index: planSteps.length + 1,
         action: "fill",
         description: actionTarget.action,
-        target: { strategy: "text", value: actionTarget.target, exact: false }
+        target: { strategy: "text", value: actionTarget.target, exact: false },
+        valueKey: actionTarget.valueKey
       });
 
       continue;
@@ -1626,7 +2007,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         currentSnapshot = scan.snapshot;
       }
 
-      const resolution = await resolveFillTarget(page, currentSnapshot, actionTarget.target);
+      const resolution = await resolveFillTarget(page, currentSnapshot, actionTarget.target, activeContainer);
 
       if (resolution.status === "not_found") {
         if (actionTarget.isOptional) {
@@ -1676,7 +2057,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         );
       }
 
-      if (resolution.status === "not_editable") {
+      if (resolution.status === "not_editable" || resolution.status === "fill_target_not_editable") {
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
 
@@ -1717,10 +2098,126 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         );
       }
 
+      if (resolution.status === "not_visible") {
+        const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+        currentSnapshot = scan.snapshot;
+
+        const errorMsg = `Fill target "${actionTarget.target}" is not visible on current page. ${(resolution as any).editableCandidatesCount ?? 0} editable candidates evaluated.`;
+
+        steps.push({
+          index: actionTarget.index,
+          action: actionTarget.action,
+          status: "fill_target_not_visible",
+          targetText: actionTarget.target,
+          snapshotUrl: scan.url,
+          snapshotTitle: scan.title,
+          elementsFound: scan.elementsCount,
+          error: errorMsg,
+          evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+          attemptedLocators: (resolution as any).attemptedLocators
+        });
+
+        failedAtStep = actionTarget.index;
+        failedTarget = actionTarget.target;
+        failedReason = "fill_target_not_visible";
+
+        await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
+        await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
+          scenario, steps, allDiscoveredObjects, planSteps,
+          pendingObjectsPath, pendingPlansPath, evidenceDir,
+          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+        ).candidatePlan ?? {}, null, 2), "utf-8");
+
+        return buildFailureResult(
+          scenario, steps, allDiscoveredObjects, planSteps,
+          pendingObjectsPath, pendingPlansPath, evidenceDir,
+          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+        );
+      }
+
+      if (resolution.status !== "resolved") {
+        const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+        currentSnapshot = scan.snapshot;
+
+        const errorMsg = `Fill resolution failed: status="${resolution.status}" reason="${resolution.matchReason}". ${(resolution as any).editableCandidatesCount ?? 0} editable candidates evaluated.`;
+
+        console.log(`[discovery:case] Fill resolution failed: ${errorMsg}`);
+
+        steps.push({
+          index: actionTarget.index,
+          action: actionTarget.action,
+          status: "fill_resolution_failed",
+          targetText: actionTarget.target,
+          snapshotUrl: scan.url,
+          snapshotTitle: scan.title,
+          elementsFound: scan.elementsCount,
+          error: errorMsg,
+          evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+          attemptedLocators: (resolution as any).attemptedLocators
+        });
+
+        failedAtStep = actionTarget.index;
+        failedTarget = actionTarget.target;
+        failedReason = "fill_resolution_failed";
+
+        await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
+        await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
+          scenario, steps, allDiscoveredObjects, planSteps,
+          pendingObjectsPath, pendingPlansPath, evidenceDir,
+          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+        ).candidatePlan ?? {}, null, 2), "utf-8");
+
+        return buildFailureResult(
+          scenario, steps, allDiscoveredObjects, planSteps,
+          pendingObjectsPath, pendingPlansPath, evidenceDir,
+          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+        );
+      }
+
+      if (!resolution.locator) {
+        const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+        currentSnapshot = scan.snapshot;
+
+        const errorMsg = `Fill resolution invalid: status="resolved" but locator is missing. This is a contract violation.`;
+
+        console.log(`[discovery:case] ${errorMsg}`);
+
+        steps.push({
+          index: actionTarget.index,
+          action: actionTarget.action,
+          status: "fill_resolution_invalid",
+          targetText: actionTarget.target,
+          snapshotUrl: scan.url,
+          snapshotTitle: scan.title,
+          elementsFound: scan.elementsCount,
+          error: errorMsg,
+          evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+          attemptedLocators: (resolution as any).attemptedLocators,
+          locatorStrategy: resolution.locatorStrategy
+        });
+
+        failedAtStep = actionTarget.index;
+        failedTarget = actionTarget.target;
+        failedReason = "fill_resolution_invalid";
+
+        await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
+        await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
+          scenario, steps, allDiscoveredObjects, planSteps,
+          pendingObjectsPath, pendingPlansPath, evidenceDir,
+          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+        ).candidatePlan ?? {}, null, 2), "utf-8");
+
+        return buildFailureResult(
+          scenario, steps, allDiscoveredObjects, planSteps,
+          pendingObjectsPath, pendingPlansPath, evidenceDir,
+          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+        );
+      }
+
       console.log(`[discovery:case] Filling target: ${actionTarget.target} (strategy: ${resolution.locatorStrategy}, confidence: ${resolution.confidence.toFixed(2)})`);
 
       try {
-        await resolution.locator!.fill(actionTarget.value);
+        await resolution.locator.fill(actionTarget.value);
       } catch (err) {
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
@@ -1906,7 +2403,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
     const resolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target, {
       semanticRole: actionTarget.semanticRole,
-      relationContext: actionTarget.relationContext
+      relationContext: actionTarget.relationContext,
+      activeContainer
     });
 
     let finalLocator = resolution.locator;
@@ -2070,12 +2568,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           relationContext: actionTarget.relationContext
         });
 
-        planSteps.push({
-          index: planSteps.length + 1,
-          action: "click",
-          description: `${actionTarget.action} [ai-assisted]`,
-          target: { strategy: "text", value: actionTarget.target, exact: false }
-        });
+      planSteps.push({
+        index: planSteps.length + 1,
+        action: "fill",
+        description: actionTarget.action,
+        target: { strategy: "text", value: actionTarget.target, exact: false },
+        valueKey: actionTarget.valueKey
+      });
 
         if (authGateState?.completed) {
           markFunctionalStepAfterAuth(actionTarget.target, authGateState);
@@ -2472,6 +2971,102 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             console.log(`[discovery:case] JavaScript click failed: ${jsClickErr instanceof Error ? jsClickErr.message : String(jsClickErr)}`);
           }
 
+          // Post-click UI change detector: check for modal/dialog/form opened without page transition
+          const afterStateForUiCheck = await capturePageState(page);
+          const afterSnapshotForUiCheck = await scanCurrentPage(page);
+          const nextActionTargets = parsed.actionTargets.filter(a => a.index > actionTarget.index).slice(0, 5).map(a => a.target);
+          
+          const postClickUiResult = await detectPostClickUiChange({
+            page,
+            target: actionTarget.target,
+            actionText: actionTarget.action,
+            beforeSnapshot: currentSnapshot,
+            afterSnapshot: afterSnapshotForUiCheck,
+            nextTargets: nextActionTargets,
+            expectedAssertions: parsed.assertionTargets.filter(a => a.index >= actionTarget.index).map(a => a.target)
+          });
+
+          console.log(`[discovery:case] Post-click UI change evaluation: target="${actionTarget.target}", success=${postClickUiResult.success}, reason=${postClickUiResult.reason || "none"}, evidence=[${postClickUiResult.evidence.slice(0, 3).join(", ")}]`);
+
+          if (postClickUiResult.success) {
+            console.log(`[discovery:case] Post-click UI change accepted without transition: target="${actionTarget.target}"`);
+            
+            const postClickScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+            currentSnapshot = postClickScan.snapshot;
+            allDiscoveredObjects.push(...postClickScan.objects);
+
+            if (postClickUiResult.reason && ["modal_opened", "dialog_opened", "form_opened", "panel_opened", "overlay_opened"].includes(postClickUiResult.reason)) {
+              const containerElement = postClickScan.snapshot.elements.find(el => {
+                const role = el.role?.toLowerCase() || "";
+                const tag = el.tagName?.toLowerCase() || "";
+                const className = (el as any).className || "";
+                return role === "dialog" || role === "alertdialog" || tag === "dialog" || 
+                  (el as any).ariaModal === "true" ||
+                  ["modal", "dialog", "popup", "overlay", "drawer", "panel", "form"].some(ind => className.toLowerCase().includes(ind));
+              });
+              
+              const containerReason = postClickUiResult.reason as "modal_opened" | "dialog_opened" | "form_opened" | "panel_opened" | "overlay_opened";
+              const containerType = containerReason === "modal_opened" ? "modal" :
+                                    containerReason === "dialog_opened" ? "dialog" :
+                                    containerReason === "form_opened" ? "form" :
+                                    containerReason === "panel_opened" ? "panel" : "drawer";
+              
+              let containerLocator: any = undefined;
+              if (containerElement) {
+                if (containerElement.domId) {
+                  containerLocator = page.locator(`#${containerElement.domId}`);
+                } else if (containerElement.className) {
+                  const firstClass = containerElement.className.split(/\s+/)[0];
+                  if (firstClass) {
+                    containerLocator = page.locator(`.${firstClass}`).first();
+                  }
+                }
+                if (!containerLocator && containerElement.tagName) {
+                  containerLocator = page.locator(containerElement.tagName).first();
+                }
+              }
+              
+              activeContainer = {
+                type: containerType,
+                reason: containerReason,
+                containerElement,
+                containerLocator: containerLocator || undefined,
+                detectedAt: new Date().toISOString()
+              };
+              
+              console.log(`[discovery:case] Active container set: type="${activeContainer.type}" reason="${activeContainer.reason}"${activeContainer.containerLocator ? ' with locator' : ' (metadata only)'}`);
+            }
+
+            steps.push({
+              index: actionTarget.index,
+              action: actionTarget.action,
+              status: "found",
+              targetText: actionTarget.target,
+              snapshotUrl: postClickScan.url,
+              snapshotTitle: postClickScan.title,
+              elementsFound: postClickScan.elementsCount,
+              evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+              semanticRole: actionTarget.semanticRole,
+              relationContext: actionTarget.relationContext,
+              postClickDiagnostics: postClickUiResult
+            } as any);
+
+            planSteps.push({
+              index: planSteps.length + 1,
+              action: "click",
+              description: actionTarget.action,
+              target: { strategy: "text", value: actionTarget.target, exact: false }
+            });
+            if (typeof currentActionOrder === "number") {
+              executedActionOrders.add(currentActionOrder);
+            }
+            executedStepIndices.add(actionTarget.index);
+            if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
+              break;
+            }
+            continue;
+          }
+
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
 
@@ -2484,7 +3079,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
           const retryResolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target, {
             semanticRole: actionTarget.semanticRole,
-            relationContext: actionTarget.relationContext
+            relationContext: actionTarget.relationContext,
+            activeContainer
           });
           if (retryResolution.status === "resolved" && retryResolution.locator) {
             console.log(`[discovery:case] Target found after stability retry: ${actionTarget.target}`);
@@ -2537,7 +3133,11 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             currentSnapshot = retryScan.snapshot;
             allDiscoveredObjects.push(...retryScan.objects);
 
-            const retryResolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target);
+          const retryResolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target, {
+            semanticRole: actionTarget.semanticRole,
+            relationContext: actionTarget.relationContext,
+            activeContainer
+          });
             if (retryResolution.status === "resolved" && retryResolution.locator) {
               await clickResolvedTarget(retryResolution.locator, false);
               await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
@@ -2749,12 +3349,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       relationContext: actionTarget.relationContext
     });
 
-    planSteps.push({
-      index: planSteps.length + 1,
-      action: "click",
-      description: actionTarget.action,
-      target: { strategy: "text", value: actionTarget.target, exact: false }
-    });
+      planSteps.push({
+        index: planSteps.length + 1,
+        action: "click",
+        description: actionTarget.action,
+        target: { strategy: "text", value: actionTarget.target, exact: false }
+      });
 
     if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
       break;
@@ -2784,6 +3384,20 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
                   ? "discovered_partial"
                   : "exploration_failed";
 
+  // Collect unique valueKeys from planSteps for requiredData
+  const requiredDataKeys = new Set<string>();
+  for (const step of planSteps) {
+    if (step.valueKey) {
+      requiredDataKeys.add(step.valueKey);
+    }
+  }
+  const requiredData: RequiredDataRef[] = Array.from(requiredDataKeys).map(key => ({
+    key,
+    required: true,
+    resolved: resolvedDataKeys.has(key),
+    source: resolvedDataKeys.has(key) ? "env" : undefined
+  }));
+
   const candidatePlan: ExecutionPlan = {
     version: "1.0",
     source: "discovery_generated",
@@ -2794,7 +3408,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       caseId: scenario.caseId,
       title: scenario.title
     },
-    requiredData: [],
+    requiredData,
     steps: planSteps,
     notes: [
       ...(allFound

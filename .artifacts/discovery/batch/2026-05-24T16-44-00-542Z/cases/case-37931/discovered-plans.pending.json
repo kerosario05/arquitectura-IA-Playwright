@@ -1,0 +1,239 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37931",
+    "caseId": 37931,
+    "title": "Validar compra exitosa desde el carrito"
+  },
+  "requiredData": [
+    {
+      "key": "orden_nombre",
+      "required": true,
+      "resolved": true,
+      "source": "env"
+    },
+    {
+      "key": "orden_pais",
+      "required": true,
+      "resolved": true,
+      "source": "env"
+    },
+    {
+      "key": "orden_ciudad",
+      "required": true,
+      "resolved": true,
+      "source": "env"
+    },
+    {
+      "key": "orden_tarjeta",
+      "required": true,
+      "resolved": true,
+      "source": "env"
+    },
+    {
+      "key": "orden_mes",
+      "required": true,
+      "resolved": true,
+      "source": "env"
+    },
+    {
+      "key": "orden_anio",
+      "required": true,
+      "resolved": true,
+      "source": "env"
+    }
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://www.demoblaze.com",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "1. Clic en \"Cart\".",
+      "target": {
+        "strategy": "text",
+        "value": "Cart",
+        "exact": false
+      }
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en \"Place Order\".",
+      "target": {
+        "strategy": "text",
+        "value": "Place Order",
+        "exact": false
+      }
+    },
+    {
+      "index": 5,
+      "action": "assertText",
+      "description": "Assert: Name",
+      "target": {
+        "strategy": "text",
+        "value": "Name",
+        "exact": false
+      },
+      "expected": "Name"
+    },
+    {
+      "index": 6,
+      "action": "fill",
+      "description": "Escribir el valor del dato \"orden_nombre\" en el campo \"Name\".",
+      "target": {
+        "strategy": "text",
+        "value": "Name",
+        "exact": false
+      },
+      "valueKey": "orden_nombre"
+    },
+    {
+      "index": 7,
+      "action": "fill",
+      "description": "Escribir el valor del dato \"orden_pais\" en el campo \"Country\".",
+      "target": {
+        "strategy": "text",
+        "value": "Country",
+        "exact": false
+      },
+      "valueKey": "orden_pais"
+    },
+    {
+      "index": 8,
+      "action": "fill",
+      "description": "Escribir el valor del dato \"orden_ciudad\" en el campo \"City\".",
+      "target": {
+        "strategy": "text",
+        "value": "City",
+        "exact": false
+      },
+      "valueKey": "orden_ciudad"
+    },
+    {
+      "index": 9,
+      "action": "fill",
+      "description": "Escribir el valor del dato \"orden_tarjeta\" en el campo \"Credit card\".",
+      "target": {
+        "strategy": "text",
+        "value": "Credit card",
+        "exact": false
+      },
+      "valueKey": "orden_tarjeta"
+    },
+    {
+      "index": 10,
+      "action": "fill",
+      "description": "Escribir el valor del dato \"orden_mes\" en el campo \"Month\".",
+      "target": {
+        "strategy": "text",
+        "value": "Month",
+        "exact": false
+      },
+      "valueKey": "orden_mes"
+    },
+    {
+      "index": 11,
+      "action": "fill",
+      "description": "Escribir el valor del dato \"orden_anio\" en el campo \"Year\".",
+      "target": {
+        "strategy": "text",
+        "value": "Year",
+        "exact": false
+      },
+      "valueKey": "orden_anio"
+    },
+    {
+      "index": 12,
+      "action": "click",
+      "description": "Clic en \"Purchase\".",
+      "target": {
+        "strategy": "text",
+        "value": "Purchase",
+        "exact": false
+      }
+    },
+    {
+      "index": 13,
+      "action": "assertText",
+      "description": "Assert: Thank you for your purchase!",
+      "target": {
+        "strategy": "text",
+        "value": "Thank you for your purchase!",
+        "exact": false
+      },
+      "expected": "Thank you for your purchase!"
+    },
+    {
+      "index": 14,
+      "action": "assertText",
+      "description": "Assert: \"Thank you for your purchase!\"",
+      "target": {
+        "strategy": "text",
+        "value": "\"Thank you for your purchase!\"",
+        "exact": false
+      },
+      "expected": "\"Thank you for your purchase!\""
+    },
+    {
+      "index": 15,
+      "action": "assertText",
+      "description": "Assert: \"Amount\"",
+      "target": {
+        "strategy": "text",
+        "value": "\"Amount\"",
+        "exact": false
+      },
+      "expected": "\"Amount\""
+    },
+    {
+      "index": 16,
+      "action": "assertText",
+      "description": "Assert: \"Card Number\"",
+      "target": {
+        "strategy": "text",
+        "value": "\"Card Number\"",
+        "exact": false
+      },
+      "expected": "\"Card Number\""
+    },
+    {
+      "index": 17,
+      "action": "assertText",
+      "description": "Assert: \"Name\"",
+      "target": {
+        "strategy": "text",
+        "value": "\"Name\"",
+        "exact": false
+      },
+      "expected": "\"Name\""
+    },
+    {
+      "index": 18,
+      "action": "assertText",
+      "description": "Assert: \"Date\"",
+      "target": {
+        "strategy": "text",
+        "value": "\"Date\"",
+        "exact": false
+      },
+      "expected": "\"Date\""
+    }
+  ],
+  "notes": [
+    "Discovery partial: 16/18 navigations/assertions satisfied."
+  ],
+  "createdAt": "2026-05-24T16:48:40.983Z"
+}

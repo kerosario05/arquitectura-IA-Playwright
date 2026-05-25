@@ -4,6 +4,138 @@ import type { ExecutionPlan } from "./execution-plan.types";
 import type { AiExplorerOutput } from "../ai/ai-explorer.types";
 import type { AssertionClassification, AssertionResolutionStatus } from "../discovery/assertion-resolver";
 
+export type RuntimeEvidenceTrace = {
+  clickActions: Array<{
+    stepIndex: number;
+    target: string;
+    normalizedTarget: string;
+    actionType: string;
+    ownerContext?: string;
+    locatorStrategy?: string;
+    success: boolean;
+    transitionDetected?: boolean;
+    postClickUiChange?: string;
+    beforeContext?: string;
+    afterContext?: string;
+  }>;
+  fillActions: Array<{
+    stepIndex: number;
+    field: string;
+    normalizedField: string;
+    valueKey?: string;
+    source?: string;
+    locatorStrategy?: string;
+    success: boolean;
+    activeContainerType?: string;
+  }>;
+  formEvidence: Array<{
+    openedAtStep?: number;
+    fieldsDetected: string[];
+    normalizedFields: string[];
+    submitAction?: string;
+    closedAtStep?: number;
+  }>;
+  confirmationEvidence: Array<{
+    successDetectedAtStep?: number;
+    successText?: string;
+    summaryFieldsDetected: string[];
+    closeActionExecuted?: string;
+    closedAtStep?: number;
+    postCloseNavigationSignals: string[];
+  }>;
+  structuralEvidence: Array<{
+    stepIndex: number;
+    contextType: "catalog" | "list" | "filtered_list" | "detail" | "cart" | "form" | "confirmation";
+    evidenceType: "items_visible" | "item_detail_visible" | "form_visible" | "summary_visible" | "success_message_visible";
+    signals: string[];
+    normalizedSignals: string[];
+    snapshotTextSample?: string;
+    confidence: number;
+  }>;
+  feedbackEvidence: Array<{
+    stepIndex: number;
+    message: string;
+    normalizedMessage: string;
+    source: "alert" | "toast" | "banner" | "dialog" | "text";
+    confidence: number;
+  }>;
+};
+
+export type PendingAssertionForensics = {
+  assertion: string;
+  normalizedAssertion: string;
+  inferredType: "field" | "action" | "form" | "cart" | "confirmation" | "list" | "detail" | "unknown";
+  requiredContext: string;
+  currentContext: string;
+  expectedConsumption: Array<
+    | "satisfied_by_fill_action"
+    | "satisfied_by_action_executed"
+    | "satisfied_by_form_field_presence"
+    | "satisfied_by_structural_evidence"
+    | "satisfied_by_feedback_message"
+    | "satisfied_by_confirmation_closed"
+  >;
+  evidenceAvailable: boolean;
+  matchedEvidence: {
+    executedAction?: Record<string, unknown>;
+    fillAction?: Record<string, unknown>;
+    activeContainer?: Record<string, unknown>;
+    successConfirmation?: Record<string, unknown>;
+    closeAction?: Record<string, unknown>;
+    latestSnapshotSignals?: string[];
+    structuralEvidence?: Record<string, unknown>[];
+    feedbackEvidence?: Record<string, unknown>[];
+  };
+  notConsumedReason:
+    | "normalization_mismatch"
+    | "evidence_not_passed_to_resolver"
+    | "wrong_context"
+    | "missing_history"
+    | "compound_field_not_split"
+    | "ambiguous_assertion"
+    | "concrete_evidence_missing"
+    | "unsafe_to_assume";
+  autoRepairAllowed: boolean;
+  classification?: AssertionClassification;
+  status?: AssertionResolutionStatus;
+};
+
+export type AutoRepairDecisionDiagnostics = {
+  attempted: boolean;
+  skipped: boolean;
+  skipReason?: "local_diagnostic_sufficient" | "non_recoverable_failure" | "no_candidate_plan" | "no_snapshot" | "already_passed" | "timeout" | "agent_unavailable" | "agent_no_proposal";
+  evaluatedPendingAssertions: string[];
+  localClosureAttempted: boolean;
+  localClosureConsumed: string[];
+  localClosureRemaining: string[];
+  ambiguousRemaining: string[];
+  localDiagnostics: string[];
+  pendingAssertions: string[];
+  consumedAssertions: string[];
+  autoRepairAllowed: boolean;
+  autoRepairReason?: string;
+  autoRepairSkippedReason?: "local_diagnostic_sufficient" | null;
+  decision: "skip" | "attempt";
+  explanation: string;
+};
+
+export type BatchCaseRootCause = 
+  | "target_not_found"
+  | "ambiguous_target"
+  | "locator_resolution_failed"
+  | "assertion_not_resolved"
+  | "context_not_reached"
+  | "precondition_unresolved"
+  | "structural_evidence_missing"
+  | "test_data_missing"
+  | "auth_gate_blocked"
+  | "page_transition_missing"
+  | "agent_timeout"
+  | "agent_no_proposal"
+  | "local_assertions_pending"
+  | "assertion_consumption_gap"
+  | "unknown";
+
 export type ProposedObject = RegistryObject & {
   confidence: number;
   reason: string;
@@ -46,6 +178,9 @@ export type DiscoveryStepResult = {
     | "ambiguous_target"
     | "locator_resolution_failed"
     | "fill_target_not_editable"
+    | "fill_target_not_visible"
+    | "fill_resolution_failed"
+    | "fill_resolution_invalid"
     | "satisfied_by_children"
     | "skipped_semantic_descriptor"
     | "needs_assertion_resolution"
@@ -54,7 +189,10 @@ export type DiscoveryStepResult = {
     | "ai_candidate_rejected"
     | "needs_approval"
     | "skipped_after_completion"
-    | "skipped_redundant";
+    | "skipped_redundant"
+    | "optional_confirmation_detail_missing"
+    | "satisfied_by_previous_assertion"
+    | "precondition_unresolved";
   targetText?: string;
   snapshotUrl?: string;
   snapshotTitle?: string;
@@ -63,6 +201,7 @@ export type DiscoveryStepResult = {
   evidencePath?: string;
   resolutionDiagnosis?: unknown[];
   attemptedLocators?: string[];
+  locatorStrategy?: string;
   candidateId?: string;
   candidateText?: string;
   assertionClassification?: AssertionClassification;
@@ -76,12 +215,13 @@ export type DiscoveryStepResult = {
   matchedTokens?: string[];
   structuralSignals?: string[];
   childAssertionsUsed?: string[];
+  assertionDiagnostics?: Record<string, unknown>;
   aiAssisted?: boolean;
   aiProposal?: AiExplorerOutput;
   aiReason?: string;
   ambiguityDiagnostics?: {
     target: string;
-    semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "unknown";
+    semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "first_visible_item" | "unknown";
     relationContext?: string;
     candidateCount: number;
     candidateTexts: string[];
@@ -114,13 +254,14 @@ export type DiscoveryStepResult = {
     satisfied: boolean;
     satisfiedAssertions: string[];
     pendingAssertions: string[];
+    deferredAssertions?: string[];
     blockingAssertions: string[];
     skippedAssertions: string[];
     weakSignals: string[];
     skippedReason?: string;
     skippedRemainingActions: number;
   };
-  semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "unknown";
+  semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "first_visible_item" | "unknown";
   relationContext?: string;
   authGateDiagnostics?: {
     detected: boolean;
@@ -132,6 +273,7 @@ export type DiscoveryStepResult = {
     inputMethod?: string;
     maskedInputs?: Record<string, string>;
   };
+  runtimeEvidenceTrace?: RuntimeEvidenceTrace;
 };
 
 export type DiscoveredObject = {
@@ -170,4 +312,37 @@ export type CaseDiscoveryResult = {
   failedAtStep?: number;
   failedTarget?: string;
   failedReason?: string;
+  partialDiagnostics?: {
+    partialReason: "pending_local_assertions" | "pending_context_deferred_assertions" | "pending_synthetic_expected";
+    pendingAssertions: string[];
+    localDiagnostics: string[];
+    autoRepairSkippedReason: "local_diagnostic_sufficient";
+    pendingForensics?: PendingAssertionForensics[];
+    runtimeClosureDiagnostics?: {
+      attempted: boolean;
+      phase?: string;
+      consumedAssertions: Array<{ assertion: string; decision: string; evidence?: string }>;
+      remainingAssertions: string[];
+      autoRepairAllowed: boolean;
+      autoRepairSkippedReason?: string;
+      notConsumedReasons?: string[];
+    };
+    diagnosticsBuildError?: string;
+  };
+  autoRepairDecisionDiagnostics?: AutoRepairDecisionDiagnostics;
+  finalStatusReconciliation?: {
+    attempted: boolean;
+    previousStatus: CaseDiscoveryResult["status"];
+    newStatus: CaseDiscoveryResult["status"];
+    reason: "local_closure_consumed_all_blockers" | "blocking_failures_remain";
+    beforePendingAssertionCount: number;
+    afterPendingAssertionCount: number;
+    pendingActionsCount: number;
+    blockingFailuresCount: number;
+    unresolvedPreconditionsCount: number;
+    promotionEligible: boolean;
+    blockers?: string[];
+  };
+  rootCauseCategory?: BatchCaseRootCause;
+  runtimeEvidenceTrace?: RuntimeEvidenceTrace;
 };

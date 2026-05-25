@@ -14,7 +14,8 @@ dotenv.config();
 
 const allowedBrowsers: BrowserName[] = ["chromium", "firefox", "webkit"];
 const allowedLoginModes: LoginMode[] = ["password", "no_login", "manual"];
-const allowedMissingInputBehaviors: MissingInputBehavior[] = ["fail", "prompt", "skip"];
+const allowedMissingInputBehaviors: MissingInputBehavior[] = ["fail", "prompt", "skip", "auto_generate"];
+const allowedTestDataProfiles: Array<"demo" | "qa" | "staging" | "production_like"> = ["demo", "qa", "staging", "production_like"];
 
 function getRequiredEnv(name: string): string {
   const value = process.env[name]?.trim();
@@ -202,8 +203,9 @@ export function normalizeAppProfile(rawValue?: string): string {
     .replace(/^_|_$/g, "") || "default";
 }
 
-function parseMissingInputBehavior(rawValue?: string): MissingInputBehavior {
-  const value = (rawValue ?? "fail").trim().toLowerCase();
+export function parseMissingInputBehavior(rawValue?: string): MissingInputBehavior {
+  const trimmed = rawValue?.trim();
+  const value = (!trimmed ? "fail" : trimmed).toLowerCase();
   if (!allowedMissingInputBehaviors.includes(value as MissingInputBehavior)) {
     throw new Error(
       `Invalid MISSING_INPUT_BEHAVIOR value: ${rawValue}. Allowed values: ${allowedMissingInputBehaviors.join(
@@ -214,7 +216,61 @@ function parseMissingInputBehavior(rawValue?: string): MissingInputBehavior {
   return value as MissingInputBehavior;
 }
 
-const appBaseUrl = getRequiredEnv("APP_BASE_URL");
+export function parseAutoGenerateTestData(rawValue?: string): boolean {
+  const trimmed = rawValue?.trim();
+  if (!trimmed) return false;
+  const normalized = trimmed.toLowerCase();
+  if (normalized === "true") return true;
+  if (normalized === "false") return false;
+  throw new Error(`Invalid AUTO_GENERATE_TEST_DATA value: ${rawValue}. Expected true or false.`);
+}
+
+export function parseAutoGenerateSensitiveData(rawValue?: string): boolean {
+  const trimmed = rawValue?.trim();
+  if (!trimmed) return false;
+  const normalized = trimmed.toLowerCase();
+  if (normalized === "true") return true;
+  if (normalized === "false") return false;
+  throw new Error(`Invalid AUTO_GENERATE_SENSITIVE_DATA value: ${rawValue}. Expected true or false.`);
+}
+
+export function parseTestDataProfile(rawValue?: string): "demo" | "qa" | "staging" | "production_like" {
+  const trimmed = rawValue?.trim();
+  if (!trimmed) return "qa";
+  const normalized = trimmed.toLowerCase();
+  if (!allowedTestDataProfiles.includes(normalized as any)) {
+    throw new Error(`Invalid APP_TEST_DATA_PROFILE value: ${rawValue}. Allowed values: ${allowedTestDataProfiles.join(", ")}`);
+  }
+  return normalized as "demo" | "qa" | "staging" | "production_like";
+}
+
+export function parseAutoSelectSafeDefaults(rawValue?: string): boolean {
+  const trimmed = rawValue?.trim();
+  if (!trimmed) return false;
+  const normalized = trimmed.toLowerCase();
+  if (normalized === "true") return true;
+  if (normalized === "false") return false;
+  throw new Error(`Invalid AUTO_SELECT_SAFE_DEFAULTS value: ${rawValue}. Expected true or false.`);
+}
+
+export function parseAutoAcceptSafeCheckboxes(rawValue?: string): boolean {
+  const trimmed = rawValue?.trim();
+  if (!trimmed) return false;
+  const normalized = trimmed.toLowerCase();
+  if (normalized === "true") return true;
+  if (normalized === "false") return false;
+  throw new Error(`Invalid AUTO_ACCEPT_SAFE_CHECKBOXES value: ${rawValue}. Expected true or false.`);
+}
+
+function getAppBaseUrl(): string {
+  const baseUrl = process.env.BASE_URL?.trim() || process.env.APP_BASE_URL?.trim();
+  if (!baseUrl) {
+    throw new Error("Missing required environment variable: BASE_URL or APP_BASE_URL");
+  }
+  return baseUrl;
+}
+
+const appBaseUrl = getAppBaseUrl();
 const appLoginMode = parseLoginMode(getRequiredEnv("APP_LOGIN_MODE"));
 const headless = parseBoolean(getRequiredEnv("HEADLESS"), "HEADLESS");
 const browser = parseBrowser(getRequiredEnv("BROWSER"));
@@ -233,7 +289,12 @@ export const config: FullConfig = {
     rawTestData: parseRawTestData(process.env.APP_TEST_DATA_JSON),
     testDataAliases: parseTestDataAliases(process.env.APP_TEST_DATA_ALIASES_JSON),
     missingInputBehavior: parseMissingInputBehavior(process.env.MISSING_INPUT_BEHAVIOR),
-    appProfile: normalizeAppProfile(process.env.APP_PROFILE)
+    appProfile: normalizeAppProfile(process.env.APP_PROFILE),
+    autoGenerateTestData: parseAutoGenerateTestData(process.env.AUTO_GENERATE_TEST_DATA),
+    autoGenerateSensitiveData: parseAutoGenerateSensitiveData(process.env.AUTO_GENERATE_SENSITIVE_DATA),
+    testDataProfile: parseTestDataProfile(process.env.APP_TEST_DATA_PROFILE),
+    autoSelectSafeDefaults: parseAutoSelectSafeDefaults(process.env.AUTO_SELECT_SAFE_DEFAULTS),
+    autoAcceptSafeCheckboxes: parseAutoAcceptSafeCheckboxes(process.env.AUTO_ACCEPT_SAFE_CHECKBOXES)
   },
   execution: {
     browser,

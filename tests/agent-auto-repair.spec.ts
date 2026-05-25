@@ -322,7 +322,7 @@ test("runAgentAutoRepairAttempt normalizes bare ExecutionPlan responses before v
     expect(written.recoveryDecision).toBe("repaired_plan");
     expect(written.plans).toHaveLength(1);
   } else {
-    expect(["no_response", "invalid_proposal", "cli_error"]).toContain((result as any).status);
+    expect(["no_response", "invalid_proposal", "cli_error", "no_proposal"]).toContain((result as any).status);
   }
 
   const normalized = normalizeAgentHandoffResponse({
@@ -337,4 +337,40 @@ test("runAgentAutoRepairAttempt normalizes bare ExecutionPlan responses before v
   expect(normalized.recoveryDecision).toBe("repaired_plan");
   expect(Array.isArray(normalized.plans)).toBe(true);
   expect(normalized.plans).toHaveLength(1);
+});
+
+test("auto-repair skips Codex spawn when CODEX_CLI_PATH is invalid", async () => {
+  let spawnCalls = 0;
+  __setSpawnForTesting(((command: string, args: string[], options: any) => {
+    spawnCalls += 1;
+    return spawnExit(1)(command, args, options);
+  }) as any);
+
+  const previousPath = process.env.CODEX_CLI_PATH;
+  process.env.CODEX_CLI_PATH = path.join(tmpDir, "missing-codex.cmd");
+
+  const outputDir = path.join(tmpDir, "run-codex-missing");
+  await fs.mkdir(outputDir, { recursive: true });
+
+  try {
+    const res = await runAgentAutoRepairAttempt({
+      fullConfig: configEnabled(),
+      outputDir,
+      attemptNumber: 1,
+      kind: "plan_repair",
+      failureSummary: "recoverable_failure",
+      failedReason: "target_not_found"
+    });
+
+    expect(res.success).toBe(false);
+    expect((res as any).status).toBe("unavailable");
+    expect((res as any).reason).toBe("codex_cli_path_invalid");
+    expect(spawnCalls).toBe(0);
+  } finally {
+    if (previousPath === undefined) {
+      delete process.env.CODEX_CLI_PATH;
+    } else {
+      process.env.CODEX_CLI_PATH = previousPath;
+    }
+  }
 });

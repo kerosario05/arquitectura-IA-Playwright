@@ -1,0 +1,129 @@
+{
+  "batchId": "2026-05-24T18-02-28-677Z",
+  "timestamp": "2026-05-24T18:16:10.633Z",
+  "args": {
+    "mode": "by-ids",
+    "caseIds": [
+      37941,
+      37942,
+      37943,
+      37944,
+      37945,
+      37946,
+      37947,
+      37948
+    ],
+    "headed": true,
+    "autoPromote": true,
+    "promotionDryRun": false,
+    "promotionStrict": false,
+    "requirePromotionApproval": false,
+    "dryRun": false,
+    "includeActive": false,
+    "stopOnFail": false,
+    "concurrency": 1,
+    "parallel": false,
+    "autoRepair": false,
+    "repairTimeoutMs": 120000,
+    "showAgentLog": false,
+    "continueOnAgentTimeout": true
+  },
+  "cases": [
+    {
+      "caseId": 37941,
+      "title": "Visualizar catálogo principal de productos disponibles",
+      "selected": false,
+      "skipReason": "already_active",
+      "status": "skipped_active",
+      "promoted": false
+    },
+    {
+      "caseId": 37942,
+      "title": "Filtrar productos por la categoría Phones",
+      "selected": true,
+      "status": "failed",
+      "promoted": false,
+      "promotionStatus": "not_applicable",
+      "outputDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-24T18-02-28-677Z\\cases\\case-37942",
+      "evidenceDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-24T18-02-28-677Z\\cases\\case-37942\\evidence",
+      "failureReason": "codex_cli_path_invalid",
+      "durationMs": 43871
+    },
+    {
+      "caseId": 37943,
+      "title": "Visualizar detalle de producto desde listado filtrado",
+      "selected": false,
+      "skipReason": "already_active",
+      "status": "skipped_active",
+      "promoted": false
+    },
+    {
+      "caseId": 37944,
+      "title": "Agregar producto al carrito desde el detalle del producto",
+      "selected": false,
+      "skipReason": "already_active",
+      "status": "skipped_active",
+      "promoted": false
+    },
+    {
+      "caseId": 37945,
+      "title": "Visualizar carrito con producto agregado durante la sesión actual",
+      "selected": true,
+      "status": "failed",
+      "promoted": false,
+      "promotionStatus": "not_applicable",
+      "outputDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-24T18-02-28-677Z\\cases\\case-37945",
+      "evidenceDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-24T18-02-28-677Z\\cases\\case-37945\\evidence",
+      "failureReason": "codex_cli_path_invalid",
+      "durationMs": 152825
+    },
+    {
+      "caseId": 37946,
+      "title": "Visualizar formulario de orden desde carrito con producto agregado",
+      "selected": true,
+      "status": "failed",
+      "promoted": false,
+      "promotionStatus": "not_applicable",
+      "outputDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-24T18-02-28-677Z\\cases\\case-37946",
+      "evidenceDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-24T18-02-28-677Z\\cases\\case-37946\\evidence",
+      "failureReason": "codex_cli_path_invalid",
+      "durationMs": 170146
+    },
+    {
+      "caseId": 37947,
+      "title": "Completar orden de compra con datos válidos generados para ambiente demo",
+      "selected": true,
+      "status": "failed",
+      "promoted": false,
+      "promotionStatus": "not_applicable",
+      "outputDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-24T18-02-28-677Z\\cases\\case-37947",
+      "evidenceDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-24T18-02-28-677Z\\cases\\case-37947\\evidence",
+      "failureReason": "codex_cli_path_invalid",
+      "durationMs": 209417
+    },
+    {
+      "caseId": 37948,
+      "title": "Cerrar confirmación de compra exitosa con la opción OK",
+      "selected": true,
+      "status": "failed",
+      "promoted": false,
+      "promotionStatus": "not_applicable",
+      "outputDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-24T18-02-28-677Z\\cases\\case-37948",
+      "evidenceDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-24T18-02-28-677Z\\cases\\case-37948\\evidence",
+      "failureReason": "codex_cli_path_invalid",
+      "durationMs": 245696
+    }
+  ],
+  "summary": {
+    "selected": 5,
+    "executed": 5,
+    "skipped": 3,
+    "passed": 0,
+    "failed": 5,
+    "promoted": 0,
+    "alreadyActiveSkipped": 3,
+    "promotionFailed": 0,
+    "notPromoted": 0,
+    "totalDurationMs": 821955
+  }
+}

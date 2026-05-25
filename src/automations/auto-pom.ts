@@ -43,6 +43,50 @@ export type AutoPomResult = {
   diagnostics: AutoPomDiagnostics;
 };
 
+function buildAutoPomMethodStub(methodName: string, intent: string): string | undefined {
+  if (intent === "select_first_visible_card" || methodName === "selectFirstVisibleCard") {
+    return [
+      "  async selectFirstVisibleCard(): Promise<void> {",
+      "    await waitForListReadiness(this.page, { timeoutMs: 10000, pollMs: 500, minCards: 1 });",
+      "    const card = this.page.locator('[class*=\"card\"]:visible, article:visible').first();",
+      "    if (await card.count() === 0) throw new Error('No visible card found to select.');",
+      "    await card.click({ timeout: 10000 });",
+      "  }"
+    ].join("\n");
+  }
+  if (intent === "select_first_visible_product" || methodName === "selectFirstVisibleProduct") {
+    return [
+      "  async selectFirstVisibleProduct(): Promise<void> {",
+      "    await waitForListReadiness(this.page, { timeoutMs: 10000, pollMs: 500, minCards: 1 });",
+      "    const productCard = this.page.locator('article:visible, [class*=\"product\"]:visible, [class*=\"card\"]:visible').first();",
+      "    if (await productCard.count() === 0) throw new Error('No visible product card found to select.');",
+      "    await productCard.click({ timeout: 10000 });",
+      "  }"
+    ].join("\n");
+  }
+  if (intent === "select_first_visible_item" || methodName === "selectFirstVisibleItem") {
+    return [
+      "  async selectFirstVisibleItem(): Promise<void> {",
+      "    await waitForListReadiness(this.page, { timeoutMs: 10000, pollMs: 500, minCards: 1 });",
+      "    const item = this.page.locator('article:visible, [class*=\"item\"]:visible, [role=\"listitem\"]:visible').first();",
+      "    if (await item.count() === 0) throw new Error('No visible item found to select.');",
+      "    await item.click({ timeout: 10000 });",
+      "  }"
+    ].join("\n");
+  }
+  if (intent === "select_first_visible_row" || methodName === "selectFirstVisibleRow") {
+    return [
+      "  async selectFirstVisibleRow(): Promise<void> {",
+      "    await waitForListReadiness(this.page, { timeoutMs: 10000, pollMs: 500, minCards: 1 });",
+      "    const row = this.page.locator('tr:visible, [role=\"row\"]:visible').first();",
+      "    if (await row.count() === 0) throw new Error('No visible row found to select.');",
+      "    await row.click({ timeout: 10000 });",
+      "  }"
+    ].join("\n");
+  }
+  return undefined;
+}
+
 export function shouldRunAutoPom(
   pomStatus: POMPromotionStatus | undefined,
   policy: PromotionPolicy
@@ -73,6 +117,7 @@ export async function runAutoPomPipeline(input: AutoPomInput): Promise<AutoPomRe
     finalPomStatus: input.initialPomStatus as AutoPomDiagnostics["finalPomStatus"] ?? "needs_manual_review"
   };
 
+  console.log(`[auto-pom] Using appSlug=${input.appProfile.appSlug}`);
   console.log(`[auto-pom] Enabled: true`);
   console.log(`[auto-pom] Auto-generate candidates: ${policy.autoGeneratePageObjectCandidates !== false}`);
   console.log(`[auto-pom] Auto-approve safe Page Objects: ${policy.autoApproveSafePageObjects !== false}`);
@@ -131,6 +176,71 @@ export async function runAutoPomPipeline(input: AutoPomInput): Promise<AutoPomRe
 
     for (const err of approvalResult.errors) {
       console.log(`[auto-pom] Approval error: ${err}`);
+    }
+  }
+
+  // Step 2.5: Auto-approve safe candidate methods inside already-active Page Objects.
+  {
+    const registry = await loadPageObjectRegistry(input.appProfile, input.outputRoot);
+    const threshold = policy.autoApproveConfidenceThreshold ?? 0.50;
+    const blockSensitive = policy.blockSensitiveAutoApproval !== false;
+    let approvedMethodCount = 0;
+
+    for (const po of registry.pageObjects) {
+      if (po.status !== "active") continue;
+      let poApprovedMethods = 0;
+      for (const method of po.methods) {
+        if (method.status === "active" && method.available) continue;
+        const check = isMethodAutoApprovable(method, { confidenceThreshold: threshold, blockSensitive });
+        if (!check.approvable) {
+          diagnostics.blockedAutoApprovals.push(`${po.className}.${method.name}(): ${check.reason}`);
+          continue;
+        }
+        method.status = "active";
+        method.available = true;
+        diagnostics.autoApprovedMethods.push(`${po.className}.${method.name}()`);
+        approvedMethodCount += 1;
+        poApprovedMethods += 1;
+      }
+
+      if (poApprovedMethods > 0) {
+        const baseName = po.className.replace(/Page$/, "").toLowerCase().replace(/-/g, "");
+        const candidatePath = path.join(input.appPaths.pagesDir, `${baseName}.page.candidate.ts`);
+        const activePath = path.join(input.appPaths.pagesDir, `${baseName}.page.ts`);
+        try {
+          await fs.access(candidatePath);
+          await fs.copyFile(candidatePath, activePath);
+          po.filePath = activePath.replace(/\\/g, "/");
+        } catch {
+          // Candidate file may not exist. Inject known safe stubs into active file when missing.
+          try {
+            let source = await fs.readFile(activePath, "utf-8");
+            let changed = false;
+            for (const method of po.methods) {
+              if (!(method.status === "active" && method.available)) continue;
+              const methodRegex = new RegExp(`\\b${method.name}\\s*\\(`);
+              if (methodRegex.test(source)) continue;
+              const stub = buildAutoPomMethodStub(method.name, method.intent);
+              if (!stub) continue;
+              const insertAt = source.lastIndexOf("}");
+              if (insertAt <= 0) continue;
+              source = `${source.slice(0, insertAt).trimEnd()}\n\n${stub}\n${source.slice(insertAt)}`;
+              changed = true;
+            }
+            if (changed) {
+              await fs.writeFile(activePath, source, "utf-8");
+              po.filePath = activePath.replace(/\\/g, "/");
+            }
+          } catch {
+            // Keep registry activation only if file injection fails.
+          }
+        }
+      }
+    }
+
+    if (approvedMethodCount > 0) {
+      await savePageObjectRegistry(registry, input.appProfile, input.outputRoot);
+      console.log(`[auto-pom] Auto-approved ${approvedMethodCount} safe method(s) in active Page Objects.`);
     }
   }
 
@@ -252,7 +362,12 @@ export function validatePomSpec(
       );
     }
 
-    if (!importPath.endsWith(".page") && !importPath.endsWith(".page.ts") && !importPath.includes(".flow")) {
+    const isSupportImport =
+      importPath.includes("/src/config/") ||
+      importPath.includes("/src/data") ||
+      importPath.includes("/src/automations/app-profile");
+
+    if (!isSupportImport && !importPath.endsWith(".page") && !importPath.endsWith(".page.ts") && !importPath.includes(".flow")) {
       errors.push(`Import '${className}' does not point to a .page file: ${importPath}`);
     }
   }

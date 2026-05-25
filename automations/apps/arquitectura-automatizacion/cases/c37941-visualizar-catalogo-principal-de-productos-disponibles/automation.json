@@ -1,0 +1,37 @@
+{
+  "id": "c37941-visualizar-catalogo-principal-de-productos-disponibles",
+  "externalId": "C37941",
+  "caseId": 37941,
+  "title": "Visualizar catálogo principal de productos disponibles",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37941-visualizar-catalogo-principal-de-productos-disponibles\\plan.json",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37941-visualizar-catalogo-principal-de-productos-disponibles\\case.spec.ts",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "arquitectura-automatizacion",
+  "baseUrlHash": "f1bffa09d02f",
+  "createdAt": "2026-05-25T01:56:30.247Z",
+  "updatedAt": "2026-05-25T01:56:30.247Z",
+  "lastPromotedFrom": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-25T01-56-22-700Z\\cases\\case-37941\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "not_run",
+  "metadata": {
+    "discoveryDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-25T01-56-22-700Z\\cases\\case-37941",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37941-visualizar-catalogo-principal-de-productos-disponibles\\plan.json",
+    "previousStatus": "active"
+  }
+}

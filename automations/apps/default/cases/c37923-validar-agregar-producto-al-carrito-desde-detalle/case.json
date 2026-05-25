@@ -1,0 +1,10 @@
+{
+  "id": "c37923-validar-agregar-producto-al-carrito-desde-detalle",
+  "externalId": "C37923",
+  "caseId": 37923,
+  "title": "Validar agregar producto al carrito desde detalle",
+  "source": "discovery",
+  "appSlug": "default",
+  "appConfigPath": "automations\\apps\\default\\app.config.json",
+  "createdAt": "2026-05-24T16:45:58.555Z"
+}

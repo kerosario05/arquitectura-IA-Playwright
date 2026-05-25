@@ -5,7 +5,7 @@ import type { ExecutionPlan } from "../src/types/execution-plan.types";
 import type { AppProfile, AppAutomationPaths } from "../src/automations/app-profile";
 import type { PageObjectRegistry } from "../src/types/page-object.types";
 import { registerPageObjectCandidate, markPageObjectActive, markMethodActive } from "../src/automations/page-object-registry";
-import { deriveMethodIntentFromStep, deriveExpectedOwnerForStep } from "../src/automations/pom-classification";
+import { deriveMethodIntentFromStep, deriveMethodIntentFromStepWithContext, deriveExpectedOwnerForStep } from "../src/automations/pom-classification";
 
 const mockProfile: AppProfile = {
   appSlug: "test",
@@ -70,6 +70,15 @@ test("step click 'tarjeta de credito visa gold' deriva select_product y encuentr
   const step = { index: 1, action: "click", target: { strategy: "role", value: "button", name: "tarjeta de credito visa gold" } };
   const intent = deriveMethodIntentFromStep(step as any);
   expect(intent).toBe("select_product");
+
+  const owner = deriveExpectedOwnerForStep(step as any);
+  expect(owner).toBe("ProductListPage");
+});
+
+test("step click 'la primera tarjeta visible del listado de productos' deriva intent first-visible y owner ProductListPage", () => {
+  const step = { index: 1, action: "click", target: { strategy: "text", value: "la primera tarjeta visible del listado de productos" } };
+  const intent = deriveMethodIntentFromStep(step as any);
+  expect(intent).toBe("select_first_visible_card");
 
   const owner = deriveExpectedOwnerForStep(step as any);
   expect(owner).toBe("ProductListPage");
@@ -183,4 +192,29 @@ test("needs_page_method diagnostics incluye derivedIntent y expectedOwner", () =
   expect(diagnostic).toContain("select_category");
   expect(diagnostic).toContain("expectedOwner=");
   expect(diagnostic).toContain("CategoryPage");
+});
+
+test("login modal steps derive dedicated login intents", () => {
+  const steps = [
+    { index: 1, action: "click", target: { strategy: "text", value: "Log in", exact: false } },
+    { index: 2, action: "assertText", target: { strategy: "text", value: "Username", exact: false } },
+    { index: 3, action: "fill", target: { strategy: "text", value: "Username", exact: false }, valueKey: "usuario_valido" },
+    { index: 4, action: "fill", target: { strategy: "text", value: "Password", exact: false }, valueKey: "contrasena_valida" },
+    { index: 5, action: "click", target: { strategy: "text", value: "Log in", exact: false } }
+  ] as any[];
+
+  expect(deriveMethodIntentFromStepWithContext(steps[0], steps as any)).toBe("open_login_modal");
+  expect(deriveExpectedOwnerForStep(steps[0], steps as any)).toBe("HomePage");
+
+  expect(deriveMethodIntentFromStep(steps[1] as any)).toBe("expect_login_form");
+  expect(deriveExpectedOwnerForStep(steps[1] as any)).toBe("LoginPage");
+
+  expect(deriveMethodIntentFromStep(steps[2] as any)).toBe("fill_username");
+  expect(deriveExpectedOwnerForStep(steps[2] as any)).toBe("LoginPage");
+
+  expect(deriveMethodIntentFromStep(steps[3] as any)).toBe("fill_password");
+  expect(deriveExpectedOwnerForStep(steps[3] as any)).toBe("LoginPage");
+
+  expect(deriveMethodIntentFromStepWithContext(steps[4], steps as any)).toBe("submit_login");
+  expect(deriveExpectedOwnerForStep(steps[4], steps as any)).toBe("LoginPage");
 });

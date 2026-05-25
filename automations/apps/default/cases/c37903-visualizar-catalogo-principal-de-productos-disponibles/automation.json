@@ -1,0 +1,45 @@
+{
+  "id": "c37903-visualizar-catalogo-principal-de-productos-disponibles",
+  "externalId": "C37903",
+  "caseId": 37903,
+  "title": "Visualizar catálogo principal de productos disponibles",
+  "planPath": "automations\\apps\\default\\cases\\c37903-visualizar-catalogo-principal-de-productos-disponibles\\plan.json",
+  "specPath": "automations\\apps\\default\\cases\\c37903-visualizar-catalogo-principal-de-productos-disponibles\\case.spec.ts",
+  "appSlug": "default",
+  "appConfigPath": "automations\\apps\\default\\app.config.json",
+  "status": "blocked_missing_pom",
+  "source": "discovery",
+  "appProfile": "default",
+  "baseUrlHash": "f1bffa09d02f",
+  "createdAt": "2026-05-23T16:46:52.573Z",
+  "updatedAt": "2026-05-23T16:46:52.573Z",
+  "lastPromotedFrom": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-23T16-46-46-034Z\\cases\\case-37903\\discovered-plans.pending.json",
+  "pomStatus": "needs_page_method",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "not_run",
+  "metadata": {
+    "discoveryDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-23T16-46-46-034Z\\cases\\case-37903",
+    "pomDiagnostics": {
+      "missingPageObjects": [],
+      "missingMethods": [
+        "step=2 target=\"Phones\" derivedIntent=\"expect_loaded\" expectedOwner=\"ProductDetailPage\" availableMethods=[clickPrimaryAction, step=4 target=\"Cédula de identidad dominicana\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]Method, step=5 target=\"continuar\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]Method]",
+        "step=3 target=\"Laptops\" derivedIntent=\"expect_loaded\" expectedOwner=\"ProductDetailPage\" availableMethods=[clickPrimaryAction, step=4 target=\"Cédula de identidad dominicana\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]Method, step=5 target=\"continuar\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]Method]",
+        "step=4 target=\"Monitors\" derivedIntent=\"expect_loaded\" expectedOwner=\"ProductDetailPage\" availableMethods=[clickPrimaryAction, step=4 target=\"Cédula de identidad dominicana\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]Method, step=5 target=\"continuar\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]Method]",
+        "step=5 target=\"Categorías visibles: Phones, Laptops y Monitors.\" derivedIntent=\"expect_loaded\" expectedOwner=\"ProductDetailPage\" availableMethods=[clickPrimaryAction, step=4 target=\"Cédula de identidad dominicana\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]Method, step=5 target=\"continuar\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]Method]"
+      ],
+      "generatedCandidates": 0,
+      "autoPom": {
+        "enabled": true,
+        "initialPomStatus": "needs_page_method",
+        "generatedCandidateFiles": [],
+        "autoApprovedPageObjects": [],
+        "autoApprovedMethods": [],
+        "blockedAutoApprovals": [],
+        "approvalThreshold": 0.5,
+        "regeneratedSpec": true,
+        "validationStatus": "failed",
+        "finalPomStatus": "needs_manual_review"
+      }
+    }
+  }
+}

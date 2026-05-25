@@ -1,0 +1,10 @@
+{
+  "id": "c37948-cerrar-confirmacion-de-compra-exitosa-con-la-opcion-ok",
+  "externalId": "C37948",
+  "caseId": 37948,
+  "title": "Cerrar confirmación de compra exitosa con la opción OK",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-05-25T02:13:28.798Z"
+}

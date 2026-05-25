@@ -208,7 +208,19 @@ test("non-candidate status blocks approval", () => {
 });
 
 test("safe intents are approvable", () => {
-  const safeIntents = ["open_home", "start_session", "open_product_information", "select_category", "select_product", "click_primary_action", "expect_loaded"];
+  const safeIntents = [
+    "open_home",
+    "start_session",
+    "open_product_information",
+    "select_category",
+    "select_product",
+    "select_first_visible_item",
+    "select_first_visible_product",
+    "select_first_visible_card",
+    "select_first_visible_row",
+    "click_primary_action",
+    "expect_loaded"
+  ];
   for (const intent of safeIntents) {
     const method = makeMethod({ intent, confidence: 0.8 });
     const result = isMethodAutoApprovable(method, {

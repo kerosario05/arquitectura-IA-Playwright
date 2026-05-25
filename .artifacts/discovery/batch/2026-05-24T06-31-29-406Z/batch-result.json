@@ -1,0 +1,60 @@
+{
+  "batchId": "2026-05-24T06-31-29-406Z",
+  "timestamp": "2026-05-24T06:33:10.160Z",
+  "args": {
+    "mode": "by-ids",
+    "caseIds": [
+      37903,
+      37907,
+      37927,
+      37931
+    ],
+    "headed": true,
+    "autoPromote": true,
+    "promotionDryRun": false,
+    "promotionStrict": false,
+    "requirePromotionApproval": false,
+    "dryRun": false,
+    "includeActive": false,
+    "stopOnFail": false,
+    "concurrency": 1,
+    "parallel": false,
+    "autoRepair": false,
+    "repairTimeoutMs": 120000,
+    "showAgentLog": false,
+    "continueOnAgentTimeout": true
+  },
+  "cases": [
+    {
+      "caseId": 37927,
+      "title": "Validar inicio de sesión con credenciales válidas",
+      "selected": false,
+      "skipReason": "already_active",
+      "status": "skipped_active",
+      "promoted": false
+    },
+    {
+      "caseId": 37931,
+      "title": "Validar compra exitosa desde el carrito",
+      "selected": true,
+      "status": "discovered_partial",
+      "promoted": false,
+      "promotionStatus": "not_applicable",
+      "outputDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-24T06-31-29-406Z\\cases\\case-37931",
+      "evidenceDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-24T06-31-29-406Z\\cases\\case-37931\\evidence",
+      "durationMs": 100752
+    }
+  ],
+  "summary": {
+    "selected": 1,
+    "executed": 1,
+    "skipped": 1,
+    "passed": 0,
+    "failed": 0,
+    "promoted": 0,
+    "alreadyActiveSkipped": 1,
+    "promotionFailed": 0,
+    "notPromoted": 0,
+    "totalDurationMs": 100752
+  }
+}

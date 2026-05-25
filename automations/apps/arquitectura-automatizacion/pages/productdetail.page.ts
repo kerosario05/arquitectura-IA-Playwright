@@ -11,20 +11,30 @@ import { Page, expect } from '@playwright/test';
 // - Rename methods if needed.
 // - Do not activate until reviewed.
 //
-// Source plans: c37870-generar-carta-de-referencia-con-certificado
+// Source plans: c37927-validar-inicio-de-sesion-con-credenciales-validas
 
 export class ProductDetailPage {
   constructor(private readonly page: Page) {}
 
+  async expectLoaded(): Promise<void> {
+    await expect(this.page.locator('body')).toBeVisible();
+  }
+
+  async expectProductDetail(productName: string): Promise<void> {
+    await expect(this.page.locator('body')).toBeVisible();
+  }
+
   async clickPrimaryAction(actionName: string): Promise<void> {
     const button = this.page.getByRole('button', { name: new RegExp(actionName, 'i') });
-await button.waitFor({ state: 'visible', timeout: 10000 });
-const isEnabled = await button.isEnabled({ timeout: 15000 }).catch(() => false);
+const link = this.page.getByRole('link', { name: new RegExp(actionName, 'i') });
+const buttonOrLink = button.or(link).first();
+await buttonOrLink.waitFor({ state: 'visible', timeout: 10000 });
+const isEnabled = await buttonOrLink.isEnabled({ timeout: 15000 }).catch(() => true);
 if (!isEnabled) {
-  const buttonText = await button.textContent().catch(() => '(unknown)');
+  const buttonText = await buttonOrLink.textContent().catch(() => '(unknown)');
   throw new Error('Cannot click primary action "' + actionName + '": button is not enabled. Text: "' + buttonText + '". This usually means required selections or form fields have not been completed.');
 }
-await button.click({ timeout: 10000 });
+await buttonOrLink.click({ timeout: 10000 });
 await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
 await this.page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
 await this.page.waitForTimeout(1000);

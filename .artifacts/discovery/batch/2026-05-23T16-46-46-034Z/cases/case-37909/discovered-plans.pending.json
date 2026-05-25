@@ -1,0 +1,83 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37909",
+    "caseId": 37909,
+    "title": "Visualizar carrito con producto agregado y total calculado"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://www.demoblaze.com",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "1. Clic en \"Cart\".",
+      "target": {
+        "strategy": "text",
+        "value": "Cart",
+        "exact": false
+      }
+    },
+    {
+      "index": 4,
+      "action": "assertText",
+      "description": "Assert: que se muestre el total de la compra",
+      "target": {
+        "strategy": "text",
+        "value": "que se muestre el total de la compra",
+        "exact": false
+      },
+      "expected": "que se muestre el total de la compra"
+    },
+    {
+      "index": 5,
+      "action": "assertText",
+      "description": "Assert: Producto agregado.",
+      "target": {
+        "strategy": "text",
+        "value": "Producto agregado.",
+        "exact": false
+      },
+      "expected": "Producto agregado."
+    },
+    {
+      "index": 6,
+      "action": "assertText",
+      "description": "Assert: Total calculado de la compra.",
+      "target": {
+        "strategy": "text",
+        "value": "Total calculado de la compra.",
+        "exact": false
+      },
+      "expected": "Total calculado de la compra."
+    },
+    {
+      "index": 7,
+      "action": "assertText",
+      "description": "Assert: Opción \"Place Order\" disponible.",
+      "target": {
+        "strategy": "text",
+        "value": "Opción \"Place Order\" disponible.",
+        "exact": false
+      },
+      "expected": "Opción \"Place Order\" disponible."
+    }
+  ],
+  "notes": [
+    "Discovery partial: 5/8 navigations/assertions satisfied."
+  ],
+  "createdAt": "2026-05-23T16:52:27.141Z"
+}

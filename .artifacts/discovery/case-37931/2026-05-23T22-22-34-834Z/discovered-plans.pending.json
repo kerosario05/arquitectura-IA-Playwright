@@ -1,0 +1,90 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37931",
+    "caseId": 37931,
+    "title": "Validar compra exitosa desde el carrito"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://www.demoblaze.com",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "1. Clic en \"Cart\".",
+      "target": {
+        "strategy": "text",
+        "value": "Cart",
+        "exact": false
+      }
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en \"Place Order\".",
+      "target": {
+        "strategy": "text",
+        "value": "Place Order",
+        "exact": false
+      }
+    },
+    {
+      "index": 5,
+      "action": "assertText",
+      "description": "Assert: Name",
+      "target": {
+        "strategy": "text",
+        "value": "Name",
+        "exact": false
+      },
+      "expected": "Name"
+    },
+    {
+      "index": 6,
+      "action": "fill",
+      "description": "Escribir el valor del dato \"orden_nombre\" en el campo \"Name\".",
+      "target": {
+        "strategy": "text",
+        "value": "Name",
+        "exact": false
+      }
+    },
+    {
+      "index": 7,
+      "action": "fill",
+      "description": "Escribir el valor del dato \"orden_pais\" en el campo \"Country\".",
+      "target": {
+        "strategy": "text",
+        "value": "Country",
+        "exact": false
+      }
+    },
+    {
+      "index": 8,
+      "action": "fill",
+      "description": "Escribir el valor del dato \"orden_ciudad\" en el campo \"City\".",
+      "target": {
+        "strategy": "text",
+        "value": "City",
+        "exact": false
+      }
+    }
+  ],
+  "notes": [
+    "Discovery failed at step 8: missing_sensitive_test_data - \"Credit card\""
+  ],
+  "createdAt": "2026-05-23T22:23:37.645Z"
+}

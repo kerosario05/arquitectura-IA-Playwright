@@ -1,0 +1,72 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37906",
+    "caseId": 37906,
+    "title": "Filtrar productos por la categoría Monitors"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://www.demoblaze.com",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "1. Seleccionar la categoría \"Monitors\".",
+      "target": {
+        "strategy": "text",
+        "value": "Monitors",
+        "exact": false
+      }
+    },
+    {
+      "index": 4,
+      "action": "assertText",
+      "description": "Assert: Monitors",
+      "target": {
+        "strategy": "text",
+        "value": "Monitors",
+        "exact": false
+      },
+      "expected": "Monitors"
+    },
+    {
+      "index": 5,
+      "action": "assertText",
+      "description": "Assert: Phones",
+      "target": {
+        "strategy": "text",
+        "value": "Phones",
+        "exact": false
+      },
+      "expected": "Phones"
+    },
+    {
+      "index": 6,
+      "action": "assertText",
+      "description": "Assert: Validar que el listado quede filtrado por \"Monitors\" y muestre:",
+      "target": {
+        "strategy": "text",
+        "value": "Validar que el listado quede filtrado por \"Monitors\" y muestre:",
+        "exact": false
+      },
+      "expected": "Validar que el listado quede filtrado por \"Monitors\" y muestre:"
+    }
+  ],
+  "notes": [
+    "Discovery partial: 4/8 navigations/assertions satisfied."
+  ],
+  "createdAt": "2026-05-23T16:49:02.919Z"
+}

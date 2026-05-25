@@ -504,6 +504,48 @@ test("login generates LoginPage candidate not loginlogin inside product PO", asy
   expect(categoryMethodNames).not.toContain("start");
 });
 
+test("login modal promotion registers HomePage and LoginPage candidates with dedicated methods", async () => {
+  const plan: ExecutionPlan = {
+    version: "1.0",
+    source: "discovery_generated",
+    status: "validated",
+    scenario: { source: "testrail", externalId: "C37927", caseId: 37927, title: "Validar inicio de sesion con credenciales validas" },
+    requiredData: [
+      { key: "usuario_valido", required: true, resolved: true, source: "env" },
+      { key: "contrasena_valida", required: true, resolved: true, source: "env" }
+    ],
+    steps: [
+      { index: 1, action: "navigate", target: "APP_BASE_URL" },
+      { index: 2, action: "click", target: { strategy: "text", value: "Log in" } },
+      { index: 3, action: "assertText", target: { strategy: "text", value: "Username" }, expected: "Username" },
+      { index: 4, action: "fill", target: { strategy: "text", value: "Username" }, valueKey: "usuario_valido" },
+      { index: 5, action: "fill", target: { strategy: "text", value: "Password" }, valueKey: "contrasena_valida" },
+      { index: 6, action: "click", target: { strategy: "text", value: "Log in" } }
+    ],
+    createdAt: new Date().toISOString()
+  };
+
+  await promoteExecutionPlan({
+    plan,
+    outputRoot: tmpDir,
+    fullConfig: makeConfig("profile-pom-login-modal"),
+    promotionPolicy: DEFAULT_PROMOTION_POLICY
+  }, false);
+
+  const registry = await loadPageObjectRegistry({ appSlug: "profile-pom-login-modal" } as any, tmpDir);
+  const homePO = registry.pageObjects.find((po) => po.className === "HomePage");
+  const loginPO = registry.pageObjects.find((po) => po.className === "LoginPage");
+
+  expect(homePO).toBeDefined();
+  expect(homePO!.methods.some((m) => m.intent === "open_login_modal")).toBe(true);
+
+  expect(loginPO).toBeDefined();
+  expect(loginPO!.methods.some((m) => m.intent === "expect_login_form")).toBe(true);
+  expect(loginPO!.methods.some((m) => m.intent === "fill_username")).toBe(true);
+  expect(loginPO!.methods.some((m) => m.intent === "fill_password")).toBe(true);
+  expect(loginPO!.methods.some((m) => m.intent === "submit_login")).toBe(true);
+});
+
 test("C37844 y C37845 comparten candidates genericos", async () => {
   const plan1: ExecutionPlan = {
     version: "1.0",

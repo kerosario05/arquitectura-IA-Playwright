@@ -35,6 +35,7 @@
     "clean:tmp": "node -e \"const fs=require('fs'),path=require('path');const root=process.cwd();const tmpRoot=path.join(root,'.artifacts','tmp');if(fs.existsSync(tmpRoot))fs.rmSync(tmpRoot,{recursive:true,force:true});fs.readdirSync(root).filter(f=>/^\\.tmp-?/.test(f)).forEach(f=>{const p=path.join(root,f);try{fs.rmSync(p,{recursive:true,force:true});console.log('Removed '+f)}catch(e){}});['codex-test.txt','codex-runner-test.txt'].forEach(f=>{const p=path.join(root,f);if(fs.existsSync(p)){fs.unlinkSync(p);console.log('Removed '+f)}});console.log('Temp cleanup complete')\""
   },
   "dependencies": {
+    "@google/genai": "^2.6.0",
     "@playwright/test": "^1.54.2",
     "dotenv": "^16.6.1"
   },

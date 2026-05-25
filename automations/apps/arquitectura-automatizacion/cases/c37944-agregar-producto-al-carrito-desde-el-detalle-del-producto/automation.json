@@ -1,0 +1,49 @@
+{
+  "id": "c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto",
+  "externalId": "C37944",
+  "caseId": 37944,
+  "title": "Agregar producto al carrito desde el detalle del producto",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto\\plan.json",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto\\case.spec.ts",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "status": "blocked_missing_pom",
+  "source": "discovery",
+  "appProfile": "arquitectura-automatizacion",
+  "baseUrlHash": "f1bffa09d02f",
+  "createdAt": "2026-05-25T02:00:30.454Z",
+  "updatedAt": "2026-05-25T02:00:30.454Z",
+  "lastPromotedFrom": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-25T01-56-22-700Z\\cases\\case-37944\\discovered-plans.pending.json",
+  "pomStatus": "needs_page_method",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "not_run",
+  "metadata": {
+    "discoveryDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-25T01-56-22-700Z\\cases\\case-37944",
+    "pomDiagnostics": {
+      "status": "needs_page_object",
+      "inlineFallbackUsed": false,
+      "reason": "needs_manual_review",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 1,
+      "autoPom": {
+        "enabled": true,
+        "initialPomStatus": "page_object_candidate_created",
+        "generatedCandidateFiles": [],
+        "autoApprovedPageObjects": [],
+        "autoApprovedMethods": [],
+        "blockedAutoApprovals": [],
+        "approvalThreshold": 0.5,
+        "regeneratedSpec": true,
+        "validationStatus": "failed",
+        "finalPomStatus": "needs_manual_review"
+      }
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto\\plan.json",
+    "previousStatus": "blocked_missing_pom"
+  }
+}

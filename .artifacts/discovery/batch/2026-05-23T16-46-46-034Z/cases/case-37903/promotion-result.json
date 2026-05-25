@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-23T16:46:52.556Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c37903-visualizar-catalogo-principal-de-productos-disponibles",
+  "appSlug": "default",
+  "specPath": "automations\\apps\\default\\cases\\c37903-visualizar-catalogo-principal-de-productos-disponibles\\case.spec.ts",
+  "planPath": "automations\\apps\\default\\cases\\c37903-visualizar-catalogo-principal-de-productos-disponibles\\plan.json",
+  "caseFolder": "c37903-visualizar-catalogo-principal-de-productos-disponibles",
+  "pomStatus": "needs_page_method",
+  "inlineDebugMode": false
+}

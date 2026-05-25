@@ -10,6 +10,7 @@ export type StepIntentType =
   | "setup_route"
   | "setup_authentication"
   | "composite_action"
+  | "select_first_visible_item"
   | "unknown";
 
 type SplitFragment = {
@@ -34,7 +35,7 @@ export type ParsedStepIntent = {
   valueKeys?: string[];
   valueSource?: string;
   associatedEntity?: string;
-  semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "unknown";
+  semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "first_visible_item" | "unknown";
   relationContext?: string;
 };
 
@@ -56,7 +57,7 @@ export type ActionTargetItem = {
   valueSource?: FillValueSource;
   associatedEntity?: string;
   actionType?: StepIntentType;
-  semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "unknown";
+  semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "first_visible_item" | "unknown";
   relationContext?: string;
 };
 
@@ -161,6 +162,9 @@ export function parseSingleIntent(text: string): ParsedStepIntent | null {
 
   const selectResult = tryParseSelectAction(trimmed, normalized);
   if (selectResult) return selectResult;
+
+  const dynamicItemResult = tryParseDynamicItemSelection(trimmed, normalized);
+  if (dynamicItemResult) return dynamicItemResult;
 
   const loginResult = tryParseLoginSetup(trimmed, normalized);
   if (loginResult) return loginResult;
@@ -575,7 +579,7 @@ function tryParseClickAction(text: string, normalized: string): ParsedStepIntent
   );
   if (relationalPattern) {
     const rawRole = relationalPattern[1].toLowerCase().replace(/[óo]/g, "o").replace(/[ií]/g, "i");
-    let semanticRole: "product" | "card" | "option" | "category" | "item" | "section" | "unknown" = "unknown";
+    let semanticRole: "product" | "card" | "option" | "category" | "item" | "section" | "first_visible_item" | "unknown" = "unknown";
     if (rawRole.includes("product")) semanticRole = "product";
     else if (rawRole.includes("card")) semanticRole = "card";
     else if (rawRole.includes("opcion")) semanticRole = "option";
@@ -662,6 +666,65 @@ function tryParseSelectAction(text: string, normalized: string): ParsedStepInten
       actionVerb: verbMatch[0].trim().toLowerCase(),
       priority: 5
     };
+  }
+
+  return null;
+}
+
+function tryParseDynamicItemSelection(text: string, normalized: string): ParsedStepIntent | null {
+  // Patterns for "first visible item" selection:
+  // - Seleccionar el primer producto visible de la categoría "Phones"
+  // - Seleccionar el primer elemento visible de la lista
+  // - Seleccionar la primera tarjeta disponible
+  // - Seleccionar el primer resultado disponible
+  // - Seleccionar la primera opción visible que coincida con /patrón/
+  
+  const selectionPatterns = [
+    // "primer producto visible de la categoría X"
+    /^(?:seleccionar|escoger|elegir|select)\s+(?:el|la|los|las|the)\s+(?:primer|primera|first)\s+(?:producto|product|elemento|item|tarjeta|card|resultado|result|opción|option)\s+(?:visible|disponible|available)(?:\s+de\s+(?:la\s+)?(?:categoría|categoria|category)\s+['"]?([^'"]+)['"]?)?/i,
+    // "primer elemento de la lista"
+    /^(?:seleccionar|escoger|elegir|select)\s+(?:el|la|los|las|the)\s+(?:primer|primera|first)\s+(?:elemento|item|producto|product|resultado|result)\s+(?:de\s+(?:la|the)\s+(?:lista|list|resultados|results))/i,
+    // "primera tarjeta disponible"
+    /^(?:seleccionar|escoger|elegir|select)\s+(?:el|la|los|las|the)\s+(?:primer|primera|first)\s+(?:tarjeta|card|opción|option)\s+(?:disponible|available|visible)/i,
+  ];
+
+  for (const pattern of selectionPatterns) {
+    const match = text.match(pattern);
+    if (match) {
+      const kindMap: Record<string, "product" | "item" | "card" | "result" | "option"> = {
+        "producto": "product", "product": "product",
+        "elemento": "item", "item": "item",
+        "tarjeta": "card", "card": "card",
+        "resultado": "result", "result": "result",
+        "opción": "option", "option": "option"
+      };
+
+      const fullMatch = match[0];
+      let kind: "product" | "item" | "card" | "result" | "option" = "item";
+      
+      // Detect kind from matched text
+      for (const [spanish, english] of [["producto", "product"], ["elemento", "item"], ["tarjeta", "card"], ["resultado", "result"], ["opción", "option"]]) {
+        if (fullMatch.toLowerCase().includes(spanish) || fullMatch.toLowerCase().includes(english)) {
+          kind = kindMap[spanish] || kindMap[english] || "item";
+          break;
+        }
+      }
+
+      const category = match[1]?.trim();
+      const hasPattern = fullMatch.includes("/");
+      
+      return {
+        type: "select_first_visible_item",
+        originalText: text,
+        normalizedText: normalized,
+        actionVerb: "select_first",
+        semanticRole: "first_visible_item",
+        associatedEntity: category,
+        relationContext: category ? "category" : (hasPattern ? "pattern" : "list"),
+        context: category,
+        priority: 5
+      };
+    }
   }
 
   return null;

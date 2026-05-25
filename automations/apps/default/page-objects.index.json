@@ -21,7 +21,9 @@
         {
           "name": "open",
           "intent": "open_home",
-          "parameters": ["moduleName"],
+          "parameters": [
+            "moduleName"
+          ],
           "available": true,
           "source": "c37869-generar-carta-de-referencia-con-cuenta-de-ahorro",
           "sensitive": false,
@@ -205,6 +207,16 @@
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
+        },
+        {
+          "name": "expectLoaded",
+          "intent": "expect_loaded",
+          "parameters": [],
+          "available": false,
+          "source": "c37903-visualizar-catalogo-principal-de-productos-disponibles-step-3,c37903-visualizar-catalogo-principal-de-productos-disponibles-missing-expect_loaded",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "candidate"
         }
       ],
       "confidence": 0.5,
@@ -214,7 +226,7 @@
       ],
       "caseIds": [],
       "createdAt": "2026-05-22T01:47:27.790Z",
-      "updatedAt": "2026-05-22T01:47:27.792Z",
+      "updatedAt": "2026-05-23T16:46:52.566Z",
       "codegenMetadata": {
         "generatedAt": "2026-05-22T01:47:27.818Z",
         "generatedBy": "page-object-codegen",
@@ -237,7 +249,9 @@
         {
           "name": "selectOperation",
           "intent": "open_home",
-          "parameters": ["operationName"],
+          "parameters": [
+            "operationName"
+          ],
           "available": true,
           "source": "c37869-generar-carta-de-referencia-con-cuenta-de-ahorro",
           "sensitive": false,
@@ -257,12 +271,14 @@
       ],
       "confidence": 0.9,
       "status": "active",
-      "sourcePlanIds": ["c37869-generar-carta-de-referencia-con-cuenta-de-ahorro"],
+      "sourcePlanIds": [
+        "c37869-generar-carta-de-referencia-con-cuenta-de-ahorro"
+      ],
       "caseIds": [],
       "createdAt": "2026-05-22T14:10:00.000Z",
       "updatedAt": "2026-05-22T14:10:00.000Z"
     }
   ],
   "componentCandidates": [],
-  "updatedAt": "2026-05-22T01:47:27.852Z"
+  "updatedAt": "2026-05-24T16:45:58.562Z"
 }

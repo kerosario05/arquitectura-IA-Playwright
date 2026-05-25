@@ -1,0 +1,102 @@
+{
+  "batchId": "2026-05-23T19-14-18-301Z",
+  "timestamp": "2026-05-23T19:19:26.675Z",
+  "args": {
+    "mode": "by-ids",
+    "caseIds": [
+      37923,
+      37927,
+      37929,
+      37931,
+      37932
+    ],
+    "headed": true,
+    "autoPromote": true,
+    "promotionDryRun": false,
+    "promotionStrict": false,
+    "requirePromotionApproval": false,
+    "dryRun": false,
+    "includeActive": false,
+    "stopOnFail": false,
+    "concurrency": 1,
+    "parallel": false,
+    "autoRepair": false,
+    "repairTimeoutMs": 120000,
+    "showAgentLog": false,
+    "continueOnAgentTimeout": true
+  },
+  "cases": [
+    {
+      "caseId": 37923,
+      "title": "Validar agregar producto al carrito desde detalle",
+      "selected": true,
+      "status": "promoted",
+      "promoted": true,
+      "promotionStatus": "needs_page_method",
+      "outputDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-23T19-14-18-301Z\\cases\\case-37923",
+      "evidenceDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-23T19-14-18-301Z\\cases\\case-37923\\evidence",
+      "specPath": "automations\\apps\\default\\cases\\c37923-validar-agregar-producto-al-carrito-desde-detalle\\case.spec.ts",
+      "durationMs": 115538
+    },
+    {
+      "caseId": 37927,
+      "title": "Validar inicio de sesión con credenciales válidas",
+      "selected": true,
+      "status": "failed",
+      "promoted": false,
+      "promotionStatus": "not_applicable",
+      "outputDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-23T19-14-18-301Z\\cases\\case-37927",
+      "evidenceDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-23T19-14-18-301Z\\cases\\case-37927\\evidence",
+      "failureReason": "click_no_transition",
+      "durationMs": 25736
+    },
+    {
+      "caseId": 37929,
+      "title": "Validar formulario de orden desde el carrito",
+      "selected": true,
+      "status": "failed",
+      "promoted": false,
+      "promotionStatus": "not_applicable",
+      "outputDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-23T19-14-18-301Z\\cases\\case-37929",
+      "evidenceDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-23T19-14-18-301Z\\cases\\case-37929\\evidence",
+      "failureReason": "click_no_transition",
+      "durationMs": 61934
+    },
+    {
+      "caseId": 37931,
+      "title": "Validar compra exitosa desde el carrito",
+      "selected": true,
+      "status": "failed",
+      "promoted": false,
+      "promotionStatus": "not_applicable",
+      "outputDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-23T19-14-18-301Z\\cases\\case-37931",
+      "evidenceDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-23T19-14-18-301Z\\cases\\case-37931\\evidence",
+      "failureReason": "click_no_transition",
+      "durationMs": 60847
+    },
+    {
+      "caseId": 37932,
+      "title": "Validar cierre de confirmación de compra",
+      "selected": true,
+      "status": "failed",
+      "promoted": false,
+      "promotionStatus": "not_applicable",
+      "outputDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-23T19-14-18-301Z\\cases\\case-37932",
+      "evidenceDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-23T19-14-18-301Z\\cases\\case-37932\\evidence",
+      "failureReason": "assertion_not_found",
+      "durationMs": 44316
+    }
+  ],
+  "summary": {
+    "selected": 5,
+    "executed": 5,
+    "skipped": 0,
+    "passed": 0,
+    "failed": 4,
+    "promoted": 1,
+    "alreadyActiveSkipped": 0,
+    "promotionFailed": 0,
+    "notPromoted": 0,
+    "totalDurationMs": 308373
+  }
+}

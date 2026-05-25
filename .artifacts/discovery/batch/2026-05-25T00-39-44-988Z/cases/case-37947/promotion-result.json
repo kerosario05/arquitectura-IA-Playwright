@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-25T00:52:45.193Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c37947-completar-orden-de-compra-con-datos-validos-generados-para-ambiente-demo",
+  "appSlug": "arquitectura-automatizacion",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37947-completar-orden-de-compra-con-datos-validos-generados-para-ambiente-demo\\case.spec.ts",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37947-completar-orden-de-compra-con-datos-validos-generados-para-ambiente-demo\\plan.json",
+  "caseFolder": "c37947-completar-orden-de-compra-con-datos-validos-generados-para-ambiente-demo",
+  "pomStatus": "needs_page_method",
+  "inlineDebugMode": false
+}

@@ -1,0 +1,10 @@
+{
+  "id": "c37943-visualizar-detalle-de-producto-desde-listado-filtrado",
+  "externalId": "C37943",
+  "caseId": 37943,
+  "title": "Visualizar detalle de producto desde listado filtrado",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-05-25T01:58:33.604Z"
+}

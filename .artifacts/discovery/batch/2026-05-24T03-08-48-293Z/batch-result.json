@@ -1,0 +1,61 @@
+{
+  "batchId": "2026-05-24T03-08-48-293Z",
+  "timestamp": "2026-05-24T03:11:31.547Z",
+  "args": {
+    "mode": "by-ids",
+    "caseIds": [
+      37927,
+      37931
+    ],
+    "headed": true,
+    "autoPromote": true,
+    "promotionDryRun": false,
+    "promotionStrict": false,
+    "requirePromotionApproval": false,
+    "dryRun": false,
+    "includeActive": false,
+    "stopOnFail": false,
+    "concurrency": 1,
+    "parallel": false,
+    "autoRepair": false,
+    "repairTimeoutMs": 120000,
+    "showAgentLog": false,
+    "continueOnAgentTimeout": true
+  },
+  "cases": [
+    {
+      "caseId": 37927,
+      "title": "Validar inicio de sesión con credenciales válidas",
+      "selected": true,
+      "status": "promotion_failed",
+      "promoted": false,
+      "promotionStatus": "promotion_failed",
+      "outputDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-24T03-08-48-293Z\\cases\\case-37927",
+      "evidenceDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-24T03-08-48-293Z\\cases\\case-37927\\evidence",
+      "durationMs": 62399
+    },
+    {
+      "caseId": 37931,
+      "title": "Validar compra exitosa desde el carrito",
+      "selected": true,
+      "status": "discovered_partial",
+      "promoted": false,
+      "promotionStatus": "not_applicable",
+      "outputDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-24T03-08-48-293Z\\cases\\case-37931",
+      "evidenceDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-24T03-08-48-293Z\\cases\\case-37931\\evidence",
+      "durationMs": 100852
+    }
+  ],
+  "summary": {
+    "selected": 2,
+    "executed": 2,
+    "skipped": 0,
+    "passed": 0,
+    "failed": 0,
+    "promoted": 0,
+    "alreadyActiveSkipped": 0,
+    "promotionFailed": 1,
+    "notPromoted": 0,
+    "totalDurationMs": 163253
+  }
+}

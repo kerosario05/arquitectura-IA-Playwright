@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-25T01:58:33.600Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c37943-visualizar-detalle-de-producto-desde-listado-filtrado",
+  "appSlug": "arquitectura-automatizacion",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37943-visualizar-detalle-de-producto-desde-listado-filtrado\\case.spec.ts",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37943-visualizar-detalle-de-producto-desde-listado-filtrado\\plan.json",
+  "caseFolder": "c37943-visualizar-detalle-de-producto-desde-listado-filtrado",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false
+}

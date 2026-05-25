@@ -1,0 +1,131 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37926",
+    "caseId": 37926,
+    "title": "Validar agregar múltiples productos al carrito desde diferentes categorías"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://www.demoblaze.com",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "1. Seleccionar la categoría \"Phones\".",
+      "target": {
+        "strategy": "text",
+        "value": "Phones",
+        "exact": false
+      }
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Seleccionar la primera tarjeta visible del listado de productos.",
+      "target": {
+        "strategy": "text",
+        "value": "la primera tarjeta visible del listado de productos",
+        "exact": false
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Clic en \"Add to cart\".",
+      "target": {
+        "strategy": "text",
+        "value": "Add to cart",
+        "exact": false
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Clic en \"Home\".",
+      "target": {
+        "strategy": "text",
+        "value": "Home",
+        "exact": false
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Seleccionar la categoría \"Laptops\".",
+      "target": {
+        "strategy": "text",
+        "value": "Laptops",
+        "exact": false
+      }
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Seleccionar la primera tarjeta visible del listado de productos.",
+      "target": {
+        "strategy": "text",
+        "value": "la primera tarjeta visible del listado de productos",
+        "exact": false
+      }
+    },
+    {
+      "index": 9,
+      "action": "click",
+      "description": "Clic en \"Add to cart\".",
+      "target": {
+        "strategy": "text",
+        "value": "Add to cart",
+        "exact": false
+      }
+    },
+    {
+      "index": 10,
+      "action": "click",
+      "description": "Clic en \"Cart\".",
+      "target": {
+        "strategy": "text",
+        "value": "Cart",
+        "exact": false
+      }
+    },
+    {
+      "index": 11,
+      "action": "assertText",
+      "description": "Assert: que se muestre el total acumulado de la compra",
+      "target": {
+        "strategy": "text",
+        "value": "que se muestre el total acumulado de la compra",
+        "exact": false
+      },
+      "expected": "que se muestre el total acumulado de la compra"
+    },
+    {
+      "index": 12,
+      "action": "assertText",
+      "description": "Assert: El carrito muestra productos agregados desde diferentes categorías y calcula el total acumulado.",
+      "target": {
+        "strategy": "text",
+        "value": "El carrito muestra productos agregados desde diferentes categorías y calcula el total acumulado.",
+        "exact": false
+      },
+      "expected": "El carrito muestra productos agregados desde diferentes categorías y calcula el total acumulado."
+    }
+  ],
+  "notes": [
+    "Discovery partial: 10/13 navigations/assertions satisfied."
+  ],
+  "createdAt": "2026-05-24T06:48:16.077Z"
+}

@@ -1,0 +1,5 @@
+interface:
+  display_name: MCP TestRail Case Generator V2
+  short_description: Generate MCP-friendly TestRail CSV scenarios from Jira stories and acceptance criteria.
+  icon: assets/icon.svg
+  theme_color: '#2563eb'

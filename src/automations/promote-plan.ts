@@ -247,6 +247,54 @@ const METHOD_INTENT_KEYWORDS: Record<string, SemanticMethodIntent> = {
   pagar: "confirm_action"
 };
 
+function normalizeSemanticText(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+function getSemanticStepText(step: ExecutionPlanStep): string {
+  const target = step.target && typeof step.target === "object"
+    ? `${step.target.value ?? ""} ${step.target.name ?? ""} ${step.target.role ?? ""}`
+    : "";
+  return normalizeSemanticText(`${target} ${step.description ?? ""} ${step.action}`);
+}
+
+function isUsernameSemanticTarget(text: string): boolean {
+  return text.includes("username") || text.includes("usuario");
+}
+
+function isPasswordSemanticTarget(text: string): boolean {
+  return text.includes("password") || text.includes("contrasena");
+}
+
+function isLoginSemanticTrigger(text: string): boolean {
+  return text.includes("log in") || text.includes("login") || text.includes("iniciar sesion");
+}
+
+function hasPriorLoginSemanticEvidence(step: ExecutionPlanStep, allSteps: ExecutionPlanStep[]): boolean {
+  const currentIndex = allSteps.indexOf(step);
+  if (currentIndex <= 0) return false;
+  return allSteps.slice(0, currentIndex).some((candidate) => {
+    const text = getSemanticStepText(candidate);
+    return (candidate.action === "fill" || candidate.action.startsWith("assert"))
+      && (isUsernameSemanticTarget(text) || isPasswordSemanticTarget(text));
+  });
+}
+
+function isFirstVisibleSemanticSelection(text: string): boolean {
+  return /\b(primer[ao]?\s+(producto|item|registro|card|tarjeta|fila)|primera?\s+(tarjeta|card|fila)|first\s+visible\s+(item|product|card|row))\b/i.test(text);
+}
+
+function deriveFirstVisibleSemanticIntent(text: string): SemanticMethodIntent {
+  if (/\b(fila|row)\b/i.test(text)) return "select_first_visible_row";
+  if (/\b(tarjeta|card)\b/i.test(text)) return "select_first_visible_card";
+  if (/\b(producto|product)\b/i.test(text)) return "select_first_visible_product";
+  return "select_first_visible_item";
+}
+
 function classifyScreenType(step: ExecutionPlanStep, allSteps: ExecutionPlanStep[]): SemanticScreenType {
   const target = step.target && typeof step.target === "object"
     ? (step.target.value ?? step.target.name ?? step.target.role ?? "").toLowerCase()
@@ -273,6 +321,10 @@ function classifyScreenType(step: ExecutionPlanStep, allSteps: ExecutionPlanStep
     return "login";
   }
 
+  if (isLoginSemanticTrigger(normalizeSemanticText(combinedText)) || isUsernameSemanticTarget(normalizeSemanticText(combinedText)) || isPasswordSemanticTarget(normalizeSemanticText(combinedText))) {
+    return "login";
+  }
+
   if (semanticRelation === "parent_category" || semanticRelation === "category") {
     return "category";
   }
@@ -292,7 +344,7 @@ function classifyScreenType(step: ExecutionPlanStep, allSteps: ExecutionPlanStep
   return "unknown";
 }
 
-function classifyMethodIntent(step: ExecutionPlanStep, screenType: SemanticScreenType): SemanticMethodIntent {
+function classifyMethodIntent(step: ExecutionPlanStep, screenType: SemanticScreenType, allSteps: ExecutionPlanStep[]): SemanticMethodIntent {
   const target = step.target && typeof step.target === "object"
     ? (step.target.value ?? step.target.name ?? step.target.role ?? "").toLowerCase()
     : "";
@@ -301,8 +353,29 @@ function classifyMethodIntent(step: ExecutionPlanStep, screenType: SemanticScree
   const recoveryMeta = (step as any).recoveryMetadata;
   const recoveredText = recoveryMeta?.selectedCandidateText?.toLowerCase() ?? "";
   const semanticRelation = recoveryMeta?.semanticRelation?.toLowerCase() ?? "";
+  const normalizedText = getSemanticStepText(step);
 
-  const combinedText = `${target} ${action} ${description} ${recoveredText} ${semanticRelation}`;
+  if (action.startsWith("assert")) {
+    if (isUsernameSemanticTarget(normalizedText) || isPasswordSemanticTarget(normalizedText)) return "expect_login_form";
+    if (normalizedText.includes("welcome") || normalizedText.includes("logout") || normalizedText.includes("cerrar sesion")) return "expect_logged_in";
+    return "expect_loaded";
+  }
+
+  if (action === "fill") {
+    if (isUsernameSemanticTarget(normalizedText)) return "fill_username";
+    if (isPasswordSemanticTarget(normalizedText)) return "fill_password";
+    return "fill_form_field";
+  }
+
+  if ((action === "click" || action === "select") && isLoginSemanticTrigger(normalizedText)) {
+    return hasPriorLoginSemanticEvidence(step, allSteps) ? "submit_login" : "open_login_modal";
+  }
+
+  if ((action === "click" || action === "select") && isFirstVisibleSemanticSelection(normalizedText)) {
+    return deriveFirstVisibleSemanticIntent(normalizedText);
+  }
+
+  const combinedText = normalizeSemanticText(`${target} ${action} ${description} ${recoveredText} ${semanticRelation}`);
 
   for (const [keyword, intent] of Object.entries(METHOD_INTENT_KEYWORDS)) {
     if (combinedText.includes(keyword)) {
@@ -313,8 +386,8 @@ function classifyMethodIntent(step: ExecutionPlanStep, screenType: SemanticScree
   if (action === "navigate") return "open_home";
   if (action === "login") return "start_session";
   if (action.startsWith("assert")) return "expect_loaded";
-  if (action === "fill") return "fill_form_field";
   if (action === "click" || action === "select") {
+    if (screenType === "login") return hasPriorLoginSemanticEvidence(step, allSteps) ? "submit_login" : "open_login_modal";
     if (screenType === "category") return "select_category";
     if (screenType === "product_list") return "select_product";
     if (screenType === "home") return "click_primary_action";
@@ -329,7 +402,7 @@ function deriveSemanticScreenType(step: ExecutionPlanStep, allSteps: ExecutionPl
 }
 
 function deriveSemanticMethodIntent(step: ExecutionPlanStep, screenType: SemanticScreenType): SemanticMethodIntent {
-  return classifyMethodIntent(step, screenType);
+  return classifyMethodIntent(step, screenType, []);
 }
 
 function derivePageObjectClassNameFromScreenType(screenType: SemanticScreenType): string {
@@ -385,7 +458,7 @@ async function registerPOMCandidatesForBlockedPromotion(
 
   for (const step of nonNavigationSteps) {
     const screenType = deriveSemanticScreenType(step, plan.steps);
-    const intent = deriveSemanticMethodIntent(step, screenType);
+    const intent = classifyMethodIntent(step, screenType, plan.steps);
     const recoveryMeta = (step as any).recoveryMetadata;
 
     const ownerClassName = INTENT_PREFERRED_OWNER[intent] ?? SCREEN_TYPE_CLASS_MAP[screenType] ?? "GenericPage";
@@ -434,7 +507,7 @@ async function registerPOMCandidatesForBlockedPromotion(
   }
 
   for (const [ownerClassName, methods] of methodsByOwner.entries()) {
-    if (ownerClassName === "LoginPage" || ownerClassName === "OtpPage") continue;
+    if (ownerClassName === "OtpPage") continue;
 
     const primaryScreenType = Object.entries(SCREEN_TYPE_CLASS_MAP).find(
       ([, cls]) => cls === ownerClassName
@@ -494,7 +567,7 @@ async function registerPOMCandidatesForBlockedPromotion(
 
   const flowSteps = plan.steps.map((s) => {
     const screenType = deriveSemanticScreenType(s, plan.steps);
-    const intent = deriveSemanticMethodIntent(s, screenType);
+    const intent = classifyMethodIntent(s, screenType, plan.steps);
     const methodName = deriveMethodNameFromIntent(intent);
     const className = derivePageObjectClassNameFromScreenType(screenType);
 
@@ -515,9 +588,14 @@ async function registerPOMCandidatesForBlockedPromotion(
   });
 
   if (pomStatus === "needs_page_method" && specResultMissingMethods.length > 0) {
+    const skipIntents: string[] = [];
+    
     for (const missingMethod of specResultMissingMethods) {
       const derivedIntentMatch = missingMethod.match(/derivedIntent="([^"]+)"/);
       const intent = derivedIntentMatch ? derivedIntentMatch[1] : missingMethod.trim();
+      
+      // Skip login-related intents
+      if (skipIntents.includes(intent)) continue;
 
       const expectedOwnerMatch = missingMethod.match(/expectedOwner="([^"]+)"/);
       const ownerClassName = expectedOwnerMatch ? expectedOwnerMatch[1] : (INTENT_PREFERRED_OWNER[intent] ?? "GenericPage");
@@ -592,6 +670,7 @@ export async function promoteExecutionPlan(
       baseUrl: input.baseUrl ?? runtimeConfig?.app.baseUrl
     });
   }
+  console.log(`[promote] Using appSlug=${appProfile.appSlug}`);
 
   const appPaths = buildAppAutomationPaths(appProfile, automationId, input.outputRoot);
 
@@ -679,6 +758,12 @@ export async function promoteExecutionPlan(
   const inlineDebugMode = input.inlineDebugMode ?? false;
   let pomStatus: POMPromotionStatus | undefined;
   let pomDiagnostics: {
+    status?: "needs_page_object" | "promoted";
+    inlineFallbackUsed?: boolean;
+    reason?: string;
+    requiredDataUsed?: string[];
+    generatedPageObjects?: string[];
+    generatedMethods?: string[];
     missingPageObjects: string[];
     missingMethods: string[];
     generatedCandidates: number;
@@ -743,6 +828,12 @@ export async function promoteExecutionPlan(
     }
 
     pomDiagnostics = {
+      status: specResult.pomStatus === "promoted" ? "promoted" : "needs_page_object",
+      inlineFallbackUsed: specResult.inlineFallbackUsed ?? false,
+      reason: specResult.pomStatus ?? "unknown",
+      requiredDataUsed: specResult.requiredDataUsed ?? [],
+      generatedPageObjects: [],
+      generatedMethods: [],
       missingPageObjects: specResult.missingPageObjects,
       missingMethods: specResult.missingMethods,
       generatedCandidates: specResult.generatedCandidates
@@ -775,6 +866,12 @@ export async function promoteExecutionPlan(
 
       pomDiagnostics = {
         ...pomDiagnostics,
+        status: autoPomResult.diagnostics.finalPomStatus === "promoted" ? "promoted" : "needs_page_object",
+        reason: autoPomResult.diagnostics.finalPomStatus,
+        generatedPageObjects: autoPomResult.diagnostics.autoApprovedPageObjects,
+        generatedMethods: autoPomResult.diagnostics.autoApprovedMethods,
+        missingPageObjects: autoPomResult.diagnostics.finalPomStatus === "promoted" ? [] : (pomDiagnostics?.missingPageObjects ?? []),
+        missingMethods: autoPomResult.diagnostics.finalPomStatus === "promoted" ? [] : (pomDiagnostics?.missingMethods ?? []),
         autoPom: autoPomResult.diagnostics
       };
     }

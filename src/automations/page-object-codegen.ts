@@ -39,6 +39,37 @@ const INTENT_LOCATOR_TEMPLATES: Record<string, string> = {
     "await this.page.waitForTimeout(3000);"
   ].join("\n"),
   open_home: "await this.page.goto('/');",
+  open_login_modal: [
+    "const openLoginButton = this.page.getByRole('link', { name: /log in|iniciar sesion/i })",
+    "  .or(this.page.getByRole('button', { name: /log in|iniciar sesion/i }));",
+    "await openLoginButton.first().waitFor({ state: 'visible', timeout: 10000 });",
+    "await openLoginButton.first().click();"
+  ].join("\n"),
+  expect_login_form: [
+    "const loginModal = this.page.locator('#logInModal');",
+    "await expect(loginModal).toBeVisible({ timeout: 10000 });",
+    "await expect(loginModal.locator('#loginusername')).toBeVisible();",
+    "await expect(loginModal.locator('#loginpassword')).toBeVisible();"
+  ].join("\n"),
+  fill_username: [
+    "const usernameInput = this.page.locator('#logInModal').locator('#loginusername');",
+    "await usernameInput.waitFor({ state: 'visible', timeout: 10000 });",
+    "await usernameInput.fill(value);"
+  ].join("\n"),
+  fill_password: [
+    "const passwordInput = this.page.locator('#logInModal').locator('#loginpassword');",
+    "await passwordInput.waitFor({ state: 'visible', timeout: 10000 });",
+    "await passwordInput.fill(value);"
+  ].join("\n"),
+  submit_login: [
+    "const submitButton = this.page.locator('#logInModal').getByRole('button', { name: /log in|iniciar sesion/i });",
+    "await submitButton.first().waitFor({ state: 'visible', timeout: 10000 });",
+    "await submitButton.first().click();"
+  ].join("\n"),
+  expect_logged_in: [
+    "const loggedInIndicator = this.page.getByText(/welcome|logout|log out|cerrar sesion/i).first();",
+    "await expect(loggedInIndicator).toBeVisible({ timeout: 10000 });"
+  ].join("\n"),
   open_product_information: [
     "const previousUrl = this.page.url();",
     "await this.page.getByRole('button', { name: /información de productos|product information/i }).click();",
@@ -102,15 +133,47 @@ const INTENT_LOCATOR_TEMPLATES: Record<string, string> = {
     "if (await fallbackLocator.count() > 0) { await fallbackLocator.click({ timeout: 10000 }); return; }",
     "throw new Error('Could not find product matching \"' + productName + '\". Strategies tried: checkbox, role, text, heading, semantic_tokens, product_condition');"
   ].join("\n"),
+  select_first_visible_item: [
+    "await waitForListReadiness(this.page, { timeoutMs: 10000, pollMs: 500, minCards: 1 });",
+    "const candidate = this.page.locator(':visible').filter({ has: this.page.locator('h1, h2, h3, h4, h5, h6, p, span') }).first();",
+    "if (await candidate.count() === 0) throw new Error('No visible list item found to select.');",
+    "await candidate.click({ timeout: 10000 });"
+  ].join("\n"),
+  select_first_visible_product: [
+    "await waitForListReadiness(this.page, { timeoutMs: 10000, pollMs: 500, minCards: 1 });",
+    "const productCard = this.page.locator('article:visible, [data-testid*=\"product\"]:visible, [class*=\"product\"]:visible, [class*=\"card\"]:visible').first();",
+    "if (await productCard.count() === 0) throw new Error('No visible product card found to select.');",
+    "const actionable = productCard.locator('a:visible, button:visible, [role=\"button\"]:visible').first();",
+    "if (await actionable.count() > 0) { await actionable.click({ timeout: 10000 }); return; }",
+    "await productCard.click({ timeout: 10000 });"
+  ].join("\n"),
+  select_first_visible_card: [
+    "await waitForListReadiness(this.page, { timeoutMs: 10000, pollMs: 500, minCards: 1 });",
+    "const productLink = this.page.locator('a[href*=\"prod.html\"]:visible, a.hrefch:visible').first();",
+    "if (await productLink.count() > 0) { await productLink.click({ timeout: 10000 }); return; }",
+    "const card = this.page.locator('[class*=\"card\"]:visible, article:visible, [class*=\"item\"]:visible').first();",
+    "if (await card.count() === 0) throw new Error('No visible card found to select.');",
+    "const actionable = card.locator('a:visible, button:visible, [role=\"button\"]:visible').first();",
+    "if (await actionable.count() > 0) { await actionable.click({ timeout: 10000 }); return; }",
+    "await card.click({ timeout: 10000 });"
+  ].join("\n"),
+  select_first_visible_row: [
+    "await waitForListReadiness(this.page, { timeoutMs: 10000, pollMs: 500, minCards: 1 });",
+    "const row = this.page.locator('tr:visible, [role=\"row\"]:visible').first();",
+    "if (await row.count() === 0) throw new Error('No visible row found to select.');",
+    "await row.click({ timeout: 10000 });"
+  ].join("\n"),
   click_primary_action: [
     "const button = this.page.getByRole('button', { name: new RegExp(actionName, 'i') });",
-    "await button.waitFor({ state: 'visible', timeout: 10000 });",
-    "const isEnabled = await button.isEnabled({ timeout: 15000 }).catch(() => false);",
+    "const link = this.page.getByRole('link', { name: new RegExp(actionName, 'i') });",
+    "const buttonOrLink = button.or(link).first();",
+    "await buttonOrLink.waitFor({ state: 'visible', timeout: 10000 });",
+    "const isEnabled = await buttonOrLink.isEnabled({ timeout: 15000 }).catch(() => true);",
     "if (!isEnabled) {",
-    "  const buttonText = await button.textContent().catch(() => '(unknown)');",
+    "  const buttonText = await buttonOrLink.textContent().catch(() => '(unknown)');",
     "  throw new Error('Cannot click primary action \"' + actionName + '\": button is not enabled. Text: \"' + buttonText + '\". This usually means required selections or form fields have not been completed.');",
     "}",
-    "await button.click({ timeout: 10000 });",
+    "await buttonOrLink.click({ timeout: 10000 });",
     "await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});",
     "await this.page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});",
     "await this.page.waitForTimeout(1000);"
@@ -124,9 +187,19 @@ const INTENT_LOCATOR_TEMPLATES: Record<string, string> = {
 const INTENT_DEFAULT_PARAMS: Record<string, string[]> = {
   start_session: [],
   open_home: [],
+  open_login_modal: [],
+  expect_login_form: [],
+  fill_username: ["value"],
+  fill_password: ["value"],
+  submit_login: [],
+  expect_logged_in: [],
   open_product_information: [],
   select_category: ["categoryName"],
   select_product: ["productName"],
+  select_first_visible_item: [],
+  select_first_visible_product: [],
+  select_first_visible_card: [],
+  select_first_visible_row: [],
   click_primary_action: ["actionName"],
   expect_loaded: [],
   fill_form_field: ["fieldName", "value"],
@@ -180,7 +253,15 @@ function buildLocatorStub(method: PageObjectMethod): string {
 
 function buildMethodStub(method: PageObjectMethod): string {
   const signature = buildMethodSignature(method);
-  const body = buildLocatorStub(method);
+  let body = buildLocatorStub(method);
+  if (sanitizeMethodName(method.name) === "loginWithCredentials") {
+    body = [
+      "    await this.expectLoginFormVisible();",
+      "    await this.fillUsername(username);",
+      "    await this.fillPassword(password);",
+      "    await this.submitLogin();"
+    ].join("\n");
+  }
 
   const lines: string[] = [];
   lines.push(`  ${signature} {`);

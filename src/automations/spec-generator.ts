@@ -39,6 +39,8 @@ export type GenerateSpecResult = {
   generatedCandidates: number;
   usedAuthFlow?: boolean;
   validationErrors: string[];
+  inlineFallbackUsed?: boolean;
+  requiredDataUsed?: string[];
 };
 
 export function generateSpecFromPlan(
@@ -114,7 +116,9 @@ export async function generateSpecFromPlanWithPolicy(
       missingMethods: pomResult.missingMethods,
       generatedCandidates: pomResult.generatedCandidates,
       usedAuthFlow: pomResult.usedAuthFlow,
-      validationErrors: pomResult.validationErrors
+      validationErrors: pomResult.validationErrors,
+      inlineFallbackUsed: pomResult.inlineFallbackUsed,
+      requiredDataUsed: pomResult.requiredDataUsed
     };
   }
 
@@ -128,7 +132,9 @@ export async function generateSpecFromPlanWithPolicy(
       missingMethods: pomResult.missingMethods,
       generatedCandidates: pomResult.generatedCandidates,
       usedAuthFlow: pomResult.usedAuthFlow,
-      validationErrors: pomResult.validationErrors
+      validationErrors: pomResult.validationErrors,
+      inlineFallbackUsed: pomResult.inlineFallbackUsed,
+      requiredDataUsed: pomResult.requiredDataUsed
     };
   }
 
@@ -160,7 +166,9 @@ export async function generateSpecFromPlanWithPolicy(
     missingMethods: pomResult.missingMethods,
     generatedCandidates: pomResult.generatedCandidates,
     usedAuthFlow: pomResult.usedAuthFlow,
-    validationErrors: pomResult.validationErrors
+    validationErrors: pomResult.validationErrors,
+    inlineFallbackUsed: pomResult.inlineFallbackUsed,
+    requiredDataUsed: pomResult.requiredDataUsed
   };
 }
 

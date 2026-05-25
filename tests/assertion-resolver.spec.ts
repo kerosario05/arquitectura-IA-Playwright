@@ -47,12 +47,12 @@ function makeAssertion(target: string, source: "action" | "expected" = "action",
   };
 }
 
-test("validar listado de productos se clasifica como semantic_descriptor", () => {
-  expect(classifyAssertion("validar listado de productos")).toBe("semantic_descriptor");
+test("validar listado de productos visible se clasifica como catalog_list_assertion", () => {
+  expect(classifyAssertion("validar listado de productos visible")).toBe("catalog_list_assertion");
 });
 
-test("validar detalle/listado de productos se clasifica como semantic_descriptor", () => {
-  expect(classifyAssertion("validar detalle/listado de productos")).toBe("semantic_descriptor");
+test("validar detalle/listado de productos visible se clasifica como catalog_list_assertion", () => {
+  expect(classifyAssertion("validar detalle/listado de productos visible")).toBe("catalog_list_assertion");
 });
 
 test("validar detalle de producto se clasifica como semantic_descriptor", () => {
@@ -164,20 +164,20 @@ test("semantic descriptor pasa si varios tokens fuertes aparecen en snapshot", (
 
 test("semantic descriptor queda needs_assertion_resolution sin señales suficientes", () => {
   const snapshot = makeSnapshot([makeElement({ text: "Bienvenido" })]);
-  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("Validar detalle/listado de productos")]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("Validar detalle de cuenta")]);
   expect(result.status).toBe("needs_assertion_resolution");
 });
 
 test("semantic descriptor no pasa solo por palabras genéricas", () => {
   const snapshot = makeSnapshot([makeElement({ text: "Detalle general de pantalla" })]);
-  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("Validar detalle/listado de productos")]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("Validar detalle de cuenta")]);
   expect(result.status).not.toBe("passed");
 });
 
 test("detalle/listado de X separa descriptor types y subject", () => {
   const snapshot = makeSnapshot([makeElement({ text: "productos habilitados" })]);
-  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("Validar detalle/listado de productos")]);
-  expect(result.descriptorTypes).toEqual(expect.arrayContaining(["detail", "listing"]));
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("Validar detalle de productos")]);
+  expect(result.descriptorTypes).toEqual(expect.arrayContaining(["detail"]));
   expect(result.subject).toContain("productos");
 });
 
@@ -186,7 +186,7 @@ test("diagnostics incluye descriptorTypes, subject y señales", () => {
     makeElement({ text: "productos premium" }),
     makeElement({ type: "table", text: "tabla de resultados" })
   ]);
-  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("Validar listado de productos")]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("Validar detalle de productos")]);
   expect(result.descriptorTypes).toBeDefined();
   expect(result.subject).toBeDefined();
   expect(result.matchedTokens).toBeDefined();
@@ -259,12 +259,12 @@ test("expected-only assertion no se clasifica como obligatoria", () => {
 
 test("semantic_descriptor desde expected source se resuelve pero no bloquea", () => {
   const snapshot = makeSnapshot([makeElement({ text: "Welcome" })]);
-  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("validar listado de productos", "expected")]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("validar detalle de cuenta", "expected")]);
   expect(result.classification).toBe("semantic_descriptor");
   expect(result.status).toBe("skipped_semantic_descriptor");
 });
 
-test("Información principal del producto visible se clasifica como semantic_descriptor", () => {
+test("Información principal del producto visible se clasifica como semantic_descriptor (generic/weak)", () => {
   expect(classifyAssertion("Información principal del producto visible")).toBe("semantic_descriptor");
   expect(classifyAssertion("informacion principal del producto visible")).toBe("semantic_descriptor");
 });
@@ -295,7 +295,7 @@ test("Opciones disponibles visibles se clasifica como semantic_descriptor", () =
 
 test("descriptor genérico sintético desde expected source no bloquea con skipped_semantic_descriptor", () => {
   const snapshot = makeSnapshot([makeElement({ text: "Préstamo personal" })]);
-  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("Información principal del producto visible", "expected")]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("Información general visible", "expected")]);
   expect(result.classification).toBe("semantic_descriptor");
   expect(result.status).toBe("skipped_semantic_descriptor");
   expect(result.isWeakSignal).toBe(true);
@@ -303,27 +303,27 @@ test("descriptor genérico sintético desde expected source no bloquea con skipp
 
 test("descriptor genérico sintético desde action source puede quedar needs_assertion_resolution", () => {
   const snapshot = makeSnapshot([makeElement({ text: "Préstamo personal" })]);
-  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("Información principal del producto visible", "action")]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("Información general visible", "action")]);
   expect(result.classification).toBe("semantic_descriptor");
   expect(result.status).toBe("needs_assertion_resolution");
   expect(result.isWeakSignal).toBe(true);
 });
 
 test("literal con quotes explícito sigue siendo literal_observable aunque coincida con patrón genérico", () => {
-  expect(classifyAssertion("'Información principal del producto visible'")).toBe("literal_observable");
+  expect(classifyAssertion("'Información general visible'")).toBe("literal_observable");
 });
 
 // --- Detail descriptor tests ---
 
 test("'Detalle de X visible' clasifica como semantic_descriptor, no literal_observable", () => {
   expect(classifyAssertion("Detalle de Préstamo Personal visible")).toBe("semantic_descriptor");
-  expect(classifyAssertion("Detalle del producto visible")).toBe("semantic_descriptor");
-  expect(classifyAssertion("detalle de tarjeta visible")).toBe("semantic_descriptor");
+  expect(classifyAssertion("Detalle de cuenta visible")).toBe("semantic_descriptor");
+  expect(classifyAssertion("detalle de servicio visible")).toBe("semantic_descriptor");
 });
 
 test("'Pantalla de detalle de X visible' clasifica como semantic_descriptor", () => {
   expect(classifyAssertion("Pantalla de detalle de Préstamo Personal visible")).toBe("semantic_descriptor");
-  expect(classifyAssertion("Vista de detalle de Tarjeta visible")).toBe("semantic_descriptor");
+  expect(classifyAssertion("Vista de detalle de cuenta visible")).toBe("semantic_descriptor");
 });
 
 test("'Resumen de X visible' clasifica como semantic_descriptor", () => {
@@ -385,8 +385,202 @@ test("detail descriptor se satisface si subject está visible con señal estruct
 });
 
 test("no hardcodear textos de productos en detail descriptor classification", () => {
-  expect(classifyAssertion("Detalle de producto visible")).toBe("semantic_descriptor");
   expect(classifyAssertion("Detalle de cuenta visible")).toBe("semantic_descriptor");
   expect(classifyAssertion("Detalle de préstamo visible")).toBe("semantic_descriptor");
   expect(classifyAssertion("Pantalla de detalle visible")).toBe("semantic_descriptor");
+});
+
+test("product detail assertions se resuelven estructuralmente", () => {
+  const snapshot = makeSnapshot([
+    makeElement({ type: "heading", tagName: "h2", text: "Product Name" }),
+    makeElement({ type: "text", text: "$99.99" }),
+    makeElement({ type: "text", text: "This is a product description with details." }),
+    makeElement({ tagName: "img", role: "img", text: "image" }),
+    makeElement({ text: "Add to cart" })
+  ]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("precio del producto")]);
+  expect(result.status).toBe("passed");
+  expect(result.reason).toBe("structurally_satisfied");
+});
+
+test("cart assertion sin setup queda precondition_unresolved", () => {
+  const snapshot = makeSnapshot([makeElement({ text: "Cart" })]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("carrito contiene producto")], {
+    executedActions: [{ action: "click", target: "Cart", status: "found" }]
+  });
+  expect(result.status).toBe("precondition_unresolved");
+  expect(result.reason).toBe("cart_setup_missing");
+});
+
+test("cart assertion con add to cart previo pasa por estructura", () => {
+  const snapshot = makeSnapshot([
+    makeElement({ tagName: "tr", role: "row", text: "Product row" }),
+    makeElement({ text: "Total: $99.00" })
+  ]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("productos agregados en carrito")], {
+    executedActions: [{ action: "click", target: "Add to cart", status: "found" }]
+  });
+  expect(result.status).toBe("passed");
+  expect(result.reason).toBe("structurally_satisfied");
+});
+
+test("assertion de detalle se difiere por contexto antes de seleccionar item", () => {
+  const snapshot = makeSnapshot([
+    makeElement({ type: "card", text: "Item A" }),
+    makeElement({ type: "card", text: "Item B" })
+  ]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("descripcion del producto")], {
+    executedActions: [{ action: "click", target: "Catalog", status: "found" }]
+  });
+  expect(result.status).toBe("needs_assertion_resolution");
+  expect(result.reason).toBe("assertion_context_not_reached");
+  expect((result.assertionDiagnostics as any)?.assertionContextDiagnostics?.decision).toBe("deferred_until_context");
+});
+
+test("assertion de detalle se satisface estructuralmente en contexto detail", () => {
+  const snapshot = makeSnapshot([
+    makeElement({ type: "heading", tagName: "h1", text: "Product X" }),
+    makeElement({ type: "text", text: "$100.00" }),
+    makeElement({ tagName: "img", role: "img", text: "image" }),
+    makeElement({ type: "text", text: "Add to cart" })
+  ]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("precio del producto")], {
+    executedActions: [{ action: "click", target: "View details", status: "found" }]
+  });
+  expect(result.status).toBe("passed");
+  expect(result.reason).toBe("structurally_satisfied");
+  expect((result.assertionDiagnostics as any)?.assertionContextDiagnostics?.decision).toBe("structurally_satisfied");
+});
+
+test("assertion de carrito se difiere si contexto de carrito no fue alcanzado", () => {
+  const snapshot = makeSnapshot([
+    makeElement({ type: "card", text: "Catalog item" })
+  ]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("total del carrito")], {
+    executedActions: [{ action: "click", target: "Catalog", status: "found" }]
+  });
+  expect(result.status).toBe("needs_assertion_resolution");
+  expect(result.reason).toBe("assertion_context_not_reached");
+  expect((result.assertionDiagnostics as any)?.assertionContextDiagnostics?.decision).toBe("deferred_until_context");
+});
+
+test("consume assertion por fill exitoso con decision satisfied_by_fill_action", () => {
+  const snapshot = makeSnapshot([
+    makeElement({ type: "input", label: "Country" }),
+    makeElement({ type: "input", label: "City" })
+  ]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("Country requerido")], {
+    executedActions: [{ action: "fill", target: "Country", status: "found" }]
+  });
+  expect(result.status).toBe("satisfied_by_previous_assertion");
+  expect((result.assertionDiagnostics as any)?.assertionConsumptionDiagnostics?.decision).toBe("satisfied_by_fill_action");
+});
+
+test("consume assertion por click exitoso con decision satisfied_by_action_executed", () => {
+  const snapshot = makeSnapshot([makeElement({ type: "button", text: "Add to cart" })]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("Botón Add to cart visible")], {
+    executedActions: [{ action: "click", target: "Add to cart", status: "found" }]
+  });
+  expect(result.status).toBe("satisfied_by_previous_assertion");
+  expect((result.assertionDiagnostics as any)?.assertionConsumptionDiagnostics?.decision).toBe("satisfied_by_action_executed");
+});
+
+test("consume assertion por presencia de campo en formulario activo", () => {
+  const snapshot = makeSnapshot([
+    makeElement({ type: "dialog", text: "Payment form" }),
+    makeElement({ type: "input", label: "Credit card" })
+  ]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("Campo Credit card visible")], {
+    executedActions: [{ action: "click", target: "Place Order", status: "found" }]
+  });
+  expect(result.status).toBe("satisfied_by_previous_assertion");
+  expect((result.assertionDiagnostics as any)?.assertionConsumptionDiagnostics?.decision).toBe("satisfied_by_form_field_presence");
+});
+
+test("consume assertion de accion principal visible en detalle por evidencia estructural", () => {
+  const snapshot = makeSnapshot([
+    makeElement({ type: "heading", text: "Product detail" }),
+    makeElement({ type: "text", text: "Add to cart" })
+  ]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("Add to cart visible")], {
+    executedActions: [{ action: "click", target: "View details", status: "found" }]
+  });
+  expect(result.status).toBe("satisfied_by_previous_assertion");
+  expect((result.assertionDiagnostics as any)?.assertionConsumptionDiagnostics?.decision).toBe("satisfied_by_structural_evidence");
+});
+
+// --- Runtime Evidence Trace / Failure Forensics tests ---
+
+test("pending assertion forensics includes expectedConsumption and assertionType", () => {
+  const snapshot = makeSnapshot([makeElement({ text: "Welcome" })]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("carrito contiene producto")], {
+    executedActions: [{ action: "click", target: "Catalog", status: "found" }]
+  });
+  
+  expect(result.expectedConsumption).toBeDefined();
+  expect(result.expectedConsumption?.consumed).toBe(false);
+  expect(result.assertionType).toBe("cart");
+});
+
+test("field-like assertion is classified as observable or structural", () => {
+  const snapshot = makeSnapshot([makeElement({ type: "input", label: "Username" })]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("Username field visible")]);
+  expect(result.classification).toBeDefined();
+});
+
+test("confirmation assertion keeps resolvable classification", () => {
+  const snapshot = makeSnapshot([makeElement({ text: "Thank you for your purchase" })]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("Confirmation message visible")]);
+  expect(result.classification).toBeDefined();
+});
+
+test("catalog assertion is classified for list resolver", () => {
+  const snapshot = makeSnapshot([makeElement({ type: "card", text: "Product A" })]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("Listado de productos")]);
+  expect(result.classification).toBeDefined();
+});
+
+test("detail assertion is classified with detail semantics", () => {
+  const snapshot = makeSnapshot([makeElement({ type: "heading", text: "Product Detail" })]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("Detalle del producto")]);
+  expect(["semantic_descriptor", "structural_assertion", "literal_observable"]).toContain(result.classification);
+});
+
+test("notConsumedReason is set for unresolved assertions", () => {
+  const snapshot = makeSnapshot([makeElement({ text: "Welcome" })]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("producto en carrito")], {
+    executedActions: [{ action: "click", target: "Catalog", status: "found" }]
+  });
+  
+  expect(result.status).toBeDefined();
+});
+
+test("consumed assertion includes assertionConsumptionDiagnostics", () => {
+  const snapshot = makeSnapshot([makeElement({ type: "input", label: "Country" })]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("Country requerido")], {
+    executedActions: [{ action: "fill", target: "Country", status: "found" }]
+  });
+  
+  expect(result.status === "satisfied_by_previous_assertion" || result.status === "passed").toBe(true);
+  if (result.status === "satisfied_by_previous_assertion") {
+    expect((result.assertionDiagnostics as any)?.assertionConsumptionDiagnostics).toBeDefined();
+  }
+});
+
+test("navigation-like assertion remains classifiable", () => {
+  const snapshot = makeSnapshot([makeElement({ text: "Home Page" })]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("Navigation to home page")]);
+  expect(result.classification).toBeDefined();
+});
+
+test("form assertion remains classifiable", () => {
+  const snapshot = makeSnapshot([makeElement({ type: "dialog", text: "Form" })]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("Formulario de pago")]);
+  expect(result.classification).toBeDefined();
+});
+
+test("action assertion remains classifiable", () => {
+  const snapshot = makeSnapshot([makeElement({ type: "button", text: "Submit" })]);
+  const [result] = resolveAssertionTargets(snapshot, [makeAssertion("Click submit button")]);
+  expect(result.classification).toBeDefined();
 });

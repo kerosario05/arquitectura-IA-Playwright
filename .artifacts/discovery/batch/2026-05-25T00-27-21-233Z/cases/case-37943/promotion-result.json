@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-05-25T00:28:48.209Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": false,
+  "gateStatus": "blocked",
+  "reasons": [
+    "Blocking discovery steps found: #3:needs_assertion_resolution, #4:needs_assertion_resolution, #7:needs_assertion_resolution"
+  ],
+  "warnings": [],
+  "promoted": false
+}

@@ -17,6 +17,23 @@ type VisibleCandidate = {
 export class ProductListPage {
   constructor(private readonly page: Page) {}
 
+  async selectFirstVisibleCard(): Promise<void> {
+    await waitForListReadiness(this.page, { timeoutMs: 10000, pollMs: 500, minCards: 1 });
+    const productLink = this.page.locator('a[href*="prod.html"]:visible, a.hrefch:visible').first();
+    if (await productLink.count() > 0) {
+      await productLink.click({ timeout: 10000 });
+      return;
+    }
+    const card = this.page.locator('[class*="card"]:visible, article:visible, [class*="item"]:visible').first();
+    if (await card.count() === 0) throw new Error('No visible card found to select.');
+    const actionable = card.locator('a:visible, button:visible, [role="button"]:visible').first();
+    if (await actionable.count() > 0) {
+      await actionable.click({ timeout: 10000 });
+      return;
+    }
+    await card.click({ timeout: 10000 });
+  }
+
   async selectProduct(productName: string): Promise<void> {
     const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
     const target = normalize(productName);
@@ -88,7 +105,7 @@ export class ProductListPage {
           while (current && depth < 5) {
             const tagName = current.tagName.toLowerCase();
             const role = current.getAttribute('role');
-            const hasOnClick = !!(current as any).onclick || current.getAttribute('onclick');
+            const hasOnClick = !!((current as any).onclick || current.getAttribute('onclick'));
             const hasClickableClass = clickableClassPatterns.some(pattern => {
               const className = current.className || '';
               return typeof className === 'string' && className.includes(pattern);
@@ -131,7 +148,7 @@ export class ProductListPage {
             while (current && depth < 5) {
               const tagName = current.tagName.toLowerCase();
               const role = current.getAttribute('role');
-              const hasOnClick = !!(current as any).onclick || current.getAttribute('onclick');
+            const hasOnClick = !!((current as any).onclick || current.getAttribute('onclick'));
               const hasClickableClass = clickableClassPatterns.some(pattern => {
                 const className = current.className || '';
                 return typeof className === 'string' && className.includes(pattern);
@@ -482,7 +499,7 @@ export class ProductListPage {
       const isClickable = (el: HTMLElement): boolean => {
         const tagName = el.tagName.toLowerCase();
         const role = el.getAttribute('role');
-        const hasOnClick = !!(el as any).onclick || el.getAttribute('onclick');
+        const hasOnClick = !!((el as any).onclick || el.getAttribute('onclick'));
         const hasClickableClass = clickableClassPatterns.some(pattern => {
           const className = el.className || '';
           return typeof className === 'string' && className.includes(pattern);

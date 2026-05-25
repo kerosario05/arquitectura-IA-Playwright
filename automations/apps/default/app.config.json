@@ -2,17 +2,21 @@
   "appProfile": {
     "appSlug": "default",
     "source": "default",
-    "name": "4",
-    "baseUrl": "https://172.27.4.50/",
-    "baseUrlHash": "74df3c0e992c",
-    "createdAt": "2026-05-22T19:14:37.287Z",
-    "updatedAt": "2026-05-22T19:14:37.289Z"
+    "name": "demoblaze",
+    "baseUrl": "https://www.demoblaze.com",
+    "baseUrlHash": "f1bffa09d02f",
+    "createdAt": "2026-05-24T16:45:58.566Z",
+    "updatedAt": "2026-05-24T16:45:58.566Z"
   },
-  "baseUrl": "https://172.27.4.50/",
+  "baseUrl": "https://www.demoblaze.com",
   "loginMode": "no_login",
   "testData": {},
   "testDataAliases": {},
   "testDataRefs": {},
-  "missingInputBehavior": "fail",
-  "updatedAt": "2026-05-22T19:14:37.289Z"
+  "username": "adminr",
+  "password": "admin123",
+  "usernameRef": "APP_USERNAME",
+  "passwordRef": "APP_PASSWORD",
+  "missingInputBehavior": "auto_generate",
+  "updatedAt": "2026-05-24T16:45:58.566Z"
 }

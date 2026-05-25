@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-25T01:52:08.936Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c37946-visualizar-formulario-de-orden-desde-carrito-con-producto-agregado",
+  "appSlug": "arquitectura-automatizacion",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37946-visualizar-formulario-de-orden-desde-carrito-con-producto-agregado\\case.spec.ts",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37946-visualizar-formulario-de-orden-desde-carrito-con-producto-agregado\\plan.json",
+  "caseFolder": "c37946-visualizar-formulario-de-orden-desde-carrito-con-producto-agregado",
+  "pomStatus": "needs_page_method",
+  "inlineDebugMode": false
+}

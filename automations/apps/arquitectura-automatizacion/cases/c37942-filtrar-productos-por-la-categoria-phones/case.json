@@ -1,0 +1,10 @@
+{
+  "id": "c37942-filtrar-productos-por-la-categoria-phones",
+  "externalId": "C37942",
+  "caseId": 37942,
+  "title": "Filtrar productos por la categoría Phones",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-05-25T01:57:13.206Z"
+}

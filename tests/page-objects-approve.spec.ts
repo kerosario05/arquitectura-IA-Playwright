@@ -4,6 +4,7 @@ import path from "node:path";
 import { approvePageObjectCandidates, parseArgs } from "../src/cli/page-objects-approve";
 import { ensurePageObjectRegistry, savePageObjectRegistry, registerPageObjectCandidate, registerMethodCandidate } from "../src/automations/page-object-registry";
 import { loadPageObjectRegistry } from "../src/automations/page-object-registry";
+import { autoApproveSafePageObjects } from "../src/automations/page-object-approval";
 import { getTestTempDir, ensureTestTempDir, cleanTestTempDir } from "./helpers/test-temp-dir";
 
 const tmpDir = getTestTempDir("test-page-object-approve");
@@ -430,4 +431,39 @@ test("candidate file no se borra tras aprobacion", async () => {
   });
 
   await expect(fs.access(candidateFile)).resolves.toBeUndefined();
+});
+
+test("auto-approve blocks LoginPage candidate when source contains OTP or literal credentials", async () => {
+  const appSlug = "test-approve-login-source-block";
+  const registry = await ensurePageObjectRegistry({ appSlug } as any, tmpDir);
+
+  registerPageObjectCandidate(registry, {
+    name: "LoginPage",
+    className: "LoginPage",
+    screenSignature: `screen:${appSlug}-login`,
+    confidence: 0.9,
+    sourcePlanId: "test-plan-login",
+    methods: [{ name: "fillUsername", intent: "fill_username", parameters: ["value"] }]
+  });
+
+  await savePageObjectRegistry(registry, { appSlug } as any, tmpDir);
+
+  const pagesDir = path.join(tmpDir, "automations", "apps", appSlug, "pages");
+  await fs.mkdir(pagesDir, { recursive: true });
+  const candidateFile = path.join(pagesDir, "login.page.candidate.ts");
+  await fs.writeFile(candidateFile, "export class LoginPage { async fillUsername(value: string) { const otp = '123456'; await this.page.fill('#user', 'admin'); } }", "utf-8");
+
+  const result = await autoApproveSafePageObjects(appSlug, tmpDir, {
+    approveAll: true,
+    overwriteActive: true,
+    dryRun: false,
+    confidenceThreshold: 0.5,
+    blockSensitive: true
+  });
+
+  expect(result.approved).toBe(0);
+  expect(result.blockedAutoApprovals.some((entry) => entry.includes("LoginPage"))).toBe(true);
+
+  const activeFile = path.join(pagesDir, "login.page.ts");
+  await expect(fs.access(activeFile)).rejects.toThrow();
 });

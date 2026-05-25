@@ -18,60 +18,42 @@
           "status": "active",
           "sensitive": false,
           "confidence": 1,
-          "source": "c37844-visualizar-detalle-de-tarjeta-visa-gold-step-6"
+          "source": "c37927-validar-inicio-de-sesion-con-credenciales-validas-step-3,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-step-5,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-missing-select_product,c37945-visualizar-carrito-con-producto-agregado-durante-la-sesion-actual-step-5"
+        },
+        {
+          "name": "selectFirstVisibleCard",
+          "intent": "select_first_visible_card",
+          "parameters": [],
+          "available": true,
+          "source": "c37945-visualizar-carrito-con-producto-agregado-durante-la-sesion-actual-step-4,c37945-visualizar-carrito-con-producto-agregado-durante-la-sesion-actual-missing-select_first_visible_card",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
         }
       ],
       "confidence": 1,
       "status": "active",
       "sourcePlanIds": [],
       "caseIds": [],
-      "createdAt": "2026-05-22T21:47:00.237Z",
-      "updatedAt": "2026-05-22T21:47:00.237Z"
+      "createdAt": "2026-05-24T05:41:09.961Z",
+      "updatedAt": "2026-05-25T12:23:43.211Z"
     },
     {
-      "id": "po_1779486492742_agn82s",
-      "className": "HomePage",
-      "filePath": "automations/apps/arquitectura-automatizacion/pages/home.page.candidate.ts",
-      "screenSignature": "screen:arquitectura-automatizacion-home",
+      "id": "po_1779601331578_mkr4do",
+      "className": "ProductDetailPage",
+      "filePath": "automations/apps/arquitectura-automatizacion/pages/productdetail.page.ts",
+      "screenSignature": "screen:arquitectura-automatizacion-product_detail",
       "methods": [
         {
-          "name": "start",
-          "intent": "start_session",
+          "name": "expectLoaded",
+          "intent": "expect_loaded",
           "parameters": [],
           "available": true,
-          "source": "candidate,c37870-generar-carta-de-referencia-con-certificado-step-3,c37870-generar-carta-de-referencia-con-certificado-missing-start_session,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-3",
+          "source": "candidate,c37927-validar-inicio-de-sesion-con-credenciales-validas-step-4,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-step-4,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-missing-expect_loaded,c37945-visualizar-carrito-con-producto-agregado-durante-la-sesion-actual-step-8",
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
-        }
-      ],
-      "confidence": 0.5,
-      "status": "candidate",
-      "sourcePlanIds": [
-        "c37870-generar-carta-de-referencia-con-certificado"
-      ],
-      "caseIds": [],
-      "createdAt": "2026-05-22T21:48:12.742Z",
-      "updatedAt": "2026-05-22T21:48:12.742Z",
-      "codegenMetadata": {
-        "generatedAt": "2026-05-22T21:48:12.754Z",
-        "generatedBy": "page-object-codegen",
-        "candidateFilePath": "automations/apps/arquitectura-automatizacion/pages/home.page.candidate.ts"
-      },
-      "approvalMetadata": {
-        "approvedAt": "2026-05-22T21:48:12.761Z",
-        "approvedFrom": "automations/apps/arquitectura-automatizacion/pages/home.page.candidate.ts",
-        "approvedBy": "auto-pom",
-        "autoApproved": true,
-        "blockedMethods": []
-      }
-    },
-    {
-      "id": "po_1779486492742_yvtxg4",
-      "className": "ProductDetailPage",
-      "filePath": "automations/apps/arquitectura-automatizacion/pages/productdetail.page.candidate.ts",
-      "screenSignature": "screen:arquitectura-automatizacion-product_detail",
-      "methods": [
+        },
         {
           "name": "clickPrimaryAction",
           "intent": "click_primary_action",
@@ -79,45 +61,7 @@
             "actionName"
           ],
           "available": true,
-          "source": "candidate,c37870-generar-carta-de-referencia-con-certificado-step-5,c37870-generar-carta-de-referencia-con-certificado-missing-click_primary_action",
-          "sensitive": false,
-          "confidence": 0.5,
-          "status": "active"
-        }
-      ],
-      "confidence": 0.5,
-      "status": "candidate",
-      "sourcePlanIds": [
-        "c37870-generar-carta-de-referencia-con-certificado"
-      ],
-      "caseIds": [],
-      "createdAt": "2026-05-22T21:48:12.742Z",
-      "updatedAt": "2026-05-22T21:48:12.742Z",
-      "codegenMetadata": {
-        "generatedAt": "2026-05-22T21:48:12.756Z",
-        "generatedBy": "page-object-codegen",
-        "candidateFilePath": "automations/apps/arquitectura-automatizacion/pages/productdetail.page.candidate.ts"
-      },
-      "approvalMetadata": {
-        "approvedAt": "2026-05-22T21:48:12.764Z",
-        "approvedFrom": "automations/apps/arquitectura-automatizacion/pages/productdetail.page.candidate.ts",
-        "approvedBy": "auto-pom",
-        "autoApproved": true,
-        "blockedMethods": []
-      }
-    },
-    {
-      "id": "po_1779487111132_qfse43",
-      "className": "ProductInformationPage",
-      "filePath": "automations/apps/arquitectura-automatizacion/pages/productinformation.page.ts",
-      "screenSignature": "screen:arquitectura-automatizacion-product_information",
-      "methods": [
-        {
-          "name": "openProductInformation",
-          "intent": "open_product_information",
-          "parameters": [],
-          "available": true,
-          "source": "candidate,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-4,c37844-visualizar-detalle-de-tarjeta-visa-gold-missing-open_product_information",
+          "source": "c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-missing-click_primary_action",
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
@@ -126,26 +70,177 @@
       "confidence": 0.5,
       "status": "active",
       "sourcePlanIds": [
-        "c37844-visualizar-detalle-de-tarjeta-visa-gold"
+        "c37927-validar-inicio-de-sesion-con-credenciales-validas"
       ],
       "caseIds": [],
-      "createdAt": "2026-05-22T21:58:31.132Z",
-      "updatedAt": "2026-05-22T21:58:31.132Z",
+      "createdAt": "2026-05-24T05:42:11.578Z",
+      "updatedAt": "2026-05-24T21:32:48.276Z",
       "codegenMetadata": {
-        "generatedAt": "2026-05-22T21:58:31.145Z",
+        "generatedAt": "2026-05-24T05:43:24.464Z",
         "generatedBy": "page-object-codegen",
-        "candidateFilePath": "automations/apps/arquitectura-automatizacion/pages/productinformation.page.candidate.ts"
+        "candidateFilePath": "automations/apps/arquitectura-automatizacion/pages/productdetail.page.candidate.ts"
       },
       "approvalMetadata": {
-        "approvedAt": "2026-05-22T21:58:31.157Z",
-        "approvedFrom": "automations/apps/arquitectura-automatizacion/pages/productinformation.page.candidate.ts",
+        "approvedAt": "2026-05-24T06:24:17.900Z",
+        "approvedFrom": "automations/apps/arquitectura-automatizacion/pages/productdetail.page.candidate.ts",
         "approvedBy": "auto-pom",
         "autoApproved": true,
         "blockedMethods": []
       }
     },
     {
-      "id": "po_1779487111132_w5kkx2",
+      "id": "po_1779601331578_ffmkcb",
+      "className": "FormPage",
+      "filePath": "automations/apps/arquitectura-automatizacion/pages/form.page.ts",
+      "screenSignature": "screen:arquitectura-automatizacion-form",
+      "methods": [
+        {
+          "name": "fillField",
+          "intent": "fill_form_field",
+          "parameters": [
+            "fieldName",
+            "value"
+          ],
+          "available": true,
+          "source": "candidate,c37927-validar-inicio-de-sesion-con-credenciales-validas-step-5",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "active",
+      "sourcePlanIds": [
+        "c37927-validar-inicio-de-sesion-con-credenciales-validas"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-05-24T05:42:11.578Z",
+      "updatedAt": "2026-05-24T05:42:11.578Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-05-24T05:43:24.465Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/arquitectura-automatizacion/pages/form.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-05-24T06:24:17.901Z",
+        "approvedFrom": "automations/apps/arquitectura-automatizacion/pages/form.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
+    },
+    {
+      "id": "po_1779603665635_b5med9",
+      "className": "HomePage",
+      "filePath": "automations/apps/arquitectura-automatizacion/pages/home.page.ts",
+      "screenSignature": "screen:arquitectura-automatizacion-home",
+      "methods": [
+        {
+          "name": "openLoginModal",
+          "intent": "open_login_modal",
+          "parameters": [],
+          "available": true,
+          "source": "candidate,c37927-validar-inicio-de-sesion-con-credenciales-validas-step-3,c37927-validar-inicio-de-sesion-con-credenciales-validas-missing-open_login_modal",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "active",
+      "sourcePlanIds": [
+        "c37927-validar-inicio-de-sesion-con-credenciales-validas"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-05-24T06:21:05.635Z",
+      "updatedAt": "2026-05-24T06:21:05.635Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-05-24T06:22:47.050Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/arquitectura-automatizacion/pages/home.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-05-24T06:24:17.902Z",
+        "approvedFrom": "automations/apps/arquitectura-automatizacion/pages/home.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
+    },
+    {
+      "id": "po_1779603665635_bv3u14",
+      "className": "LoginPage",
+      "filePath": "automations/apps/arquitectura-automatizacion/pages/login.page.ts",
+      "screenSignature": "screen:arquitectura-automatizacion-login",
+      "methods": [
+        {
+          "name": "expectLoginFormVisible",
+          "intent": "expect_login_form",
+          "parameters": [],
+          "available": true,
+          "source": "candidate,c37927-validar-inicio-de-sesion-con-credenciales-validas-step-4,c37927-validar-inicio-de-sesion-con-credenciales-validas-missing-expect_login_form",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        },
+        {
+          "name": "fillUsername",
+          "intent": "fill_username",
+          "parameters": [
+            "value"
+          ],
+          "available": true,
+          "source": "candidate,c37927-validar-inicio-de-sesion-con-credenciales-validas-step-5,c37927-validar-inicio-de-sesion-con-credenciales-validas-missing-fill_username",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        },
+        {
+          "name": "fillPassword",
+          "intent": "fill_password",
+          "parameters": [
+            "value"
+          ],
+          "available": true,
+          "source": "candidate,c37927-validar-inicio-de-sesion-con-credenciales-validas-step-6,c37927-validar-inicio-de-sesion-con-credenciales-validas-missing-fill_password",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        },
+        {
+          "name": "submitLogin",
+          "intent": "submit_login",
+          "parameters": [],
+          "available": true,
+          "source": "candidate,c37927-validar-inicio-de-sesion-con-credenciales-validas-step-7,c37927-validar-inicio-de-sesion-con-credenciales-validas-missing-submit_login",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "active",
+      "sourcePlanIds": [
+        "c37927-validar-inicio-de-sesion-con-credenciales-validas"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-05-24T06:21:05.635Z",
+      "updatedAt": "2026-05-24T06:21:05.635Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-05-24T06:21:05.640Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/arquitectura-automatizacion/pages/login.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-05-24T06:21:05.643Z",
+        "approvedFrom": "automations/apps/arquitectura-automatizacion/pages/login.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
+    },
+    {
+      "id": "po_1779651131530_zuz97x",
       "className": "CategoryPage",
       "filePath": "automations/apps/arquitectura-automatizacion/pages/category.page.ts",
       "screenSignature": "screen:arquitectura-automatizacion-category",
@@ -157,7 +252,7 @@
             "categoryName"
           ],
           "available": true,
-          "source": "candidate,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-5",
+          "source": "candidate,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-step-3,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-missing-select_category,c37945-visualizar-carrito-con-producto-agregado-durante-la-sesion-actual-step-3",
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
@@ -166,18 +261,18 @@
       "confidence": 0.5,
       "status": "active",
       "sourcePlanIds": [
-        "c37844-visualizar-detalle-de-tarjeta-visa-gold"
+        "c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto"
       ],
       "caseIds": [],
-      "createdAt": "2026-05-22T21:58:31.132Z",
-      "updatedAt": "2026-05-22T21:58:31.132Z",
+      "createdAt": "2026-05-24T19:32:11.530Z",
+      "updatedAt": "2026-05-24T19:32:11.530Z",
       "codegenMetadata": {
-        "generatedAt": "2026-05-22T21:58:31.147Z",
+        "generatedAt": "2026-05-24T19:32:11.533Z",
         "generatedBy": "page-object-codegen",
         "candidateFilePath": "automations/apps/arquitectura-automatizacion/pages/category.page.candidate.ts"
       },
       "approvalMetadata": {
-        "approvedAt": "2026-05-22T21:58:31.160Z",
+        "approvedAt": "2026-05-24T19:32:11.536Z",
         "approvedFrom": "automations/apps/arquitectura-automatizacion/pages/category.page.candidate.ts",
         "approvedBy": "auto-pom",
         "autoApproved": true,
@@ -186,5 +281,5 @@
     }
   ],
   "componentCandidates": [],
-  "updatedAt": "2026-05-22T22:13:56.385Z"
+  "updatedAt": "2026-05-25T12:51:50.063Z"
 }

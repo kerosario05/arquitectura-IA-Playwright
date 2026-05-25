@@ -1,0 +1,1346 @@
+[
+  {
+    "key": "link_product_store",
+    "name": "PRODUCT STORE",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "PRODUCT STORE",
+      "exact": false
+    },
+    "aliases": [
+      "product store"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_home_current",
+    "name": "Home (current)",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Home (current)",
+      "exact": false
+    },
+    "aliases": [
+      "home (current)"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_contact",
+    "name": "Contact",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Contact",
+      "exact": false
+    },
+    "aliases": [
+      "contact"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_about",
+    "name": "About us",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "About us",
+      "exact": false
+    },
+    "aliases": [
+      "about us"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_cart",
+    "name": "Cart",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Cart",
+      "exact": false
+    },
+    "aliases": [
+      "cart"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_log",
+    "name": "Log in",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Log in",
+      "exact": false
+    },
+    "aliases": [
+      "log in"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_sign",
+    "name": "Sign up",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Sign up",
+      "exact": false
+    },
+    "aliases": [
+      "sign up"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_previous",
+    "name": "Previous",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Previous",
+      "exact": false
+    },
+    "aliases": [
+      "previous"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_next",
+    "name": "Next",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Next",
+      "exact": false
+    },
+    "aliases": [
+      "next"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_categories",
+    "name": "CATEGORIES",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "CATEGORIES",
+      "exact": false
+    },
+    "aliases": [
+      "categories"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_phones",
+    "name": "Phones",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Phones",
+      "exact": false
+    },
+    "aliases": [
+      "phones"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_laptops",
+    "name": "Laptops",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Laptops",
+      "exact": false
+    },
+    "aliases": [
+      "laptops"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_monitors",
+    "name": "Monitors",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Monitors",
+      "exact": false
+    },
+    "aliases": [
+      "monitors"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_samsung_galaxy",
+    "name": "Samsung galaxy s6",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Samsung galaxy s6",
+      "exact": false
+    },
+    "aliases": [
+      "samsung galaxy s6"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_nokia_lumia",
+    "name": "Nokia lumia 1520",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Nokia lumia 1520",
+      "exact": false
+    },
+    "aliases": [
+      "nokia lumia 1520"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_nexus",
+    "name": "Nexus 6",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Nexus 6",
+      "exact": false
+    },
+    "aliases": [
+      "nexus 6"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_samsung_galaxy_1",
+    "name": "Samsung galaxy s7",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Samsung galaxy s7",
+      "exact": false
+    },
+    "aliases": [
+      "samsung galaxy s7"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_iphone_32gb",
+    "name": "Iphone 6 32gb",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Iphone 6 32gb",
+      "exact": false
+    },
+    "aliases": [
+      "iphone 6 32gb"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_sony_xperia",
+    "name": "Sony xperia z5",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Sony xperia z5",
+      "exact": false
+    },
+    "aliases": [
+      "sony xperia z5"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_htc_one",
+    "name": "HTC One M9",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "HTC One M9",
+      "exact": false
+    },
+    "aliases": [
+      "htc one m9"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_sony_vaio",
+    "name": "Sony vaio i5",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Sony vaio i5",
+      "exact": false
+    },
+    "aliases": [
+      "sony vaio i5"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_sony_vaio_1",
+    "name": "Sony vaio i7",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Sony vaio i7",
+      "exact": false
+    },
+    "aliases": [
+      "sony vaio i7"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_previous_1",
+    "name": "Previous",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Previous",
+      "exact": false
+    },
+    "aliases": [
+      "previous"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_next_1",
+    "name": "Next",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Next",
+      "exact": false
+    },
+    "aliases": [
+      "next"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_samsung_galaxy",
+    "name": "Samsung galaxy s6",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Samsung galaxy s6",
+      "exact": false
+    },
+    "aliases": [
+      "samsung galaxy s6"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_h5",
+    "name": "$360",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "$360",
+      "exact": false
+    },
+    "aliases": [
+      "$360"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_nokia_lumia",
+    "name": "Nokia lumia 1520",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Nokia lumia 1520",
+      "exact": false
+    },
+    "aliases": [
+      "nokia lumia 1520"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_h5_1",
+    "name": "$820",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "$820",
+      "exact": false
+    },
+    "aliases": [
+      "$820"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_nexus",
+    "name": "Nexus 6",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Nexus 6",
+      "exact": false
+    },
+    "aliases": [
+      "nexus 6"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_h5_2",
+    "name": "$650",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "$650",
+      "exact": false
+    },
+    "aliases": [
+      "$650"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_samsung_galaxy_1",
+    "name": "Samsung galaxy s7",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Samsung galaxy s7",
+      "exact": false
+    },
+    "aliases": [
+      "samsung galaxy s7"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_h5_3",
+    "name": "$800",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "$800",
+      "exact": false
+    },
+    "aliases": [
+      "$800"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_iphone_32gb",
+    "name": "Iphone 6 32gb",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Iphone 6 32gb",
+      "exact": false
+    },
+    "aliases": [
+      "iphone 6 32gb"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_h5_4",
+    "name": "$790",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "$790",
+      "exact": false
+    },
+    "aliases": [
+      "$790"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_sony_xperia",
+    "name": "Sony xperia z5",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Sony xperia z5",
+      "exact": false
+    },
+    "aliases": [
+      "sony xperia z5"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_h5_5",
+    "name": "$320",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "$320",
+      "exact": false
+    },
+    "aliases": [
+      "$320"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_htc_one",
+    "name": "HTC One M9",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "HTC One M9",
+      "exact": false
+    },
+    "aliases": [
+      "htc one m9"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_h5_6",
+    "name": "$700",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "$700",
+      "exact": false
+    },
+    "aliases": [
+      "$700"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_sony_vaio",
+    "name": "Sony vaio i5",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Sony vaio i5",
+      "exact": false
+    },
+    "aliases": [
+      "sony vaio i5"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_h5_7",
+    "name": "$790",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "$790",
+      "exact": false
+    },
+    "aliases": [
+      "$790"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_sony_vaio_1",
+    "name": "Sony vaio i7",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Sony vaio i7",
+      "exact": false
+    },
+    "aliases": [
+      "sony vaio i7"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_h5_8",
+    "name": "$790",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "$790",
+      "exact": false
+    },
+    "aliases": [
+      "$790"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_about",
+    "name": "About Us",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "About Us",
+      "exact": false
+    },
+    "aliases": [
+      "about us"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_get_touch",
+    "name": "Get in Touch",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Get in Touch",
+      "exact": false
+    },
+    "aliases": [
+      "get in touch"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_product_store",
+    "name": "PRODUCT STORE",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "PRODUCT STORE",
+      "exact": false
+    },
+    "aliases": [
+      "product store"
+    ],
+    "discoveredAt": "2026-05-25T00:39:59.391Z",
+    "sourceStep": 0,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_product_store",
+    "name": "PRODUCT STORE",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "PRODUCT STORE",
+      "exact": false
+    },
+    "aliases": [
+      "product store"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_home_current",
+    "name": "Home (current)",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Home (current)",
+      "exact": false
+    },
+    "aliases": [
+      "home (current)"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_contact",
+    "name": "Contact",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Contact",
+      "exact": false
+    },
+    "aliases": [
+      "contact"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_about",
+    "name": "About us",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "About us",
+      "exact": false
+    },
+    "aliases": [
+      "about us"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_cart",
+    "name": "Cart",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Cart",
+      "exact": false
+    },
+    "aliases": [
+      "cart"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_log",
+    "name": "Log in",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Log in",
+      "exact": false
+    },
+    "aliases": [
+      "log in"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_sign",
+    "name": "Sign up",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Sign up",
+      "exact": false
+    },
+    "aliases": [
+      "sign up"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_previous",
+    "name": "Previous",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Previous",
+      "exact": false
+    },
+    "aliases": [
+      "previous"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_next",
+    "name": "Next",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Next",
+      "exact": false
+    },
+    "aliases": [
+      "next"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_categories",
+    "name": "CATEGORIES",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "CATEGORIES",
+      "exact": false
+    },
+    "aliases": [
+      "categories"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_phones",
+    "name": "Phones",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Phones",
+      "exact": false
+    },
+    "aliases": [
+      "phones"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_laptops",
+    "name": "Laptops",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Laptops",
+      "exact": false
+    },
+    "aliases": [
+      "laptops"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_monitors",
+    "name": "Monitors",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Monitors",
+      "exact": false
+    },
+    "aliases": [
+      "monitors"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_samsung_galaxy",
+    "name": "Samsung galaxy s6",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Samsung galaxy s6",
+      "exact": false
+    },
+    "aliases": [
+      "samsung galaxy s6"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_nokia_lumia",
+    "name": "Nokia lumia 1520",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Nokia lumia 1520",
+      "exact": false
+    },
+    "aliases": [
+      "nokia lumia 1520"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_nexus",
+    "name": "Nexus 6",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Nexus 6",
+      "exact": false
+    },
+    "aliases": [
+      "nexus 6"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_samsung_galaxy_1",
+    "name": "Samsung galaxy s7",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Samsung galaxy s7",
+      "exact": false
+    },
+    "aliases": [
+      "samsung galaxy s7"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_iphone_32gb",
+    "name": "Iphone 6 32gb",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Iphone 6 32gb",
+      "exact": false
+    },
+    "aliases": [
+      "iphone 6 32gb"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_sony_xperia",
+    "name": "Sony xperia z5",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "Sony xperia z5",
+      "exact": false
+    },
+    "aliases": [
+      "sony xperia z5"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "link_htc_one",
+    "name": "HTC One M9",
+    "type": "link",
+    "locator": {
+      "strategy": "text",
+      "value": "HTC One M9",
+      "exact": false
+    },
+    "aliases": [
+      "htc one m9"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_previous_1",
+    "name": "Previous",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Previous",
+      "exact": false
+    },
+    "aliases": [
+      "previous"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "button_next_1",
+    "name": "Next",
+    "type": "button",
+    "locator": {
+      "strategy": "text",
+      "value": "Next",
+      "exact": false
+    },
+    "aliases": [
+      "next"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_samsung_galaxy",
+    "name": "Samsung galaxy s6",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Samsung galaxy s6",
+      "exact": false
+    },
+    "aliases": [
+      "samsung galaxy s6"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_h5",
+    "name": "$360",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "$360",
+      "exact": false
+    },
+    "aliases": [
+      "$360"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_nokia_lumia",
+    "name": "Nokia lumia 1520",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Nokia lumia 1520",
+      "exact": false
+    },
+    "aliases": [
+      "nokia lumia 1520"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_h5_1",
+    "name": "$820",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "$820",
+      "exact": false
+    },
+    "aliases": [
+      "$820"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_nexus",
+    "name": "Nexus 6",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Nexus 6",
+      "exact": false
+    },
+    "aliases": [
+      "nexus 6"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_h5_2",
+    "name": "$650",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "$650",
+      "exact": false
+    },
+    "aliases": [
+      "$650"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_samsung_galaxy_1",
+    "name": "Samsung galaxy s7",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Samsung galaxy s7",
+      "exact": false
+    },
+    "aliases": [
+      "samsung galaxy s7"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_h5_3",
+    "name": "$800",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "$800",
+      "exact": false
+    },
+    "aliases": [
+      "$800"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_iphone_32gb",
+    "name": "Iphone 6 32gb",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Iphone 6 32gb",
+      "exact": false
+    },
+    "aliases": [
+      "iphone 6 32gb"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_h5_4",
+    "name": "$790",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "$790",
+      "exact": false
+    },
+    "aliases": [
+      "$790"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_sony_xperia",
+    "name": "Sony xperia z5",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Sony xperia z5",
+      "exact": false
+    },
+    "aliases": [
+      "sony xperia z5"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_h5_5",
+    "name": "$320",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "$320",
+      "exact": false
+    },
+    "aliases": [
+      "$320"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_htc_one",
+    "name": "HTC One M9",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "HTC One M9",
+      "exact": false
+    },
+    "aliases": [
+      "htc one m9"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_h5_6",
+    "name": "$700",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "$700",
+      "exact": false
+    },
+    "aliases": [
+      "$700"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_about",
+    "name": "About Us",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "About Us",
+      "exact": false
+    },
+    "aliases": [
+      "about us"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_get_touch",
+    "name": "Get in Touch",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "Get in Touch",
+      "exact": false
+    },
+    "aliases": [
+      "get in touch"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  },
+  {
+    "key": "section_product_store",
+    "name": "PRODUCT STORE",
+    "type": "section",
+    "locator": {
+      "strategy": "text",
+      "value": "PRODUCT STORE",
+      "exact": false
+    },
+    "aliases": [
+      "product store"
+    ],
+    "discoveredAt": "2026-05-25T00:40:05.537Z",
+    "sourceStep": 1,
+    "confidence": 0.75
+  }
+]

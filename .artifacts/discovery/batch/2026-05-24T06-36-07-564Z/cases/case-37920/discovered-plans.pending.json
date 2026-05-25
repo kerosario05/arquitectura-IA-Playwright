@@ -1,0 +1,39 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37920",
+    "caseId": 37920,
+    "title": "Validar filtrado de productos por categoría Phones"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://www.demoblaze.com",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "1. Seleccionar la categoría \"Phones\".",
+      "target": {
+        "strategy": "text",
+        "value": "Phones",
+        "exact": false
+      }
+    }
+  ],
+  "notes": [
+    "Discovery partial: 3/5 navigations/assertions satisfied."
+  ],
+  "createdAt": "2026-05-24T06:36:58.214Z"
+}

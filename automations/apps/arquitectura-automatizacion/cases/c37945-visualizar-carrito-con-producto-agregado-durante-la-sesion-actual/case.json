@@ -1,0 +1,10 @@
+{
+  "id": "c37945-visualizar-carrito-con-producto-agregado-durante-la-sesion-actual",
+  "externalId": "C37945",
+  "caseId": 37945,
+  "title": "Visualizar carrito con producto agregado durante la sesión actual",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-05-25T12:51:50.065Z"
+}

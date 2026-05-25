@@ -1138,7 +1138,7 @@ test("expected targets sinteticos semanticos se filtran, concretos se conservan"
     title: "Expected filter",
     steps: [
       { index: 1, action: "Clic en 'Login'.", expected: undefined, dataHints: [] },
-      { index: 2, action: "Validar que se muestre 'Products'.", expected: "Products\nSauce Labs Backpack\nValidar que la pantalla final muestre señales esperadas:\nCatálogo de productos disponible", dataHints: [] }
+      { index: 2, action: "Validar que se muestre 'Products'.", expected: "Products\nSauce Labs Backpack\nValidar que la pantalla final muestre señales esperadas:\nPrecio USD 29.99", dataHints: [] }
     ]
   };
 
@@ -1148,10 +1148,10 @@ test("expected targets sinteticos semanticos se filtran, concretos se conservan"
   expect(assertionTexts).toContain("Products");
   expect(assertionTexts).toContain("Sauce Labs Backpack");
   expect(assertionTexts).not.toContain("Validar que la pantalla final muestre señales esperadas:");
-  expect(assertionTexts).toContain("Catálogo de productos disponible");
+  expect(assertionTexts).toContain("Precio USD 29.99");
 
   const expectedSources = parsed.assertionTargets.filter((t) => t.source === "expected").map((t) => t.target);
-  expect(expectedSources).toContain("Catálogo de productos disponible");
+  expect(expectedSources).toContain("Precio USD 29.99");
 });
 
 test("expected targets duplicados con action assertions se deduplican", () => {
@@ -1797,4 +1797,127 @@ test("detail descriptor isWeakSignal true es tratado como skippable por evaluate
   expect(result.pendingAssertions.length).toBe(0);
   expect(result.skippedAssertions.length).toBe(1);
   expect(result.weakSignals.length).toBe(1);
+});
+
+test("deferred assertion no bloquea early completion mientras hay acciones pendientes", () => {
+  const snapshot = makeAssertionSnapshot([
+    makeSnapshotElement({ type: "card", text: "Item 1", visible: true })
+  ]);
+  const assertionTargets: AssertionTargetInput[] = [
+    { index: 5, action: "Assert: total del carrito", target: "total del carrito", source: "action" }
+  ];
+  const remainingActions: ActionTargetItem[] = [
+    { index: 2, action: "Clic en 'Cart'", target: "Cart" }
+  ];
+  const result = evaluateEarlyCompletion(snapshot, assertionTargets, remainingActions);
+  expect(result.checked).toBe(true);
+  expect(result.pendingAssertions.length).toBe(0);
+  expect(result.deferredAssertions).toContain("total del carrito");
+});
+
+test("deferred assertion puede bloquear al final si no quedan acciones para alcanzar contexto", () => {
+  const snapshot = makeAssertionSnapshot([
+    makeSnapshotElement({ type: "card", text: "Item 1", visible: true })
+  ]);
+  const assertionTargets: AssertionTargetInput[] = [
+    { index: 5, action: "Assert: total del carrito", target: "total del carrito", source: "action" }
+  ];
+  const result = evaluateEarlyCompletion(snapshot, assertionTargets, []);
+  expect(result.checked).toBe(true);
+  expect(result.pendingAssertions).toContain("total del carrito");
+});
+
+// --- Runtime Evidence Trace / Failure Forensics tests ---
+
+test("RuntimeEvidenceTrace type captures step evidence", () => {
+  const evidence: import("../src/types/discovery.types").RuntimeEvidenceTrace = {
+    clickActions: [{
+      stepIndex: 1,
+      target: "Login",
+      normalizedTarget: "login",
+      actionType: "click",
+      success: true
+    }],
+    fillActions: [],
+    formEvidence: [],
+    confirmationEvidence: [],
+    structuralEvidence: [],
+    feedbackEvidence: []
+  };
+  
+  expect(evidence.clickActions[0].stepIndex).toBe(1);
+  expect(evidence.clickActions[0].actionType).toBe("click");
+  expect(evidence.clickActions[0].success).toBe(true);
+});
+
+test("PendingAssertionForensics type captures diagnostic information", () => {
+  const forensics: import("../src/types/discovery.types").PendingAssertionForensics = {
+    assertion: "Carrito contiene producto",
+    normalizedAssertion: "carrito contiene producto",
+    inferredType: "cart",
+    requiredContext: "cart",
+    currentContext: "catalog",
+    expectedConsumption: ["satisfied_by_structural_evidence"],
+    evidenceAvailable: false,
+    matchedEvidence: {
+      latestSnapshotSignals: ["cart_precondition_unresolved"]
+    },
+    notConsumedReason: "wrong_context",
+    autoRepairAllowed: false,
+    classification: "structural_assertion",
+    status: "needs_assertion_resolution"
+  };
+  
+  expect(forensics.inferredType).toBe("cart");
+  expect(forensics.currentContext).toBe("catalog");
+  expect(forensics.notConsumedReason).toBe("wrong_context");
+});
+
+test("AutoRepairDecisionDiagnostics type captures repair decision", () => {
+  const diagnostics: import("../src/types/discovery.types").AutoRepairDecisionDiagnostics = {
+    attempted: true,
+    skipped: true,
+    skipReason: "local_diagnostic_sufficient",
+    evaluatedPendingAssertions: ["Product detail visible"],
+    localClosureAttempted: true,
+    localClosureConsumed: ["Fill username"],
+    localClosureRemaining: ["Product detail visible"],
+    ambiguousRemaining: [],
+    localDiagnostics: ["deferred_until_context", "structurally_satisfied"],
+    pendingAssertions: ["Product detail visible"],
+    consumedAssertions: ["Fill username"],
+    autoRepairAllowed: false,
+    autoRepairReason: "none",
+    autoRepairSkippedReason: "local_diagnostic_sufficient",
+    decision: "skip",
+    explanation: "Auto-repair skipped because all pending assertions have local diagnostics"
+  };
+  
+  expect(diagnostics.skipped).toBe(true);
+  expect(diagnostics.decision).toBe("skip");
+  expect(diagnostics.skipReason).toBe("local_diagnostic_sufficient");
+});
+
+test("BatchCaseRootCause categories are defined", () => {
+  const rootCauses: import("../src/types/discovery.types").BatchCaseRootCause[] = [
+    "target_not_found",
+    "ambiguous_target",
+    "locator_resolution_failed",
+    "assertion_not_resolved",
+    "context_not_reached",
+    "precondition_unresolved",
+    "structural_evidence_missing",
+    "test_data_missing",
+    "auth_gate_blocked",
+    "page_transition_missing",
+    "agent_timeout",
+    "agent_no_proposal",
+    "local_assertions_pending",
+    "assertion_consumption_gap",
+    "unknown"
+  ];
+  
+  expect(rootCauses.length).toBe(15);
+  expect(rootCauses).toContain("context_not_reached");
+  expect(rootCauses).toContain("precondition_unresolved");
 });

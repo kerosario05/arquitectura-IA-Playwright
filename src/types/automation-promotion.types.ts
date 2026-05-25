@@ -77,6 +77,12 @@ export type PromotedAutomationIndexEntry = {
     };
     promotedObjects?: string[];
     pomDiagnostics?: {
+      status?: "needs_page_object" | "promoted";
+      inlineFallbackUsed?: boolean;
+      reason?: string;
+      requiredDataUsed?: string[];
+      generatedPageObjects?: string[];
+      generatedMethods?: string[];
       missingPageObjects: string[];
       missingMethods: string[];
       generatedCandidates: number;

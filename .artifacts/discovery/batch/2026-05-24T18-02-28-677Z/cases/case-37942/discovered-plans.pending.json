@@ -1,0 +1,72 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37942",
+    "caseId": 37942,
+    "title": "Filtrar productos por la categoría Phones"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://www.demoblaze.com",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Seleccionar la categoría \"Phones\".",
+      "target": {
+        "strategy": "text",
+        "value": "Phones",
+        "exact": false
+      }
+    },
+    {
+      "index": 4,
+      "action": "assertText",
+      "description": "Assert: Phones",
+      "target": {
+        "strategy": "text",
+        "value": "Phones",
+        "exact": false
+      },
+      "expected": "Phones"
+    },
+    {
+      "index": 5,
+      "action": "assertText",
+      "description": "Assert: Categoría \"Phones\" aplicada.",
+      "target": {
+        "strategy": "text",
+        "value": "Categoría \"Phones\" aplicada.",
+        "exact": false
+      },
+      "expected": "Categoría \"Phones\" aplicada."
+    },
+    {
+      "index": 6,
+      "action": "assertText",
+      "description": "Assert: Productos visibles relacionados con \"Phones\".",
+      "target": {
+        "strategy": "text",
+        "value": "Productos visibles relacionados con \"Phones\".",
+        "exact": false
+      },
+      "expected": "Productos visibles relacionados con \"Phones\"."
+    }
+  ],
+  "notes": [
+    "Discovery partial: 5/7 navigations/assertions satisfied."
+  ],
+  "createdAt": "2026-05-24T18:03:12.392Z"
+}

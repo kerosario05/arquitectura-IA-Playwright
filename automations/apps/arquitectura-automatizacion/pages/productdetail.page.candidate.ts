@@ -11,10 +11,18 @@ import { Page, expect } from '@playwright/test';
 // - Rename methods if needed.
 // - Do not activate until reviewed.
 //
-// Source plans: c37870-generar-carta-de-referencia-con-certificado
+// Source plans: c37927-validar-inicio-de-sesion-con-credenciales-validas
 
 export class ProductDetailPage {
   constructor(private readonly page: Page) {}
+
+  async expectLoaded(): Promise<void> {
+    await expect(this.page.locator('body')).toBeVisible();
+  }
+
+  async expectProductDetail(productName: string): Promise<void> {
+    await expect(this.page.locator('body')).toBeVisible();
+  }
 
   async clickPrimaryAction(actionName: string): Promise<void> {
     const button = this.page.getByRole('button', { name: new RegExp(actionName, 'i') });

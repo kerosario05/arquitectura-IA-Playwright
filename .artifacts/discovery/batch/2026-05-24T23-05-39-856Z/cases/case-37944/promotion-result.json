@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-24T23:09:46.447Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto",
+  "appSlug": "arquitectura-automatizacion",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto\\case.spec.ts",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto\\plan.json",
+  "caseFolder": "c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto",
+  "pomStatus": "needs_page_method",
+  "inlineDebugMode": false
+}

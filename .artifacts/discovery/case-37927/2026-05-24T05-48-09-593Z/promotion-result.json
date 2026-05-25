@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-24T05:49:10.839Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c37927-validar-inicio-de-sesion-con-credenciales-validas",
+  "appSlug": "arquitectura-automatizacion",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37927-validar-inicio-de-sesion-con-credenciales-validas\\case.spec.ts",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37927-validar-inicio-de-sesion-con-credenciales-validas\\plan.json",
+  "caseFolder": "c37927-validar-inicio-de-sesion-con-credenciales-validas",
+  "pomStatus": "needs_page_method",
+  "inlineDebugMode": false
+}

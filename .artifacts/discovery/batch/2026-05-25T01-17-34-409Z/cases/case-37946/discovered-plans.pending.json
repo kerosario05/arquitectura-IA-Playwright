@@ -1,0 +1,79 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37946",
+    "caseId": 37946,
+    "title": "Visualizar formulario de orden desde carrito con producto agregado"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://www.demoblaze.com",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Seleccionar la categoría \"Phones\".",
+      "target": {
+        "strategy": "text",
+        "value": "Phones",
+        "exact": false
+      }
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Seleccionar la primera tarjeta visible del listado de productos.",
+      "target": {
+        "strategy": "text",
+        "value": "la primera tarjeta visible del listado de productos",
+        "exact": false
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Clic en \"Add to cart\".",
+      "target": {
+        "strategy": "text",
+        "value": "Add to cart",
+        "exact": false
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Clic en \"Cart\".",
+      "target": {
+        "strategy": "text",
+        "value": "Cart",
+        "exact": false
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Clic en \"Place Order\".",
+      "target": {
+        "strategy": "text",
+        "value": "Place Order",
+        "exact": false
+      }
+    }
+  ],
+  "notes": [
+    "Discovery partial: 5/10 navigations/assertions satisfied."
+  ],
+  "createdAt": "2026-05-25T01:22:56.973Z"
+}

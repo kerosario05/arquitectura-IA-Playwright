@@ -2,13 +2,15 @@ export type BrowserName = "chromium" | "firefox" | "webkit";
 
 export type LoginMode = "password" | "no_login" | "manual";
 
-export type MissingInputBehavior = "fail" | "prompt" | "skip";
+export type MissingInputBehavior = "fail" | "prompt" | "skip" | "auto_generate";
 
 export type TestDataValue = string | number | boolean;
 
 export type TestDataMap = Record<string, TestDataValue>;
 
 export type TestDataAliasesMap = Record<string, string[]>;
+
+export type TestDataProfile = "demo" | "qa" | "staging" | "production_like";
 
 export type AppConfig = {
   name?: string;
@@ -22,6 +24,11 @@ export type AppConfig = {
   testDataAliases: TestDataAliasesMap;
   missingInputBehavior: MissingInputBehavior;
   appProfile?: string;
+  autoGenerateTestData?: boolean;
+  autoGenerateSensitiveData?: boolean;
+  testDataProfile?: TestDataProfile;
+  autoSelectSafeDefaults?: boolean;
+  autoAcceptSafeCheckboxes?: boolean;
 };
 
 export type BrowserExecutionConfig = {

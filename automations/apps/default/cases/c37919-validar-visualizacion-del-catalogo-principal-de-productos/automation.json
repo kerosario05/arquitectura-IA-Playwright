@@ -1,0 +1,46 @@
+{
+  "id": "c37919-validar-visualizacion-del-catalogo-principal-de-productos",
+  "externalId": "C37919",
+  "caseId": 37919,
+  "title": "Validar visualización del catálogo principal de productos",
+  "planPath": "automations\\apps\\default\\cases\\c37919-validar-visualizacion-del-catalogo-principal-de-productos\\plan.json",
+  "specPath": "automations\\apps\\default\\cases\\c37919-validar-visualizacion-del-catalogo-principal-de-productos\\case.spec.ts",
+  "appSlug": "default",
+  "appConfigPath": "automations\\apps\\default\\app.config.json",
+  "status": "blocked_missing_pom",
+  "source": "discovery",
+  "appProfile": "default",
+  "baseUrlHash": "f1bffa09d02f",
+  "createdAt": "2026-05-24T06:36:15.182Z",
+  "updatedAt": "2026-05-24T06:36:15.182Z",
+  "lastPromotedFrom": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-24T06-36-07-564Z\\cases\\case-37919\\discovered-plans.pending.json",
+  "pomStatus": "needs_page_method",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "not_run",
+  "metadata": {
+    "discoveryDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-24T06-36-07-564Z\\cases\\case-37919",
+    "pomDiagnostics": {
+      "status": "needs_page_object",
+      "inlineFallbackUsed": false,
+      "reason": "needs_manual_review",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 3,
+      "autoPom": {
+        "enabled": true,
+        "initialPomStatus": "page_object_candidate_created",
+        "generatedCandidateFiles": [],
+        "autoApprovedPageObjects": [],
+        "autoApprovedMethods": [],
+        "blockedAutoApprovals": [],
+        "approvalThreshold": 0.5,
+        "regeneratedSpec": true,
+        "validationStatus": "failed",
+        "finalPomStatus": "needs_manual_review"
+      }
+    }
+  }
+}

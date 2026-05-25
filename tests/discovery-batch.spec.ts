@@ -3,6 +3,7 @@ import type { RawTestRailCase } from "../src/types/testrail.types";
 import type { CaseAutomationStatus } from "../src/types/case-automation-status.types";
 import {
   parseBatchArgs,
+  resolveBatchAppProfile,
   type BatchCliArgs,
   type BatchCaseResultEntry,
   type BatchResult
@@ -13,6 +14,11 @@ import {
 test("parseBatchArgs: --all sets mode=all", () => {
   const args = parseBatchArgs(["--all"]);
   expect(args.mode).toBe("all");
+});
+
+test("parseBatchArgs: --app sets app slug override", () => {
+  const args = parseBatchArgs(["--all", "--app", "app-a"]);
+  expect(args.app).toBe("app-a");
 });
 
 test("parseBatchArgs: --not-automated sets mode=not-automated", () => {
@@ -62,6 +68,13 @@ test("parseBatchArgs: --dry-run sets dryRun", () => {
 test("parseBatchArgs: --include-active sets includeActive", () => {
   const args = parseBatchArgs(["--all", "--include-active"]);
   expect(args.includeActive).toBe(true);
+  expect(args.rerunActive).toBe(false);
+});
+
+test("parseBatchArgs: --rerun-active enables includeActive and rerunActive", () => {
+  const args = parseBatchArgs(["--all", "--rerun-active"]);
+  expect(args.includeActive).toBe(true);
+  expect(args.rerunActive).toBe(true);
 });
 
 test("parseBatchArgs: --stop-on-fail sets stopOnFail", () => {
@@ -74,8 +87,13 @@ test("parseBatchArgs: --auto-promote sets autoPromote", () => {
   expect(args.autoPromote).toBe(true);
 });
 
-test("parseBatchArgs: --concurrency sets concurrency", () => {
+test("parseBatchArgs: --concurrency without --parallel is forced to 1", () => {
   const args = parseBatchArgs(["--all", "--concurrency", "3"]);
+  expect(args.concurrency).toBe(1);
+});
+
+test("parseBatchArgs: --concurrency with --parallel allows value", () => {
+  const args = parseBatchArgs(["--all", "--parallel", "--concurrency", "3"]);
   expect(args.concurrency).toBe(3);
 });
 
@@ -209,6 +227,40 @@ test("parseBatchArgs: default overwrite is false", () => {
   expect(args.overwrite).toBe(false);
 });
 
+test("parseBatchArgs: --parallel sets parallel=true", () => {
+  const args = parseBatchArgs(["--all", "--parallel"]);
+  expect(args.parallel).toBe(true);
+});
+
+test("parseBatchArgs: default parallel is false", () => {
+  const args = parseBatchArgs(["--all"]);
+  expect(args.parallel).toBe(false);
+});
+
+test("parseBatchArgs: --parallel with --concurrency 2 allows concurrency>1", () => {
+  const args = parseBatchArgs(["--all", "--parallel", "--concurrency", "2"]);
+  expect(args.parallel).toBe(true);
+  expect(args.concurrency).toBe(2);
+});
+
+test("parseBatchArgs: --concurrency without --parallel defaults to 1", () => {
+  const args = parseBatchArgs(["--all", "--concurrency", "3"]);
+  expect(args.parallel).toBe(false);
+  expect(args.concurrency).toBe(1);
+});
+
+test("parseBatchArgs: --headed forces parallel=false", () => {
+  const args = parseBatchArgs(["--all", "--headed", "--parallel", "--concurrency", "3"]);
+  expect(args.headed).toBe(true);
+  expect(args.parallel).toBe(false);
+  expect(args.concurrency).toBe(1);
+});
+
+test("parseBatchArgs: default concurrency is 1", () => {
+  const args = parseBatchArgs(["--all"]);
+  expect(args.concurrency).toBe(1);
+});
+
 // --- filter test cases (replicates selectCases filtering logic) ---
 
 function filterTestCases(
@@ -247,6 +299,7 @@ function filterTestCases(
         caseId: tc.id,
         title: tc.title,
         selected: false,
+        activeAtSelection: true,
         skipReason: "already_active",
         status: "skipped_active",
         promoted: false
@@ -258,6 +311,7 @@ function filterTestCases(
       caseId: tc.id,
       title: tc.title,
       selected: true,
+      activeAtSelection: status === "active",
       status: "selected",
       promoted: false
     });
@@ -336,6 +390,7 @@ test("filterTestCases: --include-active keeps active cases", () => {
 
   const selected = entries.filter((e) => e.selected);
   expect(selected).toHaveLength(2);
+  expect(selected.find((e) => e.caseId === 1)?.activeAtSelection).toBe(true);
 });
 
 test("filterTestCases: --not-automated keeps only not_automated", () => {
@@ -417,6 +472,17 @@ test("filterTestCases: not_automated + includeActive combination works", () => {
   expect(selected[0].caseId).toBe(2);
 });
 
+test("filterTestCases: --overwrite does not imply rerun-active/include-active", () => {
+  const cases = [makeCase(1, "Active"), makeCase(2, "Not auto")];
+  const statuses = new Map<number, CaseAutomationStatus>([
+    [1, "active"], [2, "not_automated"]
+  ]);
+  const args = parseBatchArgs(["--all", "--overwrite"]);
+  const entries = filterTestCases(cases, statuses, args);
+  expect(entries.find((e) => e.caseId === 1)?.selected).toBe(false);
+  expect(entries.find((e) => e.caseId === 1)?.skipReason).toBe("already_active");
+});
+
 // --- BatchResult summary calculation tests ---
 
 test("BatchResult summary counts are correct", () => {
@@ -433,13 +499,17 @@ test("BatchResult summary counts are correct", () => {
       requirePromotionApproval: false,
       dryRun: false,
       includeActive: false,
+      rerunActive: false,
       stopOnFail: false,
       concurrency: 1,
+      parallel: false,
       autoRepair: false,
       repairTimeoutMs: 120000,
       showAgentLog: false,
       continueOnAgentTimeout: true
     },
+    skippedCases: [{ caseId: 5, reason: "already_active" }],
+    rerunActiveCases: [],
     cases: [
       { caseId: 1, title: "Selected", selected: true, status: "selected", promoted: false },
       { caseId: 2, title: "Passed", selected: true, status: "discovered_passed", promoted: false, durationMs: 100 },
@@ -451,6 +521,7 @@ test("BatchResult summary counts are correct", () => {
       { caseId: 8, title: "Expl Failed", selected: true, status: "exploration_failed", promoted: false, durationMs: 80 }
     ],
     summary: {
+      requested: 8,
       selected: 8,
       executed: 7,
       skipped: 1,
@@ -458,6 +529,7 @@ test("BatchResult summary counts are correct", () => {
       failed: 2,
       promoted: 1,
       alreadyActiveSkipped: 1,
+      activeRerun: 0,
       promotionFailed: 1,
       notPromoted: 1,
       totalDurationMs: 880
@@ -465,12 +537,70 @@ test("BatchResult summary counts are correct", () => {
   };
 
   expect(result.summary.selected).toBe(8);
+  expect(result.summary.requested).toBe(8);
   expect(result.summary.executed).toBe(7);
   expect(result.summary.skipped).toBe(1);
   expect(result.summary.passed).toBe(1);
   expect(result.summary.failed).toBe(2);
   expect(result.summary.promoted).toBe(1);
   expect(result.summary.alreadyActiveSkipped).toBe(1);
+  expect(result.summary.activeRerun).toBe(0);
   expect(result.summary.promotionFailed).toBe(1);
   expect(result.summary.notPromoted).toBe(1);
+});
+
+test("Batch case entry carries root-cause forensics fields", () => {
+  const entry: import("../src/cli/discovery-batch").BatchCaseResultEntry = {
+    caseId: 1001,
+    title: "Checkout case",
+    selected: true,
+    status: "failed",
+    promoted: false,
+    failureReason: "pending_local_assertions",
+    rootCauseCategory: "assertion_consumption_gap",
+    topPendingAssertions: ["Country", "Confirmation closed"],
+    pendingAssertionCount: 2,
+    autoRepairCalled: false,
+    autoRepairReason: "none",
+    localClosureConsumedCount: 3,
+    notConsumedReasons: ["normalization_mismatch", "missing_history"]
+  };
+
+  expect(entry.rootCauseCategory).toBe("assertion_consumption_gap");
+  expect(entry.pendingAssertionCount).toBe(2);
+  expect(entry.notConsumedReasons?.length).toBeGreaterThan(0);
+});
+
+test("resolveBatchAppProfile: CLI --app wins over APP_SLUG", async () => {
+  const previous = process.env.APP_SLUG;
+  process.env.APP_SLUG = "env-app";
+  try {
+    const args = parseBatchArgs(["--all", "--app", "cli-app"]);
+    const resolved = await resolveBatchAppProfile(args);
+    expect(resolved.appProfile.appSlug).toBe("cli-app");
+    expect(resolved.appProfile.source).toBe("cli");
+  } finally {
+    if (previous === undefined) {
+      delete process.env.APP_SLUG;
+    } else {
+      process.env.APP_SLUG = previous;
+    }
+  }
+});
+
+test("resolveBatchAppProfile: APP_SLUG wins when --app is not provided", async () => {
+  const previous = process.env.APP_SLUG;
+  process.env.APP_SLUG = "env-priority";
+  try {
+    const args = parseBatchArgs(["--all"]);
+    const resolved = await resolveBatchAppProfile(args);
+    expect(resolved.appProfile.appSlug).toBe("env-priority");
+    expect(resolved.appProfile.source).toBe("env");
+  } finally {
+    if (previous === undefined) {
+      delete process.env.APP_SLUG;
+    } else {
+      process.env.APP_SLUG = previous;
+    }
+  }
 });

@@ -45,6 +45,17 @@ const CREDENTIALS_KEYWORDS = [
   "ingresar"
 ];
 
+const STRONG_CREDENTIAL_KEYWORDS = [
+  "contraseña",
+  "password",
+  "iniciar sesión",
+  "iniciar sesion",
+  "acceder",
+  "log in",
+  "login",
+  "ingresar"
+];
+
 const IDENTIFICATION_TYPE_SELECTION_KEYWORDS = [
   "identificación del cliente",
   "identificacion del cliente",
@@ -346,15 +357,23 @@ export function detectAuthGate(snapshot: PageSnapshot): AuthGateDetection {
   }
 
   if (credentialsMatches.length > 0) {
-    stage = "credentials";
-    confidence = Math.min(0.95, 0.5 + credentialsMatches.length * 0.15);
-    gateType = "classic_login";
-    evidence.push(...credentialsMatches);
-    if (credentialsMatches.some(k => normalizeText(k).includes("usuario") || normalizeText(k).includes("username") || normalizeText(k).includes("correo"))) {
-      requiredInputs.push("username");
-    }
-    if (credentialsMatches.some(k => normalizeText(k).includes("contraseña") || normalizeText(k).includes("password"))) {
-      requiredInputs.push("password");
+    const strongMatches = credentialsMatches.filter(k =>
+      STRONG_CREDENTIAL_KEYWORDS.some(sk => normalizeText(k).includes(normalizeText(sk)))
+    );
+    const hasMultipleSignals = credentialsMatches.length >= 2;
+    const hasFormContext = hasNativeInput || inputCount >= 2;
+
+    if (hasMultipleSignals || (strongMatches.length >= 1 && hasFormContext)) {
+      stage = "credentials";
+      confidence = Math.min(0.95, 0.5 + credentialsMatches.length * 0.15);
+      gateType = "classic_login";
+      evidence.push(...credentialsMatches);
+      if (credentialsMatches.some(k => normalizeText(k).includes("usuario") || normalizeText(k).includes("username") || normalizeText(k).includes("correo"))) {
+        requiredInputs.push("username");
+      }
+      if (credentialsMatches.some(k => normalizeText(k).includes("contraseña") || normalizeText(k).includes("password"))) {
+        requiredInputs.push("password");
+      }
     }
   }
 

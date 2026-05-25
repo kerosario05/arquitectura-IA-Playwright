@@ -1,0 +1,1564 @@
+{
+  "version": "1.0",
+  "createdAt": "2026-05-23T16:50:04.689Z",
+  "app": {
+    "appSlug": "default",
+    "profileName": "default",
+    "baseUrl": "https://www.demoblaze.com",
+    "baseUrlHash": "f1bffa09d02f"
+  },
+  "case": {
+    "caseId": 37907,
+    "title": "Visualizar detalle de un producto disponible",
+    "source": "testrail"
+  },
+  "failure": {
+    "failedReason": "assertion_not_found",
+    "failedTarget": "que se muestre el precio del producto seleccionado",
+    "failedAtStep": 4
+  },
+  "currentRun": {
+    "outputDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-23T16-46-46-034Z\\cases\\case-37907",
+    "evidenceDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-23T16-46-46-034Z\\cases\\case-37907\\evidence",
+    "snapshotPath": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-23T16-46-46-034Z\\cases\\case-37907\\evidence\\step-2-snapshot.json",
+    "candidatePlanPath": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-23T16-46-46-034Z\\cases\\case-37907\\discovered-plans.pending.json",
+    "pendingObjectsPath": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-23T16-46-46-034Z\\cases\\case-37907\\discovered-objects.pending.json",
+    "pendingPlansPath": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-23T16-46-46-034Z\\cases\\case-37907\\discovered-plans.pending.json"
+  },
+  "knownObjects": [
+    {
+      "key": "link_product_store",
+      "name": "PRODUCT STORE",
+      "type": "link",
+      "aliases": [
+        "product store"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "PRODUCT STORE",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "link_home_current",
+      "name": "Home (current)",
+      "type": "link",
+      "aliases": [
+        "home (current)"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Home (current)",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "link_contact",
+      "name": "Contact",
+      "type": "link",
+      "aliases": [
+        "contact"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Contact",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "link_about",
+      "name": "About us",
+      "type": "link",
+      "aliases": [
+        "about us"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "About us",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "link_cart",
+      "name": "Cart",
+      "type": "link",
+      "aliases": [
+        "cart"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Cart",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "link_log",
+      "name": "Log in",
+      "type": "link",
+      "aliases": [
+        "log in"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Log in",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "link_sign",
+      "name": "Sign up",
+      "type": "link",
+      "aliases": [
+        "sign up"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Sign up",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_previous",
+      "name": "Previous",
+      "type": "button",
+      "aliases": [
+        "previous"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Previous",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_next",
+      "name": "Next",
+      "type": "button",
+      "aliases": [
+        "next"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Next",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "link_categories",
+      "name": "CATEGORIES",
+      "type": "link",
+      "aliases": [
+        "categories"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "CATEGORIES",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "link_phones",
+      "name": "Phones",
+      "type": "link",
+      "aliases": [
+        "phones"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Phones",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "link_laptops",
+      "name": "Laptops",
+      "type": "link",
+      "aliases": [
+        "laptops"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Laptops",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "link_monitors",
+      "name": "Monitors",
+      "type": "link",
+      "aliases": [
+        "monitors"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Monitors",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "link_samsung_galaxy",
+      "name": "Samsung galaxy s6",
+      "type": "link",
+      "aliases": [
+        "samsung galaxy s6"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Samsung galaxy s6",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "link_nokia_lumia",
+      "name": "Nokia lumia 1520",
+      "type": "link",
+      "aliases": [
+        "nokia lumia 1520"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Nokia lumia 1520",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "link_nexus",
+      "name": "Nexus 6",
+      "type": "link",
+      "aliases": [
+        "nexus 6"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Nexus 6",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "link_samsung_galaxy_1",
+      "name": "Samsung galaxy s7",
+      "type": "link",
+      "aliases": [
+        "samsung galaxy s7"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Samsung galaxy s7",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "link_iphone_32gb",
+      "name": "Iphone 6 32gb",
+      "type": "link",
+      "aliases": [
+        "iphone 6 32gb"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Iphone 6 32gb",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "link_sony_xperia",
+      "name": "Sony xperia z5",
+      "type": "link",
+      "aliases": [
+        "sony xperia z5"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Sony xperia z5",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "link_htc_one",
+      "name": "HTC One M9",
+      "type": "link",
+      "aliases": [
+        "htc one m9"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "HTC One M9",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "link_sony_vaio",
+      "name": "Sony vaio i5",
+      "type": "link",
+      "aliases": [
+        "sony vaio i5"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Sony vaio i5",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "link_sony_vaio_1",
+      "name": "Sony vaio i7",
+      "type": "link",
+      "aliases": [
+        "sony vaio i7"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Sony vaio i7",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_previous_1",
+      "name": "Previous",
+      "type": "button",
+      "aliases": [
+        "previous"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Previous",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "button_next_1",
+      "name": "Next",
+      "type": "button",
+      "aliases": [
+        "next"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Next",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_samsung_galaxy",
+      "name": "Samsung galaxy s6",
+      "type": "section",
+      "aliases": [
+        "samsung galaxy s6"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Samsung galaxy s6",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_h5",
+      "name": "$360",
+      "type": "section",
+      "aliases": [
+        "$360"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "$360",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_nokia_lumia",
+      "name": "Nokia lumia 1520",
+      "type": "section",
+      "aliases": [
+        "nokia lumia 1520"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Nokia lumia 1520",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_h5_1",
+      "name": "$820",
+      "type": "section",
+      "aliases": [
+        "$820"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "$820",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_nexus",
+      "name": "Nexus 6",
+      "type": "section",
+      "aliases": [
+        "nexus 6"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Nexus 6",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_h5_2",
+      "name": "$650",
+      "type": "section",
+      "aliases": [
+        "$650"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "$650",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_samsung_galaxy_1",
+      "name": "Samsung galaxy s7",
+      "type": "section",
+      "aliases": [
+        "samsung galaxy s7"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Samsung galaxy s7",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_h5_3",
+      "name": "$800",
+      "type": "section",
+      "aliases": [
+        "$800"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "$800",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_iphone_32gb",
+      "name": "Iphone 6 32gb",
+      "type": "section",
+      "aliases": [
+        "iphone 6 32gb"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Iphone 6 32gb",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_h5_4",
+      "name": "$790",
+      "type": "section",
+      "aliases": [
+        "$790"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "$790",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_sony_xperia",
+      "name": "Sony xperia z5",
+      "type": "section",
+      "aliases": [
+        "sony xperia z5"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Sony xperia z5",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_h5_5",
+      "name": "$320",
+      "type": "section",
+      "aliases": [
+        "$320"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "$320",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_htc_one",
+      "name": "HTC One M9",
+      "type": "section",
+      "aliases": [
+        "htc one m9"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "HTC One M9",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_h5_6",
+      "name": "$700",
+      "type": "section",
+      "aliases": [
+        "$700"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "$700",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_sony_vaio",
+      "name": "Sony vaio i5",
+      "type": "section",
+      "aliases": [
+        "sony vaio i5"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Sony vaio i5",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_h5_7",
+      "name": "$790",
+      "type": "section",
+      "aliases": [
+        "$790"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "$790",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_sony_vaio_1",
+      "name": "Sony vaio i7",
+      "type": "section",
+      "aliases": [
+        "sony vaio i7"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Sony vaio i7",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_h5_8",
+      "name": "$790",
+      "type": "section",
+      "aliases": [
+        "$790"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "$790",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_about",
+      "name": "About Us",
+      "type": "section",
+      "aliases": [
+        "about us"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "About Us",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_get_touch",
+      "name": "Get in Touch",
+      "type": "section",
+      "aliases": [
+        "get in touch"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Get in Touch",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "section_product_store",
+      "name": "PRODUCT STORE",
+      "type": "section",
+      "aliases": [
+        "product store"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "PRODUCT STORE",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "link_product_store",
+      "name": "PRODUCT STORE",
+      "type": "link",
+      "aliases": [
+        "product store"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "PRODUCT STORE",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "link_home_current",
+      "name": "Home (current)",
+      "type": "link",
+      "aliases": [
+        "home (current)"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Home (current)",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "link_contact",
+      "name": "Contact",
+      "type": "link",
+      "aliases": [
+        "contact"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Contact",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "link_about",
+      "name": "About us",
+      "type": "link",
+      "aliases": [
+        "about us"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "About us",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    },
+    {
+      "key": "link_cart",
+      "name": "Cart",
+      "type": "link",
+      "aliases": [
+        "cart"
+      ],
+      "locator": {
+        "strategy": "text",
+        "value": "Cart",
+        "exact": false
+      },
+      "confidence": 0.75,
+      "source": "current_run_pending",
+      "score": 0
+    }
+  ],
+  "knownPlans": [
+    {
+      "id": "c37757-consulta-depositos-a-plazo-en-dolares",
+      "caseId": 37757,
+      "externalId": "C37757",
+      "title": "Consulta depositos a plazo en dolares",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37757-consulta-depositos-a-plazo-en-dolares\\plan.json",
+      "createdAt": "2026-05-20T19:46:17.185Z",
+      "updatedAt": "2026-05-20T19:46:17.185Z",
+      "score": 0
+    },
+    {
+      "id": "c37758-c37381-visualizar-detalle-de-cuenta-de-ahorro-en-pesos",
+      "caseId": 37758,
+      "externalId": "C37758",
+      "title": "C37381 - Visualizar detalle de cuenta de ahorro en pesos",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37758-c37381-visualizar-detalle-de-cuenta-de-ahorro-en-pesos\\plan.json",
+      "createdAt": "2026-05-20T19:54:34.497Z",
+      "updatedAt": "2026-05-20T19:54:34.497Z",
+      "score": 0
+    },
+    {
+      "id": "c37844-visualizar-detalle-de-tarjeta-visa-gold",
+      "caseId": 37844,
+      "externalId": "C37844",
+      "title": "Visualizar detalle de Tarjeta Visa Gold",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37844-visualizar-detalle-de-tarjeta-visa-gold\\plan.json",
+      "createdAt": "2026-05-21T03:09:17.322Z",
+      "updatedAt": "2026-05-22T19:15:10.978Z",
+      "score": 0,
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa gold"
+      ]
+    },
+    {
+      "id": "c37845-visualizar-detalle-de-tarjeta-visa-platinum",
+      "caseId": 37845,
+      "externalId": "C37845",
+      "title": "Visualizar detalle de Tarjeta Visa Platinum",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37845-visualizar-detalle-de-tarjeta-visa-platinum\\plan.json",
+      "createdAt": "2026-05-21T03:09:22.764Z",
+      "updatedAt": "2026-05-21T19:42:47.564Z",
+      "score": 0,
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa platinum"
+      ]
+    },
+    {
+      "id": "c37846-visualizar-detalle-de-tarjeta-visa-infinite",
+      "caseId": 37846,
+      "externalId": "C37846",
+      "title": "Visualizar detalle de Tarjeta Visa Infinite",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37846-visualizar-detalle-de-tarjeta-visa-infinite\\plan.json",
+      "createdAt": "2026-05-21T03:10:25.931Z",
+      "updatedAt": "2026-05-21T19:43:29.840Z",
+      "score": 0,
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa infinite"
+      ]
+    },
+    {
+      "id": "route-recovery",
+      "title": "Route recovery",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\route-recovery\\plan.json",
+      "createdAt": "2026-05-21T15:09:19.055Z",
+      "updatedAt": "2026-05-21T15:09:19.055Z",
+      "score": 0,
+      "route": [
+        "Tarjetas"
+      ]
+    },
+    {
+      "id": "c37869-generar-carta-de-referencia-con-cuenta-de-ahorro",
+      "caseId": 37869,
+      "externalId": "C37869",
+      "title": "Generar carta de referencia con cuenta de ahorro",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37869-generar-carta-de-referencia-con-cuenta-de-ahorro\\plan.json",
+      "createdAt": "2026-05-22T01:47:27.888Z",
+      "updatedAt": "2026-05-22T18:48:36.344Z",
+      "score": 0,
+      "route": [
+        "iniciar",
+        "transacciones y servicio",
+        "Cédula de identidad dominicana",
+        "continuar",
+        "Generar cartas",
+        "Carta de referencia",
+        "cuenta de ahorros",
+        "continuar",
+        "A quien pueda interesar",
+        "continuar"
+      ]
+    },
+    {
+      "id": "c37870-generar-carta-de-referencia-con-certificado",
+      "caseId": 37870,
+      "externalId": "C37870",
+      "title": "Generar carta de referencia con certificado",
+      "status": "active",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37870-generar-carta-de-referencia-con-certificado\\plan.json",
+      "createdAt": "2026-05-22T16:48:53.157Z",
+      "updatedAt": "2026-05-22T18:43:16.883Z",
+      "score": 0,
+      "route": [
+        "iniciar",
+        "transacciones y servicio",
+        "Cédula de identidad dominicana",
+        "continuar",
+        "Generar cartas",
+        "Carta de referencia",
+        "Depósito a plazo",
+        "cuenta de ahorros",
+        "continuar",
+        "A quien pueda interesar",
+        "continuar"
+      ]
+    },
+    {
+      "id": "c37853-consulta-detalle-de-prestamo-personal",
+      "caseId": 37853,
+      "externalId": "C37853",
+      "title": "Consulta detalle de prestamo personal",
+      "status": "inline_debug_only",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37853-consulta-detalle-de-prestamo-personal\\plan.json",
+      "createdAt": "2026-05-21T02:12:12.100Z",
+      "updatedAt": "2026-05-21T15:41:45.881Z",
+      "score": 0,
+      "route": [
+        "Iniciar",
+        "Información de productos"
+      ]
+    },
+    {
+      "id": "c37903-visualizar-catalogo-principal-de-productos-disponibles",
+      "caseId": 37903,
+      "externalId": "C37903",
+      "title": "Visualizar catálogo principal de productos disponibles",
+      "status": "blocked_missing_pom",
+      "source": "discovery",
+      "planPath": "automations\\apps\\default\\cases\\c37903-visualizar-catalogo-principal-de-productos-disponibles\\plan.json",
+      "createdAt": "2026-05-23T16:46:52.573Z",
+      "updatedAt": "2026-05-23T16:46:52.573Z",
+      "score": 0
+    }
+  ],
+  "knownRoutes": [
+    {
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa gold"
+      ],
+      "sourcePlanId": "c37844-visualizar-detalle-de-tarjeta-visa-gold",
+      "score": 0
+    },
+    {
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa platinum"
+      ],
+      "sourcePlanId": "c37845-visualizar-detalle-de-tarjeta-visa-platinum",
+      "score": 0
+    },
+    {
+      "route": [
+        "Iniciar",
+        "Información de productos",
+        "tarjetas",
+        "tarjeta de credito visa infinite"
+      ],
+      "sourcePlanId": "c37846-visualizar-detalle-de-tarjeta-visa-infinite",
+      "score": 0
+    },
+    {
+      "route": [
+        "Tarjetas"
+      ],
+      "sourcePlanId": "route-recovery",
+      "score": 0
+    },
+    {
+      "route": [
+        "iniciar",
+        "transacciones y servicio",
+        "Cédula de identidad dominicana",
+        "continuar",
+        "Generar cartas",
+        "Carta de referencia",
+        "cuenta de ahorros",
+        "continuar",
+        "A quien pueda interesar",
+        "continuar"
+      ],
+      "sourcePlanId": "c37869-generar-carta-de-referencia-con-cuenta-de-ahorro",
+      "score": 0
+    },
+    {
+      "route": [
+        "iniciar",
+        "transacciones y servicio",
+        "Cédula de identidad dominicana",
+        "continuar",
+        "Generar cartas",
+        "Carta de referencia",
+        "Depósito a plazo",
+        "cuenta de ahorros",
+        "continuar",
+        "A quien pueda interesar",
+        "continuar"
+      ],
+      "sourcePlanId": "c37870-generar-carta-de-referencia-con-certificado",
+      "score": 0
+    },
+    {
+      "route": [
+        "Iniciar",
+        "Información de productos"
+      ],
+      "sourcePlanId": "c37853-consulta-detalle-de-prestamo-personal",
+      "score": 0
+    }
+  ],
+  "snapshotCandidates": [
+    {
+      "id": "el-110",
+      "type": "link",
+      "text": "PRODUCT STORE",
+      "tagName": "a",
+      "domId": "nava",
+      "href": "https://www.demoblaze.com/index.html",
+      "className": "navbar-brand",
+      "candidateLocatorsCount": 2
+    },
+    {
+      "id": "el-115",
+      "type": "link",
+      "text": "Cart",
+      "tagName": "a",
+      "domId": "cartur",
+      "href": "https://www.demoblaze.com/cart.html",
+      "className": "nav-link",
+      "candidateLocatorsCount": 2
+    },
+    {
+      "id": "el-116",
+      "type": "link",
+      "text": "Log in",
+      "tagName": "a",
+      "domId": "login2",
+      "href": "https://www.demoblaze.com/#",
+      "className": "nav-link",
+      "candidateLocatorsCount": 2
+    },
+    {
+      "id": "el-119",
+      "type": "link",
+      "text": "Sign up",
+      "tagName": "a",
+      "domId": "signin2",
+      "href": "https://www.demoblaze.com/#",
+      "className": "nav-link",
+      "candidateLocatorsCount": 2
+    },
+    {
+      "id": "el-129",
+      "type": "link",
+      "text": "CATEGORIES",
+      "tagName": "a",
+      "domId": "cat",
+      "href": "https://www.demoblaze.com/",
+      "className": "list-group-item",
+      "candidateLocatorsCount": 2
+    },
+    {
+      "id": "el-130",
+      "type": "link",
+      "text": "Phones",
+      "tagName": "a",
+      "domId": "itemc",
+      "href": "https://www.demoblaze.com/#",
+      "className": "list-group-item",
+      "candidateLocatorsCount": 2
+    },
+    {
+      "id": "el-131",
+      "type": "link",
+      "text": "Laptops",
+      "tagName": "a",
+      "domId": "itemc",
+      "href": "https://www.demoblaze.com/#",
+      "className": "list-group-item",
+      "candidateLocatorsCount": 2
+    },
+    {
+      "id": "el-132",
+      "type": "link",
+      "text": "Monitors",
+      "tagName": "a",
+      "domId": "itemc",
+      "href": "https://www.demoblaze.com/#",
+      "className": "list-group-item",
+      "candidateLocatorsCount": 2
+    },
+    {
+      "id": "el-175",
+      "type": "button",
+      "text": "Previous",
+      "tagName": "button",
+      "domId": "prev2",
+      "className": "page-link",
+      "candidateLocatorsCount": 2
+    },
+    {
+      "id": "el-176",
+      "type": "button",
+      "text": "Next",
+      "tagName": "button",
+      "domId": "next2",
+      "className": "page-link",
+      "candidateLocatorsCount": 2
+    },
+    {
+      "id": "el-138",
+      "type": "text",
+      "text": "The Samsung Galaxy S6 is powered by 1.5GHz octa-core Samsung Exynos 7420 processor and it comes with 3GB of RAM. The phone packs 32GB of internal storage cannot be expanded.",
+      "tagName": "p",
+      "domId": "article",
+      "className": "card-text",
+      "candidateLocatorsCount": 2
+    },
+    {
+      "id": "el-144",
+      "type": "text",
+      "text": "The Nokia Lumia 1520 is powered by 2.2GHz quad-core Qualcomm Snapdragon 800 processor and it comes with 2GB of RAM.",
+      "tagName": "p",
+      "domId": "article",
+      "className": "card-text",
+      "candidateLocatorsCount": 2
+    },
+    {
+      "id": "el-150",
+      "type": "text",
+      "text": "The Motorola Google Nexus 6 is powered by 2.7GHz quad-core Qualcomm Snapdragon 805 processor and it comes with 3GB of RAM.",
+      "tagName": "p",
+      "domId": "article",
+      "className": "card-text",
+      "candidateLocatorsCount": 2
+    },
+    {
+      "id": "el-156",
+      "type": "text",
+      "text": "The Samsung Galaxy S7 is powered by 1.6GHz octa-core it comes with 4GB of RAM. The phone packs 32GB of internal storage that can be expanded up to 200GB via a microSD card.",
+      "tagName": "p",
+      "domId": "article",
+      "className": "card-text",
+      "candidateLocatorsCount": 2
+    },
+    {
+      "id": "el-162",
+      "type": "text",
+      "text": "It comes with 1GB of RAM. The phone packs 16GB of internal storage cannot be expanded. As far as the cameras are concerned, the Apple iPhone 6 packs a 8-megapixel primary camera on the rear and a 1.2-...",
+      "tagName": "p",
+      "domId": "article",
+      "className": "card-text",
+      "candidateLocatorsCount": 2
+    },
+    {
+      "id": "el-168",
+      "type": "text",
+      "text": "[REDACTED]",
+      "tagName": "p",
+      "domId": "article",
+      "className": "card-text",
+      "candidateLocatorsCount": 2
+    },
+    {
+      "id": "el-174",
+      "type": "text",
+      "text": "[REDACTED]",
+      "tagName": "p",
+      "domId": "article",
+      "className": "card-text",
+      "candidateLocatorsCount": 2
+    },
+    {
+      "id": "el-111",
+      "type": "link",
+      "text": "Home (current)",
+      "tagName": "a",
+      "href": "https://www.demoblaze.com/index.html",
+      "className": "nav-link",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-113",
+      "type": "link",
+      "text": "Contact",
+      "tagName": "a",
+      "href": "https://www.demoblaze.com/#",
+      "className": "nav-link",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-114",
+      "type": "link",
+      "text": "About us",
+      "tagName": "a",
+      "href": "https://www.demoblaze.com/#",
+      "className": "nav-link",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-123",
+      "type": "button",
+      "text": "Previous",
+      "role": "button",
+      "tagName": "a",
+      "href": "https://www.demoblaze.com/#carouselExampleIndicators",
+      "className": "carousel-control-prev",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-126",
+      "type": "button",
+      "text": "Next",
+      "role": "button",
+      "tagName": "a",
+      "href": "https://www.demoblaze.com/#carouselExampleIndicators",
+      "className": "carousel-control-next",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-136",
+      "type": "link",
+      "text": "Samsung galaxy s6",
+      "tagName": "a",
+      "href": "https://www.demoblaze.com/prod.html?idp_=1",
+      "className": "hrefch",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-142",
+      "type": "link",
+      "text": "Nokia lumia 1520",
+      "tagName": "a",
+      "href": "https://www.demoblaze.com/prod.html?idp_=2",
+      "className": "hrefch",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-148",
+      "type": "link",
+      "text": "Nexus 6",
+      "tagName": "a",
+      "href": "https://www.demoblaze.com/prod.html?idp_=3",
+      "className": "hrefch",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-154",
+      "type": "link",
+      "text": "Samsung galaxy s7",
+      "tagName": "a",
+      "href": "https://www.demoblaze.com/prod.html?idp_=4",
+      "className": "hrefch",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-160",
+      "type": "link",
+      "text": "Iphone 6 32gb",
+      "tagName": "a",
+      "href": "https://www.demoblaze.com/prod.html?idp_=5",
+      "className": "hrefch",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-166",
+      "type": "link",
+      "text": "Sony xperia z5",
+      "tagName": "a",
+      "href": "https://www.demoblaze.com/prod.html?idp_=6",
+      "className": "hrefch",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-172",
+      "type": "link",
+      "text": "HTC One M9",
+      "tagName": "a",
+      "href": "https://www.demoblaze.com/prod.html?idp_=7",
+      "className": "hrefch",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-112",
+      "type": "text",
+      "text": "(current)",
+      "tagName": "span",
+      "className": "sr-only",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-125",
+      "type": "text",
+      "text": "Previous",
+      "tagName": "span",
+      "className": "sr-only",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-128",
+      "type": "text",
+      "text": "Next",
+      "tagName": "span",
+      "className": "sr-only",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-135",
+      "type": "heading",
+      "text": "Samsung galaxy s6",
+      "tagName": "h4",
+      "className": "card-title",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-137",
+      "type": "heading",
+      "text": "$360",
+      "tagName": "h5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-141",
+      "type": "heading",
+      "text": "Nokia lumia 1520",
+      "tagName": "h4",
+      "className": "card-title",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-143",
+      "type": "heading",
+      "text": "$820",
+      "tagName": "h5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-147",
+      "type": "heading",
+      "text": "Nexus 6",
+      "tagName": "h4",
+      "className": "card-title",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-149",
+      "type": "heading",
+      "text": "$650",
+      "tagName": "h5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-153",
+      "type": "heading",
+      "text": "Samsung galaxy s7",
+      "tagName": "h4",
+      "className": "card-title",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-155",
+      "type": "heading",
+      "text": "$800",
+      "tagName": "h5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-159",
+      "type": "heading",
+      "text": "Iphone 6 32gb",
+      "tagName": "h4",
+      "className": "card-title",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-161",
+      "type": "heading",
+      "text": "$790",
+      "tagName": "h5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-165",
+      "type": "heading",
+      "text": "Sony xperia z5",
+      "tagName": "h4",
+      "className": "card-title",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-167",
+      "type": "heading",
+      "text": "$320",
+      "tagName": "h5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-171",
+      "type": "heading",
+      "text": "HTC One M9",
+      "tagName": "h4",
+      "className": "card-title",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-173",
+      "type": "heading",
+      "text": "$700",
+      "tagName": "h5",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-177",
+      "type": "heading",
+      "text": "About Us",
+      "tagName": "h4",
+      "className": "grrrr",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-178",
+      "type": "text",
+      "text": "We believe performance needs to be validated at every stage of the software development cycle and our open source compatible, massively scalable platform makes that a reality.",
+      "tagName": "p",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-179",
+      "type": "heading",
+      "text": "Get in Touch",
+      "tagName": "h4",
+      "className": "grrrr",
+      "candidateLocatorsCount": 1
+    },
+    {
+      "id": "el-180",
+      "type": "text",
+      "text": "Address: 2390 El Camino Real",
+      "tagName": "p",
+      "candidateLocatorsCount": 1
+    }
+  ],
+  "supportedActions": [
+    "navigate",
+    "login",
+    "click",
+    "fill",
+    "select",
+    "check",
+    "uncheck",
+    "press",
+    "waitFor",
+    "assertVisible",
+    "assertText",
+    "assertUrl",
+    "screenshot",
+    "noop"
+  ],
+  "safeData": {
+    "availableKeys": [],
+    "redacted": true
+  },
+  "constraints": {
+    "codexMustOnlyWriteAgentResponseJson": true,
+    "doNotRunPlaywright": true,
+    "doNotModifyStableRegistry": true,
+    "doNotApproveObjectsAutomatically": true,
+    "doNotInventData": true
+  },
+  "warnings": [
+    "knownObjects limited to 50 (had 84).",
+    "Context file not found: automations\\apps\\default\\cases\\c37757-consulta-depositos-a-plazo-en-dolares\\plan.json",
+    "Context file not found: automations\\apps\\default\\cases\\c37758-c37381-visualizar-detalle-de-cuenta-de-ahorro-en-pesos\\plan.json",
+    "snapshotCandidates limited to 50 (had 71)."
+  ],
+  "appConfig": {
+    "appProfile": {
+      "appSlug": "default",
+      "source": "default",
+      "name": "demoblaze",
+      "baseUrl": "https://www.demoblaze.com",
+      "baseUrlHash": "f1bffa09d02f",
+      "createdAt": "2026-05-23T16:46:52.571Z",
+      "updatedAt": "2026-05-23T16:46:52.571Z"
+    },
+    "baseUrl": "https://www.demoblaze.com",
+    "loginMode": "no_login",
+    "testDataKeys": [],
+    "testDataAliases": {},
+    "hasUsername": false,
+    "hasPassword": false,
+    "missingInputBehavior": "fail",
+    "updatedAt": "2026-05-23T16:46:52.571Z"
+  }
+}

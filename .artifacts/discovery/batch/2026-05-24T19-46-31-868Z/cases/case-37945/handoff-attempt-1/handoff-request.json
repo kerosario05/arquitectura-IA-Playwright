@@ -1,0 +1,648 @@
+{
+  "version": "1.0",
+  "kind": "plan_repair",
+  "createdAt": "2026-05-24T19:53:12.357Z",
+  "goal": "Repair plan_repair for C37945 - Visualizar carrito con producto agregado durante la sesión actual. Failure: needs_assertion_resolution at step 5 target \"Product added\"",
+  "contextPackPath": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-24T19-46-31-868Z\\cases\\case-37945\\handoff-attempt-1\\context-pack.json",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37945",
+    "caseId": 37945,
+    "title": "Visualizar carrito con producto agregado durante la sesión actual",
+    "preconditions": "La URL base de la aplicación está configurada en BASE_URL.\nPortal web disponible y accesible.\nLa pantalla inicial de la tienda está disponible desde BASE_URL.\nExiste al menos un producto disponible para agregar al carrito.",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Seleccionar la categoría \"Phones\".",
+        "dataHints": []
+      },
+      {
+        "index": 2,
+        "action": "Seleccionar la primera tarjeta visible del listado de productos.",
+        "dataHints": []
+      },
+      {
+        "index": 3,
+        "action": "Validar que se muestre el botón \"Add to cart\".",
+        "dataHints": []
+      },
+      {
+        "index": 4,
+        "action": "Clic en \"Add to cart\".",
+        "dataHints": []
+      },
+      {
+        "index": 5,
+        "action": "Validar que se muestre el mensaje \"Product added\".",
+        "dataHints": []
+      },
+      {
+        "index": 6,
+        "action": "Clic en \"Cart\".",
+        "dataHints": []
+      },
+      {
+        "index": 7,
+        "action": "Validar que se muestre el producto agregado en el carrito.",
+        "dataHints": []
+      },
+      {
+        "index": 8,
+        "action": "Validar que se muestre el precio del producto.",
+        "dataHints": []
+      },
+      {
+        "index": 9,
+        "action": "Validar que se muestre el total de la compra.",
+        "dataHints": []
+      },
+      {
+        "index": 10,
+        "action": "Validar que se muestre el botón \"Place Order\".",
+        "expected": "Validar que el carrito muestre señales esperadas:\n\nProducto agregado visible.\nPrecio del producto visible.\nTotal de compra visible.\nBotón \"Place Order\" visible.",
+        "dataHints": []
+      }
+    ],
+    "raw": {
+      "id": 37945,
+      "title": "Visualizar carrito con producto agregado durante la sesión actual",
+      "section_id": 4769,
+      "template_id": 5,
+      "type_id": 6,
+      "priority_id": 2,
+      "milestone_id": null,
+      "refs": null,
+      "created_by": 24,
+      "created_on": 1779644228,
+      "updated_by": 24,
+      "updated_on": 1779644228,
+      "estimate": null,
+      "estimate_forecast": null,
+      "suite_id": 1731,
+      "display_order": 3,
+      "is_deleted": 0,
+      "custom_ai_type": null,
+      "custom_ai_model": null,
+      "custom_preconds": "<ol>\n<li>La URL base de la aplicación está configurada en BASE_URL.</li>\n<li>Portal web disponible y accesible.</li>\n<li>La pantalla inicial de la tienda está disponible desde BASE_URL.</li>\n<li>Existe al menos un producto disponible para agregar al carrito.</li>\n</ol>\n",
+      "custom_goals": null,
+      "custom_steps": "<ol>\n<li>Seleccionar la categoría \"Phones\".</li>\n<li>Seleccionar la primera tarjeta visible del listado de productos.</li>\n<li>Validar que se muestre el botón \"Add to cart\".</li>\n<li>Clic en \"Add to cart\".</li>\n<li>Validar que se muestre el mensaje \"Product added\".</li>\n<li>Clic en \"Cart\".</li>\n<li>Validar que se muestre el producto agregado en el carrito.</li>\n<li>Validar que se muestre el precio del producto.</li>\n<li>Validar que se muestre el total de la compra.</li>\n<li>Validar que se muestre el botón \"Place Order\".</li>\n</ol>\n",
+      "custom_case_custom": null,
+      "custom_expected": "<p>Validar que el carrito muestre señales esperadas:</p>\n\n<ul>\n<li>Producto agregado visible.</li>\n<li>Precio del producto visible.</li>\n<li>Total de compra visible.</li>\n<li>Botón \"Place Order\" visible.</li>\n</ul>\n",
+      "custom_case_oracle": "QA",
+      "custom_mission": null,
+      "custom_case_core": null,
+      "refs_data": [],
+      "ai_automated_test": null,
+      "labels": []
+    }
+  },
+  "currentPlan": {
+    "version": "1.0",
+    "source": "discovery_generated",
+    "status": "needs_discovery",
+    "scenario": {
+      "source": "testrail",
+      "externalId": "C37945",
+      "caseId": 37945,
+      "title": "Visualizar carrito con producto agregado durante la sesión actual"
+    },
+    "requiredData": [],
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "Navigate to https://www.demoblaze.com",
+        "target": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "login",
+        "description": "Execute login"
+      },
+      {
+        "index": 3,
+        "action": "click",
+        "description": "Seleccionar la categoría \"Phones\".",
+        "target": {
+          "strategy": "text",
+          "value": "Phones",
+          "exact": false
+        }
+      },
+      {
+        "index": 4,
+        "action": "click",
+        "description": "Seleccionar la primera tarjeta visible del listado de productos.",
+        "target": {
+          "strategy": "text",
+          "value": "la primera tarjeta visible del listado de productos",
+          "exact": false
+        }
+      },
+      {
+        "index": 5,
+        "action": "click",
+        "description": "Clic en \"Add to cart\".",
+        "target": {
+          "strategy": "text",
+          "value": "Add to cart",
+          "exact": false
+        }
+      },
+      {
+        "index": 6,
+        "action": "click",
+        "description": "Clic en \"Cart\".",
+        "target": {
+          "strategy": "text",
+          "value": "Cart",
+          "exact": false
+        }
+      },
+      {
+        "index": 7,
+        "action": "assertText",
+        "description": "Assert: que se muestre el producto agregado en el carrito",
+        "target": {
+          "strategy": "text",
+          "value": "que se muestre el producto agregado en el carrito",
+          "exact": false
+        },
+        "expected": "que se muestre el producto agregado en el carrito"
+      },
+      {
+        "index": 8,
+        "action": "assertText",
+        "description": "Assert: que se muestre el total de la compra",
+        "target": {
+          "strategy": "text",
+          "value": "que se muestre el total de la compra",
+          "exact": false
+        },
+        "expected": "que se muestre el total de la compra"
+      },
+      {
+        "index": 9,
+        "action": "assertText",
+        "description": "Assert: Total de compra visible.",
+        "target": {
+          "strategy": "text",
+          "value": "Total de compra visible.",
+          "exact": false
+        },
+        "expected": "Total de compra visible."
+      }
+    ],
+    "notes": [
+      "Discovery partial: 7/14 navigations/assertions satisfied."
+    ],
+    "createdAt": "2026-05-24T19:53:12.332Z"
+  },
+  "snapshot": {
+    "version": "1.0",
+    "url": "https://www.demoblaze.com/cart.html#",
+    "title": "STORE",
+    "capturedAt": "2026-05-24T19:52:42.314Z",
+    "elements": [
+      {
+        "id": "el-122",
+        "type": "link",
+        "text": "PRODUCT STORE",
+        "tagName": "a",
+        "visible": true,
+        "nearbyText": "PRODUCT STORE Home (current) Contact About us Cart Log in Log out Sign up",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "PRODUCT STORE",
+            "exact": false,
+            "confidence": 0.75
+          },
+          {
+            "strategy": "css",
+            "value": "#nava",
+            "confidence": 0.55
+          }
+        ],
+        "dataHints": [],
+        "href": "https://www.demoblaze.com/index.html",
+        "className": "navbar-brand",
+        "domId": "nava"
+      },
+      {
+        "id": "el-123",
+        "type": "link",
+        "text": "Home (current)",
+        "tagName": "a",
+        "visible": true,
+        "nearbyText": "Home (current)",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Home (current)",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [],
+        "href": "https://www.demoblaze.com/index.html",
+        "className": "nav-link"
+      },
+      {
+        "id": "el-125",
+        "type": "link",
+        "text": "Contact",
+        "tagName": "a",
+        "visible": true,
+        "nearbyText": "Contact",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Contact",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [],
+        "href": "https://www.demoblaze.com/cart.html#",
+        "className": "nav-link"
+      },
+      {
+        "id": "el-126",
+        "type": "link",
+        "text": "About us",
+        "tagName": "a",
+        "visible": true,
+        "nearbyText": "About us",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "About us",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [],
+        "href": "https://www.demoblaze.com/cart.html#",
+        "className": "nav-link"
+      },
+      {
+        "id": "el-127",
+        "type": "link",
+        "text": "Cart",
+        "tagName": "a",
+        "visible": true,
+        "nearbyText": "Cart",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Cart",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [],
+        "href": "https://www.demoblaze.com/cart.html#",
+        "className": "nav-link"
+      },
+      {
+        "id": "el-128",
+        "type": "link",
+        "text": "Log in",
+        "tagName": "a",
+        "visible": true,
+        "nearbyText": "Log in",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Log in",
+            "exact": false,
+            "confidence": 0.75
+          },
+          {
+            "strategy": "css",
+            "value": "#login2",
+            "confidence": 0.55
+          }
+        ],
+        "dataHints": [],
+        "href": "https://www.demoblaze.com/cart.html#",
+        "className": "nav-link",
+        "domId": "login2"
+      },
+      {
+        "id": "el-131",
+        "type": "link",
+        "text": "Sign up",
+        "tagName": "a",
+        "visible": true,
+        "nearbyText": "Sign up",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Sign up",
+            "exact": false,
+            "confidence": 0.75
+          },
+          {
+            "strategy": "css",
+            "value": "#signin2",
+            "confidence": 0.55
+          }
+        ],
+        "dataHints": [],
+        "href": "https://www.demoblaze.com/cart.html#",
+        "className": "nav-link",
+        "domId": "signin2"
+      },
+      {
+        "id": "el-136",
+        "type": "button",
+        "text": "Place Order",
+        "tagName": "button",
+        "inputType": "button",
+        "visible": true,
+        "nearbyText": "Total Place Order",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Place Order",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [],
+        "className": "btn btn-success"
+      },
+      {
+        "id": "el-124",
+        "type": "text",
+        "text": "(current)",
+        "tagName": "span",
+        "visible": true,
+        "nearbyText": "Home (current)",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "(current)",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [],
+        "className": "sr-only"
+      },
+      {
+        "id": "el-132",
+        "type": "heading",
+        "text": "Products",
+        "tagName": "h2",
+        "visible": true,
+        "nearbyText": "Products Pic Title Price x",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Products",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": []
+      },
+      {
+        "id": "el-133",
+        "type": "table",
+        "text": "Pic Title Price x",
+        "tagName": "table",
+        "visible": true,
+        "nearbyText": "Pic Title Price x",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Pic Title Price x",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [],
+        "className": "table table-bordered table-hover table-striped"
+      },
+      {
+        "id": "el-134",
+        "type": "heading",
+        "text": "Total",
+        "tagName": "h2",
+        "visible": true,
+        "nearbyText": "Total Place Order",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Total",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": []
+      },
+      {
+        "id": "el-137",
+        "type": "heading",
+        "text": "About Us",
+        "tagName": "h4",
+        "visible": true,
+        "nearbyText": "About Us We believe performance needs to be validated at every stage of the software development cycle and our open source compatible, massively scalable platform makes that a reality.",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "About Us",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [],
+        "className": "grrrr"
+      },
+      {
+        "id": "el-138",
+        "type": "text",
+        "text": "We believe performance needs to be validated at every stage of the software development cycle and our open source compatible, massively scalable platform makes that a reality.",
+        "tagName": "p",
+        "visible": true,
+        "nearbyText": "About Us We believe performance needs to be validated at every stage of the software development cycle and our open source compatible, massively scalable platform makes that a reality.",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "We believe performance needs to be validated at every stage of the software development cycle and our open source compatible, massively scalable platform makes that a reality.",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": []
+      },
+      {
+        "id": "el-139",
+        "type": "heading",
+        "text": "Get in Touch",
+        "tagName": "h4",
+        "visible": true,
+        "nearbyText": "[REDACTED]",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Get in Touch",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [],
+        "className": "grrrr"
+      },
+      {
+        "id": "el-140",
+        "type": "text",
+        "text": "Address: 2390 El Camino Real",
+        "tagName": "p",
+        "visible": true,
+        "nearbyText": "[REDACTED]",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Address: 2390 El Camino Real",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": []
+      },
+      {
+        "id": "el-141",
+        "type": "text",
+        "text": "Phone: +440 123456",
+        "tagName": "p",
+        "visible": true,
+        "nearbyText": "[REDACTED]",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Phone: +440 123456",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [
+          "telefono"
+        ]
+      },
+      {
+        "id": "el-142",
+        "type": "text",
+        "text": "Email: demo@blazemeter.com",
+        "tagName": "p",
+        "visible": true,
+        "nearbyText": "[REDACTED]",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Email: demo@blazemeter.com",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [
+          "email"
+        ]
+      },
+      {
+        "id": "el-143",
+        "type": "heading",
+        "text": "PRODUCT STORE",
+        "tagName": "h4",
+        "visible": true,
+        "nearbyText": "PRODUCT STORE",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "PRODUCT STORE",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": []
+      },
+      {
+        "id": "el-144",
+        "type": "text",
+        "text": "Copyright © Product Store",
+        "tagName": "p",
+        "visible": true,
+        "nearbyText": "Copyright © Product Store",
+        "candidateLocators": [
+          {
+            "strategy": "text",
+            "value": "Copyright © Product Store",
+            "exact": false,
+            "confidence": 0.75
+          }
+        ],
+        "dataHints": [],
+        "className": "m-0 text-center text-white"
+      }
+    ],
+    "summary": {
+      "totalElements": 20,
+      "buttons": 1,
+      "links": 7,
+      "inputs": 0,
+      "selects": 0,
+      "tables": 1,
+      "dialogs": 0,
+      "headings": 5
+    }
+  },
+  "actionRegistry": {
+    "supportedActions": [
+      "navigate",
+      "login",
+      "click",
+      "fill",
+      "select",
+      "check",
+      "uncheck",
+      "press",
+      "waitFor",
+      "assertVisible",
+      "assertText",
+      "assertUrl",
+      "screenshot",
+      "noop"
+    ]
+  },
+  "dataContextSummary": {
+    "totalEntries": 2,
+    "sensitiveEntries": 1,
+    "nonSensitiveEntries": 1,
+    "availableKeys": [
+      {
+        "key": "APP_USERNAME",
+        "source": "app_username",
+        "sensitive": false
+      },
+      {
+        "key": "APP_PASSWORD",
+        "source": "app_password",
+        "sensitive": true
+      }
+    ]
+  },
+  "selectedSkill": {
+    "skillId": "assertion-resolution",
+    "skillPath": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-24T19-46-31-868Z\\cases\\case-37945\\handoff-attempt-1\\selected-skill.md"
+  },
+  "constraints": {
+    "noApiKey": true,
+    "noPlaywrightExecution": true,
+    "doNotModifyStableRegistry": true,
+    "useOnlyAvailableDataKeys": true,
+    "outputMustMatchSchema": true
+  }
+}

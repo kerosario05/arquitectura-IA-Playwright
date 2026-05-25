@@ -157,7 +157,57 @@
       "status": "candidate",
       "createdAt": "2026-05-22T01:47:27.792Z",
       "updatedAt": "2026-05-22T01:47:27.792Z"
+    },
+    {
+      "id": "flow_1779554812566_u1u3pm",
+      "name": "Visualizar catálogo principal de productos disponi",
+      "filePath": "flows\\visualizar-catálogo-principal-de-productos-disponi.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "assertText",
+          "target": "Phones",
+          "pageObjectId": "ProductDetailPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "assertText",
+          "target": "Laptops",
+          "pageObjectId": "ProductDetailPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "assertText",
+          "target": "Monitors",
+          "pageObjectId": "ProductDetailPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "assertText",
+          "target": "Categorías visibles: Phones, Laptops y Monitors.",
+          "pageObjectId": "ProductDetailPage",
+          "methodName": "expectLoaded"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-23T16:46:52.566Z",
+      "updatedAt": "2026-05-23T16:46:52.566Z"
     }
   ],
-  "updatedAt": "2026-05-22T01:47:27.798Z"
+  "updatedAt": "2026-05-23T16:46:52.566Z"
 }

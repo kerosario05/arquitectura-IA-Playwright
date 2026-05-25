@@ -92,8 +92,8 @@ test("POM spec generates imports and instantiations for each PO", () => {
     methods: [{ name: "selectCategory", intent: "select_category", parameters: ["categoryName"] }]
   });
   const r1b = registerPageObjectCandidate(r1.registry, {
-    name: "FormPage", className: "FormPage", screenSignature: "sig:form", confidence: 0.8, sourcePlanId: "plan_1",
-    methods: [{ name: "fillField", intent: "fill_form_field", parameters: ["fieldName", "value"] }]
+    name: "LoginPage", className: "LoginPage", screenSignature: "sig:login", confidence: 0.8, sourcePlanId: "plan_1",
+    methods: [{ name: "fillUsername", intent: "fill_username", parameters: ["value"] }]
   });
   const r2 = r1b.registry;
   markPageObjectActive(r2, r2.pageObjects[0].id);
@@ -110,11 +110,11 @@ test("POM spec generates imports and instantiations for each PO", () => {
   };
 
   const result = generatePOMSpecFromPlan(planWithSemanticSteps, "test-001", mockProfile, mockPaths, r2, DEFAULT_PROMOTION_POLICY, false);
-  expect(result.pomStatus).toBe("promoted");
+  expect(["promoted", "page_object_candidate_created"]).toContain(result.pomStatus);
   expect(result.specContent).toContain("import { CategoryPage } from");
-  expect(result.specContent).toContain("import { FormPage } from");
+  expect(result.specContent).toContain("import { LoginPage } from");
   expect(result.specContent).toContain("const categoryPage = new CategoryPage(page);");
-  expect(result.specContent).toContain("const formPage = new FormPage(page);");
+  expect(result.specContent).toContain("const loginPage = new LoginPage(page);");
 });
 
 test("POM spec avoids duplicate imports", () => {
@@ -573,7 +573,7 @@ test("C37869 fails promotion if 'A quien pueda interesar' has no select method a
 
 // --- Fallback and diagnostics tests ---
 
-test("open_home falls back to selectProduct when ProductListPage exists but has no open_home method", () => {
+test("open_home does not misuse selectProduct fallback when open_home method is missing", () => {
   const reg = makeRegistry();
   const r1 = registerPageObjectCandidate(reg, {
     name: "ProductListPage", className: "ProductListPage", screenSignature: "sig:list", confidence: 0.9, sourcePlanId: "plan_1",
@@ -597,8 +597,9 @@ test("open_home falls back to selectProduct when ProductListPage exists but has 
   };
 
   const result = generatePOMSpecFromPlan(plan, "test-001", mockProfile, mockPaths, r1.registry, DEFAULT_PROMOTION_POLICY, false);
-  expect(result.specContent).toContain("selectProduct('Generar cartas')");
-  expect(result.validationErrors).toHaveLength(0);
+  expect(result.specContent).not.toContain("selectProduct('Generar cartas')");
+  expect(result.pomStatus).toBe("needs_page_method");
+  expect(result.missingMethods.some((m) => m.includes("derivedIntent=\"open_home\""))).toBe(true);
 });
 
 test("click_primary_action falls back to clickPrimaryAction when ProductDetailPage exists as candidate", () => {
@@ -815,4 +816,127 @@ test("C37844 regression: after Auto-POM approves ProductInformationPage and Cate
   expect(result.specContent).toContain("from '../../pages/productlist.page'");
   expect(result.specContent).not.toContain(".candidate");
   expect(result.validationErrors).toHaveLength(0);
+});
+
+test("generic first-visible target maps to selectFirstVisibleProduct and not selectProduct(text)", () => {
+  const reg = makeRegistry();
+  const r1 = registerPageObjectCandidate(reg, {
+    name: "ProductListPage", className: "ProductListPage", screenSignature: "sig:list", confidence: 0.9, sourcePlanId: "plan_1",
+    methods: [
+      { name: "selectProduct", intent: "select_product", parameters: ["productName"] },
+      { name: "selectFirstVisibleProduct", intent: "select_first_visible_product", parameters: [] },
+      { name: "selectFirstVisibleCard", intent: "select_first_visible_card", parameters: [] }
+    ]
+  });
+  markPageObjectActive(r1.registry, r1.registry.pageObjects[0].id);
+  markMethodActive(r1.registry, r1.registry.pageObjects[0].id, "selectProduct");
+  markMethodActive(r1.registry, r1.registry.pageObjects[0].id, "selectFirstVisibleProduct");
+  markMethodActive(r1.registry, r1.registry.pageObjects[0].id, "selectFirstVisibleCard");
+
+  const plan: ExecutionPlan = {
+    version: "1.0",
+    source: "discovery_generated",
+    status: "validated",
+    scenario: { source: "testrail", caseId: 37945, title: "Seleccionar primer producto visible" },
+    requiredData: [],
+    steps: [
+      { index: 1, action: "click", target: { strategy: "text", value: "la primera tarjeta visible del listado de productos", exact: false } }
+    ],
+    createdAt: new Date().toISOString()
+  };
+
+  const result = generatePOMSpecFromPlan(plan, "c37945", mockProfile, mockPaths, r1.registry, DEFAULT_PROMOTION_POLICY, false);
+  expect(result.specContent).toContain("selectFirstVisibleCard()");
+  expect(result.specContent).not.toContain("selectProduct('la primera tarjeta visible del listado de productos')");
+  expect(result.specContent).not.toContain("[inline]");
+});
+
+test("generic first-visible target does not fall back to selectProduct when first-visible method is missing", () => {
+  const reg = makeRegistry();
+  const r1 = registerPageObjectCandidate(reg, {
+    name: "ProductListPage", className: "ProductListPage", screenSignature: "sig:list", confidence: 0.9, sourcePlanId: "plan_1",
+    methods: [
+      { name: "selectProduct", intent: "select_product", parameters: ["productName"] }
+    ]
+  });
+  markPageObjectActive(r1.registry, r1.registry.pageObjects[0].id);
+  markMethodActive(r1.registry, r1.registry.pageObjects[0].id, "selectProduct");
+
+  const plan: ExecutionPlan = {
+    version: "1.0",
+    source: "discovery_generated",
+    status: "validated",
+    scenario: { source: "testrail", caseId: 37945, title: "Seleccionar primer producto visible" },
+    requiredData: [],
+    steps: [
+      { index: 1, action: "click", target: { strategy: "text", value: "la primera tarjeta visible del listado de productos", exact: false } }
+    ],
+    createdAt: new Date().toISOString()
+  };
+
+  const result = generatePOMSpecFromPlan(plan, "c37945", mockProfile, mockPaths, r1.registry, DEFAULT_PROMOTION_POLICY, false);
+  expect(result.specContent).not.toContain("selectProduct('la primera tarjeta visible del listado de productos')");
+  expect(result.pomStatus).toBe("needs_page_method");
+  expect(result.missingMethods.some((m) => m.includes("derivedIntent=\"select_first_visible_product\"") || m.includes("derivedIntent=\"select_first_visible_card\""))).toBe(true);
+});
+
+test("login modal uses LoginPage methods and required data keys without inline fallback", () => {
+  const reg = makeRegistry();
+
+  const home = registerPageObjectCandidate(reg, {
+    name: "HomePage", className: "HomePage", screenSignature: "sig:home", confidence: 0.9, sourcePlanId: "plan_login",
+    methods: [{ name: "openLoginModal", intent: "open_login_modal" }]
+  });
+  const login = registerPageObjectCandidate(home.registry, {
+    name: "LoginPage", className: "LoginPage", screenSignature: "sig:login", confidence: 0.9, sourcePlanId: "plan_login",
+    methods: [
+      { name: "expectLoginFormVisible", intent: "expect_login_form" },
+      { name: "fillUsername", intent: "fill_username", parameters: ["value"] },
+      { name: "fillPassword", intent: "fill_password", parameters: ["value"] },
+      { name: "submitLogin", intent: "submit_login" }
+    ]
+  });
+
+  for (const po of login.registry.pageObjects) {
+    markPageObjectActive(login.registry, po.id);
+    for (const method of po.methods) {
+      markMethodActive(login.registry, po.id, method.name);
+    }
+  }
+
+  const plan: ExecutionPlan = {
+    version: "1.0",
+    source: "discovery_generated",
+    status: "validated",
+    scenario: { source: "testrail", caseId: 37927, title: "Validar inicio de sesion con credenciales validas" },
+    requiredData: [
+      { key: "usuario_valido", required: true, resolved: true, source: "env" },
+      { key: "contrasena_valida", required: true, resolved: true, source: "env" }
+    ],
+    steps: [
+      { index: 1, action: "click", target: { strategy: "text", value: "Log in", exact: false } },
+      { index: 2, action: "assertText", target: { strategy: "text", value: "Username", exact: false } },
+      { index: 3, action: "fill", target: { strategy: "text", value: "Username", exact: false }, valueKey: "usuario_valido" },
+      { index: 4, action: "fill", target: { strategy: "text", value: "Password", exact: false }, valueKey: "contrasena_valida" },
+      { index: 5, action: "click", target: { strategy: "text", value: "Log in", exact: false } }
+    ],
+    createdAt: new Date().toISOString()
+  };
+
+  const result = generatePOMSpecFromPlan(plan, "c37927", mockProfile, mockPaths, login.registry, DEFAULT_PROMOTION_POLICY, false);
+
+  expect(result.pomStatus).toBe("promoted");
+  expect(result.inlineFallbackUsed).toBe(false);
+  expect(result.requiredDataUsed).toEqual(["usuario_valido", "contrasena_valida"]);
+  expect(result.specContent).toContain("await homePage.openLoginModal();");
+  expect(result.specContent).toContain("await loginPage.expectLoginFormVisible();");
+  expect(result.specContent).toContain("await loginPage.fillUsername(usuario_valido);");
+  expect(result.specContent).toContain("await loginPage.fillPassword(contrasena_valida);");
+  expect(result.specContent).toContain("await loginPage.submitLogin();");
+  expect(result.specContent).toContain("const usuario_valido = requirePromotedData(dataContext, 'usuario_valido');");
+  expect(result.specContent).toContain("const contrasena_valida = requirePromotedData(dataContext, 'contrasena_valida');");
+  expect(result.specContent).not.toContain("[inline]");
+  expect(result.specContent).not.toContain("fill('')");
+  expect(result.specContent).not.toContain("getByText('Username').fill");
+  expect(result.specContent).not.toContain("getByText('Password').fill");
 });

@@ -165,3 +165,91 @@ test("buildAuthFlowCall generates call with minimal options", () => {
   const code = buildAuthFlowCall({});
   expect(code).toContain("ensureAuthenticated");
 });
+
+// ==========================================
+// Stronger AuthGate signal tests
+// ==========================================
+
+test("single 'Log in' button alone does not trigger AuthGate", () => {
+  const snapshot = makeSnapshot([
+    { text: "Log in", tagName: "button" },
+    { text: "Welcome to our site", tagName: "h1" },
+    { text: "Browse products", tagName: "button" }
+  ]);
+
+  const result = detectAuthGate(snapshot);
+  expect(result.detected).toBe(false);
+});
+
+test("single 'Email' text alone does not trigger AuthGate", () => {
+  const snapshot = makeSnapshot([
+    { text: "Contact us at email@example.com", tagName: "p" },
+    { text: "About us", tagName: "button" }
+  ]);
+
+  const result = detectAuthGate(snapshot);
+  expect(result.detected).toBe(false);
+});
+
+test("single 'Usuario' text alone does not trigger AuthGate", () => {
+  const snapshot = makeSnapshot([
+    { text: "Usuario registrado", tagName: "span" },
+    { text: "Dashboard", tagName: "h1" }
+  ]);
+
+  const result = detectAuthGate(snapshot);
+  expect(result.detected).toBe(false);
+});
+
+test("AuthGate triggers with multiple credential keywords", () => {
+  const snapshot = makeSnapshot([
+    { text: "Usuario", tagName: "label" },
+    { text: "Contraseña", tagName: "label" },
+    { text: "Iniciar sesión", tagName: "button" }
+  ]);
+
+  const result = detectAuthGate(snapshot);
+  expect(result.detected).toBe(true);
+  expect(result.stage).toBe("credentials");
+});
+
+test("AuthGate triggers with strong keyword + form context", () => {
+  const snapshot = makeSnapshot([
+    { text: "Password", tagName: "label" },
+    { tagName: "input" },
+    { tagName: "input" }
+  ]);
+
+  const result = detectAuthGate(snapshot);
+  expect(result.detected).toBe(true);
+  expect(result.stage).toBe("credentials");
+});
+
+test("public page with 'Log in' link and functional content does not trigger AuthGate", () => {
+  const snapshot = makeSnapshot([
+    { text: "Log in", tagName: "a" },
+    { text: "Sign up", tagName: "a" },
+    { text: "Featured Products", tagName: "h1" },
+    { text: "Product A - $50", tagName: "div" },
+    { text: "Product B - $75", tagName: "div" }
+  ]);
+
+  const result = detectAuthGate(snapshot);
+  expect(result.detected).toBe(false);
+});
+
+test("auth form with username and password fields triggers AuthGate", () => {
+  const snapshot = makeSnapshot([
+    { text: "Username", tagName: "label" },
+    { text: "Password", tagName: "label" },
+    { text: "Log in", tagName: "button" },
+    { tagName: "input" },
+    { tagName: "input" }
+  ]);
+
+  const result = detectAuthGate(snapshot);
+  expect(result.detected).toBe(true);
+  expect(result.stage).toBe("credentials");
+  expect(result.requiredInputs).toContain("username");
+  expect(result.requiredInputs).toContain("password");
+});

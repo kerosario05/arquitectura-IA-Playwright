@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-05-22T19:15:10.978Z",
+  "updatedAt": "2026-05-24T16:45:58.569Z",
   "automations": [
     {
       "id": "c37757-consulta-depositos-a-plazo-en-dolares",
@@ -241,6 +241,146 @@
         "previousStatus": "active",
         "specVerification": {
           "status": "passed"
+        }
+      }
+    },
+    {
+      "id": "c37903-visualizar-catalogo-principal-de-productos-disponibles",
+      "externalId": "C37903",
+      "caseId": 37903,
+      "title": "Visualizar catálogo principal de productos disponibles",
+      "planPath": "automations\\apps\\default\\cases\\c37903-visualizar-catalogo-principal-de-productos-disponibles\\plan.json",
+      "specPath": "automations\\apps\\default\\cases\\c37903-visualizar-catalogo-principal-de-productos-disponibles\\case.spec.ts",
+      "appSlug": "default",
+      "appConfigPath": "automations\\apps\\default\\app.config.json",
+      "status": "blocked_missing_pom",
+      "source": "discovery",
+      "appProfile": "default",
+      "baseUrlHash": "f1bffa09d02f",
+      "createdAt": "2026-05-23T16:46:52.573Z",
+      "updatedAt": "2026-05-23T16:46:52.573Z",
+      "lastPromotedFrom": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-23T16-46-46-034Z\\cases\\case-37903\\discovered-plans.pending.json",
+      "pomStatus": "needs_page_method",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-23T16-46-46-034Z\\cases\\case-37903",
+        "pomDiagnostics": {
+          "missingPageObjects": [],
+          "missingMethods": [
+            "step=2 target=\"Phones\" derivedIntent=\"expect_loaded\" expectedOwner=\"ProductDetailPage\" availableMethods=[clickPrimaryAction, step=4 target=\"Cédula de identidad dominicana\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]Method, step=5 target=\"continuar\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]Method]",
+            "step=3 target=\"Laptops\" derivedIntent=\"expect_loaded\" expectedOwner=\"ProductDetailPage\" availableMethods=[clickPrimaryAction, step=4 target=\"Cédula de identidad dominicana\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]Method, step=5 target=\"continuar\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]Method]",
+            "step=4 target=\"Monitors\" derivedIntent=\"expect_loaded\" expectedOwner=\"ProductDetailPage\" availableMethods=[clickPrimaryAction, step=4 target=\"Cédula de identidad dominicana\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]Method, step=5 target=\"continuar\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]Method]",
+            "step=5 target=\"Categorías visibles: Phones, Laptops y Monitors.\" derivedIntent=\"expect_loaded\" expectedOwner=\"ProductDetailPage\" availableMethods=[clickPrimaryAction, step=4 target=\"Cédula de identidad dominicana\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]Method, step=5 target=\"continuar\" derivedIntent=\"click_primary_action\" expectedOwner=\"ProductDetailPage\" availableMethods=[]Method]"
+          ],
+          "generatedCandidates": 0,
+          "autoPom": {
+            "enabled": true,
+            "initialPomStatus": "needs_page_method",
+            "generatedCandidateFiles": [],
+            "autoApprovedPageObjects": [],
+            "autoApprovedMethods": [],
+            "blockedAutoApprovals": [],
+            "approvalThreshold": 0.5,
+            "regeneratedSpec": true,
+            "validationStatus": "failed",
+            "finalPomStatus": "needs_manual_review"
+          }
+        }
+      }
+    },
+    {
+      "id": "c37923-validar-agregar-producto-al-carrito-desde-detalle",
+      "externalId": "C37923",
+      "caseId": 37923,
+      "title": "Validar agregar producto al carrito desde detalle",
+      "planPath": "automations\\apps\\default\\cases\\c37923-validar-agregar-producto-al-carrito-desde-detalle\\plan.json",
+      "specPath": "automations\\apps\\default\\cases\\c37923-validar-agregar-producto-al-carrito-desde-detalle\\case.spec.ts",
+      "appSlug": "default",
+      "appConfigPath": "automations\\apps\\default\\app.config.json",
+      "status": "blocked_missing_pom",
+      "source": "discovery",
+      "appProfile": "default",
+      "baseUrlHash": "f1bffa09d02f",
+      "createdAt": "2026-05-23T18:38:34.462Z",
+      "updatedAt": "2026-05-24T16:45:58.569Z",
+      "lastPromotedFrom": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-24T16-44-00-542Z\\cases\\case-37923\\discovered-plans.pending.json",
+      "pomStatus": "needs_page_method",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-24T16-44-00-542Z\\cases\\case-37923",
+        "pomDiagnostics": {
+          "status": "needs_page_object",
+          "inlineFallbackUsed": false,
+          "reason": "needs_manual_review",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 1,
+          "autoPom": {
+            "enabled": true,
+            "initialPomStatus": "page_object_candidate_created",
+            "generatedCandidateFiles": [],
+            "autoApprovedPageObjects": [],
+            "autoApprovedMethods": [],
+            "blockedAutoApprovals": [],
+            "approvalThreshold": 0.5,
+            "regeneratedSpec": true,
+            "validationStatus": "failed",
+            "finalPomStatus": "needs_manual_review"
+          }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\default\\cases\\c37923-validar-agregar-producto-al-carrito-desde-detalle\\plan.json",
+        "previousStatus": "blocked_missing_pom"
+      }
+    },
+    {
+      "id": "c37919-validar-visualizacion-del-catalogo-principal-de-productos",
+      "externalId": "C37919",
+      "caseId": 37919,
+      "title": "Validar visualización del catálogo principal de productos",
+      "planPath": "automations\\apps\\default\\cases\\c37919-validar-visualizacion-del-catalogo-principal-de-productos\\plan.json",
+      "specPath": "automations\\apps\\default\\cases\\c37919-validar-visualizacion-del-catalogo-principal-de-productos\\case.spec.ts",
+      "appSlug": "default",
+      "appConfigPath": "automations\\apps\\default\\app.config.json",
+      "status": "blocked_missing_pom",
+      "source": "discovery",
+      "appProfile": "default",
+      "baseUrlHash": "f1bffa09d02f",
+      "createdAt": "2026-05-24T06:36:15.182Z",
+      "updatedAt": "2026-05-24T06:36:15.182Z",
+      "lastPromotedFrom": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-24T06-36-07-564Z\\cases\\case-37919\\discovered-plans.pending.json",
+      "pomStatus": "needs_page_method",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\batch\\2026-05-24T06-36-07-564Z\\cases\\case-37919",
+        "pomDiagnostics": {
+          "status": "needs_page_object",
+          "inlineFallbackUsed": false,
+          "reason": "needs_manual_review",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 3,
+          "autoPom": {
+            "enabled": true,
+            "initialPomStatus": "page_object_candidate_created",
+            "generatedCandidateFiles": [],
+            "autoApprovedPageObjects": [],
+            "autoApprovedMethods": [],
+            "blockedAutoApprovals": [],
+            "approvalThreshold": 0.5,
+            "regeneratedSpec": true,
+            "validationStatus": "failed",
+            "finalPomStatus": "needs_manual_review"
+          }
         }
       }
     }

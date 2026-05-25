@@ -4,7 +4,7 @@ import type { AppAutomationPaths, AppProfile } from "./app-profile";
 import type { PromotionPolicy, POMPromotionStatus } from "../types/automation-promotion.types";
 import type { PageObjectEntry, PageObjectMethod, PageObjectRegistry } from "../types/page-object.types";
 import { findReusableMethod, findMethodBySemanticIntent } from "./page-object-registry";
-import { deriveMethodIntentFromStep, deriveExpectedOwnerForStep } from "./pom-classification";
+import { deriveMethodIntentFromStepWithContext, deriveExpectedOwnerForStep } from "./pom-classification";
 import type { SemanticMethodIntent } from "../types/pom-ownership";
 import { isLikelyAuthGate, buildAuthFlowSpecImport, buildAuthFlowInstantiation, buildAuthFlowCall } from "../discovery/auth-flow-helpers";
 
@@ -17,6 +17,8 @@ export type POMSpecResult = {
   generatedCandidates: number;
   usedAuthFlow: boolean;
   validationErrors: string[];
+  inlineFallbackUsed: boolean;
+  requiredDataUsed: string[];
 };
 
 function getTarget(t: PlanTarget | "APP_BASE_URL" | undefined): PlanTarget | undefined {
@@ -32,6 +34,10 @@ function getTargetValue(t: PlanTarget | "APP_BASE_URL" | undefined): string {
 
 function escapeSpecString(value: string): string {
   return value.replace(/'/g, "''");
+}
+
+function buildPortablePathFromSpec(specPath: string, absoluteTargetPath: string): string {
+  return path.relative(path.dirname(specPath), absoluteTargetPath).replace(/\\/g, "/");
 }
 
 function buildPageObjectImport(className: string, filePath: string, specPath: string): string {
@@ -151,6 +157,27 @@ function deriveSelectionIntent(step: ExecutionPlanStep): SemanticMethodIntent {
   const targetValue = getTargetValue(step.target);
   const normalizedTarget = targetValue.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
+  const categoryKeywords = [
+    "categoria", "category", "filtro", "filter", "tab", "menu", "seccion", "section"
+  ];
+  for (const kw of categoryKeywords) {
+    if (normalizedTarget.includes(kw)) return "select_category";
+  }
+
+  const primaryActionKeywords = [
+    "add to cart", "agregar al carrito", "comprar", "purchase", "checkout", "continuar", "submit", "enviar", "confirmar"
+  ];
+  for (const kw of primaryActionKeywords) {
+    if (normalizedTarget.includes(kw)) return "click_primary_action";
+  }
+
+  if (/\b(primer[ao]?\s+(producto|item|registro|card|tarjeta|fila)|primera?\s+(tarjeta|card|fila)|first\s+visible\s+(item|product|card|row))\b/.test(normalizedTarget)) {
+    if (/\b(fila|row)\b/.test(normalizedTarget)) return "select_first_visible_row";
+    if (/\b(tarjeta|card)\b/.test(normalizedTarget)) return "select_first_visible_card";
+    if (/\b(producto|product)\b/.test(normalizedTarget)) return "select_first_visible_product";
+    return "select_first_visible_item";
+  }
+
   const productConditionKeywords = ["cuenta", "tarjeta", "prestamo", "producto", "ahorro", "corriente"];
   for (const kw of productConditionKeywords) {
     if (normalizedTarget.includes(kw)) return "select_product";
@@ -198,14 +225,18 @@ export function generatePOMSpecFromPlan(
   const missingMethods: string[] = [];
   let generatedCandidates = 0;
   let usedAuthFlow = false;
+  let inlineFallbackUsed = false;
 
   const importLines: string[] = [];
   const instantiationLines: string[] = [];
   const actionLines: string[] = [];
   const preambleLines: string[] = [];
+  const dataHelperLines: string[] = [];
+  const requiredDataUsed = new Set<string>();
 
   const importedClasses = new Set<string>();
   const instantiatedVars = new Map<string, string>();
+  const declaredValueVars = new Set<string>();
 
   function ensurePageObject(className: string, filePath: string): string {
     const key = className;
@@ -226,11 +257,30 @@ export function generatePOMSpecFromPlan(
     return `${step.action} ${target}`.trim();
   }
 
+  function ensureDataValue(step: ExecutionPlanStep): string {
+    if (!step.valueKey) {
+      return step.value ? `'${escapeSpecString(step.value)}'` : "''";
+    }
+    const rawVarName = step.valueKey.replace(/[^a-zA-Z0-9_$]/g, "_");
+    const varName = rawVarName.match(/^[A-Za-z_$]/) ? rawVarName : `data_${rawVarName}`;
+    requiredDataUsed.add(step.valueKey);
+    if (!declaredValueVars.has(varName)) {
+      declaredValueVars.add(varName);
+      dataHelperLines.push(`const ${varName} = requirePromotedData(dataContext, '${escapeSpecString(step.valueKey)}');`);
+    }
+    return varName;
+  }
+
   const authGateStepIndex = authFlowOptions ? findAuthGateStepIndex(plan.steps) : -1;
   const authGateDetected = authGateStepIndex >= 0;
 
   if (authGateDetected) {
     usedAuthFlow = true;
+  }
+
+  if (plan.steps.some((step) => step.action === "navigate" && step.target === "APP_BASE_URL")) {
+    preambleLines.push("await page.goto('/');");
+    preambleLines.push("await page.waitForLoadState('domcontentloaded');");
   }
 
   const preAuthActionLines: string[] = [];
@@ -258,7 +308,8 @@ export function generatePOMSpecFromPlan(
 
     const moduleNav = isModuleNavigationStep(step);
     const submitLike = !moduleNav && isSubmitLikeStep(step);
-    const selectionLike = !moduleNav && !submitLike && isSelectionLikeStep(step);
+    const isActionSelectionStep = step.action === "click" || step.action === "select" || step.action === "check";
+    const selectionLike = !moduleNav && !submitLike && isActionSelectionStep && isSelectionLikeStep(step);
 
     let semanticIntent: SemanticMethodIntent;
 
@@ -281,10 +332,10 @@ export function generatePOMSpecFromPlan(
       if (hasExplicitSelectionDiagnostics) {
         semanticIntent = deriveSelectionIntent(step);
       } else {
-        semanticIntent = deriveMethodIntentFromStep(step);
+        semanticIntent = deriveMethodIntentFromStepWithContext(step, plan.steps);
       }
     } else {
-      semanticIntent = deriveMethodIntentFromStep(step);
+      semanticIntent = deriveMethodIntentFromStepWithContext(step, plan.steps);
     }
 
     if (moduleNav && isHomeRouteTarget(getTargetValue(step.target))) {
@@ -300,9 +351,9 @@ export function generatePOMSpecFromPlan(
 
     if (!resolved && pageObjectRegistry) {
       const targetValue = getTargetValue(step.target);
-      const expectedOwner = deriveExpectedOwnerForStep(step);
+      const expectedOwner = deriveExpectedOwnerForStep(step, plan.steps);
 
-      if (semanticIntent === "open_home" && expectedOwner === "ProductListPage") {
+      if (!resolved && semanticIntent === "select_product") {
         const productListPO = pageObjectRegistry.pageObjects.find(
           (po) => po.className === "ProductListPage" && po.status === "active"
         ) ?? pageObjectRegistry.pageObjects.find(
@@ -317,27 +368,7 @@ export function generatePOMSpecFromPlan(
           if (selectMethod) {
             resolved = { pageObject: productListPO, method: selectMethod };
             fallbackUsed = true;
-            fallbackInfo = `open_home->selectProduct fallback for "${targetValue}"`;
-          }
-        }
-      }
-
-      if (!resolved && (semanticIntent === "select_product" || semanticIntent === "select_category")) {
-        const productListPO = pageObjectRegistry.pageObjects.find(
-          (po) => po.className === "ProductListPage" && po.status === "active"
-        ) ?? pageObjectRegistry.pageObjects.find(
-          (po) => po.className === "ProductListPage" && po.status === "candidate"
-        );
-        if (productListPO) {
-          const selectMethod = productListPO.methods.find(
-            (m) => m.name === "selectProduct" && m.status === "active" && m.available
-          ) ?? productListPO.methods.find(
-            (m) => m.name === "selectProduct" && m.status === "candidate" && m.available
-          );
-          if (selectMethod) {
-            resolved = { pageObject: productListPO, method: selectMethod };
-            fallbackUsed = true;
-            fallbackInfo = `select fallback for "${targetValue}"`;
+            fallbackInfo = `select_product fallback for "${targetValue}"`;
           }
         }
       }
@@ -386,12 +417,48 @@ export function generatePOMSpecFromPlan(
     let actionLine = "";
 
     if (resolved) {
+      const targetValue = getTargetValue(step.target);
+      const normalizedTarget = targetValue.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const isCategoryLikeTarget = /\b(categoria|category|filtro|filter|tab|menu)\b/.test(normalizedTarget);
+      const isPrimaryActionLikeTarget = /\b(add to cart|agregar al carrito|comprar|purchase|checkout|continuar|submit|enviar|confirmar)\b/.test(normalizedTarget);
+      const isFirstVisibleSelectionTarget = /\b(primer[ao]?\s+(producto|item|registro|card|tarjeta|fila)|primera?\s+(tarjeta|card|fila)|first\s+visible\s+(item|product|card|row)|visible\s+(item|product|card|row))\b/.test(normalizedTarget);
+      const isActionStep = step.action === "click" || step.action === "select";
+
+      // Prevent semantic ownership drift: do not use expectLoaded as a click/select surrogate.
+      if (isActionStep && resolved.method.intent === "expect_loaded") {
+        resolved = undefined;
+      }
+
+      // Prevent generic selectProduct misuse for category/filter/button-like targets.
+      if (
+        resolved
+        && resolved.method.name === "selectProduct"
+        && (isCategoryLikeTarget || isPrimaryActionLikeTarget || isFirstVisibleSelectionTarget)
+      ) {
+        resolved = undefined;
+      }
+    }
+
+    if (resolved) {
       const varName = ensurePageObject(resolved.pageObject.className, resolved.pageObject.filePath);
       const method = resolved.method;
       if (method.parameters.length > 0) {
-        const tv = getTargetValue(step.target);
-        const args = method.parameters.map((p) => {
-          return `'${escapeSpecString(tv || p)}'`;
+        const targetValue = getTargetValue(step.target);
+        const resolvedValueExpr = step.valueKey || typeof step.value === "string"
+          ? ensureDataValue(step)
+          : undefined;
+        const args = method.parameters.map((parameter, index) => {
+          if ((semanticIntent === "fill_username" || semanticIntent === "fill_password") && index === 0 && resolvedValueExpr) {
+            return resolvedValueExpr;
+          }
+          if (semanticIntent === "submit_login" && method.name === "loginWithCredentials") {
+            if (parameter.toLowerCase().includes("user")) return "usuario_valido";
+            if (parameter.toLowerCase().includes("pass")) return "contrasena_valida";
+          }
+          if (resolvedValueExpr && method.parameters.length === 1) {
+            return resolvedValueExpr;
+          }
+          return `'${escapeSpecString(targetValue || parameter)}'`;
         }).join(", ");
         actionLine = `await ${varName}.${method.name}(${args});`;
       } else {
@@ -405,21 +472,28 @@ export function generatePOMSpecFromPlan(
         actionLine += ` // [sensitive] ${description}`;
       }
     } else if (policy.allowCandidateGeneration && pageObjectRegistry) {
-      const candidateResult = findCandidateMethod(pageObjectRegistry, semanticIntent, description);
-      if (candidateResult) {
-        const varName = ensurePageObject(candidateResult.pageObject.className, candidateResult.pageObject.filePath);
-        const method = candidateResult.method;
-        if (method.parameters.length > 0) {
-          const tv = getTargetValue(step.target);
-          const args = method.parameters.map((p) => {
-            return `'${escapeSpecString(tv || p)}'`;
-          }).join(", ");
-          actionLine = `await ${varName}.${method.name}(${args}); // candidate method`;
-        } else {
-          actionLine = `await ${varName}.${method.name}(); // candidate method`;
+      const skipCandidateIntents: SemanticMethodIntent[] = [];
+      if (!skipCandidateIntents.includes(semanticIntent)) {
+        const candidateResult = findCandidateMethod(pageObjectRegistry, semanticIntent, description);
+        if (candidateResult) {
+          const varName = ensurePageObject(candidateResult.pageObject.className, candidateResult.pageObject.filePath);
+          const method = candidateResult.method;
+          if (method.parameters.length > 0) {
+            const targetValue = getTargetValue(step.target);
+            const resolvedValueExpr = step.valueKey || typeof step.value === "string"
+              ? ensureDataValue(step)
+              : undefined;
+            const args = method.parameters.map((parameter) => {
+              if (resolvedValueExpr && method.parameters.length === 1) return resolvedValueExpr;
+              return `'${escapeSpecString(targetValue || parameter)}'`;
+            }).join(", ");
+            actionLine = `await ${varName}.${method.name}(${args}); // candidate method`;
+          } else {
+            actionLine = `await ${varName}.${method.name}(); // candidate method`;
+          }
+          actionLine += `\n  // [candidate] ${description}`;
+          generatedCandidates += 1;
         }
-        actionLine += `\n  // [candidate] ${description}`;
-        generatedCandidates += 1;
       }
     }
 
@@ -427,11 +501,12 @@ export function generatePOMSpecFromPlan(
       const locator = buildInlineLocator(step);
       actionLine = buildInlineAction(step, locator);
       actionLine += `\n  // [inline] ${description}`;
+      inlineFallbackUsed = true;
     }
 
     if (!actionLine && resolved === undefined) {
       const targetValue = getTargetValue(step.target);
-      const expectedOwner = deriveExpectedOwnerForStep(step);
+      const expectedOwner = deriveExpectedOwnerForStep(step, plan.steps);
       const ownerPO = pageObjectRegistry?.pageObjects.find((po) => po.className === expectedOwner);
       const availableMethods = ownerPO
         ? ownerPO.methods.filter((m) => m.status === "active" && m.available).map((m) => m.name)
@@ -467,10 +542,11 @@ export function generatePOMSpecFromPlan(
         `derivedIntent="${semanticIntent}" expectedOwner="${expectedOwner}" ` +
         `availableMethods=[${availableMethods.join(", ")}]`
       );
-      if (policy.allowInlineFallback) {
+      if (policy.allowInlineFallback && !policy.requirePageObjects) {
         const locator = buildInlineLocator(step);
         actionLine = buildInlineAction(step, locator);
         actionLine += `\n  // [inline-fallback] ${description}`;
+        inlineFallbackUsed = true;
       }
     }
 
@@ -516,6 +592,15 @@ export function generatePOMSpecFromPlan(
 
   lines.push("import { test } from '@playwright/test';");
 
+  if (requiredDataUsed.size > 0) {
+    const envImportPath = escapeSpecString(buildPortablePathFromSpec(appPaths.specPath ?? "", path.resolve(process.cwd(), "src/config/env.ts")));
+    const dataImportPath = escapeSpecString(buildPortablePathFromSpec(appPaths.specPath ?? "", path.resolve(process.cwd(), "src/data/index.ts")));
+    const appProfileImportPath = escapeSpecString(buildPortablePathFromSpec(appPaths.specPath ?? "", path.resolve(process.cwd(), "src/automations/app-profile.ts")));
+    lines.push(`import { config } from '${envImportPath.replace(/\.ts$/, "")}';`);
+    lines.push(`import { buildDataContext } from '${dataImportPath.replace(/\/index\.ts$/, "").replace(/\.ts$/, "")}';`);
+    lines.push(`import { loadPromotedAppConfigSync, buildMergedConfig } from '${appProfileImportPath.replace(/\.ts$/, "")}';`);
+  }
+
   if (importLines.length > 0) {
     lines.push("");
     lines.push(...importLines);
@@ -531,6 +616,26 @@ export function generatePOMSpecFromPlan(
     : `test('${escapedTitle}', async ({ page }) => {`;
   lines.push(testName);
 
+  if (requiredDataUsed.size > 0) {
+    lines.push("");
+    lines.push(`  const __appConfig = loadPromotedAppConfigSync({ appSlug: '${escapeSpecString(appProfile.appSlug)}', configPath: '${escapeSpecString(appPaths.configPath.replace(/\\/g, "/"))}' });`);
+    lines.push("  const __runtimeConfig = __appConfig ? buildMergedConfig(__appConfig, config) : config;");
+    lines.push("  const dataContext = buildDataContext(__runtimeConfig);");
+    lines.push("  const requirePromotedData = (ctx: { entries: Array<{ key: string; value: string }> }, key: string): string => {");
+    lines.push("    const normalizedKey = key.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').trim();");
+    lines.push("    const directMatch = ctx.entries.find((entry) => entry.key === key) ?? ctx.entries.find((entry) => entry.key.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').trim() === normalizedKey);");
+    lines.push("    const aliasKey = normalizedKey.includes('usuario') || normalizedKey.includes('username') || normalizedKey.includes('user')");
+    lines.push("      ? 'APP_USERNAME'");
+    lines.push("      : normalizedKey.includes('contrasena') || normalizedKey.includes('password') || normalizedKey.includes('pass')");
+    lines.push("        ? 'APP_PASSWORD'");
+    lines.push("        : undefined;");
+    lines.push("    const aliasMatch = aliasKey ? ctx.entries.find((entry) => entry.key === aliasKey) : undefined;");
+    lines.push("    const match = directMatch ?? aliasMatch;");
+    lines.push("    if (!match || !match.value) throw new Error(`Missing required promoted data key '${key}'.`);");
+    lines.push("    return match.value;");
+    lines.push("  };");
+  }
+
   if (instantiationLines.length > 0) {
     lines.push("");
     lines.push(...instantiationLines.map((l) => `  ${l}`));
@@ -539,6 +644,11 @@ export function generatePOMSpecFromPlan(
   if (preambleLines.length > 0) {
     lines.push("");
     lines.push(...preambleLines.map((l) => `  ${l}`));
+  }
+
+  if (dataHelperLines.length > 0) {
+    lines.push("");
+    lines.push(...dataHelperLines.map((l) => `  ${l}`));
   }
 
   if (missingMethods.length > 0 && policy.requirePageObjects) {
@@ -597,7 +707,9 @@ export function generatePOMSpecFromPlan(
     missingMethods,
     generatedCandidates,
     usedAuthFlow,
-    validationErrors
+    validationErrors,
+    inlineFallbackUsed,
+    requiredDataUsed: Array.from(requiredDataUsed)
   };
 }
 

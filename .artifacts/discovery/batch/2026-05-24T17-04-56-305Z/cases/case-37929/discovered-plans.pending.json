@@ -1,0 +1,60 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C37929",
+    "caseId": 37929,
+    "title": "Validar formulario de orden desde el carrito"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://www.demoblaze.com",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "1. Clic en \"Cart\".",
+      "target": {
+        "strategy": "text",
+        "value": "Cart",
+        "exact": false
+      }
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en \"Place Order\".",
+      "target": {
+        "strategy": "text",
+        "value": "Place Order",
+        "exact": false
+      }
+    },
+    {
+      "index": 5,
+      "action": "assertText",
+      "description": "Assert: Name",
+      "target": {
+        "strategy": "text",
+        "value": "Name",
+        "exact": false
+      },
+      "expected": "Name"
+    }
+  ],
+  "notes": [
+    "Discovery partial: 3/5 navigations/assertions satisfied."
+  ],
+  "createdAt": "2026-05-24T17:07:54.469Z"
+}
