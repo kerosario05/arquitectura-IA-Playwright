@@ -17,6 +17,7 @@
  *   1 - One or more validations failed
  */
 
+import "dotenv/config";
 import { execSync } from "child_process";
 import { writeFileSync } from "fs";
 import { join } from "path";
@@ -156,13 +157,14 @@ async function runFakeProviderTests(): Promise<ValidationResult[]> {
 }
 
 async function runRealProviderTest(): Promise<ValidationResult> {
+  const providerName = process.env.AI_PROVIDER_NAME ?? process.env.AI_PROVIDER ?? "unknown";
   const result = runCommand(
     "npx tsx scripts/test-ai-repair-runtime.ts --real-provider",
-    "Real Provider Test (Gemini)"
+    `Real Provider Test (${providerName})`
   );
   
   return {
-    name: "real_provider:gemini",
+    name: `real_provider:${providerName.toLowerCase()}`,
     passed: result.success,
     durationMs: result.durationMs,
     error: result.success ? undefined : result.output.slice(-200)

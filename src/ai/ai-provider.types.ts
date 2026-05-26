@@ -1,4 +1,4 @@
-export type AiProviderName = "openai_compatible";
+export type AiProviderName = "openai_compatible" | "codex_cli" | "disabled" | "fake";
 
 export type AiMessage = {
   role: "system" | "user" | "assistant";
@@ -24,7 +24,11 @@ export type AiProviderErrorCode =
   | "ai_provider_config_missing"
   | "ai_provider_http_error"
   | "ai_provider_timeout"
-  | "ai_provider_invalid_json";
+  | "ai_provider_invalid_json"
+  | "ai_provider_process_error"
+  | "ai_provider_schema_invalid"
+  | "ai_provider_unsupported"
+  | "ai_provider_output_missing";
 
 export class AiProviderError extends Error {
   constructor(
@@ -54,4 +58,7 @@ export type AiProviderConfig = {
   timeoutMs: number;
   requireJson: boolean;
   requireJsonSchema: boolean;
+  // Codex CLI specific (optional)
+  command?: string;       // CODEX_CLI_COMMAND
+  extraArgs?: string[];   // CODEX_CLI_EXTRA_ARGS parsed
 };

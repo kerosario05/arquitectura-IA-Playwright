@@ -314,6 +314,14 @@ export type DiscoveredObject = {
   confidence: number;
 };
 
+export type ExpectedResultConsumption = {
+  originalText: string;
+  classification: "executable_assertion" | "non_executable_criteria" | "covered_by_concrete_assertions";
+  reason: string;
+  coveredByAssertions?: string[];
+  extractedQuotedTexts?: string[];
+};
+
 export type CaseDiscoveryResult = {
   version: "1.0";
   caseId: number;
@@ -355,6 +363,14 @@ export type CaseDiscoveryResult = {
       autoRepairSkippedReason?: string;
       notConsumedReasons?: string[];
     };
+    expectedResultConsumption?: Array<{
+      originalText: string;
+      classification: "executable_assertion" | "non_executable_criteria" | "covered_by_concrete_assertions";
+      reason: string;
+      coveredByAssertions?: string[];
+      extractedQuotedTexts?: string[];
+    }>;
+    nonExecutableCriteria?: string[];
     diagnosticsBuildError?: string;
   };
   autoRepairDecisionDiagnostics?: AutoRepairDecisionDiagnostics;

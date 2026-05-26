@@ -2,7 +2,7 @@ import "dotenv/config";
 import { createAiProviderFromEnv } from "../src/ai/ai-provider-factory";
 
 async function main(): Promise<void> {
-  const provider = createAiProviderFromEnv();
+  const provider = await createAiProviderFromEnv();
   if (!provider) {
     console.error("AI provider disabled. Set AI_ENABLED=true and provider env vars.");
     process.exitCode = 1;

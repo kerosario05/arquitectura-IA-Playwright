@@ -175,131 +175,149 @@ test.describe("AI Assertion Resolution Smoke", () => {
   });
 
   test("orchestrator returns valid assertion_resolution with fake provider", async () => {
-    const originalFetch = globalThis.fetch;
-    globalThis.fetch = (async () => new Response(
-      JSON.stringify({
-        choices: [{
-          message: {
-            content: JSON.stringify({
-              decision: "repaired_plan",
-              repairType: "assertion_resolution",
-              evidenceId: "ev-cart-count",
-              assertionStatus: "satisfied_by_existing_evidence",
-              reason: "Cart count text confirms item was added.",
-              confidence: 0.9
-            })
-          }
-        }]
-      }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    )) as any;
+    // Fake provider que devuelve respuesta controlada
+    const fakeProvider = {
+      providerType: "fake" as const,
+      providerName: "fake-assertion",
+      model: "fake",
+      completeJson: async () => ({
+        rawText: JSON.stringify({
+          decision: "repaired_plan",
+          repairType: "assertion_resolution",
+          evidenceId: "ev-cart-count",
+          assertionStatus: "satisfied_by_existing_evidence",
+          reason: "Cart count text confirms item was added.",
+          confidence: 0.9
+        }),
+        parsedJson: {
+          decision: "repaired_plan",
+          repairType: "assertion_resolution",
+          evidenceId: "ev-cart-count",
+          assertionStatus: "satisfied_by_existing_evidence",
+          reason: "Cart count text confirms item was added.",
+          confidence: 0.9
+        },
+        model: "fake",
+        providerName: "fake-assertion",
+        durationMs: 10
+      })
+    };
 
-    try {
-      const result = await runAiRepairOrchestrator({
-        appSlug: "arquitectura-automatizacion",
-        failure: "assertion_not_satisfied",
-        failureType: "assertion_not_satisfied" as any,
-        currentStep: "verify cart count updated",
-        currentUrl: "https://example.com/products",
-        candidates: SAFE_CANDIDATES,
-        evidenceCandidates: SAFE_EVIDENCE,
-        assertionTarget: "cart count should show 1 item",
-        constraints: [
-          "Do not invent evidence",
-          "Must use existing evidenceId from evidenceCandidates",
-          "Do not use sensitive evidence"
-        ]
-      });
+    const result = await runAiRepairOrchestrator({
+      appSlug: "arquitectura-automatizacion",
+      failure: "assertion_not_satisfied",
+      failureType: "assertion_not_satisfied" as any,
+      currentStep: "verify cart count updated",
+      currentUrl: "https://example.com/products",
+      candidates: SAFE_CANDIDATES,
+      evidenceCandidates: SAFE_EVIDENCE,
+      assertionTarget: "cart count should show 1 item",
+      constraints: [
+        "Do not invent evidence",
+        "Must use existing evidenceId from evidenceCandidates",
+        "Do not use sensitive evidence"
+      ],
+      provider: fakeProvider
+    });
 
-      expect(result.status).toBe("repaired_plan");
-      expect(result.decision?.repairType).toBe("assertion_resolution");
-      expect(result.decision?.evidenceId).toBe("ev-cart-count");
-      expect(result.decision?.assertionStatus).toBe("satisfied_by_existing_evidence");
-      expect(result.diagnostics.repairType).toBe("assertion_resolution");
-      expect(result.diagnostics.failureType).toBe("assertion_not_satisfied");
-      expect(result.diagnostics.selectedEvidenceId).toBe("ev-cart-count");
-      expect(result.diagnostics.evidenceType).toBe("text_visible");
-    } finally {
-      globalThis.fetch = originalFetch;
-    }
+    expect(result.status).toBe("repaired_plan");
+    expect(result.decision?.repairType).toBe("assertion_resolution");
+    expect(result.decision?.evidenceId).toBe("ev-cart-count");
+    expect(result.decision?.assertionStatus).toBe("satisfied_by_existing_evidence");
+    expect(result.diagnostics.repairType).toBe("assertion_resolution");
+    expect(result.diagnostics.failureType).toBe("assertion_not_satisfied");
+    expect(result.diagnostics.selectedEvidenceId).toBe("ev-cart-count");
+    expect(result.diagnostics.evidenceType).toBe("text_visible");
   });
 
   test("orchestrator blocks unknown evidenceId from AI", async () => {
-    const originalFetch = globalThis.fetch;
-    globalThis.fetch = (async () => new Response(
-      JSON.stringify({
-        choices: [{
-          message: {
-            content: JSON.stringify({
-              decision: "repaired_plan",
-              repairType: "assertion_resolution",
-              evidenceId: "ev-invented-xyz",
-              assertionStatus: "satisfied_by_existing_evidence",
-              reason: "Invented evidence confirms assertion.",
-              confidence: 0.7
-            })
-          }
-        }]
-      }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    )) as any;
+    // Fake provider que devuelve evidenceId inexistente
+    const fakeProvider = {
+      providerType: "fake" as const,
+      providerName: "fake-assertion",
+      model: "fake",
+      completeJson: async () => ({
+        rawText: JSON.stringify({
+          decision: "repaired_plan",
+          repairType: "assertion_resolution",
+          evidenceId: "ev-invented-xyz",
+          assertionStatus: "satisfied_by_existing_evidence",
+          reason: "Invented evidence confirms assertion.",
+          confidence: 0.7
+        }),
+        parsedJson: {
+          decision: "repaired_plan",
+          repairType: "assertion_resolution",
+          evidenceId: "ev-invented-xyz",
+          assertionStatus: "satisfied_by_existing_evidence",
+          reason: "Invented evidence confirms assertion.",
+          confidence: 0.7
+        },
+        model: "fake",
+        providerName: "fake-assertion",
+        durationMs: 10
+      })
+    };
 
-    try {
-      const result = await runAiRepairOrchestrator({
-        appSlug: "arquitectura-automatizacion",
-        failure: "assertion_not_satisfied",
-        failureType: "assertion_not_satisfied" as any,
-        currentStep: "verify message",
-        currentUrl: "https://example.com/page",
-        candidates: SAFE_CANDIDATES,
-        evidenceCandidates: SAFE_EVIDENCE,
-        assertionTarget: "message visible"
-      });
+    const result = await runAiRepairOrchestrator({
+      appSlug: "arquitectura-automatizacion",
+      failure: "assertion_not_satisfied",
+      failureType: "assertion_not_satisfied" as any,
+      currentStep: "verify message",
+      currentUrl: "https://example.com/page",
+      candidates: SAFE_CANDIDATES,
+      evidenceCandidates: SAFE_EVIDENCE,
+      assertionTarget: "message visible",
+      provider: fakeProvider
+    });
 
-      expect(result.status).toBe("invalid_response");
-      expect(result.diagnostics.errorCode).toBe("AI_REPAIR_UNKNOWN_EVIDENCE");
-    } finally {
-      globalThis.fetch = originalFetch;
-    }
+    expect(result.status).toBe("invalid_response");
+    expect(result.diagnostics.errorCode).toBe("AI_REPAIR_UNKNOWN_EVIDENCE");
   });
 
   test("orchestrator blocks sensitive evidence from AI", async () => {
-    const originalFetch = globalThis.fetch;
-    globalThis.fetch = (async () => new Response(
-      JSON.stringify({
-        choices: [{
-          message: {
-            content: JSON.stringify({
-              decision: "repaired_plan",
-              repairType: "assertion_resolution",
-              evidenceId: "ev-otp-field",
-              assertionStatus: "satisfied_by_existing_evidence",
-              reason: "OTP field confirms code was entered.",
-              confidence: 0.75
-            })
-          }
-        }]
-      }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    )) as any;
+    // Fake provider que devuelve sensitive evidence
+    const fakeProvider = {
+      providerType: "fake" as const,
+      providerName: "fake-assertion",
+      model: "fake",
+      completeJson: async () => ({
+        rawText: JSON.stringify({
+          decision: "repaired_plan",
+          repairType: "assertion_resolution",
+          evidenceId: "ev-otp-field",
+          assertionStatus: "satisfied_by_existing_evidence",
+          reason: "OTP field confirms code was entered.",
+          confidence: 0.75
+        }),
+        parsedJson: {
+          decision: "repaired_plan",
+          repairType: "assertion_resolution",
+          evidenceId: "ev-otp-field",
+          assertionStatus: "satisfied_by_existing_evidence",
+          reason: "OTP field confirms code was entered.",
+          confidence: 0.75
+        },
+        model: "fake",
+        providerName: "fake-assertion",
+        durationMs: 10
+      })
+    };
 
-    try {
-      const result = await runAiRepairOrchestrator({
-        appSlug: "arquitectura-automatizacion",
-        failure: "assertion_not_satisfied",
-        failureType: "assertion_not_satisfied" as any,
-        currentStep: "verify OTP entered",
-        currentUrl: "https://example.com/otp",
-        candidates: SAFE_CANDIDATES,
-        evidenceCandidates: SENSITIVE_EVIDENCE,
-        assertionTarget: "OTP field should contain code",
-        constraints: ["Do not use sensitive evidence"]
-      });
+    const result = await runAiRepairOrchestrator({
+      appSlug: "arquitectura-automatizacion",
+      failure: "assertion_not_satisfied",
+      failureType: "assertion_not_satisfied" as any,
+      currentStep: "verify OTP entered",
+      currentUrl: "https://example.com/otp",
+      candidates: SAFE_CANDIDATES,
+      evidenceCandidates: SENSITIVE_EVIDENCE,
+      assertionTarget: "OTP field should contain code",
+      constraints: ["Do not use sensitive evidence"],
+      provider: fakeProvider
+    });
 
-      expect(result.status).toBe("invalid_response");
-      expect(result.diagnostics.errorCode).toBe("AI_REPAIR_SENSITIVE_ASSERTION_BLOCKED");
-    } finally {
-      globalThis.fetch = originalFetch;
-    }
+    expect(result.status).toBe("invalid_response");
+    expect(result.diagnostics.errorCode).toBe("AI_REPAIR_SENSITIVE_ASSERTION_BLOCKED");
   });
 });

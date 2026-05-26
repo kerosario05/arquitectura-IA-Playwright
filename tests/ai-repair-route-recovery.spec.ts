@@ -7,6 +7,32 @@ import { validateRepairDecision } from "../src/ai/repair/repair-decision-validat
 import { buildRepairContextPack } from "../src/ai/repair/repair-context-pack";
 import { runAiRepairOrchestrator } from "../src/ai/repair/ai-repair-orchestrator";
 
+function withEnv<T>(values: Record<string, string | undefined>, fn: () => Promise<T>): Promise<T> {
+  const previous: Record<string, string | undefined> = {};
+  for (const key of Object.keys(values)) {
+    previous[key] = process.env[key];
+    if (values[key] === undefined) delete process.env[key];
+    else process.env[key] = values[key];
+  }
+  const restore = () => {
+    for (const key of Object.keys(values)) {
+      if (previous[key] === undefined) delete process.env[key];
+      else process.env[key] = previous[key];
+    }
+  };
+  return fn().finally(restore);
+}
+
+const FAKE_AI_ENV = {
+  AI_REPAIR_ENABLED: "true",
+  AI_ENABLED: "true",
+  AI_PROVIDER: "openai_compatible",
+  AI_PROVIDER_NAME: "gemini",
+  AI_BASE_URL: "https://example.test/v1",
+  AI_API_KEY: "test-key",
+  AI_MODEL: "test-model"
+};
+
 const ROUTE_CANDIDATES = [
   {
     candidateId: "link-products",
@@ -193,7 +219,7 @@ test("orchestrator returns repaired_plan route_recovery valid", async () => {
     { status: 200, headers: { "Content-Type": "application/json" } }
   )) as any;
 
-  const result = await runAiRepairOrchestrator({
+  const result = await withEnv(FAKE_AI_ENV, () => runAiRepairOrchestrator({
     appSlug: "test-app",
     failure: "route_not_found",
     failureType: "route_not_found",
@@ -214,7 +240,7 @@ test("orchestrator returns repaired_plan route_recovery valid", async () => {
       visitedUrls: []
     },
     constraints: ["must_return_existing_candidate_id"]
-  });
+  }));
 
   globalThis.fetch = originalFetch;
 
@@ -242,7 +268,7 @@ test("orchestrator blocks invented selector in route_recovery", async () => {
     { status: 200, headers: { "Content-Type": "application/json" } }
   )) as any;
 
-  const result = await runAiRepairOrchestrator({
+  const result = await withEnv(FAKE_AI_ENV, () => runAiRepairOrchestrator({
     appSlug: "test-app",
     failure: "route_not_found",
     failureType: "route_not_found",
@@ -251,7 +277,7 @@ test("orchestrator blocks invented selector in route_recovery", async () => {
     snapshotSummary: {},
     candidates: ROUTE_CANDIDATES,
     constraints: []
-  });
+  }));
 
   globalThis.fetch = originalFetch;
 
@@ -300,7 +326,7 @@ test("no_safe_action for route_recovery when no candidates", async () => {
     { status: 200, headers: { "Content-Type": "application/json" } }
   )) as any;
 
-  const result = await runAiRepairOrchestrator({
+  const result = await withEnv(FAKE_AI_ENV, () => runAiRepairOrchestrator({
     appSlug: "test-app",
     failure: "route_not_found",
     failureType: "navigation_dead_end",
@@ -309,7 +335,7 @@ test("no_safe_action for route_recovery when no candidates", async () => {
     snapshotSummary: {},
     candidates: [],
     constraints: []
-  });
+  }));
 
   globalThis.fetch = originalFetch;
 
@@ -334,7 +360,7 @@ test("needs_more_context for route_recovery when screen lacks nav", async () => 
     { status: 200, headers: { "Content-Type": "application/json" } }
   )) as any;
 
-  const result = await runAiRepairOrchestrator({
+  const result = await withEnv(FAKE_AI_ENV, () => runAiRepairOrchestrator({
     appSlug: "test-app",
     failure: "wrong_screen",
     failureType: "wrong_screen",
@@ -350,7 +376,7 @@ test("needs_more_context for route_recovery when screen lacks nav", async () => 
       visibleActions: ["Pay Now"]
     },
     constraints: []
-  });
+  }));
 
   globalThis.fetch = originalFetch;
 

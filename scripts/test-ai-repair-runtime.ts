@@ -145,39 +145,73 @@ function printJsonResult(testName: string, result: Awaited<ReturnType<typeof run
 }
 
 async function testRealProvider() {
-  const testName = "REAL_PROVIDER_GEMINI";
+  const providerName = process.env.AI_PROVIDER_NAME ?? process.env.AI_PROVIDER ?? "unknown";
+  const testName = `REAL_PROVIDER_${providerName.toUpperCase()}`;
   console.log(`\n>>> Starting ${testName}...`);
   
-  const input = buildMinimalContextPack({
+  // Contexto SEGURO para smoke real - NO usar targets sensibles
+  const safeCandidates: RepairCandidateForValidation[] = [
+    {
+      candidateId: "el-1",
+      role: "link",
+      name: "Products",
+      text: "View Products",
+      visible: true,
+      enabled: true,
+      clickable: true,
+      editable: false,
+      sensitive: false
+    },
+    {
+      candidateId: "el-2",
+      role: "link",
+      name: "Home",
+      text: "Go to Home",
+      visible: true,
+      enabled: true,
+      clickable: true,
+      editable: false,
+      sensitive: false
+    }
+  ];
+  
+  const input = {
     appSlug: "arquitectura-automatizacion",
-    currentStep: "click 'Confirm Purchase' button",
-    currentUrl: "https://example.com/order/confirmation",
+    failure: "target_not_found",
+    currentStep: "click 'View Products' link",
+    currentUrl: "https://example.com/welcome",
     snapshotSummary: {
       buttons: ["Continue Shopping", "Home", "Contact Support"],
       links: ["Home", "Products", "About"],
       dialogs: []
     },
-    previousActions: ["fill email", "fill password", "click login", "add product to cart", "click checkout"],
-    previousFills: ["email=user@example.com", "password=***"],
+    candidates: safeCandidates,
+    previousActions: ["navigate to welcome page", "view welcome message"],
+    previousFills: [],
     constraints: [
-      "Do not propose payment actions",
-      "Do not propose login actions",
       "Only suggest navigation or safe UI interactions",
-      "Prefer candidates that continue shopping flow"
+      "Must use existing candidateId from candidates list",
+      "Do not invent selectors"
     ]
-  });
+  };
 
   const start = Date.now();
-  const apiKey = process.env.AI_API_KEY || process.env.GEMINI_API_KEY;
+  
+  // Usar variables de entorno tal como están configuradas
+  // Para codex_cli: no requiere AI_API_KEY
+  // Para openai_compatible: requiere AI_API_KEY
   const result = await withEnv({
     AI_REPAIR_ENABLED: "true",
     AI_ENABLED: "true",
-    AI_PROVIDER: "openai_compatible",
-    AI_PROVIDER_NAME: "gemini",
-    AI_BASE_URL: "https://generativelanguage.googleapis.com/v1beta/openai",
-    AI_API_KEY: apiKey,
-    AI_MODEL: process.env.AI_MODEL ?? "gemini-2.5-flash",
-    AI_REQUIRE_JSON_SCHEMA: "true",
+    AI_PROVIDER: process.env.AI_PROVIDER,
+    AI_PROVIDER_NAME: process.env.AI_PROVIDER_NAME,
+    AI_BASE_URL: process.env.AI_BASE_URL,
+    AI_API_KEY: process.env.AI_API_KEY,
+    AI_MODEL: process.env.AI_MODEL ?? (process.env.AI_PROVIDER === "codex_cli" ? "codex" : "gemini-2.5-flash"),
+    AI_TIMEOUT_MS: process.env.AI_TIMEOUT_MS ?? "120000",
+    CODEX_CLI_COMMAND: process.env.CODEX_CLI_COMMAND,
+    CODEX_CLI_EXTRA_ARGS: process.env.CODEX_CLI_EXTRA_ARGS,
+    AI_REQUIRE_JSON_SCHEMA: process.env.AI_REQUIRE_JSON_SCHEMA ?? "true",
     AI_REPAIR_BLOCK_SENSITIVE_ACTIONS: "true",
     AI_REPAIR_BLOCK_AUTH_SECRETS: "true",
     AI_REPAIR_BLOCK_PAYMENTS: "true",
@@ -187,10 +221,15 @@ async function testRealProvider() {
   }, () => runAiRepairOrchestrator(input));
   const durationMs = Date.now() - start;
 
-  printResult(testName, result, durationMs);
+  printJsonResult(testName, result, durationMs);
 
+  // Aceptar repaired_plan, no_safe_action, o needs_more_context como exito
+  // Lo importante es que el provider devolvio una decision valida y segura
   const success = result.status === "repaired_plan" || result.status === "no_safe_action" || result.status === "needs_more_context";
   console.log(`>>> ${testName}: ${success ? "PASSED" : "FAILED"} (status=${result.status})`);
+  if (!success && result.diagnostics.errorMessage) {
+    console.log(`    Error: ${result.diagnostics.errorMessage}`);
+  }
   return { success, result, durationMs };
 }
 
@@ -1154,8 +1193,11 @@ async function main() {
   const apiKeySource = process.env.AI_API_KEY ? "AI_API_KEY" : (process.env.GEMINI_API_KEY ? "GEMINI_API_KEY (fallback)" : "not set");
   console.log(`AI_API_KEY: ${apiKeySource}`);
 
+  const providerName = process.env.AI_PROVIDER_NAME ?? process.env.AI_PROVIDER ?? "unknown";
+  const realProviderTestName = `REAL_PROVIDER_${providerName.toUpperCase()}`;
+  
   const tests: { name: string; fn: () => Promise<{ success: boolean; result: any; durationMs: number }> }[] = [
-    { name: "REAL_PROVIDER_GEMINI", fn: testRealProvider },
+    { name: realProviderTestName, fn: testRealProvider },
     { name: "FAKE_PROVIDER_REPAIRED_PLAN_VALID", fn: testFakeRepairedPlan },
     { name: "FAKE_PROVIDER_NO_SAFE_ACTION", fn: testFakeNoSafeAction },
     { name: "FAKE_PROVIDER_INVALID_JSON", fn: testFakeInvalidJson },
@@ -1177,9 +1219,9 @@ async function main() {
   ];
 
   const filteredTests = realProvider
-    ? tests.filter(t => t.name === "REAL_PROVIDER_GEMINI")
+    ? tests.filter(t => t.name === realProviderTestName)
     : mode === "all"
-      ? tests.filter(t => t.name !== "REAL_PROVIDER_GEMINI")
+      ? tests.filter(t => t.name !== realProviderTestName)
       : tests.filter(t => t.name.toLowerCase().includes(mode.toLowerCase()));
 
   const results: { name: string; passed: boolean; result?: any; durationMs?: number }[] = [];
