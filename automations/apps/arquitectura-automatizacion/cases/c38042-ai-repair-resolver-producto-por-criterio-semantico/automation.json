@@ -1,0 +1,58 @@
+{
+  "id": "c38042-ai-repair-resolver-producto-por-criterio-semantico",
+  "externalId": "C38042",
+  "caseId": 38042,
+  "title": "AI Repair - Resolver producto por criterio semántico",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c38042-ai-repair-resolver-producto-por-criterio-semantico\\plan.json",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c38042-ai-repair-resolver-producto-por-criterio-semantico\\case.spec.ts",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "arquitectura-automatizacion",
+  "baseUrlHash": "f1bffa09d02f",
+  "createdAt": "2026-05-26T13:24:58.128Z",
+  "updatedAt": "2026-05-26T13:24:58.128Z",
+  "lastPromotedFrom": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\case-38042\\2026-05-26T13-24-05-064Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "not_run",
+  "metadata": {
+    "discoveryDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\case-38042\\2026-05-26T13-24-05-064Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [],
+      "availablePageObjects": [
+        "ProductListPage",
+        "ProductDetailPage",
+        "FormPage",
+        "HomePage",
+        "LoginPage",
+        "CategoryPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": true
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c38042-ai-repair-resolver-producto-por-criterio-semantico\\plan.json",
+    "previousStatus": "active"
+  }
+}

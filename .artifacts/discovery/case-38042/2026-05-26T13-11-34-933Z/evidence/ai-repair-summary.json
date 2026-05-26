@@ -1,0 +1,50 @@
+{
+  "enabled": true,
+  "invocations": 1,
+  "providerName": "gemini",
+  "model": "gemini-2.5-flash",
+  "decisionCounts": {
+    "repaired_plan": 1,
+    "no_safe_action": 0,
+    "needs_more_context": 0,
+    "invalid_response": 0,
+    "provider_error": 0,
+    "provider_disabled": 0
+  },
+  "validationCounts": {
+    "valid": 1,
+    "blocked": 0,
+    "invalid": 0,
+    "error": 0
+  },
+  "repairTypeCounts": {
+    "target_resolution": 0,
+    "route_recovery": 0,
+    "assertion_resolution": 0,
+    "pom_method_missing": 0,
+    "selection_resolution": 1,
+    "unknown": 0
+  },
+  "appliedRepairs": 1,
+  "blockedRepairs": 0,
+  "avgDurationMs": 3637,
+  "maxDurationMs": 3637,
+  "targets": [
+    {
+      "stepIndex": 2,
+      "target": "la portátil Apple Air",
+      "action": "Seleccionar \"la portátil Apple Air\".",
+      "decisionStatus": "repaired_plan",
+      "validationStatus": "valid",
+      "repairType": "selection_resolution",
+      "selectedCandidateId": "el-148",
+      "selectionStatus": null,
+      "resolvedTargetName": "MacBook air",
+      "resolvedCandidateId": "el-148",
+      "blockedReason": null,
+      "durationMs": 3637,
+      "providerName": "gemini",
+      "model": "gemini-2.5-flash"
+    }
+  ]
+}

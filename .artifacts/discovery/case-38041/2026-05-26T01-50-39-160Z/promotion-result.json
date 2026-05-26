@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-26T01:51:59.723Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c38041-ai-repair-resolver-seleccion-con-typo-hacia-producto-existente",
+  "appSlug": "arquitectura-automatizacion",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c38041-ai-repair-resolver-seleccion-con-typo-hacia-producto-existente\\case.spec.ts",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c38041-ai-repair-resolver-seleccion-con-typo-hacia-producto-existente\\plan.json",
+  "caseFolder": "c38041-ai-repair-resolver-seleccion-con-typo-hacia-producto-existente",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false
+}

@@ -1,7 +1,7 @@
 import { createAiProviderFromEnv } from "../ai-provider-factory";
 import { AiProviderError } from "../ai-provider.types";
-import { buildRepairContextPack, type RepairContextPack } from "./repair-context-pack";
-import { validateRepairDecision, type RepairCandidateForValidation } from "./repair-decision-validator";
+import { buildRepairContextPack, type RepairContextPack, type RepairEvidence } from "./repair-context-pack";
+import { validateRepairDecision, type RepairCandidateForValidation, type RepairEvidenceForValidation } from "./repair-decision-validator";
 import type { RepairDecision } from "./repair-decision.schema";
 import { buildRepairSystemPrompt } from "./repair-system-prompt";
 
@@ -19,6 +19,32 @@ export type AiRepairOrchestratorInput = {
   previousActions?: string[];
   previousFills?: string[];
   constraints?: string[];
+  // Route recovery fields
+  failureType?: "target_not_found" | "route_not_found" | "navigation_dead_end" | "wrong_screen" | "assertion_not_satisfied" | "ambiguous_selection";
+  targetRoute?: string;
+  currentScreen?: {
+    url: string;
+    title: string;
+    visibleHeadings?: string[];
+    visibleNavItems?: string[];
+    visibleActions?: string[];
+    visibleTextSummary?: string[];
+    visibleDialogs?: string[];
+    visibleForms?: string[];
+    visibleLists?: string[];
+  };
+  routeHistory?: {
+    failedRoutePaths?: string[];
+    visitedUrls?: string[];
+  };
+  // Assertion resolution fields
+  assertionTarget?: string;
+  assertionText?: string;
+  evidenceCandidates?: RepairEvidence[];
+  // Selection resolution fields
+  selectionTarget?: string;
+  selectionIntent?: string;
+  selectionCandidates?: RepairCandidateForValidation[];
 };
 
 export type AiRepairOrchestratorResult = {
@@ -72,22 +98,28 @@ export async function runAiRepairOrchestrator(input: AiRepairOrchestratorInput):
 
     const validation = validateRepairDecision(completion.parsedJson ?? completion.rawText, {
       candidates: input.candidates,
+      evidenceCandidates: input.evidenceCandidates,
       blockSensitiveActions: bool("AI_REPAIR_BLOCK_SENSITIVE_ACTIONS", true),
       blockAuthSecrets: bool("AI_REPAIR_BLOCK_AUTH_SECRETS", true),
       blockPayments: bool("AI_REPAIR_BLOCK_PAYMENTS", true),
       blockTransfers: bool("AI_REPAIR_BLOCK_TRANSFERS", true),
       mustUseVisibleCandidate: bool("AI_REPAIR_MUST_USE_VISIBLE_CANDIDATE", true),
-      mustReturnExistingCandidateId: bool("AI_REPAIR_MUST_RETURN_EXISTING_CANDIDATE_ID", true)
+      mustReturnExistingCandidateId: bool("AI_REPAIR_MUST_RETURN_EXISTING_CANDIDATE_ID", true),
+      failedRoutePaths: input.routeHistory?.failedRoutePaths
     });
 
     if (!validation.valid) {
+      console.log(`[ai-repair] validation failed: code=${validation.code} message=${validation.message}`);
+      console.log(`[ai-repair] raw response: ${JSON.stringify(completion.parsedJson).substring(0, 500)}`);
       return {
         status: "invalid_response",
         diagnostics: {
           errorCode: validation.code,
           errorMessage: validation.message,
           provider: provider.providerName,
-          scope: "target_not_found"
+          failureType: input.failureType ?? "target_not_found",
+          repairType: (completion.parsedJson as any)?.repairType,
+          scope: input.failureType ?? "target_not_found"
         }
       };
     }
@@ -96,20 +128,43 @@ export async function runAiRepairOrchestrator(input: AiRepairOrchestratorInput):
       return {
         status: "repaired_plan",
         decision: validation.decision,
-        diagnostics: { provider: provider.providerName, scope: "target_not_found" }
+        diagnostics: {
+          provider: provider.providerName,
+          failureType: input.failureType ?? "target_not_found",
+          repairType: validation.decision.repairType,
+          scope: input.failureType ?? "target_not_found",
+          selectedEvidenceId: validation.decision.evidenceId ?? null,
+          evidenceType: validation.decision.evidenceId
+            ? input.evidenceCandidates?.find((e) => e.evidenceId === validation.decision!.evidenceId)?.type ?? null
+            : null,
+          assertionStatus: validation.decision.assertionStatus ?? null,
+          selectedCandidateId: validation.decision.candidateId ?? null,
+          selectionStatus: validation.decision.selectionStatus ?? null,
+          candidateCount: input.selectionCandidates?.length ?? input.candidates.length
+        }
       };
     }
     if (validation.decision.decision === "needs_more_context") {
       return {
         status: "needs_more_context",
         decision: validation.decision,
-        diagnostics: { provider: provider.providerName, scope: "target_not_found" }
+        diagnostics: {
+          provider: provider.providerName,
+          failureType: input.failureType ?? "target_not_found",
+          repairType: validation.decision.repairType,
+          scope: input.failureType ?? "target_not_found"
+        }
       };
     }
     return {
       status: "no_safe_action",
       decision: validation.decision,
-      diagnostics: { provider: provider.providerName, scope: "target_not_found" }
+      diagnostics: {
+        provider: provider.providerName,
+        failureType: input.failureType ?? "target_not_found",
+        repairType: validation.decision.repairType,
+        scope: input.failureType ?? "target_not_found"
+      }
     };
   } catch (error) {
     if (error instanceof AiProviderError) {

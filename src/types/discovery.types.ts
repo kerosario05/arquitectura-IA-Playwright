@@ -3,6 +3,7 @@ import type { SnapshotElement } from "./page-snapshot.types";
 import type { ExecutionPlan } from "./execution-plan.types";
 import type { AiExplorerOutput } from "../ai/ai-explorer.types";
 import type { AssertionClassification, AssertionResolutionStatus } from "../discovery/assertion-resolver";
+import type { AiRepairCaseSummary } from "../ai/repair/ai-repair-metrics";
 
 export type RuntimeEvidenceTrace = {
   clickActions: Array<{
@@ -274,6 +275,32 @@ export type DiscoveryStepResult = {
     maskedInputs?: Record<string, string>;
   };
   runtimeEvidenceTrace?: RuntimeEvidenceTrace;
+  // AI selection resolution fields
+  resolvedTargetName?: string;
+  resolvedCandidateId?: string;
+  resolvedLocator?: string;
+  resolvedRole?: string;
+  aiRepairType?: "target_resolution" | "route_recovery" | "assertion_resolution" | "selection_resolution" | "pom_method_missing";
+  aiDecisionStatus?: "repaired_plan" | "no_safe_action" | "needs_more_context";
+  aiValidationStatus?: "valid" | "invalid" | "error";
+  aiSelectionRepairDiagnostics?: {
+    enabled: boolean;
+    providerName: string;
+    model: string;
+    failureType: string;
+    selectionTarget: string;
+    contextPackSummary: {
+      selectionCandidateCount: number;
+      hasSecrets: boolean;
+      maxContextChars: number;
+    };
+    decisionStatus: string;
+    validationStatus: string;
+    selectedCandidateId: string | null;
+    selectionStatus: string | null;
+    blockedReason: string | null;
+    durationMs: number;
+  };
 };
 
 export type DiscoveredObject = {
@@ -312,6 +339,7 @@ export type CaseDiscoveryResult = {
   failedAtStep?: number;
   failedTarget?: string;
   failedReason?: string;
+  aiRepairSummary?: AiRepairCaseSummary;
   partialDiagnostics?: {
     partialReason: "pending_local_assertions" | "pending_context_deferred_assertions" | "pending_synthetic_expected";
     pendingAssertions: string[];

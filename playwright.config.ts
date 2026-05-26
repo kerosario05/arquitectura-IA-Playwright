@@ -10,7 +10,8 @@ export default defineConfig({
   testDir: ".",
   testMatch: [
     "automations/apps/**/cases/**/*.spec.ts",
-    "automations/apps/**/cases/**/spec.ts"
+    "automations/apps/**/cases/**/spec.ts",
+    "tests/**/*.spec.ts"
   ],
   testIgnore: [
     "node_modules/**",

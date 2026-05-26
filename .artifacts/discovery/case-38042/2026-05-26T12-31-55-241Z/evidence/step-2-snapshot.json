@@ -1,0 +1,416 @@
+{
+  "version": "1.0",
+  "url": "https://www.demoblaze.com/prod.html?idp_=11",
+  "title": "STORE",
+  "capturedAt": "2026-05-26T12:32:47.070Z",
+  "elements": [
+    {
+      "id": "el-110",
+      "type": "link",
+      "text": "PRODUCT STORE",
+      "tagName": "a",
+      "visible": true,
+      "nearbyText": "PRODUCT STORE Home (current) Contact About us Cart Log in Log out Sign up",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "PRODUCT STORE",
+          "exact": false,
+          "confidence": 0.75
+        },
+        {
+          "strategy": "css",
+          "value": "#nava",
+          "confidence": 0.55
+        }
+      ],
+      "dataHints": [],
+      "href": "https://www.demoblaze.com/index.html",
+      "className": "navbar-brand",
+      "domId": "nava"
+    },
+    {
+      "id": "el-111",
+      "type": "link",
+      "text": "Home (current)",
+      "tagName": "a",
+      "visible": true,
+      "nearbyText": "Home (current)",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Home (current)",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "href": "https://www.demoblaze.com/index.html",
+      "className": "nav-link"
+    },
+    {
+      "id": "el-113",
+      "type": "link",
+      "text": "Contact",
+      "tagName": "a",
+      "visible": true,
+      "nearbyText": "Contact",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Contact",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "href": "https://www.demoblaze.com/prod.html?idp_=11#",
+      "className": "nav-link"
+    },
+    {
+      "id": "el-114",
+      "type": "link",
+      "text": "About us",
+      "tagName": "a",
+      "visible": true,
+      "nearbyText": "About us",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "About us",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "href": "https://www.demoblaze.com/prod.html?idp_=11#",
+      "className": "nav-link"
+    },
+    {
+      "id": "el-115",
+      "type": "link",
+      "text": "Cart",
+      "tagName": "a",
+      "visible": true,
+      "nearbyText": "Cart",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Cart",
+          "exact": false,
+          "confidence": 0.75
+        },
+        {
+          "strategy": "css",
+          "value": "#cartur",
+          "confidence": 0.55
+        }
+      ],
+      "dataHints": [],
+      "href": "https://www.demoblaze.com/cart.html",
+      "className": "nav-link",
+      "domId": "cartur"
+    },
+    {
+      "id": "el-116",
+      "type": "link",
+      "text": "Log in",
+      "tagName": "a",
+      "visible": true,
+      "nearbyText": "Log in",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Log in",
+          "exact": false,
+          "confidence": 0.75
+        },
+        {
+          "strategy": "css",
+          "value": "#login2",
+          "confidence": 0.55
+        }
+      ],
+      "dataHints": [],
+      "href": "https://www.demoblaze.com/prod.html?idp_=11#",
+      "className": "nav-link",
+      "domId": "login2"
+    },
+    {
+      "id": "el-119",
+      "type": "link",
+      "text": "Sign up",
+      "tagName": "a",
+      "visible": true,
+      "nearbyText": "Sign up",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Sign up",
+          "exact": false,
+          "confidence": 0.75
+        },
+        {
+          "strategy": "css",
+          "value": "#signin2",
+          "confidence": 0.55
+        }
+      ],
+      "dataHints": [],
+      "href": "https://www.demoblaze.com/prod.html?idp_=11#",
+      "className": "nav-link",
+      "domId": "signin2"
+    },
+    {
+      "id": "el-126",
+      "type": "link",
+      "text": "Add to cart",
+      "tagName": "a",
+      "visible": true,
+      "nearbyText": "Add to cart",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Add to cart",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "href": "https://www.demoblaze.com/prod.html?idp_=11#",
+      "className": "btn btn-success btn-lg"
+    },
+    {
+      "id": "el-112",
+      "type": "text",
+      "text": "(current)",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Home (current)",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "(current)",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "sr-only"
+    },
+    {
+      "id": "el-120",
+      "type": "image",
+      "tagName": "img",
+      "visible": true,
+      "candidateLocators": [],
+      "dataHints": []
+    },
+    {
+      "id": "el-123",
+      "type": "heading",
+      "text": "MacBook air",
+      "tagName": "h2",
+      "visible": true,
+      "nearbyText": "[REDACTED]",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "MacBook air",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "name"
+    },
+    {
+      "id": "el-124",
+      "type": "heading",
+      "text": "$700 *includes tax",
+      "tagName": "h3",
+      "visible": true,
+      "nearbyText": "[REDACTED]",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "$700 *includes tax",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "price-container"
+    },
+    {
+      "id": "el-125",
+      "type": "text",
+      "text": "[REDACTED]",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "[REDACTED]",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "[REDACTED]",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-127",
+      "type": "heading",
+      "text": "About Us",
+      "tagName": "h4",
+      "visible": true,
+      "nearbyText": "About Us We believe performance needs to be validated at every stage of the software development cycle and our open source compatible, massively scalable platform makes that a reality.",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "About Us",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "grrrr"
+    },
+    {
+      "id": "el-128",
+      "type": "text",
+      "text": "We believe performance needs to be validated at every stage of the software development cycle and our open source compatible, massively scalable platform makes that a reality.",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "About Us We believe performance needs to be validated at every stage of the software development cycle and our open source compatible, massively scalable platform makes that a reality.",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "We believe performance needs to be validated at every stage of the software development cycle and our open source compatible, massively scalable platform makes that a reality.",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-129",
+      "type": "heading",
+      "text": "Get in Touch",
+      "tagName": "h4",
+      "visible": true,
+      "nearbyText": "[REDACTED]",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Get in Touch",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "grrrr"
+    },
+    {
+      "id": "el-130",
+      "type": "text",
+      "text": "Address: 2390 El Camino Real",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "[REDACTED]",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Address: 2390 El Camino Real",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-131",
+      "type": "text",
+      "text": "Phone: +440 123456",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "[REDACTED]",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Phone: +440 123456",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "telefono"
+      ]
+    },
+    {
+      "id": "el-132",
+      "type": "text",
+      "text": "Email: demo@blazemeter.com",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "[REDACTED]",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Email: demo@blazemeter.com",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "email"
+      ]
+    },
+    {
+      "id": "el-133",
+      "type": "heading",
+      "text": "PRODUCT STORE",
+      "tagName": "h4",
+      "visible": true,
+      "nearbyText": "PRODUCT STORE",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "PRODUCT STORE",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": []
+    },
+    {
+      "id": "el-134",
+      "type": "text",
+      "text": "Copyright © Product Store",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "Copyright © Product Store",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Copyright © Product Store",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "m-0 text-center text-white"
+    }
+  ],
+  "summary": {
+    "totalElements": 21,
+    "buttons": 0,
+    "links": 8,
+    "inputs": 0,
+    "selects": 0,
+    "tables": 0,
+    "dialogs": 0,
+    "headings": 5
+  }
+}

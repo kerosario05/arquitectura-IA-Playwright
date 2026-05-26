@@ -10,6 +10,24 @@ type RepairCandidate = {
   semanticRelation?: string;
   score?: number;
   sensitive?: boolean;
+  // Enriched fields for selection_resolution
+  cardText?: string;
+  nearbyText?: string;
+  priceText?: string;
+  position?: number;
+  category?: string;
+  heading?: string;
+  categoryHeading?: string;
+};
+
+export type RepairEvidence = {
+  evidenceId: string;
+  type: "feedback_message" | "structural" | "modal_state" | "text_visible" | "form_field" | "url_state";
+  text?: string;
+  visible: boolean;
+  source: "runtimeEvidenceTrace" | "structuralEvidence" | "feedbackEvidence";
+  confidence?: number;
+  sensitive?: boolean;
 };
 
 export type RepairContextPackInput = {
@@ -27,6 +45,32 @@ export type RepairContextPackInput = {
   previousFills?: string[];
   constraints?: string[];
   maxChars: number;
+  // Route recovery specific fields
+  failureType?: "target_not_found" | "route_not_found" | "navigation_dead_end" | "wrong_screen" | "assertion_not_satisfied" | "ambiguous_selection";
+  targetRoute?: string;
+  currentScreen?: {
+    url: string;
+    title: string;
+    visibleHeadings?: string[];
+    visibleNavItems?: string[];
+    visibleActions?: string[];
+    visibleTextSummary?: string[];
+    visibleDialogs?: string[];
+    visibleForms?: string[];
+    visibleLists?: string[];
+  };
+  routeHistory?: {
+    failedRoutePaths?: string[];
+    visitedUrls?: string[];
+  };
+  // Assertion resolution specific fields
+  assertionTarget?: string;
+  assertionText?: string;
+  evidenceCandidates?: RepairEvidence[];
+  // Selection resolution specific fields
+  selectionTarget?: string;
+  selectionIntent?: string;
+  selectionCandidates?: RepairCandidate[];
 };
 
 export type RepairContextPack = Omit<RepairContextPackInput, "maxChars">;
@@ -93,7 +137,58 @@ export function buildRepairContextPack(input: RepairContextPackInput): RepairCon
     pendingAssertions: input.pendingAssertions?.map(redactSecrets),
     previousActions: input.previousActions?.map(redactSecrets),
     previousFills: input.previousFills?.map(redactSecrets),
-    constraints: input.constraints?.map(redactSecrets)
+    constraints: input.constraints?.map(redactSecrets),
+    // Route recovery fields
+    failureType: input.failureType,
+    targetRoute: input.targetRoute ? redactSecrets(input.targetRoute) : undefined,
+    currentScreen: input.currentScreen ? {
+      url: input.currentScreen.url,
+      title: redactSecrets(input.currentScreen.title),
+      visibleHeadings: input.currentScreen.visibleHeadings?.map(redactSecrets),
+      visibleNavItems: input.currentScreen.visibleNavItems?.map(redactSecrets),
+      visibleActions: input.currentScreen.visibleActions?.map(redactSecrets),
+      visibleTextSummary: input.currentScreen.visibleTextSummary?.map(redactSecrets),
+      visibleDialogs: input.currentScreen.visibleDialogs?.map(redactSecrets),
+      visibleForms: input.currentScreen.visibleForms?.map(redactSecrets),
+      visibleLists: input.currentScreen.visibleLists?.map(redactSecrets)
+    } : undefined,
+    routeHistory: input.routeHistory ? {
+      failedRoutePaths: input.routeHistory.failedRoutePaths,
+      visitedUrls: input.routeHistory.visitedUrls?.map(redactSecrets)
+    } : undefined,
+    // Assertion resolution fields
+    assertionTarget: input.assertionTarget ? redactSecrets(input.assertionTarget) : undefined,
+    assertionText: input.assertionText ? redactSecrets(input.assertionText) : undefined,
+    evidenceCandidates: input.evidenceCandidates?.map((e) => ({
+      evidenceId: e.evidenceId,
+      type: e.type,
+      text: e.text ? redactSecrets(e.text) : undefined,
+      visible: e.visible,
+      source: e.source,
+      confidence: e.confidence,
+      sensitive: e.sensitive
+    })),
+    // Selection resolution fields
+    selectionTarget: input.selectionTarget ? redactSecrets(input.selectionTarget) : undefined,
+    selectionIntent: input.selectionIntent ? redactSecrets(input.selectionIntent) : undefined,
+    selectionCandidates: input.selectionCandidates?.map((c) => ({
+      candidateId: c.candidateId,
+      role: c.role,
+      name: c.name ? redactSecrets(c.name) : undefined,
+      text: c.text ? redactSecrets(c.text) : undefined,
+      visible: c.visible,
+      enabled: c.enabled,
+      clickable: c.clickable,
+      semanticRelation: c.semanticRelation,
+      score: c.score,
+      sensitive: c.sensitive,
+      // Enriched fields for AI selection
+      cardText: c.cardText ? redactSecrets(c.cardText) : undefined,
+      nearbyText: c.nearbyText ? redactSecrets(c.nearbyText) : undefined,
+      priceText: c.priceText,
+      categoryHeading: c.categoryHeading ? redactSecrets(c.categoryHeading) : undefined,
+      position: c.position
+    }))
   };
 
   const serialized = JSON.stringify(pack);

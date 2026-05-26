@@ -1,0 +1,105 @@
+# Future TestRail integration
+TESTRAIL_URL=https://bscqa.testrail.io/
+TESTRAIL_EMAIL=radames@bsc.com.do
+TESTRAIL_API_KEY=sVqkc.oPRtlnDQraSqfK-0ULMdhAbfyiBzqEqPCSB
+TESTRAIL_PROJECT_ID=56
+TESTRAIL_SUITE_ID=1731
+TESTRAIL_SECTION_ID=4769
+
+# Future Jira integration
+JIRA_BASE_URL=https://bmsc.atlassian.net
+JIRA_EMAIL=radames@bsc.com.do
+JIRA_API_TOKEN=ATATT3xFfGF0RNIs4m7qXVqd_ZAVSeSMpuvUuNQzwbNqbMM5J8KPI-MqZCMqUZJu_BobSgDpHw_ZY-sB-fEjIrjDDayvI-LRYJluFPrg620LgQpmFD2YPa0ZM1w5i77tSrhII4LD85ZS3LgFY-QokG6I3kCECEdwancAWloMr9T6VxuPROldLRM=BD217823
+JIRA_PROJECT_KEY=AA
+
+
+# Target web application
+BASE_URL=https://www.demoblaze.com
+APP_BASE_URL=https://www.demoblaze.com
+APP_LOGIN_MODE=no_login
+
+APP_USERNAME=adminr
+APP_PASSWORD=admin123
+
+OTP_SECRET=000000
+Identity_Provider=00116848235
+APP_EXTRA_LOGIN_FIELDS_JSON=
+APP_TEST_DATA_JSON={}
+APP_TEST_DATA_ALIASES_JSON={}
+
+MISSING_INPUT_BEHAVIOR=auto_generate
+AUTO_GENERATE_TEST_DATA=true
+APP_TEST_DATA_PROFILE=demo
+AUTO_GENERATE_SENSITIVE_DATA=false
+AUTO_SELECT_SAFE_DEFAULTS=false
+AUTO_ACCEPT_SAFE_CHECKBOXES=false
+# Browser execution
+HEADLESS=false
+BROWSER=chromium
+EVIDENCE_DIR=./evidence
+DEFAULT_TIMEOUT_MS=30000
+
+# =========================================================
+# AI Provider - Gemini Free Tier
+# =========================================================
+
+AI_ENABLED=true
+AI_PROVIDER=openai_compatible
+AI_PROVIDER_NAME=gemini
+
+AI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai
+AI_API_KEY=AIzaSyDvqZVbxU1F2oLrV3e2d_EyXGjZi9HbGm0
+GEMINI_API_KEY=AIzaSyDvqZVbxU1F2oLrV3e2d_EyXGjZi9HbGm0
+AI_MODEL=gemini-2.5-flash
+
+AI_TIMEOUT_MS=30000
+AI_REQUIRE_JSON=true
+AI_REQUIRE_JSON_SCHEMA=true
+
+
+# =========================================================
+# AI Repair
+# =========================================================
+
+AI_REPAIR_ENABLED=true
+AI_REPAIR_MODE=compact
+AI_REPAIR_USE_CONTEXT_PACK=true
+AI_REPAIR_MAX_CONTEXT_CHARS=30000
+
+AI_REPAIR_ALLOW_REPO_PATCH=false
+AI_REPAIR_ALLOW_BROWSER_CONTROL=false
+
+AI_REPAIR_MAX_ATTEMPTS_PER_CASE=1
+AI_REPAIR_MAX_RERUNS_PER_CASE=1
+
+AI_REPAIR_BLOCK_SENSITIVE_ACTIONS=true
+AI_REPAIR_BLOCK_AUTH_SECRETS=true
+AI_REPAIR_BLOCK_PAYMENTS=true
+AI_REPAIR_BLOCK_TRANSFERS=true
+AI_REPAIR_MUST_USE_VISIBLE_CANDIDATE=true
+AI_REPAIR_MUST_RETURN_EXISTING_CANDIDATE_ID=true
+
+
+# =========================================================
+# Discovery
+# =========================================================
+
+DISCOVERY_MODE=true
+AUTO_APPROVE_DISCOVERED_OBJECTS=false
+
+AI_DISCOVERY_ENABLED=true
+AI_DISCOVERY_CONFIDENCE_THRESHOLD=0.75
+AI_DISCOVERY_REQUIRE_APPROVAL_THRESHOLD=0.90
+AI_DISCOVERY_MAX_ATTEMPTS=2
+
+
+# =========================================================
+# Codex disabled
+# =========================================================
+
+AGENT_PROVIDER=none
+AGENT_AUTO_REPAIR_ENABLED=false
+
+CODEX_AUTO_REPAIR_ENABLED=false
+CODEX_AUTO_REPAIR_TIMEOUT_MS=0
+CODEX_AUTO_REPAIR_PROMPT_MODE=disabled

@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-05-25T16:43:24.620Z",
+  "updatedAt": "2026-05-26T13:24:58.129Z",
   "automations": [
     {
       "id": "c10002-test-automation-plan",
@@ -827,6 +827,119 @@
         },
         "overwritten": true,
         "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37948-cerrar-confirmacion-de-compra-exitosa-con-la-opcion-ok\\plan.json",
+        "previousStatus": "active"
+      }
+    },
+    {
+      "id": "c38041-ai-repair-resolver-seleccion-con-typo-hacia-producto-existente",
+      "externalId": "C38041",
+      "caseId": 38041,
+      "title": "AI Repair - Resolver selección con typo hacia producto existente",
+      "planPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c38041-ai-repair-resolver-seleccion-con-typo-hacia-producto-existente\\plan.json",
+      "specPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c38041-ai-repair-resolver-seleccion-con-typo-hacia-producto-existente\\case.spec.ts",
+      "appSlug": "arquitectura-automatizacion",
+      "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "arquitectura-automatizacion",
+      "baseUrlHash": "f1bffa09d02f",
+      "createdAt": "2026-05-26T01:51:59.736Z",
+      "updatedAt": "2026-05-26T01:51:59.737Z",
+      "lastPromotedFrom": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\case-38041\\2026-05-26T01-50-39-160Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\case-38041\\2026-05-26T01-50-39-160Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "ProductDetailPage",
+            "FormPage",
+            "HomePage",
+            "LoginPage",
+            "CategoryPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": true
+        }
+      }
+    },
+    {
+      "id": "c38042-ai-repair-resolver-producto-por-criterio-semantico",
+      "externalId": "C38042",
+      "caseId": 38042,
+      "title": "AI Repair - Resolver producto por criterio semántico",
+      "planPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c38042-ai-repair-resolver-producto-por-criterio-semantico\\plan.json",
+      "specPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c38042-ai-repair-resolver-producto-por-criterio-semantico\\case.spec.ts",
+      "appSlug": "arquitectura-automatizacion",
+      "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "arquitectura-automatizacion",
+      "baseUrlHash": "f1bffa09d02f",
+      "createdAt": "2026-05-26T01:56:28.361Z",
+      "updatedAt": "2026-05-26T13:24:58.129Z",
+      "lastPromotedFrom": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\case-38042\\2026-05-26T13-24-05-064Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\case-38042\\2026-05-26T13-24-05-064Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "ProductDetailPage",
+            "FormPage",
+            "HomePage",
+            "LoginPage",
+            "CategoryPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": true
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c38042-ai-repair-resolver-producto-por-criterio-semantico\\plan.json",
         "previousStatus": "active"
       }
     }

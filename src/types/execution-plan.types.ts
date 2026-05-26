@@ -44,6 +44,17 @@ export type PlanTarget = {
   role?: string;
   name?: string;
   exact?: boolean;
+  // AI-assisted resolution metadata
+  metadata?: {
+    originalTarget?: string;
+    resolvedTargetName?: string;
+    resolvedCandidateId?: string;
+    aiAssisted?: boolean;
+    aiReason?: string;
+    repairType?: string;
+    decisionStatus?: string;
+    validationStatus?: string;
+  };
 };
 
 export type RequiredDataRef = {

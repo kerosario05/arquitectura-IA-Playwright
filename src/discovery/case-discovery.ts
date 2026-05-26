@@ -14,9 +14,12 @@ import {
   resolveFillTarget,
   type ActiveContainerContext
 } from "./target-resolver";
+import { isSelectionLikeTarget as isSelectionLikeTargetNew, shouldBlockSemanticFallback, getSelectionConfidenceThreshold, verifyPostClickSemanticMatch, buildSelectionCandidatesFromSnapshot } from "./selection-resolution";
 import { resolveLoginForm, type LoginFormResolution } from "./login-resolver";
 import { runAiAssistedDiscovery, type AiAssistedDiscoveryConfig } from "./ai-assisted-discovery";
 import { runAiRepairOrchestrator } from "../ai/repair/ai-repair-orchestrator";
+import { buildAiRepairCaseSummary, formatAiRepairConsoleOutput, type StepWithAiRepair } from "../ai/repair/ai-repair-summary-builder";
+import { writeJsonSafe } from "../utils/json-utils";
 import { detectPostClickUiChange, type PostClickUiChangeResult } from "./post-click-ui-change-detector";
 import {
   buildConcreteAssertionsFromExpected,
@@ -1383,6 +1386,129 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
               ? "needs_assertion_resolution"
               : "assertion_not_found";
           }
+
+          // AI Repair for assertions: attempt assertion_resolution after local resolvers fail
+          if (assertionResult.status === "needs_assertion_resolution" && envTrue("AI_REPAIR_ENABLED", false) && envTrue("AI_REPAIR_USE_CONTEXT_PACK", true)) {
+            const aiAssertionStartTime = Date.now();
+            console.log(`[ai-repair:assertion] enabled provider=${process.env.AI_PROVIDER ?? "unknown"} model=${process.env.AI_MODEL ?? "unknown"}`);
+            console.log(`[ai-repair:assertion] failure=assertion_not_satisfied target="${assertionResult.assertionText}"`);
+
+            // Build evidence candidates from assertion resolution result
+            const evidenceCandidates = [
+              ...(assertionResult.visibleTexts?.map((t: string, i: number) => ({
+                evidenceId: `ev-text-${i}`,
+                type: "text_visible" as const,
+                text: t,
+                visible: true,
+                source: "runtimeEvidenceTrace" as const,
+                confidence: 0.8,
+                sensitive: false
+              })) ?? []),
+              ...(assertionResult.closestCandidates?.map((c: any, i: number) => ({
+                evidenceId: `ev-candidate-${i}`,
+                type: "structural" as const,
+                text: c.text ?? c.name ?? c.label,
+                visible: c.visible ?? true,
+                source: "structuralEvidence" as const,
+                confidence: c.confidence ?? 0.7,
+                sensitive: false
+              })) ?? [])
+            ];
+
+            console.log(`[ai-repair:assertion] context evidenceCandidates=${evidenceCandidates.length}`);
+
+            const aiAssertionRepair = await runAiRepairOrchestrator({
+              appSlug: String((options.env as any)?.APP_SLUG ?? "default"),
+              failure: "assertion_not_satisfied",
+              failureType: "assertion_not_satisfied",
+              currentStep: es.originalText,
+              currentUrl: page.url(),
+              snapshotSummary: {
+                title: currentSnapshot.title,
+                url: currentSnapshot.url,
+                summary: currentSnapshot.summary
+              },
+              candidates: currentSnapshot.elements.map((el) => ({
+                candidateId: el.id,
+                role: el.role,
+                name: el.name,
+                text: el.text,
+                visible: Boolean(el.visible),
+                enabled: undefined,
+                clickable: Boolean(el.visible && (el.type === "button" || el.type === "link" || el.role === "button" || el.role === "link")),
+                editable: Boolean(el.type === "input" || el.type === "textarea" || el.role === "textbox"),
+                sensitive: false
+              })),
+              runtimeEvidenceTrace: { matchedText: assertionResult.matchedText, confidence: assertionResult.confidence },
+              structuralEvidence: assertionResult.structuralSignals,
+              feedbackEvidence: steps.slice(-5).map((s) => ({ index: s.index, status: s.status, targetText: s.targetText })),
+              pendingAssertions: [assertionResult.assertionText],
+              previousActions: steps.filter((s) => s.targetText).map((s) => `${s.action}: ${s.targetText}`),
+              previousFills: planSteps.filter((s) => s.action === "fill").map((s) => `${s.description ?? "fill"}:${(s as any).valueKey ?? ""}`),
+              constraints: [
+                "must_use_existing_evidence_id",
+                "no_invented_text",
+                "no_selector_invention",
+                "no_sensitive_evidence"
+              ],
+              assertionTarget: assertionResult.assertionText,
+              assertionText: assertionResult.assertionText,
+              evidenceCandidates,
+              currentScreen: {
+                url: currentSnapshot.url,
+                title: currentSnapshot.title,
+                visibleTextSummary: assertionResult.visibleTexts,
+                visibleDialogs: [],
+                visibleForms: []
+              }
+            });
+            const aiAssertionDuration = Date.now() - aiAssertionStartTime;
+
+            console.log(`[ai-repair:assertion] decision=status ${aiAssertionRepair.status}`);
+            console.log(`[ai-repair:assertion] validated=${aiAssertionRepair.status === "repaired_plan" || aiAssertionRepair.status === "no_safe_action" || aiAssertionRepair.status === "needs_more_context"}`);
+
+            // Build comprehensive diagnostics for artifact
+            const aiAssertionDiagnostics = {
+              enabled: true,
+              providerName: aiAssertionRepair.diagnostics.provider ?? "unknown",
+              model: process.env.AI_MODEL ?? "unknown",
+              failureType: "assertion_not_satisfied",
+              assertionTarget: assertionResult.assertionText,
+              contextPackSummary: {
+                evidenceCandidateCount: evidenceCandidates.length,
+                hasSecrets: false,
+                maxContextChars: 30000
+              },
+              decisionStatus: aiAssertionRepair.status,
+              validationStatus: aiAssertionRepair.status === "invalid_response" ? "invalid" : aiAssertionRepair.status === "provider_error" ? "error" : "valid",
+              selectedEvidenceId: aiAssertionRepair.decision?.evidenceId ?? null,
+              evidenceType: aiAssertionRepair.diagnostics.evidenceType ?? null,
+              assertionStatus: aiAssertionRepair.decision?.assertionStatus ?? null,
+              blockedReason: aiAssertionRepair.diagnostics.errorCode ?? null,
+              durationMs: aiAssertionDuration
+            };
+
+            (assertionResult as any).aiRepairDiagnostics = aiAssertionDiagnostics;
+
+            // If AI found existing evidence that satisfies assertion, mark as satisfied
+            if (aiAssertionRepair.status === "repaired_plan" && aiAssertionRepair.decision?.evidenceId && aiAssertionRepair.decision.assertionStatus === "satisfied_by_existing_evidence") {
+              console.log(`[ai-repair:assertion] assertion satisfied by existing evidence: ${aiAssertionRepair.decision.evidenceId}`);
+              // Update step status to reflect AI resolution
+              steps[steps.length - 1].status = "found";
+              steps[steps.length - 1].recoveryStatus = "recovered";
+              (steps[steps.length - 1] as any).recoveredBy = "ai_repair";
+              (steps[steps.length - 1] as any).aiAssertionDiagnostics = aiAssertionDiagnostics;
+              // Clear the failedAtStep marker since assertion was resolved
+              if (failedAtStep === es.stepIndex) {
+                failedAtStep = undefined;
+                failedTarget = undefined;
+                failedReason = undefined;
+              }
+            } else {
+              console.log(`[ai-repair:assertion] no safe action or needs more context for assertion`);
+              (steps[steps.length - 1] as any).aiAssertionDiagnostics = aiAssertionDiagnostics;
+            }
+          }
         }
       }
       continue;
@@ -2613,9 +2739,27 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           proposal: aiOutcome.proposal
         };
 
-        if (resolution.status === "resolved" && resolution.locator) {
+        // Check if we should block low-confidence semantic fallback for selection-like targets
+        const isSelectionLike = isSelectionLikeTargetNew(actionTarget.target);
+        const selectionThreshold = getSelectionConfidenceThreshold();
+        const shouldBlockFallback = isSelectionLike && 
+          resolution.confidence < selectionThreshold && 
+          resolution.locatorStrategy?.includes("semantic");
+
+        if (resolution.status === "resolved" && resolution.locator && !shouldBlockFallback) {
           console.log(`[discovery:case] AI failed but deterministic locator exists. Using deterministic resolution.`);
           (resolution as any)._aiFailedDeterministicAvailable = true;
+        } else if (shouldBlockFallback) {
+          console.log(`[discovery:case] Low-confidence semantic selection blocked: target="${actionTarget.target}" confidence=${resolution.confidence.toFixed(2)} threshold=${selectionThreshold}`);
+          console.log(`[discovery:case] Will invoke AI selection_resolution or fail safely instead of using low-confidence semantic match.`);
+          // Block the fallback by clearing the locator and marking as blocked
+          (resolution as any)._selectionFallbackBlocked = true;
+          (resolution as any)._aiFailedDeterministicAvailable = false;
+          // Clear the locator to prevent click execution
+          resolution.locator = undefined;
+          resolution.status = "ambiguous" as any;
+          // Also clear finalLocator to prevent click at line 3318
+          finalLocator = undefined;
         }
       }
     }
@@ -2716,6 +2860,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             sensitive: false
           }));
 
+          // Build enhanced AI Repair diagnostics for artifact persistence
+          const aiRepairStartTime = Date.now();
+          console.log(`[ai-repair] enabled provider=${process.env.AI_PROVIDER ?? "unknown"} model=${process.env.AI_MODEL ?? "unknown"}`);
+          console.log(`[ai-repair] failure=target_not_found target="${actionTarget.target}"`);
+          console.log(`[ai-repair] context candidates=${aiCandidates.length}`);
+
           const aiRepair = await runAiRepairOrchestrator({
             appSlug: String((options.env as any)?.APP_SLUG ?? "default"),
             failure: "target_not_found",
@@ -2740,8 +2890,31 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
               "no_selector_invention"
             ]
           });
+          const aiRepairDuration = Date.now() - aiRepairStartTime;
 
-          (resolution as any).aiRepairDiagnostics = aiRepair.diagnostics;
+          console.log(`[ai-repair] decision=status ${aiRepair.status}`);
+          console.log(`[ai-repair] validated=${aiRepair.status === "repaired_plan" || aiRepair.status === "no_safe_action" || aiRepair.status === "needs_more_context"}`);
+
+          // Build comprehensive diagnostics for artifact
+          const aiRepairDiagnostics = {
+            enabled: true,
+            providerName: aiRepair.diagnostics.provider ?? "unknown",
+            model: process.env.AI_MODEL ?? "unknown",
+            failureType: "target_not_found",
+            target: actionTarget.target,
+            contextPackSummary: {
+              candidateCount: aiCandidates.length,
+              hasSecrets: false, // Context pack redacts secrets internally
+              maxContextChars: 30000
+            },
+            decisionStatus: aiRepair.status,
+            validationStatus: aiRepair.status === "invalid_response" ? "invalid" : aiRepair.status === "provider_error" ? "error" : "valid",
+            selectedCandidateId: aiRepair.decision?.candidateId ?? null,
+            blockedReason: aiRepair.diagnostics.errorCode ?? null,
+            durationMs: aiRepairDuration
+          };
+
+          (resolution as any).aiRepairDiagnostics = aiRepairDiagnostics;
 
           if (aiRepair.status === "repaired_plan" && aiRepair.decision?.candidateId) {
             const selected = currentSnapshot.elements.find((el) => el.id === aiRepair.decision!.candidateId);
@@ -2841,6 +3014,175 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           ? `Ambiguous target: ${resolution.matchReason} (${resolution.candidates?.length ?? 0} matches). Target has associated entity "${actionTarget.associatedEntity}" that could disambiguate context.`
           : `Ambiguous target: ${resolution.matchReason} (${resolution.candidates?.length ?? 0} matches).`;
 
+        // AI Repair for selection: attempt selection_resolution after local resolvers fail due to ambiguity
+        if (envTrue("AI_REPAIR_ENABLED", false) && envTrue("AI_REPAIR_USE_CONTEXT_PACK", true)) {
+          const aiSelectionStartTime = Date.now();
+          console.log(`[ai-repair:selection] enabled provider=${process.env.AI_PROVIDER ?? "unknown"} model=${process.env.AI_MODEL ?? "unknown"}`);
+          console.log(`[ai-repair:selection] failure=ambiguous_selection target="${actionTarget.target}"`);
+
+          // Build enriched selection candidates from snapshot with full card context
+          // This harvests all visible product cards, not just resolution matches
+          const selectionCandidates = buildSelectionCandidatesFromSnapshot(
+            currentSnapshot,
+            actionTarget.target,
+            resolution.candidates
+          );
+
+          console.log(`[ai-repair:selection] context selectionCandidates=${selectionCandidates.length} (harvested from snapshot)`);
+          if (selectionCandidates.length > 0) {
+            console.log(`[ai-repair:selection] top candidates: ${selectionCandidates.slice(0, 3).map(c => `"${c.name}"`).join(", ")}`);
+          }
+
+          const aiSelectionRepair = await runAiRepairOrchestrator({
+            appSlug: String((options.env as any)?.APP_SLUG ?? "default"),
+            failure: "ambiguous_selection",
+            failureType: "ambiguous_selection",
+            currentStep: actionTarget.action,
+            currentUrl: page.url(),
+            snapshotSummary: {
+              title: currentSnapshot.title,
+              url: currentSnapshot.url,
+              summary: currentSnapshot.summary
+            },
+            candidates: selectionCandidates,
+            runtimeEvidenceTrace: { attemptedLocators: resolution.attemptedLocators, matchReason: resolution.matchReason },
+            structuralEvidence: [],
+            feedbackEvidence: steps.slice(-5).map((s) => ({ index: s.index, status: s.status, targetText: s.targetText })),
+            pendingAssertions: parsed.assertionTargets.map((a) => a.target),
+            previousActions: steps.filter((s) => s.targetText).map((s) => `${s.action}: ${s.targetText}`),
+            previousFills: planSteps.filter((s) => s.action === "fill").map((s) => `${s.description ?? "fill"}:${(s as any).valueKey ?? ""}`),
+            constraints: [
+              "forbid_action:fill",
+              "must_return_existing_candidate_id",
+              "no_selector_invention",
+              "no_sensitive_selection"
+            ],
+            selectionTarget: actionTarget.target,
+            selectionIntent: actionTarget.action,
+            selectionCandidates,
+            currentScreen: {
+              url: currentSnapshot.url,
+              title: currentSnapshot.title,
+              visibleHeadings: [],
+              visibleLists: [],
+              visibleDialogs: []
+            }
+          });
+          const aiSelectionDuration = Date.now() - aiSelectionStartTime;
+
+          console.log(`[ai-repair:selection] decision=status ${aiSelectionRepair.status}`);
+          console.log(`[ai-repair:selection] validated=${aiSelectionRepair.status === "repaired_plan" || aiSelectionRepair.status === "no_safe_action" || aiSelectionRepair.status === "needs_more_context"}`);
+
+          // Build comprehensive diagnostics for artifact
+          const aiSelectionDiagnostics = {
+            enabled: true,
+            providerName: String(aiSelectionRepair.diagnostics.provider ?? "unknown"),
+            model: process.env.AI_MODEL ?? "unknown",
+            failureType: "ambiguous_selection",
+            repairType: "selection_resolution" as const,  // NEW: Include repairType for metrics
+            selectionTarget: actionTarget.target,
+            contextPackSummary: {
+              selectionCandidateCount: selectionCandidates.length,
+              hasSecrets: false,
+              maxContextChars: 30000
+            },
+            decisionStatus: aiSelectionRepair.status,
+            validationStatus: aiSelectionRepair.status === "invalid_response" ? "invalid" : aiSelectionRepair.status === "provider_error" ? "error" : "valid",
+            selectedCandidateId: aiSelectionRepair.decision?.candidateId ?? null,
+            selectionStatus: aiSelectionRepair.decision?.selectionStatus ?? null,
+            blockedReason: (aiSelectionRepair.diagnostics.errorCode as string) ?? null,
+            durationMs: aiSelectionDuration
+          };
+
+          (resolution as any).aiSelectionRepairDiagnostics = aiSelectionDiagnostics;
+
+          // If AI selected a valid candidate, execute the selection
+          if (aiSelectionRepair.status === "repaired_plan" && aiSelectionRepair.decision?.candidateId) {
+            const selected = currentSnapshot.elements.find((el) => el.id === aiSelectionRepair.decision!.candidateId);
+            if (selected) {
+              const resolvedFromAi = await resolveSnapshotElementLocator(page, {
+                element: selected,
+                target: actionTarget.target,
+                candidateText: selected.text ?? selected.label ?? selected.name ?? actionTarget.target,
+                type: selected.type,
+                tagName: selected.tagName,
+                confidence: aiSelectionRepair.decision.confidence ?? 0.5,
+                matchReason: `ai_repair:selection_resolution`
+              });
+              if (resolvedFromAi.locator) {
+                await clickResolvedTarget(resolvedFromAi.locator, false).catch(async () => {
+                  await clickResolvedTarget(resolvedFromAi.locator!, true);
+                });
+                await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+                const aiRecoveredScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+                currentSnapshot = aiRecoveredScan.snapshot;
+                allDiscoveredObjects.push(...aiRecoveredScan.objects);
+
+                // Resolved target name from AI selection
+                const resolvedTargetName = selected.name ?? selected.label ?? selected.text ?? actionTarget.target;
+                const resolvedCandidateId = aiSelectionRepair.decision.candidateId;
+
+                steps.push({
+                  index: actionTarget.index,
+                  action: actionTarget.action,
+                  status: "found",
+                  targetText: actionTarget.target,
+                  resolvedTargetName,  // NEW: Resolved target from AI
+                  resolvedCandidateId,  // NEW: Candidate ID selected by AI
+                  resolvedLocator: resolvedFromAi.locator.toString(),  // NEW: Actual locator
+                  resolvedRole: selected.role ?? selected.type ?? "unknown",  // NEW: Element role
+                  snapshotUrl: aiRecoveredScan.url,
+                  snapshotTitle: aiRecoveredScan.title,
+                  elementsFound: aiRecoveredScan.elementsCount,
+                  evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+                  aiAssisted: true,
+                  aiReason: "ai_selection_resolution",
+                  aiRepairType: "selection_resolution" as const,
+                  aiDecisionStatus: "repaired_plan" as const,
+                  aiValidationStatus: "valid" as const,
+                  aiSelectionRepairDiagnostics: aiSelectionDiagnostics,  // NEW: Include diagnostics for metrics
+                  semanticRole: actionTarget.semanticRole,
+                  relationContext: actionTarget.relationContext
+                });
+
+                planSteps.push({
+                  index: planSteps.length + 1,
+                  action: "click",
+                  description: actionTarget.action,
+                  target: { 
+                    strategy: "text" as const, 
+                    value: resolvedTargetName,  // NEW: Use resolved target name, not original
+                    exact: false,
+                    // NEW: Metadata for AI-assisted resolution
+                    metadata: {
+                      originalTarget: actionTarget.target,
+                      resolvedTargetName,
+                      resolvedCandidateId,
+                      aiAssisted: true,
+                      aiReason: "ai_selection_resolution",
+                      repairType: "selection_resolution",
+                      decisionStatus: "repaired_plan",
+                      validationStatus: "valid"
+                    }
+                  }
+                });
+
+                executedStepIndices.add(actionTarget.index);
+                if (typeof currentActionOrder === "number") executedActionOrders.add(currentActionOrder);
+                if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
+                  break;
+                }
+                continue;
+              }
+            }
+          }
+
+          // AI returned no_safe_action or invalid response - fail without click
+          if (aiSelectionRepair.status === "no_safe_action") {
+            console.log(`[discovery:case] Selection unresolved safely; no click executed.`);
+          }
+        }
+
         steps.push({
           index: actionTarget.index,
           action: actionTarget.action,
@@ -2852,6 +3194,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           error: ambiguousReason,
           evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
           aiDiagnostics: (resolution as any).aiDiagnostics,
+          aiSelectionRepairDiagnostics: (resolution as any).aiSelectionRepairDiagnostics,
           semanticRole: actionTarget.semanticRole,
           relationContext: actionTarget.relationContext,
           earlyCompletionDiagnostics: earlyCompletion
@@ -3005,6 +3348,69 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
     await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
     console.log("[discovery:case] Waiting after click...");
+
+    // Post-click semantic verification for selection-like targets
+    const isSelectionLike = isSelectionLikeTargetNew(actionTarget.target);
+    if (isSelectionLike) {
+      console.log(`[discovery:case] Performing post-click semantic verification for selection-like target: ${actionTarget.target}`);
+      const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+      // Extract visible texts from elements
+      const visibleTexts = scan.snapshot.elements
+        .filter(e => e.visible && e.text)
+        .map(e => e.text!)
+        .slice(0, 50); // Limit to first 50 texts
+      
+      const semanticMatch = verifyPostClickSemanticMatch(
+        actionTarget.target,
+        visibleTexts,
+        scan.title
+      );
+      
+      if (!semanticMatch.matches) {
+        console.log(`[discovery:case] Post-click semantic MISMATCH detected!`);
+        console.log(`[discovery:case] Target: ${actionTarget.target}`);
+        console.log(`[discovery:case] Missing tokens: ${semanticMatch.missingTokens.join(", ")}`);
+        console.log(`[discovery:case] Reason: ${semanticMatch.mismatchReason}`);
+        
+        // Mark as failure with semantic mismatch
+        steps.push({
+          index: actionTarget.index,
+          action: actionTarget.action,
+          status: "not_found",
+          targetText: actionTarget.target,
+          snapshotUrl: scan.url,
+          snapshotTitle: scan.title,
+          elementsFound: scan.elementsCount,
+          error: `Semantic mismatch after click: ${semanticMatch.mismatchReason}`,
+          evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+          semanticMismatchDiagnostics: {
+            target: actionTarget.target,
+            matchedTokens: semanticMatch.matchedTokens,
+            missingTokens: semanticMatch.missingTokens,
+            reason: semanticMatch.mismatchReason
+          }
+        } as any);
+        
+        failedAtStep = actionTarget.index;
+        failedTarget = actionTarget.target;
+        failedReason = "semantic_mismatch";
+        
+        await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
+        await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
+          scenario, steps, allDiscoveredObjects, planSteps,
+          pendingObjectsPath, pendingPlansPath, evidenceDir,
+          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+        ).candidatePlan ?? {}, null, 2), "utf-8");
+        
+        return buildFailureResult(
+          scenario, steps, allDiscoveredObjects, planSteps,
+          pendingObjectsPath, pendingPlansPath, evidenceDir,
+          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+        );
+      }
+      
+      console.log(`[discovery:case] Post-click semantic verification PASSED. Matched tokens: ${semanticMatch.matchedTokens.join(", ")}`);
+    }
 
     const afterState = await capturePageState(page);
     const transitionDetected = hasPageTransition(beforeState, afterState, actionTarget.target);
@@ -3526,6 +3932,57 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
   await writeFile(pendingPlansPath, JSON.stringify(candidatePlan, null, 2), "utf-8");
 
+  // Generate AI Repair case-level summary
+  // Collect all AI repair diagnostics variants (target_resolution, selection_resolution, route_recovery, assertion_resolution)
+  const stepsWithAiRepair: StepWithAiRepair[] = steps.map(s => {
+    // Normalize all AI repair diagnostics variants to common format
+    const aiRepairDiagnostics = (s as any).aiRepairDiagnostics;
+    const aiSelectionRepairDiagnostics = (s as any).aiSelectionRepairDiagnostics;
+    const aiRouteRepairDiagnostics = (s as any).aiRouteRepairDiagnostics;
+    const aiAssertionRepairDiagnostics = (s as any).aiAssertionRepairDiagnostics;
+    
+    // Use the first available diagnostics variant
+    let diagnostics = aiRepairDiagnostics || aiSelectionRepairDiagnostics || aiRouteRepairDiagnostics || aiAssertionRepairDiagnostics;
+    
+    // Enrich with selection-specific fields if present
+    if (aiSelectionRepairDiagnostics && diagnostics) {
+      diagnostics = {
+        ...diagnostics,
+        selectedCandidateId: aiSelectionRepairDiagnostics.selectedCandidateId ?? diagnostics.selectedCandidateId,
+        selectionStatus: aiSelectionRepairDiagnostics.selectionStatus ?? diagnostics.selectionStatus
+      };
+    }
+    
+    // Include resolved target info for selection_resolution
+    const resolvedTargetName = (s as any).resolvedTargetName;
+    const resolvedCandidateId = (s as any).resolvedCandidateId;
+    
+    if (resolvedTargetName && diagnostics) {
+      diagnostics = {
+        ...diagnostics,
+        target: diagnostics.target ?? (s as any).targetText,
+        resolvedTargetName,
+        resolvedCandidateId: resolvedCandidateId ?? diagnostics.selectedCandidateId
+      };
+    }
+    
+    return {
+      index: s.index,
+      targetText: s.targetText,
+      action: s.action,
+      aiRepairDiagnostics: diagnostics
+    };
+  });
+  const aiRepairSummary = buildAiRepairCaseSummary(stepsWithAiRepair, options.env?.APP_SLUG as string | undefined);
+  
+  // Save AI Repair summary to artifact
+  const aiRepairSummaryPath = path.join(evidenceDir, "ai-repair-summary.json");
+  await writeJsonSafe(aiRepairSummaryPath, aiRepairSummary);
+  
+  // Print AI Repair summary to console
+  console.log("");
+  console.log(formatAiRepairConsoleOutput(aiRepairSummary));
+
   return {
     version: "1.0",
     caseId: scenario.caseId,
@@ -3540,7 +3997,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     evidenceDir,
     failedAtStep,
     failedTarget,
-    failedReason
+    failedReason,
+    aiRepairSummary
   };
 }
 

@@ -1,0 +1,99 @@
+{
+  "aiRepairValidation": {
+    "provider": "unknown",
+    "realProvider": false,
+    "targetResolution": "passed",
+    "routeRecovery": "passed",
+    "assertionResolution": "passed",
+    "selectionResolution": "passed",
+    "securityGuards": "passed",
+    "durationMs": 7454,
+    "details": [
+      {
+        "name": "target_resolution:repaired_plan_valid",
+        "passed": true,
+        "durationMs": 445
+      },
+      {
+        "name": "target_resolution:no_safe_action",
+        "passed": true,
+        "durationMs": 445
+      },
+      {
+        "name": "target_resolution:invalid_json",
+        "passed": true,
+        "durationMs": 430
+      },
+      {
+        "name": "target_resolution:unknown_candidate",
+        "passed": true,
+        "durationMs": 444
+      },
+      {
+        "name": "target_resolution:invented_selector",
+        "passed": true,
+        "durationMs": 436
+      },
+      {
+        "name": "target_resolution:sensitive_candidate",
+        "passed": true,
+        "durationMs": 433
+      },
+      {
+        "name": "route_recovery:route_recovery_valid",
+        "passed": true,
+        "durationMs": 444
+      },
+      {
+        "name": "route_recovery:route_recovery_no_safe_action",
+        "passed": true,
+        "durationMs": 438
+      },
+      {
+        "name": "route_recovery:route_recovery_failed_candidate",
+        "passed": true,
+        "durationMs": 434
+      },
+      {
+        "name": "assertion_resolution:assertion_resolution_valid",
+        "passed": true,
+        "durationMs": 441
+      },
+      {
+        "name": "assertion_resolution:assertion_resolution_no_safe_action",
+        "passed": true,
+        "durationMs": 437
+      },
+      {
+        "name": "assertion_resolution:assertion_resolution_unknown_evidence",
+        "passed": true,
+        "durationMs": 445
+      },
+      {
+        "name": "assertion_resolution:assertion_resolution_sensitive_evidence",
+        "passed": true,
+        "durationMs": 440
+      },
+      {
+        "name": "selection_resolution:selection_resolution_valid",
+        "passed": true,
+        "durationMs": 434
+      },
+      {
+        "name": "selection_resolution:selection_resolution_no_safe_action",
+        "passed": true,
+        "durationMs": 432
+      },
+      {
+        "name": "selection_resolution:selection_resolution_unknown_candidate",
+        "passed": true,
+        "durationMs": 431
+      },
+      {
+        "name": "selection_resolution:selection_resolution_sensitive_candidate",
+        "passed": true,
+        "durationMs": 444
+      }
+    ]
+  }
+}

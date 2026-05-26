@@ -12,8 +12,11 @@ test("la documentacion define limites clave", () => {
   const content = readFileSync(path, "utf8");
   expect(content).toContain("La IA no reemplaza el motor MCP");
   expect(content).toContain("La IA NO debe:");
-  expect(content).toContain("controlar el navegador");
-  expect(content).toContain("modificar repo");
-  expect(content).toContain("inventar selectores");
+  expect(content.toLowerCase()).toContain("controlar el navegador");
+  expect(content).toContain("IA no modifica repo");
+  expect(content).toContain("IA no inventa selectores");
   expect(content).toContain("target_not_found");
+  expect(content).toContain("route_recovery");
+  expect(content).toContain("assertion_resolution");
+  expect(content).toContain("selection_resolution");
 });

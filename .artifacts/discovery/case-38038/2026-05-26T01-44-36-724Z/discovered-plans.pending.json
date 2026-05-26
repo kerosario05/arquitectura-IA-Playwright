@@ -1,0 +1,59 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C38038",
+    "caseId": 38038,
+    "title": "AI Repair - Provocar assertion_resolution con evidencia visible ambigua"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://www.demoblaze.com",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "1. Clic en \"Phones\".",
+      "target": {
+        "strategy": "text",
+        "value": "Phones",
+        "exact": false
+      }
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Seleccionar la primera tarjeta visible del listado de productos.",
+      "target": {
+        "strategy": "text",
+        "value": "la primera tarjeta visible del listado de productos",
+        "exact": false
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Clic en \"Add to cart\".",
+      "target": {
+        "strategy": "text",
+        "value": "Add to cart",
+        "exact": false
+      }
+    }
+  ],
+  "notes": [
+    "Discovery failed at step 6: target_not_found - \"un evidenceId existente\""
+  ],
+  "createdAt": "2026-05-26T01:46:42.808Z"
+}

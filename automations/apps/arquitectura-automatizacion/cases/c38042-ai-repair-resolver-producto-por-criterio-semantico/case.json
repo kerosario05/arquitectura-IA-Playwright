@@ -1,0 +1,10 @@
+{
+  "id": "c38042-ai-repair-resolver-producto-por-criterio-semantico",
+  "externalId": "C38042",
+  "caseId": 38042,
+  "title": "AI Repair - Resolver producto por criterio semántico",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-05-26T13:24:58.118Z"
+}

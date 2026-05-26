@@ -9,6 +9,9 @@ import type { CaseDiscoveryWorkflowOptions, CaseDiscoveryWorkflowResult } from "
 import type { QueueItemContext } from "../runner/case-execution-queue";
 import type { PendingAssertionForensics, BatchCaseRootCause } from "../types/discovery.types";
 import { ensureAppStructure, logAppProfile, resolveAppProfile, type AppProfile } from "../automations/app-profile";
+import { buildAiRepairBatchSummary, formatAiRepairBatchConsoleOutput } from "../ai/repair/ai-repair-summary-builder";
+import { writeJsonSafe } from "../utils/json-utils";
+import type { AiRepairCaseSummary } from "../ai/repair/ai-repair-metrics";
 
 export type BatchCaseMode = "all" | "not-automated" | "by-ids" | "by-range";
 
@@ -90,6 +93,7 @@ export type BatchCaseResultEntry = {
   pendingBefore?: number;
   pendingAfter?: number;
   promotionEligible?: boolean;
+  discoveryResult?: import("../discovery/case-discovery-workflow").CaseDiscoveryWorkflowResult["caseResult"];
 };
 
 export type BatchResult = {
@@ -135,6 +139,7 @@ export type BatchResult = {
     notPromoted: number;
     totalDurationMs: number;
   };
+  aiRepairBatchSummary?: import("../ai/repair/ai-repair-metrics").AiRepairBatchSummary;
 };
 
 export function parseBatchArgs(argv: string[]): BatchCliArgs {
@@ -534,6 +539,12 @@ export async function executeBatch(
 
   if (args.dryRun || selected.length === 0) {
     const startTime = Date.now();
+    
+    // Generate empty AI Repair batch summary for dry-run
+    const aiRepairBatchSummary = buildAiRepairBatchSummary([]);
+    console.log("");
+    console.log(formatAiRepairBatchConsoleOutput(aiRepairBatchSummary));
+    
     const result: BatchResult = {
       batchId,
       timestamp: new Date().toISOString(),
@@ -556,7 +567,8 @@ export async function executeBatch(
         promotionFailed: 0,
         notPromoted: 0,
         totalDurationMs: Date.now() - startTime
-      }
+      },
+      aiRepairBatchSummary
     };
     result.skippedCases = entries.filter((e) => !e.selected && e.skipReason).map((e) => ({ caseId: e.caseId, reason: e.skipReason! }));
     result.rerunActiveCases = args.rerunActive
@@ -654,7 +666,8 @@ export async function executeBatch(
       finalStatusReason: cr.finalStatusReconciliation?.reason,
       pendingBefore: cr.finalStatusReconciliation?.beforePendingAssertionCount,
       pendingAfter: cr.finalStatusReconciliation?.afterPendingAssertionCount,
-      promotionEligible: cr.finalStatusReconciliation?.promotionEligible
+      promotionEligible: cr.finalStatusReconciliation?.promotionEligible,
+      discoveryResult: cr
     };
 
     console.log(`[discovery:batch] Case C${entry.caseId} finished: ${state} (${durationMs}ms)`);
@@ -720,6 +733,26 @@ export async function executeBatch(
       .map((e) => ({ caseId: e.caseId }))
     : [];
 
+  // Collect AI Repair summaries from executed cases
+  const aiRepairCaseSummaries: Array<{ caseId: string; appSlug: string; summary: AiRepairCaseSummary }> = allExecutedResults
+    .filter((r) => r.discoveryResult?.aiRepairSummary)
+    .map((r) => ({
+      caseId: `C${r.caseId}`,
+      appSlug: appProfile?.appSlug ?? "default",
+      summary: r.discoveryResult!.aiRepairSummary!
+    }));
+
+  // Build batch-level AI Repair summary
+  const aiRepairBatchSummary = buildAiRepairBatchSummary(aiRepairCaseSummaries);
+
+  // Save AI Repair batch summary artifact
+  const aiRepairBatchSummaryPath = path.join(batchDir, "ai-repair-batch-summary.json");
+  await writeJsonSafe(aiRepairBatchSummaryPath, aiRepairBatchSummary);
+
+  // Print AI Repair batch summary to console
+  console.log("");
+  console.log(formatAiRepairBatchConsoleOutput(aiRepairBatchSummary));
+
   const batchResult: BatchResult = {
     batchId,
     timestamp: new Date().toISOString(),
@@ -740,7 +773,8 @@ export async function executeBatch(
       promotionFailed,
       notPromoted,
       totalDurationMs: queueResult.totalDurationMs
-    }
+    },
+    aiRepairBatchSummary
   };
 
   await writeBatchArtifacts(batchDir, batchResult);

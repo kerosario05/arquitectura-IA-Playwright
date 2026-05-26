@@ -30,6 +30,12 @@ function getTarget(t: PlanTarget | "APP_BASE_URL" | undefined): PlanTarget | und
 function getTargetValue(t: PlanTarget | "APP_BASE_URL" | undefined): string {
   if (!t) return "";
   if (t === "APP_BASE_URL") return "APP_BASE_URL";
+  
+  // For AI-assisted resolution, use resolved target name from metadata
+  if (t.metadata?.aiAssisted && t.metadata?.resolvedTargetName) {
+    return t.metadata.resolvedTargetName;
+  }
+  
   return t.name ?? t.value ?? t.role ?? "";
 }
 

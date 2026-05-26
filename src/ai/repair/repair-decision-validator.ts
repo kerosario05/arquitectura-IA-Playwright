@@ -7,24 +7,36 @@ import {
 
 export type RepairCandidateForValidation = {
   candidateId: string;
+  role?: string;
+  name?: string;
+  text?: string;
   visible: boolean;
   enabled?: boolean;
   clickable?: boolean;
   editable?: boolean;
   sensitive?: boolean;
-  role?: string;
-  name?: string;
+};
+
+export type RepairEvidenceForValidation = {
+  evidenceId: string;
+  type: "feedback_message" | "structural" | "modal_state" | "text_visible" | "form_field" | "url_state";
   text?: string;
+  visible: boolean;
+  source: "runtimeEvidenceTrace" | "structuralEvidence" | "feedbackEvidence";
+  confidence?: number;
+  sensitive?: boolean;
 };
 
 export type RepairValidationContext = {
   candidates: RepairCandidateForValidation[];
+  evidenceCandidates?: RepairEvidenceForValidation[]; // For assertion_resolution
   blockSensitiveActions?: boolean;
   blockAuthSecrets?: boolean;
   blockPayments?: boolean;
   blockTransfers?: boolean;
   mustUseVisibleCandidate?: boolean;
   mustReturnExistingCandidateId?: boolean;
+  failedRoutePaths?: string[]; // For route_recovery loop prevention
 };
 
 export type RepairDecisionValidationResult =
@@ -35,6 +47,13 @@ const SELECTOR_HINTS = /(locator|selector|xpath|css|testid|getby|queryselector)/
 const SENSITIVE_HINTS = /(otp|pin|token|password|contrasena|api[_ -]?key|secret)/i;
 const PAYMENT_HINTS = /(payment|pago|card number|tarjeta|cvv)/i;
 const TRANSFER_HINTS = /(transfer|transferencia|wire)/i;
+const INVENTED_TEXT_HINTS = /(i think|probably|maybe|seems like|appears to|likely|should be|would be)/i;
+
+const ASSERTION_STATUS_ALLOWED = [
+  "satisfied_by_existing_evidence",
+  "partially_satisfied",
+  "needs_manual_review"
+] as const;
 
 function asObject(value: unknown): Record<string, unknown> | undefined {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return undefined;
@@ -80,6 +99,94 @@ export function validateRepairDecision(
     return { valid: false, code: "AI_REPAIR_SELECTOR_INVENTED", message: "Selector-like content is not allowed." };
   }
 
+  // Assertion resolution validation (before general candidateId validation)
+  if (repairType === "assertion_resolution") {
+    const evidenceId = obj.evidenceId as string | undefined;
+    const assertionStatus = obj.assertionStatus as string | undefined;
+
+    if (decision === "repaired_plan") {
+      // For assertion_resolution, evidenceId is required instead of candidateId
+      if (!evidenceId || evidenceId.trim().length === 0) {
+        return { valid: false, code: "AI_REPAIR_MISSING_EVIDENCE", message: "evidenceId is required for assertion_resolution repaired_plan." };
+      }
+      // Validate assertionStatus
+      if (!assertionStatus || !ASSERTION_STATUS_ALLOWED.includes(assertionStatus as any)) {
+        return { valid: false, code: "AI_REPAIR_SCHEMA_INVALID", message: `assertionStatus must be one of: ${ASSERTION_STATUS_ALLOWED.join(", ")}` };
+      }
+    }
+
+    // Validate evidenceId exists in evidenceCandidates
+    if (evidenceId && context.evidenceCandidates?.length) {
+      const evidence = context.evidenceCandidates.find((e) => e.evidenceId === evidenceId);
+      if (!evidence) {
+        return { valid: false, code: "AI_REPAIR_UNKNOWN_EVIDENCE", message: `Unknown evidenceId "${evidenceId}".` };
+      }
+      // Evidence must be visible for assertion satisfaction
+      if (!evidence.visible) {
+        return { valid: false, code: "AI_REPAIR_EVIDENCE_NOT_VISIBLE", message: `Evidence "${evidenceId}" is not visible.` };
+      }
+      // Block sensitive evidence
+      if (evidence.sensitive) {
+        return { valid: false, code: "AI_REPAIR_SENSITIVE_ASSERTION_BLOCKED", message: `Sensitive evidence "${evidenceId}" cannot be used for assertion.` };
+      }
+    }
+
+    // Check for invented text patterns in reason
+    if (obj.reason && INVENTED_TEXT_HINTS.test(String(obj.reason))) {
+      return { valid: false, code: "AI_REPAIR_ASSERTION_TEXT_INVENTED", message: "Reason contains uncertain/invented language." };
+    }
+    
+    // For assertion_resolution, skip candidateId validation
+    return { valid: true, decision: obj as RepairDecision };
+  }
+
+  // Selection resolution validation (before general candidateId validation)
+  if (repairType === "selection_resolution") {
+    const selectionStatus = obj.selectionStatus as string | undefined;
+
+    if (decision === "repaired_plan") {
+      // For selection_resolution, candidateId is required
+      if (typeof candidateId !== "string" || candidateId.trim().length === 0) {
+        return { valid: false, code: "AI_REPAIR_MISSING_CANDIDATE", message: "candidateId is required for selection_resolution repaired_plan." };
+      }
+      // Validate selectionStatus if present
+      if (selectionStatus && !["selected", "partially_matched", "needs_confirmation"].includes(selectionStatus)) {
+        return { valid: false, code: "AI_REPAIR_SCHEMA_INVALID", message: "selectionStatus must be one of: selected, partially_matched, needs_confirmation" };
+      }
+    }
+
+    // Validate candidateId exists and is valid for selection
+    if (typeof candidateId === "string" && candidateId.trim().length > 0) {
+      const candidate = context.candidates.find((c) => c.candidateId === candidateId);
+      if (!candidate) {
+        return { valid: false, code: "AI_REPAIR_UNKNOWN_CANDIDATE", message: `Unknown candidateId "${candidateId}".` };
+      }
+      // Candidate must be visible for selection
+      if (decision === "repaired_plan" && !candidate.visible) {
+        return { valid: false, code: "AI_REPAIR_CANDIDATE_NOT_VISIBLE", message: `Candidate "${candidateId}" is not visible.` };
+      }
+      // Candidate must be actionable (clickable/selectable)
+      if (decision === "repaired_plan") {
+        const actionable = candidate.clickable || candidate.enabled;
+        if (!actionable) {
+          return { valid: false, code: "AI_REPAIR_CANDIDATE_NOT_ACTIONABLE", message: `Candidate "${candidateId}" is not selectable.` };
+        }
+      }
+      // Block sensitive candidates for selection
+      if (decision === "repaired_plan" && context.blockSensitiveActions !== false && candidate.sensitive) {
+        return { valid: false, code: "AI_REPAIR_SENSITIVE_ACTION_BLOCKED", message: `Sensitive candidate "${candidateId}" cannot be selected.` };
+      }
+    }
+
+    // Check for invented text patterns in reason
+    if (obj.reason && INVENTED_TEXT_HINTS.test(String(obj.reason))) {
+      return { valid: false, code: "AI_REPAIR_ASSERTION_TEXT_INVENTED", message: "Reason contains uncertain/invented language." };
+    }
+    
+    // For selection_resolution, return early after validation
+    return { valid: true, decision: obj as RepairDecision };
+  }
+
   if (decision === "repaired_plan") {
     if (typeof candidateId !== "string" || candidateId.trim().length === 0) {
       return { valid: false, code: "AI_REPAIR_MISSING_CANDIDATE", message: "candidateId is required for repaired_plan." };
@@ -100,6 +207,10 @@ export function validateRepairDecision(
     }
     if (decision === "repaired_plan" && context.blockSensitiveActions !== false && candidate.sensitive) {
       return { valid: false, code: "AI_REPAIR_SENSITIVE_ACTION_BLOCKED", message: `Sensitive candidate "${candidateId}" is blocked.` };
+    }
+    // Route recovery loop prevention: don't reuse failed route candidates
+    if (repairType === "route_recovery" && context.failedRoutePaths?.includes(candidateId)) {
+      return { valid: false, code: "AI_REPAIR_ROUTE_CANDIDATE_ALREADY_FAILED", message: `Candidate "${candidateId}" already failed for route recovery.` };
     }
   }
 
