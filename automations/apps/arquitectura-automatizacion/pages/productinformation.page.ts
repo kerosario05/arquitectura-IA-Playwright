@@ -12,7 +12,7 @@ import { waitForPromotedSpecStepReady, waitForListReadiness } from '../../../bro
 // - Rename methods if needed.
 // - Do not activate until reviewed.
 //
-// Source plans: c37844-visualizar-detalle-de-tarjeta-visa-gold
+// Source plans: c38065-visualizar-categorias-principales-de-informacion-de-productos
 
 export class ProductInformationPage {
   constructor(private readonly page: Page) {}

@@ -144,6 +144,16 @@
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
+        },
+        {
+          "name": "start",
+          "intent": "start_session",
+          "parameters": [],
+          "available": true,
+          "source": "c38065-visualizar-categorias-principales-de-informacion-de-productos-step-3,c38065-visualizar-categorias-principales-de-informacion-de-productos-missing-start_session",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
         }
       ],
       "confidence": 0.5,
@@ -153,7 +163,7 @@
       ],
       "caseIds": [],
       "createdAt": "2026-05-24T06:21:05.635Z",
-      "updatedAt": "2026-05-24T06:21:05.635Z",
+      "updatedAt": "2026-05-26T20:45:59.484Z",
       "codegenMetadata": {
         "generatedAt": "2026-05-24T06:22:47.050Z",
         "generatedBy": "page-object-codegen",
@@ -278,8 +288,46 @@
         "autoApproved": true,
         "blockedMethods": []
       }
+    },
+    {
+      "id": "po_1779828359484_q2u9m4",
+      "className": "ProductInformationPage",
+      "filePath": "automations/apps/arquitectura-automatizacion/pages/productinformation.page.ts",
+      "screenSignature": "screen:arquitectura-automatizacion-product_information",
+      "methods": [
+        {
+          "name": "openProductInformation",
+          "intent": "open_product_information",
+          "parameters": [],
+          "available": true,
+          "source": "candidate,c38065-visualizar-categorias-principales-de-informacion-de-productos-step-4,c38065-visualizar-categorias-principales-de-informacion-de-productos-missing-open_product_information",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "active",
+      "sourcePlanIds": [
+        "c38065-visualizar-categorias-principales-de-informacion-de-productos"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-05-26T20:45:59.484Z",
+      "updatedAt": "2026-05-26T20:45:59.484Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-05-26T20:45:59.504Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/arquitectura-automatizacion/pages/productinformation.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-05-26T20:45:59.515Z",
+        "approvedFrom": "automations/apps/arquitectura-automatizacion/pages/productinformation.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
     }
   ],
   "componentCandidates": [],
-  "updatedAt": "2026-05-26T18:48:22.795Z"
+  "updatedAt": "2026-05-27T13:58:07.716Z"
 }

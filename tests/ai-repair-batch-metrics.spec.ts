@@ -32,6 +32,7 @@ function createCaseSummary(overrides?: Partial<AiRepairCaseSummary>): AiRepairCa
       assertion_resolution: 0,
       pom_method_missing: 0,
       selection_resolution: 0,
+      missing_intermediate_step: 0,
       unknown: 0
     },
     appliedRepairs: 0,

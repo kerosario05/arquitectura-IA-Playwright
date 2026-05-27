@@ -1,0 +1,10 @@
+{
+  "id": "c38068-visualizar-subcategorias-de-cuentas-de-efectivo",
+  "externalId": "C38068",
+  "caseId": 38068,
+  "title": "Visualizar subcategorías de Cuentas de Efectivo",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-05-26T20:53:40.934Z"
+}

@@ -497,7 +497,45 @@
       "status": "candidate",
       "createdAt": "2026-05-25T12:23:43.211Z",
       "updatedAt": "2026-05-25T12:23:43.211Z"
+    },
+    {
+      "id": "flow_1779828359486_ju41x3",
+      "name": "Visualizar categorías principales de Información d",
+      "filePath": "flows\\visualizar-categorías-principales-de-información-d.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Información de productos",
+          "pageObjectId": "ProductInformationPage",
+          "methodName": "openProductInformation"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-26T20:45:59.486Z",
+      "updatedAt": "2026-05-26T20:45:59.486Z"
     }
   ],
-  "updatedAt": "2026-05-25T12:23:43.212Z"
+  "updatedAt": "2026-05-26T20:45:59.489Z"
 }

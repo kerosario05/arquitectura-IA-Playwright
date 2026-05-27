@@ -239,7 +239,7 @@ export type DiscoveryStepResult = {
   // Recovery metadata — set when segmented route recovery resolves a failed step
   originalStatus?: string;
   recoveryStatus?: "recovered" | "repaired";
-  recoveredBy?: "segmented_route_recovery";
+  recoveredBy?: "segmented_route_recovery" | "route_completion";
   recoveryMetadata?: {
     selectedCandidateId: string;
     selectedCandidateText?: string;
@@ -249,6 +249,20 @@ export type DiscoveryStepResult = {
     transitionDetected: boolean;
     executedAction: string;
     rationale?: string;
+  };
+  routeCompletionDiagnostics?: {
+    attempted: boolean;
+    enabled: boolean;
+    appSlug: string;
+    routeProfileUsed: boolean;
+    trigger?: "pre_click_weak_resolution" | "post_click_semantic_mismatch" | "target_not_found";
+    source?: "app_route_profile" | "generic_forward_route_completion";
+    selectedCandidateId?: string;
+    selectedCandidateText?: string;
+    blockedReason?: string;
+    retrySucceeded?: boolean;
+    deterministicResolutionConfidence?: number;
+    deterministicResolutionStrategy?: string;
   };
   earlyCompletionDiagnostics?: {
     checked: boolean;

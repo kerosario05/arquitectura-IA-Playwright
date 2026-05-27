@@ -961,6 +961,11 @@ export async function runCaseDiscoveryWorkflow(
       ? "custom"
       : (activeConfig.integrations.ai?.agentProvider ?? "custom");
 
+    // Debug logging for routeCompletion config propagation
+    console.log(`[env-debug] raw AI_ROUTE_COMPLETION_ENABLED=${process.env.AI_ROUTE_COMPLETION_ENABLED}`);
+    console.log(`[env-debug] loaded routeCompletion.enabled=${activeConfig.integrations.ai?.routeCompletion?.enabled}`);
+    console.log(`[env-debug] appProfile appSlug=${options.appProfile?.appSlug ?? "undefined"}`);
+
     caseResult = await runCaseDiscovery({
       page,
       scenario,
@@ -968,6 +973,7 @@ export async function runCaseDiscoveryWorkflow(
       pendingObjectsPath,
       pendingPlansPath,
       appBaseUrl: activeConfig.app.baseUrl,
+      appSlug: options.appProfile?.appSlug,
       testData: activeConfig.app.testData,
       loginAction: async () => {
         await loginStrategy.execute(page, activeConfig);
@@ -980,7 +986,9 @@ export async function runCaseDiscoveryWorkflow(
           enabled: activeConfig.integrations.ai?.discoveryEnabled ?? false,
           confidenceThreshold: activeConfig.integrations.ai?.discoveryConfidenceThreshold ?? 0.85,
           requireApprovalThreshold: activeConfig.integrations.ai?.discoveryRequireApprovalThreshold ?? 0.7,
-          maxAttempts: activeConfig.integrations.ai?.discoveryMaxAttempts ?? 3
+          maxAttempts: activeConfig.integrations.ai?.discoveryMaxAttempts ?? 3,
+          routeCompletion: activeConfig.integrations.ai?.routeCompletion,
+          routeProfileLearning: activeConfig.integrations.ai?.routeProfileLearning
         }
       },
       env: {

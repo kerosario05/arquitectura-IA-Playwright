@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
-import type { AppConfig, FullConfig, LoginMode, MissingInputBehavior, TestDataAliasesMap, TestDataMap } from "../types/env.types";
+import type { AppConfig, FullConfig, LoginMode, MissingInputBehavior, TestDataAliasesMap, TestDataMap, AppRouteProfile } from "../types/env.types";
 
 const SENSITIVE_KEY_HINTS = ["password", "secret", "token", "key", "pass"];
 
@@ -305,6 +305,7 @@ export type PromotedAppConfig = {
   passwordRef?: string;
   extraLoginFields?: Record<string, string>;
   missingInputBehavior: MissingInputBehavior;
+  routeProfile?: AppRouteProfile;
   updatedAt: string;
 };
 
@@ -506,6 +507,11 @@ export function loadPromotedAppConfigSync(options: { appSlug: string; configPath
   } catch {
     return undefined;
   }
+}
+
+export function loadRouteProfile(appSlug: string): AppRouteProfile | undefined {
+  const config = loadPromotedAppConfigSync({ appSlug });
+  return config?.routeProfile;
 }
 
 export async function savePromotedAppConfig(config: PromotedAppConfig, outputRoot?: string): Promise<void> {

@@ -1,0 +1,10 @@
+{
+  "id": "c38076-visualizar-accion-solicitar-en-el-detalle-del-producto",
+  "externalId": "C38076",
+  "caseId": 38076,
+  "title": "Visualizar acción Solicitar en el detalle del producto",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-05-27T00:48:25.115Z"
+}

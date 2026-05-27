@@ -1,0 +1,10 @@
+{
+  "id": "c38075-regresar-al-listado-desde-el-detalle-de-producto",
+  "externalId": "C38075",
+  "caseId": 38075,
+  "title": "Regresar al listado desde el detalle de producto",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-05-27T00:48:02.579Z"
+}

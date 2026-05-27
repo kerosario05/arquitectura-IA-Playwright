@@ -1,0 +1,10 @@
+{
+  "id": "c38072-visualizar-subcategoria-de-prestamos",
+  "externalId": "C38072",
+  "caseId": 38072,
+  "title": "Visualizar subcategoría de Préstamos",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-05-26T21:07:29.981Z"
+}

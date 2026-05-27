@@ -11,6 +11,20 @@ export type AiAssistedDiscoveryConfig = {
   requireApprovalThreshold: number;
   maxAttempts: number;
   sensitiveActions?: AiExplorerAction[];
+  routeCompletion?: {
+    enabled?: boolean;
+    minConfidence?: number;
+    maxInsertedSteps?: number;
+    useAppProfile?: boolean;
+    allowGeneric?: boolean;
+  };
+  routeProfileLearning?: {
+    enabled?: boolean;
+    autoApproveThreshold?: number;
+    autoApply?: boolean;
+    minOccurrences?: number;
+    blockSensitive?: boolean;
+  };
 };
 
 export type AiProposalExecutionResult = {

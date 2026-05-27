@@ -1,0 +1,34 @@
+TASK: Write exactly ONE file at the absolute path below with valid JSON.
+
+OUTPUT FILE (absolute path): C:\MisProyectos\arquitectura-IA-Playwright-feature-auth-gate\.artifacts\ai-provider\codex\1779826767004\repair-decision.json
+
+RULES:
+- Write EXACTLY one file at: C:\MisProyectos\arquitectura-IA-Playwright-feature-auth-gate\.artifacts\ai-provider\codex\1779826767004\repair-decision.json
+- Do NOT modify any other files
+- Do NOT execute shell commands
+- Do NOT write markdown or explanations
+- Do NOT write to stdout as the primary output source
+- Output must be valid JSON (no trailing commas, no comments)
+- The JSON must conform to repair-decision.schema.json in the same directory
+
+REQUIRED FIELDS:
+- decision: one of [repaired_plan, no_safe_action, needs_more_context]
+- reason: string explaining the decision
+
+OPTIONAL FIELDS:
+- repairType, candidateId, evidenceId, assertionStatus, selectionStatus, confidence, questions
+
+SYSTEM CONTEXT:
+Return JSON only
+
+USER REQUEST:
+Test
+
+INSTRUCTION: Use the SYSTEM CONTEXT and USER REQUEST above to determine the appropriate decision and reason.
+Write the JSON object to: C:\MisProyectos\arquitectura-IA-Playwright-feature-auth-gate\.artifacts\ai-provider\codex\1779826767004\repair-decision.json
+Do NOT write any other files. Do NOT write to stdout.
+
+EXAMPLE OUTPUT:
+{"decision":"no_safe_action","reason":"No safe candidate matches the intent without user confirmation."}
+
+IMPORTANT: Write ONLY the file at the OUTPUT FILE path. Nothing else.

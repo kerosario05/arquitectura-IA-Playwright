@@ -49,6 +49,7 @@ const SENSITIVE_HINTS = /(otp|pin|token|password|contrasena|api[_ -]?key|secret)
 const PAYMENT_HINTS = /(payment|pago|card number|tarjeta|cvv)/i;
 const TRANSFER_HINTS = /(transfer|transferencia|wire)/i;
 const INVENTED_TEXT_HINTS = /(i think|probably|maybe|seems like|appears to|likely|should be|would be)/i;
+const SUBMIT_LIKE_HINTS = /(continuar|confirmar|enviar|submit|next|continue|confirm|send)/i;
 
 const ASSERTION_STATUS_ALLOWED = [
   "satisfied_by_existing_evidence",
@@ -101,8 +102,8 @@ export function validateRepairDecision(
     return { valid: false, code: "AI_REPAIR_SELECTOR_INVENTED", message: "Selector-like fields are not allowed." };
   }
 
-  // Verificar patrones de texto inventado en reason
-  if (reason && INVENTED_TEXT_HINTS.test(reason)) {
+  // Verificar patrones de texto inventado en reason (excluyendo missing_intermediate_step que usa insertedStepText)
+  if (repairType !== "missing_intermediate_step" && reason && INVENTED_TEXT_HINTS.test(reason)) {
     return { valid: false, code: "AI_REPAIR_ASSERTION_TEXT_INVENTED", message: "Reason contains invented/uncertain text patterns." };
   }
 
@@ -172,6 +173,53 @@ export function validateRepairDecision(
     }
     // Para selection_resolution, NO aplicar bloques genéricos PAYMENT_HINTS/TRANSFER_HINTS en reason
     // porque el control de sensitive ya se hizo arriba sobre candidate.sensitive
+  } else if (repairType === "missing_intermediate_step") {
+    // missing_intermediate_step: insertar paso intermedio de navegación
+    const insertedStepText = obj.insertedStepText as string | undefined;
+
+    if (decision === "repaired_plan") {
+      // candidateId es requerido para repaired_plan
+      const candidateIdStr = candidateId as string | undefined;
+      if (!candidateIdStr || candidateIdStr.trim().length === 0) {
+        return { valid: false, code: "AI_REPAIR_MISSING_CANDIDATE", message: "candidateId is required for missing_intermediate_step repaired_plan." };
+      }
+      // insertedStepText es requerido para repaired_plan
+      if (!insertedStepText || (insertedStepText as string).trim().length === 0) {
+        return { valid: false, code: "AI_REPAIR_MISSING_INSERTED_STEP", message: "insertedStepText is required for missing_intermediate_step repaired_plan." };
+      }
+      // candidateId debe existir en candidates
+      const candidate = context.candidates.find((c) => c.candidateId === candidateIdStr);
+      if (!candidate) {
+        return { valid: false, code: "AI_REPAIR_UNKNOWN_CANDIDATE", message: `candidateId "${candidateIdStr}" not found in candidates.` };
+      }
+      // candidate debe ser visible/enabled/clickable si mustUseVisibleCandidate está activo
+      if (context.mustUseVisibleCandidate !== false) {
+        if (!candidate.visible) {
+          return { valid: false, code: "AI_REPAIR_CANDIDATE_NOT_VISIBLE", message: `Candidate "${candidateIdStr}" is not visible.` };
+        }
+        if (!candidate.enabled) {
+          return { valid: false, code: "AI_REPAIR_CANDIDATE_NOT_ENABLED", message: `Candidate "${candidateIdStr}" is not enabled.` };
+        }
+        if (!candidate.clickable) {
+          return { valid: false, code: "AI_REPAIR_CANDIDATE_NOT_CLICKABLE", message: `Candidate "${candidateIdStr}" is not clickable.` };
+        }
+      }
+      // candidateId no debe ser sensible
+      if (context.blockSensitiveActions !== false && candidate.sensitive) {
+        return { valid: false, code: "AI_REPAIR_SENSITIVE_ACTION_BLOCKED", message: `Sensitive candidate "${candidateIdStr}" is blocked.` };
+      }
+      // candidateId no debe ser un botón submit-like (Continuar, Confirmar, Enviar)
+      // Los pasos intermedios deben ser navegación, no acciones de envío
+      const candidateText = (candidate.name || candidate.text || "").toLowerCase();
+      if (SUBMIT_LIKE_HINTS.test(candidateText)) {
+        return { valid: false, code: "AI_REPAIR_SUBMIT_LIKE_CANDIDATE_BLOCKED", message: `Submit-like candidate "${candidateIdStr}" is not valid as intermediate navigation step.` };
+      }
+    } else if (decision === "no_safe_action") {
+      // no_safe_action no requiere candidateId ni insertedStepText
+    }
+    // Para missing_intermediate_step, NO aplicar bloques genéricos de payment/transfer
+    // porque el control de sensitive ya se hizo arriba sobre candidate.sensitive
+    // "Tarjetas" es una categoría de navegación válida, no es sensible por sí misma
   } else {
     // Para target_resolution / route_recovery / otros: aplicar bloques genéricos
     const fullText = JSON.stringify(obj);
@@ -217,6 +265,7 @@ export function validateRepairDecision(
     evidenceId: obj.evidenceId as any,
     assertionStatus: obj.assertionStatus as any,
     selectionStatus: obj.selectionStatus as any,
+    insertedStepText: obj.insertedStepText as any,
     confidence: confidence as any,
     questions: questions as any
   };

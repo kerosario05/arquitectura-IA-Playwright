@@ -339,7 +339,33 @@ export const config: FullConfig = {
       discoveryMaxAttempts: parseOptionalPositiveNumber(
         process.env.AI_DISCOVERY_MAX_ATTEMPTS,
         "AI_DISCOVERY_MAX_ATTEMPTS"
-      ) ?? 3
+      ) ?? 3,
+      routeCompletion: {
+        enabled: (process.env.AI_ROUTE_COMPLETION_ENABLED ?? "false").toLowerCase() === "true",
+        minConfidence: parseOptionalThreshold(
+          process.env.AI_ROUTE_COMPLETION_MIN_CONFIDENCE,
+          "AI_ROUTE_COMPLETION_MIN_CONFIDENCE"
+        ) ?? 0.75,
+        maxInsertedSteps: parseOptionalPositiveNumber(
+          process.env.AI_ROUTE_COMPLETION_MAX_INSERTED_STEPS,
+          "AI_ROUTE_COMPLETION_MAX_INSERTED_STEPS"
+        ) ?? 1,
+        useAppProfile: (process.env.AI_ROUTE_COMPLETION_USE_APP_PROFILE ?? "true").toLowerCase() === "true",
+        allowGeneric: (process.env.AI_ROUTE_COMPLETION_ALLOW_GENERIC ?? "true").toLowerCase() === "true"
+      },
+      routeProfileLearning: {
+        enabled: (process.env.ROUTE_PROFILE_LEARNING_ENABLED ?? "false").toLowerCase() === "true",
+        autoApproveThreshold: parseOptionalThreshold(
+          process.env.ROUTE_PROFILE_LEARNING_AUTO_APPROVE_THRESHOLD,
+          "ROUTE_PROFILE_LEARNING_AUTO_APPROVE_THRESHOLD"
+        ) ?? 0.90,
+        autoApply: (process.env.ROUTE_PROFILE_LEARNING_AUTO_APPLY ?? "false").toLowerCase() === "true",
+        minOccurrences: parseOptionalPositiveNumber(
+          process.env.ROUTE_PROFILE_LEARNING_MIN_OCCURRENCES,
+          "ROUTE_PROFILE_LEARNING_MIN_OCCURRENCES"
+        ) ?? 1,
+        blockSensitive: (process.env.ROUTE_PROFILE_LEARNING_BLOCK_SENSITIVE ?? "true").toLowerCase() === "true"
+      }
     },
     agent: {
       provider: parseAgentProvider(process.env.AGENT_PROVIDER),

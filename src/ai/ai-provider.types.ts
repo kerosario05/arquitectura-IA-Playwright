@@ -18,6 +18,12 @@ export type AiCompletionResponse = {
   model: string;
   providerName: string;
   durationMs: number;
+  diagnostics?: {
+    warning?: string;
+    exitCode?: number;
+    stdout?: string;
+    stderr?: string;
+  };
 };
 
 export type AiProviderErrorCode =
@@ -61,4 +67,5 @@ export type AiProviderConfig = {
   // Codex CLI specific (optional)
   command?: string;       // CODEX_CLI_COMMAND
   extraArgs?: string[];   // CODEX_CLI_EXTRA_ARGS parsed
+  allowStdoutJsonFallback?: boolean; // Only for test-ai-provider connectivity checks
 };

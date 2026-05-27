@@ -1,0 +1,56 @@
+{
+  "id": "c38074-validar-secciones-visibles-del-contenido-oficial-del-producto",
+  "externalId": "C38074",
+  "caseId": 38074,
+  "title": "Validar secciones visibles del contenido oficial del producto",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c38074-validar-secciones-visibles-del-contenido-oficial-del-producto\\plan.json",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c38074-validar-secciones-visibles-del-contenido-oficial-del-producto\\case.spec.ts",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "arquitectura-automatizacion",
+  "baseUrlHash": "1423ba294517",
+  "createdAt": "2026-05-27T00:47:21.247Z",
+  "updatedAt": "2026-05-27T00:47:21.247Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-27T00-44-02-561Z\\cases\\case-38074\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "not_run",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-27T00-44-02-561Z\\cases\\case-38074",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [],
+      "availablePageObjects": [
+        "ProductListPage",
+        "ProductDetailPage",
+        "FormPage",
+        "HomePage",
+        "LoginPage",
+        "CategoryPage",
+        "ProductInformationPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    }
+  }
+}

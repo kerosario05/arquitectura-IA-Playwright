@@ -46,7 +46,7 @@ export type RepairContextPackInput = {
   constraints?: string[];
   maxChars: number;
   // Route recovery specific fields
-  failureType?: "target_not_found" | "route_not_found" | "navigation_dead_end" | "wrong_screen" | "assertion_not_satisfied" | "ambiguous_selection";
+  failureType?: "target_not_found" | "route_not_found" | "navigation_dead_end" | "wrong_screen" | "assertion_not_satisfied" | "ambiguous_selection" | "missing_intermediate_step";
   targetRoute?: string;
   currentScreen?: {
     url: string;

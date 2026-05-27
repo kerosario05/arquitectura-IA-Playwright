@@ -1,0 +1,59 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C38077",
+    "caseId": 38077,
+    "title": "Finalizar sesión desde el detalle del producto"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "1. Clic en \"Iniciar\".",
+      "target": {
+        "strategy": "text",
+        "value": "Iniciar",
+        "exact": false
+      }
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en \"Información de productos\".",
+      "target": {
+        "strategy": "text",
+        "value": "Información de productos",
+        "exact": false
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Clic en \"Tarjetas\".",
+      "target": {
+        "strategy": "text",
+        "value": "Tarjetas",
+        "exact": false
+      }
+    }
+  ],
+  "notes": [
+    "Discovery failed at step 4: semantic_mismatch - \"la primera tarjeta visible del listado de productos\""
+  ],
+  "createdAt": "2026-05-26T21:08:53.492Z"
+}

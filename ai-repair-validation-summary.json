@@ -7,92 +7,92 @@
     "assertionResolution": "passed",
     "selectionResolution": "passed",
     "securityGuards": "passed",
-    "durationMs": 7517,
+    "durationMs": 27142,
     "details": [
       {
         "name": "target_resolution:repaired_plan_valid",
         "passed": true,
-        "durationMs": 438
+        "durationMs": 1670
       },
       {
         "name": "target_resolution:no_safe_action",
         "passed": true,
-        "durationMs": 448
+        "durationMs": 1698
       },
       {
         "name": "target_resolution:invalid_json",
         "passed": true,
-        "durationMs": 441
+        "durationMs": 1657
       },
       {
         "name": "target_resolution:unknown_candidate",
         "passed": true,
-        "durationMs": 441
+        "durationMs": 1646
       },
       {
         "name": "target_resolution:invented_selector",
         "passed": true,
-        "durationMs": 434
+        "durationMs": 1748
       },
       {
         "name": "target_resolution:sensitive_candidate",
         "passed": true,
-        "durationMs": 437
+        "durationMs": 1694
       },
       {
         "name": "route_recovery:route_recovery_valid",
         "passed": true,
-        "durationMs": 440
+        "durationMs": 1743
       },
       {
         "name": "route_recovery:route_recovery_no_safe_action",
         "passed": true,
-        "durationMs": 449
+        "durationMs": 1524
       },
       {
         "name": "route_recovery:route_recovery_failed_candidate",
         "passed": true,
-        "durationMs": 439
+        "durationMs": 1544
       },
       {
         "name": "assertion_resolution:assertion_resolution_valid",
         "passed": true,
-        "durationMs": 432
+        "durationMs": 1547
       },
       {
         "name": "assertion_resolution:assertion_resolution_no_safe_action",
         "passed": true,
-        "durationMs": 445
+        "durationMs": 1549
       },
       {
         "name": "assertion_resolution:assertion_resolution_unknown_evidence",
         "passed": true,
-        "durationMs": 448
+        "durationMs": 1550
       },
       {
         "name": "assertion_resolution:assertion_resolution_sensitive_evidence",
         "passed": true,
-        "durationMs": 442
+        "durationMs": 1504
       },
       {
         "name": "selection_resolution:selection_resolution_valid",
         "passed": true,
-        "durationMs": 443
+        "durationMs": 1582
       },
       {
         "name": "selection_resolution:selection_resolution_no_safe_action",
         "passed": true,
-        "durationMs": 447
+        "durationMs": 1525
       },
       {
         "name": "selection_resolution:selection_resolution_unknown_candidate",
         "passed": true,
-        "durationMs": 442
+        "durationMs": 1501
       },
       {
         "name": "selection_resolution:selection_resolution_sensitive_candidate",
         "passed": true,
-        "durationMs": 450
+        "durationMs": 1458
       }
     ]
   }

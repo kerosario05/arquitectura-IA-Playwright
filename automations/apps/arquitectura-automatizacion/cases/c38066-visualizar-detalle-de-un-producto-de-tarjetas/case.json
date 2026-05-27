@@ -1,0 +1,10 @@
+{
+  "id": "c38066-visualizar-detalle-de-un-producto-de-tarjetas",
+  "externalId": "C38066",
+  "caseId": 38066,
+  "title": "Visualizar detalle de un producto de Tarjetas",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-05-27T13:08:03.948Z"
+}

@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-27T00:48:02.570Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c38075-regresar-al-listado-desde-el-detalle-de-producto",
+  "appSlug": "arquitectura-automatizacion",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c38075-regresar-al-listado-desde-el-detalle-de-producto\\case.spec.ts",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c38075-regresar-al-listado-desde-el-detalle-de-producto\\plan.json",
+  "caseFolder": "c38075-regresar-al-listado-desde-el-detalle-de-producto",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false
+}

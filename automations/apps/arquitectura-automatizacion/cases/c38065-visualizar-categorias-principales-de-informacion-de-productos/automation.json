@@ -1,0 +1,59 @@
+{
+  "id": "c38065-visualizar-categorias-principales-de-informacion-de-productos",
+  "externalId": "C38065",
+  "caseId": 38065,
+  "title": "Visualizar categorías principales de Información de productos",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c38065-visualizar-categorias-principales-de-informacion-de-productos\\plan.json",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c38065-visualizar-categorias-principales-de-informacion-de-productos\\case.spec.ts",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "arquitectura-automatizacion",
+  "baseUrlHash": "1423ba294517",
+  "createdAt": "2026-05-27T12:54:11.899Z",
+  "updatedAt": "2026-05-27T12:54:11.899Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38065\\2026-05-27T12-53-57-857Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "not_run",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38065\\2026-05-27T12-53-57-857Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [],
+      "availablePageObjects": [
+        "ProductListPage",
+        "ProductDetailPage",
+        "FormPage",
+        "HomePage",
+        "LoginPage",
+        "CategoryPage",
+        "ProductInformationPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c38065-visualizar-categorias-principales-de-informacion-de-productos\\plan.json",
+    "previousStatus": "active"
+  }
+}

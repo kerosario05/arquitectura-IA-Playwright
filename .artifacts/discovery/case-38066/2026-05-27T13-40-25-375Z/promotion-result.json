@@ -1,0 +1,9 @@
+{
+  "timestamp": "2026-05-27T13:40:48.081Z",
+  "autoPromoteRequested": false,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": false
+}
