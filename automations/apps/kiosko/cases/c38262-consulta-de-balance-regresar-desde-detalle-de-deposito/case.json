@@ -1,0 +1,10 @@
+{
+  "id": "c38262-consulta-de-balance-regresar-desde-detalle-de-deposito",
+  "externalId": "C38262",
+  "caseId": 38262,
+  "title": "Consulta de balance - Regresar desde detalle de depósito",
+  "source": "discovery",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "createdAt": "2026-05-28T14:34:02.356Z"
+}

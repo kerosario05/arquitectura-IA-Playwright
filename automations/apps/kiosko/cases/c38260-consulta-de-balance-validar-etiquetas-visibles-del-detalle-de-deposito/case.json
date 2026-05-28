@@ -1,0 +1,10 @@
+{
+  "id": "c38260-consulta-de-balance-validar-etiquetas-visibles-del-detalle-de-deposito",
+  "externalId": "C38260",
+  "caseId": 38260,
+  "title": "Consulta de balance - Validar etiquetas visibles del detalle de depósito",
+  "source": "discovery",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "createdAt": "2026-05-28T14:31:37.772Z"
+}

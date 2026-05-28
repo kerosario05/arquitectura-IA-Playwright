@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-05-28T14:04:09.800Z",
+  "updatedAt": "2026-05-28T14:34:02.407Z",
   "automations": [
     {
       "id": "c10002-test-automation-plan",
@@ -1756,6 +1756,276 @@
           "autoPomCreatedMethods": [
             "HomePage.open()"
           ],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos",
+      "externalId": "C38257",
+      "caseId": 38257,
+      "title": "Consulta de balance - Visualizar listado de depósitos a plazo activos",
+      "planPath": "automations\\apps\\kiosko\\cases\\c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos\\plan.json",
+      "specPath": "automations\\apps\\kiosko\\cases\\c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos\\case.spec.ts",
+      "appSlug": "kiosko",
+      "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "kiosko",
+      "baseUrlHash": "1423ba294517",
+      "createdAt": "2026-05-28T14:20:12.465Z",
+      "updatedAt": "2026-05-28T14:20:12.472Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38257\\2026-05-28T14-19-29-322Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38257\\2026-05-28T14-19-29-322Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "HomePage",
+            "ProductInformationPage",
+            "CategoryPage",
+            "ProductDetailPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "c38258-consulta-de-balance-visualizar-detalle-de-deposito-a-plazo-activo",
+      "externalId": "C38258",
+      "caseId": 38258,
+      "title": "Consulta de balance - Visualizar detalle de depósito a plazo activo",
+      "planPath": "automations\\apps\\kiosko\\cases\\c38258-consulta-de-balance-visualizar-detalle-de-deposito-a-plazo-activo\\plan.json",
+      "specPath": "automations\\apps\\kiosko\\cases\\c38258-consulta-de-balance-visualizar-detalle-de-deposito-a-plazo-activo\\case.spec.ts",
+      "appSlug": "kiosko",
+      "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "kiosko",
+      "baseUrlHash": "1423ba294517",
+      "createdAt": "2026-05-28T14:21:36.791Z",
+      "updatedAt": "2026-05-28T14:21:36.799Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38258\\2026-05-28T14-20-56-647Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38258\\2026-05-28T14-20-56-647Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "HomePage",
+            "ProductInformationPage",
+            "CategoryPage",
+            "ProductDetailPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "c38260-consulta-de-balance-validar-etiquetas-visibles-del-detalle-de-deposito",
+      "externalId": "C38260",
+      "caseId": 38260,
+      "title": "Consulta de balance - Validar etiquetas visibles del detalle de depósito",
+      "planPath": "automations\\apps\\kiosko\\cases\\c38260-consulta-de-balance-validar-etiquetas-visibles-del-detalle-de-deposito\\plan.json",
+      "specPath": "automations\\apps\\kiosko\\cases\\c38260-consulta-de-balance-validar-etiquetas-visibles-del-detalle-de-deposito\\case.spec.ts",
+      "appSlug": "kiosko",
+      "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "kiosko",
+      "baseUrlHash": "1423ba294517",
+      "createdAt": "2026-05-28T14:31:37.809Z",
+      "updatedAt": "2026-05-28T14:31:37.817Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38260\\2026-05-28T14-30-57-229Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38260\\2026-05-28T14-30-57-229Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "HomePage",
+            "ProductInformationPage",
+            "CategoryPage",
+            "ProductDetailPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "c38261-consulta-de-balance-ver-acciones-disponibles-en-detalle-de-deposito",
+      "externalId": "C38261",
+      "caseId": 38261,
+      "title": "Consulta de balance - Ver acciones disponibles en detalle de depósito",
+      "planPath": "automations\\apps\\kiosko\\cases\\c38261-consulta-de-balance-ver-acciones-disponibles-en-detalle-de-deposito\\plan.json",
+      "specPath": "automations\\apps\\kiosko\\cases\\c38261-consulta-de-balance-ver-acciones-disponibles-en-detalle-de-deposito\\case.spec.ts",
+      "appSlug": "kiosko",
+      "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "kiosko",
+      "baseUrlHash": "1423ba294517",
+      "createdAt": "2026-05-28T14:32:50.673Z",
+      "updatedAt": "2026-05-28T14:32:50.679Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38261\\2026-05-28T14-32-09-517Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38261\\2026-05-28T14-32-09-517Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "HomePage",
+            "ProductInformationPage",
+            "CategoryPage",
+            "ProductDetailPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "c38262-consulta-de-balance-regresar-desde-detalle-de-deposito",
+      "externalId": "C38262",
+      "caseId": 38262,
+      "title": "Consulta de balance - Regresar desde detalle de depósito",
+      "planPath": "automations\\apps\\kiosko\\cases\\c38262-consulta-de-balance-regresar-desde-detalle-de-deposito\\plan.json",
+      "specPath": "automations\\apps\\kiosko\\cases\\c38262-consulta-de-balance-regresar-desde-detalle-de-deposito\\case.spec.ts",
+      "appSlug": "kiosko",
+      "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "kiosko",
+      "baseUrlHash": "1423ba294517",
+      "createdAt": "2026-05-28T14:34:02.398Z",
+      "updatedAt": "2026-05-28T14:34:02.407Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38262\\2026-05-28T14-33-22-308Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38262\\2026-05-28T14-33-22-308Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "HomePage",
+            "ProductInformationPage",
+            "CategoryPage",
+            "ProductDetailPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
         }

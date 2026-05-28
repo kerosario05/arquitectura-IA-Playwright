@@ -1,0 +1,10 @@
+{
+  "id": "c38258-consulta-de-balance-visualizar-detalle-de-deposito-a-plazo-activo",
+  "externalId": "C38258",
+  "caseId": 38258,
+  "title": "Consulta de balance - Visualizar detalle de depósito a plazo activo",
+  "source": "discovery",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "createdAt": "2026-05-28T14:21:36.761Z"
+}

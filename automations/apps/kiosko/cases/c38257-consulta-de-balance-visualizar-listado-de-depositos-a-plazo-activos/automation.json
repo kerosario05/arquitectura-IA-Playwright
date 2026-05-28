@@ -1,0 +1,54 @@
+{
+  "id": "c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos",
+  "externalId": "C38257",
+  "caseId": 38257,
+  "title": "Consulta de balance - Visualizar listado de depósitos a plazo activos",
+  "planPath": "automations\\apps\\kiosko\\cases\\c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos\\plan.json",
+  "specPath": "automations\\apps\\kiosko\\cases\\c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos\\case.spec.ts",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "kiosko",
+  "baseUrlHash": "1423ba294517",
+  "createdAt": "2026-05-28T14:20:12.465Z",
+  "updatedAt": "2026-05-28T14:20:12.465Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38257\\2026-05-28T14-19-29-322Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "not_run",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38257\\2026-05-28T14-19-29-322Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [],
+      "availablePageObjects": [
+        "ProductListPage",
+        "HomePage",
+        "ProductInformationPage",
+        "CategoryPage",
+        "ProductDetailPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    }
+  }
+}
