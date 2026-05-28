@@ -77,6 +77,32 @@ export type ExecutionPlanStep = {
   timeoutMs?: number;
   optional?: boolean;
   evidence?: boolean;
+  // Discovery resolution metadata
+  locatorStrategy?: string;
+  recoveryMetadata?: {
+    recoveredBy?: "segmented_route_recovery" | "route_completion" | "contextual_intermediate_already_satisfied" | "ordinal_selection";
+    rationale?: string;
+    ordinalSelectionDiagnostics?: {
+      selectionPatternDetected: boolean;
+      ordinal?: "first" | "second" | "third" | "last";
+      domainTerm?: string;
+      domainTermSource?: "routeProfile" | "generic_fallback";
+      selectedCandidateText?: string;
+      selectedCandidateId?: string;
+    };
+    alreadySatisfiedEvidence?: {
+      candidateText: string;
+      candidateType: string;
+      containsTarget: boolean;
+      consistentWithNextTarget: boolean;
+      reason: string;
+    };
+    selectedCandidateId?: string;
+    selectedCandidateText?: string;
+    segmentIndex?: number;
+    transitionDetected?: boolean;
+    executedAction?: string;
+  };
 };
 
 export type ExecutionPlanScenarioRef = {

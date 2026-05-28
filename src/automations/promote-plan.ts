@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { config as envConfig } from "../config/env";
 import { validateExecutionPlan } from "../plans/execution-plan-validator";
-import type { ExecutionPlan, ExecutionPlanStep } from "../types/execution-plan.types";
+import type { ExecutionPlan, ExecutionPlanStep, PlanTarget } from "../types/execution-plan.types";
 import type { FullConfig } from "../types/env.types";
 import type { PromotedAutomationIndexEntry, PromotionPolicy, POMPromotionStatus } from "../types/automation-promotion.types";
 import { DEFAULT_PROMOTION_POLICY } from "../types/automation-promotion.types";
@@ -23,6 +23,7 @@ import {
   buildAppAutomationPaths,
   ensureAppStructure,
   validateAuthFlowDependencies,
+  loadPromotedAppConfigSync,
   type AppProfile
 } from "./app-profile";
 import {
@@ -601,8 +602,8 @@ async function registerPOMCandidatesForBlockedPromotion(
       // Skip login-related intents
       if (skipIntents.includes(intent)) continue;
 
-      const expectedOwnerMatch = missingMethod.match(/expectedOwner="([^"]+)"/);
-      const ownerClassName = expectedOwnerMatch ? expectedOwnerMatch[1] : (INTENT_PREFERRED_OWNER[intent] ?? "GenericPage");
+      // Always use INTENT_PREFERRED_OWNER for consistency, don't trust stale expectedOwner from missing method string
+      const ownerClassName = INTENT_PREFERRED_OWNER[intent as SemanticMethodIntent] ?? "GenericPage";
 
       let ownerPO = registry.pageObjects.find((po) => po.className === ownerClassName);
 
@@ -974,7 +975,8 @@ export async function promoteExecutionPlan(
     }
   }
 
-  const appConfig = serializeRuntimeConfigForPromotion(input.fullConfig ?? envConfig);
+  const existingConfig = loadPromotedAppConfigSync({ appSlug: appProfile.appSlug });
+  const appConfig = serializeRuntimeConfigForPromotion(input.fullConfig ?? envConfig, existingConfig);
   appConfig.appProfile = {
     ...appConfig.appProfile,
     appSlug: appProfile.appSlug,

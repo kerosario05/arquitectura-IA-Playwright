@@ -1,0 +1,10 @@
+{
+  "id": "c38131-visualizar-detalle-informativo-de-prestamo-personal",
+  "externalId": "C38131",
+  "caseId": 38131,
+  "title": "Visualizar detalle informativo de préstamo personal",
+  "source": "discovery",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "createdAt": "2026-05-28T02:47:47.920Z"
+}

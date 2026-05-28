@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-28T02:49:07.496Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c38133-accion-solicitar-visible-desde-detalle-de-producto",
+  "appSlug": "kiosko",
+  "specPath": "automations\\apps\\kiosko\\cases\\c38133-accion-solicitar-visible-desde-detalle-de-producto\\case.spec.ts",
+  "planPath": "automations\\apps\\kiosko\\cases\\c38133-accion-solicitar-visible-desde-detalle-de-producto\\plan.json",
+  "caseFolder": "c38133-accion-solicitar-visible-desde-detalle-de-producto",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false
+}

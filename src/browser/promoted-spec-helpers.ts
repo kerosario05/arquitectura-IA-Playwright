@@ -36,6 +36,8 @@ export type PageDiagnostics = {
   loadingDetected: boolean;
   skeletonDetected: boolean;
   listReadiness: ListReadinessState;
+  pageClosed?: boolean;
+  pageClosedReason?: string;
 };
 
 const LOADING_KEYWORDS = [
@@ -231,20 +233,81 @@ async function checkListReadiness(
 }
 
 export async function capturePageDiagnostics(page: Page): Promise<PageDiagnostics> {
+  // Check if page/context is closed before attempting diagnostics
+  try {
+    if (!page.context() || !page.isClosed()) {
+      // Page is accessible, continue with diagnostics
+    } else {
+      return {
+        currentUrl: "(page closed)",
+        title: "",
+        visibleHeadings: [],
+        visibleButtons: [],
+        visibleTexts: [],
+        loadingDetected: false,
+        skeletonDetected: false,
+        listReadiness: {
+          cardsVisible: 0,
+          listItemsVisible: 0,
+          loadingDetected: false,
+          zeroProductsDetected: false,
+          hasEntityContainers: false,
+          visibleHeadings: [],
+          visibleButtons: [],
+          ready: false
+        },
+        pageClosed: true,
+        pageClosedReason: "context_closed_during_diagnostics"
+      };
+    }
+  } catch {
+    // Page/context is closed or inaccessible
+    return {
+      currentUrl: "(page closed)",
+      title: "",
+      visibleHeadings: [],
+      visibleButtons: [],
+      visibleTexts: [],
+      loadingDetected: false,
+      skeletonDetected: false,
+      listReadiness: {
+        cardsVisible: 0,
+        listItemsVisible: 0,
+        loadingDetected: false,
+        zeroProductsDetected: false,
+        hasEntityContainers: false,
+        visibleHeadings: [],
+        visibleButtons: [],
+        ready: false
+      },
+      pageClosed: true,
+      pageClosedReason: "error_accessing_page"
+    };
+  }
+
   const currentUrl = page.url();
   const title = await page.title().catch(() => "");
 
-  const visibleHeadings = await scanVisibleElements(page, "h1:visible, h2:visible, h3:visible");
-  const visibleButtonsRaw = await scanVisibleElements(page, "button:visible, [role='button']:visible");
+  const visibleHeadings = await scanVisibleElements(page, "h1:visible, h2:visible, h3:visible").catch(() => []);
+  const visibleButtonsRaw = await scanVisibleElements(page, "button:visible, [role='button']:visible").catch(() => []);
   const visibleButtons = visibleButtonsRaw.slice(0, 10);
 
-  const texts = await scanPageTexts(page);
+  const texts = await scanPageTexts(page).catch(() => []);
   const visibleTexts = texts.filter(t => t.length > 3 && t.length < 100).slice(0, 20);
 
   const loadingDetected = containsAny(texts, LOADING_KEYWORDS);
   const skeletonDetected = containsAny(texts, SKELETON_KEYWORDS);
 
-  const listReadiness = await checkListReadiness(page, { timeoutMs: 0, pollMs: 0, minCards: 1 });
+  const listReadiness = await checkListReadiness(page, { timeoutMs: 0, pollMs: 0, minCards: 1 }).catch(() => ({
+    cardsVisible: 0,
+    listItemsVisible: 0,
+    loadingDetected: false,
+    zeroProductsDetected: false,
+    hasEntityContainers: false,
+    visibleHeadings: [],
+    visibleButtons: [],
+    ready: false
+  }));
 
   return {
     currentUrl,

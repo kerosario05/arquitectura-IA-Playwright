@@ -1,0 +1,10 @@
+{
+  "id": "c38126-visualizar-detalle-informativo-de-tarjeta-de-credito",
+  "externalId": "C38126",
+  "caseId": 38126,
+  "title": "Visualizar detalle informativo de tarjeta de crédito",
+  "source": "discovery",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "createdAt": "2026-05-28T02:46:55.111Z"
+}

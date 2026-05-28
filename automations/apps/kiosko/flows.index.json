@@ -51,7 +51,231 @@
       "status": "candidate",
       "createdAt": "2026-05-22T19:16:38.494Z",
       "updatedAt": "2026-05-22T19:16:38.494Z"
+    },
+    {
+      "id": "flow_1779904355239_h11m69",
+      "name": "Visualizar detalle informativo de tarjeta de crédi",
+      "filePath": "flows\\visualizar-detalle-informativo-de-tarjeta-de-crédi.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Información de productos",
+          "pageObjectId": "ProductInformationPage",
+          "methodName": "openProductInformation"
+        },
+        {
+          "action": "click",
+          "target": "Tarjetas",
+          "pageObjectId": "CategoryPage",
+          "methodName": "selectCategory"
+        },
+        {
+          "action": "click",
+          "target": "Tarjeta de Crédito",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "la primera tarjeta visible del listado",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectFirstVisibleCard"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-27T17:52:35.239Z",
+      "updatedAt": "2026-05-27T17:52:35.239Z"
+    },
+    {
+      "id": "flow_1779914263764_knss6h",
+      "name": "Visualizar detalle informativo de cuenta de ahorro",
+      "filePath": "flows\\visualizar-detalle-informativo-de-cuenta-de-ahorro.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Información de productos",
+          "pageObjectId": "ProductInformationPage",
+          "methodName": "openProductInformation"
+        },
+        {
+          "action": "click",
+          "target": "Cuentas",
+          "pageObjectId": "CategoryPage",
+          "methodName": "selectCategory"
+        },
+        {
+          "action": "click",
+          "target": "Cuenta de Ahorro",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "la primera cuenta visible del listado",
+          "pageObjectId": "ProductListPage",
+          "methodName": "expectLoaded"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-27T20:37:43.764Z",
+      "updatedAt": "2026-05-27T20:37:43.764Z"
+    },
+    {
+      "id": "flow_1779928897718_c9es2w",
+      "name": "Acción Solicitar visible desde detalle de producto",
+      "filePath": "flows\\acción-solicitar-visible-desde-detalle-de-producto.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Información de productos",
+          "pageObjectId": "ProductInformationPage",
+          "methodName": "openProductInformation"
+        },
+        {
+          "action": "click",
+          "target": "Tarjetas",
+          "pageObjectId": "CategoryPage",
+          "methodName": "selectCategory"
+        },
+        {
+          "action": "click",
+          "target": "Tarjeta de Crédito",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "la primera tarjeta visible del listado",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectFirstVisibleCard"
+        },
+        {
+          "action": "click",
+          "target": "Solicitar",
+          "pageObjectId": "ProductListPage",
+          "methodName": "clickPrimaryAction"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-28T00:41:37.718Z",
+      "updatedAt": "2026-05-28T00:41:37.718Z"
+    },
+    {
+      "id": "flow_1779931312159_tzran6",
+      "name": "Volver al listado desde el detalle de producto",
+      "filePath": "flows\\volver-al-listado-desde-el-detalle-de-producto.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Información de productos",
+          "pageObjectId": "ProductInformationPage",
+          "methodName": "openProductInformation"
+        },
+        {
+          "action": "click",
+          "target": "Depósitos a plazo",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "Volver al listado de productos",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-28T01:21:52.159Z",
+      "updatedAt": "2026-05-28T01:21:52.159Z"
     }
   ],
-  "updatedAt": "2026-05-22T19:16:38.497Z"
+  "updatedAt": "2026-05-28T01:32:16.694Z"
 }

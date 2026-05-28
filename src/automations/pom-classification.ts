@@ -73,6 +73,76 @@ function isDetailPrimaryAction(text: string): boolean {
   return /\b(add to cart|agregar al carrito|purchase|buy|comprar|checkout|place order|continuar|confirmar|submit|enviar|pagar)\b/i.test(text);
 }
 
+function isBackOrReturnTarget(text: string): boolean {
+  return /\b(volver|regresar|atr|back|return|cancel)\b/i.test(text);
+}
+
+function isVisibleAssertion(text: string): boolean {
+  const visibilityKeywords = [
+    "validar.*visible", "verificar.*visible", "se muestra", "se visualiza",
+    "aparece", "está disponible", "opción visible", "acción visible",
+    "botón visible", "se presenta", "está visible", "visible",
+    "disponible", "muestra", "visualiza", "presente"
+  ];
+  const combined = visibilityKeywords.map(k => k.replace(/\./g, "\\s+")).join("|");
+  return new RegExp(combined, "i").test(text);
+}
+
+function isStateAssertion(text: string): { enabled: boolean | null } {
+  const enabledKeywords = [
+    "habilitado", "activo", "permite", "puede", "disponible para click"
+  ];
+  const disabledKeywords = [
+    "deshabilitado", "inactivo", "no permite", "bloqueado", "desactivado"
+  ];
+  
+  for (const kw of disabledKeywords) {
+    if (new RegExp(`\\b${kw}\\b`, "i").test(text)) {
+      return { enabled: false };
+    }
+  }
+  
+  for (const kw of enabledKeywords) {
+    if (new RegExp(`\\b${kw}\\b`, "i").test(text)) {
+      return { enabled: true };
+    }
+  }
+  
+  return { enabled: null };
+}
+
+function isExplicitClickAction(text: string, action: string): boolean {
+  const clickKeywords = [
+    "clic", "click", "presionar", "pulsar", "seleccionar",
+    "ejecutar", "activar", "disparar"
+  ];
+  const actionLower = action.toLowerCase();
+  if (actionLower === "click" || actionLower === "select") {
+    for (const kw of clickKeywords) {
+      if (new RegExp(`\\b${kw}\\b`, "i").test(text)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function isSensitiveAction(text: string): boolean {
+  const sensitiveKeywords = [
+    "pagar", "transferir", "enviar dinero", "debitar",
+    "eliminar", "borrar", "cancelar producto", "cancelar cuenta",
+    "firmar", "aceptar contrato", "aceptar términos",
+    "solicitar préstamo", "solicitar crédito", "solicitar tarjeta",
+    "aprobar", "rechazar", "confirmar operación", "confirmar pago"
+  ];
+  for (const kw of sensitiveKeywords) {
+    if (new RegExp(`\\b${kw}\\b`, "i").test(text)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function isUsernameTarget(text: string): boolean {
   return text.includes("username") || text.includes("usuario");
 }
@@ -122,6 +192,37 @@ export function deriveSemanticMethodIntent(
 
   if ((action === "click" || action === "select") && isDetailPrimaryAction(normalizedText)) {
     return (screenType === "form" || screenType === "confirmation") ? "submit_form" : "click_primary_action";
+  }
+
+  // Check for back/return navigation before select_product
+  if ((action === "click" || action === "select") && isBackOrReturnTarget(normalizedText)) {
+    return "return_to_list";
+  }
+
+  // Check for primary action visibility/state assertions before click
+  // Priority: visibility assertion > state assertion > explicit click
+  const isPrimaryActionTarget = isDetailPrimaryAction(normalizedText) || 
+                                 /solicitar|enviar|continuar|confirmar|guardar|crear|descargar|pagar|transferir/i.test(normalizedText);
+  
+  if (isPrimaryActionTarget) {
+    // Check for visibility assertion first
+    if (isVisibleAssertion(normalizedText)) {
+      return "expect_primary_action_visible";
+    }
+    
+    // Check for state assertion
+    const stateCheck = isStateAssertion(normalizedText);
+    if (stateCheck.enabled === true) {
+      return "expect_primary_action_enabled";
+    }
+    if (stateCheck.enabled === false) {
+      return "expect_primary_action_disabled";
+    }
+    
+    // Check for explicit click action
+    if (isExplicitClickAction(normalizedText, action)) {
+      return "click_primary_action";
+    }
   }
 
   if (action.startsWith("assert")) {
@@ -286,6 +387,10 @@ export function deriveExpectedOwnerForStep(step: ExecutionPlanStep, allSteps: Ex
   if (isFirstVisibleItemSelection(target)) {
     return "ProductListPage";
   }
+  // Check for ordinal selection pattern in target text
+  if (/\b(primer[ao]?\s+(producto|item|registro|card|tarjeta|fila|cuenta)|primera?\s+(tarjeta|card|fila|cuenta)|first\s+visible\s+(item|product|card|row)|visible\s+(item|product|card|row))\b/i.test(target)) {
+    return "ProductListPage";
+  }
   if (isDetailPrimaryAction(target)) {
     if (target.includes("submit") || target.includes("enviar") || target.includes("purchase") || target.includes("place order")) {
       return "FormPage";
@@ -309,6 +414,7 @@ export function deriveExpectedOwnerForStep(step: ExecutionPlanStep, allSteps: Ex
     select_first_visible_product: "ProductListPage",
     select_first_visible_card: "ProductListPage",
     select_first_visible_row: "ProductListPage",
+    select_visible_item_by_ordinal: "ProductListPage",
     click_primary_action: "ProductDetailPage",
     expect_loaded: "ProductDetailPage",
     fill_form_field: "FormPage",

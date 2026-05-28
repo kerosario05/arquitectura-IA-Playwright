@@ -3,16 +3,48 @@
     "appSlug": "kiosko",
     "source": "default",
     "name": "4",
-    "baseUrl": "https://172.27.4.50/",
-    "baseUrlHash": "74df3c0e992c",
-    "createdAt": "2026-05-22T19:16:38.575Z",
-    "updatedAt": "2026-05-22T19:16:38.576Z"
+    "baseUrl": "https://172.27.4.50",
+    "baseUrlHash": "1423ba294517",
+    "createdAt": "2026-05-28T02:49:07.513Z",
+    "updatedAt": "2026-05-28T02:49:07.513Z"
   },
-  "baseUrl": "https://172.27.4.50/",
-  "loginMode": "no_login",
+  "baseUrl": "https://172.27.4.50",
+  "loginMode": "password",
   "testData": {},
   "testDataAliases": {},
   "testDataRefs": {},
-  "missingInputBehavior": "fail",
-  "updatedAt": "2026-05-22T19:16:38.576Z"
+  "username": "adminr",
+  "password": "admin123",
+  "usernameRef": "APP_USERNAME",
+  "passwordRef": "APP_PASSWORD",
+  "missingInputBehavior": "auto_generate",
+  "routeProfile": {
+    "domainTerms": [
+      "tarjeta",
+      "cuenta",
+      "prestamo",
+      "producto"
+    ],
+    "routes": [
+      {
+        "name": "product_information",
+        "entry": [
+          "menu",
+          "productos"
+        ],
+        "intermediates": {
+          "category": [
+            "categoria",
+            "filtro"
+          ],
+          "product_condition": [
+            "pesos",
+            "moneda",
+            "tipo"
+          ]
+        }
+      }
+    ]
+  },
+  "updatedAt": "2026-05-28T02:49:07.513Z"
 }

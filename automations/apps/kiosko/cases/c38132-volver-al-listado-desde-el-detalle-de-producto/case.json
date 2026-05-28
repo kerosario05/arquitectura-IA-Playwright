@@ -1,0 +1,10 @@
+{
+  "id": "c38132-volver-al-listado-desde-el-detalle-de-producto",
+  "externalId": "C38132",
+  "caseId": 38132,
+  "title": "Volver al listado desde el detalle de producto",
+  "source": "discovery",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "createdAt": "2026-05-28T02:48:41.027Z"
+}

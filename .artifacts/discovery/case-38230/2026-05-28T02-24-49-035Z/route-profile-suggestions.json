@@ -1,0 +1,80 @@
+[
+  {
+    "appSlug": "kiosko",
+    "from": "entry",
+    "to": "Iniciar",
+    "relation": "child_route",
+    "source": "successful_transition",
+    "confidence": 0.8999999999999999,
+    "evidence": {
+      "beforeUrl": "https://172.27.4.50/",
+      "afterUrl": "https://172.27.4.50/success",
+      "beforeSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38230\\2026-05-28T02-24-49-035Z\\evidence\\step-1-before.json",
+      "afterSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38230\\2026-05-28T02-24-49-035Z\\evidence\\step-1-after.json",
+      "candidateId": "el-5",
+      "candidateText": "Iniciar",
+      "locatorSummary": "role:button"
+    },
+    "safety": {
+      "clickable": true,
+      "visible": true,
+      "sensitive": false,
+      "submitLike": false,
+      "riskyAction": false
+    },
+    "status": "pending",
+    "createdAt": "2026-05-28T02:25:03.448Z"
+  },
+  {
+    "appSlug": "kiosko",
+    "from": "Iniciar",
+    "to": "Transacciones y servicios",
+    "relation": "child_route",
+    "source": "successful_transition",
+    "confidence": 0.9999999999999999,
+    "evidence": {
+      "beforeUrl": "https://172.27.4.50/success",
+      "afterUrl": "https://172.27.4.50/client-identification",
+      "beforeSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38230\\2026-05-28T02-24-49-035Z\\evidence\\step-2-before.json",
+      "afterSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38230\\2026-05-28T02-24-49-035Z\\evidence\\step-2-after.json",
+      "candidateId": "el-9",
+      "candidateText": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+      "locatorSummary": "role:button"
+    },
+    "safety": {
+      "clickable": true,
+      "visible": true,
+      "sensitive": false,
+      "submitLike": false,
+      "riskyAction": false
+    },
+    "status": "auto_approved",
+    "createdAt": "2026-05-28T02:25:05.122Z"
+  },
+  {
+    "appSlug": "kiosko",
+    "from": "Consulta de balance",
+    "to": "Depósitos a plazos",
+    "relation": "child_route",
+    "source": "successful_transition",
+    "confidence": 0.8999999999999999,
+    "evidence": {
+      "beforeUrl": "https://172.27.4.50/balance-inquiry",
+      "afterUrl": "https://172.27.4.50/balance-inquiry",
+      "beforeSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38230\\2026-05-28T02-24-49-035Z\\evidence\\step-5-before.json",
+      "afterSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38230\\2026-05-28T02-24-49-035Z\\evidence\\step-5-after.json",
+      "candidateId": "el-12",
+      "candidateText": "Depósitos a PlazosConsulta tus depósitos a plazos",
+      "locatorSummary": "role:button"
+    },
+    "safety": {
+      "clickable": true,
+      "visible": true,
+      "sensitive": false,
+      "submitLike": false,
+      "riskyAction": false
+    },
+    "status": "pending",
+    "createdAt": "2026-05-28T02:25:43.043Z"
+  }
+]

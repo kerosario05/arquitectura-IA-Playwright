@@ -3,6 +3,7 @@ import path from "node:path";
 import type { Page } from "@playwright/test";
 import { capturePageDiagnostics, waitForPromotedSpecStepReady } from "../../browser/promoted-spec-helpers";
 import { waitForStablePageState } from "../../discovery/page-stability-detector";
+import { findSemanticTargetMatch, type SemanticMatchOptions } from "./semantic-target-matcher";
 
 export type PromotedExpectedEffect =
   | "none"
@@ -395,6 +396,7 @@ export async function resolvePromotedClickableLocator(
     containerLocator?: string;
     timeoutMs?: number;
     actionKind?: "submit" | "link" | "button" | "action";
+    actionIntent?: string;
   }
 ): Promise<{
   locator: any;
@@ -407,6 +409,7 @@ export async function resolvePromotedClickableLocator(
   const normalizedTarget = normalizeText(target);
   const timeoutMs = options?.timeoutMs ?? 5000;
   const actionKind = options?.actionKind;
+  const actionIntent = options?.actionIntent;
   const container = options?.containerLocator
     ? page.locator(options.containerLocator)
     : undefined;
@@ -533,6 +536,76 @@ export async function resolvePromotedClickableLocator(
     }
   }
 
+  // Semantic fallback for category/product/item selection
+  // Only apply semantic matching for navigation/selection intents, not for sensitive actions
+  const semanticIntents = ["select_category", "select_product", "select_item_by_text", "select_visible_item_by_ordinal", "return_to_list", "select"];
+  const intentForSemantic = actionIntent || (semanticIntents.includes(actionKind || "") ? actionKind : undefined);
+  
+  if (intentForSemantic && semanticIntents.includes(intentForSemantic)) {
+    const semanticOptions: SemanticMatchOptions = {
+      timeoutMs: Math.min(timeoutMs, 3000),
+      actionIntent: intentForSemantic,
+      minScore: 0.65,
+      allowAmbiguity: false,
+      excludeSensitive: true
+    };
+    
+    // Prefer categories/filters over product cards for category selection
+    if (intentForSemantic === "select_category") {
+      semanticOptions.preferTypes = ["button", "link", "heading"];
+      semanticOptions.excludeTypes = ["card"];
+    } else if (intentForSemantic === "select_product") {
+      semanticOptions.preferTypes = ["card", "list_item", "button", "link"];
+    } else if (intentForSemantic === "return_to_list") {
+      semanticOptions.preferTypes = ["button", "link"];
+    }
+    
+    const semanticResult = await findSemanticTargetMatch(page, target, semanticOptions);
+    
+    if (semanticResult.status === "exact" || semanticResult.status === "semantic") {
+      const candidate = semanticResult.candidate!;
+      const tagName = await candidate.locator.evaluate((el: Element) => el.tagName.toLowerCase()).catch(() => "");
+      const type = await candidate.locator.evaluate((el: Element) => (el as HTMLInputElement).type || "").catch(() => "");
+      const isClickable = 
+        ["button", "a", "input"].includes(tagName) ||
+        (tagName === "input" && ["submit", "button", "reset"].includes(type)) ||
+        await candidate.locator.evaluate((el: Element) => el.getAttribute("onclick") !== null || el.getAttribute("role") === "button").catch(() => false);
+      
+      if (isClickable) {
+        return {
+          locator: candidate.locator,
+          strategy: `semantic:${candidate.type}:${semanticResult.reason}`,
+          scope: "page",
+          visible: candidate.visible,
+          enabled: candidate.enabled,
+          clickable: true
+        };
+      }
+    }
+    
+    // Ambiguity error with diagnostics
+    if (semanticResult.status === "ambiguous") {
+      throw new Error(
+        `semantic_target_ambiguous: target="${target}" ` +
+        `bestCandidates=[${semanticResult.candidates?.slice(0, 2).map(c => 
+          `{ text:"${c.text}", score:${c.score.toFixed(2)}, type:"${c.type}" }`
+        ).join(", ")}] ` +
+        `reason="${semanticResult.reason}"`
+      );
+    }
+    
+    // Not found error with diagnostics
+    if (semanticResult.status === "not_found") {
+      throw new Error(
+        `semantic_target_not_found: target="${target}" actionIntent="${intentForSemantic}" ` +
+        `bestCandidates=[${semanticResult.diagnostics.candidateScores.slice(0, 3).map(c => 
+          `{ text:"${c.text}", score:${c.score.toFixed(2)}, type:"${c.type}" }`
+        ).join(", ")}] ` +
+        `reason="${semanticResult.reason}"`
+      );
+    }
+  }
+
   return undefined;
 }
 
@@ -556,6 +629,7 @@ export class PromotedSpecRuntime {
   private lastDialogMessage?: string;
   private activeContainer?: { selector: string; descriptor: string };
   private activeContainerDiscardReason?: string;
+  private lastSelectionStep?: { selectedTarget: string; stepIndex: number; timestamp: number };
 
   constructor(private readonly page: Page, config?: Partial<PromotedRuntimeConfig>) {
     this.config = { ...loadPromotedRuntimeConfigFromEnv(), ...config };
@@ -605,6 +679,65 @@ export class PromotedSpecRuntime {
     let fallbackUsed: PromotedRuntimeDiagnostics["fallbackUsed"] = "none";
     let matchedLocatorStrategy = "unknown";
 
+    // Post-selection detail state verification
+    // If previous step was a selection and current step expects detail page, verify we navigated
+    if (this.lastSelectionStep && options.actionIntent === "click_primary_action") {
+      const selectionDiag = await this.verifyDetailStateAfterSelection(options.target);
+      if (!selectionDiag.reachedDetail) {
+        throw new Error(
+          `selection_did_not_reach_expected_detail_state: After selecting "${this.lastSelectionStep.selectedTarget}", ` +
+          `expected to be on detail page but still on list/source page. ` +
+          `currentUrl="${selectionDiag.currentUrl}" visibleButtons=[${selectionDiag.visibleButtons.join(", ")}] ` +
+          `visibleHeadings=[${selectionDiag.visibleHeadings.join(", ")}] nextStepTarget="${options.target}" ` +
+          `nextStepIntent="${options.actionIntent}" expectedOwnerPage="DetailPage" ` +
+          `sourcePageSignature="ListPage" destinationPageExpectedSignals=["primary_action_button", "detail_heading"]`
+        );
+      }
+      this.lastSelectionStep = undefined;
+    }
+
+    // Guard: Verify target is visible before executing primary action
+    // This prevents calling POM methods on wrong page/state
+    if (options.actionIntent === "click_primary_action" || options.actionIntent === "expect_primary_action_visible") {
+      try {
+        // First try exact role/link match
+        const targetLocator = this.page.getByRole('button', { name: new RegExp(options.target, 'i') })
+          .or(this.page.getByRole('link', { name: new RegExp(options.target, 'i') }));
+        let isVisible = await targetLocator.isVisible({ timeout: 5000 }).catch(() => false);
+        
+        // Semantic fallback if exact match fails
+        if (!isVisible) {
+          const semanticResult = await findSemanticTargetMatch(this.page, options.target, {
+            timeoutMs: 3000,
+            actionIntent: "click_primary_action",
+            minScore: 0.75,
+            preferTypes: ["button", "link"],
+            excludeSensitive: false
+          });
+          
+          if (semanticResult.status === "exact" || semanticResult.status === "semantic") {
+            isVisible = await semanticResult.candidate!.locator.isVisible().catch(() => false);
+          }
+        }
+        
+        if (!isVisible) {
+          // Capture page state for diagnostics
+          const pageDiag = await capturePageDiagnostics(this.page);
+          throw new Error(
+            `wrong_screen_before_primary_action: Target "${options.target}" not visible on current page. ` +
+            `currentUrl="${pageDiag.currentUrl}" visibleButtons=[${pageDiag.visibleButtons.join(", ")}] ` +
+            `visibleHeadings=[${pageDiag.visibleHeadings.join(", ")}] stepIndex=${options.stepIndex} ` +
+            `actionIntent="${options.actionIntent}" expectedOwnerPage="DetailPage"`
+          );
+        }
+      } catch (error) {
+        if (error instanceof Error && error.message.includes("wrong_screen_before_primary_action")) {
+          throw error;
+        }
+        // Continue with normal flow if visibility check fails for other reasons
+      }
+    }
+
     // Step 1: Try native runtime click with resolved locator
     nativeClickAttempted = true;
     const containerSelector = this.activeContainer?.selector;
@@ -613,7 +746,8 @@ export class PromotedSpecRuntime {
       const resolved = await resolvePromotedClickableLocator(this.page, options.target, {
         containerLocator: containerSelector,
         timeoutMs: this.config.actionTimeoutMs,
-        actionKind: options.actionIntent as "submit" | "link" | "button" | "action"
+        actionKind: options.actionIntent as "submit" | "link" | "button" | "action",
+        actionIntent: options.actionIntent
       });
 
       if (resolved && resolved.locator) {
@@ -884,6 +1018,12 @@ export class PromotedSpecRuntime {
   }
 
   async selectPromotedItem(options: PromotedActionOptions): Promise<void> {
+    // Track selection step for post-selection detail verification
+    this.lastSelectionStep = {
+      selectedTarget: options.target,
+      stepIndex: options.stepIndex,
+      timestamp: Date.now()
+    };
     await this.clickPromotedTarget({ ...options, actionIntent: "select" });
   }
 
@@ -910,6 +1050,53 @@ export class PromotedSpecRuntime {
         `Promoted assertion failed at step ${options.stepIndex} target="${options.target}". diagnostics=${JSON.stringify(diagnostics)} cause=${error instanceof Error ? error.message : String(error)}`
       );
     }
+  }
+
+  private async verifyDetailStateAfterSelection(nextTarget: string): Promise<{
+    reachedDetail: boolean;
+    currentUrl: string;
+    visibleButtons: string[];
+    visibleHeadings: string[];
+  }> {
+    // Wait for potential navigation after selection
+    await this.page.waitForLoadState('domcontentloaded', { timeout: 5000 }).catch(() => {});
+    await this.page.waitForTimeout(1000);
+    
+    const pageDiag = await capturePageDiagnostics(this.page);
+    
+    // Check if we're still on a list/subcategory page
+    const listPageIndicators = [
+      /selecciona/i, /elige/i, /select/i, /choose/i,
+      /listado/i, /lista/i, /list/i,
+      /subcategoria/i, /subcategory/i
+    ];
+    
+    const isStillOnListPage = pageDiag.visibleHeadings.some(h => listPageIndicators.some(r => r.test(h)));
+    
+    // Check if primary action button is visible (detail page indicator)
+    const primaryActionVisible = pageDiag.visibleButtons.some(b => 
+      b.toLowerCase().includes(nextTarget.toLowerCase())
+    );
+    
+    // Check for detail page indicators
+    const detailIndicators = [
+      /detalle/i, /detail/i, /resumen/i, /summary/i,
+      /información/i, /information/i, /datos/i
+    ];
+    
+    const hasDetailHeading = pageDiag.visibleHeadings.some(h => detailIndicators.some(r => r.test(h)));
+    
+    // Consider it reached detail if:
+    // 1. Primary action is visible, OR
+    // 2. Has detail heading AND not on list page
+    const reachedDetail = primaryActionVisible || (hasDetailHeading && !isStillOnListPage);
+    
+    return {
+      reachedDetail,
+      currentUrl: pageDiag.currentUrl,
+      visibleButtons: pageDiag.visibleButtons,
+      visibleHeadings: pageDiag.visibleHeadings
+    };
   }
 
   private async postActionStability(previousUrl: string, expectedEffect: PromotedExpectedEffect): Promise<void> {

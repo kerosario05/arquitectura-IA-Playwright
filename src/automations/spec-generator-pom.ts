@@ -206,6 +206,17 @@ function deriveSelectionIntent(step: ExecutionPlanStep): SemanticMethodIntent {
   return "select_product";
 }
 
+function deriveSelectionIntentWithOrdinalSupport(step: ExecutionPlanStep): SemanticMethodIntent {
+  const recoveryMeta = (step as any).recoveryMetadata;
+  const ordinalDiag = recoveryMeta?.ordinalSelectionDiagnostics;
+  
+  if (ordinalDiag?.selectionPatternDetected === true) {
+    return "select_visible_item_by_ordinal";
+  }
+  
+  return deriveSelectionIntent(step);
+}
+
 function findAuthGateStepIndex(steps: ExecutionPlanStep[]): number {
   for (let i = 0; i < steps.length; i++) {
     const step = steps[i];
@@ -331,6 +342,12 @@ export function generatePOMSpecFromPlan(
     if (recoveryMeta?.recoveredBy === "auth_flow" || recoveryMeta?.recoveredBy === "auth_gate") {
       continue;
     }
+    
+    // Skip steps that were already satisfied without UI action (contextual_intermediate_already_satisfied)
+    if (recoveryMeta?.recoveredBy === "contextual_intermediate_already_satisfied") {
+      console.log(`[spec-generator-pom] Skipping already_satisfied step: target="${getTargetValue(step.target)}" (no UI action executed)`);
+      continue;
+    }
 
     const isPreAuth = authGateDetected && stepIndex < authGateStepIndex;
 
@@ -350,17 +367,27 @@ export function generatePOMSpecFromPlan(
       const semanticRole = recoveryMeta?.semanticRole;
       const actionType = recoveryMeta?.actionType;
       const selectionDiagnostics = (step as any).selectionDiagnostics;
+      const locatorStrategy = (step as any).locatorStrategy;
+      const ordinalDiag = recoveryMeta?.ordinalSelectionDiagnostics;
 
-      const hasExplicitSelectionDiagnostics =
-        selectionDiagnostics?.selectionLike ||
-        actionType === "action_select" ||
-        ["option", "card", "item", "entity", "product", "recipient", "list_item"].includes(semanticRole) ||
-        selectionDiagnostics?.reason === "selection_no_transition_next_action_enabled";
-
-      if (hasExplicitSelectionDiagnostics) {
-        semanticIntent = deriveSelectionIntent(step);
+      // Check for ordinal_selection from recovery metadata
+      const isOrdinalSelection = locatorStrategy === "ordinal_selection" || 
+                                 ordinalDiag?.selectionPatternDetected === true;
+      
+      if (isOrdinalSelection) {
+        semanticIntent = "select_visible_item_by_ordinal";
       } else {
-        semanticIntent = deriveMethodIntentFromStepWithContext(step, plan.steps);
+        const hasExplicitSelectionDiagnostics =
+          selectionDiagnostics?.selectionLike ||
+          actionType === "action_select" ||
+          ["option", "card", "item", "entity", "product", "recipient", "list_item"].includes(semanticRole) ||
+          selectionDiagnostics?.reason === "selection_no_transition_next_action_enabled";
+
+        if (hasExplicitSelectionDiagnostics) {
+          semanticIntent = deriveSelectionIntentWithOrdinalSupport(step);
+        } else {
+          semanticIntent = deriveMethodIntentFromStepWithContext(step, plan.steps);
+        }
       }
     } else {
       semanticIntent = deriveMethodIntentFromStepWithContext(step, plan.steps);
@@ -475,38 +502,55 @@ export function generatePOMSpecFromPlan(
         const resolvedValueExpr = step.valueKey || typeof step.value === "string"
           ? ensureDataValue(step)
           : undefined;
-        const args = method.parameters.map((parameter, index) => {
-          if ((semanticIntent === "fill_username" || semanticIntent === "fill_password") && index === 0 && resolvedValueExpr) {
-            return resolvedValueExpr;
+        
+        // Special handling for select_visible_item_by_ordinal
+        if (semanticIntent === "select_visible_item_by_ordinal") {
+          const recoveryMeta = (step as any).recoveryMetadata;
+          const ordinalDiag = recoveryMeta?.ordinalSelectionDiagnostics;
+          const ordinal = ordinalDiag?.ordinal || "first";
+          const domainTerm = ordinalDiag?.domainTerm;
+          
+          // Build arguments: ordinal (required), domainTerm (optional)
+          const args = [`"${ordinal}"`];
+          if (domainTerm) {
+            args.push(`"${domainTerm}"`);
           }
-          if (semanticIntent === "submit_login" && method.name === "loginWithCredentials") {
-            if (parameter.toLowerCase().includes("user")) return "usuario_valido";
-            if (parameter.toLowerCase().includes("pass")) return "contrasena_valida";
-          }
-          if (resolvedValueExpr && method.parameters.length === 1) {
-            return resolvedValueExpr;
-          }
-          if (resolvedValueExpr && method.parameters.length > 1) {
-            const paramName = parameter.toLowerCase();
-            const isLastParameter = index === method.parameters.length - 1;
-            if (paramName.includes("value") || paramName.includes("text") || paramName.includes("input") || paramName === "v") {
-              return resolvedValueExpr;
-            }
-            if (isLastParameter && step.action === "fill") {
-              return resolvedValueExpr;
-            }
-          }
-          return `'${escapeSpecString(targetValue || parameter)}'`;
-        }).join(", ");
-        const methodCall = `${varName}.${method.name}(${args})`;
-        if (step.action === "fill") {
-          actionLine = `await promotedRuntime.fillPromotedField({ stepIndex: ${step.index}, field: '${escapeSpecString(targetValue)}', value: String(${resolvedValueExpr ?? "''"}), sensitive: ${String(Boolean(method.sensitive))}, fill: async () => { await ${methodCall}; } });`;
-        } else if (step.action.startsWith("assert")) {
-          actionLine = `await promotedRuntime.expectPromotedVisible({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', assertion: async () => { await ${methodCall}; } });`;
-        } else if (step.action === "select") {
-          actionLine = `await promotedRuntime.selectPromotedItem({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: '${inferExpectedEffect(step, semanticIntent)}', sensitive: ${String(Boolean(method.sensitive))}, action: async () => { await ${methodCall}; } });`;
+          const methodCall = `${varName}.${method.name}(${args.join(", ")})`;
+          actionLine = `await promotedRuntime.clickPromotedTarget({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: 'ui_change', sensitive: false, action: async () => { await ${methodCall}; } });`;
         } else {
-          actionLine = `await promotedRuntime.clickPromotedTarget({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: '${inferExpectedEffect(step, semanticIntent)}', sensitive: ${String(Boolean(method.sensitive))}, action: async () => { await ${methodCall}; } });`;
+          const args = method.parameters.map((parameter, index) => {
+            if ((semanticIntent === "fill_username" || semanticIntent === "fill_password") && index === 0 && resolvedValueExpr) {
+              return resolvedValueExpr;
+            }
+            if (semanticIntent === "submit_login" && method.name === "loginWithCredentials") {
+              if (parameter.toLowerCase().includes("user")) return "usuario_valido";
+              if (parameter.toLowerCase().includes("pass")) return "contrasena_valida";
+            }
+            if (resolvedValueExpr && method.parameters.length === 1) {
+              return resolvedValueExpr;
+            }
+            if (resolvedValueExpr && method.parameters.length > 1) {
+              const paramName = parameter.toLowerCase();
+              const isLastParameter = index === method.parameters.length - 1;
+              if (paramName.includes("value") || paramName.includes("text") || paramName.includes("input") || paramName === "v") {
+                return resolvedValueExpr;
+              }
+              if (isLastParameter && step.action === "fill") {
+                return resolvedValueExpr;
+              }
+            }
+            return `'${escapeSpecString(targetValue || parameter)}'`;
+          }).join(", ");
+          const methodCall = `${varName}.${method.name}(${args})`;
+          if (step.action === "fill") {
+            actionLine = `await promotedRuntime.fillPromotedField({ stepIndex: ${step.index}, field: '${escapeSpecString(targetValue)}', value: String(${resolvedValueExpr ?? "''"}), sensitive: ${String(Boolean(method.sensitive))}, fill: async () => { await ${methodCall}; } });`;
+          } else if (step.action.startsWith("assert")) {
+            actionLine = `await promotedRuntime.expectPromotedVisible({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', assertion: async () => { await ${methodCall}; } });`;
+          } else if (step.action === "select") {
+            actionLine = `await promotedRuntime.selectPromotedItem({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: '${inferExpectedEffect(step, semanticIntent)}', sensitive: ${String(Boolean(method.sensitive))}, action: async () => { await ${methodCall}; } });`;
+          } else {
+            actionLine = `await promotedRuntime.clickPromotedTarget({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: '${inferExpectedEffect(step, semanticIntent)}', sensitive: ${String(Boolean(method.sensitive))}, action: async () => { await ${methodCall}; } });`;
+          }
         }
       } else {
         const methodCall = `${varName}.${method.name}()`;

@@ -39,9 +39,10 @@ import type {
   DiscoveredObject
 } from "../types/discovery.types";
 import type { TestScenario, TestScenarioStep } from "../types/testrail.types";
-import type { ExecutionPlan, ExecutionPlanStep, RequiredDataRef } from "../types/execution-plan.types";
+import type { ExecutionPlan, ExecutionPlanStep, RequiredDataRef, LocatorStrategy } from "../types/execution-plan.types";
 import type { PageSnapshot } from "../types/page-snapshot.types";
-import type { TestDataMap, TestDataValue, MissingInputBehavior } from "../types/env.types";
+import type { TestDataMap, TestDataValue, MissingInputBehavior, ExpectedResultMode } from "../types/env.types";
+import { config as envConfig } from "../config/env";
 import { detectAuthGate, type AuthGateDetection } from "./auth-gate-detector";
 import { resolveAuthInputs, validateRequiredInputs, logAuthResolution, type AuthInputResolverConfig } from "./auth-input-resolver";
 import { loadRouteProfile } from "../automations/app-profile";
@@ -142,6 +143,11 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
   let expectedResultConsumption: ExpectedResultConsumption[] | undefined;
   let nonExecutableCriteria: string[] | undefined;
 
+  // Get expected result mode from config (default: context)
+  const expectedResultMode: ExpectedResultMode = envConfig.integrations.ai?.expectedResultMode ?? "context";
+
+  console.log(`[expected-result-parser] mode=${expectedResultMode}`);
+
   const findExistingAssertionByTarget = (target: string): boolean =>
     assertionTargets.some((a) => a.source === "action" && normalizeText(a.target) === normalizeText(target));
 
@@ -225,39 +231,76 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
     }
   }
 
+  // Process expected results based on mode
   if (scenario.steps.length > 0) {
     const lastStep = scenario.steps[scenario.steps.length - 1];
     if (lastStep.expected) {
       const expectedTargets = extractAssertionTargets(lastStep.expected);
-      // Collect existing concrete assertions from steps to check coverage
-      const existingConcreteAssertions = assertionTargets
-        .filter((a) => a.source === "action")
-        .map((a) => a.target);
-      const buildResult = buildConcreteAssertionsFromExpected(expectedTargets, existingConcreteAssertions);
-      expectedResultConsumption = buildResult.expectedResultConsumption;
-      nonExecutableCriteria = buildResult.nonExecutableCriteria;
       
-      // Add only executable assertions
-      for (const target of buildResult.assertions) {
-        if (findExistingAssertionByTarget(target)) {
-          continue;
+      if (expectedResultMode === "context") {
+        // Mode: context - store as non-blocking metadata only
+        expectedResultConsumption = expectedTargets.map(text => ({
+          originalText: text,
+          classification: "non_executable_criteria" as const,
+          reason: "mode=context: expected result stored as non-blocking context"
+        }));
+        nonExecutableCriteria = expectedTargets;
+        console.log(`[expected-result-parser] expected results stored as non-blocking context. items=${expectedTargets.length}`);
+        console.log(`[discovery:case] Expected result assertions disabled by mode=context`);
+      } else if (expectedResultMode === "smart") {
+        // Mode: smart - convert only observable assertions, rest as non-executable
+        const existingConcreteAssertions = assertionTargets
+          .filter((a) => a.source === "action")
+          .map((a) => a.target);
+        const buildResult = buildConcreteAssertionsFromExpected(expectedTargets, existingConcreteAssertions);
+        expectedResultConsumption = buildResult.expectedResultConsumption;
+        nonExecutableCriteria = buildResult.nonExecutableCriteria;
+        
+        for (const target of buildResult.assertions) {
+          if (findExistingAssertionByTarget(target)) {
+            continue;
+          }
+          assertionTargets.push({ index: lastStep.index, action: target, target, source: "expected" });
+          orderedSteps.push({
+            stepIndex: lastStep.index,
+            originalText: target,
+            type: "assertion",
+            target,
+            source: "expected"
+          });
         }
-        assertionTargets.push({ index: lastStep.index, action: target, target, source: "expected" });
-        orderedSteps.push({
-          stepIndex: lastStep.index,
-          originalText: target,
-          type: "assertion",
-          target,
-          source: "expected"
-        });
+        console.log(`[expected-result-parser] mode=smart: converted ${buildResult.assertions.length} observable assertions, ${nonExecutableCriteria.length} non-executable`);
+      } else {
+        // Mode: assertions - legacy behavior, convert all to assertions
+        const existingConcreteAssertions = assertionTargets
+          .filter((a) => a.source === "action")
+          .map((a) => a.target);
+        const buildResult = buildConcreteAssertionsFromExpected(expectedTargets, existingConcreteAssertions);
+        expectedResultConsumption = buildResult.expectedResultConsumption;
+        nonExecutableCriteria = buildResult.nonExecutableCriteria;
+        
+        for (const target of buildResult.assertions) {
+          if (findExistingAssertionByTarget(target)) {
+            continue;
+          }
+          assertionTargets.push({ index: lastStep.index, action: target, target, source: "expected" });
+          orderedSteps.push({
+            stepIndex: lastStep.index,
+            originalText: target,
+            type: "assertion",
+            target,
+            source: "expected"
+          });
+        }
+        console.log(`[expected-result-parser] mode=assertions: converted ${buildResult.assertions.length} assertions from expected results`);
       }
       
       // Non-executable criteria are tracked in metadata but don't block execution
       // They are logged for diagnostics but not added as assertion targets
-      if (buildResult.nonExecutableCriteria.length > 0) {
-        console.log(`[discovery:case] Non-executable expected criteria (${buildResult.nonExecutableCriteria.length}): ${buildResult.nonExecutableCriteria.map(c => `"${c}"`).join(", ")}`);
+      if (nonExecutableCriteria && nonExecutableCriteria.length > 0) {
+        console.log(`[discovery:case] Non-executable expected criteria (${nonExecutableCriteria.length}): ${nonExecutableCriteria.map(c => `"${c}"`).join(", ")}`);
       }
-      if (buildResult.expectedResultConsumption.some(c => c.classification === "covered_by_concrete_assertions")) {
+      if (expectedResultConsumption && expectedResultConsumption.some(c => c.classification === "covered_by_concrete_assertions")) {
         console.log(`[discovery:case] Expected result covered by concrete assertions from steps`);
       }
     }
@@ -835,6 +878,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     ...options.aiAssistedDiscovery?.config
   };
   const aiExplorer = options.aiAssistedDiscovery?.explorer ?? createAIExplorer();
+  
+  // Load route profile for ordinal selection and route completion
+  const appSlug = options.appSlug ?? "default";
+  const routeProfile = options.aiAssistedDiscovery?.config?.routeCompletion?.useAppProfile !== false ? loadRouteProfile(appSlug) : undefined;
+  if (routeProfile) {
+    console.log(`[discovery:case] routeProfile loaded appSlug=${appSlug} domainTerms=${routeProfile.domainTerms?.length ?? 0} routes=${routeProfile.routes?.length ?? 0}`);
+  }
 
   const steps: DiscoveryStepResult[] = [];
   const allDiscoveredObjects: DiscoveredObject[] = [];
@@ -1599,7 +1649,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         const scan = await scanAndCollectObjects(page, orderedItem.index, evidenceDir);
         currentSnapshot = scan.snapshot;
       }
-      const resolution = await resolveActionTarget(page, currentSnapshot, nav.target);
+      const resolution = await resolveActionTarget(page, currentSnapshot, nav.target, { routeProfile });
       if (resolution.status !== "resolved" || !resolution.locator) {
         console.log(`[discovery:case] Nav segment not found: ${nav.target}`);
 
@@ -1617,7 +1667,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           currentSnapshot = retryScan.snapshot;
           allDiscoveredObjects.push(...retryScan.objects);
 
-          const retryResolution = await resolveActionTarget(page, currentSnapshot, nav.target);
+          const retryResolution = await resolveActionTarget(page, currentSnapshot, nav.target, { routeProfile });
           if (retryResolution.status === "resolved" && retryResolution.locator) {
             await clickResolvedTarget(retryResolution.locator, false);
             await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
@@ -2579,10 +2629,26 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       currentSnapshot = scan.snapshot;
     }
 
+    // Build route history from previous found steps
+    const routeHistory = steps
+      .filter(s => s.status === "found" && s.targetText)
+      .map(s => s.targetText!);
+    
+    // Get next target for contextual resolution
+    const nextTarget = parsed.actionTargets.find(a => a.index > actionTarget.index)?.target;
+    
+    // Get previous target from relation context or route history
+    const previousTarget = actionTarget.relationContext || routeHistory[routeHistory.length - 1];
+
     const resolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target, {
       semanticRole: actionTarget.semanticRole,
       relationContext: actionTarget.relationContext,
-      activeContainer
+      activeContainer,
+      routeProfile,
+      actionText: actionTarget.action,
+      nextTarget,
+      previousTarget,
+      routeHistory
     });
 
     let finalLocator = resolution.locator;
@@ -2602,6 +2668,34 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
     if (resolution.status === "resolved" && resolution.confidence >= aiConfig.confidenceThreshold && finalLocator) {
       console.log(`[discovery:case] Deterministic target resolved: ${actionTarget.target} (confidence: ${resolution.confidence.toFixed(2)})`);
+    }
+    
+    // Handle contextual intermediate already satisfied - skip click and continue
+    if (resolution.locatorStrategy === "contextual_intermediate_already_satisfied") {
+      console.log(`[discovery:case] Contextual intermediate already satisfied: ${actionTarget.target}. Continuing without click.`);
+      console.log(`[discovery:case] Evidence: ${resolution.alreadySatisfiedEvidence?.candidateText} (${resolution.alreadySatisfiedEvidence?.candidateType})`);
+      
+      // Mark step as found/recovered without executing click
+      steps.push({
+        index: actionTarget.index,
+        action: actionTarget.action,
+        status: "found",
+        targetText: actionTarget.target,
+        snapshotUrl: currentSnapshot.url,
+        snapshotTitle: currentSnapshot.title,
+        elementsFound: currentSnapshot.elements.length,
+        locatorStrategy: "contextual_intermediate_already_satisfied",
+        candidateText: resolution.alreadySatisfiedEvidence?.candidateText,
+        recoveredBy: "contextual_intermediate_already_satisfied",
+        recoveryMetadata: {
+          rationale: `Intermediate variant "${actionTarget.target}" already visible in list. Next step is ordinal selection.`,
+          alreadySatisfiedEvidence: resolution.alreadySatisfiedEvidence
+        },
+        evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`)
+      });
+      
+      // Continue to next step without clicking
+      continue;
     }
 
     const needsEarlyCompletionCheck =
@@ -2837,7 +2931,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           currentSnapshot = retryScan.snapshot;
           allDiscoveredObjects.push(...retryScan.objects);
 
-          const retryResolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target);
+          const retryResolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target, { routeProfile, actionText: actionTarget.action });
           if (retryResolution.status === "resolved" && retryResolution.locator) {
             await clickResolvedTarget(retryResolution.locator, false);
             await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
@@ -3018,7 +3112,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         // Route completion: attempt to insert missing intermediate step before declaring failure
         const appSlug = options.appSlug ?? "default";
         const routeCompletionConfig = (options as any)?.aiAssistedDiscovery?.config?.routeCompletion;
-        const routeProfile = routeCompletionConfig?.useAppProfile !== false ? loadRouteProfile(appSlug) : undefined;
+        const rcRouteProfile = routeCompletionConfig?.useAppProfile !== false ? loadRouteProfile(appSlug) : undefined;
         
         console.log(`[route-completion] app context appSlug=${appSlug} source=${options.appSlug ? "workflow" : "default-fallback"}`);
         
@@ -3028,7 +3122,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
         if (routeCompletionAttempted) {
           console.log(`[route-completion] attempted step=${actionTarget.index} failure=target_not_found`);
-          console.log(`[route-completion] routeProfile loaded=${Boolean(routeProfile)} appSlug=${appSlug}`);
+          console.log(`[route-completion] routeProfile loaded=${Boolean(rcRouteProfile)} appSlug=${appSlug}`);
           
           const currentRouteHistory = steps
             .filter((s) => (s as any).status === "passed" && s.targetText)
@@ -3062,7 +3156,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
           routeCompletionResolution = resolveMissingIntermediateStep({
             appSlug,
-            routeProfile,
+            routeProfile: rcRouteProfile,
             currentRouteHistory,
             currentStepText: actionTarget.action,
             currentTarget: actionTarget.target,
@@ -3079,7 +3173,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             }
           });
 
-          console.log(`[route-completion] appSlug=${appSlug} routeProfileUsed=${Boolean(routeProfile)}`);
+          console.log(`[route-completion] appSlug=${appSlug} routeProfileUsed=${Boolean(rcRouteProfile)}`);
 
           if (routeCompletionResolution.status === "repaired_plan" && routeCompletionResolution.candidateId) {
             const selectedCandidate = aiCandidates.find((c) => c.candidateId === routeCompletionResolution!.candidateId);
@@ -3133,7 +3227,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
                     {
                       semanticRole: actionTarget.semanticRole,
                       relationContext: actionTarget.relationContext,
-                      activeContainer
+                      activeContainer,
+                      routeProfile,
+                      actionText: actionTarget.action
                     }
                   );
 
@@ -3587,12 +3683,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       if (routeCompletionConfig?.enabled !== true) {
         console.log(`[route-completion] skipped: routeCompletion not enabled in config`);
       } else {
-        const routeProfile = routeCompletionConfig?.useAppProfile !== false ? loadRouteProfile(appSlug) : undefined;
+        const rcRouteProfile = routeCompletionConfig?.useAppProfile !== false ? loadRouteProfile(appSlug) : undefined;
         
-        if (!routeProfile) {
+        if (!rcRouteProfile) {
           console.log(`[route-completion] routeProfile missing appSlug=${appSlug} source=loadRouteProfile returned undefined`);
         } else {
-          console.log(`[route-completion] routeProfile loaded appSlug=${appSlug} routes=${routeProfile.routes?.length ?? 0}`);
+          console.log(`[route-completion] routeProfile loaded appSlug=${appSlug} routes=${rcRouteProfile.routes?.length ?? 0}`);
         }
         
         const currentRouteHistory = steps
@@ -3639,7 +3735,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
         preClickRouteCompletionResolution = resolveMissingIntermediateStep({
           appSlug,
-          routeProfile,
+          routeProfile: rcRouteProfile,
           currentRouteHistory,
           lastSuccessfulTarget: currentRouteHistory[currentRouteHistory.length - 1],
           currentStepText: actionTarget.action,
@@ -3708,16 +3804,18 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
                 const rescanAfterInsert = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
                 currentSnapshot = rescanAfterInsert.snapshot;
 
-                const resolvedRetry = await resolveActionTarget(
-                  page,
-                  currentSnapshot,
-                  actionTarget.target,
-                  {
-                    semanticRole: actionTarget.semanticRole,
-                    relationContext: actionTarget.relationContext,
-                    activeContainer
-                  }
-                );
+                  const resolvedRetry = await resolveActionTarget(
+                    page,
+                    currentSnapshot,
+                    actionTarget.target,
+                    {
+                      semanticRole: actionTarget.semanticRole,
+                      relationContext: actionTarget.relationContext,
+                      activeContainer,
+                      routeProfile,
+                      actionText: actionTarget.action
+                    }
+                  );
 
                 if (resolvedRetry.status === "resolved" && resolvedRetry.locator) {
                   try {
@@ -3879,33 +3977,55 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
     console.log("[discovery:case] Waiting after click...");
 
+    // Check if this was an ordinal selection - skip instructive token verification
+    const wasOrdinalSelection = resolution.locatorStrategy === "ordinal_selection" || 
+                                (resolution as any).ordinalSelectionDiagnostics?.selectionPatternDetected === true;
+    
+    if (wasOrdinalSelection) {
+      console.log(`[discovery:case] Ordinal selection detected - skipping instructive token verification`);
+      console.log(`[discovery:case] Ordinal: ${(resolution as any).ordinalSelectionDiagnostics?.ordinal ?? "unknown"}`);
+      console.log(`[discovery:case] Domain term: ${(resolution as any).ordinalSelectionDiagnostics?.domainTerm ?? "none"}`);
+      console.log(`[discovery:case] Selected candidate: ${(resolution as any).ordinalSelectionDiagnostics?.selectedCandidateText ?? "unknown"}`);
+    }
+
     // Post-click semantic verification for selection-like targets
+    // SKIP for ordinal_selection since tokens like "primera", "visible", "listado" are instructions, not UI text
     const isSelectionLike = isSelectionLikeTargetNew(actionTarget.target);
-    if (isSelectionLike) {
+    
+    const postClickScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+    currentSnapshot = postClickScan.snapshot;
+    
+    if (isSelectionLike && wasOrdinalSelection) {
+      // For ordinal_selection, skip instructive token verification
+      console.log(`[discovery:case] Ordinal selection post-click verification skipped (instructive tokens)`);
+      console.log(`[discovery:case] postClickSemanticVerificationSkipped=true skipReason="ordinal_selection_instruction_tokens"`);
+    } else if (isSelectionLike) {
+      // Normal selection-like: perform semantic verification
       console.log(`[discovery:case] Performing post-click semantic verification for selection-like target: ${actionTarget.target}`);
-      const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+      
       // Extract visible texts from elements
-      const visibleTexts = scan.snapshot.elements
+      const visibleTexts = postClickScan.snapshot.elements
         .filter(e => e.visible && e.text)
         .map(e => e.text!)
-        .slice(0, 50); // Limit to first 50 texts
+        .slice(0, 50);
       
       const semanticMatch = verifyPostClickSemanticMatch(
         actionTarget.target,
         visibleTexts,
-        scan.title
+        postClickScan.title
       );
       
       if (!semanticMatch.matches) {
         console.log(`[discovery:case] Post-click semantic MISMATCH detected!`);
         console.log(`[discovery:case] Target: ${actionTarget.target}`);
         console.log(`[discovery:case] Missing tokens: ${semanticMatch.missingTokens.join(", ")}`);
-        console.log(`[discovery:case] Reason: ${semanticMatch.mismatchReason}`);
+        const mismatchReason = semanticMatch.mismatchReason || "post_click_semantic_mismatch";
+        console.log(`[discovery:case] Reason: ${mismatchReason}`);
         
         // Post-click route completion recovery: attempt to insert missing intermediate step
         const appSlug = options.appSlug ?? "default";
         const routeCompletionConfig = (options as any)?.aiAssistedDiscovery?.config?.routeCompletion;
-        const routeProfile = routeCompletionConfig?.useAppProfile !== false ? loadRouteProfile(appSlug) : undefined;
+        const postRcRouteProfile = routeCompletionConfig?.useAppProfile !== false ? loadRouteProfile(appSlug) : undefined;
         
         let postClickRouteCompletionAttempted = false;
         let postClickRouteCompletionResolution: MissingIntermediateStepResolution | undefined;
@@ -3917,10 +4037,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         if (routeCompletionConfig?.enabled !== true) {
           console.log(`[route-completion] post-click skipped: routeCompletion not enabled in config`);
         } else {
-          if (!routeProfile) {
+          if (!postRcRouteProfile) {
             console.log(`[route-completion] post-click routeProfile missing appSlug=${appSlug}`);
           } else {
-            console.log(`[route-completion] post-click routeProfile loaded appSlug=${appSlug} routes=${routeProfile.routes?.length ?? 0}`);
+            console.log(`[route-completion] post-click routeProfile loaded appSlug=${appSlug} routes=${postRcRouteProfile.routes?.length ?? 0}`);
           }
           
           const currentRouteHistory = steps
@@ -3929,7 +4049,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           
           console.log(`[route-completion] post-click routeHistory=[${currentRouteHistory.join(", ")}] lastSuccessfulTarget=${currentRouteHistory[currentRouteHistory.length - 1] ?? "none"}`);
           
-          const aiCandidates: DiscoveryCandidate[] = scan.snapshot.elements.map((el) => ({
+          const aiCandidates: DiscoveryCandidate[] = postClickScan.snapshot.elements.map((el) => ({
             candidateId: el.id,
             role: el.role,
             name: el.name,
@@ -3947,8 +4067,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           console.log(`[route-completion] post-click candidates summary total=${aiCandidates.length} clickable=${clickableCandidates.length} visibleClickable=[${visibleClickableLabels.join(",")}]`);
 
           const snapshot: DiscoverySnapshot = {
-            url: scan.snapshot.url,
-            title: scan.snapshot.title,
+            url: postClickScan.snapshot.url,
+            title: postClickScan.snapshot.title,
             visibleHeadings: [],
             visibleNavItems: [],
             visibleActions: [],
@@ -3961,7 +4081,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
           postClickRouteCompletionResolution = resolveMissingIntermediateStep({
             appSlug,
-            routeProfile,
+            routeProfile: postRcRouteProfile,
             currentRouteHistory,
             lastSuccessfulTarget: currentRouteHistory[currentRouteHistory.length - 1],
             currentStepText: actionTarget.action,
@@ -3987,7 +4107,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             const selectedCandidate = aiCandidates.find((c) => c.candidateId === postClickRouteCompletionResolution!.candidateId);
             console.log(`[route-completion] selected candidate="${selectedCandidate?.name ?? selectedCandidate?.text}" source=${postClickRouteCompletionResolution.source} confidence=${postClickRouteCompletionResolution.confidence}`);
 
-            const selectedElement = scan.snapshot.elements.find((el) => el.id === postClickRouteCompletionResolution!.candidateId);
+            const selectedElement = postClickScan.snapshot.elements.find((el) => el.id === postClickRouteCompletionResolution!.candidateId);
             
             if (selectedElement) {
               const resolvedInserted = await resolveSnapshotElementLocator(page, {
@@ -4035,7 +4155,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
                     {
                       semanticRole: actionTarget.semanticRole,
                       relationContext: actionTarget.relationContext,
-                      activeContainer
+                      activeContainer,
+                      routeProfile,
+                      actionText: actionTarget.action
                     }
                   );
 
@@ -4150,16 +4272,16 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             action: actionTarget.action,
             status: "not_found",
             targetText: actionTarget.target,
-            snapshotUrl: scan.url,
-            snapshotTitle: scan.title,
-            elementsFound: scan.elementsCount,
-            error: `Semantic mismatch after click: ${semanticMatch.mismatchReason}`,
+            snapshotUrl: postClickScan.url,
+            snapshotTitle: postClickScan.title,
+            elementsFound: postClickScan.elementsCount,
+            error: `Semantic mismatch after click: ${mismatchReason}`,
             evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
             semanticMismatchDiagnostics: {
               target: actionTarget.target,
               matchedTokens: semanticMatch.matchedTokens,
               missingTokens: semanticMatch.missingTokens,
-              reason: semanticMatch.mismatchReason
+              reason: mismatchReason
             },
             routeCompletionDiagnostics: postClickRouteCompletionAttempted ? {
               attempted: true,
@@ -4376,7 +4498,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           const retryResolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target, {
             semanticRole: actionTarget.semanticRole,
             relationContext: actionTarget.relationContext,
-            activeContainer
+            activeContainer,
+            routeProfile,
+            actionText: actionTarget.action
           });
           if (retryResolution.status === "resolved" && retryResolution.locator) {
             console.log(`[discovery:case] Target found after stability retry: ${actionTarget.target}`);
@@ -4432,7 +4556,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           const retryResolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target, {
             semanticRole: actionTarget.semanticRole,
             relationContext: actionTarget.relationContext,
-            activeContainer
+            activeContainer,
+            routeProfile,
+            actionText: actionTarget.action
           });
             if (retryResolution.status === "resolved" && retryResolution.locator) {
               await clickResolvedTarget(retryResolution.locator, false);
@@ -4676,14 +4802,70 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       elementsFound: scan.elementsCount,
       evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
       semanticRole: actionTarget.semanticRole,
-      relationContext: actionTarget.relationContext
+      relationContext: actionTarget.relationContext,
+      locatorStrategy: resolution.locatorStrategy,
+      recoveryMetadata: (resolution.locatorStrategy === "ordinal_selection" || 
+                        resolution.locatorStrategy === "contextual_intermediate_already_satisfied"
+        ? {
+            recoveredBy: resolution.locatorStrategy === "ordinal_selection" ? "ordinal_selection" as const : "contextual_intermediate_already_satisfied" as const,
+            rationale: resolution.matchReason,
+            ordinalSelectionDiagnostics: (resolution as any).ordinalSelectionDiagnostics ? {
+              selectionPatternDetected: (resolution as any).ordinalSelectionDiagnostics.selectionPatternDetected,
+              ordinal: (resolution as any).ordinalSelectionDiagnostics.ordinal,
+              domainTerm: (resolution as any).ordinalSelectionDiagnostics.domainTerm,
+              domainTermSource: (resolution as any).ordinalSelectionDiagnostics.domainTermSource,
+              selectedCandidateText: (resolution as any).ordinalSelectionDiagnostics.selectedCandidateText,
+              selectedCandidateId: (resolution as any).ordinalSelectionDiagnostics.selectedCandidateId
+            } : undefined,
+            alreadySatisfiedEvidence: (resolution as any).alreadySatisfiedEvidence,
+            selectedCandidateId: resolution.candidateId,
+            selectedCandidateText: resolution.candidateText,
+            segmentIndex: 0,
+            transitionDetected,
+            executedAction: actionTarget.action
+          }
+        : undefined) as any
     });
 
       planSteps.push({
         index: planSteps.length + 1,
         action: "click",
         description: actionTarget.action,
-        target: { strategy: "text", value: actionTarget.target, exact: false }
+        target: { 
+          strategy: (resolution.locatorStrategy || "text") as LocatorStrategy, 
+          value: actionTarget.target, 
+          exact: false,
+          metadata: resolution.locatorStrategy === "ordinal_selection" ? {
+            resolvedTargetName: resolution.candidateText,
+            resolvedCandidateId: resolution.candidateId,
+            aiAssisted: false,
+            repairType: "ordinal_selection",
+            decisionStatus: "resolved",
+            validationStatus: "passed"
+          } : undefined
+        },
+        locatorStrategy: resolution.locatorStrategy,
+        recoveryMetadata: resolution.locatorStrategy === "ordinal_selection" || 
+                          resolution.locatorStrategy === "contextual_intermediate_already_satisfied"
+          ? {
+              recoveredBy: resolution.locatorStrategy === "ordinal_selection" ? "ordinal_selection" : "contextual_intermediate_already_satisfied",
+              rationale: resolution.matchReason,
+              ordinalSelectionDiagnostics: (resolution as any).ordinalSelectionDiagnostics ? {
+                selectionPatternDetected: (resolution as any).ordinalSelectionDiagnostics.selectionPatternDetected,
+                ordinal: (resolution as any).ordinalSelectionDiagnostics.ordinal,
+                domainTerm: (resolution as any).ordinalSelectionDiagnostics.domainTerm,
+                domainTermSource: (resolution as any).ordinalSelectionDiagnostics.domainTermSource,
+                selectedCandidateText: (resolution as any).ordinalSelectionDiagnostics.selectedCandidateText,
+                selectedCandidateId: (resolution as any).ordinalSelectionDiagnostics.selectedCandidateId
+              } : undefined,
+              alreadySatisfiedEvidence: (resolution as any).alreadySatisfiedEvidence,
+              selectedCandidateId: resolution.candidateId,
+              selectedCandidateText: resolution.candidateText,
+              segmentIndex: 0,
+              transitionDetected,
+              executedAction: actionTarget.action
+            }
+          : undefined
       });
 
     if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {

@@ -95,6 +95,18 @@ function parseOptionalString(rawValue: string | undefined): string | undefined {
   return trimmed ? trimmed : undefined;
 }
 
+function parseExpectedResultMode(rawValue?: string): "context" | "assertions" | "smart" {
+  if (!rawValue || !rawValue.trim()) {
+    return "context"; // Default to context mode
+  }
+  const normalized = rawValue.trim().toLowerCase();
+  if (normalized === "context" || normalized === "assertions" || normalized === "smart") {
+    return normalized;
+  }
+  console.warn(`Invalid DISCOVERY_EXPECTED_RESULT_MODE value: "${rawValue}". Using default "context".`);
+  return "context";
+}
+
 function parseExtraLoginFields(rawValue?: string): Record<string, string> | undefined {
   if (!rawValue || !rawValue.trim()) {
     return undefined;
@@ -340,6 +352,7 @@ export const config: FullConfig = {
         process.env.AI_DISCOVERY_MAX_ATTEMPTS,
         "AI_DISCOVERY_MAX_ATTEMPTS"
       ) ?? 3,
+      expectedResultMode: parseExpectedResultMode(process.env.DISCOVERY_EXPECTED_RESULT_MODE),
       routeCompletion: {
         enabled: (process.env.AI_ROUTE_COMPLETION_ENABLED ?? "false").toLowerCase() === "true",
         minConfidence: parseOptionalThreshold(

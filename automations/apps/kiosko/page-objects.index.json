@@ -3,123 +3,7 @@
   "appSlug": "kiosko",
   "pageObjects": [
     {
-      "id": "po_1779477398494_bcsczy",
-      "className": "HomePage",
-      "filePath": "automations/apps/kiosko/pages/home.page.ts",
-      "screenSignature": "screen:kiosko-home",
-      "methods": [
-        {
-          "name": "start",
-          "intent": "start_session",
-          "parameters": [],
-          "available": true,
-          "source": "candidate,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-3",
-          "sensitive": false,
-          "confidence": 0.5,
-          "status": "active"
-        }
-      ],
-      "confidence": 0.5,
-      "status": "active",
-      "sourcePlanIds": [
-        "c37844-visualizar-detalle-de-tarjeta-visa-gold"
-      ],
-      "caseIds": [],
-      "createdAt": "2026-05-22T19:16:38.493Z",
-      "updatedAt": "2026-05-22T19:16:38.493Z",
-      "codegenMetadata": {
-        "generatedAt": "2026-05-22T19:16:38.512Z",
-        "generatedBy": "page-object-codegen",
-        "candidateFilePath": "automations/apps/kiosko/pages/home.page.candidate.ts"
-      },
-      "approvalMetadata": {
-        "approvedAt": "2026-05-22T19:16:38.538Z",
-        "approvedFrom": "automations/apps/kiosko/pages/home.page.candidate.ts",
-        "approvedBy": "auto-pom",
-        "autoApproved": true,
-        "blockedMethods": []
-      }
-    },
-    {
-      "id": "po_1779477398494_ejn7w5",
-      "className": "ProductInformationPage",
-      "filePath": "automations/apps/kiosko/pages/productinformation.page.ts",
-      "screenSignature": "screen:kiosko-product_information",
-      "methods": [
-        {
-          "name": "openProductInformation",
-          "intent": "open_product_information",
-          "parameters": [],
-          "available": true,
-          "source": "candidate,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-4",
-          "sensitive": false,
-          "confidence": 0.5,
-          "status": "active"
-        }
-      ],
-      "confidence": 0.5,
-      "status": "active",
-      "sourcePlanIds": [
-        "c37844-visualizar-detalle-de-tarjeta-visa-gold"
-      ],
-      "caseIds": [],
-      "createdAt": "2026-05-22T19:16:38.494Z",
-      "updatedAt": "2026-05-22T19:16:38.494Z",
-      "codegenMetadata": {
-        "generatedAt": "2026-05-22T19:16:38.514Z",
-        "generatedBy": "page-object-codegen",
-        "candidateFilePath": "automations/apps/kiosko/pages/productinformation.page.candidate.ts"
-      },
-      "approvalMetadata": {
-        "approvedAt": "2026-05-22T19:16:38.543Z",
-        "approvedFrom": "automations/apps/kiosko/pages/productinformation.page.candidate.ts",
-        "approvedBy": "auto-pom",
-        "autoApproved": true,
-        "blockedMethods": []
-      }
-    },
-    {
-      "id": "po_1779477398494_2j1hwo",
-      "className": "CategoryPage",
-      "filePath": "automations/apps/kiosko/pages/category.page.ts",
-      "screenSignature": "screen:kiosko-category",
-      "methods": [
-        {
-          "name": "selectCategory",
-          "intent": "select_category",
-          "parameters": [
-            "categoryName"
-          ],
-          "available": true,
-          "source": "candidate,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-5",
-          "sensitive": false,
-          "confidence": 0.5,
-          "status": "active"
-        }
-      ],
-      "confidence": 0.5,
-      "status": "active",
-      "sourcePlanIds": [
-        "c37844-visualizar-detalle-de-tarjeta-visa-gold"
-      ],
-      "caseIds": [],
-      "createdAt": "2026-05-22T19:16:38.494Z",
-      "updatedAt": "2026-05-22T19:16:38.494Z",
-      "codegenMetadata": {
-        "generatedAt": "2026-05-22T19:16:38.521Z",
-        "generatedBy": "page-object-codegen",
-        "candidateFilePath": "automations/apps/kiosko/pages/category.page.candidate.ts"
-      },
-      "approvalMetadata": {
-        "approvedAt": "2026-05-22T19:16:38.550Z",
-        "approvedFrom": "automations/apps/kiosko/pages/category.page.candidate.ts",
-        "approvedBy": "auto-pom",
-        "autoApproved": true,
-        "blockedMethods": []
-      }
-    },
-    {
-      "id": "po_1779477398494_igphtc",
+      "id": "po_framework_productlistpage",
       "className": "ProductListPage",
       "filePath": "automations/apps/kiosko/pages/productlist.page.ts",
       "screenSignature": "screen:kiosko-product_list",
@@ -131,7 +15,54 @@
             "productName"
           ],
           "available": true,
-          "source": "candidate,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-6",
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": "c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos-step-6,c38132-volver-al-listado-desde-el-detalle-de-producto-step-5,c38133-accion-solicitar-visible-desde-detalle-de-producto-step-6"
+        },
+        {
+          "name": "selectVisibleItemByOrdinal",
+          "intent": "select_visible_item_by_ordinal",
+          "parameters": [
+            "ordinal",
+            "domainTerm"
+          ],
+          "available": true,
+          "source": "c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos-missing-select_visible_item_by_ordinal",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        },
+        {
+          "name": "selectFirstVisibleCard",
+          "intent": "select_first_visible_card",
+          "parameters": [],
+          "available": true,
+          "source": "c38133-accion-solicitar-visible-desde-detalle-de-producto-step-7",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 1,
+      "status": "active",
+      "sourcePlanIds": [],
+      "caseIds": [],
+      "createdAt": "2026-05-28T01:15:21.735Z",
+      "updatedAt": "2026-05-28T01:32:16.691Z"
+    },
+    {
+      "id": "po_1779930946358_yaf3qe",
+      "className": "HomePage",
+      "filePath": "automations/apps/kiosko/pages/home.page.ts",
+      "screenSignature": "screen:kiosko-home",
+      "methods": [
+        {
+          "name": "start",
+          "intent": "start_session",
+          "parameters": [],
+          "available": true,
+          "source": "candidate,c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos-step-3,c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos-missing-start_session,c38132-volver-al-listado-desde-el-detalle-de-producto-step-3,c38133-accion-solicitar-visible-desde-detalle-de-producto-step-3",
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
@@ -140,19 +71,157 @@
       "confidence": 0.5,
       "status": "active",
       "sourcePlanIds": [
-        "c37844-visualizar-detalle-de-tarjeta-visa-gold"
+        "c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos"
       ],
       "caseIds": [],
-      "createdAt": "2026-05-22T19:16:38.494Z",
-      "updatedAt": "2026-05-22T19:16:38.494Z",
+      "createdAt": "2026-05-28T01:15:46.358Z",
+      "updatedAt": "2026-05-28T01:15:46.358Z",
       "codegenMetadata": {
-        "generatedAt": "2026-05-22T19:16:38.524Z",
+        "generatedAt": "2026-05-28T01:15:46.369Z",
         "generatedBy": "page-object-codegen",
-        "candidateFilePath": "automations/apps/kiosko/pages/productlist.page.candidate.ts"
+        "candidateFilePath": "automations/apps/kiosko/pages/home.page.candidate.ts"
       },
       "approvalMetadata": {
-        "approvedAt": "2026-05-22T19:16:38.558Z",
-        "approvedFrom": "automations/apps/kiosko/pages/productlist.page.candidate.ts",
+        "approvedAt": "2026-05-28T01:15:46.379Z",
+        "approvedFrom": "automations/apps/kiosko/pages/home.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
+    },
+    {
+      "id": "po_1779930946358_ub5jde",
+      "className": "ProductInformationPage",
+      "filePath": "automations/apps/kiosko/pages/productinformation.page.ts",
+      "screenSignature": "screen:kiosko-product_information",
+      "methods": [
+        {
+          "name": "openProductInformation",
+          "intent": "open_product_information",
+          "parameters": [],
+          "available": true,
+          "source": "candidate,c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos-step-4,c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos-missing-open_product_information,c38132-volver-al-listado-desde-el-detalle-de-producto-step-4,c38133-accion-solicitar-visible-desde-detalle-de-producto-step-4",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "active",
+      "sourcePlanIds": [
+        "c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-05-28T01:15:46.358Z",
+      "updatedAt": "2026-05-28T01:15:46.358Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-05-28T01:15:46.372Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/kiosko/pages/productinformation.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-05-28T01:15:46.383Z",
+        "approvedFrom": "automations/apps/kiosko/pages/productinformation.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
+    },
+    {
+      "id": "po_1779930946358_hou0jq",
+      "className": "CategoryPage",
+      "filePath": "automations/apps/kiosko/pages/category.page.ts",
+      "screenSignature": "screen:kiosko-category",
+      "methods": [
+        {
+          "name": "selectCategory",
+          "intent": "select_category",
+          "parameters": [
+            "categoryName"
+          ],
+          "available": true,
+          "source": "candidate,c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos-step-5,c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos-missing-select_category,c38133-accion-solicitar-visible-desde-detalle-de-producto-step-5",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "active",
+      "sourcePlanIds": [
+        "c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-05-28T01:15:46.358Z",
+      "updatedAt": "2026-05-28T01:15:46.358Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-05-28T01:15:46.373Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/kiosko/pages/category.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-05-28T01:15:46.386Z",
+        "approvedFrom": "automations/apps/kiosko/pages/category.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
+    },
+    {
+      "id": "po_1779930946358_k0xa82",
+      "className": "ProductDetailPage",
+      "filePath": "automations/apps/kiosko/pages/productdetail.page.ts",
+      "screenSignature": "screen:kiosko-product_detail",
+      "methods": [
+        {
+          "name": "expectLoaded",
+          "intent": "expect_loaded",
+          "parameters": [],
+          "available": true,
+          "source": "candidate,c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos-step-7",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        },
+        {
+          "name": "backToList",
+          "intent": "return_to_list",
+          "parameters": [],
+          "available": true,
+          "source": "c38132-volver-al-listado-desde-el-detalle-de-producto-missing-return_to_list",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        },
+        {
+          "name": "clickPrimaryAction",
+          "intent": "click_primary_action",
+          "parameters": [
+            "actionName"
+          ],
+          "available": true,
+          "source": "c38133-accion-solicitar-visible-desde-detalle-de-producto-step-8,c38133-accion-solicitar-visible-desde-detalle-de-producto-missing-click_primary_action",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "active",
+      "sourcePlanIds": [
+        "c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-05-28T01:15:46.358Z",
+      "updatedAt": "2026-05-28T01:32:16.691Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-05-28T01:15:46.374Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/kiosko/pages/productdetail.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-05-28T01:15:46.388Z",
+        "approvedFrom": "automations/apps/kiosko/pages/productdetail.page.candidate.ts",
         "approvedBy": "auto-pom",
         "autoApproved": true,
         "blockedMethods": []
@@ -160,5 +229,5 @@
     }
   ],
   "componentCandidates": [],
-  "updatedAt": "2026-05-22T19:16:38.558Z"
+  "updatedAt": "2026-05-28T12:35:43.775Z"
 }

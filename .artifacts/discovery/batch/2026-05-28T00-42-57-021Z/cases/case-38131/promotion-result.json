@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-28T00:44:28.727Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c38131-visualizar-detalle-informativo-de-prestamo-personal",
+  "appSlug": "kiosko",
+  "specPath": "automations\\apps\\kiosko\\cases\\c38131-visualizar-detalle-informativo-de-prestamo-personal\\case.spec.ts",
+  "planPath": "automations\\apps\\kiosko\\cases\\c38131-visualizar-detalle-informativo-de-prestamo-personal\\plan.json",
+  "caseFolder": "c38131-visualizar-detalle-informativo-de-prestamo-personal",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false
+}

@@ -163,6 +163,20 @@ const INTENT_LOCATOR_TEMPLATES: Record<string, string> = {
     "if (await row.count() === 0) throw new Error('No visible row found to select.');",
     "await row.click({ timeout: 10000 });"
   ].join("\n"),
+  select_visible_item_by_ordinal: [
+    "await waitForListReadiness(this.page, { timeoutMs: 10000, pollMs: 500, minCards: 1 });",
+    "const ordinalNum = ordinal === 'first' ? 0 : ordinal === 'second' ? 1 : ordinal === 'third' ? 2 : -1;",
+    "if (ordinalNum < 0) throw new Error('Unsupported ordinal: ' + ordinal);",
+    "const domainSelector = domainTerm ? `[data-testid*=\"${domainTerm}\"], [class*=\"${domainTerm}\"], :has-text(\"${domainTerm}\")` : ':visible';",
+    "const items = this.page.locator(`article${domainSelector}, [role=\"listitem\"]${domainSelector}, [class*=\"card\"]${domainSelector}, [class*=\"item\"]${domainSelector}`);",
+    "const count = await items.count();",
+    "if (count === 0) throw new Error('No visible items found for ordinal selection.');",
+    "if (ordinalNum >= count) throw new Error(`Ordinal ${ordinal} (${ordinalNum + 1}) exceeds available items (${count}).`);",
+    "const item = items.nth(ordinalNum);",
+    "const actionable = item.locator('a:visible, button:visible, [role=\"button\"]:visible').first();",
+    "if (await actionable.count() > 0) { await actionable.click({ timeout: 10000 }); return; }",
+    "await item.click({ timeout: 10000 });"
+  ].join("\n"),
   click_primary_action: [
     "const button = this.page.getByRole('button', { name: new RegExp(actionName, 'i') });",
     "const link = this.page.getByRole('link', { name: new RegExp(actionName, 'i') });",
@@ -181,7 +195,41 @@ const INTENT_LOCATOR_TEMPLATES: Record<string, string> = {
   expect_loaded: "await expect(this.page.locator('body')).toBeVisible();",
   fill_form_field: "await this.page.getByLabel(fieldName).or(this.page.getByPlaceholder(fieldName)).fill(value);",
   submit_form: "await this.page.getByRole('button', { name: /submit|enviar|confirmar/i }).click();",
-  confirm_action: "await this.page.getByRole('button', { name: /confirm|confirmar|accept|aceptar/i }).click();"
+  confirm_action: "await this.page.getByRole('button', { name: /confirm|confirmar|accept|aceptar/i }).click();",
+  return_to_list: [
+    "const backKeywords = /volver|regresar|atr|back|return|cancel|listado/i;",
+    "const backButton = this.page.getByRole('button', { name: backKeywords }).first();",
+    "const backLink = this.page.getByRole('link', { name: backKeywords }).first();",
+    "const backLocator = backButton.or(backLink);",
+    "await backLocator.waitFor({ state: 'visible', timeout: 10000 });",
+    "await backLocator.click({ timeout: 10000 });",
+    "await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});",
+    "await this.page.waitForTimeout(500);"
+  ].join("\n"),
+  expect_primary_action_visible: [
+    "const actionKeywords = new RegExp(actionName, 'i');",
+    "const button = this.page.getByRole('button', { name: actionKeywords }).first();",
+    "const link = this.page.getByRole('link', { name: actionKeywords }).first();",
+    "const locator = button.or(link);",
+    "await locator.waitFor({ state: 'visible', timeout: 10000 });",
+    "await expect(locator).toBeVisible();"
+  ].join("\n"),
+  expect_primary_action_enabled: [
+    "const actionKeywords = new RegExp(actionName, 'i');",
+    "const button = this.page.getByRole('button', { name: actionKeywords }).first();",
+    "const link = this.page.getByRole('link', { name: actionKeywords }).first();",
+    "const locator = button.or(link);",
+    "await locator.waitFor({ state: 'visible', timeout: 10000 });",
+    "await expect(locator).toBeEnabled();"
+  ].join("\n"),
+  expect_primary_action_disabled: [
+    "const actionKeywords = new RegExp(actionName, 'i');",
+    "const button = this.page.getByRole('button', { name: actionKeywords }).first();",
+    "const link = this.page.getByRole('link', { name: actionKeywords }).first();",
+    "const locator = button.or(link);",
+    "await locator.waitFor({ state: 'visible', timeout: 10000 });",
+    "await expect(locator).toBeDisabled();"
+  ].join("\n")
 };
 
 const INTENT_DEFAULT_PARAMS: Record<string, string[]> = {
@@ -200,11 +248,16 @@ const INTENT_DEFAULT_PARAMS: Record<string, string[]> = {
   select_first_visible_product: [],
   select_first_visible_card: [],
   select_first_visible_row: [],
+  select_visible_item_by_ordinal: ["ordinal", "domainTerm"],
   click_primary_action: ["actionName"],
+  expect_primary_action_visible: ["actionName"],
+  expect_primary_action_enabled: ["actionName"],
+  expect_primary_action_disabled: ["actionName"],
   expect_loaded: [],
   fill_form_field: ["fieldName", "value"],
   submit_form: [],
   confirm_action: [],
+  return_to_list: [],
   expect_product_detail: ["productName"]
 };
 

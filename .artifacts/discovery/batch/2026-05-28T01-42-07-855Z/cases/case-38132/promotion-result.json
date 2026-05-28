@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-28T01:44:05.546Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c38132-volver-al-listado-desde-el-detalle-de-producto",
+  "appSlug": "kiosko",
+  "specPath": "automations\\apps\\kiosko\\cases\\c38132-volver-al-listado-desde-el-detalle-de-producto\\case.spec.ts",
+  "planPath": "automations\\apps\\kiosko\\cases\\c38132-volver-al-listado-desde-el-detalle-de-producto\\plan.json",
+  "caseFolder": "c38132-volver-al-listado-desde-el-detalle-de-producto",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false
+}

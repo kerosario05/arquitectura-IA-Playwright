@@ -447,7 +447,7 @@ function sanitizeExtraLoginFields(extraLoginFields?: Record<string, string>): Re
   return sanitized;
 }
 
-export function serializeRuntimeConfigForPromotion(config: FullConfig): PromotedAppConfig {
+export function serializeRuntimeConfigForPromotion(config: FullConfig, existingConfig?: PromotedAppConfig): PromotedAppConfig {
   const profile = deriveAppProfile({
     appProfile: config.app.appProfile,
     appName: config.app.name,
@@ -467,6 +467,8 @@ export function serializeRuntimeConfigForPromotion(config: FullConfig): Promoted
     passwordRef: config.app.password ? "APP_PASSWORD" : undefined,
     extraLoginFields: sanitizeExtraLoginFields(config.app.extraLoginFields),
     missingInputBehavior: config.app.missingInputBehavior,
+    // Preserve routeProfile from existing config if available
+    routeProfile: existingConfig?.routeProfile,
     updatedAt: new Date().toISOString()
   };
 }
@@ -511,7 +513,167 @@ export function loadPromotedAppConfigSync(options: { appSlug: string; configPath
 
 export function loadRouteProfile(appSlug: string): AppRouteProfile | undefined {
   const config = loadPromotedAppConfigSync({ appSlug });
-  return config?.routeProfile;
+  
+  // First try to load from app.config.json routeProfile
+  if (config?.routeProfile) {
+    const normalized = normalizeRouteProfileConfig(config, appSlug);
+    if (normalized) {
+      console.log(`[route-profile] loaded appSlug=${appSlug} source=app.config.json domainTerms=${normalized.domainTerms?.length ?? 0} routes=${normalized.routes?.length ?? 0}`);
+      return normalized;
+    }
+  }
+  
+  // Fallback: check if config has flat routeProfile fields (domainTerms, routes, intermediates)
+  const configWithRouteProfile = config as any;
+  if (configWithRouteProfile?.domainTerms || configWithRouteProfile?.routes || configWithRouteProfile?.intermediates) {
+    const normalized = normalizeRouteProfileConfig(configWithRouteProfile, appSlug);
+    if (normalized) {
+      console.log(`[route-profile] loaded appSlug=${appSlug} source=app.config.json.flat domainTerms=${normalized.domainTerms?.length ?? 0} routes=${normalized.routes?.length ?? 0}`);
+      return normalized;
+    }
+  }
+  
+  // Last resort: load from pending suggestions if available
+  // This allows route profile learning to work even before suggestions are applied
+  console.log(`[route-profile] appSlug=${appSlug} no routeProfile in app.config.json, returning undefined`);
+  return undefined;
+}
+
+/**
+ * Normalize routeProfile from app.config.json to standard AppRouteProfile format.
+ * 
+ * Supports two formats:
+ * 
+ * A) app.config.json with routeProfile object:
+ * {
+ *   "appSlug": "kiosko",
+ *   "routeProfile": {
+ *     "name": "product_information",
+ *     "entry": [],
+ *   "aliases": {},
+ *     "intermediates": {},
+ *     "domainTerms": {}
+ *   }
+ * }
+ * 
+ * B) routeProfile standalone flat:
+ * {
+ *   "appSlug": "kiosko",
+ *   "routeProfile": "product_information",
+ *   "entry": [],
+ *   "aliases": {},
+ *   "intermediates": {},
+ *   "domainTerms": {}
+ * }
+ */
+export function normalizeRouteProfileConfig(config: PromotedAppConfig, appSlug?: string): AppRouteProfile | undefined {
+  const routeProfile = config.routeProfile;
+  if (!routeProfile) {
+    return undefined;
+  }
+  
+  // Format A: routeProfile is already an object
+  if (typeof routeProfile === "object" && !Array.isArray(routeProfile)) {
+    const normalized: AppRouteProfile = {
+      entryPoints: (routeProfile as any).entry ?? (routeProfile as any).entryPoints ?? [],
+      aliases: (routeProfile as any).aliases ?? {},
+      domainTerms: normalizeDomainTerms((routeProfile as any).domainTerms),
+      blockedLabels: (routeProfile as any).blockedLabels ?? [],
+      submitLikeLabels: (routeProfile as any).submitLikeLabels ?? []
+    };
+    
+    // Convert intermediates to routes if routes not present
+    if ((routeProfile as any).routes) {
+      normalized.routes = (routeProfile as any).routes;
+    } else if ((routeProfile as any).intermediates) {
+      normalized.routes = convertIntermediatesToRoutes((routeProfile as any).intermediates);
+    }
+    
+    const source = "app_config_object";
+    const loggedAppSlug = config.appProfile?.appSlug ?? appSlug ?? "unknown";
+    console.log(`[route-profile] normalized appSlug=${loggedAppSlug} source=${source} domainTerms=${normalized.domainTerms?.length ?? 0} routes=${normalized.routes?.length ?? 0}`);
+    
+    return normalized;
+  }
+  
+  // Format B: routeProfile is a string (standalone flat format)
+  if (typeof routeProfile === "string") {
+    const normalized: AppRouteProfile = {
+      entryPoints: (config as any).entry ?? (config as any).entryPoints ?? [],
+      aliases: (config as any).aliases ?? {},
+      domainTerms: normalizeDomainTerms((config as any).domainTerms),
+      blockedLabels: (config as any).blockedLabels ?? [],
+      submitLikeLabels: (config as any).submitLikeLabels ?? []
+    };
+    
+    // Convert intermediates to routes if routes not present
+    if ((config as any).routes) {
+      normalized.routes = (config as any).routes;
+    } else if ((config as any).intermediates) {
+      normalized.routes = convertIntermediatesToRoutes((config as any).intermediates);
+    }
+    
+    const source = "standalone_flat";
+    const loggedAppSlug = config.appProfile?.appSlug ?? appSlug ?? "unknown";
+    console.log(`[route-profile] normalized appSlug=${loggedAppSlug} source=${source} domainTerms=${normalized.domainTerms?.length ?? 0} routes=${normalized.routes?.length ?? 0}`);
+    
+    return normalized;
+  }
+  
+  return undefined;
+}
+
+/**
+ * Normalize domainTerms from various formats to string array.
+ * Supports: string[], Record<string, any>, or undefined
+ */
+function normalizeDomainTerms(domainTerms: any): string[] {
+  if (!domainTerms) {
+    return [];
+  }
+  
+  if (Array.isArray(domainTerms)) {
+    const unique = Array.from(new Set(domainTerms.filter(t => typeof t === "string")));
+    return unique;
+  }
+  
+  if (typeof domainTerms === "object") {
+    // Record<string, any> - extract keys or values
+    const entries = Object.entries(domainTerms);
+    if (entries.length > 0) {
+      // If values are strings, use values; otherwise use keys
+      const firstValue = entries[0][1];
+      let result: string[];
+      if (typeof firstValue === "string") {
+        result = Object.values(domainTerms).filter(v => typeof v === "string");
+      } else {
+        result = Object.keys(domainTerms);
+      }
+      // Deduplicate
+      const unique = Array.from(new Set(result));
+      return unique;
+    }
+  }
+  
+  return [];
+}
+
+/**
+ * Convert intermediates object to routes array.
+ * 
+ * Input: { "Tarjetas": ["Tarjeta de Crédito", "Tarjeta de Débito"], ... }
+ * Output: [{ from: "Tarjetas", intermediates: ["Tarjeta de Crédito", "Tarjeta de Débito"] }, ...]
+ */
+function convertIntermediatesToRoutes(intermediates: Record<string, string[]>): Array<{ from: string; intermediates: string[]; domain?: string }> {
+  if (!intermediates || typeof intermediates !== "object") {
+    return [];
+  }
+  
+  return Object.entries(intermediates).map(([from, intermediatesList]) => ({
+    from,
+    intermediates: Array.isArray(intermediatesList) ? intermediatesList : [],
+    domain: undefined
+  }));
 }
 
 export async function savePromotedAppConfig(config: PromotedAppConfig, outputRoot?: string): Promise<void> {

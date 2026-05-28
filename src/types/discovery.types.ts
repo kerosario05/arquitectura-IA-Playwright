@@ -239,16 +239,31 @@ export type DiscoveryStepResult = {
   // Recovery metadata — set when segmented route recovery resolves a failed step
   originalStatus?: string;
   recoveryStatus?: "recovered" | "repaired";
-  recoveredBy?: "segmented_route_recovery" | "route_completion";
+  recoveredBy?: "segmented_route_recovery" | "route_completion" | "contextual_intermediate_already_satisfied" | "ordinal_selection";
   recoveryMetadata?: {
-    selectedCandidateId: string;
+    selectedCandidateId?: string;
     selectedCandidateText?: string;
     semanticRelation?: string;
     score?: number;
-    segmentIndex: number;
-    transitionDetected: boolean;
-    executedAction: string;
+    segmentIndex?: number;
+    transitionDetected?: boolean;
+    executedAction?: string;
     rationale?: string;
+    alreadySatisfiedEvidence?: {
+      candidateText: string;
+      candidateType: string;
+      containsTarget: boolean;
+      consistentWithNextTarget: boolean;
+      reason: string;
+    };
+    ordinalSelectionDiagnostics?: {
+      selectionPatternDetected: boolean;
+      ordinal?: "first" | "second" | "third" | "last";
+      domainTerm?: string;
+      domainTermSource?: "routeProfile" | "generic_fallback";
+      selectedCandidateText?: string;
+      selectedCandidateId?: string;
+    };
   };
   routeCompletionDiagnostics?: {
     attempted: boolean;

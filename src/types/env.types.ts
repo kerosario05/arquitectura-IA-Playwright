@@ -95,6 +95,8 @@ export type RequiredTestRailRuntimeConfig = {
   apiKey: string;
 };
 
+export type ExpectedResultMode = "context" | "assertions" | "smart";
+
 export type FutureIntegrationsConfig = {
   testRail?: TestRailConfig;
   jira?: {
@@ -113,6 +115,7 @@ export type FutureIntegrationsConfig = {
     discoveryConfidenceThreshold?: number;
     discoveryRequireApprovalThreshold?: number;
     discoveryMaxAttempts?: number;
+    expectedResultMode?: ExpectedResultMode;
     routeCompletion?: {
       enabled?: boolean;
       minConfidence?: number;

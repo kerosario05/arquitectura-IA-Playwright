@@ -1,0 +1,10 @@
+{
+  "id": "c38133-accion-solicitar-visible-desde-detalle-de-producto",
+  "externalId": "C38133",
+  "caseId": 38133,
+  "title": "Acción Solicitar visible desde detalle de producto",
+  "source": "discovery",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "createdAt": "2026-05-28T02:49:07.505Z"
+}

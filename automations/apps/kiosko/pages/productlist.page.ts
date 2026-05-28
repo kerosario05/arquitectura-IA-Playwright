@@ -67,7 +67,50 @@ try {
   }
 } catch { /* continue */ }
 const fallbackLocator = this.page.locator(':has-text("' + productName.replace(/"/g, '\\"') + '")').first();
-if (await fallbackLocator.count() > 0) { await fallbackLocator.click({ timeout: 10000 }); return; }
-throw new Error('Could not find product matching "' + productName + '". Strategies tried: checkbox, role, text, heading, semantic_tokens, product_condition');
+if (await fallbackLocator.count() > 0) { await fallbackLocator.click({ timeout: 10000 }); }
+else { throw new Error('Could not find product matching "' + productName + '". Strategies tried: checkbox, role, text, heading, semantic_tokens, product_condition'); }
+
+// Wait for navigation or page state change after selection
+await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
+await this.page.waitForTimeout(1000);
+  }
+
+  async selectVisibleItemByOrdinal(ordinal: 'first' | 'second' | 'third', domainTerm?: string): Promise<void> {
+    await waitForListReadiness(this.page, { timeoutMs: 10000, pollMs: 500, minCards: 1 });
+    const ordinalNum = ordinal === 'first' ? 0 : ordinal === 'second' ? 1 : ordinal === 'third' ? 2 : -1;
+    if (ordinalNum < 0) throw new Error('Unsupported ordinal: ' + ordinal);
+    const domainSelector = domainTerm ? `[data-testid*="${domainTerm}"], [class*="${domainTerm}"], :has-text("${domainTerm}")` : ':visible';
+    const items = this.page.locator(`article${domainSelector}, [role="listitem"]${domainSelector}, [class*="card"]${domainSelector}, [class*="item"]${domainSelector}`);
+    const count = await items.count();
+    if (count === 0) throw new Error('No visible items found for ordinal selection.');
+    if (ordinalNum >= count) throw new Error(`Ordinal ${ordinal} (${ordinalNum + 1}) exceeds available items (${count}).`);
+    const item = items.nth(ordinalNum);
+    
+    // Try to find clickable container or actionable element within the item
+    // Priority: clickable container > link > button > item itself
+    const clickableContainer = item.locator('[class*="clickable"], [class*="cursor-pointer"], [onclick]').first();
+    const link = item.locator('a:visible').first();
+    const button = item.locator('button:visible, [role="button"]:visible').first();
+    
+    if (await clickableContainer.count() > 0) {
+      await clickableContainer.click({ timeout: 10000 });
+    } else if (await link.count() > 0) {
+      await link.click({ timeout: 10000 });
+    } else if (await button.count() > 0) {
+      await button.click({ timeout: 10000 });
+    } else {
+      await item.click({ timeout: 10000 });
+    }
+    
+    // Wait for navigation or page state change after selection
+    await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
+    await this.page.waitForTimeout(1000);
+  }
+
+  async selectFirstVisibleCard(): Promise<void> {
+    await waitForListReadiness(this.page, { timeoutMs: 10000, pollMs: 500, minCards: 1 });
+    const card = this.page.locator('[class*="card"]:visible, article:visible').first();
+    if (await card.count() === 0) throw new Error('No visible card found to select.');
+    await card.click({ timeout: 10000 });
   }
 }

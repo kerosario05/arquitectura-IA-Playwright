@@ -12,7 +12,7 @@ import type {
 } from "../types/page-object.types";
 import type { ExecutionPlanStep } from "../types/execution-plan.types";
 import type { SemanticMethodIntent } from "../types/pom-ownership";
-import { INTENT_PREFERRED_OWNER, INTENT_CLASS_OWNERSHIP } from "../types/pom-ownership";
+import { INTENT_PREFERRED_OWNER, INTENT_CLASS_OWNERSHIP, METHOD_INTENT_NAME_MAP } from "../types/pom-ownership";
 import { buildAppAutomationPaths } from "./app-profile";
 import type { AppProfile } from "./app-profile";
 
@@ -110,9 +110,21 @@ export function findMethodBySemanticIntent(
       (po) => po.className === preferredOwner && po.status === "active"
     );
     if (ownerPO) {
-      const method = ownerPO.methods.find(
+      // First try to find by intent
+      let method = ownerPO.methods.find(
         (m) => m.intent === intent && m.status === "active" && m.available
       );
+      
+      // Fallback: try to find by method name using METHOD_INTENT_NAME_MAP
+      if (!method) {
+        const expectedMethodName = METHOD_INTENT_NAME_MAP[intent];
+        if (expectedMethodName) {
+          method = ownerPO.methods.find(
+            (m) => m.name === expectedMethodName && m.status === "active" && m.available
+          );
+        }
+      }
+      
       if (method) return { pageObject: ownerPO, method };
     }
   }
@@ -120,9 +132,22 @@ export function findMethodBySemanticIntent(
   const allowedClasses = INTENT_CLASS_OWNERSHIP[intent];
   for (const po of registry.pageObjects.filter((p) => p.status === "active")) {
     if (allowedClasses && !allowedClasses.includes(po.className)) continue;
-    const method = po.methods.find(
+    
+    // First try to find by intent
+    let method = po.methods.find(
       (m) => m.intent === intent && m.status === "active" && m.available
     );
+    
+    // Fallback: try to find by method name using METHOD_INTENT_NAME_MAP
+    if (!method) {
+      const expectedMethodName = METHOD_INTENT_NAME_MAP[intent];
+      if (expectedMethodName) {
+        method = po.methods.find(
+          (m) => m.name === expectedMethodName && m.status === "active" && m.available
+        );
+      }
+    }
+    
     if (method) return { pageObject: po, method };
   }
 

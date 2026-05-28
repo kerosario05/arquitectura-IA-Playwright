@@ -1,0 +1,20 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [],
+  "availablePageObjects": [
+    "ProductListPage",
+    "HomePage",
+    "ProductInformationPage",
+    "CategoryPage",
+    "ProductDetailPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false
+}

@@ -1,0 +1,436 @@
+{
+  "version": "1.0",
+  "url": "https://172.27.4.50/product-subcategory?category=accounts&subcategory=savings",
+  "title": "Kiosco de Autogestión - Banco Santa Cruz",
+  "capturedAt": "2026-05-28T00:44:02.707Z",
+  "elements": [
+    {
+      "id": "el-3",
+      "type": "button",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "Selecciona un productoElige el tipo de producto que deseas conocer:",
+      "candidateLocators": [],
+      "dataHints": [],
+      "className": "absolute left-0 top-1/2 -translate-y-1/2 p-3 hover:bg-primary/10 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 border-2 border-transparent hover:border-primary/20"
+    },
+    {
+      "id": "el-24",
+      "type": "button",
+      "text": "Volver",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "Volver",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Volver",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary hover:bg-primary/90 h-10 min-h-[70px] text-lg font-semibold rounded-2xl transition-all duration-200 ease-out shadow-card hover:shadow-card-hover disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden select-none transform-gpu bg-gradient-to-br from-white to-gray-50 text-foreground border-2 border-border hover:border-border/80 hover:from-muted/50 hover:to-muted active:shadow-inner hover:scale-[1.02] px-12 py-4"
+    },
+    {
+      "id": "el-2",
+      "type": "image",
+      "tagName": "img",
+      "visible": true,
+      "candidateLocators": [],
+      "dataHints": [],
+      "alt": "Banco Santa Cruz",
+      "className": "h-10 object-contain"
+    },
+    {
+      "id": "el-4",
+      "type": "heading",
+      "text": "Selecciona un producto",
+      "tagName": "h1",
+      "visible": true,
+      "nearbyText": "Selecciona un productoElige el tipo de producto que deseas conocer:",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Selecciona un producto",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-3xl font-bold text-foreground text-center"
+    },
+    {
+      "id": "el-5",
+      "type": "text",
+      "text": "Elige el tipo de producto que deseas conocer:",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "Selecciona un productoElige el tipo de producto que deseas conocer:",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Elige el tipo de producto que deseas conocer:",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-base text-muted-foreground text-center mt-2"
+    },
+    {
+      "id": "el-6",
+      "type": "image",
+      "tagName": "img",
+      "visible": true,
+      "candidateLocators": [],
+      "dataHints": [],
+      "alt": "Cuenta de Ahorros Personal en Pesos",
+      "className": "\n            max-w-full max-h-full h-auto object-contain\n            transition-all duration-300\n            hover:scale-105\n            \n          "
+    },
+    {
+      "id": "el-7",
+      "type": "heading",
+      "text": "Cuenta de Ahorros Personal en Pesos",
+      "tagName": "h3",
+      "visible": true,
+      "nearbyText": "Cuenta de Ahorros Personal en PesosLiquidez total, retiros y transferencias en cualquier momento.TIN 0.25% anual, acreditados mensualmente sobre el balance promedio.Alertas de movimientos y transaccio",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Cuenta de Ahorros Personal en Pesos",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta"
+      ],
+      "className": "\n        text-2xl font-bold mb-5 min-h-[4rem] flex items-center \n        transition-colors duration-300 relative z-10 leading-tight\n        text-foreground hover:text-primary\n      "
+    },
+    {
+      "id": "el-8",
+      "type": "text",
+      "text": "Liquidez total, retiros y transferencias en cualquier momento.",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Liquidez total, retiros y transferencias en cualquier momento.",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Liquidez total, retiros y transferencias en cualquier momento.",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-base text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-9",
+      "type": "text",
+      "text": "TIN 0.25% anual, acreditados mensualmente sobre el balance promedio.",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "TIN 0.25% anual, acreditados mensualmente sobre el balance promedio.",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "TIN 0.25% anual, acreditados mensualmente sobre el balance promedio.",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-base text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-10",
+      "type": "text",
+      "text": "Alertas de movimientos y transacciones seguras por BSC en línea y App BSC.",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Alertas de movimientos y transacciones seguras por BSC en línea y App BSC.",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Alertas de movimientos y transacciones seguras por BSC en línea y App BSC.",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-base text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-11",
+      "type": "text",
+      "text": "Complementos opcionales: préstamos en pesos, compra/venta de divisas entre tus cuentas directamente en el canal, depósito a plazo.",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Complementos opcionales: préstamos en pesos, compra/venta de divisas entre tus cuentas directamente en el canal, depósito a plazo.",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Complementos opcionales: préstamos en pesos, compra/venta de divisas entre tus cuentas directamente en el canal, depósito a plazo.",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta",
+        "prestamo"
+      ],
+      "className": "text-base text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-12",
+      "type": "image",
+      "tagName": "img",
+      "visible": true,
+      "candidateLocators": [],
+      "dataHints": [],
+      "alt": "Cuenta de Ahorros Personal en Dólares",
+      "className": "\n            max-w-full max-h-full h-auto object-contain\n            transition-all duration-300\n            hover:scale-105\n            \n          "
+    },
+    {
+      "id": "el-13",
+      "type": "heading",
+      "text": "Cuenta de Ahorros Personal en Dólares",
+      "tagName": "h3",
+      "visible": true,
+      "nearbyText": "Cuenta de Ahorros Personal en DólaresLiquidez total: retiros y transferencias en cualquier momento.TIN anual: 0.05%, acreditado mensualmente sobre el balance promedio.Alertas de movimientos y transacc",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Cuenta de Ahorros Personal en Dólares",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta"
+      ],
+      "className": "\n        text-2xl font-bold mb-5 min-h-[4rem] flex items-center \n        transition-colors duration-300 relative z-10 leading-tight\n        text-foreground hover:text-primary\n      "
+    },
+    {
+      "id": "el-14",
+      "type": "text",
+      "text": "Liquidez total: retiros y transferencias en cualquier momento.",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Liquidez total: retiros y transferencias en cualquier momento.",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Liquidez total: retiros y transferencias en cualquier momento.",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-base text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-15",
+      "type": "text",
+      "text": "TIN anual: 0.05%, acreditado mensualmente sobre el balance promedio.",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "TIN anual: 0.05%, acreditado mensualmente sobre el balance promedio.",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "TIN anual: 0.05%, acreditado mensualmente sobre el balance promedio.",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-base text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-16",
+      "type": "text",
+      "text": "Alertas de movimientos y transacciones seguras por BSC en línea y App BSC.",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Alertas de movimientos y transacciones seguras por BSC en línea y App BSC.",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Alertas de movimientos y transacciones seguras por BSC en línea y App BSC.",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-base text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-17",
+      "type": "text",
+      "text": "Complementos opcionales: préstamos en dólares, compra/venta de divisas entre tus cuentas directamente en el canal, depósitos a plazo.",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Complementos opcionales: préstamos en dólares, compra/venta de divisas entre tus cuentas directamente en el canal, depósitos a plazo.",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Complementos opcionales: préstamos en dólares, compra/venta de divisas entre tus cuentas directamente en el canal, depósitos a plazo.",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta",
+        "prestamo"
+      ],
+      "className": "text-base text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-18",
+      "type": "image",
+      "tagName": "img",
+      "visible": true,
+      "candidateLocators": [],
+      "dataHints": [],
+      "alt": "Cuenta de Ahorros Personal en Euros",
+      "className": "\n            max-w-full max-h-full h-auto object-contain\n            transition-all duration-300\n            hover:scale-105\n            \n          "
+    },
+    {
+      "id": "el-19",
+      "type": "heading",
+      "text": "Cuenta de Ahorros Personal en Euros",
+      "tagName": "h3",
+      "visible": true,
+      "nearbyText": "Cuenta de Ahorros Personal en EurosLiquidez total: retiros y transferencias en cualquier momento.Interés nominal anual (TIN): 0.01%, acreditado mensualmente sobre el balance promedio.Alertas de movimi",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Cuenta de Ahorros Personal en Euros",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta"
+      ],
+      "className": "\n        text-2xl font-bold mb-5 min-h-[4rem] flex items-center \n        transition-colors duration-300 relative z-10 leading-tight\n        text-foreground hover:text-primary\n      "
+    },
+    {
+      "id": "el-20",
+      "type": "text",
+      "text": "Liquidez total: retiros y transferencias en cualquier momento.",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Liquidez total: retiros y transferencias en cualquier momento.",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Liquidez total: retiros y transferencias en cualquier momento.",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-base text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-21",
+      "type": "text",
+      "text": "Interés nominal anual (TIN): 0.01%, acreditado mensualmente sobre el balance promedio.",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Interés nominal anual (TIN): 0.01%, acreditado mensualmente sobre el balance promedio.",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Interés nominal anual (TIN): 0.01%, acreditado mensualmente sobre el balance promedio.",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-base text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-22",
+      "type": "text",
+      "text": "Alertas de movimientos y transacciones seguras por BSC en línea y App BSC.",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Alertas de movimientos y transacciones seguras por BSC en línea y App BSC.",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Alertas de movimientos y transacciones seguras por BSC en línea y App BSC.",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-base text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-23",
+      "type": "text",
+      "text": "Complementos opcionales: compra/venta de divisas entre tus cuentas directamente en el canal.",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Complementos opcionales: compra/venta de divisas entre tus cuentas directamente en el canal.",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Complementos opcionales: compra/venta de divisas entre tus cuentas directamente en el canal.",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta"
+      ],
+      "className": "text-base text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-25",
+      "type": "text",
+      "text": "Volver",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Volver",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Volver",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "relative z-10 flex items-center justify-center gap-2"
+    },
+    {
+      "id": "el-26",
+      "type": "text",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Volver",
+      "candidateLocators": [],
+      "dataHints": [],
+      "className": "absolute inset-0 bg-gradient-to-t from-transparent via-white/5 to-white/10 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+    }
+  ],
+  "summary": {
+    "totalElements": 25,
+    "buttons": 2,
+    "links": 0,
+    "inputs": 0,
+    "selects": 0,
+    "tables": 0,
+    "dialogs": 0,
+    "headings": 4
+  }
+}

@@ -1,0 +1,123 @@
+[
+  {
+    "appSlug": "kiosko",
+    "from": "entry",
+    "to": "Iniciar",
+    "relation": "child_route",
+    "source": "successful_transition",
+    "confidence": 0.8999999999999999,
+    "evidence": {
+      "beforeUrl": "https://172.27.4.50/",
+      "afterUrl": "https://172.27.4.50/success",
+      "beforeSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-28T01-42-07-855Z\\cases\\case-38132\\evidence\\step-1-before.json",
+      "afterSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-28T01-42-07-855Z\\cases\\case-38132\\evidence\\step-1-after.json",
+      "candidateId": "el-5",
+      "candidateText": "Iniciar",
+      "locatorSummary": "role:button"
+    },
+    "safety": {
+      "clickable": true,
+      "visible": true,
+      "sensitive": false,
+      "submitLike": false,
+      "riskyAction": false
+    },
+    "status": "pending",
+    "createdAt": "2026-05-28T01:43:38.953Z"
+  },
+  {
+    "appSlug": "kiosko",
+    "from": "Iniciar",
+    "to": "Información de productos",
+    "relation": "child_route",
+    "source": "successful_transition",
+    "confidence": 0.9999999999999999,
+    "evidence": {
+      "beforeUrl": "https://172.27.4.50/success",
+      "afterUrl": "https://172.27.4.50/product-catalog",
+      "beforeSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-28T01-42-07-855Z\\cases\\case-38132\\evidence\\step-2-before.json",
+      "afterSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-28T01-42-07-855Z\\cases\\case-38132\\evidence\\step-2-after.json",
+      "candidateId": "el-6",
+      "candidateText": "Información de productosExplora nuestros productos bancarios",
+      "locatorSummary": "product_condition"
+    },
+    "safety": {
+      "clickable": true,
+      "visible": true,
+      "sensitive": false,
+      "submitLike": false,
+      "riskyAction": false
+    },
+    "status": "auto_approved",
+    "createdAt": "2026-05-28T01:43:40.682Z"
+  },
+  {
+    "appSlug": "kiosko",
+    "from": "Información de productos",
+    "to": "Depósitos a plazo",
+    "relation": "child_route",
+    "source": "successful_transition",
+    "confidence": 0.8999999999999999,
+    "evidence": {
+      "beforeUrl": "https://172.27.4.50/product-catalog",
+      "afterUrl": "https://172.27.4.50/product-subcategory?category=certificates",
+      "beforeSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-28T01-42-07-855Z\\cases\\case-38132\\evidence\\step-3-before.json",
+      "afterSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-28T01-42-07-855Z\\cases\\case-38132\\evidence\\step-3-after.json",
+      "candidateId": "el-12",
+      "candidateText": "Depósitos a plazo",
+      "locatorSummary": "role:button"
+    },
+    "safety": {
+      "clickable": true,
+      "visible": true,
+      "sensitive": false,
+      "submitLike": false,
+      "riskyAction": false
+    },
+    "status": "pending",
+    "createdAt": "2026-05-28T01:43:42.330Z"
+  },
+  {
+    "appSlug": "kiosko",
+    "from": "Depósitos a plazo",
+    "to": "Depósitos a plazo en Pesos",
+    "relation": "intermediate_step",
+    "source": "route_completion",
+    "confidence": 0.85,
+    "safety": {
+      "clickable": true,
+      "visible": true,
+      "sensitive": false,
+      "submitLike": false,
+      "riskyAction": false
+    },
+    "status": "auto_approved",
+    "createdAt": "2026-05-28T01:43:44.596Z"
+  },
+  {
+    "appSlug": "kiosko",
+    "from": "el primer depósito visible del listado",
+    "to": "Volver al listado de productos",
+    "relation": "child_route",
+    "source": "successful_transition",
+    "confidence": 0.8999999999999999,
+    "evidence": {
+      "beforeUrl": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+      "afterUrl": "https://172.27.4.50/product-extended?product=deposito-a-plazo-digital-en-pesos",
+      "beforeSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-28T01-42-07-855Z\\cases\\case-38132\\evidence\\step-5-before.json",
+      "afterSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-28T01-42-07-855Z\\cases\\case-38132\\evidence\\step-5-after.json",
+      "candidateId": "el-3",
+      "candidateText": "Más detalles del productoDepósito a Plazo Digital en Pesos",
+      "locatorSummary": "product_condition"
+    },
+    "safety": {
+      "clickable": true,
+      "visible": true,
+      "sensitive": false,
+      "submitLike": false,
+      "riskyAction": false
+    },
+    "status": "pending",
+    "createdAt": "2026-05-28T01:43:45.776Z"
+  }
+]
