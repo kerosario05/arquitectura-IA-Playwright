@@ -19,9 +19,11 @@ import type { PageSnapshot } from "../types/page-snapshot.types";
 import type { FullConfig } from "../types/env.types";
 import type { CaseDiscoveryResult, RuntimeEvidenceTrace, PendingAssertionForensics, AutoRepairDecisionDiagnostics, BatchCaseRootCause, DiscoveryStepResult } from "../types/discovery.types";
 import type { AppProfile } from "../automations/app-profile";
+import type { TestScenario } from "../types/testrail.types";
 
 export type CaseDiscoveryWorkflowOptions = {
-  caseId: number;
+  caseId?: number;
+  scenario?: TestScenario;
   headed: boolean;
   outputDir?: string;
   autoPromote: boolean;
@@ -65,9 +67,10 @@ export type CaseDiscoveryWorkflowResult = {
   durationMs: number;
 };
 
-function getDefaultOutputDir(caseId: number): string {
+function getDefaultOutputDir(id: number | string): string {
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-  return path.resolve(`./.artifacts/discovery/case-${caseId}/${stamp}`);
+  const label = typeof id === "number" ? `case-${id}` : `story-${id}`;
+  return path.resolve(`./.artifacts/discovery/${label}/${stamp}`);
 }
 
 function inferAssertionTypeFromText(assertionText: string): "field" | "action" | "form" | "cart" | "confirmation" | "list" | "detail" | "unknown" {
@@ -914,7 +917,8 @@ export async function runCaseDiscoveryWorkflow(
 ): Promise<CaseDiscoveryWorkflowResult> {
   const startTime = Date.now();
   const activeConfig = options.config ?? envConfig;
-  const outputDir = options.outputDir ? path.resolve(options.outputDir) : getDefaultOutputDir(options.caseId);
+  const outputId = options.scenario?.externalId ?? options.caseId ?? "unknown";
+  const outputDir = options.outputDir ? path.resolve(options.outputDir) : getDefaultOutputDir(outputId);
   const evidenceDir = path.join(outputDir, "evidence");
   const pendingObjectsPath = path.join(outputDir, "discovered-objects.pending.json");
   const pendingPlansPath = path.join(outputDir, "discovered-plans.pending.json");
@@ -922,22 +926,27 @@ export async function runCaseDiscoveryWorkflow(
     console.log(`[discovery:case] Using app profile: appSlug=${options.appProfile.appSlug} source=${options.appProfile.source}`);
   }
 
-  let client: TestRailClient;
-  if (options.testRailClient) {
-    client = options.testRailClient;
+  let scenario: TestScenario;
+  if (options.scenario) {
+    scenario = options.scenario;
   } else {
-    const testRailRuntimeConfig = requireTestRailConfig(activeConfig);
-    client = new TestRailClient(testRailRuntimeConfig);
+    if (!options.caseId) {
+      throw new Error("Either scenario or caseId must be provided.");
+    }
+    let client: TestRailClient;
+    if (options.testRailClient) {
+      client = options.testRailClient;
+    } else {
+      const testRailRuntimeConfig = requireTestRailConfig(activeConfig);
+      client = new TestRailClient(testRailRuntimeConfig);
+    }
+    const rawCase = await client.getCase(options.caseId);
+    const scenarios = normalizeTestRailCases([rawCase]);
+    if (scenarios.length === 0) {
+      throw new Error(`No scenario could be generated for case C${options.caseId}.`);
+    }
+    scenario = scenarios[0];
   }
-
-  const rawCase = await client.getCase(options.caseId);
-  const scenarios = normalizeTestRailCases([rawCase]);
-
-  if (scenarios.length === 0) {
-    throw new Error(`No scenario could be generated for case C${options.caseId}.`);
-  }
-
-  const scenario = scenarios[0];
 
   const browserType = { chromium, firefox, webkit }[activeConfig.execution.browser];
   const headless = !options.headed;

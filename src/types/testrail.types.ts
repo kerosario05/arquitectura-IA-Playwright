@@ -28,7 +28,7 @@ export type TestScenarioStep = {
 };
 
 export type TestScenario = {
-  source: "testrail";
+  source: "testrail" | "jira";
   externalId: string;
   caseId: number;
   title: string;
@@ -85,4 +85,18 @@ export type CreateRunInput = {
   name: string;
   description?: string;
   caseIds: number[];
+};
+
+export type AddCaseInput = {
+  title: string;
+  refs?: string;
+  preconditions?: string;
+  stepsSeparated?: Array<{ content: string; expected?: string }>;
+};
+
+export type UpdateCaseInput = {
+  title?: string;
+  refs?: string;
+  preconditions?: string;
+  stepsSeparated?: Array<{ content: string; expected?: string }>;
 };

@@ -80,7 +80,7 @@ export type ExecutionPlanStep = {
 };
 
 export type ExecutionPlanScenarioRef = {
-  source: "testrail" | "manual";
+  source: "testrail" | "jira" | "manual";
   externalId?: string;
   caseId?: number;
   title: string;

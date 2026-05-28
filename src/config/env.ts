@@ -9,6 +9,7 @@ import type {
   TestDataMap,
   TestDataValue
 } from "../types/env.types";
+import type { RequiredJiraRuntimeConfig } from "../types/jira.types";
 
 dotenv.config();
 
@@ -271,11 +272,11 @@ function getAppBaseUrl(): string {
 }
 
 const appBaseUrl = getAppBaseUrl();
-const appLoginMode = parseLoginMode(getRequiredEnv("APP_LOGIN_MODE"));
-const headless = parseBoolean(getRequiredEnv("HEADLESS"), "HEADLESS");
-const browser = parseBrowser(getRequiredEnv("BROWSER"));
-const evidenceDir = getRequiredEnv("EVIDENCE_DIR");
-const defaultTimeoutMs = parseNumber(getRequiredEnv("DEFAULT_TIMEOUT_MS"), "DEFAULT_TIMEOUT_MS");
+const appLoginMode = parseLoginMode(process.env.APP_LOGIN_MODE?.trim() || "no_login");
+const headless = parseBoolean(process.env.HEADLESS?.trim() || "false", "HEADLESS");
+const browser = parseBrowser(process.env.BROWSER?.trim() || "chromium");
+const evidenceDir = process.env.EVIDENCE_DIR?.trim() || "./evidence";
+const defaultTimeoutMs = parseNumber(process.env.DEFAULT_TIMEOUT_MS?.trim() || "30000", "DEFAULT_TIMEOUT_MS");
 
 export const config: FullConfig = {
   app: {
@@ -316,7 +317,10 @@ export const config: FullConfig = {
       baseUrl: process.env.JIRA_BASE_URL?.trim() || undefined,
       email: process.env.JIRA_EMAIL?.trim() || undefined,
       apiToken: process.env.JIRA_API_TOKEN?.trim() || undefined,
-      projectKey: process.env.JIRA_PROJECT_KEY?.trim() || undefined
+      projectKey: process.env.JIRA_PROJECT_KEY?.trim() || undefined,
+      acceptanceCriteriaField: process.env.JIRA_ACCEPTANCE_CRITERIA_FIELD?.trim() || undefined,
+      defaultJql: process.env.JIRA_JQL?.trim() || undefined,
+      dryRun: (process.env.JIRA_DRY_RUN ?? "false").toLowerCase() === "true"
     },
     ai: {
       provider: process.env.AI_PROVIDER?.trim() || undefined,
@@ -400,5 +404,31 @@ export function requireTestRailConfig(fullConfig: FullConfig): RequiredTestRailR
     url: normalizeTestRailUrl(url),
     email,
     apiKey
+  };
+}
+
+export function requireJiraConfig(fullConfig: FullConfig): RequiredJiraRuntimeConfig {
+  const jira = fullConfig.integrations.jira;
+  const baseUrl = jira?.baseUrl?.trim();
+  const email = jira?.email?.trim();
+  const apiToken = jira?.apiToken?.trim();
+
+  if (!baseUrl) {
+    throw new Error("Missing required Jira environment variable: JIRA_BASE_URL");
+  }
+  if (!email) {
+    throw new Error("Missing required Jira environment variable: JIRA_EMAIL");
+  }
+  if (!apiToken) {
+    throw new Error("Missing required Jira environment variable: JIRA_API_TOKEN");
+  }
+
+  return {
+    baseUrl,
+    email,
+    apiToken,
+    projectKey: jira?.projectKey,
+    acceptanceCriteriaField: jira?.acceptanceCriteriaField ?? "description",
+    defaultJql: jira?.defaultJql
   };
 }

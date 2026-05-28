@@ -1,0 +1,103 @@
+import { randomUUID } from "crypto";
+import { EventEmitter } from "events";
+import type { ChildProcess } from "child_process";
+
+export type JobStatus = "queued" | "running" | "done" | "failed" | "cancelled";
+
+export type JobSummary = {
+  sprintLabel?: string;
+  totalStories: number;
+  synced: number;
+  passed: number;
+  failed: number;
+  testRailRunId?: number;
+  testRailRunUrl?: string;
+};
+
+export type Job = {
+  id: string;
+  type: "sprint";
+  status: JobStatus;
+  params: Record<string, unknown>;
+  createdAt: string;
+  startedAt?: string;
+  completedAt?: string;
+  exitCode?: number;
+  logs: string[];
+  summary?: JobSummary;
+};
+
+export type JobInternal = Job & {
+  process?: ChildProcess;
+  emitter: EventEmitter;
+};
+
+class JobStore {
+  private readonly jobs = new Map<string, JobInternal>();
+
+  create(type: "sprint", params: Record<string, unknown>): Job {
+    const id = randomUUID();
+    const job: JobInternal = {
+      id,
+      type,
+      status: "queued",
+      params,
+      createdAt: new Date().toISOString(),
+      logs: [],
+      emitter: new EventEmitter()
+    };
+    job.emitter.setMaxListeners(100);
+    this.jobs.set(id, job);
+    return this.serialize(job);
+  }
+
+  get(id: string): Job | undefined {
+    const job = this.jobs.get(id);
+    return job ? this.serialize(job) : undefined;
+  }
+
+  getInternal(id: string): JobInternal | undefined {
+    return this.jobs.get(id);
+  }
+
+  list(): Job[] {
+    return Array.from(this.jobs.values())
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .map((j) => this.serialize(j));
+  }
+
+  update(id: string, patch: Partial<Pick<JobInternal, "status" | "startedAt" | "completedAt" | "exitCode" | "summary" | "process">>): void {
+    const job = this.jobs.get(id);
+    if (!job) return;
+    Object.assign(job, patch);
+    job.emitter.emit("update", this.serialize(job));
+  }
+
+  appendLog(id: string, line: string): void {
+    const job = this.jobs.get(id);
+    if (!job) return;
+    job.logs.push(line);
+    job.emitter.emit("log", line);
+  }
+
+  subscribe(
+    id: string,
+    handlers: { onLog: (line: string) => void; onUpdate: (job: Job) => void }
+  ): () => void {
+    const job = this.jobs.get(id);
+    if (!job) return () => {};
+    job.emitter.on("log", handlers.onLog);
+    job.emitter.on("update", handlers.onUpdate);
+    return () => {
+      job.emitter.off("log", handlers.onLog);
+      job.emitter.off("update", handlers.onUpdate);
+    };
+  }
+
+  private serialize(job: JobInternal): Job {
+    const { process: _proc, emitter: _em, ...pub } = job;
+    return pub;
+  }
+}
+
+export const jobStore = new JobStore();

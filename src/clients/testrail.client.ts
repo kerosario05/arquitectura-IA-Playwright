@@ -1,9 +1,11 @@
 import type { RequiredTestRailRuntimeConfig } from "../types/env.types";
 import type {
+  AddCaseInput,
   AddResultForCaseInput,
   CreateRunInput,
   RawTestRailCase,
-  TestRailRun
+  TestRailRun,
+  UpdateCaseInput
 } from "../types/testrail.types";
 
 type ApiErrorPayload = {
@@ -141,9 +143,75 @@ export class TestRailClient {
       })
     };
 
-    const payload = await this.requestJson<Record<string, unknown>>(endpoint, "POST", body);
-    const entries = payload.results;
+    const payload = await this.requestJson<unknown[] | Record<string, unknown>>(endpoint, "POST", body);
+    const entries = Array.isArray(payload) ? payload : (payload as Record<string, unknown>).results;
     return { added: Array.isArray(entries) ? entries.length : 0 };
+  }
+
+  async getRuns(projectId: string, suiteId?: string): Promise<TestRailRun[]> {
+    const params = new URLSearchParams();
+    if (suiteId) params.set("suite_id", suiteId);
+    const query = params.toString();
+    const endpoint = query ? `get_runs/${projectId}&${query}` : `get_runs/${projectId}`;
+    const payload = await this.requestJson<TestRailRun[] | { runs?: TestRailRun[] }>(endpoint);
+    return Array.isArray(payload) ? payload : (payload.runs ?? []);
+  }
+
+  async getCasesByRefs(
+    projectId: string,
+    refs: string,
+    suiteId?: string,
+    sectionId?: string
+  ): Promise<RawTestRailCase[]> {
+    const params = new URLSearchParams({ refs_filter: refs });
+    if (suiteId) params.set("suite_id", suiteId);
+    if (sectionId) params.set("section_id", sectionId);
+    const endpoint = `get_cases/${projectId}&${params.toString()}`;
+    const payload = await this.requestJson<RawTestRailCase[] | { cases?: RawTestRailCase[] }>(endpoint);
+    return Array.isArray(payload) ? payload : (payload.cases ?? []);
+  }
+
+  async addCase(sectionId: string, input: AddCaseInput): Promise<RawTestRailCase> {
+    const body: Record<string, unknown> = { title: input.title };
+    if (input.refs) body.refs = input.refs;
+    if (input.preconditions) body.custom_preconds = input.preconditions;
+    if (input.stepsSeparated && input.stepsSeparated.length > 0) {
+      body.custom_steps_separated = input.stepsSeparated.map((s) => ({
+        content: s.content,
+        expected: s.expected ?? ""
+      }));
+      // plain-text fallback for "Test Case (Text)" template
+      body.custom_steps = input.stepsSeparated
+        .map((s, i) => `${i + 1}. ${s.content}${s.expected ? `\nEsperado: ${s.expected}` : ""}`)
+        .join("\n");
+    }
+    const payload = await this.requestJson<RawTestRailCase>(`add_case/${sectionId}`, "POST", body);
+    if (!payload || typeof payload.id !== "number") {
+      throw new Error("Invalid add_case response from TestRail.");
+    }
+    return payload;
+  }
+
+  async updateCase(caseId: number, input: UpdateCaseInput): Promise<RawTestRailCase> {
+    const body: Record<string, unknown> = {};
+    if (input.title) body.title = input.title;
+    if (input.refs !== undefined) body.refs = input.refs;
+    if (input.preconditions !== undefined) body.custom_preconds = input.preconditions;
+    if (input.stepsSeparated && input.stepsSeparated.length > 0) {
+      body.custom_steps_separated = input.stepsSeparated.map((s) => ({
+        content: s.content,
+        expected: s.expected ?? ""
+      }));
+      // plain-text fallback for "Test Case (Text)" template
+      body.custom_steps = input.stepsSeparated
+        .map((s, i) => `${i + 1}. ${s.content}${s.expected ? `\nEsperado: ${s.expected}` : ""}`)
+        .join("\n");
+    }
+    const payload = await this.requestJson<RawTestRailCase>(`update_case/${caseId}`, "POST", body);
+    if (!payload || typeof payload.id !== "number") {
+      throw new Error("Invalid update_case response from TestRail.");
+    }
+    return payload;
   }
 
   private buildCasesEndpoint(projectId: string, suiteId?: string, sectionId?: string): string {

@@ -61,6 +61,9 @@ export type FutureIntegrationsConfig = {
     email?: string;
     apiToken?: string;
     projectKey?: string;
+    acceptanceCriteriaField?: string;
+    defaultJql?: string;
+    dryRun?: boolean;
   };
   ai?: {
     provider?: string;

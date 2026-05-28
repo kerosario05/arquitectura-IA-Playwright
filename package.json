@@ -4,6 +4,7 @@
   "private": true,
   "description": "Generic web automation runner foundation with Playwright and TypeScript",
   "scripts": {
+    "server": "tsx src/server/server.ts",
     "dev": "tsx src/main.ts",
     "test": "playwright test",
     "test:headed": "playwright test --headed",
@@ -15,6 +16,10 @@
     "typecheck": "tsc --noEmit",
     "data:inspect": "tsx src/cli/data-inspect.ts",
     "testrail:inspect": "tsx src/cli/testrail-inspect.ts",
+    "jira:inspect": "tsx src/cli/jira-inspect.ts",
+    "jira:projects": "tsx src/cli/jira-projects.ts",
+    "discovery:story": "tsx src/cli/discovery-story.ts",
+    "discovery:sprint": "tsx src/cli/discovery-sprint.ts",
     "plans:generate": "tsx src/cli/plans-generate.ts",
     "plans:enrich": "tsx src/cli/plans-enrich.ts",
     "plans:execute": "tsx src/cli/plans-execute.ts",
@@ -41,9 +46,13 @@
   "dependencies": {
     "@google/genai": "^2.6.0",
     "@playwright/test": "^1.54.2",
-    "dotenv": "^16.6.1"
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^5.2.1"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
     "@types/node": "^24.3.0",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2"

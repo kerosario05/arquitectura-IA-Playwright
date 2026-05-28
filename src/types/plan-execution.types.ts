@@ -15,7 +15,7 @@ export type StepExecutionResult = {
 
 export type PlanExecutionResult = {
   scenario: {
-    source: "testrail" | "manual";
+    source: "testrail" | "jira" | "manual";
     externalId?: string;
     caseId?: number;
     title: string;
