@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-28T14:04:09.692Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c38230-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos",
+  "appSlug": "kiosko",
+  "specPath": "automations\\apps\\kiosko\\cases\\c38230-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos\\case.spec.ts",
+  "planPath": "automations\\apps\\kiosko\\cases\\c38230-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos\\plan.json",
+  "caseFolder": "c38230-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false
+}

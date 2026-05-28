@@ -275,7 +275,63 @@
       "status": "candidate",
       "createdAt": "2026-05-28T01:21:52.159Z",
       "updatedAt": "2026-05-28T01:21:52.159Z"
+    },
+    {
+      "id": "flow_1779977049741_rovvat",
+      "name": "Consulta de balance - Visualizar listado de depósi",
+      "filePath": "flows\\consulta-de-balance---visualizar-listado-de-depósi.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Transacciones y servicios",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "assertText",
+          "target": "Consulta de balance",
+          "pageObjectId": "ProductDetailPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "click",
+          "target": "Consulta de balance",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "Depósitos a plazos",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-28T14:04:09.741Z",
+      "updatedAt": "2026-05-28T14:04:09.741Z"
     }
   ],
-  "updatedAt": "2026-05-28T01:32:16.694Z"
+  "updatedAt": "2026-05-28T14:04:09.745Z"
 }

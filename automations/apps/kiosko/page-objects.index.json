@@ -18,7 +18,7 @@
           "status": "active",
           "sensitive": false,
           "confidence": 1,
-          "source": "c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos-step-6,c38132-volver-al-listado-desde-el-detalle-de-producto-step-5,c38133-accion-solicitar-visible-desde-detalle-de-producto-step-6"
+          "source": "c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos-step-6,c38132-volver-al-listado-desde-el-detalle-de-producto-step-5,c38133-accion-solicitar-visible-desde-detalle-de-producto-step-6,c38230-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos-step-4"
         },
         {
           "name": "selectVisibleItemByOrdinal",
@@ -62,7 +62,17 @@
           "intent": "start_session",
           "parameters": [],
           "available": true,
-          "source": "candidate,c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos-step-3,c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos-missing-start_session,c38132-volver-al-listado-desde-el-detalle-de-producto-step-3,c38133-accion-solicitar-visible-desde-detalle-de-producto-step-3",
+          "source": "candidate,c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos-step-3,c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos-missing-start_session,c38132-volver-al-listado-desde-el-detalle-de-producto-step-3,c38133-accion-solicitar-visible-desde-detalle-de-producto-step-3,c38230-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos-step-3",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        },
+        {
+          "name": "open",
+          "intent": "open_home",
+          "parameters": [],
+          "available": true,
+          "source": "c38230-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos-missing-open_home",
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
@@ -75,7 +85,7 @@
       ],
       "caseIds": [],
       "createdAt": "2026-05-28T01:15:46.358Z",
-      "updatedAt": "2026-05-28T01:15:46.358Z",
+      "updatedAt": "2026-05-28T14:04:09.741Z",
       "codegenMetadata": {
         "generatedAt": "2026-05-28T01:15:46.369Z",
         "generatedBy": "page-object-codegen",
@@ -178,7 +188,7 @@
           "intent": "expect_loaded",
           "parameters": [],
           "available": true,
-          "source": "candidate,c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos-step-7",
+          "source": "candidate,c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos-step-7,c38230-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos-step-5",
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
@@ -229,5 +239,5 @@
     }
   ],
   "componentCandidates": [],
-  "updatedAt": "2026-05-28T12:35:43.775Z"
+  "updatedAt": "2026-05-28T14:06:20.676Z"
 }

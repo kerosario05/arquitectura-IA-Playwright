@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-05-28T13:37:26.746Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": false,
+  "gateStatus": "not_applicable",
+  "reasons": [
+    "Promotion not applicable because discovery status is discovered_partial."
+  ],
+  "warnings": [],
+  "promoted": false
+}

@@ -1394,28 +1394,119 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         continue;
       }
 
-      const assertionTargetInputs: AssertionTargetInput[] = [{
-        index: es.stepIndex,
-        action: es.originalText,
-        target: es.target ?? "",
-        source: "action"
-      }];
+      // Wait for page stability before evaluating assertion after transition
+      const lastActionStep = steps.filter(s => 
+        s.status === "found" || s.status === "satisfied_by_children" || s.status === "click_no_transition"
+      ).pop();
+      const isAfterTransition = lastActionStep && lastActionStep.recoveryMetadata?.transitionDetected === true;
+      
+      let stabilityDiagnostics: Record<string, unknown> | undefined;
+      let snapshotForAssertion = currentSnapshot;
+      
+      if (isAfterTransition) {
+        console.log(`[discovery:case] Waiting for stable page before assertion target="${es.target}"`);
+        const stabilityStart = Date.now();
+        
+        try {
+          const stabilityResult = await waitForStablePageState(page, {
+            timeoutMs: 10000,
+            pollMs: 500,
+            stableForMs: 800
+          });
+          
+          stabilityDiagnostics = {
+            waited: true,
+            reason: stabilityResult.finalStable ? "stabilized" : "timeout",
+            durationMs: Date.now() - stabilityStart,
+            finalUrl: stabilityResult.finalUrl,
+            finalStable: stabilityResult.finalStable,
+            transientDetections: stabilityResult.transientDetections?.length ?? 0
+          };
+          
+          console.log(`[discovery:case] Assertion page stability: waited=true reason="${stabilityDiagnostics.reason}" durationMs=${stabilityDiagnostics.durationMs}`);
+          
+          // Refresh snapshot after stability
+          snapshotForAssertion = await scanCurrentPage(page);
+          console.log(`[discovery:case] Assertion snapshot refreshed target="${es.target}" visibleButtons=${snapshotForAssertion.elements.filter(e => e.role === "button" && e.visible).length} visibleHeadings=${snapshotForAssertion.elements.filter(e => e.type === "heading" && e.visible).length}`);
+        } catch (stabilityError) {
+          console.warn(`[discovery:case] Stability wait failed: ${stabilityError instanceof Error ? stabilityError.message : stabilityError}`);
+          stabilityDiagnostics = {
+            waited: true,
+            reason: "error",
+            error: stabilityError instanceof Error ? stabilityError.message : String(stabilityError),
+            durationMs: Date.now() - stabilityStart
+          };
+        }
+      }
 
-      const executedActionsForAssertions = steps
-        .filter((step) =>
-          step.status === "found" ||
-          step.status === "satisfied_by_children" ||
-          step.status === "satisfied_by_previous_assertion"
-        )
-        .map((step) => ({
-          action: step.action,
-          target: step.targetText ?? "",
-          status: "found" as const
-        }));
+      // Assertion retry mechanism
+      const ASSERTION_RETRY_COUNT = 3;
+      const ASSERTION_RETRY_INTERVAL_MS = 500;
+      let resolutionResults: ReturnType<typeof resolveAssertionTargets> | undefined;
+      let retryCount = 0;
+      let lastFailureReason: string | undefined;
+      
+      while (retryCount < ASSERTION_RETRY_COUNT) {
+        const assertionTargetInputs: AssertionTargetInput[] = [{
+          index: es.stepIndex,
+          action: es.originalText,
+          target: es.target ?? "",
+          source: "action"
+        }];
 
-      const resolutionResults = resolveAssertionTargets(currentSnapshot, assertionTargetInputs, {
-        executedActions: executedActionsForAssertions
-      });
+        const executedActionsForAssertions = steps
+          .filter((step) =>
+            step.status === "found" ||
+            step.status === "satisfied_by_children" ||
+            step.status === "satisfied_by_previous_assertion"
+          )
+          .map((step) => ({
+            action: step.action,
+            target: step.targetText ?? "",
+            status: "found" as const
+          }));
+
+        resolutionResults = resolveAssertionTargets(snapshotForAssertion, assertionTargetInputs, {
+          executedActions: executedActionsForAssertions
+        });
+        
+        // Check if any assertion passed
+        const anyPassed = resolutionResults.some(r => r.status === "passed" || r.status === "satisfied_by_children" || r.status === "satisfied_by_previous_assertion");
+        
+        if (anyPassed) {
+          break; // Success, no need to retry
+        }
+        
+        // Track failure for diagnostics
+        const failedAssertions = resolutionResults.filter(r => r.status === "failed" || r.status === "needs_assertion_resolution");
+        if (failedAssertions.length > 0) {
+          lastFailureReason = failedAssertions[0].reason;
+        }
+        
+        // Retry if not last attempt and assertion failed
+        if (retryCount < ASSERTION_RETRY_COUNT - 1 && !anyPassed) {
+          console.log(`[discovery:case] Assertion retry ${retryCount + 1}/${ASSERTION_RETRY_COUNT} target="${es.target}" reason="${lastFailureReason}"`);
+          await new Promise(resolve => setTimeout(resolve, ASSERTION_RETRY_INTERVAL_MS));
+          
+          // Refresh snapshot for retry
+          try {
+            snapshotForAssertion = await scanCurrentPage(page);
+          } catch (scanError) {
+            console.warn(`[discovery:case] Snapshot refresh failed: ${scanError instanceof Error ? scanError.message : scanError}`);
+          }
+          
+          retryCount++;
+        } else {
+          break;
+        }
+      }
+      
+      // resolutionResults should always be defined after the loop
+      if (!resolutionResults) {
+        console.error(`[discovery:case] Assertion resolution failed to produce results target="${es.target}"`);
+        resolutionResults = [];
+      }
+      
       for (const assertionResult of resolutionResults) {
         const mappedStatus: DiscoveryStepResult["status"] =
           assertionResult.status === "passed"
@@ -1444,6 +1535,35 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           errorMessage = `Precondition not met: ${assertionResult.reason}`;
         }
 
+        // Build comprehensive diagnostics for assertion
+        const assertionDiag: Record<string, unknown> = {
+          ...assertionResult.assertionDiagnostics
+        };
+        
+        // Add stability diagnostics
+        if (stabilityDiagnostics) {
+          assertionDiag.stability = stabilityDiagnostics;
+        }
+        
+        // Add retry diagnostics
+        if (retryCount > 0 || lastFailureReason) {
+          assertionDiag.retry = {
+            count: retryCount,
+            maxAttempts: ASSERTION_RETRY_COUNT,
+            lastFailureReason: lastFailureReason
+          };
+        }
+        
+        // Add back/return alias diagnostics if present
+        if (assertionResult.matchReason?.includes("alias") || assertionResult.originalTarget) {
+          assertionDiag.backReturnAlias = {
+            originalTarget: assertionResult.originalTarget || es.target,
+            matchedTarget: assertionResult.matchedTarget,
+            matchReason: assertionResult.matchReason,
+            aliasResolverUsed: true
+          };
+        }
+
         steps.push({
           index: es.stepIndex,
           action: es.originalText,
@@ -1462,7 +1582,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           matchedTokens: assertionResult.matchedTokens,
           structuralSignals: assertionResult.structuralSignals,
           childAssertionsUsed: assertionResult.childAssertionsUsed,
-          assertionDiagnostics: assertionResult.assertionDiagnostics
+          assertionDiagnostics: assertionDiag
         });
 
         if (assertionResult.status === "passed" && assertionResult.classification === "literal_observable") {

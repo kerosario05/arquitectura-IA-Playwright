@@ -1,0 +1,78 @@
+{
+  "id": "c38230-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos",
+  "externalId": "C38230",
+  "caseId": 38230,
+  "title": "Consulta de balance - Visualizar listado de depósitos a plazo activos",
+  "planPath": "automations\\apps\\kiosko\\cases\\c38230-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos\\plan.json",
+  "specPath": "automations\\apps\\kiosko\\cases\\c38230-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos\\case.spec.ts",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "kiosko",
+  "baseUrlHash": "1423ba294517",
+  "createdAt": "2026-05-28T14:04:09.791Z",
+  "updatedAt": "2026-05-28T14:04:09.791Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38230\\2026-05-28T14-03-08-590Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "not_run",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38230\\2026-05-28T14-03-08-590Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [
+        "HomePage.open()"
+      ],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0,
+      "autoPom": {
+        "enabled": true,
+        "initialPomStatus": "needs_page_method",
+        "generatedCandidateFiles": [],
+        "autoApprovedPageObjects": [],
+        "autoApprovedMethods": [
+          "HomePage.open()"
+        ],
+        "blockedAutoApprovals": [],
+        "approvalThreshold": 0.5,
+        "regeneratedSpec": true,
+        "validationStatus": "passed",
+        "finalPomStatus": "promoted"
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [
+        "missing_method:step=3 target=\"Transacciones y servicios\" derivedIntent=\"open_home\" expectedOwner=\"ProductListPage\" availableMethods=[selectProduct, selectVisibleItemByOrdinal, selectFirstVisibleCard]",
+        "missing_method:step=5 target=\"Consulta de balance\" derivedIntent=\"open_home\" expectedOwner=\"ProductListPage\" availableMethods=[selectProduct, selectVisibleItemByOrdinal, selectFirstVisibleCard]"
+      ],
+      "availablePageObjects": [
+        "ProductListPage",
+        "HomePage",
+        "ProductInformationPage",
+        "CategoryPage",
+        "ProductDetailPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [
+        "step=3 target=\"Transacciones y servicios\" derivedIntent=\"open_home\" expectedOwner=\"ProductListPage\" availableMethods=[selectProduct, selectVisibleItemByOrdinal, selectFirstVisibleCard]",
+        "step=5 target=\"Consulta de balance\" derivedIntent=\"open_home\" expectedOwner=\"ProductListPage\" availableMethods=[selectProduct, selectVisibleItemByOrdinal, selectFirstVisibleCard]"
+      ],
+      "autoPomAttempted": true,
+      "autoPomCreatedMethods": [
+        "HomePage.open()"
+      ],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    }
+  }
+}

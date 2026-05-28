@@ -5,8 +5,8 @@
     "name": "4",
     "baseUrl": "https://172.27.4.50",
     "baseUrlHash": "1423ba294517",
-    "createdAt": "2026-05-28T02:49:07.513Z",
-    "updatedAt": "2026-05-28T02:49:07.513Z"
+    "createdAt": "2026-05-28T14:04:09.779Z",
+    "updatedAt": "2026-05-28T14:04:09.780Z"
   },
   "baseUrl": "https://172.27.4.50",
   "loginMode": "password",
@@ -46,5 +46,5 @@
       }
     ]
   },
-  "updatedAt": "2026-05-28T02:49:07.513Z"
+  "updatedAt": "2026-05-28T14:04:09.780Z"
 }
