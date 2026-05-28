@@ -5,8 +5,8 @@
     "name": "demoblaze",
     "baseUrl": "https://www.demoblaze.com",
     "baseUrlHash": "f1bffa09d02f",
-    "createdAt": "2026-05-26T13:24:58.125Z",
-    "updatedAt": "2026-05-26T13:24:58.126Z"
+    "createdAt": "2026-05-26T18:48:22.804Z",
+    "updatedAt": "2026-05-26T18:48:22.805Z"
   },
   "baseUrl": "https://www.demoblaze.com",
   "loginMode": "no_login",
@@ -18,5 +18,5 @@
   "usernameRef": "APP_USERNAME",
   "passwordRef": "APP_PASSWORD",
   "missingInputBehavior": "auto_generate",
-  "updatedAt": "2026-05-26T13:24:58.126Z"
+  "updatedAt": "2026-05-26T18:48:22.805Z"
 }

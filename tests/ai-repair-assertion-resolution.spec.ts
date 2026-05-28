@@ -242,122 +242,138 @@ test("context-pack redacts secrets in assertion fields", () => {
 });
 
 test("orchestrator returns valid repaired_plan with assertion_resolution", async () => {
-  const originalFetch = globalThis.fetch;
-  globalThis.fetch = (async () => new Response(
-    JSON.stringify({
-      choices: [{
-        message: {
-          content: JSON.stringify({
-            decision: "repaired_plan",
-            repairType: "assertion_resolution",
-            evidenceId: "ev-feedback-1",
-            assertionStatus: "satisfied_by_existing_evidence",
-            reason: "Feedback message confirms assertion is satisfied.",
-            confidence: 0.9
-          })
-        }
-      }]
+  const fakeProvider = {
+    providerType: "fake" as const,
+    providerName: "fake-assertion",
+    model: "fake",
+    completeJson: async () => ({
+      rawText: JSON.stringify({
+        decision: "repaired_plan",
+        repairType: "assertion_resolution",
+        evidenceId: "ev-feedback-1",
+        assertionStatus: "satisfied_by_existing_evidence",
+        reason: "Feedback message confirms assertion is satisfied.",
+        confidence: 0.9
+      }),
+      parsedJson: {
+        decision: "repaired_plan",
+        repairType: "assertion_resolution",
+        evidenceId: "ev-feedback-1",
+        assertionStatus: "satisfied_by_existing_evidence",
+        reason: "Feedback message confirms assertion is satisfied.",
+        confidence: 0.9
+      },
+      model: "fake",
+      providerName: "fake-assertion",
+      durationMs: 10
     })
-  )) as any;
+  };
 
-  try {
-    const result = await runAiRepairOrchestrator({
-      appSlug: "test-app",
-      failure: "assertion_not_satisfied",
-      failureType: "assertion_not_satisfied" as any,
-      currentStep: "verify success message",
-      currentUrl: "https://example.com/cart",
-      candidates: SAFE_CANDIDATES,
-      evidenceCandidates: SAFE_EVIDENCE,
-      assertionTarget: "success message visible",
-      constraints: ["Do not invent evidence", "Must use existing evidenceId"]
-    });
+  const result = await runAiRepairOrchestrator({
+    appSlug: "test-app",
+    failure: "assertion_not_satisfied",
+    failureType: "assertion_not_satisfied" as any,
+    currentStep: "verify success message",
+    currentUrl: "https://example.com/cart",
+    candidates: SAFE_CANDIDATES,
+    evidenceCandidates: SAFE_EVIDENCE,
+    assertionTarget: "success message visible",
+    constraints: ["Do not invent evidence", "Must use existing evidenceId"],
+    provider: fakeProvider
+  });
 
-    expect(result.status).toBe("repaired_plan");
-    expect(result.decision?.repairType).toBe("assertion_resolution");
-    expect(result.decision?.evidenceId).toBe("ev-feedback-1");
-    expect(result.decision?.assertionStatus).toBe("satisfied_by_existing_evidence");
-    expect(result.diagnostics.repairType).toBe("assertion_resolution");
-    expect(result.diagnostics.failureType).toBe("assertion_not_satisfied");
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
+  expect(result.status).toBe("repaired_plan");
+  expect(result.decision?.repairType).toBe("assertion_resolution");
+  expect(result.decision?.evidenceId).toBe("ev-feedback-1");
+  expect(result.decision?.assertionStatus).toBe("satisfied_by_existing_evidence");
+  expect(result.diagnostics.repairType).toBe("assertion_resolution");
+  expect(result.diagnostics.failureType).toBe("assertion_not_satisfied");
 });
 
 test("orchestrator handles no_safe_action for assertion_resolution", async () => {
-  const originalFetch = globalThis.fetch;
-  globalThis.fetch = (async () => new Response(
-    JSON.stringify({
-      choices: [{
-        message: {
-          content: JSON.stringify({
-            decision: "no_safe_action",
-            repairType: "assertion_resolution",
-            reason: "No existing evidence can satisfy this assertion safely.",
-            confidence: 0.7
-          })
-        }
-      }]
+  const fakeProvider = {
+    providerType: "fake" as const,
+    providerName: "fake-assertion",
+    model: "fake",
+    completeJson: async () => ({
+      rawText: JSON.stringify({
+        decision: "no_safe_action",
+        repairType: "assertion_resolution",
+        reason: "No existing evidence can satisfy this assertion safely.",
+        confidence: 0.7
+      }),
+      parsedJson: {
+        decision: "no_safe_action",
+        repairType: "assertion_resolution",
+        reason: "No existing evidence can satisfy this assertion safely.",
+        confidence: 0.7
+      },
+      model: "fake",
+      providerName: "fake-assertion",
+      durationMs: 10
     })
-  )) as any;
+  };
 
-  try {
-    const result = await runAiRepairOrchestrator({
-      appSlug: "test-app",
-      failure: "assertion_not_satisfied",
-      failureType: "assertion_not_satisfied" as any,
-      currentStep: "verify OTP entered",
-      currentUrl: "https://example.com/otp",
-      candidates: SAFE_CANDIDATES,
-      evidenceCandidates: SENSITIVE_EVIDENCE,
-      assertionTarget: "OTP field should contain code",
-      constraints: ["Do not use sensitive evidence"]
-    });
+  const result = await runAiRepairOrchestrator({
+    appSlug: "test-app",
+    failure: "assertion_not_satisfied",
+    failureType: "assertion_not_satisfied" as any,
+    currentStep: "verify OTP entered",
+    currentUrl: "https://example.com/otp",
+    candidates: SAFE_CANDIDATES,
+    evidenceCandidates: SENSITIVE_EVIDENCE,
+    assertionTarget: "OTP field should contain code",
+    constraints: ["Do not use sensitive evidence"],
+    provider: fakeProvider
+  });
 
-    expect(result.status).toBe("no_safe_action");
-    expect(result.decision?.repairType).toBe("assertion_resolution");
-    expect(result.decision?.evidenceId).toBeUndefined();
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
+  expect(result.status).toBe("no_safe_action");
+  expect(result.decision?.repairType).toBe("assertion_resolution");
+  expect(result.decision?.evidenceId).toBeUndefined();
 });
 
 test("orchestrator blocks unknown evidenceId", async () => {
-  const originalFetch = globalThis.fetch;
-  globalThis.fetch = (async () => new Response(
-    JSON.stringify({
-      choices: [{
-        message: {
-          content: JSON.stringify({
-            decision: "repaired_plan",
-            repairType: "assertion_resolution",
-            evidenceId: "ev-unknown-999",
-            assertionStatus: "satisfied_by_existing_evidence",
-            reason: "Evidence confirms assertion.",
-            confidence: 0.8
-          })
-        }
-      }]
+  const fakeProvider = {
+    providerType: "fake" as const,
+    providerName: "fake-assertion",
+    model: "fake",
+    completeJson: async () => ({
+      rawText: JSON.stringify({
+        decision: "repaired_plan",
+        repairType: "assertion_resolution",
+        evidenceId: "ev-unknown-999",
+        assertionStatus: "satisfied_by_existing_evidence",
+        reason: "Evidence confirms assertion.",
+        confidence: 0.8
+      }),
+      parsedJson: {
+        decision: "repaired_plan",
+        repairType: "assertion_resolution",
+        evidenceId: "ev-unknown-999",
+        assertionStatus: "satisfied_by_existing_evidence",
+        reason: "Evidence confirms assertion.",
+        confidence: 0.8
+      },
+      model: "fake",
+      providerName: "fake-assertion",
+      durationMs: 10
     })
-  )) as any;
+  };
 
-  try {
-    const result = await runAiRepairOrchestrator({
-      appSlug: "test-app",
-      failure: "assertion_not_satisfied",
-      failureType: "assertion_not_satisfied" as any,
-      currentStep: "verify message",
-      currentUrl: "https://example.com/page",
-      candidates: SAFE_CANDIDATES,
-      evidenceCandidates: SAFE_EVIDENCE,
-      assertionTarget: "message visible"
-    });
+  const result = await runAiRepairOrchestrator({
+    appSlug: "test-app",
+    failure: "assertion_not_satisfied",
+    failureType: "assertion_not_satisfied" as any,
+    currentStep: "verify message",
+    currentUrl: "https://example.com/page",
+    candidates: SAFE_CANDIDATES,
+    evidenceCandidates: SAFE_EVIDENCE,
+    assertionTarget: "message visible",
+    provider: fakeProvider
+  });
 
-    expect(result.status).toBe("invalid_response");
-    expect(result.diagnostics.errorCode).toBe("AI_REPAIR_UNKNOWN_EVIDENCE");
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
+  expect(result.status).toBe("invalid_response");
+  expect(result.diagnostics.errorCode).toBe("AI_REPAIR_UNKNOWN_EVIDENCE");
 });
 
 test("metrics count assertion_resolution repairType", () => {

@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-05-26T13:24:58.129Z",
+  "updatedAt": "2026-05-26T18:48:22.809Z",
   "automations": [
     {
       "id": "c10002-test-automation-plan",
@@ -899,13 +899,13 @@
       "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "f1bffa09d02f",
       "createdAt": "2026-05-26T01:56:28.361Z",
-      "updatedAt": "2026-05-26T13:24:58.129Z",
-      "lastPromotedFrom": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\case-38042\\2026-05-26T13-24-05-064Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-05-26T18:48:22.809Z",
+      "lastPromotedFrom": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\case-38042\\2026-05-26T18-47-17-383Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\case-38042\\2026-05-26T13-24-05-064Z",
+        "discoveryDir": "C:\\Users\\roque\\OneDrive\\Documents\\MCP\\arquitectura-IA-Playwright\\.artifacts\\discovery\\case-38042\\2026-05-26T18-47-17-383Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,

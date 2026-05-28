@@ -1,0 +1,1 @@
+{"decision":"repaired_plan","reason":"The screen is on the wrong route and the visible safe candidate `Products` matches the target route `/products`, so the repair is to select that candidate and recover the navigation flow.","repairType":"route_recovery","candidateId":"nav-products","selectionStatus":"selected","confidence":0.98}

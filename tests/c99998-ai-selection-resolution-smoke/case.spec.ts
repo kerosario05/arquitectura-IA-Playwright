@@ -163,130 +163,146 @@ test.describe("AI Selection Resolution Smoke", () => {
   });
 
   test("orchestrator returns valid selection_resolution with fake provider", async () => {
-    const originalFetch = globalThis.fetch;
-    globalThis.fetch = (async () => new Response(
-      JSON.stringify({
-        choices: [{
-          message: {
-            content: JSON.stringify({
-              decision: "repaired_plan",
-              repairType: "selection_resolution",
-              candidateId: "product-b",
-              selectionStatus: "selected",
-              reason: "Product B best matches the selection criteria.",
-              confidence: 0.82
-            })
-          }
-        }]
-      }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    )) as any;
+    // Fake provider que devuelve respuesta controlada
+    const fakeProvider = {
+      providerType: "fake" as const,
+      providerName: "fake-selection",
+      model: "fake",
+      completeJson: async () => ({
+        rawText: JSON.stringify({
+          decision: "repaired_plan",
+          repairType: "selection_resolution",
+          candidateId: "product-b",
+          selectionStatus: "selected",
+          reason: "Product B best matches the selection criteria.",
+          confidence: 0.82
+        }),
+        parsedJson: {
+          decision: "repaired_plan",
+          repairType: "selection_resolution",
+          candidateId: "product-b",
+          selectionStatus: "selected",
+          reason: "Product B best matches the selection criteria.",
+          confidence: 0.82
+        },
+        model: "fake",
+        providerName: "fake-selection",
+        durationMs: 10
+      })
+    };
 
-    try {
-      const result = await runAiRepairOrchestrator({
-        appSlug: "arquitectura-automatizacion",
-        failure: "ambiguous_selection",
-        failureType: "ambiguous_selection" as any,
-        currentStep: "select product",
-        currentUrl: "https://example.com/products",
-        candidates: SELECTION_CANDIDATES,
-        selectionCandidates: SELECTION_CANDIDATES,
-        selectionTarget: "Product B",
-        selectionIntent: "select the mid-range product",
-        constraints: [
-          "Do not invent selectors",
-          "Must use existing candidateId from candidates list",
-          "Do not select sensitive options"
-        ]
-      });
+    const result = await runAiRepairOrchestrator({
+      appSlug: "arquitectura-automatizacion",
+      failure: "ambiguous_selection",
+      failureType: "ambiguous_selection" as any,
+      currentStep: "select product",
+      currentUrl: "https://example.com/products",
+      candidates: SELECTION_CANDIDATES,
+      selectionCandidates: SELECTION_CANDIDATES,
+      selectionTarget: "Product B",
+      selectionIntent: "select the mid-range product",
+      constraints: [
+        "Do not invent selectors",
+        "Must use existing candidateId from candidates list",
+        "Do not select sensitive options"
+      ],
+      provider: fakeProvider
+    });
 
-      expect(result.status).toBe("repaired_plan");
-      expect(result.decision?.repairType).toBe("selection_resolution");
-      expect(result.decision?.candidateId).toBe("product-b");
-      expect(result.decision?.selectionStatus).toBe("selected");
-      expect(result.diagnostics.repairType).toBe("selection_resolution");
-      expect(result.diagnostics.failureType).toBe("ambiguous_selection");
-      expect(result.diagnostics.selectedCandidateId).toBe("product-b");
-      expect(result.diagnostics.candidateCount).toBe(3);
-    } finally {
-      globalThis.fetch = originalFetch;
-    }
+    expect(result.status).toBe("repaired_plan");
+    expect(result.decision?.repairType).toBe("selection_resolution");
+    expect(result.decision?.candidateId).toBe("product-b");
+    expect(result.decision?.selectionStatus).toBe("selected");
+    expect(result.diagnostics.repairType).toBe("selection_resolution");
+    expect(result.diagnostics.failureType).toBe("ambiguous_selection");
+    expect(result.diagnostics.selectedCandidateId).toBe("product-b");
+    expect(result.diagnostics.candidateCount).toBe(3);
   });
 
   test("orchestrator blocks unknown candidateId from AI", async () => {
-    const originalFetch = globalThis.fetch;
-    globalThis.fetch = (async () => new Response(
-      JSON.stringify({
-        choices: [{
-          message: {
-            content: JSON.stringify({
-              decision: "repaired_plan",
-              repairType: "selection_resolution",
-              candidateId: "ai-invented-product",
-              reason: "Select invented product.",
-              confidence: 0.6
-            })
-          }
-        }]
-      }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    )) as any;
+    // Fake provider que devuelve candidateId inexistente
+    const fakeProvider = {
+      providerType: "fake" as const,
+      providerName: "fake-selection",
+      model: "fake",
+      completeJson: async () => ({
+        rawText: JSON.stringify({
+          decision: "repaired_plan",
+          repairType: "selection_resolution",
+          candidateId: "ai-invented-product",
+          reason: "Select invented product.",
+          confidence: 0.6
+        }),
+        parsedJson: {
+          decision: "repaired_plan",
+          repairType: "selection_resolution",
+          candidateId: "ai-invented-product",
+          reason: "Select invented product.",
+          confidence: 0.6
+        },
+        model: "fake",
+        providerName: "fake-selection",
+        durationMs: 10
+      })
+    };
 
-    try {
-      const result = await runAiRepairOrchestrator({
-        appSlug: "arquitectura-automatizacion",
-        failure: "ambiguous_selection",
-        failureType: "ambiguous_selection" as any,
-        currentStep: "select product",
-        currentUrl: "https://example.com/products",
-        candidates: SELECTION_CANDIDATES,
-        selectionCandidates: SELECTION_CANDIDATES,
-        selectionTarget: "any product"
-      });
+    const result = await runAiRepairOrchestrator({
+      appSlug: "arquitectura-automatizacion",
+      failure: "ambiguous_selection",
+      failureType: "ambiguous_selection" as any,
+      currentStep: "select product",
+      currentUrl: "https://example.com/products",
+      candidates: SELECTION_CANDIDATES,
+      selectionCandidates: SELECTION_CANDIDATES,
+      selectionTarget: "any product",
+      provider: fakeProvider
+    });
 
-      expect(result.status).toBe("invalid_response");
-      expect(result.diagnostics.errorCode).toBe("AI_REPAIR_UNKNOWN_CANDIDATE");
-    } finally {
-      globalThis.fetch = originalFetch;
-    }
+    expect(result.status).toBe("invalid_response");
+    expect(result.diagnostics.errorCode).toBe("AI_REPAIR_UNKNOWN_CANDIDATE");
   });
 
   test("orchestrator blocks sensitive candidate from AI", async () => {
-    const originalFetch = globalThis.fetch;
-    globalThis.fetch = (async () => new Response(
-      JSON.stringify({
-        choices: [{
-          message: {
-            content: JSON.stringify({
-              decision: "repaired_plan",
-              repairType: "selection_resolution",
-              candidateId: "terms-accept",
-              reason: "Accept terms to continue.",
-              confidence: 0.75
-            })
-          }
-        }]
-      }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    )) as any;
+    // Fake provider que devuelve sensitive candidate
+    const fakeProvider = {
+      providerType: "fake" as const,
+      providerName: "fake-selection",
+      model: "fake",
+      completeJson: async () => ({
+        rawText: JSON.stringify({
+          decision: "repaired_plan",
+          repairType: "selection_resolution",
+          candidateId: "terms-accept",
+          reason: "Accept terms to continue.",
+          confidence: 0.75
+        }),
+        parsedJson: {
+          decision: "repaired_plan",
+          repairType: "selection_resolution",
+          candidateId: "terms-accept",
+          reason: "Accept terms to continue.",
+          confidence: 0.75
+        },
+        model: "fake",
+        providerName: "fake-selection",
+        durationMs: 10
+      })
+    };
 
-    try {
-      const result = await runAiRepairOrchestrator({
-        appSlug: "arquitectura-automatizacion",
-        failure: "ambiguous_selection",
-        failureType: "ambiguous_selection" as any,
-        currentStep: "accept terms",
-        currentUrl: "https://example.com/checkout",
-        candidates: SENSITIVE_SELECTION_CANDIDATES,
-        selectionCandidates: SENSITIVE_SELECTION_CANDIDATES,
-        selectionTarget: "terms acceptance",
-        constraints: ["Do not select sensitive options"]
-      });
+    const result = await runAiRepairOrchestrator({
+      appSlug: "arquitectura-automatizacion",
+      failure: "ambiguous_selection",
+      failureType: "ambiguous_selection" as any,
+      currentStep: "accept terms",
+      currentUrl: "https://example.com/checkout",
+      candidates: SENSITIVE_SELECTION_CANDIDATES,
+      selectionCandidates: SENSITIVE_SELECTION_CANDIDATES,
+      selectionTarget: "terms acceptance",
+      constraints: ["Do not select sensitive options"],
+      provider: fakeProvider
+    });
 
-      expect(result.status).toBe("invalid_response");
-      expect(result.diagnostics.errorCode).toBe("AI_REPAIR_SENSITIVE_ACTION_BLOCKED");
-    } finally {
-      globalThis.fetch = originalFetch;
-    }
+    expect(result.status).toBe("invalid_response");
+    expect(result.diagnostics.errorCode).toBe("AI_REPAIR_SENSITIVE_ACTION_BLOCKED");
   });
 });

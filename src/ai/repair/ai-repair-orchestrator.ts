@@ -1,4 +1,4 @@
-import { createAiProviderFromEnv } from "../ai-provider-factory";
+import { createAiProviderFromEnv, type AiProvider } from "../ai-provider-factory";
 import { AiProviderError } from "../ai-provider.types";
 import { buildRepairContextPack, type RepairContextPack, type RepairEvidence } from "./repair-context-pack";
 import { validateRepairDecision, type RepairCandidateForValidation, type RepairEvidenceForValidation } from "./repair-decision-validator";
@@ -45,6 +45,8 @@ export type AiRepairOrchestratorInput = {
   selectionTarget?: string;
   selectionIntent?: string;
   selectionCandidates?: RepairCandidateForValidation[];
+  // Provider injection for testing (optional)
+  provider?: AiProvider;
 };
 
 export type AiRepairOrchestratorResult = {
@@ -64,7 +66,8 @@ export async function runAiRepairOrchestrator(input: AiRepairOrchestratorInput):
     return { status: "provider_disabled", diagnostics: { reason: "AI_REPAIR_ENABLED=false" } };
   }
 
-  const provider = createAiProviderFromEnv();
+  // Usar provider inyectado si viene (para tests), sino crear desde env
+  const provider = input.provider ?? await createAiProviderFromEnv();
   if (!provider) {
     return { status: "provider_disabled", diagnostics: { reason: "AI provider is disabled or missing." } };
   }
@@ -76,12 +79,11 @@ export async function runAiRepairOrchestrator(input: AiRepairOrchestratorInput):
   });
 
   const prompt = [
-    "Return ONLY a compact JSON object for repair decision.",
-    "Do not propose selectors/xpath/css/testId.",
-    "Do not propose browser actions.",
-    "If safe candidate exists, return repaired_plan with candidateId.",
-    "Otherwise return no_safe_action or needs_more_context.",
-    JSON.stringify(pack)
+    "CRITICAL: Return ONLY valid JSON. No explanations, no markdown, no text outside the JSON.",
+    "Context pack:",
+    JSON.stringify(pack),
+    "",
+    "Respond with JSON object containing: decision, reason, and optional fields per schema."
   ].join("\n");
   const systemPrompt = buildRepairSystemPrompt();
 
@@ -99,6 +101,7 @@ export async function runAiRepairOrchestrator(input: AiRepairOrchestratorInput):
     const validation = validateRepairDecision(completion.parsedJson ?? completion.rawText, {
       candidates: input.candidates,
       evidenceCandidates: input.evidenceCandidates,
+      selectionCandidates: input.selectionCandidates,
       blockSensitiveActions: bool("AI_REPAIR_BLOCK_SENSITIVE_ACTIONS", true),
       blockAuthSecrets: bool("AI_REPAIR_BLOCK_AUTH_SECRETS", true),
       blockPayments: bool("AI_REPAIR_BLOCK_PAYMENTS", true),

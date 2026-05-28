@@ -704,17 +704,132 @@ function resolveProductDetailStructural(snapshot: PageSnapshot, assertionText: s
 
 const MONETARY_PATTERN = /(?:USD?\$|EUR|RD\$|\$)\s*\d[\d,.]*|\d[\d,.]*\s*(?:USD|EUR|RD\$)/i;
 
+export type ExpectedResultConsumption = {
+  originalText: string;
+  classification: "executable_assertion" | "non_executable_criteria" | "covered_by_concrete_assertions";
+  reason: string;
+  coveredByAssertions?: string[];
+  extractedQuotedTexts?: string[];
+};
+
+export type BuildConcreteAssertionsResult = {
+  assertions: string[];
+  expectedResultConsumption: ExpectedResultConsumption[];
+  nonExecutableCriteria: string[];
+};
+
+const ABSTRACT_EXPECTED_PATTERNS = [
+  /\bel\s+cliente\s+visualiza\b/i,
+  /\bvisualiza\s+las\s+categor[aí]as\b/i,
+  /\bcategor[aí]as\s+principales\b/i,
+  /\bdisponibles\s+para\s+consulta\b/i,
+  /\bconsulta\s+informativa\b/i,
+  /\bflujo\s+permanece\b/i,
+  /\bentorno\s+controlado\b/i,
+  /\bsistema\s+muestra\b.*\bcorrectamente\b/i,
+  /\binformacion\s+correctamente\b/i,
+  /\bcorresponden\s+al\s+cat[aá]logo\b/i,
+  /\boperacion\s+se\s+realiza\s+exitosamente\b/i,
+  /\bexitosamente\b/i,
+  /\busuario\s+puede\s+consultar\b/i,
+  /\bpantalla\s+muestra\s+los\s+datos\s+solicitados\b/i,
+  /\bdatos\s+solicitados\s+correctamente\b/i,
+  /\bse\s+realiza\s+con\s+[eé]xito\b/i,
+  /\bcompletado\s+con\s+[eé]xito\b/i,
+  /\bcorrectamente\b/i
+];
+
+function isAbstractExpected(text: string): boolean {
+  const normalized = normalizeText(text);
+  return ABSTRACT_EXPECTED_PATTERNS.some((pattern) => pattern.test(normalized));
+}
+
+function extractQuotedTexts(text: string): string[] {
+  const quoted: string[] = [];
+  const matches = text.match(/["']([^"']+)["']/g);
+  if (matches) {
+    for (const match of matches) {
+      const clean = match.replace(/^["']|["']$/g, "").trim();
+      if (clean.length > 0) {
+        quoted.push(clean);
+      }
+    }
+  }
+  return quoted;
+}
+
 export function buildConcreteAssertionsFromExpected(
   expectedTexts: string[],
+  existingAssertions?: string[],
   _options?: Record<string, unknown>
-): string[] {
-  return expectedTexts
-    .map((text) => text.trim())
-    .filter(Boolean)
-    .filter((text) => {
-      const classification = classifyAssertion(text);
-      return classification === "literal_observable" || classification === "structural_assertion";
-    });
+): BuildConcreteAssertionsResult {
+  const assertions: string[] = [];
+  const expectedResultConsumption: ExpectedResultConsumption[] = [];
+  const nonExecutableCriteria: string[] = [];
+
+  for (const text of expectedTexts) {
+    const trimmed = text.trim();
+    if (!trimmed) continue;
+
+    const consumption: ExpectedResultConsumption = {
+      originalText: trimmed,
+      classification: "executable_assertion",
+      reason: "",
+      coveredByAssertions: [],
+      extractedQuotedTexts: []
+    };
+
+    // Check if abstract/non-observable
+    if (isAbstractExpected(trimmed)) {
+      // Check if covered by existing concrete assertions
+      if (existingAssertions && existingAssertions.length > 0) {
+        consumption.classification = "covered_by_concrete_assertions";
+        consumption.reason = "Abstract expected result is semantically covered by concrete assertions from steps";
+        consumption.coveredByAssertions = [...existingAssertions];
+        nonExecutableCriteria.push(trimmed);
+      } else {
+        consumption.classification = "non_executable_criteria";
+        consumption.reason = "Expected result contains abstract/non-observable language without concrete evidence";
+        nonExecutableCriteria.push(trimmed);
+      }
+      expectedResultConsumption.push(consumption);
+      continue;
+    }
+
+    // Extract quoted texts - these are concrete assertions
+    const quotedTexts = extractQuotedTexts(trimmed);
+    if (quotedTexts.length > 0) {
+      consumption.extractedQuotedTexts = quotedTexts;
+      consumption.reason = "Quoted texts extracted as concrete assertions";
+      for (const quoted of quotedTexts) {
+        if (!existingAssertions?.some((a) => normalizeText(a) === normalizeText(quoted))) {
+          assertions.push(quoted);
+        }
+      }
+      expectedResultConsumption.push(consumption);
+      continue;
+    }
+
+    // Legacy behavior: classify and filter
+    const classification = classifyAssertion(trimmed);
+    if (classification === "literal_observable" || classification === "structural_assertion") {
+      if (!existingAssertions?.some((a) => normalizeText(a) === normalizeText(trimmed))) {
+        assertions.push(trimmed);
+      }
+      consumption.reason = `Classified as ${classification}`;
+    } else {
+      consumption.classification = "non_executable_criteria";
+      consumption.reason = `Classified as ${classification} - not concrete enough for execution`;
+      nonExecutableCriteria.push(trimmed);
+    }
+    expectedResultConsumption.push(consumption);
+  }
+
+  return {
+    assertions,
+    expectedResultConsumption,
+    nonExecutableCriteria
+  };
 }
 
 export function resolveAssertionTargets(

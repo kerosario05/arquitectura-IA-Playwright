@@ -1,8 +1,33 @@
 import { test, expect } from "@playwright/test";
 import { runAiRepairOrchestrator } from "../src/ai/repair/ai-repair-orchestrator";
 
+function withEnv<T>(values: Record<string, string | undefined>, fn: () => Promise<T>): Promise<T> {
+  const previous: Record<string, string | undefined> = {};
+  for (const key of Object.keys(values)) {
+    previous[key] = process.env[key];
+    if (values[key] === undefined) delete process.env[key];
+    else process.env[key] = values[key];
+  }
+  const restore = () => {
+    for (const key of Object.keys(values)) {
+      if (previous[key] === undefined) delete process.env[key];
+      else process.env[key] = previous[key];
+    }
+  };
+  return fn().finally(restore);
+}
+
+const FAKE_AI_ENV = {
+  AI_REPAIR_ENABLED: "true",
+  AI_ENABLED: "true",
+  AI_PROVIDER: "openai_compatible",
+  AI_PROVIDER_NAME: "gemini",
+  AI_BASE_URL: "https://example.test/v1",
+  AI_API_KEY: "test-key",
+  AI_MODEL: "test-model"
+};
+
 test("discovery integration: AI Repair invoked on target_not_found", async () => {
-  // Simulate discovery scenario: target_not_found with visible candidates
   const originalFetch = globalThis.fetch;
   globalThis.fetch = (async () => new Response(
     JSON.stringify({
@@ -19,7 +44,7 @@ test("discovery integration: AI Repair invoked on target_not_found", async () =>
     { status: 200, headers: { "Content-Type": "application/json" } }
   )) as any;
 
-  const result = await runAiRepairOrchestrator({
+  const result = await withEnv(FAKE_AI_ENV, () => runAiRepairOrchestrator({
     appSlug: "test-app",
     failure: "target_not_found",
     currentStep: "click",
@@ -47,7 +72,7 @@ test("discovery integration: AI Repair invoked on target_not_found", async () =>
     previousActions: ["navigate: https://example.com"],
     previousFills: [],
     constraints: ["forbid_action:fill", "no_selector_invention"]
-  });
+  }));
 
   globalThis.fetch = originalFetch;
 
@@ -75,7 +100,7 @@ test("discovery integration: AI Repair repaired_plan with valid candidate", asyn
     { status: 200, headers: { "Content-Type": "application/json" } }
   )) as any;
 
-  const result = await runAiRepairOrchestrator({
+  const result = await withEnv(FAKE_AI_ENV, () => runAiRepairOrchestrator({
     appSlug: "test-app",
     failure: "target_not_found",
     currentStep: "click",
@@ -93,7 +118,7 @@ test("discovery integration: AI Repair repaired_plan with valid candidate", asyn
       }
     ],
     constraints: ["must_return_existing_candidate_id"]
-  });
+  }));
 
   globalThis.fetch = originalFetch;
 
@@ -118,7 +143,7 @@ test("discovery integration: AI Repair diagnostics include required fields", asy
     { status: 200, headers: { "Content-Type": "application/json" } }
   )) as any;
 
-  const result = await runAiRepairOrchestrator({
+  const result = await withEnv(FAKE_AI_ENV, () => runAiRepairOrchestrator({
     appSlug: "test-app",
     failure: "target_not_found",
     currentStep: "click",
@@ -126,7 +151,7 @@ test("discovery integration: AI Repair diagnostics include required fields", asy
     snapshotSummary: {},
     candidates: [],
     constraints: []
-  });
+  }));
 
   globalThis.fetch = originalFetch;
 
@@ -174,7 +199,7 @@ test("discovery integration: context-pack does not include secrets", async () =>
     );
   }) as any;
 
-  await runAiRepairOrchestrator({
+  await withEnv(FAKE_AI_ENV, async () => await runAiRepairOrchestrator({
     appSlug: "test-app",
     failure: "target_not_found",
     currentStep: "login",
@@ -183,7 +208,7 @@ test("discovery integration: context-pack does not include secrets", async () =>
     candidates: [],
     previousFills: ["email=user@test.com", "password=secret123", "otp=999999"],
     constraints: []
-  });
+  }));
 
   globalThis.fetch = originalFetch;
 
@@ -210,7 +235,7 @@ test("discovery integration: AI Repair blocked sensitive candidate", async () =>
     { status: 200, headers: { "Content-Type": "application/json" } }
   )) as any;
 
-  const result = await runAiRepairOrchestrator({
+  const result = await withEnv(FAKE_AI_ENV, () => runAiRepairOrchestrator({
     appSlug: "test-app",
     failure: "target_not_found",
     currentStep: "click",
@@ -228,7 +253,7 @@ test("discovery integration: AI Repair blocked sensitive candidate", async () =>
       }
     ],
     constraints: []
-  });
+  }));
 
   globalThis.fetch = originalFetch;
 
@@ -256,7 +281,7 @@ test("discovery integration: AI Repair blocked invented selector", async () => {
     { status: 200, headers: { "Content-Type": "application/json" } }
   )) as any;
 
-  const result = await runAiRepairOrchestrator({
+  const result = await withEnv(FAKE_AI_ENV, () => runAiRepairOrchestrator({
     appSlug: "test-app",
     failure: "target_not_found",
     currentStep: "click",
@@ -272,7 +297,7 @@ test("discovery integration: AI Repair blocked invented selector", async () => {
       }
     ],
     constraints: ["no_selector_invention"]
-  });
+  }));
 
   globalThis.fetch = originalFetch;
 

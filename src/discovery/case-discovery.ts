@@ -24,7 +24,8 @@ import { detectPostClickUiChange, type PostClickUiChangeResult } from "./post-cl
 import {
   buildConcreteAssertionsFromExpected,
   resolveAssertionTargets,
-  type AssertionTargetInput
+  type AssertionTargetInput,
+  type ExpectedResultConsumption
 } from "./assertion-resolver";
 import {
   parseStepIntent,
@@ -127,12 +128,16 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
   skippedActions: { index: number; action: string }[];
   setupIntents: ParsedStepIntent[];
   orderedSteps: ExecutableStep[];
+  expectedResultConsumption?: ExpectedResultConsumption[];
+  nonExecutableCriteria?: string[];
 } {
   const actionTargets: ActionTargetItem[] = [];
   const assertionTargets: AssertionTargetInput[] = [];
   const skippedActions: { index: number; action: string }[] = [];
   const setupIntents: ParsedStepIntent[] = [];
   const orderedSteps: ExecutableStep[] = [];
+  let expectedResultConsumption: ExpectedResultConsumption[] | undefined;
+  let nonExecutableCriteria: string[] | undefined;
 
   const findExistingAssertionByTarget = (target: string): boolean =>
     assertionTargets.some((a) => a.source === "action" && normalizeText(a.target) === normalizeText(target));
@@ -221,8 +226,16 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
     const lastStep = scenario.steps[scenario.steps.length - 1];
     if (lastStep.expected) {
       const expectedTargets = extractAssertionTargets(lastStep.expected);
-      const concreteTargets = buildConcreteAssertionsFromExpected(expectedTargets);
-      for (const target of concreteTargets) {
+      // Collect existing concrete assertions from steps to check coverage
+      const existingConcreteAssertions = assertionTargets
+        .filter((a) => a.source === "action")
+        .map((a) => a.target);
+      const buildResult = buildConcreteAssertionsFromExpected(expectedTargets, existingConcreteAssertions);
+      expectedResultConsumption = buildResult.expectedResultConsumption;
+      nonExecutableCriteria = buildResult.nonExecutableCriteria;
+      
+      // Add only executable assertions
+      for (const target of buildResult.assertions) {
         if (findExistingAssertionByTarget(target)) {
           continue;
         }
@@ -235,10 +248,27 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
           source: "expected"
         });
       }
+      
+      // Non-executable criteria are tracked in metadata but don't block execution
+      // They are logged for diagnostics but not added as assertion targets
+      if (buildResult.nonExecutableCriteria.length > 0) {
+        console.log(`[discovery:case] Non-executable expected criteria (${buildResult.nonExecutableCriteria.length}): ${buildResult.nonExecutableCriteria.map(c => `"${c}"`).join(", ")}`);
+      }
+      if (buildResult.expectedResultConsumption.some(c => c.classification === "covered_by_concrete_assertions")) {
+        console.log(`[discovery:case] Expected result covered by concrete assertions from steps`);
+      }
     }
   }
 
-  return { actionTargets, assertionTargets, skippedActions, setupIntents, orderedSteps };
+  return {
+    actionTargets,
+    assertionTargets,
+    skippedActions,
+    setupIntents,
+    orderedSteps,
+    expectedResultConsumption,
+    nonExecutableCriteria
+  };
 }
 
 type PageState = {

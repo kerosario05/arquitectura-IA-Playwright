@@ -1,98 +1,98 @@
 {
   "aiRepairValidation": {
-    "provider": "unknown",
+    "provider": "codex",
     "realProvider": false,
     "targetResolution": "passed",
     "routeRecovery": "passed",
     "assertionResolution": "passed",
     "selectionResolution": "passed",
     "securityGuards": "passed",
-    "durationMs": 7454,
+    "durationMs": 7517,
     "details": [
       {
         "name": "target_resolution:repaired_plan_valid",
         "passed": true,
-        "durationMs": 445
+        "durationMs": 438
       },
       {
         "name": "target_resolution:no_safe_action",
         "passed": true,
-        "durationMs": 445
+        "durationMs": 448
       },
       {
         "name": "target_resolution:invalid_json",
         "passed": true,
-        "durationMs": 430
+        "durationMs": 441
       },
       {
         "name": "target_resolution:unknown_candidate",
         "passed": true,
-        "durationMs": 444
+        "durationMs": 441
       },
       {
         "name": "target_resolution:invented_selector",
         "passed": true,
-        "durationMs": 436
+        "durationMs": 434
       },
       {
         "name": "target_resolution:sensitive_candidate",
         "passed": true,
-        "durationMs": 433
+        "durationMs": 437
       },
       {
         "name": "route_recovery:route_recovery_valid",
         "passed": true,
-        "durationMs": 444
+        "durationMs": 440
       },
       {
         "name": "route_recovery:route_recovery_no_safe_action",
         "passed": true,
-        "durationMs": 438
+        "durationMs": 449
       },
       {
         "name": "route_recovery:route_recovery_failed_candidate",
         "passed": true,
-        "durationMs": 434
+        "durationMs": 439
       },
       {
         "name": "assertion_resolution:assertion_resolution_valid",
         "passed": true,
-        "durationMs": 441
+        "durationMs": 432
       },
       {
         "name": "assertion_resolution:assertion_resolution_no_safe_action",
         "passed": true,
-        "durationMs": 437
+        "durationMs": 445
       },
       {
         "name": "assertion_resolution:assertion_resolution_unknown_evidence",
         "passed": true,
-        "durationMs": 445
+        "durationMs": 448
       },
       {
         "name": "assertion_resolution:assertion_resolution_sensitive_evidence",
         "passed": true,
-        "durationMs": 440
+        "durationMs": 442
       },
       {
         "name": "selection_resolution:selection_resolution_valid",
         "passed": true,
-        "durationMs": 434
+        "durationMs": 443
       },
       {
         "name": "selection_resolution:selection_resolution_no_safe_action",
         "passed": true,
-        "durationMs": 432
+        "durationMs": 447
       },
       {
         "name": "selection_resolution:selection_resolution_unknown_candidate",
         "passed": true,
-        "durationMs": 431
+        "durationMs": 442
       },
       {
         "name": "selection_resolution:selection_resolution_sensitive_candidate",
         "passed": true,
-        "durationMs": 444
+        "durationMs": 450
       }
     ]
   }

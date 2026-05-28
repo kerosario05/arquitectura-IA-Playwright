@@ -1,0 +1,1 @@
+{"decision":"repaired_plan","reason":"A safe visible clickable candidate is available and matches the failed click intent better than the missing text target.","repairType":"selection_resolution","candidateId":"btn-1","selectionStatus":"selected","confidence":0.94}

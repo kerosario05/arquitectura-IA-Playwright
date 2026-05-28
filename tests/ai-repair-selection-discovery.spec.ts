@@ -19,6 +19,32 @@ import { buildRepairContextPack } from "../src/ai/repair/repair-context-pack";
 import { runAiRepairOrchestrator } from "../src/ai/repair/ai-repair-orchestrator";
 import { buildAiRepairCaseSummary } from "../src/ai/repair/ai-repair-summary-builder";
 
+function withEnv<T>(values: Record<string, string | undefined>, fn: () => Promise<T>): Promise<T> {
+  const previous: Record<string, string | undefined> = {};
+  for (const key of Object.keys(values)) {
+    previous[key] = process.env[key];
+    if (values[key] === undefined) delete process.env[key];
+    else process.env[key] = values[key];
+  }
+  const restore = () => {
+    for (const key of Object.keys(values)) {
+      if (previous[key] === undefined) delete process.env[key];
+      else process.env[key] = previous[key];
+    }
+  };
+  return fn().finally(restore);
+}
+
+const FAKE_AI_ENV = {
+  AI_REPAIR_ENABLED: "true",
+  AI_ENABLED: "true",
+  AI_PROVIDER: "openai_compatible",
+  AI_PROVIDER_NAME: "gemini",
+  AI_BASE_URL: "https://example.test/v1",
+  AI_API_KEY: "test-key",
+  AI_MODEL: "test-model"
+};
+
 const AMBIGUOUS_SELECTION_CANDIDATES = [
   {
     candidateId: "product-card-1",
@@ -104,7 +130,7 @@ test("discovery invokes AI selection_resolution when local selection fails by am
   )) as any;
 
   try {
-    const result = await runAiRepairOrchestrator({
+    const result = await withEnv(FAKE_AI_ENV, () => runAiRepairOrchestrator({
       appSlug: "test-app",
       failure: "ambiguous_selection",
       failureType: "ambiguous_selection" as any,
@@ -114,7 +140,7 @@ test("discovery invokes AI selection_resolution when local selection fails by am
       selectionCandidates: AMBIGUOUS_SELECTION_CANDIDATES,
       selectionTarget: "Product A",
       selectionIntent: "select Product A"
-    });
+    }));
 
     expect(result.status).toBe("repaired_plan");
     expect(result.decision?.repairType).toBe("selection_resolution");
@@ -181,7 +207,7 @@ test("repaired_plan valid selects candidateId and marks recoveredBy ai_selection
   )) as any;
 
   try {
-    const result = await runAiRepairOrchestrator({
+    const result = await withEnv(FAKE_AI_ENV, () => runAiRepairOrchestrator({
       appSlug: "test-app",
       failure: "ambiguous_selection",
       failureType: "ambiguous_selection" as any,
@@ -190,7 +216,7 @@ test("repaired_plan valid selects candidateId and marks recoveredBy ai_selection
       candidates: AMBIGUOUS_SELECTION_CANDIDATES,
       selectionCandidates: AMBIGUOUS_SELECTION_CANDIDATES,
       selectionTarget: "Product A"
-    });
+    }));
 
     expect(result.status).toBe("repaired_plan");
     expect(result.decision?.candidateId).toBe("product-card-2");
@@ -220,7 +246,7 @@ test("no_safe_action is diagnosed and does not apply selection", async () => {
   )) as any;
 
   try {
-    const result = await runAiRepairOrchestrator({
+    const result = await withEnv(FAKE_AI_ENV, () => runAiRepairOrchestrator({
       appSlug: "test-app",
       failure: "ambiguous_selection",
       failureType: "ambiguous_selection" as any,
@@ -229,7 +255,7 @@ test("no_safe_action is diagnosed and does not apply selection", async () => {
       candidates: AMBIGUOUS_SELECTION_CANDIDATES,
       selectionCandidates: AMBIGUOUS_SELECTION_CANDIDATES,
       selectionTarget: "any option"
-    });
+    }));
 
     expect(result.status).toBe("no_safe_action");
     expect(result.decision?.candidateId).toBeUndefined();
@@ -258,7 +284,7 @@ test("sensitive candidate is blocked", async () => {
   )) as any;
 
   try {
-    const result = await runAiRepairOrchestrator({
+    const result = await withEnv(FAKE_AI_ENV, () => runAiRepairOrchestrator({
       appSlug: "test-app",
       failure: "ambiguous_selection",
       failureType: "ambiguous_selection" as any,
@@ -268,7 +294,7 @@ test("sensitive candidate is blocked", async () => {
       selectionCandidates: SENSITIVE_SELECTION_CANDIDATES,
       selectionTarget: "payment method",
       constraints: ["no_sensitive_selection"]
-    });
+    }));
 
     expect(result.status).toBe("invalid_response");
     expect(result.diagnostics.errorCode).toBe("AI_REPAIR_SENSITIVE_ACTION_BLOCKED");
@@ -309,7 +335,7 @@ test("invisible/non-actionable candidate is blocked", async () => {
   )) as any;
 
   try {
-    const result = await runAiRepairOrchestrator({
+    const result = await withEnv(FAKE_AI_ENV, () => runAiRepairOrchestrator({
       appSlug: "test-app",
       failure: "ambiguous_selection",
       failureType: "ambiguous_selection" as any,
@@ -318,7 +344,7 @@ test("invisible/non-actionable candidate is blocked", async () => {
       candidates: invisibleCandidates,
       selectionCandidates: invisibleCandidates,
       selectionTarget: "any option"
-    });
+    }));
 
     expect(result.status).toBe("invalid_response");
     expect(result.diagnostics.errorCode).toBeTruthy();
@@ -372,7 +398,7 @@ test("diagnostics persist with selectedCandidateId and selectionStatus", async (
   )) as any;
 
   try {
-    const result = await runAiRepairOrchestrator({
+    const result = await withEnv(FAKE_AI_ENV, () => runAiRepairOrchestrator({
       appSlug: "test-app",
       failure: "ambiguous_selection",
       failureType: "ambiguous_selection" as any,
@@ -381,7 +407,7 @@ test("diagnostics persist with selectedCandidateId and selectionStatus", async (
       candidates: AMBIGUOUS_SELECTION_CANDIDATES,
       selectionCandidates: AMBIGUOUS_SELECTION_CANDIDATES,
       selectionTarget: "Product A"
-    });
+    }));
 
     expect(result.diagnostics.selectedCandidateId).toBe("product-card-1");
     expect(result.diagnostics.selectionStatus).toBe("selected");
