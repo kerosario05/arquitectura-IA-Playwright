@@ -398,6 +398,34 @@ export function deriveExpectedOwnerForStep(step: ExecutionPlanStep, allSteps: Ex
     return "ProductDetailPage";
   }
 
+  // Special handling for expect_loaded assertions - use context from previous step
+  if (intent === "expect_loaded" && allSteps.length > 0) {
+    const currentStepIndex = step.index;
+    const previousStep = allSteps.find(s => s.index === currentStepIndex - 1);
+    
+    if (previousStep) {
+      const prevIntent = deriveMethodIntentFromStepWithContext(previousStep, allSteps);
+      
+      // If previous step was open_module, use OperationsMenuPage for module visibility assertion
+      if (prevIntent === "open_module") {
+        return "OperationsMenuPage";
+      }
+      
+      // If previous step was select_product or selection-like, use ProductListPage
+      if (prevIntent === "select_product" || 
+          prevIntent === "select_first_visible_item" || 
+          prevIntent === "select_first_visible_card" ||
+          prevIntent === "select_visible_item_by_ordinal") {
+        return "ProductListPage";
+      }
+      
+      // If previous step was open_product_information, use ProductDetailPage
+      if (prevIntent === "open_product_information") {
+        return "ProductDetailPage";
+      }
+    }
+  }
+
   const preferredOwner: Record<string, string> = {
     start_session: "HomePage",
     open_home: "HomePage",

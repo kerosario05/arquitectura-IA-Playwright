@@ -288,6 +288,10 @@ const headless = parseBoolean(getRequiredEnv("HEADLESS"), "HEADLESS");
 const browser = parseBrowser(getRequiredEnv("BROWSER"));
 const evidenceDir = getRequiredEnv("EVIDENCE_DIR");
 const defaultTimeoutMs = parseNumber(getRequiredEnv("DEFAULT_TIMEOUT_MS"), "DEFAULT_TIMEOUT_MS");
+const promotedSpecTimeoutMs = parseOptionalPositiveNumber(
+  process.env.PROMOTED_SPEC_TIMEOUT_MS,
+  "PROMOTED_SPEC_TIMEOUT_MS"
+) ?? 90000;
 
 export const config: FullConfig = {
   app: {
@@ -312,7 +316,8 @@ export const config: FullConfig = {
     browser,
     headless,
     evidenceDir,
-    defaultTimeoutMs
+    defaultTimeoutMs,
+    promotedSpecTimeoutMs
   },
   integrations: {
     testRail: {

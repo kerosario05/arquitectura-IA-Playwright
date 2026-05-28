@@ -1,0 +1,14 @@
+{
+  "requestedStrategy": "inline",
+  "autoPomEnabled": false,
+  "selectedStrategy": "inline",
+  "reason": "inline_mode_requested",
+  "blockers": [],
+  "availablePageObjects": [],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false
+}

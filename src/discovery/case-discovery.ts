@@ -71,6 +71,181 @@ function normalizeText(text: string): string {
     .trim();
 }
 
+/**
+ * Check if a failed assertion was recovered by later success
+ * Returns the step index where recovery happened, or undefined if not recovered
+ * 
+ * Recovery scenarios:
+ * 1. Same target succeeds later (exact match recovery)
+ * 2. Any action succeeds later, indicating page navigation completed (navigation recovery)
+ */
+function findAssertionRecoveryByLaterSuccess(
+  failedAssertionTarget: string,
+  steps: DiscoveryStepResult[],
+  currentIndex: number
+): number | undefined {
+  const normalizedTarget = normalizeText(failedAssertionTarget);
+  
+  console.log(`[assertion-recovery] checking failed assertion target="${failedAssertionTarget}" normalized="${normalizedTarget}" from index=${currentIndex}`);
+  
+  // Look for successful actions/assertions on the same target after the failure
+  for (let i = currentIndex; i < steps.length; i++) {
+    const step = steps[i];
+    const stepTarget = normalizeText(step.targetText || "");
+    
+    console.log(`[assertion-recovery] checking discovery step ${i}: target="${step.targetText}" normalized="${stepTarget}" status="${step.status}"`);
+    
+    // Check if this step successfully used the same target
+    // Consider as success: found, passed, recovered, repaired, satisfied_by_*
+    const isSuccessStatus = [
+      "found",
+      "satisfied_by_children",
+      "satisfied_by_previous_assertion",
+      "skipped_after_completion"
+    ].includes(step.status);
+    
+    if (stepTarget === normalizedTarget && isSuccessStatus) {
+      console.log(`[assertion-recovery] found later success step=${i} target="${step.targetText}" type=action status=${step.status}`);
+      return i;
+    }
+    
+    // Check if this is an assertion that passed on the same target
+    if (stepTarget === normalizedTarget && step.assertionStatus === "passed") {
+      console.log(`[assertion-recovery] found later success step=${i} target="${step.targetText}" type=assertion assertionStatus=passed`);
+      return i;
+    }
+    
+    // Check if this step was recovered/repaired (indicates the target was eventually used successfully)
+    if (stepTarget === normalizedTarget && (step.recoveryStatus === "recovered" || step.recoveryStatus === "repaired")) {
+      console.log(`[assertion-recovery] found later success step=${i} target="${step.targetText}" recoveryStatus=${step.recoveryStatus}`);
+      return i;
+    }
+  }
+  
+  // NAVIGATION RECOVERY: If any action succeeds after the failed assertion,
+  // it indicates the page was functional and navigation completed.
+  // The assertion failure was likely due to page transitioning before assertion completed.
+  for (let i = currentIndex; i < steps.length; i++) {
+    const step = steps[i];
+    const isSuccessStatus = [
+      "found",
+      "satisfied_by_children",
+      "satisfied_by_previous_assertion",
+      "skipped_after_completion"
+    ].includes(step.status);
+    
+    if (isSuccessStatus) {
+      console.log(`[assertion-recovery] found navigation recovery step=${i} target="${step.targetText}" status=${step.status} (different target indicates successful navigation)`);
+      return i;
+    }
+  }
+  
+  console.log(`[assertion-recovery] no later success found for target="${failedAssertionTarget}"`);
+  return undefined;
+}
+
+/**
+ * Get unresolved blocking failures - ignores steps that were recovered or marked as non-blocking
+ */
+function getUnresolvedBlockingFailures(steps: DiscoveryStepResult[]): DiscoveryStepResult[] {
+  return steps.filter((s) => {
+    // Skip if recovered
+    if (s.recoveryStatus === "recovered" || s.recoveryStatus === "repaired") {
+      return false;
+    }
+    
+    // Skip if marked as non-blocking by recovery metadata
+    const recoveryMeta = (s as any).recoveryMetadata;
+    if (recoveryMeta?.blocking === false) {
+      return false;
+    }
+    
+    // Skip if recoveredBy is set to a known recovery mechanism
+    if (s.recoveredBy && ["auth_flow", "page_stability", "later_success", "retry_after_navigation", "contextual_intermediate_already_satisfied"].includes(s.recoveredBy)) {
+      return false;
+    }
+    
+    // Include only actual blocking failures
+    return (s.status === "not_found" || s.status === "needs_assertion_resolution") && s.assertionClassification;
+  });
+}
+
+/**
+ * Mark failed assertions as recovered if they were resolved by AuthGate, PageStability, or later success
+ */
+function recoverTransientAssertionFailures(
+  steps: DiscoveryStepResult[],
+  authGateCompletedAtStep?: number,
+  pageStabilizedAtStep?: number
+): void {
+  const failedAssertions = steps.filter(
+    (s) => (s.status === "not_found" || s.status === "needs_assertion_resolution") &&
+           s.assertionClassification &&
+           !s.recoveryStatus
+  );
+  
+  console.log(`[assertion-recovery] checking ${failedAssertions.length} failed assertion(s) for recovery`);
+  
+  for (const failedStep of failedAssertions) {
+    const target = failedStep.targetText;
+    if (!target) continue;
+    
+    console.log(`[assertion-recovery] checking failed assertion step=${failedStep.index} target="${target}"`);
+    
+    // Check if recovered by AuthGate
+    if (authGateCompletedAtStep !== undefined && authGateCompletedAtStep > failedStep.index) {
+      const recoveryIndex = findAssertionRecoveryByLaterSuccess(target, steps, authGateCompletedAtStep);
+      if (recoveryIndex !== undefined) {
+        failedStep.recoveryStatus = "recovered";
+        failedStep.recoveredBy = "auth_flow";
+        failedStep.recoveryMetadata = {
+          ...failedStep.recoveryMetadata,
+          originalFailureReason: failedStep.error,
+          recoveredAfterStep: recoveryIndex,
+          recoveredBecause: "auth_gate_completed",
+          blocking: false
+        };
+        console.log(`[assertion-recovery] recovered step=${failedStep.index} target="${target}" recoveredBy=auth_flow blocking=false`);
+        continue;
+      }
+    }
+    
+    // Check if recovered by page stability
+    if (pageStabilizedAtStep !== undefined && pageStabilizedAtStep > failedStep.index) {
+      const recoveryIndex = findAssertionRecoveryByLaterSuccess(target, steps, pageStabilizedAtStep);
+      if (recoveryIndex !== undefined) {
+        failedStep.recoveryStatus = "recovered";
+        failedStep.recoveredBy = "page_stability";
+        failedStep.recoveryMetadata = {
+          ...failedStep.recoveryMetadata,
+          originalFailureReason: failedStep.error,
+          recoveredAfterStep: recoveryIndex,
+          recoveredBecause: "page_stabilized",
+          blocking: false
+        };
+        console.log(`[assertion-recovery] recovered step=${failedStep.index} target="${target}" recoveredBy=page_stability blocking=false`);
+        continue;
+      }
+    }
+    
+    // Check if recovered by later success (without AuthGate)
+    // Start searching from the step immediately after the failed assertion
+    const recoveryIndex = findAssertionRecoveryByLaterSuccess(target, steps, failedStep.index + 1);
+    if (recoveryIndex !== undefined) {
+      failedStep.recoveryStatus = "recovered";
+      failedStep.recoveredBy = "later_success";
+      failedStep.recoveryMetadata = {
+        ...failedStep.recoveryMetadata,
+        originalFailureReason: failedStep.error,
+        recoveredAfterStep: recoveryIndex,
+        recoveredBecause: "target_used_successfully_later",
+        blocking: false
+      };
+      console.log(`[assertion-recovery] recovered step=${failedStep.index} target="${target}" recoveredBy=later_success blocking=false`);
+    }
+  }
+}
+
 function envTrue(name: string, fallback = false): boolean {
   const raw = process.env[name];
   if (!raw) return fallback;
@@ -908,6 +1083,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   let failedReason: string | undefined;
   let earlyCompletionSatisfied = false;
   let authGateState: AuthGateState | undefined;
+  let authGateCompletedAfterStepIndex: number | undefined; // Track step index after which AuthFlow completed
   let activeContainer: ActiveContainerContext | undefined;
   const resolvedDataKeys = new Set<string>();
 
@@ -1324,6 +1500,29 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       if (proactiveAuthCheck.recovered) {
         console.log(`[discovery:case] Proactive auth gate recovery completed before step: ${orderedItem.type}`);
         authGateState = proactiveAuthCheck.authGateState;
+        // Track when AuthGate was completed for later AuthFlow insertion
+        if (authGateState && authGateState.completed && authGateCompletedAfterStepIndex === undefined) {
+          // AuthFlow completed before this step - will be inserted after the previous executed step
+          const lastExecutedStepIndex = executedStepIndices.size > 0 
+            ? Math.max(...Array.from(executedStepIndices))
+            : 0;
+          authGateCompletedAfterStepIndex = lastExecutedStepIndex;
+        console.log(`[discovery:case] AuthGate completed after step index ${authGateCompletedAfterStepIndex} (proactive)`);
+        
+        // The AuthFlow was triggered proactively before executing the current step (orderedItem)
+        // The step that triggered AuthGate is the PREVIOUS step (the one that was just executed)
+        // Set insertion index to be AFTER the previous step
+        if (orderedItem.type === "action" && orderedItem.actionTarget) {
+          // The previous step is the one that triggered AuthGate
+          // Use the actionTarget index - 1 to insert after the previous step
+          authGateCompletedAfterStepIndex = orderedItem.actionTarget.index - 1;
+          console.log(`[discovery:case] Updated AuthGate insertion index to ${authGateCompletedAfterStepIndex} (after previous step, current=${orderedItem.actionTarget.index}: ${orderedItem.actionTarget.target})`);
+        } else {
+          // For other types, use orderedItem index - 1
+          authGateCompletedAfterStepIndex = orderedItem.index - 1;
+          console.log(`[discovery:case] Updated AuthGate insertion index to ${authGateCompletedAfterStepIndex} (orderedItem.index - 1)`);
+        }
+      }
         console.log(`[discovery:case] Waiting for stable page after AuthFlow...`);
         const stabilityResult = await waitForStablePageState(page, {
           timeoutMs: 20000,
@@ -1345,6 +1544,36 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     }
 
     const currentActionTarget = orderedItem.actionTarget;
+    
+    // Check if this step should be skipped because AuthFlow already handled it
+    // Skip if we're on operations menu and the step is the landing target
+    if (authGateState && orderedItem.type === "action" && orderedItem.actionTarget) {
+      const targetText = orderedItem.actionTarget.target.toLowerCase();
+      const landingHints = ["transacciones y servicios", "transacciones y services", "operaciones", "operations menu"];
+      const isLandingTarget = landingHints.some(hint => targetText.includes(hint));
+      const isOnOperationsMenu = /operations-menu|operaciones|transacciones.*servicios/i.test(currentSnapshot.url);
+      
+      console.log(`[discovery:case] Skip check: type=${orderedItem.type}, target=${targetText}, isLanding=${isLandingTarget}, isOnMenu=${isOnOperationsMenu}, url=${currentSnapshot.url}`);
+      
+      if (isLandingTarget && isOnOperationsMenu) {
+        console.log(`[discovery:case] Skipping step ${orderedItem.actionTarget.index} (${targetText}) - already on landing page after AuthFlow (url=${currentSnapshot.url})`);
+        steps.push({
+          index: orderedItem.actionTarget.index,
+          action: orderedItem.actionTarget.action,
+          status: "skipped",
+          targetText: orderedItem.actionTarget.target,
+          error: "Step consumed by AuthFlow navigation",
+          recoveryStatus: "recovered",
+          recoveredBy: "auth_flow"
+        } as any);
+        if (typeof currentActionOrder === "number") {
+          skippedActionOrders.add(currentActionOrder);
+        }
+        // Skip adding to planSteps - AuthFlow already handled this navigation
+        continue;
+      }
+    }
+
     if (currentActionTarget && authGateState && shouldSkipStepAsAuthConsumed(currentActionTarget.target, authGateState)) {
       console.log(`[discovery:case] Skipping auth-consumed step: ${currentActionTarget.target}`);
       authGateState.skippedAuthSteps.push({
@@ -1781,6 +2010,15 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           console.log(`[discovery:case] Auth gate recovery successful, retrying nav segment...`);
           if (authRecovery.authGateState) {
             authGateState = authRecovery.authGateState;
+            // Track when AuthGate was completed for later AuthFlow insertion
+            if (authGateState.completed && authGateCompletedAfterStepIndex === undefined) {
+              // AuthFlow completed before this step - will be inserted after the previous executed step
+              const lastExecutedStepIndex = executedStepIndices.size > 0 
+                ? Math.max(...Array.from(executedStepIndices))
+                : 0;
+              authGateCompletedAfterStepIndex = lastExecutedStepIndex;
+              console.log(`[discovery:case] AuthGate completed after step index ${authGateCompletedAfterStepIndex}`);
+            }
           }
           await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
           const retryScan = await scanAndCollectObjects(page, orderedItem.index, evidenceDir);
@@ -2008,6 +2246,14 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           console.log(`[discovery:case] Auth gate recovery successful, retrying fill target...`);
           if (authRecovery.authGateState) {
             authGateState = authRecovery.authGateState;
+            // Track when AuthGate was completed for later AuthFlow insertion
+            if (authGateState.completed && authGateCompletedAfterStepIndex === undefined) {
+              const lastExecutedStepIndex = executedStepIndices.size > 0 
+                ? Math.max(...Array.from(executedStepIndices))
+                : 0;
+              authGateCompletedAfterStepIndex = lastExecutedStepIndex;
+              console.log(`[discovery:case] AuthGate completed after step index ${authGateCompletedAfterStepIndex}`);
+            }
           }
           await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
           const retryScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
@@ -3045,6 +3291,14 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           console.log(`[discovery:case] Auth gate recovery successful, retrying click target...`);
           if (authRecovery.authGateState) {
             authGateState = authRecovery.authGateState;
+            // Track when AuthGate was completed for later AuthFlow insertion
+            if (authGateState.completed && authGateCompletedAfterStepIndex === undefined) {
+              const lastExecutedStepIndex = executedStepIndices.size > 0 
+                ? Math.max(...Array.from(executedStepIndices))
+                : 0;
+              authGateCompletedAfterStepIndex = lastExecutedStepIndex;
+              console.log(`[discovery:case] AuthGate completed after step index ${authGateCompletedAfterStepIndex}`);
+            }
           }
           await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
           const retryScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
@@ -4667,6 +4921,14 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             console.log(`[discovery:case] Auth gate recovery after click_no_transition successful, retrying...`);
             if (authRecovery.authGateState) {
               authGateState = authRecovery.authGateState;
+              // Track when AuthGate was completed for later AuthFlow insertion
+              if (authGateState.completed && authGateCompletedAfterStepIndex === undefined) {
+                const lastExecutedStepIndex = executedStepIndices.size > 0 
+                  ? Math.max(...Array.from(executedStepIndices))
+                  : 0;
+                authGateCompletedAfterStepIndex = lastExecutedStepIndex;
+                console.log(`[discovery:case] AuthGate completed after step index ${authGateCompletedAfterStepIndex}`);
+              }
             }
             await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
             const retryScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
@@ -4993,28 +5255,81 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     }
   }
 
+  // Recover transient assertion failures BEFORE calculating final status
+  // Find when AuthGate was completed (if at all)
+  const authGateCompletedAtStep = steps.findIndex(
+    (s) => s.recoveredBy === "auth_flow" && s.index > 0
+  );
+  
+  // Recover assertions that failed before AuthGate but were resolved after
+  if (authGateCompletedAtStep >= 0 || steps.some(s => s.status === "found" && s.index > 0)) {
+    recoverTransientAssertionFailures(
+      steps,
+      authGateCompletedAtStep >= 0 ? authGateCompletedAtStep : undefined,
+      undefined // pageStabilizedAtStep - could be added if needed
+    );
+  }
+  
+  // Log recovery results
+  const recoveredSteps = steps.filter(s => s.recoveryStatus === "recovered");
+  if (recoveredSteps.length > 0) {
+    console.log(`[discovery:case] Recovered ${recoveredSteps.length} transient assertion failure(s):`);
+    for (const step of recoveredSteps) {
+      console.log(`  - step=${step.index} target="${step.targetText}" recoveredBy=${step.recoveredBy} blocking=false`);
+    }
+  }
+
+  // Calculate status based on UNRESOLVED blocking failures (not historical failures)
+  const unresolvedBlockingFailures = getUnresolvedBlockingFailures(steps);
   const foundSteps = steps.filter((s) => s.status === "found" || s.status === "satisfied_by_children" || (s.status === "skipped_after_completion" && earlyCompletionSatisfied)).length;
   const totalSteps = steps.filter((s) => s.status !== "skipped").length;
-  const allFound = (foundSteps === totalSteps && totalSteps > 0 && !failedReason) || earlyCompletionSatisfied;
+  const allFound = (foundSteps === totalSteps && totalSteps > 0 && unresolvedBlockingFailures.length === 0) || earlyCompletionSatisfied;
   const someFound = foundSteps > 0 || earlyCompletionSatisfied;
+  
+  // Clear failedReason if all failures were recovered
+  let effectiveFailedReason = failedReason;
+  let effectiveFailedAtStep = failedAtStep;
+  let effectiveFailedTarget = failedTarget;
+  
+  if (unresolvedBlockingFailures.length === 0 && failedReason) {
+    // All failures were recovered - clear failedReason
+    console.log(`[discovery:case] All failures recovered, clearing failedReason='${failedReason}'`);
+    effectiveFailedReason = undefined;
+    effectiveFailedAtStep = undefined;
+    effectiveFailedTarget = undefined;
+  } else if (unresolvedBlockingFailures.length > 0) {
+    // Still have unresolved failures - use the first one
+    const firstUnresolved = unresolvedBlockingFailures[0];
+    effectiveFailedReason = firstUnresolved.error || "assertion_not_found";
+    effectiveFailedAtStep = firstUnresolved.index;
+    effectiveFailedTarget = firstUnresolved.targetText;
+    console.log(`[discovery:case] unresolvedBlockingFailures=${unresolvedBlockingFailures.length}, using failedReason='${effectiveFailedReason}'`);
+  } else {
+    console.log(`[discovery:case] unresolvedBlockingFailures=0 after assertion recovery`);
+  }
 
-  const status: CaseDiscoveryResult["status"] = failedReason === "needs_approval"
+  const status: CaseDiscoveryResult["status"] = effectiveFailedReason === "needs_approval"
     ? "needs_approval"
-    : failedReason === "needs_assertion_resolution"
+    : effectiveFailedReason === "needs_assertion_resolution"
       ? "needs_assertion_resolution"
-      : failedReason === "needs_setup_resolution"
+      : effectiveFailedReason === "needs_setup_resolution"
         ? "needs_setup_resolution"
-        : failedReason === "needs_associated_target_resolution"
+        : effectiveFailedReason === "needs_associated_target_resolution"
           ? "needs_associated_target_resolution"
-          : failedReason === "associated_entity_not_found"
+          : effectiveFailedReason === "associated_entity_not_found"
             ? "needs_associated_target_resolution"
-            : failedReason === "associated_action_not_found"
+            : effectiveFailedReason === "associated_action_not_found"
               ? "needs_associated_target_resolution"
               : allFound
                 ? "discovered_passed"
                 : someFound
                   ? "discovered_partial"
                   : "exploration_failed";
+  
+  // Log status reconciliation
+  if (failedReason && !effectiveFailedReason) {
+    console.log(`[discovery:case] status reconciled: discovered_partial -> ${status} (all failures recovered)`);
+  }
 
   // Collect unique valueKeys from planSteps for requiredData
   const requiredDataKeys = new Set<string>();
@@ -5045,9 +5360,22 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     notes: [
       ...(allFound
         ? ["Discovery completed successfully. All targets and concrete assertions passed."]
-        : [`Discovery partial: ${foundSteps}/${totalSteps} navigations/assertions satisfied.`])
+        : [`Discovery partial: ${foundSteps}/${totalSteps} navigations/assertions satisfied.`]),
+      ...(recoveredSteps.length > 0
+        ? [`Recovered ${recoveredSteps.length} transient assertion failure(s) - see step recovery metadata for details.`]
+        : [])
     ],
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    // AuthFlow metadata for spec generation
+    metadata: authGateCompletedAfterStepIndex !== undefined
+      ? {
+          authFlowRequired: true,
+          authFlowInsertionAfterStepIndex: authGateCompletedAfterStepIndex,
+          authFlowAlias: "defaultClient",
+          authFlowLanding: "transactions_menu",
+          authGateDetectedDuringDiscovery: true
+        }
+      : undefined
   };
 
   await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
@@ -5125,6 +5453,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     }
   }
 
+  // Remove the duplicate recoverTransientAssertionFailures call - already done above
+  // (keeping this as a no-op for safety but it's redundant now)
+
   return {
     version: "1.0",
     caseId: scenario.caseId,
@@ -5137,9 +5468,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     pendingObjectsPath,
     pendingPlansPath,
     evidenceDir,
-    failedAtStep,
-    failedTarget,
-    failedReason,
+    failedAtStep: effectiveFailedAtStep,
+    failedTarget: effectiveFailedTarget,
+    failedReason: effectiveFailedReason,
     aiRepairSummary
   };
 }

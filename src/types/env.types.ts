@@ -77,6 +77,7 @@ export type BrowserExecutionConfig = {
   headless: boolean;
   evidenceDir: string;
   defaultTimeoutMs: number;
+  promotedSpecTimeoutMs?: number;
 };
 
 export type TestRailConfig = {

@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-05-28T14:34:02.407Z",
+  "updatedAt": "2026-05-28T22:21:19.459Z",
   "automations": [
     {
       "id": "c10002-test-automation-plan",
@@ -1766,22 +1766,22 @@
       "externalId": "C38257",
       "caseId": 38257,
       "title": "Consulta de balance - Visualizar listado de depósitos a plazo activos",
-      "planPath": "automations\\apps\\kiosko\\cases\\c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos\\plan.json",
-      "specPath": "automations\\apps\\kiosko\\cases\\c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos\\case.spec.ts",
-      "appSlug": "kiosko",
-      "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+      "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos\\plan.json",
+      "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos\\case.spec.ts",
+      "appSlug": "arquitectura-automatizacion",
+      "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
       "status": "active",
       "source": "discovery",
-      "appProfile": "kiosko",
+      "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "1423ba294517",
       "createdAt": "2026-05-28T14:20:12.465Z",
-      "updatedAt": "2026-05-28T14:20:12.472Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38257\\2026-05-28T14-19-29-322Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-05-28T21:43:32.341Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38257\\2026-05-28T21-42-18-496Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38257\\2026-05-28T14-19-29-322Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38257\\2026-05-28T21-42-18-496Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -1801,10 +1801,13 @@
           "blockers": [],
           "availablePageObjects": [
             "ProductListPage",
+            "ProductDetailPage",
+            "FormPage",
             "HomePage",
-            "ProductInformationPage",
+            "LoginPage",
             "CategoryPage",
-            "ProductDetailPage"
+            "ProductInformationPage",
+            "OperationsMenuPage"
           ],
           "requiredPageMethods": [],
           "missingPageMethods": [],
@@ -1812,7 +1815,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -1874,22 +1880,22 @@
       "externalId": "C38260",
       "caseId": 38260,
       "title": "Consulta de balance - Validar etiquetas visibles del detalle de depósito",
-      "planPath": "automations\\apps\\kiosko\\cases\\c38260-consulta-de-balance-validar-etiquetas-visibles-del-detalle-de-deposito\\plan.json",
-      "specPath": "automations\\apps\\kiosko\\cases\\c38260-consulta-de-balance-validar-etiquetas-visibles-del-detalle-de-deposito\\case.spec.ts",
-      "appSlug": "kiosko",
-      "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+      "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38260-consulta-de-balance-validar-etiquetas-visibles-del-detalle-de-deposito\\plan.json",
+      "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38260-consulta-de-balance-validar-etiquetas-visibles-del-detalle-de-deposito\\case.spec.ts",
+      "appSlug": "arquitectura-automatizacion",
+      "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
       "status": "active",
       "source": "discovery",
-      "appProfile": "kiosko",
+      "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "1423ba294517",
       "createdAt": "2026-05-28T14:31:37.809Z",
-      "updatedAt": "2026-05-28T14:31:37.817Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38260\\2026-05-28T14-30-57-229Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-05-28T22:21:19.459Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38260\\2026-05-28T22-20-04-473Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38260\\2026-05-28T14-30-57-229Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38260\\2026-05-28T22-20-04-473Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -1909,10 +1915,13 @@
           "blockers": [],
           "availablePageObjects": [
             "ProductListPage",
+            "ProductDetailPage",
+            "FormPage",
             "HomePage",
-            "ProductInformationPage",
+            "LoginPage",
             "CategoryPage",
-            "ProductDetailPage"
+            "ProductInformationPage",
+            "OperationsMenuPage"
           ],
           "requiredPageMethods": [],
           "missingPageMethods": [],
@@ -1920,7 +1929,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38260-consulta-de-balance-validar-etiquetas-visibles-del-detalle-de-deposito\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -2025,6 +2037,74 @@
           "requiredPageMethods": [],
           "missingPageMethods": [],
           "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "c37710-api-agreementsacceptanceget-get-agreements-acceptance",
+      "externalId": "C37710",
+      "caseId": 37710,
+      "title": "[API] AgreementsAcceptanceGET - GET /agreements/acceptance",
+      "planPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37710-api-agreementsacceptanceget-get-agreements-acceptance\\plan.json",
+      "specPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c37710-api-agreementsacceptanceget-get-agreements-acceptance\\case.spec.ts",
+      "appSlug": "arquitectura-automatizacion",
+      "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+      "status": "blocked_missing_pom",
+      "source": "discovery",
+      "appProfile": "arquitectura-automatizacion",
+      "baseUrlHash": "1423ba294517",
+      "createdAt": "2026-05-28T15:15:38.669Z",
+      "updatedAt": "2026-05-28T15:15:38.674Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-37710\\2026-05-28T15-15-23-728Z\\discovered-plans.pending.json",
+      "pomStatus": "needs_page_object",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-37710\\2026-05-28T15-15-23-728Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0,
+          "autoPom": {
+            "enabled": true,
+            "initialPomStatus": "needs_page_object",
+            "generatedCandidateFiles": [],
+            "autoApprovedPageObjects": [],
+            "autoApprovedMethods": [],
+            "blockedAutoApprovals": [],
+            "approvalThreshold": 0.5,
+            "regeneratedSpec": true,
+            "validationStatus": "passed",
+            "finalPomStatus": "promoted"
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "ProductDetailPage",
+            "FormPage",
+            "HomePage",
+            "LoginPage",
+            "CategoryPage",
+            "ProductInformationPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": true,
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false

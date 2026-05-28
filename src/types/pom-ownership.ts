@@ -1,5 +1,6 @@
 export type SemanticMethodIntent =
   | "open_home"
+  | "open_module"
   | "start_session"
   | "open_login_modal"
   | "expect_login_form"
@@ -57,6 +58,7 @@ export const SCREEN_TYPE_CLASS_MAP: Record<SemanticScreenType, string> = {
 
 export const METHOD_INTENT_NAME_MAP: Record<SemanticMethodIntent, string> = {
   open_home: "open",
+  open_module: "openModule",
   start_session: "start",
   open_login_modal: "openLoginModal",
   expect_login_form: "expectLoginFormVisible",
@@ -86,6 +88,7 @@ export const METHOD_INTENT_NAME_MAP: Record<SemanticMethodIntent, string> = {
 
 export const METHOD_INTENT_PARAMS: Record<SemanticMethodIntent, string[]> = {
   open_home: [],
+  open_module: ["moduleName"],
   start_session: [],
   open_login_modal: [],
   expect_login_form: [],
@@ -116,6 +119,7 @@ export const METHOD_INTENT_PARAMS: Record<SemanticMethodIntent, string[]> = {
 export const INTENT_CLASS_OWNERSHIP: Record<string, string[]> = {
   start_session: ["HomePage", "LoginPage"],
   open_home: ["HomePage"],
+  open_module: ["OperationsMenuPage", "MainMenuPage", "HomePage", "DashboardPage"],
   open_login_modal: ["HomePage"],
   expect_login_form: ["LoginPage"],
   fill_username: ["LoginPage"],
@@ -143,6 +147,7 @@ export const INTENT_CLASS_OWNERSHIP: Record<string, string[]> = {
 export const INTENT_PREFERRED_OWNER: Record<string, string> = {
   start_session: "HomePage",
   open_home: "HomePage",
+  open_module: "OperationsMenuPage",
   open_login_modal: "HomePage",
   expect_login_form: "LoginPage",
   fill_username: "LoginPage",
@@ -186,11 +191,18 @@ export const CLASS_SPECIFIC_METHODS: Record<string, Array<{ name: string; intent
     { name: "selectFirstVisibleRow", intent: "select_first_visible_row", parameters: [] },
     { name: "selectVisibleItemByOrdinal", intent: "select_visible_item_by_ordinal", parameters: ["ordinal", "domainTerm"] }
   ],
+  OperationsMenuPage: [
+    { name: "openModule", intent: "open_module", parameters: ["moduleName"] }
+  ],
+  MainMenuPage: [
+    { name: "openModule", intent: "open_module", parameters: ["moduleName"] }
+  ],
   HomePage: [
     { name: "start", intent: "start_session", parameters: [] },
     { name: "open", intent: "open_home", parameters: [] },
     { name: "openLoginModal", intent: "open_login_modal", parameters: [] },
-    { name: "openProductInformation", intent: "open_product_information", parameters: [] }
+    { name: "openProductInformation", intent: "open_product_information", parameters: [] },
+    { name: "openModule", intent: "open_module", parameters: ["moduleName"] }
   ],
   CategoryPage: [
     { name: "selectCategory", intent: "select_category", parameters: ["categoryName"] }
@@ -231,4 +243,51 @@ export function getMisplacedMethodWarning(className: string, methodName: string,
   if (!allowedClasses) return null;
   if (allowedClasses.includes(className)) return null;
   return `Method '${methodName}' (intent: ${intent}) does not belong in ${className}. Allowed classes: ${allowedClasses.join(", ")}`;
+}
+
+/**
+ * Context-dependent action intents that require specific screen/module context
+ */
+export const CONTEXT_DEPENDENT_INTENTS: Set<SemanticMethodIntent> = new Set([
+  "select_product",
+  "select_category",
+  "click_primary_action",
+  "return_to_list",
+  "submit_form",
+  "confirm_action",
+  "fill_form_field",
+  "select_first_visible_item",
+  "select_first_visible_product",
+  "select_first_visible_card",
+  "select_first_visible_row",
+  "select_visible_item_by_ordinal",
+  "expect_primary_action_visible",
+  "expect_primary_action_enabled",
+  "expect_primary_action_disabled"
+]);
+
+/**
+ * Intents that produce/establish screen context
+ */
+export const CONTEXT_PRODUCING_INTENTS: Partial<Record<SemanticMethodIntent, string>> = {
+  open_home: "home",
+  open_module: "module",
+  start_session: "entry_started",
+  submit_login: "authenticated",
+  select_category: "category_selected",
+  select_product: "product_selected"
+};
+
+/**
+ * Check if an intent is context-dependent
+ */
+export function isContextDependentIntent(intent: SemanticMethodIntent): boolean {
+  return CONTEXT_DEPENDENT_INTENTS.has(intent);
+}
+
+/**
+ * Get the context produced by an intent (if any)
+ */
+export function getContextProducedByIntent(intent: SemanticMethodIntent): string | undefined {
+  return CONTEXT_PRODUCING_INTENTS[intent];
 }

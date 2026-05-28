@@ -1,0 +1,18 @@
+{
+  "timestamp": "2026-05-28T20:15:10.194Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [
+    "Discovery had failedReason 'assertion_not_found' but plan is validated (recovered)."
+  ],
+  "promoted": true,
+  "automationId": "c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos",
+  "appSlug": "arquitectura-automatizacion",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos\\case.spec.ts",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos\\plan.json",
+  "caseFolder": "c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false
+}

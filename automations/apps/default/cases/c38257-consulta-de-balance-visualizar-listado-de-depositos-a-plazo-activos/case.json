@@ -1,0 +1,10 @@
+{
+  "id": "c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos",
+  "externalId": "C38257",
+  "caseId": 38257,
+  "title": "Consulta de balance - Visualizar listado de depósitos a plazo activos",
+  "source": "manual",
+  "appSlug": "default",
+  "appConfigPath": "automations\\apps\\default\\app.config.json",
+  "createdAt": "2026-05-28T19:18:30.060Z"
+}

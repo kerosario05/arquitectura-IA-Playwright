@@ -71,6 +71,9 @@ interface PromoteInput {
   verifySpec?: boolean;
   specVerificationTimeoutMs?: number;
   requirePomRuntime?: boolean;
+  sectionSlug?: string;
+  sectionId?: string | number;
+  sectionName?: string;
 }
 
 function assertPromotable(status: string, allowDraft: boolean): void {
@@ -676,15 +679,21 @@ export async function promoteExecutionPlan(
     });
   }
   console.log(`[promote] Using appSlug=${appProfile.appSlug}`);
+  
+  // Determine sectionSlug from input
+  const sectionSlug = input.sectionSlug || undefined;
+  if (sectionSlug) {
+    console.log(`[promote] Using sectionSlug=${sectionSlug}`);
+  }
 
-  const appPaths = buildAppAutomationPaths(appProfile, automationId, input.outputRoot);
+  const appPaths = buildAppAutomationPaths(appProfile, automationId, input.outputRoot, sectionSlug);
 
   const planHasAuthConsumedSteps = plan.steps.some(s => {
     const desc = (s.description ?? "").toLowerCase();
     return desc.startsWith("authflow handled") || desc.includes("step consumed by authflow");
   });
 
-  await ensureAppStructure(appPaths.appDir);
+  await ensureAppStructure(appPaths.appDir, sectionSlug);
   if (!appPaths.planPath || !appPaths.specPath) {
     throw new Error("Unable to resolve promoted automation paths.");
   }
@@ -799,15 +808,25 @@ export async function promoteExecutionPlan(
   if (promotionPolicy && promotionPolicy.specMode === "page-object") {
     const registry = await loadPageObjectRegistry(appProfile, input.outputRoot).catch(() => undefined);
 
-    // Detect if plan has auth-consumed steps to enable AuthFlow in spec generation
-    const hasAuthConsumedSteps = plan.steps.some(s => {
+    // Detect if plan requires AuthFlow from metadata (preferred) or auth-consumed steps (legacy)
+    const authFlowMetadata = plan.metadata?.authFlowRequired
+      ? {
+          alias: plan.metadata.authFlowAlias || "defaultClient",
+          landing: plan.metadata.authFlowLanding || "transactions_menu",
+          insertionAfterStepIndex: plan.metadata.authFlowInsertionAfterStepIndex
+        }
+      : undefined;
+    
+    // Legacy detection: check for auth-consumed step descriptions
+    const hasAuthConsumedSteps = !authFlowMetadata && plan.steps.some(s => {
       const desc = (s.description ?? "").toLowerCase();
       return desc.startsWith("authflow handled") || desc.includes("step consumed by authflow");
     });
-    const authFlowOptions = hasAuthConsumedSteps ? {
+    
+    const authFlowOptions = authFlowMetadata ?? (hasAuthConsumedSteps ? {
       alias: "defaultClient",
       landing: "transactions_menu"
-    } : undefined;
+    } : undefined);
 
     const specResult = await generateSpecFromPlanWithPolicy({
       plan,

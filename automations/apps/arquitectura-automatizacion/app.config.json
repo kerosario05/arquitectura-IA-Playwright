@@ -2,14 +2,14 @@
   "appProfile": {
     "appSlug": "arquitectura-automatizacion",
     "source": "default",
-    "name": "4",
+    "name": "Arquitectura automatización",
     "baseUrl": "https://172.27.4.50",
     "baseUrlHash": "1423ba294517",
-    "createdAt": "2026-05-27T13:08:03.968Z",
-    "updatedAt": "2026-05-27T13:08:03.969Z"
+    "createdAt": "2026-05-28T22:21:19.447Z",
+    "updatedAt": "2026-05-28T22:21:19.447Z"
   },
   "baseUrl": "https://172.27.4.50",
-  "loginMode": "no_login",
+  "loginMode": "password",
   "testData": {},
   "testDataAliases": {},
   "testDataRefs": {},
@@ -18,5 +18,5 @@
   "usernameRef": "APP_USERNAME",
   "passwordRef": "APP_PASSWORD",
   "missingInputBehavior": "auto_generate",
-  "updatedAt": "2026-05-27T13:08:03.968Z"
+  "updatedAt": "2026-05-28T22:21:19.447Z"
 }

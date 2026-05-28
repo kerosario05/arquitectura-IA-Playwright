@@ -330,7 +330,9 @@ export function normalizeTestRailCase(rawCase: RawTestRailCase): TestScenario {
     preconditions,
     references,
     steps,
-    raw: rawCase
+    raw: rawCase,
+    sectionId: rawCase.section_id,
+    sectionName: undefined
   };
 }
 

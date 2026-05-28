@@ -18,7 +18,8 @@ import { runSegmentedRouteRecovery } from "../agent/segment-route-recovery";
 import type { PageSnapshot } from "../types/page-snapshot.types";
 import type { FullConfig } from "../types/env.types";
 import type { CaseDiscoveryResult, RuntimeEvidenceTrace, PendingAssertionForensics, AutoRepairDecisionDiagnostics, BatchCaseRootCause, DiscoveryStepResult } from "../types/discovery.types";
-import type { AppProfile } from "../automations/app-profile";
+import type { AppProfile, SectionProfile } from "../automations/app-profile";
+import { resolveSectionProfile } from "../automations/app-profile";
 
 export type CaseDiscoveryWorkflowOptions = {
   caseId: number;
@@ -49,6 +50,7 @@ export type CaseDiscoveryWorkflowOptions = {
   verifyPromotedSpec?: boolean;
   promotedSpecTimeoutMs?: number;
   appProfile?: AppProfile;
+  sectionProfile?: SectionProfile;
   requirePomRuntime?: boolean;
 };
 
@@ -937,7 +939,25 @@ export async function runCaseDiscoveryWorkflow(
     throw new Error(`No scenario could be generated for case C${options.caseId}.`);
   }
 
+  // Resolve sectionProfile from TestRail case
+  let sectionProfile: SectionProfile | undefined;
+  if (rawCase.section_id) {
+    const sectionInfo = await client.getSection(rawCase.section_id);
+    const sectionResult = await resolveSectionProfile({
+      testCaseSectionId: rawCase.section_id,
+      testCaseSectionName: sectionInfo?.name
+    });
+    sectionProfile = sectionResult.sectionProfile;
+    console.log(`[section-profile] source=${sectionProfile.source} sectionId=${sectionProfile.sectionId} sectionName="${sectionProfile.sectionName}" sectionSlug=${sectionProfile.sectionSlug}`);
+  } else {
+    console.log(`[section-profile] No section_id found for case C${options.caseId}, using default-section`);
+  }
+
   const scenario = scenarios[0];
+  if (sectionProfile) {
+    scenario.sectionId = sectionProfile.sectionId as number | undefined;
+    scenario.sectionName = sectionProfile.sectionName;
+  }
 
   const browserType = { chromium, firefox, webkit }[activeConfig.execution.browser];
   const headless = !options.headed;
@@ -1454,8 +1474,11 @@ export async function runCaseDiscoveryWorkflow(
           inlineDebugMode: options.inlineDebugSpec ?? false,
           verifySpec: options.verifyPromotedSpec ?? false,
           specVerificationTimeoutMs: options.promotedSpecTimeoutMs,
-          appProfileObject: options.appProfile
-          ,requirePomRuntime: options.requirePomRuntime === true
+          appProfileObject: options.appProfile,
+          sectionSlug: sectionProfile?.sectionSlug,
+          sectionId: sectionProfile?.sectionId,
+          sectionName: sectionProfile?.sectionName,
+          requirePomRuntime: options.requirePomRuntime === true
         },
         false,
         {

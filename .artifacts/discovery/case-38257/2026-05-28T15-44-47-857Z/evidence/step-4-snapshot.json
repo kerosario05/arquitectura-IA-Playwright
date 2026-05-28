@@ -1,0 +1,315 @@
+{
+  "version": "1.0",
+  "url": "https://172.27.4.50/balance-inquiry",
+  "title": "Kiosco de Autogestión - Banco Santa Cruz",
+  "capturedAt": "2026-05-28T15:45:25.153Z",
+  "elements": [
+    {
+      "id": "el-3",
+      "type": "button",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "Consulta de balance",
+      "candidateLocators": [],
+      "dataHints": [],
+      "className": "absolute left-0 top-1/2 -translate-y-1/2 p-3 hover:bg-primary/10 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 border-2 border-transparent hover:border-primary/20"
+    },
+    {
+      "id": "el-6",
+      "type": "button",
+      "text": "Tarjetas de CréditoConsulta saldos de tarjetas",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "Tarjetas de CréditoConsulta saldos de tarjetasCuentas de efectivoCuentas de ahorro y corrienteDepósitos a PlazosConsulta tus depósitos a plazosPréstamosConsulta saldos de préstamos",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Tarjetas de CréditoConsulta saldos de tarjetas",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta",
+        "prestamo"
+      ],
+      "className": "group relative bg-white rounded-2xl shadow-card hover:shadow-card-hover border-2 hover:scale-[1.02] transition-all duration-300 overflow-hidden min-h-[140px] border-primary/40"
+    },
+    {
+      "id": "el-9",
+      "type": "button",
+      "text": "Cuentas de efectivoCuentas de ahorro y corriente",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "Tarjetas de CréditoConsulta saldos de tarjetasCuentas de efectivoCuentas de ahorro y corrienteDepósitos a PlazosConsulta tus depósitos a plazosPréstamosConsulta saldos de préstamos",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Cuentas de efectivoCuentas de ahorro y corriente",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta",
+        "prestamo"
+      ],
+      "className": "group relative bg-white rounded-2xl shadow-card hover:shadow-card-hover border-2 hover:scale-[1.02] transition-all duration-300 overflow-hidden min-h-[140px] border-kiosk-success/40"
+    },
+    {
+      "id": "el-12",
+      "type": "button",
+      "text": "Depósitos a PlazosConsulta tus depósitos a plazos",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "Tarjetas de CréditoConsulta saldos de tarjetasCuentas de efectivoCuentas de ahorro y corrienteDepósitos a PlazosConsulta tus depósitos a plazosPréstamosConsulta saldos de préstamos",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Depósitos a PlazosConsulta tus depósitos a plazos",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta",
+        "prestamo"
+      ],
+      "className": "group relative bg-white rounded-2xl shadow-card hover:shadow-card-hover border-2 hover:scale-[1.02] transition-all duration-300 overflow-hidden min-h-[140px] border-kiosk-success/40"
+    },
+    {
+      "id": "el-15",
+      "type": "button",
+      "text": "PréstamosConsulta saldos de préstamos",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "Tarjetas de CréditoConsulta saldos de tarjetasCuentas de efectivoCuentas de ahorro y corrienteDepósitos a PlazosConsulta tus depósitos a plazosPréstamosConsulta saldos de préstamos",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "PréstamosConsulta saldos de préstamos",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta",
+        "prestamo"
+      ],
+      "className": "group relative bg-white rounded-2xl shadow-card hover:shadow-card-hover border-2 hover:scale-[1.02] transition-all duration-300 overflow-hidden min-h-[140px] border-primary/40"
+    },
+    {
+      "id": "el-2",
+      "type": "image",
+      "tagName": "img",
+      "visible": true,
+      "candidateLocators": [],
+      "dataHints": [],
+      "alt": "Banco Santa Cruz",
+      "className": "h-10 object-contain"
+    },
+    {
+      "id": "el-4",
+      "type": "heading",
+      "text": "Consulta de balance",
+      "tagName": "h1",
+      "visible": true,
+      "nearbyText": "Consulta de balance",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Consulta de balance",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-3xl font-bold text-foreground text-center"
+    },
+    {
+      "id": "el-5",
+      "type": "text",
+      "text": "Selecciona el tipo de producto para consultar tu balance",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "Selecciona el tipo de producto para consultar tu balance",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Selecciona el tipo de producto para consultar tu balance",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-xl text-muted-foreground"
+    },
+    {
+      "id": "el-7",
+      "type": "heading",
+      "text": "Tarjetas de Crédito",
+      "tagName": "h3",
+      "visible": true,
+      "nearbyText": "Tarjetas de CréditoConsulta saldos de tarjetas",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Tarjetas de Crédito",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-2xl font-bold mb-2 transition-colors text-primary"
+    },
+    {
+      "id": "el-8",
+      "type": "text",
+      "text": "Consulta saldos de tarjetas",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "Tarjetas de CréditoConsulta saldos de tarjetas",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Consulta saldos de tarjetas",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-base text-muted-foreground"
+    },
+    {
+      "id": "el-10",
+      "type": "heading",
+      "text": "Cuentas de efectivo",
+      "tagName": "h3",
+      "visible": true,
+      "nearbyText": "Cuentas de efectivoCuentas de ahorro y corriente",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Cuentas de efectivo",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta"
+      ],
+      "className": "text-2xl font-bold mb-2 transition-colors text-kiosk-success"
+    },
+    {
+      "id": "el-11",
+      "type": "text",
+      "text": "Cuentas de ahorro y corriente",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "Cuentas de efectivoCuentas de ahorro y corriente",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Cuentas de ahorro y corriente",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta"
+      ],
+      "className": "text-base text-muted-foreground"
+    },
+    {
+      "id": "el-13",
+      "type": "heading",
+      "text": "Depósitos a Plazos",
+      "tagName": "h3",
+      "visible": true,
+      "nearbyText": "Depósitos a PlazosConsulta tus depósitos a plazos",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Depósitos a Plazos",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-2xl font-bold mb-2 transition-colors text-kiosk-success"
+    },
+    {
+      "id": "el-14",
+      "type": "text",
+      "text": "Consulta tus depósitos a plazos",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "Depósitos a PlazosConsulta tus depósitos a plazos",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Consulta tus depósitos a plazos",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-base text-muted-foreground"
+    },
+    {
+      "id": "el-16",
+      "type": "heading",
+      "text": "Préstamos",
+      "tagName": "h3",
+      "visible": true,
+      "nearbyText": "PréstamosConsulta saldos de préstamos",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Préstamos",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "prestamo"
+      ],
+      "className": "text-2xl font-bold mb-2 transition-colors text-primary"
+    },
+    {
+      "id": "el-17",
+      "type": "text",
+      "text": "Consulta saldos de préstamos",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "PréstamosConsulta saldos de préstamos",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Consulta saldos de préstamos",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "prestamo"
+      ],
+      "className": "text-base text-muted-foreground"
+    }
+  ],
+  "summary": {
+    "totalElements": 16,
+    "buttons": 5,
+    "links": 0,
+    "inputs": 0,
+    "selects": 0,
+    "tables": 0,
+    "dialogs": 0,
+    "headings": 5
+  }
+}

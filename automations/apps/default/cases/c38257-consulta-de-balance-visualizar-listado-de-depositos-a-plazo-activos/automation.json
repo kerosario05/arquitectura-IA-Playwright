@@ -1,0 +1,19 @@
+{
+  "id": "c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos",
+  "externalId": "C38257",
+  "caseId": 38257,
+  "title": "Consulta de balance - Visualizar listado de depósitos a plazo activos",
+  "planPath": "automations\\apps\\default\\cases\\c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos\\plan.json",
+  "specPath": "automations\\apps\\default\\cases\\c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos\\case.spec.ts",
+  "appSlug": "default",
+  "appConfigPath": "automations\\apps\\default\\app.config.json",
+  "status": "active",
+  "source": "manual",
+  "appProfile": "default",
+  "baseUrlHash": "1423ba294517",
+  "createdAt": "2026-05-28T19:18:30.106Z",
+  "updatedAt": "2026-05-28T19:18:30.106Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38257\\2026-05-28T19-13-56-510Z\\discovered-plans.pending.json",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "not_run"
+}

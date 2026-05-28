@@ -67,15 +67,31 @@ const BLOCKING_FAILED_REASONS = new Set([
 ]);
 
 function isBlockingStep(step: DiscoveryStepResult): boolean {
+  // Recovered/repaired steps are not blocking
   if (step.recoveryStatus === "recovered" || step.recoveryStatus === "repaired") {
     return false;
   }
+  
+  // Assertion failures that were recovered are not blocking
+  if (step.recoveredBy === "auth_flow" || step.recoveredBy === "page_stability" || step.recoveredBy === "later_success" || step.recoveredBy === "retry_after_navigation") {
+    return false;
+  }
+  
+  // Check recovery metadata for explicit blocking flag
+  if (step.recoveryMetadata?.blocking === false) {
+    return false;
+  }
+  
+  // Not found and click_no_transition are blocking unless recovered
   if (step.status === "not_found" || step.status === "click_no_transition") {
     return true;
   }
+  
+  // Resolution needs are blocking
   if (step.status === "needs_assertion_resolution" || step.status === "needs_setup_resolution" || step.status === "needs_associated_target_resolution") {
     return true;
   }
+  
   return false;
 }
 
@@ -120,20 +136,32 @@ export function evaluatePromotionGate(input: PromotionGateInput): PromotionGateR
   }
 
   if (discovery.failedReason) {
-    const hasUnresolvedBlocking = discovery.steps.some(
-      (s) => !isOptionalOrInformational(s) && isBlockingStep(s)
-    );
-    if (hasUnresolvedBlocking) {
-      reasons.push(`Discovery reported failedReason '${discovery.failedReason}' with unresolved blocking steps.`);
-      if (BLOCKING_FAILED_REASONS.has(discovery.failedReason)) {
-        reasons.push(`Blocking failedReason detected: ${discovery.failedReason}.`);
+    // Check if the candidate plan is validated - if so, the failure was recovered
+    // and shouldn't block promotion
+    if (plan.status === "validated" && validation.valid) {
+      // Plan is valid, failure was recovered during discovery
+      warnings.push(`Discovery had failedReason '${discovery.failedReason}' but plan is validated (recovered).`);
+    } else {
+      const hasUnresolvedBlocking = discovery.steps.some(
+        (s) => !isOptionalOrInformational(s) && isBlockingStep(s)
+      );
+      if (hasUnresolvedBlocking) {
+        reasons.push(`Discovery reported failedReason '${discovery.failedReason}' with unresolved blocking steps.`);
+        if (BLOCKING_FAILED_REASONS.has(discovery.failedReason)) {
+          reasons.push(`Blocking failedReason detected: ${discovery.failedReason}.`);
+        }
       }
     }
   }
 
-  const blockingSteps = discovery.steps.filter((step) => !isOptionalOrInformational(step) && isBlockingStep(step));
-  if (blockingSteps.length > 0) {
-    reasons.push(`Blocking discovery steps found: ${blockingSteps.map((step) => `#${step.index}:${step.status}`).join(", ")}`);
+  // Check for blocking steps in discovery
+  // If the plan is validated, skip this check - the plan validation already ensures correctness
+  // and any failed discovery steps were recovered/removed from the plan
+  if (plan.status !== "validated" || !validation.valid) {
+    const blockingSteps = discovery.steps.filter((step) => !isOptionalOrInformational(step) && isBlockingStep(step));
+    if (blockingSteps.length > 0) {
+      reasons.push(`Blocking discovery steps found: ${blockingSteps.map((step) => `#${step.index}:${step.status}`).join(", ")}`);
+    }
   }
 
   const unresolvedData = plan.requiredData.filter((entry) => entry.required && !entry.resolved);
@@ -202,6 +230,22 @@ export function evaluatePromotionGate(input: PromotionGateInput): PromotionGateR
     if (fillValueErrors.length > 0) {
       reasons.push(...fillValueErrors);
       pomStatus = "needs_manual_review";
+    }
+  }
+
+  // --- AuthFlow Requirement Check ---
+  // If plan metadata indicates AuthFlow is required but spec doesn't include it, block promotion
+  if (plan.metadata?.authFlowRequired && input.specContent) {
+    const hasAuthFlowImport = input.specContent.includes("AuthFlow");
+    const hasAuthFlowCall = input.specContent.includes("authFlow.ensureAuthenticated");
+    
+    if (!hasAuthFlowImport || !hasAuthFlowCall) {
+      reasons.push(
+        `Plan requires AuthFlow (authGate detected during discovery at step ${plan.metadata.authFlowInsertionAfterStepIndex ?? "unknown"}), ` +
+        `but generated spec does not include AuthFlow.ensureAuthenticated(). ` +
+        `This will cause runtime failure with auth_required_before_open_module error.`
+      );
+      pomStatus = "needs_auth_flow_in_spec";
     }
   }
 

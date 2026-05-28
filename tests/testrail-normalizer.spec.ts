@@ -5,7 +5,7 @@
  */
 
 import { test, expect } from "@playwright/test";
-import { normalizeTestRailCase, splitIntoSteps } from "../src/testrail/testrail-normalizer";
+import { normalizeTestRailCase } from "../src/testrail/testrail-normalizer";
 import type { RawTestRailCase } from "../src/types/testrail.types";
 
 test.describe("TestRail Normalizer", () => {

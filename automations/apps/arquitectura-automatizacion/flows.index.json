@@ -535,7 +535,95 @@
       "status": "candidate",
       "createdAt": "2026-05-26T20:45:59.486Z",
       "updatedAt": "2026-05-26T20:45:59.486Z"
+    },
+    {
+      "id": "flow_1779981338645_qn3o76",
+      "name": "[API] AgreementsAcceptanceGET - GET /agreements/ac",
+      "filePath": "flows\\[api]-agreementsacceptanceget---get-\\agreements\\ac.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-28T15:15:38.645Z",
+      "updatedAt": "2026-05-28T15:15:38.645Z"
+    },
+    {
+      "id": "flow_1779981438724_d6vusu",
+      "name": "Consulta de balance - Visualizar listado de depósi",
+      "filePath": "flows\\consulta-de-balance---visualizar-listado-de-depósi.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Transacciones y servicios",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "assertText",
+          "target": "Consulta de balance",
+          "pageObjectId": "ProductDetailPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "click",
+          "target": "Consulta de balance",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "assertText",
+          "target": "Depósitos a plazos",
+          "pageObjectId": "ProductDetailPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "click",
+          "target": "Depósitos a plazos",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-28T15:17:18.724Z",
+      "updatedAt": "2026-05-28T15:17:18.724Z"
     }
   ],
-  "updatedAt": "2026-05-26T20:45:59.489Z"
+  "updatedAt": "2026-05-28T16:24:27.586Z"
 }

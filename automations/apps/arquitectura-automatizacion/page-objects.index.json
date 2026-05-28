@@ -18,7 +18,7 @@
           "status": "active",
           "sensitive": false,
           "confidence": 1,
-          "source": "c37927-validar-inicio-de-sesion-con-credenciales-validas-step-3,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-step-5,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-missing-select_product,c37945-visualizar-carrito-con-producto-agregado-durante-la-sesion-actual-step-5"
+          "source": "c37927-validar-inicio-de-sesion-con-credenciales-validas-step-3,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-step-5,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-missing-select_product,c37945-visualizar-carrito-con-producto-agregado-durante-la-sesion-actual-step-5,c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos-step-4"
         },
         {
           "name": "selectFirstVisibleCard",
@@ -29,6 +29,18 @@
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
+        },
+        {
+          "name": "openModule",
+          "intent": "open_module",
+          "parameters": [
+            "moduleName"
+          ],
+          "available": true,
+          "source": "c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos-missing-open_module",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
         }
       ],
       "confidence": 1,
@@ -36,7 +48,7 @@
       "sourcePlanIds": [],
       "caseIds": [],
       "createdAt": "2026-05-24T05:41:09.961Z",
-      "updatedAt": "2026-05-25T12:23:43.211Z"
+      "updatedAt": "2026-05-28T16:24:27.583Z"
     },
     {
       "id": "po_1779601331578_mkr4do",
@@ -49,7 +61,7 @@
           "intent": "expect_loaded",
           "parameters": [],
           "available": true,
-          "source": "candidate,c37927-validar-inicio-de-sesion-con-credenciales-validas-step-4,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-step-4,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-missing-expect_loaded,c37945-visualizar-carrito-con-producto-agregado-durante-la-sesion-actual-step-8",
+          "source": "candidate,c37927-validar-inicio-de-sesion-con-credenciales-validas-step-4,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-step-4,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-missing-expect_loaded,c37945-visualizar-carrito-con-producto-agregado-durante-la-sesion-actual-step-8,c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos-step-5",
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
@@ -150,7 +162,17 @@
           "intent": "start_session",
           "parameters": [],
           "available": true,
-          "source": "c38065-visualizar-categorias-principales-de-informacion-de-productos-step-3,c38065-visualizar-categorias-principales-de-informacion-de-productos-missing-start_session",
+          "source": "c38065-visualizar-categorias-principales-de-informacion-de-productos-step-3,c38065-visualizar-categorias-principales-de-informacion-de-productos-missing-start_session,c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos-step-3",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        },
+        {
+          "name": "open",
+          "intent": "open_home",
+          "parameters": [],
+          "available": true,
+          "source": "c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos-missing-open_home",
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
@@ -163,7 +185,7 @@
       ],
       "caseIds": [],
       "createdAt": "2026-05-24T06:21:05.635Z",
-      "updatedAt": "2026-05-26T20:45:59.484Z",
+      "updatedAt": "2026-05-28T15:17:18.724Z",
       "codegenMetadata": {
         "generatedAt": "2026-05-24T06:22:47.050Z",
         "generatedBy": "page-object-codegen",
@@ -326,8 +348,34 @@
         "autoApproved": true,
         "blockedMethods": []
       }
+    },
+    {
+      "id": "po_framework_operationsmenupage",
+      "className": "OperationsMenuPage",
+      "filePath": "automations/apps/arquitectura-automatizacion/pages/operationsmenu.page.ts",
+      "screenSignature": "screen:arquitectura-automatizacion-operations_menu",
+      "methods": [
+        {
+          "name": "openModule",
+          "intent": "open_module",
+          "parameters": [
+            "moduleName"
+          ],
+          "available": true,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        }
+      ],
+      "confidence": 1,
+      "status": "active",
+      "sourcePlanIds": [],
+      "caseIds": [],
+      "createdAt": "2026-05-28T17:44:45.467Z",
+      "updatedAt": "2026-05-28T17:44:45.467Z"
     }
   ],
   "componentCandidates": [],
-  "updatedAt": "2026-05-27T13:58:07.716Z"
+  "updatedAt": "2026-05-28T22:21:19.425Z"
 }

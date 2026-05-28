@@ -239,7 +239,7 @@ export type DiscoveryStepResult = {
   // Recovery metadata — set when segmented route recovery resolves a failed step
   originalStatus?: string;
   recoveryStatus?: "recovered" | "repaired";
-  recoveredBy?: "segmented_route_recovery" | "route_completion" | "contextual_intermediate_already_satisfied" | "ordinal_selection";
+  recoveredBy?: "segmented_route_recovery" | "route_completion" | "contextual_intermediate_already_satisfied" | "ordinal_selection" | "auth_flow" | "page_stability" | "later_success" | "retry_after_navigation";
   recoveryMetadata?: {
     selectedCandidateId?: string;
     selectedCandidateText?: string;
@@ -256,6 +256,11 @@ export type DiscoveryStepResult = {
       consistentWithNextTarget: boolean;
       reason: string;
     };
+    // Assertion recovery tracking
+    originalFailureReason?: string;
+    recoveredAfterStep?: number;
+    recoveredBecause?: "auth_gate_completed" | "page_stabilized" | "target_used_successfully_later" | "action_on_target_succeeded";
+    blocking?: boolean;
     ordinalSelectionDiagnostics?: {
       selectionPatternDetected: boolean;
       ordinal?: "first" | "second" | "third" | "last";

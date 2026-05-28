@@ -6,6 +6,7 @@ import type { PageObjectEntry, PageObjectMethod, PageObjectRegistry } from "../t
 import { findReusableMethod, findMethodBySemanticIntent } from "./page-object-registry";
 import { deriveMethodIntentFromStepWithContext, deriveExpectedOwnerForStep } from "./pom-classification";
 import type { SemanticMethodIntent } from "../types/pom-ownership";
+import { isContextDependentIntent, getContextProducedByIntent, INTENT_PREFERRED_OWNER, METHOD_INTENT_NAME_MAP } from "../types/pom-ownership";
 import { isLikelyAuthGate, buildAuthFlowSpecImport, buildAuthFlowInstantiation, buildAuthFlowCall } from "../discovery/auth-flow-helpers";
 import { buildDataKeyVariableMap } from "../data/promoted-data";
 
@@ -239,6 +240,61 @@ function findAuthGateStepIndex(steps: ExecutionPlanStep[]): number {
   return -1;
 }
 
+/**
+ * Validate that context-dependent actions have required context produced by previous steps
+ */
+function validateContextChain(plan: ExecutionPlan): string[] {
+  const errors: string[] = [];
+  const producedContexts = new Set<string>();
+  
+  for (let i = 0; i < plan.steps.length; i++) {
+    const step = plan.steps[i];
+    const semanticIntent = (step as any).semanticIntent as SemanticMethodIntent | undefined;
+    const contextMetadata = step.contextMetadata;
+    
+    if (!semanticIntent) continue;
+    
+    // Track context produced by this step
+    const producedContext = getContextProducedByIntent(semanticIntent);
+    if (producedContext) {
+      producedContexts.add(producedContext);
+    }
+    if (contextMetadata?.producesContext) {
+      producedContexts.add(contextMetadata.producesContext);
+    }
+    
+    // Check if this step requires context
+    if (contextMetadata?.isContextDependent || isContextDependentIntent(semanticIntent)) {
+      const requiredContexts = contextMetadata?.requiresContext || [];
+      
+      // Add default required contexts based on intent
+      if (semanticIntent === "select_product" || semanticIntent === "select_first_visible_product") {
+        requiredContexts.push("product_list");
+      }
+      if (semanticIntent === "click_primary_action") {
+        requiredContexts.push("authenticated");
+      }
+      if (semanticIntent === "submit_form") {
+        requiredContexts.push("form_visible");
+      }
+      
+      // Check if any required context is satisfied
+      const hasRequiredContext = requiredContexts.some(ctx => producedContexts.has(ctx));
+      
+      if (!hasRequiredContext && requiredContexts.length > 0) {
+        const targetValue = getTargetValue(step.target);
+        errors.push(
+          `Context dependency violation at step ${step.index}: Action '${semanticIntent}' on target '${targetValue}' ` +
+          `requires context [${requiredContexts.join(", ")}] but no prior step produces it. ` +
+          `Ensure navigation/module/auth steps precede context-dependent actions.`
+        );
+      }
+    }
+  }
+  
+  return errors;
+}
+
 export function generatePOMSpecFromPlan(
   plan: ExecutionPlan,
   automationId: string,
@@ -247,7 +303,7 @@ export function generatePOMSpecFromPlan(
   pageObjectRegistry: PageObjectRegistry | undefined,
   policy: PromotionPolicy,
   inlineDebugMode: boolean,
-  authFlowOptions?: { alias?: string; landing?: string; testDataJson?: string }
+  authFlowOptions?: { alias?: string; landing?: string; testDataJson?: string; insertionAfterStepIndex?: number }
 ): POMSpecResult {
   const escapedTitle = escapeSpecString(plan.scenario.title);
 
@@ -310,8 +366,16 @@ export function generatePOMSpecFromPlan(
     return varName;
   }
 
-  const authGateStepIndex = authFlowOptions ? findAuthGateStepIndex(plan.steps) : -1;
-  const authGateDetected = authGateStepIndex >= 0;
+  // Determine AuthFlow insertion point from metadata (preferred) or legacy detection
+  const authFlowInsertionAfterIndex = authFlowOptions?.insertionAfterStepIndex ?? -1;
+  const authGateStepIndex = authFlowOptions && authFlowInsertionAfterIndex < 0 
+    ? findAuthGateStepIndex(plan.steps) 
+    : -1;
+  // Use metadata index if available, otherwise use legacy detection
+  const effectiveAuthInsertionIndex = authFlowInsertionAfterIndex >= 0 
+    ? authFlowInsertionAfterIndex 
+    : authGateStepIndex;
+  const authGateDetected = effectiveAuthInsertionIndex >= 0 || authFlowOptions !== undefined;
 
   if (authGateDetected) {
     usedAuthFlow = true;
@@ -349,7 +413,9 @@ export function generatePOMSpecFromPlan(
       continue;
     }
 
-    const isPreAuth = authGateDetected && stepIndex < authGateStepIndex;
+    // Determine if this step is before or after AuthFlow insertion point
+    // Steps at index <= effectiveAuthInsertionIndex are pre-auth, steps after are post-auth
+    const isPreAuth = effectiveAuthInsertionIndex >= 0 && stepIndex <= effectiveAuthInsertionIndex;
 
     const moduleNav = isModuleNavigationStep(step);
     const submitLike = !moduleNav && isSubmitLikeStep(step);
@@ -357,11 +423,24 @@ export function generatePOMSpecFromPlan(
     const selectionLike = !moduleNav && !submitLike && isActionSelectionStep && isSelectionLikeStep(step);
 
     let semanticIntent: SemanticMethodIntent;
+    let contextMetadata: ExecutionPlanStep["contextMetadata"] = {};
 
     if (moduleNav) {
-      semanticIntent = "open_home";
+      // Preserve module navigation target instead of compacting to open_home
+      const targetValue = getTargetValue(step.target);
+      semanticIntent = "open_module";
+      contextMetadata = {
+        producesContext: `module:${targetValue}`,
+        expectedScreen: `module:${targetValue}`,
+        screenTransition: "navigation",
+        isContextDependent: false
+      };
     } else if (submitLike) {
       semanticIntent = "click_primary_action";
+      contextMetadata = {
+        requiresContext: ["authenticated"],
+        isContextDependent: true
+      };
     } else if (selectionLike) {
       const recoveryMeta = (step as any).recoveryMetadata;
       const semanticRole = recoveryMeta?.semanticRole;
@@ -389,12 +468,24 @@ export function generatePOMSpecFromPlan(
           semanticIntent = deriveMethodIntentFromStepWithContext(step, plan.steps);
         }
       }
+      
+      // Mark selection actions as context-dependent
+      contextMetadata = {
+        requiresContext: ["product_list", "category", "module"],
+        isContextDependent: true
+      };
     } else {
       semanticIntent = deriveMethodIntentFromStepWithContext(step, plan.steps);
     }
 
     if (moduleNav && isHomeRouteTarget(getTargetValue(step.target))) {
       semanticIntent = "open_home";
+      contextMetadata = {
+        producesContext: "home",
+        expectedScreen: "home",
+        screenTransition: "navigation",
+        isContextDependent: false
+      };
     }
 
     let resolved = pageObjectRegistry
@@ -628,18 +719,22 @@ export function generatePOMSpecFromPlan(
         reason = "method_missing";
       }
 
+      // Get expected method name (camelCase) from semantic intent (snake_case)
+      const expectedMethodName = METHOD_INTENT_NAME_MAP[semanticIntent] || semanticIntent;
+
       const missingInfo = {
         target: targetValue,
         stepIndex: stepIndex,
         ownerPage: expectedOwner,
-        expectedMethod: semanticIntent,
+        expectedMethod: expectedMethodName,
+        expectedIntent: semanticIntent,
         classification,
         strategy,
         availableMethods,
         reason
       };
 
-      console.log(`[spec-generator-pom] Missing page method: target="${missingInfo.target}" stepIndex=${missingInfo.stepIndex} ownerPage="${missingInfo.ownerPage}" expectedMethod="${missingInfo.expectedMethod}" classification="${missingInfo.classification}" strategy="${missingInfo.strategy}" availableMethods=[${missingInfo.availableMethods.join(", ")}] reason="${missingInfo.reason}"`);
+      console.log(`[spec-generator-pom] Missing page method: target="${missingInfo.target}" stepIndex=${missingInfo.stepIndex} ownerPage="${missingInfo.ownerPage}" expectedMethod="${missingInfo.expectedMethod}" (intent="${missingInfo.expectedIntent}") classification="${missingInfo.classification}" strategy="${missingInfo.strategy}" availableMethods=[${missingInfo.availableMethods.join(", ")}] reason="${missingInfo.reason}"`);
 
       missingMethods.push(
         `step=${stepIndex} target="${targetValue}" ` +
@@ -664,7 +759,11 @@ export function generatePOMSpecFromPlan(
   }
 
   if (usedAuthFlow && authFlowOptions) {
-    const authImport = buildAuthFlowSpecImport(appProfile.appSlug);
+    // Calculate AuthFlow import path dynamically based on spec location
+    const authFlowAbsolutePath = path.resolve(process.cwd(), "automations/apps", appProfile.appSlug, "flows/auth.flow.ts");
+    const authFlowImportPath = buildPortablePathFromSpec(appPaths.specPath ?? "", authFlowAbsolutePath).replace(/\.ts$/, "");
+    const authImport = `import { AuthFlow, setAuthFlowTestData } from '${authFlowImportPath}';`;
+    
     if (!importLines.includes(authImport)) {
       importLines.push(authImport);
     }
@@ -721,7 +820,8 @@ export function generatePOMSpecFromPlan(
   }
 
   if (usedAuthFlow) {
-    lines.push("import { resolvePromotedSpecAuthDataFromEnv } from '../../flows/auth.flow.helpers';");
+    const authFlowHelpersPath = buildPortablePathFromSpec(appPaths.specPath ?? "", path.resolve(process.cwd(), "automations/apps", appProfile.appSlug, "flows", "auth.flow.helpers.ts"));
+    lines.push(`import { resolvePromotedSpecAuthDataFromEnv } from '${authFlowHelpersPath.replace(/\.ts$/, "")}';`);
   }
 
   lines.push("");
@@ -731,6 +831,7 @@ export function generatePOMSpecFromPlan(
     ? `test('[INLINE DEBUG] ${escapedTitle}', async ({ page }) => {`
     : `test('${escapedTitle}', async ({ page }) => {`;
   lines.push(testName);
+  lines.push(`  test.setTimeout(Number(process.env.PROMOTED_SPEC_TIMEOUT_MS ?? 90000));`);
 
   if (requiredDataUsed.size > 0) {
     lines.push("");
@@ -808,7 +909,8 @@ export function generatePOMSpecFromPlan(
     ...validateSpecQuality(actionLines, plan, specContent),
     ...validatePreAuthSteps(plan, specContent, usedAuthFlow),
     ...validateSelectionMapping(plan, actionLines),
-    ...validateNavigationDegradation(plan, actionLines)
+    ...validateNavigationDegradation(plan, actionLines),
+    ...validateContextChain(plan)
   ];
 
   if (validationErrors.length > 0 && pomStatus === "promoted") {

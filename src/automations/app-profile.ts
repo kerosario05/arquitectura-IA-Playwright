@@ -18,6 +18,15 @@ export type AppProfile = {
   updatedAt: string;
 };
 
+export type SectionProfile = {
+  sectionSlug: string;
+  source: "cli" | "env" | "testrail_case" | "default";
+  sectionId?: string | number;
+  sectionName?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type AppProfileResolveOptions = {
   cliAppSlug?: string;
   envAppSlug?: string;
@@ -63,6 +72,34 @@ export function normalizeAppSlug(input?: string): string {
     .replace(/^-|-$/g, "");
 
   if (!normalized || normalized === "default") return "default";
+
+  return normalized;
+}
+
+/**
+ * Normalize section name to a safe sectionSlug
+ * - Remove accents
+ * - Lowercase
+ * - Spaces to dashes
+ * - Block path traversal (../, ..\)
+ * - Block / and \ characters
+ * - Limit to [a-z0-9-]
+ */
+export function normalizeSectionSlug(input?: string): string {
+  if (!input || !input.trim()) return "default-section";
+
+  const raw = input.trim();
+
+  // Block path traversal attempts
+  const sanitized = raw.replace(/\.\./g, "").replace(/[\\/]/g, "-");
+
+  // Normalize: lowercase, remove accents
+  const normalized = normalizeText(sanitized)
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  if (!normalized || normalized === "default") return "default-section";
 
   return normalized;
 }
@@ -138,7 +175,59 @@ export async function resolveAppProfile(options: AppProfileResolveOptions): Prom
   return { profile, baseDir };
 }
 
-export async function ensureAppStructure(baseDir: string): Promise<string[]> {
+export type SectionProfileResolveOptions = {
+  cliSectionSlug?: string;
+  envSectionId?: string | number;
+  testCaseSectionId?: string | number;
+  testCaseSectionName?: string;
+  testRailBaseUrl?: string;
+  testRailEmail?: string;
+  testRailApiKey?: string;
+};
+
+export async function resolveSectionProfile(options: SectionProfileResolveOptions): Promise<{ sectionProfile: SectionProfile }> {
+  const now = new Date().toISOString();
+  let sectionSlug: string;
+  let source: SectionProfile["source"];
+  let sectionId: string | number | undefined;
+  let sectionName: string | undefined;
+
+  if (options.cliSectionSlug?.trim()) {
+    sectionSlug = normalizeSectionSlug(options.cliSectionSlug);
+    source = "cli";
+  } else if (options.envSectionId) {
+    // Could fetch section name from TestRail API if needed
+    sectionSlug = `section-${options.envSectionId}`;
+    source = "env";
+    sectionId = options.envSectionId;
+  } else if (options.testCaseSectionId) {
+    sectionSlug = `section-${options.testCaseSectionId}`;
+    source = "testrail_case";
+    sectionId = options.testCaseSectionId;
+    sectionName = options.testCaseSectionName;
+    
+    // If we have section name, use it for a more readable slug
+    if (options.testCaseSectionName) {
+      sectionSlug = normalizeSectionSlug(options.testCaseSectionName);
+    }
+  } else {
+    sectionSlug = "default-section";
+    source = "default";
+  }
+
+  const sectionProfile: SectionProfile = {
+    sectionSlug,
+    source,
+    sectionId,
+    sectionName,
+    createdAt: now,
+    updatedAt: now
+  };
+
+  return { sectionProfile };
+}
+
+export async function ensureAppStructure(baseDir: string, sectionSlug?: string): Promise<string[]> {
   const created: string[] = [];
 
   await fsp.mkdir(baseDir, { recursive: true });
@@ -151,6 +240,27 @@ export async function ensureAppStructure(baseDir: string): Promise<string[]> {
       await fsp.mkdir(dirPath, { recursive: true });
       created.push(subdir);
     }
+  }
+
+  // Create section folders if sectionSlug is provided
+  if (sectionSlug && sectionSlug !== "default-section") {
+    const sectionsDir = path.join(baseDir, "sections");
+    const sectionDir = path.join(sectionsDir, sectionSlug);
+    const sectionSubdirs = ["cases", "evidence", "runs"];
+    
+    await fsp.mkdir(sectionsDir, { recursive: true });
+    
+    for (const subdir of sectionSubdirs) {
+      const dirPath = path.join(sectionDir, subdir);
+      try {
+        await fsp.access(dirPath);
+      } catch {
+        await fsp.mkdir(dirPath, { recursive: true });
+        created.push(`sections/${sectionSlug}/${subdir}`);
+      }
+    }
+    
+    console.log(`[app-structure] ensured section path ${sectionDir}`);
   }
 
   const defaultAppDir = path.resolve(__dirname, "../../automations/apps/default");
@@ -228,7 +338,24 @@ async function registerFrameworkPageObjects(baseDir: string): Promise<void> {
       filePath: `automations/apps/${appSlug}/pages/productlist.page.ts`,
       screenSignature: `screen:${appSlug}-product_list`,
       methods: [
-        { name: "selectProduct", intent: "select_product", parameters: ["productName"], available: true, status: "active", sensitive: false, confidence: 1.0, source: "" }
+        { name: "selectProduct", intent: "select_product", parameters: ["productName"], available: true, status: "active", sensitive: false, confidence: 1.0, source: "" },
+        { name: "selectFirstVisibleCard", intent: "select_first_visible_card", parameters: [], available: true, status: "active", sensitive: false, confidence: 1.0, source: "" }
+      ],
+      confidence: 1.0,
+      status: "active",
+      sourcePlanIds: [],
+      caseIds: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: "po_framework_operationsmenupage",
+      className: "OperationsMenuPage",
+      filePath: `automations/apps/${appSlug}/pages/operationsmenu.page.ts`,
+      screenSignature: `screen:${appSlug}-operations_menu`,
+      methods: [
+        { name: "openModule", intent: "open_module", parameters: ["moduleName"], available: true, status: "active", sensitive: false, confidence: 1.0, source: "" },
+        { name: "expectModuleVisible", intent: "expect_loaded", parameters: ["moduleName"], available: true, status: "active", sensitive: false, confidence: 1.0, source: "" }
       ],
       confidence: 1.0,
       status: "active",
@@ -389,17 +516,31 @@ export function getPromotedAppDirectory(appProfile: AppProfile, outputRoot?: str
   return path.join(outputRoot ?? ".", "automations", "apps", appProfile.appSlug);
 }
 
-export function buildAppAutomationPaths(appProfile: AppProfile, automationId?: string, outputRoot?: string): AppAutomationPaths {
+export function buildAppAutomationPaths(appProfile: AppProfile, automationId?: string, outputRoot?: string, sectionSlug?: string): AppAutomationPaths {
   const appDir = getPromotedAppDirectory(appProfile, outputRoot);
-  const casesDir = path.join(appDir, "cases");
-  const plansDir = path.join(appDir, "plans");
-  const specsDir = path.join(appDir, "specs");
-  const evidenceDir = path.join(appDir, "evidence");
-  const runsDir = path.join(appDir, "runs");
+  
+  // Use section folder if sectionSlug is provided, otherwise use root cases/specs/evidence/runs
+  const casesDir = sectionSlug && sectionSlug !== "default-section"
+    ? path.join(appDir, "sections", sectionSlug, "cases")
+    : path.join(appDir, "cases");
+  const plansDir = sectionSlug && sectionSlug !== "default-section"
+    ? path.join(appDir, "sections", sectionSlug, "plans")
+    : path.join(appDir, "plans");
+  const specsDir = sectionSlug && sectionSlug !== "default-section"
+    ? path.join(appDir, "sections", sectionSlug, "specs")
+    : path.join(appDir, "specs");
+  const evidenceDir = sectionSlug && sectionSlug !== "default-section"
+    ? path.join(appDir, "sections", sectionSlug, "evidence")
+    : path.join(appDir, "evidence");
+  const runsDir = sectionSlug && sectionSlug !== "default-section"
+    ? path.join(appDir, "sections", sectionSlug, "runs")
+    : path.join(appDir, "runs");
+  
   const pagesDir = path.join(appDir, "pages");
   const componentsDir = path.join(appDir, "components");
   const flowsDir = path.join(appDir, "flows");
   const caseDir = automationId ? path.join(casesDir, automationId) : undefined;
+  
   return {
     appDir,
     configPath: path.join(appDir, "app.config.json"),

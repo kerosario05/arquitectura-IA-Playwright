@@ -103,6 +103,15 @@ export type ExecutionPlanStep = {
     transitionDetected?: boolean;
     executedAction?: string;
   };
+  // Context tracking for context-dependent actions
+  contextMetadata?: {
+    expectedScreen?: string;
+    requiresContext?: string[];
+    producesContext?: string;
+    screenTransition?: "none" | "navigation" | "modal" | "in-place";
+    ownerPage?: string;
+    isContextDependent?: boolean;
+  };
 };
 
 export type ExecutionPlanScenarioRef = {
@@ -121,4 +130,12 @@ export type ExecutionPlan = {
   steps: ExecutionPlanStep[];
   notes?: string[];
   createdAt: string;
+  // Metadata for auth flow insertion and other cross-cutting concerns
+  metadata?: {
+    authFlowRequired?: boolean;
+    authFlowInsertionAfterStepIndex?: number; // Insert AuthFlow after this step (0-based)
+    authFlowAlias?: string;
+    authFlowLanding?: string;
+    authGateDetectedDuringDiscovery?: boolean;
+  };
 };

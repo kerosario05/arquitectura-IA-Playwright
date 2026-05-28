@@ -72,6 +72,7 @@ export type PromotedFillOptions = {
   field: string;
   value: string;
   sensitive?: boolean;
+  actionIntent?: string;
   fill: () => Promise<void>;
   fillInActiveContainer?: () => Promise<void>;
   fillInPage?: () => Promise<void>;
@@ -624,6 +625,82 @@ async function captureDiagnosticsIfNeeded(
   return { ...diagnostics, screenshotPath };
 }
 
+/**
+ * Validate screen context before executing context-dependent actions
+ * Prevents executing deep functional actions from wrong screen (Home/Login/Menu)
+ */
+async function validateScreenContextForAction(
+  page: Page,
+  options: { target: string; actionIntent: string; stepIndex: number }
+): Promise<void> {
+  const CONTEXT_DEPENDENT_ACTIONS = new Set([
+    "select_product", "select_category", "click_primary_action",
+    "submit_form", "confirm_action", "fill_form_field",
+    "select_first_visible_item", "select_first_visible_product",
+    "select_first_visible_card", "select_first_visible_row",
+    "select_visible_item_by_ordinal", "open_module"
+  ]);
+  
+  if (!CONTEXT_DEPENDENT_ACTIONS.has(options.actionIntent)) {
+    return;
+  }
+  
+  // Capture current page state
+  const pageDiag = await capturePageDiagnostics(page);
+  const currentUrl = pageDiag.currentUrl;
+  const visibleButtons = pageDiag.visibleButtons;
+  const visibleHeadings = pageDiag.visibleHeadings;
+  
+  // Check for clear signals of being on wrong screen
+  const isOnHomeScreen = currentUrl === "/" || currentUrl === "" || 
+    visibleHeadings.some(h => /home|inicio|welcome|bienvenid/i.test(h));
+  const isOnLoginScreen = visibleButtons.some(b => /iniciar|login|sign in|ingresar/i.test(b)) &&
+    !visibleButtons.some(b => /continuar|next|submit|confirmar/i.test(b));
+  const isOnMenuScreen = visibleHeadings.some(h => /menu|operaciones|module/i.test(h)) &&
+    visibleButtons.length > 0 && 
+    !visibleButtons.some(b => /producto|item|card|select/i.test(b));
+  
+  // Check for AuthGate/Identification screen
+  const isOnAuthGate = /client-identification|identification|auth|login/i.test(currentUrl) ||
+    visibleHeadings.some(h => /identificaci|identification|auth|login/i.test(h));
+  
+  const isOnWrongScreen = isOnHomeScreen || isOnLoginScreen || isOnMenuScreen || isOnAuthGate;
+  
+  if (isOnWrongScreen) {
+    // Check if target exists on current page
+    const targetExists = visibleButtons.some(b => 
+      b.toLowerCase().includes(options.target.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+    ) || visibleHeadings.some(h =>
+      h.toLowerCase().includes(options.target.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+    );
+    
+    if (!targetExists) {
+      // Special handling for open_module when on AuthGate
+      if (options.actionIntent === "open_module" && isOnAuthGate) {
+        throw new Error(
+          `auth_required_before_open_module: Cannot execute '${options.actionIntent}' on target "${options.target}" ` +
+          `because authentication is required but not completed. ` +
+          `currentUrl="${currentUrl}" visibleButtons=[${visibleButtons.join(", ")}] ` +
+          `visibleHeadings=[${visibleHeadings.join(", ")}] stepIndex=${options.stepIndex} ` +
+          `actionIntent="${options.actionIntent}" ` +
+          `screenSignals={isOnAuthGate:${isOnAuthGate}} ` +
+          `suggestedFix="Call AuthFlow.ensureAuthenticated() before openModule() in the spec"`
+        );
+      }
+      
+      throw new Error(
+        `wrong_screen_before_contextual_action: Cannot execute '${options.actionIntent}' on target "${options.target}" ` +
+        `because current screen does not match required context. ` +
+        `currentUrl="${currentUrl}" visibleButtons=[${visibleButtons.join(", ")}] ` +
+        `visibleHeadings=[${visibleHeadings.join(", ")}] stepIndex=${options.stepIndex} ` +
+        `actionIntent="${options.actionIntent}" ` +
+        `screenSignals={isOnHomeScreen:${isOnHomeScreen}, isOnLoginScreen:${isOnLoginScreen}, isOnMenuScreen:${isOnMenuScreen}, isOnAuthGate:${isOnAuthGate}} ` +
+        `suggestedFix="Ensure navigation/module/auth steps precede this action in the spec"`
+      );
+    }
+  }
+}
+
 export class PromotedSpecRuntime {
   private readonly config: PromotedRuntimeConfig;
   private lastDialogMessage?: string;
@@ -666,6 +743,13 @@ export class PromotedSpecRuntime {
     const previousUrl = this.page.url();
     const expectedEffect = options.expectedEffect ?? "ui_change";
     let retryAttempted = false;
+    
+    // Validate screen context before executing context-dependent actions
+    await validateScreenContextForAction(this.page, {
+      target: options.target,
+      actionIntent: options.actionIntent,
+      stepIndex: options.stepIndex
+    });
     
     // New diagnostics for native click tracking
     let clickPath: PromotedRuntimeDiagnostics["clickPath"] = "failed";
@@ -854,6 +938,13 @@ export class PromotedSpecRuntime {
     const refresh = await this.refreshActiveContainerForField(options.field);
     const refreshedActiveContainer = this.activeContainer?.descriptor;
     const searchedContainers = refresh.candidates.length;
+    
+    // Validate screen context before executing context-dependent actions
+    await validateScreenContextForAction(this.page, {
+      target: options.field,
+      actionIntent: options.actionIntent ?? "fill_form_field",
+      stepIndex: options.stepIndex
+    });
     
     // New diagnostics for native fill tracking
     let fillPath: PromotedRuntimeDiagnostics["fillPath"] = "failed";
