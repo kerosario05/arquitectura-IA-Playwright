@@ -49,6 +49,8 @@ app.listen(PORT, HOST, () => {
   console.log(`  GET  /api/jira/projects/:key/sprints`);
   console.log(`  GET  /api/jira/projects/:key/sprint/active`);
   console.log(`  GET  /api/testrail/status`);
+  console.log(`  GET  /api/testrail/sections`);
+  console.log(`  GET  /api/testrail/sections/:sectionId/cases`);
   console.log(`  GET  /api/testrail/runs`);
   console.log(`  POST /api/runs/sprint`);
   console.log(`  GET  /api/runs`);

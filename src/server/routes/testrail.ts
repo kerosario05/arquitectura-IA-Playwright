@@ -76,6 +76,39 @@ testrailRouter.get("/projects/:projectId/suites/:suiteId/sections", async (req, 
   }
 });
 
+// GET /api/testrail/sections?projectId=1&suiteId=2
+// projectId es requerido; suiteId es opcional (fallback al configurado en .env)
+testrailRouter.get("/sections", async (req, res, next) => {
+  try {
+    const projectId = (req.query["projectId"] as string) || config.integrations.testRail?.projectId;
+    const suiteId = (req.query["suiteId"] as string) || config.integrations.testRail?.suiteId;
+    if (!projectId) {
+      res.status(400).json({ error: "projectId es requerido (query param o TESTRAIL_PROJECT_ID en .env)" });
+      return;
+    }
+    const sections = await client().getSections(projectId, suiteId);
+    res.json({ projectId, suiteId, total: sections.length, sections });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/testrail/sections/:sectionId/cases?projectId=1&suiteId=2
+testrailRouter.get("/sections/:sectionId/cases", async (req, res, next) => {
+  try {
+    const projectId = (req.query["projectId"] as string) || config.integrations.testRail?.projectId;
+    const suiteId = (req.query["suiteId"] as string) || config.integrations.testRail?.suiteId;
+    if (!projectId) {
+      res.status(400).json({ error: "projectId es requerido (query param o TESTRAIL_PROJECT_ID en .env)" });
+      return;
+    }
+    const cases = await client().getCases(projectId, suiteId, req.params.sectionId);
+    res.json({ projectId, suiteId, sectionId: req.params.sectionId, total: cases.length, cases });
+  } catch (err) {
+    next(err);
+  }
+});
+
 testrailRouter.get("/runs", async (_req, res, next) => {
   try {
     const projectId = config.integrations.testRail?.projectId;
