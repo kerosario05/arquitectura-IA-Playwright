@@ -24,8 +24,12 @@ test('Consulta de balance - Finalizar sesión desde detalle de depósito', async
   await page.goto('/');
   await page.waitForLoadState('domcontentloaded');
 
-  await promotedRuntime.clickPromotedTarget({ stepIndex: 3, target: 'Iniciar', actionIntent: 'start_session', expectedEffect: 'ui_change', sensitive: false, previousSteps: [{ stepIndex: 1, actionIntent: 'navigate', target: 'APP_BASE_URL', sensitive: false }], lastSelectionStep: undefined,  expectedOwnerPage: 'HomePage', action: async () => { await homePage.start(); } }); // [target: Iniciar]
-  await promotedRuntime.clickPromotedTarget({ stepIndex: 4, target: 'Transacciones y servicios', actionIntent: 'open_module', expectedEffect: 'ui_change', sensitive: false, previousSteps: [{ stepIndex: 1, actionIntent: 'navigate', target: 'APP_BASE_URL', sensitive: false }, { stepIndex: 3, actionIntent: 'start_session', target: 'Iniciar', sensitive: false }], lastSelectionStep: undefined,  expectedOwnerPage: 'ProductListPage', action: async () => { await operationsMenuPage.openModule('Transacciones y servicios'); } });
+  const replayStep_3 = async () => { await homePage.start(); };
+  const replayStep_4 = async () => { await mainMenuPage.openModule('Transacciones y servicios'); };
+  const replayStep_7 = async () => { await productListPage.selectProduct('Depósitos a plazos'); };
+
+  await promotedRuntime.clickPromotedTarget({ stepIndex: 3, target: 'Iniciar', actionIntent: 'start_session', expectedEffect: 'ui_change', sensitive: false, previousStepReplays: [], lastSelectionStep: undefined,  expectedOwnerPage: 'HomePage', action: async () => { await homePage.start(); } }); // [target: Iniciar]
+  await promotedRuntime.clickPromotedTarget({ stepIndex: 4, target: 'Transacciones y servicios', actionIntent: 'open_module', expectedEffect: 'ui_change', sensitive: false, previousStepReplays: [{ stepIndex: 3, actionIntent: 'start_session', target: 'Iniciar', sensitive: false, replay: replayStep_3 }], lastSelectionStep: undefined,  expectedOwnerPage: 'ProductListPage', action: async () => { await operationsMenuPage.openModule('Transacciones y servicios'); } });
   
     setAuthFlowTestData(resolvePromotedSpecAuthDataFromEnv());
     await authFlow.ensureAuthenticated({
@@ -33,17 +37,8 @@ test('Consulta de balance - Finalizar sesión desde detalle de depósito', async
       landing: 'transactions_menu',
     });
   
-  await promotedRuntime.clickPromotedTarget({ stepIndex: 5, target: 'Consulta de balance', actionIntent: 'open_module', expectedEffect: 'ui_change', sensitive: false, previousSteps: [{ stepIndex: 1, actionIntent: 'navigate', target: 'APP_BASE_URL', sensitive: false }, { stepIndex: 3, actionIntent: 'start_session', target: 'Iniciar', sensitive: false }, { stepIndex: 4, actionIntent: 'open_module', target: 'Transacciones y servicios', sensitive: false }], lastSelectionStep: undefined,  expectedOwnerPage: 'ProductListPage', action: async () => { await operationsMenuPage.openModule('Consulta de balance'); } });
+  await promotedRuntime.clickPromotedTarget({ stepIndex: 5, target: 'Consulta de balance', actionIntent: 'open_module', expectedEffect: 'ui_change', sensitive: false, previousStepReplays: [{ stepIndex: 3, actionIntent: 'start_session', target: 'Iniciar', sensitive: false, replay: replayStep_3 }, { stepIndex: 4, actionIntent: 'open_module', target: 'Transacciones y servicios', sensitive: false, replay: replayStep_4 }], lastSelectionStep: undefined,  expectedOwnerPage: 'ProductListPage', action: async () => { await operationsMenuPage.openModule('Consulta de balance'); } });
   await promotedRuntime.expectPromotedVisible({ stepIndex: 6, target: 'Depósitos a plazos', assertion: async () => { await productDetailPage.expectLoaded(); } }); // [target: Depósitos a plazos]
-  await promotedRuntime.clickPromotedTarget({ stepIndex: 7, target: 'Depósitos a plazos', actionIntent: 'select_product', expectedEffect: 'ui_change', sensitive: false, previousSteps: [{ stepIndex: 1, actionIntent: 'navigate', target: 'APP_BASE_URL', sensitive: false }, { stepIndex: 3, actionIntent: 'start_session', target: 'Iniciar', sensitive: false }, { stepIndex: 4, actionIntent: 'open_module', target: 'Transacciones y servicios', sensitive: false }], lastSelectionStep: { stepIndex: 6, selectedTarget: 'Depósitos a plazos' },  expectedOwnerPage: 'ProductListPage', action: async () => { await productListPage.selectProduct('Depósitos a plazos'); } });
-  await promotedRuntime.clickPromotedTarget({ stepIndex: 8, target: 'Finalizar sesión', actionIntent: 'click_primary_action', expectedEffect: 'ui_change', sensitive: false, previousSteps: [{ stepIndex: 1, actionIntent: 'navigate', target: 'APP_BASE_URL', sensitive: false }, { stepIndex: 3, actionIntent: 'start_session', target: 'Iniciar', sensitive: false }, { stepIndex: 4, actionIntent: 'open_module', target: 'Transacciones y servicios', sensitive: false }, { stepIndex: 7, actionIntent: 'select_product', target: 'Depósitos a plazos', sensitive: false }], lastSelectionStep: { stepIndex: 7, selectedTarget: 'Depósitos a plazos' }, lastSelectionReplay: async () => {
-    await promotedRuntime.clickPromotedTarget({
-      stepIndex: 7,
-      target: 'Depósitos a plazos',
-      actionIntent: 'select_product',
-      expectedEffect: 'ui_change',
-      sensitive: false,
-      previousSteps: [{ stepIndex: 1, actionIntent: 'navigate', target: 'APP_BASE_URL', sensitive: false }, { stepIndex: 3, actionIntent: 'start_session', target: 'Iniciar', sensitive: false }, { stepIndex: 4, actionIntent: 'open_module', target: 'Transacciones y servicios', sensitive: false }]
-    });
-  }, expectedOwnerPage: 'ProductListPage', action: async () => { await productDetailPage.clickPrimaryAction('Finalizar sesión'); } });
+  await promotedRuntime.clickPromotedTarget({ stepIndex: 7, target: 'Depósitos a plazos', actionIntent: 'select_product', expectedEffect: 'ui_change', sensitive: false, previousStepReplays: [{ stepIndex: 3, actionIntent: 'start_session', target: 'Iniciar', sensitive: false, replay: replayStep_3 }, { stepIndex: 4, actionIntent: 'open_module', target: 'Transacciones y servicios', sensitive: false, replay: replayStep_4 }], lastSelectionStep: undefined,  expectedOwnerPage: 'ProductListPage', action: async () => { await productListPage.selectProduct('Depósitos a plazos'); } });
+  await promotedRuntime.clickPromotedTarget({ stepIndex: 8, target: 'Finalizar sesión', actionIntent: 'click_primary_action', expectedEffect: 'ui_change', sensitive: false, previousStepReplays: [{ stepIndex: 3, actionIntent: 'start_session', target: 'Iniciar', sensitive: false, replay: replayStep_3 }, { stepIndex: 4, actionIntent: 'open_module', target: 'Transacciones y servicios', sensitive: false, replay: replayStep_4 }, { stepIndex: 7, actionIntent: 'select_product', target: 'Depósitos a plazos', sensitive: false, replay: replayStep_7 }], lastSelectionStep: undefined,  expectedOwnerPage: 'ProductListPage', action: async () => { await productDetailPage.clickPrimaryAction('Finalizar sesión'); } });
 });

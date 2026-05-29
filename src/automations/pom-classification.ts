@@ -190,57 +190,8 @@ export function deriveSemanticMethodIntent(
     return deriveFirstVisibleSelectionIntent(normalizedText);
   }
 
-  if ((action === "click" || action === "select") && isDetailPrimaryAction(normalizedText)) {
-    return (screenType === "form" || screenType === "confirmation") ? "submit_form" : "click_primary_action";
-  }
-
-  // Check for back/return navigation before select_product
-  if ((action === "click" || action === "select") && isBackOrReturnTarget(normalizedText)) {
-    return "return_to_list";
-  }
-
-  // Check for primary action visibility/state assertions before click
-  // Priority: visibility assertion > state assertion > explicit click
-  const isPrimaryActionTarget = isDetailPrimaryAction(normalizedText) || 
-                                 /solicitar|enviar|continuar|confirmar|guardar|crear|descargar|pagar|transferir/i.test(normalizedText);
-  
-  if (isPrimaryActionTarget) {
-    // Check for visibility assertion first
-    if (isVisibleAssertion(normalizedText)) {
-      return "expect_primary_action_visible";
-    }
-    
-    // Check for state assertion
-    const stateCheck = isStateAssertion(normalizedText);
-    if (stateCheck.enabled === true) {
-      return "expect_primary_action_enabled";
-    }
-    if (stateCheck.enabled === false) {
-      return "expect_primary_action_disabled";
-    }
-    
-    // Check for explicit click action
-    if (isExplicitClickAction(normalizedText, action)) {
-      return "click_primary_action";
-    }
-  }
-
-  if (action.startsWith("assert")) {
-    if (isUsernameTarget(normalizedText) || isPasswordTarget(normalizedText)) return "expect_login_form";
-    if (isLoggedInIndicator(normalizedText)) return "expect_logged_in";
-    return "expect_loaded";
-  }
-
-  if (action === "fill") {
-    if (isUsernameTarget(normalizedText)) return "fill_username";
-    if (isPasswordTarget(normalizedText)) return "fill_password";
-    return "fill_form_field";
-  }
-
-  if ((action === "click" || action === "select") && isLoginTrigger(normalizedText)) {
-    return hasPriorLoginFormEvidence(step, allSteps) ? "submit_login" : "open_login_modal";
-  }
-
+  // Selection-like steps should NEVER be classified as click_primary_action
+  // This prevents false positives for module/category names that contain action-like words
   if (selectionDiagnostics?.selectionLike && selectionDiagnostics?.success) {
     if (screenType === "category" || semanticRole === "category") return "select_category";
     if (screenType === "product_list" || ["product", "card", "item", "entity"].includes(semanticRole)) return "select_product";
@@ -260,6 +211,73 @@ export function deriveSemanticMethodIntent(
   if (selectionDiagnostics?.reason === "selection_no_transition_next_action_enabled") {
     if (screenType === "category") return "select_category";
     return "select_product";
+  }
+
+  // Check for back/return navigation before select_product
+  if ((action === "click" || action === "select") && isBackOrReturnTarget(normalizedText)) {
+    return "return_to_list";
+  }
+
+  // Only check for detail primary actions AFTER ruling out selection-like steps
+  // Detail primary actions are specific to product detail pages, not list/module pages
+  if ((action === "click" || action === "select") && isDetailPrimaryAction(normalizedText)) {
+    // Exclude module/category headings that might contain action words
+    const moduleHeadingPatterns = [
+      /^dep.A?sitos?(a\s+plazo)?$/i,
+      /^pr.A?stamos?$/i,
+      /^cuentas?$/i,
+      /^tarjetas?$/i,
+      /^inversiones?$/i,
+      /^consulta\s+de\s+/i,
+      /^transferencias?$/i,
+      /^pago\s+de\s+/i,
+      /^mis\s+productos$/i,
+      /^productos$/i,
+      /^listado/i,
+    ];
+    const isModuleHeading = moduleHeadingPatterns.some(p => p.test(normalizedText));
+    
+    if (!isModuleHeading) {
+      return (screenType === "form" || screenType === "confirmation") ? "submit_form" : "click_primary_action";
+    }
+  }
+
+  // Check for primary action visibility/state assertions (not actual clicks)
+  const isPrimaryActionTarget = isDetailPrimaryAction(normalizedText) || 
+                                 /solicitar|enviar|continuar|confirmar|guardar|crear|descargar|pagar|transferir/i.test(normalizedText);
+  
+  if (isPrimaryActionTarget) {
+    if (isVisibleAssertion(normalizedText)) {
+      return "expect_primary_action_visible";
+    }
+    
+    const stateCheck = isStateAssertion(normalizedText);
+    if (stateCheck.enabled === true) {
+      return "expect_primary_action_enabled";
+    }
+    if (stateCheck.enabled === false) {
+      return "expect_primary_action_disabled";
+    }
+    
+    if (isExplicitClickAction(normalizedText, action)) {
+      return "click_primary_action";
+    }
+  }
+
+  if (action.startsWith("assert")) {
+    if (isUsernameTarget(normalizedText) || isPasswordTarget(normalizedText)) return "expect_login_form";
+    if (isLoggedInIndicator(normalizedText)) return "expect_logged_in";
+    return "expect_loaded";
+  }
+
+  if (action === "fill") {
+    if (isUsernameTarget(normalizedText)) return "fill_username";
+    if (isPasswordTarget(normalizedText)) return "fill_password";
+    return "fill_form_field";
+  }
+
+  if ((action === "click" || action === "select") && isLoginTrigger(normalizedText)) {
+    return hasPriorLoginFormEvidence(step, allSteps) ? "submit_login" : "open_login_modal";
   }
 
   const combinedText = normalize(`${target} ${action} ${recoveredText} ${semanticRelation}`);

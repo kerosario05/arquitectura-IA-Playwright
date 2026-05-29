@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-05-29T12:49:30.431Z",
+  "updatedAt": "2026-05-29T13:37:38.019Z",
   "automations": [
     {
       "id": "c10002-test-automation-plan",
@@ -1548,13 +1548,13 @@
       "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "1423ba294517",
       "createdAt": "2026-05-28T00:40:22.168Z",
-      "updatedAt": "2026-05-29T12:47:57.689Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-29T12-47-33-274Z\\cases\\case-38131\\discovered-plans.pending.json",
+      "updatedAt": "2026-05-29T13:36:06.770Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-29T13-35-43-233Z\\cases\\case-38131\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-29T12-47-33-274Z\\cases\\case-38131",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-29T13-35-43-233Z\\cases\\case-38131",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -2222,13 +2222,13 @@
       "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "1423ba294517",
       "createdAt": "2026-05-29T00:42:24.443Z",
-      "updatedAt": "2026-05-29T02:04:52.867Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-29T02-04-07-410Z\\cases\\case-38134\\discovered-plans.pending.json",
+      "updatedAt": "2026-05-29T13:36:23.217Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-29T13-35-43-233Z\\cases\\case-38134\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-29T02-04-07-410Z\\cases\\case-38134",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-29T13-35-43-233Z\\cases\\case-38134",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -2282,13 +2282,13 @@
       "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "1423ba294517",
       "createdAt": "2026-05-29T00:50:11.677Z",
-      "updatedAt": "2026-05-29T12:49:30.431Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-29T12-47-33-274Z\\cases\\case-38264\\discovered-plans.pending.json",
+      "updatedAt": "2026-05-29T13:37:38.019Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-29T13-35-43-233Z\\cases\\case-38264\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-29T12-47-33-274Z\\cases\\case-38264",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-29T13-35-43-233Z\\cases\\case-38264",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,

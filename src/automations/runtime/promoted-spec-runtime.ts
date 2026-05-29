@@ -9,7 +9,8 @@ export type SafeReplayStep = {
   stepIndex: number;
   actionIntent: string;
   target: string;
-  action: () => Promise<void>;
+  action?: () => Promise<void>;
+  replay?: () => Promise<void>;
   sensitive?: boolean;
 };
 
@@ -873,6 +874,7 @@ function isSafeActionToReplay(actionIntent: string): boolean {
 
 export type PromotedClickOptions = PromotedActionOptions & {
   previousSteps?: SafeReplayStep[];
+  previousStepReplays?: SafeReplayStep[];
   lastSelectionStep?: { stepIndex: number; selectedTarget: string };
   lastSelectionReplay?: () => Promise<void>;
   expectedOwnerPage?: string;
@@ -930,7 +932,6 @@ export class PromotedSpecRuntime {
   }> {
     const replayedSteps: number[] = [];
     
-    // Filter to steps before the target that are safe to replay
     const stepsToReplay = previousSteps.filter(
       s => s.stepIndex < targetStepIndex && isSafeActionToReplay(s.actionIntent) && !s.sensitive
     );
@@ -944,10 +945,22 @@ export class PromotedSpecRuntime {
     for (const step of stepsToReplay) {
       try {
         console.log(`[runtime:replay] Replaying step ${step.stepIndex}: ${step.actionIntent} "${step.target}"`);
-        await step.action();
-        replayedSteps.push(step.stepIndex);
         
-        // Wait for stability after each replayed step
+        if (step.replay && typeof step.replay === 'function') {
+          await step.replay();
+        } else if (step.action && typeof step.action === 'function') {
+          await step.action();
+        } else {
+          console.warn(`[runtime:replay] Step ${step.stepIndex} has no executable callback`);
+          return { 
+            success: false, 
+            replayedSteps, 
+            stoppedAt: step.stepIndex, 
+            reason: `step_${step.stepIndex}_missing_replay_callback` 
+          };
+        }
+        
+        replayedSteps.push(step.stepIndex);
         await this.waitForPromotedUiStable(step.stepIndex, step.target);
       } catch (error) {
         console.warn(`[runtime:replay] Failed to replay step ${step.stepIndex}: ${error instanceof Error ? error.message : String(error)}`);
@@ -1016,15 +1029,16 @@ export class PromotedSpecRuntime {
     const expectedEffect = options.expectedEffect ?? "ui_change";
     let retryAttempted = false;
     
+    const replaySteps = options.previousStepReplays || options.previousSteps;
+    
     // STEP 1: Detect home reset/inactivity BEFORE any target resolution
     const homeReset = await detectHomeResetOrInactivity(this.page);
     if (homeReset.detected) {
       console.log(`[runtime:session_reset] detected: reason="${homeReset.reason}" currentUrl="${homeReset.currentUrl}" stepIndex=${options.stepIndex}`);
       
-      if (options.previousSteps && options.previousSteps.length > 0) {
-        // Attempt safe replay to restore context
-        console.log(`[runtime:session_reset] replaying steps count=${options.previousSteps.length}`);
-        const replayResult = await this.safeReplayContext(options.previousSteps, options.stepIndex);
+      if (replaySteps && replaySteps.length > 0) {
+        console.log(`[runtime:session_reset] replaying steps count=${replaySteps.length}`);
+        const replayResult = await this.safeReplayContext(replaySteps, options.stepIndex);
         
         if (replayResult.success) {
           console.log(`[runtime:session_reset] replay succeeded: replayedSteps=[${replayResult.replayedSteps.join(", ")}]`);
@@ -1033,19 +1047,18 @@ export class PromotedSpecRuntime {
           throw new Error(
             `session_reset_unrecoverable_replay_failed: Home reset detected but safe replay failed. ` +
             `reason="${replayResult.reason}" currentUrl="${homeReset.currentUrl}" ` +
-            `previousStepsCount=${options.previousSteps.length} stepIndex=${options.stepIndex} ` +
+            `previousStepsCount=${replaySteps.length} stepIndex=${options.stepIndex} ` +
             `target="${options.target}" actionIntent="${options.actionIntent}" ` +
             `suggestedFix="Regenerate spec or increase session timeout"`
           );
         }
       } else {
-        // No previousSteps available for replay
         throw new Error(
-          `session_reset_unrecoverable_missing_step_metadata: Home reset detected but cannot recover context. ` +
+          `session_reset_unrecoverable_missing_replay_callback: Home reset detected but cannot recover context. ` +
           `reason="${homeReset.reason}" currentUrl="${homeReset.currentUrl}" ` +
-          `previousStepsCount=${options.previousSteps?.length || 0} stepIndex=${options.stepIndex} ` +
+          `previousStepsCount=${replaySteps?.length || 0} stepIndex=${options.stepIndex} ` +
           `target="${options.target}" actionIntent="${options.actionIntent}" ` +
-          `suggestedFix="Regenerate spec with previousSteps metadata or increase session timeout"`
+          `suggestedFix="Regenerate spec with previousStepReplays callbacks or increase session timeout"`
         );
       }
     }

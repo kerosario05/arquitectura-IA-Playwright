@@ -5,8 +5,8 @@
     "name": "Arquitectura automatización",
     "baseUrl": "https://172.27.4.50",
     "baseUrlHash": "1423ba294517",
-    "createdAt": "2026-05-29T12:49:30.421Z",
-    "updatedAt": "2026-05-29T12:49:30.421Z"
+    "createdAt": "2026-05-29T13:37:38.005Z",
+    "updatedAt": "2026-05-29T13:37:38.006Z"
   },
   "baseUrl": "https://172.27.4.50",
   "loginMode": "password",
@@ -18,5 +18,5 @@
   "usernameRef": "APP_USERNAME",
   "passwordRef": "APP_PASSWORD",
   "missingInputBehavior": "auto_generate",
-  "updatedAt": "2026-05-29T12:49:30.421Z"
+  "updatedAt": "2026-05-29T13:37:38.006Z"
 }
