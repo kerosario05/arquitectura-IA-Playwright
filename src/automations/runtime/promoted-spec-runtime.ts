@@ -5,6 +5,14 @@ import { capturePageDiagnostics, waitForPromotedSpecStepReady } from "../../brow
 import { waitForStablePageState } from "../../discovery/page-stability-detector";
 import { findSemanticTargetMatch, type SemanticMatchOptions } from "./semantic-target-matcher";
 
+export type SafeReplayStep = {
+  stepIndex: number;
+  actionIntent: string;
+  target: string;
+  action: () => Promise<void>;
+  sensitive?: boolean;
+};
+
 export type PromotedExpectedEffect =
   | "none"
   | "navigation"
@@ -407,7 +415,64 @@ export async function resolvePromotedClickableLocator(
   enabled: boolean;
   clickable: boolean;
 } | undefined> {
-  const normalizedTarget = normalizeText(target);
+  // Alias resolution for return_to_list intent
+  // Maps various "back to list" phrases to the common "Volver" button
+  let effectiveTarget = target;
+  if (options?.actionIntent === "return_to_list") {
+    const returnToListAliases = [
+      /volver al listado/i,
+      /volver al listado de productos/i,
+      /volver al listado principal/i,
+      /regresar al listado/i,
+      /volver al list/i,
+      /regresar al list/i,
+      /back to list/i,
+      /back to listing/i
+    ];
+    
+    const normalizedTarget = normalizeText(target);
+    if (returnToListAliases.some(alias => alias.test(target) || alias.test(normalizedTarget))) {
+      // Try to find "Volver" button first
+      const volverButton = page.getByRole('button', { name: 'Volver', exact: true });
+      if (await volverButton.count() > 0) {
+        const isVisible = await volverButton.isVisible().catch(() => false);
+        if (isVisible) {
+          console.log(`[runtime:return_to_list] Mapped "${target}" -> "Volver" button (alias resolution)`);
+          return {
+            locator: volverButton,
+            strategy: "return_to_list_alias:Volver",
+            scope: "page",
+            visible: true,
+            enabled: true,
+            clickable: true
+          };
+        }
+      }
+      
+      // Fallback: "Atrás" button
+      const atrasButton = page.getByRole('button', { name: /atrás|atras/i });
+      if (await atrasButton.count() > 0) {
+        const isVisible = await atrasButton.first().isVisible().catch(() => false);
+        if (isVisible) {
+          console.log(`[runtime:return_to_list] Mapped "${target}" -> "Atrás" button (alias resolution)`);
+          return {
+            locator: atrasButton.first(),
+            strategy: "return_to_list_alias:Atrás",
+            scope: "page",
+            visible: true,
+            enabled: true,
+            clickable: true
+          };
+        }
+      }
+      
+      // Use normalized target for further resolution
+      effectiveTarget = "Volver";
+      console.log(`[runtime:return_to_list] Using fallback target "${effectiveTarget}" for "${target}"`);
+    }
+  }
+  
+  const normalizedTarget = normalizeText(effectiveTarget);
   const timeoutMs = options?.timeoutMs ?? 5000;
   const actionKind = options?.actionKind;
   const actionIntent = options?.actionIntent;
@@ -631,7 +696,13 @@ async function captureDiagnosticsIfNeeded(
  */
 async function validateScreenContextForAction(
   page: Page,
-  options: { target: string; actionIntent: string; stepIndex: number }
+  options: { 
+    target: string; 
+    actionIntent: string; 
+    stepIndex: number;
+    expectedOwnerPage?: string;
+    lastSelectionStep?: { selectedTarget: string; stepIndex: number };
+  }
 ): Promise<void> {
   const CONTEXT_DEPENDENT_ACTIONS = new Set([
     "select_product", "select_category", "click_primary_action",
@@ -699,7 +770,113 @@ async function validateScreenContextForAction(
       );
     }
   }
+  
+  // Special handling for click_primary_action when on list page but target not visible
+  // This handles cases where we need to re-enter detail page before executing primary action
+  if (options.actionIntent === "click_primary_action" && options.lastSelectionStep) {
+    // Check if we're on a list page (has product cards/items but not detail-specific elements)
+    const isOnListPage = visibleButtons.some(b => /producto|item|card|select|dep|cuenta|tarjeta|balance/i.test(b)) &&
+      !visibleHeadings.some(h => /detalle|detail|informaci|information del producto/i.test(h));
+    
+    if (isOnListPage) {
+      // Check if the primary action target exists on current page
+      const primaryActionExists = visibleButtons.some(b => 
+        b.toLowerCase().includes(options.target.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+      );
+      
+      if (!primaryActionExists) {
+        // Throw specific error that can be caught for re-entry attempt
+        throw new Error(
+          `detail_reentry_required: Expected to be on DetailPage but currently on list page. ` +
+          `Target "${options.target}" not visible. ` +
+          `currentUrl="${currentUrl}" visibleButtons=[${visibleButtons.join(", ")}] ` +
+          `visibleHeadings=[${visibleHeadings.join(", ")}] stepIndex=${options.stepIndex} ` +
+          `actionIntent="${options.actionIntent}" expectedOwnerPage="${options.expectedOwnerPage || 'unknown'}" ` +
+          `lastSelectionStep=${options.lastSelectionStep ? `step=${options.lastSelectionStep.stepIndex} target="${options.lastSelectionStep.selectedTarget}"` : "none"} ` +
+          `suggestedFix="Re-execute the product/item selection step before click_primary_action"`
+        );
+      }
+    }
+  }
 }
+
+/**
+ * Detect if page has returned to home due to inactivity/session timeout
+ */
+async function detectHomeResetOrInactivity(page: Page): Promise<{
+  detected: boolean;
+  reason?: "inactivity_message" | "home_url_with_iniciar" | "session_reset";
+  visibleTexts?: string[];
+  visibleButtons?: string[];
+  currentUrl?: string;
+}> {
+  const pageDiag = await capturePageDiagnostics(page);
+  const currentUrl = pageDiag.currentUrl;
+  const visibleTexts = pageDiag.visibleTexts;
+  const visibleButtons = pageDiag.visibleButtons;
+  const visibleHeadings = pageDiag.visibleHeadings;
+  
+  // Check for inactivity messages
+  const inactivityPatterns = [
+    /volviendo al inicio/i,
+    /volvió a la pantalla de inicio/i,
+    /inactividad/i,
+    /sess(?:ion)? (?:time.?out|expired)/i,
+    /sess(?:ion)? reset/i,
+    /por inactividad/i
+  ];
+  
+  const hasInactivityMessage = visibleTexts.some(t => 
+    inactivityPatterns.some(p => p.test(t))
+  ) || visibleHeadings.some(h => 
+    inactivityPatterns.some(p => p.test(h))
+  );
+  
+  // Check for home URL with only "Iniciar" button (fresh session state)
+  const isOnHomeWithIniciar = (currentUrl === "/" || currentUrl === "") && 
+    visibleButtons.some(b => /iniciar|login|ingresar/i.test(b)) &&
+    visibleButtons.length <= 3; // Home should have few buttons
+  
+  if (hasInactivityMessage) {
+    return { detected: true, reason: "inactivity_message", visibleTexts, visibleButtons, currentUrl };
+  }
+  
+  if (isOnHomeWithIniciar) {
+    return { detected: true, reason: "home_url_with_iniciar", visibleTexts, visibleButtons, currentUrl };
+  }
+  
+  return { detected: false };
+}
+
+/**
+ * Check if an action intent is safe to replay
+ */
+function isSafeActionToReplay(actionIntent: string): boolean {
+  const SAFE_ACTIONS = new Set([
+    "start_session", "open_home", "open_module", "open_product_information",
+    "select_category", "select_product", "select_visible_item_by_ordinal",
+    "select_first_visible_item", "select_first_visible_product", "select_first_visible_card",
+    "navigate", "return_to_list"
+  ]);
+  
+  const UNSAFE_ACTIONS = new Set([
+    "submit_form", "confirm_action", "payment", "transfer", "send",
+    "accept_terms", "delete", "fill_form_field", "click_primary_action"
+  ]);
+  
+  if (UNSAFE_ACTIONS.has(actionIntent)) return false;
+  if (SAFE_ACTIONS.has(actionIntent)) return true;
+  
+  // Default: be conservative, don't replay unknown actions
+  return false;
+}
+
+export type PromotedClickOptions = PromotedActionOptions & {
+  previousSteps?: SafeReplayStep[];
+  lastSelectionStep?: { stepIndex: number; selectedTarget: string };
+  lastSelectionReplay?: () => Promise<void>;
+  expectedOwnerPage?: string;
+};
 
 export class PromotedSpecRuntime {
   private readonly config: PromotedRuntimeConfig;
@@ -739,17 +916,193 @@ export class PromotedSpecRuntime {
     return this.lastDialogMessage;
   }
 
-  async clickPromotedTarget(options: PromotedActionOptions): Promise<void> {
+  /**
+   * Attempt safe replay of previous steps to restore context after home reset
+   */
+  async safeReplayContext(
+    previousSteps: SafeReplayStep[],
+    targetStepIndex: number
+  ): Promise<{
+    success: boolean;
+    replayedSteps: number[];
+    stoppedAt?: number;
+    reason?: string;
+  }> {
+    const replayedSteps: number[] = [];
+    
+    // Filter to steps before the target that are safe to replay
+    const stepsToReplay = previousSteps.filter(
+      s => s.stepIndex < targetStepIndex && isSafeActionToReplay(s.actionIntent) && !s.sensitive
+    );
+    
+    if (stepsToReplay.length === 0) {
+      return { success: false, replayedSteps, reason: "no_safe_steps_to_replay" };
+    }
+    
+    console.log(`[runtime:replay] Attempting to replay ${stepsToReplay.length} safe step(s) to restore context`);
+    
+    for (const step of stepsToReplay) {
+      try {
+        console.log(`[runtime:replay] Replaying step ${step.stepIndex}: ${step.actionIntent} "${step.target}"`);
+        await step.action();
+        replayedSteps.push(step.stepIndex);
+        
+        // Wait for stability after each replayed step
+        await this.waitForPromotedUiStable(step.stepIndex, step.target);
+      } catch (error) {
+        console.warn(`[runtime:replay] Failed to replay step ${step.stepIndex}: ${error instanceof Error ? error.message : String(error)}`);
+        return { 
+          success: false, 
+          replayedSteps, 
+          stoppedAt: step.stepIndex, 
+          reason: `replay_failed_at_step_${step.stepIndex}` 
+        };
+      }
+    }
+    
+    console.log(`[runtime:replay] Successfully replayed ${replayedSteps.length} step(s)`);
+    return { success: true, replayedSteps };
+  }
+
+  /**
+   * Check if current page is already a list page (for return_to_list handling)
+   */
+  async checkIfAlreadyOnListPage(pageDiag: {
+    currentUrl: string;
+    visibleButtons: string[];
+    visibleHeadings: string[];
+    visibleTexts: string[];
+  }): Promise<boolean> {
+    const { currentUrl, visibleButtons, visibleHeadings, visibleTexts } = pageDiag;
+    
+    // Signals that indicate we're on a list page
+    const listPageSignals = {
+      // Multiple product cards/items visible
+      hasMultipleItems: visibleButtons.length >= 2,
+      
+      // Heading indicates list/module
+      hasListHeading: visibleHeadings.some(h => 
+        /consulta|listado|productos|productos|balance|transacciones|menu/i.test(h)
+      ),
+      
+      // No detail-specific elements
+      noDetailSignals: !visibleHeadings.some(h => 
+        /detalle|detail|informaci|information del producto|finalizar sesi|log out|log out/i.test(h)
+      ) && !visibleButtons.some(b =>
+        /finalizar sesi|log out|log out|más detalles|ver detalles|informaci|details/i.test(b)
+      ),
+      
+      // Has product selection buttons/cards
+      hasProductButtons: visibleButtons.some(b =>
+        /dep|cuenta|tarjeta|producto|item|card|balance|préstamo|prestamo/i.test(b)
+      )
+    };
+    
+    const isOnListPage = 
+      listPageSignals.hasMultipleItems &&
+      listPageSignals.hasListHeading &&
+      listPageSignals.noDetailSignals &&
+      listPageSignals.hasProductButtons;
+    
+    if (isOnListPage) {
+      console.log(`[runtime:list_check] List page detected: hasMultipleItems=${listPageSignals.hasMultipleItems} hasListHeading=${listPageSignals.hasListHeading} noDetailSignals=${listPageSignals.noDetailSignals} hasProductButtons=${listPageSignals.hasProductButtons}`);
+    }
+    
+    return isOnListPage;
+  }
+
+  async clickPromotedTarget(options: PromotedClickOptions): Promise<void> {
     const previousUrl = this.page.url();
     const expectedEffect = options.expectedEffect ?? "ui_change";
     let retryAttempted = false;
     
-    // Validate screen context before executing context-dependent actions
-    await validateScreenContextForAction(this.page, {
-      target: options.target,
-      actionIntent: options.actionIntent,
-      stepIndex: options.stepIndex
-    });
+    // STEP 1: Detect home reset/inactivity BEFORE any target resolution
+    const homeReset = await detectHomeResetOrInactivity(this.page);
+    if (homeReset.detected) {
+      console.log(`[runtime:session_reset] detected: reason="${homeReset.reason}" currentUrl="${homeReset.currentUrl}" stepIndex=${options.stepIndex}`);
+      
+      if (options.previousSteps && options.previousSteps.length > 0) {
+        // Attempt safe replay to restore context
+        console.log(`[runtime:session_reset] replaying steps count=${options.previousSteps.length}`);
+        const replayResult = await this.safeReplayContext(options.previousSteps, options.stepIndex);
+        
+        if (replayResult.success) {
+          console.log(`[runtime:session_reset] replay succeeded: replayedSteps=[${replayResult.replayedSteps.join(", ")}]`);
+        } else {
+          console.log(`[runtime:session_reset] replay failed: ${replayResult.reason}`);
+          throw new Error(
+            `session_reset_unrecoverable_replay_failed: Home reset detected but safe replay failed. ` +
+            `reason="${replayResult.reason}" currentUrl="${homeReset.currentUrl}" ` +
+            `previousStepsCount=${options.previousSteps.length} stepIndex=${options.stepIndex} ` +
+            `target="${options.target}" actionIntent="${options.actionIntent}" ` +
+            `suggestedFix="Regenerate spec or increase session timeout"`
+          );
+        }
+      } else {
+        // No previousSteps available for replay
+        throw new Error(
+          `session_reset_unrecoverable_missing_step_metadata: Home reset detected but cannot recover context. ` +
+          `reason="${homeReset.reason}" currentUrl="${homeReset.currentUrl}" ` +
+          `previousStepsCount=${options.previousSteps?.length || 0} stepIndex=${options.stepIndex} ` +
+          `target="${options.target}" actionIntent="${options.actionIntent}" ` +
+          `suggestedFix="Regenerate spec with previousSteps metadata or increase session timeout"`
+        );
+      }
+    }
+    
+    // STEP 2: Special handling for return_to_list: check if already on list page
+    if (options.actionIntent === "return_to_list") {
+      const pageDiag = await capturePageDiagnostics(this.page);
+      const alreadyOnList = await this.checkIfAlreadyOnListPage(pageDiag);
+      
+      if (alreadyOnList) {
+        console.log(`[runtime:return_to_list] Already on list page, marking as satisfied: currentUrl="${pageDiag.currentUrl}"`);
+        return;
+      }
+    }
+    
+    // STEP 3: Validate screen context before executing context-dependent actions
+    try {
+      await validateScreenContextForAction(this.page, {
+        target: options.target,
+        actionIntent: options.actionIntent,
+        stepIndex: options.stepIndex,
+        expectedOwnerPage: options.expectedOwnerPage,
+        lastSelectionStep: options.lastSelectionStep
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("detail_reentry_required")) {
+        // Detail re-entry required - attempt replay if callback available
+        if (options.lastSelectionReplay) {
+          console.log(`[runtime:detail_reentry] Executing lastSelectionReplay callback for step=${options.lastSelectionStep?.stepIndex || 'unknown'} target="${options.lastSelectionStep?.selectedTarget || 'unknown'}"`);
+          try {
+            await options.lastSelectionReplay();
+            console.log(`[runtime:detail_reentry] Replay succeeded, retrying target resolution`);
+            // After successful replay, continue with normal flow (don't throw)
+          } catch (replayError) {
+            console.log(`[runtime:detail_reentry] Replay failed: ${replayError instanceof Error ? replayError.message : String(replayError)}`);
+            throw new Error(
+              `detail_reentry_replay_failed: Could not re-enter detail page to execute "${options.target}". ` +
+              `lastSelectionStep=${options.lastSelectionStep ? `step=${options.lastSelectionStep.stepIndex} target="${options.lastSelectionStep.selectedTarget}"` : "none"} ` +
+              `replayError="${replayError instanceof Error ? replayError.message : String(replayError)}" ` +
+              `suggestedFix="Ensure the selection step callback is executable and navigates to detail page."`
+            );
+          }
+        } else {
+          // No replay callback available - this is a framework limitation
+          throw new Error(
+            `detail_reentry_required: Expected to be on DetailPage but currently on list page. ` +
+            `Target "${options.target}" not visible. ` +
+            `currentUrl="${(await capturePageDiagnostics(this.page)).currentUrl}" ` +
+            `lastSelectionStep=${options.lastSelectionStep ? `step=${options.lastSelectionStep.stepIndex} target="${options.lastSelectionStep.selectedTarget}"` : "none"} ` +
+            `suggestedFix="This is a known framework limitation. The selection step needs an action callback for replay. ` +
+            `Please regenerate the spec or manually add the selection step before the primary action in the spec."`
+          );
+        }
+      } else {
+        throw error;
+      }
+    }
     
     // New diagnostics for native click tracking
     let clickPath: PromotedRuntimeDiagnostics["clickPath"] = "failed";
@@ -923,6 +1276,42 @@ export class PromotedSpecRuntime {
         options.evidenceDir,
         this.config.captureDiagnostics
       );
+      
+      // Check for home reset/inactivity BEFORE throwing generic click error
+      // This prevents semantic_target_not_found when the real issue is session timeout
+      const homeResetFromDiagnostics = await detectHomeResetOrInactivity(this.page);
+      if (homeResetFromDiagnostics.detected) {
+        console.log(`[runtime:session_reset] detected from diagnostics before throw: reason="${homeResetFromDiagnostics.reason}" currentUrl="${homeResetFromDiagnostics.currentUrl}"`);
+        
+        if (options.previousSteps && options.previousSteps.length > 0) {
+          console.log(`[runtime:session_reset] attempting replay from diagnostics: steps=${options.previousSteps.length}`);
+          const replayResult = await this.safeReplayContext(options.previousSteps, options.stepIndex);
+          
+          if (replayResult.success) {
+            console.log(`[runtime:session_reset] replay succeeded, retrying target="${options.target}"`);
+            // Retry the original action after successful replay
+            try {
+              await options.action();
+              await this.waitForPromotedUiStable(options.stepIndex, options.target);
+              return; // Success after replay
+            } catch (retryError) {
+              // Retry failed, throw original error
+            }
+          } else {
+            console.log(`[runtime:session_reset] replay failed: ${replayResult.reason}`);
+          }
+        }
+        
+        // Throw session reset error instead of generic click error
+        throw new Error(
+          `session_reset_unrecoverable: Home reset detected but recovery failed. ` +
+          `reason="${homeResetFromDiagnostics.reason}" currentUrl="${homeResetFromDiagnostics.currentUrl}" ` +
+          `stepIndex=${options.stepIndex} target="${options.target}" actionIntent="${options.actionIntent}" ` +
+          `previousStepsCount=${options.previousSteps?.length || 0} ` +
+          `suggestedFix="Regenerate spec with previousSteps metadata or increase session timeout"`
+        );
+      }
+      
       throw new Error(
         `Promoted click failed at step ${options.stepIndex} target="${options.target}". ` +
         `clickPath=${clickPath} nativeClickAttempted=${nativeClickAttempted} nativeClickSucceeded=${nativeClickSucceeded} ` +

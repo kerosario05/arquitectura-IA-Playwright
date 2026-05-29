@@ -1,0 +1,60 @@
+{
+  "id": "c38262-consulta-de-balance-regresar-desde-detalle-de-deposito",
+  "externalId": "C38262",
+  "caseId": 38262,
+  "title": "Consulta de balance - Regresar desde detalle de depósito",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38262-consulta-de-balance-regresar-desde-detalle-de-deposito\\plan.json",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38262-consulta-de-balance-regresar-desde-detalle-de-deposito\\case.spec.ts",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "arquitectura-automatizacion",
+  "baseUrlHash": "1423ba294517",
+  "createdAt": "2026-05-29T03:09:31.131Z",
+  "updatedAt": "2026-05-29T03:09:31.131Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-29T03-07-33-180Z\\cases\\case-38262\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "not_run",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-29T03-07-33-180Z\\cases\\case-38262",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [],
+      "availablePageObjects": [
+        "ProductListPage",
+        "ProductDetailPage",
+        "FormPage",
+        "HomePage",
+        "LoginPage",
+        "CategoryPage",
+        "ProductInformationPage",
+        "OperationsMenuPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38262-consulta-de-balance-regresar-desde-detalle-de-deposito\\plan.json",
+    "previousStatus": "active"
+  }
+}

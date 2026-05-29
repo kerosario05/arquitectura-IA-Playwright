@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-29T00:40:32.243Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos",
+  "appSlug": "arquitectura-automatizacion",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos\\case.spec.ts",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos\\plan.json",
+  "caseFolder": "c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false
+}

@@ -81,7 +81,7 @@
     "Discovery partial: 6/11 navigations/assertions satisfied.",
     "Recovered 2 transient assertion failure(s) - see step recovery metadata for details."
   ],
-  "createdAt": "2026-05-28T22:21:19.406Z",
+  "createdAt": "2026-05-29T00:45:34.839Z",
   "metadata": {
     "authFlowRequired": true,
     "authFlowInsertionAfterStepIndex": 3,

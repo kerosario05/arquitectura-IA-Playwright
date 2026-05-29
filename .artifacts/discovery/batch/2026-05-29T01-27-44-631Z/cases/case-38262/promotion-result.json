@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-29T01:29:53.803Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c38262-consulta-de-balance-regresar-desde-detalle-de-deposito",
+  "appSlug": "arquitectura-automatizacion",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38262-consulta-de-balance-regresar-desde-detalle-de-deposito\\case.spec.ts",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38262-consulta-de-balance-regresar-desde-detalle-de-deposito\\plan.json",
+  "caseFolder": "c38262-consulta-de-balance-regresar-desde-detalle-de-deposito",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false
+}

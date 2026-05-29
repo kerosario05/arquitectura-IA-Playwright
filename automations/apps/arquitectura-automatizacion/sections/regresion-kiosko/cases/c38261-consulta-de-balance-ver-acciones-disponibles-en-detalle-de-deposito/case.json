@@ -1,0 +1,10 @@
+{
+  "id": "c38261-consulta-de-balance-ver-acciones-disponibles-en-detalle-de-deposito",
+  "externalId": "C38261",
+  "caseId": 38261,
+  "title": "Consulta de balance - Ver acciones disponibles en detalle de depósito",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-05-29T00:46:38.269Z"
+}

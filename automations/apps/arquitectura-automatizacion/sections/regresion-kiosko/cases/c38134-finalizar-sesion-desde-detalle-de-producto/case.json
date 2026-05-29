@@ -1,0 +1,10 @@
+{
+  "id": "c38134-finalizar-sesion-desde-detalle-de-producto",
+  "externalId": "C38134",
+  "caseId": 38134,
+  "title": "Finalizar sesión desde detalle de producto",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-05-29T12:48:14.212Z"
+}

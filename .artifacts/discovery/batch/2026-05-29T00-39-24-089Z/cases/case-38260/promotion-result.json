@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-29T00:45:34.858Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c38260-consulta-de-balance-validar-etiquetas-visibles-del-detalle-de-deposito",
+  "appSlug": "arquitectura-automatizacion",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38260-consulta-de-balance-validar-etiquetas-visibles-del-detalle-de-deposito\\case.spec.ts",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38260-consulta-de-balance-validar-etiquetas-visibles-del-detalle-de-deposito\\plan.json",
+  "caseFolder": "c38260-consulta-de-balance-validar-etiquetas-visibles-del-detalle-de-deposito",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false
+}

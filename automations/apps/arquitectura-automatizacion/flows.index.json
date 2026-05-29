@@ -623,7 +623,113 @@
       "status": "candidate",
       "createdAt": "2026-05-28T15:17:18.724Z",
       "updatedAt": "2026-05-28T15:17:18.724Z"
+    },
+    {
+      "id": "flow_1780015197419_pwdvzs",
+      "name": "Visualizar detalle informativo de tarjeta de crédi",
+      "filePath": "flows\\visualizar-detalle-informativo-de-tarjeta-de-crédi.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Información de productos",
+          "pageObjectId": "ProductInformationPage",
+          "methodName": "openProductInformation"
+        },
+        {
+          "action": "click",
+          "target": "Tarjetas",
+          "pageObjectId": "CategoryPage",
+          "methodName": "selectCategory"
+        },
+        {
+          "action": "click",
+          "target": "Tarjeta de Crédito",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "la primera tarjeta visible del listado",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectFirstVisibleCard"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-29T00:39:57.419Z",
+      "updatedAt": "2026-05-29T00:39:57.419Z"
+    },
+    {
+      "id": "flow_1780015268460_qe0zrf",
+      "name": "Volver al listado desde el detalle de producto",
+      "filePath": "flows\\volver-al-listado-desde-el-detalle-de-producto.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Información de productos",
+          "pageObjectId": "ProductInformationPage",
+          "methodName": "openProductInformation"
+        },
+        {
+          "action": "click",
+          "target": "Depósitos a plazo",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "Volver al listado de productos",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-29T00:41:08.460Z",
+      "updatedAt": "2026-05-29T00:41:08.460Z"
     }
   ],
-  "updatedAt": "2026-05-28T16:24:27.586Z"
+  "updatedAt": "2026-05-29T00:41:08.461Z"
 }

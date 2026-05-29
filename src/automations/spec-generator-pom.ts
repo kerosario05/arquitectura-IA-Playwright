@@ -44,6 +44,185 @@ function escapeSpecString(value: string): string {
   return value.replace(/'/g, "''");
 }
 
+/**
+ * Build previousSteps array for runtime context recovery
+ * Includes safe navigation/selection steps that can be replayed after session reset
+ */
+function buildPreviousStepsParam(steps: ExecutionPlanStep[], currentIndex: number, currentStepSemanticIntent?: string): string {
+  const SAFE_INTENTS = new Set([
+    'start_session', 'open_home', 'open_module', 'open_product_information',
+    'select_category', 'select_product', 'select_visible_item_by_ordinal',
+    'select_first_visible_item', 'select_first_visible_product', 'select_first_visible_card',
+    'navigate', 'return_to_list'
+  ]);
+  
+  const UNSAFE_INTENTS = new Set([
+    'submit_form', 'confirm_action', 'payment', 'transfer', 'send',
+    'accept_terms', 'delete', 'fill_form_field', 'click_primary_action'
+  ]);
+  
+  const previousSteps: string[] = [];
+  
+  for (let i = 0; i < currentIndex; i++) {
+    const step = steps[i];
+    // Extract semantic intent from the step metadata or infer from action
+    let intent = (step as any).semanticIntent;
+    
+    // If semanticIntent not set, try to infer from step metadata or use actionIntent from context
+    if (!intent) {
+      // Check if this step has actionIntent stored in metadata
+      const stepMetadata = (step as any).actionIntent;
+      if (stepMetadata) {
+        intent = stepMetadata;
+      } else {
+        // Fall back to inferring from action type and target
+        const targetValue = getTargetValue(step.target) || step.description || '';
+        const normalizedTarget = targetValue.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        
+        if (step.action === 'click') {
+          if (/iniciar|login|sign in/i.test(normalizedTarget)) {
+            intent = 'start_session';
+          } else if (/informaci|information/i.test(normalizedTarget)) {
+            intent = 'open_product_information';
+          } else if (/transacciones|menu|operaciones/i.test(normalizedTarget)) {
+            intent = 'open_module';
+          } else if (/pr.A?stamos|cuenta|categoria|category/i.test(normalizedTarget)) {
+            intent = 'select_category';
+          } else if (/dep.A?sito|producto|product/i.test(normalizedTarget)) {
+            intent = 'select_product';
+          } else if (/primer|first|visible/i.test(normalizedTarget)) {
+            intent = 'select_visible_item_by_ordinal';
+          } else if (/volver|regresar|back/i.test(normalizedTarget)) {
+            intent = 'return_to_list';
+          } else {
+            intent = 'click'; // Unknown click type
+          }
+        } else {
+          intent = step.action;
+        }
+      }
+    }
+    
+    // Only include safe steps
+    if (SAFE_INTENTS.has(intent) && !UNSAFE_INTENTS.has(intent)) {
+      const targetValue = getTargetValue(step.target) || step.description || '';
+      const isSensitive = (step as any).sensitive || false;
+      previousSteps.push(
+        `{ stepIndex: ${step.index}, actionIntent: '${intent}', target: '${escapeSpecString(targetValue)}', sensitive: ${isSensitive} }`
+      );
+    }
+  }
+  
+  return previousSteps.length > 0 ? `[${previousSteps.join(', ')}]` : '[]';
+}
+
+/**
+ * Find last selection step for detail page re-entry
+ * Prefers ordinal/visible item selections over category/module selections
+ */
+function findLastSelectionStep(steps: ExecutionPlanStep[], currentIndex: number): { stepIndex: number; target: string } | null {
+  // Priority 1: Ordinal/visible item selections (most likely to navigate to detail)
+  const ORDINAL_INTENTS = new Set([
+    'select_visible_item_by_ordinal', 'select_first_visible_item',
+    'select_first_visible_product', 'select_first_visible_card'
+  ]);
+  
+  // Priority 2: Product/item selections
+  const PRODUCT_INTENTS = new Set([
+    'select_product'
+  ]);
+  
+  // Priority 3: Category selections (least specific)
+  const CATEGORY_INTENTS = new Set([
+    'select_category'
+  ]);
+  
+  // Search backwards for highest priority selection
+  let lastOrdinalSelection: { stepIndex: number; target: string } | null = null;
+  let lastProductSelection: { stepIndex: number; target: string } | null = null;
+  let lastCategorySelection: { stepIndex: number; target: string } | null = null;
+  
+  for (let i = currentIndex - 1; i >= 0; i--) {
+    const step = steps[i];
+    let intent = (step as any).semanticIntent;
+    
+    // If semanticIntent not set, infer from target
+    if (!intent) {
+      const targetValue = getTargetValue(step.target) || step.description || '';
+      const normalizedTarget = targetValue.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      
+      if (/pr.A?stamos|cuenta|categoria|category/i.test(normalizedTarget)) {
+        intent = 'select_category';
+      } else if (/dep.A?sito|producto|product/i.test(normalizedTarget)) {
+        intent = 'select_product';
+      } else if (/primer|first|visible|listado/i.test(normalizedTarget)) {
+        intent = 'select_visible_item_by_ordinal';
+      }
+    }
+    
+    // Store the last occurrence of each priority level
+    if (ORDINAL_INTENTS.has(intent) && !lastOrdinalSelection) {
+      lastOrdinalSelection = { stepIndex: step.index, target: getTargetValue(step.target) || step.description || '' };
+    } else if (PRODUCT_INTENTS.has(intent) && !lastProductSelection) {
+      lastProductSelection = { stepIndex: step.index, target: getTargetValue(step.target) || step.description || '' };
+    } else if (CATEGORY_INTENTS.has(intent) && !lastCategorySelection) {
+      lastCategorySelection = { stepIndex: step.index, target: getTargetValue(step.target) || step.description || '' };
+    }
+  }
+  
+  // Return highest priority selection found
+  return lastOrdinalSelection || lastProductSelection || lastCategorySelection;
+}
+
+/**
+ * Build lastSelectionReplay callback for detail page re-entry
+ * Only applies to click_primary_action steps that need detail page context
+ */
+function buildLastSelectionReplayParam(
+  steps: ExecutionPlanStep[],
+  currentIndex: number,
+  currentStep: ExecutionPlanStep
+): string {
+  const lastSelection = findLastSelectionStep(steps, currentIndex);
+  if (!lastSelection) return 'undefined';
+  
+  // Find the selection step details
+  const selectionStep = steps.find(s => s.index === lastSelection.stepIndex);
+  if (!selectionStep) return 'undefined';
+  
+  // Get semantic intent for the selection step
+  let selectionIntent = (selectionStep as any).semanticIntent;
+  if (!selectionIntent) {
+    const targetValue = getTargetValue(selectionStep.target) || selectionStep.description || '';
+    const normalizedTarget = targetValue.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    
+    if (/pr.A?stamos|cuenta|categoria|category/i.test(normalizedTarget)) {
+      selectionIntent = 'select_category';
+    } else if (/dep.A?sito|producto|product/i.test(normalizedTarget)) {
+      selectionIntent = 'select_product';
+    } else if (/primer|first|visible/i.test(normalizedTarget)) {
+      selectionIntent = 'select_visible_item_by_ordinal';
+    } else {
+      selectionIntent = 'click';
+    }
+  }
+  
+  const selectionTarget = getTargetValue(selectionStep.target) || selectionStep.description || '';
+  const previousStepsBeforeSelection = buildPreviousStepsParam(steps, currentIndex - 1);
+  
+  // Build replay callback that uses clickPromotedTarget
+  return `async () => {
+    await promotedRuntime.clickPromotedTarget({
+      stepIndex: ${lastSelection.stepIndex},
+      target: '${escapeSpecString(selectionTarget)}',
+      actionIntent: '${selectionIntent}',
+      expectedEffect: 'ui_change',
+      sensitive: false,
+      previousSteps: ${previousStepsBeforeSelection}
+    });
+  }`;
+}
+
 function buildPortablePathFromSpec(specPath: string, absoluteTargetPath: string): string {
   return path.relative(path.dirname(specPath), absoluteTargetPath).replace(/\\/g, "/");
 }
@@ -607,7 +786,8 @@ export function generatePOMSpecFromPlan(
             args.push(`"${domainTerm}"`);
           }
           const methodCall = `${varName}.${method.name}(${args.join(", ")})`;
-          actionLine = `await promotedRuntime.clickPromotedTarget({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: 'ui_change', sensitive: false, action: async () => { await ${methodCall}; } });`;
+          const previousStepsParam = buildPreviousStepsParam(plan.steps, stepIndex);
+          actionLine = `await promotedRuntime.clickPromotedTarget({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: 'ui_change', sensitive: false, previousSteps: ${previousStepsParam}, action: async () => { await ${methodCall}; } });`;
         } else {
           const args = method.parameters.map((parameter, index) => {
             if ((semanticIntent === "fill_username" || semanticIntent === "fill_password") && index === 0 && resolvedValueExpr) {
@@ -640,7 +820,15 @@ export function generatePOMSpecFromPlan(
           } else if (step.action === "select") {
             actionLine = `await promotedRuntime.selectPromotedItem({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: '${inferExpectedEffect(step, semanticIntent)}', sensitive: ${String(Boolean(method.sensitive))}, action: async () => { await ${methodCall}; } });`;
           } else {
-            actionLine = `await promotedRuntime.clickPromotedTarget({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: '${inferExpectedEffect(step, semanticIntent)}', sensitive: ${String(Boolean(method.sensitive))}, action: async () => { await ${methodCall}; } });`;
+            const previousStepsParam = buildPreviousStepsParam(plan.steps, stepIndex);
+            const lastSelection = findLastSelectionStep(plan.steps, stepIndex);
+            const lastSelectionParam = lastSelection ? `{ stepIndex: ${lastSelection.stepIndex}, selectedTarget: '${escapeSpecString(lastSelection.target)}' }` : 'undefined';
+            const expectedOwnerPage = deriveExpectedOwnerForStep(step, plan.steps);
+            // Add lastSelectionReplay for click_primary_action to enable detail page re-entry
+            const lastSelectionReplayParam = semanticIntent === 'click_primary_action' && lastSelection 
+              ? `lastSelectionReplay: ${buildLastSelectionReplayParam(plan.steps, stepIndex, step)},` 
+              : '';
+            actionLine = `await promotedRuntime.clickPromotedTarget({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: '${inferExpectedEffect(step, semanticIntent)}', sensitive: ${String(Boolean(method.sensitive))}, previousSteps: ${previousStepsParam}, lastSelectionStep: ${lastSelectionParam}, ${lastSelectionReplayParam} expectedOwnerPage: '${expectedOwnerPage || ''}', action: async () => { await ${methodCall}; } });`;
           }
         }
       } else {
@@ -654,7 +842,15 @@ export function generatePOMSpecFromPlan(
         } else if (step.action === "select") {
           actionLine = `await promotedRuntime.selectPromotedItem({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: '${inferExpectedEffect(step, semanticIntent)}', sensitive: ${String(Boolean(method.sensitive))}, action: async () => { await ${methodCall}; } });`;
         } else {
-          actionLine = `await promotedRuntime.clickPromotedTarget({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: '${inferExpectedEffect(step, semanticIntent)}', sensitive: ${String(Boolean(method.sensitive))}, action: async () => { await ${methodCall}; } });`;
+          const previousStepsParam = buildPreviousStepsParam(plan.steps, stepIndex);
+          const lastSelection = findLastSelectionStep(plan.steps, stepIndex);
+          const lastSelectionParam = lastSelection ? `{ stepIndex: ${lastSelection.stepIndex}, selectedTarget: '${escapeSpecString(lastSelection.target)}' }` : 'undefined';
+          const expectedOwnerPage = deriveExpectedOwnerForStep(step, plan.steps);
+          // Add lastSelectionReplay for click_primary_action to enable detail page re-entry
+          const lastSelectionReplayParam = semanticIntent === 'click_primary_action' && lastSelection 
+            ? `lastSelectionReplay: ${buildLastSelectionReplayParam(plan.steps, stepIndex, step)},` 
+            : '';
+          actionLine = `await promotedRuntime.clickPromotedTarget({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: '${inferExpectedEffect(step, semanticIntent)}', sensitive: ${String(Boolean(method.sensitive))}, previousSteps: ${previousStepsParam}, lastSelectionStep: ${lastSelectionParam}, ${lastSelectionReplayParam} expectedOwnerPage: '${expectedOwnerPage || ''}', action: async () => { await ${methodCall}; } });`;
         }
         const tv = getTargetValue(step.target);
         if (tv) {
@@ -681,10 +877,18 @@ export function generatePOMSpecFromPlan(
               return `'${escapeSpecString(targetValue || parameter)}'`;
             }).join(", ");
             const methodCall = `${varName}.${method.name}(${args})`;
-            actionLine = `await promotedRuntime.clickPromotedTarget({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: '${inferExpectedEffect(step, semanticIntent)}', action: async () => { await ${methodCall}; } }); // candidate method`;
+            const previousStepsParam = buildPreviousStepsParam(plan.steps, stepIndex);
+            const lastSelection = findLastSelectionStep(plan.steps, stepIndex);
+            const lastSelectionParam = lastSelection ? `{ stepIndex: ${lastSelection.stepIndex}, selectedTarget: '${escapeSpecString(lastSelection.target)}' }` : 'undefined';
+            const expectedOwnerPage = deriveExpectedOwnerForStep(step, plan.steps);
+            actionLine = `await promotedRuntime.clickPromotedTarget({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: '${inferExpectedEffect(step, semanticIntent)}', previousSteps: ${previousStepsParam}, lastSelectionStep: ${lastSelectionParam}, expectedOwnerPage: '${expectedOwnerPage || ''}', action: async () => { await ${methodCall}; } }); // candidate method`;
           } else {
             const methodCall = `${varName}.${method.name}()`;
-            actionLine = `await promotedRuntime.clickPromotedTarget({ stepIndex: ${step.index}, target: '${escapeSpecString(getTargetValue(step.target))}', actionIntent: '${semanticIntent}', expectedEffect: '${inferExpectedEffect(step, semanticIntent)}', action: async () => { await ${methodCall}; } }); // candidate method`;
+            const previousStepsParam = buildPreviousStepsParam(plan.steps, stepIndex);
+            const lastSelection = findLastSelectionStep(plan.steps, stepIndex);
+            const lastSelectionParam = lastSelection ? `{ stepIndex: ${lastSelection.stepIndex}, selectedTarget: '${escapeSpecString(lastSelection.target)}' }` : 'undefined';
+            const expectedOwnerPage = deriveExpectedOwnerForStep(step, plan.steps);
+            actionLine = `await promotedRuntime.clickPromotedTarget({ stepIndex: ${step.index}, target: '${escapeSpecString(getTargetValue(step.target))}', actionIntent: '${semanticIntent}', expectedEffect: '${inferExpectedEffect(step, semanticIntent)}', previousSteps: ${previousStepsParam}, lastSelectionStep: ${lastSelectionParam}, expectedOwnerPage: '${expectedOwnerPage || ''}', action: async () => { await ${methodCall}; } }); // candidate method`;
           }
           actionLine += `\n  // [candidate] ${description}`;
           generatedCandidates += 1;

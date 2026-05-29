@@ -11,6 +11,7 @@ import { resolvePromotedSpecAuthDataFromEnv } from '../../../../flows/auth.flow.
 export const PROMOTED_SPEC_STRATEGY = "pom_runtime";
 
 test('Consulta de balance - Visualizar listado de depósitos a plazo activos', async ({ page }) => {
+  test.setTimeout(Number(process.env.PROMOTED_SPEC_TIMEOUT_MS ?? 90000));
 
   const homePage = new HomePage(page);
   const operationsMenuPage = new OperationsMenuPage(page);

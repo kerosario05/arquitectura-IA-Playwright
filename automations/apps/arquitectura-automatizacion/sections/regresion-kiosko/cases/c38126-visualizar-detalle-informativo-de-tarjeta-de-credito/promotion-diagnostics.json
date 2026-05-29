@@ -1,0 +1,29 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [
+    "missing_method:step=6 target=\"la primera tarjeta visible del listado\" derivedIntent=\"select_visible_item_by_ordinal\" expectedOwner=\"ProductListPage\" availableMethods=[selectProduct, selectFirstVisibleCard, openModule]"
+  ],
+  "availablePageObjects": [
+    "ProductListPage",
+    "ProductDetailPage",
+    "FormPage",
+    "HomePage",
+    "LoginPage",
+    "CategoryPage",
+    "ProductInformationPage",
+    "OperationsMenuPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [
+    "step=6 target=\"la primera tarjeta visible del listado\" derivedIntent=\"select_visible_item_by_ordinal\" expectedOwner=\"ProductListPage\" availableMethods=[selectProduct, selectFirstVisibleCard, openModule]"
+  ],
+  "autoPomAttempted": true,
+  "autoPomCreatedMethods": [
+    "ProductListPage.selectVisibleItemByOrdinal()"
+  ],
+  "fallbackUsed": false,
+  "requirePomRuntime": false
+}

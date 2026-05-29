@@ -18,14 +18,14 @@
           "status": "active",
           "sensitive": false,
           "confidence": 1,
-          "source": "c37927-validar-inicio-de-sesion-con-credenciales-validas-step-3,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-step-5,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-missing-select_product,c37945-visualizar-carrito-con-producto-agregado-durante-la-sesion-actual-step-5,c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos-step-4"
+          "source": "c37927-validar-inicio-de-sesion-con-credenciales-validas-step-3,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-step-5,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-missing-select_product,c37945-visualizar-carrito-con-producto-agregado-durante-la-sesion-actual-step-5,c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos-step-4,c38126-visualizar-detalle-informativo-de-tarjeta-de-credito-step-6,c38132-volver-al-listado-desde-el-detalle-de-producto-step-5"
         },
         {
           "name": "selectFirstVisibleCard",
           "intent": "select_first_visible_card",
           "parameters": [],
           "available": true,
-          "source": "c37945-visualizar-carrito-con-producto-agregado-durante-la-sesion-actual-step-4,c37945-visualizar-carrito-con-producto-agregado-durante-la-sesion-actual-missing-select_first_visible_card",
+          "source": "c37945-visualizar-carrito-con-producto-agregado-durante-la-sesion-actual-step-4,c37945-visualizar-carrito-con-producto-agregado-durante-la-sesion-actual-missing-select_first_visible_card,c38126-visualizar-detalle-informativo-de-tarjeta-de-credito-step-7",
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
@@ -41,6 +41,19 @@
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
+        },
+        {
+          "name": "selectVisibleItemByOrdinal",
+          "intent": "select_visible_item_by_ordinal",
+          "parameters": [
+            "ordinal",
+            "domainTerm"
+          ],
+          "available": true,
+          "source": "c38126-visualizar-detalle-informativo-de-tarjeta-de-credito-missing-select_visible_item_by_ordinal",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
         }
       ],
       "confidence": 1,
@@ -48,7 +61,7 @@
       "sourcePlanIds": [],
       "caseIds": [],
       "createdAt": "2026-05-24T05:41:09.961Z",
-      "updatedAt": "2026-05-28T16:24:27.583Z"
+      "updatedAt": "2026-05-29T00:39:57.419Z"
     },
     {
       "id": "po_1779601331578_mkr4do",
@@ -77,6 +90,16 @@
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
+        },
+        {
+          "name": "backToList",
+          "intent": "return_to_list",
+          "parameters": [],
+          "available": true,
+          "source": "c38132-volver-al-listado-desde-el-detalle-de-producto-missing-return_to_list",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
         }
       ],
       "confidence": 0.5,
@@ -86,7 +109,7 @@
       ],
       "caseIds": [],
       "createdAt": "2026-05-24T05:42:11.578Z",
-      "updatedAt": "2026-05-24T21:32:48.276Z",
+      "updatedAt": "2026-05-29T00:41:08.460Z",
       "codegenMetadata": {
         "generatedAt": "2026-05-24T05:43:24.464Z",
         "generatedBy": "page-object-codegen",
@@ -162,7 +185,7 @@
           "intent": "start_session",
           "parameters": [],
           "available": true,
-          "source": "c38065-visualizar-categorias-principales-de-informacion-de-productos-step-3,c38065-visualizar-categorias-principales-de-informacion-de-productos-missing-start_session,c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos-step-3",
+          "source": "c38065-visualizar-categorias-principales-de-informacion-de-productos-step-3,c38065-visualizar-categorias-principales-de-informacion-de-productos-missing-start_session,c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos-step-3,c38126-visualizar-detalle-informativo-de-tarjeta-de-credito-step-3,c38132-volver-al-listado-desde-el-detalle-de-producto-step-3",
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
@@ -284,7 +307,7 @@
             "categoryName"
           ],
           "available": true,
-          "source": "candidate,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-step-3,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-missing-select_category,c37945-visualizar-carrito-con-producto-agregado-durante-la-sesion-actual-step-3",
+          "source": "candidate,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-step-3,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-missing-select_category,c37945-visualizar-carrito-con-producto-agregado-durante-la-sesion-actual-step-3,c38126-visualizar-detalle-informativo-de-tarjeta-de-credito-step-5",
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
@@ -322,7 +345,7 @@
           "intent": "open_product_information",
           "parameters": [],
           "available": true,
-          "source": "candidate,c38065-visualizar-categorias-principales-de-informacion-de-productos-step-4,c38065-visualizar-categorias-principales-de-informacion-de-productos-missing-open_product_information",
+          "source": "candidate,c38065-visualizar-categorias-principales-de-informacion-de-productos-step-4,c38065-visualizar-categorias-principales-de-informacion-de-productos-missing-open_product_information,c38126-visualizar-detalle-informativo-de-tarjeta-de-credito-step-4,c38132-volver-al-listado-desde-el-detalle-de-producto-step-4",
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
@@ -377,5 +400,5 @@
     }
   ],
   "componentCandidates": [],
-  "updatedAt": "2026-05-28T22:21:19.425Z"
+  "updatedAt": "2026-05-29T12:49:30.406Z"
 }

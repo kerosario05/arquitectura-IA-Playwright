@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-29T00:40:17.362Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c38127-visualizar-detalle-informativo-de-deposito-a-plazo",
+  "appSlug": "arquitectura-automatizacion",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38127-visualizar-detalle-informativo-de-deposito-a-plazo\\case.spec.ts",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38127-visualizar-detalle-informativo-de-deposito-a-plazo\\plan.json",
+  "caseFolder": "c38127-visualizar-detalle-informativo-de-deposito-a-plazo",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false
+}

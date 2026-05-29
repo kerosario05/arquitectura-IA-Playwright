@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-29T01:28:22.624Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c38132-volver-al-listado-desde-el-detalle-de-producto",
+  "appSlug": "arquitectura-automatizacion",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38132-volver-al-listado-desde-el-detalle-de-producto\\case.spec.ts",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38132-volver-al-listado-desde-el-detalle-de-producto\\plan.json",
+  "caseFolder": "c38132-volver-al-listado-desde-el-detalle-de-producto",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false
+}

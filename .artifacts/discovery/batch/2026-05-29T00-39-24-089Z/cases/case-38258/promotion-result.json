@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-29T00:44:31.010Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c38258-consulta-de-balance-visualizar-detalle-de-deposito-a-plazo-activo",
+  "appSlug": "arquitectura-automatizacion",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38258-consulta-de-balance-visualizar-detalle-de-deposito-a-plazo-activo\\case.spec.ts",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38258-consulta-de-balance-visualizar-detalle-de-deposito-a-plazo-activo\\plan.json",
+  "caseFolder": "c38258-consulta-de-balance-visualizar-detalle-de-deposito-a-plazo-activo",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false
+}
