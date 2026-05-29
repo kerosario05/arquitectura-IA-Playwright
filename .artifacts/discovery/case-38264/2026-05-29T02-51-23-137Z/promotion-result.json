@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-29T02:52:37.448Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c38264-consulta-de-balance-finalizar-sesion-desde-detalle-de-deposito",
+  "appSlug": "arquitectura-automatizacion",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38264-consulta-de-balance-finalizar-sesion-desde-detalle-de-deposito\\case.spec.ts",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38264-consulta-de-balance-finalizar-sesion-desde-detalle-de-deposito\\plan.json",
+  "caseFolder": "c38264-consulta-de-balance-finalizar-sesion-desde-detalle-de-deposito",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false
+}

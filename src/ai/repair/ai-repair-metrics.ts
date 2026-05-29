@@ -24,6 +24,7 @@ export type AiRepairRepairTypeCounts = {
   assertion_resolution: number;
   pom_method_missing: number;
   selection_resolution: number;
+  missing_intermediate_step: number;
   unknown: number;
 };
 
@@ -111,6 +112,7 @@ export function createEmptyCaseSummary(): AiRepairCaseSummary {
       assertion_resolution: 0,
       pom_method_missing: 0,
       selection_resolution: 0,
+      missing_intermediate_step: 0,
       unknown: 0
     },
     appliedRepairs: 0,

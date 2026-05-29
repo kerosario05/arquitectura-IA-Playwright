@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-27T12:55:00.874Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c38066-visualizar-detalle-de-un-producto-de-tarjetas",
+  "appSlug": "arquitectura-automatizacion",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c38066-visualizar-detalle-de-un-producto-de-tarjetas\\case.spec.ts",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c38066-visualizar-detalle-de-un-producto-de-tarjetas\\plan.json",
+  "caseFolder": "c38066-visualizar-detalle-de-un-producto-de-tarjetas",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false
+}

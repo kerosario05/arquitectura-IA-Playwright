@@ -3,6 +3,16 @@ import path from "node:path";
 import type { Page } from "@playwright/test";
 import { capturePageDiagnostics, waitForPromotedSpecStepReady } from "../../browser/promoted-spec-helpers";
 import { waitForStablePageState } from "../../discovery/page-stability-detector";
+import { findSemanticTargetMatch, type SemanticMatchOptions } from "./semantic-target-matcher";
+
+export type SafeReplayStep = {
+  stepIndex: number;
+  actionIntent: string;
+  target: string;
+  action?: () => Promise<void>;
+  replay?: () => Promise<void>;
+  sensitive?: boolean;
+};
 
 export type PromotedExpectedEffect =
   | "none"
@@ -71,6 +81,7 @@ export type PromotedFillOptions = {
   field: string;
   value: string;
   sensitive?: boolean;
+  actionIntent?: string;
   fill: () => Promise<void>;
   fillInActiveContainer?: () => Promise<void>;
   fillInPage?: () => Promise<void>;
@@ -395,6 +406,7 @@ export async function resolvePromotedClickableLocator(
     containerLocator?: string;
     timeoutMs?: number;
     actionKind?: "submit" | "link" | "button" | "action";
+    actionIntent?: string;
   }
 ): Promise<{
   locator: any;
@@ -404,9 +416,67 @@ export async function resolvePromotedClickableLocator(
   enabled: boolean;
   clickable: boolean;
 } | undefined> {
-  const normalizedTarget = normalizeText(target);
+  // Alias resolution for return_to_list intent
+  // Maps various "back to list" phrases to the common "Volver" button
+  let effectiveTarget = target;
+  if (options?.actionIntent === "return_to_list") {
+    const returnToListAliases = [
+      /volver al listado/i,
+      /volver al listado de productos/i,
+      /volver al listado principal/i,
+      /regresar al listado/i,
+      /volver al list/i,
+      /regresar al list/i,
+      /back to list/i,
+      /back to listing/i
+    ];
+    
+    const normalizedTarget = normalizeText(target);
+    if (returnToListAliases.some(alias => alias.test(target) || alias.test(normalizedTarget))) {
+      // Try to find "Volver" button first
+      const volverButton = page.getByRole('button', { name: 'Volver', exact: true });
+      if (await volverButton.count() > 0) {
+        const isVisible = await volverButton.isVisible().catch(() => false);
+        if (isVisible) {
+          console.log(`[runtime:return_to_list] Mapped "${target}" -> "Volver" button (alias resolution)`);
+          return {
+            locator: volverButton,
+            strategy: "return_to_list_alias:Volver",
+            scope: "page",
+            visible: true,
+            enabled: true,
+            clickable: true
+          };
+        }
+      }
+      
+      // Fallback: "Atrás" button
+      const atrasButton = page.getByRole('button', { name: /atrás|atras/i });
+      if (await atrasButton.count() > 0) {
+        const isVisible = await atrasButton.first().isVisible().catch(() => false);
+        if (isVisible) {
+          console.log(`[runtime:return_to_list] Mapped "${target}" -> "Atrás" button (alias resolution)`);
+          return {
+            locator: atrasButton.first(),
+            strategy: "return_to_list_alias:Atrás",
+            scope: "page",
+            visible: true,
+            enabled: true,
+            clickable: true
+          };
+        }
+      }
+      
+      // Use normalized target for further resolution
+      effectiveTarget = "Volver";
+      console.log(`[runtime:return_to_list] Using fallback target "${effectiveTarget}" for "${target}"`);
+    }
+  }
+  
+  const normalizedTarget = normalizeText(effectiveTarget);
   const timeoutMs = options?.timeoutMs ?? 5000;
   const actionKind = options?.actionKind;
+  const actionIntent = options?.actionIntent;
   const container = options?.containerLocator
     ? page.locator(options.containerLocator)
     : undefined;
@@ -533,6 +603,76 @@ export async function resolvePromotedClickableLocator(
     }
   }
 
+  // Semantic fallback for category/product/item selection
+  // Only apply semantic matching for navigation/selection intents, not for sensitive actions
+  const semanticIntents = ["select_category", "select_product", "select_item_by_text", "select_visible_item_by_ordinal", "return_to_list", "select"];
+  const intentForSemantic = actionIntent || (semanticIntents.includes(actionKind || "") ? actionKind : undefined);
+  
+  if (intentForSemantic && semanticIntents.includes(intentForSemantic)) {
+    const semanticOptions: SemanticMatchOptions = {
+      timeoutMs: Math.min(timeoutMs, 3000),
+      actionIntent: intentForSemantic,
+      minScore: 0.65,
+      allowAmbiguity: false,
+      excludeSensitive: true
+    };
+    
+    // Prefer categories/filters over product cards for category selection
+    if (intentForSemantic === "select_category") {
+      semanticOptions.preferTypes = ["button", "link", "heading"];
+      semanticOptions.excludeTypes = ["card"];
+    } else if (intentForSemantic === "select_product") {
+      semanticOptions.preferTypes = ["card", "list_item", "button", "link"];
+    } else if (intentForSemantic === "return_to_list") {
+      semanticOptions.preferTypes = ["button", "link"];
+    }
+    
+    const semanticResult = await findSemanticTargetMatch(page, target, semanticOptions);
+    
+    if (semanticResult.status === "exact" || semanticResult.status === "semantic") {
+      const candidate = semanticResult.candidate!;
+      const tagName = await candidate.locator.evaluate((el: Element) => el.tagName.toLowerCase()).catch(() => "");
+      const type = await candidate.locator.evaluate((el: Element) => (el as HTMLInputElement).type || "").catch(() => "");
+      const isClickable = 
+        ["button", "a", "input"].includes(tagName) ||
+        (tagName === "input" && ["submit", "button", "reset"].includes(type)) ||
+        await candidate.locator.evaluate((el: Element) => el.getAttribute("onclick") !== null || el.getAttribute("role") === "button").catch(() => false);
+      
+      if (isClickable) {
+        return {
+          locator: candidate.locator,
+          strategy: `semantic:${candidate.type}:${semanticResult.reason}`,
+          scope: "page",
+          visible: candidate.visible,
+          enabled: candidate.enabled,
+          clickable: true
+        };
+      }
+    }
+    
+    // Ambiguity error with diagnostics
+    if (semanticResult.status === "ambiguous") {
+      throw new Error(
+        `semantic_target_ambiguous: target="${target}" ` +
+        `bestCandidates=[${semanticResult.candidates?.slice(0, 2).map(c => 
+          `{ text:"${c.text}", score:${c.score.toFixed(2)}, type:"${c.type}" }`
+        ).join(", ")}] ` +
+        `reason="${semanticResult.reason}"`
+      );
+    }
+    
+    // Not found error with diagnostics
+    if (semanticResult.status === "not_found") {
+      throw new Error(
+        `semantic_target_not_found: target="${target}" actionIntent="${intentForSemantic}" ` +
+        `bestCandidates=[${semanticResult.diagnostics.candidateScores.slice(0, 3).map(c => 
+          `{ text:"${c.text}", score:${c.score.toFixed(2)}, type:"${c.type}" }`
+        ).join(", ")}] ` +
+        `reason="${semanticResult.reason}"`
+      );
+    }
+  }
+
   return undefined;
 }
 
@@ -551,11 +691,201 @@ async function captureDiagnosticsIfNeeded(
   return { ...diagnostics, screenshotPath };
 }
 
+/**
+ * Validate screen context before executing context-dependent actions
+ * Prevents executing deep functional actions from wrong screen (Home/Login/Menu)
+ */
+async function validateScreenContextForAction(
+  page: Page,
+  options: { 
+    target: string; 
+    actionIntent: string; 
+    stepIndex: number;
+    expectedOwnerPage?: string;
+    lastSelectionStep?: { selectedTarget: string; stepIndex: number };
+  }
+): Promise<void> {
+  const CONTEXT_DEPENDENT_ACTIONS = new Set([
+    "select_product", "select_category", "click_primary_action",
+    "submit_form", "confirm_action", "fill_form_field",
+    "select_first_visible_item", "select_first_visible_product",
+    "select_first_visible_card", "select_first_visible_row",
+    "select_visible_item_by_ordinal", "open_module"
+  ]);
+  
+  if (!CONTEXT_DEPENDENT_ACTIONS.has(options.actionIntent)) {
+    return;
+  }
+  
+  // Capture current page state
+  const pageDiag = await capturePageDiagnostics(page);
+  const currentUrl = pageDiag.currentUrl;
+  const visibleButtons = pageDiag.visibleButtons;
+  const visibleHeadings = pageDiag.visibleHeadings;
+  
+  // Check for clear signals of being on wrong screen
+  const isOnHomeScreen = currentUrl === "/" || currentUrl === "" || 
+    visibleHeadings.some(h => /home|inicio|welcome|bienvenid/i.test(h));
+  const isOnLoginScreen = visibleButtons.some(b => /iniciar|login|sign in|ingresar/i.test(b)) &&
+    !visibleButtons.some(b => /continuar|next|submit|confirmar/i.test(b));
+  const isOnMenuScreen = visibleHeadings.some(h => /menu|operaciones|module/i.test(h)) &&
+    visibleButtons.length > 0 && 
+    !visibleButtons.some(b => /producto|item|card|select/i.test(b));
+  
+  // Check for AuthGate/Identification screen
+  const isOnAuthGate = /client-identification|identification|auth|login/i.test(currentUrl) ||
+    visibleHeadings.some(h => /identificaci|identification|auth|login/i.test(h));
+  
+  const isOnWrongScreen = isOnHomeScreen || isOnLoginScreen || isOnMenuScreen || isOnAuthGate;
+  
+  if (isOnWrongScreen) {
+    // Check if target exists on current page
+    const targetExists = visibleButtons.some(b => 
+      b.toLowerCase().includes(options.target.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+    ) || visibleHeadings.some(h =>
+      h.toLowerCase().includes(options.target.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+    );
+    
+    if (!targetExists) {
+      // Special handling for open_module when on AuthGate
+      if (options.actionIntent === "open_module" && isOnAuthGate) {
+        throw new Error(
+          `auth_required_before_open_module: Cannot execute '${options.actionIntent}' on target "${options.target}" ` +
+          `because authentication is required but not completed. ` +
+          `currentUrl="${currentUrl}" visibleButtons=[${visibleButtons.join(", ")}] ` +
+          `visibleHeadings=[${visibleHeadings.join(", ")}] stepIndex=${options.stepIndex} ` +
+          `actionIntent="${options.actionIntent}" ` +
+          `screenSignals={isOnAuthGate:${isOnAuthGate}} ` +
+          `suggestedFix="Call AuthFlow.ensureAuthenticated() before openModule() in the spec"`
+        );
+      }
+      
+      throw new Error(
+        `wrong_screen_before_contextual_action: Cannot execute '${options.actionIntent}' on target "${options.target}" ` +
+        `because current screen does not match required context. ` +
+        `currentUrl="${currentUrl}" visibleButtons=[${visibleButtons.join(", ")}] ` +
+        `visibleHeadings=[${visibleHeadings.join(", ")}] stepIndex=${options.stepIndex} ` +
+        `actionIntent="${options.actionIntent}" ` +
+        `screenSignals={isOnHomeScreen:${isOnHomeScreen}, isOnLoginScreen:${isOnLoginScreen}, isOnMenuScreen:${isOnMenuScreen}, isOnAuthGate:${isOnAuthGate}} ` +
+        `suggestedFix="Ensure navigation/module/auth steps precede this action in the spec"`
+      );
+    }
+  }
+  
+  // Special handling for click_primary_action when on list page but target not visible
+  // This handles cases where we need to re-enter detail page before executing primary action
+  if (options.actionIntent === "click_primary_action" && options.lastSelectionStep) {
+    // Check if we're on a list page (has product cards/items but not detail-specific elements)
+    const isOnListPage = visibleButtons.some(b => /producto|item|card|select|dep|cuenta|tarjeta|balance/i.test(b)) &&
+      !visibleHeadings.some(h => /detalle|detail|informaci|information del producto/i.test(h));
+    
+    if (isOnListPage) {
+      // Check if the primary action target exists on current page
+      const primaryActionExists = visibleButtons.some(b => 
+        b.toLowerCase().includes(options.target.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+      );
+      
+      if (!primaryActionExists) {
+        // Throw specific error that can be caught for re-entry attempt
+        throw new Error(
+          `detail_reentry_required: Expected to be on DetailPage but currently on list page. ` +
+          `Target "${options.target}" not visible. ` +
+          `currentUrl="${currentUrl}" visibleButtons=[${visibleButtons.join(", ")}] ` +
+          `visibleHeadings=[${visibleHeadings.join(", ")}] stepIndex=${options.stepIndex} ` +
+          `actionIntent="${options.actionIntent}" expectedOwnerPage="${options.expectedOwnerPage || 'unknown'}" ` +
+          `lastSelectionStep=${options.lastSelectionStep ? `step=${options.lastSelectionStep.stepIndex} target="${options.lastSelectionStep.selectedTarget}"` : "none"} ` +
+          `suggestedFix="Re-execute the product/item selection step before click_primary_action"`
+        );
+      }
+    }
+  }
+}
+
+/**
+ * Detect if page has returned to home due to inactivity/session timeout
+ */
+async function detectHomeResetOrInactivity(page: Page): Promise<{
+  detected: boolean;
+  reason?: "inactivity_message" | "home_url_with_iniciar" | "session_reset";
+  visibleTexts?: string[];
+  visibleButtons?: string[];
+  currentUrl?: string;
+}> {
+  const pageDiag = await capturePageDiagnostics(page);
+  const currentUrl = pageDiag.currentUrl;
+  const visibleTexts = pageDiag.visibleTexts;
+  const visibleButtons = pageDiag.visibleButtons;
+  const visibleHeadings = pageDiag.visibleHeadings;
+  
+  // Check for inactivity messages
+  const inactivityPatterns = [
+    /volviendo al inicio/i,
+    /volvió a la pantalla de inicio/i,
+    /inactividad/i,
+    /sess(?:ion)? (?:time.?out|expired)/i,
+    /sess(?:ion)? reset/i,
+    /por inactividad/i
+  ];
+  
+  const hasInactivityMessage = visibleTexts.some(t => 
+    inactivityPatterns.some(p => p.test(t))
+  ) || visibleHeadings.some(h => 
+    inactivityPatterns.some(p => p.test(h))
+  );
+  
+  // Check for home URL with only "Iniciar" button (fresh session state)
+  const isOnHomeWithIniciar = (currentUrl === "/" || currentUrl === "") && 
+    visibleButtons.some(b => /iniciar|login|ingresar/i.test(b)) &&
+    visibleButtons.length <= 3; // Home should have few buttons
+  
+  if (hasInactivityMessage) {
+    return { detected: true, reason: "inactivity_message", visibleTexts, visibleButtons, currentUrl };
+  }
+  
+  if (isOnHomeWithIniciar) {
+    return { detected: true, reason: "home_url_with_iniciar", visibleTexts, visibleButtons, currentUrl };
+  }
+  
+  return { detected: false };
+}
+
+/**
+ * Check if an action intent is safe to replay
+ */
+function isSafeActionToReplay(actionIntent: string): boolean {
+  const SAFE_ACTIONS = new Set([
+    "start_session", "open_home", "open_module", "open_product_information",
+    "select_category", "select_product", "select_visible_item_by_ordinal",
+    "select_first_visible_item", "select_first_visible_product", "select_first_visible_card",
+    "navigate", "return_to_list"
+  ]);
+  
+  const UNSAFE_ACTIONS = new Set([
+    "submit_form", "confirm_action", "payment", "transfer", "send",
+    "accept_terms", "delete", "fill_form_field", "click_primary_action"
+  ]);
+  
+  if (UNSAFE_ACTIONS.has(actionIntent)) return false;
+  if (SAFE_ACTIONS.has(actionIntent)) return true;
+  
+  // Default: be conservative, don't replay unknown actions
+  return false;
+}
+
+export type PromotedClickOptions = PromotedActionOptions & {
+  previousSteps?: SafeReplayStep[];
+  previousStepReplays?: SafeReplayStep[];
+  lastSelectionStep?: { stepIndex: number; selectedTarget: string };
+  lastSelectionReplay?: () => Promise<void>;
+  expectedOwnerPage?: string;
+};
+
 export class PromotedSpecRuntime {
   private readonly config: PromotedRuntimeConfig;
   private lastDialogMessage?: string;
   private activeContainer?: { selector: string; descriptor: string };
   private activeContainerDiscardReason?: string;
+  private lastSelectionStep?: { selectedTarget: string; stepIndex: number; timestamp: number };
 
   constructor(private readonly page: Page, config?: Partial<PromotedRuntimeConfig>) {
     this.config = { ...loadPromotedRuntimeConfigFromEnv(), ...config };
@@ -588,10 +918,204 @@ export class PromotedSpecRuntime {
     return this.lastDialogMessage;
   }
 
-  async clickPromotedTarget(options: PromotedActionOptions): Promise<void> {
+  /**
+   * Attempt safe replay of previous steps to restore context after home reset
+   */
+  async safeReplayContext(
+    previousSteps: SafeReplayStep[],
+    targetStepIndex: number
+  ): Promise<{
+    success: boolean;
+    replayedSteps: number[];
+    stoppedAt?: number;
+    reason?: string;
+  }> {
+    const replayedSteps: number[] = [];
+    
+    const stepsToReplay = previousSteps.filter(
+      s => s.stepIndex < targetStepIndex && isSafeActionToReplay(s.actionIntent) && !s.sensitive
+    );
+    
+    if (stepsToReplay.length === 0) {
+      return { success: false, replayedSteps, reason: "no_safe_steps_to_replay" };
+    }
+    
+    console.log(`[runtime:replay] Attempting to replay ${stepsToReplay.length} safe step(s) to restore context`);
+    
+    for (const step of stepsToReplay) {
+      try {
+        console.log(`[runtime:replay] Replaying step ${step.stepIndex}: ${step.actionIntent} "${step.target}"`);
+        
+        if (step.replay && typeof step.replay === 'function') {
+          await step.replay();
+        } else if (step.action && typeof step.action === 'function') {
+          await step.action();
+        } else {
+          console.warn(`[runtime:replay] Step ${step.stepIndex} has no executable callback`);
+          return { 
+            success: false, 
+            replayedSteps, 
+            stoppedAt: step.stepIndex, 
+            reason: `step_${step.stepIndex}_missing_replay_callback` 
+          };
+        }
+        
+        replayedSteps.push(step.stepIndex);
+        await this.waitForPromotedUiStable(step.stepIndex, step.target);
+      } catch (error) {
+        console.warn(`[runtime:replay] Failed to replay step ${step.stepIndex}: ${error instanceof Error ? error.message : String(error)}`);
+        return { 
+          success: false, 
+          replayedSteps, 
+          stoppedAt: step.stepIndex, 
+          reason: `replay_failed_at_step_${step.stepIndex}` 
+        };
+      }
+    }
+    
+    console.log(`[runtime:replay] Successfully replayed ${replayedSteps.length} step(s)`);
+    return { success: true, replayedSteps };
+  }
+
+  /**
+   * Check if current page is already a list page (for return_to_list handling)
+   */
+  async checkIfAlreadyOnListPage(pageDiag: {
+    currentUrl: string;
+    visibleButtons: string[];
+    visibleHeadings: string[];
+    visibleTexts: string[];
+  }): Promise<boolean> {
+    const { currentUrl, visibleButtons, visibleHeadings, visibleTexts } = pageDiag;
+    
+    // Signals that indicate we're on a list page
+    const listPageSignals = {
+      // Multiple product cards/items visible
+      hasMultipleItems: visibleButtons.length >= 2,
+      
+      // Heading indicates list/module
+      hasListHeading: visibleHeadings.some(h => 
+        /consulta|listado|productos|productos|balance|transacciones|menu/i.test(h)
+      ),
+      
+      // No detail-specific elements
+      noDetailSignals: !visibleHeadings.some(h => 
+        /detalle|detail|informaci|information del producto|finalizar sesi|log out|log out/i.test(h)
+      ) && !visibleButtons.some(b =>
+        /finalizar sesi|log out|log out|más detalles|ver detalles|informaci|details/i.test(b)
+      ),
+      
+      // Has product selection buttons/cards
+      hasProductButtons: visibleButtons.some(b =>
+        /dep|cuenta|tarjeta|producto|item|card|balance|préstamo|prestamo/i.test(b)
+      )
+    };
+    
+    const isOnListPage = 
+      listPageSignals.hasMultipleItems &&
+      listPageSignals.hasListHeading &&
+      listPageSignals.noDetailSignals &&
+      listPageSignals.hasProductButtons;
+    
+    if (isOnListPage) {
+      console.log(`[runtime:list_check] List page detected: hasMultipleItems=${listPageSignals.hasMultipleItems} hasListHeading=${listPageSignals.hasListHeading} noDetailSignals=${listPageSignals.noDetailSignals} hasProductButtons=${listPageSignals.hasProductButtons}`);
+    }
+    
+    return isOnListPage;
+  }
+
+  async clickPromotedTarget(options: PromotedClickOptions): Promise<void> {
     const previousUrl = this.page.url();
     const expectedEffect = options.expectedEffect ?? "ui_change";
     let retryAttempted = false;
+    
+    const replaySteps = options.previousStepReplays || options.previousSteps;
+    
+    // STEP 1: Detect home reset/inactivity BEFORE any target resolution
+    const homeReset = await detectHomeResetOrInactivity(this.page);
+    if (homeReset.detected) {
+      console.log(`[runtime:session_reset] detected: reason="${homeReset.reason}" currentUrl="${homeReset.currentUrl}" stepIndex=${options.stepIndex}`);
+      
+      if (replaySteps && replaySteps.length > 0) {
+        console.log(`[runtime:session_reset] replaying steps count=${replaySteps.length}`);
+        const replayResult = await this.safeReplayContext(replaySteps, options.stepIndex);
+        
+        if (replayResult.success) {
+          console.log(`[runtime:session_reset] replay succeeded: replayedSteps=[${replayResult.replayedSteps.join(", ")}]`);
+        } else {
+          console.log(`[runtime:session_reset] replay failed: ${replayResult.reason}`);
+          throw new Error(
+            `session_reset_unrecoverable_replay_failed: Home reset detected but safe replay failed. ` +
+            `reason="${replayResult.reason}" currentUrl="${homeReset.currentUrl}" ` +
+            `previousStepsCount=${replaySteps.length} stepIndex=${options.stepIndex} ` +
+            `target="${options.target}" actionIntent="${options.actionIntent}" ` +
+            `suggestedFix="Regenerate spec or increase session timeout"`
+          );
+        }
+      } else {
+        throw new Error(
+          `session_reset_unrecoverable_missing_replay_callback: Home reset detected but cannot recover context. ` +
+          `reason="${homeReset.reason}" currentUrl="${homeReset.currentUrl}" ` +
+          `previousStepsCount=${replaySteps?.length || 0} stepIndex=${options.stepIndex} ` +
+          `target="${options.target}" actionIntent="${options.actionIntent}" ` +
+          `suggestedFix="Regenerate spec with previousStepReplays callbacks or increase session timeout"`
+        );
+      }
+    }
+    
+    // STEP 2: Special handling for return_to_list: check if already on list page
+    if (options.actionIntent === "return_to_list") {
+      const pageDiag = await capturePageDiagnostics(this.page);
+      const alreadyOnList = await this.checkIfAlreadyOnListPage(pageDiag);
+      
+      if (alreadyOnList) {
+        console.log(`[runtime:return_to_list] Already on list page, marking as satisfied: currentUrl="${pageDiag.currentUrl}"`);
+        return;
+      }
+    }
+    
+    // STEP 3: Validate screen context before executing context-dependent actions
+    try {
+      await validateScreenContextForAction(this.page, {
+        target: options.target,
+        actionIntent: options.actionIntent,
+        stepIndex: options.stepIndex,
+        expectedOwnerPage: options.expectedOwnerPage,
+        lastSelectionStep: options.lastSelectionStep
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("detail_reentry_required")) {
+        // Detail re-entry required - attempt replay if callback available
+        if (options.lastSelectionReplay) {
+          console.log(`[runtime:detail_reentry] Executing lastSelectionReplay callback for step=${options.lastSelectionStep?.stepIndex || 'unknown'} target="${options.lastSelectionStep?.selectedTarget || 'unknown'}"`);
+          try {
+            await options.lastSelectionReplay();
+            console.log(`[runtime:detail_reentry] Replay succeeded, retrying target resolution`);
+            // After successful replay, continue with normal flow (don't throw)
+          } catch (replayError) {
+            console.log(`[runtime:detail_reentry] Replay failed: ${replayError instanceof Error ? replayError.message : String(replayError)}`);
+            throw new Error(
+              `detail_reentry_replay_failed: Could not re-enter detail page to execute "${options.target}". ` +
+              `lastSelectionStep=${options.lastSelectionStep ? `step=${options.lastSelectionStep.stepIndex} target="${options.lastSelectionStep.selectedTarget}"` : "none"} ` +
+              `replayError="${replayError instanceof Error ? replayError.message : String(replayError)}" ` +
+              `suggestedFix="Ensure the selection step callback is executable and navigates to detail page."`
+            );
+          }
+        } else {
+          // No replay callback available - this is a framework limitation
+          throw new Error(
+            `detail_reentry_required: Expected to be on DetailPage but currently on list page. ` +
+            `Target "${options.target}" not visible. ` +
+            `currentUrl="${(await capturePageDiagnostics(this.page)).currentUrl}" ` +
+            `lastSelectionStep=${options.lastSelectionStep ? `step=${options.lastSelectionStep.stepIndex} target="${options.lastSelectionStep.selectedTarget}"` : "none"} ` +
+            `suggestedFix="This is a known framework limitation. The selection step needs an action callback for replay. ` +
+            `Please regenerate the spec or manually add the selection step before the primary action in the spec."`
+          );
+        }
+      } else {
+        throw error;
+      }
+    }
     
     // New diagnostics for native click tracking
     let clickPath: PromotedRuntimeDiagnostics["clickPath"] = "failed";
@@ -605,6 +1129,65 @@ export class PromotedSpecRuntime {
     let fallbackUsed: PromotedRuntimeDiagnostics["fallbackUsed"] = "none";
     let matchedLocatorStrategy = "unknown";
 
+    // Post-selection detail state verification
+    // If previous step was a selection and current step expects detail page, verify we navigated
+    if (this.lastSelectionStep && options.actionIntent === "click_primary_action") {
+      const selectionDiag = await this.verifyDetailStateAfterSelection(options.target);
+      if (!selectionDiag.reachedDetail) {
+        throw new Error(
+          `selection_did_not_reach_expected_detail_state: After selecting "${this.lastSelectionStep.selectedTarget}", ` +
+          `expected to be on detail page but still on list/source page. ` +
+          `currentUrl="${selectionDiag.currentUrl}" visibleButtons=[${selectionDiag.visibleButtons.join(", ")}] ` +
+          `visibleHeadings=[${selectionDiag.visibleHeadings.join(", ")}] nextStepTarget="${options.target}" ` +
+          `nextStepIntent="${options.actionIntent}" expectedOwnerPage="DetailPage" ` +
+          `sourcePageSignature="ListPage" destinationPageExpectedSignals=["primary_action_button", "detail_heading"]`
+        );
+      }
+      this.lastSelectionStep = undefined;
+    }
+
+    // Guard: Verify target is visible before executing primary action
+    // This prevents calling POM methods on wrong page/state
+    if (options.actionIntent === "click_primary_action" || options.actionIntent === "expect_primary_action_visible") {
+      try {
+        // First try exact role/link match
+        const targetLocator = this.page.getByRole('button', { name: new RegExp(options.target, 'i') })
+          .or(this.page.getByRole('link', { name: new RegExp(options.target, 'i') }));
+        let isVisible = await targetLocator.isVisible({ timeout: 5000 }).catch(() => false);
+        
+        // Semantic fallback if exact match fails
+        if (!isVisible) {
+          const semanticResult = await findSemanticTargetMatch(this.page, options.target, {
+            timeoutMs: 3000,
+            actionIntent: "click_primary_action",
+            minScore: 0.75,
+            preferTypes: ["button", "link"],
+            excludeSensitive: false
+          });
+          
+          if (semanticResult.status === "exact" || semanticResult.status === "semantic") {
+            isVisible = await semanticResult.candidate!.locator.isVisible().catch(() => false);
+          }
+        }
+        
+        if (!isVisible) {
+          // Capture page state for diagnostics
+          const pageDiag = await capturePageDiagnostics(this.page);
+          throw new Error(
+            `wrong_screen_before_primary_action: Target "${options.target}" not visible on current page. ` +
+            `currentUrl="${pageDiag.currentUrl}" visibleButtons=[${pageDiag.visibleButtons.join(", ")}] ` +
+            `visibleHeadings=[${pageDiag.visibleHeadings.join(", ")}] stepIndex=${options.stepIndex} ` +
+            `actionIntent="${options.actionIntent}" expectedOwnerPage="DetailPage"`
+          );
+        }
+      } catch (error) {
+        if (error instanceof Error && error.message.includes("wrong_screen_before_primary_action")) {
+          throw error;
+        }
+        // Continue with normal flow if visibility check fails for other reasons
+      }
+    }
+
     // Step 1: Try native runtime click with resolved locator
     nativeClickAttempted = true;
     const containerSelector = this.activeContainer?.selector;
@@ -613,7 +1196,8 @@ export class PromotedSpecRuntime {
       const resolved = await resolvePromotedClickableLocator(this.page, options.target, {
         containerLocator: containerSelector,
         timeoutMs: this.config.actionTimeoutMs,
-        actionKind: options.actionIntent as "submit" | "link" | "button" | "action"
+        actionKind: options.actionIntent as "submit" | "link" | "button" | "action",
+        actionIntent: options.actionIntent
       });
 
       if (resolved && resolved.locator) {
@@ -705,6 +1289,42 @@ export class PromotedSpecRuntime {
         options.evidenceDir,
         this.config.captureDiagnostics
       );
+      
+      // Check for home reset/inactivity BEFORE throwing generic click error
+      // This prevents semantic_target_not_found when the real issue is session timeout
+      const homeResetFromDiagnostics = await detectHomeResetOrInactivity(this.page);
+      if (homeResetFromDiagnostics.detected) {
+        console.log(`[runtime:session_reset] detected from diagnostics before throw: reason="${homeResetFromDiagnostics.reason}" currentUrl="${homeResetFromDiagnostics.currentUrl}"`);
+        
+        if (options.previousSteps && options.previousSteps.length > 0) {
+          console.log(`[runtime:session_reset] attempting replay from diagnostics: steps=${options.previousSteps.length}`);
+          const replayResult = await this.safeReplayContext(options.previousSteps, options.stepIndex);
+          
+          if (replayResult.success) {
+            console.log(`[runtime:session_reset] replay succeeded, retrying target="${options.target}"`);
+            // Retry the original action after successful replay
+            try {
+              await options.action();
+              await this.waitForPromotedUiStable(options.stepIndex, options.target);
+              return; // Success after replay
+            } catch (retryError) {
+              // Retry failed, throw original error
+            }
+          } else {
+            console.log(`[runtime:session_reset] replay failed: ${replayResult.reason}`);
+          }
+        }
+        
+        // Throw session reset error instead of generic click error
+        throw new Error(
+          `session_reset_unrecoverable: Home reset detected but recovery failed. ` +
+          `reason="${homeResetFromDiagnostics.reason}" currentUrl="${homeResetFromDiagnostics.currentUrl}" ` +
+          `stepIndex=${options.stepIndex} target="${options.target}" actionIntent="${options.actionIntent}" ` +
+          `previousStepsCount=${options.previousSteps?.length || 0} ` +
+          `suggestedFix="Regenerate spec with previousSteps metadata or increase session timeout"`
+        );
+      }
+      
       throw new Error(
         `Promoted click failed at step ${options.stepIndex} target="${options.target}". ` +
         `clickPath=${clickPath} nativeClickAttempted=${nativeClickAttempted} nativeClickSucceeded=${nativeClickSucceeded} ` +
@@ -720,6 +1340,13 @@ export class PromotedSpecRuntime {
     const refresh = await this.refreshActiveContainerForField(options.field);
     const refreshedActiveContainer = this.activeContainer?.descriptor;
     const searchedContainers = refresh.candidates.length;
+    
+    // Validate screen context before executing context-dependent actions
+    await validateScreenContextForAction(this.page, {
+      target: options.field,
+      actionIntent: options.actionIntent ?? "fill_form_field",
+      stepIndex: options.stepIndex
+    });
     
     // New diagnostics for native fill tracking
     let fillPath: PromotedRuntimeDiagnostics["fillPath"] = "failed";
@@ -884,6 +1511,12 @@ export class PromotedSpecRuntime {
   }
 
   async selectPromotedItem(options: PromotedActionOptions): Promise<void> {
+    // Track selection step for post-selection detail verification
+    this.lastSelectionStep = {
+      selectedTarget: options.target,
+      stepIndex: options.stepIndex,
+      timestamp: Date.now()
+    };
     await this.clickPromotedTarget({ ...options, actionIntent: "select" });
   }
 
@@ -910,6 +1543,53 @@ export class PromotedSpecRuntime {
         `Promoted assertion failed at step ${options.stepIndex} target="${options.target}". diagnostics=${JSON.stringify(diagnostics)} cause=${error instanceof Error ? error.message : String(error)}`
       );
     }
+  }
+
+  private async verifyDetailStateAfterSelection(nextTarget: string): Promise<{
+    reachedDetail: boolean;
+    currentUrl: string;
+    visibleButtons: string[];
+    visibleHeadings: string[];
+  }> {
+    // Wait for potential navigation after selection
+    await this.page.waitForLoadState('domcontentloaded', { timeout: 5000 }).catch(() => {});
+    await this.page.waitForTimeout(1000);
+    
+    const pageDiag = await capturePageDiagnostics(this.page);
+    
+    // Check if we're still on a list/subcategory page
+    const listPageIndicators = [
+      /selecciona/i, /elige/i, /select/i, /choose/i,
+      /listado/i, /lista/i, /list/i,
+      /subcategoria/i, /subcategory/i
+    ];
+    
+    const isStillOnListPage = pageDiag.visibleHeadings.some(h => listPageIndicators.some(r => r.test(h)));
+    
+    // Check if primary action button is visible (detail page indicator)
+    const primaryActionVisible = pageDiag.visibleButtons.some(b => 
+      b.toLowerCase().includes(nextTarget.toLowerCase())
+    );
+    
+    // Check for detail page indicators
+    const detailIndicators = [
+      /detalle/i, /detail/i, /resumen/i, /summary/i,
+      /información/i, /information/i, /datos/i
+    ];
+    
+    const hasDetailHeading = pageDiag.visibleHeadings.some(h => detailIndicators.some(r => r.test(h)));
+    
+    // Consider it reached detail if:
+    // 1. Primary action is visible, OR
+    // 2. Has detail heading AND not on list page
+    const reachedDetail = primaryActionVisible || (hasDetailHeading && !isStillOnListPage);
+    
+    return {
+      reachedDetail,
+      currentUrl: pageDiag.currentUrl,
+      visibleButtons: pageDiag.visibleButtons,
+      visibleHeadings: pageDiag.visibleHeadings
+    };
   }
 
   private async postActionStability(previousUrl: string, expectedEffect: PromotedExpectedEffect): Promise<void> {

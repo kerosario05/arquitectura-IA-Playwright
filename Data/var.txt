@@ -4,7 +4,7 @@ TESTRAIL_EMAIL=radames@bsc.com.do
 TESTRAIL_API_KEY=sVqkc.oPRtlnDQraSqfK-0ULMdhAbfyiBzqEqPCSB
 TESTRAIL_PROJECT_ID=56
 TESTRAIL_SUITE_ID=1731
-TESTRAIL_SECTION_ID=4769
+TESTRAIL_SECTION_ID=4761
 
 # Future Jira integration
 JIRA_BASE_URL=https://bmsc.atlassian.net
@@ -14,12 +14,15 @@ JIRA_PROJECT_KEY=AA
 
 
 # Target web application
-BASE_URL=https://www.demoblaze.com
-APP_BASE_URL=https://www.demoblaze.com
-APP_LOGIN_MODE=no_login
+BASE_URL=https://172.27.4.50
+APP_BASE_URL=https://172.27.4.50
+APP_LOGIN_MODE=password
+DISCOVERY_EXPECTED_RESULT_MODE=context
 
 APP_USERNAME=adminr
 APP_PASSWORD=admin123
+
+
 
 OTP_SECRET=000000
 Identity_Provider=00116848235
@@ -64,16 +67,14 @@ AI_REQUIRE_JSON_SCHEMA=true
 AI_ENABLED=true
 AI_PROVIDER=codex_cli
 AI_PROVIDER_NAME=codex
-AI_MODEL=codex
+AI_MODEL=gpt-5.4-mini
 
 AI_TIMEOUT_MS=120000
 AI_REQUIRE_JSON=true
 AI_REQUIRE_JSON_SCHEMA=true
 
-AI_MODEL=gpt-5.4-mini
-CODEX_CLI_COMMAND=C:\Users\roque\AppData\Roaming\npm\codex.cmd
+CODEX_CLI_COMMAND=C:\Users\radames\AppData\Roaming\npm\codex.cmd
 CODEX_CLI_EXTRA_ARGS=--sandbox workspace-write
-
 
 # =========================================================
 # AI Repair
@@ -97,14 +98,12 @@ AI_REPAIR_BLOCK_TRANSFERS=true
 AI_REPAIR_MUST_USE_VISIBLE_CANDIDATE=true
 AI_REPAIR_MUST_RETURN_EXISTING_CANDIDATE_ID=true
 
-
 # =========================================================
 # Selection Semantic Safety
 # =========================================================
 
 SELECTION_LOCAL_CONFIDENCE_THRESHOLD=0.85
 SELECTION_AI_REPAIR_THRESHOLD=0.60
-
 
 # =========================================================
 # Discovery
@@ -116,8 +115,7 @@ AUTO_APPROVE_DISCOVERED_OBJECTS=false
 AI_DISCOVERY_ENABLED=true
 AI_DISCOVERY_CONFIDENCE_THRESHOLD=0.75
 AI_DISCOVERY_REQUIRE_APPROVAL_THRESHOLD=0.90
-AI_DISCOVERY_MAX_ATTEMPTS=2
-
+AI_DISCOVERY_MAX_ATTEMPTS=1
 
 # =========================================================
 # Legacy Agent / Auto Repair disabled
@@ -129,3 +127,24 @@ AGENT_AUTO_REPAIR_ENABLED=false
 CODEX_AUTO_REPAIR_ENABLED=false
 CODEX_AUTO_REPAIR_TIMEOUT_MS=0
 CODEX_AUTO_REPAIR_PROMPT_MODE=disabled
+
+# =========================================================
+# Route Profile Learning
+# =========================================================
+
+ROUTE_PROFILE_LEARNING_ENABLED=true
+ROUTE_PROFILE_LEARNING_AUTO_APPROVE_THRESHOLD=0.90
+ROUTE_PROFILE_LEARNING_AUTO_APPLY=false
+ROUTE_PROFILE_LEARNING_MIN_OCCURRENCES=1
+ROUTE_PROFILE_LEARNING_BLOCK_SENSITIVE=true
+
+# =========================================================
+# Forward Route Completion
+# =========================================================
+
+AI_ROUTE_COMPLETION_ENABLED=true
+AI_ROUTE_COMPLETION_MIN_CONFIDENCE=0.75
+AI_ROUTE_COMPLETION_MAX_INSERTED_STEPS=1
+AI_ROUTE_COMPLETION_USE_APP_PROFILE=true
+AI_ROUTE_COMPLETION_ALLOW_GENERIC=true
+

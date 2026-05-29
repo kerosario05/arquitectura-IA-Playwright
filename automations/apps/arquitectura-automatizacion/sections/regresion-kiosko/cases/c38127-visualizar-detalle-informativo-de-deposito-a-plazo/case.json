@@ -1,0 +1,10 @@
+{
+  "id": "c38127-visualizar-detalle-informativo-de-deposito-a-plazo",
+  "externalId": "C38127",
+  "caseId": 38127,
+  "title": "Visualizar detalle informativo de depósito a plazo",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-05-29T00:40:17.375Z"
+}

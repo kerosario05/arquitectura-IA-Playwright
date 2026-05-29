@@ -25,10 +25,36 @@
       "status": "active",
       "sourcePlanIds": [],
       "caseIds": [],
-      "createdAt": "2026-05-24T16:56:45.876Z",
-      "updatedAt": "2026-05-24T16:56:45.876Z"
+      "createdAt": "2026-05-28T16:19:25.742Z",
+      "updatedAt": "2026-05-28T16:19:25.742Z"
+    },
+    {
+      "id": "po_framework_operationsmenupage",
+      "className": "OperationsMenuPage",
+      "filePath": "automations/apps/env-priority/pages/operationsmenu.page.ts",
+      "screenSignature": "screen:env-priority-operations_menu",
+      "methods": [
+        {
+          "name": "openModule",
+          "intent": "open_module",
+          "parameters": [
+            "moduleName"
+          ],
+          "available": true,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        }
+      ],
+      "confidence": 1,
+      "status": "active",
+      "sourcePlanIds": [],
+      "caseIds": [],
+      "createdAt": "2026-05-28T17:36:56.793Z",
+      "updatedAt": "2026-05-28T17:36:56.793Z"
     }
   ],
   "componentCandidates": [],
-  "updatedAt": "2026-05-25T21:38:30.774Z"
+  "updatedAt": "2026-05-29T02:59:13.802Z"
 }

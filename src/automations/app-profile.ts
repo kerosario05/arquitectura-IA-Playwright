@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
-import type { AppConfig, FullConfig, LoginMode, MissingInputBehavior, TestDataAliasesMap, TestDataMap } from "../types/env.types";
+import type { AppConfig, FullConfig, LoginMode, MissingInputBehavior, TestDataAliasesMap, TestDataMap, AppRouteProfile } from "../types/env.types";
 
 const SENSITIVE_KEY_HINTS = ["password", "secret", "token", "key", "pass"];
 
@@ -14,6 +14,15 @@ export type AppProfile = {
   baseUrlHash?: string;
   projectId?: string | number;
   projectName?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type SectionProfile = {
+  sectionSlug: string;
+  source: "cli" | "env" | "testrail_case" | "default";
+  sectionId?: string | number;
+  sectionName?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -63,6 +72,34 @@ export function normalizeAppSlug(input?: string): string {
     .replace(/^-|-$/g, "");
 
   if (!normalized || normalized === "default") return "default";
+
+  return normalized;
+}
+
+/**
+ * Normalize section name to a safe sectionSlug
+ * - Remove accents
+ * - Lowercase
+ * - Spaces to dashes
+ * - Block path traversal (../, ..\)
+ * - Block / and \ characters
+ * - Limit to [a-z0-9-]
+ */
+export function normalizeSectionSlug(input?: string): string {
+  if (!input || !input.trim()) return "default-section";
+
+  const raw = input.trim();
+
+  // Block path traversal attempts
+  const sanitized = raw.replace(/\.\./g, "").replace(/[\\/]/g, "-");
+
+  // Normalize: lowercase, remove accents
+  const normalized = normalizeText(sanitized)
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  if (!normalized || normalized === "default") return "default-section";
 
   return normalized;
 }
@@ -138,7 +175,59 @@ export async function resolveAppProfile(options: AppProfileResolveOptions): Prom
   return { profile, baseDir };
 }
 
-export async function ensureAppStructure(baseDir: string): Promise<string[]> {
+export type SectionProfileResolveOptions = {
+  cliSectionSlug?: string;
+  envSectionId?: string | number;
+  testCaseSectionId?: string | number;
+  testCaseSectionName?: string;
+  testRailBaseUrl?: string;
+  testRailEmail?: string;
+  testRailApiKey?: string;
+};
+
+export async function resolveSectionProfile(options: SectionProfileResolveOptions): Promise<{ sectionProfile: SectionProfile }> {
+  const now = new Date().toISOString();
+  let sectionSlug: string;
+  let source: SectionProfile["source"];
+  let sectionId: string | number | undefined;
+  let sectionName: string | undefined;
+
+  if (options.cliSectionSlug?.trim()) {
+    sectionSlug = normalizeSectionSlug(options.cliSectionSlug);
+    source = "cli";
+  } else if (options.envSectionId) {
+    // Could fetch section name from TestRail API if needed
+    sectionSlug = `section-${options.envSectionId}`;
+    source = "env";
+    sectionId = options.envSectionId;
+  } else if (options.testCaseSectionId) {
+    sectionSlug = `section-${options.testCaseSectionId}`;
+    source = "testrail_case";
+    sectionId = options.testCaseSectionId;
+    sectionName = options.testCaseSectionName;
+    
+    // If we have section name, use it for a more readable slug
+    if (options.testCaseSectionName) {
+      sectionSlug = normalizeSectionSlug(options.testCaseSectionName);
+    }
+  } else {
+    sectionSlug = "default-section";
+    source = "default";
+  }
+
+  const sectionProfile: SectionProfile = {
+    sectionSlug,
+    source,
+    sectionId,
+    sectionName,
+    createdAt: now,
+    updatedAt: now
+  };
+
+  return { sectionProfile };
+}
+
+export async function ensureAppStructure(baseDir: string, sectionSlug?: string): Promise<string[]> {
   const created: string[] = [];
 
   await fsp.mkdir(baseDir, { recursive: true });
@@ -151,6 +240,27 @@ export async function ensureAppStructure(baseDir: string): Promise<string[]> {
       await fsp.mkdir(dirPath, { recursive: true });
       created.push(subdir);
     }
+  }
+
+  // Create section folders if sectionSlug is provided
+  if (sectionSlug && sectionSlug !== "default-section") {
+    const sectionsDir = path.join(baseDir, "sections");
+    const sectionDir = path.join(sectionsDir, sectionSlug);
+    const sectionSubdirs = ["cases", "evidence", "runs"];
+    
+    await fsp.mkdir(sectionsDir, { recursive: true });
+    
+    for (const subdir of sectionSubdirs) {
+      const dirPath = path.join(sectionDir, subdir);
+      try {
+        await fsp.access(dirPath);
+      } catch {
+        await fsp.mkdir(dirPath, { recursive: true });
+        created.push(`sections/${sectionSlug}/${subdir}`);
+      }
+    }
+    
+    console.log(`[app-structure] ensured section path ${sectionDir}`);
   }
 
   const defaultAppDir = path.resolve(__dirname, "../../automations/apps/default");
@@ -228,7 +338,24 @@ async function registerFrameworkPageObjects(baseDir: string): Promise<void> {
       filePath: `automations/apps/${appSlug}/pages/productlist.page.ts`,
       screenSignature: `screen:${appSlug}-product_list`,
       methods: [
-        { name: "selectProduct", intent: "select_product", parameters: ["productName"], available: true, status: "active", sensitive: false, confidence: 1.0, source: "" }
+        { name: "selectProduct", intent: "select_product", parameters: ["productName"], available: true, status: "active", sensitive: false, confidence: 1.0, source: "" },
+        { name: "selectFirstVisibleCard", intent: "select_first_visible_card", parameters: [], available: true, status: "active", sensitive: false, confidence: 1.0, source: "" }
+      ],
+      confidence: 1.0,
+      status: "active",
+      sourcePlanIds: [],
+      caseIds: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: "po_framework_operationsmenupage",
+      className: "OperationsMenuPage",
+      filePath: `automations/apps/${appSlug}/pages/operationsmenu.page.ts`,
+      screenSignature: `screen:${appSlug}-operations_menu`,
+      methods: [
+        { name: "openModule", intent: "open_module", parameters: ["moduleName"], available: true, status: "active", sensitive: false, confidence: 1.0, source: "" },
+        { name: "expectModuleVisible", intent: "expect_loaded", parameters: ["moduleName"], available: true, status: "active", sensitive: false, confidence: 1.0, source: "" }
       ],
       confidence: 1.0,
       status: "active",
@@ -305,6 +432,7 @@ export type PromotedAppConfig = {
   passwordRef?: string;
   extraLoginFields?: Record<string, string>;
   missingInputBehavior: MissingInputBehavior;
+  routeProfile?: AppRouteProfile;
   updatedAt: string;
 };
 
@@ -388,17 +516,31 @@ export function getPromotedAppDirectory(appProfile: AppProfile, outputRoot?: str
   return path.join(outputRoot ?? ".", "automations", "apps", appProfile.appSlug);
 }
 
-export function buildAppAutomationPaths(appProfile: AppProfile, automationId?: string, outputRoot?: string): AppAutomationPaths {
+export function buildAppAutomationPaths(appProfile: AppProfile, automationId?: string, outputRoot?: string, sectionSlug?: string): AppAutomationPaths {
   const appDir = getPromotedAppDirectory(appProfile, outputRoot);
-  const casesDir = path.join(appDir, "cases");
-  const plansDir = path.join(appDir, "plans");
-  const specsDir = path.join(appDir, "specs");
-  const evidenceDir = path.join(appDir, "evidence");
-  const runsDir = path.join(appDir, "runs");
+  
+  // Use section folder if sectionSlug is provided, otherwise use root cases/specs/evidence/runs
+  const casesDir = sectionSlug && sectionSlug !== "default-section"
+    ? path.join(appDir, "sections", sectionSlug, "cases")
+    : path.join(appDir, "cases");
+  const plansDir = sectionSlug && sectionSlug !== "default-section"
+    ? path.join(appDir, "sections", sectionSlug, "plans")
+    : path.join(appDir, "plans");
+  const specsDir = sectionSlug && sectionSlug !== "default-section"
+    ? path.join(appDir, "sections", sectionSlug, "specs")
+    : path.join(appDir, "specs");
+  const evidenceDir = sectionSlug && sectionSlug !== "default-section"
+    ? path.join(appDir, "sections", sectionSlug, "evidence")
+    : path.join(appDir, "evidence");
+  const runsDir = sectionSlug && sectionSlug !== "default-section"
+    ? path.join(appDir, "sections", sectionSlug, "runs")
+    : path.join(appDir, "runs");
+  
   const pagesDir = path.join(appDir, "pages");
   const componentsDir = path.join(appDir, "components");
   const flowsDir = path.join(appDir, "flows");
   const caseDir = automationId ? path.join(casesDir, automationId) : undefined;
+  
   return {
     appDir,
     configPath: path.join(appDir, "app.config.json"),
@@ -446,7 +588,7 @@ function sanitizeExtraLoginFields(extraLoginFields?: Record<string, string>): Re
   return sanitized;
 }
 
-export function serializeRuntimeConfigForPromotion(config: FullConfig): PromotedAppConfig {
+export function serializeRuntimeConfigForPromotion(config: FullConfig, existingConfig?: PromotedAppConfig): PromotedAppConfig {
   const profile = deriveAppProfile({
     appProfile: config.app.appProfile,
     appName: config.app.name,
@@ -466,6 +608,8 @@ export function serializeRuntimeConfigForPromotion(config: FullConfig): Promoted
     passwordRef: config.app.password ? "APP_PASSWORD" : undefined,
     extraLoginFields: sanitizeExtraLoginFields(config.app.extraLoginFields),
     missingInputBehavior: config.app.missingInputBehavior,
+    // Preserve routeProfile from existing config if available
+    routeProfile: existingConfig?.routeProfile,
     updatedAt: new Date().toISOString()
   };
 }
@@ -506,6 +650,171 @@ export function loadPromotedAppConfigSync(options: { appSlug: string; configPath
   } catch {
     return undefined;
   }
+}
+
+export function loadRouteProfile(appSlug: string): AppRouteProfile | undefined {
+  const config = loadPromotedAppConfigSync({ appSlug });
+  
+  // First try to load from app.config.json routeProfile
+  if (config?.routeProfile) {
+    const normalized = normalizeRouteProfileConfig(config, appSlug);
+    if (normalized) {
+      console.log(`[route-profile] loaded appSlug=${appSlug} source=app.config.json domainTerms=${normalized.domainTerms?.length ?? 0} routes=${normalized.routes?.length ?? 0}`);
+      return normalized;
+    }
+  }
+  
+  // Fallback: check if config has flat routeProfile fields (domainTerms, routes, intermediates)
+  const configWithRouteProfile = config as any;
+  if (configWithRouteProfile?.domainTerms || configWithRouteProfile?.routes || configWithRouteProfile?.intermediates) {
+    const normalized = normalizeRouteProfileConfig(configWithRouteProfile, appSlug);
+    if (normalized) {
+      console.log(`[route-profile] loaded appSlug=${appSlug} source=app.config.json.flat domainTerms=${normalized.domainTerms?.length ?? 0} routes=${normalized.routes?.length ?? 0}`);
+      return normalized;
+    }
+  }
+  
+  // Last resort: load from pending suggestions if available
+  // This allows route profile learning to work even before suggestions are applied
+  console.log(`[route-profile] appSlug=${appSlug} no routeProfile in app.config.json, returning undefined`);
+  return undefined;
+}
+
+/**
+ * Normalize routeProfile from app.config.json to standard AppRouteProfile format.
+ * 
+ * Supports two formats:
+ * 
+ * A) app.config.json with routeProfile object:
+ * {
+ *   "appSlug": "kiosko",
+ *   "routeProfile": {
+ *     "name": "product_information",
+ *     "entry": [],
+ *   "aliases": {},
+ *     "intermediates": {},
+ *     "domainTerms": {}
+ *   }
+ * }
+ * 
+ * B) routeProfile standalone flat:
+ * {
+ *   "appSlug": "kiosko",
+ *   "routeProfile": "product_information",
+ *   "entry": [],
+ *   "aliases": {},
+ *   "intermediates": {},
+ *   "domainTerms": {}
+ * }
+ */
+export function normalizeRouteProfileConfig(config: PromotedAppConfig, appSlug?: string): AppRouteProfile | undefined {
+  const routeProfile = config.routeProfile;
+  if (!routeProfile) {
+    return undefined;
+  }
+  
+  // Format A: routeProfile is already an object
+  if (typeof routeProfile === "object" && !Array.isArray(routeProfile)) {
+    const normalized: AppRouteProfile = {
+      entryPoints: (routeProfile as any).entry ?? (routeProfile as any).entryPoints ?? [],
+      aliases: (routeProfile as any).aliases ?? {},
+      domainTerms: normalizeDomainTerms((routeProfile as any).domainTerms),
+      blockedLabels: (routeProfile as any).blockedLabels ?? [],
+      submitLikeLabels: (routeProfile as any).submitLikeLabels ?? []
+    };
+    
+    // Convert intermediates to routes if routes not present
+    if ((routeProfile as any).routes) {
+      normalized.routes = (routeProfile as any).routes;
+    } else if ((routeProfile as any).intermediates) {
+      normalized.routes = convertIntermediatesToRoutes((routeProfile as any).intermediates);
+    }
+    
+    const source = "app_config_object";
+    const loggedAppSlug = config.appProfile?.appSlug ?? appSlug ?? "unknown";
+    console.log(`[route-profile] normalized appSlug=${loggedAppSlug} source=${source} domainTerms=${normalized.domainTerms?.length ?? 0} routes=${normalized.routes?.length ?? 0}`);
+    
+    return normalized;
+  }
+  
+  // Format B: routeProfile is a string (standalone flat format)
+  if (typeof routeProfile === "string") {
+    const normalized: AppRouteProfile = {
+      entryPoints: (config as any).entry ?? (config as any).entryPoints ?? [],
+      aliases: (config as any).aliases ?? {},
+      domainTerms: normalizeDomainTerms((config as any).domainTerms),
+      blockedLabels: (config as any).blockedLabels ?? [],
+      submitLikeLabels: (config as any).submitLikeLabels ?? []
+    };
+    
+    // Convert intermediates to routes if routes not present
+    if ((config as any).routes) {
+      normalized.routes = (config as any).routes;
+    } else if ((config as any).intermediates) {
+      normalized.routes = convertIntermediatesToRoutes((config as any).intermediates);
+    }
+    
+    const source = "standalone_flat";
+    const loggedAppSlug = config.appProfile?.appSlug ?? appSlug ?? "unknown";
+    console.log(`[route-profile] normalized appSlug=${loggedAppSlug} source=${source} domainTerms=${normalized.domainTerms?.length ?? 0} routes=${normalized.routes?.length ?? 0}`);
+    
+    return normalized;
+  }
+  
+  return undefined;
+}
+
+/**
+ * Normalize domainTerms from various formats to string array.
+ * Supports: string[], Record<string, any>, or undefined
+ */
+function normalizeDomainTerms(domainTerms: any): string[] {
+  if (!domainTerms) {
+    return [];
+  }
+  
+  if (Array.isArray(domainTerms)) {
+    const unique = Array.from(new Set(domainTerms.filter(t => typeof t === "string")));
+    return unique;
+  }
+  
+  if (typeof domainTerms === "object") {
+    // Record<string, any> - extract keys or values
+    const entries = Object.entries(domainTerms);
+    if (entries.length > 0) {
+      // If values are strings, use values; otherwise use keys
+      const firstValue = entries[0][1];
+      let result: string[];
+      if (typeof firstValue === "string") {
+        result = Object.values(domainTerms).filter(v => typeof v === "string");
+      } else {
+        result = Object.keys(domainTerms);
+      }
+      // Deduplicate
+      const unique = Array.from(new Set(result));
+      return unique;
+    }
+  }
+  
+  return [];
+}
+
+/**
+ * Convert intermediates object to routes array.
+ * 
+ * Input: { "Tarjetas": ["Tarjeta de Crédito", "Tarjeta de Débito"], ... }
+ * Output: [{ from: "Tarjetas", intermediates: ["Tarjeta de Crédito", "Tarjeta de Débito"] }, ...]
+ */
+function convertIntermediatesToRoutes(intermediates: Record<string, string[]>): Array<{ from: string; intermediates: string[]; domain?: string }> {
+  if (!intermediates || typeof intermediates !== "object") {
+    return [];
+  }
+  
+  return Object.entries(intermediates).map(([from, intermediatesList]) => ({
+    from,
+    intermediates: Array.isArray(intermediatesList) ? intermediatesList : [],
+    domain: undefined
+  }));
 }
 
 export async function savePromotedAppConfig(config: PromotedAppConfig, outputRoot?: string): Promise<void> {

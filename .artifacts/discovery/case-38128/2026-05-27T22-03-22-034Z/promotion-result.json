@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-27T22:03:46.989Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos",
+  "appSlug": "kiosko",
+  "specPath": "automations\\apps\\kiosko\\cases\\c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos\\case.spec.ts",
+  "planPath": "automations\\apps\\kiosko\\cases\\c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos\\plan.json",
+  "caseFolder": "c38128-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-pesos",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false
+}

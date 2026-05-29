@@ -44,6 +44,18 @@ export class TestRailClient {
     return payload;
   }
 
+  async getSection(sectionId: number): Promise<{ id: number; name: string; project_id?: number; suite_id?: number } | null> {
+    try {
+      const payload = await this.requestJson<{ id: number; name: string; project_id?: number; suite_id?: number }>(`get_section/${sectionId}`);
+      if (!payload || typeof payload.id !== "number" || typeof payload.name !== "string") {
+        return null;
+      }
+      return payload;
+    } catch {
+      return null;
+    }
+  }
+
   async getCasesByIds(caseIds: number[]): Promise<RawTestRailCase[]> {
     const uniqueIds = Array.from(new Set(caseIds));
     const cases: RawTestRailCase[] = [];

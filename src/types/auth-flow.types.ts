@@ -29,7 +29,9 @@ export type AuthFlowStage =
   | "phone_confirmation"
   | "otp"
   | "authenticated"
-  | "skipped";
+  | "skipped"
+  | "home"
+  | "protected_entry";
 
 export type AuthFlowResult = {
   success: boolean;

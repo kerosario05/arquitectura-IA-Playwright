@@ -77,6 +77,41 @@ export type ExecutionPlanStep = {
   timeoutMs?: number;
   optional?: boolean;
   evidence?: boolean;
+  // Discovery resolution metadata
+  locatorStrategy?: string;
+  recoveryMetadata?: {
+    recoveredBy?: "segmented_route_recovery" | "route_completion" | "contextual_intermediate_already_satisfied" | "ordinal_selection";
+    rationale?: string;
+    ordinalSelectionDiagnostics?: {
+      selectionPatternDetected: boolean;
+      ordinal?: "first" | "second" | "third" | "last";
+      domainTerm?: string;
+      domainTermSource?: "routeProfile" | "generic_fallback";
+      selectedCandidateText?: string;
+      selectedCandidateId?: string;
+    };
+    alreadySatisfiedEvidence?: {
+      candidateText: string;
+      candidateType: string;
+      containsTarget: boolean;
+      consistentWithNextTarget: boolean;
+      reason: string;
+    };
+    selectedCandidateId?: string;
+    selectedCandidateText?: string;
+    segmentIndex?: number;
+    transitionDetected?: boolean;
+    executedAction?: string;
+  };
+  // Context tracking for context-dependent actions
+  contextMetadata?: {
+    expectedScreen?: string;
+    requiresContext?: string[];
+    producesContext?: string;
+    screenTransition?: "none" | "navigation" | "modal" | "in-place";
+    ownerPage?: string;
+    isContextDependent?: boolean;
+  };
 };
 
 export type ExecutionPlanScenarioRef = {
@@ -95,4 +130,12 @@ export type ExecutionPlan = {
   steps: ExecutionPlanStep[];
   notes?: string[];
   createdAt: string;
+  // Metadata for auth flow insertion and other cross-cutting concerns
+  metadata?: {
+    authFlowRequired?: boolean;
+    authFlowInsertionAfterStepIndex?: number; // Insert AuthFlow after this step (0-based)
+    authFlowAlias?: string;
+    authFlowLanding?: string;
+    authGateDetectedDuringDiscovery?: boolean;
+  };
 };

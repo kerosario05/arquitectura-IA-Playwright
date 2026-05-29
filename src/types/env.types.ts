@@ -12,6 +12,46 @@ export type TestDataAliasesMap = Record<string, string[]>;
 
 export type TestDataProfile = "demo" | "qa" | "staging" | "production_like";
 
+export type AppRouteProfile = {
+  entryPoints?: string[];
+  aliases?: Record<string, string>;
+  routes?: Array<{
+    from: string;
+    intermediates: string[];
+    domain?: string;
+  }>;
+  blockedLabels?: string[];
+  submitLikeLabels?: string[];
+  domainTerms?: string[];
+};
+
+export type RouteProfileSuggestion = {
+  appSlug: string;
+  from: string;
+  to: string;
+  relation: "child_route" | "sibling_route" | "intermediate_step" | "entry_point" | "alias_candidate" | "domain_term_candidate";
+  source: "discovery_snapshot" | "successful_transition" | "route_completion" | "assertion_context" | "successful_resolution";
+  confidence: number;
+  evidence?: {
+    beforeUrl?: string;
+    afterUrl?: string;
+    beforeSnapshotPath?: string;
+    afterSnapshotPath?: string;
+    candidateId?: string;
+    candidateText?: string;
+    locatorSummary?: string;
+  };
+  safety?: {
+    clickable?: boolean;
+    visible?: boolean;
+    sensitive?: boolean;
+    submitLike?: boolean;
+    riskyAction?: boolean;
+  };
+  status: "pending" | "auto_approved" | "rejected";
+  createdAt?: string;
+};
+
 export type AppConfig = {
   name?: string;
   baseUrl: string;
@@ -29,6 +69,7 @@ export type AppConfig = {
   testDataProfile?: TestDataProfile;
   autoSelectSafeDefaults?: boolean;
   autoAcceptSafeCheckboxes?: boolean;
+  routeProfile?: AppRouteProfile;
 };
 
 export type BrowserExecutionConfig = {
@@ -36,6 +77,7 @@ export type BrowserExecutionConfig = {
   headless: boolean;
   evidenceDir: string;
   defaultTimeoutMs: number;
+  promotedSpecTimeoutMs?: number;
 };
 
 export type TestRailConfig = {
@@ -53,6 +95,8 @@ export type RequiredTestRailRuntimeConfig = {
   email: string;
   apiKey: string;
 };
+
+export type ExpectedResultMode = "context" | "assertions" | "smart";
 
 export type FutureIntegrationsConfig = {
   testRail?: TestRailConfig;
@@ -75,6 +119,21 @@ export type FutureIntegrationsConfig = {
     discoveryConfidenceThreshold?: number;
     discoveryRequireApprovalThreshold?: number;
     discoveryMaxAttempts?: number;
+    expectedResultMode?: ExpectedResultMode;
+    routeCompletion?: {
+      enabled?: boolean;
+      minConfidence?: number;
+      maxInsertedSteps?: number;
+      useAppProfile?: boolean;
+      allowGeneric?: boolean;
+    };
+    routeProfileLearning?: {
+      enabled?: boolean;
+      autoApproveThreshold?: number;
+      autoApply?: boolean;
+      minOccurrences?: number;
+      blockSensitive?: boolean;
+    };
   };
   agent?: {
     provider?: "codex" | "copilot" | "custom" | "none";

@@ -2,7 +2,10 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import type { Page, Locator } from "@playwright/test";
 import type { PageSnapshot, SnapshotElement } from "../types/page-snapshot.types";
+import type { AppRouteProfile } from "../types/env.types";
 import { parseProductConditionTarget, resolveProductConditionAgainstSnapshot, type ProductCondition } from "./product-condition-parser";
+import { detectOrdinalSelectionPattern, resolveOrdinalSelection, type OrdinalSelectionResult } from "./ordinal-selection-resolver";
+import { resolveAmbiguousIntermediateTarget, type ContextualResolverInput } from "./contextual-intermediate-resolver";
 
 let evaluateCodeCache: string | undefined;
 function readEvaluateCode(): string {
@@ -68,6 +71,13 @@ export type TargetResolutionResult = {
   attemptedLocators?: string[];
   ambiguityDiagnostics?: AmbiguityDiagnostics;
   targetDisambiguation?: TargetDisambiguationDiagnostics;
+  alreadySatisfiedEvidence?: {
+    candidateText: string;
+    candidateType: string;
+    containsTarget: boolean;
+    consistentWithNextTarget: boolean;
+    reason: string;
+  };
 };
 
 export type ResolveActionTargetOptions = {
@@ -76,6 +86,11 @@ export type ResolveActionTargetOptions = {
   semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "first_visible_item" | "unknown";
   relationContext?: string;
   activeContainer?: ActiveContainerContext;
+  routeProfile?: AppRouteProfile;
+  actionText?: string;
+  nextTarget?: string;
+  previousTarget?: string;
+  routeHistory?: string[];
 };
 
 export type AiAssistanceTriggerReason =
@@ -482,6 +497,83 @@ export async function resolveActionTarget(
 ): Promise<TargetResolutionResult> {
   const opts = { ...DEFAULT_OPTIONS, ...options };
   
+  // === Ordinal Selection Pattern Resolution (BEFORE product_condition) ===
+  // Must run first to handle "Seleccionar la primera tarjeta visible del listado" patterns
+  const ordinalPattern = detectOrdinalSelectionPattern(target, opts.routeProfile, opts.actionText);
+  if (ordinalPattern) {
+    console.log(`[target-resolver] Ordinal selection pattern detected: ordinal=${ordinalPattern.ordinal} domainTerm=${ordinalPattern.domainTerm || "none"} target="${target}"`);
+    
+    const ordinalResult = resolveOrdinalSelection(snapshot, ordinalPattern, opts.routeProfile, opts.actionText);
+    
+    if (ordinalResult.status === "resolved" && ordinalResult.candidateId) {
+      const element = snapshot.elements.find(e => e.id === ordinalResult.candidateId);
+      if (element) {
+        const resolved = await resolveSnapshotElementLocator(page, {
+          element,
+          target,
+          candidateText: ordinalResult.candidateText!,
+          type: "card",
+          tagName: element.tagName,
+          confidence: ordinalResult.confidence,
+          matchReason: `ordinal_selection:${ordinalPattern.ordinal}`
+        });
+        
+        if (resolved.locator) {
+          return {
+            status: "resolved",
+            target,
+            locator: resolved.locator,
+            locatorStrategy: "ordinal_selection",
+            confidence: ordinalResult.confidence,
+            matchReason: `ordinal_selection:${ordinalPattern.ordinal}`,
+            candidateText: ordinalResult.candidateText!,
+            candidateId: ordinalResult.candidateId,
+            candidates: [
+              {
+                elementId: ordinalResult.candidateId,
+                text: ordinalResult.candidateText!,
+                normalizedText: normalizeText(ordinalResult.candidateText!),
+                type: "card",
+                role: "listitem",
+                tagName: element.tagName,
+                isClickable: true,
+                matchScore: ordinalResult.confidence,
+                matchReason: `ordinal_selection:${ordinalPattern.ordinal}`,
+                locatorStrategy: "ordinal_selection"
+              }
+            ],
+            ordinalSelectionDiagnostics: ordinalResult.diagnostics
+          } as TargetResolutionResult & { ordinalSelectionDiagnostics?: any };
+        }
+      }
+    }
+    
+    if (ordinalResult.status === "ambiguous_target") {
+      return {
+        status: "ambiguous",
+        target,
+        confidence: ordinalResult.confidence,
+        matchReason: "ordinal_selection_ambiguous",
+        candidateText: "",
+        candidates: [],
+        ordinalSelectionDiagnostics: ordinalResult.diagnostics
+      } as TargetResolutionResult & { ordinalSelectionDiagnostics?: any };
+    }
+    
+    if (ordinalResult.status === "no_safe_candidate") {
+      return {
+        status: "not_found",
+        target,
+        confidence: 0,
+        matchReason: "ordinal_selection_no_safe_candidate",
+        candidateText: "",
+        candidates: [],
+        ordinalSelectionDiagnostics: ordinalResult.diagnostics
+      } as TargetResolutionResult & { ordinalSelectionDiagnostics?: any };
+    }
+  }
+  
+  // === Product Condition Resolution (after ordinal) ===
   const productCondition = parseProductConditionTarget(target);
   if (productCondition) {
     const resolution = resolveProductConditionAgainstSnapshot(snapshot, productCondition, target);
@@ -900,6 +992,85 @@ export async function resolveActionTarget(
     const scoreDiff = best.matchScore - second.matchScore;
 
     if (scoreDiff < opts.ambiguousThreshold && second.matchScore >= opts.minConfidence) {
+      // === Contextual Ambiguous Intermediate Resolution ===
+      // Try to resolve using route context before semantic fallback
+      const contextualInput: ContextualResolverInput = {
+        target,
+        previousTarget: opts.previousTarget || opts.relationContext,
+        nextTarget: opts.nextTarget,
+        routeHistory: opts.routeHistory,
+        routeProfile: opts.routeProfile,
+        candidates: sorted.slice(0, 10).map(c => {
+          // Reconstruct snapshot elements from candidates
+          const element = snapshot.elements.find(e => 
+            (e.text && normalizeText(e.text) === c.normalizedText) ||
+            (e.label && normalizeText(e.label) === c.normalizedText) ||
+            (e.name && normalizeText(e.name) === c.normalizedText)
+          );
+          if (element) return element;
+          // Create minimal element if not found
+          return {
+            id: c.elementId || `cand-${c.normalizedText.slice(0, 10)}`,
+            type: c.type === "card" ? "card" : c.type === "link" ? "link" : "button",
+            text: c.text,
+            label: c.text,
+            name: c.text,
+            role: c.role,
+            tagName: c.tagName || "div",
+            visible: true,
+            candidateLocators: [],
+            dataHints: []
+          } as SnapshotElement;
+        })
+      };
+      
+      const contextualResult = resolveAmbiguousIntermediateTarget(contextualInput);
+      
+      if (contextualResult.status === "resolved" && contextualResult.selectedCandidate) {
+        console.log(`[target-resolver] contextual_intermediate_resolver resolved target="${target}" selected="${contextualResult.selectedCandidateText}" type="${contextualResult.classifiedCandidates.find(c => c.element === contextualResult.selectedCandidate)?.type}"`);
+        
+        const resolved = await resolveSnapshotElementLocator(page, {
+          element: contextualResult.selectedCandidate,
+          target,
+          candidateText: contextualResult.selectedCandidateText!,
+          type: contextualResult.classifiedCandidates.find(c => c.element === contextualResult.selectedCandidate)?.type || "button",
+          tagName: contextualResult.selectedCandidate.tagName,
+          confidence: contextualResult.classifiedCandidates.find(c => c.element === contextualResult.selectedCandidate)?.score || 0.7,
+          matchReason: `contextual_intermediate:${contextualResult.reason}`
+        });
+        
+        if (resolved.locator) {
+          return {
+            status: "resolved",
+            target,
+            locator: resolved.locator,
+            locatorStrategy: "contextual_intermediate",
+            confidence: contextualResult.classifiedCandidates.find(c => c.element === contextualResult.selectedCandidate)?.score || 0.7,
+            matchReason: `contextual_intermediate:${contextualResult.reason}`,
+            candidateText: contextualResult.selectedCandidateText!,
+            candidateId: contextualResult.selectedCandidate.id,
+            candidates: sorted.slice(0, 5),
+            contextualResolverDiagnostics: contextualResult.diagnostics
+          } as TargetResolutionResult & { contextualResolverDiagnostics?: any };
+        }
+      }
+      
+      // Handle already_satisfied: intermediate variant already visible, skip click
+      if (contextualResult.status === "already_satisfied") {
+        console.log(`[target-resolver] contextual_intermediate already_satisfied target="${target}" reason="${contextualResult.reason}" evidence="${contextualResult.alreadySatisfiedEvidence?.candidateText}"`);
+        return {
+          status: "resolved",
+          target,
+          locator: undefined,
+          locatorStrategy: "contextual_intermediate_already_satisfied",
+          confidence: 0.9,
+          matchReason: `contextual_intermediate_already_satisfied:${contextualResult.reason}`,
+          candidateText: contextualResult.alreadySatisfiedEvidence?.candidateText || "",
+          contextualResolverDiagnostics: contextualResult.diagnostics,
+          alreadySatisfiedEvidence: contextualResult.alreadySatisfiedEvidence
+        } as TargetResolutionResult & { contextualResolverDiagnostics?: any; alreadySatisfiedEvidence?: any };
+      }
+      
       // Try semantic DOM-based resolution before declaring ambiguous
       const semanticResult = await trySemanticFallback(page, target, opts);
       if (semanticResult) return semanticResult;
@@ -933,6 +1104,46 @@ export async function resolveActionTarget(
   }
 
   if (best.matchScore < opts.minConfidence) {
+    // === Contextual Ambiguous Intermediate Resolution (low confidence) ===
+    const contextualInput: ContextualResolverInput = {
+      target,
+      previousTarget: opts.previousTarget || opts.relationContext,
+      nextTarget: opts.nextTarget,
+      routeHistory: opts.routeHistory,
+      routeProfile: opts.routeProfile,
+      candidates: snapshot.elements.filter(e => e.visible).slice(0, 20)
+    };
+    
+    const contextualResult = resolveAmbiguousIntermediateTarget(contextualInput);
+    
+    if (contextualResult.status === "resolved" && contextualResult.selectedCandidate) {
+      console.log(`[target-resolver] contextual_intermediate_resolver resolved low-confidence target="${target}" selected="${contextualResult.selectedCandidateText}"`);
+      
+      const resolved = await resolveSnapshotElementLocator(page, {
+        element: contextualResult.selectedCandidate,
+        target,
+        candidateText: contextualResult.selectedCandidateText!,
+        type: contextualResult.classifiedCandidates.find(c => c.element === contextualResult.selectedCandidate)?.type || "button",
+        tagName: contextualResult.selectedCandidate.tagName,
+        confidence: contextualResult.classifiedCandidates.find(c => c.element === contextualResult.selectedCandidate)?.score || 0.5,
+        matchReason: `contextual_intermediate_low_confidence:${contextualResult.reason}`
+      });
+      
+      if (resolved.locator) {
+        return {
+          status: "resolved",
+          target,
+          locator: resolved.locator,
+          locatorStrategy: "contextual_intermediate",
+          confidence: contextualResult.classifiedCandidates.find(c => c.element === contextualResult.selectedCandidate)?.score || 0.5,
+          matchReason: `contextual_intermediate_low_confidence:${contextualResult.reason}`,
+          candidateText: contextualResult.selectedCandidateText!,
+          candidateId: contextualResult.selectedCandidate.id,
+          contextualResolverDiagnostics: contextualResult.diagnostics
+        } as TargetResolutionResult & { contextualResolverDiagnostics?: any };
+      }
+    }
+    
     // Try semantic DOM-based resolution before giving up
     const semanticResult = await trySemanticFallback(page, target, opts);
     if (semanticResult) return semanticResult;

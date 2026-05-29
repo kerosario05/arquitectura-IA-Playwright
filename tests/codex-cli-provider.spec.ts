@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { CodexCliProvider } from "../src/ai/providers/codex-cli-provider";
 import { AiProviderError } from "../src/ai/ai-provider.types";
-import { __setSpawnForTesting } from "../src/agent/codex-cli-runner";
+import { __setSpawnForTesting, __getLastRunnerInputForTesting } from "../src/agent/codex-cli-runner";
 import { EventEmitter } from "node:events";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
@@ -32,9 +32,7 @@ test("CodexCliProvider lee repair-decision.json válido", async () => {
     child.stderr = new EventEmitter();
     child.kill = () => {};
     
-    // Simular escritura de archivo en workdir
     setTimeout(async () => {
-      // Extraer workdir de options.cwd
       capturedWorkDir = options.cwd || "";
       if (capturedWorkDir) {
         const outputPath = path.join(capturedWorkDir, "repair-decision.json");
@@ -88,7 +86,6 @@ test("CodexCliProvider reporta output file faltante", async () => {
     child.stderr = new EventEmitter();
     child.kill = () => {};
     
-    // No escribir archivo - simular fallo
     setTimeout(() => {
       child.emit("close", 0, null);
     }, 10);
@@ -136,7 +133,6 @@ test("CodexCliProvider maneja timeout", async () => {
     child.stdout = new EventEmitter();
     child.stderr = new EventEmitter();
     child.kill = () => {};
-    // No emitir eventos - simular timeout
     return child;
   }) as any);
 
@@ -215,7 +211,6 @@ test("CodexCliProvider usa CODEX_CLI_COMMAND explícito", async () => {
       requireJson: true
     });
 
-    // En Windows, codex.cmd se ejecuta via cmd.exe
     const fullCommand = capturedCommand;
     expect(fullCommand).toBeTruthy();
   } finally {
@@ -271,7 +266,6 @@ test("CodexCliProvider pasa extraArgs correctamente", async () => {
       requireJson: true
     });
 
-    // Verificar que --model está en los args
     expect(capturedArgs).toContain("--model");
     expect(capturedArgs).toContain("codex");
     expect(capturedArgs).toContain("--skip-git-repo-check");
@@ -327,7 +321,6 @@ test("CodexCliProvider sanitiza secretos en diagnostics", async () => {
       requireJson: true
     });
 
-    // Verificar que parsedJson no expone secretos
     expect(JSON.stringify(result.parsedJson)).not.toContain("secret123");
   } finally {
     __setSpawnForTesting(undefined as any);
@@ -377,7 +370,7 @@ test("CodexCliProvider maneja error de proceso", async () => {
         { role: "user", content: "Test" }
       ],
       requireJson: true
-    })).rejects.toThrow(/exited with code 1/i);
+    })).rejects.toThrow(/did not write/i);
   } finally {
     __setSpawnForTesting(undefined as any);
   }
@@ -394,7 +387,6 @@ test("CodexCliProvider reporta JSON inválido en archivo", async () => {
       const workDir = options.cwd || "";
       if (workDir) {
         const outputPath = path.join(workDir, "repair-decision.json");
-        // Escribir JSON inválido
         await fs.writeFile(outputPath, "This is not valid JSON at all", "utf-8");
       }
       child.emit("close", 0, null);
@@ -432,6 +424,710 @@ test("CodexCliProvider reporta JSON inválido en archivo", async () => {
       ],
       requireJson: true
     })).rejects.toThrow(/invalid json/i);
+  } finally {
+    __setSpawnForTesting(undefined as any);
+  }
+});
+
+test("CodexCliProvider acepta output válido aunque exitCode != 0", async () => {
+  __setSpawnForTesting(((command: string, args: string[], options: any) => {
+    const child = new EventEmitter() as any;
+    child.stdout = new EventEmitter();
+    child.stderr = new EventEmitter();
+    child.kill = () => {};
+    
+    setTimeout(async () => {
+      const workDir = options.cwd || "";
+      if (workDir) {
+        const outputPath = path.join(workDir, "repair-decision.json");
+        await fs.writeFile(outputPath, JSON.stringify({
+          decision: "repaired_plan",
+          reason: "Route recovery successful",
+          repairType: "route_recovery",
+          candidateId: "nav-products",
+          selectionStatus: "selected",
+          confidence: 0.98
+        }), "utf-8");
+      }
+      child.stderr.emit("data", Buffer.from("Warning: some non-fatal issue"));
+      child.emit("close", 1, null);
+    }, 10);
+    
+    return child;
+  }) as any);
+
+  try {
+    const provider = new CodexCliProvider({
+      enabled: true,
+      provider: "codex_cli",
+      providerName: "codex",
+      baseUrl: "",
+      apiKey: "",
+      model: "codex",
+      command: "codex",
+      extraArgs: [],
+      timeoutMs: 30000,
+      requireJson: true,
+      requireJsonSchema: false
+    });
+
+    const result = await provider.completeJson({
+      messages: [
+        { role: "system", content: "Return JSON only" },
+        { role: "user", content: "Test" }
+      ],
+      requireJson: true
+    });
+
+    expect(result.parsedJson?.decision).toBe("repaired_plan");
+    expect(result.parsedJson?.candidateId).toBe("nav-products");
+    expect(result.diagnostics?.warning).toBe("codex_exited_non_zero_but_output_valid");
+    expect(result.diagnostics?.exitCode).toBe(1);
+    expect(result.diagnostics?.stderr).toContain("non-fatal issue");
+  } finally {
+    __setSpawnForTesting(undefined as any);
+  }
+});
+
+test("CodexCliProvider falla con exitCode != 0 y repair-decision.json faltante", async () => {
+  __setSpawnForTesting(((command: string, args: string[], options: any) => {
+    const child = new EventEmitter() as any;
+    child.stdout = new EventEmitter();
+    child.stderr = new EventEmitter();
+    child.kill = () => {};
+    
+    setTimeout(() => {
+      child.stderr.emit("data", Buffer.from("Fatal error from codex"));
+      child.emit("close", 1, null);
+    }, 10);
+    
+    return child;
+  }) as any);
+
+  try {
+    const provider = new CodexCliProvider({
+      enabled: true,
+      provider: "codex_cli",
+      providerName: "codex",
+      baseUrl: "",
+      apiKey: "",
+      model: "codex",
+      command: "codex",
+      extraArgs: [],
+      timeoutMs: 30000,
+      requireJson: true,
+      requireJsonSchema: false
+    });
+
+    await expect(provider.completeJson({
+      messages: [
+        { role: "system", content: "Return JSON only" },
+        { role: "user", content: "Test" }
+      ],
+      requireJson: true
+    })).rejects.toThrow(AiProviderError);
+    await expect(provider.completeJson({
+      messages: [
+        { role: "system", content: "Return JSON only" },
+        { role: "user", content: "Test" }
+      ],
+      requireJson: true
+    })).rejects.toThrow(/did not write/i);
+  } finally {
+    __setSpawnForTesting(undefined as any);
+  }
+});
+
+test("CodexCliProvider falla con exitCode != 0 y repair-decision.json inválido", async () => {
+  __setSpawnForTesting(((command: string, args: string[], options: any) => {
+    const child = new EventEmitter() as any;
+    child.stdout = new EventEmitter();
+    child.stderr = new EventEmitter();
+    child.kill = () => {};
+    
+    setTimeout(async () => {
+      const workDir = options.cwd || "";
+      if (workDir) {
+        const outputPath = path.join(workDir, "repair-decision.json");
+        await fs.writeFile(outputPath, "not valid json {{{", "utf-8");
+      }
+      child.stderr.emit("data", Buffer.from("Codex had a problem"));
+      child.emit("close", 1, null);
+    }, 10);
+    
+    return child;
+  }) as any);
+
+  try {
+    const provider = new CodexCliProvider({
+      enabled: true,
+      provider: "codex_cli",
+      providerName: "codex",
+      baseUrl: "",
+      apiKey: "",
+      model: "codex",
+      command: "codex",
+      extraArgs: [],
+      timeoutMs: 30000,
+      requireJson: true,
+      requireJsonSchema: false
+    });
+
+    await expect(provider.completeJson({
+      messages: [
+        { role: "system", content: "Return JSON only" },
+        { role: "user", content: "Test" }
+      ],
+      requireJson: true
+    })).rejects.toThrow(AiProviderError);
+    await expect(provider.completeJson({
+      messages: [
+        { role: "system", content: "Return JSON only" },
+        { role: "user", content: "Test" }
+      ],
+      requireJson: true
+    })).rejects.toThrow(/invalid json/i);
+  } finally {
+    __setSpawnForTesting(undefined as any);
+  }
+});
+
+test("CodexCliProvider CLI prompt es corto y referencia prompt.txt", async () => {
+  let capturedPrompt = "";
+  let capturedWorkDir = "";
+  
+  __setSpawnForTesting(((command: string, args: string[], options: any) => {
+    const child = new EventEmitter() as any;
+    child.stdout = new EventEmitter();
+    child.stderr = new EventEmitter();
+    child.kill = () => {};
+    
+    setTimeout(async () => {
+      capturedWorkDir = options.cwd || "";
+      capturedPrompt = args[args.length - 1] || "";
+      if (capturedWorkDir) {
+        const outputPath = path.join(capturedWorkDir, "repair-decision.json");
+        await fs.writeFile(outputPath, JSON.stringify({
+          decision: "no_safe_action",
+          reason: "test"
+        }), "utf-8");
+      }
+      child.emit("close", 0, null);
+    }, 10);
+    
+    return child;
+  }) as any);
+
+  try {
+    const provider = new CodexCliProvider({
+      enabled: true,
+      provider: "codex_cli",
+      providerName: "codex",
+      baseUrl: "",
+      apiKey: "",
+      model: "codex",
+      command: "codex",
+      extraArgs: [],
+      timeoutMs: 30000,
+      requireJson: true,
+      requireJsonSchema: false
+    });
+
+    await provider.completeJson({
+      messages: [
+        { role: "system", content: "Return JSON only" },
+        { role: "user", content: "Test request" }
+      ],
+      requireJson: true
+    });
+
+    expect(capturedPrompt).toContain("prompt.txt");
+    expect(capturedPrompt).toContain("Read and follow");
+    expect(capturedPrompt).not.toContain("OUTPUT FILE");
+    expect(capturedPrompt).not.toContain("REQUIRED FIELDS");
+  } finally {
+    __setSpawnForTesting(undefined as any);
+  }
+});
+
+test("CodexCliProvider prompt.txt incluye outputPath absoluto e instrucciones file-output", async () => {
+  let capturedWorkDir = "";
+  let capturedPromptContent = "";
+  
+  __setSpawnForTesting(((command: string, args: string[], options: any) => {
+    const child = new EventEmitter() as any;
+    child.stdout = new EventEmitter();
+    child.stderr = new EventEmitter();
+    child.kill = () => {};
+    
+    setTimeout(async () => {
+      capturedWorkDir = options.cwd || "";
+      if (capturedWorkDir) {
+        try {
+          capturedPromptContent = await fs.readFile(path.join(capturedWorkDir, "prompt.txt"), "utf-8");
+        } catch {
+          capturedPromptContent = "";
+        }
+        const outputPath = path.join(capturedWorkDir, "repair-decision.json");
+        await fs.writeFile(outputPath, JSON.stringify({
+          decision: "no_safe_action",
+          reason: "test"
+        }), "utf-8");
+      }
+      child.emit("close", 0, null);
+    }, 10);
+    
+    return child;
+  }) as any);
+
+  try {
+    const provider = new CodexCliProvider({
+      enabled: true,
+      provider: "codex_cli",
+      providerName: "codex",
+      baseUrl: "",
+      apiKey: "",
+      model: "codex",
+      command: "codex",
+      extraArgs: [],
+      timeoutMs: 30000,
+      requireJson: true,
+      requireJsonSchema: false
+    });
+
+    await provider.completeJson({
+      messages: [
+        { role: "system", content: "Return JSON only" },
+        { role: "user", content: "Test request" }
+      ],
+      requireJson: true
+    });
+
+    expect(capturedPromptContent).toContain("repair-decision.json");
+    expect(capturedPromptContent).toContain(".artifacts");
+    expect(capturedPromptContent).toContain("OUTPUT FILE");
+    expect(capturedPromptContent).toContain("Write EXACTLY one file at:");
+    expect(capturedPromptContent).toContain("Do NOT write to stdout");
+    expect(capturedPromptContent).toContain("repair-decision.schema.json");
+  } finally {
+    __setSpawnForTesting(undefined as any);
+  }
+});
+
+test("CodexCliProvider prompt.txt no contiene solo Respond with JSON", async () => {
+  let capturedWorkDir = "";
+  let capturedPromptContent = "";
+  
+  __setSpawnForTesting(((command: string, args: string[], options: any) => {
+    const child = new EventEmitter() as any;
+    child.stdout = new EventEmitter();
+    child.stderr = new EventEmitter();
+    child.kill = () => {};
+    
+    setTimeout(async () => {
+      capturedWorkDir = options.cwd || "";
+      if (capturedWorkDir) {
+        try {
+          capturedPromptContent = await fs.readFile(path.join(capturedWorkDir, "prompt.txt"), "utf-8");
+        } catch {
+          capturedPromptContent = "";
+        }
+        const outputPath = path.join(capturedWorkDir, "repair-decision.json");
+        await fs.writeFile(outputPath, JSON.stringify({
+          decision: "no_safe_action",
+          reason: "test"
+        }), "utf-8");
+      }
+      child.emit("close", 0, null);
+    }, 10);
+    
+    return child;
+  }) as any);
+
+  try {
+    const provider = new CodexCliProvider({
+      enabled: true,
+      provider: "codex_cli",
+      providerName: "codex",
+      baseUrl: "",
+      apiKey: "",
+      model: "codex",
+      command: "codex",
+      extraArgs: [],
+      timeoutMs: 30000,
+      requireJson: true,
+      requireJsonSchema: false
+    });
+
+    await provider.completeJson({
+      messages: [
+        { role: "system", content: "Respond with JSON" },
+        { role: "user", content: "{\"decision\":\"no_safe_action\",\"reason\":\"test\"}" }
+      ],
+      requireJson: true
+    });
+
+    expect(capturedPromptContent).toContain("Write EXACTLY one file");
+    expect(capturedPromptContent).toContain("Do NOT write to stdout");
+    expect(capturedPromptContent).toContain("OUTPUT FILE");
+  } finally {
+    __setSpawnForTesting(undefined as any);
+  }
+});
+
+test("CodexCliProvider prompt.txt incluye contenido del user message", async () => {
+  let capturedWorkDir = "";
+  let capturedPromptContent = "";
+  
+  __setSpawnForTesting(((command: string, args: string[], options: any) => {
+    const child = new EventEmitter() as any;
+    child.stdout = new EventEmitter();
+    child.stderr = new EventEmitter();
+    child.kill = () => {};
+    
+    setTimeout(async () => {
+      capturedWorkDir = options.cwd || "";
+      if (capturedWorkDir) {
+        try {
+          capturedPromptContent = await fs.readFile(path.join(capturedWorkDir, "prompt.txt"), "utf-8");
+        } catch {
+          capturedPromptContent = "";
+        }
+        const outputPath = path.join(capturedWorkDir, "repair-decision.json");
+        await fs.writeFile(outputPath, JSON.stringify({
+          decision: "no_safe_action",
+          reason: "connection test"
+        }), "utf-8");
+      }
+      child.emit("close", 0, null);
+    }, 10);
+    
+    return child;
+  }) as any);
+
+  try {
+    const provider = new CodexCliProvider({
+      enabled: true,
+      provider: "codex_cli",
+      providerName: "codex",
+      baseUrl: "",
+      apiKey: "",
+      model: "codex",
+      command: "codex",
+      extraArgs: [],
+      timeoutMs: 30000,
+      requireJson: true,
+      requireJsonSchema: false
+    });
+
+    await provider.completeJson({
+      messages: [
+        { role: "system", content: "Return JSON only." },
+        { role: "user", content: "Respond with {\"decision\":\"no_safe_action\",\"reason\":\"connection test\"}" }
+      ],
+      requireJson: true
+    });
+
+    expect(capturedPromptContent).toContain("USER REQUEST:");
+    expect(capturedPromptContent).toContain("connection test");
+    expect(capturedPromptContent).toContain("no_safe_action");
+  } finally {
+    __setSpawnForTesting(undefined as any);
+  }
+});
+
+test("CodexCliProvider log filenames son consistentes (codex-stdout.log, codex-stderr.log)", async () => {
+  __setSpawnForTesting(((command: string, args: string[], options: any) => {
+    const child = new EventEmitter() as any;
+    child.stdout = new EventEmitter();
+    child.stderr = new EventEmitter();
+    child.kill = () => {};
+    
+    setTimeout(async () => {
+      const workDir = options.cwd || "";
+      if (workDir) {
+        const outputPath = path.join(workDir, "repair-decision.json");
+        await fs.writeFile(outputPath, JSON.stringify({
+          decision: "no_safe_action",
+          reason: "test"
+        }), "utf-8");
+      }
+      child.emit("close", 0, null);
+    }, 10);
+    
+    return child;
+  }) as any);
+
+  try {
+    const provider = new CodexCliProvider({
+      enabled: true,
+      provider: "codex_cli",
+      providerName: "codex",
+      baseUrl: "",
+      apiKey: "",
+      model: "codex",
+      command: "codex",
+      extraArgs: [],
+      timeoutMs: 30000,
+      requireJson: true,
+      requireJsonSchema: false
+    });
+
+    await provider.completeJson({
+      messages: [
+        { role: "system", content: "Return JSON only" },
+        { role: "user", content: "Test" }
+      ],
+      requireJson: true
+    });
+
+    const runnerInput = __getLastRunnerInputForTesting();
+    expect(runnerInput).toBeDefined();
+    expect(runnerInput?.stdoutLogPath).toContain("codex-stdout.log");
+    expect(runnerInput?.stderrLogPath).toContain("codex-stderr.log");
+  } finally {
+    __setSpawnForTesting(undefined as any);
+  }
+});
+
+test("CodexCliProvider stdout fallback pasa cuando repair-decision.json falta y fallback habilitado", async () => {
+  __setSpawnForTesting(((command: string, args: string[], options: any) => {
+    const child = new EventEmitter() as any;
+    child.stdout = new EventEmitter();
+    child.stderr = new EventEmitter();
+    child.kill = () => {};
+    
+    setTimeout(() => {
+      child.stdout.emit("data", Buffer.from('{"decision":"no_safe_action","reason":"connection test"}'));
+      child.emit("close", 0, null);
+    }, 10);
+    
+    return child;
+  }) as any);
+
+  try {
+    const provider = new CodexCliProvider({
+      enabled: true,
+      provider: "codex_cli",
+      providerName: "codex",
+      baseUrl: "",
+      apiKey: "",
+      model: "codex",
+      command: "codex",
+      extraArgs: [],
+      timeoutMs: 30000,
+      requireJson: true,
+      requireJsonSchema: false,
+      allowStdoutJsonFallback: true
+    });
+
+    const result = await provider.completeJson({
+      messages: [
+        { role: "system", content: "Return JSON only" },
+        { role: "user", content: "Connection test" }
+      ],
+      requireJson: true
+    });
+
+    expect(result.parsedJson?.decision).toBe("no_safe_action");
+    expect(result.parsedJson?.reason).toBe("connection test");
+    expect(result.diagnostics?.warning).toBe("codex_stdout_fallback_used");
+  } finally {
+    __setSpawnForTesting(undefined as any);
+  }
+});
+
+test("CodexCliProvider stdout fallback valida decision/reason", async () => {
+  __setSpawnForTesting(((command: string, args: string[], options: any) => {
+    const child = new EventEmitter() as any;
+    child.stdout = new EventEmitter();
+    child.stderr = new EventEmitter();
+    child.kill = () => {};
+    
+    setTimeout(() => {
+      child.stdout.emit("data", Buffer.from('{"decision":"repaired_plan","reason":"Found safe candidate","candidateId":"el-1","confidence":0.9}'));
+      child.emit("close", 0, null);
+    }, 10);
+    
+    return child;
+  }) as any);
+
+  try {
+    const provider = new CodexCliProvider({
+      enabled: true,
+      provider: "codex_cli",
+      providerName: "codex",
+      baseUrl: "",
+      apiKey: "",
+      model: "codex",
+      command: "codex",
+      extraArgs: [],
+      timeoutMs: 30000,
+      requireJson: true,
+      requireJsonSchema: false,
+      allowStdoutJsonFallback: true
+    });
+
+    const result = await provider.completeJson({
+      messages: [
+        { role: "system", content: "Return JSON only" },
+        { role: "user", content: "Repair test" }
+      ],
+      requireJson: true
+    });
+
+    expect(result.parsedJson?.decision).toBe("repaired_plan");
+    expect(result.parsedJson?.reason).toBe("Found safe candidate");
+    expect(result.parsedJson?.candidateId).toBe("el-1");
+    expect(result.parsedJson?.confidence).toBe(0.9);
+    expect(result.diagnostics?.warning).toBe("codex_stdout_fallback_used");
+  } finally {
+    __setSpawnForTesting(undefined as any);
+  }
+});
+
+test("CodexCliProvider stdout fallback no acepta JSON inválido", async () => {
+  __setSpawnForTesting(((command: string, args: string[], options: any) => {
+    const child = new EventEmitter() as any;
+    child.stdout = new EventEmitter();
+    child.stderr = new EventEmitter();
+    child.kill = () => {};
+    
+    setTimeout(() => {
+      child.stdout.emit("data", Buffer.from("This is not JSON at all"));
+      child.emit("close", 0, null);
+    }, 10);
+    
+    return child;
+  }) as any);
+
+  try {
+    const provider = new CodexCliProvider({
+      enabled: true,
+      provider: "codex_cli",
+      providerName: "codex",
+      baseUrl: "",
+      apiKey: "",
+      model: "codex",
+      command: "codex",
+      extraArgs: [],
+      timeoutMs: 30000,
+      requireJson: true,
+      requireJsonSchema: false,
+      allowStdoutJsonFallback: true
+    });
+
+    await expect(provider.completeJson({
+      messages: [
+        { role: "system", content: "Return JSON only" },
+        { role: "user", content: "Test" }
+      ],
+      requireJson: true
+    })).rejects.toThrow(AiProviderError);
+    await expect(provider.completeJson({
+      messages: [
+        { role: "system", content: "Return JSON only" },
+        { role: "user", content: "Test" }
+      ],
+      requireJson: true
+    })).rejects.toThrow(/did not write/i);
+  } finally {
+    __setSpawnForTesting(undefined as any);
+  }
+});
+
+test("CodexCliProvider sin fallback falla cuando repair-decision.json falta (AI Repair real)", async () => {
+  __setSpawnForTesting(((command: string, args: string[], options: any) => {
+    const child = new EventEmitter() as any;
+    child.stdout = new EventEmitter();
+    child.stderr = new EventEmitter();
+    child.kill = () => {};
+    
+    setTimeout(() => {
+      child.stdout.emit("data", Buffer.from('{"decision":"no_safe_action","reason":"stdout response"}'));
+      child.emit("close", 0, null);
+    }, 10);
+    
+    return child;
+  }) as any);
+
+  try {
+    const provider = new CodexCliProvider({
+      enabled: true,
+      provider: "codex_cli",
+      providerName: "codex",
+      baseUrl: "",
+      apiKey: "",
+      model: "codex",
+      command: "codex",
+      extraArgs: [],
+      timeoutMs: 30000,
+      requireJson: true,
+      requireJsonSchema: false,
+      allowStdoutJsonFallback: false
+    });
+
+    await expect(provider.completeJson({
+      messages: [
+        { role: "system", content: "Return JSON only" },
+        { role: "user", content: "Test" }
+      ],
+      requireJson: true
+    })).rejects.toThrow(AiProviderError);
+    await expect(provider.completeJson({
+      messages: [
+        { role: "system", content: "Return JSON only" },
+        { role: "user", content: "Test" }
+      ],
+      requireJson: true
+    })).rejects.toThrow(/did not write/i);
+  } finally {
+    __setSpawnForTesting(undefined as any);
+  }
+});
+
+test("CodexCliProvider stdout fallback extrae JSON de texto mixto", async () => {
+  __setSpawnForTesting(((command: string, args: string[], options: any) => {
+    const child = new EventEmitter() as any;
+    child.stdout = new EventEmitter();
+    child.stderr = new EventEmitter();
+    child.kill = () => {};
+    
+    setTimeout(() => {
+      child.stdout.emit("data", Buffer.from("Some prefix text\n{\"decision\":\"no_safe_action\",\"reason\":\"connection test\"}\nSome suffix text"));
+      child.emit("close", 0, null);
+    }, 10);
+    
+    return child;
+  }) as any);
+
+  try {
+    const provider = new CodexCliProvider({
+      enabled: true,
+      provider: "codex_cli",
+      providerName: "codex",
+      baseUrl: "",
+      apiKey: "",
+      model: "codex",
+      command: "codex",
+      extraArgs: [],
+      timeoutMs: 30000,
+      requireJson: true,
+      requireJsonSchema: false,
+      allowStdoutJsonFallback: true
+    });
+
+    const result = await provider.completeJson({
+      messages: [
+        { role: "system", content: "Return JSON only" },
+        { role: "user", content: "Connection test" }
+      ],
+      requireJson: true
+    });
+
+    expect(result.parsedJson?.decision).toBe("no_safe_action");
+    expect(result.parsedJson?.reason).toBe("connection test");
+    expect(result.diagnostics?.warning).toBe("codex_stdout_fallback_used");
   } finally {
     __setSpawnForTesting(undefined as any);
   }

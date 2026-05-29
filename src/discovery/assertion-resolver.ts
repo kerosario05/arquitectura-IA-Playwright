@@ -4,6 +4,63 @@ import { resolveFeedbackMessageAssertion, isFeedbackAssertion } from "./feedback
 import { resolveCompoundFormFieldsAssertion, parseCompoundFormFieldsAssertion } from "./compound-form-fields-resolver";
 import type { PageSnapshot, SnapshotElement } from "../types/page-snapshot.types";
 
+/**
+ * Back/return button aliases for semantic matching
+ * These allow "Volver al menú principal" to match "Volver al menú" or "Volver"
+ */
+const BACK_RETURN_ALIASES: Record<string, string[]> = {
+  "volver": ["volver", "regresar", "atrás", "atras", "retroceder"],
+  "menu": ["menú", "menu", "menu principal", "menú principal"],
+  "listado": ["listado", "lista", "list"],
+  "inicio": ["inicio", "home", "dashboard"]
+};
+
+/**
+ * Check if an assertion target is a back/return type assertion
+ */
+function isBackReturnAssertion(assertionText: string): boolean {
+  const normalized = normalizeText(assertionText);
+  const backKeywords = ["volver", "regresar", "atras", "atrás", "retroceder", "back", "return"];
+  return backKeywords.some(keyword => normalized.includes(keyword));
+}
+
+/**
+ * Get semantic aliases for a back/return assertion
+ * Returns expanded set of texts to match against
+ */
+function getBackReturnAliases(assertionText: string): string[] {
+  const normalized = normalizeText(assertionText);
+  const aliases: string[] = [assertionText]; // Always include original
+  
+  // Check each word/phrase against alias map
+  for (const [key, synonyms] of Object.entries(BACK_RETURN_ALIASES)) {
+    if (normalized.includes(key)) {
+      // Add all synonyms for this key
+      for (const synonym of synonyms) {
+        // Create variations by replacing the key with synonym
+        const replaced = assertionText.replace(new RegExp(key, "gi"), synonym);
+        if (replaced !== assertionText && !aliases.includes(replaced)) {
+          aliases.push(replaced);
+        }
+      }
+    }
+  }
+  
+  // Add shortened variants for common patterns
+  if (normalized.includes("volver al menú principal")) {
+    aliases.push("Volver al menú");
+    aliases.push("Volver");
+  }
+  if (normalized.includes("volver al listado")) {
+    aliases.push("Volver");
+  }
+  if (normalized.includes("regresar al")) {
+    aliases.push("Regresar");
+  }
+  
+  return aliases;
+}
+
 export type AssertionClassification =
   | "literal_observable"
   | "semantic_descriptor"
@@ -60,6 +117,9 @@ export type AssertionResolutionResult = {
   matchedText?: string;
   confidence: number;
   reason: string;
+  matchReason?: string;
+  originalTarget?: string;
+  matchedTarget?: string;
   closestCandidates: Array<{
     text: string;
     score: number;
@@ -365,27 +425,50 @@ function buildClosestCandidates(snapshot: PageSnapshot, assertionText: string): 
     .slice(0, 5);
 }
 
-function isTextVisible(snapshot: PageSnapshot, assertionText: string): { matchedText?: string; confidence: number } {
+function isTextVisible(snapshot: PageSnapshot, assertionText: string): { matchedText?: string; confidence: number; matchReason?: string } {
   const normalizedAssertion = normalizeText(assertionText);
-  let bestMatch: { matchedText?: string; confidence: number } = { confidence: 0 };
+  let bestMatch: { matchedText?: string; confidence: number; matchReason?: string } = { confidence: 0 };
+
+  // Get aliases for back/return assertions
+  const textsToMatch = isBackReturnAssertion(assertionText) 
+    ? getBackReturnAliases(assertionText)
+    : [assertionText];
 
   for (const visibleText of uniqueVisibleTexts(snapshot)) {
     const normalizedVisible = normalizeText(visibleText);
-    let confidence = 0;
+    
+    // Try matching against each alias
+    for (const textToMatch of textsToMatch) {
+      const normalizedToMatch = normalizeText(textToMatch);
+      let confidence = 0;
+      let matchReason: string | undefined;
 
-    if (normalizedVisible === normalizedAssertion) {
-      confidence = 1;
-    } else if (normalizedVisible.includes(normalizedAssertion) || normalizedAssertion.includes(normalizedVisible)) {
-      confidence = Math.max(0.85, computeTokenScore(assertionText, visibleText));
-    } else {
-      confidence = computeTokenScore(assertionText, visibleText);
-    }
+      if (normalizedVisible === normalizedToMatch) {
+        confidence = 1;
+        matchReason = textToMatch === assertionText ? "exact_match" : "alias_exact_match";
+      } else if (normalizedVisible.includes(normalizedToMatch) || normalizedToMatch.includes(normalizedVisible)) {
+        confidence = Math.max(0.85, computeTokenScore(textToMatch, visibleText));
+        matchReason = textToMatch === assertionText ? "contains_match" : "alias_contains_match";
+      } else {
+        confidence = computeTokenScore(textToMatch, visibleText);
+        if (isBackReturnAssertion(assertionText) && textToMatch !== assertionText) {
+          matchReason = "alias_token_match";
+        }
+      }
 
-    if (confidence > bestMatch.confidence) {
-      bestMatch = {
-        matchedText: visibleText,
-        confidence
-      };
+      // Boost confidence for back/return alias matches
+      if (isBackReturnAssertion(assertionText) && textToMatch !== assertionText && confidence > 0.5) {
+        confidence = Math.min(0.95, confidence + 0.1);
+        matchReason = matchReason ? `${matchReason}_boosted` : "alias_boosted";
+      }
+
+      if (confidence > bestMatch.confidence) {
+        bestMatch = {
+          matchedText: visibleText,
+          confidence,
+          matchReason
+        };
+      }
     }
   }
 
@@ -1222,6 +1305,16 @@ export function resolveAssertionTargets(
 
     if (classification === "literal_observable") {
       if (literalMatch.confidence >= 0.6 && literalMatch.matchedText) {
+        // Add back/return alias diagnostics
+        const isBackReturn = isBackReturnAssertion(assertion.target);
+        const backReturnDiagnostics = isBackReturn ? {
+          backReturnAliasMatch: {
+            originalTarget: assertion.target,
+            matchedTarget: literalMatch.matchedText,
+            matchReason: literalMatch.matchReason || "back_return_alias"
+          }
+        } : {};
+        
         const result = {
           assertionText: assertion.target,
           normalizedAssertion: normalizeText(assertion.target),
@@ -1229,7 +1322,12 @@ export function resolveAssertionTargets(
           status: "passed" as const,
           matchedText: literalMatch.matchedText,
           confidence: literalMatch.confidence,
-          reason: "Observable text matched in the snapshot.",
+          reason: isBackReturn && literalMatch.matchReason?.includes("alias") 
+            ? "Back/return assertion matched via semantic alias." 
+            : "Observable text matched in the snapshot.",
+          matchReason: literalMatch.matchReason,
+          originalTarget: isBackReturn ? assertion.target : undefined,
+          matchedTarget: isBackReturn && literalMatch.matchReason?.includes("alias") ? literalMatch.matchedText : undefined,
           closestCandidates,
           visibleTexts,
           descriptorTypes,
@@ -1237,6 +1335,7 @@ export function resolveAssertionTargets(
           matchedTokens: subjectSignal.matchedTokens,
           structuralSignals,
           assertionType: inferAssertionType(assertion.target),
+          assertionDiagnostics: isBackReturn ? backReturnDiagnostics : undefined,
           ...(isWeakSignal && { isWeakSignal })
         };
         results.push(result);
@@ -1269,13 +1368,30 @@ export function resolveAssertionTargets(
         };
       }
 
+      // Add back/return alias diagnostics for failed assertions
+      const isBackReturn = isBackReturnAssertion(assertion.target);
+      const backReturnDiagnostics = isBackReturn ? {
+        backReturnAliasAttempt: {
+          originalTarget: assertion.target,
+          attemptedAliases: getBackReturnAliases(assertion.target),
+          bestMatch: literalMatch.matchedText,
+          bestConfidence: literalMatch.confidence,
+          matchReason: literalMatch.matchReason
+        }
+      } : {};
+
       const result = {
         assertionText: assertion.target,
         normalizedAssertion: normalizeText(assertion.target),
         classification,
         status: "failed" as const,
         confidence: literalMatch.confidence,
-        reason: "Concrete observable text was not found in the snapshot.",
+        reason: isBackReturn && literalMatch.confidence >= 0.5
+          ? "Back/return assertion partially matched but below threshold."
+          : "Concrete observable text was not found in the snapshot.",
+        matchReason: literalMatch.matchReason,
+        originalTarget: isBackReturn ? assertion.target : undefined,
+        matchedTarget: isBackReturn && literalMatch.matchedText ? literalMatch.matchedText : undefined,
         closestCandidates,
         visibleTexts,
         descriptorTypes,
@@ -1283,6 +1399,7 @@ export function resolveAssertionTargets(
         matchedTokens: subjectSignal.matchedTokens,
         structuralSignals,
         assertionType: inferAssertionType(assertion.target),
+        assertionDiagnostics: isBackReturn ? backReturnDiagnostics : undefined,
         ...(isWeakSignal && { isWeakSignal })
       };
       results.push(result);

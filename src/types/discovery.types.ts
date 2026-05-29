@@ -239,16 +239,50 @@ export type DiscoveryStepResult = {
   // Recovery metadata — set when segmented route recovery resolves a failed step
   originalStatus?: string;
   recoveryStatus?: "recovered" | "repaired";
-  recoveredBy?: "segmented_route_recovery";
+  recoveredBy?: "segmented_route_recovery" | "route_completion" | "contextual_intermediate_already_satisfied" | "ordinal_selection" | "auth_flow" | "page_stability" | "later_success" | "retry_after_navigation";
   recoveryMetadata?: {
-    selectedCandidateId: string;
+    selectedCandidateId?: string;
     selectedCandidateText?: string;
     semanticRelation?: string;
     score?: number;
-    segmentIndex: number;
-    transitionDetected: boolean;
-    executedAction: string;
+    segmentIndex?: number;
+    transitionDetected?: boolean;
+    executedAction?: string;
     rationale?: string;
+    alreadySatisfiedEvidence?: {
+      candidateText: string;
+      candidateType: string;
+      containsTarget: boolean;
+      consistentWithNextTarget: boolean;
+      reason: string;
+    };
+    // Assertion recovery tracking
+    originalFailureReason?: string;
+    recoveredAfterStep?: number;
+    recoveredBecause?: "auth_gate_completed" | "page_stabilized" | "target_used_successfully_later" | "action_on_target_succeeded";
+    blocking?: boolean;
+    ordinalSelectionDiagnostics?: {
+      selectionPatternDetected: boolean;
+      ordinal?: "first" | "second" | "third" | "last";
+      domainTerm?: string;
+      domainTermSource?: "routeProfile" | "generic_fallback";
+      selectedCandidateText?: string;
+      selectedCandidateId?: string;
+    };
+  };
+  routeCompletionDiagnostics?: {
+    attempted: boolean;
+    enabled: boolean;
+    appSlug: string;
+    routeProfileUsed: boolean;
+    trigger?: "pre_click_weak_resolution" | "post_click_semantic_mismatch" | "target_not_found";
+    source?: "app_route_profile" | "generic_forward_route_completion";
+    selectedCandidateId?: string;
+    selectedCandidateText?: string;
+    blockedReason?: string;
+    retrySucceeded?: boolean;
+    deterministicResolutionConfidence?: number;
+    deterministicResolutionStrategy?: string;
   };
   earlyCompletionDiagnostics?: {
     checked: boolean;

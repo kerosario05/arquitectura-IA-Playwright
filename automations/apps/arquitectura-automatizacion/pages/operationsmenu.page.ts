@@ -10,9 +10,13 @@ export class OperationsMenuPage {
     ).toBeVisible();
   }
 
-  async selectOperation(operationName: string): Promise<void> {
+  async openModule(moduleName: string): Promise<void> {
     const previousUrl = this.page.url();
-    await this.page.getByRole('button', { name: new RegExp(operationName, 'i') }).click();
+    await this.page.getByRole('button', { name: new RegExp(moduleName, 'i') }).click();
     await waitForPromotedSpecStepReady(this.page, { previousUrl, expectEntityList: false });
+  }
+
+  async selectOperation(operationName: string): Promise<void> {
+    return this.openModule(operationName);
   }
 }

@@ -26,17 +26,55 @@ export class ProductDetailPage {
 
   async clickPrimaryAction(actionName: string): Promise<void> {
     const button = this.page.getByRole('button', { name: new RegExp(actionName, 'i') });
-const link = this.page.getByRole('link', { name: new RegExp(actionName, 'i') });
-const buttonOrLink = button.or(link).first();
-await buttonOrLink.waitFor({ state: 'visible', timeout: 10000 });
-const isEnabled = await buttonOrLink.isEnabled({ timeout: 15000 }).catch(() => true);
+await button.waitFor({ state: 'visible', timeout: 10000 });
+const isEnabled = await button.isEnabled({ timeout: 15000 }).catch(() => false);
 if (!isEnabled) {
-  const buttonText = await buttonOrLink.textContent().catch(() => '(unknown)');
+  const buttonText = await button.textContent().catch(() => '(unknown)');
   throw new Error('Cannot click primary action "' + actionName + '": button is not enabled. Text: "' + buttonText + '". This usually means required selections or form fields have not been completed.');
 }
-await buttonOrLink.click({ timeout: 10000 });
+await button.click({ timeout: 10000 });
 await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
 await this.page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
 await this.page.waitForTimeout(1000);
+  }
+
+  async backToList(): Promise<void> {
+    // Try exact "Volver" button first (most common)
+    const volverButton = this.page.getByRole('button', { name: 'Volver', exact: true });
+    if (await volverButton.count() > 0) {
+      await volverButton.click({ timeout: 10000 });
+      await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
+      await this.page.waitForTimeout(500);
+      return;
+    }
+    
+    // Fallback: "Volver" with partial match
+    const volverPartial = this.page.getByRole('button', { name: /volver/i });
+    if (await volverPartial.count() > 0) {
+      await volverPartial.first().click({ timeout: 10000 });
+      await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
+      await this.page.waitForTimeout(500);
+      return;
+    }
+    
+    // Fallback: "Atrás" button
+    const atrasButton = this.page.getByRole('button', { name: /atrás|atras/i });
+    if (await atrasButton.count() > 0) {
+      await atrasButton.first().click({ timeout: 10000 });
+      await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
+      await this.page.waitForTimeout(500);
+      return;
+    }
+    
+    // Final fallback: any button with "volver" or "atrás" in text
+    const anyBackButton = this.page.locator('button:has-text("Volver"), button:has-text("volver"), button:has-text("Atrás"), button:has-text("atras")').first();
+    if (await anyBackButton.count() > 0) {
+      await anyBackButton.click({ timeout: 10000 });
+      await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
+      await this.page.waitForTimeout(500);
+      return;
+    }
+    
+    throw new Error('backToList: No "Volver" or "Atrás" button found on detail page');
   }
 }

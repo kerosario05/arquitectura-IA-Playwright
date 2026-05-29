@@ -1,0 +1,13 @@
+{
+  "timestamp": "2026-05-28T19:35:16.510Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": false,
+  "gateStatus": "blocked",
+  "reasons": [
+    "Blocking discovery steps found: #3:not_found"
+  ],
+  "warnings": [
+    "Discovery had failedReason 'assertion_not_found' but plan is validated (recovered)."
+  ],
+  "promoted": false
+}

@@ -12,6 +12,7 @@ export default defineConfig({
   timeout: Number(process.env.DEFAULT_TIMEOUT_MS ?? 30000),
   outputDir: "test-results/apps",
   reporter: [["list"], ["html", { open: "never" }]],
+  reportSlowTests: null,
   use: {
     baseURL: process.env.APP_BASE_URL,
     browserName: browser === "firefox" || browser === "webkit" ? browser : "chromium",

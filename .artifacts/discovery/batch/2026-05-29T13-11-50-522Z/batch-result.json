@@ -1,0 +1,93 @@
+{
+  "batchId": "2026-05-29T13-11-50-522Z",
+  "timestamp": "2026-05-29T13:13:45.561Z",
+  "args": {
+    "mode": "by-ids",
+    "caseIds": [
+      38131,
+      38134,
+      38264
+    ],
+    "headed": false,
+    "autoPromote": true,
+    "promotionDryRun": false,
+    "promotionStrict": false,
+    "requirePromotionApproval": false,
+    "dryRun": false,
+    "includeActive": true,
+    "rerunActive": true,
+    "stopOnFail": false,
+    "concurrency": 1,
+    "parallel": false,
+    "autoRepair": false,
+    "repairTimeoutMs": 120000,
+    "showAgentLog": false,
+    "continueOnAgentTimeout": true
+  },
+  "cases": [
+    {
+      "caseId": 38131,
+      "title": "Visualizar detalle informativo de préstamo personal",
+      "selected": true,
+      "status": "failed",
+      "promoted": false,
+      "failureReason": "Spec validation failed: Suspicious duplicate homePage.start() calls: 5. Spec may be degraded.. Promotion blocked to prevent degraded spec from being promoted.",
+      "durationMs": 23933
+    },
+    {
+      "caseId": 38134,
+      "title": "Finalizar sesión desde detalle de producto",
+      "selected": true,
+      "status": "failed",
+      "promoted": false,
+      "failureReason": "Spec validation failed: Suspicious duplicate homePage.start() calls: 6. Spec may be degraded.; Selection-like step \"Información de productos\" is mapped to clickPrimaryAction instead of a select method.; Selection-like step \"el primer préstamo visible del listado\" is mapped to clickPrimaryAction instead of a select method.. Promotion blocked to prevent degraded spec from being promoted.",
+      "durationMs": 16143
+    },
+    {
+      "caseId": 38264,
+      "title": "Consulta de balance - Finalizar sesión desde detalle de depósito",
+      "selected": true,
+      "status": "failed",
+      "promoted": false,
+      "failureReason": "Spec validation failed: Suspicious duplicate homePage.start() calls: 5. Spec may be degraded.. Promotion blocked to prevent degraded spec from being promoted.",
+      "durationMs": 74957
+    }
+  ],
+  "skippedCases": [],
+  "rerunActiveCases": [
+    {
+      "caseId": 38131
+    },
+    {
+      "caseId": 38134
+    },
+    {
+      "caseId": 38264
+    }
+  ],
+  "summary": {
+    "requested": 3,
+    "selected": 3,
+    "executed": 3,
+    "skipped": 0,
+    "passed": 0,
+    "failed": 3,
+    "promoted": 0,
+    "alreadyActiveSkipped": 0,
+    "activeRerun": 3,
+    "promotionFailed": 0,
+    "notPromoted": 0,
+    "totalDurationMs": 115034
+  },
+  "aiRepairBatchSummary": {
+    "casesWithAiRepair": 0,
+    "totalInvocations": 0,
+    "appliedRepairs": 0,
+    "blockedRepairs": 0,
+    "providerErrors": 0,
+    "invalidResponses": 0,
+    "avgDurationMs": 0,
+    "byProvider": {},
+    "cases": []
+  }
+}

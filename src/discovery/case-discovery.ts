@@ -39,11 +39,15 @@ import type {
   DiscoveredObject
 } from "../types/discovery.types";
 import type { TestScenario, TestScenarioStep } from "../types/testrail.types";
-import type { ExecutionPlan, ExecutionPlanStep, RequiredDataRef } from "../types/execution-plan.types";
+import type { ExecutionPlan, ExecutionPlanStep, RequiredDataRef, LocatorStrategy } from "../types/execution-plan.types";
 import type { PageSnapshot } from "../types/page-snapshot.types";
-import type { TestDataMap, TestDataValue, MissingInputBehavior } from "../types/env.types";
+import type { TestDataMap, TestDataValue, MissingInputBehavior, ExpectedResultMode } from "../types/env.types";
+import { config as envConfig } from "../config/env";
 import { detectAuthGate, type AuthGateDetection } from "./auth-gate-detector";
 import { resolveAuthInputs, validateRequiredInputs, logAuthResolution, type AuthInputResolverConfig } from "./auth-input-resolver";
+import { loadRouteProfile } from "../automations/app-profile";
+import { resolveMissingIntermediateStep, type MissingIntermediateStepResolution, type DiscoveryCandidate, type DiscoverySnapshot } from "./missing-intermediate-step-resolver";
+import { observeRouteTransition, observeRouteCompletionSuccess, saveRouteProfileSuggestions, type RouteProfileSuggestion, type RouteProfileLearningConfig } from "./route-profile-learning";
 import {
   createAuthGateState,
   shouldSkipStepAsAuthConsumed,
@@ -65,6 +69,181 @@ function normalizeText(text: string): string {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+/**
+ * Check if a failed assertion was recovered by later success
+ * Returns the step index where recovery happened, or undefined if not recovered
+ * 
+ * Recovery scenarios:
+ * 1. Same target succeeds later (exact match recovery)
+ * 2. Any action succeeds later, indicating page navigation completed (navigation recovery)
+ */
+function findAssertionRecoveryByLaterSuccess(
+  failedAssertionTarget: string,
+  steps: DiscoveryStepResult[],
+  currentIndex: number
+): number | undefined {
+  const normalizedTarget = normalizeText(failedAssertionTarget);
+  
+  console.log(`[assertion-recovery] checking failed assertion target="${failedAssertionTarget}" normalized="${normalizedTarget}" from index=${currentIndex}`);
+  
+  // Look for successful actions/assertions on the same target after the failure
+  for (let i = currentIndex; i < steps.length; i++) {
+    const step = steps[i];
+    const stepTarget = normalizeText(step.targetText || "");
+    
+    console.log(`[assertion-recovery] checking discovery step ${i}: target="${step.targetText}" normalized="${stepTarget}" status="${step.status}"`);
+    
+    // Check if this step successfully used the same target
+    // Consider as success: found, passed, recovered, repaired, satisfied_by_*
+    const isSuccessStatus = [
+      "found",
+      "satisfied_by_children",
+      "satisfied_by_previous_assertion",
+      "skipped_after_completion"
+    ].includes(step.status);
+    
+    if (stepTarget === normalizedTarget && isSuccessStatus) {
+      console.log(`[assertion-recovery] found later success step=${i} target="${step.targetText}" type=action status=${step.status}`);
+      return i;
+    }
+    
+    // Check if this is an assertion that passed on the same target
+    if (stepTarget === normalizedTarget && step.assertionStatus === "passed") {
+      console.log(`[assertion-recovery] found later success step=${i} target="${step.targetText}" type=assertion assertionStatus=passed`);
+      return i;
+    }
+    
+    // Check if this step was recovered/repaired (indicates the target was eventually used successfully)
+    if (stepTarget === normalizedTarget && (step.recoveryStatus === "recovered" || step.recoveryStatus === "repaired")) {
+      console.log(`[assertion-recovery] found later success step=${i} target="${step.targetText}" recoveryStatus=${step.recoveryStatus}`);
+      return i;
+    }
+  }
+  
+  // NAVIGATION RECOVERY: If any action succeeds after the failed assertion,
+  // it indicates the page was functional and navigation completed.
+  // The assertion failure was likely due to page transitioning before assertion completed.
+  for (let i = currentIndex; i < steps.length; i++) {
+    const step = steps[i];
+    const isSuccessStatus = [
+      "found",
+      "satisfied_by_children",
+      "satisfied_by_previous_assertion",
+      "skipped_after_completion"
+    ].includes(step.status);
+    
+    if (isSuccessStatus) {
+      console.log(`[assertion-recovery] found navigation recovery step=${i} target="${step.targetText}" status=${step.status} (different target indicates successful navigation)`);
+      return i;
+    }
+  }
+  
+  console.log(`[assertion-recovery] no later success found for target="${failedAssertionTarget}"`);
+  return undefined;
+}
+
+/**
+ * Get unresolved blocking failures - ignores steps that were recovered or marked as non-blocking
+ */
+function getUnresolvedBlockingFailures(steps: DiscoveryStepResult[]): DiscoveryStepResult[] {
+  return steps.filter((s) => {
+    // Skip if recovered
+    if (s.recoveryStatus === "recovered" || s.recoveryStatus === "repaired") {
+      return false;
+    }
+    
+    // Skip if marked as non-blocking by recovery metadata
+    const recoveryMeta = (s as any).recoveryMetadata;
+    if (recoveryMeta?.blocking === false) {
+      return false;
+    }
+    
+    // Skip if recoveredBy is set to a known recovery mechanism
+    if (s.recoveredBy && ["auth_flow", "page_stability", "later_success", "retry_after_navigation", "contextual_intermediate_already_satisfied"].includes(s.recoveredBy)) {
+      return false;
+    }
+    
+    // Include only actual blocking failures
+    return (s.status === "not_found" || s.status === "needs_assertion_resolution") && s.assertionClassification;
+  });
+}
+
+/**
+ * Mark failed assertions as recovered if they were resolved by AuthGate, PageStability, or later success
+ */
+function recoverTransientAssertionFailures(
+  steps: DiscoveryStepResult[],
+  authGateCompletedAtStep?: number,
+  pageStabilizedAtStep?: number
+): void {
+  const failedAssertions = steps.filter(
+    (s) => (s.status === "not_found" || s.status === "needs_assertion_resolution") &&
+           s.assertionClassification &&
+           !s.recoveryStatus
+  );
+  
+  console.log(`[assertion-recovery] checking ${failedAssertions.length} failed assertion(s) for recovery`);
+  
+  for (const failedStep of failedAssertions) {
+    const target = failedStep.targetText;
+    if (!target) continue;
+    
+    console.log(`[assertion-recovery] checking failed assertion step=${failedStep.index} target="${target}"`);
+    
+    // Check if recovered by AuthGate
+    if (authGateCompletedAtStep !== undefined && authGateCompletedAtStep > failedStep.index) {
+      const recoveryIndex = findAssertionRecoveryByLaterSuccess(target, steps, authGateCompletedAtStep);
+      if (recoveryIndex !== undefined) {
+        failedStep.recoveryStatus = "recovered";
+        failedStep.recoveredBy = "auth_flow";
+        failedStep.recoveryMetadata = {
+          ...failedStep.recoveryMetadata,
+          originalFailureReason: failedStep.error,
+          recoveredAfterStep: recoveryIndex,
+          recoveredBecause: "auth_gate_completed",
+          blocking: false
+        };
+        console.log(`[assertion-recovery] recovered step=${failedStep.index} target="${target}" recoveredBy=auth_flow blocking=false`);
+        continue;
+      }
+    }
+    
+    // Check if recovered by page stability
+    if (pageStabilizedAtStep !== undefined && pageStabilizedAtStep > failedStep.index) {
+      const recoveryIndex = findAssertionRecoveryByLaterSuccess(target, steps, pageStabilizedAtStep);
+      if (recoveryIndex !== undefined) {
+        failedStep.recoveryStatus = "recovered";
+        failedStep.recoveredBy = "page_stability";
+        failedStep.recoveryMetadata = {
+          ...failedStep.recoveryMetadata,
+          originalFailureReason: failedStep.error,
+          recoveredAfterStep: recoveryIndex,
+          recoveredBecause: "page_stabilized",
+          blocking: false
+        };
+        console.log(`[assertion-recovery] recovered step=${failedStep.index} target="${target}" recoveredBy=page_stability blocking=false`);
+        continue;
+      }
+    }
+    
+    // Check if recovered by later success (without AuthGate)
+    // Start searching from the step immediately after the failed assertion
+    const recoveryIndex = findAssertionRecoveryByLaterSuccess(target, steps, failedStep.index + 1);
+    if (recoveryIndex !== undefined) {
+      failedStep.recoveryStatus = "recovered";
+      failedStep.recoveredBy = "later_success";
+      failedStep.recoveryMetadata = {
+        ...failedStep.recoveryMetadata,
+        originalFailureReason: failedStep.error,
+        recoveredAfterStep: recoveryIndex,
+        recoveredBecause: "target_used_successfully_later",
+        blocking: false
+      };
+      console.log(`[assertion-recovery] recovered step=${failedStep.index} target="${target}" recoveredBy=later_success blocking=false`);
+    }
+  }
 }
 
 function envTrue(name: string, fallback = false): boolean {
@@ -138,6 +317,11 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
   const orderedSteps: ExecutableStep[] = [];
   let expectedResultConsumption: ExpectedResultConsumption[] | undefined;
   let nonExecutableCriteria: string[] | undefined;
+
+  // Get expected result mode from config (default: context)
+  const expectedResultMode: ExpectedResultMode = envConfig.integrations.ai?.expectedResultMode ?? "context";
+
+  console.log(`[expected-result-parser] mode=${expectedResultMode}`);
 
   const findExistingAssertionByTarget = (target: string): boolean =>
     assertionTargets.some((a) => a.source === "action" && normalizeText(a.target) === normalizeText(target));
@@ -222,39 +406,76 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
     }
   }
 
+  // Process expected results based on mode
   if (scenario.steps.length > 0) {
     const lastStep = scenario.steps[scenario.steps.length - 1];
     if (lastStep.expected) {
       const expectedTargets = extractAssertionTargets(lastStep.expected);
-      // Collect existing concrete assertions from steps to check coverage
-      const existingConcreteAssertions = assertionTargets
-        .filter((a) => a.source === "action")
-        .map((a) => a.target);
-      const buildResult = buildConcreteAssertionsFromExpected(expectedTargets, existingConcreteAssertions);
-      expectedResultConsumption = buildResult.expectedResultConsumption;
-      nonExecutableCriteria = buildResult.nonExecutableCriteria;
       
-      // Add only executable assertions
-      for (const target of buildResult.assertions) {
-        if (findExistingAssertionByTarget(target)) {
-          continue;
+      if (expectedResultMode === "context") {
+        // Mode: context - store as non-blocking metadata only
+        expectedResultConsumption = expectedTargets.map(text => ({
+          originalText: text,
+          classification: "non_executable_criteria" as const,
+          reason: "mode=context: expected result stored as non-blocking context"
+        }));
+        nonExecutableCriteria = expectedTargets;
+        console.log(`[expected-result-parser] expected results stored as non-blocking context. items=${expectedTargets.length}`);
+        console.log(`[discovery:case] Expected result assertions disabled by mode=context`);
+      } else if (expectedResultMode === "smart") {
+        // Mode: smart - convert only observable assertions, rest as non-executable
+        const existingConcreteAssertions = assertionTargets
+          .filter((a) => a.source === "action")
+          .map((a) => a.target);
+        const buildResult = buildConcreteAssertionsFromExpected(expectedTargets, existingConcreteAssertions);
+        expectedResultConsumption = buildResult.expectedResultConsumption;
+        nonExecutableCriteria = buildResult.nonExecutableCriteria;
+        
+        for (const target of buildResult.assertions) {
+          if (findExistingAssertionByTarget(target)) {
+            continue;
+          }
+          assertionTargets.push({ index: lastStep.index, action: target, target, source: "expected" });
+          orderedSteps.push({
+            stepIndex: lastStep.index,
+            originalText: target,
+            type: "assertion",
+            target,
+            source: "expected"
+          });
         }
-        assertionTargets.push({ index: lastStep.index, action: target, target, source: "expected" });
-        orderedSteps.push({
-          stepIndex: lastStep.index,
-          originalText: target,
-          type: "assertion",
-          target,
-          source: "expected"
-        });
+        console.log(`[expected-result-parser] mode=smart: converted ${buildResult.assertions.length} observable assertions, ${nonExecutableCriteria.length} non-executable`);
+      } else {
+        // Mode: assertions - legacy behavior, convert all to assertions
+        const existingConcreteAssertions = assertionTargets
+          .filter((a) => a.source === "action")
+          .map((a) => a.target);
+        const buildResult = buildConcreteAssertionsFromExpected(expectedTargets, existingConcreteAssertions);
+        expectedResultConsumption = buildResult.expectedResultConsumption;
+        nonExecutableCriteria = buildResult.nonExecutableCriteria;
+        
+        for (const target of buildResult.assertions) {
+          if (findExistingAssertionByTarget(target)) {
+            continue;
+          }
+          assertionTargets.push({ index: lastStep.index, action: target, target, source: "expected" });
+          orderedSteps.push({
+            stepIndex: lastStep.index,
+            originalText: target,
+            type: "assertion",
+            target,
+            source: "expected"
+          });
+        }
+        console.log(`[expected-result-parser] mode=assertions: converted ${buildResult.assertions.length} assertions from expected results`);
       }
       
       // Non-executable criteria are tracked in metadata but don't block execution
       // They are logged for diagnostics but not added as assertion targets
-      if (buildResult.nonExecutableCriteria.length > 0) {
-        console.log(`[discovery:case] Non-executable expected criteria (${buildResult.nonExecutableCriteria.length}): ${buildResult.nonExecutableCriteria.map(c => `"${c}"`).join(", ")}`);
+      if (nonExecutableCriteria && nonExecutableCriteria.length > 0) {
+        console.log(`[discovery:case] Non-executable expected criteria (${nonExecutableCriteria.length}): ${nonExecutableCriteria.map(c => `"${c}"`).join(", ")}`);
       }
-      if (buildResult.expectedResultConsumption.some(c => c.classification === "covered_by_concrete_assertions")) {
+      if (expectedResultConsumption && expectedResultConsumption.some(c => c.classification === "covered_by_concrete_assertions")) {
         console.log(`[discovery:case] Expected result covered by concrete assertions from steps`);
       }
     }
@@ -624,6 +845,7 @@ export type CaseDiscoveryOptions = {
   pendingObjectsPath: string;
   pendingPlansPath: string;
   appBaseUrl: string;
+  appSlug?: string;
   testData?: TestDataMap;
   loginAction?: () => Promise<void>;
   loginMode?: "password" | "no_login" | "manual";
@@ -831,6 +1053,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     ...options.aiAssistedDiscovery?.config
   };
   const aiExplorer = options.aiAssistedDiscovery?.explorer ?? createAIExplorer();
+  
+  // Load route profile for ordinal selection and route completion
+  const appSlug = options.appSlug ?? "default";
+  const routeProfile = options.aiAssistedDiscovery?.config?.routeCompletion?.useAppProfile !== false ? loadRouteProfile(appSlug) : undefined;
+  if (routeProfile) {
+    console.log(`[discovery:case] routeProfile loaded appSlug=${appSlug} domainTerms=${routeProfile.domainTerms?.length ?? 0} routes=${routeProfile.routes?.length ?? 0}`);
+  }
 
   const steps: DiscoveryStepResult[] = [];
   const allDiscoveredObjects: DiscoveredObject[] = [];
@@ -838,11 +1067,23 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   const executedStepIndices = new Set<number>();
   const executedActionOrders = new Set<number>();
   const skippedActionOrders = new Set<number>();
+  const routeProfileSuggestions: RouteProfileSuggestion[] = [];
+  const routeProfileLearningConfig: RouteProfileLearningConfig = (options as any)?.aiAssistedDiscovery?.config?.routeProfileLearning ?? {
+    enabled: false,
+    autoApproveThreshold: 0.90,
+    autoApply: false,
+    minOccurrences: 1,
+    blockSensitive: true
+  };
+  
+  console.log(`[route-learning] config enabled=${routeProfileLearningConfig.enabled} autoApply=${routeProfileLearningConfig.autoApply} threshold=${routeProfileLearningConfig.autoApproveThreshold}`);
+  
   let failedAtStep: number | undefined;
   let failedTarget: string | undefined;
   let failedReason: string | undefined;
   let earlyCompletionSatisfied = false;
   let authGateState: AuthGateState | undefined;
+  let authGateCompletedAfterStepIndex: number | undefined; // Track step index after which AuthFlow completed
   let activeContainer: ActiveContainerContext | undefined;
   const resolvedDataKeys = new Set<string>();
 
@@ -1259,6 +1500,29 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       if (proactiveAuthCheck.recovered) {
         console.log(`[discovery:case] Proactive auth gate recovery completed before step: ${orderedItem.type}`);
         authGateState = proactiveAuthCheck.authGateState;
+        // Track when AuthGate was completed for later AuthFlow insertion
+        if (authGateState && authGateState.completed && authGateCompletedAfterStepIndex === undefined) {
+          // AuthFlow completed before this step - will be inserted after the previous executed step
+          const lastExecutedStepIndex = executedStepIndices.size > 0 
+            ? Math.max(...Array.from(executedStepIndices))
+            : 0;
+          authGateCompletedAfterStepIndex = lastExecutedStepIndex;
+        console.log(`[discovery:case] AuthGate completed after step index ${authGateCompletedAfterStepIndex} (proactive)`);
+        
+        // The AuthFlow was triggered proactively before executing the current step (orderedItem)
+        // The step that triggered AuthGate is the PREVIOUS step (the one that was just executed)
+        // Set insertion index to be AFTER the previous step
+        if (orderedItem.type === "action" && orderedItem.actionTarget) {
+          // The previous step is the one that triggered AuthGate
+          // Use the actionTarget index - 1 to insert after the previous step
+          authGateCompletedAfterStepIndex = orderedItem.actionTarget.index - 1;
+          console.log(`[discovery:case] Updated AuthGate insertion index to ${authGateCompletedAfterStepIndex} (after previous step, current=${orderedItem.actionTarget.index}: ${orderedItem.actionTarget.target})`);
+        } else {
+          // For other types, use orderedItem index - 1
+          authGateCompletedAfterStepIndex = orderedItem.index - 1;
+          console.log(`[discovery:case] Updated AuthGate insertion index to ${authGateCompletedAfterStepIndex} (orderedItem.index - 1)`);
+        }
+      }
         console.log(`[discovery:case] Waiting for stable page after AuthFlow...`);
         const stabilityResult = await waitForStablePageState(page, {
           timeoutMs: 20000,
@@ -1280,6 +1544,36 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     }
 
     const currentActionTarget = orderedItem.actionTarget;
+    
+    // Check if this step should be skipped because AuthFlow already handled it
+    // Skip if we're on operations menu and the step is the landing target
+    if (authGateState && orderedItem.type === "action" && orderedItem.actionTarget) {
+      const targetText = orderedItem.actionTarget.target.toLowerCase();
+      const landingHints = ["transacciones y servicios", "transacciones y services", "operaciones", "operations menu"];
+      const isLandingTarget = landingHints.some(hint => targetText.includes(hint));
+      const isOnOperationsMenu = /operations-menu|operaciones|transacciones.*servicios/i.test(currentSnapshot.url);
+      
+      console.log(`[discovery:case] Skip check: type=${orderedItem.type}, target=${targetText}, isLanding=${isLandingTarget}, isOnMenu=${isOnOperationsMenu}, url=${currentSnapshot.url}`);
+      
+      if (isLandingTarget && isOnOperationsMenu) {
+        console.log(`[discovery:case] Skipping step ${orderedItem.actionTarget.index} (${targetText}) - already on landing page after AuthFlow (url=${currentSnapshot.url})`);
+        steps.push({
+          index: orderedItem.actionTarget.index,
+          action: orderedItem.actionTarget.action,
+          status: "skipped",
+          targetText: orderedItem.actionTarget.target,
+          error: "Step consumed by AuthFlow navigation",
+          recoveryStatus: "recovered",
+          recoveredBy: "auth_flow"
+        } as any);
+        if (typeof currentActionOrder === "number") {
+          skippedActionOrders.add(currentActionOrder);
+        }
+        // Skip adding to planSteps - AuthFlow already handled this navigation
+        continue;
+      }
+    }
+
     if (currentActionTarget && authGateState && shouldSkipStepAsAuthConsumed(currentActionTarget.target, authGateState)) {
       console.log(`[discovery:case] Skipping auth-consumed step: ${currentActionTarget.target}`);
       authGateState.skippedAuthSteps.push({
@@ -1329,28 +1623,119 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         continue;
       }
 
-      const assertionTargetInputs: AssertionTargetInput[] = [{
-        index: es.stepIndex,
-        action: es.originalText,
-        target: es.target ?? "",
-        source: "action"
-      }];
+      // Wait for page stability before evaluating assertion after transition
+      const lastActionStep = steps.filter(s => 
+        s.status === "found" || s.status === "satisfied_by_children" || s.status === "click_no_transition"
+      ).pop();
+      const isAfterTransition = lastActionStep && lastActionStep.recoveryMetadata?.transitionDetected === true;
+      
+      let stabilityDiagnostics: Record<string, unknown> | undefined;
+      let snapshotForAssertion = currentSnapshot;
+      
+      if (isAfterTransition) {
+        console.log(`[discovery:case] Waiting for stable page before assertion target="${es.target}"`);
+        const stabilityStart = Date.now();
+        
+        try {
+          const stabilityResult = await waitForStablePageState(page, {
+            timeoutMs: 10000,
+            pollMs: 500,
+            stableForMs: 800
+          });
+          
+          stabilityDiagnostics = {
+            waited: true,
+            reason: stabilityResult.finalStable ? "stabilized" : "timeout",
+            durationMs: Date.now() - stabilityStart,
+            finalUrl: stabilityResult.finalUrl,
+            finalStable: stabilityResult.finalStable,
+            transientDetections: stabilityResult.transientDetections?.length ?? 0
+          };
+          
+          console.log(`[discovery:case] Assertion page stability: waited=true reason="${stabilityDiagnostics.reason}" durationMs=${stabilityDiagnostics.durationMs}`);
+          
+          // Refresh snapshot after stability
+          snapshotForAssertion = await scanCurrentPage(page);
+          console.log(`[discovery:case] Assertion snapshot refreshed target="${es.target}" visibleButtons=${snapshotForAssertion.elements.filter(e => e.role === "button" && e.visible).length} visibleHeadings=${snapshotForAssertion.elements.filter(e => e.type === "heading" && e.visible).length}`);
+        } catch (stabilityError) {
+          console.warn(`[discovery:case] Stability wait failed: ${stabilityError instanceof Error ? stabilityError.message : stabilityError}`);
+          stabilityDiagnostics = {
+            waited: true,
+            reason: "error",
+            error: stabilityError instanceof Error ? stabilityError.message : String(stabilityError),
+            durationMs: Date.now() - stabilityStart
+          };
+        }
+      }
 
-      const executedActionsForAssertions = steps
-        .filter((step) =>
-          step.status === "found" ||
-          step.status === "satisfied_by_children" ||
-          step.status === "satisfied_by_previous_assertion"
-        )
-        .map((step) => ({
-          action: step.action,
-          target: step.targetText ?? "",
-          status: "found" as const
-        }));
+      // Assertion retry mechanism
+      const ASSERTION_RETRY_COUNT = 3;
+      const ASSERTION_RETRY_INTERVAL_MS = 500;
+      let resolutionResults: ReturnType<typeof resolveAssertionTargets> | undefined;
+      let retryCount = 0;
+      let lastFailureReason: string | undefined;
+      
+      while (retryCount < ASSERTION_RETRY_COUNT) {
+        const assertionTargetInputs: AssertionTargetInput[] = [{
+          index: es.stepIndex,
+          action: es.originalText,
+          target: es.target ?? "",
+          source: "action"
+        }];
 
-      const resolutionResults = resolveAssertionTargets(currentSnapshot, assertionTargetInputs, {
-        executedActions: executedActionsForAssertions
-      });
+        const executedActionsForAssertions = steps
+          .filter((step) =>
+            step.status === "found" ||
+            step.status === "satisfied_by_children" ||
+            step.status === "satisfied_by_previous_assertion"
+          )
+          .map((step) => ({
+            action: step.action,
+            target: step.targetText ?? "",
+            status: "found" as const
+          }));
+
+        resolutionResults = resolveAssertionTargets(snapshotForAssertion, assertionTargetInputs, {
+          executedActions: executedActionsForAssertions
+        });
+        
+        // Check if any assertion passed
+        const anyPassed = resolutionResults.some(r => r.status === "passed" || r.status === "satisfied_by_children" || r.status === "satisfied_by_previous_assertion");
+        
+        if (anyPassed) {
+          break; // Success, no need to retry
+        }
+        
+        // Track failure for diagnostics
+        const failedAssertions = resolutionResults.filter(r => r.status === "failed" || r.status === "needs_assertion_resolution");
+        if (failedAssertions.length > 0) {
+          lastFailureReason = failedAssertions[0].reason;
+        }
+        
+        // Retry if not last attempt and assertion failed
+        if (retryCount < ASSERTION_RETRY_COUNT - 1 && !anyPassed) {
+          console.log(`[discovery:case] Assertion retry ${retryCount + 1}/${ASSERTION_RETRY_COUNT} target="${es.target}" reason="${lastFailureReason}"`);
+          await new Promise(resolve => setTimeout(resolve, ASSERTION_RETRY_INTERVAL_MS));
+          
+          // Refresh snapshot for retry
+          try {
+            snapshotForAssertion = await scanCurrentPage(page);
+          } catch (scanError) {
+            console.warn(`[discovery:case] Snapshot refresh failed: ${scanError instanceof Error ? scanError.message : scanError}`);
+          }
+          
+          retryCount++;
+        } else {
+          break;
+        }
+      }
+      
+      // resolutionResults should always be defined after the loop
+      if (!resolutionResults) {
+        console.error(`[discovery:case] Assertion resolution failed to produce results target="${es.target}"`);
+        resolutionResults = [];
+      }
+      
       for (const assertionResult of resolutionResults) {
         const mappedStatus: DiscoveryStepResult["status"] =
           assertionResult.status === "passed"
@@ -1379,6 +1764,35 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           errorMessage = `Precondition not met: ${assertionResult.reason}`;
         }
 
+        // Build comprehensive diagnostics for assertion
+        const assertionDiag: Record<string, unknown> = {
+          ...assertionResult.assertionDiagnostics
+        };
+        
+        // Add stability diagnostics
+        if (stabilityDiagnostics) {
+          assertionDiag.stability = stabilityDiagnostics;
+        }
+        
+        // Add retry diagnostics
+        if (retryCount > 0 || lastFailureReason) {
+          assertionDiag.retry = {
+            count: retryCount,
+            maxAttempts: ASSERTION_RETRY_COUNT,
+            lastFailureReason: lastFailureReason
+          };
+        }
+        
+        // Add back/return alias diagnostics if present
+        if (assertionResult.matchReason?.includes("alias") || assertionResult.originalTarget) {
+          assertionDiag.backReturnAlias = {
+            originalTarget: assertionResult.originalTarget || es.target,
+            matchedTarget: assertionResult.matchedTarget,
+            matchReason: assertionResult.matchReason,
+            aliasResolverUsed: true
+          };
+        }
+
         steps.push({
           index: es.stepIndex,
           action: es.originalText,
@@ -1397,7 +1811,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           matchedTokens: assertionResult.matchedTokens,
           structuralSignals: assertionResult.structuralSignals,
           childAssertionsUsed: assertionResult.childAssertionsUsed,
-          assertionDiagnostics: assertionResult.assertionDiagnostics
+          assertionDiagnostics: assertionDiag
         });
 
         if (assertionResult.status === "passed" && assertionResult.classification === "literal_observable") {
@@ -1584,7 +1998,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         const scan = await scanAndCollectObjects(page, orderedItem.index, evidenceDir);
         currentSnapshot = scan.snapshot;
       }
-      const resolution = await resolveActionTarget(page, currentSnapshot, nav.target);
+      const resolution = await resolveActionTarget(page, currentSnapshot, nav.target, { routeProfile });
       if (resolution.status !== "resolved" || !resolution.locator) {
         console.log(`[discovery:case] Nav segment not found: ${nav.target}`);
 
@@ -1596,13 +2010,22 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           console.log(`[discovery:case] Auth gate recovery successful, retrying nav segment...`);
           if (authRecovery.authGateState) {
             authGateState = authRecovery.authGateState;
+            // Track when AuthGate was completed for later AuthFlow insertion
+            if (authGateState.completed && authGateCompletedAfterStepIndex === undefined) {
+              // AuthFlow completed before this step - will be inserted after the previous executed step
+              const lastExecutedStepIndex = executedStepIndices.size > 0 
+                ? Math.max(...Array.from(executedStepIndices))
+                : 0;
+              authGateCompletedAfterStepIndex = lastExecutedStepIndex;
+              console.log(`[discovery:case] AuthGate completed after step index ${authGateCompletedAfterStepIndex}`);
+            }
           }
           await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
           const retryScan = await scanAndCollectObjects(page, orderedItem.index, evidenceDir);
           currentSnapshot = retryScan.snapshot;
           allDiscoveredObjects.push(...retryScan.objects);
 
-          const retryResolution = await resolveActionTarget(page, currentSnapshot, nav.target);
+          const retryResolution = await resolveActionTarget(page, currentSnapshot, nav.target, { routeProfile });
           if (retryResolution.status === "resolved" && retryResolution.locator) {
             await clickResolvedTarget(retryResolution.locator, false);
             await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
@@ -1823,6 +2246,14 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           console.log(`[discovery:case] Auth gate recovery successful, retrying fill target...`);
           if (authRecovery.authGateState) {
             authGateState = authRecovery.authGateState;
+            // Track when AuthGate was completed for later AuthFlow insertion
+            if (authGateState.completed && authGateCompletedAfterStepIndex === undefined) {
+              const lastExecutedStepIndex = executedStepIndices.size > 0 
+                ? Math.max(...Array.from(executedStepIndices))
+                : 0;
+              authGateCompletedAfterStepIndex = lastExecutedStepIndex;
+              console.log(`[discovery:case] AuthGate completed after step index ${authGateCompletedAfterStepIndex}`);
+            }
           }
           await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
           const retryScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
@@ -2564,10 +2995,26 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       currentSnapshot = scan.snapshot;
     }
 
+    // Build route history from previous found steps
+    const routeHistory = steps
+      .filter(s => s.status === "found" && s.targetText)
+      .map(s => s.targetText!);
+    
+    // Get next target for contextual resolution
+    const nextTarget = parsed.actionTargets.find(a => a.index > actionTarget.index)?.target;
+    
+    // Get previous target from relation context or route history
+    const previousTarget = actionTarget.relationContext || routeHistory[routeHistory.length - 1];
+
     const resolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target, {
       semanticRole: actionTarget.semanticRole,
       relationContext: actionTarget.relationContext,
-      activeContainer
+      activeContainer,
+      routeProfile,
+      actionText: actionTarget.action,
+      nextTarget,
+      previousTarget,
+      routeHistory
     });
 
     let finalLocator = resolution.locator;
@@ -2587,6 +3034,34 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
     if (resolution.status === "resolved" && resolution.confidence >= aiConfig.confidenceThreshold && finalLocator) {
       console.log(`[discovery:case] Deterministic target resolved: ${actionTarget.target} (confidence: ${resolution.confidence.toFixed(2)})`);
+    }
+    
+    // Handle contextual intermediate already satisfied - skip click and continue
+    if (resolution.locatorStrategy === "contextual_intermediate_already_satisfied") {
+      console.log(`[discovery:case] Contextual intermediate already satisfied: ${actionTarget.target}. Continuing without click.`);
+      console.log(`[discovery:case] Evidence: ${resolution.alreadySatisfiedEvidence?.candidateText} (${resolution.alreadySatisfiedEvidence?.candidateType})`);
+      
+      // Mark step as found/recovered without executing click
+      steps.push({
+        index: actionTarget.index,
+        action: actionTarget.action,
+        status: "found",
+        targetText: actionTarget.target,
+        snapshotUrl: currentSnapshot.url,
+        snapshotTitle: currentSnapshot.title,
+        elementsFound: currentSnapshot.elements.length,
+        locatorStrategy: "contextual_intermediate_already_satisfied",
+        candidateText: resolution.alreadySatisfiedEvidence?.candidateText,
+        recoveredBy: "contextual_intermediate_already_satisfied",
+        recoveryMetadata: {
+          rationale: `Intermediate variant "${actionTarget.target}" already visible in list. Next step is ordinal selection.`,
+          alreadySatisfiedEvidence: resolution.alreadySatisfiedEvidence
+        },
+        evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`)
+      });
+      
+      // Continue to next step without clicking
+      continue;
     }
 
     const needsEarlyCompletionCheck =
@@ -2816,13 +3291,21 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           console.log(`[discovery:case] Auth gate recovery successful, retrying click target...`);
           if (authRecovery.authGateState) {
             authGateState = authRecovery.authGateState;
+            // Track when AuthGate was completed for later AuthFlow insertion
+            if (authGateState.completed && authGateCompletedAfterStepIndex === undefined) {
+              const lastExecutedStepIndex = executedStepIndices.size > 0 
+                ? Math.max(...Array.from(executedStepIndices))
+                : 0;
+              authGateCompletedAfterStepIndex = lastExecutedStepIndex;
+              console.log(`[discovery:case] AuthGate completed after step index ${authGateCompletedAfterStepIndex}`);
+            }
           }
           await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
           const retryScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
           currentSnapshot = retryScan.snapshot;
           allDiscoveredObjects.push(...retryScan.objects);
 
-          const retryResolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target);
+          const retryResolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target, { routeProfile, actionText: actionTarget.action });
           if (retryResolution.status === "resolved" && retryResolution.locator) {
             await clickResolvedTarget(retryResolution.locator, false);
             await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
@@ -3000,6 +3483,227 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           }
         }
 
+        // Route completion: attempt to insert missing intermediate step before declaring failure
+        const appSlug = options.appSlug ?? "default";
+        const routeCompletionConfig = (options as any)?.aiAssistedDiscovery?.config?.routeCompletion;
+        const rcRouteProfile = routeCompletionConfig?.useAppProfile !== false ? loadRouteProfile(appSlug) : undefined;
+        
+        console.log(`[route-completion] app context appSlug=${appSlug} source=${options.appSlug ? "workflow" : "default-fallback"}`);
+        
+        const routeCompletionAttempted = routeCompletionConfig?.enabled === true;
+        let routeCompletionResolution: MissingIntermediateStepResolution | undefined;
+        let routeCompletionDiagnostics: any = undefined;
+
+        if (routeCompletionAttempted) {
+          console.log(`[route-completion] attempted step=${actionTarget.index} failure=target_not_found`);
+          console.log(`[route-completion] routeProfile loaded=${Boolean(rcRouteProfile)} appSlug=${appSlug}`);
+          
+          const currentRouteHistory = steps
+            .filter((s) => (s as any).status === "passed" && s.targetText)
+            .map((s) => s.targetText!);
+          
+          const lastSuccessfulTarget = currentRouteHistory[currentRouteHistory.length - 1];
+          console.log(`[route-completion] routeHistory=[${currentRouteHistory.join(", ")}] lastSuccessfulTarget=${lastSuccessfulTarget ?? "none"}`);
+          
+          const aiCandidates: DiscoveryCandidate[] = currentSnapshot.elements.map((el) => ({
+            candidateId: el.id,
+            role: el.role,
+            name: el.name,
+            text: el.text,
+            visible: Boolean(el.visible),
+            enabled: undefined,
+            clickable: Boolean(el.visible && (el.type === "button" || el.type === "link" || el.role === "button" || el.role === "link")),
+            editable: Boolean(el.type === "input" || el.type === "textarea" || el.role === "textbox"),
+            sensitive: false
+          }));
+
+          const snapshot: DiscoverySnapshot = {
+            url: currentSnapshot.url,
+            title: currentSnapshot.title,
+            visibleHeadings: [],
+            visibleNavItems: [],
+            visibleActions: [],
+            visibleTextSummary: []
+          };
+
+          const insertedStepsSoFar = (steps as any).insertedSteps?.length ?? 0;
+
+          routeCompletionResolution = resolveMissingIntermediateStep({
+            appSlug,
+            routeProfile: rcRouteProfile,
+            currentRouteHistory,
+            currentStepText: actionTarget.action,
+            currentTarget: actionTarget.target,
+            failureType: "target_not_found",
+            snapshot,
+            candidates: aiCandidates,
+            insertedStepsSoFar,
+            config: {
+              enabled: routeCompletionConfig?.enabled ?? false,
+              minConfidence: routeCompletionConfig?.minConfidence ?? 0.75,
+              maxInsertedSteps: routeCompletionConfig?.maxInsertedSteps ?? 1,
+              useAppProfile: routeCompletionConfig?.useAppProfile ?? true,
+              allowGeneric: routeCompletionConfig?.allowGeneric ?? true
+            }
+          });
+
+          console.log(`[route-completion] appSlug=${appSlug} routeProfileUsed=${Boolean(rcRouteProfile)}`);
+
+          if (routeCompletionResolution.status === "repaired_plan" && routeCompletionResolution.candidateId) {
+            const selectedCandidate = aiCandidates.find((c) => c.candidateId === routeCompletionResolution!.candidateId);
+            console.log(`[route-completion] selected candidate="${selectedCandidate?.name ?? selectedCandidate?.text}" source=${routeCompletionResolution.source} confidence=${routeCompletionResolution.confidence}`);
+
+            const selectedElement = currentSnapshot.elements.find((el) => el.id === routeCompletionResolution!.candidateId);
+            
+            if (selectedElement) {
+              const resolvedInserted = await resolveSnapshotElementLocator(page, {
+                element: selectedElement,
+                target: routeCompletionResolution.insertedStepText ?? actionTarget.target,
+                candidateText: selectedElement.text ?? selectedElement.label ?? selectedElement.name ?? routeCompletionResolution.insertedStepText!,
+                type: selectedElement.type,
+                tagName: selectedElement.tagName,
+                confidence: routeCompletionResolution.confidence ?? 0.75,
+                matchReason: "route_completion_intermediate_step"
+              });
+
+              if (resolvedInserted.locator) {
+                try {
+                  await clickResolvedTarget(resolvedInserted.locator, false);
+                  await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+                  console.log(`[route-completion] inserted step executed`);
+
+                  const insertedStepResult = {
+                    originalStepIndex: actionTarget.index,
+                    insertedBeforeStepIndex: actionTarget.index,
+                    reason: "missing_intermediate_step",
+                    target: routeCompletionResolution.insertedStepText,
+                    candidateId: routeCompletionResolution.candidateId,
+                    confidence: routeCompletionResolution.confidence,
+                    source: routeCompletionResolution.source,
+                    executed: true,
+                    retrySucceeded: false
+                  };
+
+                  if (!(steps as any).insertedSteps) {
+                    (steps as any).insertedSteps = [];
+                  }
+                  (steps as any).insertedSteps.push(insertedStepResult);
+
+                  console.log(`[route-completion] retrying original step`);
+
+                  const rescanAfterInsert = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+                  currentSnapshot = rescanAfterInsert.snapshot;
+
+                  const resolvedRetry = await resolveActionTarget(
+                    page,
+                    currentSnapshot,
+                    actionTarget.target,
+                    {
+                      semanticRole: actionTarget.semanticRole,
+                      relationContext: actionTarget.relationContext,
+                      activeContainer,
+                      routeProfile,
+                      actionText: actionTarget.action
+                    }
+                  );
+
+                  if (resolvedRetry.status === "resolved" && resolvedRetry.locator) {
+                    try {
+                      await clickResolvedTarget(resolvedRetry.locator, false);
+                      await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+                      console.log(`[route-completion] retry succeeded`);
+
+                      insertedStepResult.retrySucceeded = true;
+
+                      const aiRecoveredScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+                      currentSnapshot = aiRecoveredScan.snapshot;
+                      allDiscoveredObjects.push(...aiRecoveredScan.objects);
+
+                      steps.push({
+                        index: actionTarget.index,
+                        action: actionTarget.action,
+                        status: "passed" as any,
+                        targetText: actionTarget.target,
+                        snapshotUrl: currentSnapshot.url,
+                        snapshotTitle: currentSnapshot.title,
+                        elementsFound: currentSnapshot.elements.length,
+                        recoveredBy: "route_completion" as any,
+                        recoveryStatus: "recovered",
+                        routeCompletionDiagnostics: {
+                          attempted: true,
+                          enabled: routeCompletionConfig?.enabled ?? false,
+                          appSlug,
+                          routeProfileUsed: Boolean(routeProfile),
+                          source: routeCompletionResolution.source,
+                          selectedCandidateId: routeCompletionResolution.candidateId,
+                          selectedCandidateText: routeCompletionResolution.insertedStepText,
+                          retrySucceeded: true
+                        }
+                      });
+
+                      executedStepIndices.add(actionTarget.index);
+                      if (typeof currentActionOrder === "number") executedActionOrders.add(currentActionOrder);
+                      
+                      // Route profile learning: observe successful route completion
+                      if (routeProfileLearningConfig.enabled && routeCompletionResolution?.insertedStepText) {
+                        const currentRouteHistory = steps
+                          .filter((s) => (s as any).status === "passed" || (s as any).status === "found")
+                          .filter((s) => s.index !== actionTarget.index) // Exclude current step
+                          .map((s) => s.targetText!)
+                          .filter(Boolean);
+                        const lastSuccessfulTarget = currentRouteHistory[currentRouteHistory.length - 1];
+                        
+                        const learningResult = observeRouteCompletionSuccess(
+                          {
+                            target: routeCompletionResolution.insertedStepText,
+                            candidateId: routeCompletionResolution.candidateId,
+                            source: routeCompletionResolution.source
+                          },
+                          lastSuccessfulTarget || "entry",
+                          options.appSlug ?? "default",
+                          routeProfileLearningConfig
+                        );
+                        
+                        if (learningResult.suggestion) {
+                          routeProfileSuggestions.push(learningResult.suggestion);
+                          console.log(`[route-learning] observed route completion from="${learningResult.suggestion.from}" to="${learningResult.suggestion.to}" relation=${learningResult.suggestion.relation}`);
+                        }
+                      }
+                      
+                      if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
+                        break;
+                      }
+                      continue;
+                    } catch (retryErr) {
+                      console.log(`[route-completion] retry failed`);
+                      insertedStepResult.retrySucceeded = false;
+                    }
+                  } else {
+                    console.log(`[route-completion] retry resolution failed status=${resolvedRetry.status}`);
+                    insertedStepResult.retrySucceeded = false;
+                  }
+                } catch (insertErr) {
+                  console.log(`[route-completion] inserted step execution failed`);
+                }
+              }
+            }
+          } else {
+            console.log(`[route-completion] blocked: ${routeCompletionResolution.blockedReason ?? "no_safe_action"}`);
+          }
+
+          routeCompletionDiagnostics = {
+            attempted: true,
+            enabled: routeCompletionConfig?.enabled ?? false,
+            appSlug,
+            routeProfileUsed: Boolean(routeProfile),
+            source: routeCompletionResolution?.source,
+            selectedCandidateId: routeCompletionResolution?.candidateId,
+            selectedCandidateText: routeCompletionResolution?.insertedStepText,
+            blockedReason: routeCompletionResolution?.blockedReason,
+            retrySucceeded: routeCompletionResolution?.status === "repaired_plan" ? (steps as any).insertedSteps?.[(steps as any).insertedSteps.length - 1]?.retrySucceeded : undefined
+          };
+        }
+
         steps.push({
           index: actionTarget.index,
           action: actionTarget.action,
@@ -3013,6 +3717,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           resolutionDiagnosis: diagnosis,
           aiDiagnostics: (resolution as any).aiDiagnostics,
           aiRepairDiagnostics: (resolution as any).aiRepairDiagnostics,
+          routeCompletionDiagnostics: routeCompletionDiagnostics,
           semanticRole: actionTarget.semanticRole,
           relationContext: actionTarget.relationContext,
           earlyCompletionDiagnostics: earlyCompletion
@@ -3330,6 +4035,273 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       continue;
     }
 
+    // Pre-click guard: evaluate route completion for weak deterministic resolutions
+    const selectionThreshold = getSelectionConfidenceThreshold();
+    const isSelectionLikeForPreClick = isSelectionLikeTargetNew(actionTarget.target);
+    const isWeakResolution = resolution.confidence < selectionThreshold && isSelectionLikeForPreClick;
+    
+    let preClickRouteCompletionAttempted = false;
+    let preClickRouteCompletionResolution: MissingIntermediateStepResolution | undefined;
+    let preClickRouteCompletionDiagnostics: any = undefined;
+    let routeCompletionPreventedWeakClick = false;
+
+    if (isWeakResolution) {
+      console.log(`[route-completion] pre-click guard evaluating step=${actionTarget.index} target="${actionTarget.target}" confidence=${resolution.confidence.toFixed(2)} strategy=${resolution.locatorStrategy}`);
+      
+      const appSlug = options.appSlug ?? "default";
+      const routeCompletionConfig = (options as any)?.aiAssistedDiscovery?.config?.routeCompletion;
+      
+      console.log(`[route-completion] app context appSlug=${appSlug} source=${options.appSlug ? "workflow" : "default-fallback"}`);
+      console.log(`[route-completion] config enabled=${routeCompletionConfig?.enabled ?? false} minConfidence=${routeCompletionConfig?.minConfidence ?? 0.75} maxInsertedSteps=${routeCompletionConfig?.maxInsertedSteps ?? 1}`);
+      
+      if (routeCompletionConfig?.enabled !== true) {
+        console.log(`[route-completion] skipped: routeCompletion not enabled in config`);
+      } else {
+        const rcRouteProfile = routeCompletionConfig?.useAppProfile !== false ? loadRouteProfile(appSlug) : undefined;
+        
+        if (!rcRouteProfile) {
+          console.log(`[route-completion] routeProfile missing appSlug=${appSlug} source=loadRouteProfile returned undefined`);
+        } else {
+          console.log(`[route-completion] routeProfile loaded appSlug=${appSlug} routes=${rcRouteProfile.routes?.length ?? 0}`);
+        }
+        
+        const currentRouteHistory = steps
+          .filter((s) => (s as any).status === "passed" && s.targetText)
+          .map((s) => s.targetText!);
+        
+        console.log(`[route-completion] routeHistory=[${currentRouteHistory.join(", ")}] lastSuccessfulTarget=${currentRouteHistory[currentRouteHistory.length - 1] ?? "none"}`);
+        
+        const aiCandidates: DiscoveryCandidate[] = currentSnapshot.elements.map((el) => ({
+          candidateId: el.id,
+          role: el.role,
+          name: el.name,
+          text: el.text,
+          visible: Boolean(el.visible),
+          enabled: undefined,
+          clickable: Boolean(el.visible && (el.type === "button" || el.type === "link" || el.role === "button" || el.role === "link")),
+          editable: Boolean(el.type === "input" || el.type === "textarea" || el.role === "textbox"),
+          sensitive: false
+        }));
+
+        // Log candidates summary
+        const clickableCandidates = aiCandidates.filter((c) => c.visible && c.clickable);
+        const visibleClickableLabels = clickableCandidates.slice(0, 10).map((c) => c.name ?? c.text ?? "unknown");
+        const submitLikeCount = clickableCandidates.filter((c) => {
+          const text = (c.name ?? c.text ?? "").toLowerCase();
+          return /(continuar|confirmar|enviar|solicitar|finalizar)/i.test(text);
+        }).length;
+        const sensitiveCount = aiCandidates.filter((c) => c.sensitive).length;
+        
+        console.log(`[route-completion] candidates summary total=${aiCandidates.length} clickable=${clickableCandidates.length} visibleClickable=[${visibleClickableLabels.join(",")}] submitLikeBlocked=${submitLikeCount} sensitiveBlocked=${sensitiveCount}`);
+
+        const snapshot: DiscoverySnapshot = {
+          url: currentSnapshot.url,
+          title: currentSnapshot.title,
+          visibleHeadings: [],
+          visibleNavItems: [],
+          visibleActions: [],
+          visibleTextSummary: []
+        };
+
+        const insertedStepsSoFar = (steps as any).insertedSteps?.length ?? 0;
+
+        console.log(`[route-completion] calling resolver failureType=weak_deterministic_resolution insertedStepsSoFar=${insertedStepsSoFar}`);
+
+        preClickRouteCompletionResolution = resolveMissingIntermediateStep({
+          appSlug,
+          routeProfile: rcRouteProfile,
+          currentRouteHistory,
+          lastSuccessfulTarget: currentRouteHistory[currentRouteHistory.length - 1],
+          currentStepText: actionTarget.action,
+          currentTarget: actionTarget.target,
+          failureType: "weak_deterministic_resolution",
+          snapshot,
+          candidates: aiCandidates,
+          insertedStepsSoFar,
+          config: {
+            enabled: routeCompletionConfig?.enabled ?? false,
+            minConfidence: routeCompletionConfig?.minConfidence ?? 0.75,
+            maxInsertedSteps: routeCompletionConfig?.maxInsertedSteps ?? 1,
+            useAppProfile: routeCompletionConfig?.useAppProfile ?? true,
+            allowGeneric: routeCompletionConfig?.allowGeneric ?? true
+          },
+          deterministicResolutionConfidence: resolution.confidence,
+          deterministicResolutionStrategy: resolution.locatorStrategy
+        });
+
+        preClickRouteCompletionAttempted = true;
+        console.log(`[route-completion] attempted step=${actionTarget.index} failure=weak_deterministic_resolution appSlug=${appSlug} routeProfileLoaded=${Boolean(routeProfile)} candidates=${aiCandidates.length}`);
+        console.log(`[route-completion] resolver returned status=${preClickRouteCompletionResolution.status} source=${preClickRouteCompletionResolution.source}`);
+
+        if (preClickRouteCompletionResolution.status === "repaired_plan" && preClickRouteCompletionResolution.candidateId) {
+          const selectedCandidate = aiCandidates.find((c) => c.candidateId === preClickRouteCompletionResolution!.candidateId);
+          console.log(`[route-completion] selected candidate="${selectedCandidate?.name ?? selectedCandidate?.text}" source=${preClickRouteCompletionResolution.source} confidence=${preClickRouteCompletionResolution.confidence}`);
+
+          const selectedElement = currentSnapshot.elements.find((el) => el.id === preClickRouteCompletionResolution!.candidateId);
+          
+          if (selectedElement) {
+            const resolvedInserted = await resolveSnapshotElementLocator(page, {
+              element: selectedElement,
+              target: preClickRouteCompletionResolution.insertedStepText ?? actionTarget.target,
+              candidateText: selectedElement.text ?? selectedElement.label ?? selectedElement.name ?? preClickRouteCompletionResolution.insertedStepText!,
+              type: selectedElement.type,
+              tagName: selectedElement.tagName,
+              confidence: preClickRouteCompletionResolution.confidence ?? 0.75,
+              matchReason: "route_completion_intermediate_step"
+            });
+
+            if (resolvedInserted.locator) {
+              try {
+                await clickResolvedTarget(resolvedInserted.locator, false);
+                await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+                console.log(`[route-completion] inserted step executed`);
+
+                const insertedStepResult = {
+                  originalStepIndex: actionTarget.index,
+                  insertedBeforeStepIndex: actionTarget.index,
+                  reason: "missing_intermediate_step",
+                  target: preClickRouteCompletionResolution.insertedStepText,
+                  candidateId: preClickRouteCompletionResolution.candidateId,
+                  confidence: preClickRouteCompletionResolution.confidence,
+                  source: preClickRouteCompletionResolution.source,
+                  executed: true,
+                  retrySucceeded: false
+                };
+
+                if (!(steps as any).insertedSteps) {
+                  (steps as any).insertedSteps = [];
+                }
+                (steps as any).insertedSteps.push(insertedStepResult);
+
+                console.log(`[route-completion] retrying original step`);
+
+                const rescanAfterInsert = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+                currentSnapshot = rescanAfterInsert.snapshot;
+
+                  const resolvedRetry = await resolveActionTarget(
+                    page,
+                    currentSnapshot,
+                    actionTarget.target,
+                    {
+                      semanticRole: actionTarget.semanticRole,
+                      relationContext: actionTarget.relationContext,
+                      activeContainer,
+                      routeProfile,
+                      actionText: actionTarget.action
+                    }
+                  );
+
+                if (resolvedRetry.status === "resolved" && resolvedRetry.locator) {
+                  try {
+                    await clickResolvedTarget(resolvedRetry.locator, false);
+                    await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+                    console.log(`[route-completion] retry succeeded`);
+
+                    insertedStepResult.retrySucceeded = true;
+                    routeCompletionPreventedWeakClick = true;
+
+                    const aiRecoveredScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+                    currentSnapshot = aiRecoveredScan.snapshot;
+                    allDiscoveredObjects.push(...aiRecoveredScan.objects);
+
+                    steps.push({
+                      index: actionTarget.index,
+                      action: actionTarget.action,
+                      status: "found" as any,
+                      targetText: actionTarget.target,
+                      snapshotUrl: currentSnapshot.url,
+                      snapshotTitle: currentSnapshot.title,
+                      elementsFound: currentSnapshot.elements.length,
+                      recoveredBy: "route_completion" as any,
+                      recoveryStatus: "recovered",
+                      routeCompletionDiagnostics: {
+                        attempted: true,
+                        enabled: routeCompletionConfig?.enabled ?? false,
+                        appSlug,
+                        routeProfileUsed: Boolean(routeProfile),
+                        trigger: "pre_click_weak_resolution",
+                        source: preClickRouteCompletionResolution.source,
+                        selectedCandidateId: preClickRouteCompletionResolution.candidateId,
+                        selectedCandidateText: preClickRouteCompletionResolution.insertedStepText,
+                        deterministicResolutionConfidence: resolution.confidence,
+                        deterministicResolutionStrategy: resolution.locatorStrategy,
+                        retrySucceeded: true
+                      }
+                    });
+
+                    executedStepIndices.add(actionTarget.index);
+                    if (typeof currentActionOrder === "number") executedActionOrders.add(currentActionOrder);
+                    
+                    // Route profile learning: observe successful route completion (pre-click weak resolution)
+                    if (routeProfileLearningConfig.enabled && preClickRouteCompletionResolution?.insertedStepText) {
+                      const currentRouteHistory = steps
+                        .filter((s) => (s as any).status === "passed" || (s as any).status === "found")
+                        .filter((s) => s.index !== actionTarget.index) // Exclude current step
+                        .map((s) => s.targetText!)
+                        .filter(Boolean);
+                      const lastSuccessfulTarget = currentRouteHistory[currentRouteHistory.length - 1];
+                      
+                      const learningResult = observeRouteCompletionSuccess(
+                        {
+                          target: preClickRouteCompletionResolution.insertedStepText,
+                          candidateId: preClickRouteCompletionResolution.candidateId,
+                          source: preClickRouteCompletionResolution.source
+                        },
+                        lastSuccessfulTarget || "entry",
+                        options.appSlug ?? "default",
+                        routeProfileLearningConfig
+                      );
+                      
+                      if (learningResult.suggestion) {
+                        routeProfileSuggestions.push(learningResult.suggestion);
+                        console.log(`[route-learning] observed pre-click route completion from="${learningResult.suggestion.from}" to="${learningResult.suggestion.to}" relation=${learningResult.suggestion.relation}`);
+                      }
+                    }
+                    
+                    if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
+                      break;
+                    }
+                    continue;
+                  } catch (retryErr) {
+                    console.log(`[route-completion] retry failed`);
+                    insertedStepResult.retrySucceeded = false;
+                  }
+                } else {
+                  console.log(`[route-completion] retry resolution failed status=${resolvedRetry.status}`);
+                  insertedStepResult.retrySucceeded = false;
+                }
+              } catch (insertErr) {
+                console.log(`[route-completion] inserted step execution failed`);
+              }
+            }
+          } else {
+            console.log(`[route-completion] blocked: ${preClickRouteCompletionResolution.blockedReason ?? "no_safe_action"} reason="${preClickRouteCompletionResolution.reason}"`);
+          }
+        } else {
+          console.log(`[route-completion] no_safe_action returned reason="${preClickRouteCompletionResolution.reason}"`);
+        }
+
+        preClickRouteCompletionDiagnostics = {
+          attempted: true,
+          enabled: routeCompletionConfig?.enabled ?? false,
+          appSlug,
+          routeProfileUsed: Boolean(routeProfile),
+          trigger: "pre_click_weak_resolution",
+          source: preClickRouteCompletionResolution?.source,
+          selectedCandidateId: preClickRouteCompletionResolution?.candidateId,
+          selectedCandidateText: preClickRouteCompletionResolution?.insertedStepText,
+          blockedReason: preClickRouteCompletionResolution?.blockedReason,
+          deterministicResolutionConfidence: resolution.confidence,
+          deterministicResolutionStrategy: resolution.locatorStrategy
+        };
+      }
+    }
+
+    // Skip click if route completion already succeeded
+    if (routeCompletionPreventedWeakClick) {
+      continue;
+    }
+
     console.log(`[discovery:case] Clicking target: ${actionTarget.target} (strategy: ${resolution.locatorStrategy}, confidence: ${resolution.confidence.toFixed(2)})`);
 
     const beforeState = await capturePageState(page);
@@ -3379,64 +4351,343 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
     console.log("[discovery:case] Waiting after click...");
 
+    // Check if this was an ordinal selection - skip instructive token verification
+    const wasOrdinalSelection = resolution.locatorStrategy === "ordinal_selection" || 
+                                (resolution as any).ordinalSelectionDiagnostics?.selectionPatternDetected === true;
+    
+    if (wasOrdinalSelection) {
+      console.log(`[discovery:case] Ordinal selection detected - skipping instructive token verification`);
+      console.log(`[discovery:case] Ordinal: ${(resolution as any).ordinalSelectionDiagnostics?.ordinal ?? "unknown"}`);
+      console.log(`[discovery:case] Domain term: ${(resolution as any).ordinalSelectionDiagnostics?.domainTerm ?? "none"}`);
+      console.log(`[discovery:case] Selected candidate: ${(resolution as any).ordinalSelectionDiagnostics?.selectedCandidateText ?? "unknown"}`);
+    }
+
     // Post-click semantic verification for selection-like targets
+    // SKIP for ordinal_selection since tokens like "primera", "visible", "listado" are instructions, not UI text
     const isSelectionLike = isSelectionLikeTargetNew(actionTarget.target);
-    if (isSelectionLike) {
+    
+    const postClickScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+    currentSnapshot = postClickScan.snapshot;
+    
+    if (isSelectionLike && wasOrdinalSelection) {
+      // For ordinal_selection, skip instructive token verification
+      console.log(`[discovery:case] Ordinal selection post-click verification skipped (instructive tokens)`);
+      console.log(`[discovery:case] postClickSemanticVerificationSkipped=true skipReason="ordinal_selection_instruction_tokens"`);
+    } else if (isSelectionLike) {
+      // Normal selection-like: perform semantic verification
       console.log(`[discovery:case] Performing post-click semantic verification for selection-like target: ${actionTarget.target}`);
-      const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+      
       // Extract visible texts from elements
-      const visibleTexts = scan.snapshot.elements
+      const visibleTexts = postClickScan.snapshot.elements
         .filter(e => e.visible && e.text)
         .map(e => e.text!)
-        .slice(0, 50); // Limit to first 50 texts
+        .slice(0, 50);
       
       const semanticMatch = verifyPostClickSemanticMatch(
         actionTarget.target,
         visibleTexts,
-        scan.title
+        postClickScan.title
       );
       
       if (!semanticMatch.matches) {
         console.log(`[discovery:case] Post-click semantic MISMATCH detected!`);
         console.log(`[discovery:case] Target: ${actionTarget.target}`);
         console.log(`[discovery:case] Missing tokens: ${semanticMatch.missingTokens.join(", ")}`);
-        console.log(`[discovery:case] Reason: ${semanticMatch.mismatchReason}`);
+        const mismatchReason = semanticMatch.mismatchReason || "post_click_semantic_mismatch";
+        console.log(`[discovery:case] Reason: ${mismatchReason}`);
         
-        // Mark as failure with semantic mismatch
-        steps.push({
-          index: actionTarget.index,
-          action: actionTarget.action,
-          status: "not_found",
-          targetText: actionTarget.target,
-          snapshotUrl: scan.url,
-          snapshotTitle: scan.title,
-          elementsFound: scan.elementsCount,
-          error: `Semantic mismatch after click: ${semanticMatch.mismatchReason}`,
-          evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
-          semanticMismatchDiagnostics: {
-            target: actionTarget.target,
-            matchedTokens: semanticMatch.matchedTokens,
-            missingTokens: semanticMatch.missingTokens,
-            reason: semanticMatch.mismatchReason
+        // Post-click route completion recovery: attempt to insert missing intermediate step
+        const appSlug = options.appSlug ?? "default";
+        const routeCompletionConfig = (options as any)?.aiAssistedDiscovery?.config?.routeCompletion;
+        const postRcRouteProfile = routeCompletionConfig?.useAppProfile !== false ? loadRouteProfile(appSlug) : undefined;
+        
+        let postClickRouteCompletionAttempted = false;
+        let postClickRouteCompletionResolution: MissingIntermediateStepResolution | undefined;
+        let postClickRouteCompletionSucceeded = false;
+        
+        console.log(`[route-completion] post-click app context appSlug=${appSlug} source=${options.appSlug ? "workflow" : "default-fallback"}`);
+        console.log(`[route-completion] post-click config enabled=${routeCompletionConfig?.enabled ?? false}`);
+        
+        if (routeCompletionConfig?.enabled !== true) {
+          console.log(`[route-completion] post-click skipped: routeCompletion not enabled in config`);
+        } else {
+          if (!postRcRouteProfile) {
+            console.log(`[route-completion] post-click routeProfile missing appSlug=${appSlug}`);
+          } else {
+            console.log(`[route-completion] post-click routeProfile loaded appSlug=${appSlug} routes=${postRcRouteProfile.routes?.length ?? 0}`);
           }
-        } as any);
-        
-        failedAtStep = actionTarget.index;
-        failedTarget = actionTarget.target;
-        failedReason = "semantic_mismatch";
-        
-        await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
-        await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
-          scenario, steps, allDiscoveredObjects, planSteps,
-          pendingObjectsPath, pendingPlansPath, evidenceDir,
-          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
-        ).candidatePlan ?? {}, null, 2), "utf-8");
-        
-        return buildFailureResult(
-          scenario, steps, allDiscoveredObjects, planSteps,
-          pendingObjectsPath, pendingPlansPath, evidenceDir,
-          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
-        );
+          
+          const currentRouteHistory = steps
+            .filter((s) => (s as any).status === "passed" && s.targetText)
+            .map((s) => s.targetText!);
+          
+          console.log(`[route-completion] post-click routeHistory=[${currentRouteHistory.join(", ")}] lastSuccessfulTarget=${currentRouteHistory[currentRouteHistory.length - 1] ?? "none"}`);
+          
+          const aiCandidates: DiscoveryCandidate[] = postClickScan.snapshot.elements.map((el) => ({
+            candidateId: el.id,
+            role: el.role,
+            name: el.name,
+            text: el.text,
+            visible: Boolean(el.visible),
+            enabled: undefined,
+            clickable: Boolean(el.visible && (el.type === "button" || el.type === "link" || el.role === "button" || el.role === "link")),
+            editable: Boolean(el.type === "input" || el.type === "textarea" || el.role === "textbox"),
+            sensitive: false
+          }));
+
+          const clickableCandidates = aiCandidates.filter((c) => c.visible && c.clickable);
+          const visibleClickableLabels = clickableCandidates.slice(0, 10).map((c) => c.name ?? c.text ?? "unknown");
+          
+          console.log(`[route-completion] post-click candidates summary total=${aiCandidates.length} clickable=${clickableCandidates.length} visibleClickable=[${visibleClickableLabels.join(",")}]`);
+
+          const snapshot: DiscoverySnapshot = {
+            url: postClickScan.snapshot.url,
+            title: postClickScan.snapshot.title,
+            visibleHeadings: [],
+            visibleNavItems: [],
+            visibleActions: [],
+            visibleTextSummary: []
+          };
+
+          const insertedStepsSoFar = (steps as any).insertedSteps?.length ?? 0;
+
+          console.log(`[route-completion] post-click calling resolver failureType=semantic_mismatch`);
+
+          postClickRouteCompletionResolution = resolveMissingIntermediateStep({
+            appSlug,
+            routeProfile: postRcRouteProfile,
+            currentRouteHistory,
+            lastSuccessfulTarget: currentRouteHistory[currentRouteHistory.length - 1],
+            currentStepText: actionTarget.action,
+            currentTarget: actionTarget.target,
+            failureType: "semantic_mismatch",
+            snapshot,
+            candidates: aiCandidates,
+            insertedStepsSoFar,
+            config: {
+              enabled: routeCompletionConfig?.enabled ?? false,
+              minConfidence: routeCompletionConfig?.minConfidence ?? 0.75,
+              maxInsertedSteps: routeCompletionConfig?.maxInsertedSteps ?? 1,
+              useAppProfile: routeCompletionConfig?.useAppProfile ?? true,
+              allowGeneric: routeCompletionConfig?.allowGeneric ?? true
+            }
+          });
+
+          postClickRouteCompletionAttempted = true;
+          console.log(`[route-completion] attempted step=${actionTarget.index} failure=semantic_mismatch appSlug=${appSlug} routeProfileLoaded=${Boolean(routeProfile)} candidates=${aiCandidates.length}`);
+          console.log(`[route-completion] resolver returned status=${postClickRouteCompletionResolution.status} source=${postClickRouteCompletionResolution.source}`);
+
+          if (postClickRouteCompletionResolution.status === "repaired_plan" && postClickRouteCompletionResolution.candidateId) {
+            const selectedCandidate = aiCandidates.find((c) => c.candidateId === postClickRouteCompletionResolution!.candidateId);
+            console.log(`[route-completion] selected candidate="${selectedCandidate?.name ?? selectedCandidate?.text}" source=${postClickRouteCompletionResolution.source} confidence=${postClickRouteCompletionResolution.confidence}`);
+
+            const selectedElement = postClickScan.snapshot.elements.find((el) => el.id === postClickRouteCompletionResolution!.candidateId);
+            
+            if (selectedElement) {
+              const resolvedInserted = await resolveSnapshotElementLocator(page, {
+                element: selectedElement,
+                target: postClickRouteCompletionResolution.insertedStepText ?? actionTarget.target,
+                candidateText: selectedElement.text ?? selectedElement.label ?? selectedElement.name ?? postClickRouteCompletionResolution.insertedStepText!,
+                type: selectedElement.type,
+                tagName: selectedElement.tagName,
+                confidence: postClickRouteCompletionResolution.confidence ?? 0.75,
+                matchReason: "route_completion_intermediate_step"
+              });
+
+              if (resolvedInserted.locator) {
+                try {
+                  await clickResolvedTarget(resolvedInserted.locator, false);
+                  await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+                  console.log(`[route-completion] inserted step executed`);
+
+                  const insertedStepResult = {
+                    originalStepIndex: actionTarget.index,
+                    insertedBeforeStepIndex: actionTarget.index,
+                    reason: "missing_intermediate_step",
+                    target: postClickRouteCompletionResolution.insertedStepText,
+                    candidateId: postClickRouteCompletionResolution.candidateId,
+                    confidence: postClickRouteCompletionResolution.confidence,
+                    source: postClickRouteCompletionResolution.source,
+                    executed: true,
+                    retrySucceeded: false
+                  };
+
+                  if (!(steps as any).insertedSteps) {
+                    (steps as any).insertedSteps = [];
+                  }
+                  (steps as any).insertedSteps.push(insertedStepResult);
+
+                  console.log(`[route-completion] retrying original step`);
+
+                  const rescanAfterInsert = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+                  currentSnapshot = rescanAfterInsert.snapshot;
+
+                  const resolvedRetry = await resolveActionTarget(
+                    page,
+                    currentSnapshot,
+                    actionTarget.target,
+                    {
+                      semanticRole: actionTarget.semanticRole,
+                      relationContext: actionTarget.relationContext,
+                      activeContainer,
+                      routeProfile,
+                      actionText: actionTarget.action
+                    }
+                  );
+
+                  if (resolvedRetry.status === "resolved" && resolvedRetry.locator) {
+                    try {
+                      await clickResolvedTarget(resolvedRetry.locator, false);
+                      await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+                      
+                      // Verify semantic match again after retry
+                      const retryScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+                      const retryVisibleTexts = retryScan.snapshot.elements
+                        .filter(e => e.visible && e.text)
+                        .map(e => e.text!)
+                        .slice(0, 50);
+                      
+                      const retrySemanticMatch = verifyPostClickSemanticMatch(
+                        actionTarget.target,
+                        retryVisibleTexts,
+                        retryScan.title
+                      );
+
+                      if (retrySemanticMatch.matches) {
+                        console.log(`[route-completion] retry succeeded`);
+                        insertedStepResult.retrySucceeded = true;
+                        postClickRouteCompletionSucceeded = true;
+
+                        currentSnapshot = retryScan.snapshot;
+                        allDiscoveredObjects.push(...retryScan.objects);
+
+                        // Route profile learning: observe successful post-click route completion
+                        if (routeProfileLearningConfig.enabled && postClickRouteCompletionResolution?.insertedStepText) {
+                          const currentRouteHistory = steps
+                            .filter((s) => (s as any).status === "passed" || (s as any).status === "found")
+                            .filter((s) => s.index !== actionTarget.index) // Exclude current step
+                            .map((s) => s.targetText!)
+                            .filter(Boolean);
+                          const lastSuccessfulTarget = currentRouteHistory[currentRouteHistory.length - 1];
+                          
+                          const learningResult = observeRouteCompletionSuccess(
+                            {
+                              target: postClickRouteCompletionResolution.insertedStepText,
+                              candidateId: postClickRouteCompletionResolution.candidateId,
+                              source: postClickRouteCompletionResolution.source
+                            },
+                            lastSuccessfulTarget || "entry",
+                            options.appSlug ?? "default",
+                            routeProfileLearningConfig
+                          );
+                          
+                          if (learningResult.suggestion) {
+                            routeProfileSuggestions.push(learningResult.suggestion);
+                            console.log(`[route-learning] observed post-click route completion from="${learningResult.suggestion.from}" to="${learningResult.suggestion.to}"`);
+                          }
+                        }
+
+                        steps.push({
+                          index: actionTarget.index,
+                          action: actionTarget.action,
+                          status: "found" as any,
+                          targetText: actionTarget.target,
+                          snapshotUrl: currentSnapshot.url,
+                          snapshotTitle: currentSnapshot.title,
+                          elementsFound: currentSnapshot.elements.length,
+                          recoveredBy: "route_completion" as any,
+                          recoveryStatus: "recovered",
+                          routeCompletionDiagnostics: {
+                            attempted: true,
+                            enabled: routeCompletionConfig?.enabled ?? false,
+                            appSlug,
+                            routeProfileUsed: Boolean(routeProfile),
+                            trigger: "post_click_semantic_mismatch",
+                            source: postClickRouteCompletionResolution.source,
+                            selectedCandidateId: postClickRouteCompletionResolution.candidateId,
+                            selectedCandidateText: postClickRouteCompletionResolution.insertedStepText,
+                            retrySucceeded: true
+                          }
+                        });
+
+                        executedStepIndices.add(actionTarget.index);
+                        if (typeof currentActionOrder === "number") executedActionOrders.add(currentActionOrder);
+                        if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
+                          break;
+                        }
+                        continue;
+                      } else {
+                        console.log(`[route-completion] retry failed semantic verification`);
+                        insertedStepResult.retrySucceeded = false;
+                      }
+                    } catch (retryErr) {
+                      console.log(`[route-completion] retry failed`);
+                      insertedStepResult.retrySucceeded = false;
+                    }
+                  } else {
+                    console.log(`[route-completion] retry resolution failed status=${resolvedRetry.status}`);
+                    insertedStepResult.retrySucceeded = false;
+                  }
+                } catch (insertErr) {
+                  console.log(`[route-completion] inserted step execution failed`);
+                }
+              }
+            }
+          } else {
+            console.log(`[route-completion] post-click blocked: ${postClickRouteCompletionResolution.blockedReason ?? "no_safe_action"} reason="${postClickRouteCompletionResolution.reason}"`);
+          }
+        }
+
+        // If route completion didn't recover, proceed with original failure
+        if (!postClickRouteCompletionSucceeded) {
+          // Mark as failure with semantic mismatch
+          steps.push({
+            index: actionTarget.index,
+            action: actionTarget.action,
+            status: "not_found",
+            targetText: actionTarget.target,
+            snapshotUrl: postClickScan.url,
+            snapshotTitle: postClickScan.title,
+            elementsFound: postClickScan.elementsCount,
+            error: `Semantic mismatch after click: ${mismatchReason}`,
+            evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+            semanticMismatchDiagnostics: {
+              target: actionTarget.target,
+              matchedTokens: semanticMatch.matchedTokens,
+              missingTokens: semanticMatch.missingTokens,
+              reason: mismatchReason
+            },
+            routeCompletionDiagnostics: postClickRouteCompletionAttempted ? {
+              attempted: true,
+              enabled: routeCompletionConfig?.enabled ?? false,
+              appSlug,
+              routeProfileUsed: Boolean(routeProfile),
+              trigger: "post_click_semantic_mismatch",
+              source: postClickRouteCompletionResolution?.source,
+              selectedCandidateId: postClickRouteCompletionResolution?.candidateId,
+              selectedCandidateText: postClickRouteCompletionResolution?.insertedStepText,
+              blockedReason: postClickRouteCompletionResolution?.blockedReason,
+              retrySucceeded: false
+            } : undefined
+          } as any);
+          
+          failedAtStep = actionTarget.index;
+          failedTarget = actionTarget.target;
+          failedReason = "semantic_mismatch";
+          
+          await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
+          await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
+            scenario, steps, allDiscoveredObjects, planSteps,
+            pendingObjectsPath, pendingPlansPath, evidenceDir,
+            failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+          ).candidatePlan ?? {}, null, 2), "utf-8");
+          
+          return buildFailureResult(
+            scenario, steps, allDiscoveredObjects, planSteps,
+            pendingObjectsPath, pendingPlansPath, evidenceDir,
+            failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+          );
+        }
       }
       
       console.log(`[discovery:case] Post-click semantic verification PASSED. Matched tokens: ${semanticMatch.matchedTokens.join(", ")}`);
@@ -3621,7 +4872,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           const retryResolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target, {
             semanticRole: actionTarget.semanticRole,
             relationContext: actionTarget.relationContext,
-            activeContainer
+            activeContainer,
+            routeProfile,
+            actionText: actionTarget.action
           });
           if (retryResolution.status === "resolved" && retryResolution.locator) {
             console.log(`[discovery:case] Target found after stability retry: ${actionTarget.target}`);
@@ -3668,6 +4921,14 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             console.log(`[discovery:case] Auth gate recovery after click_no_transition successful, retrying...`);
             if (authRecovery.authGateState) {
               authGateState = authRecovery.authGateState;
+              // Track when AuthGate was completed for later AuthFlow insertion
+              if (authGateState.completed && authGateCompletedAfterStepIndex === undefined) {
+                const lastExecutedStepIndex = executedStepIndices.size > 0 
+                  ? Math.max(...Array.from(executedStepIndices))
+                  : 0;
+                authGateCompletedAfterStepIndex = lastExecutedStepIndex;
+                console.log(`[discovery:case] AuthGate completed after step index ${authGateCompletedAfterStepIndex}`);
+              }
             }
             await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
             const retryScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
@@ -3677,7 +4938,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           const retryResolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target, {
             semanticRole: actionTarget.semanticRole,
             relationContext: actionTarget.relationContext,
-            activeContainer
+            activeContainer,
+            routeProfile,
+            actionText: actionTarget.action
           });
             if (retryResolution.status === "resolved" && retryResolution.locator) {
               await clickResolvedTarget(retryResolution.locator, false);
@@ -3848,6 +5111,40 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     currentSnapshot = scan.snapshot;
     allDiscoveredObjects.push(...scan.objects);
 
+    // Route profile learning: observe successful transitions
+    if (transitionDetected && routeProfileLearningConfig.enabled) {
+      const currentRouteHistory = steps
+        .filter((s) => (s as any).status === "passed" || (s as any).status === "found")
+        .map((s) => s.targetText!)
+        .filter(Boolean);
+      const lastSuccessfulTarget = currentRouteHistory[currentRouteHistory.length - 1];
+      
+      const learningResult = observeRouteTransition({
+        from: lastSuccessfulTarget || "entry",
+        to: actionTarget.target,
+        beforeUrl: beforeState.url,
+        afterUrl: afterState.url,
+        beforeSnapshotPath: path.join(evidenceDir, `step-${actionTarget.index}-before.json`),
+        afterSnapshotPath: path.join(evidenceDir, `step-${actionTarget.index}-after.json`),
+        candidateId: resolution.candidateId,
+        candidateText: resolution.candidateText,
+        locatorSummary: resolution.locatorStrategy,
+        clickable: true,
+        visible: true,
+        sensitive: false,
+        submitLike: false,
+        riskyAction: false,
+        transitionDetected: true
+      }, options.appSlug ?? "default", routeProfileLearningConfig);
+      
+      if (learningResult.suggestion) {
+        routeProfileSuggestions.push(learningResult.suggestion);
+        console.log(`[route-learning] observed transition from="${learningResult.suggestion.from}" to="${learningResult.suggestion.to}" confidence=${learningResult.suggestion.confidence.toFixed(2)} status=${learningResult.suggestion.status}`);
+      } else if (learningResult.reason) {
+        console.log(`[route-learning] skipped: ${learningResult.reason}`);
+      }
+    }
+
     // Wait for server-side loading states to complete (e.g., "Generando...")
     if (transitionDetected) {
       try {
@@ -3887,14 +5184,70 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       elementsFound: scan.elementsCount,
       evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
       semanticRole: actionTarget.semanticRole,
-      relationContext: actionTarget.relationContext
+      relationContext: actionTarget.relationContext,
+      locatorStrategy: resolution.locatorStrategy,
+      recoveryMetadata: (resolution.locatorStrategy === "ordinal_selection" || 
+                        resolution.locatorStrategy === "contextual_intermediate_already_satisfied"
+        ? {
+            recoveredBy: resolution.locatorStrategy === "ordinal_selection" ? "ordinal_selection" as const : "contextual_intermediate_already_satisfied" as const,
+            rationale: resolution.matchReason,
+            ordinalSelectionDiagnostics: (resolution as any).ordinalSelectionDiagnostics ? {
+              selectionPatternDetected: (resolution as any).ordinalSelectionDiagnostics.selectionPatternDetected,
+              ordinal: (resolution as any).ordinalSelectionDiagnostics.ordinal,
+              domainTerm: (resolution as any).ordinalSelectionDiagnostics.domainTerm,
+              domainTermSource: (resolution as any).ordinalSelectionDiagnostics.domainTermSource,
+              selectedCandidateText: (resolution as any).ordinalSelectionDiagnostics.selectedCandidateText,
+              selectedCandidateId: (resolution as any).ordinalSelectionDiagnostics.selectedCandidateId
+            } : undefined,
+            alreadySatisfiedEvidence: (resolution as any).alreadySatisfiedEvidence,
+            selectedCandidateId: resolution.candidateId,
+            selectedCandidateText: resolution.candidateText,
+            segmentIndex: 0,
+            transitionDetected,
+            executedAction: actionTarget.action
+          }
+        : undefined) as any
     });
 
       planSteps.push({
         index: planSteps.length + 1,
         action: "click",
         description: actionTarget.action,
-        target: { strategy: "text", value: actionTarget.target, exact: false }
+        target: { 
+          strategy: (resolution.locatorStrategy || "text") as LocatorStrategy, 
+          value: actionTarget.target, 
+          exact: false,
+          metadata: resolution.locatorStrategy === "ordinal_selection" ? {
+            resolvedTargetName: resolution.candidateText,
+            resolvedCandidateId: resolution.candidateId,
+            aiAssisted: false,
+            repairType: "ordinal_selection",
+            decisionStatus: "resolved",
+            validationStatus: "passed"
+          } : undefined
+        },
+        locatorStrategy: resolution.locatorStrategy,
+        recoveryMetadata: resolution.locatorStrategy === "ordinal_selection" || 
+                          resolution.locatorStrategy === "contextual_intermediate_already_satisfied"
+          ? {
+              recoveredBy: resolution.locatorStrategy === "ordinal_selection" ? "ordinal_selection" : "contextual_intermediate_already_satisfied",
+              rationale: resolution.matchReason,
+              ordinalSelectionDiagnostics: (resolution as any).ordinalSelectionDiagnostics ? {
+                selectionPatternDetected: (resolution as any).ordinalSelectionDiagnostics.selectionPatternDetected,
+                ordinal: (resolution as any).ordinalSelectionDiagnostics.ordinal,
+                domainTerm: (resolution as any).ordinalSelectionDiagnostics.domainTerm,
+                domainTermSource: (resolution as any).ordinalSelectionDiagnostics.domainTermSource,
+                selectedCandidateText: (resolution as any).ordinalSelectionDiagnostics.selectedCandidateText,
+                selectedCandidateId: (resolution as any).ordinalSelectionDiagnostics.selectedCandidateId
+              } : undefined,
+              alreadySatisfiedEvidence: (resolution as any).alreadySatisfiedEvidence,
+              selectedCandidateId: resolution.candidateId,
+              selectedCandidateText: resolution.candidateText,
+              segmentIndex: 0,
+              transitionDetected,
+              executedAction: actionTarget.action
+            }
+          : undefined
       });
 
     if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
@@ -3902,28 +5255,81 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     }
   }
 
+  // Recover transient assertion failures BEFORE calculating final status
+  // Find when AuthGate was completed (if at all)
+  const authGateCompletedAtStep = steps.findIndex(
+    (s) => s.recoveredBy === "auth_flow" && s.index > 0
+  );
+  
+  // Recover assertions that failed before AuthGate but were resolved after
+  if (authGateCompletedAtStep >= 0 || steps.some(s => s.status === "found" && s.index > 0)) {
+    recoverTransientAssertionFailures(
+      steps,
+      authGateCompletedAtStep >= 0 ? authGateCompletedAtStep : undefined,
+      undefined // pageStabilizedAtStep - could be added if needed
+    );
+  }
+  
+  // Log recovery results
+  const recoveredSteps = steps.filter(s => s.recoveryStatus === "recovered");
+  if (recoveredSteps.length > 0) {
+    console.log(`[discovery:case] Recovered ${recoveredSteps.length} transient assertion failure(s):`);
+    for (const step of recoveredSteps) {
+      console.log(`  - step=${step.index} target="${step.targetText}" recoveredBy=${step.recoveredBy} blocking=false`);
+    }
+  }
+
+  // Calculate status based on UNRESOLVED blocking failures (not historical failures)
+  const unresolvedBlockingFailures = getUnresolvedBlockingFailures(steps);
   const foundSteps = steps.filter((s) => s.status === "found" || s.status === "satisfied_by_children" || (s.status === "skipped_after_completion" && earlyCompletionSatisfied)).length;
   const totalSteps = steps.filter((s) => s.status !== "skipped").length;
-  const allFound = (foundSteps === totalSteps && totalSteps > 0 && !failedReason) || earlyCompletionSatisfied;
+  const allFound = (foundSteps === totalSteps && totalSteps > 0 && unresolvedBlockingFailures.length === 0) || earlyCompletionSatisfied;
   const someFound = foundSteps > 0 || earlyCompletionSatisfied;
+  
+  // Clear failedReason if all failures were recovered
+  let effectiveFailedReason = failedReason;
+  let effectiveFailedAtStep = failedAtStep;
+  let effectiveFailedTarget = failedTarget;
+  
+  if (unresolvedBlockingFailures.length === 0 && failedReason) {
+    // All failures were recovered - clear failedReason
+    console.log(`[discovery:case] All failures recovered, clearing failedReason='${failedReason}'`);
+    effectiveFailedReason = undefined;
+    effectiveFailedAtStep = undefined;
+    effectiveFailedTarget = undefined;
+  } else if (unresolvedBlockingFailures.length > 0) {
+    // Still have unresolved failures - use the first one
+    const firstUnresolved = unresolvedBlockingFailures[0];
+    effectiveFailedReason = firstUnresolved.error || "assertion_not_found";
+    effectiveFailedAtStep = firstUnresolved.index;
+    effectiveFailedTarget = firstUnresolved.targetText;
+    console.log(`[discovery:case] unresolvedBlockingFailures=${unresolvedBlockingFailures.length}, using failedReason='${effectiveFailedReason}'`);
+  } else {
+    console.log(`[discovery:case] unresolvedBlockingFailures=0 after assertion recovery`);
+  }
 
-  const status: CaseDiscoveryResult["status"] = failedReason === "needs_approval"
+  const status: CaseDiscoveryResult["status"] = effectiveFailedReason === "needs_approval"
     ? "needs_approval"
-    : failedReason === "needs_assertion_resolution"
+    : effectiveFailedReason === "needs_assertion_resolution"
       ? "needs_assertion_resolution"
-      : failedReason === "needs_setup_resolution"
+      : effectiveFailedReason === "needs_setup_resolution"
         ? "needs_setup_resolution"
-        : failedReason === "needs_associated_target_resolution"
+        : effectiveFailedReason === "needs_associated_target_resolution"
           ? "needs_associated_target_resolution"
-          : failedReason === "associated_entity_not_found"
+          : effectiveFailedReason === "associated_entity_not_found"
             ? "needs_associated_target_resolution"
-            : failedReason === "associated_action_not_found"
+            : effectiveFailedReason === "associated_action_not_found"
               ? "needs_associated_target_resolution"
               : allFound
                 ? "discovered_passed"
                 : someFound
                   ? "discovered_partial"
                   : "exploration_failed";
+  
+  // Log status reconciliation
+  if (failedReason && !effectiveFailedReason) {
+    console.log(`[discovery:case] status reconciled: discovered_partial -> ${status} (all failures recovered)`);
+  }
 
   // Collect unique valueKeys from planSteps for requiredData
   const requiredDataKeys = new Set<string>();
@@ -3954,9 +5360,22 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     notes: [
       ...(allFound
         ? ["Discovery completed successfully. All targets and concrete assertions passed."]
-        : [`Discovery partial: ${foundSteps}/${totalSteps} navigations/assertions satisfied.`])
+        : [`Discovery partial: ${foundSteps}/${totalSteps} navigations/assertions satisfied.`]),
+      ...(recoveredSteps.length > 0
+        ? [`Recovered ${recoveredSteps.length} transient assertion failure(s) - see step recovery metadata for details.`]
+        : [])
     ],
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    // AuthFlow metadata for spec generation
+    metadata: authGateCompletedAfterStepIndex !== undefined
+      ? {
+          authFlowRequired: true,
+          authFlowInsertionAfterStepIndex: authGateCompletedAfterStepIndex,
+          authFlowAlias: "defaultClient",
+          authFlowLanding: "transactions_menu",
+          authGateDetectedDuringDiscovery: true
+        }
+      : undefined
   };
 
   await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
@@ -4013,6 +5432,30 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   console.log("");
   console.log(formatAiRepairConsoleOutput(aiRepairSummary));
 
+  // Save route profile learning suggestions
+  if (routeProfileLearningConfig.enabled) {
+    try {
+      const suggestionsPath = await saveRouteProfileSuggestions(
+        routeProfileSuggestions,
+        evidenceDir,
+        options.appSlug ?? "default",
+        scenario.caseId
+      );
+      
+      if (suggestionsPath) {
+        const approved = routeProfileSuggestions.filter((s) => s.status === "auto_approved");
+        const pending = routeProfileSuggestions.filter((s) => s.status === "pending");
+        
+        console.log(`[route-learning] summary: ${approved.length} auto_approved, ${pending.length} pending`);
+      }
+    } catch (err) {
+      console.log(`[route-learning] failed to save suggestions: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
+  // Remove the duplicate recoverTransientAssertionFailures call - already done above
+  // (keeping this as a no-op for safety but it's redundant now)
+
   return {
     version: "1.0",
     caseId: scenario.caseId,
@@ -4025,9 +5468,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     pendingObjectsPath,
     pendingPlansPath,
     evidenceDir,
-    failedAtStep,
-    failedTarget,
-    failedReason,
+    failedAtStep: effectiveFailedAtStep,
+    failedTarget: effectiveFailedTarget,
+    failedReason: effectiveFailedReason,
     aiRepairSummary
   };
 }

@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-28T14:32:50.623Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c38261-consulta-de-balance-ver-acciones-disponibles-en-detalle-de-deposito",
+  "appSlug": "kiosko",
+  "specPath": "automations\\apps\\kiosko\\cases\\c38261-consulta-de-balance-ver-acciones-disponibles-en-detalle-de-deposito\\case.spec.ts",
+  "planPath": "automations\\apps\\kiosko\\cases\\c38261-consulta-de-balance-ver-acciones-disponibles-en-detalle-de-deposito\\plan.json",
+  "caseFolder": "c38261-consulta-de-balance-ver-acciones-disponibles-en-detalle-de-deposito",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false
+}

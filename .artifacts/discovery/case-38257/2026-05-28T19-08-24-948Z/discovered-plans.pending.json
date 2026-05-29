@@ -1,0 +1,84 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C38257",
+    "caseId": 38257,
+    "title": "Consulta de balance - Visualizar listado de depósitos a plazo activos"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Clic en \"Iniciar\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en \"Transacciones y servicios\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Transacciones y servicios",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Clic en \"Consulta de balance\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Consulta de balance",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 6,
+      "action": "assertText",
+      "description": "Assert: Depósitos a plazos",
+      "target": {
+        "strategy": "text",
+        "value": "Depósitos a plazos",
+        "exact": false
+      },
+      "expected": "Depósitos a plazos"
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Clic en \"Depósitos a plazos\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Depósitos a plazos",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-05-28T19:09:46.223Z"
+}

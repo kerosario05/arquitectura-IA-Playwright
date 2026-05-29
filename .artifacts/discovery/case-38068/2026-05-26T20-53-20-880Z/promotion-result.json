@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-26T20:53:40.921Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c38068-visualizar-subcategorias-de-cuentas-de-efectivo",
+  "appSlug": "arquitectura-automatizacion",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c38068-visualizar-subcategorias-de-cuentas-de-efectivo\\case.spec.ts",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\cases\\c38068-visualizar-subcategorias-de-cuentas-de-efectivo\\plan.json",
+  "caseFolder": "c38068-visualizar-subcategorias-de-cuentas-de-efectivo",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false
+}

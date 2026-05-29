@@ -80,6 +80,7 @@ export function buildAiRepairCaseSummary(
     else if (repairType === "assertion_resolution") summary.repairTypeCounts.assertion_resolution++;
     else if (repairType === "pom_method_missing") summary.repairTypeCounts.pom_method_missing++;
     else if (repairType === "selection_resolution") summary.repairTypeCounts.selection_resolution++;
+    else if (repairType === "missing_intermediate_step") summary.repairTypeCounts.missing_intermediate_step++;
     else summary.repairTypeCounts.unknown++;
     
     // Count applied vs blocked

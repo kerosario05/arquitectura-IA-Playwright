@@ -634,4 +634,19 @@ export class ProductListPage {
 
     return candidates;
   }
+
+  async selectVisibleItemByOrdinal(ordinal: 'first' | 'second' | 'third', domainTerm?: string): Promise<void> {
+    await waitForListReadiness(this.page, { timeoutMs: 10000, pollMs: 500, minCards: 1 });
+    const ordinalNum = ordinal === 'first' ? 0 : ordinal === 'second' ? 1 : ordinal === 'third' ? 2 : -1;
+    if (ordinalNum < 0) throw new Error('Unsupported ordinal: ' + ordinal);
+    const domainSelector = domainTerm ? `[data-testid*="${domainTerm}"], [class*="${domainTerm}"], :has-text("${domainTerm}")` : ':visible';
+    const items = this.page.locator(`article${domainSelector}, [role="listitem"]${domainSelector}, [class*="card"]${domainSelector}, [class*="item"]${domainSelector}`);
+    const count = await items.count();
+    if (count === 0) throw new Error('No visible items found for ordinal selection.');
+    if (ordinalNum >= count) throw new Error(`Ordinal ${ordinal} (${ordinalNum + 1}) exceeds available items (${count}).`);
+    const item = items.nth(ordinalNum);
+    const actionable = item.locator('a:visible, button:visible, [role="button"]:visible').first();
+    if (await actionable.count() > 0) { await actionable.click({ timeout: 10000 }); return; }
+    await item.click({ timeout: 10000 });
+  }
 }

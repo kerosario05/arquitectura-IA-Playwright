@@ -1,0 +1,249 @@
+{
+  "version": "1.0",
+  "url": "https://172.27.4.50/success",
+  "title": "Kiosco de Autogestión - Banco Santa Cruz",
+  "capturedAt": "2026-05-27T14:00:23.411Z",
+  "elements": [
+    {
+      "id": "el-6",
+      "type": "button",
+      "text": "Información de productosExplora nuestros productos bancarios",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "Información de productosExplora nuestros productos bancariosTransacciones y serviciosRealiza operaciones con tus cuentas",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Información de productosExplora nuestros productos bancarios",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta"
+      ],
+      "className": "group relative bg-white rounded-2xl shadow-xl hover:shadow-2xl border-[3px] hover:scale-[1.02] transition-all duration-300 overflow-hidden min-h-[160px] border-primary/40"
+    },
+    {
+      "id": "el-9",
+      "type": "button",
+      "text": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "Información de productosExplora nuestros productos bancariosTransacciones y serviciosRealiza operaciones con tus cuentas",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta"
+      ],
+      "className": "group relative bg-white rounded-2xl shadow-xl hover:shadow-2xl border-[3px] hover:scale-[1.02] transition-all duration-300 overflow-hidden min-h-[160px] border-kiosk-success/40"
+    },
+    {
+      "id": "el-12",
+      "type": "button",
+      "text": "Salir",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "¡Hola!¡Nos alegra que estés con nosotros!¿Qué deseas realizar hoy?Información de productosExplora nuestros productos bancariosTransacciones y serviciosRealiza operaciones con tus cuentasSalir",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Salir",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta"
+      ],
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary hover:bg-primary/90 h-10 min-h-[70px] font-semibold rounded-2xl transition-all duration-200 ease-out shadow-card hover:shadow-card-hover disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden select-none transform-gpu bg-gradient-to-br from-white to-gray-50 text-foreground border-2 border-border hover:border-border/80 hover:from-muted/50 hover:to-muted active:shadow-inner hover:scale-[1.02] px-20 py-6 text-lg"
+    },
+    {
+      "id": "el-2",
+      "type": "image",
+      "tagName": "img",
+      "visible": true,
+      "candidateLocators": [],
+      "dataHints": [],
+      "alt": "Banco Santa Cruz",
+      "className": "h-10 object-contain"
+    },
+    {
+      "id": "el-3",
+      "type": "heading",
+      "text": "¡Hola!",
+      "tagName": "h1",
+      "visible": true,
+      "nearbyText": "¡Hola!¡Nos alegra que estés con nosotros!¿Qué deseas realizar hoy?",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "¡Hola!",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-4xl font-bold text-foreground mb-3"
+    },
+    {
+      "id": "el-4",
+      "type": "heading",
+      "text": "¡Nos alegra que estés con nosotros!",
+      "tagName": "h2",
+      "visible": true,
+      "nearbyText": "¡Hola!¡Nos alegra que estés con nosotros!¿Qué deseas realizar hoy?",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "¡Nos alegra que estés con nosotros!",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-3xl font-bold text-foreground mb-3"
+    },
+    {
+      "id": "el-5",
+      "type": "text",
+      "text": "¿Qué deseas realizar hoy?",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "¡Hola!¡Nos alegra que estés con nosotros!¿Qué deseas realizar hoy?",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "¿Qué deseas realizar hoy?",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-xl text-muted-foreground"
+    },
+    {
+      "id": "el-7",
+      "type": "heading",
+      "text": "Información de productos",
+      "tagName": "h3",
+      "visible": true,
+      "nearbyText": "Información de productosExplora nuestros productos bancarios",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Información de productos",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-2xl font-bold mb-2 transition-colors text-primary"
+    },
+    {
+      "id": "el-8",
+      "type": "text",
+      "text": "Explora nuestros productos bancarios",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "Información de productosExplora nuestros productos bancarios",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Explora nuestros productos bancarios",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-lg text-muted-foreground"
+    },
+    {
+      "id": "el-10",
+      "type": "heading",
+      "text": "Transacciones y servicios",
+      "tagName": "h3",
+      "visible": true,
+      "nearbyText": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Transacciones y servicios",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta"
+      ],
+      "className": "text-2xl font-bold mb-2 transition-colors text-kiosk-success"
+    },
+    {
+      "id": "el-11",
+      "type": "text",
+      "text": "Realiza operaciones con tus cuentas",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Realiza operaciones con tus cuentas",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta"
+      ],
+      "className": "text-lg text-muted-foreground"
+    },
+    {
+      "id": "el-13",
+      "type": "text",
+      "text": "Salir",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Salir",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Salir",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "relative z-10 flex items-center justify-center gap-2"
+    },
+    {
+      "id": "el-14",
+      "type": "text",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Salir",
+      "candidateLocators": [],
+      "dataHints": [],
+      "className": "absolute inset-0 bg-gradient-to-t from-transparent via-white/5 to-white/10 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+    }
+  ],
+  "summary": {
+    "totalElements": 13,
+    "buttons": 3,
+    "links": 0,
+    "inputs": 0,
+    "selects": 0,
+    "tables": 0,
+    "dialogs": 0,
+    "headings": 4
+  }
+}

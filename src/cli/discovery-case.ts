@@ -1,12 +1,13 @@
 import { config } from "../config/env";
 import { runCaseDiscoveryWorkflow, printCaseDiscoverySummary } from "../discovery/case-discovery-workflow";
 import type { CaseDiscoveryWorkflowOptions } from "../discovery/case-discovery-workflow";
-import { resolveAppProfile, ensureAppStructure, logAppProfile } from "../automations/app-profile";
-import type { AppProfile } from "../automations/app-profile";
+import { resolveAppProfile, ensureAppStructure, logAppProfile, resolveSectionProfile } from "../automations/app-profile";
+import type { AppProfile, SectionProfile } from "../automations/app-profile";
 
 type CliArgs = {
   caseId: number;
   app?: string;
+  section?: string;
   headed: boolean;
   output?: string;
   autoPromote: boolean;
@@ -29,6 +30,7 @@ export function parseDiscoveryCaseArgs(argv: string[]): CliArgs {
   const args: CliArgs = {
     caseId: 0,
     app: undefined,
+    section: undefined,
     headed: false,
     autoPromote: false,
     promotionDryRun: false,
@@ -59,6 +61,14 @@ export function parseDiscoveryCaseArgs(argv: string[]): CliArgs {
         throw new Error("Missing value for --app");
       }
       args.app = nextValue;
+      i += 1;
+      continue;
+    }
+    if (token === "--section") {
+      if (!nextValue || nextValue.startsWith("--")) {
+        throw new Error("Missing value for --section");
+      }
+      args.section = nextValue;
       i += 1;
       continue;
     }
@@ -189,6 +199,7 @@ async function resolveAndEnsureApp(args: CliArgs): Promise<AppProfile> {
     appName: config.app.name
   });
 
+  // Only create root app structure here, section structure will be created in workflow after section resolution
   const ensured = await ensureAppStructure(baseDir);
 
   logAppProfile(profile, baseDir, ensured.length > 0 ? ensured : undefined);
@@ -203,6 +214,16 @@ async function main(): Promise<void> {
   console.log(`[discovery:case] Overwrite enabled: ${args.overwrite}`);
 
   const appProfile = await resolveAndEnsureApp(args);
+
+  // Resolve sectionProfile from CLI --section flag (if provided)
+  let sectionProfile: SectionProfile | undefined;
+  if (args.section) {
+    const sectionResult = await resolveSectionProfile({
+      cliSectionSlug: args.section
+    });
+    sectionProfile = sectionResult.sectionProfile;
+    console.log(`[section-profile] source=${sectionProfile.source} sectionSlug=${sectionProfile.sectionSlug} (from CLI --section)`);
+  }
 
   const workflowOptions: CaseDiscoveryWorkflowOptions = {
     caseId: args.caseId,
@@ -223,7 +244,8 @@ async function main(): Promise<void> {
     promotedSpecTimeoutMs: args.promotedSpecTimeoutMs,
     requirePomRuntime: args.requirePomRuntime,
     config,
-    appProfile
+    appProfile,
+    sectionProfile
   };
 
   const workflowResult = await runCaseDiscoveryWorkflow(workflowOptions);

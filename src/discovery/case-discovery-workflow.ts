@@ -18,7 +18,8 @@ import { runSegmentedRouteRecovery } from "../agent/segment-route-recovery";
 import type { PageSnapshot } from "../types/page-snapshot.types";
 import type { FullConfig } from "../types/env.types";
 import type { CaseDiscoveryResult, RuntimeEvidenceTrace, PendingAssertionForensics, AutoRepairDecisionDiagnostics, BatchCaseRootCause, DiscoveryStepResult } from "../types/discovery.types";
-import type { AppProfile } from "../automations/app-profile";
+import type { AppProfile, SectionProfile } from "../automations/app-profile";
+import { resolveSectionProfile } from "../automations/app-profile";
 import type { TestScenario } from "../types/testrail.types";
 
 export type CaseDiscoveryWorkflowOptions = {
@@ -51,6 +52,7 @@ export type CaseDiscoveryWorkflowOptions = {
   verifyPromotedSpec?: boolean;
   promotedSpecTimeoutMs?: number;
   appProfile?: AppProfile;
+  sectionProfile?: SectionProfile;
   requirePomRuntime?: boolean;
 };
 
@@ -75,7 +77,7 @@ function getDefaultOutputDir(id: number | string): string {
 
 function inferAssertionTypeFromText(assertionText: string): "field" | "action" | "form" | "cart" | "confirmation" | "list" | "detail" | "unknown" {
   const normalized = assertionText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9\s]/g, " ").trim();
-  
+
   if (/\b(field|campo|input|checkbox|select|dropdown|username|password|email|phone|name|address|city|country|card number|credit card)\b/.test(normalized)) {
     return "field";
   }
@@ -235,7 +237,7 @@ function buildRuntimeEvidenceTrace(caseResult: CaseDiscoveryResult): RuntimeEvid
 function buildForensicsRecommendation(step: DiscoveryStepResult): string | undefined {
   const diag = (step.assertionDiagnostics ?? {}) as Record<string, unknown>;
   const contextDiag = (diag.assertionContextDiagnostics as any);
-  
+
   if (contextDiag?.decision === "deferred_until_context") {
     return `Add navigation step to reach ${contextDiag.requiredContext ?? "required context"} before this assertion`;
   }
@@ -580,7 +582,7 @@ function collectLocalPendingAssertionDiagnostics(caseResult: CaseDiscoveryResult
   const executedSuccessfulActions = caseResult.steps
     .filter((step) => step.status === "found" || step.status === "satisfied_by_previous_assertion" || step.status === "satisfied_by_children")
     .map((step) => `${step.action} ${step.targetText ?? ""}`.trim());
-  
+
   const buildForensics = (step: DiscoveryStepResult): PendingAssertionForensics | undefined => {
     if (!(step.status === "needs_assertion_resolution" || (step.status === "not_found" && isAssertionLikeStep(step)))) return undefined;
     const diag = (step.assertionDiagnostics ?? {}) as Record<string, unknown>;
@@ -635,12 +637,12 @@ function collectLocalPendingAssertionDiagnostics(caseResult: CaseDiscoveryResult
       status: step.assertionStatus
     };
   };
-  
+
   const pendingForensics = pendingSteps
     .filter((step) => !consumedByLocalEvidence(step.targetText ?? step.action))
     .map(buildForensics)
     .filter(Boolean) as PendingAssertionForensics[];
-  
+
   if (pendingAssertions.length === 0) {
     return {
       shouldSkipAutoRepair: false,
@@ -835,7 +837,7 @@ export function printCaseDiscoverySummary(result: CaseDiscoveryResult, workflowR
     else if (step.status === "precondition_unresolved") icon = "⚠";
     else if (step.status === "skipped_semantic_descriptor") icon = "○";
     else if (step.status === "satisfied_by_children") icon = "✓";
-    
+
     console.log(`  ${icon} Step ${step.index}: ${step.action}`);
     if (step.targetText) {
       console.log(`    Target: ${step.targetText}`);
@@ -927,13 +929,20 @@ export async function runCaseDiscoveryWorkflow(
   }
 
   let scenario: TestScenario;
+  let client: TestRailClient;
+  
   if (options.scenario) {
     scenario = options.scenario;
+    if (!options.testRailClient) {
+      const testRailRuntimeConfig = requireTestRailConfig(activeConfig);
+      client = new TestRailClient(testRailRuntimeConfig);
+    } else {
+      client = options.testRailClient;
+    }
   } else {
     if (!options.caseId) {
       throw new Error("Either scenario or caseId must be provided.");
     }
-    let client: TestRailClient;
     if (options.testRailClient) {
       client = options.testRailClient;
     } else {
@@ -946,6 +955,28 @@ export async function runCaseDiscoveryWorkflow(
       throw new Error(`No scenario could be generated for case C${options.caseId}.`);
     }
     scenario = scenarios[0];
+  }
+
+  // Resolve sectionProfile from TestRail case
+  let sectionProfile: SectionProfile | undefined;
+  if (options.caseId) {
+    const rawCase = await client.getCase(options.caseId);
+    if (rawCase.section_id) {
+      const sectionInfo = await client.getSection(rawCase.section_id);
+      const sectionResult = await resolveSectionProfile({
+        testCaseSectionId: rawCase.section_id,
+        testCaseSectionName: sectionInfo?.name
+      });
+      sectionProfile = sectionResult.sectionProfile;
+      console.log(`[section-profile] source=${sectionProfile.source} sectionId=${sectionProfile.sectionId} sectionName="${sectionProfile.sectionName}" sectionSlug=${sectionProfile.sectionSlug}`);
+    } else {
+      console.log(`[section-profile] No section_id found for case C${options.caseId}, using default-section`);
+    }
+  }
+  
+  if (sectionProfile) {
+    scenario.sectionId = sectionProfile.sectionId as number | undefined;
+    scenario.sectionName = sectionProfile.sectionName;
   }
 
   const browserType = { chromium, firefox, webkit }[activeConfig.execution.browser];
@@ -970,6 +1001,11 @@ export async function runCaseDiscoveryWorkflow(
       ? "custom"
       : (activeConfig.integrations.ai?.agentProvider ?? "custom");
 
+    // Debug logging for routeCompletion config propagation
+    console.log(`[env-debug] raw AI_ROUTE_COMPLETION_ENABLED=${process.env.AI_ROUTE_COMPLETION_ENABLED}`);
+    console.log(`[env-debug] loaded routeCompletion.enabled=${activeConfig.integrations.ai?.routeCompletion?.enabled}`);
+    console.log(`[env-debug] appProfile appSlug=${options.appProfile?.appSlug ?? "undefined"}`);
+
     caseResult = await runCaseDiscovery({
       page,
       scenario,
@@ -977,6 +1013,7 @@ export async function runCaseDiscoveryWorkflow(
       pendingObjectsPath,
       pendingPlansPath,
       appBaseUrl: activeConfig.app.baseUrl,
+      appSlug: options.appProfile?.appSlug,
       testData: activeConfig.app.testData,
       loginAction: async () => {
         await loginStrategy.execute(page, activeConfig);
@@ -989,7 +1026,9 @@ export async function runCaseDiscoveryWorkflow(
           enabled: activeConfig.integrations.ai?.discoveryEnabled ?? false,
           confidenceThreshold: activeConfig.integrations.ai?.discoveryConfidenceThreshold ?? 0.85,
           requireApprovalThreshold: activeConfig.integrations.ai?.discoveryRequireApprovalThreshold ?? 0.7,
-          maxAttempts: activeConfig.integrations.ai?.discoveryMaxAttempts ?? 3
+          maxAttempts: activeConfig.integrations.ai?.discoveryMaxAttempts ?? 3,
+          routeCompletion: activeConfig.integrations.ai?.routeCompletion,
+          routeProfileLearning: activeConfig.integrations.ai?.routeProfileLearning
         }
       },
       env: {
@@ -1041,7 +1080,7 @@ export async function runCaseDiscoveryWorkflow(
       "click_no_transition",
       "assertion_not_found"
     ]);
-    
+
     const LOCAL_DIAGNOSTIC_REASONS = new Set([
       "fill_target_not_found",
       "fill_target_not_editable",
@@ -1065,14 +1104,14 @@ export async function runCaseDiscoveryWorkflow(
       "category_filter_structural_match",
       "product_detail_missing_optional",
       "cart_setup_missing"
-      ,"weak_signal_not_blocking"
-      ,"structurally_satisfied"
-      ,"detail_descriptor_skipped"
-      ,"synthetic_expected_skipped"
-      ,"assertion_context_not_reached"
-      ,"deferred_until_context"
+      , "weak_signal_not_blocking"
+      , "structurally_satisfied"
+      , "detail_descriptor_skipped"
+      , "synthetic_expected_skipped"
+      , "assertion_context_not_reached"
+      , "deferred_until_context"
     ]);
-    
+
     let localPending: ReturnType<typeof collectLocalPendingAssertionDiagnostics> = {
       shouldSkipAutoRepair: false,
       pendingAssertions: [],
@@ -1099,26 +1138,26 @@ export async function runCaseDiscoveryWorkflow(
       runtimeEvidenceTrace,
       partialDiagnostics: caseResult.partialDiagnostics ?? (localPending.pendingForensics && localPending.pendingForensics.length > 0
         ? {
+          partialReason: "pending_local_assertions",
+          pendingAssertions: localPending.pendingAssertions,
+          localDiagnostics: localPending.localDiagnostics,
+          autoRepairSkippedReason: "local_diagnostic_sufficient",
+          pendingForensics: localPending.pendingForensics,
+          diagnosticsBuildError
+        }
+        : diagnosticsBuildError
+          ? {
             partialReason: "pending_local_assertions",
-            pendingAssertions: localPending.pendingAssertions,
-            localDiagnostics: localPending.localDiagnostics,
+            pendingAssertions: [],
+            localDiagnostics: [],
             autoRepairSkippedReason: "local_diagnostic_sufficient",
-            pendingForensics: localPending.pendingForensics,
             diagnosticsBuildError
           }
-          : diagnosticsBuildError
-          ? {
-              partialReason: "pending_local_assertions",
-              pendingAssertions: [],
-              localDiagnostics: [],
-              autoRepairSkippedReason: "local_diagnostic_sufficient",
-              diagnosticsBuildError
-            }
           : undefined)
     };
     if (localPending.shouldSkipAutoRepair) {
       console.log(`[discovery:workflow] Auto-repair skipped: reason="local_diagnostic_sufficient"`);
-      
+
       const autoRepairDecisionDiagnostics: AutoRepairDecisionDiagnostics = {
         attempted: true,
         skipped: true,
@@ -1137,7 +1176,7 @@ export async function runCaseDiscoveryWorkflow(
         decision: "skip",
         explanation: `Auto-repair skipped because all pending assertions have local diagnostics that explain them. Pending: ${localPending.pendingAssertions.length}, Local diagnostics: ${localPending.localDiagnostics.join(", ")}`
       };
-      
+
       caseResult = {
         ...caseResult,
         status: caseResult.status === "discovered_passed" ? caseResult.status : "discovered_partial",
@@ -1183,7 +1222,7 @@ export async function runCaseDiscoveryWorkflow(
       && Boolean(caseResult.failedReason && RECOVERABLE_REASONS.has(caseResult.failedReason))
       && Boolean(caseResult.candidatePlan)
       && Boolean((await loadLatestSnapshot(evidenceDir)).snapshot);
-    
+
     if (caseResult.failedReason && LOCAL_DIAGNOSTIC_REASONS.has(caseResult.failedReason)) {
       console.log(`[discovery:workflow] Auto-repair skipped: reason="${caseResult.failedReason}" (local diagnostic sufficient)`);
     }
@@ -1264,9 +1303,9 @@ export async function runCaseDiscoveryWorkflow(
           }
 
           if (attemptResult.status === "timeout" && options.continueOnAgentTimeout) {
-            caseResult = { 
-              ...caseResult, 
-              status: "needs_agent", 
+            caseResult = {
+              ...caseResult,
+              status: "needs_agent",
               failedReason: "auto_repair_timeout",
               autoRepairDecisionDiagnostics: {
                 ...(caseResult.autoRepairDecisionDiagnostics!),
@@ -1277,8 +1316,8 @@ export async function runCaseDiscoveryWorkflow(
             break;
           }
           if (attemptResult.status === "no_proposal") {
-            caseResult = { 
-              ...caseResult, 
+            caseResult = {
+              ...caseResult,
               status: "needs_agent",
               autoRepairDecisionDiagnostics: {
                 ...(caseResult.autoRepairDecisionDiagnostics!),
@@ -1290,8 +1329,8 @@ export async function runCaseDiscoveryWorkflow(
           }
 
           if (attempt === agentCfg.maxAttempts) {
-            caseResult = { 
-              ...caseResult, 
+            caseResult = {
+              ...caseResult,
               status: "auto_repair_exhausted",
               autoRepairDecisionDiagnostics: {
                 ...(caseResult.autoRepairDecisionDiagnostics!),
@@ -1455,8 +1494,11 @@ export async function runCaseDiscoveryWorkflow(
           inlineDebugMode: options.inlineDebugSpec ?? false,
           verifySpec: options.verifyPromotedSpec ?? false,
           specVerificationTimeoutMs: options.promotedSpecTimeoutMs,
-          appProfileObject: options.appProfile
-          ,requirePomRuntime: options.requirePomRuntime === true
+          appProfileObject: options.appProfile,
+          sectionSlug: sectionProfile?.sectionSlug,
+          sectionId: sectionProfile?.sectionId,
+          sectionName: sectionProfile?.sectionName,
+          requirePomRuntime: options.requirePomRuntime === true
         },
         false,
         {

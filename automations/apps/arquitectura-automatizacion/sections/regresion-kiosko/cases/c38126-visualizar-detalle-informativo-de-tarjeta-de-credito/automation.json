@@ -1,0 +1,79 @@
+{
+  "id": "c38126-visualizar-detalle-informativo-de-tarjeta-de-credito",
+  "externalId": "C38126",
+  "caseId": 38126,
+  "title": "Visualizar detalle informativo de tarjeta de crédito",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38126-visualizar-detalle-informativo-de-tarjeta-de-credito\\plan.json",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38126-visualizar-detalle-informativo-de-tarjeta-de-credito\\case.spec.ts",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "arquitectura-automatizacion",
+  "baseUrlHash": "1423ba294517",
+  "createdAt": "2026-05-29T00:39:57.446Z",
+  "updatedAt": "2026-05-29T00:39:57.446Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-29T00-39-24-089Z\\cases\\case-38126\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "not_run",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-29T00-39-24-089Z\\cases\\case-38126",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [
+        "ProductListPage.selectVisibleItemByOrdinal()"
+      ],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0,
+      "autoPom": {
+        "enabled": true,
+        "initialPomStatus": "needs_page_method",
+        "generatedCandidateFiles": [],
+        "autoApprovedPageObjects": [],
+        "autoApprovedMethods": [
+          "ProductListPage.selectVisibleItemByOrdinal()"
+        ],
+        "blockedAutoApprovals": [],
+        "approvalThreshold": 0.5,
+        "regeneratedSpec": true,
+        "validationStatus": "passed",
+        "finalPomStatus": "promoted"
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [
+        "missing_method:step=6 target=\"la primera tarjeta visible del listado\" derivedIntent=\"select_visible_item_by_ordinal\" expectedOwner=\"ProductListPage\" availableMethods=[selectProduct, selectFirstVisibleCard, openModule]"
+      ],
+      "availablePageObjects": [
+        "ProductListPage",
+        "ProductDetailPage",
+        "FormPage",
+        "HomePage",
+        "LoginPage",
+        "CategoryPage",
+        "ProductInformationPage",
+        "OperationsMenuPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [
+        "step=6 target=\"la primera tarjeta visible del listado\" derivedIntent=\"select_visible_item_by_ordinal\" expectedOwner=\"ProductListPage\" availableMethods=[selectProduct, selectFirstVisibleCard, openModule]"
+      ],
+      "autoPomAttempted": true,
+      "autoPomCreatedMethods": [
+        "ProductListPage.selectVisibleItemByOrdinal()"
+      ],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    }
+  }
+}

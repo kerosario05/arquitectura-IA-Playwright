@@ -1,0 +1,120 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C38133",
+    "caseId": 38133,
+    "title": "Acción Solicitar visible desde detalle de producto"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "1. Clic en \"Iniciar\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en \"Información de productos\".",
+      "target": {
+        "strategy": "product_condition",
+        "value": "Información de productos",
+        "exact": false
+      },
+      "locatorStrategy": "product_condition"
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Clic en \"Tarjetas\".",
+      "target": {
+        "strategy": "product_condition",
+        "value": "Tarjetas",
+        "exact": false
+      },
+      "locatorStrategy": "product_condition"
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Clic en \"Tarjeta de Crédito\".",
+      "target": {
+        "strategy": "product_condition",
+        "value": "Tarjeta de Crédito",
+        "exact": false
+      },
+      "locatorStrategy": "product_condition"
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Seleccionar la primera tarjeta visible del listado.",
+      "target": {
+        "strategy": "ordinal_selection",
+        "value": "la primera tarjeta visible del listado",
+        "exact": false,
+        "metadata": {
+          "resolvedTargetName": "Tarjeta Crédito Visa Clásica",
+          "resolvedCandidateId": "el-8",
+          "aiAssisted": false,
+          "repairType": "ordinal_selection",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "ordinal_selection",
+      "recoveryMetadata": {
+        "recoveredBy": "ordinal_selection",
+        "rationale": "ordinal_selection:first",
+        "ordinalSelectionDiagnostics": {
+          "selectionPatternDetected": true,
+          "ordinal": "first",
+          "domainTerm": "tarjeta",
+          "domainTermSource": "routeProfile",
+          "selectedCandidateText": "Tarjeta Crédito Visa Clásica",
+          "selectedCandidateId": "el-8"
+        },
+        "selectedCandidateId": "el-8",
+        "selectedCandidateText": "Tarjeta Crédito Visa Clásica",
+        "segmentIndex": 0,
+        "transitionDetected": true,
+        "executedAction": "Seleccionar la primera tarjeta visible del listado."
+      }
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Clic en \"Solicitar\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Solicitar",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-05-28T00:41:37.689Z"
+}

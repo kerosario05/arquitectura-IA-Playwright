@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-05-29T00:46:38.255Z",
+  "autoPromoteRequested": true,
+  "gateAllowed": true,
+  "gateStatus": "passed",
+  "reasons": [],
+  "warnings": [],
+  "promoted": true,
+  "automationId": "c38261-consulta-de-balance-ver-acciones-disponibles-en-detalle-de-deposito",
+  "appSlug": "arquitectura-automatizacion",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38261-consulta-de-balance-ver-acciones-disponibles-en-detalle-de-deposito\\case.spec.ts",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38261-consulta-de-balance-ver-acciones-disponibles-en-detalle-de-deposito\\plan.json",
+  "caseFolder": "c38261-consulta-de-balance-ver-acciones-disponibles-en-detalle-de-deposito",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false
+}

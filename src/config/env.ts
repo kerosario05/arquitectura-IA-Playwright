@@ -96,6 +96,18 @@ function parseOptionalString(rawValue: string | undefined): string | undefined {
   return trimmed ? trimmed : undefined;
 }
 
+function parseExpectedResultMode(rawValue?: string): "context" | "assertions" | "smart" {
+  if (!rawValue || !rawValue.trim()) {
+    return "context"; // Default to context mode
+  }
+  const normalized = rawValue.trim().toLowerCase();
+  if (normalized === "context" || normalized === "assertions" || normalized === "smart") {
+    return normalized;
+  }
+  console.warn(`Invalid DISCOVERY_EXPECTED_RESULT_MODE value: "${rawValue}". Using default "context".`);
+  return "context";
+}
+
 function parseExtraLoginFields(rawValue?: string): Record<string, string> | undefined {
   if (!rawValue || !rawValue.trim()) {
     return undefined;
@@ -272,11 +284,17 @@ function getAppBaseUrl(): string {
 }
 
 const appBaseUrl = getAppBaseUrl();
-const appLoginMode = parseLoginMode(process.env.APP_LOGIN_MODE?.trim() || "no_login");
-const headless = parseBoolean(process.env.HEADLESS?.trim() || "false", "HEADLESS");
-const browser = parseBrowser(process.env.BROWSER?.trim() || "chromium");
-const evidenceDir = process.env.EVIDENCE_DIR?.trim() || "./evidence";
-const defaultTimeoutMs = parseNumber(process.env.DEFAULT_TIMEOUT_MS?.trim() || "30000", "DEFAULT_TIMEOUT_MS");
+
+const appLoginMode = parseLoginMode(getRequiredEnv("APP_LOGIN_MODE"));
+const headless = parseBoolean(getRequiredEnv("HEADLESS"), "HEADLESS");
+const browser = parseBrowser(getRequiredEnv("BROWSER"));
+const evidenceDir = getRequiredEnv("EVIDENCE_DIR");
+const defaultTimeoutMs = parseNumber(getRequiredEnv("DEFAULT_TIMEOUT_MS"), "DEFAULT_TIMEOUT_MS");
+const promotedSpecTimeoutMs = parseOptionalPositiveNumber(
+  process.env.PROMOTED_SPEC_TIMEOUT_MS,
+  "PROMOTED_SPEC_TIMEOUT_MS"
+) ?? 90000;
+
 
 export const config: FullConfig = {
   app: {
@@ -301,7 +319,8 @@ export const config: FullConfig = {
     browser,
     headless,
     evidenceDir,
-    defaultTimeoutMs
+    defaultTimeoutMs,
+    promotedSpecTimeoutMs
   },
   integrations: {
     testRail: {
@@ -343,7 +362,34 @@ export const config: FullConfig = {
       discoveryMaxAttempts: parseOptionalPositiveNumber(
         process.env.AI_DISCOVERY_MAX_ATTEMPTS,
         "AI_DISCOVERY_MAX_ATTEMPTS"
-      ) ?? 3
+      ) ?? 3,
+      expectedResultMode: parseExpectedResultMode(process.env.DISCOVERY_EXPECTED_RESULT_MODE),
+      routeCompletion: {
+        enabled: (process.env.AI_ROUTE_COMPLETION_ENABLED ?? "false").toLowerCase() === "true",
+        minConfidence: parseOptionalThreshold(
+          process.env.AI_ROUTE_COMPLETION_MIN_CONFIDENCE,
+          "AI_ROUTE_COMPLETION_MIN_CONFIDENCE"
+        ) ?? 0.75,
+        maxInsertedSteps: parseOptionalPositiveNumber(
+          process.env.AI_ROUTE_COMPLETION_MAX_INSERTED_STEPS,
+          "AI_ROUTE_COMPLETION_MAX_INSERTED_STEPS"
+        ) ?? 1,
+        useAppProfile: (process.env.AI_ROUTE_COMPLETION_USE_APP_PROFILE ?? "true").toLowerCase() === "true",
+        allowGeneric: (process.env.AI_ROUTE_COMPLETION_ALLOW_GENERIC ?? "true").toLowerCase() === "true"
+      },
+      routeProfileLearning: {
+        enabled: (process.env.ROUTE_PROFILE_LEARNING_ENABLED ?? "false").toLowerCase() === "true",
+        autoApproveThreshold: parseOptionalThreshold(
+          process.env.ROUTE_PROFILE_LEARNING_AUTO_APPROVE_THRESHOLD,
+          "ROUTE_PROFILE_LEARNING_AUTO_APPROVE_THRESHOLD"
+        ) ?? 0.90,
+        autoApply: (process.env.ROUTE_PROFILE_LEARNING_AUTO_APPLY ?? "false").toLowerCase() === "true",
+        minOccurrences: parseOptionalPositiveNumber(
+          process.env.ROUTE_PROFILE_LEARNING_MIN_OCCURRENCES,
+          "ROUTE_PROFILE_LEARNING_MIN_OCCURRENCES"
+        ) ?? 1,
+        blockSensitive: (process.env.ROUTE_PROFILE_LEARNING_BLOCK_SENSITIVE ?? "true").toLowerCase() === "true"
+      }
     },
     agent: {
       provider: parseAgentProvider(process.env.AGENT_PROVIDER),

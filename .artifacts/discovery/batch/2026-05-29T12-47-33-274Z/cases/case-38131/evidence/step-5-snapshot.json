@@ -1,0 +1,705 @@
+{
+  "version": "1.0",
+  "url": "https://172.27.4.50/product-extended?product=prestamo-personal",
+  "title": "Kiosco de Autogestión - Banco Santa Cruz",
+  "capturedAt": "2026-05-29T12:47:57.609Z",
+  "elements": [
+    {
+      "id": "el-3",
+      "type": "button",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "Más detalles del productoPréstamo Personal",
+      "candidateLocators": [],
+      "dataHints": [
+        "prestamo"
+      ],
+      "className": "absolute left-0 top-1/2 -translate-y-1/2 p-3 hover:bg-primary/10 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 border-2 border-transparent hover:border-primary/20"
+    },
+    {
+      "id": "el-31",
+      "type": "button",
+      "text": "Finalizar sesión",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "Finalizar sesiónVolverSolicitar",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Finalizar sesión",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary hover:bg-primary/90 h-10 min-h-[70px] font-semibold rounded-2xl transition-all duration-200 ease-out shadow-card hover:shadow-card-hover disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden select-none transform-gpu bg-gradient-to-br from-white to-gray-50 text-foreground border-2 border-border hover:border-border/80 hover:from-muted/50 hover:to-muted active:shadow-inner hover:scale-[1.02] px-20 py-6 text-lg"
+    },
+    {
+      "id": "el-34",
+      "type": "button",
+      "text": "Volver",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "Finalizar sesiónVolverSolicitar",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Volver",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary hover:bg-primary/90 h-10 min-h-[70px] font-semibold rounded-2xl transition-all duration-200 ease-out shadow-card hover:shadow-card-hover disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden select-none transform-gpu bg-gradient-to-br from-white to-gray-50 text-foreground border-border hover:border-border/80 hover:from-muted/50 hover:to-muted active:shadow-inner hover:scale-[1.02] px-20 py-6 text-lg border-2"
+    },
+    {
+      "id": "el-37",
+      "type": "button",
+      "text": "Solicitar",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "Finalizar sesiónVolverSolicitar",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Solicitar",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary hover:bg-primary/90 h-10 min-h-[70px] font-semibold rounded-2xl transition-all duration-200 ease-out shadow-card hover:shadow-card-hover disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden select-none transform-gpu bg-gradient-to-br from-primary to-primary/90 text-primary-foreground hover:from-primary/95 hover:to-primary/85 border-2 border-primary/20 hover:border-primary/30 active:shadow-inner hover:scale-[1.02] px-20 py-6 text-lg"
+    },
+    {
+      "id": "el-2",
+      "type": "image",
+      "tagName": "img",
+      "visible": true,
+      "candidateLocators": [],
+      "dataHints": [],
+      "alt": "Banco Santa Cruz",
+      "className": "h-10 object-contain"
+    },
+    {
+      "id": "el-4",
+      "type": "heading",
+      "text": "Más detalles del producto",
+      "tagName": "h1",
+      "visible": true,
+      "nearbyText": "Más detalles del productoPréstamo Personal",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Más detalles del producto",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "prestamo"
+      ],
+      "className": "text-3xl font-bold text-foreground text-center"
+    },
+    {
+      "id": "el-5",
+      "type": "text",
+      "text": "Préstamo Personal",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "Más detalles del productoPréstamo Personal",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Préstamo Personal",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "prestamo"
+      ],
+      "className": "text-base text-muted-foreground text-center mt-2"
+    },
+    {
+      "id": "el-6",
+      "type": "heading",
+      "text": "Préstamo Personal",
+      "tagName": "h3",
+      "visible": true,
+      "nearbyText": "Préstamo Personal¡Financia tus planes sin complicaciones! Accede rápido a financiamiento sin garantía.Monto del préstamo sujeto a evaluación crediticia.Tasa de interés fija o variable, según condicion",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Préstamo Personal",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "monto",
+        "prestamo"
+      ],
+      "className": "text-4xl font-bold text-primary mb-3"
+    },
+    {
+      "id": "el-7",
+      "type": "text",
+      "text": "¡Financia tus planes sin complicaciones! Accede rápido a financiamiento sin garantía.",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "¡Financia tus planes sin complicaciones! Accede rápido a financiamiento sin garantía.Monto del préstamo sujeto a evaluación crediticia.Tasa de interés fija o variable, según condiciones aprobadas.",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "¡Financia tus planes sin complicaciones! Accede rápido a financiamiento sin garantía.",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "monto",
+        "prestamo"
+      ],
+      "className": "text-lg text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-8",
+      "type": "text",
+      "text": "Monto del préstamo sujeto a evaluación crediticia.",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "¡Financia tus planes sin complicaciones! Accede rápido a financiamiento sin garantía.Monto del préstamo sujeto a evaluación crediticia.Tasa de interés fija o variable, según condiciones aprobadas.",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Monto del préstamo sujeto a evaluación crediticia.",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "monto",
+        "prestamo"
+      ],
+      "className": "text-lg text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-9",
+      "type": "text",
+      "text": "Tasa de interés fija o variable, según condiciones aprobadas.",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "¡Financia tus planes sin complicaciones! Accede rápido a financiamiento sin garantía.Monto del préstamo sujeto a evaluación crediticia.Tasa de interés fija o variable, según condiciones aprobadas.",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Tasa de interés fija o variable, según condiciones aprobadas.",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "monto",
+        "prestamo"
+      ],
+      "className": "text-lg text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-10",
+      "type": "heading",
+      "text": "Beneficios",
+      "tagName": "h4",
+      "visible": true,
+      "nearbyText": "BeneficiosCompetitiva tasa de interésHasta 48 meses para pagarEliges la fecha de pago, según tu convenienciaPago automático al préstamo desde tu cuentaSeguro de desempleoPre-Aprobación Inmediata",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Beneficios",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta",
+        "prestamo"
+      ],
+      "className": "text-2xl font-bold text-kiosk-success mb-4"
+    },
+    {
+      "id": "el-11",
+      "type": "text",
+      "text": "Competitiva tasa de interés",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Competitiva tasa de interés",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Competitiva tasa de interés",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-base text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-12",
+      "type": "text",
+      "text": "Hasta 48 meses para pagar",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Hasta 48 meses para pagar",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Hasta 48 meses para pagar",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-base text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-13",
+      "type": "text",
+      "text": "Eliges la fecha de pago, según tu conveniencia",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Eliges la fecha de pago, según tu conveniencia",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Eliges la fecha de pago, según tu conveniencia",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-base text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-14",
+      "type": "text",
+      "text": "Pago automático al préstamo desde tu cuenta",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Pago automático al préstamo desde tu cuenta",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Pago automático al préstamo desde tu cuenta",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta",
+        "prestamo"
+      ],
+      "className": "text-base text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-15",
+      "type": "text",
+      "text": "Seguro de desempleo",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Seguro de desempleo",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Seguro de desempleo",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-base text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-16",
+      "type": "text",
+      "text": "Pre-Aprobación Inmediata",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Pre-Aprobación Inmediata",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Pre-Aprobación Inmediata",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-base text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-17",
+      "type": "heading",
+      "text": "Requisitos:",
+      "tagName": "h4",
+      "visible": true,
+      "nearbyText": "Requisitos:Completar la solicitud de préstamos.Cédula de identidad y electoral del solicitante y del garante (en caso de aplicar).Evidencias de Ingresos del solicitante y del garante.Carta de trabajo",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Requisitos:",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cedula",
+        "prestamo"
+      ],
+      "className": "text-2xl font-bold text-primary mb-4"
+    },
+    {
+      "id": "el-18",
+      "type": "text",
+      "text": "Completar la solicitud de préstamos.",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Completar la solicitud de préstamos.",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Completar la solicitud de préstamos.",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "prestamo"
+      ],
+      "className": "text-base text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-19",
+      "type": "text",
+      "text": "Cédula de identidad y electoral del solicitante y del garante (en caso de aplicar).",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Cédula de identidad y electoral del solicitante y del garante (en caso de aplicar).",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Cédula de identidad y electoral del solicitante y del garante (en caso de aplicar).",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cedula"
+      ],
+      "className": "text-base text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-20",
+      "type": "text",
+      "text": "Evidencias de Ingresos del solicitante y del garante.",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Evidencias de Ingresos del solicitante y del garante.",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Evidencias de Ingresos del solicitante y del garante.",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-base text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-21",
+      "type": "text",
+      "text": "Carta de trabajo certificada por el empleador.",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Carta de trabajo certificada por el empleador.",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Carta de trabajo certificada por el empleador.",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-base text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-22",
+      "type": "text",
+      "text": "Si es profesional independiente o propietario de negocio.",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Si es profesional independiente o propietario de negocio.",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Si es profesional independiente o propietario de negocio.",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-base text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-23",
+      "type": "text",
+      "text": "Copia de los 6 ultimos estados de cuenta y/o tarjeta de crédito.",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Copia de los 6 ultimos estados de cuenta y/o tarjeta de crédito.",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Copia de los 6 ultimos estados de cuenta y/o tarjeta de crédito.",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "cuenta"
+      ],
+      "className": "text-base text-foreground leading-relaxed"
+    },
+    {
+      "id": "el-24",
+      "type": "heading",
+      "text": "Información del Producto",
+      "tagName": "h4",
+      "visible": true,
+      "nearbyText": "Información del ProductoTipo:PréstamosCategoría:Sin GarantíaGrupo:Consumo",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Información del Producto",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "prestamo"
+      ],
+      "className": "text-2xl font-bold text-primary mb-4"
+    },
+    {
+      "id": "el-25",
+      "type": "text",
+      "text": "Tipo:",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Tipo:Préstamos",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Tipo:",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "prestamo"
+      ],
+      "className": "text-base font-semibold text-foreground min-w-[100px]"
+    },
+    {
+      "id": "el-26",
+      "type": "text",
+      "text": "Préstamos",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Tipo:Préstamos",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Préstamos",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [
+        "prestamo"
+      ],
+      "className": "text-base text-foreground"
+    },
+    {
+      "id": "el-27",
+      "type": "text",
+      "text": "Categoría:",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Categoría:Sin Garantía",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Categoría:",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-base font-semibold text-foreground min-w-[100px]"
+    },
+    {
+      "id": "el-28",
+      "type": "text",
+      "text": "Sin Garantía",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Categoría:Sin Garantía",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Sin Garantía",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-base text-foreground"
+    },
+    {
+      "id": "el-29",
+      "type": "text",
+      "text": "Grupo:",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Grupo:Consumo",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Grupo:",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-base font-semibold text-foreground min-w-[100px]"
+    },
+    {
+      "id": "el-30",
+      "type": "text",
+      "text": "Consumo",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Grupo:Consumo",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Consumo",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-base text-foreground"
+    },
+    {
+      "id": "el-32",
+      "type": "text",
+      "text": "Finalizar sesión",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Finalizar sesión",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Finalizar sesión",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "relative z-10 flex items-center justify-center gap-2"
+    },
+    {
+      "id": "el-33",
+      "type": "text",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Finalizar sesión",
+      "candidateLocators": [],
+      "dataHints": [],
+      "className": "absolute inset-0 bg-gradient-to-t from-transparent via-white/5 to-white/10 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+    },
+    {
+      "id": "el-35",
+      "type": "text",
+      "text": "Volver",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Volver",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Volver",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "relative z-10 flex items-center justify-center gap-2"
+    },
+    {
+      "id": "el-36",
+      "type": "text",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Volver",
+      "candidateLocators": [],
+      "dataHints": [],
+      "className": "absolute inset-0 bg-gradient-to-t from-transparent via-white/5 to-white/10 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+    },
+    {
+      "id": "el-38",
+      "type": "text",
+      "text": "Solicitar",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Solicitar",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Solicitar",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "relative z-10 flex items-center justify-center gap-2"
+    },
+    {
+      "id": "el-39",
+      "type": "text",
+      "tagName": "span",
+      "visible": true,
+      "nearbyText": "Solicitar",
+      "candidateLocators": [],
+      "dataHints": [],
+      "className": "absolute inset-0 bg-gradient-to-t from-transparent via-white/5 to-white/10 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+    }
+  ],
+  "summary": {
+    "totalElements": 38,
+    "buttons": 4,
+    "links": 0,
+    "inputs": 0,
+    "selects": 0,
+    "tables": 0,
+    "dialogs": 0,
+    "headings": 5
+  }
+}

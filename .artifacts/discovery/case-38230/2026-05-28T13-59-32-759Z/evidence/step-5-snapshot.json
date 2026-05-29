@@ -1,0 +1,223 @@
+{
+  "version": "1.0",
+  "url": "https://172.27.4.50/balance-inquiry",
+  "title": "Kiosco de Autogestión - Banco Santa Cruz",
+  "capturedAt": "2026-05-28T14:00:12.277Z",
+  "elements": [
+    {
+      "id": "el-3",
+      "type": "button",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "Consulta de balance",
+      "candidateLocators": [],
+      "dataHints": [],
+      "className": "absolute left-0 top-1/2 -translate-y-1/2 p-3 hover:bg-primary/10 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 border-2 border-transparent hover:border-primary/20"
+    },
+    {
+      "id": "el-6",
+      "type": "button",
+      "text": "Depósito a Plazo **** 7348 - Pesos Dominicanos",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "[REDACTED]",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Depósito a Plazo **** 7348 - Pesos Dominicanos",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "group relative bg-white border-2 border-border hover:border-primary rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden min-h-[120px]"
+    },
+    {
+      "id": "el-8",
+      "type": "button",
+      "text": "Depósito a Plazo **** 7668 - Pesos Dominicanos",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "[REDACTED]",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Depósito a Plazo **** 7668 - Pesos Dominicanos",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "group relative bg-white border-2 border-border hover:border-primary rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden min-h-[120px]"
+    },
+    {
+      "id": "el-10",
+      "type": "button",
+      "text": "Depósito a Plazo **** 7742 - Pesos Dominicanos",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "[REDACTED]",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Depósito a Plazo **** 7742 - Pesos Dominicanos",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "group relative bg-white border-2 border-border hover:border-primary rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden min-h-[120px]"
+    },
+    {
+      "id": "el-12",
+      "type": "button",
+      "text": "Depósito a Plazo **** 0342 - Dólares Estadounidenses",
+      "tagName": "button",
+      "inputType": "submit",
+      "visible": true,
+      "nearbyText": "[REDACTED]",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Depósito a Plazo **** 0342 - Dólares Estadounidenses",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "group relative bg-white border-2 border-border hover:border-primary rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden min-h-[120px]"
+    },
+    {
+      "id": "el-2",
+      "type": "image",
+      "tagName": "img",
+      "visible": true,
+      "candidateLocators": [],
+      "dataHints": [],
+      "alt": "Banco Santa Cruz",
+      "className": "h-10 object-contain"
+    },
+    {
+      "id": "el-4",
+      "type": "heading",
+      "text": "Consulta de balance",
+      "tagName": "h1",
+      "visible": true,
+      "nearbyText": "Consulta de balance",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Consulta de balance",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-3xl font-bold text-foreground text-center"
+    },
+    {
+      "id": "el-5",
+      "type": "text",
+      "text": "Seleccione el producto a consultar:",
+      "tagName": "p",
+      "visible": true,
+      "nearbyText": "Seleccione el producto a consultar:",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Seleccione el producto a consultar:",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-xl text-muted-foreground"
+    },
+    {
+      "id": "el-7",
+      "type": "heading",
+      "text": "Depósito a Plazo **** 7348 - Pesos Dominicanos",
+      "tagName": "h3",
+      "visible": true,
+      "nearbyText": "Depósito a Plazo **** 7348 - Pesos Dominicanos",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Depósito a Plazo **** 7348 - Pesos Dominicanos",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-xl font-bold text-foreground group-hover:text-primary transition-colors mb-2"
+    },
+    {
+      "id": "el-9",
+      "type": "heading",
+      "text": "Depósito a Plazo **** 7668 - Pesos Dominicanos",
+      "tagName": "h3",
+      "visible": true,
+      "nearbyText": "Depósito a Plazo **** 7668 - Pesos Dominicanos",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Depósito a Plazo **** 7668 - Pesos Dominicanos",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-xl font-bold text-foreground group-hover:text-primary transition-colors mb-2"
+    },
+    {
+      "id": "el-11",
+      "type": "heading",
+      "text": "Depósito a Plazo **** 7742 - Pesos Dominicanos",
+      "tagName": "h3",
+      "visible": true,
+      "nearbyText": "Depósito a Plazo **** 7742 - Pesos Dominicanos",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Depósito a Plazo **** 7742 - Pesos Dominicanos",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-xl font-bold text-foreground group-hover:text-primary transition-colors mb-2"
+    },
+    {
+      "id": "el-13",
+      "type": "heading",
+      "text": "Depósito a Plazo **** 0342 - Dólares Estadounidenses",
+      "tagName": "h3",
+      "visible": true,
+      "nearbyText": "Depósito a Plazo **** 0342 - Dólares Estadounidenses",
+      "candidateLocators": [
+        {
+          "strategy": "text",
+          "value": "Depósito a Plazo **** 0342 - Dólares Estadounidenses",
+          "exact": false,
+          "confidence": 0.75
+        }
+      ],
+      "dataHints": [],
+      "className": "text-xl font-bold text-foreground group-hover:text-primary transition-colors mb-2"
+    }
+  ],
+  "summary": {
+    "totalElements": 12,
+    "buttons": 5,
+    "links": 0,
+    "inputs": 0,
+    "selects": 0,
+    "tables": 0,
+    "dialogs": 0,
+    "headings": 5
+  }
+}

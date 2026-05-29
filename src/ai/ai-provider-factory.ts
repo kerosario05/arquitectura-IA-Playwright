@@ -75,7 +75,8 @@ export function readAiProviderConfigFromEnv(): AiProviderConfig | undefined {
       command: explicitCommand, // Opcional, se resuelve después
       extraArgs: parseExtraArgs(extraArgsRaw),
       requireJson: parseBool(process.env.AI_REQUIRE_JSON, true),
-      requireJsonSchema: parseBool(process.env.AI_REQUIRE_JSON_SCHEMA, true)
+      requireJsonSchema: parseBool(process.env.AI_REQUIRE_JSON_SCHEMA, true),
+      allowStdoutJsonFallback: parseBool(process.env.AI_ALLOW_STDOUT_JSON_FALLBACK, false)
     };
   }
 

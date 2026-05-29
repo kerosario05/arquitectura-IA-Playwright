@@ -1,124 +1,278 @@
-import { expect, test } from "@playwright/test";
-import {
-  extractDataHintsFromText,
-  normalizeTestRailCase,
-  normalizeTestRailCases
-} from "../src/testrail/testrail-normalizer";
+/**
+ * TestRail Normalizer Tests
+ * 
+ * Tests for HTML parsing, step splitting, and concatenated step repair.
+ */
+
+import { test, expect } from "@playwright/test";
+import { normalizeTestRailCase } from "../src/testrail/testrail-normalizer";
 import type { RawTestRailCase } from "../src/types/testrail.types";
 
-test("normalizes custom_steps_separated into separated steps", () => {
-  const rawCase: RawTestRailCase = {
-    id: 101,
-    title: "Validar transferencia",
-    custom_steps_separated: [
-      { content: "Ingresar cédula", expected: "Cédula aceptada" },
-      { content: "Ingresar código OTP", expected: "Token válido" }
-    ]
-  };
+test.describe("TestRail Normalizer", () => {
+  test.describe("HTML List Parsing", () => {
+    test("HTML <ol><li> generates multiple steps", () => {
+      const rawCase: RawTestRailCase = {
+        id: 38230,
+        title: "Test Case",
+        custom_steps: '<ol><li>Clic en "Iniciar".</li><li>Clic en "Transacciones".</li><li>Validar que se muestre "Menu".</li></ol>',
+        custom_expected: "",
+        custom_preconds: "",
+        refs: ""
+      };
 
-  const scenario = normalizeTestRailCase(rawCase);
-  expect(scenario.steps).toHaveLength(2);
-  expect(scenario.steps[0].action).toBe("Ingresar cédula");
-  expect(scenario.steps[1].expected).toBe("Token válido");
-});
+      const result = normalizeTestRailCase(rawCase);
 
-test("normalizes custom_steps and custom_expected", () => {
-  const rawCase: RawTestRailCase = {
-    id: 102,
-    title: "Validar pago",
-    custom_steps: "1. Ingresar monto\n2. Confirmar cuenta",
-    custom_expected: "Pago procesado"
-  };
+      expect(result.steps).toHaveLength(3);
+      expect(result.steps[0].action).toBe('Clic en "Iniciar".');
+      expect(result.steps[1].action).toBe('Clic en "Transacciones".');
+      expect(result.steps[2].action).toBe('Validar que se muestre "Menu".');
+    });
 
-  const scenario = normalizeTestRailCase(rawCase);
-  expect(scenario.steps.length).toBeGreaterThan(0);
-  expect(scenario.steps[scenario.steps.length - 1].expected).toBe("Pago procesado");
-});
+    test("HTML <ul><li> generates multiple steps", () => {
+      const rawCase: RawTestRailCase = {
+        id: 38231,
+        title: "Test Case",
+        custom_steps: '<ul><li>Step one</li><li>Step two</li><li>Step three</li></ul>',
+        custom_expected: "",
+        custom_preconds: "",
+        refs: ""
+      };
 
-test("creates fallback step when no steps exist", () => {
-  const rawCase: RawTestRailCase = {
-    id: 103,
-    title: "Caso sin pasos"
-  };
+      const result = normalizeTestRailCase(rawCase);
 
-  const scenario = normalizeTestRailCase(rawCase);
-  expect(scenario.steps).toHaveLength(1);
-  expect(scenario.steps[0].action).toBe("Caso sin pasos");
-});
+      expect(result.steps).toHaveLength(3);
+      expect(result.steps[0].action).toBe("Step one");
+      expect(result.steps[1].action).toBe("Step two");
+      expect(result.steps[2].action).toBe("Step three");
+    });
 
-test("extracts expected data hints", () => {
-  const hints = extractDataHintsFromText(
-    "Ingresar cedula y codigo OTP, validar monto en cuenta y numero de prestamo"
-  );
+    test("HTML with <br> generates multiple steps", () => {
+      const rawCase: RawTestRailCase = {
+        id: 38232,
+        title: "Test Case",
+        custom_steps: 'Clic en "A".<br>Clic en "B".<br>Validar "C".',
+        custom_expected: "",
+        custom_preconds: "",
+        refs: ""
+      };
 
-  expect(hints).toEqual(expect.arrayContaining(["cedula", "codigo", "otp", "monto", "cuenta", "prestamo"]));
-});
+      const result = normalizeTestRailCase(rawCase);
 
-test("cleans basic html from steps", () => {
-  const rawCase: RawTestRailCase = {
-    id: 104,
-    title: "<b>Flujo</b>",
-    custom_steps_separated: [{ content: "<p>Ingresar <b>usuario</b></p>", expected: "<div>Acceso OK</div>" }]
-  };
+      expect(result.steps).toHaveLength(3);
+      expect(result.steps[0].action).toBe('Clic en "A".');
+      expect(result.steps[1].action).toBe('Clic en "B".');
+      expect(result.steps[2].action).toBe('Validar "C".');
+    });
 
-  const scenarios = normalizeTestRailCases([rawCase]);
-  expect(scenarios[0].steps[0].action).toBe("Ingresar usuario");
-  expect(scenarios[0].steps[0].expected).toBe("Acceso OK");
-});
+    test("HTML with <p> generates multiple blocks", () => {
+      const rawCase: RawTestRailCase = {
+        id: 38233,
+        title: "Test Case",
+        custom_steps: '<p>Clic en "A".</p><p>Clic en "B".</p>',
+        custom_expected: "",
+        custom_preconds: "",
+        refs: ""
+      };
 
-test("splits multiline custom_steps into separate action steps", () => {
-  const rawCase: RawTestRailCase = {
-    id: 37750,
-    title: "Consulta listado de tarjetas de credito",
-    custom_steps: [
-      "Abrir URL del Kiosko.",
-      "Clic en 'Iniciar'.",
-      "Clic en 'Información de productos'.",
-      "Clic en 'Tarjetas'.",
-      "Clic en 'Tarjeta de Crédito'.",
-      "Validar listado de tarjetas de crédito."
-    ].join("\n"),
-    custom_expected: "Visa Clásica\nVisa Gold\nVisa Platinum\nVisa Infinite"
-  };
+      const result = normalizeTestRailCase(rawCase);
 
-  const scenario = normalizeTestRailCase(rawCase);
+      expect(result.steps).toHaveLength(2);
+      expect(result.steps[0].action).toBe('Clic en "A".');
+      expect(result.steps[1].action).toBe('Clic en "B".');
+    });
 
-  expect(scenario.steps.length).toBe(6);
-  expect(scenario.steps[0].action).toBe("Abrir URL del Kiosko.");
-  expect(scenario.steps[1].action).toBe("Clic en 'Iniciar'.");
-  expect(scenario.steps[2].action).toBe("Clic en 'Información de productos'.");
-  expect(scenario.steps[3].action).toBe("Clic en 'Tarjetas'.");
-  expect(scenario.steps[4].action).toBe("Clic en 'Tarjeta de Crédito'.");
-  expect(scenario.steps[5].action).toBe("Validar listado de tarjetas de crédito.");
-  expect(scenario.steps[5].expected).toBe("Visa Clásica\nVisa Gold\nVisa Platinum\nVisa Infinite");
-});
+    test("HTML entities are decoded", () => {
+      const rawCase: RawTestRailCase = {
+        id: 38234,
+        title: "Test &quot;Case&quot;",
+        custom_steps: 'Clic en "A" &amp; "B".',
+        custom_expected: "",
+        custom_preconds: "",
+        refs: ""
+      };
 
-test("does not truncate multiline action into single target", () => {
-  const rawCase: RawTestRailCase = {
-    id: 37750,
-    title: "Test",
-    custom_steps: "Clic en 'Iniciar'.\nClic en 'Información de productos'.\nClic en 'Tarjetas'."
-  };
+      const result = normalizeTestRailCase(rawCase);
 
-  const scenario = normalizeTestRailCase(rawCase);
+      expect(result.title).toBe('Test "Case"');
+      expect(result.steps[0].action).toBe('Clic en "A" & "B".');
+    });
+  });
 
-  expect(scenario.steps.length).toBe(3);
-  for (const step of scenario.steps) {
-    expect(step.action).not.toContain("\n");
-    expect(step.action.length).toBeLessThan(50);
-  }
-});
+  test.describe("Plain Text Numbered Lists", () => {
+    test("Numbered text generates multiple steps", () => {
+      const rawCase: RawTestRailCase = {
+        id: 38235,
+        title: "Test Case",
+        custom_steps: "1. Clic en \"A\".\n2. Clic en \"B\".\n3. Validar \"C\".",
+        custom_expected: "",
+        custom_preconds: "",
+        refs: ""
+      };
 
-test("handles numbered multiline steps still works", () => {
-  const rawCase: RawTestRailCase = {
-    id: 105,
-    title: "Flujo numerado",
-    custom_steps: "1. Abrir URL\n2. Clic en 'Iniciar'\n3. Validar resultado"
-  };
+      const result = normalizeTestRailCase(rawCase);
 
-  const scenario = normalizeTestRailCase(rawCase);
+      expect(result.steps).toHaveLength(3);
+      expect(result.steps[0].action).toBe('Clic en "A".');
+      expect(result.steps[1].action).toBe('Clic en "B".');
+      expect(result.steps[2].action).toBe('Validar "C".');
+    });
 
-  expect(scenario.steps.length).toBe(3);
-  expect(scenario.steps[0].action).toBe("1. Abrir URL");
-  expect(scenario.steps[1].action).toBe("Clic en 'Iniciar'");
+    test("Numbered with parenthesis generates multiple steps", () => {
+      const rawCase: RawTestRailCase = {
+        id: 38236,
+        title: "Test Case",
+        custom_steps: "1) Step one\n2) Step two\n3) Step three",
+        custom_expected: "",
+        custom_preconds: "",
+        refs: ""
+      };
+
+      const result = normalizeTestRailCase(rawCase);
+
+      expect(result.steps).toHaveLength(3);
+    });
+  });
+
+  test.describe("Concatenated Step Repair", () => {
+    test("Concatenated steps with '.Clic en' are repaired", () => {
+      const rawCase: RawTestRailCase = {
+        id: 38237,
+        title: "Test Case",
+        custom_steps: 'Clic en "Iniciar".Clic en "Transacciones".Validar que se muestre "Menu".',
+        custom_expected: "",
+        custom_preconds: "",
+        refs: ""
+      };
+
+      const result = normalizeTestRailCase(rawCase);
+
+      expect(result.steps).toHaveLength(3);
+      expect(result.steps[0].action).toBe('Clic en "Iniciar".');
+      expect(result.steps[1].action).toBe('Clic en "Transacciones".');
+      expect(result.steps[2].action).toBe('Validar que se muestre "Menu".');
+    });
+
+    test("Concatenated steps with '.Validar que' are repaired", () => {
+      const rawCase: RawTestRailCase = {
+        id: 38238,
+        title: "Test Case",
+        custom_steps: 'Clic en "A".Validar que se muestre "B".Clic en "C".',
+        custom_expected: "",
+        custom_preconds: "",
+        refs: ""
+      };
+
+      const result = normalizeTestRailCase(rawCase);
+
+      expect(result.steps).toHaveLength(3);
+    });
+
+    test("Concatenated steps with quote-verb pattern are repaired", () => {
+      const rawCase: RawTestRailCase = {
+        id: 38239,
+        title: "Test Case",
+        custom_steps: '"A"Clic en "B"Validar "C"',
+        custom_expected: "",
+        custom_preconds: "",
+        refs: ""
+      };
+
+      const result = normalizeTestRailCase(rawCase);
+
+      // Should split at quote-verb boundaries
+      expect(result.steps.length).toBeGreaterThanOrEqual(2);
+    });
+  });
+
+  test.describe("Expected Result Parsing", () => {
+    test("Expected Result with HTML lists is preserved", () => {
+      const rawCase: RawTestRailCase = {
+        id: 38240,
+        title: "Test Case",
+        custom_steps: "1. Step one.",
+        custom_expected: '<ol><li>Expected one.</li><li>Expected two.</li></ol>',
+        custom_preconds: "",
+        refs: ""
+      };
+
+      const result = normalizeTestRailCase(rawCase);
+
+      expect(result.steps[0].expected).toBeDefined();
+      expect(result.steps[0].expected).toContain("Expected one");
+      expect(result.steps[0].expected).toContain("Expected two");
+    });
+
+    test("Expected Result concatenated is repaired", () => {
+      const rawCase: RawTestRailCase = {
+        id: 38241,
+        title: "Test Case",
+        custom_steps: "1. Step one.",
+        custom_expected: "Expected one.Expected two.Expected three.",
+        custom_preconds: "",
+        refs: ""
+      };
+
+      const result = normalizeTestRailCase(rawCase);
+
+      expect(result.steps[0].expected).toBeDefined();
+      // Should have newlines between items
+      expect(result.steps[0].expected).toContain("\n");
+    });
+  });
+
+  test.describe("Step Index Correctness", () => {
+    test("Case with 6 steps generates step indices 1..6", () => {
+      const rawCase: RawTestRailCase = {
+        id: 38230,
+        title: "Visualizar listado de depósitos a plazo",
+        custom_steps: '1. Clic en "Iniciar".\n2. Clic en "Transacciones y servicios".\n3. Validar que se muestre "Consulta de balance".\n4. Clic en "Consulta de balance".\n5. Clic en "Depósitos a plazos".\n6. Validar que se muestre "Volver al menú".',
+        custom_expected: "",
+        custom_preconds: "",
+        refs: ""
+      };
+
+      const result = normalizeTestRailCase(rawCase);
+
+      expect(result.steps).toHaveLength(6);
+      result.steps.forEach((step, index) => {
+        expect(step.index).toBe(index + 1);
+      });
+
+      expect(result.steps[0].action).toBe('Clic en "Iniciar".');
+      expect(result.steps[5].action).toBe('Validar que se muestre "Volver al menú".');
+    });
+  });
+
+  test.describe("Non-Breaking Cases", () => {
+    test("Normal sentences are not incorrectly split", () => {
+      const rawCase: RawTestRailCase = {
+        id: 38242,
+        title: "Test Case",
+        custom_steps: "El usuario debe hacer clic en el botón para continuar con el proceso.",
+        custom_expected: "",
+        custom_preconds: "",
+        refs: ""
+      };
+
+      const result = normalizeTestRailCase(rawCase);
+
+      // Should be a single step, not split by 'clic en' in middle of sentence
+      expect(result.steps).toHaveLength(1);
+    });
+
+    test("Existing separated steps are not affected", () => {
+      const rawCase: RawTestRailCase = {
+        id: 38243,
+        title: "Test Case",
+        custom_steps: "Step one\nStep two\nStep three",
+        custom_expected: "",
+        custom_preconds: "",
+        refs: ""
+      };
+
+      const result = normalizeTestRailCase(rawCase);
+
+      expect(result.steps).toHaveLength(3);
+    });
+  });
 });

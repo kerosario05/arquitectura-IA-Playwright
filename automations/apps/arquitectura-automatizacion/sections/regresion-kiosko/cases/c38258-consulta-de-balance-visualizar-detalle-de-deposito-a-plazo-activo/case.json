@@ -1,0 +1,10 @@
+{
+  "id": "c38258-consulta-de-balance-visualizar-detalle-de-deposito-a-plazo-activo",
+  "externalId": "C38258",
+  "caseId": 38258,
+  "title": "Consulta de balance - Visualizar detalle de depósito a plazo activo",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-05-29T00:44:31.032Z"
+}

@@ -1,0 +1,95 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C38125",
+    "caseId": 38125,
+    "title": "Validar categorías principales visibles en Información de productos"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Clic en \"Iniciar\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en \"Información de productos\".",
+      "target": {
+        "strategy": "product_condition",
+        "value": "Información de productos",
+        "exact": false
+      },
+      "locatorStrategy": "product_condition"
+    },
+    {
+      "index": 5,
+      "action": "assertText",
+      "description": "Assert: Tarjetas",
+      "target": {
+        "strategy": "text",
+        "value": "Tarjetas",
+        "exact": false
+      },
+      "expected": "Tarjetas"
+    },
+    {
+      "index": 6,
+      "action": "assertText",
+      "description": "Assert: Depósitos a plazo",
+      "target": {
+        "strategy": "text",
+        "value": "Depósitos a plazo",
+        "exact": false
+      },
+      "expected": "Depósitos a plazo"
+    },
+    {
+      "index": 7,
+      "action": "assertText",
+      "description": "Assert: Cuentas",
+      "target": {
+        "strategy": "text",
+        "value": "Cuentas",
+        "exact": false
+      },
+      "expected": "Cuentas"
+    },
+    {
+      "index": 8,
+      "action": "assertText",
+      "description": "Assert: Préstamos",
+      "target": {
+        "strategy": "text",
+        "value": "Préstamos",
+        "exact": false
+      },
+      "expected": "Préstamos"
+    }
+  ],
+  "notes": [
+    "Discovery partial: 6/8 navigations/assertions satisfied."
+  ],
+  "createdAt": "2026-05-28T00:43:15.475Z"
+}

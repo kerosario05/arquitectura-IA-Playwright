@@ -68,6 +68,8 @@ export type TestScenario = {
   references?: string;
   steps: TestScenarioStep[];
   raw?: RawTestRailCase;
+  sectionId?: number;
+  sectionName?: string;
 };
 
 export type TestRailCaseFetchResult = {

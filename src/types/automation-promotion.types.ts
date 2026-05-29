@@ -45,7 +45,8 @@ export type POMPromotionStatus =
   | "needs_flow"
   | "page_object_candidate_created"
   | "blocked_missing_pom"
-  | "needs_manual_review";
+  | "needs_manual_review"
+  | "needs_auth_flow_in_spec";
 
 export type SpecVerificationStatus = "passed" | "failed" | "skipped" | "not_run";
 

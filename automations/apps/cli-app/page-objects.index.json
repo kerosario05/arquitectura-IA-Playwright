@@ -25,10 +25,36 @@
       "status": "active",
       "sourcePlanIds": [],
       "caseIds": [],
-      "createdAt": "2026-05-24T16:56:45.743Z",
-      "updatedAt": "2026-05-24T16:56:45.743Z"
+      "createdAt": "2026-05-28T16:19:25.652Z",
+      "updatedAt": "2026-05-28T16:19:25.652Z"
+    },
+    {
+      "id": "po_framework_operationsmenupage",
+      "className": "OperationsMenuPage",
+      "filePath": "automations/apps/cli-app/pages/operationsmenu.page.ts",
+      "screenSignature": "screen:cli-app-operations_menu",
+      "methods": [
+        {
+          "name": "openModule",
+          "intent": "open_module",
+          "parameters": [
+            "moduleName"
+          ],
+          "available": true,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        }
+      ],
+      "confidence": 1,
+      "status": "active",
+      "sourcePlanIds": [],
+      "caseIds": [],
+      "createdAt": "2026-05-28T17:36:56.764Z",
+      "updatedAt": "2026-05-28T17:36:56.764Z"
     }
   ],
   "componentCandidates": [],
-  "updatedAt": "2026-05-25T21:38:30.767Z"
+  "updatedAt": "2026-05-29T02:59:13.781Z"
 }

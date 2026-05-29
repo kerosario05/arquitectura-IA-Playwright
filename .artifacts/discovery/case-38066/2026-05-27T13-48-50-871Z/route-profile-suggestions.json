@@ -1,0 +1,71 @@
+[
+  {
+    "appSlug": "arquitectura-automatizacion",
+    "from": "entry",
+    "to": "Iniciar",
+    "relation": "child_route",
+    "source": "successful_transition",
+    "confidence": 0.8999999999999999,
+    "evidence": {
+      "beforeUrl": "https://172.27.4.50/",
+      "afterUrl": "https://172.27.4.50/success",
+      "beforeSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38066\\2026-05-27T13-48-50-871Z\\evidence\\step-1-before.json",
+      "afterSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38066\\2026-05-27T13-48-50-871Z\\evidence\\step-1-after.json",
+      "candidateId": "el-5",
+      "candidateText": "Iniciar",
+      "locatorSummary": "role:button"
+    },
+    "safety": {
+      "clickable": true,
+      "visible": true,
+      "sensitive": false,
+      "submitLike": false,
+      "riskyAction": false
+    },
+    "status": "pending",
+    "createdAt": "2026-05-27T13:49:07.437Z"
+  },
+  {
+    "appSlug": "arquitectura-automatizacion",
+    "from": "Iniciar",
+    "to": "Información de productos",
+    "relation": "child_route",
+    "source": "successful_transition",
+    "confidence": 0.9999999999999999,
+    "evidence": {
+      "beforeUrl": "https://172.27.4.50/success",
+      "afterUrl": "https://172.27.4.50/product-catalog",
+      "beforeSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38066\\2026-05-27T13-48-50-871Z\\evidence\\step-2-before.json",
+      "afterSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38066\\2026-05-27T13-48-50-871Z\\evidence\\step-2-after.json",
+      "candidateId": "el-6",
+      "candidateText": "Información de productosExplora nuestros productos bancarios",
+      "locatorSummary": "product_condition"
+    },
+    "safety": {
+      "clickable": true,
+      "visible": true,
+      "sensitive": false,
+      "submitLike": false,
+      "riskyAction": false
+    },
+    "status": "auto_approved",
+    "createdAt": "2026-05-27T13:49:09.200Z"
+  },
+  {
+    "appSlug": "arquitectura-automatizacion",
+    "from": "la primera tarjeta visible del listado de productos",
+    "to": "Tarjeta de Crédito",
+    "relation": "intermediate_step",
+    "source": "route_completion",
+    "confidence": 0.85,
+    "safety": {
+      "clickable": true,
+      "visible": true,
+      "sensitive": false,
+      "submitLike": false,
+      "riskyAction": false
+    },
+    "status": "auto_approved",
+    "createdAt": "2026-05-27T13:49:13.363Z"
+  }
+]

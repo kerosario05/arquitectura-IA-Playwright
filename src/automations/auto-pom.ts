@@ -84,6 +84,60 @@ function buildAutoPomMethodStub(methodName: string, intent: string): string | un
       "  }"
     ].join("\n");
   }
+  if (intent === "select_visible_item_by_ordinal" || methodName === "selectVisibleItemByOrdinal") {
+    return [
+      "  async selectVisibleItemByOrdinal(ordinal: 'first' | 'second' | 'third', domainTerm?: string): Promise<void> {",
+      "    await waitForListReadiness(this.page, { timeoutMs: 10000, pollMs: 500, minCards: 1 });",
+      "    const ordinalNum = ordinal === 'first' ? 0 : ordinal === 'second' ? 1 : ordinal === 'third' ? 2 : -1;",
+      "    if (ordinalNum < 0) throw new Error('Unsupported ordinal: ' + ordinal);",
+      "    const domainSelector = domainTerm ? `[data-testid*=\"${domainTerm}\"], [class*=\"${domainTerm}\"], :has-text(\"${domainTerm}\")` : ':visible';",
+      "    const items = this.page.locator(`article${domainSelector}, [role=\"listitem\"]${domainSelector}, [class*=\"card\"]${domainSelector}, [class*=\"item\"]${domainSelector}`);",
+      "    const count = await items.count();",
+      "    if (count === 0) throw new Error('No visible items found for ordinal selection.');",
+      "    if (ordinalNum >= count) throw new Error(`Ordinal ${ordinal} (${ordinalNum + 1}) exceeds available items (${count}).`);",
+      "    const item = items.nth(ordinalNum);",
+      "    const actionable = item.locator('a:visible, button:visible, [role=\"button\"]:visible').first();",
+      "    if (await actionable.count() > 0) { await actionable.click({ timeout: 10000 }); return; }",
+      "    await item.click({ timeout: 10000 });",
+      "  }"
+    ].join("\n");
+  }
+  if (intent === "expect_primary_action_visible" || methodName === "expectPrimaryActionVisible") {
+    return [
+      "  async expectPrimaryActionVisible(actionName: string): Promise<void> {",
+      "    const actionKeywords = new RegExp(actionName, 'i');",
+      "    const button = this.page.getByRole('button', { name: actionKeywords }).first();",
+      "    const link = this.page.getByRole('link', { name: actionKeywords }).first();",
+      "    const locator = button.or(link);",
+      "    await locator.waitFor({ state: 'visible', timeout: 10000 });",
+      "    await expect(locator).toBeVisible();",
+      "  }"
+    ].join("\n");
+  }
+  if (intent === "expect_primary_action_enabled" || methodName === "expectPrimaryActionEnabled") {
+    return [
+      "  async expectPrimaryActionEnabled(actionName: string): Promise<void> {",
+      "    const actionKeywords = new RegExp(actionName, 'i');",
+      "    const button = this.page.getByRole('button', { name: actionKeywords }).first();",
+      "    const link = this.page.getByRole('link', { name: actionKeywords }).first();",
+      "    const locator = button.or(link);",
+      "    await locator.waitFor({ state: 'visible', timeout: 10000 });",
+      "    await expect(locator).toBeEnabled();",
+      "  }"
+    ].join("\n");
+  }
+  if (intent === "expect_primary_action_disabled" || methodName === "expectPrimaryActionDisabled") {
+    return [
+      "  async expectPrimaryActionDisabled(actionName: string): Promise<void> {",
+      "    const actionKeywords = new RegExp(actionName, 'i');",
+      "    const button = this.page.getByRole('button', { name: actionKeywords }).first();",
+      "    const link = this.page.getByRole('link', { name: actionKeywords }).first();",
+      "    const locator = button.or(link);",
+      "    await locator.waitFor({ state: 'visible', timeout: 10000 });",
+      "    await expect(locator).toBeDisabled();",
+      "  }"
+    ].join("\n");
+  }
   return undefined;
 }
 
@@ -365,7 +419,8 @@ export function validatePomSpec(
     const isSupportImport =
       importPath.includes("/src/config/") ||
       importPath.includes("/src/data") ||
-      importPath.includes("/src/automations/app-profile");
+      importPath.includes("/src/automations/app-profile") ||
+      importPath.includes("/src/automations/runtime/");
 
     if (!isSupportImport && !importPath.endsWith(".page") && !importPath.endsWith(".page.ts") && !importPath.includes(".flow")) {
       errors.push(`Import '${className}' does not point to a .page file: ${importPath}`);

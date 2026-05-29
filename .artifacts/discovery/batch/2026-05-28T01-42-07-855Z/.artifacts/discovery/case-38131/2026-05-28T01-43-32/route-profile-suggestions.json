@@ -1,0 +1,132 @@
+[
+  {
+    "appSlug": "kiosko",
+    "from": "entry",
+    "to": "Iniciar",
+    "relation": "child_route",
+    "source": "successful_transition",
+    "confidence": 0.8999999999999999,
+    "evidence": {
+      "beforeUrl": "https://172.27.4.50/",
+      "afterUrl": "https://172.27.4.50/success",
+      "beforeSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-28T01-42-07-855Z\\cases\\case-38131\\evidence\\step-1-before.json",
+      "afterSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-28T01-42-07-855Z\\cases\\case-38131\\evidence\\step-1-after.json",
+      "candidateId": "el-5",
+      "candidateText": "Iniciar",
+      "locatorSummary": "role:button"
+    },
+    "safety": {
+      "clickable": true,
+      "visible": true,
+      "sensitive": false,
+      "submitLike": false,
+      "riskyAction": false
+    },
+    "status": "pending",
+    "createdAt": "2026-05-28T01:43:25.506Z"
+  },
+  {
+    "appSlug": "kiosko",
+    "from": "Iniciar",
+    "to": "Información de productos",
+    "relation": "child_route",
+    "source": "successful_transition",
+    "confidence": 0.9999999999999999,
+    "evidence": {
+      "beforeUrl": "https://172.27.4.50/success",
+      "afterUrl": "https://172.27.4.50/product-catalog",
+      "beforeSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-28T01-42-07-855Z\\cases\\case-38131\\evidence\\step-2-before.json",
+      "afterSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-28T01-42-07-855Z\\cases\\case-38131\\evidence\\step-2-after.json",
+      "candidateId": "el-6",
+      "candidateText": "Información de productosExplora nuestros productos bancarios",
+      "locatorSummary": "product_condition"
+    },
+    "safety": {
+      "clickable": true,
+      "visible": true,
+      "sensitive": false,
+      "submitLike": false,
+      "riskyAction": false
+    },
+    "status": "auto_approved",
+    "createdAt": "2026-05-28T01:43:27.164Z"
+  },
+  {
+    "appSlug": "kiosko",
+    "from": "Información de productos",
+    "to": "Préstamos",
+    "relation": "child_route",
+    "source": "successful_transition",
+    "confidence": 0.9999999999999999,
+    "evidence": {
+      "beforeUrl": "https://172.27.4.50/product-catalog",
+      "afterUrl": "https://172.27.4.50/product-subcategory?category=loans",
+      "beforeSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-28T01-42-07-855Z\\cases\\case-38131\\evidence\\step-3-before.json",
+      "afterSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-28T01-42-07-855Z\\cases\\case-38131\\evidence\\step-3-after.json",
+      "candidateId": "el-10",
+      "candidateText": "Préstamos",
+      "locatorSummary": "product_condition"
+    },
+    "safety": {
+      "clickable": true,
+      "visible": true,
+      "sensitive": false,
+      "submitLike": false,
+      "riskyAction": false
+    },
+    "status": "auto_approved",
+    "createdAt": "2026-05-28T01:43:28.753Z"
+  },
+  {
+    "appSlug": "kiosko",
+    "from": "Préstamos",
+    "to": "Préstamos personales",
+    "relation": "child_route",
+    "source": "successful_transition",
+    "confidence": 0.8999999999999999,
+    "evidence": {
+      "beforeUrl": "https://172.27.4.50/product-subcategory?category=loans",
+      "afterUrl": "https://172.27.4.50/product-extended?product=prestamo-personal",
+      "beforeSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-28T01-42-07-855Z\\cases\\case-38131\\evidence\\step-4-before.json",
+      "afterSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-28T01-42-07-855Z\\cases\\case-38131\\evidence\\step-4-after.json",
+      "candidateId": "el-6",
+      "candidateText": "Préstamo Personal",
+      "locatorSummary": "product_condition"
+    },
+    "safety": {
+      "clickable": true,
+      "visible": true,
+      "sensitive": false,
+      "submitLike": false,
+      "riskyAction": false
+    },
+    "status": "pending",
+    "createdAt": "2026-05-28T01:43:30.434Z"
+  },
+  {
+    "appSlug": "kiosko",
+    "from": "Préstamos personales",
+    "to": "el primer préstamo visible del listado",
+    "relation": "child_route",
+    "source": "successful_transition",
+    "confidence": 0.8999999999999999,
+    "evidence": {
+      "beforeUrl": "https://172.27.4.50/product-extended?product=prestamo-personal",
+      "afterUrl": "https://172.27.4.50/product-extended?product=prestamo-personal",
+      "beforeSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-28T01-42-07-855Z\\cases\\case-38131\\evidence\\step-5-before.json",
+      "afterSnapshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-28T01-42-07-855Z\\cases\\case-38131\\evidence\\step-5-after.json",
+      "candidateId": "el-6",
+      "candidateText": "Préstamo Personal",
+      "locatorSummary": "ordinal_selection"
+    },
+    "safety": {
+      "clickable": true,
+      "visible": true,
+      "sensitive": false,
+      "submitLike": false,
+      "riskyAction": false
+    },
+    "status": "pending",
+    "createdAt": "2026-05-28T01:43:32.113Z"
+  }
+]
