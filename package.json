@@ -15,6 +15,7 @@
     "install:browsers": "playwright install",
     "typecheck": "tsc --noEmit",
     "data:inspect": "tsx src/cli/data-inspect.ts",
+    "testrail:projects": "tsx src/cli/testrail-projects.ts",
     "testrail:inspect": "tsx src/cli/testrail-inspect.ts",
     "jira:inspect": "tsx src/cli/jira-inspect.ts",
     "jira:projects": "tsx src/cli/jira-projects.ts",

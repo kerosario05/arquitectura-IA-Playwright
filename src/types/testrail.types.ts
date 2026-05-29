@@ -1,5 +1,37 @@
 export type TestRailCaseId = number;
 
+export type TestRailProject = {
+  id: number;
+  name: string;
+  announcement?: string;
+  is_completed: boolean;
+  suite_mode: 1 | 2 | 3; // 1=single, 2=single+baselines, 3=multiple suites
+  url?: string;
+  [key: string]: unknown;
+};
+
+export type TestRailSuite = {
+  id: number;
+  name: string;
+  description?: string;
+  project_id: number;
+  is_master?: boolean;
+  is_baseline?: boolean;
+  is_completed?: boolean;
+  url?: string;
+  [key: string]: unknown;
+};
+
+export type TestRailSection = {
+  id: number;
+  name: string;
+  parent_id: number | null;
+  depth: number;
+  display_order: number;
+  suite_id: number;
+  [key: string]: unknown;
+};
+
 export type RawTestRailCase = {
   id: number;
   title: string;

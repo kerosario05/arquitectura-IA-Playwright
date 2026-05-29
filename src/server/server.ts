@@ -4,6 +4,7 @@ import { healthRouter } from "./routes/health";
 import { jiraRouter } from "./routes/jira";
 import { testrailRouter } from "./routes/testrail";
 import { runsRouter } from "./routes/runs";
+import { scenariosRouter } from "./routes/scenarios";
 
 const PORT = Number(process.env.API_PORT || "3001");
 const HOST = process.env.API_HOST || "0.0.0.0";
@@ -30,6 +31,7 @@ app.use(healthRouter);
 app.use("/api/jira", jiraRouter);
 app.use("/api/testrail", testrailRouter);
 app.use("/api/runs", runsRouter);
+app.use("/api/scenarios", scenariosRouter);
 
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   const message = err instanceof Error ? err.message : String(err);
@@ -52,5 +54,7 @@ app.listen(PORT, HOST, () => {
   console.log(`  GET  /api/runs`);
   console.log(`  GET  /api/runs/:jobId`);
   console.log(`  GET  /api/runs/:jobId/logs  (SSE)`);
-  console.log(`  DEL  /api/runs/:jobId\n`);
+  console.log(`  DEL  /api/runs/:jobId`);
+  console.log(`  GET  /api/scenarios/preview?projectKey=AA&sprintId=42&status=...`);
+  console.log(`  POST /api/scenarios/preview  { projectKey, sprintId|activeSprint, status }\n`);
 });

@@ -23,6 +23,59 @@ testrailRouter.get("/status", async (_req, res, next) => {
   }
 });
 
+testrailRouter.get("/projects", async (req, res, next) => {
+  try {
+    const tr = client();
+    const withCounts = req.query["counts"] === "true";
+    const projects = await tr.getProjects();
+
+    const enriched = await Promise.all(
+      projects.map(async (project) => {
+        try {
+          const suites = await tr.getSuites(String(project.id));
+
+          if (!withCounts) {
+            return { ...project, suites };
+          }
+
+          const suitesWithCounts = await Promise.all(
+            suites.map(async (suite) => {
+              const { count, hasMore } = await tr.getCaseCount(String(project.id), String(suite.id));
+              return { ...suite, caseCount: count, caseCountApproximate: hasMore };
+            })
+          );
+          const totalCaseCount = suitesWithCounts.reduce((sum, s) => sum + s.caseCount, 0);
+          return { ...project, suites: suitesWithCounts, totalCaseCount };
+        } catch {
+          return { ...project, suites: [] };
+        }
+      })
+    );
+
+    res.json({ projects: enriched });
+  } catch (err) {
+    next(err);
+  }
+});
+
+testrailRouter.get("/projects/:projectId/suites", async (req, res, next) => {
+  try {
+    const suites = await client().getSuites(req.params.projectId);
+    res.json({ suites });
+  } catch (err) {
+    next(err);
+  }
+});
+
+testrailRouter.get("/projects/:projectId/suites/:suiteId/sections", async (req, res, next) => {
+  try {
+    const sections = await client().getSections(req.params.projectId, req.params.suiteId);
+    res.json({ sections });
+  } catch (err) {
+    next(err);
+  }
+});
+
 testrailRouter.get("/runs", async (_req, res, next) => {
   try {
     const projectId = config.integrations.testRail?.projectId;

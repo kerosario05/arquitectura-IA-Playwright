@@ -4,7 +4,10 @@ import type {
   AddResultForCaseInput,
   CreateRunInput,
   RawTestRailCase,
+  TestRailProject,
   TestRailRun,
+  TestRailSection,
+  TestRailSuite,
   UpdateCaseInput
 } from "../types/testrail.types";
 
@@ -146,6 +149,34 @@ export class TestRailClient {
     const payload = await this.requestJson<unknown[] | Record<string, unknown>>(endpoint, "POST", body);
     const entries = Array.isArray(payload) ? payload : (payload as Record<string, unknown>).results;
     return { added: Array.isArray(entries) ? entries.length : 0 };
+  }
+
+  async getProjects(): Promise<TestRailProject[]> {
+    const payload = await this.requestJson<TestRailProject[] | { projects?: TestRailProject[] }>("get_projects");
+    return Array.isArray(payload) ? payload : (payload.projects ?? []);
+  }
+
+  async getSuites(projectId: string): Promise<TestRailSuite[]> {
+    const payload = await this.requestJson<TestRailSuite[] | { suites?: TestRailSuite[] }>(`get_suites/${projectId}`);
+    return Array.isArray(payload) ? payload : (payload.suites ?? []);
+  }
+
+  async getCaseCount(projectId: string, suiteId?: string): Promise<{ count: number; hasMore: boolean }> {
+    const params = new URLSearchParams({ limit: "250" });
+    if (suiteId) params.set("suite_id", suiteId);
+    try {
+      const payload = await this.requestJson<RawTestRailCase[] | CasesPagePayload>(`get_cases/${projectId}&${params.toString()}`);
+      if (Array.isArray(payload)) return { count: payload.length, hasMore: false };
+      return { count: (payload.cases ?? []).length, hasMore: !!(payload._links?.next) };
+    } catch {
+      return { count: 0, hasMore: false };
+    }
+  }
+
+  async getSections(projectId: string, suiteId?: string): Promise<TestRailSection[]> {
+    const params = suiteId ? `&suite_id=${suiteId}` : "";
+    const payload = await this.requestJson<TestRailSection[] | { sections?: TestRailSection[] }>(`get_sections/${projectId}${params}`);
+    return Array.isArray(payload) ? payload : (payload.sections ?? []);
   }
 
   async getRuns(projectId: string, suiteId?: string): Promise<TestRailRun[]> {
