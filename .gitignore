@@ -1,23 +1,49 @@
+# Dependencies
 node_modules/
+
+# Environment / secrets
 .env
+.env.*
+!.env.example
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Runtime / discovery / generated execution artifacts
+.artifacts/
 evidence/*
 !evidence/.gitkeep
 test-results/
 playwright-report/
 playwright/.auth/
-dist/
+
+# Logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# Temporary test/debug artifacts (consolidated under .artifacts/tmp/)
-.artifacts/tmp/
-
-# Legacy temp folders in root (to be removed)
+# Temporary test/debug artifacts
 .tmp-*/
 .tmp*/
 codex-test.txt
 codex-runner-test.txt
 
-# Runtime / discovery artifacts
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+
 .artifacts/
 test-results/
 playwright-report/
+blob-report/
+evidence/
+*.log
+*.tmp
