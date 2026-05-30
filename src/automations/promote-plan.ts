@@ -76,6 +76,48 @@ interface PromoteInput {
   sectionName?: string;
 }
 
+const PROMOTION_IO_RETRIES = 3;
+const PROMOTION_IO_RETRY_DELAY_MS = 50;
+
+function isTransientFsError(error: unknown): boolean {
+  const code = error && typeof error === "object" && "code" in error
+    ? (error as NodeJS.ErrnoException).code
+    : undefined;
+  return code === "EBUSY" || code === "EPERM" || code === "EACCES" || code === "EMFILE" || code === "ENFILE";
+}
+
+async function delay(ms: number): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function writeFileAtomicWithRetry(filePath: string, content: string): Promise<void> {
+  const dir = path.dirname(filePath);
+  await fs.mkdir(dir, { recursive: true });
+
+  for (let attempt = 0; attempt <= PROMOTION_IO_RETRIES; attempt += 1) {
+    const tempPath = path.join(dir, `${path.basename(filePath)}.${process.pid}.${Date.now()}.${attempt}.tmp`);
+    try {
+      await fs.writeFile(tempPath, content, "utf-8");
+      await fs.rename(tempPath, filePath).catch(async (error) => {
+        if (isTransientFsError(error) || (error && typeof error === "object" && "code" in error && (error as NodeJS.ErrnoException).code === "EEXIST")) {
+          await fs.rm(filePath, { force: true }).catch(() => undefined);
+          await fs.rename(tempPath, filePath);
+          return;
+        }
+        throw error;
+      });
+      return;
+    } catch (error) {
+      await fs.rm(tempPath, { force: true }).catch(() => undefined);
+      if (isTransientFsError(error) && attempt < PROMOTION_IO_RETRIES) {
+        await delay(PROMOTION_IO_RETRY_DELAY_MS * (attempt + 1));
+        continue;
+      }
+      throw error;
+    }
+  }
+}
+
 function assertPromotable(status: string, allowDraft: boolean): void {
   if (status === "needs_data" || status === "needs_discovery" || status === "unsupported") {
     throw new Error(
@@ -749,9 +791,9 @@ export async function promoteExecutionPlan(
   await ensureDirectories(appPaths);
 
   const planContent = JSON.stringify(plan, null, 2);
-  await fs.writeFile(appPaths.planPath, planContent, "utf-8");
+  await writeFileAtomicWithRetry(appPaths.planPath, planContent);
   if (appPaths.caseConfigPath) {
-    await fs.writeFile(
+    await writeFileAtomicWithRetry(
       appPaths.caseConfigPath,
       JSON.stringify({
         id: automationId,
@@ -762,8 +804,7 @@ export async function promoteExecutionPlan(
         appSlug: appProfile.appSlug,
         appConfigPath: appPaths.configPath,
         createdAt: new Date().toISOString()
-      }, null, 2),
-      "utf-8"
+      }, null, 2)
     );
   }
 
@@ -838,7 +879,7 @@ export async function promoteExecutionPlan(
       pageObjectRegistry: registry,
       authFlowOptions
     });
-    await fs.writeFile(appPaths.specPath, specResult.specContent, "utf-8");
+    await writeFileAtomicWithRetry(appPaths.specPath, specResult.specContent);
     pomStatus = specResult.pomStatus;
 
     const requirePomRuntime = input.requirePomRuntime === true || process.env.PROMOTION_REQUIRE_POM_RUNTIME === "true";
@@ -934,10 +975,10 @@ export async function promoteExecutionPlan(
       pomStatus = autoPomResult.pomStatus;
 
       if (autoPomResult.diagnostics.finalPomStatus === "promoted") {
-        await fs.writeFile(appPaths.specPath, autoPomResult.specContent, "utf-8");
+        await writeFileAtomicWithRetry(appPaths.specPath, autoPomResult.specContent);
         console.log(`[promote-plan] Auto-POM succeeded, spec regenerated and promoted.`);
       } else {
-        await fs.writeFile(appPaths.specPath, autoPomResult.specContent, "utf-8");
+        await writeFileAtomicWithRetry(appPaths.specPath, autoPomResult.specContent);
         console.log(`[promote-plan] Auto-POM completed but promotion still blocked: ${autoPomResult.diagnostics.finalPomStatus}`);
       }
 
@@ -961,7 +1002,7 @@ export async function promoteExecutionPlan(
     }
   } else {
     const specContent = generateSpecFromPlan(plan, automationId, appProfile, appPaths);
-    await fs.writeFile(appPaths.specPath, specContent, "utf-8");
+    await writeFileAtomicWithRetry(appPaths.specPath, specContent);
     pomStatus = inlineDebugMode ? "inline_debug_only" : undefined;
     strategyDiagnostics = {
       requestedStrategy: "inline",
@@ -980,7 +1021,7 @@ export async function promoteExecutionPlan(
   }
 
   if (appPaths.caseDir && strategyDiagnostics) {
-    await fs.writeFile(path.join(appPaths.caseDir, "promotion-diagnostics.json"), JSON.stringify(strategyDiagnostics, null, 2), "utf-8");
+    await writeFileAtomicWithRetry(path.join(appPaths.caseDir, "promotion-diagnostics.json"), JSON.stringify(strategyDiagnostics, null, 2));
   }
 
   const requirePomRuntimeContract = input.requirePomRuntime === true || process.env.PROMOTION_REQUIRE_POM_RUNTIME === "true";
@@ -1093,10 +1134,10 @@ export async function promoteExecutionPlan(
   await saveAutomationIndex(updatedAppIndex, appIndexPath);
 
   if (appPaths.caseAutomationPath) {
-    await fs.writeFile(appPaths.caseAutomationPath, JSON.stringify(appIndexEntry, null, 2), "utf-8");
+    await writeFileAtomicWithRetry(appPaths.caseAutomationPath, JSON.stringify(appIndexEntry, null, 2));
   }
   if (appPaths.caseDir && strategyDiagnostics) {
-    await fs.writeFile(path.join(appPaths.caseDir, "promotion-diagnostics.json"), JSON.stringify(strategyDiagnostics, null, 2), "utf-8");
+    await writeFileAtomicWithRetry(path.join(appPaths.caseDir, "promotion-diagnostics.json"), JSON.stringify(strategyDiagnostics, null, 2));
   }
 
   // --- Update global index too ---

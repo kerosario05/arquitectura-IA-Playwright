@@ -11,14 +11,14 @@
   "source": "discovery",
   "appProfile": "arquitectura-automatizacion",
   "baseUrlHash": "1423ba294517",
-  "createdAt": "2026-05-29T01:28:22.649Z",
-  "updatedAt": "2026-05-29T01:28:22.649Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-29T01-27-44-631Z\\cases\\case-38132\\discovered-plans.pending.json",
+  "createdAt": "2026-05-30T16:14:22.026Z",
+  "updatedAt": "2026-05-30T16:14:22.026Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-30T16-12-49-028Z\\cases\\case-38132\\discovered-plans.pending.json",
   "pomStatus": "promoted",
   "inlineDebugMode": false,
   "specVerificationStatus": "not_run",
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-29T01-27-44-631Z\\cases\\case-38132",
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-30T16-12-49-028Z\\cases\\case-38132",
     "pomDiagnostics": {
       "status": "promoted",
       "inlineFallbackUsed": false,

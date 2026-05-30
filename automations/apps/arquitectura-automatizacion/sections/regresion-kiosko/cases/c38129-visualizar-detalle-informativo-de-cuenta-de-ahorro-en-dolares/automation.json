@@ -1,0 +1,60 @@
+{
+  "id": "c38129-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-dolares",
+  "externalId": "C38129",
+  "caseId": 38129,
+  "title": "Visualizar detalle informativo de cuenta de ahorro en Dólares",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38129-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-dolares\\plan.json",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38129-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-dolares\\case.spec.ts",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "arquitectura-automatizacion",
+  "baseUrlHash": "1423ba294517",
+  "createdAt": "2026-05-30T02:32:11.332Z",
+  "updatedAt": "2026-05-30T02:32:11.332Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-30T02-31-46-603Z\\cases\\case-38129\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "not_run",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-30T02-31-46-603Z\\cases\\case-38129",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [],
+      "availablePageObjects": [
+        "ProductListPage",
+        "ProductDetailPage",
+        "FormPage",
+        "HomePage",
+        "LoginPage",
+        "CategoryPage",
+        "ProductInformationPage",
+        "OperationsMenuPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38129-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-dolares\\plan.json",
+    "previousStatus": "active"
+  }
+}

@@ -3,13 +3,13 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 test.describe('Promoted Spec Timeout Configuration', () => {
-  test('promotedSpecTimeoutMs default is 90000 in env config', () => {
+  test('promotedSpecTimeoutMs default is 120000 in env config', () => {
     // Verify the default value is set in env.ts
     const envPath = path.join(__dirname, '../src/config/env.ts');
     const content = fs.readFileSync(envPath, 'utf-8');
     
     expect(content).toContain('promotedSpecTimeoutMs');
-    expect(content).toContain('90000');
+    expect(content).toContain('120000');
   });
 
   test('promotedSpecTimeoutMs is in execution config type', () => {
@@ -25,15 +25,15 @@ test.describe('Generated Spec Timeout Insertion', () => {
     const specGeneratorPath = path.join(__dirname, '../src/automations/spec-generator-pom.ts');
     const content = fs.readFileSync(specGeneratorPath, 'utf-8');
     
-    const expectedPattern = 'test.setTimeout(Number(process.env.PROMOTED_SPEC_TIMEOUT_MS ?? 90000))';
+    const expectedPattern = 'test.setTimeout(Number(process.env.PROMOTED_SPEC_TIMEOUT_MS ?? 120000))';
     expect(content).toContain(expectedPattern);
   });
 
-  test('timeout default is 90000 in spec-generator', () => {
+  test('timeout default is 120000 in spec-generator', () => {
     const specGeneratorPath = path.join(__dirname, '../src/automations/spec-generator-pom.ts');
     const content = fs.readFileSync(specGeneratorPath, 'utf-8');
     
-    expect(content).toContain('90000');
+    expect(content).toContain('120000');
   });
 });
 
@@ -78,11 +78,11 @@ test.describe('test:promoted CLI Wrapper', () => {
     expect(content).toContain('--parallel');
   });
 
-  test('CLI wrapper default timeout is 90000', () => {
+  test('CLI wrapper default timeout is 120000', () => {
     const cliPath = path.join(__dirname, '../src/cli/test-promoted.ts');
     const content = fs.readFileSync(cliPath, 'utf-8');
     
-    expect(content).toContain('timeout: 90000');
+    expect(content).toContain('timeout: 120000');
   });
 
   test('CLI wrapper default workers is 1 (serial)', () => {
@@ -105,6 +105,40 @@ test.describe('test:promoted CLI Wrapper', () => {
     
     expect(content).toContain('Usage:');
     expect(content).toContain('--help');
+  });
+
+  test('CLI wrapper uses shell:false to prevent pipe interpretation', () => {
+    const cliPath = path.join(__dirname, '../src/cli/test-promoted.ts');
+    const content = fs.readFileSync(cliPath, 'utf-8');
+    
+    expect(content).toContain('shell: false');
+    expect(content).toContain('process.execPath');
+  });
+
+  test('CLI wrapper spawns node directly with cli.js to avoid shell', () => {
+    const cliPath = path.join(__dirname, '../src/cli/test-promoted.ts');
+    const content = fs.readFileSync(cliPath, 'utf-8');
+    
+    expect(content).toContain('cli.js');
+    expect(content).toContain('spawnArgs');
+  });
+});
+
+test.describe('CLI Grep Pattern Handling', () => {
+  test('grep pattern with pipes is preserved as single argument', () => {
+    const cliPath = path.join(__dirname, '../src/cli/test-promoted.ts');
+    const content = fs.readFileSync(cliPath, 'utf-8');
+    
+    // Verify grep is pushed as single argument with --grep= prefix
+    expect(content).toMatch(/playwrightArgs\.push\(`--grep=/);
+  });
+
+  test('--case-id generates grep pattern correctly', () => {
+    const cliPath = path.join(__dirname, '../src/cli/test-promoted.ts');
+    const content = fs.readFileSync(cliPath, 'utf-8');
+    
+    // Verify case-id generates grep with C prefix
+    expect(content).toMatch(/--grep=C\$\{options\.caseId\}/);
   });
 });
 

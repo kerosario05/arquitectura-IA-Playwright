@@ -17,6 +17,8 @@ import { buildAppAutomationPaths } from "./app-profile";
 import type { AppProfile } from "./app-profile";
 
 const REGISTRY_VERSION = "1.0";
+const REGISTRY_READ_RETRIES = 3;
+const REGISTRY_RETRY_DELAY_MS = 50;
 
 function createEmptyRegistry(appSlug: string): PageObjectRegistry {
   return {
@@ -28,6 +30,74 @@ function createEmptyRegistry(appSlug: string): PageObjectRegistry {
   };
 }
 
+function isMissingFileError(error: unknown): boolean {
+  return Boolean(error && typeof error === "object" && "code" in error && (error as NodeJS.ErrnoException).code === "ENOENT");
+}
+
+function isTransientFsError(error: unknown): boolean {
+  const code = error && typeof error === "object" && "code" in error
+    ? (error as NodeJS.ErrnoException).code
+    : undefined;
+  return code === "EBUSY" || code === "EPERM" || code === "EACCES" || code === "EMFILE" || code === "ENFILE";
+}
+
+async function delay(ms: number): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function readRegistryFileWithRetry(registryPath: string): Promise<string | undefined> {
+  for (let attempt = 0; attempt <= REGISTRY_READ_RETRIES; attempt++) {
+    try {
+      return await fs.readFile(registryPath, "utf-8");
+    } catch (error) {
+      if (isMissingFileError(error)) {
+        return undefined;
+      }
+      if (isTransientFsError(error) && attempt < REGISTRY_READ_RETRIES) {
+        await delay(REGISTRY_RETRY_DELAY_MS * (attempt + 1));
+        continue;
+      }
+      throw error;
+    }
+  }
+  return undefined;
+}
+
+function parseRegistryJson(raw: string, registryPath: string): PageObjectRegistry {
+  try {
+    return JSON.parse(raw) as PageObjectRegistry;
+  } catch (error) {
+    throw new Error(
+      `Invalid JSON in page object registry at "${registryPath}". ` +
+      `The file exists but could not be parsed. ` +
+      `Cause: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+}
+
+async function writeFileAtomic(filePath: string, content: string): Promise<void> {
+  const dir = path.dirname(filePath);
+  const tempPath = path.join(
+    dir,
+    `${path.basename(filePath)}.${process.pid}.${Date.now()}.tmp`
+  );
+
+  await fs.mkdir(dir, { recursive: true });
+  await fs.writeFile(tempPath, content, "utf-8");
+
+  try {
+    await fs.rename(tempPath, filePath);
+  } catch (error) {
+    if (isTransientFsError(error) || (error && typeof error === "object" && "code" in error && (error as NodeJS.ErrnoException).code === "EEXIST")) {
+      await fs.rm(filePath, { force: true });
+      await fs.rename(tempPath, filePath);
+    } else {
+      await fs.rm(tempPath, { force: true }).catch(() => undefined);
+      throw error;
+    }
+  }
+}
+
 export function getPageObjectRegistryPath(appProfile: AppProfile, outputRoot?: string): string {
   const paths = buildAppAutomationPaths(appProfile, undefined, outputRoot);
   return paths.pageObjectsIndexPath;
@@ -35,19 +105,18 @@ export function getPageObjectRegistryPath(appProfile: AppProfile, outputRoot?: s
 
 export async function loadPageObjectRegistry(appProfile: AppProfile, outputRoot?: string): Promise<PageObjectRegistry> {
   const registryPath = getPageObjectRegistryPath(appProfile, outputRoot);
-  try {
-    const raw = await fs.readFile(registryPath, "utf-8");
-    return JSON.parse(raw) as PageObjectRegistry;
-  } catch {
+  await fs.mkdir(path.dirname(registryPath), { recursive: true });
+  const raw = await readRegistryFileWithRetry(registryPath);
+  if (raw === undefined) {
     return createEmptyRegistry(appProfile.appSlug);
   }
+  return parseRegistryJson(raw, registryPath);
 }
 
 export async function savePageObjectRegistry(registry: PageObjectRegistry, appProfile: AppProfile, outputRoot?: string): Promise<void> {
   const registryPath = getPageObjectRegistryPath(appProfile, outputRoot);
   registry.updatedAt = new Date().toISOString();
-  await fs.mkdir(path.dirname(registryPath), { recursive: true });
-  await fs.writeFile(registryPath, JSON.stringify(registry, null, 2), "utf-8");
+  await writeFileAtomic(registryPath, JSON.stringify(registry, null, 2));
 }
 
 export async function ensurePageObjectRegistry(appProfile: AppProfile, outputRoot?: string): Promise<PageObjectRegistry> {

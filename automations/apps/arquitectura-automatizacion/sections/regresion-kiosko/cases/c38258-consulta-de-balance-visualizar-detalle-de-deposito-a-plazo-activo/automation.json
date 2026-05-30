@@ -11,14 +11,14 @@
   "source": "discovery",
   "appProfile": "arquitectura-automatizacion",
   "baseUrlHash": "1423ba294517",
-  "createdAt": "2026-05-29T00:44:31.050Z",
-  "updatedAt": "2026-05-29T00:44:31.050Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-29T00-39-24-089Z\\cases\\case-38258\\discovered-plans.pending.json",
+  "createdAt": "2026-05-30T16:16:38.818Z",
+  "updatedAt": "2026-05-30T16:16:38.818Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-30T16-12-49-028Z\\cases\\case-38258\\discovered-plans.pending.json",
   "pomStatus": "promoted",
   "inlineDebugMode": false,
   "specVerificationStatus": "not_run",
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-29T00-39-24-089Z\\cases\\case-38258",
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-30T16-12-49-028Z\\cases\\case-38258",
     "pomDiagnostics": {
       "status": "promoted",
       "inlineFallbackUsed": false,
@@ -52,6 +52,9 @@
       "autoPomCreatedMethods": [],
       "fallbackUsed": false,
       "requirePomRuntime": false
-    }
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38258-consulta-de-balance-visualizar-detalle-de-deposito-a-plazo-activo\\plan.json",
+    "previousStatus": "active"
   }
 }

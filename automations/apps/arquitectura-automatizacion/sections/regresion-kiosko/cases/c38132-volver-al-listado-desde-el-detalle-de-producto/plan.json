@@ -57,6 +57,37 @@
     {
       "index": 6,
       "action": "click",
+      "description": "Depósitos a plazo en Pesos",
+      "target": {
+        "strategy": "text",
+        "value": "Depósitos a plazo en Pesos",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "el primer depósito visible del listado",
+          "resolvedTargetName": "Depósitos a plazo en Pesos",
+          "resolvedCandidateId": "el-6",
+          "aiAssisted": false,
+          "repairType": "route_completion"
+        }
+      },
+      "locatorStrategy": "ordinal_selection",
+      "recoveryMetadata": {
+        "recoveredBy": "route_completion",
+        "ordinalSelectionDiagnostics": {
+          "selectionPatternDetected": true,
+          "ordinal": "first",
+          "selectedCandidateText": "Depósitos a plazo en Pesos",
+          "selectedCandidateId": "el-6"
+        },
+        "selectedCandidateId": "el-6",
+        "selectedCandidateText": "Depósitos a plazo en Pesos",
+        "transitionDetected": true,
+        "executedAction": "click"
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
       "description": "Clic en \"Volver al listado de productos\".",
       "target": {
         "strategy": "product_condition",
@@ -70,5 +101,5 @@
     "Discovery completed successfully. All targets and concrete assertions passed.",
     "Recovered 1 transient assertion failure(s) - see step recovery metadata for details."
   ],
-  "createdAt": "2026-05-29T01:28:22.605Z"
+  "createdAt": "2026-05-30T16:14:21.923Z"
 }

@@ -11,14 +11,14 @@
   "source": "discovery",
   "appProfile": "arquitectura-automatizacion",
   "baseUrlHash": "1423ba294517",
-  "createdAt": "2026-05-29T00:39:42.906Z",
-  "updatedAt": "2026-05-29T00:39:42.906Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-29T00-39-24-089Z\\cases\\case-38125\\discovered-plans.pending.json",
+  "createdAt": "2026-05-30T16:13:08.571Z",
+  "updatedAt": "2026-05-30T16:13:08.571Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-30T16-12-49-028Z\\cases\\case-38125\\discovered-plans.pending.json",
   "pomStatus": "promoted",
   "inlineDebugMode": false,
   "specVerificationStatus": "not_run",
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-29T00-39-24-089Z\\cases\\case-38125",
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-05-30T16-12-49-028Z\\cases\\case-38125",
     "pomDiagnostics": {
       "status": "promoted",
       "inlineFallbackUsed": false,
@@ -52,6 +52,9 @@
       "autoPomCreatedMethods": [],
       "fallbackUsed": false,
       "requirePomRuntime": false
-    }
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\regresion-kiosko\\cases\\c38125-validar-categorias-principales-visibles-en-informacion-de-productos\\plan.json",
+    "previousStatus": "active"
   }
 }

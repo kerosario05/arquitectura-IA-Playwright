@@ -234,3 +234,35 @@ test("fillPromotedField uses options.value as source of truth", async ({ page })
   const value = await page.locator("#email").inputValue();
   expect(value).toBe("test@example.com");
 });
+
+test("return_to_list recovers from home reset using replay metadata", async ({ page }) => {
+  const runtime = createPromotedSpecRuntime(page, { enabled: false, retryEnabled: false });
+  await page.setContent(`<h1>¡Hola!</h1><button>Iniciar</button>`);
+
+  const toDetail = async () => {
+    await page.setContent(`
+      <h1>Detalle del producto</h1>
+      <button id="volver" onclick="document.body.innerHTML='<h1>Consulta de balance</h1><button>Depósitos a plazos</button><button>Depósito a Plazo 1</button>'">Volver</button>
+    `);
+  };
+
+  await runtime.clickPromotedTarget({
+    stepIndex: 7,
+    target: "Volver al listado de productos",
+    actionIntent: "return_to_list",
+    previousStepReplays: [
+      { stepIndex: 3, actionIntent: "start_session", target: "Iniciar", replay: async () => {} },
+      { stepIndex: 4, actionIntent: "open_product_information", target: "Información de productos", replay: async () => {} },
+      { stepIndex: 5, actionIntent: "select_product", target: "Depósitos a plazo", replay: async () => {} },
+      { stepIndex: 6, actionIntent: "select_visible_item_by_ordinal", target: "el primer depósito visible del listado", replay: toDetail }
+    ],
+    lastSelectionStep: { stepIndex: 6, selectedTarget: "el primer depósito visible del listado" },
+    lastSelectionReplay: toDetail,
+    expectedOwnerPage: "ProductDetailPage",
+    action: async () => {
+      await page.getByRole("button", { name: "Volver", exact: true }).click();
+    }
+  });
+
+  await expect(page.getByRole("heading", { name: /consulta de balance/i })).toBeVisible();
+});

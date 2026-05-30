@@ -302,14 +302,21 @@ export async function runAutoPomPipeline(input: AutoPomInput): Promise<AutoPomRe
   console.log(`[auto-pom] Regenerating POM spec...`);
   const registry = await loadPageObjectRegistry(input.appProfile, input.outputRoot);
 
-  const hasAuthConsumedSteps = input.plan.steps.some(s => {
+  const authFlowMetadata = input.plan.metadata?.authFlowRequired
+    ? {
+        alias: input.plan.metadata.authFlowAlias || "defaultClient",
+        landing: input.plan.metadata.authFlowLanding || "transactions_menu",
+        insertionAfterStepIndex: input.plan.metadata.authFlowInsertionAfterStepIndex
+      }
+    : undefined;
+  const hasAuthConsumedSteps = !authFlowMetadata && input.plan.steps.some(s => {
     const desc = (s.description ?? "").toLowerCase();
     return desc.startsWith("authflow handled") || desc.includes("step consumed by authflow");
   });
-  const authFlowOptions = hasAuthConsumedSteps ? {
+  const authFlowOptions = authFlowMetadata ?? (hasAuthConsumedSteps ? {
     alias: "defaultClient",
     landing: "transactions_menu"
-  } : undefined;
+  } : undefined);
 
   const specResult = await generateSpecFromPlanWithPolicy({
     plan: input.plan,

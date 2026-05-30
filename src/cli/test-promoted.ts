@@ -12,7 +12,7 @@ Options:
   --headed            Run tests in headed mode (visible browser)
   --parallel          Run tests in parallel (default: serial with workers=1)
   --workers <n>       Number of workers (default: 1 for serial execution)
-  --timeout <ms>      Test timeout in milliseconds (default: 90000)
+  --timeout <ms>      Test timeout in milliseconds (default: 120000)
   --project <name>    Playwright project name (chromium, firefox, webkit)
   --grep <pattern>    Filter tests by name pattern
   --help              Show this help message
@@ -34,7 +34,7 @@ Examples:
   npm run test:promoted -- --parallel
 
 Environment Variables:
-  PROMOTED_SPEC_TIMEOUT_MS    Override default timeout (default: 90000)
+  PROMOTED_SPEC_TIMEOUT_MS    Override default timeout (default: 120000)
   BROWSER                     Browser to use (default: chromium)
   HEADLESS                    Run in headless mode (default: false when using --headed)
 `);
@@ -59,7 +59,7 @@ function parseArgs(args: string[]): {
     headed: false,
     parallel: false,
     workers: 1,
-    timeout: 90000,
+    timeout: 120000,
     project: undefined as string | undefined,
     grep: undefined as string | undefined,
     help: false
@@ -196,22 +196,29 @@ function main(): void {
     console.log(`[test:promoted] Using project: ${options.project}`);
   }
 
+  // Determine platform early for proper arg handling
+  const isWindows = process.platform === "win32";
+
   // Add grep filter
   if (options.grep) {
     playwrightArgs.push(`--grep=${options.grep}`);
     console.log(`[test:promoted] Filtering by: ${options.grep}`);
   }
 
-  // Build full command
-  const cliPath = path.resolve(process.cwd(), "node_modules/.bin/playwright");
-  const command = process.platform === "win32" ? `${cliPath}.cmd` : cliPath;
-
+  // Build full command - spawn node directly with Playwright CLI to avoid shell interpretation
+  const playwrightCliPath = path.resolve(process.cwd(), "node_modules/@playwright/test/cli.js");
+  
+  // Log the command for debugging (showing as it would appear in shell)
   console.log(`[test:promoted] Executing: playwright test ${playwrightArgs.join(" ")}\n`);
 
-  // Spawn Playwright process
-  const child = spawn(command, ["test", ...playwrightArgs], {
+  // Spawn node directly with Playwright CLI JS file
+  // This avoids any shell interpretation of | characters
+  const spawnCommand = process.execPath; // node executable
+  const spawnArgs = [playwrightCliPath, "test", ...playwrightArgs];
+  
+  const child = spawn(spawnCommand, spawnArgs, {
     stdio: "inherit",
-    shell: process.platform === "win32"
+    shell: false // Critical: prevents any shell interpretation of special chars
   });
 
   child.on("close", (code) => {

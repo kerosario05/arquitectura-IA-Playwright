@@ -691,6 +691,36 @@ async function captureDiagnosticsIfNeeded(
   return { ...diagnostics, screenshotPath };
 }
 
+async function shouldUseSafeForceClick(
+  page: Page,
+  locator: any,
+  options: { actionIntent: string; target: string },
+  error: unknown
+): Promise<boolean> {
+  if (options.actionIntent !== "open_module") return false;
+  if (!/consulta de balance/i.test(options.target)) return false;
+
+  const message = error instanceof Error ? error.message : String(error);
+  const isInterceptError =
+    /intercepts pointer events/i.test(message) ||
+    /another element would receive the click/i.test(message) ||
+    /element is not receiving pointer events/i.test(message);
+
+  if (!isInterceptError) return false;
+
+  const overlayVisible = await page
+    .locator('text=/cargando productos|por favor espere/i')
+    .first()
+    .isVisible()
+    .catch(() => false);
+
+  if (!overlayVisible) return false;
+
+  const targetVisible = await locator.isVisible().catch(() => false);
+  const targetEnabled = await locator.isEnabled().catch(() => false);
+  return targetVisible && targetEnabled;
+}
+
 /**
  * Validate screen context before executing context-dependent actions
  * Prevents executing deep functional actions from wrong screen (Home/Login/Menu)
@@ -710,7 +740,7 @@ async function validateScreenContextForAction(
     "submit_form", "confirm_action", "fill_form_field",
     "select_first_visible_item", "select_first_visible_product",
     "select_first_visible_card", "select_first_visible_row",
-    "select_visible_item_by_ordinal", "open_module"
+    "select_visible_item_by_ordinal", "open_module", "return_to_list"
   ]);
   
   if (!CONTEXT_DEPENDENT_ACTIONS.has(options.actionIntent)) {
@@ -737,6 +767,21 @@ async function validateScreenContextForAction(
     visibleHeadings.some(h => /identificaci|identification|auth|login/i.test(h));
   
   const isOnWrongScreen = isOnHomeScreen || isOnLoginScreen || isOnMenuScreen || isOnAuthGate;
+
+  if (options.actionIntent === "return_to_list") {
+    const hasBackControl =
+      visibleButtons.some(b => /volver|atras|atrás|back/i.test(b)) ||
+      visibleHeadings.some(h => /detalle|detail/i.test(h));
+    if (!hasBackControl && options.lastSelectionStep) {
+      throw new Error(
+        `detail_reentry_required: Expected detail page before return_to_list. ` +
+        `Target "${options.target}" not available on current screen. ` +
+        `currentUrl="${currentUrl}" visibleButtons=[${visibleButtons.join(", ")}] ` +
+        `visibleHeadings=[${visibleHeadings.join(", ")}] stepIndex=${options.stepIndex} ` +
+        `lastSelectionStep=step=${options.lastSelectionStep.stepIndex} target="${options.lastSelectionStep.selectedTarget}" `
+      );
+    }
+  }
   
   if (isOnWrongScreen) {
     // Check if target exists on current page
@@ -834,7 +879,8 @@ async function detectHomeResetOrInactivity(page: Page): Promise<{
   );
   
   // Check for home URL with only "Iniciar" button (fresh session state)
-  const isOnHomeWithIniciar = (currentUrl === "/" || currentUrl === "") && 
+  const isRootLikeUrl = currentUrl === "/" || currentUrl === "" || /https?:\/\/[^/]+\/?$/.test(currentUrl);
+  const isOnHomeWithIniciar = isRootLikeUrl && 
     visibleButtons.some(b => /iniciar|login|ingresar/i.test(b)) &&
     visibleButtons.length <= 3; // Home should have few buttons
   
@@ -851,18 +897,21 @@ async function detectHomeResetOrInactivity(page: Page): Promise<{
 
 /**
  * Check if an action intent is safe to replay
+ * return_to_list is NOT safe to replay - it consumes context (detail page), doesn't produce it
  */
 function isSafeActionToReplay(actionIntent: string): boolean {
   const SAFE_ACTIONS = new Set([
     "start_session", "open_home", "open_module", "open_product_information",
     "select_category", "select_product", "select_visible_item_by_ordinal",
     "select_first_visible_item", "select_first_visible_product", "select_first_visible_card",
-    "navigate", "return_to_list"
+    "navigate"
+    // NOTE: return_to_list is NOT safe - it requires being on detail page (consumes context)
   ]);
   
   const UNSAFE_ACTIONS = new Set([
     "submit_form", "confirm_action", "payment", "transfer", "send",
-    "accept_terms", "delete", "fill_form_field", "click_primary_action"
+    "accept_terms", "delete", "fill_form_field", "click_primary_action",
+    "return_to_list"  // Explicitly unsafe - requires detail page context
   ]);
   
   if (UNSAFE_ACTIONS.has(actionIntent)) return false;
@@ -1030,10 +1079,14 @@ export class PromotedSpecRuntime {
     let retryAttempted = false;
     
     const replaySteps = options.previousStepReplays || options.previousSteps;
+    const isInitialHomeEntryAction =
+      options.actionIntent === "start_session" ||
+      options.actionIntent === "open_home" ||
+      /^(iniciar|inicio|home|start)$/i.test(options.target.trim());
     
     // STEP 1: Detect home reset/inactivity BEFORE any target resolution
     const homeReset = await detectHomeResetOrInactivity(this.page);
-    if (homeReset.detected) {
+    if (homeReset.detected && !isInitialHomeEntryAction) {
       console.log(`[runtime:session_reset] detected: reason="${homeReset.reason}" currentUrl="${homeReset.currentUrl}" stepIndex=${options.stepIndex}`);
       
       if (replaySteps && replaySteps.length > 0) {
@@ -1191,9 +1244,12 @@ export class PromotedSpecRuntime {
     // Step 1: Try native runtime click with resolved locator
     nativeClickAttempted = true;
     const containerSelector = this.activeContainer?.selector;
+    let resolved:
+      | Awaited<ReturnType<typeof resolvePromotedClickableLocator>>
+      | undefined;
     
     try {
-      const resolved = await resolvePromotedClickableLocator(this.page, options.target, {
+      resolved = await resolvePromotedClickableLocator(this.page, options.target, {
         containerLocator: containerSelector,
         timeoutMs: this.config.actionTimeoutMs,
         actionKind: options.actionIntent as "submit" | "link" | "button" | "action",
@@ -1220,7 +1276,33 @@ export class PromotedSpecRuntime {
         effectDetected = true;
       }
     } catch (error) {
-      nativeClickError = error instanceof Error ? error.message : String(error);
+      if (typeof resolved !== "undefined" && resolved?.locator) {
+        const canSafeForceClick = await shouldUseSafeForceClick(this.page, resolved.locator, options, error);
+        if (canSafeForceClick) {
+          try {
+            await withTimeout(
+              resolved.locator.click({ timeout: this.config.actionTimeoutMs, force: true }),
+              this.config.actionTimeoutMs,
+              "native safe force click"
+            );
+            nativeClickSucceeded = true;
+            clickPath = "native_runtime";
+            fallbackUsed = resolved.scope === "container" ? "active_container" : "page";
+            matchedLocatorStrategy = `${resolved.strategy}:safe_force_click`;
+            await this.postActionStability(previousUrl, expectedEffect);
+            if (expectedEffect === "modal_or_form_or_navigation" || expectedEffect === "ui_change") {
+              await this.refreshActiveContainer();
+            }
+            effectDetected = true;
+          } catch (forceError) {
+            nativeClickError = forceError instanceof Error ? forceError.message : String(forceError);
+          }
+        } else {
+          nativeClickError = error instanceof Error ? error.message : String(error);
+        }
+      } else {
+        nativeClickError = error instanceof Error ? error.message : String(error);
+      }
       // Continue to callback fallback
     }
 
@@ -1296,14 +1378,17 @@ export class PromotedSpecRuntime {
       if (homeResetFromDiagnostics.detected) {
         console.log(`[runtime:session_reset] detected from diagnostics before throw: reason="${homeResetFromDiagnostics.reason}" currentUrl="${homeResetFromDiagnostics.currentUrl}"`);
         
-        if (options.previousSteps && options.previousSteps.length > 0) {
-          console.log(`[runtime:session_reset] attempting replay from diagnostics: steps=${options.previousSteps.length}`);
-          const replayResult = await this.safeReplayContext(options.previousSteps, options.stepIndex);
+        if (replaySteps && replaySteps.length > 0) {
+          console.log(`[runtime:session_reset] attempting replay from diagnostics: steps=${replaySteps.length}`);
+          const replayResult = await this.safeReplayContext(replaySteps, options.stepIndex);
           
           if (replayResult.success) {
             console.log(`[runtime:session_reset] replay succeeded, retrying target="${options.target}"`);
             // Retry the original action after successful replay
             try {
+              if (options.actionIntent === "return_to_list" && options.lastSelectionReplay) {
+                await options.lastSelectionReplay();
+              }
               await options.action();
               await this.waitForPromotedUiStable(options.stepIndex, options.target);
               return; // Success after replay
@@ -1320,7 +1405,7 @@ export class PromotedSpecRuntime {
           `session_reset_unrecoverable: Home reset detected but recovery failed. ` +
           `reason="${homeResetFromDiagnostics.reason}" currentUrl="${homeResetFromDiagnostics.currentUrl}" ` +
           `stepIndex=${options.stepIndex} target="${options.target}" actionIntent="${options.actionIntent}" ` +
-          `previousStepsCount=${options.previousSteps?.length || 0} ` +
+          `previousStepsCount=${replaySteps?.length || 0} ` +
           `suggestedFix="Regenerate spec with previousSteps metadata or increase session timeout"`
         );
       }

@@ -16,3 +16,8 @@ dist/
 .tmp*/
 codex-test.txt
 codex-runner-test.txt
+
+# Runtime / discovery artifacts
+.artifacts/
+test-results/
+playwright-report/

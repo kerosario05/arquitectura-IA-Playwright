@@ -1,2 +1,0 @@
-Return JSON only.
-Respond with {"decision":"no_safe_action","reason":"connection test"}

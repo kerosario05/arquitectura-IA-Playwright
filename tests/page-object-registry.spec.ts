@@ -1,5 +1,10 @@
 import { test, expect } from "@playwright/test";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import {
+  loadPageObjectRegistry,
+  savePageObjectRegistry,
   findPageObjectByScreenSignature,
   findMethodForIntent,
   findReusableMethod,
@@ -211,4 +216,97 @@ test("registerComponentCandidate does not duplicate", () => {
     name: "DatePicker", className: "DatePickerComponent", componentSignature: "sig:datepicker", confidence: 0.8
   });
   expect(r2.created).toBe(false);
+});
+
+test("loadPageObjectRegistry initializes empty registry when file is missing", async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "po-reg-missing-"));
+  const registry = await loadPageObjectRegistry({ appSlug: "isolated-app" } as any, tmpDir);
+  expect(registry.appSlug).toBe("isolated-app");
+  expect(registry.pageObjects).toHaveLength(0);
+});
+
+test("savePageObjectRegistry writes valid JSON atomically", async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "po-reg-atomic-"));
+  const registry = emptyReg();
+  registry.appSlug = "atomic-app";
+  registerPageObjectCandidate(registry, {
+    name: "HomePage",
+    className: "HomePage",
+    screenSignature: "sig:home",
+    confidence: 0.9,
+    sourcePlanId: "plan_1"
+  });
+
+  await savePageObjectRegistry(registry, { appSlug: "atomic-app" } as any, tmpDir);
+  const registryPath = path.join(tmpDir, "automations", "apps", "atomic-app", "page-objects.index.json");
+  const raw = await fs.readFile(registryPath, "utf-8");
+  expect(() => JSON.parse(raw)).not.toThrow();
+});
+
+test("loadPageObjectRegistry retries transient read errors", async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "po-reg-retry-"));
+  const registry = emptyReg();
+  registry.appSlug = "retry-app";
+  await savePageObjectRegistry(registry, { appSlug: "retry-app" } as any, tmpDir);
+
+  const originalReadFile = (fs as any).readFile;
+  let attempts = 0;
+  (fs as any).readFile = async (...args: any[]) => {
+    attempts += 1;
+    if (attempts === 1) {
+      const error = new Error("busy") as NodeJS.ErrnoException;
+      error.code = "EBUSY";
+      throw error;
+    }
+    return originalReadFile.apply(fs, args);
+  };
+
+  try {
+    const loaded = await loadPageObjectRegistry({ appSlug: "retry-app" } as any, tmpDir);
+    expect(loaded.appSlug).toBe("retry-app");
+    expect(attempts).toBeGreaterThan(1);
+  } finally {
+    (fs as any).readFile = originalReadFile;
+  }
+});
+
+test("loadPageObjectRegistry reports invalid JSON clearly", async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "po-reg-invalid-"));
+  const registryPath = path.join(tmpDir, "automations", "apps", "broken-app", "page-objects.index.json");
+  await fs.mkdir(path.dirname(registryPath), { recursive: true });
+  await fs.writeFile(registryPath, "{ invalid json", "utf-8");
+
+  await expect(
+    loadPageObjectRegistry({ appSlug: "broken-app" } as any, tmpDir)
+  ).rejects.toThrow(/Invalid JSON in page object registry/);
+});
+
+test("loadPageObjectRegistry keeps app isolation by appSlug", async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "po-reg-apps-"));
+  const left = emptyReg();
+  left.appSlug = "app-left";
+  const right = emptyReg();
+  right.appSlug = "app-right";
+  registerPageObjectCandidate(left, {
+    name: "LeftPage",
+    className: "LeftPage",
+    screenSignature: "sig:left",
+    confidence: 0.8,
+    sourcePlanId: "plan_left"
+  });
+  registerPageObjectCandidate(right, {
+    name: "RightPage",
+    className: "RightPage",
+    screenSignature: "sig:right",
+    confidence: 0.8,
+    sourcePlanId: "plan_right"
+  });
+
+  await savePageObjectRegistry(left, { appSlug: "app-left" } as any, tmpDir);
+  await savePageObjectRegistry(right, { appSlug: "app-right" } as any, tmpDir);
+
+  const loadedLeft = await loadPageObjectRegistry({ appSlug: "app-left" } as any, tmpDir);
+  const loadedRight = await loadPageObjectRegistry({ appSlug: "app-right" } as any, tmpDir);
+  expect(loadedLeft.pageObjects[0].className).toBe("LeftPage");
+  expect(loadedRight.pageObjects[0].className).toBe("RightPage");
 });

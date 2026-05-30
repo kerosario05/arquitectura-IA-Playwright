@@ -1,0 +1,10 @@
+{
+  "id": "c38130-visualizar-detalle-informativo-de-cuenta-de-ahorro-en-euros",
+  "externalId": "C38130",
+  "caseId": 38130,
+  "title": "Visualizar detalle informativo de cuenta de ahorro en Euros",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-05-30T02:32:27.810Z"
+}

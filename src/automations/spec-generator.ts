@@ -27,7 +27,7 @@ export type GenerateSpecOptions = {
   promotionPolicy?: PromotionPolicy;
   inlineDebugMode?: boolean;
   pageObjectRegistry?: PageObjectRegistry;
-  authFlowOptions?: { alias?: string; landing?: string; testDataJson?: string };
+  authFlowOptions?: { alias?: string; landing?: string; testDataJson?: string; insertionAfterStepIndex?: number };
 };
 
 export type GenerateSpecResult = {

@@ -1,1 +1,0 @@
-{"decision":"repaired_plan","reason":"A safe visible route-recovery action exists: click the clickable `Products` link to reach the target route `/products`; it also matches the failed route path in history.","repairType":"route_recovery","candidateId":"nav-products","confidence":0.98}

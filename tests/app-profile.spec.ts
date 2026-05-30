@@ -2,8 +2,9 @@ import { test, expect } from "@playwright/test";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
-import { normalizeAppSlug, resolveAppProfile, ensureAppStructure, resolveProjectNameFromTestRail, logAppProfile, validateAuthFlowDependencies } from "../src/automations/app-profile";
+import { normalizeAppSlug, resolveAppProfile, ensureAppStructure, resolveProjectNameFromTestRail, logAppProfile, validateAuthFlowDependencies, savePromotedAppConfig, loadPromotedAppConfigSync } from "../src/automations/app-profile";
 import type { AppProfile } from "../src/automations/app-profile";
+import { loadPageObjectRegistry } from "../src/automations/page-object-registry";
 
 // normalizeAppSlug tests
 test.describe("normalizeAppSlug", () => {
@@ -184,6 +185,18 @@ test.describe("ensureAppStructure", () => {
     const content = await fsp.readFile(existingFile, "utf-8");
     expect(content).toBe("// existing");
   });
+
+  test("registers framework page objects through the shared registry helpers", async () => {
+    const registryRoot = path.join("registry-test-app-structure", "automations", "apps", "test-app");
+    try {
+      await ensureAppStructure(registryRoot);
+      const registry = await loadPageObjectRegistry({ appSlug: "test-app" } as any, path.join("registry-test-app-structure"));
+      expect(registry.pageObjects.some((po) => po.className === "ProductListPage")).toBe(true);
+      expect(registry.pageObjects.some((po) => po.className === "OperationsMenuPage")).toBe(true);
+    } finally {
+      await fsp.rm(path.join("registry-test-app-structure"), { recursive: true, force: true });
+    }
+  });
 });
 
 // Isolation tests
@@ -329,5 +342,39 @@ test.describe("AuthFlow dependency bundle", () => {
     expect(result.valid).toBe(false);
     expect(result.missing.length).toBeGreaterThan(0);
     expect(result.missing.some(f => f.includes("auth.flow"))).toBe(true);
+  });
+});
+
+test.describe("promoted app config IO", () => {
+  const outputRoot = path.join("registry-test-app-config");
+
+  test.afterEach(async () => {
+    await fsp.rm(outputRoot, { recursive: true, force: true });
+  });
+
+  test("savePromotedAppConfig writes atomically and loadPromotedAppConfigSync reads it back", async () => {
+    await savePromotedAppConfig({
+      appProfile: {
+        appSlug: "io-app",
+        source: "default",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      baseUrl: "https://example.test",
+      loginMode: "no_login",
+      testData: {},
+      testDataAliases: {},
+      testDataRefs: {},
+      missingInputBehavior: "fail",
+      updatedAt: new Date().toISOString()
+    }, outputRoot);
+
+    const loaded = loadPromotedAppConfigSync({
+      appSlug: "io-app",
+      configPath: path.join(outputRoot, "automations", "apps", "io-app", "app.config.json")
+    });
+
+    expect(loaded?.baseUrl).toBe("https://example.test");
+    expect(loaded?.appProfile.appSlug).toBe("io-app");
   });
 });

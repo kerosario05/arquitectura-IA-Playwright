@@ -26,6 +26,8 @@ export type AuthFlowOptions = {
 export type AuthFlowStage =
   | "not_started"
   | "identification"
+  | "identification_type_selection"
+  | "identification_input"
   | "phone_confirmation"
   | "otp"
   | "authenticated"
@@ -39,4 +41,12 @@ export type AuthFlowResult = {
   clientAlias: string;
   landingDetected: string | undefined;
   error?: string;
+  diagnostics?: {
+    initialStage?: AuthFlowStage;
+    stageTransitions?: string[];
+    finalStage?: AuthFlowStage;
+    currentUrl?: string;
+    stuckReason?: string;
+    visibleErrors?: string[];
+  };
 };

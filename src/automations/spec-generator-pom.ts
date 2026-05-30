@@ -47,18 +47,21 @@ function escapeSpecString(value: string): string {
 /**
  * Build previousSteps array for runtime context recovery
  * Includes safe navigation/selection steps that can be replayed after session reset
+ * NOTE: return_to_list is NOT safe to replay - it consumes context (detail page), doesn't produce it
  */
 function buildPreviousStepsParam(steps: ExecutionPlanStep[], currentIndex: number, currentStepSemanticIntent?: string): string {
   const SAFE_INTENTS = new Set([
     'start_session', 'open_home', 'open_module', 'open_product_information',
     'select_category', 'select_product', 'select_visible_item_by_ordinal',
     'select_first_visible_item', 'select_first_visible_product', 'select_first_visible_card',
-    'navigate', 'return_to_list'
+    'navigate'
+    // NOTE: return_to_list is NOT safe - it requires being on detail page (consumes context)
   ]);
   
   const UNSAFE_INTENTS = new Set([
     'submit_form', 'confirm_action', 'payment', 'transfer', 'send',
-    'accept_terms', 'delete', 'fill_form_field', 'click_primary_action'
+    'accept_terms', 'delete', 'fill_form_field', 'click_primary_action',
+    'return_to_list'  // Explicitly unsafe - requires detail page context
   ]);
   
   const previousSteps: string[] = [];
@@ -114,31 +117,49 @@ function buildPreviousStepsParam(steps: ExecutionPlanStep[], currentIndex: numbe
 /**
  * Build executable replay callbacks for previous safe steps
  * Generates unique replay functions using step indices to avoid duplicates
+ * NOTE: return_to_list is NOT safe to replay - it consumes context (detail page), doesn't produce it
  */
 function buildPreviousStepReplaysParam(
   steps: ExecutionPlanStep[],
   currentIndex: number,
-  pageObjectRegistry: PageObjectRegistry | null | undefined
+  pageObjectRegistry: PageObjectRegistry | null | undefined,
+  options?: {
+    excludeStepIndices?: number[];
+  }
 ): { replayFunctions: string[]; arrayParam: string } {
   const SAFE_INTENTS = new Set([
     'start_session', 'open_home', 'open_module', 'open_product_information',
     'select_category', 'select_product', 'select_visible_item_by_ordinal',
     'select_first_visible_item', 'select_first_visible_product', 'select_first_visible_card',
-    'navigate', 'return_to_list'
+    'navigate'
+    // NOTE: return_to_list is NOT safe - it requires being on detail page (consumes context)
   ]);
   
   const UNSAFE_INTENTS = new Set([
     'submit_form', 'confirm_action', 'payment', 'transfer', 'send',
-    'accept_terms', 'delete', 'fill_form_field', 'click_primary_action'
+    'accept_terms', 'delete', 'fill_form_field', 'click_primary_action',
+    'return_to_list'  // Explicitly unsafe - requires detail page context
   ]);
   
   const replayFunctions: string[] = [];
   const replayArrayItems: string[] = [];
+  const excludedStepIndices = new Set(options?.excludeStepIndices ?? []);
   
   for (let i = 0; i < currentIndex; i++) {
     const step = steps[i];
+    if (excludedStepIndices.has(step.index)) {
+      continue;
+    }
     let intent = (step as any).semanticIntent;
     
+    if (!intent) {
+      const locatorStrategy = (step as any).locatorStrategy;
+      const ordinalDiag = (step as any).recoveryMetadata?.ordinalSelectionDiagnostics;
+      if (locatorStrategy === "ordinal_selection" || ordinalDiag?.selectionPatternDetected === true) {
+        intent = "select_visible_item_by_ordinal";
+      }
+    }
+
     if (!intent) {
       const targetValue = getTargetValue(step.target) || step.description || '';
       const normalizedTarget = targetValue.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -179,7 +200,7 @@ function buildPreviousStepReplaysParam(
         replayBody = `await homePage.open();`;
         break;
       case 'open_module':
-        replayBody = `await mainMenuPage.openModule('${escapeSpecString(targetValue)}');`;
+        replayBody = `await operationsMenuPage.openModule('${escapeSpecString(targetValue)}');`;
         break;
       case 'open_product_information':
         replayBody = `await productInformationPage.openProductInformation();`;
@@ -191,10 +212,19 @@ function buildPreviousStepReplaysParam(
         replayBody = `await productListPage.selectProduct('${escapeSpecString(targetValue)}');`;
         break;
       case 'select_visible_item_by_ordinal':
+        {
+          const ordinalDiag = (step as any).recoveryMetadata?.ordinalSelectionDiagnostics;
+          const ordinal = ordinalDiag?.ordinal || 'first';
+          const domainTerm = ordinalDiag?.domainTerm;
+          replayBody = domainTerm
+            ? `await productListPage.selectVisibleItemByOrdinal('${escapeSpecString(ordinal)}', '${escapeSpecString(domainTerm)}');`
+            : `await productListPage.selectVisibleItemByOrdinal('${escapeSpecString(ordinal)}');`;
+        }
+        break;
       case 'select_first_visible_item':
       case 'select_first_visible_product':
       case 'select_first_visible_card':
-        replayBody = `await productListPage.selectFirstVisibleCard('${escapeSpecString(targetValue)}');`;
+        replayBody = `await productListPage.selectFirstVisibleCard();`;
         break;
       case 'return_to_list':
         replayBody = `await productDetailPage.backToList();`;
@@ -284,6 +314,14 @@ function findLastSelectionStep(steps: ExecutionPlanStep[], currentIndex: number)
     const targetValue = getTargetValue(step.target) || step.description || '';
     
     if (!intent) {
+      const locatorStrategy = (step as any).locatorStrategy;
+      const ordinalDiag = (step as any).recoveryMetadata?.ordinalSelectionDiagnostics;
+      if (locatorStrategy === "ordinal_selection" || ordinalDiag?.selectionPatternDetected === true) {
+        intent = "select_visible_item_by_ordinal";
+      }
+    }
+
+    if (!intent) {
       const normalizedTarget = targetValue.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       
       if (/pr.A?stamos|cuenta|categoria|category/i.test(normalizedTarget)) {
@@ -324,14 +362,76 @@ function findLastSelectionStep(steps: ExecutionPlanStep[], currentIndex: number)
   return null;
 }
 
+function deriveReplayIntent(step: ExecutionPlanStep): string | undefined {
+  let intent = (step as any).semanticIntent;
+  if (intent) return intent;
+
+  const locatorStrategy = (step as any).locatorStrategy;
+  const ordinalDiag = (step as any).recoveryMetadata?.ordinalSelectionDiagnostics;
+  if (locatorStrategy === "ordinal_selection" || ordinalDiag?.selectionPatternDetected === true) {
+    return "select_visible_item_by_ordinal";
+  }
+
+  const targetValue = getTargetValue(step.target) || step.description || "";
+  const normalizedTarget = targetValue.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  if (/pr.A?stamos|cuenta|categoria|category/i.test(normalizedTarget)) {
+    return "select_category";
+  }
+  if (/primer|first|visible/i.test(normalizedTarget)) {
+    return "select_visible_item_by_ordinal";
+  }
+  if (/dep.A?sito|producto|product/i.test(normalizedTarget)) {
+    return "select_product";
+  }
+  return undefined;
+}
+
+function buildReplayBodyForStep(step: ExecutionPlanStep): string | undefined {
+  const intent = deriveReplayIntent(step);
+  const targetValue = getTargetValue(step.target) || step.description || "";
+
+  switch (intent) {
+    case "start_session":
+      return "await homePage.start();";
+    case "open_home":
+      return "await homePage.open();";
+    case "open_module":
+      return `await operationsMenuPage.openModule('${escapeSpecString(targetValue)}');`;
+    case "open_product_information":
+      return "await productInformationPage.openProductInformation();";
+    case "select_category":
+      return `await categoryPage.selectCategory('${escapeSpecString(targetValue)}');`;
+    case "select_product":
+      return `await productListPage.selectProduct('${escapeSpecString(targetValue)}');`;
+    case "select_visible_item_by_ordinal": {
+      const ordinalDiag = (step as any).recoveryMetadata?.ordinalSelectionDiagnostics;
+      const ordinal = ordinalDiag?.ordinal || "first";
+      const domainTerm = ordinalDiag?.domainTerm;
+      return domainTerm
+        ? `await productListPage.selectVisibleItemByOrdinal('${escapeSpecString(ordinal)}', '${escapeSpecString(domainTerm)}');`
+        : `await productListPage.selectVisibleItemByOrdinal('${escapeSpecString(ordinal)}');`;
+    }
+    case "select_first_visible_item":
+    case "select_first_visible_product":
+    case "select_first_visible_card":
+      return "await productListPage.selectFirstVisibleCard();";
+    case "return_to_list":
+      return "await productDetailPage.backToList();";
+    case "navigate":
+      return `await page.goto('${escapeSpecString(targetValue || "/")}');`;
+    default:
+      return undefined;
+  }
+}
+
 /**
  * Build lastSelectionReplay callback for detail page re-entry
  * Only applies to click_primary_action steps that need detail page context
  */
 function buildLastSelectionReplayParam(
   steps: ExecutionPlanStep[],
-  currentIndex: number,
-  currentStep: ExecutionPlanStep
+  currentIndex: number
 ): string {
   const lastSelection = findLastSelectionStep(steps, currentIndex);
   if (!lastSelection) return 'undefined';
@@ -339,38 +439,11 @@ function buildLastSelectionReplayParam(
   // Find the selection step details
   const selectionStep = steps.find(s => s.index === lastSelection.stepIndex);
   if (!selectionStep) return 'undefined';
-  
-  // Get semantic intent for the selection step
-  let selectionIntent = (selectionStep as any).semanticIntent;
-  if (!selectionIntent) {
-    const targetValue = getTargetValue(selectionStep.target) || selectionStep.description || '';
-    const normalizedTarget = targetValue.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    
-    if (/pr.A?stamos|cuenta|categoria|category/i.test(normalizedTarget)) {
-      selectionIntent = 'select_category';
-    } else if (/dep.A?sito|producto|product/i.test(normalizedTarget)) {
-      selectionIntent = 'select_product';
-    } else if (/primer|first|visible/i.test(normalizedTarget)) {
-      selectionIntent = 'select_visible_item_by_ordinal';
-    } else {
-      selectionIntent = 'click';
-    }
-  }
-  
-  const selectionTarget = getTargetValue(selectionStep.target) || selectionStep.description || '';
-  const previousStepsBeforeSelection = buildPreviousStepsParam(steps, currentIndex - 1);
-  
-  // Build replay callback that uses clickPromotedTarget
-  return `async () => {
-    await promotedRuntime.clickPromotedTarget({
-      stepIndex: ${lastSelection.stepIndex},
-      target: '${escapeSpecString(selectionTarget)}',
-      actionIntent: '${selectionIntent}',
-      expectedEffect: 'ui_change',
-      sensitive: false,
-      previousSteps: ${previousStepsBeforeSelection}
-    });
-  }`;
+
+  const replayBody = buildReplayBodyForStep(selectionStep);
+  if (!replayBody) return "undefined";
+
+  return `async () => { ${replayBody} }`;
 }
 
 function buildPortablePathFromSpec(specPath: string, absoluteTargetPath: string): string {
@@ -403,6 +476,11 @@ function normalizePageObjectFilePath(filePath: string, _appDir: string): string 
 function isSelectionLikeStep(step: ExecutionPlanStep): boolean {
   const recoveryMeta = (step as any).recoveryMetadata;
   const selectionDiagnostics = (step as any).selectionDiagnostics;
+  const locatorStrategy = (step as any).locatorStrategy;
+
+  if (locatorStrategy === "ordinal_selection" || recoveryMeta?.ordinalSelectionDiagnostics?.selectionPatternDetected === true) {
+    return true;
+  }
 
   if (selectionDiagnostics?.selectionLike && selectionDiagnostics?.success) {
     return true;
@@ -952,6 +1030,9 @@ export function generatePOMSpecFromPlan(
           const ordinalDiag = recoveryMeta?.ordinalSelectionDiagnostics;
           const ordinal = ordinalDiag?.ordinal || "first";
           const domainTerm = ordinalDiag?.domainTerm;
+          const runtimeTarget = recoveryMeta?.selectedCandidateText
+            ? (step.target as any)?.metadata?.originalTarget || step.description || targetValue
+            : targetValue;
           
           const args = [`"${ordinal}"`];
           if (domainTerm) {
@@ -959,7 +1040,7 @@ export function generatePOMSpecFromPlan(
           }
           const methodCall = `${varName}.${method.name}(${args.join(", ")})`;
           const replays = buildPreviousStepReplaysParam(plan.steps, stepIndex, pageObjectRegistry);
-          actionLine = `await promotedRuntime.clickPromotedTarget({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: 'ui_change', sensitive: false, previousStepReplays: ${replays.arrayParam}, action: async () => { await ${methodCall}; } });`;
+          actionLine = `await promotedRuntime.clickPromotedTarget({ stepIndex: ${step.index}, target: '${escapeSpecString(runtimeTarget)}', actionIntent: '${semanticIntent}', expectedEffect: 'ui_change', sensitive: false, previousStepReplays: ${replays.arrayParam}, action: async () => { await ${methodCall}; } });`;
         } else {
           const args = method.parameters.map((parameter, index) => {
             if ((semanticIntent === "fill_username" || semanticIntent === "fill_password") && index === 0 && resolvedValueExpr) {
@@ -992,12 +1073,15 @@ export function generatePOMSpecFromPlan(
           } else if (step.action === "select") {
             actionLine = `await promotedRuntime.selectPromotedItem({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: '${inferExpectedEffect(step, semanticIntent)}', sensitive: ${String(Boolean(method.sensitive))}, action: async () => { await ${methodCall}; } });`;
           } else {
-            const replays = buildPreviousStepReplaysParam(plan.steps, stepIndex, pageObjectRegistry);
             const lastSelection = findLastSelectionStep(plan.steps, stepIndex);
+            const replayExclusions = semanticIntent === "return_to_list" && lastSelection
+              ? { excludeStepIndices: [lastSelection.stepIndex] }
+              : undefined;
+            const replays = buildPreviousStepReplaysParam(plan.steps, stepIndex, pageObjectRegistry, replayExclusions);
             const lastSelectionParam = lastSelection ? `{ stepIndex: ${lastSelection.stepIndex}, selectedTarget: '${escapeSpecString(lastSelection.target)}' }` : 'undefined';
             const expectedOwnerPage = deriveExpectedOwnerForStep(step, plan.steps);
-            const lastSelectionReplayParam = semanticIntent === 'click_primary_action' && lastSelection 
-              ? `lastSelectionReplay: ${buildLastSelectionReplayParam(plan.steps, stepIndex, step)},` 
+            const lastSelectionReplayParam = (semanticIntent === 'click_primary_action' || semanticIntent === 'return_to_list') && lastSelection 
+              ? `lastSelectionReplay: ${buildLastSelectionReplayParam(plan.steps, stepIndex)},` 
               : '';
             actionLine = `await promotedRuntime.clickPromotedTarget({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: '${inferExpectedEffect(step, semanticIntent)}', sensitive: ${String(Boolean(method.sensitive))}, previousStepReplays: ${replays.arrayParam}, lastSelectionStep: ${lastSelectionParam}, ${lastSelectionReplayParam} expectedOwnerPage: '${expectedOwnerPage || ''}', action: async () => { await ${methodCall}; } });`;
           }
@@ -1013,12 +1097,15 @@ export function generatePOMSpecFromPlan(
         } else if (step.action === "select") {
           actionLine = `await promotedRuntime.selectPromotedItem({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: '${inferExpectedEffect(step, semanticIntent)}', sensitive: ${String(Boolean(method.sensitive))}, action: async () => { await ${methodCall}; } });`;
         } else {
-          const replays = buildPreviousStepReplaysParam(plan.steps, stepIndex, pageObjectRegistry);
           const lastSelection = findLastSelectionStep(plan.steps, stepIndex);
+          const replayExclusions = semanticIntent === "return_to_list" && lastSelection
+            ? { excludeStepIndices: [lastSelection.stepIndex] }
+            : undefined;
+          const replays = buildPreviousStepReplaysParam(plan.steps, stepIndex, pageObjectRegistry, replayExclusions);
           const lastSelectionParam = lastSelection ? `{ stepIndex: ${lastSelection.stepIndex}, selectedTarget: '${escapeSpecString(lastSelection.target)}' }` : 'undefined';
           const expectedOwnerPage = deriveExpectedOwnerForStep(step, plan.steps);
-          const lastSelectionReplayParam = semanticIntent === 'click_primary_action' && lastSelection 
-            ? `lastSelectionReplay: ${buildLastSelectionReplayParam(plan.steps, stepIndex, step)},` 
+          const lastSelectionReplayParam = (semanticIntent === 'click_primary_action' || semanticIntent === 'return_to_list') && lastSelection 
+            ? `lastSelectionReplay: ${buildLastSelectionReplayParam(plan.steps, stepIndex)},` 
             : '';
           actionLine = `await promotedRuntime.clickPromotedTarget({ stepIndex: ${step.index}, target: '${escapeSpecString(targetValue)}', actionIntent: '${semanticIntent}', expectedEffect: '${inferExpectedEffect(step, semanticIntent)}', sensitive: ${String(Boolean(method.sensitive))}, previousStepReplays: ${replays.arrayParam}, lastSelectionStep: ${lastSelectionParam}, ${lastSelectionReplayParam} expectedOwnerPage: '${expectedOwnerPage || ''}', action: async () => { await ${methodCall}; } });`;
         }
@@ -1152,10 +1239,13 @@ export function generatePOMSpecFromPlan(
       actionLines.push("");
     }
     actionLines.push(`  setAuthFlowTestData(resolvePromotedSpecAuthDataFromEnv());`);
-    actionLines.push(`  await authFlow.ensureAuthenticated({`);
+    actionLines.push(`  const authFlowResult = await authFlow.ensureAuthenticated({`);
     actionLines.push(`    alias: '${authFlowOptions.alias || 'defaultClient'}',`);
     actionLines.push(`    landing: '${authFlowOptions.landing || 'transactions_menu'}',`);
     actionLines.push(`  });`);
+    actionLines.push(`  if (!authFlowResult.success) {`);
+    actionLines.push(`    throw new Error(\`auth_flow_failed_in_promoted_spec: \${authFlowResult.error || 'unknown_error'}\`);`);
+    actionLines.push(`  }`);
     if (postAuthActionLines.length > 0) {
       actionLines.push("");
     }

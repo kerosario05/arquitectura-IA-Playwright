@@ -18,20 +18,23 @@ export class ProductListPage {
   constructor(private readonly page: Page) {}
 
   async selectFirstVisibleCard(): Promise<void> {
+    // Wait for list readiness (loading gone, cards visible)
+    // Runtime will handle stale loading overlay with safe force click if needed
     await waitForListReadiness(this.page, { timeoutMs: 10000, pollMs: 500, minCards: 1 });
+    
     const productLink = this.page.locator('a[href*="prod.html"]:visible, a.hrefch:visible').first();
     if (await productLink.count() > 0) {
-      await productLink.click({ timeout: 10000 });
+      await productLink.click({ timeout: 5000 });
       return;
     }
     const card = this.page.locator('[class*="card"]:visible, article:visible, [class*="item"]:visible').first();
     if (await card.count() === 0) throw new Error('No visible card found to select.');
     const actionable = card.locator('a:visible, button:visible, [role="button"]:visible').first();
     if (await actionable.count() > 0) {
-      await actionable.click({ timeout: 10000 });
+      await actionable.click({ timeout: 5000 });
       return;
     }
-    await card.click({ timeout: 10000 });
+    await card.click({ timeout: 5000 });
   }
 
   async selectProduct(productName: string): Promise<void> {
@@ -63,7 +66,7 @@ export class ProductListPage {
     for (const role of rolesToTry) {
       const locator = this.page.getByRole(role, { name: roleRegex, exact: false });
       if (await locator.count() > 0) {
-        await locator.first().click({ timeout: 10000 });
+        await locator.first().click({ timeout: 5000 });
         return;
       }
     }
@@ -74,7 +77,7 @@ export class ProductListPage {
       const diagnostics = await capturePageDiagnostics(this.page);
 
       if (diagnostics.listReadiness.loadingDetected) {
-        await this.page.waitForTimeout(2000);
+        await this.page.waitForTimeout(1000);
         candidates = await this.scanVisibleCandidates(tokensToMatch);
       }
 
@@ -91,7 +94,7 @@ export class ProductListPage {
       const best = candidates[0];
       if (best.matchScore >= 0.5) {
         if (best.clickable) {
-          await best.elementHandle.click({ timeout: 10000 });
+          await best.elementHandle.click({ timeout: 5000 });
           return;
         }
 

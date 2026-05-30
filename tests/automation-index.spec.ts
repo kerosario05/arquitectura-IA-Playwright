@@ -141,3 +141,35 @@ test("index entries preserve appSlug and appConfigPath", async () => {
   expect(loaded.automations[0].appSlug).toBe("profile-a");
   expect(loaded.automations[0].appConfigPath).toContain("app.config.json");
 });
+
+test("loadAutomationIndex retries transient read errors", async () => {
+  const indexPath = path.join(tmpDir, "retry.json");
+  await saveAutomationIndex(
+    {
+      version: "1.0",
+      updatedAt: new Date().toISOString(),
+      automations: [makeEntry("C1")]
+    },
+    indexPath
+  );
+
+  const originalReadFile = fs.readFile;
+  let attempts = 0;
+  (fs as any).readFile = async (...args: Parameters<typeof fs.readFile>) => {
+    attempts += 1;
+    if (attempts < 3) {
+      const error = new Error("busy") as NodeJS.ErrnoException;
+      error.code = "EBUSY";
+      throw error;
+    }
+    return originalReadFile(...args);
+  };
+
+  try {
+    const loaded = await loadAutomationIndex(indexPath);
+    expect(loaded.automations).toHaveLength(1);
+    expect(attempts).toBe(3);
+  } finally {
+    (fs as any).readFile = originalReadFile;
+  }
+});

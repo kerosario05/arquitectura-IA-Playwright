@@ -1,9 +1,0 @@
-{
-  "timestamp": "2026-05-21T03:43:30.431Z",
-  "attemptNumber": 1,
-  "repairStatus": "cli_error",
-  "success": false,
-  "error": "Codex CLI exited with code 1.\n\nCommand: C:\\Users\\radames\\AppData\\Roaming\\npm\\codex.cmd exec --skip-git-repo-check --sandbox workspace-write \"You are repairing a...\n\nCwd: C:\\MisProyectos\\MCP\n\nStderr:\nReading additional input from stdin...",
-  "responsePath": "C:\\MisProyectos\\MCP\\.artifacts\\discovery\\batch\\2026-05-21T03-42-51-328Z\\cases\\case-37844\\handoff-attempt-1\\agent-response.json",
-  "selectedSkill": "target-disambiguation"
-}

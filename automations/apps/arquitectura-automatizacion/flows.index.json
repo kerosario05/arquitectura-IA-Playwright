@@ -729,7 +729,515 @@
       "status": "candidate",
       "createdAt": "2026-05-29T00:41:08.460Z",
       "updatedAt": "2026-05-29T00:41:08.460Z"
+    },
+    {
+      "id": "flow_1780067061279_bxsu16",
+      "name": "Consulta de balance - Finalizar sesión desde detal",
+      "filePath": "flows\\consulta-de-balance---finalizar-sesión-desde-detal.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Transacciones y servicios",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "Consulta de balance",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "assertText",
+          "target": "Depósitos a plazos",
+          "pageObjectId": "ProductDetailPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "click",
+          "target": "Depósitos a plazos",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "el primer depósito visible del listado",
+          "pageObjectId": "ProductListPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "click",
+          "target": "Finalizar sesión",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-29T15:04:21.279Z",
+      "updatedAt": "2026-05-29T15:04:21.279Z"
+    },
+    {
+      "id": "flow_1780107125843_nrle52",
+      "name": "Consulta de balance - Visualizar detalle de depósi",
+      "filePath": "flows\\consulta-de-balance---visualizar-detalle-de-depósi.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Transacciones y servicios",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "Consulta de balance",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "assertText",
+          "target": "Depósitos a plazos",
+          "pageObjectId": "ProductDetailPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "click",
+          "target": "Depósitos a plazos",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "el primer depósito visible del listado",
+          "pageObjectId": "ProductListPage",
+          "methodName": "expectLoaded"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-30T02:12:05.843Z",
+      "updatedAt": "2026-05-30T02:12:05.843Z"
+    },
+    {
+      "id": "flow_1780107234518_8jkbkf",
+      "name": "Consulta de balance - Validar etiquetas visibles d",
+      "filePath": "flows\\consulta-de-balance---validar-etiquetas-visibles-d.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Transacciones y servicios",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "Consulta de balance",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "assertText",
+          "target": "Depósitos a plazos",
+          "pageObjectId": "ProductDetailPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "click",
+          "target": "Depósitos a plazos",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "el primer depósito visible del listado",
+          "pageObjectId": "ProductListPage",
+          "methodName": "expectLoaded"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-30T02:13:54.518Z",
+      "updatedAt": "2026-05-30T02:13:54.518Z"
+    },
+    {
+      "id": "flow_1780107317041_wn65h8",
+      "name": "Consulta de balance - Ver acciones disponibles en ",
+      "filePath": "flows\\consulta-de-balance---ver-acciones-disponibles-en-.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Transacciones y servicios",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "Consulta de balance",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "assertText",
+          "target": "Depósitos a plazos",
+          "pageObjectId": "ProductDetailPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "click",
+          "target": "Depósitos a plazos",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "el primer depósito visible del listado",
+          "pageObjectId": "ProductListPage",
+          "methodName": "expectLoaded"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-30T02:15:17.041Z",
+      "updatedAt": "2026-05-30T02:15:17.041Z"
+    },
+    {
+      "id": "flow_1780107388412_0etwug",
+      "name": "Consulta de balance - Regresar desde detalle de de",
+      "filePath": "flows\\consulta-de-balance---regresar-desde-detalle-de-de.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Transacciones y servicios",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "Consulta de balance",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "assertText",
+          "target": "Depósitos a plazos",
+          "pageObjectId": "ProductDetailPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "click",
+          "target": "Depósitos a plazos",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "el primer depósito visible del listado",
+          "pageObjectId": "ProductListPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "click",
+          "target": "Volver al Listado",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-30T02:16:28.412Z",
+      "updatedAt": "2026-05-30T02:16:28.412Z"
+    },
+    {
+      "id": "flow_1780107907440_44kqn0",
+      "name": "Consulta de balance - Visualizar mensaje de depósi",
+      "filePath": "flows\\consulta-de-balance---visualizar-mensaje-de-depósi.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Transacciones y servicios",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "Consulta de balance",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "assertText",
+          "target": "Depósitos a plazos",
+          "pageObjectId": "ProductDetailPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "click",
+          "target": "Depósitos a plazos",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "el primer depósito visible del listado",
+          "pageObjectId": "ProductListPage",
+          "methodName": "expectLoaded"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-30T02:25:07.440Z",
+      "updatedAt": "2026-05-30T02:25:07.440Z"
+    },
+    {
+      "id": "flow_1780107976175_eh0kn4",
+      "name": "Consulta de balance - Visualizar campos con inform",
+      "filePath": "flows\\consulta-de-balance---visualizar-campos-con-inform.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Transacciones y servicios",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "Consulta de balance",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "assertText",
+          "target": "Depósitos a plazos",
+          "pageObjectId": "ProductDetailPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "click",
+          "target": "Depósitos a plazos",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "el primer depósito visible del listado",
+          "pageObjectId": "ProductListPage",
+          "methodName": "expectLoaded"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-30T02:26:16.175Z",
+      "updatedAt": "2026-05-30T02:26:16.175Z"
+    },
+    {
+      "id": "flow_1780108724851_kqre17",
+      "name": "Consulta de balance - Visualizar alerta de depósit",
+      "filePath": "flows\\consulta-de-balance---visualizar-alerta-de-depósit.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Transacciones y servicios",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "Consulta de balance",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "assertText",
+          "target": "Depósitos a plazos",
+          "pageObjectId": "ProductDetailPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "click",
+          "target": "Depósitos a plazos",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "el primer depósito visible del listado",
+          "pageObjectId": "ProductListPage",
+          "methodName": "expectLoaded"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-05-30T02:38:44.851Z",
+      "updatedAt": "2026-05-30T02:38:44.851Z"
     }
   ],
-  "updatedAt": "2026-05-29T00:41:08.461Z"
+  "updatedAt": "2026-05-30T04:12:51.173Z"
 }

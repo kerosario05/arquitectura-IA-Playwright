@@ -1046,3 +1046,87 @@ test("fill with valueKey does not generate fillField(fieldName, fieldName) anti-
   expect(result.specContent).toContain("fillField('Name', ordenNombre)");
   expect(result.specContent).toContain("fillField('Country', ordenPais)");
 });
+
+test("return_to_list preserves ordinal lastSelectionReplay instead of degrading to select_product", () => {
+  const reg = makeRegistry();
+
+  const pageObjects = [
+    {
+      className: "HomePage",
+      screenSignature: "sig:home",
+      methods: [{ name: "start", intent: "start_session" }]
+    },
+    {
+      className: "ProductInformationPage",
+      screenSignature: "sig:product-information",
+      methods: [{ name: "openProductInformation", intent: "open_product_information" }]
+    },
+    {
+      className: "ProductListPage",
+      screenSignature: "sig:product-list",
+      methods: [
+        { name: "selectProduct", intent: "select_product", parameters: ["productName"] },
+        { name: "selectVisibleItemByOrdinal", intent: "select_visible_item_by_ordinal", parameters: ["ordinal"] }
+      ]
+    },
+    {
+      className: "ProductDetailPage",
+      screenSignature: "sig:product-detail",
+      methods: [{ name: "backToList", intent: "return_to_list" }]
+    }
+  ];
+
+  for (const pageObject of pageObjects) {
+    const registered = registerPageObjectCandidate(reg, {
+      name: pageObject.className,
+      className: pageObject.className,
+      screenSignature: pageObject.screenSignature,
+      confidence: 0.9,
+      sourcePlanId: "plan_ordinal",
+      methods: pageObject.methods as any
+    });
+    const poId = registered.registry.pageObjects[registered.registry.pageObjects.length - 1].id;
+    markPageObjectActive(registered.registry, poId);
+    for (const method of pageObject.methods) {
+      markMethodActive(registered.registry, poId, method.name);
+    }
+  }
+
+  const plan: ExecutionPlan = {
+    version: "1.0",
+    source: "discovery_generated",
+    status: "validated",
+    scenario: { source: "testrail", caseId: 38132, title: "Volver al listado desde el detalle de producto" },
+    requiredData: [],
+    steps: [
+      { index: 1, action: "navigate", target: "APP_BASE_URL" },
+      { index: 2, action: "login" },
+      { index: 3, action: "click", target: { strategy: "role", value: "button", name: "Iniciar" } },
+      { index: 4, action: "click", target: { strategy: "text", value: "Información de productos" } },
+      { index: 5, action: "click", target: { strategy: "text", value: "Depósitos a plazo" } },
+      {
+        index: 6,
+        action: "click",
+        description: "Seleccionar el primer depósito visible del listado.",
+        target: { strategy: "text", value: "el primer depósito visible del listado" },
+        locatorStrategy: "ordinal_selection" as any,
+        recoveryMetadata: {
+          ordinalSelectionDiagnostics: {
+            selectionPatternDetected: true,
+            ordinal: "first",
+            selectedCandidateText: "Depósitos a plazo en Pesos"
+          }
+        } as any
+      },
+      { index: 7, action: "click", target: { strategy: "text", value: "Volver al listado de productos" } }
+    ],
+    createdAt: new Date().toISOString()
+  };
+
+  const result = generatePOMSpecFromPlan(plan, "c38132", mockProfile, mockPaths, reg, DEFAULT_PROMOTION_POLICY, false);
+
+  expect(result.specContent).toContain("lastSelectionReplay: async () => { await productListPage.selectVisibleItemByOrdinal('first'); }");
+  expect(result.specContent).not.toContain("{ stepIndex: 6, actionIntent: 'select_visible_item_by_ordinal'");
+  expect(result.specContent).not.toContain("lastSelectionReplay: async () => {\n    await promotedRuntime.clickPromotedTarget({");
+  expect(result.specContent).not.toContain("target: 'el primer depósito visible del listado',\n      actionIntent: 'select_product'");
+});

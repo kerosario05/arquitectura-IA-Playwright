@@ -18,7 +18,7 @@
           "status": "active",
           "sensitive": false,
           "confidence": 1,
-          "source": "c37927-validar-inicio-de-sesion-con-credenciales-validas-step-3,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-step-5,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-missing-select_product,c37945-visualizar-carrito-con-producto-agregado-durante-la-sesion-actual-step-5,c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos-step-4,c38126-visualizar-detalle-informativo-de-tarjeta-de-credito-step-6,c38132-volver-al-listado-desde-el-detalle-de-producto-step-5"
+          "source": "c37927-validar-inicio-de-sesion-con-credenciales-validas-step-3,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-step-5,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-missing-select_product,c37945-visualizar-carrito-con-producto-agregado-durante-la-sesion-actual-step-5,c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos-step-4,c38126-visualizar-detalle-informativo-de-tarjeta-de-credito-step-6,c38132-volver-al-listado-desde-el-detalle-de-producto-step-5,c38264-consulta-de-balance-finalizar-sesion-desde-detalle-de-deposito-step-4,c38258-consulta-de-balance-visualizar-detalle-de-deposito-a-plazo-activo-step-4,c38260-consulta-de-balance-validar-etiquetas-visibles-del-detalle-de-deposito-step-4,c38261-consulta-de-balance-ver-acciones-disponibles-en-detalle-de-deposito-step-4,c38262-consulta-de-balance-regresar-desde-detalle-de-deposito-step-4,c38267-consulta-de-balance-visualizar-mensaje-de-deposito-no-disponible-step-4,c38268-consulta-de-balance-visualizar-campos-con-informacion-no-disponible-step-4,c38265-consulta-de-balance-visualizar-alerta-de-deposito-proximo-a-vencer-step-4"
         },
         {
           "name": "selectFirstVisibleCard",
@@ -74,7 +74,7 @@
           "intent": "expect_loaded",
           "parameters": [],
           "available": true,
-          "source": "candidate,c37927-validar-inicio-de-sesion-con-credenciales-validas-step-4,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-step-4,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-missing-expect_loaded,c37945-visualizar-carrito-con-producto-agregado-durante-la-sesion-actual-step-8,c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos-step-5",
+          "source": "candidate,c37927-validar-inicio-de-sesion-con-credenciales-validas-step-4,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-step-4,c37944-agregar-producto-al-carrito-desde-el-detalle-del-producto-missing-expect_loaded,c37945-visualizar-carrito-con-producto-agregado-durante-la-sesion-actual-step-8,c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos-step-5,c38264-consulta-de-balance-finalizar-sesion-desde-detalle-de-deposito-step-6,c38264-consulta-de-balance-finalizar-sesion-desde-detalle-de-deposito-missing-expect_loaded,c38258-consulta-de-balance-visualizar-detalle-de-deposito-a-plazo-activo-step-6,c38258-consulta-de-balance-visualizar-detalle-de-deposito-a-plazo-activo-missing-expect_loaded,c38260-consulta-de-balance-validar-etiquetas-visibles-del-detalle-de-deposito-step-6,c38260-consulta-de-balance-validar-etiquetas-visibles-del-detalle-de-deposito-missing-expect_loaded,c38261-consulta-de-balance-ver-acciones-disponibles-en-detalle-de-deposito-step-6,c38261-consulta-de-balance-ver-acciones-disponibles-en-detalle-de-deposito-missing-expect_loaded,c38262-consulta-de-balance-regresar-desde-detalle-de-deposito-step-6,c38262-consulta-de-balance-regresar-desde-detalle-de-deposito-missing-expect_loaded,c38267-consulta-de-balance-visualizar-mensaje-de-deposito-no-disponible-step-6,c38267-consulta-de-balance-visualizar-mensaje-de-deposito-no-disponible-missing-expect_loaded,c38268-consulta-de-balance-visualizar-campos-con-informacion-no-disponible-step-6,c38268-consulta-de-balance-visualizar-campos-con-informacion-no-disponible-missing-expect_loaded,c38265-consulta-de-balance-visualizar-alerta-de-deposito-proximo-a-vencer-step-6,c38265-consulta-de-balance-visualizar-alerta-de-deposito-proximo-a-vencer-missing-expect_loaded",
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
@@ -185,7 +185,7 @@
           "intent": "start_session",
           "parameters": [],
           "available": true,
-          "source": "c38065-visualizar-categorias-principales-de-informacion-de-productos-step-3,c38065-visualizar-categorias-principales-de-informacion-de-productos-missing-start_session,c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos-step-3,c38126-visualizar-detalle-informativo-de-tarjeta-de-credito-step-3,c38132-volver-al-listado-desde-el-detalle-de-producto-step-3",
+          "source": "c38065-visualizar-categorias-principales-de-informacion-de-productos-step-3,c38065-visualizar-categorias-principales-de-informacion-de-productos-missing-start_session,c38257-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos-step-3,c38126-visualizar-detalle-informativo-de-tarjeta-de-credito-step-3,c38132-volver-al-listado-desde-el-detalle-de-producto-step-3,c38264-consulta-de-balance-finalizar-sesion-desde-detalle-de-deposito-step-3,c38258-consulta-de-balance-visualizar-detalle-de-deposito-a-plazo-activo-step-3,c38260-consulta-de-balance-validar-etiquetas-visibles-del-detalle-de-deposito-step-3,c38261-consulta-de-balance-ver-acciones-disponibles-en-detalle-de-deposito-step-3,c38262-consulta-de-balance-regresar-desde-detalle-de-deposito-step-3,c38267-consulta-de-balance-visualizar-mensaje-de-deposito-no-disponible-step-3,c38268-consulta-de-balance-visualizar-campos-con-informacion-no-disponible-step-3,c38265-consulta-de-balance-visualizar-alerta-de-deposito-proximo-a-vencer-step-3",
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
@@ -400,5 +400,5 @@
     }
   ],
   "componentCandidates": [],
-  "updatedAt": "2026-05-29T13:37:37.985Z"
+  "updatedAt": "2026-05-30T16:23:37.739Z"
 }

@@ -72,6 +72,25 @@ function normalizeText(text: string): string {
 }
 
 /**
+ * Infer product type from candidate text for generic ordinal descriptions
+ * Avoids hardcoding dynamic product names with masked numbers
+ */
+function inferProductType(candidateText: string): string {
+  const normalized = normalizeText(candidateText);
+  
+  if (/dep.A?sito|plazo/i.test(normalized)) return "depósito";
+  if (/pr.A?stamo|cr.A?dito|prestamo/i.test(normalized)) return "préstamo";
+  if (/cuenta|ahorro|corriente/i.test(normalized)) return "cuenta";
+  if (/tarjeta|card|cr.A?dito|debito/i.test(normalized)) return "tarjeta";
+  if (/inversion|inversión|fondo/i.test(normalized)) return "inversión";
+  if (/seguro|policy/i.test(normalized)) return "seguro";
+  if (/transferencia|transfer/i.test(normalized)) return "transferencia";
+  if (/pago|payment/i.test(normalized)) return "pago";
+  
+  return "producto";
+}
+
+/**
  * Check if a failed assertion was recovered by later success
  * Returns the step index where recovery happened, or undefined if not recovered
  * 
@@ -3589,6 +3608,50 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
                   }
                   (steps as any).insertedSteps.push(insertedStepResult);
 
+                  // Add inserted step to execution plan as a functional step
+                  // This preserves the ordinal selection for spec generation
+                  const insertedStepIndex = routeCompletionResolution.insertedStepText || actionTarget.target;
+                  const isOrdinalSelection = /primer|primera|first|visible|listado/i.test(insertedStepIndex);
+                  
+                  // Use generic ordinal description if candidate contains dynamic data (masked numbers, etc.)
+                  const insertedStepTextSafe = routeCompletionResolution.insertedStepText || "producto";
+                  const hasDynamicData = /\*\*\*\s*\d|\d{4}\s*\*\*\*|^\d{3,}/.test(insertedStepTextSafe);
+                  const genericOrdinalTarget = hasDynamicData 
+                    ? `el primer ${inferProductType(insertedStepTextSafe)} visible del listado`
+                    : insertedStepTextSafe;
+                  
+                  planSteps.push({
+                    index: planSteps.length + 1,
+                    action: "click",
+                    description: genericOrdinalTarget,
+                    target: {
+                      strategy: "text" as LocatorStrategy,
+                      value: genericOrdinalTarget,
+                      exact: false,
+                      metadata: {
+                        originalTarget: actionTarget.target,
+                        resolvedTargetName: routeCompletionResolution.insertedStepText,
+                        resolvedCandidateId: routeCompletionResolution.candidateId,
+                        aiAssisted: false,
+                        repairType: "route_completion"
+                      }
+                    },
+                    locatorStrategy: "ordinal_selection",
+                    recoveryMetadata: {
+                      recoveredBy: "route_completion",
+                      ordinalSelectionDiagnostics: {
+                        selectionPatternDetected: true,
+                        ordinal: "first",
+                        selectedCandidateText: routeCompletionResolution.insertedStepText,
+                        selectedCandidateId: routeCompletionResolution.candidateId
+                      },
+                      selectedCandidateId: routeCompletionResolution.candidateId,
+                      selectedCandidateText: routeCompletionResolution.insertedStepText,
+                      transitionDetected: true,
+                      executedAction: "click"
+                    }
+                  });
+
                   console.log(`[route-completion] retrying original step`);
 
                   const rescanAfterInsert = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
@@ -4173,6 +4236,49 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
                 }
                 (steps as any).insertedSteps.push(insertedStepResult);
 
+                // Add inserted step to execution plan as a functional step
+                const insertedStepText = preClickRouteCompletionResolution.insertedStepText || actionTarget.target;
+                const isOrdinalSelection = /primer|primera|first|visible|listado/i.test(insertedStepText);
+                
+                // Use generic ordinal description if candidate contains dynamic data
+                const insertedStepTextSafe = preClickRouteCompletionResolution.insertedStepText || "producto";
+                const hasDynamicData = /\*\*\*\s*\d|\d{4}\s*\*\*\*|^\d{3,}/.test(insertedStepTextSafe);
+                const genericOrdinalTarget = hasDynamicData 
+                  ? `el primer ${inferProductType(insertedStepTextSafe)} visible del listado`
+                  : insertedStepTextSafe;
+                
+                planSteps.push({
+                  index: planSteps.length + 1,
+                  action: "click",
+                  description: genericOrdinalTarget,
+                  target: {
+                    strategy: "text" as LocatorStrategy,
+                    value: genericOrdinalTarget,
+                    exact: false,
+                    metadata: {
+                      originalTarget: actionTarget.target,
+                      resolvedTargetName: preClickRouteCompletionResolution.insertedStepText,
+                      resolvedCandidateId: preClickRouteCompletionResolution.candidateId,
+                      aiAssisted: false,
+                      repairType: "route_completion"
+                    }
+                  },
+                  locatorStrategy: "ordinal_selection",
+                  recoveryMetadata: {
+                    recoveredBy: "route_completion",
+                    ordinalSelectionDiagnostics: {
+                      selectionPatternDetected: true,
+                      ordinal: "first",
+                      selectedCandidateText: preClickRouteCompletionResolution.insertedStepText,
+                      selectedCandidateId: preClickRouteCompletionResolution.candidateId
+                    },
+                    selectedCandidateId: preClickRouteCompletionResolution.candidateId,
+                    selectedCandidateText: preClickRouteCompletionResolution.insertedStepText,
+                    transitionDetected: true,
+                    executedAction: "click"
+                  }
+                });
+
                 console.log(`[route-completion] retrying original step`);
 
                 const rescanAfterInsert = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
@@ -4516,6 +4622,49 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
                     (steps as any).insertedSteps = [];
                   }
                   (steps as any).insertedSteps.push(insertedStepResult);
+
+                  // Add inserted step to execution plan as a functional step
+                  const insertedStepText = postClickRouteCompletionResolution.insertedStepText || actionTarget.target;
+                  const isOrdinalSelection = /primer|primera|first|visible|listado/i.test(insertedStepText);
+                  
+                  // Use generic ordinal description if candidate contains dynamic data
+                  const insertedStepTextSafe = postClickRouteCompletionResolution.insertedStepText || "producto";
+                  const hasDynamicData = /\*\*\*\s*\d|\d{4}\s*\*\*\*|^\d{3,}/.test(insertedStepTextSafe);
+                  const genericOrdinalTarget = hasDynamicData 
+                    ? `el primer ${inferProductType(insertedStepTextSafe)} visible del listado`
+                    : insertedStepTextSafe;
+                  
+                  planSteps.push({
+                    index: planSteps.length + 1,
+                    action: "click",
+                    description: genericOrdinalTarget,
+                    target: {
+                      strategy: "text" as LocatorStrategy,
+                      value: genericOrdinalTarget,
+                      exact: false,
+                      metadata: {
+                        originalTarget: actionTarget.target,
+                        resolvedTargetName: postClickRouteCompletionResolution.insertedStepText,
+                        resolvedCandidateId: postClickRouteCompletionResolution.candidateId,
+                        aiAssisted: false,
+                        repairType: "route_completion"
+                      }
+                    },
+                    locatorStrategy: "ordinal_selection",
+                    recoveryMetadata: {
+                      recoveredBy: "route_completion",
+                      ordinalSelectionDiagnostics: {
+                        selectionPatternDetected: true,
+                        ordinal: "first",
+                        selectedCandidateText: postClickRouteCompletionResolution.insertedStepText,
+                        selectedCandidateId: postClickRouteCompletionResolution.candidateId
+                      },
+                      selectedCandidateId: postClickRouteCompletionResolution.candidateId,
+                      selectedCandidateText: postClickRouteCompletionResolution.insertedStepText,
+                      transitionDetected: true,
+                      executedAction: "click"
+                    }
+                  });
 
                   console.log(`[route-completion] retrying original step`);
 

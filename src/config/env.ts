@@ -96,6 +96,22 @@ function parseOptionalString(rawValue: string | undefined): string | undefined {
   return trimmed ? trimmed : undefined;
 }
 
+function parsePromotedRuntimeConfig(): {
+  staleLoadingMs: number;
+  maxLoadingMs: number;
+  allowSafeForceClick: boolean;
+  keepAliveDuringLoading: boolean;
+  keepAliveIntervalMs: number;
+} {
+  return {
+    staleLoadingMs: parseOptionalPositiveNumber(process.env.PROMOTED_RUNTIME_STALE_LOADING_MS, "PROMOTED_RUNTIME_STALE_LOADING_MS") ?? 12000,
+    maxLoadingMs: parseOptionalPositiveNumber(process.env.PROMOTED_RUNTIME_MAX_LOADING_MS, "PROMOTED_RUNTIME_MAX_LOADING_MS") ?? 45000,
+    allowSafeForceClick: process.env.PROMOTED_RUNTIME_ALLOW_SAFE_FORCE_CLICK?.toLowerCase() !== 'false',
+    keepAliveDuringLoading: process.env.PROMOTED_RUNTIME_KEEP_ALIVE_DURING_LOADING?.toLowerCase() === 'true',
+    keepAliveIntervalMs: parseOptionalPositiveNumber(process.env.PROMOTED_RUNTIME_KEEP_ALIVE_INTERVAL_MS, "PROMOTED_RUNTIME_KEEP_ALIVE_INTERVAL_MS") ?? 5000,
+  };
+}
+
 function parseExpectedResultMode(rawValue?: string): "context" | "assertions" | "smart" {
   if (!rawValue || !rawValue.trim()) {
     return "context"; // Default to context mode
@@ -293,7 +309,9 @@ const defaultTimeoutMs = parseNumber(getRequiredEnv("DEFAULT_TIMEOUT_MS"), "DEFA
 const promotedSpecTimeoutMs = parseOptionalPositiveNumber(
   process.env.PROMOTED_SPEC_TIMEOUT_MS,
   "PROMOTED_SPEC_TIMEOUT_MS"
-) ?? 90000;
+) ?? 120000;
+
+const promotedRuntimeConfig = parsePromotedRuntimeConfig();
 
 
 export const config: FullConfig = {
@@ -320,7 +338,8 @@ export const config: FullConfig = {
     headless,
     evidenceDir,
     defaultTimeoutMs,
-    promotedSpecTimeoutMs
+    promotedSpecTimeoutMs,
+    ...promotedRuntimeConfig
   },
   integrations: {
     testRail: {

@@ -78,6 +78,12 @@ export type BrowserExecutionConfig = {
   evidenceDir: string;
   defaultTimeoutMs: number;
   promotedSpecTimeoutMs?: number;
+  // Stale loading overlay handling
+  staleLoadingMs?: number;
+  maxLoadingMs?: number;
+  allowSafeForceClick?: boolean;
+  keepAliveDuringLoading?: boolean;
+  keepAliveIntervalMs?: number;
 };
 
 export type TestRailConfig = {

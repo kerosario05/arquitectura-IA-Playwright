@@ -5,6 +5,51 @@ import path from "node:path";
 import type { AppConfig, FullConfig, LoginMode, MissingInputBehavior, TestDataAliasesMap, TestDataMap, AppRouteProfile } from "../types/env.types";
 
 const SENSITIVE_KEY_HINTS = ["password", "secret", "token", "key", "pass"];
+const APP_PROFILE_IO_RETRIES = 3;
+const APP_PROFILE_IO_RETRY_DELAY_MS = 50;
+
+function isMissingFileError(error: unknown): boolean {
+  return Boolean(error && typeof error === "object" && "code" in error && (error as NodeJS.ErrnoException).code === "ENOENT");
+}
+
+function isTransientFsError(error: unknown): boolean {
+  const code = error && typeof error === "object" && "code" in error
+    ? (error as NodeJS.ErrnoException).code
+    : undefined;
+  return code === "EBUSY" || code === "EPERM" || code === "EACCES" || code === "EMFILE" || code === "ENFILE";
+}
+
+async function delay(ms: number): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function writeFileAtomicWithRetry(filePath: string, content: string): Promise<void> {
+  const dir = path.dirname(filePath);
+  await fsp.mkdir(dir, { recursive: true });
+
+  for (let attempt = 0; attempt <= APP_PROFILE_IO_RETRIES; attempt += 1) {
+    const tempPath = path.join(dir, `${path.basename(filePath)}.${process.pid}.${Date.now()}.${attempt}.tmp`);
+    try {
+      await fsp.writeFile(tempPath, content, "utf-8");
+      await fsp.rename(tempPath, filePath).catch(async (error) => {
+        if (isTransientFsError(error) || (error && typeof error === "object" && "code" in error && (error as NodeJS.ErrnoException).code === "EEXIST")) {
+          await fsp.rm(filePath, { force: true }).catch(() => undefined);
+          await fsp.rename(tempPath, filePath);
+          return;
+        }
+        throw error;
+      });
+      return;
+    } catch (error) {
+      await fsp.rm(tempPath, { force: true }).catch(() => undefined);
+      if (isTransientFsError(error) && attempt < APP_PROFILE_IO_RETRIES) {
+        await delay(APP_PROFILE_IO_RETRY_DELAY_MS * (attempt + 1));
+        continue;
+      }
+      throw error;
+    }
+  }
+}
 
 export type AppProfile = {
   appSlug: string;
@@ -321,16 +366,44 @@ async function registerFrameworkPageObjects(baseDir: string): Promise<void> {
     return;
   }
 
-  const indexPath = path.join(baseDir, "page-objects.index.json");
+  const appSlug = path.basename(baseDir);
+  const appDirMarker = `${path.sep}automations${path.sep}apps${path.sep}`;
+  const appDirIndex = baseDir.lastIndexOf(appDirMarker);
+  const isStandardAppDir = appDirIndex >= 0;
+
   let registry: any;
-  try {
-    const raw = await fsp.readFile(indexPath, "utf-8");
-    registry = JSON.parse(raw);
-  } catch {
-    registry = { version: "1.0", appSlug: path.basename(baseDir), pageObjects: [], componentCandidates: [], updatedAt: new Date().toISOString() };
+  let saveRegistry: (() => Promise<void>) | undefined;
+
+  if (isStandardAppDir) {
+    const { loadPageObjectRegistry, savePageObjectRegistry } = await import("./page-object-registry");
+    const appProfile: AppProfile = {
+      appSlug,
+      source: "default",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    const outputRoot = baseDir.slice(0, appDirIndex);
+    registry = await loadPageObjectRegistry(appProfile, outputRoot);
+    saveRegistry = async () => savePageObjectRegistry(registry, appProfile, outputRoot);
+  } else {
+    const indexPath = path.join(baseDir, "page-objects.index.json");
+    try {
+      const raw = await fsp.readFile(indexPath, "utf-8");
+      registry = JSON.parse(raw);
+    } catch {
+      registry = { version: "1.0", appSlug, pageObjects: [], componentCandidates: [], updatedAt: new Date().toISOString() };
+    }
+    saveRegistry = async () => {
+      await fsp.mkdir(baseDir, { recursive: true });
+      const tempPath = `${indexPath}.${process.pid}.${Date.now()}.tmp`;
+      await fsp.writeFile(tempPath, JSON.stringify(registry, null, 2), "utf-8");
+      await fsp.rename(tempPath, indexPath).catch(async () => {
+        await fsp.rm(indexPath, { force: true }).catch(() => undefined);
+        await fsp.rename(tempPath, indexPath);
+      });
+    };
   }
 
-  const appSlug = path.basename(baseDir);
   const frameworkPageObjects = [
     {
       id: "po_framework_productlistpage",
@@ -374,7 +447,7 @@ async function registerFrameworkPageObjects(baseDir: string): Promise<void> {
   }
 
   registry.updatedAt = new Date().toISOString();
-  await fsp.writeFile(indexPath, JSON.stringify(registry, null, 2), "utf-8");
+  await saveRegistry();
 }
 
 export function validateAuthFlowDependencies(baseDir: string): { valid: boolean; missing: string[] } {
@@ -644,12 +717,22 @@ export function loadPromotedAppConfigSync(options: { appSlug: string; configPath
   };
   const paths = buildAppAutomationPaths(appProfile);
   const configPath = options.configPath ?? paths.configPath;
-  try {
-    const raw = fs.readFileSync(configPath, "utf-8");
-    return JSON.parse(raw) as PromotedAppConfig;
-  } catch {
-    return undefined;
+  for (let attempt = 0; attempt <= APP_PROFILE_IO_RETRIES; attempt += 1) {
+    try {
+      const raw = fs.readFileSync(configPath, "utf-8");
+      return JSON.parse(raw) as PromotedAppConfig;
+    } catch (error) {
+      if (isMissingFileError(error)) {
+        return undefined;
+      }
+      if (isTransientFsError(error) && attempt < APP_PROFILE_IO_RETRIES) {
+        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, APP_PROFILE_IO_RETRY_DELAY_MS * (attempt + 1));
+        continue;
+      }
+      return undefined;
+    }
   }
+  return undefined;
 }
 
 export function loadRouteProfile(appSlug: string): AppRouteProfile | undefined {
@@ -828,8 +911,8 @@ export async function savePromotedAppConfig(config: PromotedAppConfig, outputRoo
   await fsp.mkdir(paths.specsDir, { recursive: true });
   await fsp.mkdir(paths.evidenceDir, { recursive: true });
   await fsp.mkdir(paths.runsDir, { recursive: true });
-  await fsp.writeFile(paths.configPath, JSON.stringify(config, null, 2), "utf-8");
-  await fsp.writeFile(paths.testDataRefsPath, JSON.stringify(config.testDataRefs, null, 2), "utf-8");
+  await writeFileAtomicWithRetry(paths.configPath, JSON.stringify(config, null, 2));
+  await writeFileAtomicWithRetry(paths.testDataRefsPath, JSON.stringify(config.testDataRefs, null, 2));
 }
 
 export function redactPromotedAppConfigForLogs(config: PromotedAppConfig): Record<string, unknown> {
