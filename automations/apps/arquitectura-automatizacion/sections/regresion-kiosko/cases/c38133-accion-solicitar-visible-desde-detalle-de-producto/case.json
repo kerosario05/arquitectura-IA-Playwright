@@ -1,0 +1,10 @@
+{
+  "id": "c38133-accion-solicitar-visible-desde-detalle-de-producto",
+  "externalId": "C38133",
+  "caseId": 38133,
+  "title": "Acción Solicitar visible desde detalle de producto",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-01T13:17:43.283Z"
+}

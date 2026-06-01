@@ -1,0 +1,10 @@
+{
+  "id": "c38347-informacion-de-productos-validar-secciones-visibles-del-detalle",
+  "externalId": "C38347",
+  "caseId": 38347,
+  "title": "Información de productos - Validar secciones visibles del detalle",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-01T13:38:38.523Z"
+}

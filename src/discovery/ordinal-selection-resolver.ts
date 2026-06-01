@@ -1,3 +1,75 @@
+function isInstructionalProductText(text: string): boolean {
+  return INSTRUCTIONAL_PRODUCT_PATTERNS.some(pattern => pattern.test(text));
+}
+
+function hasProductLikeSemantics(el: SnapshotElement): boolean {
+  const className = String((el as any).className ?? "").toLowerCase();
+  const role = String(el.role ?? "").toLowerCase();
+  const tagName = String(el.tagName ?? "").toLowerCase();
+  const type = String(el.type ?? "").toLowerCase();
+
+  return type === "card" ||
+    type === "listitem" ||
+    type === "list-item" ||
+    role === "listitem" ||
+    role === "list-item" ||
+    role === "option" ||
+    tagName === "article" ||
+    tagName === "li" ||
+    className.includes("product") ||
+    className.includes("card") ||
+    className.includes("list-item") ||
+    className.includes("listitem") ||
+    className.includes("product-item");
+}
+
+function looksLikeProductTitle(text: string, pattern: OrdinalSelectionPattern): boolean {
+  const normalizedText = normalizeText(text);
+  const tokens = normalizedText.split(/\s+/).filter(Boolean);
+  const significantTokens = tokens.filter(token =>
+    token.length > 2 && !["de", "del", "la", "el", "los", "las", "con", "sin", "para", "por"].includes(token)
+  );
+  if (significantTokens.length < 2) {
+    return false;
+  }
+  if (significantTokens.length > 8 || normalizedText.length > 90) {
+    return false;
+  }
+
+  if (pattern.domainTerm && !isGenericItemTerm(pattern.domainTerm)) {
+    const domainToken = normalizeText(pattern.domainTerm);
+    return normalizedText.includes(domainToken) && tokens.slice(0, 3).some(token => token.includes(domainToken));
+  }
+
+  const genericToken = normalizeText(pattern.genericItemTerm);
+  return normalizedText.includes(genericToken) && tokens.slice(0, 3).some(token => token.includes(genericToken));
+}
+
+function isDisallowedOrdinalCandidate(el: SnapshotElement, text: string, pattern: OrdinalSelectionPattern): boolean {
+  const normalizedText = normalizeText(text);
+  const role = String(el.role ?? "").toLowerCase();
+  const tagName = String(el.tagName ?? "").toLowerCase();
+  const type = String(el.type ?? "").toLowerCase();
+
+  if (isInstructionalProductText(text)) {
+    return true;
+  }
+
+  if ((type === "heading" || role.includes("heading") || /^h[1-6]$/.test(tagName)) && !looksLikeProductTitle(text, pattern)) {
+    return true;
+  }
+
+  if (type === "label" || tagName === "label") {
+    return true;
+  }
+
+  if ((type === "container" || type === "section" || tagName === "section" || tagName === "div") && !hasProductLikeSemantics(el)) {
+    return true;
+  }
+
+  return normalizedText === "producto" || normalizedText === "selecciona un producto";
+}
+
 /**
  * Ordinal Selection Resolver
  * 
@@ -115,6 +187,17 @@ const SUBMIT_LIKE_PATTERNS = [
   /transfer/i,
   /contrato/i,
   /contract/i
+];
+
+const INSTRUCTIONAL_PRODUCT_PATTERNS = [
+  /selecciona\s+un\s+producto/i,
+  /seleccione\s+un\s+producto/i,
+  /elige\s+un\s+producto/i,
+  /escoge\s+un\s+producto/i,
+  /escoja\s+un\s+producto/i,
+  /select\s+a\s+product/i,
+  /choose\s+a\s+product/i,
+  /pick\s+a\s+product/i
 ];
 
 function isSelectionVerb(text: string): boolean {
@@ -294,6 +377,11 @@ export function resolveOrdinalSelection(
   const candidates = snapshot.elements.filter(el => {
     const text = (el.text || el.label || el.name || "").trim();
     if (!text) return false;
+
+    if (isDisallowedOrdinalCandidate(el, text, pattern)) {
+      excludedCandidates.push(text);
+      return false;
+    }
     
     if (isGlobalButton(text, routeProfile)) {
       excludedCandidates.push(text);
@@ -319,7 +407,7 @@ export function resolveOrdinalSelection(
       return false;
     }
     
-    if (pattern.domainTerm) {
+    if (pattern.domainTerm && !isGenericItemTerm(pattern.domainTerm)) {
       const normalizedText = normalizeText(text);
       const normalizedDomainTerm = normalizeText(pattern.domainTerm);
       if (!normalizedText.includes(normalizedDomainTerm)) {
@@ -333,15 +421,7 @@ export function resolveOrdinalSelection(
       }
     }
     
-    const isListItem = el.type === "card" || el.role === "listitem" || el.role === "list-item" || 
-                       el.tagName === "li" || el.tagName === "article" ||
-                       (el as any).className?.includes("card") ||
-                       (el as any).className?.includes("list-item");
-    
-    const isHeading = el.tagName === "h1" || el.tagName === "h2" || el.tagName === "h3" || 
-                      el.tagName === "h4" || el.role?.includes("heading");
-    
-    return isListItem || isHeading;
+    return hasProductLikeSemantics(el) || looksLikeProductTitle(text, pattern);
   });
   
   if (candidates.length === 0) {

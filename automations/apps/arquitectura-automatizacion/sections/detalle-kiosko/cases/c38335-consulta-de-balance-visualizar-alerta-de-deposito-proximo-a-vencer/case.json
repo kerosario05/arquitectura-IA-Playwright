@@ -1,0 +1,10 @@
+{
+  "id": "c38335-consulta-de-balance-visualizar-alerta-de-deposito-proximo-a-vencer",
+  "externalId": "C38335",
+  "caseId": 38335,
+  "title": "Consulta de balance - Visualizar alerta de depósito próximo a vencer",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-01T13:34:22.454Z"
+}

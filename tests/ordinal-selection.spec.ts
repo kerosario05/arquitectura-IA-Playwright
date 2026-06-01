@@ -233,6 +233,29 @@ test("excludes submit-like candidates", () => {
   expect(result.diagnostics.excludedCandidates).toContain("Confirmar");
 });
 
+test('never selects "Selecciona un producto" as ordinal product candidate', () => {
+  const snapshot = createMockSnapshot([
+    { id: "el-1", text: "Selecciona un producto", type: "heading", role: "heading", tagName: "h2", visible: true },
+    { id: "el-1b", text: "Todas nuestras tarjetas están libres de costo emisión durante el primer año.", type: "text", tagName: "p", visible: true },
+    { id: "el-2", text: "Depósito a Plazo Digital en Dólares", type: "card", tagName: "article", visible: true },
+    { id: "el-3", text: "Depósitos a plazo en Pesos", type: "card", tagName: "article", visible: true }
+  ]);
+
+  const pattern: OrdinalSelectionPattern = {
+    ordinal: "first",
+    domainTerm: "producto",
+    genericItemTerm: "producto",
+    isListContext: true
+  };
+
+  const result = resolveOrdinalSelection(snapshot, pattern, BASE_ROUTE_PROFILE);
+
+  expect(result.status).toBe("resolved");
+  expect(result.candidateId).toBe("el-2");
+  expect(result.candidateText).toBe("Depósito a Plazo Digital en Dólares");
+  expect(result.diagnostics.excludedCandidates).toContain("Selecciona un producto");
+});
+
 test("returns no_safe_candidate when no matches", () => {
   const snapshot = createMockSnapshot([
     { id: "el-1", text: "Volver", type: "button", role: "button" },

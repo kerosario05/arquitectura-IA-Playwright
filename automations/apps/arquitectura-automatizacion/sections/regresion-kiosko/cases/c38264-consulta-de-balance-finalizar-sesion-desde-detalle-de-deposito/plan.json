@@ -79,6 +79,41 @@
     {
       "index": 8,
       "action": "click",
+      "description": "Seleccionar el primer depósito visible del listado.",
+      "target": {
+        "strategy": "ordinal_selection",
+        "value": "el primer depósito visible del listado",
+        "exact": false,
+        "metadata": {
+          "resolvedTargetName": "Depósito a Plazo **** 7348 - Pesos Dominicanos",
+          "resolvedCandidateId": "el-6",
+          "aiAssisted": false,
+          "repairType": "ordinal_selection",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "ordinal_selection",
+      "recoveryMetadata": {
+        "recoveredBy": "ordinal_selection",
+        "rationale": "ordinal_selection:first",
+        "ordinalSelectionDiagnostics": {
+          "selectionPatternDetected": true,
+          "ordinal": "first",
+          "domainTermSource": "generic_fallback",
+          "selectedCandidateText": "Depósito a Plazo **** 7348 - Pesos Dominicanos",
+          "selectedCandidateId": "el-6"
+        },
+        "selectedCandidateId": "el-6",
+        "selectedCandidateText": "Depósito a Plazo **** 7348 - Pesos Dominicanos",
+        "segmentIndex": 0,
+        "transitionDetected": true,
+        "executedAction": "Seleccionar el primer depósito visible del listado."
+      }
+    },
+    {
+      "index": 9,
+      "action": "click",
       "description": "Clic en \"Finalizar sesión\".",
       "target": {
         "strategy": "role:button",
@@ -90,9 +125,9 @@
   ],
   "notes": [
     "Discovery completed successfully. All targets and concrete assertions passed.",
-    "Recovered 2 transient assertion failure(s) - see step recovery metadata for details."
+    "Recovered 1 transient assertion failure(s) - see step recovery metadata for details."
   ],
-  "createdAt": "2026-05-29T13:37:37.959Z",
+  "createdAt": "2026-06-01T12:47:58.464Z",
   "metadata": {
     "authFlowRequired": true,
     "authFlowInsertionAfterStepIndex": 3,

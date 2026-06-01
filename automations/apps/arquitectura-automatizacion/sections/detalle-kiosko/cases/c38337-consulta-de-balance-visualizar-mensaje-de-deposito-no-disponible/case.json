@@ -1,0 +1,10 @@
+{
+  "id": "c38337-consulta-de-balance-visualizar-mensaje-de-deposito-no-disponible",
+  "externalId": "C38337",
+  "caseId": 38337,
+  "title": "Consulta de balance - Visualizar mensaje de depósito no disponible",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-01T13:35:30.898Z"
+}

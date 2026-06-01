@@ -1,0 +1,10 @@
+{
+  "id": "c38330-consulta-de-balance-validar-etiquetas-visibles-del-detalle-de-deposito",
+  "externalId": "C38330",
+  "caseId": 38330,
+  "title": "Consulta de balance - Validar etiquetas visibles del detalle de depósito",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-01T13:30:48.343Z"
+}

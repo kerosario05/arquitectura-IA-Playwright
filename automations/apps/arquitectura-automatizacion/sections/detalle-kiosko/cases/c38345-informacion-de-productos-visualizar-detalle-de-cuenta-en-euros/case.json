@@ -1,0 +1,10 @@
+{
+  "id": "c38345-informacion-de-productos-visualizar-detalle-de-cuenta-en-euros",
+  "externalId": "C38345",
+  "caseId": 38345,
+  "title": "Información de productos - Visualizar detalle de cuenta en euros",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-01T13:38:09.546Z"
+}

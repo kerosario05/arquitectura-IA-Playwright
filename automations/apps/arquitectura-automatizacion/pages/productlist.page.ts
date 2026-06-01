@@ -642,8 +642,13 @@ export class ProductListPage {
     await waitForListReadiness(this.page, { timeoutMs: 10000, pollMs: 500, minCards: 1 });
     const ordinalNum = ordinal === 'first' ? 0 : ordinal === 'second' ? 1 : ordinal === 'third' ? 2 : -1;
     if (ordinalNum < 0) throw new Error('Unsupported ordinal: ' + ordinal);
-    const domainSelector = domainTerm ? `[data-testid*="${domainTerm}"], [class*="${domainTerm}"], :has-text("${domainTerm}")` : ':visible';
-    const items = this.page.locator(`article${domainSelector}, [role="listitem"]${domainSelector}, [class*="card"]${domainSelector}, [class*="item"]${domainSelector}`);
+    let items = this.page
+      .locator('article:visible, [role="listitem"]:visible, [class*="product"]:visible, [class*="card"]:visible, [class*="item"]:visible')
+      .filter({ hasNotText: /selecciona un producto|seleccione un producto|elige un producto|choose a product|select a product/i });
+    if (domainTerm) {
+      const escaped = domainTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      items = items.filter({ hasText: new RegExp(escaped, 'i') });
+    }
     const count = await items.count();
     if (count === 0) throw new Error('No visible items found for ordinal selection.');
     if (ordinalNum >= count) throw new Error(`Ordinal ${ordinal} (${ordinalNum + 1}) exceeds available items (${count}).`);

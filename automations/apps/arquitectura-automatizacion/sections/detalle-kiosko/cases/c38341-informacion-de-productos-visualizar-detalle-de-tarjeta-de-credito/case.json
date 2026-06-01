@@ -1,0 +1,10 @@
+{
+  "id": "c38341-informacion-de-productos-visualizar-detalle-de-tarjeta-de-credito",
+  "externalId": "C38341",
+  "caseId": 38341,
+  "title": "Información de productos - Visualizar detalle de tarjeta de crédito",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-01T13:37:03.994Z"
+}

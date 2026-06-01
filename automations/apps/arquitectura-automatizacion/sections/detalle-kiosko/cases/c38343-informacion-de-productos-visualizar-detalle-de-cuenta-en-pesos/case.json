@@ -1,0 +1,10 @@
+{
+  "id": "c38343-informacion-de-productos-visualizar-detalle-de-cuenta-en-pesos",
+  "externalId": "C38343",
+  "caseId": 38343,
+  "title": "Información de productos - Visualizar detalle de cuenta en pesos",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-01T13:37:35.578Z"
+}
