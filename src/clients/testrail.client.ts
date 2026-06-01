@@ -16,6 +16,15 @@ type ApiErrorPayload = {
   message?: string;
 };
 
+function formatFetchError(error: unknown, prefix: string): Error {
+  if (!(error instanceof Error)) return new Error(`${prefix}: ${String(error)}`);
+  const cause = (error as NodeJS.ErrnoException & { cause?: unknown }).cause;
+  const causeMsg = cause instanceof Error
+    ? ` → ${(cause as NodeJS.ErrnoException).code ? `[${(cause as NodeJS.ErrnoException).code}] ` : ""}${cause.message}`
+    : "";
+  return new Error(`${prefix}: ${error.message}${causeMsg}`);
+}
+
 type CasesPagePayload = {
   cases?: RawTestRailCase[];
   offset?: number;
@@ -204,16 +213,16 @@ export class TestRailClient {
 
   async addCase(sectionId: string, input: AddCaseInput): Promise<RawTestRailCase> {
     const body: Record<string, unknown> = { title: input.title };
-    if (input.refs) body.refs = input.refs;
     if (input.preconditions) body.custom_preconds = input.preconditions;
+    if (input.expectedResult) body.custom_expected = input.expectedResult;
+    body.custom_case_oracle = input.caseOracle ?? "QA";
     if (input.stepsSeparated && input.stepsSeparated.length > 0) {
       body.custom_steps_separated = input.stepsSeparated.map((s) => ({
         content: s.content,
         expected: s.expected ?? ""
       }));
-      // plain-text fallback for "Test Case (Text)" template
       body.custom_steps = input.stepsSeparated
-        .map((s, i) => `${i + 1}. ${s.content}${s.expected ? `\nEsperado: ${s.expected}` : ""}`)
+        .map((s, i) => `${i + 1}. ${s.content}`)
         .join("\n");
     }
     const payload = await this.requestJson<RawTestRailCase>(`add_case/${sectionId}`, "POST", body);
@@ -226,16 +235,16 @@ export class TestRailClient {
   async updateCase(caseId: number, input: UpdateCaseInput): Promise<RawTestRailCase> {
     const body: Record<string, unknown> = {};
     if (input.title) body.title = input.title;
-    if (input.refs !== undefined) body.refs = input.refs;
     if (input.preconditions !== undefined) body.custom_preconds = input.preconditions;
+    if (input.expectedResult !== undefined) body.custom_expected = input.expectedResult;
+    body.custom_case_oracle = input.caseOracle ?? "QA";
     if (input.stepsSeparated && input.stepsSeparated.length > 0) {
       body.custom_steps_separated = input.stepsSeparated.map((s) => ({
         content: s.content,
         expected: s.expected ?? ""
       }));
-      // plain-text fallback for "Test Case (Text)" template
       body.custom_steps = input.stepsSeparated
-        .map((s, i) => `${i + 1}. ${s.content}${s.expected ? `\nEsperado: ${s.expected}` : ""}`)
+        .map((s, i) => `${i + 1}. ${s.content}`)
         .join("\n");
     }
     const payload = await this.requestJson<RawTestRailCase>(`update_case/${caseId}`, "POST", body);
@@ -261,7 +270,8 @@ export class TestRailClient {
   private async requestJson<T>(
     endpoint: string,
     method: "GET" | "POST" = "GET",
-    body?: Record<string, unknown> | unknown[]
+    body?: Record<string, unknown> | unknown[],
+    retryCount = 0
   ): Promise<T> {
     const sanitizedEndpoint = endpoint.replace(/^\/+/, "");
     const url = `${this.baseApiUrl}/${sanitizedEndpoint}`;
@@ -277,8 +287,25 @@ export class TestRailClient {
         body: body ? JSON.stringify(body) : undefined
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`TestRail request failed: ${message}`);
+      throw formatFetchError(error, `TestRail request failed [${method} ${url}]`);
+    }
+
+    // Rate limit — esperar el tiempo indicado y reintentar una vez
+    if (response.status === 429 && retryCount === 0) {
+      const rawText = await response.text();
+      const retryAfterHeader = response.headers.get("Retry-After");
+      let waitMs = 60_000;
+
+      if (retryAfterHeader && Number.isFinite(Number(retryAfterHeader))) {
+        waitMs = Number(retryAfterHeader) * 1000;
+      } else {
+        const match = rawText.match(/Retry after (\d+) second/i);
+        if (match) waitMs = Number(match[1]) * 1000;
+      }
+
+      console.warn(`[testrail] Rate limit alcanzado — esperando ${waitMs / 1000}s antes de reintentar...`);
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
+      return this.requestJson<T>(endpoint, method, body, 1);
     }
 
     const rawText = await response.text();

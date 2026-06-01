@@ -124,6 +124,8 @@ export type AddCaseInput = {
   refs?: string;
   preconditions?: string;
   stepsSeparated?: Array<{ content: string; expected?: string }>;
+  expectedResult?: string;
+  caseOracle?: string;
 };
 
 export type UpdateCaseInput = {
@@ -131,4 +133,6 @@ export type UpdateCaseInput = {
   refs?: string;
   preconditions?: string;
   stepsSeparated?: Array<{ content: string; expected?: string }>;
+  expectedResult?: string;
+  caseOracle?: string;
 };

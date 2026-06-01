@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { jobStore } from "../jobs/job-store";
 import { startSprintRun } from "../jobs/run-runner";
+import { startScenarioRun } from "../jobs/scenario-runner";
 
 export const runsRouter = Router();
 
@@ -30,6 +31,33 @@ runsRouter.post("/sprint", (req, res) => {
 
   const job = jobStore.create("sprint", body as Record<string, unknown>);
   setImmediate(() => startSprintRun(job.id));
+
+  res.status(202).json({ jobId: job.id, status: job.status });
+});
+
+// POST /api/runs/from-scenarios
+// Acepta el response del preview como body, guarda en TestRail y ejecuta la automatización
+runsRouter.post("/from-scenarios", (req, res) => {
+  const body = req.body as {
+    stories?: unknown[];
+    sprint?: { id: number; name: string };
+    sectionId?: string;
+    app?: string;
+    headed?: boolean;
+    autoPromote?: boolean;
+    overwrite?: boolean;
+    force?: boolean;
+    autoRepair?: boolean;
+    repairTimeoutMs?: number;
+  };
+
+  if (!body.stories || !Array.isArray(body.stories) || body.stories.length === 0) {
+    res.status(400).json({ error: "stories es requerido — pega el response del preview" });
+    return;
+  }
+
+  const job = jobStore.create("scenario-run", body as Record<string, unknown>);
+  setImmediate(() => startScenarioRun(job.id));
 
   res.status(202).json({ jobId: job.id, status: job.status });
 });

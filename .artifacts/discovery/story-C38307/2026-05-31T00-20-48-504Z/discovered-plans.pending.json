@@ -1,0 +1,91 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C38307",
+    "caseId": 38307,
+    "title": "Visualización completa del detalle oficial de un producto con todos sus campos requeridos"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Clic en \"Iniciar\"",
+      "target": {
+        "strategy": "text",
+        "value": "Iniciar",
+        "exact": false
+      }
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en \"Información de productos\"",
+      "target": {
+        "strategy": "text",
+        "value": "Información de productos",
+        "exact": false
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Clic en \"Tarjetas\"",
+      "target": {
+        "strategy": "text",
+        "value": "Tarjetas",
+        "exact": false
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Clic en \"Tarjetas de crédito\"",
+      "target": {
+        "strategy": "text",
+        "value": "Tarjetas de crédito",
+        "exact": false
+      }
+    },
+    {
+      "index": 7,
+      "action": "assertText",
+      "description": "Assert: Solicitar",
+      "target": {
+        "strategy": "text",
+        "value": "Solicitar",
+        "exact": false
+      },
+      "expected": "Solicitar"
+    },
+    {
+      "index": 8,
+      "action": "assertText",
+      "description": "Assert: Finalizar sesión",
+      "target": {
+        "strategy": "text",
+        "value": "Finalizar sesión",
+        "exact": false
+      },
+      "expected": "Finalizar sesión"
+    }
+  ],
+  "notes": [
+    "Discovery partial: 8/17 navigations/assertions satisfied."
+  ],
+  "createdAt": "2026-05-31T00:21:29.004Z"
+}

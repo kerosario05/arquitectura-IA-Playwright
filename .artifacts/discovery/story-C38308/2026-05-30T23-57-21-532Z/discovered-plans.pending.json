@@ -1,0 +1,126 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C38308",
+    "caseId": 38308,
+    "title": "Consulta exitosa de categorías y subcategorías de productos desde el menú principal del kiosco"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Clic en \"Iniciar\"",
+      "target": {
+        "strategy": "text",
+        "value": "Iniciar",
+        "exact": false
+      }
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en \"Información de productos\"",
+      "target": {
+        "strategy": "text",
+        "value": "Información de productos",
+        "exact": false
+      }
+    },
+    {
+      "index": 5,
+      "action": "assertText",
+      "description": "Assert: Tarjetas",
+      "target": {
+        "strategy": "text",
+        "value": "Tarjetas",
+        "exact": false
+      },
+      "expected": "Tarjetas"
+    },
+    {
+      "index": 6,
+      "action": "assertText",
+      "description": "Assert: Tarjetas de crédito",
+      "target": {
+        "strategy": "text",
+        "value": "Tarjetas de crédito",
+        "exact": false
+      },
+      "expected": "Tarjetas de crédito"
+    },
+    {
+      "index": 7,
+      "action": "assertText",
+      "description": "Assert: Depósitos a Plazo",
+      "target": {
+        "strategy": "text",
+        "value": "Depósitos a Plazo",
+        "exact": false
+      },
+      "expected": "Depósitos a Plazo"
+    },
+    {
+      "index": 8,
+      "action": "assertText",
+      "description": "Assert: Cuentas de Efectivo",
+      "target": {
+        "strategy": "text",
+        "value": "Cuentas de Efectivo",
+        "exact": false
+      },
+      "expected": "Cuentas de Efectivo"
+    },
+    {
+      "index": 9,
+      "action": "assertText",
+      "description": "Assert: Dólares",
+      "target": {
+        "strategy": "text",
+        "value": "Dólares",
+        "exact": false
+      },
+      "expected": "Dólares"
+    },
+    {
+      "index": 10,
+      "action": "assertText",
+      "description": "Assert: Préstamos",
+      "target": {
+        "strategy": "text",
+        "value": "Préstamos",
+        "exact": false
+      },
+      "expected": "Préstamos"
+    },
+    {
+      "index": 11,
+      "action": "assertText",
+      "description": "Assert: Préstamos personales",
+      "target": {
+        "strategy": "text",
+        "value": "Préstamos personales",
+        "exact": false
+      },
+      "expected": "Préstamos personales"
+    }
+  ],
+  "notes": [
+    "Discovery partial: 9/13 navigations/assertions satisfied."
+  ],
+  "createdAt": "2026-05-30T23:57:48.561Z"
+}

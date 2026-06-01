@@ -6,6 +6,15 @@ type ApiErrorPayload = {
   message?: string;
 };
 
+function formatFetchError(error: unknown, prefix: string): Error {
+  if (!(error instanceof Error)) return new Error(`${prefix}: ${String(error)}`);
+  const cause = (error as NodeJS.ErrnoException & { cause?: unknown }).cause;
+  const causeMsg = cause instanceof Error
+    ? ` → ${(cause as NodeJS.ErrnoException).code ? `[${(cause as NodeJS.ErrnoException).code}] ` : ""}${cause.message}`
+    : "";
+  return new Error(`${prefix}: ${error.message}${causeMsg}`);
+}
+
 type JiraProjectsResponse = {
   values?: JiraProject[];
   isLast?: boolean;
@@ -182,8 +191,7 @@ export class JiraClient {
         body: body ? JSON.stringify(body) : undefined
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`Jira request failed: ${message}`);
+      throw formatFetchError(error, `Jira request failed [${method} ${url}]`);
     }
 
     const rawText = await response.text();

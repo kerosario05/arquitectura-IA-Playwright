@@ -46,15 +46,21 @@ export type RepairDecisionValidationResult =
 
 const SELECTOR_HINTS = /(locator|selector|xpath|css|testid|getby|queryselector)/i;
 const SENSITIVE_HINTS = /(otp|pin|token|password|contrasena|api[_ -]?key|secret)/i;
-const PAYMENT_HINTS = /(payment|pago|card number|tarjeta|cvv)/i;
+const PAYMENT_HINTS = /(payment|pago|card\s+number|tarjeta\s+de\s+cr[eé]dito|tarjeta\s+de\s+d[eé]bito|n[uú]mero\s+de\s+tarjeta|cvv|cvc)/i;
 const TRANSFER_HINTS = /(transfer|transferencia|wire)/i;
 const INVENTED_TEXT_HINTS = /(i think|probably|maybe|seems like|appears to|likely|should be|would be)/i;
 
 const ASSERTION_STATUS_ALLOWED = [
   "satisfied_by_existing_evidence",
+  "satisfied",
   "partially_satisfied",
   "needs_manual_review"
 ] as const;
+
+// Claude a veces devuelve "satisfied" — lo normalizamos al valor canónico
+function normalizeAssertionStatus(status: string): string {
+  return status === "satisfied" ? "satisfied_by_existing_evidence" : status;
+}
 
 function asObject(value: unknown): Record<string, unknown> | undefined {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return undefined;
@@ -109,7 +115,12 @@ export function validateRepairDecision(
   // Assertion resolution validation (ANTES de bloques genéricos para tener control fino sobre sensitive evidence)
   if (repairType === "assertion_resolution") {
     const evidenceId = obj.evidenceId as string | undefined;
-    const assertionStatus = obj.assertionStatus as string | undefined;
+    const rawAssertionStatus = obj.assertionStatus as string | undefined;
+    const assertionStatus = rawAssertionStatus ? normalizeAssertionStatus(rawAssertionStatus) : undefined;
+    // Normalizar en el objeto para que el downstream use el valor canónico
+    if (assertionStatus && assertionStatus !== rawAssertionStatus) {
+      obj.assertionStatus = assertionStatus;
+    }
 
     if (decision === "repaired_plan") {
       // evidenceId es requerido para repaired_plan

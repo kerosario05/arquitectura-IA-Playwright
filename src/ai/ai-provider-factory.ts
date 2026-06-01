@@ -1,6 +1,7 @@
 import { AiProviderError, type AiProvider, type AiProviderConfig } from "./ai-provider.types";
 export { AiProviderError, type AiProvider, type AiProviderConfig } from "./ai-provider.types";
 import { OpenAICompatibleProvider } from "./openai-compatible-provider";
+import { AnthropicProvider } from "./providers/anthropic-provider";
 import { CodexCliProvider } from "./providers/codex-cli-provider";
 import { resolveCodexCliPath } from "../agent/codex-cli-resolver";
 
@@ -93,7 +94,21 @@ export function readAiProviderConfigFromEnv(): AiProviderConfig | undefined {
     };
   }
 
-  throw new AiProviderError("ai_provider_unsupported", `Unsupported AI_PROVIDER "${providerRaw}". Expected "openai_compatible" or "codex_cli".`);
+  if (providerRaw === "anthropic") {
+    return {
+      enabled,
+      provider: "anthropic",
+      providerName: process.env.AI_PROVIDER_NAME?.trim() || "claude",
+      baseUrl: process.env.AI_BASE_URL?.trim() || "https://api.anthropic.com",
+      apiKey: readRequired("AI_API_KEY"),
+      model: process.env.AI_MODEL?.trim() || "claude-sonnet-4-6",
+      timeoutMs,
+      requireJson: parseBool(process.env.AI_REQUIRE_JSON, true),
+      requireJsonSchema: parseBool(process.env.AI_REQUIRE_JSON_SCHEMA, true)
+    };
+  }
+
+  throw new AiProviderError("ai_provider_unsupported", `Unsupported AI_PROVIDER "${providerRaw}". Expected "openai_compatible", "anthropic" or "codex_cli".`);
 }
 
 export async function createAiProviderFromEnv(): Promise<AiProvider | undefined> {
@@ -102,6 +117,10 @@ export async function createAiProviderFromEnv(): Promise<AiProvider | undefined>
 
   if (config.provider === "openai_compatible") {
     return new OpenAICompatibleProvider(config);
+  }
+
+  if (config.provider === "anthropic") {
+    return new AnthropicProvider(config);
   }
 
   if (config.provider === "codex_cli") {

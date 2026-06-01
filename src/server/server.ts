@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import { setupHttpAgent, logNetworkConfig } from "./http-agent";
 import { healthRouter } from "./routes/health";
 import { jiraRouter } from "./routes/jira";
 import { testrailRouter } from "./routes/testrail";
@@ -39,24 +40,30 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
   res.status(500).json({ error: message });
 });
 
-app.listen(PORT, HOST, () => {
-  console.log(`\n[server] Automation Engine API → http://${HOST === "0.0.0.0" ? "localhost" : HOST}:${PORT}`);
-  console.log(`[server] CORS origin : ${CORS_ORIGIN}`);
-  console.log(`[server] Auth        : ${API_KEY ? "API key enabled (X-Api-Key header)" : "disabled"}`);
-  console.log(`\n[server] Endpoints disponibles:`);
-  console.log(`  GET  /health`);
-  console.log(`  GET  /api/jira/projects`);
-  console.log(`  GET  /api/jira/projects/:key/sprints`);
-  console.log(`  GET  /api/jira/projects/:key/sprint/active`);
-  console.log(`  GET  /api/testrail/status`);
-  console.log(`  GET  /api/testrail/sections`);
-  console.log(`  GET  /api/testrail/sections/:sectionId/cases`);
-  console.log(`  GET  /api/testrail/runs`);
-  console.log(`  POST /api/runs/sprint`);
-  console.log(`  GET  /api/runs`);
-  console.log(`  GET  /api/runs/:jobId`);
-  console.log(`  GET  /api/runs/:jobId/logs  (SSE)`);
-  console.log(`  DEL  /api/runs/:jobId`);
-  console.log(`  GET  /api/scenarios/preview?projectKey=AA&sprintId=42&status=...`);
-  console.log(`  POST /api/scenarios/preview  { projectKey, sprintId|activeSprint, status }\n`);
+setupHttpAgent().then(() => {
+  app.listen(PORT, HOST, () => {
+    logNetworkConfig();
+    console.log(`\n[server] Automation Engine API → http://${HOST === "0.0.0.0" ? "localhost" : HOST}:${PORT}`);
+    console.log(`[server] CORS origin : ${CORS_ORIGIN}`);
+    console.log(`[server] Auth        : ${API_KEY ? "API key enabled (X-Api-Key header)" : "disabled"}`);
+    console.log(`\n[server] Endpoints disponibles:`);
+    console.log(`  GET  /health`);
+    console.log(`  GET  /api/jira/projects`);
+    console.log(`  GET  /api/jira/projects/:key/sprints`);
+    console.log(`  GET  /api/jira/projects/:key/sprint/active`);
+    console.log(`  GET  /api/testrail/status`);
+    console.log(`  GET  /api/testrail/sections`);
+    console.log(`  GET  /api/testrail/sections/:sectionId/cases`);
+    console.log(`  POST /api/testrail/cases/preview`);
+    console.log(`  POST /api/testrail/cases/push`);
+    console.log(`  GET  /api/testrail/runs`);
+    console.log(`  POST /api/runs/sprint`);
+  console.log(`  POST /api/runs/from-scenarios`);
+    console.log(`  GET  /api/runs`);
+    console.log(`  GET  /api/runs/:jobId`);
+    console.log(`  GET  /api/runs/:jobId/logs  (SSE)`);
+    console.log(`  DEL  /api/runs/:jobId`);
+    console.log(`  GET  /api/scenarios/preview?projectKey=AA&sprintId=42&status=...`);
+    console.log(`  POST /api/scenarios/preview  { projectKey, sprintId|activeSprint, status }\n`);
+  });
 });

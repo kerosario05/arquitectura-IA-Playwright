@@ -1,4 +1,4 @@
-export type AiProviderName = "openai_compatible" | "codex_cli" | "disabled" | "fake";
+export type AiProviderName = "openai_compatible" | "anthropic" | "codex_cli" | "disabled" | "fake";
 
 export type AiMessage = {
   role: "system" | "user" | "assistant";

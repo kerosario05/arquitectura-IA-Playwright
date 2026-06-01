@@ -16,7 +16,7 @@ export type JobSummary = {
 
 export type Job = {
   id: string;
-  type: "sprint";
+  type: "sprint" | "scenario-run";
   status: JobStatus;
   params: Record<string, unknown>;
   createdAt: string;
@@ -35,7 +35,7 @@ export type JobInternal = Job & {
 class JobStore {
   private readonly jobs = new Map<string, JobInternal>();
 
-  create(type: "sprint", params: Record<string, unknown>): Job {
+  create(type: "sprint" | "scenario-run", params: Record<string, unknown>): Job {
     const id = randomUUID();
     const job: JobInternal = {
       id,

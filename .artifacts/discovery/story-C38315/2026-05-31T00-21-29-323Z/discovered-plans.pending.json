@@ -1,0 +1,79 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C38315",
+    "caseId": 38315,
+    "title": "Redirección al flujo de solicitud al presionar el botón Solicitar desde el detalle de un producto"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Clic en \"Iniciar\"",
+      "target": {
+        "strategy": "text",
+        "value": "Iniciar",
+        "exact": false
+      }
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en \"Información de productos\"",
+      "target": {
+        "strategy": "text",
+        "value": "Información de productos",
+        "exact": false
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Clic en \"Préstamos\"",
+      "target": {
+        "strategy": "text",
+        "value": "Préstamos",
+        "exact": false
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Clic en \"Préstamos personales\"",
+      "target": {
+        "strategy": "text",
+        "value": "Préstamos personales",
+        "exact": false
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Clic en \"Solicitar\"",
+      "target": {
+        "strategy": "text",
+        "value": "Solicitar",
+        "exact": false
+      }
+    }
+  ],
+  "notes": [
+    "Discovery partial: 5/10 navigations/assertions satisfied."
+  ],
+  "createdAt": "2026-05-31T00:22:03.989Z"
+}

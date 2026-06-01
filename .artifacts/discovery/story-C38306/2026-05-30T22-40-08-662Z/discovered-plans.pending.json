@@ -1,0 +1,29 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C38306",
+    "caseId": 38306,
+    "title": "Consulta exitosa del listado de categorías y subcategorías de productos desde el menú principal del kiosco"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    }
+  ],
+  "notes": [
+    "Discovery failed at step 1: target_not_found - \"Información de productos\""
+  ],
+  "createdAt": "2026-05-30T22:40:48.659Z"
+}
