@@ -60,6 +60,7 @@ export type CaseDiscoveryWorkflowResult = {
   caseResult: CaseDiscoveryResult;
   promoted: boolean;
   promotionStatus: string;
+  promotionReason?: string;
   automationId?: string;
   appSlug?: string;
   specPath?: string;
@@ -73,6 +74,39 @@ function getDefaultOutputDir(id: number | string): string {
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
   const label = typeof id === "number" ? `case-${id}` : `story-${id}`;
   return path.resolve(`./.artifacts/discovery/${label}/${stamp}`);
+}
+
+export function isAssertionLikeStep(step: DiscoveryStepResult): boolean {
+  const actionText = (step.action ?? "").toLowerCase();
+  if (step.assertionStatus || step.assertionClassification) return true;
+  if (["asserttext", "assertvisible", "assertexists"].includes(actionText.replace(/\s+/g, ""))) return true;
+  return /\b(validar|verificar|assert|visible|mostrar|muestra|show|confirmacion|confirmation|detalle|resumen|formulario|catalogo|catalog|carrito|cart)\b/i.test(step.action ?? "");
+}
+
+export function inferAssertionImportance(assertionText: string, scenarioTitle: string): "blocking" | "contextual" | "optional" {
+  const normText = assertionText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const normTitle = scenarioTitle.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  // If the scenario title explicitly mentions the assertion subject, it is blocking!
+  const quotedMatch = assertionText.match(/"([^"]+)"/);
+  const targetSubject = quotedMatch ? quotedMatch[1].toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : normText;
+
+  if (normTitle.includes(targetSubject) || normTitle.includes(normText)) {
+    return "blocking";
+  }
+
+  // Common optional/contextual subjects (data/environment specific or general UI cleanup)
+  const optionalKeywords = [
+    "finalizar sesion", "cerrar sesion", "logout", "sign out", 
+    "pesos", "dolares", "euros", "solicitar", "volver", "regresar"
+  ];
+
+  if (optionalKeywords.some(kw => normText.includes(kw) || targetSubject.includes(kw))) {
+    return "optional";
+  }
+
+  // Otherwise, default to contextual for general additional UI evidence
+  return "contextual";
 }
 
 function inferAssertionTypeFromText(assertionText: string): "field" | "action" | "form" | "cart" | "confirmation" | "list" | "detail" | "unknown" {
@@ -282,10 +316,23 @@ function reconcileDiscoveryStatusAfterLocalClosure(
     .reverse()
     .map((s) => s.earlyCompletionDiagnostics)
     .find((d) => d && d.checked);
-  const beforePendingAssertionCount = localPending.localClosureDiagnostics?.beforePending.length
-    ?? localPending.pendingAssertions.length;
-  const afterPendingAssertionCount = localPending.localClosureDiagnostics?.afterPending.length
-    ?? localPending.pendingAssertions.length;
+
+  // Filter pending assertions to only count blocking ones
+  const pendingAssertions = localPending.pendingAssertions.filter(a => {
+    const importance = inferAssertionImportance(a, caseResult.caseTitle);
+    return importance === "blocking";
+  });
+
+  const beforePendingAssertionCount = localPending.localClosureDiagnostics?.beforePending.filter(a => {
+    const importance = inferAssertionImportance(a, caseResult.caseTitle);
+    return importance === "blocking";
+  }).length ?? pendingAssertions.length;
+
+  const afterPendingAssertionCount = localPending.localClosureDiagnostics?.afterPending.filter(a => {
+    const importance = inferAssertionImportance(a, caseResult.caseTitle);
+    return importance === "blocking";
+  }).length ?? pendingAssertions.length;
+
   const canTreatEarlyCompletionAsStale =
     localPending.shouldSkipAutoRepair
     && afterPendingAssertionCount === 0
@@ -317,6 +364,15 @@ function reconcileDiscoveryStatusAfterLocalClosure(
   );
   const blockingFailures = caseResult.steps.filter((s) => {
     if (!blockingStatuses.has(s.status)) return false;
+
+    // Check if it's an assertion step and not blocking
+    if (isAssertionLikeStep(s)) {
+      const importance = inferAssertionImportance(s.targetText ?? s.action, caseResult.caseTitle);
+      if (importance !== "blocking") {
+        return false; // Non-blocking assertion failures don't block the plan
+      }
+    }
+
     // Reconciliation rule: if local closure already consumed all pending assertions,
     // stale needs_assertion_resolution markers should not remain blocking.
     if (afterPendingAssertionCount === 0 && (s.status === "needs_assertion_resolution" || s.status === "not_found")) {
@@ -339,22 +395,36 @@ function reconcileDiscoveryStatusAfterLocalClosure(
     && blockingFailuresCount === 0
     && !hasBlockingFailedReason;
 
+  const reconciledConsumedAssertions = new Set(
+    (localPending.localClosureDiagnostics?.consumed ?? []).map((a) => a.trim().toLowerCase())
+  );
+  const reconciledSteps = caseResult.steps.map((step) => {
+    const isAssert = isAssertionLikeStep(step);
+    let updatedStep = { ...step };
+    if (isAssert) {
+      const importance = inferAssertionImportance(step.targetText ?? step.action, caseResult.caseTitle);
+      updatedStep = {
+        ...updatedStep,
+        assertionImportance: importance,
+        blockingAssertion: importance === "blocking",
+        contextualAssertion: importance === "contextual",
+        optionalAssertion: importance === "optional"
+      } as any;
+    }
+
+    if (!(step.status === "needs_assertion_resolution" || step.status === "not_found")) return updatedStep;
+    const key = (step.targetText ?? step.action).trim().toLowerCase();
+    if (!reconciledConsumedAssertions.has(key)) return updatedStep;
+    return {
+      ...updatedStep,
+      status: "satisfied_by_previous_assertion" as const,
+      assertionStatus: "satisfied_by_previous_assertion",
+      error: undefined,
+      structuralSignals: Array.from(new Set([...(step.structuralSignals ?? []), "satisfied_by_structural_evidence"]))
+    } as DiscoveryStepResult;
+  });
+
   if (noBlockers) {
-    const reconciledConsumedAssertions = new Set(
-      (localPending.localClosureDiagnostics?.consumed ?? []).map((a) => a.trim().toLowerCase())
-    );
-    const reconciledSteps = caseResult.steps.map((step) => {
-      if (!(step.status === "needs_assertion_resolution" || step.status === "not_found")) return step;
-      const key = (step.targetText ?? step.action).trim().toLowerCase();
-      if (!reconciledConsumedAssertions.has(key)) return step;
-      return {
-        ...step,
-        status: "satisfied_by_previous_assertion" as const,
-        assertionStatus: "satisfied_by_previous_assertion",
-        error: undefined,
-        structuralSignals: Array.from(new Set([...(step.structuralSignals ?? []), "satisfied_by_structural_evidence"]))
-      } as DiscoveryStepResult;
-    });
     const reconciledPlan = caseResult.candidatePlan
       ? { ...caseResult.candidatePlan, status: "validated" as const }
       : caseResult.candidatePlan;
@@ -391,6 +461,7 @@ function reconcileDiscoveryStatusAfterLocalClosure(
   ];
   return {
     ...caseResult,
+    steps: reconciledSteps,
     finalStatusReconciliation: {
       attempted: true,
       previousStatus,
@@ -436,12 +507,6 @@ function collectLocalPendingAssertionDiagnostics(caseResult: CaseDiscoveryResult
   };
   pendingForensics?: PendingAssertionForensics[];
 } {
-  const isAssertionLikeStep = (step: DiscoveryStepResult): boolean => {
-    const actionText = (step.action ?? "").toLowerCase();
-    if (step.assertionStatus || step.assertionClassification) return true;
-    if (["asserttext", "assertvisible", "assertexists"].includes(actionText.replace(/\s+/g, ""))) return true;
-    return /\b(validar|verificar|assert|visible|mostrar|muestra|show|confirmacion|confirmation|detalle|resumen|formulario|catalogo|catalog|carrito|cart)\b/i.test(step.action ?? "");
-  };
   const normalize = (value: string): string =>
     value
       .toLowerCase()
@@ -927,6 +992,7 @@ export async function runCaseDiscoveryWorkflow(
   if (options.appProfile) {
     console.log(`[discovery:case] Using app profile: appSlug=${options.appProfile.appSlug} source=${options.appProfile.source}`);
   }
+  const workflowAppSlug = options.appProfile?.appSlug ?? activeConfig.app.appProfile;
 
   let scenario: TestScenario;
   let client: TestRailClient;
@@ -957,7 +1023,7 @@ export async function runCaseDiscoveryWorkflow(
     scenario = scenarios[0];
   }
 
-  // Resolve sectionProfile from TestRail case
+  // Resolve sectionProfile from TestRail case or scenario
   let sectionProfile: SectionProfile | undefined;
   if (options.caseId) {
     const rawCase = await client.getCase(options.caseId);
@@ -972,6 +1038,12 @@ export async function runCaseDiscoveryWorkflow(
     } else {
       console.log(`[section-profile] No section_id found for case C${options.caseId}, using default-section`);
     }
+  } else if (scenario.sectionName) {
+    const sectionResult = await resolveSectionProfile({
+      testCaseSectionName: scenario.sectionName
+    });
+    sectionProfile = sectionResult.sectionProfile;
+    console.log(`[section-profile] source=scenario sectionName="${sectionProfile.sectionName}" sectionSlug=${sectionProfile.sectionSlug}`);
   }
   
   if (sectionProfile) {
@@ -989,6 +1061,7 @@ export async function runCaseDiscoveryWorkflow(
   let appSlug: string | undefined;
   let specPath: string | undefined;
   let promotionStatus = "not_promoted";
+  let promotionReason: string | undefined;
   try {
     browser = await browserType.launch({ headless });
     const context = await browser.newContext();
@@ -1004,7 +1077,7 @@ export async function runCaseDiscoveryWorkflow(
     // Debug logging for routeCompletion config propagation
     console.log(`[env-debug] raw AI_ROUTE_COMPLETION_ENABLED=${process.env.AI_ROUTE_COMPLETION_ENABLED}`);
     console.log(`[env-debug] loaded routeCompletion.enabled=${activeConfig.integrations.ai?.routeCompletion?.enabled}`);
-    console.log(`[env-debug] appProfile appSlug=${options.appProfile?.appSlug ?? "undefined"}`);
+    console.log(`[env-debug] appProfile appSlug=${workflowAppSlug ?? "undefined"}`);
 
     caseResult = await runCaseDiscovery({
       page,
@@ -1013,7 +1086,7 @@ export async function runCaseDiscoveryWorkflow(
       pendingObjectsPath,
       pendingPlansPath,
       appBaseUrl: activeConfig.app.baseUrl,
-      appSlug: options.appProfile?.appSlug,
+      appSlug: workflowAppSlug,
       testData: activeConfig.app.testData,
       loginAction: async () => {
         await loginStrategy.execute(page, activeConfig);
@@ -1038,6 +1111,8 @@ export async function runCaseDiscoveryWorkflow(
         OTP_SECRET: process.env.OTP_SECRET,
         APP_USERNAME: activeConfig.app.username,
         APP_PASSWORD: activeConfig.app.password,
+        APP_SLUG: workflowAppSlug,
+        APP_PROFILE: workflowAppSlug,
         APP_EXTRA_LOGIN_FIELDS_JSON: activeConfig.app.extraLoginFields,
         MISSING_INPUT_BEHAVIOR: activeConfig.app.missingInputBehavior,
         AUTO_GENERATE_TEST_DATA: activeConfig.app.autoGenerateTestData,
@@ -1447,6 +1522,7 @@ export async function runCaseDiscoveryWorkflow(
       requireApproval: options.requirePromotionApproval,
       promotionPolicy
     });
+    promotionReason = gate.allowed ? "" : gate.reasons.join("; ");
 
     console.log(`[discovery:workflow] Promotion gate: allowed=${gate.allowed}, status=${gate.status}`);
     if (gate.reasons.length > 0) {
@@ -1543,6 +1619,7 @@ export async function runCaseDiscoveryWorkflow(
     caseResult,
     promoted,
     promotionStatus,
+    promotionReason,
     automationId,
     appSlug,
     specPath,

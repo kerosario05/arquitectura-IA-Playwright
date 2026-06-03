@@ -15,6 +15,128 @@ test("click exitoso sin retry", async ({ page }) => {
   expect(clicked).toBe(true);
 });
 
+test("select_visible_item_by_ordinal selecciona el primer producto visible", async ({ page }) => {
+  await page.setContent(`
+    <div role="list">
+      <article class="product-card">
+        <button id="card-1" onclick="window.__selected='Tarjeta de Crédito'">Tarjeta de Crédito</button>
+      </article>
+      <button id="back">Volver</button>
+    </div>
+  `);
+
+  const runtime = createPromotedSpecRuntime(page, { enabled: false });
+  await runtime.clickPromotedTarget({
+    stepIndex: 1,
+    target: "Seleccionar el primer producto visible del listado",
+    actionIntent: "select_visible_item_by_ordinal",
+    routeProfile: { domainTerms: ["producto", "tarjeta", "cuenta"], aliases: {}, routes: [] } as any,
+    action: async () => { await page.locator("#card-1").click(); }
+  });
+
+  const selected = await page.evaluate(() => (window as any).__selected);
+  expect(selected).toBe("Tarjeta de Crédito");
+});
+
+test("select_visible_item_by_ordinal selecciona la primera cuenta visible", async ({ page }) => {
+  await page.setContent(`
+    <button id="ignore">Selecciona una cuenta</button>
+    <div class="account-row" role="row">
+      <button id="account-1" onclick="window.__selected='Cuenta Corriente'">Cuenta Corriente</button>
+    </div>
+    <div class="account-row" role="row">
+      <button id="account-2" onclick="window.__selected='Cuenta de Ahorros'">Cuenta de Ahorros</button>
+    </div>
+  `);
+
+  const runtime = createPromotedSpecRuntime(page, { enabled: false });
+  await runtime.clickPromotedTarget({
+    stepIndex: 2,
+    target: "Seleccionar la primera cuenta visible",
+    actionIntent: "select_visible_item_by_ordinal",
+    routeProfile: { domainTerms: ["cuenta"], aliases: {}, routes: [] } as any,
+    action: async () => { await page.locator("#account-1").click(); }
+  });
+
+  const selected = await page.evaluate(() => (window as any).__selected);
+  expect(selected).toBe("Cuenta Corriente");
+});
+
+test("select_visible_item_by_ordinal selecciona el primer beneficiario visible", async ({ page }) => {
+  await page.setContent(`
+    <h2>Selecciona un beneficiario</h2>
+    <div role="listitem">
+      <button id="benef-1" onclick="window.__selected='Beneficiario 1'">Beneficiario 1</button>
+    </div>
+    <div role="listitem">
+      <button id="benef-2" onclick="window.__selected='Beneficiario 2'">Beneficiario 2</button>
+    </div>
+  `);
+
+  const runtime = createPromotedSpecRuntime(page, { enabled: false });
+  await runtime.clickPromotedTarget({
+    stepIndex: 3,
+    target: "Seleccionar el primer beneficiario",
+    actionIntent: "select_visible_item_by_ordinal",
+    routeProfile: { domainTerms: ["beneficiario"], aliases: {}, routes: [] } as any,
+    action: async () => { await page.locator("#benef-1").click(); }
+  });
+
+  const selected = await page.evaluate(() => (window as any).__selected);
+  expect(selected).toBe("Beneficiario 1");
+});
+
+test("select_visible_item_by_ordinal excluye headings y textos instructivos", async ({ page }) => {
+  await page.setContent(`
+    <h2>Selecciona un producto</h2>
+    <div class="helper">Elige una opción para continuar</div>
+    <article class="product-card">
+      <button id="real-1" onclick="window.__selected='Producto real'">Producto real</button>
+    </article>
+  `);
+
+  const runtime = createPromotedSpecRuntime(page, { enabled: false });
+  await runtime.clickPromotedTarget({
+    stepIndex: 4,
+    target: "Seleccionar el primer producto visible del listado",
+    actionIntent: "select_visible_item_by_ordinal",
+    routeProfile: { domainTerms: ["producto"], aliases: {}, routes: [] } as any,
+    action: async () => { await page.locator("#real-1").click(); }
+  });
+
+  const selected = await page.evaluate(() => (window as any).__selected);
+  expect(selected).toBe("Producto real");
+});
+
+test("select_visible_item_by_ordinal falla con diagnostico claro cuando no hay candidato seguro", async ({ page }) => {
+  await page.setContent(`
+    <h2>Selecciona un producto</h2>
+    <button>Volver</button>
+  `);
+
+  const runtime = createPromotedSpecRuntime(page, { enabled: false });
+  await expect(runtime.clickPromotedTarget({
+    stepIndex: 5,
+    target: "Seleccionar el primer producto visible del listado",
+    actionIntent: "select_visible_item_by_ordinal",
+    routeProfile: { domainTerms: ["producto"], aliases: {}, routes: [] } as any,
+    action: async () => { await page.click("#missing"); }
+  })).rejects.toThrow(/missing_runtime_context_for_ordinal/);
+});
+
+test("select_visible_item_by_ordinal falla con missing_runtime_context_for_ordinal cuando no hay listado listo", async ({ page }) => {
+  await page.setContent(`<h1>Â¡Hola!</h1><button>Iniciar</button>`);
+
+  const runtime = createPromotedSpecRuntime(page, { enabled: false });
+  await expect(runtime.clickPromotedTarget({
+    stepIndex: 6,
+    target: "Seleccionar el primer producto visible del listado",
+    actionIntent: "select_visible_item_by_ordinal",
+    routeProfile: { domainTerms: ["producto"], aliases: {}, routes: [] } as any,
+    action: async () => { throw new Error("should not be called"); }
+  })).rejects.toThrow(/missing_runtime_context_for_ordinal/);
+});
+
 test("click abre modal y se considera exito sin navegacion", async ({ page }) => {
   await page.setContent(`
     <button id="open" onclick="document.getElementById('m').style.display='block'">Open</button>

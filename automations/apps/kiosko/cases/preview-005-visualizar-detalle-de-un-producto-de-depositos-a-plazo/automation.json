@@ -1,0 +1,54 @@
+{
+  "id": "preview-005-visualizar-detalle-de-un-producto-de-depositos-a-plazo",
+  "externalId": "PREVIEW-005",
+  "caseId": 0,
+  "title": "Visualizar detalle de un producto de Depósitos a Plazo",
+  "planPath": "automations\\apps\\kiosko\\cases\\preview-005-visualizar-detalle-de-un-producto-de-depositos-a-plazo\\plan.json",
+  "specPath": "automations\\apps\\kiosko\\cases\\preview-005-visualizar-detalle-de-un-producto-de-depositos-a-plazo\\case.spec.ts",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "kiosko",
+  "createdAt": "2026-06-02T20:15:27.916Z",
+  "updatedAt": "2026-06-02T20:15:27.916Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-06-02T20-15-09-947Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "not_run",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-06-02T20-15-09-947Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [],
+      "availablePageObjects": [
+        "ProductListPage",
+        "OperationsMenuPage",
+        "HomePage",
+        "ProductInformationPage",
+        "CategoryPage",
+        "ProductDetailPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    }
+  }
+}

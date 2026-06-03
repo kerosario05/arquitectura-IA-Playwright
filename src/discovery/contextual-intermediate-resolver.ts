@@ -108,8 +108,25 @@ const SENSITIVE_PATTERNS = [
   /cerrar.*cuenta/i, /close.*account/i
 ];
 
-function normalizeText(text: string): string {
-  return text
+function extractTextValue(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (value == null) return "";
+  if (Array.isArray(value)) return value.map((item) => extractTextValue(item)).filter(Boolean).join(" ");
+  if (typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+    return [
+      extractTextValue(obj.text),
+      extractTextValue(obj.label),
+      extractTextValue(obj.name),
+      extractTextValue(obj.value),
+      extractTextValue(obj.title)
+    ].filter(Boolean).join(" ").trim();
+  }
+  return String(value);
+}
+
+function normalizeText(text: unknown): string {
+  return extractTextValue(text)
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -155,7 +172,7 @@ function classifyCandidateType(
   target: string,
   nextTarget?: string
 ): CandidateType {
-  const text = normalizeText(element.text || element.label || element.name || "");
+  const text = normalizeText(element.text || element.label || element.name || element.value || element.title || "");
   const normalizedTarget = normalizeText(target);
   
   // Check if element is inside a card or list item
@@ -517,7 +534,7 @@ export function resolveAmbiguousIntermediateTarget(
   
   // Classify all candidates
   const classifiedCandidates: ClassifiedCandidate[] = input.candidates.map(element => {
-    const text = element.text || element.label || element.name || "";
+    const text = extractTextValue(element.text || element.label || element.name || element.value || element.title || "");
     const normalizedText = normalizeText(text);
     const isExactMatch = normalizedText === normalizedTarget;
     const isContainsMatch = normalizedText.includes(normalizedTarget) && !isExactMatch;
@@ -640,6 +657,26 @@ export function resolveAmbiguousIntermediateTarget(
         classificationSummary
       }
     };
+  }
+
+  if (targetIsShort || targetIsGeneric) {
+    const bestTextMatchesTarget = best.isExactMatch || best.isContainsMatch || best.normalizedText.includes(normalizedTarget);
+    const bestIsSafeContextualType = best.type === "filter" || best.type === "category" || best.type === "intermediate" || best.type === "route_option";
+    if (!bestTextMatchesTarget || (!bestIsSafeContextualType && best.score < 0.75)) {
+      console.log(`[contextual-resolver] unresolved reason="unsafe_generic_target" best="${best.text}" type="${best.type}" score=${best.score.toFixed(2)}`);
+      return {
+        status: "unresolved",
+        classifiedCandidates,
+        reason: "unsafe_generic_target",
+        diagnostics: {
+          targetIsShort,
+          nextTargetIsOrdinal: nextIsOrdinal,
+          routeProfileUsed: !!input.routeProfile,
+          intermediatesMatched: classifiedCandidates.filter(c => c.routeProfileMatch === "intermediate").map(c => c.text),
+          classificationSummary
+        }
+      };
+    }
   }
   
   console.log(`[contextual-resolver] resolved target="${input.target}" selected="${best.text}" type="${best.type}" score=${best.score.toFixed(2)} reason="${best.scoreReasons.join(",")}"`);

@@ -28,10 +28,16 @@ import {
   type ExpectedResultConsumption
 } from "./assertion-resolver";
 import {
+  attemptAssertionRecovery,
+  classifyAssertionImportance,
+  detectConditionalAssertionRisk
+} from "./assertion-recovery";
+import {
   parseStepIntent,
   type ParsedStepIntent,
   type ActionTargetItem,
-  type FillValueSource
+  type FillValueSource,
+  normalizeParsedTarget
 } from "./step-intent-parser";
 import type {
   CaseDiscoveryResult,
@@ -184,9 +190,34 @@ function getUnresolvedBlockingFailures(steps: DiscoveryStepResult[]): DiscoveryS
       return false;
     }
     
-    // Include only actual blocking failures
-    return (s.status === "not_found" || s.status === "needs_assertion_resolution") && s.assertionClassification;
+    if (!(s.status === "not_found" || s.status === "needs_assertion_resolution")) {
+      return false;
+    }
+
+    if (!s.assertionClassification) {
+      return true;
+    }
+
+    const importance = s.assertionImportance ?? "blocking";
+    if (importance === "contextual" || importance === "optional") {
+      return false;
+    }
+
+    if (s.conditionalAssertion && s.conditionalRisk === "high") {
+      return false;
+    }
+
+    return true;
   });
+}
+
+function countNonBlockingAssertionFailures(steps: DiscoveryStepResult[]): number {
+  return steps.filter((s) => {
+    if (!(s.status === "not_found" || s.status === "needs_assertion_resolution")) return false;
+    if (!s.assertionClassification) return false;
+    const importance = s.assertionImportance ?? "blocking";
+    return importance === "contextual" || importance === "optional" || (s.conditionalAssertion === true && s.conditionalRisk === "high");
+  }).length;
 }
 
 /**
@@ -269,6 +300,27 @@ function envTrue(name: string, fallback = false): boolean {
   const raw = process.env[name];
   if (!raw) return fallback;
   return raw.trim().toLowerCase() === "true";
+}
+
+function isSnapshotElementEnabled(element: { disabled?: boolean | null }): boolean {
+  return element.disabled !== true;
+}
+
+function isSnapshotElementClickable(element: {
+  visible?: boolean | null;
+  type?: string | null;
+  role?: string | null;
+  tagName?: string | null;
+  candidateLocators?: Array<{ strategy: string }>;
+}): boolean {
+  if (!element.visible) return false;
+  const type = String(element.type ?? "").toLowerCase();
+  const role = String(element.role ?? "").toLowerCase();
+  const tagName = String(element.tagName ?? "").toLowerCase();
+  if (["button", "link", "card"].includes(type)) return true;
+  if (["button", "link", "option", "listitem"].includes(role)) return true;
+  if (["button", "a", "article", "li"].includes(tagName)) return true;
+  return Boolean(element.candidateLocators?.some((loc) => loc.strategy === "role" || loc.strategy === "text"));
 }
 
 export function extractCleanTarget(action: string): { type: "click" | "assert" | "setup_route" | "skip" | "unknown"; target: string } {
@@ -876,6 +928,17 @@ export type CaseDiscoveryOptions = {
   missingInputBehavior?: MissingInputBehavior;
 };
 
+export function resolveCaseDiscoveryAppSlug(options: Pick<CaseDiscoveryOptions, "appSlug" | "env">): string {
+  const explicitAppSlug = typeof options.appSlug === "string" ? options.appSlug.trim() : "";
+  if (explicitAppSlug) {
+    return explicitAppSlug;
+  }
+  const envAppSlug = typeof (options.env as any)?.APP_SLUG === "string"
+    ? String((options.env as any).APP_SLUG).trim()
+    : "";
+  return envAppSlug || "default";
+}
+
 const DEFAULT_AI_ASSISTED_DISCOVERY_CONFIG: AiAssistedDiscoveryConfig = {
   enabled: false,
   confidenceThreshold: 0.85,
@@ -1074,10 +1137,11 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   const aiExplorer = options.aiAssistedDiscovery?.explorer ?? createAIExplorer();
   
   // Load route profile for ordinal selection and route completion
-  const appSlug = options.appSlug ?? "default";
-  const routeProfile = options.aiAssistedDiscovery?.config?.routeCompletion?.useAppProfile !== false ? loadRouteProfile(appSlug) : undefined;
+  const discoveryAppSlug = resolveCaseDiscoveryAppSlug(options);
+  const explicitRouteProfile = (options.scenario as any)?.routeProfile;
+  const routeProfile = options.aiAssistedDiscovery?.config?.routeCompletion?.useAppProfile !== false ? loadRouteProfile(discoveryAppSlug, explicitRouteProfile) : undefined;
   if (routeProfile) {
-    console.log(`[discovery:case] routeProfile loaded appSlug=${appSlug} domainTerms=${routeProfile.domainTerms?.length ?? 0} routes=${routeProfile.routes?.length ?? 0}`);
+    console.log(`[discovery:case] routeProfile loaded appSlug=${discoveryAppSlug} domainTerms=${routeProfile.domainTerms?.length ?? 0} routes=${routeProfile.routes?.length ?? 0}`);
   }
 
   const steps: DiscoveryStepResult[] = [];
@@ -1842,16 +1906,76 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             expected: assertionResult.assertionText
           });
         } else if (assertionResult.status === "failed" || assertionResult.status === "needs_assertion_resolution") {
-          if (!failedAtStep && es.source === "action") {
-            failedAtStep = es.stepIndex;
-            failedTarget = assertionResult.assertionText;
-            failedReason = assertionResult.status === "needs_assertion_resolution"
-              ? "needs_assertion_resolution"
-              : "assertion_not_found";
-          }
+          // ── LOCAL ASSERTION RECOVERY ──
+          // Try to recover failed assertion using accent-insensitive matching, aliases, plural/singular variants, etc.
+          const recoveryResult = attemptAssertionRecovery(currentSnapshot, assertionResult.assertionText, {
+            routeProfile,
+            appConfig: (options as any).appConfig,
+            scenarioTitle: scenario.title,
+            expectedResult: (scenario as any).expectedResult ?? "",
+          });
 
-          // AI Repair for assertions: attempt assertion_resolution after local resolvers fail
-          if (assertionResult.status === "needs_assertion_resolution" && envTrue("AI_REPAIR_ENABLED", false) && envTrue("AI_REPAIR_USE_CONTEXT_PACK", true)) {
+          // Classify assertion importance
+          const assertionImportance = classifyAssertionImportance(assertionResult.assertionText, {
+            scenarioTitle: scenario.title,
+            expectedResult: (scenario as any).expectedResult ?? "",
+            routeProfile,
+          });
+
+          // Detect conditional assertion risk
+          const conditionalRisk = detectConditionalAssertionRisk(assertionResult.assertionText, {
+            dataRequirement: (scenario as any).dataRequirement,
+            routeProfile,
+          });
+
+          if (recoveryResult.recovered) {
+            console.log(`[assertion-recovery] recovered "${assertionResult.assertionText}" -> "${recoveryResult.matchedText}" decision=${recoveryResult.decision} confidence=${recoveryResult.confidence}`);
+            // Update step status to recovered
+            steps[steps.length - 1].status = "found";
+            steps[steps.length - 1].recoveryStatus = "recovered";
+            (steps[steps.length - 1] as any).recoveredBy = "local_assertion_recovery";
+            (steps[steps.length - 1] as any).recoveryDecision = recoveryResult.decision;
+            (steps[steps.length - 1] as any).recoveryAttempts = recoveryResult.recoveryAttempts;
+            (steps[steps.length - 1] as any).recoveryConfidence = recoveryResult.confidence;
+            (steps[steps.length - 1] as any).matchedText = recoveryResult.matchedText;
+            (steps[steps.length - 1] as any).assertionImportance = assertionImportance;
+            (steps[steps.length - 1] as any).conditionalAssertion = conditionalRisk.isConditional;
+            (steps[steps.length - 1] as any).conditionalRisk = conditionalRisk.risk;
+            // Clear failure markers
+            if (failedAtStep === es.stepIndex) {
+              failedAtStep = undefined;
+              failedTarget = undefined;
+              failedReason = undefined;
+            }
+          } else {
+            // Not recovered - set failure metadata
+            (steps[steps.length - 1] as any).recoveryAttempts = recoveryResult.recoveryAttempts;
+            (steps[steps.length - 1] as any).assertionImportance = assertionImportance;
+            (steps[steps.length - 1] as any).conditionalAssertion = conditionalRisk.isConditional;
+            (steps[steps.length - 1] as any).conditionalRisk = conditionalRisk.risk;
+            (steps[steps.length - 1] as any).conditionalReason = conditionalRisk.reason;
+
+            // Only mark as blocking failure if importance is blocking and not conditional
+            if (assertionImportance === "blocking" && !conditionalRisk.isConditional) {
+              if (!failedAtStep && es.source === "action") {
+                failedAtStep = es.stepIndex;
+                failedTarget = assertionResult.assertionText;
+                failedReason = "assertion_not_found_unrecovered";
+              }
+            } else if (conditionalRisk.isConditional && conditionalRisk.risk === "high") {
+              // Conditional assertion without data requirement - mark as review needed
+              if (!failedAtStep && es.source === "action") {
+                failedAtStep = es.stepIndex;
+                failedTarget = assertionResult.assertionText;
+                failedReason = "conditional_assertion_without_data";
+              }
+            } else if (assertionImportance === "contextual" || assertionImportance === "optional") {
+              // Non-blocking assertion - don't fail the scenario
+              console.log(`[assertion-recovery] non-blocking assertion "${assertionResult.assertionText}" importance=${assertionImportance} - not failing scenario`);
+            }
+
+            // AI Repair for assertions: attempt assertion_resolution after local recovery fails
+            if (assertionResult.status === "needs_assertion_resolution" && envTrue("AI_REPAIR_ENABLED", false) && envTrue("AI_REPAIR_USE_CONTEXT_PACK", true)) {
             const aiAssertionStartTime = Date.now();
             console.log(`[ai-repair:assertion] enabled provider=${process.env.AI_PROVIDER ?? "unknown"} model=${process.env.AI_MODEL ?? "unknown"}`);
             console.log(`[ai-repair:assertion] failure=assertion_not_satisfied target="${assertionResult.assertionText}"`);
@@ -1881,7 +2005,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             console.log(`[ai-repair:assertion] context evidenceCandidates=${evidenceCandidates.length}`);
 
             const aiAssertionRepair = await runAiRepairOrchestrator({
-              appSlug: String((options.env as any)?.APP_SLUG ?? "default"),
+              appSlug: discoveryAppSlug,
               failure: "assertion_not_satisfied",
               failureType: "assertion_not_satisfied",
               currentStep: es.originalText,
@@ -1897,8 +2021,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
                 name: el.name,
                 text: el.text,
                 visible: Boolean(el.visible),
-                enabled: undefined,
-                clickable: Boolean(el.visible && (el.type === "button" || el.type === "link" || el.role === "button" || el.role === "link")),
+                enabled: isSnapshotElementEnabled(el),
+                clickable: isSnapshotElementClickable(el),
                 editable: Boolean(el.type === "input" || el.type === "textarea" || el.role === "textbox"),
                 sensitive: false
               })),
@@ -1975,6 +2099,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         }
       }
       continue;
+    }
+
     }
 
     if (orderedItem.type === "nav_segment") {
@@ -2138,9 +2264,20 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       continue;
     }
 
-    const actionTarget = orderedItem.actionTarget!;
-    if (actionTarget.valueSource === "test_data" && actionTarget.valueKey) {
-      console.log(`[discovery:case] Resolving fill target: ${actionTarget.target}`);
+    const actionTarget = orderedItem.actionTarget;
+    if (!actionTarget) {
+      console.log(`[value-source] missing target context phase=action stepIndex=${orderedItem.index} targetText=none source=parser`);
+      continue;
+    }
+
+    const normalizedActionTarget = normalizeParsedTarget<ActionTargetItem>(actionTarget);
+    if (!normalizedActionTarget.target) {
+      console.log(`[value-source] missing target context phase=action stepIndex=${orderedItem.index} targetText=none source=parser`);
+      continue;
+    }
+
+    if (normalizedActionTarget.valueSource === "test_data" && normalizedActionTarget.valueKey) {
+      console.log(`[discovery:case] Resolving fill target: ${normalizedActionTarget.target}`);
       
       // Build auto-generate config from env/config
       const env = options.env ?? {};
@@ -2155,7 +2292,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       };
       
       console.log(`[data-resolver] config: missingInputBehavior=${missingInputBehavior}, autoGenerateTestData=${autoGenerateTestData}, profile=${testDataProfile}, autoGenerateSensitiveData=${autoGenerateSensitiveData}`);
-      console.log(`[data-resolver] resolving key="${actionTarget.valueKey}" field="${actionTarget.target}"`);
+      console.log(`[data-resolver] resolving key="${normalizedActionTarget.valueKey}" field="${normalizedActionTarget.target}"`);
       
       const testDataMap = testData ?? {};
       const testDataAliases = (env.APP_TEST_DATA_ALIASES_JSON as Record<string, string[]>) ?? {};
@@ -2166,13 +2303,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         }
       }
       
-      const dataResolution = resolveDataKey(actionTarget.valueKey, {
+      const dataResolution = resolveDataKey(normalizedActionTarget.valueKey, {
         testData: testDataMap,
         testDataAliases,
         env: envVars,
         missingInputBehavior,
         autoGenerateConfig,
-        field: actionTarget.target,
+        field: normalizedActionTarget.target,
         context: scenario.title
       });
       
@@ -2183,14 +2320,14 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         currentSnapshot = scan.snapshot;
         
         const errorMsg = dataResolution.status === "missing_sensitive"
-          ? `Missing sensitive test data value for key "${actionTarget.valueKey}". Set APP_TEST_DATA_JSON.${actionTarget.valueKey} or enable AUTO_GENERATE_SENSITIVE_DATA for test data.`
-          : `Missing test data value for key "${actionTarget.valueKey}". Set APP_TEST_DATA_JSON.${actionTarget.valueKey} or APP_${actionTarget.valueKey.toUpperCase()}`;
+          ? `Missing sensitive test data value for key "${normalizedActionTarget.valueKey}". Set APP_TEST_DATA_JSON.${normalizedActionTarget.valueKey} or enable AUTO_GENERATE_SENSITIVE_DATA for test data.`
+          : `Missing test data value for key "${normalizedActionTarget.valueKey}". Set APP_TEST_DATA_JSON.${normalizedActionTarget.valueKey} or APP_${normalizedActionTarget.valueKey.toUpperCase()}`;
         
         steps.push({
           index: actionTarget.index,
           action: actionTarget.action,
           status: "not_found",
-          targetText: actionTarget.target,
+          targetText: normalizedActionTarget.target,
           snapshotUrl: scan.url,
           snapshotTitle: scan.title,
           elementsFound: scan.elementsCount,
@@ -2199,7 +2336,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         });
         
         failedAtStep = actionTarget.index;
-        failedTarget = actionTarget.target;
+        failedTarget = normalizedActionTarget.target;
         failedReason = dataResolution.status === "missing_sensitive" ? "missing_sensitive_test_data" : "missing_test_data";
         
         await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
@@ -2217,22 +2354,22 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       }
       
       if (dataResolution.status === "skipped") {
-        console.log(`[discovery:case] Skipping fill due to missingInputBehavior=skip: ${actionTarget.valueKey}`);
+        console.log(`[discovery:case] Skipping fill due to missingInputBehavior=skip: ${normalizedActionTarget.valueKey}`);
         steps.push({
           index: actionTarget.index,
           action: actionTarget.action,
           status: "skipped",
-          targetText: actionTarget.target,
+          targetText: normalizedActionTarget.target,
           error: dataResolution.error
         });
         continue;
       }
       
       // Track resolved data keys
-      if (actionTarget.valueKey) {
-        resolvedDataKeys.add(actionTarget.valueKey);
+      if (normalizedActionTarget.valueKey) {
+        resolvedDataKeys.add(normalizedActionTarget.valueKey);
       }
-      
+
       const fillValue = dataResolution.value!;
 
       const fillStability = await waitForStablePageState(page, { timeoutMs: 10000, pollMs: 500, stableForMs: 800 });
@@ -2242,17 +2379,17 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         currentSnapshot = scan.snapshot;
       }
 
-      const resolution = await resolveFillTarget(page, currentSnapshot, actionTarget.target, activeContainer);
+      const resolution = await resolveFillTarget(page, currentSnapshot, normalizedActionTarget.target, activeContainer);
 
       if (resolution.status === "not_found") {
         if (actionTarget.isOptional) {
-          console.log(`[discovery:case] Optional fill target not found, skipping: ${actionTarget.target}`);
+          console.log(`[discovery:case] Optional fill target not found, skipping: ${normalizedActionTarget.target}`);
           steps.push({
             index: actionTarget.index,
             action: actionTarget.action,
             status: "skipped",
-            targetText: actionTarget.target,
-            error: `Optional fill target "${actionTarget.target}" not found on current page.`
+            targetText: normalizedActionTarget.target,
+            error: `Optional fill target "${normalizedActionTarget.target}" not found on current page.`
           });
           continue;
         }
@@ -2638,13 +2775,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
 
-        const errorMsg = `Fill target "${actionTarget.target}" not found on current page. ${(resolution as any).editableCandidatesCount ?? 0} editable candidates evaluated.`;
+        const errorMsg = `Fill target "${normalizedActionTarget.target}" not found on current page. ${(resolution as any).editableCandidatesCount ?? 0} editable candidates evaluated.`;
 
         steps.push({
           index: actionTarget.index,
           action: actionTarget.action,
           status: "not_found",
-          targetText: actionTarget.target,
+          targetText: normalizedActionTarget.target,
           snapshotUrl: scan.url,
           snapshotTitle: scan.title,
           elementsFound: scan.elementsCount,
@@ -2653,7 +2790,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         });
 
         failedAtStep = actionTarget.index;
-        failedTarget = actionTarget.target;
+        failedTarget = normalizedActionTarget.target;
         failedReason = "fill_target_not_found";
 
         await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
@@ -2683,7 +2820,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           index: actionTarget.index,
           action: actionTarget.action,
           status: "fill_target_not_editable",
-          targetText: actionTarget.target,
+          targetText: normalizedActionTarget.target,
           snapshotUrl: scan.url,
           snapshotTitle: scan.title,
           elementsFound: scan.elementsCount,
@@ -3384,8 +3521,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             name: el.name,
             text: el.text,
             visible: Boolean(el.visible),
-            enabled: undefined,
-            clickable: Boolean(el.visible && (el.type === "button" || el.type === "link" || el.role === "button" || el.role === "link")),
+            enabled: isSnapshotElementEnabled(el),
+            clickable: isSnapshotElementClickable(el),
             editable: Boolean(el.type === "input" || el.type === "textarea" || el.role === "textbox"),
             semanticRelation: undefined,
             score: resolution.candidates.find((c) => c.elementId === el.id)?.matchScore,
@@ -3399,7 +3536,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           console.log(`[ai-repair] context candidates=${aiCandidates.length}`);
 
           const aiRepair = await runAiRepairOrchestrator({
-            appSlug: String((options.env as any)?.APP_SLUG ?? "default"),
+            appSlug: discoveryAppSlug,
             failure: "target_not_found",
             currentStep: actionTarget.action,
             currentUrl: page.url(),
@@ -3505,7 +3642,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         // Route completion: attempt to insert missing intermediate step before declaring failure
         const appSlug = options.appSlug ?? "default";
         const routeCompletionConfig = (options as any)?.aiAssistedDiscovery?.config?.routeCompletion;
-        const rcRouteProfile = routeCompletionConfig?.useAppProfile !== false ? loadRouteProfile(appSlug) : undefined;
+        const explicitRouteProfile = (options.scenario as any)?.routeProfile;
+        const rcRouteProfile = routeCompletionConfig?.useAppProfile !== false ? loadRouteProfile(appSlug, explicitRouteProfile) : undefined;
         
         console.log(`[route-completion] app context appSlug=${appSlug} source=${options.appSlug ? "workflow" : "default-fallback"}`);
         
@@ -3530,8 +3668,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             name: el.name,
             text: el.text,
             visible: Boolean(el.visible),
-            enabled: undefined,
-            clickable: Boolean(el.visible && (el.type === "button" || el.type === "link" || el.role === "button" || el.role === "link")),
+            enabled: isSnapshotElementEnabled(el),
+            clickable: isSnapshotElementClickable(el),
             editable: Boolean(el.type === "input" || el.type === "textarea" || el.role === "textbox"),
             sensitive: false
           }));
@@ -3832,7 +3970,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           }
 
           const aiSelectionRepair = await runAiRepairOrchestrator({
-            appSlug: String((options.env as any)?.APP_SLUG ?? "default"),
+            appSlug: discoveryAppSlug,
             failure: "ambiguous_selection",
             failureType: "ambiguous_selection",
             currentStep: actionTarget.action,
@@ -4120,7 +4258,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       if (routeCompletionConfig?.enabled !== true) {
         console.log(`[route-completion] skipped: routeCompletion not enabled in config`);
       } else {
-        const rcRouteProfile = routeCompletionConfig?.useAppProfile !== false ? loadRouteProfile(appSlug) : undefined;
+        const explicitRouteProfile = (options.scenario as any)?.routeProfile;
+        const rcRouteProfile = routeCompletionConfig?.useAppProfile !== false ? loadRouteProfile(appSlug, explicitRouteProfile) : undefined;
         
         if (!rcRouteProfile) {
           console.log(`[route-completion] routeProfile missing appSlug=${appSlug} source=loadRouteProfile returned undefined`);
@@ -4140,8 +4279,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           name: el.name,
           text: el.text,
           visible: Boolean(el.visible),
-          enabled: undefined,
-          clickable: Boolean(el.visible && (el.type === "button" || el.type === "link" || el.role === "button" || el.role === "link")),
+          enabled: isSnapshotElementEnabled(el),
+          clickable: isSnapshotElementClickable(el),
           editable: Boolean(el.type === "input" || el.type === "textarea" || el.role === "textbox"),
           sensitive: false
         }));
@@ -4505,7 +4644,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         // Post-click route completion recovery: attempt to insert missing intermediate step
         const appSlug = options.appSlug ?? "default";
         const routeCompletionConfig = (options as any)?.aiAssistedDiscovery?.config?.routeCompletion;
-        const postRcRouteProfile = routeCompletionConfig?.useAppProfile !== false ? loadRouteProfile(appSlug) : undefined;
+        const explicitRouteProfile = (options.scenario as any)?.routeProfile;
+        const postRcRouteProfile = routeCompletionConfig?.useAppProfile !== false ? loadRouteProfile(appSlug, explicitRouteProfile) : undefined;
         
         let postClickRouteCompletionAttempted = false;
         let postClickRouteCompletionResolution: MissingIntermediateStepResolution | undefined;
@@ -4535,8 +4675,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             name: el.name,
             text: el.text,
             visible: Boolean(el.visible),
-            enabled: undefined,
-            clickable: Boolean(el.visible && (el.type === "button" || el.type === "link" || el.role === "button" || el.role === "link")),
+            enabled: isSnapshotElementEnabled(el),
+            clickable: isSnapshotElementClickable(el),
             editable: Boolean(el.type === "input" || el.type === "textarea" || el.role === "textbox"),
             sensitive: false
           }));
@@ -5430,6 +5570,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
   // Calculate status based on UNRESOLVED blocking failures (not historical failures)
   const unresolvedBlockingFailures = getUnresolvedBlockingFailures(steps);
+  const nonBlockingAssertionFailures = countNonBlockingAssertionFailures(steps);
   const foundSteps = steps.filter((s) => s.status === "found" || s.status === "satisfied_by_children" || (s.status === "skipped_after_completion" && earlyCompletionSatisfied)).length;
   const totalSteps = steps.filter((s) => s.status !== "skipped").length;
   const allFound = (foundSteps === totalSteps && totalSteps > 0 && unresolvedBlockingFailures.length === 0) || earlyCompletionSatisfied;
@@ -5455,6 +5596,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     console.log(`[discovery:case] unresolvedBlockingFailures=${unresolvedBlockingFailures.length}, using failedReason='${effectiveFailedReason}'`);
   } else {
     console.log(`[discovery:case] unresolvedBlockingFailures=0 after assertion recovery`);
+  }
+
+  if (nonBlockingAssertionFailures > 0) {
+    console.log(`[discovery:case] nonBlockingAssertionFailures=${nonBlockingAssertionFailures} ignored for blocking status`);
   }
 
   const status: CaseDiscoveryResult["status"] = effectiveFailedReason === "needs_approval"
@@ -5510,6 +5655,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       ...(allFound
         ? ["Discovery completed successfully. All targets and concrete assertions passed."]
         : [`Discovery partial: ${foundSteps}/${totalSteps} navigations/assertions satisfied.`]),
+      ...(nonBlockingAssertionFailures > 0
+        ? [`Review needed: ${nonBlockingAssertionFailures} non-blocking assertion failure(s) were ignored for pass/fail reconciliation.`]
+        : []),
       ...(recoveredSteps.length > 0
         ? [`Recovered ${recoveredSteps.length} transient assertion failure(s) - see step recovery metadata for details.`]
         : [])
@@ -5571,7 +5719,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       aiRepairDiagnostics: diagnostics
     };
   });
-  const aiRepairSummary = buildAiRepairCaseSummary(stepsWithAiRepair, options.env?.APP_SLUG as string | undefined);
+  const aiRepairSummary = buildAiRepairCaseSummary(stepsWithAiRepair, discoveryAppSlug);
   
   // Save AI Repair summary to artifact
   const aiRepairSummaryPath = path.join(evidenceDir, "ai-repair-summary.json");

@@ -1,0 +1,22 @@
+{
+  "appSlug": "estafetas-pagatodo",
+  "name": "ESTAFETAS PAGATODO",
+  "source": {
+    "type": "testrail_section",
+    "sectionName": "ESTAFETAS PAGATODO"
+  },
+  "routeProfile": {
+    "name": "default",
+    "entry": [],
+    "aliases": {},
+    "intermediates": {},
+    "domainTerms": {},
+    "visibleControls": [],
+    "representativeFixture": {},
+    "notes": [
+      "App creada automáticamente desde QA Lab."
+    ]
+  },
+  "createdAt": "2026-06-01T20:07:23.513Z",
+  "updatedAt": "2026-06-01T20:07:23.513Z"
+}

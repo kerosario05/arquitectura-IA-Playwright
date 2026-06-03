@@ -168,6 +168,28 @@ function parseFlatJsonObject(rawValue: string, envName: string): Record<string, 
   return parsed as Record<string, unknown>;
 }
 
+function parseRequiredCaseFields(rawValue?: string): Record<string, string> | undefined {
+  if (!rawValue || !rawValue.trim()) {
+    return undefined;
+  }
+
+  const parsed = parseFlatJsonObject(rawValue, "TESTRAIL_REQUIRED_CASE_FIELDS_JSON");
+  const result: Record<string, string> = {};
+
+  for (const [key, value] of Object.entries(parsed)) {
+    if (typeof value !== "string") {
+      throw new Error("Invalid TESTRAIL_REQUIRED_CASE_FIELDS_JSON. All values must be strings.");
+    }
+    const trimmed = value.trim();
+    if (!trimmed) {
+      continue;
+    }
+    result[key] = trimmed;
+  }
+
+  return Object.keys(result).length > 0 ? result : undefined;
+}
+
 function parseTestData(rawValue?: string): TestDataMap {
   if (!rawValue || !rawValue.trim()) {
     return {};
@@ -349,7 +371,8 @@ export const config: FullConfig = {
       projectId: process.env.TESTRAIL_PROJECT_ID?.trim() || undefined,
       suiteId: process.env.TESTRAIL_SUITE_ID?.trim() || undefined,
       sectionId: process.env.TESTRAIL_SECTION_ID?.trim() || undefined,
-      sessionId: process.env.TESTRAIL_SESSION_ID?.trim() || undefined
+      sessionId: process.env.TESTRAIL_SESSION_ID?.trim() || undefined,
+      requiredCaseFields: parseRequiredCaseFields(process.env.TESTRAIL_REQUIRED_CASE_FIELDS_JSON)
     },
     jira: {
       baseUrl: process.env.JIRA_BASE_URL?.trim() || undefined,

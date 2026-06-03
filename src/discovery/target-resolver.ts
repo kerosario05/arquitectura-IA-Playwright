@@ -114,8 +114,25 @@ const DEFAULT_OPTIONS = {
   activeContainer: undefined
 };
 
-export function normalizeText(text: string): string {
-  return text
+function extractTextValue(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (value == null) return "";
+  if (Array.isArray(value)) return value.map((item) => extractTextValue(item)).filter(Boolean).join(" ");
+  if (typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+    return [
+      extractTextValue(obj.text),
+      extractTextValue(obj.label),
+      extractTextValue(obj.name),
+      extractTextValue(obj.value),
+      extractTextValue(obj.title)
+    ].filter(Boolean).join(" ").trim();
+  }
+  return String(value);
+}
+
+export function normalizeText(text: unknown): string {
+  return extractTextValue(text)
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -125,6 +142,26 @@ export function normalizeText(text: string): string {
 
 function escapeRegex(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function sanitizeRegexPattern(pattern: string): string {
+  return pattern
+    .replace(/\\s\+\*/g, "\\s+")
+    .replace(/\\s\*\+/g, "\\s*")
+    .replace(/\\s\+\+/g, "\\s+")
+    .replace(/\\s\*\*/g, "\\s*")
+    .replace(/(\.\*|\.\+|\.\?)([+*?]+)/g, "$1")
+    .replace(/([+*?]){2,}/g, "$1");
+}
+
+function createSafeRegExp(pattern: string, flags = "i"): RegExp {
+  const sanitized = sanitizeRegexPattern(pattern);
+  try {
+    return new RegExp(sanitized, flags);
+  } catch {
+    const literal = escapeRegex(normalizeText(pattern));
+    return new RegExp(literal || ".^", flags);
+  }
 }
 
 function toAccentInsensitivePattern(text: string): string {
@@ -152,16 +189,16 @@ function toAccentInsensitivePattern(text: string): string {
   }).join("");
 }
 
-export function buildFlexibleTextRegex(text: string): RegExp {
-  const trimmed = text.trim();
+export function buildFlexibleTextRegex(text: unknown): RegExp {
+  const trimmed = extractTextValue(text).trim();
   if (!trimmed) {
     return /.^/i;
   }
 
-  return new RegExp(toAccentInsensitivePattern(trimmed), "i");
+  return createSafeRegExp(toAccentInsensitivePattern(trimmed), "i");
 }
 
-export function buildFlexibleTokenRegex(text: string): RegExp {
+export function buildFlexibleTokenRegex(text: unknown): RegExp {
   const normalized = normalizeText(text);
   const tokens = normalized.split(/\s+/).filter(Boolean);
   if (tokens.length === 0) {
@@ -172,7 +209,7 @@ export function buildFlexibleTokenRegex(text: string): RegExp {
     .map((token) => toAccentInsensitivePattern(token))
     .join(".*");
 
-  return new RegExp(pattern, "i");
+  return createSafeRegExp(pattern, "i");
 }
 
 export function computeTokenScore(target: string, candidate: string): number {
@@ -489,6 +526,193 @@ export function deduplicateCandidates(candidates: TargetCandidate[]): TargetCand
   return Array.from(seen.values()).sort((a, b) => b.matchScore - a.matchScore);
 }
 
+function normalizeRouteTerms(routeProfile?: AppRouteProfile): string[] {
+  return [
+    ...(routeProfile?.domainTerms || []),
+    ...(routeProfile?.entryPoints || []),
+    ...Object.values(routeProfile?.aliases || {})
+  ].map((term) => normalizeText(term)).filter(Boolean);
+}
+
+function shouldTryContextualOptionResolution(target: string, opts: ResolveActionTargetOptions): boolean {
+  const normalized = normalizeText(target);
+  if (!normalized) return false;
+
+  const tokenCount = normalized.split(/\s+/).filter(Boolean).length;
+  const hasOptionKeywords = /\b(opcion|opción|tipo|subtipo|producto|cuenta|moneda|beneficiario|registro|fila|card|lista|listado)\b/i.test(normalized);
+  const hasSelectionKeywords = /\b(selecciona|seleccionar|elige|escoge|clic en|click en|pulsa|toca|ver)\b/i.test(normalized);
+  const routeTerms = normalizeRouteTerms(opts.routeProfile);
+  const routeTermMatch = routeTerms.some((term) => term && (normalized.includes(term) || term.includes(normalized)));
+
+  return tokenCount <= 6 || hasOptionKeywords || hasSelectionKeywords || routeTermMatch;
+}
+
+async function attemptContextualOptionResolution(
+  page: Page,
+  snapshot: PageSnapshot,
+  target: string,
+  opts: ResolveActionTargetOptions
+): Promise<TargetResolutionResult | undefined> {
+  if (!shouldTryContextualOptionResolution(target, opts)) {
+    return undefined;
+  }
+
+  const contextualInput: ContextualResolverInput = {
+    target,
+    previousTarget: opts.previousTarget || opts.relationContext,
+    nextTarget: opts.nextTarget,
+    routeHistory: opts.routeHistory,
+    routeProfile: opts.routeProfile,
+    candidates: snapshot.elements.filter((el) => el.visible).slice(0, 30)
+  };
+
+  const contextualResult = resolveAmbiguousIntermediateTarget(contextualInput);
+  const selectedCandidate = contextualResult.selectedCandidate;
+  const selectedCandidateText = contextualResult.selectedCandidateText || "";
+
+  if (contextualResult.status === "resolved" && selectedCandidate) {
+    console.log(`[target-resolver] contextual_option_resolver resolved target="${target}" selected="${selectedCandidateText}" reason="${contextualResult.reason}"`);
+
+    const resolved = await resolveSnapshotElementLocator(page, {
+      element: selectedCandidate,
+      target,
+      candidateText: selectedCandidateText,
+      type: contextualResult.classifiedCandidates.find((c) => c.element === selectedCandidate)?.type || "button",
+      tagName: selectedCandidate.tagName,
+      confidence: contextualResult.classifiedCandidates.find((c) => c.element === selectedCandidate)?.score || 0.7,
+      matchReason: `contextual_option:${contextualResult.reason}`
+    });
+
+    if (resolved.locator) {
+      return {
+        status: "resolved",
+        target,
+        locator: resolved.locator,
+        locatorStrategy: "contextual_option",
+        confidence: contextualResult.classifiedCandidates.find((c) => c.element === selectedCandidate)?.score || 0.7,
+        matchReason: `contextual_option:${contextualResult.reason}`,
+        candidateText: selectedCandidateText,
+        candidateId: selectedCandidate.id,
+        candidates: contextualResult.classifiedCandidates.map((c) => ({
+          elementId: c.element.id,
+          text: c.text,
+          normalizedText: c.normalizedText,
+          type: c.type,
+          role: c.element.role,
+          tagName: c.element.tagName,
+          isClickable: c.isClickable,
+          matchScore: c.score,
+          matchReason: `contextual_option:${c.scoreReasons.join(",")}`,
+          locatorStrategy: c.isClickable ? "contextual_option" : "text"
+        })),
+        contextualResolverDiagnostics: contextualResult.diagnostics
+      } as TargetResolutionResult & { contextualResolverDiagnostics?: any };
+    }
+  }
+
+  if (contextualResult.status === "already_satisfied") {
+    return {
+      status: "resolved",
+      target,
+      locator: undefined,
+      locatorStrategy: "contextual_option_already_satisfied",
+      confidence: 0.9,
+      matchReason: `contextual_option_already_satisfied:${contextualResult.reason || "already_satisfied"}`,
+      candidateText: contextualResult.alreadySatisfiedEvidence?.candidateText || "",
+      candidates: [],
+      alreadySatisfiedEvidence: contextualResult.alreadySatisfiedEvidence,
+      ambiguityDiagnostics: {
+        target,
+        semanticRole: opts.semanticRole !== "unknown" ? opts.semanticRole : undefined,
+        relationContext: opts.relationContext || undefined,
+        candidateCount: contextualResult.classifiedCandidates.length,
+        candidateTexts: contextualResult.classifiedCandidates.slice(0, 5).map((c) => c.text),
+        candidateRoles: [...new Set(contextualResult.classifiedCandidates.slice(0, 5).map((c) => c.element.role ?? c.element.tagName ?? "unknown"))],
+        candidateStrategies: [...new Set(contextualResult.classifiedCandidates.slice(0, 5).map((c) => c.type))]
+      }
+    } as TargetResolutionResult;
+  }
+
+  if (contextualResult.status === "unresolved" && contextualResult.classifiedCandidates.length > 0) {
+    const classified = [...contextualResult.classifiedCandidates].sort((a, b) => b.score - a.score);
+    const best = classified[0];
+    const second = classified[1];
+    const hasAmbiguity = classified.length > 1 && !!second && Math.abs(best.score - second.score) < 0.15;
+
+    if (classified.length === 1 && !best.isSubmitLike && !best.isSensitive && !best.isBackNavigation) {
+      const resolved = await resolveSnapshotElementLocator(page, {
+        element: best.element,
+        target,
+        candidateText: best.text,
+        type: best.type,
+        tagName: best.element.tagName,
+        confidence: Math.max(best.score, 0.5),
+        matchReason: "contextual_option_single_safe_candidate"
+      });
+
+      if (resolved.locator) {
+        return {
+          status: "resolved",
+          target,
+          locator: resolved.locator,
+          locatorStrategy: "contextual_option",
+          confidence: Math.max(best.score, 0.5),
+          matchReason: "contextual_option_single_safe_candidate",
+          candidateText: best.text,
+          candidateId: best.element.id,
+          candidates: classified.slice(0, 5).map((c) => ({
+            elementId: c.element.id,
+            text: c.text,
+            normalizedText: c.normalizedText,
+            type: c.type,
+            role: c.element.role,
+            tagName: c.element.tagName,
+            isClickable: c.isClickable,
+            matchScore: c.score,
+            matchReason: `contextual_option:${c.scoreReasons.join(",")}`,
+            locatorStrategy: c.isClickable ? "contextual_option" : "text"
+          })),
+          contextualResolverDiagnostics: contextualResult.diagnostics
+        } as TargetResolutionResult & { contextualResolverDiagnostics?: any };
+      }
+    }
+
+    return {
+      status: hasAmbiguity ? "ambiguous" : "not_found",
+      target,
+      confidence: best.score,
+      matchReason: hasAmbiguity ? "ambiguous_contextual_option" : "review_needed",
+      candidateText: best.text,
+      candidates: classified.slice(0, 5).map((c) => ({
+        elementId: c.element.id,
+        text: c.text,
+        normalizedText: c.normalizedText,
+        type: c.type,
+        role: c.element.role,
+        tagName: c.element.tagName,
+        isClickable: c.isClickable,
+        matchScore: c.score,
+        matchReason: `contextual_option:${c.scoreReasons.join(",")}`,
+        locatorStrategy: c.isClickable ? "contextual_option" : "text"
+      })),
+      ambiguityDiagnostics: {
+        target,
+        semanticRole: opts.semanticRole !== "unknown" ? opts.semanticRole : undefined,
+        relationContext: opts.relationContext || undefined,
+        candidateCount: classified.length,
+        candidateTexts: classified.slice(0, 5).map((c) => c.text),
+        candidateRoles: [...new Set(classified.slice(0, 5).map((c) => c.element.role ?? c.element.tagName ?? "unknown"))],
+        candidateStrategies: [...new Set(classified.slice(0, 5).map((c) => c.type))],
+        suggestedExactTargetPattern: hasAmbiguity
+          ? `Ambiguous contextual option. Candidates: ${classified.slice(0, 3).map((c) => `"${c.text}"`).join(", ")}`
+          : `Review needed for contextual option "${target}". Best candidate: "${best.text}".`
+      }
+    } as TargetResolutionResult;
+  }
+
+  return undefined;
+}
+
 export async function resolveActionTarget(
   page: Page,
   snapshot: PageSnapshot,
@@ -623,12 +847,57 @@ export async function resolveActionTarget(
 
   const snapshotCandidates = buildSnapshotCandidates(snapshot, target);
 
+  const normalizedTarget = normalizeText(target);
+  const backNavigationAlias = (
+    /\bvolver\b/.test(normalizedTarget) ||
+    /\bregresar\b/.test(normalizedTarget) ||
+    /\bvolver\s+al\s+listado\b/.test(normalizedTarget) ||
+    /\bregresar\s+al\s+listado\b/.test(normalizedTarget) ||
+    /\bvolver\s+atr[áa]s\b/.test(normalizedTarget) ||
+    /\bregresar\s+atr[áa]s\b/.test(normalizedTarget)
+  );
+
+  if (backNavigationAlias) {
+    const backButton = page.getByRole("button", { name: buildFlexibleTextRegex("Volver") }).first();
+    if (await backButton.count().catch(() => 0) > 0) {
+      return {
+        status: "resolved",
+        target,
+        locator: backButton,
+        locatorStrategy: "back_navigation_alias",
+        confidence: 0.85,
+        matchReason: "back_navigation_alias",
+        candidateText: "Volver",
+        candidates: [{
+          elementId: "back-navigation",
+          text: "Volver",
+          normalizedText: "volver",
+          type: "button",
+          role: "button",
+          tagName: "button",
+          isClickable: true,
+          matchScore: 0.85,
+          matchReason: "back_navigation_alias",
+          locatorStrategy: "back_navigation_alias"
+        }],
+        targetDisambiguation: {
+          target,
+          submitLike: false,
+          activeContainerUsed: false,
+          candidatesInsideActiveContainer: 0,
+          candidatesOutsideActiveContainer: 1,
+          selectedReason: "back_navigation_alias"
+        }
+      };
+    }
+  }
+
   // === Early resolution for submit-like targets within activeContainer ===
   if (opts.activeContainer && isSubmitLikeTarget(target) && opts.activeContainer.containerLocator) {
     console.log(`[target-resolver] Submit-like target within active container: target="${target}"`);
     
     // Try to find button inside activeContainer first
-    const buttonInContainer = opts.activeContainer.containerLocator.getByRole('button', { name: new RegExp(target, 'i') }).first();
+    const buttonInContainer = opts.activeContainer.containerLocator.getByRole('button', { name: buildFlexibleTextRegex(target) }).first();
     const buttonCount = await buttonInContainer.count().catch(() => 0);
     
     console.log(`[target-resolver] Button count in container: ${buttonCount}`);
@@ -868,6 +1137,11 @@ export async function resolveActionTarget(
   const allViable = [...clickableCandidates, ...nonClickableCandidates].slice(0, 10);
 
   if (clickableCandidates.length === 0 && nonClickableCandidates.length === 0) {
+    const contextualOptionResult = await attemptContextualOptionResolution(page, snapshot, target, opts);
+    if (contextualOptionResult) {
+      return contextualOptionResult;
+    }
+
     // Try semantic resolution as fallback
     try {
       const semanticResult = await resolveSemanticActionTarget(page, target);
@@ -1053,6 +1327,37 @@ export async function resolveActionTarget(
             contextualResolverDiagnostics: contextualResult.diagnostics
           } as TargetResolutionResult & { contextualResolverDiagnostics?: any };
         }
+
+        return {
+          status: "ambiguous",
+          target,
+          confidence: contextualResult.classifiedCandidates.find(c => c.element === contextualResult.selectedCandidate)?.score || best.matchScore,
+          matchReason: "ambiguous_contextual_option",
+          candidateText: contextualResult.selectedCandidateText || best.text,
+          candidates: contextualResult.classifiedCandidates.map(c => ({
+            elementId: c.element.id,
+            text: c.text,
+            normalizedText: c.normalizedText,
+            type: c.type,
+            role: c.element.role,
+            tagName: c.element.tagName,
+            isClickable: c.isClickable,
+            matchScore: c.score,
+            matchReason: `contextual_option:${c.scoreReasons.join(",")}`,
+            locatorStrategy: c.isClickable ? "contextual_option" : "text"
+          })).slice(0, 5),
+          ambiguityDiagnostics: {
+            target,
+            semanticRole: opts.semanticRole !== "unknown" ? opts.semanticRole : undefined,
+            relationContext: opts.relationContext || undefined,
+            candidateCount: contextualResult.classifiedCandidates.length,
+            candidateTexts: contextualResult.classifiedCandidates.slice(0, 5).map(c => c.text),
+            candidateRoles: [...new Set(contextualResult.classifiedCandidates.slice(0, 5).map(c => c.element.role ?? c.element.tagName ?? "unknown"))],
+            candidateStrategies: [...new Set(contextualResult.classifiedCandidates.slice(0, 5).map(c => c.type))],
+            suggestedExactTargetPattern: `Ambiguous contextual option. Candidates: ${contextualResult.classifiedCandidates.slice(0, 3).map(c => `"${c.text}"`).join(", ")}`
+          },
+          contextualResolverDiagnostics: contextualResult.diagnostics
+        } as TargetResolutionResult & { contextualResolverDiagnostics?: any };
       }
       
       // Handle already_satisfied: intermediate variant already visible, skip click
@@ -1104,6 +1409,11 @@ export async function resolveActionTarget(
   }
 
   if (best.matchScore < opts.minConfidence) {
+    const contextualOptionResult = await attemptContextualOptionResolution(page, snapshot, target, opts);
+    if (contextualOptionResult) {
+      return contextualOptionResult;
+    }
+
     // === Contextual Ambiguous Intermediate Resolution (low confidence) ===
     const contextualInput: ContextualResolverInput = {
       target,
@@ -1158,7 +1468,7 @@ export async function resolveActionTarget(
     };
   }
 
-  const normalizedTarget = normalizeText(target);
+  const normalizedTargetText = normalizeText(target);
   const element = best.elementId
     ? snapshot.elements.find((candidate) => candidate.id === best.elementId)
     : undefined;
@@ -1176,7 +1486,7 @@ export async function resolveActionTarget(
 
   if (!resolved.locator) {
     const diagnosis = allViable.map((c) => ({
-      target: normalizedTarget,
+      target: normalizedTargetText,
       candidateText: c.text,
       normalizedCandidate: c.normalizedText,
       type: c.type,

@@ -1,0 +1,10 @@
+{
+  "id": "preview-003-visualizar-subcategorias-de-prestamos",
+  "externalId": "PREVIEW-003",
+  "caseId": 0,
+  "title": "Visualizar subcategorías de Préstamos",
+  "source": "discovery",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "createdAt": "2026-06-02T20:14:51.440Z"
+}

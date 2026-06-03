@@ -37,6 +37,7 @@
     "discovery:scan": "tsx src/cli/discovery-scan.ts",
     "discovery:case": "tsx src/cli/discovery-case.ts",
     "discovery:batch": "tsx src/cli/discovery-batch.ts",
+    "discovery:preview": "tsx src/cli/discovery-preview.ts",
     "promoted:inspect": "tsx src/cli/promoted-inspect.ts",
     "promoted:validate-runtime": "tsx src/cli/promoted-validate-runtime.ts",
     "ai:validate": "tsx scripts/validate-ai-repair.ts",

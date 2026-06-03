@@ -1,0 +1,5 @@
+interface:
+  display_name: MCP TestRail Case Generator V2
+  short_description: Generate MCP-ready TestRail CSV scenarios, app_config route profiles, and validators.
+  icon: 🧪
+  color: blue

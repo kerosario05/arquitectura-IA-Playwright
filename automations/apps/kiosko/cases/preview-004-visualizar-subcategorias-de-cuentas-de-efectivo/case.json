@@ -1,0 +1,10 @@
+{
+  "id": "preview-004-visualizar-subcategorias-de-cuentas-de-efectivo",
+  "externalId": "PREVIEW-004",
+  "caseId": 0,
+  "title": "Visualizar subcategorías de Cuentas de Efectivo",
+  "source": "discovery",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "createdAt": "2026-06-02T18:56:41.570Z"
+}

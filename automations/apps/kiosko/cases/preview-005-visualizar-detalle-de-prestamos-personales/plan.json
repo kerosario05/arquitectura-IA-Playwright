@@ -1,0 +1,84 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-005",
+    "caseId": 0,
+    "title": "Visualizar detalle de Préstamos personales"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Clic en \"Iniciar\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en \"Información de productos\".",
+      "target": {
+        "strategy": "product_condition",
+        "value": "Información de productos",
+        "exact": false
+      },
+      "locatorStrategy": "product_condition"
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Clic en \"Préstamos\".",
+      "target": {
+        "strategy": "product_condition",
+        "value": "Préstamos",
+        "exact": false
+      },
+      "locatorStrategy": "product_condition"
+    },
+    {
+      "index": 6,
+      "action": "assertText",
+      "description": "Assert: Préstamos personales",
+      "target": {
+        "strategy": "text",
+        "value": "Préstamos personales",
+        "exact": false
+      },
+      "expected": "Préstamos personales"
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Clic en \"Préstamos personales\".",
+      "target": {
+        "strategy": "product_condition",
+        "value": "Préstamos personales",
+        "exact": false
+      },
+      "locatorStrategy": "product_condition"
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-06-02T23:38:26.703Z"
+}

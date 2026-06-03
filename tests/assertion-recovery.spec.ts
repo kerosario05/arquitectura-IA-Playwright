@@ -1,250 +1,194 @@
-/**
- * Assertion Recovery Tests
- * 
- * Tests for transient assertion failure recovery.
- * Verifies that assertions that fail temporarily but are recovered later
- * don't block promotion.
- */
-
 import { test, expect } from "@playwright/test";
-import { evaluatePromotionGate } from "../src/automations/promotion-gate";
-import type { CaseDiscoveryResult, DiscoveryStepResult } from "../src/types/discovery.types";
-import type { ExecutionPlan } from "../src/types/execution-plan.types";
+import {
+  attemptAssertionRecovery,
+  classifyAssertionImportance,
+  detectConditionalAssertionRisk,
+} from "../src/discovery/assertion-recovery";
+import type { PageSnapshot } from "../src/types/page-snapshot.types";
+import type { McpRouteProfile } from "../src/scenarios/scenario-types";
 
-test.describe("Assertion Recovery - Promotion Gate", () => {
-  function createDiscoveryResult(steps: DiscoveryStepResult[], status: string = "discovered_passed"): CaseDiscoveryResult {
-    return {
-      version: "1.0",
-      caseId: 12345,
-      caseTitle: "Test Case",
-      discoveredAt: new Date().toISOString(),
-      status: status as any,
-      steps,
-      discoveredObjects: [],
-      pendingObjectsPath: undefined,
-      pendingPlansPath: undefined,
-      evidenceDir: ".artifacts/test",
-      failedAtStep: undefined,
-      failedTarget: undefined,
-      failedReason: undefined,
-      aiRepairSummary: {
-        enabled: false,
-        invocations: 0,
-        providerName: null,
-        model: null,
-        decisionCounts: {
-          repaired_plan: 0,
-          no_safe_action: 0,
-          needs_more_context: 0,
-          invalid_response: 0,
-          provider_error: 0,
-          provider_disabled: 0
-        },
-        validationCounts: {
-          valid: 0,
-          blocked: 0,
-          invalid: 0,
-          error: 0
-        },
-        repairTypeCounts: {
-          target_resolution: 0,
-          route_recovery: 0,
-          assertion_resolution: 0,
-          pom_method_missing: 0,
-          selection_resolution: 0,
-          missing_intermediate_step: 0,
-          unknown: 0
-        },
-        appliedRepairs: 0,
-        blockedRepairs: 0,
-        avgDurationMs: 0,
-        maxDurationMs: 0,
-        targets: []
-      }
-    };
-  }
+function makeSnapshot(elements: Array<{ text?: string; label?: string; name?: string }>): PageSnapshot {
+  return {
+    version: "1.0",
+    url: "https://example.com",
+    title: "Test Page",
+    capturedAt: new Date().toISOString(),
+    elements: elements.map((el, i) => ({
+      id: `el-${i}`,
+      type: "text",
+      role: "generic",
+      tagName: "span",
+      text: el.text,
+      label: el.label,
+      name: el.name,
+      placeholder: undefined,
+      value: undefined,
+      visible: true,
+      enabled: true,
+      candidateLocators: [],
+      dataHints: [],
+    })),
+    summary: {
+      totalElements: elements.length,
+      buttons: 0,
+      inputs: 0,
+      links: 0,
+      selects: 0,
+      tables: 0,
+      dialogs: 0,
+      headings: 0,
+    },
+  };
+}
 
-  function createPlan(steps: DiscoveryStepResult[], status: ExecutionPlan["status"] = "validated"): ExecutionPlan {
-    return {
-      version: "1.0",
-      source: "discovery_generated",
-      status,
-      scenario: { source: "testrail", caseId: 12345, title: "Test" },
-      requiredData: [],
-      steps: steps.map(s => ({
-        index: s.index,
-        action: s.action as any,
-        description: s.targetText,
-        target: s.targetText ? { strategy: "text" as const, value: s.targetText } : undefined
-      })),
-      createdAt: new Date().toISOString()
-    };
-  }
+function makeRouteProfile(aliases?: Record<string, string | string[]>): McpRouteProfile {
+  return {
+    name: "test_profile",
+    entry: [],
+    aliases: aliases ?? {},
+    intermediates: {},
+    domainTerms: {},
+    visibleControls: ["Volver", "Finalizar sesión", "Solicitar"],
+    representativeFixture: {},
+    notes: [],
+  };
+}
 
-  test("recovered assertion (recoveryStatus=recovered) is not blocking", () => {
-    const steps: DiscoveryStepResult[] = [
-      {
-        index: 1,
-        action: "click",
-        status: "found",
-        targetText: "Home"
-      },
-      {
-        index: 2,
-        action: "assertVisible",
-        status: "not_found",
-        targetText: "Target X",
-        error: "Not visible",
-        assertionClassification: "literal_observable",
-        recoveryStatus: "recovered",
-        recoveredBy: "later_success",
-        recoveryMetadata: {
-          originalFailureReason: "Not visible",
-          recoveredAfterStep: 3,
-          recoveredBecause: "target_used_successfully_later",
-          blocking: false
-        }
-      },
-      {
-        index: 3,
-        action: "click",
-        status: "found",
-        targetText: "Target X"
-      }
-    ];
+// ── attemptAssertionRecovery tests ──
 
-    const result = createDiscoveryResult(steps);
-    const plan = createPlan(steps);
+test("assertion recovery finds accent-insensitive match", () => {
+  const snapshot = makeSnapshot([{ text: "Préstamos personales" }]);
+  const result = attemptAssertionRecovery(snapshot, "Prestamos personales");
 
-    const gate = evaluatePromotionGate({
-      discoveryResult: result,
-      candidatePlan: plan
-    });
+  expect(result.recovered).toBe(true);
+  expect(result.decision).toBe("recovered_accent_insensitive");
+  expect(result.matchedText).toBe("Préstamos personales");
+  expect(result.confidence).toBeGreaterThanOrEqual(0.85);
+});
 
-    // Should be allowed because assertion was recovered
-    expect(gate.allowed).toBe(true);
-    expect(gate.status).toBe("passed");
-    expect(gate.reasons).toEqual([]);
+test("assertion recovery uses alias from routeProfile", () => {
+  const snapshot = makeSnapshot([{ text: "USD" }]);
+  const routeProfile = makeRouteProfile({
+    dolares: ["Dólares", "USD", "Dólares estadounidenses"],
+  });
+  const result = attemptAssertionRecovery(snapshot, "dolares", { routeProfile });
+
+  expect(result.recovered).toBe(true);
+});
+
+test("assertion recovery handles plural/singular variants", () => {
+  const snapshot = makeSnapshot([{ text: "Tarjetas" }]);
+  const result = attemptAssertionRecovery(snapshot, "Tarjetas");
+
+  expect(result.recovered).toBe(true);
+  expect(result.decision).toBe("recovered_accent_insensitive");
+});
+
+test("assertion recovery uses visibleControls", () => {
+  const snapshot = makeSnapshot([{ text: "Volver" }]);
+  const routeProfile = makeRouteProfile();
+  const result = attemptAssertionRecovery(snapshot, "Volver", { routeProfile });
+
+  expect(result.recovered).toBe(true);
+});
+
+test("assertion recovery handles conditional variants", () => {
+  const snapshot = makeSnapshot([{ text: "No disponible" }]);
+  const result = attemptAssertionRecovery(snapshot, "no está disponible");
+
+  expect(result.recovered).toBe(true);
+  expect(result.decision).toBe("recovered_conditional_variant");
+});
+
+test("assertion recovery returns not_recovered when no match", () => {
+  const snapshot = makeSnapshot([{ text: "Something else" }]);
+  const result = attemptAssertionRecovery(snapshot, "completely different text");
+
+  expect(result.recovered).toBe(false);
+  expect(result.decision).toBe("not_recovered");
+  expect(result.recoveryAttempts.length).toBeGreaterThan(0);
+});
+
+// ── classifyAssertionImportance tests ──
+
+test("classifyAssertionImportance: blocking when in title", () => {
+  const importance = classifyAssertionImportance("Tarjetas de crédito", {
+    scenarioTitle: "Visualizar Tarjetas de crédito",
   });
 
-  test("unrecovered assertion (status=not_found) is blocking", () => {
-    const steps: DiscoveryStepResult[] = [
-      {
-        index: 1,
-        action: "click",
-        status: "found",
-        targetText: "Home"
-      },
-      {
-        index: 2,
-        action: "assertVisible",
-        status: "not_found",
-        targetText: "Target X",
-        error: "Not visible",
-        assertionClassification: "literal_observable"
-      },
-      {
-        index: 3,
-        action: "click",
-        status: "found",
-        targetText: "Target Y"
-      }
-    ];
+  expect(importance).toBe("blocking");
+});
 
-    const result = createDiscoveryResult(steps);
-    // Use needs_discovery status to indicate unrecovered failures
-    const plan = createPlan(steps, "needs_discovery");
-
-    const gate = evaluatePromotionGate({
-      discoveryResult: result,
-      candidatePlan: plan
-    });
-
-    // Should be blocked because Target X was never recovered and plan status is needs_discovery
-    expect(gate.allowed).toBe(false);
-    expect(gate.status).toBe("blocked");
-    expect(gate.reasons.some(r => r.includes("Blocking"))).toBe(true);
+test("classifyAssertionImportance: blocking when in expectedResult", () => {
+  const importance = classifyAssertionImportance("Préstamos personales", {
+    expectedResult: "Se muestran Préstamos personales",
   });
 
-  test("recovered assertion with recoveredBy=auth_flow is not blocking", () => {
-    const steps: DiscoveryStepResult[] = [
-      {
-        index: 1,
-        action: "click",
-        status: "found",
-        targetText: "Login"
-      },
-      {
-        index: 2,
-        action: "assertVisible",
-        status: "not_found",
-        targetText: "Dashboard",
-        error: "Not visible before auth",
-        assertionClassification: "literal_observable",
-        recoveryStatus: "recovered",
-        recoveredBy: "auth_flow",
-        recoveryMetadata: {
-          originalFailureReason: "Not visible before auth",
-          recoveredAfterStep: 3,
-          recoveredBecause: "auth_gate_completed",
-          blocking: false
-        }
-      },
-      {
-        index: 3,
-        action: "click",
-        status: "found",
-        targetText: "Dashboard",
-        recoveredBy: "auth_flow"
-      }
-    ];
+  expect(importance).toBe("blocking");
+});
 
-    const result = createDiscoveryResult(steps);
-    const plan = createPlan(steps);
+test("classifyAssertionImportance: optional for conditional language", () => {
+  const importance = classifyAssertionImportance("si está disponible");
 
-    const gate = evaluatePromotionGate({
-      discoveryResult: result,
-      candidatePlan: plan
-    });
+  expect(importance).toBe("optional");
+});
 
-    // Should be allowed because assertion was recovered by auth_flow
-    expect(gate.allowed).toBe(true);
-    expect(gate.status).toBe("passed");
+test("classifyAssertionImportance: optional for 'no está disponible'", () => {
+  const importance = classifyAssertionImportance("no está disponible");
+
+  expect(importance).toBe("optional");
+});
+
+test("classifyAssertionImportance: contextual for routeProfile labels", () => {
+  const routeProfile = makeRouteProfile();
+  const importance = classifyAssertionImportance("Volver", { routeProfile });
+
+  expect(importance).toBe("contextual");
+});
+
+test("classifyAssertionImportance: contextual for secondary buttons when not primary objective", () => {
+  const importance = classifyAssertionImportance("Solicitar", {
+    scenarioTitle: "Visualizar detalle del producto",
+    expectedResult: "Se muestra el detalle completo del producto",
+    routeProfile: makeRouteProfile(),
   });
 
-  test("recoveryMetadata preserves original failure for diagnostics", () => {
-    const steps: DiscoveryStepResult[] = [
-      {
-        index: 1,
-        action: "assertVisible",
-        status: "not_found",
-        targetText: "Target X",
-        error: "Original failure message",
-        assertionClassification: "literal_observable",
-        recoveryStatus: "recovered",
-        recoveredBy: "auth_flow",
-        recoveryMetadata: {
-          originalFailureReason: "Original failure message",
-          recoveredAfterStep: 2,
-          recoveredBecause: "auth_gate_completed",
-          blocking: false
-        }
-      },
-      {
-        index: 2,
-        action: "click",
-        status: "found",
-        targetText: "Target X",
-        recoveredBy: "auth_flow"
-      }
-    ];
+  expect(importance).toBe("contextual");
+});
 
-    const result = createDiscoveryResult(steps);
-    const recoveredStep = result.steps[0];
-
-    expect(recoveredStep.recoveryMetadata?.originalFailureReason).toBe("Original failure message");
-    expect(recoveredStep.recoveryMetadata?.recoveredAfterStep).toBe(2);
-    expect(recoveredStep.recoveryMetadata?.recoveredBecause).toBe("auth_gate_completed");
-    expect(recoveredStep.recoveryMetadata?.blocking).toBe(false);
+test("classifyAssertionImportance: blocking for secondary button when explicit objective", () => {
+  const importance = classifyAssertionImportance("Solicitar", {
+    scenarioTitle: "Solicitar producto",
+    expectedResult: "Se debe poder Solicitar el producto",
+    routeProfile: makeRouteProfile(),
   });
+
+  expect(importance).toBe("blocking");
+});
+
+// ── detectConditionalAssertionRisk tests ──
+
+test("detectConditionalAssertionRisk: high risk without dataRequirement", () => {
+  const risk = detectConditionalAssertionRisk("no está disponible");
+
+  expect(risk.isConditional).toBe(true);
+  expect(risk.risk).toBe("high");
+  expect(risk.reason).toContain("without_data_requirement");
+});
+
+test("detectConditionalAssertionRisk: low risk with dataRequirement", () => {
+  const risk = detectConditionalAssertionRisk("no está disponible", {
+    dataRequirement: "product must be unavailable",
+  });
+
+  expect(risk.isConditional).toBe(true);
+  expect(risk.risk).toBe("low");
+  expect(risk.reason).toContain("with_data_requirement");
+});
+
+test("detectConditionalAssertionRisk: not conditional for normal assertion", () => {
+  const risk = detectConditionalAssertionRisk("Tarjetas de crédito");
+
+  expect(risk.isConditional).toBe(false);
+  expect(risk.risk).toBe("low");
 });

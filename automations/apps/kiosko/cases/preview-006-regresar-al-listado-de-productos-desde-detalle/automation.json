@@ -1,0 +1,54 @@
+{
+  "id": "preview-006-regresar-al-listado-de-productos-desde-detalle",
+  "externalId": "PREVIEW-006",
+  "caseId": 0,
+  "title": "Regresar al listado de productos desde detalle",
+  "planPath": "automations\\apps\\kiosko\\cases\\preview-006-regresar-al-listado-de-productos-desde-detalle\\plan.json",
+  "specPath": "automations\\apps\\kiosko\\cases\\preview-006-regresar-al-listado-de-productos-desde-detalle\\case.spec.ts",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "kiosko",
+  "createdAt": "2026-06-02T23:38:42.635Z",
+  "updatedAt": "2026-06-02T23:38:42.635Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-006\\2026-06-02T23-38-26-957Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "not_run",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-006\\2026-06-02T23-38-26-957Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [],
+      "availablePageObjects": [
+        "ProductListPage",
+        "OperationsMenuPage",
+        "HomePage",
+        "ProductInformationPage",
+        "CategoryPage",
+        "ProductDetailPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    }
+  }
+}

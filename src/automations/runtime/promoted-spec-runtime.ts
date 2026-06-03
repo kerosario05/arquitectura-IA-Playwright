@@ -1,7 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { Page } from "@playwright/test";
-import { capturePageDiagnostics, waitForPromotedSpecStepReady } from "../../browser/promoted-spec-helpers";
+import type { AppRouteProfile } from "../../types/env.types";
+import { capturePageDiagnostics, waitForListReadiness, waitForPromotedSpecStepReady } from "../../browser/promoted-spec-helpers";
 import { waitForStablePageState } from "../../discovery/page-stability-detector";
 import { findSemanticTargetMatch, type SemanticMatchOptions } from "./semantic-target-matcher";
 
@@ -72,6 +73,7 @@ export type PromotedActionOptions = {
   actionIntent: string;
   expectedEffect?: PromotedExpectedEffect;
   sensitive?: boolean;
+  routeProfile?: AppRouteProfile;
   action: () => Promise<void>;
   evidenceDir?: string;
 };
@@ -929,6 +931,275 @@ export type PromotedClickOptions = PromotedActionOptions & {
   expectedOwnerPage?: string;
 };
 
+type OrdinalSelectionRuntimeCandidate = {
+  locator: any;
+  text: string;
+  selector: string;
+  type: string;
+  role?: string;
+  tagName?: string;
+  visible: boolean;
+  enabled: boolean;
+  domainRelated: boolean;
+  productLike: boolean;
+};
+
+const ORDINAL_PATTERNS = [
+  { pattern: /(?:la|el|los|las)\s+primer[oa]?\b/i, ordinal: "first" as const },
+  { pattern: /(?:la|el|los|las)\s+primera?\b/i, ordinal: "first" as const },
+  { pattern: /(?:la|el|los|las)\s+segunda?\b/i, ordinal: "second" as const },
+  { pattern: /(?:la|el|los|las)\s+tercera?\b/i, ordinal: "third" as const },
+  { pattern: /(?:la|el|los|las)\s+(?:última|ultima)\b/i, ordinal: "last" as const },
+  { pattern: /\bfirst\b/i, ordinal: "first" as const },
+  { pattern: /\bsecond\b/i, ordinal: "second" as const },
+  { pattern: /\bthird\b/i, ordinal: "third" as const },
+  { pattern: /\blast\b/i, ordinal: "last" as const },
+];
+
+const ORDINAL_GENERIC_TERMS = [
+  "producto", "productos", "item", "items", "elemento", "elementos", "fila", "filas",
+  "card", "cards", "cuenta", "cuentas", "tarjeta", "tarjetas", "beneficiario", "beneficiarios",
+  "registro", "registros", "solicitud", "solicitudes", "resultado", "resultados", "row", "rows",
+  "list item", "listitem"
+];
+
+const ORDINAL_INSTRUCTIONAL_PATTERNS = [
+  /selecciona/i,
+  /elige/i,
+  /escoge/i,
+  /escoge/i,
+  /select/i,
+  /choose/i,
+  /pick/i,
+  /ver detalles/i,
+  /detalles?/i,
+  /ayuda/i,
+  /help/i,
+];
+
+function normalizeOrdinalText(text: string): string {
+  return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim();
+}
+
+function escapeRegex(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function extractOrdinalFromText(text: string): "first" | "second" | "third" | "last" | null {
+  const normalized = normalizeOrdinalText(text);
+  for (const { pattern, ordinal } of ORDINAL_PATTERNS) {
+    if (pattern.test(normalized)) return ordinal;
+  }
+  return null;
+}
+
+function buildOrdinalDomainTerms(routeProfile?: AppRouteProfile): string[] {
+  const terms = new Set<string>(ORDINAL_GENERIC_TERMS.map(normalizeOrdinalText));
+  for (const term of routeProfile?.domainTerms ?? []) {
+    const normalized = normalizeOrdinalText(term);
+    if (normalized) terms.add(normalized);
+    if (normalized && !normalized.endsWith("s")) terms.add(`${normalized}s`);
+  }
+  return [...terms];
+}
+
+function extractDomainTermFromText(target: string, routeProfile?: AppRouteProfile): string | undefined {
+  const normalized = normalizeOrdinalText(target);
+  const terms = buildOrdinalDomainTerms(routeProfile);
+  const matched = terms.find(term => term && normalized.includes(term));
+  if (!matched) return undefined;
+  return matched.replace(/s$/, "");
+}
+
+function isInstructionalText(text: string): boolean {
+  const normalized = normalizeOrdinalText(text);
+  return ORDINAL_INSTRUCTIONAL_PATTERNS.some(pattern => pattern.test(normalized));
+}
+
+function isOrdinalCandidateText(text: string): boolean {
+  const normalized = normalizeOrdinalText(text);
+  if (!normalized) return false;
+  if (isInstructionalText(normalized)) return false;
+  if (/^(selecciona|elige|escoge|select|choose|pick)\b/i.test(normalized)) return false;
+  if (normalized.length > 80) return false;
+  if ((normalized.match(/[.!?]/g) ?? []).length > 1) return false;
+  if (normalized.length < 2) return false;
+  return true;
+}
+
+function isProductLikeText(text: string, domainTerm?: string): boolean {
+  const normalized = normalizeOrdinalText(text);
+  if (!normalized) return false;
+  if (domainTerm && normalized.includes(normalizeOrdinalText(domainTerm))) return true;
+  return ORDINAL_GENERIC_TERMS.some(term => normalized.includes(normalizeOrdinalText(term)));
+}
+
+function isGlobalOrdinalControl(text: string, routeProfile?: AppRouteProfile): boolean {
+  const normalized = normalizeOrdinalText(text);
+  const blocked = new Set([
+    "volver", "atras", "atrás", "back", "regresar", "return",
+    "finalizar sesion", "finalizar sesión", "cerrar sesion", "cerrar sesión",
+    "logout", "sign out", "salir", "solicitar", "request",
+    "cancelar", "cancel", "confirmar", "confirm", "aceptar", "accept",
+    "continuar", "continue", "siguiente", "next", "menu principal", "main menu"
+  ]);
+  if (blocked.has(normalized)) return true;
+  for (const label of routeProfile?.blockedLabels ?? []) {
+    if (normalized.includes(normalizeOrdinalText(label))) return true;
+  }
+  return false;
+}
+
+function isOrdinalSelectionActionIntent(actionIntent?: string): boolean {
+  return actionIntent === "select_visible_item_by_ordinal";
+}
+
+async function resolveOrdinalSelectionOnPage(
+  page: Page,
+  options: { target: string; actionIntent: string; routeProfile?: AppRouteProfile }
+): Promise<{ locator: any; text: string; selector: string; ordinal: string; domainTerm?: string; candidateCount: number } | null> {
+  if (!isOrdinalSelectionActionIntent(options.actionIntent)) return null;
+
+  const ordinal = extractOrdinalFromText(options.target);
+  const domainTerm = extractDomainTermFromText(options.target, options.routeProfile);
+  if (!ordinal) return null;
+
+  const pageDiag = await capturePageDiagnostics(page).catch(() => null);
+
+  const selectors = [
+    'button:visible',
+    '[role="button"]:visible',
+    'a:visible',
+    '[role="link"]:visible',
+    'article:visible',
+    '[role="listitem"]:visible',
+    '[role="row"]:visible',
+    '[class*="card"]:visible',
+  ];
+
+  const seen = new Set<string>();
+  const candidates: OrdinalSelectionRuntimeCandidate[] = [];
+
+  for (const selector of selectors) {
+    const locatorGroup = page.locator(selector);
+    const count = await locatorGroup.count().catch(() => 0);
+    for (let index = 0; index < count; index += 1) {
+      const locator = locatorGroup.nth(index);
+      try {
+        const visible = await locator.isVisible().catch(() => false);
+        if (!visible) continue;
+        const enabled = await locator.isEnabled().catch(() => false);
+        if (!enabled) continue;
+        const text = ((await locator.textContent().catch(() => "")) ?? "").replace(/\s+/g, " ").trim();
+        if (!isOrdinalCandidateText(text)) continue;
+        const tagName = await locator.evaluate((el: Element) => el.tagName.toLowerCase()).catch(() => "");
+        const role = await locator.getAttribute("role").catch(() => undefined) ?? undefined;
+        const isHeading = /^h[1-6]$/.test(tagName) || role === "heading";
+        const isCardLike = /article|li|div|section|row/i.test(tagName) || /card|item|row|product/i.test(text);
+        const isClickable = ["button", "a", "input"].includes(tagName) || role === "button" || role === "link" || isCardLike || isHeading;
+        if (!isClickable) continue;
+        const selectorKey = `${tagName}:${role ?? ""}:${text}`;
+        if (seen.has(selectorKey)) continue;
+        seen.add(selectorKey);
+        let finalLocator = locator;
+        if (isHeading) {
+          const container = locator.locator('xpath=ancestor::article[1] | ancestor::li[1] | ancestor::section[1] | ancestor::div[contains(@class,"card")][1] | ancestor::div[contains(@class,"item")][1]');
+          const containerCount = await container.count().catch(() => 0);
+          if (containerCount > 0) {
+            finalLocator = container.first();
+          }
+        }
+        candidates.push({
+          locator: finalLocator,
+          text,
+          selector,
+          type: isHeading ? "heading" : isCardLike ? "card" : tagName === "button" ? "button" : tagName === "a" ? "link" : "item",
+          role,
+          tagName,
+          visible,
+          enabled,
+          domainRelated: Boolean(domainTerm ? normalizeOrdinalText(text).includes(normalizeOrdinalText(domainTerm)) : isProductLikeText(text)),
+          productLike: isProductLikeText(text, domainTerm),
+        });
+      } catch {
+        continue;
+      }
+    }
+  }
+
+  if (candidates.length === 0 && pageDiag?.visibleButtons?.length) {
+    for (const text of pageDiag.visibleButtons) {
+      if (!isOrdinalCandidateText(text)) continue;
+      const normalizedText = normalizeOrdinalText(text);
+      const domainRelated = Boolean(domainTerm ? normalizedText.includes(normalizeOrdinalText(domainTerm)) : isProductLikeText(text));
+      const productLike = isProductLikeText(text, domainTerm);
+      if (!domainRelated && !productLike) continue;
+      try {
+        const locator = page.getByRole("button", { name: new RegExp(escapeRegex(text), "i") });
+        candidates.push({
+          locator,
+          text,
+          selector: `visibleButton:${text}`,
+          type: "button",
+          role: "button",
+          tagName: "button",
+          visible: true,
+          enabled: true,
+          domainRelated,
+          productLike,
+        });
+      } catch {
+        continue;
+      }
+    }
+  }
+
+  const safe = candidates.filter(c => c.visible && c.enabled && c.domainRelated && c.productLike);
+  const ordered = safe.length > 0 ? safe : candidates.filter(c => c.visible && c.enabled && c.domainRelated);
+  const fallback = ordered.length === 1 ? ordered[0] : ordered[0];
+  if (!fallback) {
+    const visibleButtons = pageDiag?.visibleButtons ?? [];
+    const visibleHeadings = pageDiag?.visibleHeadings ?? [];
+    const firstVisibleButton = visibleButtons.find(text =>
+      isOrdinalCandidateText(text) &&
+      !isGlobalOrdinalControl(text, options.routeProfile) &&
+      isProductLikeText(text, domainTerm)
+    );
+    if (firstVisibleButton) {
+      return {
+        locator: page.getByRole("button", { name: new RegExp(escapeRegex(firstVisibleButton), "i") }).first(),
+        text: firstVisibleButton,
+        selector: `visibleButton:${firstVisibleButton}`,
+        ordinal,
+        domainTerm,
+        candidateCount: Math.max(candidates.length, visibleButtons.length),
+      };
+    }
+
+    const firstHeading = visibleHeadings.find(text => isOrdinalCandidateText(text) && !isInstructionalText(text));
+    if (firstHeading) {
+      const headingLocator = page.getByRole("heading", { name: new RegExp(escapeRegex(firstHeading), "i") }).first();
+      const headingContainer = headingLocator.locator('xpath=ancestor::article[1] | ancestor::li[1] | ancestor::section[1] | ancestor::div[contains(@class,"card")][1] | ancestor::div[contains(@class,"item")][1]').first();
+      return {
+        locator: headingContainer,
+        text: firstHeading,
+        selector: `visibleHeading:${firstHeading}`,
+        ordinal,
+        domainTerm,
+        candidateCount: Math.max(candidates.length, visibleHeadings.length),
+      };
+    }
+
+    const allProductLike = candidates.filter(c => c.visible && c.enabled && c.productLike);
+    if (allProductLike.length === 1) {
+      return { ...allProductLike[0], ordinal, domainTerm, candidateCount: candidates.length };
+    }
+    return null;
+  }
+
+  return { ...fallback, ordinal, domainTerm, candidateCount: candidates.length };
+}
+
 export class PromotedSpecRuntime {
   private readonly config: PromotedRuntimeConfig;
   private lastDialogMessage?: string;
@@ -1073,6 +1344,52 @@ export class PromotedSpecRuntime {
     return isOnListPage;
   }
 
+  private async ensureContextForOrdinalSelection(options: {
+    target: string;
+    stepIndex: number;
+    previousStepReplays?: SafeReplayStep[];
+    previousSteps?: SafeReplayStep[];
+    routeProfile?: AppRouteProfile;
+  }): Promise<void> {
+    const replaySteps = options.previousStepReplays || options.previousSteps || [];
+    const readyBeforeReplay = await waitForListReadiness(this.page, { timeoutMs: 1500, pollMs: 250, minCards: 1 });
+    if (readyBeforeReplay.ready) return;
+
+    const currentDiag = await capturePageDiagnostics(this.page).catch(() => undefined);
+    const nonGlobalButtons = (currentDiag?.visibleButtons ?? []).filter((text) =>
+      isOrdinalCandidateText(text) &&
+      !isGlobalOrdinalControl(text, options.routeProfile) &&
+      !isInstructionalText(text)
+    );
+    const nonGlobalHeadings = (currentDiag?.visibleHeadings ?? []).filter((text) =>
+      isOrdinalCandidateText(text) && !isInstructionalText(text)
+    );
+    const hasVisibleOrdinalCandidate = nonGlobalButtons.length >= 2 || nonGlobalHeadings.length >= 2;
+
+    if (hasVisibleOrdinalCandidate) return;
+
+    if (replaySteps.length > 0) {
+      console.log(`[runtime:ordinal_context] list not ready, replaying ${replaySteps.length} prior step(s) before ordinal target="${options.target}" stepIndex=${options.stepIndex}`);
+      const replayResult = await this.safeReplayContext(replaySteps, options.stepIndex);
+      if (replayResult.success) {
+        const readyAfterReplay = await waitForListReadiness(this.page, { timeoutMs: 4000, pollMs: 250, minCards: 1 });
+        if (readyAfterReplay.ready) return;
+      }
+    }
+
+    const pageDiag = await capturePageDiagnostics(this.page);
+    const expectedContext = options.routeProfile?.domainTerms?.length
+      ? `list_context:${options.routeProfile.domainTerms.join("|")}`
+      : "list_context";
+    throw new Error(
+      `missing_runtime_context_for_ordinal: target="${options.target}" actionIntent="select_visible_item_by_ordinal" ` +
+      `expectedContext="${expectedContext}" currentUrl="${pageDiag.currentUrl}" ` +
+      `visibleHeadings=[${pageDiag.visibleHeadings.join(", ")}] visibleButtons=[${pageDiag.visibleButtons.join(", ")}] ` +
+      `replayStepsCount=${replaySteps.length} stepIndex=${options.stepIndex} ` +
+      `suggestedFix="Reproduce the full navigation path before ordinal selection, including entry/module/category/list"` 
+    );
+  }
+
   async clickPromotedTarget(options: PromotedClickOptions): Promise<void> {
     const previousUrl = this.page.url();
     const expectedEffect = options.expectedEffect ?? "ui_change";
@@ -1127,6 +1444,16 @@ export class PromotedSpecRuntime {
       }
     }
     
+    if (isOrdinalSelectionActionIntent(options.actionIntent)) {
+      await this.ensureContextForOrdinalSelection({
+        target: options.target,
+        stepIndex: options.stepIndex,
+        previousStepReplays: options.previousStepReplays,
+        previousSteps: options.previousSteps,
+        routeProfile: options.routeProfile
+      });
+    }
+
     // STEP 3: Validate screen context before executing context-dependent actions
     try {
       await validateScreenContextForAction(this.page, {
@@ -1169,7 +1496,7 @@ export class PromotedSpecRuntime {
         throw error;
       }
     }
-    
+
     // New diagnostics for native click tracking
     let clickPath: PromotedRuntimeDiagnostics["clickPath"] = "failed";
     let nativeClickAttempted = false;
@@ -1249,6 +1576,58 @@ export class PromotedSpecRuntime {
       | undefined;
     
     try {
+      const ordinalResolved = await resolveOrdinalSelectionOnPage(this.page, {
+        target: options.target,
+        actionIntent: options.actionIntent,
+        routeProfile: options.routeProfile
+      });
+
+      if (ordinalResolved) {
+        matchedLocatorStrategy = `ordinal_selection:${ordinalResolved.ordinal}:${ordinalResolved.domainTerm ?? "generic"}:${ordinalResolved.selector}`;
+        const previousUrlOrdinal = this.page.url();
+        try {
+          await withTimeout(ordinalResolved.locator.click({ timeout: this.config.actionTimeoutMs, noWaitAfter: true }), this.config.actionTimeoutMs, "ordinal click");
+        } catch {
+          try {
+            await withTimeout(
+              ordinalResolved.locator.click({ timeout: this.config.actionTimeoutMs, force: true, noWaitAfter: true }),
+              this.config.actionTimeoutMs,
+              "ordinal force click"
+            );
+          } catch (ordinalForceError) {
+            try {
+              await withTimeout(
+                ordinalResolved.locator.evaluate((el: Element) => {
+                  (el as HTMLElement).click();
+                }),
+                this.config.actionTimeoutMs,
+                "ordinal dom click"
+              );
+              nativeClickError = undefined;
+            } catch (ordinalDomError) {
+              nativeClickError = ordinalDomError instanceof Error ? ordinalDomError.message : String(ordinalDomError);
+            }
+          }
+        }
+        if (!nativeClickError) {
+          nativeClickSucceeded = true;
+          clickPath = "native_runtime";
+          fallbackUsed = "page";
+          await this.postActionStability(previousUrlOrdinal, expectedEffect);
+          if (expectedEffect === "modal_or_form_or_navigation" || expectedEffect === "ui_change") {
+            await this.refreshActiveContainer();
+          }
+          effectDetected = true;
+          console.log(
+            `[ordinal-selection-runtime] ordinal=${ordinalResolved.ordinal} domainTerm=${ordinalResolved.domainTerm ?? "none"} ` +
+            `candidateCount=${ordinalResolved.candidateCount} selectedText="${ordinalResolved.text}" selectedLocator="${matchedLocatorStrategy}"`
+          );
+        }
+      }
+
+      if (nativeClickSucceeded) {
+        // Ordinal selection handled without semantic matching.
+      } else {
       resolved = await resolvePromotedClickableLocator(this.page, options.target, {
         containerLocator: containerSelector,
         timeoutMs: this.config.actionTimeoutMs,
@@ -1275,7 +1654,11 @@ export class PromotedSpecRuntime {
         
         effectDetected = true;
       }
+      }
     } catch (error) {
+      if (isOrdinalSelectionActionIntent(options.actionIntent)) {
+        nativeClickError = error instanceof Error ? error.message : String(error);
+      }
       if (typeof resolved !== "undefined" && resolved?.locator) {
         const canSafeForceClick = await shouldUseSafeForceClick(this.page, resolved.locator, options, error);
         if (canSafeForceClick) {
@@ -1343,6 +1726,14 @@ export class PromotedSpecRuntime {
     // Step 3: Error handling with enhanced diagnostics
     if (!nativeClickSucceeded && !callbackSucceeded) {
       const pageDiag = await capturePageDiagnostics(this.page);
+      if (isOrdinalSelectionActionIntent(options.actionIntent)) {
+        throw new Error(
+          `ordinal_selection_no_safe_candidate: target="${options.target}" actionIntent="${options.actionIntent}" ` +
+          `currentUrl="${pageDiag.currentUrl}" visibleButtons=[${pageDiag.visibleButtons.join(", ")}] ` +
+          `visibleHeadings=[${pageDiag.visibleHeadings.join(", ")}] ` +
+          `reason="${nativeClickError || callbackError || "unknown"}"`
+        );
+      }
       const diagnostics = await captureDiagnosticsIfNeeded(
         this.page,
         {

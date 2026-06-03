@@ -1,11 +1,9 @@
 import { config, requireJiraConfig, requireTestRailConfig } from "../config/env";
-import { JiraClient } from "../clients/jira.client";
+import { resolveAppProfile, ensureAppStructure } from "../automations/app-profile";
 import { TestRailClient } from "../clients/testrail.client";
-import { normalizeJiraIssues } from "../jira/jira-normalizer";
-import { runCaseDiscoveryWorkflow } from "../discovery/case-discovery-workflow";
-import { resolveAppProfile, ensureAppStructure, logAppProfile } from "../automations/app-profile";
-import type { AppProfile } from "../automations/app-profile";
+import type { AppProfile } from "../types/app-profile.types";
 import type { TestScenario } from "../types/testrail.types";
+import { sanitizeTestRailRef } from "../server/services/testrail-case-publisher";
 import type { AddResultForCaseInput } from "../types/testrail.types";
 
 type CliArgs = {
@@ -129,26 +127,29 @@ async function syncScenarioToTestRail(
     expected: s.expected ?? ""
   }));
 
-  const existing = await client.getCasesByRefs(projectId, scenario.externalId, suiteId, sectionId);
+  // Sanitize refs: never send undefined/null/empty
+  const safeRef = sanitizeTestRailRef(scenario.externalId) || "UNKNOWN";
+
+  const existing = await client.getCasesByRefs(projectId, safeRef, suiteId, sectionId);
 
   if (existing.length > 0) {
     const updated = await client.updateCase(existing[0].id, {
       title: scenario.title,
-      refs: scenario.externalId,
+      refs: safeRef,
       preconditions: scenario.preconditions,
       stepsSeparated
     });
-    console.log(`  [testrail] Actualizado C${updated.id} ← ${scenario.externalId}: "${scenario.title}"`);
+    console.log(`  [testrail] Actualizado C${updated.id} ← ${scenario.externalId}: "${scenario.title}" refs="${safeRef}"`);
     return updated.id;
   }
 
   const created = await client.addCase(sectionId, {
     title: scenario.title,
-    refs: scenario.externalId,
+    refs: safeRef,
     preconditions: scenario.preconditions,
     stepsSeparated
   });
-  console.log(`  [testrail] Creado C${created.id} ← ${scenario.externalId}: "${scenario.title}"`);
+  console.log(`  [testrail] Creado C${created.id} ← ${scenario.externalId}: "${scenario.title}" refs="${safeRef}"`);
   return created.id;
 }
 

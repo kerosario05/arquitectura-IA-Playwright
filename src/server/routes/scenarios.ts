@@ -3,6 +3,8 @@ import { config, requireJiraConfig } from "../../config/env";
 import { JiraClient } from "../../clients/jira.client";
 import { normalizeJiraIssues } from "../../jira/jira-normalizer";
 import type { TestScenario } from "../../types/testrail.types";
+import { generateScenarioPreview } from "../../scenarios/scenario-preview.service";
+import type { ScenarioPreviewRequest } from "../../scenarios/scenario-types";
 
 export const scenariosRouter = Router();
 
@@ -30,65 +32,20 @@ function toTestRailFormat(scenario: TestScenario) {
   };
 }
 
-// POST /api/scenarios/preview
+// POST /api/scenarios/preview — MCP-ready generation
 scenariosRouter.post("/preview", async (req, res, next) => {
   try {
-    const body = req.body as {
-      projectKey?: string;
-      sprintId?: number;
-      activeSprint?: boolean;
-      status?: string;
-      maxResults?: number;
-    };
+    const body = req.body as ScenarioPreviewRequest;
+    const result = await generateScenarioPreview(body);
 
-    if (!body.projectKey) {
-      res.status(400).json({ error: "projectKey is required" });
-      return;
-    }
-    if (!body.activeSprint && !body.sprintId) {
-      res.status(400).json({ error: "activeSprint: true or sprintId is required" });
+    if (!result.ok) {
+      const errorResult = result as Extract<typeof result, { ok: false }>;
+      const status = errorResult.error === "no_active_sprint" ? 404 : errorResult.error === "invalid_request" ? 400 : 502;
+      res.status(status).json(errorResult);
       return;
     }
 
-    const jiraConfig = requireJiraConfig(config);
-    const jira = new JiraClient(jiraConfig);
-
-    // Resolver sprint
-    let sprintId = body.sprintId;
-    let sprint: { id: number; name: string } | null = null;
-
-    if (body.activeSprint) {
-      const active = await jira.getActiveSprint(body.projectKey);
-      if (!active) {
-        res.status(404).json({ error: `No hay sprint activo para el proyecto ${body.projectKey}` });
-        return;
-      }
-      sprintId = active.id;
-      sprint = { id: active.id, name: active.name };
-    } else {
-      sprint = { id: sprintId!, name: `Sprint ${sprintId}` };
-    }
-
-    // Fetch historias Jira
-    const jql = buildJql(body.projectKey, sprintId!, body.status);
-    const rawIssues = await jira.searchIssues(jql, undefined, body.maxResults ?? 50);
-    const scenarios = normalizeJiraIssues(rawIssues, {
-      acceptanceCriteriaField: jiraConfig.acceptanceCriteriaField
-    });
-
-    const result = scenarios.map((scenario) => ({
-      jiraKey: scenario.externalId,
-      title: scenario.title,
-      stepCount: scenario.steps.length,
-      testrailFormat: toTestRailFormat(scenario)
-    }));
-
-    res.json({
-      sprint,
-      jql,
-      total: result.length,
-      scenarios: result
-    });
+    res.json(result);
   } catch (err) {
     next(err);
   }

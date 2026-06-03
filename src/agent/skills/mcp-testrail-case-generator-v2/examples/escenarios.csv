@@ -1,0 +1,36 @@
+"ID","Título","Pasos","Precondiciones","Resultado Esperado","Tipo","base de datos","is_converted","automationType","setupStrategy","appSlug","routeProfile","dataRequirements","nonExecutableCriteria","mcpExecutable"
+"","Consulta de balance - Visualizar listado de depósitos a plazo activos","1. Clic en ""Iniciar"".
+2. Clic en ""Transacciones y servicios"".
+3. Validar que se muestre ""Consulta de balance"".
+4. Clic en ""Consulta de balance"".
+5. Validar que se muestre ""Depósitos a plazos"".
+6. Clic en ""Depósitos a plazos"".
+7. Validar que se muestre ""Volver"".","1. BASE_URL configurado.
+2. Kiosko disponible.
+3. APP_LOGIN_MODE=password.
+4. AuthGate/AuthFlow habilitado para autenticación por Transacciones y servicios.
+5. Cliente de prueba cumple dataRequirements.
+6. App Slug: kiosko.
+7. Route Profile: authenticated_operations_balance_depositos_plazo.
+8. Setup Strategy: auth_gate.
+9. Automation Type: ui_with_auth_gate.
+10. Data Requirements: cliente_deposito_plazo_multiple_activo.","El cliente visualiza el listado de depósitos a plazo activos.","Functional","QA","0","ui_with_auth_gate","auth_gate","kiosko","authenticated_operations_balance_depositos_plazo","cliente_deposito_plazo_multiple_activo","","true"
+"","Consulta de balance - Visualizar detalle de depósito a plazo activo","1. Clic en ""Iniciar"".
+2. Clic en ""Transacciones y servicios"".
+3. Validar que se muestre ""Consulta de balance"".
+4. Clic en ""Consulta de balance"".
+5. Clic en ""Depósitos a plazos"".
+6. Seleccionar el primer depósito visible del listado.
+7. Validar que se muestre ""Volver"".
+8. Validar que el botón ""Imprimir"" esté visible.
+9. Validar que el botón ""Enviar vía correo"" esté visible.
+10. Validar que el botón ""Finalizar sesión"" esté visible.","1. BASE_URL configurado.
+2. Kiosko disponible.
+3. APP_LOGIN_MODE=password.
+4. AuthGate/AuthFlow habilitado para autenticación por Transacciones y servicios.
+5. Cliente de prueba cumple dataRequirements.
+6. App Slug: kiosko.
+7. Route Profile: authenticated_operations_balance_depositos_plazo.
+8. Setup Strategy: auth_gate.
+9. Automation Type: ui_with_auth_gate.
+10. Data Requirements: cliente_deposito_plazo_multiple_activo.","El cliente visualiza el detalle del depósito a plazo seleccionado.","Functional","QA","0","ui_with_auth_gate","auth_gate","kiosko","authenticated_operations_balance_depositos_plazo","cliente_deposito_plazo_multiple_activo","","true"

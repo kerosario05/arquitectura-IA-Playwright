@@ -41,8 +41,7 @@ function looksLikeProductTitle(text: string, pattern: OrdinalSelectionPattern): 
     return normalizedText.includes(domainToken) && tokens.slice(0, 3).some(token => token.includes(domainToken));
   }
 
-  const genericToken = normalizeText(pattern.genericItemTerm);
-  return normalizedText.includes(genericToken) && tokens.slice(0, 3).some(token => token.includes(genericToken));
+  return significantTokens.length >= 2;
 }
 
 function isDisallowedOrdinalCandidate(el: SnapshotElement, text: string, pattern: OrdinalSelectionPattern): boolean {
@@ -111,6 +110,10 @@ export type OrdinalSelectionDiagnostics = {
   excludedCandidates: string[];
   totalCandidates: number;
   clickableCandidates: number;
+  visibleCandidates?: number;
+  enabledCandidates?: number;
+  domainRelatedCandidates?: number;
+  ordinalFallbackReason?: string;
   candidateSearchScope: "main_content" | "snapshot";
   resolution?: "clicked_card" | "clicked_container" | "accepted_visible_item" | "ambiguous";
   reason?: string;
@@ -295,6 +298,29 @@ function isSubmitLike(text: string): boolean {
   return SUBMIT_LIKE_PATTERNS.some(pattern => pattern.test(text));
 }
 
+function isEnabled(el: SnapshotElement): boolean {
+  return el.disabled !== true;
+}
+
+function isActionable(el: SnapshotElement): boolean {
+  return Boolean(
+    el.visible && (
+      el.type === "button" ||
+      el.type === "link" ||
+      el.type === "card" ||
+      el.role === "button" ||
+      el.role === "link" ||
+      el.role === "listitem" ||
+      el.role === "option" ||
+      el.tagName === "button" ||
+      el.tagName === "a" ||
+      el.tagName === "article" ||
+      el.tagName === "li" ||
+      el.candidateLocators.some(loc => loc.strategy === "role" || loc.strategy === "text")
+    )
+  );
+}
+
 function isGenericItemTerm(term: string): boolean {
   const genericTerms = ["producto", "product", "elemento", "item", "tarjeta", "card", "resultado", "result", "opción", "option"];
   const normalized = normalizeText(term);
@@ -374,58 +400,66 @@ export function resolveOrdinalSelection(
   const hasActionVerb = isSelectionVerb(actionText ?? "");
   const inputMode: "action_text" | "target_text" | "combined" = actionText && hasActionVerb ? "combined" : (actionText ? "action_text" : "target_text");
   
-  const candidates = snapshot.elements.filter(el => {
+  const candidates = snapshot.elements.flatMap(el => {
     const text = (el.text || el.label || el.name || "").trim();
-    if (!text) return false;
+    if (!text) return [];
 
     if (isDisallowedOrdinalCandidate(el, text, pattern)) {
       excludedCandidates.push(text);
-      return false;
+      return [];
     }
     
     if (isGlobalButton(text, routeProfile)) {
       excludedCandidates.push(text);
-      return false;
+      return [];
     }
     
     if (isSubmitLike(text)) {
       excludedCandidates.push(text);
-      return false;
+      return [];
     }
-    
-    // Check if element is clickable (button, link, card, or has click handlers)
-    const isClickable = el.type === "button" || el.type === "link" || el.type === "card" ||
-                        el.role === "button" || el.role === "link" || el.role === "listitem" ||
-                        el.tagName === "button" || el.tagName === "a" || el.tagName === "article" ||
-                        el.candidateLocators.some(loc => loc.strategy === "role" || loc.strategy === "text");
-    
-    if (!isClickable) {
-      return false;
-    }
-    
-    if (!el.visible) {
-      return false;
-    }
-    
-    if (pattern.domainTerm && !isGenericItemTerm(pattern.domainTerm)) {
-      const normalizedText = normalizeText(text);
-      const normalizedDomainTerm = normalizeText(pattern.domainTerm);
-      if (!normalizedText.includes(normalizedDomainTerm)) {
-        return false;
+    const normalizedText = normalizeText(text);
+    const clickable = isActionable(el);
+    const visible = Boolean(el.visible);
+    const enabled = isEnabled(el);
+    const productLike = hasProductLikeSemantics(el) || looksLikeProductTitle(text, pattern);
+    const domainRelated = (() => {
+      if (pattern.domainTerm && !isGenericItemTerm(pattern.domainTerm)) {
+        return normalizedText.includes(normalizeText(pattern.domainTerm));
       }
-    } else if (!isGenericItemTerm(pattern.genericItemTerm)) {
-      const normalizedText = normalizeText(text);
-      const normalizedDomainTerm = normalizeText(pattern.genericItemTerm);
-      if (!normalizedText.includes(normalizedDomainTerm)) {
-        return false;
+      if (!isGenericItemTerm(pattern.genericItemTerm)) {
+        return normalizedText.includes(normalizeText(pattern.genericItemTerm));
       }
-    }
-    
-    return hasProductLikeSemantics(el) || looksLikeProductTitle(text, pattern);
+      return productLike;
+    })();
+
+    console.log(`[ordinal-selection] candidate id=${el.id} text="${text}" visible=${visible} enabled=${enabled} clickable=${clickable} domainRelated=${domainRelated} reason=${productLike ? "product_like" : "weak_product_signal"}`);
+
+    return [{
+      element: el,
+      text,
+      visible,
+      enabled,
+      clickable,
+      domainRelated,
+      productLike,
+    }];
   });
-  
-  if (candidates.length === 0) {
-    console.log(`[ordinal-selection] skipped reason=no_safe_candidate domainTerm=${pattern.domainTerm ?? "none"}`);
+
+  const totalCandidates = candidates.length;
+  const visibleCandidates = candidates.filter(c => c.visible).length;
+  const enabledCandidates = candidates.filter(c => c.enabled).length;
+  const clickableCandidates = candidates.filter(c => c.clickable).length;
+  const domainRelatedCandidates = candidates.filter(c => c.domainRelated).length;
+  console.log(`[ordinal-selection] candidates total=${totalCandidates} visible=${visibleCandidates} enabled=${enabledCandidates} clickable=${clickableCandidates} domainRelated=${domainRelatedCandidates}`);
+
+  const safeCandidates = candidates.filter(c => c.visible && c.enabled && c.clickable && c.domainRelated && c.productLike);
+
+  if (safeCandidates.length === 0) {
+    const allDisabled = candidates.length > 0 &&
+      candidates.some(c => c.visible && c.clickable && c.domainRelated) &&
+      !candidates.some(c => c.visible && c.enabled && c.clickable && c.domainRelated);
+    console.log(`[ordinal-selection] failed reason=${allDisabled ? "all_candidates_disabled" : "no_enabled_clickable_candidate"}`);
     return {
       status: "no_safe_candidate",
       confidence: 0,
@@ -436,19 +470,32 @@ export function resolveOrdinalSelection(
         domainTerm: pattern.domainTerm,
         domainTermSource: pattern.domainTerm ? "routeProfile" : "generic_fallback",
         excludedCandidates,
-        totalCandidates: 0,
-        clickableCandidates: 0,
+        totalCandidates,
+        clickableCandidates,
+        visibleCandidates,
+        enabledCandidates,
+        domainRelatedCandidates,
         candidateSearchScope: "main_content",
-        reason: "No visible clickable candidates matching domain term",
+        reason: allDisabled ? "ordinal_candidates_disabled" : "ordinal_selection_no_safe_candidate",
         domainTermsUsed: domainTermsList
       }
     };
   }
-  
-  if (candidates.length === 1) {
-    const selected = candidates[0];
+
+  const sortedCandidates = safeCandidates.sort((a, b) => {
+    const aIndex = snapshot.elements.findIndex(el => el.id === a.element.id);
+    const bIndex = snapshot.elements.findIndex(el => el.id === b.element.id);
+    return aIndex - bIndex;
+  });
+  const firstVisibleRelated = candidates.find(c => c.visible && c.clickable && c.domainRelated);
+  const ordinalFallbackReason = firstVisibleRelated && !firstVisibleRelated.enabled
+    ? "first_visible_disabled_using_first_enabled"
+    : undefined;
+
+  if (sortedCandidates.length === 1) {
+    const selected = sortedCandidates[0].element;
     const strategy = selected.type === "card" ? "card" : selected.role === "listitem" ? "listitem" : selected.tagName === "h1" || selected.tagName === "h2" ? "heading" : "button";
-    console.log(`[ordinal-selection] selected candidate="${selected.text || selected.label || selected.name}" strategy=${strategy}`);
+    console.log(`[ordinal-selection] selected candidate=${selected.id} reason=first_enabled_visible_domain_related`);
     return {
       status: "resolved",
       candidateId: selected.id,
@@ -464,21 +511,19 @@ export function resolveOrdinalSelection(
         selectedCandidateText: selected.text || selected.label || selected.name,
         selectedCandidateId: selected.id,
         excludedCandidates,
-        totalCandidates: candidates.length,
-        clickableCandidates: candidates.length,
+        totalCandidates,
+        clickableCandidates,
+        visibleCandidates,
+        enabledCandidates,
+        domainRelatedCandidates,
+        ordinalFallbackReason,
         candidateSearchScope: "main_content",
         resolution: strategy === "card" ? "clicked_card" : strategy === "heading" ? "clicked_container" : "accepted_visible_item",
         domainTermsUsed: domainTermsList
       }
     };
   }
-  
-  const sortedCandidates = candidates.sort((a, b) => {
-    const aIndex = snapshot.elements.findIndex(el => el.id === a.id);
-    const bIndex = snapshot.elements.findIndex(el => el.id === b.id);
-    return aIndex - bIndex;
-  });
-  
+
   let selectedIndex = 0;
   switch (pattern.ordinal) {
     case "first":
@@ -495,8 +540,9 @@ export function resolveOrdinalSelection(
       break;
   }
   
-  const selected = sortedCandidates[selectedIndex];
+  const selected = sortedCandidates[selectedIndex].element;
   const strategy = selected.type === "card" ? "card" : selected.role === "listitem" ? "listitem" : selected.tagName === "h1" || selected.tagName === "h2" ? "heading" : "button";
+  console.log(`[ordinal-selection] selected candidate=${selected.id} reason=first_enabled_visible_domain_related`);
   
   return {
     status: "resolved",
@@ -513,8 +559,12 @@ export function resolveOrdinalSelection(
       selectedCandidateText: selected.text || selected.label || selected.name,
       selectedCandidateId: selected.id,
       excludedCandidates,
-      totalCandidates: sortedCandidates.length,
-      clickableCandidates: sortedCandidates.length,
+      totalCandidates,
+      clickableCandidates,
+      visibleCandidates,
+      enabledCandidates,
+      domainRelatedCandidates,
+      ordinalFallbackReason,
       candidateSearchScope: "main_content",
       resolution: strategy === "card" ? "clicked_card" : strategy === "heading" ? "clicked_container" : "accepted_visible_item",
       domainTermsUsed: domainTermsList

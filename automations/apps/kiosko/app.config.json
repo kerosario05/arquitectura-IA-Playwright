@@ -1,0 +1,81 @@
+{
+  "appProfile": {
+    "appSlug": "kiosko",
+    "source": "default",
+    "name": "4",
+    "baseUrl": "https://172.27.4.50",
+    "baseUrlHash": "1423ba294517",
+    "createdAt": "2026-06-03T14:37:41.325Z",
+    "updatedAt": "2026-06-03T14:37:41.326Z"
+  },
+  "baseUrl": "https://172.27.4.50",
+  "loginMode": "password",
+  "testData": {},
+  "testDataAliases": {},
+  "testDataRefs": {},
+  "username": "adminr",
+  "password": "admin123",
+  "usernameRef": "APP_USERNAME",
+  "passwordRef": "APP_PASSWORD",
+  "missingInputBehavior": "auto_generate",
+  "routeProfile": {
+    "name": "informacion_productos",
+    "entry": [
+      {
+        "businessLabel": "iniciar",
+        "visibleLabel": "Iniciar"
+      },
+      {
+        "businessLabel": "informacion_productos",
+        "visibleLabel": "Información de productos"
+      }
+    ],
+    "aliases": {
+      "tarjetas_credito": [
+        "Tarjetas de crédito",
+        "Tarjetas"
+      ],
+      "depositos_plazo": [
+        "Depósitos a Plazo",
+        "Depósitos a plazo"
+      ],
+      "cuentas_efectivo": [
+        "Cuentas de Efectivo",
+        "Cuentas"
+      ],
+      "prestamos": "Préstamos",
+      "volver": "Volver",
+      "solicitar": "Solicitar",
+      "finalizar_sesion": "Finalizar sesión"
+    },
+    "domainTerms": {
+      "producto": [
+        "producto",
+        "tarjeta de crédito",
+        "depósito a plazo",
+        "cuenta de efectivo",
+        "préstamo"
+      ],
+      "categoria": [
+        "categoría",
+        "subcategoría"
+      ]
+    },
+    "visibleControls": [
+      "Iniciar",
+      "Información de productos",
+      "Tarjetas de crédito",
+      "Depósitos a Plazo",
+      "Cuentas de Efectivo",
+      "Préstamos",
+      "Volver",
+      "Solicitar",
+      "Finalizar sesión"
+    ],
+    "representativeFixture": {},
+    "notes": [
+      "RouteProfile para KIOSKO / Información de productos."
+    ]
+  },
+  "updatedAt": "2026-06-03T14:37:41.326Z"
+}

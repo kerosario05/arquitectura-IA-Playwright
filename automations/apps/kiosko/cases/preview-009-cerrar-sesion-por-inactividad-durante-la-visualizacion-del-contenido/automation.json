@@ -1,0 +1,54 @@
+{
+  "id": "preview-009-cerrar-sesion-por-inactividad-durante-la-visualizacion-del-contenido",
+  "externalId": "PREVIEW-009",
+  "caseId": 0,
+  "title": "Cerrar sesión por inactividad durante la visualización del contenido",
+  "planPath": "automations\\apps\\kiosko\\cases\\preview-009-cerrar-sesion-por-inactividad-durante-la-visualizacion-del-contenido\\plan.json",
+  "specPath": "automations\\apps\\kiosko\\cases\\preview-009-cerrar-sesion-por-inactividad-durante-la-visualizacion-del-contenido\\case.spec.ts",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "kiosko",
+  "createdAt": "2026-06-02T19:29:24.886Z",
+  "updatedAt": "2026-06-02T19:29:24.886Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-009\\2026-06-02T19-28-59-014Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "not_run",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-009\\2026-06-02T19-28-59-014Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [],
+      "availablePageObjects": [
+        "ProductListPage",
+        "OperationsMenuPage",
+        "HomePage",
+        "ProductInformationPage",
+        "CategoryPage",
+        "ProductDetailPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    }
+  }
+}

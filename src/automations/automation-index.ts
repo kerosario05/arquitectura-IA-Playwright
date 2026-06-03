@@ -9,6 +9,22 @@ const DEFAULT_INDEX_PATH = "automations/index.json";
 const INDEX_IO_RETRIES = 3;
 const INDEX_IO_RETRY_DELAY_MS = 50;
 
+function inferIndexKind(indexPath: string): "automation" | "page-object" | "flow" | "section" | "unknown" {
+  const normalized = indexPath.replace(/\\/g, "/").toLowerCase();
+  if (normalized.endsWith("/page-objects.index.json")) return "page-object";
+  if (normalized.endsWith("/flows.index.json")) return "flow";
+  if (normalized.endsWith("/index.json")) {
+    return normalized.includes("/sections/") ? "section" : "automation";
+  }
+  return "unknown";
+}
+
+function inferAppSlugFromIndexPath(indexPath: string): string | undefined {
+  const normalized = indexPath.replace(/\\/g, "/");
+  const match = normalized.match(/automations\/apps\/([^/]+)\//i);
+  return match?.[1];
+}
+
 function isMissingFileError(error: unknown): boolean {
   return Boolean(error && typeof error === "object" && "code" in error && (error as NodeJS.ErrnoException).code === "ENOENT");
 }
@@ -78,6 +94,30 @@ function createEmptyIndex(): PromotedAutomationIndex {
   };
 }
 
+function isLegacyBootstrapIndex(parsed: unknown): parsed is {
+  appSlug?: string;
+  name?: string;
+  createdAt?: string;
+  entries?: unknown[];
+} {
+  return Boolean(
+    parsed &&
+    typeof parsed === "object" &&
+    !Array.isArray(parsed) &&
+    "entries" in parsed &&
+    Array.isArray((parsed as any).entries) &&
+    !("automations" in parsed)
+  );
+}
+
+function migrateLegacyBootstrapIndex(parsed: { createdAt?: string }): PromotedAutomationIndex {
+  return {
+    version: "1.0",
+    updatedAt: parsed.createdAt ?? new Date().toISOString(),
+    automations: []
+  };
+}
+
 export async function loadAutomationIndex(
   indexPath?: string
 ): Promise<PromotedAutomationIndex> {
@@ -88,7 +128,15 @@ export async function loadAutomationIndex(
   }
   const parsed = JSON.parse(content) as PromotedAutomationIndex;
 
+  if (isLegacyBootstrapIndex(parsed)) {
+    const appSlug = inferAppSlugFromIndexPath(resolved) ?? parsed.appSlug ?? "unknown";
+    console.log(`[index-loader] path=${resolved} version=undefined appSlug=${appSlug} kind=${inferIndexKind(resolved)} legacyBootstrap=true`);
+    return migrateLegacyBootstrapIndex(parsed);
+  }
+
   if (parsed.version !== "1.0") {
+    const appSlug = inferAppSlugFromIndexPath(resolved) ?? (parsed as any)?.appSlug ?? "unknown";
+    console.log(`[index-loader] path=${resolved} version=${String((parsed as any)?.version)} appSlug=${appSlug} kind=${inferIndexKind(resolved)}`);
     throw new Error(`Unsupported index version: ${parsed.version}`);
   }
 

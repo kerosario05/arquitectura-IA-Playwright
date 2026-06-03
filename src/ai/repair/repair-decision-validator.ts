@@ -50,6 +50,11 @@ const PAYMENT_HINTS = /(payment|pago|card number|tarjeta|cvv)/i;
 const TRANSFER_HINTS = /(transfer|transferencia|wire)/i;
 const INVENTED_TEXT_HINTS = /(i think|probably|maybe|seems like|appears to|likely|should be|would be)/i;
 const SUBMIT_LIKE_HINTS = /(continuar|confirmar|enviar|submit|next|continue|confirm|send)/i;
+const CONFIDENCE_STRING_MAP: Record<string, number> = {
+  high: 0.85,
+  medium: 0.65,
+  low: 0.4,
+};
 
 const ASSERTION_STATUS_ALLOWED = [
   "satisfied_by_existing_evidence",
@@ -60,6 +65,26 @@ const ASSERTION_STATUS_ALLOWED = [
 function asObject(value: unknown): Record<string, unknown> | undefined {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return undefined;
   return value as Record<string, unknown>;
+}
+
+function normalizeConfidenceValue(value: unknown): { value?: number; normalizedFrom?: string; valid: boolean } {
+  if (value === undefined) {
+    return { value: undefined, valid: true };
+  }
+  if (typeof value === "number") {
+    return { value, valid: true };
+  }
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (normalized in CONFIDENCE_STRING_MAP) {
+      return {
+        value: CONFIDENCE_STRING_MAP[normalized],
+        normalizedFrom: value,
+        valid: true,
+      };
+    }
+  }
+  return { valid: false };
 }
 
 export function validateRepairDecision(
@@ -78,7 +103,7 @@ export function validateRepairDecision(
   const repairType = obj.repairType;
   const candidateId = obj.candidateId;
   const questions = obj.questions;
-  const confidence = obj.confidence;
+  const normalizedConfidence = normalizeConfidenceValue(obj.confidence);
 
   if (typeof decision !== "string" || !REPAIR_DECISION_ALLOWED_DECISIONS.includes(decision as any)) {
     return { valid: false, code: "AI_REPAIR_SCHEMA_INVALID", message: "Invalid or missing decision." };
@@ -92,7 +117,7 @@ export function validateRepairDecision(
   if (questions !== undefined && (!Array.isArray(questions) || !questions.every((q) => typeof q === "string"))) {
     return { valid: false, code: "AI_REPAIR_SCHEMA_INVALID", message: "questions must be string[] when present." };
   }
-  if (confidence !== undefined && typeof confidence !== "number") {
+  if (!normalizedConfidence.valid) {
     return { valid: false, code: "AI_REPAIR_SCHEMA_INVALID", message: "confidence must be numeric when present." };
   }
 
@@ -234,6 +259,25 @@ export function validateRepairDecision(
     }
   }
 
+  if (decision === "repaired_plan" && candidateId !== undefined) {
+    const candidateIdStr = candidateId as string;
+    const candidate = context.candidates.find((c) => c.candidateId === candidateIdStr);
+    if (!candidate) {
+      return { valid: false, code: "AI_REPAIR_UNKNOWN_CANDIDATE", message: `candidateId "${candidateIdStr}" not found in candidates.` };
+    }
+    if (context.mustUseVisibleCandidate !== false) {
+      if (!candidate.visible) {
+        return { valid: false, code: "AI_REPAIR_CANDIDATE_NOT_VISIBLE", message: `Candidate "${candidateIdStr}" is not visible.` };
+      }
+      if (candidate.enabled === false) {
+        return { valid: false, code: "AI_REPAIR_CANDIDATE_NOT_ENABLED", message: `Candidate "${candidateIdStr}" is not enabled.` };
+      }
+      if (candidate.clickable === false && candidate.editable !== true) {
+        return { valid: false, code: "AI_REPAIR_CANDIDATE_NOT_ACTIONABLE", message: `Candidate "${candidateIdStr}" is not actionable.` };
+      }
+    }
+  }
+
   // Validación de candidateId cuando está presente (independiente de repairType)
   if (candidateId !== undefined) {
     if (context.mustReturnExistingCandidateId !== false) {
@@ -254,7 +298,7 @@ export function validateRepairDecision(
 
   // Validación general: repaired_plan debe tener al menos un campo de acción
   if (decision === "repaired_plan" && !candidateId && !obj.evidenceId) {
-    return { valid: false, code: "AI_REPAIR_SCHEMA_INVALID", message: "repaired_plan must include candidateId or evidenceId." };
+    return { valid: false, code: "AI_REPAIR_MISSING_CANDIDATE", message: "repaired_plan must include candidateId or evidenceId." };
   }
 
   const normalized: RepairDecision = {
@@ -266,7 +310,8 @@ export function validateRepairDecision(
     assertionStatus: obj.assertionStatus as any,
     selectionStatus: obj.selectionStatus as any,
     insertedStepText: obj.insertedStepText as any,
-    confidence: confidence as any,
+    confidence: normalizedConfidence.value as any,
+    confidenceNormalizedFrom: normalizedConfidence.normalizedFrom as any,
     questions: questions as any
   };
   return { valid: true, decision: normalized };

@@ -1,0 +1,10 @@
+{
+  "id": "preview-003-test-scenario",
+  "externalId": "PREVIEW-003",
+  "caseId": 0,
+  "title": "Test scenario",
+  "source": "discovery",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "createdAt": "2026-06-03T13:04:57.517Z"
+}

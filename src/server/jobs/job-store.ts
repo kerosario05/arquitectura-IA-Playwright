@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 import { EventEmitter } from "events";
 import type { ChildProcess } from "child_process";
 
-export type JobStatus = "queued" | "running" | "done" | "failed" | "cancelled";
+export type JobStatus = "queued" | "running" | "done" | "failed" | "cancelled" | "completed_with_failures";
 
 export type JobSummary = {
   sprintLabel?: string;
@@ -10,13 +10,21 @@ export type JobSummary = {
   synced: number;
   passed: number;
   failed: number;
+  completed?: number;
+  errorMessage?: string;
   testRailRunId?: number;
   testRailRunUrl?: string;
+  caseIds?: number[];
+  command?: string;
+  artifactsDir?: string;
+  scenarioCount?: number;
+  currentCaseIndex?: number;
+  totalCases?: number;
 };
 
 export type Job = {
   id: string;
-  type: "sprint";
+  type: "sprint" | "discovery-batch" | "scenario-preview";
   status: JobStatus;
   params: Record<string, unknown>;
   createdAt: string;
@@ -25,6 +33,8 @@ export type Job = {
   exitCode?: number;
   logs: string[];
   summary?: JobSummary;
+  currentCase?: string | null;
+  errorMessage?: string;
 };
 
 export type JobInternal = Job & {
@@ -35,7 +45,7 @@ export type JobInternal = Job & {
 class JobStore {
   private readonly jobs = new Map<string, JobInternal>();
 
-  create(type: "sprint", params: Record<string, unknown>): Job {
+  create(type: "sprint" | "discovery-batch" | "scenario-preview", params: Record<string, unknown>): Job {
     const id = randomUUID();
     const job: JobInternal = {
       id,
@@ -66,7 +76,7 @@ class JobStore {
       .map((j) => this.serialize(j));
   }
 
-  update(id: string, patch: Partial<Pick<JobInternal, "status" | "startedAt" | "completedAt" | "exitCode" | "summary" | "process">>): void {
+  update(id: string, patch: Partial<Pick<JobInternal, "status" | "startedAt" | "completedAt" | "exitCode" | "summary" | "process" | "currentCase" | "errorMessage">>): void {
     const job = this.jobs.get(id);
     if (!job) return;
     Object.assign(job, patch);

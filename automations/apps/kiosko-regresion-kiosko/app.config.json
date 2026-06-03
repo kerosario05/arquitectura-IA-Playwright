@@ -1,0 +1,22 @@
+{
+  "appSlug": "kiosko-regresion-kiosko",
+  "name": "Kiosko / REGRESION-KIOSKO",
+  "source": {
+    "type": "testrail_section",
+    "sectionName": "Kiosko / REGRESION-KIOSKO"
+  },
+  "routeProfile": {
+    "name": "default",
+    "entry": [],
+    "aliases": {},
+    "intermediates": {},
+    "domainTerms": {},
+    "visibleControls": [],
+    "representativeFixture": {},
+    "notes": [
+      "App creada automáticamente desde QA Lab."
+    ]
+  },
+  "createdAt": "2026-06-02T22:59:00.805Z",
+  "updatedAt": "2026-06-02T22:59:00.805Z"
+}

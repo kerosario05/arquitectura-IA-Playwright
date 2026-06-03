@@ -1,0 +1,118 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-007",
+    "caseId": 0,
+    "title": "Regresar desde el detalle al listado principal"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Clic en \"Iniciar\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en \"Información de productos\".",
+      "target": {
+        "strategy": "product_condition",
+        "value": "Información de productos",
+        "exact": false
+      },
+      "locatorStrategy": "product_condition"
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Clic en \"Depósitos a Plazo\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Depósitos a Plazo",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Clic en \"Volver\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Volver",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 7,
+      "action": "assertText",
+      "description": "Assert: Tarjetas de crédito",
+      "target": {
+        "strategy": "text",
+        "value": "Tarjetas de crédito",
+        "exact": false
+      },
+      "expected": "Tarjetas de crédito"
+    },
+    {
+      "index": 8,
+      "action": "assertText",
+      "description": "Assert: Depósitos a Plazo",
+      "target": {
+        "strategy": "text",
+        "value": "Depósitos a Plazo",
+        "exact": false
+      },
+      "expected": "Depósitos a Plazo"
+    },
+    {
+      "index": 9,
+      "action": "assertText",
+      "description": "Assert: Cuentas de Efectivo",
+      "target": {
+        "strategy": "text",
+        "value": "Cuentas de Efectivo",
+        "exact": false
+      },
+      "expected": "Cuentas de Efectivo"
+    },
+    {
+      "index": 10,
+      "action": "assertText",
+      "description": "Assert: Préstamos",
+      "target": {
+        "strategy": "text",
+        "value": "Préstamos",
+        "exact": false
+      },
+      "expected": "Préstamos"
+    }
+  ],
+  "notes": [
+    "Discovery partial: 8/9 navigations/assertions satisfied.",
+    "Review needed: 1 non-blocking assertion failure(s) were ignored for pass/fail reconciliation."
+  ],
+  "createdAt": "2026-06-02T18:58:16.669Z"
+}

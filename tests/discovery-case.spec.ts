@@ -5,7 +5,7 @@ import type { TestScenario } from "../src/types/testrail.types";
 import { extractCleanTarget, parseScenarioStepsForDiscovery, evaluateEarlyCompletion } from "../src/discovery/case-discovery";
 import { expandSemanticTokens, tokenizeWithStopwords, computeSemanticScore, normalizeSemanticText, buildSnapshotCandidates } from "../src/discovery/target-resolver";
 import { resolveAssertionTargets, type AssertionTargetInput } from "../src/discovery/assertion-resolver";
-import type { ActionTargetItem } from "../src/discovery/step-intent-parser";
+import { normalizeParsedTarget, type ActionTargetItem } from "../src/discovery/step-intent-parser";
 import type { PageSnapshot, SnapshotElement } from "../src/types/page-snapshot.types";
 
 type CliArgs = {
@@ -1085,6 +1085,39 @@ test("fill actions tienen valueSource definido, click no tiene value ni valueSou
   const clickAction = parsed.actionTargets.find((t) => t.target === "Login");
   expect(clickAction!.valueSource).toBeUndefined();
   expect(clickAction!.valueKey).toBeUndefined();
+});
+
+test("normalizeParsedTarget completa valueSource faltante", () => {
+  expect(normalizeParsedTarget("Pesos")).toEqual({
+    target: "Pesos",
+    valueSource: "unknown",
+  });
+
+  expect(normalizeParsedTarget({ target: "Pesos" })).toEqual({
+    target: "Pesos",
+    valueSource: "unknown",
+  });
+});
+
+test("parseScenarioStepsForDiscovery conserva action targets seguros en escenarios mixtos", () => {
+  const scenario: TestScenario = {
+    source: "testrail",
+    externalId: "SYNTH_SAFE_TARGETS",
+    caseId: 99993,
+    title: "Safe targets",
+    steps: [
+      { index: 1, action: "Clic en 'Iniciar'.", expected: undefined, dataHints: [] },
+      { index: 2, action: "Clic en 'Información de productos'.", expected: undefined, dataHints: [] },
+      { index: 3, action: "Clic en 'Cuentas de Efectivo'.", expected: undefined, dataHints: [] },
+      { index: 4, action: "Validar Pesos.", expected: undefined, dataHints: [] },
+      { index: 5, action: "Validar Dólares.", expected: undefined, dataHints: [] },
+      { index: 6, action: "Validar Euros.", expected: undefined, dataHints: [] },
+    ]
+  };
+
+  const parsed = parseScenarioStepsForDiscovery(scenario);
+  expect(parsed.actionTargets.every((target) => typeof target.target === "string" && target.target.length > 0)).toBe(true);
+  expect(parsed.actionTargets.every((target) => target.valueSource === undefined || target.valueSource === "literal" || target.valueSource === "test_data" || target.valueSource === "unknown")).toBe(true);
 });
 
 test("orderedSteps intercala assertion antes de accion cuando el indice del paso lo requiere", () => {

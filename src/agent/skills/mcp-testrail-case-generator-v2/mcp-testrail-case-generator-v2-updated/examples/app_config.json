@@ -1,0 +1,35 @@
+{
+  "appSlug": "kiosko",
+  "routeProfile": {
+    "name": "authenticated_operations_balance_depositos_plazo",
+    "entry": [
+      {"businessLabel": "iniciar", "visibleLabel": "Iniciar"},
+      {"businessLabel": "transacciones_servicios", "visibleLabel": "Transacciones y servicios"}
+    ],
+    "aliases": {
+      "consulta_balance": "Consulta de balance",
+      "depositos_plazo": "Depósitos a plazos",
+      "volver": "Volver",
+      "imprimir": "Imprimir",
+      "correo": "Enviar vía correo",
+      "finalizar": "Finalizar sesión",
+      "sin_depositos": "No tiene depósitos a plazo asociados",
+      "proximo_vencer": "vence próximamente"
+    },
+    "intermediates": {
+      "depositos_plazo": ["Consulta de balance", "Depósitos a plazos"]
+    },
+    "domainTerms": {
+      "depositos_plazo": "depósito"
+    },
+    "visibleControls": ["Volver", "Imprimir", "Enviar vía correo", "Finalizar sesión"],
+    "representativeFixture": {
+      "default": "cliente_deposito_plazo_multiple_activo",
+      "empty": "cliente_sin_depositos_plazo",
+      "single": "cliente_deposito_plazo_unico_activo"
+    },
+    "notes": [
+      "AuthGate/AuthFlow resuelve login cuando el flujo entra por zona autenticada."
+    ]
+  }
+}

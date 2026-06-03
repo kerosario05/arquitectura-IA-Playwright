@@ -1,0 +1,27 @@
+{
+  "appSlug": "tests",
+  "name": "Tests",
+  "source": {
+    "type": "testrail_section",
+    "sectionName": "API Tests"
+  },
+  "routeProfile": {
+    "name": "default",
+    "entry": [],
+    "aliases": {},
+    "intermediates": {},
+    "domainTerms": {},
+    "visibleControls": [],
+    "representativeFixture": {},
+    "notes": [
+      "App creada automáticamente desde QA Lab."
+    ]
+  },
+  "createdAt": "2026-06-02T12:04:22.612Z",
+  "updatedAt": "2026-06-03T00:28:18.476Z",
+  "lastUsedSource": {
+    "type": "testrail_section",
+    "sectionName": "API Tests",
+    "updatedAt": "2026-06-03T00:28:18.476Z"
+  }
+}

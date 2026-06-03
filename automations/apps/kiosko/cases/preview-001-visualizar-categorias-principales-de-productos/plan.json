@@ -1,0 +1,75 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-001",
+    "caseId": 0,
+    "title": "Visualizar categorías principales de productos"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Clic en \"Iniciar\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en \"Información de productos\".",
+      "target": {
+        "strategy": "product_condition",
+        "value": "Información de productos",
+        "exact": false
+      },
+      "locatorStrategy": "product_condition"
+    },
+    {
+      "index": 5,
+      "action": "assertText",
+      "description": "Assert: Cuentas de Efectivo",
+      "target": {
+        "strategy": "text",
+        "value": "Cuentas de Efectivo",
+        "exact": false
+      },
+      "expected": "Cuentas de Efectivo"
+    },
+    {
+      "index": 6,
+      "action": "assertText",
+      "description": "Assert: Préstamos",
+      "target": {
+        "strategy": "text",
+        "value": "Préstamos",
+        "exact": false
+      },
+      "expected": "Préstamos"
+    }
+  ],
+  "notes": [
+    "Discovery partial: 4/6 navigations/assertions satisfied.",
+    "Review needed: 2 non-blocking assertion failure(s) were ignored for pass/fail reconciliation.",
+    "Recovered 2 transient assertion failure(s) - see step recovery metadata for details."
+  ],
+  "createdAt": "2026-06-03T14:37:41.222Z"
+}

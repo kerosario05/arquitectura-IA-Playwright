@@ -1,0 +1,267 @@
+{
+  "appSlug": "kiosko",
+  "pageObjects": [
+    {
+      "id": "po_framework_productlistpage",
+      "className": "ProductListPage",
+      "filePath": "automations/apps/kiosko/pages/productlist.page.ts",
+      "screenSignature": "screen:kiosko-product_list",
+      "methods": [
+        {
+          "name": "selectProduct",
+          "intent": "select_product",
+          "parameters": [
+            "productName"
+          ],
+          "available": true,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": "preview-007-regresar-al-listado-desde-el-detalle-de-un-producto-en-kiosko-step-7,preview-005-regresar-al-listado-desde-el-detalle-del-producto-step-7"
+        },
+        {
+          "name": "selectFirstVisibleCard",
+          "intent": "select_first_visible_card",
+          "parameters": [],
+          "available": true,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        },
+        {
+          "name": "selectFirstVisibleProduct",
+          "intent": "select_first_visible_product",
+          "parameters": [],
+          "available": true,
+          "source": "preview-007-visualizar-detalle-del-primer-producto-de-prestamos-personales-step-7,preview-007-regresar-al-listado-desde-el-detalle-de-un-producto-en-kiosko-step-6,preview-005-regresar-al-listado-desde-el-detalle-del-producto-step-6",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        },
+        {
+          "name": "selectVisibleItemByOrdinal",
+          "intent": "select_visible_item_by_ordinal",
+          "parameters": [
+            "ordinal",
+            "domainTerm"
+          ],
+          "available": true,
+          "source": "preview-007-visualizar-detalle-del-primer-producto-de-prestamos-personales-missing-select_visible_item_by_ordinal",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        },
+        {
+          "name": "backToList",
+          "intent": "return_to_list",
+          "parameters": [],
+          "available": true,
+          "source": "preview-007-regresar-al-listado-desde-el-detalle-de-un-producto-en-kiosko-missing-return_to_list",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 1,
+      "status": "active",
+      "sourcePlanIds": [],
+      "caseIds": [],
+      "createdAt": "2026-06-01T20:56:54.277Z",
+      "updatedAt": "2026-06-02T11:34:10.204Z"
+    },
+    {
+      "id": "po_framework_operationsmenupage",
+      "className": "OperationsMenuPage",
+      "filePath": "automations/apps/kiosko/pages/operationsmenu.page.ts",
+      "screenSignature": "screen:kiosko-operations_menu",
+      "methods": [
+        {
+          "name": "openModule",
+          "intent": "open_module",
+          "parameters": [
+            "moduleName"
+          ],
+          "available": true,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        },
+        {
+          "name": "expectModuleVisible",
+          "intent": "expect_loaded",
+          "parameters": [
+            "moduleName"
+          ],
+          "available": true,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        }
+      ],
+      "confidence": 1,
+      "status": "active",
+      "sourcePlanIds": [],
+      "caseIds": [],
+      "createdAt": "2026-06-01T20:56:54.277Z",
+      "updatedAt": "2026-06-01T20:56:54.277Z"
+    },
+    {
+      "id": "po_1780366216847_38jizu",
+      "className": "HomePage",
+      "filePath": "automations/apps/kiosko/pages/home.page.ts",
+      "screenSignature": "screen:kiosko-home",
+      "methods": [
+        {
+          "name": "start",
+          "intent": "start_session",
+          "parameters": [],
+          "available": true,
+          "source": "candidate,preview-001-visualizar-categorias-principales-de-informacion-de-productos-step-3,preview-001-visualizar-categorias-principales-de-informacion-de-productos-missing-start_session,preview-003-navegar-a-subcategoria-de-prestamos-personales-step-3,preview-007-visualizar-detalle-del-primer-producto-de-prestamos-personales-step-3,preview-007-regresar-al-listado-desde-el-detalle-de-un-producto-en-kiosko-step-3,preview-005-regresar-al-listado-desde-el-detalle-del-producto-step-3",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "active",
+      "sourcePlanIds": [
+        "preview-001-visualizar-categorias-principales-de-informacion-de-productos"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-06-02T02:10:16.847Z",
+      "updatedAt": "2026-06-02T02:10:16.847Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-06-02T02:10:16.864Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/kiosko/pages/home.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-06-02T02:10:16.879Z",
+        "approvedFrom": "automations/apps/kiosko/pages/home.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
+    },
+    {
+      "id": "po_1780366216848_z2j3qj",
+      "className": "ProductInformationPage",
+      "filePath": "automations/apps/kiosko/pages/productinformation.page.ts",
+      "screenSignature": "screen:kiosko-product_information",
+      "methods": [
+        {
+          "name": "openProductInformation",
+          "intent": "open_product_information",
+          "parameters": [],
+          "available": true,
+          "source": "candidate,preview-001-visualizar-categorias-principales-de-informacion-de-productos-step-4,preview-001-visualizar-categorias-principales-de-informacion-de-productos-missing-open_product_information,preview-003-navegar-a-subcategoria-de-prestamos-personales-step-4,preview-007-visualizar-detalle-del-primer-producto-de-prestamos-personales-step-4,preview-007-regresar-al-listado-desde-el-detalle-de-un-producto-en-kiosko-step-4,preview-005-regresar-al-listado-desde-el-detalle-del-producto-step-4",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "active",
+      "sourcePlanIds": [
+        "preview-001-visualizar-categorias-principales-de-informacion-de-productos"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-06-02T02:10:16.848Z",
+      "updatedAt": "2026-06-02T02:10:16.848Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-06-02T02:10:16.867Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/kiosko/pages/productinformation.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-06-02T02:10:16.883Z",
+        "approvedFrom": "automations/apps/kiosko/pages/productinformation.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
+    },
+    {
+      "id": "po_1780366254287_x5u14q",
+      "className": "CategoryPage",
+      "filePath": "automations/apps/kiosko/pages/category.page.ts",
+      "screenSignature": "screen:kiosko-category",
+      "methods": [
+        {
+          "name": "selectCategory",
+          "intent": "select_category",
+          "parameters": [
+            "categoryName"
+          ],
+          "available": true,
+          "source": "candidate,preview-003-navegar-a-subcategoria-de-prestamos-personales-step-5,preview-003-navegar-a-subcategoria-de-prestamos-personales-missing-select_category,preview-007-visualizar-detalle-del-primer-producto-de-prestamos-personales-step-5,preview-007-regresar-al-listado-desde-el-detalle-de-un-producto-en-kiosko-step-5,preview-005-regresar-al-listado-desde-el-detalle-del-producto-step-5",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "active",
+      "sourcePlanIds": [
+        "preview-003-navegar-a-subcategoria-de-prestamos-personales"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-06-02T02:10:54.287Z",
+      "updatedAt": "2026-06-02T02:10:54.287Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-06-02T02:10:54.298Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/kiosko/pages/category.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-06-02T02:10:54.307Z",
+        "approvedFrom": "automations/apps/kiosko/pages/category.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
+    },
+    {
+      "id": "po_1780422140516_t94exb",
+      "className": "ProductDetailPage",
+      "filePath": "automations/apps/kiosko/pages/productdetail.page.ts",
+      "screenSignature": "screen:kiosko-product_detail",
+      "methods": [
+        {
+          "name": "expectLoaded",
+          "intent": "expect_loaded",
+          "parameters": [],
+          "available": true,
+          "source": "candidate,preview-005-regresar-al-listado-desde-el-detalle-del-producto-step-8,preview-005-regresar-al-listado-desde-el-detalle-del-producto-missing-expect_loaded",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "active",
+      "sourcePlanIds": [
+        "preview-005-regresar-al-listado-desde-el-detalle-del-producto"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-06-02T17:42:20.516Z",
+      "updatedAt": "2026-06-02T17:42:20.516Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-06-02T17:42:20.535Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/kiosko/pages/productdetail.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-06-02T17:42:20.552Z",
+        "approvedFrom": "automations/apps/kiosko/pages/productdetail.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
+    }
+  ],
+  "updatedAt": "2026-06-03T14:37:41.265Z"
+}

@@ -31,7 +31,7 @@ test("bloquea candidate invisible", () => {
 test("bloquea candidate no actionable", () => {
   const r = validateRepairDecision(
     { decision: "repaired_plan", reason: "x", candidateId: "c1" },
-    { candidates: [{ candidateId: "c1", visible: true, clickable: false, editable: false, enabled: false }] }
+    { candidates: [{ candidateId: "c1", visible: true, clickable: false, editable: false, enabled: true }] }
   );
   expect(r.valid).toBe(false);
   if (!r.valid) expect(r.code).toBe("AI_REPAIR_CANDIDATE_NOT_ACTIONABLE");
@@ -60,4 +60,25 @@ test("acepta no_safe_action con reason", () => {
 test("acepta needs_more_context con reason", () => {
   const r = validateRepairDecision({ decision: "needs_more_context", reason: "x" }, baseContext);
   expect(r.valid).toBe(true);
+});
+
+test("normaliza confidence high a numerico conocido", () => {
+  const r = validateRepairDecision(
+    { decision: "repaired_plan", reason: "x", candidateId: "c1", confidence: "high" },
+    baseContext
+  );
+  expect(r.valid).toBe(true);
+  if (r.valid) {
+    expect(r.decision.confidence).toBe(0.85);
+    expect(r.decision.confidenceNormalizedFrom).toBe("high");
+  }
+});
+
+test("rechaza confidence string desconocido", () => {
+  const r = validateRepairDecision(
+    { decision: "repaired_plan", reason: "x", candidateId: "c1", confidence: "very-high" },
+    baseContext
+  );
+  expect(r.valid).toBe(false);
+  if (!r.valid) expect(r.code).toBe("AI_REPAIR_SCHEMA_INVALID");
 });

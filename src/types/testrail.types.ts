@@ -125,12 +125,18 @@ export type AddCaseInput = {
   title: string;
   refs?: string;
   preconditions?: string;
+  customExpected?: string;
+  customCaseOracle?: string;
   stepsSeparated?: Array<{ content: string; expected?: string }>;
+  customFields?: Record<string, unknown>;
 };
 
 export type UpdateCaseInput = {
   title?: string;
   refs?: string;
   preconditions?: string;
+  customExpected?: string;
+  customCaseOracle?: string;
   stepsSeparated?: Array<{ content: string; expected?: string }>;
+  customFields?: Record<string, unknown>;
 };

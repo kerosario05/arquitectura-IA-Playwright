@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-05-28T19:18:30.106Z",
+  "updatedAt": "2026-06-02T01:35:39.292Z",
   "automations": [
     {
       "id": "c37757-consulta-depositos-a-plazo-en-dolares",
@@ -426,6 +426,499 @@
       "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\case-38257\\2026-05-28T19-13-56-510Z\\discovered-plans.pending.json",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run"
+    },
+    {
+      "id": "preview-001-visualizar-categorias-principales-de-informacion-de-productos",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "Visualizar categorías principales de Información de productos",
+      "planPath": "automations\\apps\\default\\cases\\preview-001-visualizar-categorias-principales-de-informacion-de-productos\\plan.json",
+      "specPath": "automations\\apps\\default\\cases\\preview-001-visualizar-categorias-principales-de-informacion-de-productos\\case.spec.ts",
+      "appSlug": "default",
+      "appConfigPath": "automations\\apps\\default\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "default",
+      "baseUrlHash": "1423ba294517",
+      "createdAt": "2026-06-01T19:25:54.670Z",
+      "updatedAt": "2026-06-02T01:31:04.719Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-06-02T01-30-45-979Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-06-02T01-30-45-979Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "HomePage",
+            "ProductInformationPage",
+            "CategoryPage",
+            "ProductListPage",
+            "ProductDetailPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\default\\cases\\preview-001-visualizar-categorias-principales-de-informacion-de-productos\\plan.json",
+        "previousStatus": "active"
+      }
+    },
+    {
+      "id": "preview-003-visualizar-subcategoria-de-prestamos-personales",
+      "externalId": "PREVIEW-003",
+      "caseId": 0,
+      "title": "Visualizar subcategoría de préstamos personales",
+      "planPath": "automations\\apps\\default\\cases\\preview-003-visualizar-subcategoria-de-prestamos-personales\\plan.json",
+      "specPath": "automations\\apps\\default\\cases\\preview-003-visualizar-subcategoria-de-prestamos-personales\\case.spec.ts",
+      "appSlug": "default",
+      "appConfigPath": "automations\\apps\\default\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "default",
+      "baseUrlHash": "1423ba294517",
+      "createdAt": "2026-06-01T19:26:34.620Z",
+      "updatedAt": "2026-06-01T19:26:34.620Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-06-01T19-26-10-199Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-06-01T19-26-10-199Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "HomePage",
+            "ProductInformationPage",
+            "CategoryPage",
+            "ProductListPage",
+            "ProductDetailPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-003-visualizar-subcategoria-disponible-de-prestamos",
+      "externalId": "PREVIEW-003",
+      "caseId": 0,
+      "title": "Visualizar subcategoría disponible de Préstamos",
+      "planPath": "automations\\apps\\default\\cases\\preview-003-visualizar-subcategoria-disponible-de-prestamos\\plan.json",
+      "specPath": "automations\\apps\\default\\cases\\preview-003-visualizar-subcategoria-disponible-de-prestamos\\case.spec.ts",
+      "appSlug": "default",
+      "appConfigPath": "automations\\apps\\default\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "default",
+      "baseUrlHash": "1423ba294517",
+      "createdAt": "2026-06-01T21:17:17.377Z",
+      "updatedAt": "2026-06-01T21:17:17.377Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-06-01T21-16-55-582Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-06-01T21-16-55-582Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "HomePage",
+            "ProductInformationPage",
+            "CategoryPage",
+            "ProductListPage",
+            "ProductDetailPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-004-visualizar-detalle-del-primer-producto-de-tarjetas-de-credito",
+      "externalId": "PREVIEW-004",
+      "caseId": 0,
+      "title": "Visualizar detalle del primer producto de Tarjetas de crédito",
+      "planPath": "automations\\apps\\default\\cases\\preview-004-visualizar-detalle-del-primer-producto-de-tarjetas-de-credito\\plan.json",
+      "specPath": "automations\\apps\\default\\cases\\preview-004-visualizar-detalle-del-primer-producto-de-tarjetas-de-credito\\case.spec.ts",
+      "appSlug": "default",
+      "appConfigPath": "automations\\apps\\default\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "default",
+      "baseUrlHash": "1423ba294517",
+      "createdAt": "2026-06-01T21:17:30.720Z",
+      "updatedAt": "2026-06-01T21:17:30.720Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-06-01T21-17-17-489Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-06-01T21-17-17-489Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [
+            "ProductListPage.selectFirstVisibleCard()",
+            "ProductListPage.selectVisibleItemByOrdinal()",
+            "ProductDetailPage.expectLoaded()"
+          ],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0,
+          "autoPom": {
+            "enabled": true,
+            "initialPomStatus": "needs_page_method",
+            "generatedCandidateFiles": [],
+            "autoApprovedPageObjects": [],
+            "autoApprovedMethods": [
+              "ProductListPage.selectFirstVisibleCard()",
+              "ProductListPage.selectVisibleItemByOrdinal()",
+              "ProductDetailPage.expectLoaded()"
+            ],
+            "blockedAutoApprovals": [],
+            "approvalThreshold": 0.5,
+            "regeneratedSpec": true,
+            "validationStatus": "passed",
+            "finalPomStatus": "promoted"
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [
+            "missing_method:step=5 target=\"la primera tarjeta de crédito visible del listado\" derivedIntent=\"select_visible_item_by_ordinal\" expectedOwner=\"ProductListPage\" availableMethods=[selectProduct]"
+          ],
+          "availablePageObjects": [
+            "HomePage",
+            "ProductInformationPage",
+            "CategoryPage",
+            "ProductListPage",
+            "ProductDetailPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [
+            "step=5 target=\"la primera tarjeta de crédito visible del listado\" derivedIntent=\"select_visible_item_by_ordinal\" expectedOwner=\"ProductListPage\" availableMethods=[selectProduct]"
+          ],
+          "autoPomAttempted": true,
+          "autoPomCreatedMethods": [
+            "ProductListPage.selectFirstVisibleCard()",
+            "ProductListPage.selectVisibleItemByOrdinal()",
+            "ProductDetailPage.expectLoaded()"
+          ],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-005-visualizar-detalle-del-primer-deposito-a-plazo",
+      "externalId": "PREVIEW-005",
+      "caseId": 0,
+      "title": "Visualizar detalle del primer depósito a plazo",
+      "planPath": "automations\\apps\\default\\cases\\preview-005-visualizar-detalle-del-primer-deposito-a-plazo\\plan.json",
+      "specPath": "automations\\apps\\default\\cases\\preview-005-visualizar-detalle-del-primer-deposito-a-plazo\\case.spec.ts",
+      "appSlug": "default",
+      "appConfigPath": "automations\\apps\\default\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "default",
+      "baseUrlHash": "1423ba294517",
+      "createdAt": "2026-06-01T21:17:55.354Z",
+      "updatedAt": "2026-06-01T21:17:55.354Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-06-01T21-17-30-811Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-06-01T21-17-30-811Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "HomePage",
+            "ProductInformationPage",
+            "CategoryPage",
+            "ProductListPage",
+            "ProductDetailPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-006-regresar-al-listado-de-depositos-a-plazo-desde-el-detalle",
+      "externalId": "PREVIEW-006",
+      "caseId": 0,
+      "title": "Regresar al listado de Depósitos a Plazo desde el detalle",
+      "planPath": "automations\\apps\\default\\cases\\preview-006-regresar-al-listado-de-depositos-a-plazo-desde-el-detalle\\plan.json",
+      "specPath": "automations\\apps\\default\\cases\\preview-006-regresar-al-listado-de-depositos-a-plazo-desde-el-detalle\\case.spec.ts",
+      "appSlug": "default",
+      "appConfigPath": "automations\\apps\\default\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "default",
+      "baseUrlHash": "1423ba294517",
+      "createdAt": "2026-06-01T21:18:10.798Z",
+      "updatedAt": "2026-06-01T21:18:10.799Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-006\\2026-06-01T21-17-55-438Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-006\\2026-06-01T21-17-55-438Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [
+            "ProductDetailPage.backToList()"
+          ],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0,
+          "autoPom": {
+            "enabled": true,
+            "initialPomStatus": "needs_page_method",
+            "generatedCandidateFiles": [],
+            "autoApprovedPageObjects": [],
+            "autoApprovedMethods": [
+              "ProductDetailPage.backToList()"
+            ],
+            "blockedAutoApprovals": [],
+            "approvalThreshold": 0.5,
+            "regeneratedSpec": true,
+            "validationStatus": "passed",
+            "finalPomStatus": "promoted"
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [
+            "missing_method:step=6 target=\"Volver\" derivedIntent=\"return_to_list\" expectedOwner=\"GenericPage\" availableMethods=[]"
+          ],
+          "availablePageObjects": [
+            "HomePage",
+            "ProductInformationPage",
+            "CategoryPage",
+            "ProductListPage",
+            "ProductDetailPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [
+            "step=6 target=\"Volver\" derivedIntent=\"return_to_list\" expectedOwner=\"GenericPage\" availableMethods=[]"
+          ],
+          "autoPomAttempted": true,
+          "autoPomCreatedMethods": [
+            "ProductDetailPage.backToList()"
+          ],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-008-visualizar-subcategoria-prestamos-personales",
+      "externalId": "PREVIEW-008",
+      "caseId": 0,
+      "title": "Visualizar subcategoría Préstamos personales",
+      "planPath": "automations\\apps\\default\\cases\\preview-008-visualizar-subcategoria-prestamos-personales\\plan.json",
+      "specPath": "automations\\apps\\default\\cases\\preview-008-visualizar-subcategoria-prestamos-personales\\case.spec.ts",
+      "appSlug": "default",
+      "appConfigPath": "automations\\apps\\default\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "default",
+      "baseUrlHash": "1423ba294517",
+      "createdAt": "2026-06-02T01:35:21.778Z",
+      "updatedAt": "2026-06-02T01:35:21.778Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-008\\2026-06-02T01-35-01-145Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-008\\2026-06-02T01-35-01-145Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "HomePage",
+            "ProductInformationPage",
+            "CategoryPage",
+            "ProductListPage",
+            "ProductDetailPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-009-visualizar-detalle-del-primer-producto-visible-en-prestamos-personales-y-regresar",
+      "externalId": "PREVIEW-009",
+      "caseId": 0,
+      "title": "Visualizar detalle del primer producto visible en Préstamos personales y regresar",
+      "planPath": "automations\\apps\\default\\cases\\preview-009-visualizar-detalle-del-primer-producto-visible-en-prestamos-personales-y-regresar\\plan.json",
+      "specPath": "automations\\apps\\default\\cases\\preview-009-visualizar-detalle-del-primer-producto-visible-en-prestamos-personales-y-regresar\\case.spec.ts",
+      "appSlug": "default",
+      "appConfigPath": "automations\\apps\\default\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "default",
+      "baseUrlHash": "1423ba294517",
+      "createdAt": "2026-06-02T01:35:39.292Z",
+      "updatedAt": "2026-06-02T01:35:39.292Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-009\\2026-06-02T01-35-21-892Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-009\\2026-06-02T01-35-21-892Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "HomePage",
+            "ProductInformationPage",
+            "CategoryPage",
+            "ProductListPage",
+            "ProductDetailPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
     }
   ]
 }

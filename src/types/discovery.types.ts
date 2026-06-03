@@ -217,6 +217,10 @@ export type DiscoveryStepResult = {
   structuralSignals?: string[];
   childAssertionsUsed?: string[];
   assertionDiagnostics?: Record<string, unknown>;
+  assertionImportance?: "blocking" | "contextual" | "optional";
+  conditionalAssertion?: boolean;
+  conditionalRisk?: "low" | "medium" | "high";
+  conditionalReason?: string;
   aiAssisted?: boolean;
   aiProposal?: AiExplorerOutput;
   aiReason?: string;

@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
-import { normalizeAppSlug, resolveAppProfile, ensureAppStructure, resolveProjectNameFromTestRail, logAppProfile, validateAuthFlowDependencies, savePromotedAppConfig, loadPromotedAppConfigSync } from "../src/automations/app-profile";
+import { normalizeAppSlug, resolveAppProfile, ensureAppStructure, resolveProjectNameFromTestRail, logAppProfile, validateAuthFlowDependencies, savePromotedAppConfig, loadPromotedAppConfigSync, loadRouteProfile } from "../src/automations/app-profile";
 import type { AppProfile } from "../src/automations/app-profile";
 import { loadPageObjectRegistry } from "../src/automations/page-object-registry";
 
@@ -376,5 +376,56 @@ test.describe("promoted app config IO", () => {
 
     expect(loaded?.baseUrl).toBe("https://example.test");
     expect(loaded?.appProfile.appSlug).toBe("io-app");
+  });
+});
+
+test.describe("route profile multi-app isolation", () => {
+  const appARoot = path.resolve("automations/apps/test-preview-app-a");
+  const appBRoot = path.resolve("automations/apps/test-preview-app-b");
+
+  test.afterEach(async () => {
+    await fsp.rm(appARoot, { recursive: true, force: true });
+    await fsp.rm(appBRoot, { recursive: true, force: true });
+  });
+
+  test("loadRouteProfile usa automations/apps/<appSlug>/app.config.json correcto", async () => {
+    await fsp.mkdir(appARoot, { recursive: true });
+    await fsp.mkdir(appBRoot, { recursive: true });
+
+    await fsp.writeFile(path.join(appARoot, "app.config.json"), JSON.stringify({
+      appProfile: { appSlug: "test-preview-app-a", source: "default", createdAt: "", updatedAt: "" },
+      baseUrl: "https://app-a.example.test",
+      loginMode: "no_login",
+      testData: {},
+      testDataAliases: {},
+      testDataRefs: {},
+      missingInputBehavior: "fail",
+      updatedAt: new Date().toISOString(),
+      routeProfile: {
+        name: "app-a-profile",
+        domainTerms: ["tarjeta", "cuenta"],
+      }
+    }, null, 2), "utf-8");
+
+    await fsp.writeFile(path.join(appBRoot, "app.config.json"), JSON.stringify({
+      appProfile: { appSlug: "test-preview-app-b", source: "default", createdAt: "", updatedAt: "" },
+      baseUrl: "https://app-b.example.test",
+      loginMode: "no_login",
+      testData: {},
+      testDataAliases: {},
+      testDataRefs: {},
+      missingInputBehavior: "fail",
+      updatedAt: new Date().toISOString(),
+      routeProfile: {
+        name: "app-b-profile",
+        domainTerms: ["prestamo"],
+      }
+    }, null, 2), "utf-8");
+
+    const routeProfileA = loadRouteProfile("test-preview-app-a");
+    const routeProfileB = loadRouteProfile("test-preview-app-b");
+
+    expect(routeProfileA?.domainTerms).toEqual(["tarjeta", "cuenta"]);
+    expect(routeProfileB?.domainTerms).toEqual(["prestamo"]);
   });
 });

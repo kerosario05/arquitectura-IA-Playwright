@@ -94,6 +94,7 @@ export type TestRailConfig = {
   suiteId?: string;
   sectionId?: string;
   sessionId?: string;
+  requiredCaseFields?: Record<string, string>;
 };
 
 export type RequiredTestRailRuntimeConfig = {

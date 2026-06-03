@@ -38,6 +38,7 @@ export type RepairDecision = {
   insertedStepText?: string; // For missing_intermediate_step: the text of the inserted intermediate step
   reason: string;
   confidence?: number;
+  confidenceNormalizedFrom?: string;
   questions?: string[];
 };
 

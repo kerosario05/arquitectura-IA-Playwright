@@ -11,6 +11,29 @@ import type {
   UpdateCaseInput
 } from "../types/testrail.types";
 
+/**
+ * Fields that are set explicitly by addCase/updateCase and must never be overwritten
+ * by a caller-supplied `customFields` bag.
+ */
+const RESERVED_TESTRAIL_FIELDS = new Set([
+  "title",
+  "refs",
+  "custom_refs",
+  "custom_preconds",
+  "custom_expected",
+  "custom_case_oracle",
+  "custom_steps",
+  "custom_steps_separated",
+]);
+
+const DEFAULT_CUSTOM_PRECONDS =
+  "Precondiciones:\n- App disponible.\n- Usuario o ambiente de prueba configurado.\n- Datos de prueba disponibles según el escenario.";
+
+function buildCustomPreconds(value: string | undefined | null): string {
+  if (typeof value === "string" && value.trim().length > 0) return value.trim();
+  return DEFAULT_CUSTOM_PRECONDS;
+}
+
 type ApiErrorPayload = {
   error?: string;
   message?: string;
@@ -215,9 +238,39 @@ export class TestRailClient {
   }
 
   async addCase(sectionId: string, input: AddCaseInput): Promise<RawTestRailCase> {
+    console.log(`[testrail-debug] addCase invoked sectionId=${sectionId} title="${input.title?.substring(0, 50)}..."`);
+
     const body: Record<string, unknown> = { title: input.title };
-    if (input.refs) body.refs = input.refs;
-    if (input.preconditions) body.custom_preconds = input.preconditions;
+
+    // Handle refs field with configurable fallback to custom_refs
+    const refsField = process.env.TESTRAIL_REFS_FIELD || "both";
+    const refsValue = input.refs || "";
+    const hasRefs = typeof refsValue === "string" && refsValue.trim().length > 0;
+    console.log(`[testrail-debug] addCase refs handling: refsField="${refsField}" refsValue="${refsValue}" hasRefs=${hasRefs}`);
+
+    if (refsField === "both" || refsField === "refs") {
+      body.refs = refsValue;
+    }
+    if (refsField === "both" || refsField === "custom_refs") {
+      body.custom_refs = refsValue;
+    }
+
+    body.custom_preconds = buildCustomPreconds(input.preconditions);
+    if (input.customExpected) body.custom_expected = input.customExpected;
+    if (input.customCaseOracle) body.custom_case_oracle = input.customCaseOracle;
+    const customFields = (input as AddCaseInput & { customFields?: Record<string, unknown> }).customFields;
+    if (customFields && typeof customFields === "object") {
+      for (const [key, value] of Object.entries(customFields)) {
+        // Never let caller-supplied customFields overwrite reserved core fields
+        if (RESERVED_TESTRAIL_FIELDS.has(key)) {
+          console.log(`[testrail-debug] addCase: skipping reserved field "${key}" from customFields (value=${JSON.stringify(value)})`);
+          continue;
+        }
+        if (value !== undefined) {
+          body[key] = value;
+        }
+      }
+    }
     if (input.stepsSeparated && input.stepsSeparated.length > 0) {
       body.custom_steps_separated = input.stepsSeparated.map((s) => ({
         content: s.content,
@@ -228,6 +281,18 @@ export class TestRailClient {
         .map((s, i) => `${i + 1}. ${s.content}${s.expected ? `\nEsperado: ${s.expected}` : ""}`)
         .join("\n");
     }
+
+    const hasCustomRefs = body.hasOwnProperty("custom_refs");
+    const refsPreview = hasRefs ? refsValue.replace(/[|,]/g, "").slice(0, 64) : "";
+    console.log(`[testrail-debug] addCase payloadKeys=${Object.keys(body).join(",")} hasRefs=${hasRefs} hasCustomRefs=${hasCustomRefs} refsPreview="${refsPreview}"`);
+    console.log(`[testrail-debug] final add_case body=${JSON.stringify(body)}`);
+
+    const isRefsString = typeof body.refs === "string";
+    const isRefsEmpty = typeof body.refs === "string" && body.refs === "";
+    const refsIsNonEmpty = isRefsString && !isRefsEmpty;
+    const customRefsIsNonEmpty = typeof body.custom_refs === "string" && (body.custom_refs as string).trim().length > 0;
+    console.log(`[testrail-debug] addCase pre-send validation: refs=${JSON.stringify(body.refs)} custom_refs=${JSON.stringify(body.custom_refs)} refsIsNonEmpty=${refsIsNonEmpty} customRefsIsNonEmpty=${customRefsIsNonEmpty}`);
+
     const payload = await this.requestJson<RawTestRailCase>(`add_case/${sectionId}`, "POST", body);
     if (!payload || typeof payload.id !== "number") {
       throw new Error("Invalid add_case response from TestRail.");
@@ -236,10 +301,40 @@ export class TestRailClient {
   }
 
   async updateCase(caseId: number, input: UpdateCaseInput): Promise<RawTestRailCase> {
+    console.log(`[testrail-debug] updateCase invoked caseId=${caseId} title="${input.title?.substring(0, 50) ?? "no-title"}..."`);
+    
     const body: Record<string, unknown> = {};
     if (input.title) body.title = input.title;
-    if (input.refs !== undefined) body.refs = input.refs;
-    if (input.preconditions !== undefined) body.custom_preconds = input.preconditions;
+
+    // Handle refs field with configurable fallback to custom_refs
+    const refsField = process.env.TESTRAIL_REFS_FIELD || "both";
+    const refsValue = input.refs || "";
+    const hasRefs = typeof refsValue === "string" && refsValue.trim().length > 0;
+    console.log(`[testrail-debug] updateCase refs handling: refsField="${refsField}" refsValue="${refsValue}" hasRefs=${hasRefs}`);
+
+    if (refsField === "both" || refsField === "refs") {
+      body.refs = refsValue;
+    }
+    if (refsField === "both" || refsField === "custom_refs") {
+      body.custom_refs = refsValue;
+    }
+
+    body.custom_preconds = buildCustomPreconds(input.preconditions);
+    if (input.customExpected !== undefined) body.custom_expected = input.customExpected;
+    if (input.customCaseOracle !== undefined) body.custom_case_oracle = input.customCaseOracle;
+    const customFields = (input as UpdateCaseInput & { customFields?: Record<string, unknown> }).customFields;
+    if (customFields && typeof customFields === "object") {
+      for (const [key, value] of Object.entries(customFields)) {
+        // Never let caller-supplied customFields overwrite reserved core fields
+        if (RESERVED_TESTRAIL_FIELDS.has(key)) {
+          console.log(`[testrail-debug] updateCase: skipping reserved field "${key}" from customFields (value=${JSON.stringify(value)})`);
+          continue;
+        }
+        if (value !== undefined) {
+          body[key] = value;
+        }
+      }
+    }
     if (input.stepsSeparated && input.stepsSeparated.length > 0) {
       body.custom_steps_separated = input.stepsSeparated.map((s) => ({
         content: s.content,
@@ -250,6 +345,18 @@ export class TestRailClient {
         .map((s, i) => `${i + 1}. ${s.content}${s.expected ? `\nEsperado: ${s.expected}` : ""}`)
         .join("\n");
     }
+
+    const hasCustomRefs = body.hasOwnProperty("custom_refs");
+    const refsPreview = hasRefs ? refsValue.replace(/[|,]/g, "").slice(0, 64) : "";
+    console.log(`[testrail-debug] updateCase payloadKeys=${Object.keys(body).join(",")} hasRefs=${hasRefs} hasCustomRefs=${hasCustomRefs} refsPreview="${refsPreview}"`);
+    console.log(`[testrail-debug] final update_case body=${JSON.stringify(body)}`);
+
+    const isRefsString = typeof body.refs === "string";
+    const isRefsEmpty = typeof body.refs === "string" && body.refs === "";
+    const refsIsNonEmpty = isRefsString && !isRefsEmpty;
+    const customRefsIsNonEmpty = typeof body.custom_refs === "string" && (body.custom_refs as string).trim().length > 0;
+    console.log(`[testrail-debug] updateCase pre-send validation: refs=${JSON.stringify(body.refs)} custom_refs=${JSON.stringify(body.custom_refs)} refsIsNonEmpty=${refsIsNonEmpty} customRefsIsNonEmpty=${customRefsIsNonEmpty}`);
+
     const payload = await this.requestJson<RawTestRailCase>(`update_case/${caseId}`, "POST", body);
     if (!payload || typeof payload.id !== "number") {
       throw new Error("Invalid update_case response from TestRail.");
@@ -277,6 +384,21 @@ export class TestRailClient {
   ): Promise<T> {
     const sanitizedEndpoint = endpoint.replace(/^\/+/, "");
     const url = `${this.baseApiUrl}/${sanitizedEndpoint}`;
+    const queryString = sanitizedEndpoint.includes("&") ? sanitizedEndpoint.split("&").slice(1).join("&") : "";
+    const queryKeys = queryString ? Array.from(new URLSearchParams(queryString).keys()).join(",") : "none";
+    const payloadKeys = body && !Array.isArray(body) && typeof body === "object" ? Object.keys(body).join(",") : "none";
+    const refsValue = body && !Array.isArray(body) && typeof body === "object" ? (body as Record<string, unknown>).refs : undefined;
+    const refsPreview = typeof refsValue === "string" ? refsValue.replace(/[|,]/g, "") : "";
+    const refsType = typeof refsValue;
+    const refsLength = typeof refsValue === "string" ? refsValue.length : 0;
+    const hasRefs = typeof refsValue === "string" && refsValue.trim().length > 0;
+    const endpointName = sanitizedEndpoint.split("&")[0];
+    const debugEnabled = process.env.TESTRAIL_DEBUG_PAYLOADS === "true";
+    if (debugEnabled) {
+      console.log(
+        `[testrail-debug] endpoint=${endpointName} method=${method} payloadKeys=${payloadKeys} queryKeys=${queryKeys} hasRefs=${hasRefs} refsType=${refsType} refsLength=${refsLength} refsPreview="${refsPreview}"`
+      );
+    }
 
     let response: Response;
     try {
@@ -305,9 +427,13 @@ export class TestRailClient {
     }
 
     if (!response.ok) {
+      console.error(`[testrail-debug] HTTP error response:
+- status: ${response.status}
+- body: ${rawText}
+- endpoint: ${endpointName}`);
       const errorPayload = payload as ApiErrorPayload;
       const apiMessage = errorPayload.error || errorPayload.message || "Unknown TestRail API error";
-      throw new Error(`TestRail API error (HTTP ${response.status}): ${apiMessage}`);
+      throw new Error(`TestRail API error (HTTP ${response.status}) at ${endpointName}: ${apiMessage}`);
     }
 
     return payload as T;

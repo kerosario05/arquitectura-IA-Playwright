@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-06-01T13:39:22.921Z",
+  "updatedAt": "2026-06-01T14:38:41.008Z",
   "automations": [
     {
       "id": "c37869-generar-carta-de-referencia-con-cuenta-de-ahorro",
@@ -2311,13 +2311,13 @@
       "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "1423ba294517",
       "createdAt": "2026-06-01T13:28:31.659Z",
-      "updatedAt": "2026-06-01T13:28:31.659Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38327\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-01T14:26:55.291Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38327\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38327",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38327",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -2351,7 +2351,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\c38327-consulta-de-balance-visualizar-listado-de-depositos-a-plazo-activos\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -2368,13 +2371,13 @@
       "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "1423ba294517",
       "createdAt": "2026-06-01T13:29:39.497Z",
-      "updatedAt": "2026-06-01T13:29:39.498Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38328\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-01T14:28:05.325Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38328\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38328",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38328",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -2408,7 +2411,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\c38328-consulta-de-balance-visualizar-detalle-de-deposito-a-plazo-activo\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -2425,13 +2431,13 @@
       "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "1423ba294517",
       "createdAt": "2026-06-01T13:30:48.359Z",
-      "updatedAt": "2026-06-01T13:30:48.359Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38330\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-01T14:29:15.096Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38330\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38330",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38330",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -2465,7 +2471,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\c38330-consulta-de-balance-validar-etiquetas-visibles-del-detalle-de-deposito\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -2482,13 +2491,13 @@
       "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "1423ba294517",
       "createdAt": "2026-06-01T13:31:56.886Z",
-      "updatedAt": "2026-06-01T13:31:56.886Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38331\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-01T14:30:25.217Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38331\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38331",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38331",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -2522,7 +2531,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\c38331-consulta-de-balance-ver-acciones-disponibles-en-detalle-de-deposito\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -2539,13 +2551,13 @@
       "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "1423ba294517",
       "createdAt": "2026-06-01T13:33:07.037Z",
-      "updatedAt": "2026-06-01T13:33:07.037Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38332\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-01T14:31:39.235Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38332\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38332",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38332",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -2579,7 +2591,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\c38332-consulta-de-balance-regresar-desde-detalle-de-deposito\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -2596,13 +2611,13 @@
       "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "1423ba294517",
       "createdAt": "2026-06-01T13:34:22.471Z",
-      "updatedAt": "2026-06-01T13:34:22.471Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38335\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-01T14:32:52.587Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38335\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38335",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38335",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -2636,7 +2651,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\c38335-consulta-de-balance-visualizar-alerta-de-deposito-proximo-a-vencer\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -2653,13 +2671,13 @@
       "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "1423ba294517",
       "createdAt": "2026-06-01T13:35:30.916Z",
-      "updatedAt": "2026-06-01T13:35:30.916Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38337\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-01T14:34:03.170Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38337\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38337",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38337",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -2693,7 +2711,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\c38337-consulta-de-balance-visualizar-mensaje-de-deposito-no-disponible\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -2710,13 +2731,13 @@
       "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "1423ba294517",
       "createdAt": "2026-06-01T13:36:39.024Z",
-      "updatedAt": "2026-06-01T13:36:39.024Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38338\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-01T14:35:13.810Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38338\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38338",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38338",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -2750,7 +2771,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\c38338-consulta-de-balance-visualizar-campos-con-informacion-no-disponible\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -2767,13 +2791,13 @@
       "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "1423ba294517",
       "createdAt": "2026-06-01T13:36:48.715Z",
-      "updatedAt": "2026-06-01T13:36:48.715Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38340\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-01T14:35:24.446Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38340\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38340",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38340",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -2807,7 +2831,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\c38340-informacion-de-productos-visualizar-categorias-principales\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -2824,13 +2851,13 @@
       "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "1423ba294517",
       "createdAt": "2026-06-01T13:37:04.011Z",
-      "updatedAt": "2026-06-01T13:37:04.011Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38341\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-01T14:35:42.260Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38341\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38341",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38341",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -2864,7 +2891,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\c38341-informacion-de-productos-visualizar-detalle-de-tarjeta-de-credito\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -2881,13 +2911,13 @@
       "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "1423ba294517",
       "createdAt": "2026-06-01T13:37:19.813Z",
-      "updatedAt": "2026-06-01T13:37:19.813Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38342\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-01T14:35:58.396Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38342\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38342",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38342",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -2921,7 +2951,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\c38342-informacion-de-productos-visualizar-detalle-de-deposito-a-plazo\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -2938,13 +2971,13 @@
       "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "1423ba294517",
       "createdAt": "2026-06-01T13:37:35.597Z",
-      "updatedAt": "2026-06-01T13:37:35.597Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38343\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-01T14:36:17.076Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38343\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38343",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38343",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -2978,7 +3011,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\c38343-informacion-de-productos-visualizar-detalle-de-cuenta-en-pesos\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -2995,13 +3031,13 @@
       "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "1423ba294517",
       "createdAt": "2026-06-01T13:37:53.124Z",
-      "updatedAt": "2026-06-01T13:37:53.124Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38344\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-01T14:36:40.488Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38344\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38344",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38344",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -3035,7 +3071,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\c38344-informacion-de-productos-visualizar-detalle-de-cuenta-en-dolares\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -3052,13 +3091,13 @@
       "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "1423ba294517",
       "createdAt": "2026-06-01T13:38:09.566Z",
-      "updatedAt": "2026-06-01T13:38:09.566Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38345\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-01T14:37:08.348Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38345\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38345",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38345",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -3092,7 +3131,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\c38345-informacion-de-productos-visualizar-detalle-de-cuenta-en-euros\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -3109,13 +3151,13 @@
       "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "1423ba294517",
       "createdAt": "2026-06-01T13:38:25.283Z",
-      "updatedAt": "2026-06-01T13:38:25.283Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38346\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-01T14:37:26.076Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38346\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38346",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38346",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -3149,7 +3191,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\c38346-informacion-de-productos-visualizar-detalle-de-prestamo-personal\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -3166,13 +3211,13 @@
       "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "1423ba294517",
       "createdAt": "2026-06-01T13:38:38.540Z",
-      "updatedAt": "2026-06-01T13:38:38.541Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38347\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-01T14:37:50.449Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38347\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38347",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38347",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -3206,7 +3251,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\c38347-informacion-de-productos-validar-secciones-visibles-del-detalle\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -3223,13 +3271,13 @@
       "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "1423ba294517",
       "createdAt": "2026-06-01T13:39:04.653Z",
-      "updatedAt": "2026-06-01T13:39:04.653Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38348\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-01T14:38:10.014Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38348\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38348",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38348",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -3263,7 +3311,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\c38348-informacion-de-productos-regresar-desde-detalle-informativo\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -3280,13 +3331,13 @@
       "appProfile": "arquitectura-automatizacion",
       "baseUrlHash": "1423ba294517",
       "createdAt": "2026-06-01T13:39:22.921Z",
-      "updatedAt": "2026-06-01T13:39:22.921Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38349\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-01T14:38:41.008Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38349\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T13-27-15-374Z\\cases\\case-38349",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-06-01T14-25-35-810Z\\cases\\case-38349",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -3320,7 +3371,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\c38349-informacion-de-productos-finalizar-sesion-desde-detalle-informativo\\plan.json",
+        "previousStatus": "active"
       }
     }
   ]

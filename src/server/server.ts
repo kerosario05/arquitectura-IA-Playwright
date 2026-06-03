@@ -5,6 +5,7 @@ import { jiraRouter } from "./routes/jira";
 import { testrailRouter } from "./routes/testrail";
 import { runsRouter } from "./routes/runs";
 import { scenariosRouter } from "./routes/scenarios";
+import { debugRouter } from "./routes/debug";
 
 const PORT = Number(process.env.API_PORT || "3001");
 const HOST = process.env.API_HOST || "0.0.0.0";
@@ -14,7 +15,13 @@ const API_KEY = process.env.API_KEY || "";
 const app = express();
 
 app.use(cors({ origin: CORS_ORIGIN }));
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
+
+// Ensure UTF-8 encoding for all JSON responses
+app.use((req, res, next) => {
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  next();
+});
 
 if (API_KEY) {
   app.use((req, res, next) => {
@@ -33,6 +40,13 @@ app.use("/api/testrail", testrailRouter);
 app.use("/api/runs", runsRouter);
 app.use("/api/scenarios", scenariosRouter);
 
+const isDebugEnabled =
+  process.env.NODE_ENV !== "production" ||
+  process.env.DEBUG_TESTRAIL_ENDPOINTS === "true";
+if (isDebugEnabled) {
+  app.use("/api/debug", debugRouter);
+}
+
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   const message = err instanceof Error ? err.message : String(err);
   console.error(`[server] Error:`, message);
@@ -50,11 +64,20 @@ app.listen(PORT, HOST, () => {
   console.log(`  GET  /api/jira/projects/:key/sprint/active`);
   console.log(`  GET  /api/testrail/status`);
   console.log(`  GET  /api/testrail/runs`);
+  console.log(`  GET  /api/testrail/sections`);
+  console.log(`  POST /api/testrail/cases/preview`);
   console.log(`  POST /api/runs/sprint`);
   console.log(`  GET  /api/runs`);
   console.log(`  GET  /api/runs/:jobId`);
   console.log(`  GET  /api/runs/:jobId/logs  (SSE)`);
   console.log(`  DEL  /api/runs/:jobId`);
   console.log(`  GET  /api/scenarios/preview?projectKey=AA&sprintId=42&status=...`);
-  console.log(`  POST /api/scenarios/preview  { projectKey, sprintId|activeSprint, status }\n`);
+  console.log(`  POST /api/scenarios/preview  { projectKey, sprintId|activeSprint, status }`);
+  if (isDebugEnabled) {
+    console.log(`\n[server] Debug endpoints (dev-only):`);
+    console.log(`  GET  /api/debug/testrail/status`);
+    console.log(`  POST /api/debug/testrail/publish-scenario`);
+    console.log(`         DEBUG_TESTRAIL_PAYLOAD=${process.env.DEBUG_TESTRAIL_PAYLOAD ?? "false"} (set to true for full payload in response)`);
+  }
+  console.log("");
 });

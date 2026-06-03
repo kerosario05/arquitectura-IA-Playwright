@@ -33,6 +33,7 @@ function createMockSnapshot(elements: Array<{
   role?: string;
   tagName?: string;
   visible?: boolean;
+  disabled?: boolean;
   className?: string;
 }>): PageSnapshot {
   const snapshotElements = elements.map(el => ({
@@ -44,6 +45,7 @@ function createMockSnapshot(elements: Array<{
     role: el.role,
     tagName: el.tagName,
     visible: el.visible !== false,
+    disabled: el.disabled,
     className: el.className,
     candidateLocators: [{ strategy: "text" as const, confidence: 0.8 }],
     dataHints: []
@@ -256,6 +258,45 @@ test('never selects "Selecciona un producto" as ordinal product candidate', () =
   expect(result.diagnostics.excludedCandidates).toContain("Selecciona un producto");
 });
 
+test("si el primer visible esta disabled usa el primer enabled seguro", () => {
+  const snapshot = createMockSnapshot([
+    { id: "el-1", text: "Tarjeta Ideal", type: "button", tagName: "button", visible: true, disabled: true, className: "product-card" },
+    { id: "el-2", text: "Tarjeta Activa", type: "button", tagName: "button", visible: true, disabled: false, className: "product-card" },
+  ]);
+
+  const pattern: OrdinalSelectionPattern = {
+    ordinal: "first",
+    domainTerm: "producto",
+    genericItemTerm: "producto",
+    isListContext: true
+  };
+
+  const result = resolveOrdinalSelection(snapshot, pattern, BASE_ROUTE_PROFILE);
+
+  expect(result.status).toBe("resolved");
+  expect(result.candidateId).toBe("el-2");
+  expect(result.diagnostics.ordinalFallbackReason).toBe("first_visible_disabled_using_first_enabled");
+});
+
+test("si todos los candidatos estan disabled devuelve diagnostico especifico", () => {
+  const snapshot = createMockSnapshot([
+    { id: "el-1", text: "Préstamo Uno", type: "button", tagName: "button", visible: true, disabled: true, className: "product-card" },
+    { id: "el-2", text: "Préstamo Dos", type: "button", tagName: "button", visible: true, disabled: true, className: "product-card" },
+  ]);
+
+  const pattern: OrdinalSelectionPattern = {
+    ordinal: "first",
+    domainTerm: "producto",
+    genericItemTerm: "producto",
+    isListContext: true
+  };
+
+  const result = resolveOrdinalSelection(snapshot, pattern, BASE_ROUTE_PROFILE);
+
+  expect(result.status).toBe("no_safe_candidate");
+  expect(result.diagnostics.reason).toBe("ordinal_candidates_disabled");
+});
+
 test("returns no_safe_candidate when no matches", () => {
   const snapshot = createMockSnapshot([
     { id: "el-1", text: "Volver", type: "button", role: "button" },
@@ -272,7 +313,7 @@ test("returns no_safe_candidate when no matches", () => {
   const result = resolveOrdinalSelection(snapshot, pattern, BASE_ROUTE_PROFILE);
   
   expect(result.status).toBe("no_safe_candidate");
-  expect(result.diagnostics.reason).toContain("No visible clickable candidates");
+  expect(result.diagnostics.reason).toBe("ordinal_selection_no_safe_candidate");
 });
 
 test("uses domainTerms from routeProfile", () => {

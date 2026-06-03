@@ -735,31 +735,74 @@ export function loadPromotedAppConfigSync(options: { appSlug: string; configPath
   return undefined;
 }
 
-export function loadRouteProfile(appSlug: string): AppRouteProfile | undefined {
+export function loadRouteProfile(appSlug: string, routeProfileNameOrExplicit?: string | AppRouteProfile | any): AppRouteProfile | undefined {
+  // If routeProfileNameOrExplicit is already a normalized object, return it.
+  if (routeProfileNameOrExplicit && typeof routeProfileNameOrExplicit === "object" && !Array.isArray(routeProfileNameOrExplicit)) {
+    const normalized = normalizeRouteProfileConfig({ routeProfile: routeProfileNameOrExplicit } as any, appSlug);
+    if (normalized) {
+      const name = (routeProfileNameOrExplicit as any).name || "explicit";
+      console.log(`[route-profile] appSlug=${appSlug} source=app_config routeProfile=${name}`);
+      return normalized;
+    }
+  }
+
+  // Load app config
   const config = loadPromotedAppConfigSync({ appSlug });
   
-  // First try to load from app.config.json routeProfile
-  if (config?.routeProfile) {
-    const normalized = normalizeRouteProfileConfig(config, appSlug);
+  let selectedProfile: any = undefined;
+  let source = "app_config";
+  let profileName = "default";
+
+  // Check 1: routeProfileNameOrExplicit is a string (could be name of profile or JSON string)
+  if (typeof routeProfileNameOrExplicit === "string" && routeProfileNameOrExplicit.trim()) {
+    const trimmed = routeProfileNameOrExplicit.trim();
+    if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        const normalized = normalizeRouteProfileConfig({ routeProfile: parsed } as any, appSlug);
+        if (normalized) {
+          const name = parsed.name || "explicit";
+          console.log(`[route-profile] appSlug=${appSlug} source=app_config routeProfile=${name}`);
+          return normalized;
+        }
+      } catch (e) {
+        // ignore JSON parse error, treat as string name
+      }
+    }
+
+    // Try finding in appConfig.routeProfiles[name]
+    const routeProfiles = (config as any)?.routeProfiles;
+    if (routeProfiles && typeof routeProfiles === "object" && routeProfiles[trimmed]) {
+      selectedProfile = routeProfiles[trimmed];
+      profileName = trimmed;
+    } else if (config?.routeProfile && typeof config.routeProfile === "object" && (config.routeProfile as any).name === trimmed) {
+      selectedProfile = config.routeProfile;
+      profileName = trimmed;
+    }
+  }
+
+  // Check 2: Try to fall back to the active route profile in app config
+  if (!selectedProfile && config) {
+    const activeName = (config as any).activeRouteProfileName;
+    const routeProfiles = (config as any).routeProfiles;
+    if (activeName && routeProfiles && typeof routeProfiles === "object" && routeProfiles[activeName]) {
+      selectedProfile = routeProfiles[activeName];
+      profileName = activeName;
+    } else if (config.routeProfile) {
+      selectedProfile = config.routeProfile;
+      profileName = (config.routeProfile as any).name || "default";
+    }
+  }
+
+  if (selectedProfile) {
+    const normalized = normalizeRouteProfileConfig({ routeProfile: selectedProfile } as any, appSlug);
     if (normalized) {
-      console.log(`[route-profile] loaded appSlug=${appSlug} source=app.config.json domainTerms=${normalized.domainTerms?.length ?? 0} routes=${normalized.routes?.length ?? 0}`);
+      console.log(`[route-profile] appSlug=${appSlug} source=app_config routeProfile=${profileName}`);
       return normalized;
     }
   }
-  
-  // Fallback: check if config has flat routeProfile fields (domainTerms, routes, intermediates)
-  const configWithRouteProfile = config as any;
-  if (configWithRouteProfile?.domainTerms || configWithRouteProfile?.routes || configWithRouteProfile?.intermediates) {
-    const normalized = normalizeRouteProfileConfig(configWithRouteProfile, appSlug);
-    if (normalized) {
-      console.log(`[route-profile] loaded appSlug=${appSlug} source=app.config.json.flat domainTerms=${normalized.domainTerms?.length ?? 0} routes=${normalized.routes?.length ?? 0}`);
-      return normalized;
-    }
-  }
-  
-  // Last resort: load from pending suggestions if available
-  // This allows route profile learning to work even before suggestions are applied
-  console.log(`[route-profile] appSlug=${appSlug} no routeProfile in app.config.json, returning undefined`);
+
+  console.log(`[route-profile] appSlug=${appSlug} no routeProfile resolved, returning undefined`);
   return undefined;
 }
 

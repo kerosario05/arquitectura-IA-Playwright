@@ -13,7 +13,7 @@
           "intent": "start_session",
           "parameters": [],
           "available": true,
-          "source": "candidate,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-3,c37869-generar-carta-de-referencia-con-cuenta-de-ahorro-step-3",
+          "source": "candidate,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-3,c37869-generar-carta-de-referencia-con-cuenta-de-ahorro-step-3,preview-004-visualizar-detalle-del-primer-producto-de-tarjetas-de-credito-step-3,preview-006-regresar-al-listado-de-depositos-a-plazo-desde-el-detalle-step-3",
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
@@ -63,7 +63,7 @@
           "intent": "open_product_information",
           "parameters": [],
           "available": true,
-          "source": "candidate,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-4",
+          "source": "candidate,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-4,preview-004-visualizar-detalle-del-primer-producto-de-tarjetas-de-credito-step-4,preview-006-regresar-al-listado-de-depositos-a-plazo-desde-el-detalle-step-4",
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
@@ -103,7 +103,7 @@
             "categoryName"
           ],
           "available": true,
-          "source": "candidate,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-5",
+          "source": "candidate,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-5,preview-004-visualizar-detalle-del-primer-producto-de-tarjetas-de-credito-step-5",
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
@@ -143,7 +143,30 @@
             "productName"
           ],
           "available": true,
-          "source": "candidate,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-6",
+          "source": "candidate,c37844-visualizar-detalle-de-tarjeta-visa-gold-step-6,preview-006-regresar-al-listado-de-depositos-a-plazo-desde-el-detalle-step-5",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        },
+        {
+          "name": "selectFirstVisibleCard",
+          "intent": "select_first_visible_card",
+          "parameters": [],
+          "available": true,
+          "source": "preview-004-visualizar-detalle-del-primer-producto-de-tarjetas-de-credito-step-6",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        },
+        {
+          "name": "selectVisibleItemByOrdinal",
+          "intent": "select_visible_item_by_ordinal",
+          "parameters": [
+            "ordinal",
+            "domainTerm"
+          ],
+          "available": true,
+          "source": "preview-004-visualizar-detalle-del-primer-producto-de-tarjetas-de-credito-missing-select_visible_item_by_ordinal",
           "sensitive": false,
           "confidence": 0.5,
           "status": "active"
@@ -156,7 +179,7 @@
       ],
       "caseIds": [],
       "createdAt": "2026-05-21T19:50:07.994Z",
-      "updatedAt": "2026-05-21T19:50:07.994Z",
+      "updatedAt": "2026-06-01T21:17:30.665Z",
       "codegenMetadata": {
         "generatedAt": "2026-05-21T19:50:08.049Z",
         "generatedBy": "page-object-codegen",
@@ -212,11 +235,21 @@
           "name": "expectLoaded",
           "intent": "expect_loaded",
           "parameters": [],
-          "available": false,
-          "source": "c37903-visualizar-catalogo-principal-de-productos-disponibles-step-3,c37903-visualizar-catalogo-principal-de-productos-disponibles-missing-expect_loaded",
+          "available": true,
+          "source": "c37903-visualizar-catalogo-principal-de-productos-disponibles-step-3,c37903-visualizar-catalogo-principal-de-productos-disponibles-missing-expect_loaded,preview-006-regresar-al-listado-de-depositos-a-plazo-desde-el-detalle-step-6",
           "sensitive": false,
           "confidence": 0.5,
-          "status": "candidate"
+          "status": "active"
+        },
+        {
+          "name": "backToList",
+          "intent": "return_to_list",
+          "parameters": [],
+          "available": true,
+          "source": "preview-006-regresar-al-listado-de-depositos-a-plazo-desde-el-detalle-missing-return_to_list",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
         }
       ],
       "confidence": 0.5,
@@ -226,7 +259,7 @@
       ],
       "caseIds": [],
       "createdAt": "2026-05-22T01:47:27.790Z",
-      "updatedAt": "2026-05-23T16:46:52.566Z",
+      "updatedAt": "2026-06-01T21:18:10.759Z",
       "codegenMetadata": {
         "generatedAt": "2026-05-22T01:47:27.818Z",
         "generatedBy": "page-object-codegen",
@@ -280,5 +313,5 @@
     }
   ],
   "componentCandidates": [],
-  "updatedAt": "2026-05-28T19:18:30.046Z"
+  "updatedAt": "2026-06-02T01:35:39.246Z"
 }

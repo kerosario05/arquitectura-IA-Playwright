@@ -31,6 +31,7 @@ export type SnapshotElement = {
   label?: string;
   placeholder?: string;
   name?: string;
+  value?: string | null;
   role?: string;
   tagName?: string;
   inputType?: string;

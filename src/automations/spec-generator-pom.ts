@@ -79,18 +79,15 @@ function buildPreviousStepsParam(steps: ExecutionPlanStep[], currentIndex: numbe
         const normalizedTarget = targetValue.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         
         if (step.action === 'click') {
-          if (/iniciar|login|sign in/i.test(normalizedTarget)) {
+          intent = deriveSelectionIntentWithOrdinalSupport(step);
+          if (intent === "select_product" || intent === "select_category" || intent === "select_visible_item_by_ordinal") {
+            // keep the derived selection intent
+          } else if (/iniciar|login|sign in/i.test(normalizedTarget)) {
             intent = 'start_session';
           } else if (/informaci|information/i.test(normalizedTarget)) {
             intent = 'open_product_information';
           } else if (/transacciones|menu|operaciones/i.test(normalizedTarget)) {
             intent = 'open_module';
-          } else if (/pr.A?stamos|cuenta|categoria|category/i.test(normalizedTarget)) {
-            intent = 'select_category';
-          } else if (/dep.A?sito|producto|product/i.test(normalizedTarget)) {
-            intent = 'select_product';
-          } else if (/primer|first|visible/i.test(normalizedTarget)) {
-            intent = 'select_visible_item_by_ordinal';
           } else if (/volver|regresar|back/i.test(normalizedTarget)) {
             intent = 'return_to_list';
           } else {
@@ -165,20 +162,17 @@ function buildPreviousStepReplaysParam(
       const normalizedTarget = targetValue.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       
       if (step.action === 'click') {
-        if (/iniciar|login|sign in/i.test(normalizedTarget)) {
-          intent = 'start_session';
-        } else if (/informaci|information/i.test(normalizedTarget)) {
-          intent = 'open_product_information';
-        } else if (/transacciones|menu|operaciones/i.test(normalizedTarget)) {
-          intent = 'open_module';
-        } else if (/pr.A?stamos|cuenta|categoria|category/i.test(normalizedTarget)) {
-          intent = 'select_category';
-        } else if (/dep.A?sito|producto|product/i.test(normalizedTarget)) {
-          intent = 'select_product';
-        } else if (/primer|first|visible/i.test(normalizedTarget)) {
-          intent = 'select_visible_item_by_ordinal';
-        } else if (/volver|regresar|back/i.test(normalizedTarget)) {
-          intent = 'return_to_list';
+        intent = deriveSelectionIntentWithOrdinalSupport(step);
+        if (!(intent === "select_product" || intent === "select_category" || intent === "select_visible_item_by_ordinal")) {
+          if (/iniciar|login|sign in/i.test(normalizedTarget)) {
+            intent = 'start_session';
+          } else if (/informaci|information/i.test(normalizedTarget)) {
+            intent = 'open_product_information';
+          } else if (/transacciones|menu|operaciones/i.test(normalizedTarget)) {
+            intent = 'open_module';
+          } else if (/volver|regresar|back/i.test(normalizedTarget)) {
+            intent = 'return_to_list';
+          }
         }
       }
     }

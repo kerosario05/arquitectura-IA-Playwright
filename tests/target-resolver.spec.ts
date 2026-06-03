@@ -141,6 +141,16 @@ test("buildFlexibleTokenRegex preserves token order with flexible gaps", () => {
   expect(regex.test("AxxxB")).toBe(true);
 });
 
+test("buildFlexibleTextRegex no rompe con caracteres y cuantificadores especiales", () => {
+  expect(() => buildFlexibleTextRegex("Seleccionar el primer producto visible del listado")).not.toThrow();
+  expect(() => buildFlexibleTextRegex("Precio + IVA *")).not.toThrow();
+});
+
+test("parsear pasos con validar visible no genera regex inválido", () => {
+  const { parseSingleIntent } = require("../src/discovery/step-intent-parser");
+  expect(() => parseSingleIntent("Validar que se muestre visible")).not.toThrow();
+});
+
 test("computeTokenScore returns 1.0 for exact match", () => {
   expect(computeTokenScore("Iniciar", "Iniciar")).toBe(1.0);
   expect(computeTokenScore("tarjetas", "Tarjetas")).toBe(1.0);
@@ -606,6 +616,138 @@ test("attemptedLocators aparece en diagnostico", async () => {
 
   expect(result.attemptedLocators).toBeDefined();
   expect(result.attemptedLocators?.length).toBeGreaterThan(0);
+});
+
+test("resolveActionTarget resuelve una opcion contextual visible como candidato unico seguro", async () => {
+  const page = new FakePage({
+    [`role:button:${String(buildFlexibleTextRegex("Dólares"))}`]: 1
+  });
+  const snapshot = makeSnapshot([
+    makeElement({
+      id: "opt-1",
+      type: "button",
+      tagName: "BUTTON",
+      text: "Dólares",
+      role: "button",
+      visible: true
+    })
+  ]);
+
+  const result = await resolveActionTarget(
+    page as any,
+    snapshot,
+    "Moneda",
+    {
+      routeProfile: {
+        domainTerms: ["moneda"]
+      }
+    }
+  );
+
+  expect(result.status).toBe("resolved");
+  expect(result.matchReason).toContain("contextual_option");
+  expect(result.candidateText).toBe("Dólares");
+});
+
+test("resolveActionTarget no rompe si el candidato contextual no es string", async () => {
+  const page = new FakePage({
+    [`role:button:${String(buildFlexibleTextRegex("Euros"))}`]: 1
+  });
+  const snapshot = makeSnapshot([
+    makeElement({
+      id: "opt-1",
+      type: "button",
+      tagName: "BUTTON",
+      text: { value: "Euros" } as any,
+      label: { value: "Euros" } as any,
+      role: "button",
+      visible: true
+    })
+  ]);
+
+  const result = await resolveActionTarget(
+    page as any,
+    snapshot,
+    "Moneda",
+    {
+      routeProfile: {
+        domainTerms: ["moneda"]
+      }
+    }
+  );
+
+  expect(result.status).toBe("resolved");
+  expect(result.candidateText).toBe("Euros");
+});
+
+test("resolveActionTarget devuelve ambiguous_contextual_option cuando hay ambiguedad contextual", async () => {
+  const page = new FakePage({});
+  const snapshot = makeSnapshot([
+    makeElement({
+      id: "opt-1",
+      type: "button",
+      tagName: "BUTTON",
+      text: "Cuenta A",
+      role: "button",
+      visible: true
+    }),
+    makeElement({
+      id: "opt-2",
+      type: "button",
+      tagName: "BUTTON",
+      text: "Cuenta B",
+      role: "button",
+      visible: true
+    })
+  ]);
+
+  const result = await resolveActionTarget(
+    page as any,
+    snapshot,
+    "Cuenta",
+    {
+      routeProfile: {
+        domainTerms: ["cuenta"]
+      }
+    }
+  );
+
+  expect(result.status).toBe("ambiguous");
+  expect(result.matchReason).toBe("ambiguous_contextual_option");
+  expect(result.ambiguityDiagnostics).toBeDefined();
+});
+
+test("resolveActionTarget mapea Volver al listado de productos al boton Volver", async () => {
+  const page = new FakePage({
+    [`role:button:${String(buildFlexibleTextRegex("Volver"))}`]: 1
+  });
+  const snapshot = makeSnapshot([
+    makeElement({
+      id: "back-1",
+      type: "button",
+      tagName: "BUTTON",
+      text: "Volver",
+      role: "button",
+      visible: true
+    }),
+    makeElement({
+      id: "text-1",
+      type: "text",
+      tagName: "SPAN",
+      text: "Listado de productos",
+      visible: true
+    })
+  ]);
+
+  const result = await resolveActionTarget(
+    page as any,
+    snapshot,
+    "Volver al listado de productos"
+  );
+
+  expect(result.status).toBe("resolved");
+  expect(result.matchReason).toBe("back_navigation_alias");
+  expect(result.candidateText).toBe("Volver");
 });
 
 test("resolveFillTarget resuelve input por label", async () => {

@@ -207,7 +207,113 @@
       "status": "candidate",
       "createdAt": "2026-05-23T16:46:52.566Z",
       "updatedAt": "2026-05-23T16:46:52.566Z"
+    },
+    {
+      "id": "flow_1780348650665_3bdya7",
+      "name": "Visualizar detalle del primer producto de Tarjetas",
+      "filePath": "flows\\visualizar-detalle-del-primer-producto-de-tarjetas.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Información de productos",
+          "pageObjectId": "ProductInformationPage",
+          "methodName": "openProductInformation"
+        },
+        {
+          "action": "click",
+          "target": "Tarjetas de crédito",
+          "pageObjectId": "CategoryPage",
+          "methodName": "selectCategory"
+        },
+        {
+          "action": "click",
+          "target": "la primera tarjeta de crédito visible del listado",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectFirstVisibleCard"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-06-01T21:17:30.665Z",
+      "updatedAt": "2026-06-01T21:17:30.665Z"
+    },
+    {
+      "id": "flow_1780348690759_x7717p",
+      "name": "Regresar al listado de Depósitos a Plazo desde el ",
+      "filePath": "flows\\regresar-al-listado-de-depósitos-a-plazo-desde-el-.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "login",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Información de productos",
+          "pageObjectId": "ProductInformationPage",
+          "methodName": "openProductInformation"
+        },
+        {
+          "action": "click",
+          "target": "Depósitos a Plazo",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "el primer depósito a plazo visible del listado",
+          "pageObjectId": "ProductListPage",
+          "methodName": "expectLoaded"
+        },
+        {
+          "action": "click",
+          "target": "Volver",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-06-01T21:18:10.759Z",
+      "updatedAt": "2026-06-01T21:18:10.759Z"
     }
   ],
-  "updatedAt": "2026-05-23T16:46:52.566Z"
+  "updatedAt": "2026-06-01T21:18:10.762Z"
 }

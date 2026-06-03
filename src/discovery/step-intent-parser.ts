@@ -63,6 +63,13 @@ export type ActionTargetItem = {
 
 export type FillValueSource = "literal" | "test_data" | "unknown";
 
+export type NormalizedParsedTarget<T extends Record<string, unknown> = Record<string, unknown>> = T & {
+  target: string;
+  valueSource: FillValueSource;
+  valueKey?: string;
+  value?: string;
+};
+
 const BOUNDARY_WORDS = [
   "click", "clic",
   "presionar", "tocar",
@@ -91,6 +98,35 @@ export function normalizeText(text: string): string {
     .replace(/['""«»]/g, "'")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+export function normalizeParsedTarget<T extends Record<string, unknown> = Record<string, unknown>>(input: unknown): NormalizedParsedTarget<T> {
+  if (typeof input === "string") {
+    return {
+      target: input,
+      valueSource: "unknown",
+    } as NormalizedParsedTarget<T>;
+  }
+
+  if (!input || typeof input !== "object") {
+    return {
+      target: "",
+      valueSource: "unknown",
+    } as NormalizedParsedTarget<T>;
+  }
+
+  const target = typeof (input as any).target === "string" ? (input as any).target : "";
+  const valueSource = (input as any).valueSource === "literal" || (input as any).valueSource === "test_data" || (input as any).valueSource === "unknown"
+    ? (input as any).valueSource
+    : "unknown";
+
+  return {
+    ...input as Record<string, unknown>,
+    target,
+    valueSource,
+    valueKey: typeof (input as any).valueKey === "string" ? (input as any).valueKey : undefined,
+    value: typeof (input as any).value === "string" ? (input as any).value : undefined,
+  } as NormalizedParsedTarget<T>;
 }
 
 export function parseStepIntent(stepText: string, _context?: Record<string, unknown>): ParsedStepIntent[] {
@@ -199,13 +235,31 @@ function isLetter(ch: string | undefined): boolean {
   return /[a-zA-ZáéíóúñüÁÉÍÓÚÑÜ]/.test(ch);
 }
 
+function sanitizeRegexPattern(pattern: string): string {
+  return pattern
+    .replace(/\\s\+\*/g, "\\s+")
+    .replace(/\\s\*\+/g, "\\s*")
+    .replace(/\\s\+\+/g, "\\s+")
+    .replace(/\\s\*\*/g, "\\s*")
+    .replace(/(\.\*|\.\+|\.\?)([+*?]+)/g, "$1")
+    .replace(/([+*?]){2,}/g, "$1");
+}
+
+function createSafeRegExp(pattern: string, flags = "i"): RegExp {
+  try {
+    return new RegExp(sanitizeRegexPattern(pattern), flags);
+  } catch {
+    return /$^/i;
+  }
+}
+
 export function splitByIntentBoundaries(text: string): string[] {
   if (!text || text.length < 3) return [text];
 
   const sorted = [...BOUNDARY_WORDS].sort((a, b) => b.length - a.length);
   const escaped = sorted.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
   const pattern = escaped.join("|");
-  const regex = new RegExp(pattern, "gi");
+  const regex = createSafeRegExp(pattern, "gi");
 
   const splitPoints: number[] = [];
   let match;
