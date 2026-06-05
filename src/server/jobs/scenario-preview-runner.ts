@@ -1514,7 +1514,13 @@ function resolveEffectiveAppSlug(
 
   const tryLoad = (slug: string): ResolvedApp | null => {
     const ac = loadAppConfigSync(slug);
-    const rp = extractRouteProfile(params.routeProfile, ac);
+    let rp = extractRouteProfile(params.routeProfile, ac);
+    if (!rp) {
+      rp = extractRouteProfileFromScenarios(validScenarios);
+      if (rp) {
+        console.log(`[scenario-preview] routeProfile inferred from scenarios: "${rp.name}" entry=${rp.entry.length} controls=${rp.visibleControls.length}`);
+      }
+    }
     if (isExecutableAppSlug(slug, rp)) {
       return { appSlug: slug, appConfig: ac, routeProfile: rp, inference };
     }
@@ -1575,6 +1581,71 @@ function loadAppConfigSync(appSlug: string): Record<string, unknown> | null {
   } catch {
     return null;
   }
+}
+
+function extractRouteProfileFromScenarios(
+  scenarios: Array<{ steps?: string[]; preconditions?: string[]; routeProfile?: string }> | undefined,
+): McpRouteProfile | null {
+  if (!scenarios || scenarios.length === 0) return null;
+
+  const entryLabels: string[] = [];
+  const allLabels: Set<string> = new Set();
+  const allRouteNames: Set<string> = new Set();
+
+  for (const sc of scenarios) {
+    if (sc.routeProfile) allRouteNames.add(sc.routeProfile);
+
+    if (sc.preconditions) {
+      for (const pc of sc.preconditions) {
+        const match = pc.match(/Route\s*Profile:\s*(\S+)/i);
+        if (match) allRouteNames.add(match[1]);
+      }
+    }
+
+    if (!sc.steps || sc.steps.length === 0) continue;
+    const firstStep = sc.steps[0];
+    const labelMatch = firstStep.match(/"([^"]+)"/);
+    if (labelMatch) {
+      if (entryLabels.length === 0) entryLabels.push(labelMatch[1]);
+      allLabels.add(labelMatch[1]);
+    }
+    for (const step of sc.steps) {
+      const m = step.match(/"([^"]+)"/g);
+      if (m) {
+        m.forEach((quoted) => {
+          const lbl = quoted.replace(/"/g, "");
+          if (lbl.length > 0 && lbl.length < 80) allLabels.add(lbl);
+        });
+      }
+    }
+  }
+
+  if (entryLabels.length === 0) return null;
+
+  const sortedLabels = Array.from(allLabels).sort();
+  const entry = entryLabels.map((label) => ({
+    businessLabel: label
+      .toLowerCase()
+      .replace(/[^a-z0-9áéíóúñü\s]/g, "")
+      .trim()
+      .replace(/\s+/g, "_"),
+    visibleLabel: label,
+  }));
+
+  const routeProfileName = allRouteNames.size === 1
+    ? Array.from(allRouteNames)[0]
+    : "inferred_from_scenarios";
+
+  return {
+    name: routeProfileName,
+    entry,
+    aliases: {},
+    intermediates: {},
+    domainTerms: {},
+    visibleControls: sortedLabels,
+    representativeFixture: {},
+    notes: [`Auto-inferred from ${scenarios.length} scenario(s) during run. Persist routeProfile in app.config.json for reuse.`],
+  };
 }
 
 function extractRouteProfile(

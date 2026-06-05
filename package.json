@@ -7,6 +7,7 @@
     "server": "tsx src/server/server.ts",
     "dev": "tsx src/main.ts",
     "test": "playwright test",
+    "test:server": "tsx src/server/server.test.ts",
     "test:headed": "playwright test --headed",
     "test:framework": "playwright test --config playwright.config.framework.ts",
     "test:apps": "playwright test --config playwright.config.apps.ts",

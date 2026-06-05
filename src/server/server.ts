@@ -6,8 +6,9 @@ import { testrailRouter } from "./routes/testrail";
 import { runsRouter } from "./routes/runs";
 import { scenariosRouter } from "./routes/scenarios";
 import { debugRouter } from "./routes/debug";
+import { resolveServerPort } from "./config";
 
-const PORT = Number(process.env.API_PORT || "3001");
+const PORT = resolveServerPort(process.env as Record<string, string | undefined>);
 const HOST = process.env.API_HOST || "0.0.0.0";
 const CORS_ORIGIN = process.env.API_CORS_ORIGIN || "*";
 const API_KEY = process.env.API_KEY || "";
