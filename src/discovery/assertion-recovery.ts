@@ -416,13 +416,15 @@ export function classifyAssertionImportance(
   }
 
   // Optional: conditional language
-  const conditionalPatterns = [
+  const optionalPatterns = [
     /\b(si (esta|está|disponible|existe|hay))\b/,
     /\b(puede|podria|podría|tal vez|quizas|quizás)\b/,
     /\b(no (esta|está) disponible|no disponible|no se encuentra)\b/,
     /\b(opcional|opcionalmente|si aplica|si corresponde)\b/,
+    // Global session/navigation assertions (non-blocking when secondary)
+    /\b(finalizar sesion|cerrar sesion|logout|sign out|log out|salir|ayuda|help|perfil|profile)\b/i,
   ];
-  for (const pattern of conditionalPatterns) {
+  for (const pattern of optionalPatterns) {
     if (pattern.test(normalizedAssertion)) {
       return "optional";
     }

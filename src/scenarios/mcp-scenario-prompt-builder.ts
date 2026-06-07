@@ -1,6 +1,14 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import type { JiraIssueSource, McpRouteProfile } from "./scenario-types";
+import {
+  buildAppProfilePromptContext,
+  formatAppProfileContext,
+  buildEntryPathBlockFromContext,
+  logAppProfileContext,
+  sanitizeForPrompt,
+  type AppProfilePromptContext,
+} from "./scenario-prompt-context";
 
 const SKILL_DIR = path.join(process.cwd(), "src", "agent", "skills", "mcp-testrail-case-generator-v2");
 
@@ -45,66 +53,13 @@ function formatIssues(issues: JiraIssueSource[]): string {
     .join("\n\n---\n\n");
 }
 
-function formatRouteProfile(rp: McpRouteProfile | null): string {
-  if (!rp || !rp.name) return "";
-
-  const parts: string[] = [];
-
-  if (rp.entry && rp.entry.length > 0) {
-    const entryLabels = rp.entry.map((e) => e.visibleLabel).join(" → ");
-    parts.push(`- Entry path: ${entryLabels}`);
-  }
-
-  if (rp.aliases && Object.keys(rp.aliases).length > 0) {
-    parts.push(`- Aliases: ${JSON.stringify(rp.aliases)}`);
-  }
-
-  if (rp.domainTerms && Object.keys(rp.domainTerms).length > 0) {
-    parts.push(`- Domain terms: ${JSON.stringify(rp.domainTerms)}`);
-  }
-
-  if (rp.visibleControls && rp.visibleControls.length > 0) {
-    parts.push(`- Visible controls: ${rp.visibleControls.join(", ")}`);
-  }
-
-  if (rp.representativeFixture && Object.keys(rp.representativeFixture).length > 0) {
-    parts.push(`- Fixtures: ${JSON.stringify(rp.representativeFixture)}`);
-  }
-
-  if (rp.notes && rp.notes.length > 0) {
-    parts.push(`- Notes: ${rp.notes.join("; ")}`);
-  }
-
-  return parts.join("\n");
-}
-
-function buildEntryPathBlock(rp: McpRouteProfile | null): string {
-  if (!rp || !rp.entry || rp.entry.length === 0) return "";
-
-  const steps = rp.entry
-    .map((e, i) => `${i + 1}. Clic en "${e.visibleLabel}".`)
-    .join("\n");
-
-  return `
-REQUIRED ENTRY PATH:
-Every generated scenario must start with these steps, exactly in this order:
-${steps}
-
-If a routeProfile.entry is provided, do not omit these entry steps.
-Do not start directly inside the module.
-Do not assume prior navigation state.
-Do not generate manual login, cédula, OTP, PIN, or password steps.
-AuthGate/AuthFlow will resolve authentication when the flow enters through the authenticated route.
-`;
-}
-
 function buildSystemPrompt(
   skillMd: string | null,
   appSlug: string,
   testrailMeta?: { projectId: number; suiteId: number; sectionId?: number; sectionName?: string },
   targetAppSlug?: string,
   targetAppName?: string,
-  routeProfile?: McpRouteProfile | null,
+  profileCtx?: AppProfilePromptContext,
 ): string {
   const testrailSection = testrailMeta
     ? `\n\n## TestRail Target\n- Project ID: ${testrailMeta.projectId}\n- Suite ID: ${testrailMeta.suiteId}${testrailMeta.sectionId ? `\n- Section ID: ${testrailMeta.sectionId}` : ""}${testrailMeta.sectionName ? `\n- Section Name: ${testrailMeta.sectionName}` : ""}`
@@ -114,9 +69,11 @@ function buildSystemPrompt(
     ? `\n\n## Target Functional App\n- targetAppSlug: ${targetAppSlug}\n- targetAppName: ${targetAppName ?? targetAppSlug}`
     : "";
 
-  const routeProfileBlock = routeProfile ? `\n\n## App Configuration / RouteProfile\n- appSlug: ${appSlug} (technical profile)\n- targetAppSlug: ${targetAppSlug ?? appSlug} (functional app)\n- targetAppName: ${targetAppName ?? appSlug}\n- routeProfile: ${routeProfile.name}\n${formatRouteProfile(routeProfile)}` : "";
+  const routeProfileBlock = profileCtx?.present
+    ? `\n\n## App Configuration / RouteProfile\n${formatAppProfileContext(profileCtx)}`
+    : "";
 
-  const entryPathBlock = buildEntryPathBlock(routeProfile ?? null);
+  const entryPathBlock = buildEntryPathBlockFromContext(profileCtx ?? { appSlug, entrySteps: [], navigationHints: {}, aliases: {}, domainTerms: {}, visibleControls: [], present: false });
 
   const skillRules = skillMd
     ? `## Skill Rules (from mcp-testrail-case-generator-v2)\n\n${skillMd}\n\n`
@@ -142,6 +99,14 @@ ${skillRules}
 7. If an issue is not UI-automatable, add it to "rejected" array with reason.
 8. Forbidden step phrases: "El sistema permite", "El cliente accede", "Validar correctamente", "Verificar que funcione", "Se procesa exitosamente", "Validar backend", "Validar Core Banking", "Validar base de datos", "Validar cálculo exacto", "Validar auditoría".
 
+## Entry Steps Rules
+- If entrySteps are provided in the App Configuration section, EVERY scenario MUST start with them.
+- Do NOT omit, reorder, or modify entry steps.
+- entrySteps are mandatory navigation steps (e.g., clicking "Iniciar") needed before the first functional step.
+- If entrySteps are NOT provided, do NOT invent them. Generate steps based ONLY on the Jira story.
+- MCP will insert missing entrySteps automatically at runtime if the routeProfile defines them.
+- Do NOT duplicate entry steps. Each entry step must appear exactly once per scenario.
+
 ## Sensitive Actions
 Sensitive actions include: Solicitar, Confirmar, Enviar, Pagar, Transferir, Firmar, Aceptar contrato, Aprobar, Debitar, Eliminar, Cancelar producto.
 - Do NOT generate "Clic en" for sensitive actions by default.
@@ -165,6 +130,20 @@ ${entryPathBlock}
 - Reject backend/manual/integration/log/audit/external website checks.
 - Do not reject valid UI routes only because they require controlled data.
 - Prefer \`ui_with_controlled_data\` when a realistic fixture is needed.
+
+## Valid Action Targets
+- Only generate "Clic en" steps for targets that are visible controls, entry steps, aliases, or domain terms from the App Configuration section.
+- Do NOT convert expected result values, category names, subcategory names, currency names (e.g., "Pesos", "Dólares", "Euros"), or data values into click targets unless they appear in visibleControls.
+- If the expected result or user story mentions a value that is not a confirmed clickable control, use a validation step instead: "Validar que se muestre \"<value>\"."
+- Generic ordinal selections like "Seleccionar el primer producto visible del listado" are allowed only when the story lists visible items and the profile provides domain terms.
+- When in doubt, prefer "Validar que se muestre" over "Clic en" for values that appear to be data content rather than controls.
+
+## Detail Scenario Pattern
+- When a scenario reaches a listing/category page and then validates detail fields (nombre, descripción, beneficios, condiciones, estado, etc.), it MUST include a selection step before the detail assertions.
+- Use: "Seleccionar el primer elemento visible del listado." (or use domainTerm if available: "Seleccionar el primer <domainTerm> visible del listado.")
+- Do NOT validate detail fields without first selecting an item from the list.
+- Do NOT invent specific product/item names. Use generic "primer elemento visible del listado".
+- This selection step goes between the navigation/list step and the detail validation steps.
 
 ## CRITICAL OUTPUT CONTRACT
 - Return exactly one JSON object.
@@ -261,13 +240,29 @@ export async function buildMcpScenarioMessages(
   targetAppSlug?: string,
   targetAppName?: string,
   routeProfile?: McpRouteProfile | null,
+  entrySteps?: Array<{ action: string; target: string; when?: string }>,
+  loginMode?: string,
 ): Promise<Array<{ role: "system" | "user"; content: string }>> {
   const skillMd = await loadSkillMarkdown();
 
-  const systemContent = buildSystemPrompt(skillMd, appSlug, testrailMeta, targetAppSlug, targetAppName, routeProfile);
-  const userContent = `Generate MCP-ready TestRail scenarios from the following Jira issues:\n\n${formatIssues(issues)}`;
+  const profileCtx = buildAppProfilePromptContext(appSlug, {
+    targetAppSlug,
+    targetAppName,
+    routeProfile,
+    entrySteps,
+    loginMode,
+  });
 
-  console.log(`[scenarios:prompt] prompt built chars=${systemContent.length + userContent.length} issues=${issues.length}`);
+  logAppProfileContext(profileCtx);
+
+  const issueKeys = issues.map((i) => i.key).join(", ");
+  console.log(`[scenarios:prompt] jira issues included keys=${issueKeys}`);
+
+  const systemContent = buildSystemPrompt(skillMd, appSlug, testrailMeta, targetAppSlug, targetAppName, profileCtx);
+  const safeUserContent = sanitizeForPrompt(formatIssues(issues));
+  const userContent = `Generate MCP-ready TestRail scenarios from the following Jira issues:\n\n${safeUserContent}`;
+
+  console.log(`[scenarios:prompt] prompt built chars=${systemContent.length + userContent.length} issues=${issues.length} expectedResultAsContext=true`);
 
   return [
     { role: "system", content: systemContent },

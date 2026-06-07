@@ -808,6 +808,24 @@ export async function promoteExecutionPlan(
     );
   }
 
+  // Write case.meta.json with section and app metadata
+  if (appPaths.caseDir) {
+    const caseMeta = {
+      appSlug: appProfile.appSlug,
+      sectionSlug: sectionSlug ?? "default-section",
+      sectionName: input.sectionName,
+      sectionId: input.sectionId,
+      sourceScenarioId: plan.scenario.externalId,
+      testRailCaseId: plan.scenario.caseId ?? input.sectionId,
+      generatedAt: new Date().toISOString(),
+      title: plan.scenario.title,
+    };
+    await writeFileAtomicWithRetry(
+      path.join(appPaths.caseDir, "case.meta.json"),
+      JSON.stringify(caseMeta, null, 2)
+    );
+  }
+
   if (appPaths.caseDir) {
     const runtimeForData = input.fullConfig ?? envConfig;
     const dataContext = buildDataContext(runtimeForData);

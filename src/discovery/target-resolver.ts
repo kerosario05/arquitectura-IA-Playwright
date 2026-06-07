@@ -6,6 +6,7 @@ import type { AppRouteProfile } from "../types/env.types";
 import { parseProductConditionTarget, resolveProductConditionAgainstSnapshot, type ProductCondition } from "./product-condition-parser";
 import { detectOrdinalSelectionPattern, resolveOrdinalSelection, type OrdinalSelectionResult } from "./ordinal-selection-resolver";
 import { resolveAmbiguousIntermediateTarget, type ContextualResolverInput } from "./contextual-intermediate-resolver";
+import { resolveTargetWithAliases } from "./target-alias-resolver";
 
 let evaluateCodeCache: string | undefined;
 function readEvaluateCode(): string {
@@ -797,6 +798,137 @@ export async function resolveActionTarget(
     }
   }
   
+  // === Alias-based resolution (BEFORE product_condition) ===
+  console.log(`[target-alias] evaluating`);
+  const normalizedTargetAlias = normalizeText(target);
+  const backNavigationAlias = (
+    /\bvolver\b/.test(normalizedTargetAlias) ||
+    /\bregresar\b/.test(normalizedTargetAlias) ||
+    /\bvolver\s+al\s+listado\b/.test(normalizedTargetAlias) ||
+    /\bregresar\s+al\s+listado\b/.test(normalizedTargetAlias) ||
+    /\bvolver\s+atr[�a]s\b/.test(normalizedTargetAlias) ||
+    /\bregresar\s+atr[�a]s\b/.test(normalizedTargetAlias)
+  );
+
+  // Strategy A: hardcoded back navigation alias
+  if (backNavigationAlias) {
+    const backButton = page.getByRole("button", { name: buildFlexibleTextRegex("Volver") }).first();
+    if (await backButton.count().catch(() => 0) > 0) {
+      console.log(`[target-alias] candidate visible alias="Volver" confidence=0.85`);
+      console.log(`[target-alias] using effectiveTarget="Volver" for click originalTarget="` + '$' + `{target}"`);
+      return {
+        status: "resolved",
+        target,
+        locator: backButton,
+        locatorStrategy: "back_navigation_alias",
+        confidence: 0.85,
+        matchReason: "back_navigation_alias",
+        candidateText: "Volver",
+        candidates: [{
+          elementId: "back-navigation",
+          text: "Volver",
+          normalizedText: "volver",
+          type: "button",
+          role: "button",
+          tagName: "button",
+          isClickable: true,
+          matchScore: 0.85,
+          matchReason: "back_navigation_alias",
+          locatorStrategy: "back_navigation_alias"
+        }],
+        targetDisambiguation: {
+          target,
+          submitLike: false,
+          activeContainerUsed: false,
+          candidatesInsideActiveContainer: 0,
+          candidatesOutsideActiveContainer: 1,
+          selectedReason: "back_navigation_alias"
+        }
+      };
+    }
+  }
+
+  // Strategy B: routeProfile aliases (app-specific, from target-alias-resolver)
+  if (opts?.routeProfile?.aliases && Object.keys(opts.routeProfile.aliases).length > 0) {
+    const aliasResult = resolveTargetWithAliases(target, opts.routeProfile);
+    if (aliasResult.resolved && aliasResult.resolvedTarget && aliasResult.resolvedTarget !== target) {
+      console.log(`[target-alias] candidate visible alias="` + '$' + `{aliasResult.resolvedTarget}" confidence=` + '$' + `{aliasResult.confidence}`);
+      
+      // Try button role first
+      const aliasLocator = page.getByRole("button", { name: buildFlexibleTextRegex(aliasResult.resolvedTarget) }).first();
+      if (await aliasLocator.count().catch(() => 0) > 0) {
+        console.log(`[target-alias] using effectiveTarget="` + '$' + `{aliasResult.resolvedTarget}" for click originalTarget="` + '$' + `{target}"`);
+        return {
+          status: "resolved",
+          target,
+          locator: aliasLocator,
+          locatorStrategy: "route_profile_alias",
+          confidence: aliasResult.confidence,
+          matchReason: `route_profile_alias:` + '$' + `{aliasResult.resolvedTarget}`,
+          candidateText: aliasResult.resolvedTarget,
+          candidates: [{
+            elementId: "alias-resolution",
+            text: aliasResult.resolvedTarget,
+            normalizedText: normalizeText(aliasResult.resolvedTarget),
+            type: "button",
+            role: "button",
+            tagName: "button",
+            isClickable: true,
+            matchScore: aliasResult.confidence,
+            matchReason: "route_profile_alias",
+            locatorStrategy: "route_profile_alias"
+          }],
+          targetDisambiguation: {
+            target,
+            submitLike: false,
+            activeContainerUsed: false,
+            candidatesInsideActiveContainer: 0,
+            candidatesOutsideActiveContainer: 1,
+            selectedReason: "route_profile_alias"
+          }
+        };
+      }
+      
+      // Fallback to text locator
+      const aliasTextLocator = page.getByText(buildFlexibleTextRegex(aliasResult.resolvedTarget)).first();
+      if (await aliasTextLocator.count().catch(() => 0) > 0) {
+        console.log(`[target-alias] using effectiveTarget="` + '$' + `{aliasResult.resolvedTarget}" (text) originalTarget="` + '$' + `{target}"`);
+        return {
+          status: "resolved",
+          target,
+          locator: aliasTextLocator,
+          locatorStrategy: "route_profile_alias",
+          confidence: aliasResult.confidence * 0.9,
+          matchReason: `route_profile_alias:` + '$' + `{aliasResult.resolvedTarget}`,
+          candidateText: aliasResult.resolvedTarget,
+          candidates: [{
+            elementId: "alias-resolution-text",
+            text: aliasResult.resolvedTarget,
+            normalizedText: normalizeText(aliasResult.resolvedTarget),
+            type: "text",
+            role: "link",
+            tagName: "span",
+            isClickable: true,
+            matchScore: aliasResult.confidence * 0.9,
+            matchReason: "route_profile_alias_text",
+            locatorStrategy: "route_profile_alias"
+          }],
+          targetDisambiguation: {
+            target,
+            submitLike: false,
+            activeContainerUsed: false,
+            candidatesInsideActiveContainer: 0,
+            candidatesOutsideActiveContainer: 1,
+            selectedReason: "route_profile_alias_text"
+          }
+        };
+      }
+      
+      console.log(`[target-alias] alias "` + '$' + `{aliasResult.resolvedTarget}" resolved but not found as visible element, falling through`);
+    }
+  }
+
+  console.log(`[target-alias] skipped`);
   // === Product Condition Resolution (after ordinal) ===
   const productCondition = parseProductConditionTarget(target);
   if (productCondition) {
@@ -846,51 +978,6 @@ export async function resolveActionTarget(
   }
 
   const snapshotCandidates = buildSnapshotCandidates(snapshot, target);
-
-  const normalizedTarget = normalizeText(target);
-  const backNavigationAlias = (
-    /\bvolver\b/.test(normalizedTarget) ||
-    /\bregresar\b/.test(normalizedTarget) ||
-    /\bvolver\s+al\s+listado\b/.test(normalizedTarget) ||
-    /\bregresar\s+al\s+listado\b/.test(normalizedTarget) ||
-    /\bvolver\s+atr[áa]s\b/.test(normalizedTarget) ||
-    /\bregresar\s+atr[áa]s\b/.test(normalizedTarget)
-  );
-
-  if (backNavigationAlias) {
-    const backButton = page.getByRole("button", { name: buildFlexibleTextRegex("Volver") }).first();
-    if (await backButton.count().catch(() => 0) > 0) {
-      return {
-        status: "resolved",
-        target,
-        locator: backButton,
-        locatorStrategy: "back_navigation_alias",
-        confidence: 0.85,
-        matchReason: "back_navigation_alias",
-        candidateText: "Volver",
-        candidates: [{
-          elementId: "back-navigation",
-          text: "Volver",
-          normalizedText: "volver",
-          type: "button",
-          role: "button",
-          tagName: "button",
-          isClickable: true,
-          matchScore: 0.85,
-          matchReason: "back_navigation_alias",
-          locatorStrategy: "back_navigation_alias"
-        }],
-        targetDisambiguation: {
-          target,
-          submitLike: false,
-          activeContainerUsed: false,
-          candidatesInsideActiveContainer: 0,
-          candidatesOutsideActiveContainer: 1,
-          selectedReason: "back_navigation_alias"
-        }
-      };
-    }
-  }
 
   // === Early resolution for submit-like targets within activeContainer ===
   if (opts.activeContainer && isSubmitLikeTarget(target) && opts.activeContainer.containerLocator) {

@@ -4614,7 +4614,35 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     const postClickScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
     currentSnapshot = postClickScan.snapshot;
     
-    if (isSelectionLike && wasOrdinalSelection) {
+    // Determine effective target from alias resolution
+    const locatorStrategy = (resolution as any)?.locatorStrategy ?? "";
+    const candidateText = (resolution as any)?.candidateText ?? "";
+    const effectiveTarget = locatorStrategy.includes("alias") ? candidateText : undefined;
+    
+    // Check for navigation alias + transition: when a navigation/back alias click
+    // successfully transitions the page, the alias element disappears and semantic
+    // verification against it would falsely fail. Detect this and skip verification.
+    let aliasTransitionSkip = false;
+    const isNavigationAlias = locatorStrategy.includes("back_navigation_alias") || locatorStrategy.includes("route_profile_alias");
+    
+    if (isNavigationAlias && effectiveTarget) {
+      const afterState: PageState = {
+        url: postClickScan.url,
+        bodyText: normalizeText(postClickScan.snapshot.elements.map(e => e.text || "").join(" ")),
+        elementCount: postClickScan.elementsCount,
+      };
+      const transitionDetectedAlias = hasPageTransition(beforeState, afterState, effectiveTarget);
+      console.log(`[discovery:case] Navigation alias transition check: transition=${transitionDetectedAlias ? "yes" : "no"}`);
+      
+      if (transitionDetectedAlias) {
+        aliasTransitionSkip = true;
+        console.log(`[semantic-verification] aliasNavigationAccepted original="${actionTarget.target}" canonical="${effectiveTarget}" reason="transition_detected"`);
+      }
+    }
+    
+    if (aliasTransitionSkip) {
+      console.log(`[discovery:case] postClickSemanticVerificationSkipped=true skipReason="alias_navigation_transition"`);
+    } else if (isSelectionLike && wasOrdinalSelection) {
       // For ordinal_selection, skip instructive token verification
       console.log(`[discovery:case] Ordinal selection post-click verification skipped (instructive tokens)`);
       console.log(`[discovery:case] postClickSemanticVerificationSkipped=true skipReason="ordinal_selection_instruction_tokens"`);
@@ -4622,16 +4650,20 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       // Normal selection-like: perform semantic verification
       console.log(`[discovery:case] Performing post-click semantic verification for selection-like target: ${actionTarget.target}`);
       
-      // Extract visible texts from elements
       const visibleTexts = postClickScan.snapshot.elements
         .filter(e => e.visible && e.text)
         .map(e => e.text!)
         .slice(0, 50);
       
+      if (effectiveTarget && effectiveTarget !== actionTarget.target) {
+        console.log(`[semantic-verification] aliasAccepted original="${actionTarget.target}" canonical="${effectiveTarget}"`);
+      }
+      
       const semanticMatch = verifyPostClickSemanticMatch(
         actionTarget.target,
         visibleTexts,
-        postClickScan.title
+        postClickScan.title,
+        effectiveTarget,
       );
       
       if (!semanticMatch.matches) {
@@ -4839,7 +4871,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
                       const retrySemanticMatch = verifyPostClickSemanticMatch(
                         actionTarget.target,
                         retryVisibleTexts,
-                        retryScan.title
+                        retryScan.title,
+                        effectiveTarget,
                       );
 
                       if (retrySemanticMatch.matches) {

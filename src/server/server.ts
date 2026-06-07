@@ -63,15 +63,20 @@ app.listen(PORT, HOST, () => {
   console.log(`  GET  /api/jira/projects`);
   console.log(`  GET  /api/jira/projects/:key/sprints`);
   console.log(`  GET  /api/jira/projects/:key/sprint/active`);
+  console.log(`  GET  /api/jira/issues?projectId=...&sprintId=...&status=...`);
   console.log(`  GET  /api/testrail/status`);
   console.log(`  GET  /api/testrail/runs`);
   console.log(`  GET  /api/testrail/sections`);
   console.log(`  POST /api/testrail/cases/preview`);
+  console.log(`  POST /api/runs/scenario-preview`);
+  console.log(`  POST /api/runs/discovery-batch`);
   console.log(`  POST /api/runs/sprint`);
   console.log(`  GET  /api/runs`);
   console.log(`  GET  /api/runs/:jobId`);
   console.log(`  GET  /api/runs/:jobId/logs  (SSE)`);
   console.log(`  DEL  /api/runs/:jobId`);
+  console.log(`  POST /api/runs/:jobId/rerun  { mode: "failed_only" | "all" }`);
+  console.log(`  POST /api/runs/launch-execution  { appSlug, projectId, sectionId, selectedScenarios }`);
   console.log(`  GET  /api/scenarios/preview?projectKey=AA&sprintId=42&status=...`);
   console.log(`  POST /api/scenarios/preview  { projectKey, sprintId|activeSprint, status }`);
   if (isDebugEnabled) {

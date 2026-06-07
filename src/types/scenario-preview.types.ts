@@ -21,6 +21,9 @@ export type VirtualCase = {
   type: string;
   automationType: string;
   setupStrategy: string;
+  sectionSlug?: string;
+  sectionName?: string;
+  sectionId?: string | number;
 };
 
 export type ScenarioPreviewRequest = {
@@ -28,6 +31,8 @@ export type ScenarioPreviewRequest = {
   targetAppSlug?: string;
   targetAppName?: string;
   sectionName?: string;
+  sectionSlug?: string;
+  sectionId?: string | number;
   testrailProjectId?: number;
   testrailSuiteId?: number;
   testrailSectionId?: number;
@@ -68,7 +73,7 @@ export function normalizeStep(step: string): string {
   return step.replace(/^\d+[\.)]\s*/, "").trim();
 }
 
-export function toVirtualCase(scenario: McpScenario, index: number): VirtualCase {
+export function toVirtualCase(scenario: McpScenario, index: number, sectionSlug?: string, sectionName?: string, sectionId?: string | number): VirtualCase {
   const displayId = `PREVIEW-${String(index + 1).padStart(3, "0")}`;
   return {
     id: `preview-${String(index + 1).padStart(3, "0")}`,
@@ -88,5 +93,8 @@ export function toVirtualCase(scenario: McpScenario, index: number): VirtualCase
     type: scenario.type,
     automationType: scenario.automationType,
     setupStrategy: scenario.setupStrategy,
+    sectionSlug,
+    sectionName,
+    sectionId,
   };
 }

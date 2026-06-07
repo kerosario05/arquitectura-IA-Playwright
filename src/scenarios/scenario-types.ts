@@ -3,6 +3,10 @@ export type ScenarioPreviewRequest = {
   sprintId?: number;
   activeSprint?: boolean;
   status?: string;
+  selectedIssueKeys?: string[];
+  sectionName?: string;
+  sectionSlug?: string;
+  sectionId?: string | number;
   testrailProjectId?: number;
   testrailSuiteId?: number;
   testrailSectionId?: number;

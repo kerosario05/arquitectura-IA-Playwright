@@ -1,6 +1,7 @@
 import type { McpRouteProfile, McpScenario } from "../scenarios/scenario-types";
 import { loadAppConfig, getRouteProfileFromConfig } from "./app-auto-resolver";
 import type { VirtualCase } from "../types/scenario-preview.types";
+import type { EntryStepConfig } from "../server/services/entry-steps-learner";
 
 export { loadAppConfig };
 
@@ -300,7 +301,101 @@ export function canonicalizeText(text: string, labelMap: CanonicalLabelMap): str
 
 // ── Entry step canonicalization ──
 
-export function buildCanonicalEntrySteps(routeProfile: McpRouteProfile | null): string[] {
+function entryStepToCanonicalText(entryStep: EntryStepConfig): string {
+  const label = entryStep.target.trim();
+  switch (entryStep.action) {
+    case "click":
+      return `Clic en "${label}".`;
+    case "type":
+      return `Escribir "${label}".`;
+    case "select":
+      return `Seleccionar "${label}".`;
+    case "navigate":
+      return `Ir a "${label}".`;
+    default:
+      return `Clic en "${label}".`;
+  }
+}
+
+export function normalizeScenarioEntryStepsOrder(
+  steps: string[],
+  entrySteps: EntryStepConfig[],
+): { steps: string[]; inserted: number; moved: number; alreadyFirst: number; deduped: number } {
+  if (!entrySteps.length || !steps.length) {
+    return { steps, inserted: 0, moved: 0, alreadyFirst: 0, deduped: 0 };
+  }
+
+  const canonicalTexts = entrySteps.map(entryStepToCanonicalText);
+  const normalizedCanonical = canonicalTexts.map((t) => normalizeForComparison(stripStepNumbering(t)));
+
+  let inserted = 0;
+  let alreadyFirst = 0;
+  let deduped = 0;
+  const placed = new Array<boolean>(canonicalTexts.length).fill(false);
+  const nonEntrySteps: string[] = [];
+
+  for (const step of steps) {
+    const ns = normalizeForComparison(stripStepNumbering(step));
+    let matchedIdx = -1;
+    for (let ci = 0; ci < normalizedCanonical.length; ci++) {
+      if (ns === normalizedCanonical[ci]) {
+        matchedIdx = ci;
+        break;
+      }
+    }
+    if (matchedIdx !== -1) {
+      if (!placed[matchedIdx]) {
+        placed[matchedIdx] = true;
+        if (steps.indexOf(step) === matchedIdx) {
+          alreadyFirst++;
+        }
+      } else {
+        deduped++;
+      }
+    } else {
+      nonEntrySteps.push(step);
+    }
+  }
+
+  let moved = 0;
+  for (let ci = 0; ci < placed.length; ci++) {
+    if (placed[ci]) {
+      const origIdx = steps.findIndex(
+        (s) => normalizeForComparison(stripStepNumbering(s)) === normalizedCanonical[ci],
+      );
+      if (origIdx !== ci) moved++;
+    }
+  }
+
+  for (let ci = 0; ci < placed.length; ci++) {
+    if (!placed[ci]) inserted++;
+  }
+
+  const resultSteps: string[] = [];
+  for (let ci = 0; ci < canonicalTexts.length; ci++) {
+    if (placed[ci]) {
+      const origIdx = steps.findIndex(
+        (s) => normalizeForComparison(stripStepNumbering(s)) === normalizedCanonical[ci],
+      );
+      resultSteps.push(steps[origIdx]);
+    } else {
+      resultSteps.push(canonicalTexts[ci]);
+    }
+  }
+  resultSteps.push(...nonEntrySteps);
+
+  return { steps: resultSteps, inserted, moved, alreadyFirst, deduped };
+}
+
+export function buildCanonicalEntrySteps(
+  routeProfile: McpRouteProfile | null,
+  entrySteps?: EntryStepConfig[],
+): string[] {
+  if (entrySteps && entrySteps.length > 0) {
+    return entrySteps
+      .filter((es) => es.action === "click")
+      .map((es) => `Clic en "${es.target}".`);
+  }
   if (!routeProfile?.entry) return [];
   return routeProfile.entry
     .map((e) => e.visibleLabel)
@@ -311,12 +406,11 @@ export function buildCanonicalEntrySteps(routeProfile: McpRouteProfile | null): 
 export function normalizeEntrySteps(
   steps: string[],
   routeProfile: McpRouteProfile | null,
+  entrySteps?: EntryStepConfig[],
 ): { steps: string[]; deduped: number } {
-  if (!routeProfile?.entry || steps.length === 0) {
-    return { steps: steps.map(stripStepNumbering), deduped: 0 };
-  }
+  if (steps.length === 0) return { steps: [], deduped: 0 };
 
-  const canonicalEntrySteps = buildCanonicalEntrySteps(routeProfile);
+  const canonicalEntrySteps = buildCanonicalEntrySteps(routeProfile, entrySteps);
   if (canonicalEntrySteps.length === 0) {
     return { steps: steps.map(stripStepNumbering), deduped: 0 };
   }
@@ -363,6 +457,7 @@ export function normalizeScenario(
   scenario: McpScenario,
   routeProfile: McpRouteProfile | null,
   appConfig: Record<string, unknown> | null,
+  entrySteps?: EntryStepConfig[],
 ): { scenario: McpScenario; stats: NormalizationStats } {
   const labelMap = buildCanonicalLabelMap(routeProfile, appConfig);
 
@@ -376,7 +471,7 @@ export function normalizeScenario(
   const canonicalizedSteps = scenario.steps.map((s) => canonicalizeText(s, labelMap));
 
   // Deduplicate entry steps
-  const { steps: normalizedSteps, deduped } = normalizeEntrySteps(canonicalizedSteps, routeProfile);
+  const { steps: normalizedSteps, deduped } = normalizeEntrySteps(canonicalizedSteps, routeProfile, entrySteps);
 
   for (let i = 0; i < canonicalizedSteps.length; i++) {
     if (canonicalizedSteps[i] !== scenario.steps[i]) canonicalizedCount++;
@@ -414,6 +509,7 @@ export function normalizeVirtualCase(
   vc: VirtualCase,
   routeProfile: McpRouteProfile | null,
   appConfig: Record<string, unknown> | null,
+  entrySteps?: EntryStepConfig[],
 ): { vc: VirtualCase; stats: NormalizationStats } {
   const labelMap = buildCanonicalLabelMap(routeProfile, appConfig);
 
@@ -423,7 +519,7 @@ export function normalizeVirtualCase(
   if (newTitle !== vc.title) canonicalizedCount++;
 
   const canonicalizedSteps = vc.steps.map((s) => canonicalizeText(s, labelMap));
-  const { steps: normalizedSteps, deduped } = normalizeEntrySteps(canonicalizedSteps, routeProfile);
+  const { steps: normalizedSteps, deduped } = normalizeEntrySteps(canonicalizedSteps, routeProfile, entrySteps);
 
   for (let i = 0; i < canonicalizedSteps.length; i++) {
     if (canonicalizedSteps[i] !== vc.steps[i]) canonicalizedCount++;
@@ -451,6 +547,550 @@ export function normalizeVirtualCase(
       canonicalizedLabels: canonicalizedCount,
     },
   };
+}
+
+// ── Unsupported target filtering ──
+
+function computeProfileContextStrength(
+  entryCount: number,
+  visibleControlsCount: number,
+  aliasCount: number,
+  domainTermCount: number,
+  entryStepsCount: number,
+): "none" | "low" | "medium" | "high" {
+  const total = entryCount + visibleControlsCount + aliasCount + domainTermCount + entryStepsCount;
+  if (total === 0) return "none";
+  if (visibleControlsCount >= 4 || (visibleControlsCount >= 2 && aliasCount + domainTermCount >= 2)) return "high";
+  if (visibleControlsCount >= 1 || entryCount >= 1 || entryStepsCount >= 1) return "medium";
+  return "low";
+}
+
+export function filterUnsupportedClickTargets(
+  steps: string[],
+  routeProfile: McpRouteProfile | null,
+  entrySteps?: EntryStepConfig[],
+): {
+  steps: string[];
+  convertedToAssertion: number;
+  kept: number;
+  skipped: number;
+  skippedReason: string | null;
+  allowlistSize: number;
+  profileContextStrength: "none" | "low" | "medium" | "high";
+  convertedTargets: string[];
+} {
+  if (!routeProfile) {
+    return { steps, convertedToAssertion: 0, kept: 0, skipped: steps.length, skippedReason: "insufficient_profile_context", allowlistSize: 0, profileContextStrength: "none", convertedTargets: [] };
+  }
+
+  const allowedTargets = new Set<string>();
+
+  const addTarget = (target: string) => {
+    const normalized = normalizeForComparison(target);
+    if (normalized.length > 0) allowedTargets.add(normalized);
+  };
+
+  let entryCount = 0;
+  let visibleControlsCount = 0;
+  let aliasCount = 0;
+  let domainTermCount = 0;
+  let entryStepsCount = 0;
+
+  if (routeProfile.entry) {
+    for (const e of routeProfile.entry) {
+      if (e.visibleLabel) { addTarget(e.visibleLabel); entryCount++; }
+    }
+  }
+
+  if (routeProfile.visibleControls) {
+    for (const vc of routeProfile.visibleControls) {
+      addTarget(vc);
+      visibleControlsCount++;
+    }
+  }
+
+  if (routeProfile.aliases) {
+    for (const val of Object.values(routeProfile.aliases)) {
+      if (typeof val === "string") { addTarget(val); aliasCount++; }
+      else if (Array.isArray(val)) {
+        for (const v of val) {
+          if (typeof v === "string") { addTarget(v); aliasCount++; }
+        }
+      }
+    }
+  }
+
+  if (routeProfile.domainTerms) {
+    for (const val of Object.values(routeProfile.domainTerms)) {
+      if (typeof val === "string") { addTarget(val); domainTermCount++; }
+      else if (Array.isArray(val)) {
+        for (const v of val) {
+          if (typeof v === "string") { addTarget(v); domainTermCount++; }
+        }
+      }
+    }
+  }
+
+  if (entrySteps) {
+    for (const es of entrySteps) {
+      addTarget(es.target);
+      entryStepsCount++;
+    }
+  }
+
+  const allowlistSize = allowedTargets.size;
+  const profileContextStrength = computeProfileContextStrength(entryCount, visibleControlsCount, aliasCount, domainTermCount, entryStepsCount);
+
+  // If no useful profile context, skip filtering entirely
+  if (allowlistSize === 0 || profileContextStrength === "none") {
+    return { steps, convertedToAssertion: 0, kept: 0, skipped: steps.length, skippedReason: "insufficient_profile_context", allowlistSize, profileContextStrength, convertedTargets: [] };
+  }
+
+  let convertedToAssertion = 0;
+  let kept = 0;
+  const convertedTargets: string[] = [];
+
+  const resultSteps: string[] = [];
+  for (const step of steps) {
+    const stripped = stripStepNumbering(step);
+    const clickMatch = stripped.match(/^Clic en "(.+)"\.$/i);
+    if (clickMatch) {
+      const target = clickMatch[1];
+      const normalizedTarget = normalizeForComparison(target);
+      if (!allowedTargets.has(normalizedTarget)) {
+        convertedTargets.push(target);
+        resultSteps.push(`Validar que se muestre "${target}".`);
+        convertedToAssertion++;
+        continue;
+      }
+      kept++;
+    }
+    resultSteps.push(step);
+  }
+
+  return { steps: resultSteps, convertedToAssertion, kept, skipped: 0, skippedReason: null, allowlistSize, profileContextStrength, convertedTargets };
+}
+
+// ── Detail scenario guard ──
+
+const DETAIL_KEYWORDS = [
+  "nombre", "descripci", "detalle", "informaci", "beneficios",
+  "requisitos", "condiciones", "estado", "resumen", "datos",
+  "atributos", "acciones disponibles", "botón de retorno",
+  "botón de solicitud", "name", "description", "detail",
+  "information", "benefits", "requirements", "conditions",
+  "status", "summary", "data", "attributes",
+];
+
+const SELECTION_PATTERNS = [
+  /seleccionar\s+(el|la|un|una)?\s*primer/i,
+  /select\s+(the\s+)?first/i,
+  /primer\s+(elemento|producto|item|registro|tarjeta|opción) visible/i,
+  /first\s+visible\s+(element|product|item|record|card|option)/i,
+  /primer\s+(elemento|producto|item|registro|tarjeta|opción)\s+del\s+listado/i,
+];
+
+const SENSITIVE_ACTION_PATTERNS = [
+  /pagar/i, /transferir/i, /contrato/i, /confirmar/i, /enviar/i,
+  /solicitar/i, /eliminar/i, /cancelar/i, /formalizar/i,
+  /desembolso/i, /aprobar/i, /debitar/i, /firmar/i,
+];
+
+// Known category nouns that can serve as parent list navigation.
+// If a specific target like "Reportes mensuales" isn't backed but "Reportes" is,
+// the guard can recover by clicking the parent category.
+const CATEGORY_PARENT_CANDIDATES = new Set([
+  "tarjetas", "cuentas", "prestamos", "préstamos", "depósitos", "depositos",
+  "productos", "servicios", "categorías", "categorias", "solicitudes",
+  "usuarios", "reportes", "documentos", "planes", "facturas", "ordenes", "órdenes",
+  "sucursales", "beneficiarios", "registros", "resultados", "items", "elementos",
+]);
+
+function hasSensitiveExecutableAction(steps: string[]): boolean {
+  return steps.some((step) => {
+    const stripped = stripStepNumbering(step);
+    // Only block if it's an executable click action, not a visible assertion
+    if (!/^clic en /i.test(stripped)) return false;
+    return SENSITIVE_ACTION_PATTERNS.some((p) => p.test(stripped));
+  });
+}
+
+function hasPassiveSensitiveAssertion(steps: string[]): boolean {
+  return steps.some((step) => {
+    const stripped = stripStepNumbering(step);
+    // Only match assertion-type steps (Validar que el botón X esté visible)
+    if (!/^(validar|verificar|comprobar|esperar)\b/i.test(stripped)) return false;
+    return SENSITIVE_ACTION_PATTERNS.some((p) => p.test(stripped));
+  });
+}
+
+/**
+ * Try to recover a parent category/list navigation from unsupported targets.
+ * E.g., if "Pesos" was converted to a validation but "Cuentas de Efectivo"
+ * is a valid clickable target, insert "Clic en Cuentas de Efectivo" before
+ * the ordinal selection to navigate into the right section.
+ */
+function findRecoverableParentCategory(
+  steps: string[],
+  routeProfile?: McpRouteProfile | null,
+  entrySteps?: EntryStepConfig[],
+): { originalTarget: string; parentTarget: string; parentLabel: string } | null {
+  // Build the clickable allowlist (same sources as convertUnsupportedPreOrdinalClicks)
+  const allowedTargets = new Set<string>();
+  const addTarget = (target: string) => {
+    const normalized = normalizeForComparison(target);
+    if (normalized.length > 0) allowedTargets.add(normalized);
+  };
+
+  if (routeProfile?.entry) {
+    for (const e of routeProfile.entry) if (e.visibleLabel) addTarget(e.visibleLabel);
+  }
+  if (routeProfile?.visibleControls) {
+    for (const vc of routeProfile.visibleControls) addTarget(vc);
+  }
+  if (routeProfile?.aliases) {
+    for (const val of Object.values(routeProfile.aliases)) {
+      if (typeof val === "string") addTarget(val);
+      else if (Array.isArray(val)) for (const v of val) if (typeof v === "string") addTarget(v);
+    }
+  }
+  if (entrySteps) for (const es of entrySteps) addTarget(es.target);
+
+  // Check each step before the first detail assertion for a click target that was
+  // converted to a validation (like "Pesos" → "Validar que se muestre Pesos").
+  // Try to find a parent category for it in the allowlist.
+  for (const step of steps) {
+    const stripped = stripStepNumbering(step);
+    // Look for validation steps that might have been converted click targets
+    const validationMatch = stripped.match(/^Validar que se muestre "(.+)"\.$/i);
+    if (!validationMatch) continue;
+
+    const target = validationMatch[1];
+    const normalizedTarget = normalizeForComparison(target);
+
+    // Skip if target is short generic value (Pesos, Dólares, etc.)
+    // Parent recovery only for multi-word or specific targets
+    if (target.length <= 5) continue;
+
+    // Try to find a parent category noun inside the target text
+    // e.g., "Reportes mensuales" → "Reportes"
+    const targetWords = normalizedTarget.split(/\s+/);
+    for (const word of targetWords) {
+      if (CATEGORY_PARENT_CANDIDATES.has(word)) {
+        const parentLabel = word.charAt(0).toUpperCase() + word.slice(1);
+        const normalizedParent = normalizeForComparison(parentLabel);
+        if (allowedTargets.has(normalizedParent)) {
+          return {
+            originalTarget: target,
+            parentTarget: parentLabel,
+            parentLabel,
+          };
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
+function hasDetailAssertions(steps: string[], expectedResult: string): boolean {
+  // Only check assertion-type steps (Validar, Verificar, check) and expectedResult
+  // Exclude click/navigation steps to avoid false positives from product names like "información de productos"
+  const assertionText = [
+    ...steps
+      .map(stripStepNumbering)
+      .filter((s) => /^(validar|verificar|comprobar|esperar|should|verify|check|assert)\b/i.test(s)),
+    expectedResult,
+  ].join(" ").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  return DETAIL_KEYWORDS.some((kw) => assertionText.includes(kw));
+}
+
+function hasItemSelection(steps: string[]): boolean {
+  return steps.some((step) => {
+    const stripped = stripStepNumbering(step);
+    return SELECTION_PATTERNS.some((p) => p.test(stripped));
+  });
+}
+
+function hasSensitiveAction(steps: string[]): boolean {
+  return steps.some((step) => {
+    const stripped = stripStepNumbering(step).toLowerCase();
+    return SENSITIVE_ACTION_PATTERNS.some((p) => p.test(stripped));
+  });
+}
+
+function findDominantDomainTerm(routeProfile: McpRouteProfile | null): string | null {
+  if (!routeProfile?.domainTerms) return null;
+  const counts = new Map<string, number>();
+  for (const val of Object.values(routeProfile.domainTerms)) {
+    const items = typeof val === "string" ? [val] : Array.isArray(val) ? val : [];
+    for (const item of items) {
+      if (typeof item === "string" && item.length > 0) {
+        counts.set(item, (counts.get(item) ?? 0) + 1);
+      }
+    }
+  }
+  if (counts.size === 0) return null;
+  let best = "";
+  let bestCount = 0;
+  for (const [term, count] of counts) {
+    if (count > bestCount) {
+      best = term;
+      bestCount = count;
+    }
+  }
+  return best;
+}
+
+export function ensureDetailScenarioHasItemSelection(
+  steps: string[],
+  expectedResult: string,
+  routeProfile?: McpRouteProfile | null,
+  entrySteps?: EntryStepConfig[],
+): { steps: string[]; inserted: boolean; reason?: string } {
+  // Conditions for insertion:
+  // 1. Has detail assertions
+  // 2. No item selection yet
+  // 3. No sensitive executable actions (passive assertions like "Validar que el botón X esté visible" are OK)
+  if (!hasDetailAssertions(steps, expectedResult)) {
+    return { steps, inserted: false, reason: "no_detail_assertions" };
+  }
+
+  if (hasItemSelection(steps)) {
+    return { steps, inserted: false, reason: "already_has_selection" };
+  }
+
+  if (hasSensitiveExecutableAction(steps)) {
+    return { steps, inserted: false, reason: "sensitive_action_blocked" };
+  }
+
+  // Log passive sensitive assertions (they don't block)
+  if (hasPassiveSensitiveAssertion(steps)) {
+    for (const step of steps) {
+      const stripped = stripStepNumbering(step);
+      if (/^(validar|verificar|comprobar|esperar)\b/i.test(stripped)) {
+        const match = stripped.match(/"(.+)"/)
+        if (match) {
+          // Log handled in runner context
+        }
+      }
+    }
+  }
+
+  const result = [...steps];
+
+  // STEP A: Try to recover parent category/list navigation for unsupported detail targets
+  let parentRecovery = findRecoverableParentCategory(steps, routeProfile, entrySteps);
+  if (parentRecovery) {
+    let insertIdx = result.length;
+    for (let i = result.length - 1; i >= 0; i--) {
+      const stripped = stripStepNumbering(result[i]);
+      if (/^(validar|verificar|comprobar|esperar|should|verify|check|assert)\b/i.test(stripped)) {
+        insertIdx = i;
+      } else {
+        break;
+      }
+    }
+    const parentStep = `Clic en "${parentRecovery.parentLabel}".`;
+    result.splice(insertIdx, 0, parentStep);
+  }
+
+  // STEP B: Build the clickable allowlist to identify supported list navigation
+  const allowedClickTargets = new Set<string>();
+  const addTarget = (t: string) => { const n = normalizeForComparison(t); if (n.length > 0) allowedClickTargets.add(n); };
+  if (routeProfile?.entry) for (const e of routeProfile.entry) if (e.visibleLabel) addTarget(e.visibleLabel);
+  if (routeProfile?.visibleControls) for (const vc of routeProfile.visibleControls) addTarget(vc);
+  if (routeProfile?.aliases) for (const val of Object.values(routeProfile.aliases)) {
+    if (typeof val === "string") addTarget(val);
+    else if (Array.isArray(val)) for (const v of val) if (typeof v === "string") addTarget(v);
+  }
+  if (entrySteps) for (const es of entrySteps) addTarget(es.target);
+
+  // Identify which steps are root entry-level navigation (e.g., "Información de productos") vs
+  // supported list/category navigation (e.g., "Tarjetas", "Reportes").
+  const entryLabels = new Set<string>();
+  if (routeProfile?.entry) for (const e of routeProfile.entry) if (e.visibleLabel) entryLabels.add(normalizeForComparison(e.visibleLabel));
+  if (entrySteps) for (const es of entrySteps) entryLabels.add(normalizeForComparison(es.target));
+
+  // STEP C: Examine the last click step before assertions to see if we have list navigation.
+  // Find the last non-assertion step (click/navigation) before detail assertions.
+  let lastClickStep: string | null = null;
+  let lastClickNormalized: string | null = null;
+  for (let i = 0; i < result.length; i++) {
+    const stripped = stripStepNumbering(result[i]);
+    if (/^(validar|verificar|comprobar|esperar|should|verify|check|assert)\b/i.test(stripped)) break;
+    const clickMatch = stripped.match(/^Clic en "(.+)"\.$/i);
+    if (clickMatch) {
+      lastClickStep = clickMatch[1];
+      lastClickNormalized = normalizeForComparison(lastClickStep);
+    }
+  }
+
+  const isRootOnly = lastClickNormalized !== null && entryLabels.has(lastClickNormalized);
+
+  // STEP D: Only insert ordinal selection if there's list navigation beyond root module.
+  // Any click target that is NOT a root entry step counts as supported list navigation.
+  if (!parentRecovery && isRootOnly) {
+    return {
+      steps: result,
+      inserted: false,
+      reason: "missing_supported_list_navigation",
+    };
+  }
+
+  if (!parentRecovery && lastClickNormalized === null) {
+    return {
+      steps: result,
+      inserted: false,
+      reason: "no_list_navigation_before_detail",
+    };
+  }
+
+  // Build ordinal selection step text
+  const domainTerm = routeProfile ? findDominantDomainTerm(routeProfile) : null;
+  const itemText = domainTerm
+    ? `Seleccionar el primer ${domainTerm} visible del listado.`
+    : "Seleccionar el primer elemento visible del listado.";
+
+  // Find insertion point: before the first detail assertion step, after click/navigation steps
+  let insertIdx = result.length;
+
+  for (let i = result.length - 1; i >= 0; i--) {
+    const stripped = stripStepNumbering(result[i]);
+    if (/^(validar|verificar|comprobar|esperar|should|verify|check|assert)\b/i.test(stripped)) {
+      insertIdx = i;
+    } else {
+      break;
+    }
+  }
+
+  result.splice(insertIdx, 0, itemText);
+
+  return { steps: result, inserted: true, reason: parentRecovery ? "detail_assertions_after_listing_with_parent_recovery" : "detail_assertions_after_listing" };
+}
+
+// ── Pre-ordinal click guard ──
+
+const ORDINAL_SELECTION_PATTERNS = [
+  /^seleccionar\s+(el|la|un|una)?\s*primer/i,
+  /^seleccionar\s+(el|la|un|una)?\s*segund/i,
+  /^seleccionar\s+(el|la|un|una)?\s*tercer/i,
+  /^seleccionar\s+(el|la|un|una)?\s*últim/i,
+  /^seleccionar\s+(el|la|un|una)?\s*ultim/i,
+  /^select\s+(the\s+)?(first|second|third|last)/i,
+];
+
+function isOrdinalSelectionStep(step: string): boolean {
+  const stripped = stripStepNumbering(step);
+  return ORDINAL_SELECTION_PATTERNS.some((p) => p.test(stripped));
+}
+
+/**
+ * Determine if a target looks like a contextual qualifier rather than a navigational control.
+ * Uses general heuristics (not hardcoded business values):
+ * - Very short single word → likely a filter/attribute value
+ * - Target that doesn't contain structure words (de, del, para, en) → likely not a navigation label
+ * - Target content after NFD is short → likely a generic value
+ */
+function isLikelyContextualTarget(target: string): boolean {
+  const t = target.trim();
+  if (t.length > 20) return false;
+  
+  const lower = t.toLowerCase();
+  const afterNfd = lower.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const wordCount = lower.split(/\s+/).length;
+  
+  // Single word, short (<= 7 chars) with no prepositions → likely attribute/filter value
+  if (wordCount === 1 && afterNfd.length <= 7 && !/\b(de|del|para|por|en|con|sin|al)\b/i.test(lower)) return true;
+  
+  // Two words, short total (<= 10 chars), no prepositions → likely flat qualifier
+  if (wordCount === 2 && afterNfd.length <= 10 && !/\b(de|del|para|por|en|con|sin|al)\b/i.test(lower)) return true;
+  
+  return false;
+}
+
+export function convertUnsupportedPreOrdinalClicks(
+  steps: string[],
+  routeProfile?: McpRouteProfile | null,
+  entrySteps?: EntryStepConfig[],
+): { steps: string[]; converted: number; diagnostics: Array<{ target: string; stepIndex: number; reason: string }> } {
+  if (steps.length < 2) return { steps, converted: 0, diagnostics: [] };
+
+  // Build allowlist of known clickable targets from profile metadata
+  const allowedTargets = new Set<string>();
+
+  const addTarget = (target: string) => {
+    const normalized = normalizeForComparison(target);
+    if (normalized.length > 0) allowedTargets.add(normalized);
+  };
+
+  if (routeProfile?.entry) {
+    for (const e of routeProfile.entry) if (e.visibleLabel) addTarget(e.visibleLabel);
+  }
+  if (routeProfile?.visibleControls) {
+    for (const vc of routeProfile.visibleControls) addTarget(vc);
+  }
+  if (routeProfile?.aliases) {
+    for (const val of Object.values(routeProfile.aliases)) {
+      if (typeof val === "string") addTarget(val);
+      else if (Array.isArray(val)) for (const v of val) if (typeof v === "string") addTarget(v);
+    }
+  }
+  // intermediates/navigationHints also represent navigable targets
+  if (routeProfile?.intermediates) {
+    for (const steps of Object.values(routeProfile.intermediates)) {
+      if (Array.isArray(steps)) for (const step of steps) addTarget(step);
+    }
+  }
+  if (entrySteps) {
+    for (const es of entrySteps) addTarget(es.target);
+  }
+
+  const diagnostics: Array<{ target: string; stepIndex: number; reason: string }> = [];
+  const resultSteps = [...steps];
+  let converted = 0;
+
+  for (let i = 0; i < resultSteps.length - 1; i++) {
+    const currentStripped = stripStepNumbering(resultSteps[i]);
+    const nextStripped = stripStepNumbering(resultSteps[i + 1]);
+
+    // Check if current is a click step and next is ordinal selection
+    const clickMatch = currentStripped.match(/^Clic en "(.+)"\.$/i);
+    if (!clickMatch) continue;
+    if (!isOrdinalSelectionStep(nextStripped)) continue;
+
+    const target = clickMatch[1];
+    const normalizedTarget = normalizeForComparison(target);
+
+    // CASE 1: Target is in the allowlist (known clickable) → keep it
+    if (allowedTargets.has(normalizedTarget)) continue;
+
+    // CASE 2: Target looks like a specific navigation label (multi-word, has structure) → keep it
+    if (!isLikelyContextualTarget(target)) continue;
+
+    // CASE 3: Unsupported contextual target before ordinal → convert to validation
+    // Avoid creating duplicate assertions if one already exists
+    const validationStep = `Validar que se muestre "${target}".`;
+    const alreadyHasAssertion = resultSteps.some(
+      (s) => stripStepNumbering(s) === stripStepNumbering(validationStep)
+    );
+
+    if (!alreadyHasAssertion) {
+      resultSteps[i] = validationStep;
+      diagnostics.push({ target, stepIndex: i, reason: "unsupported_contextual_target_before_ordinal" });
+      converted++;
+    } else {
+      // Remove the click step entirely since a validation already exists
+      resultSteps.splice(i, 1);
+      diagnostics.push({ target, stepIndex: i, reason: "removed_duplicate_contextual_click" });
+      converted++;
+      // Adjust loop because we removed an element
+      i--;
+    }
+  }
+
+  return { steps: resultSteps, converted, diagnostics };
 }
 
 // ── Validation ──

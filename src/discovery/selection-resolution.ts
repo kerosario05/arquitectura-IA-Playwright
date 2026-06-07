@@ -53,14 +53,18 @@ export function extractMeaningfulTokens(target: string): string[] {
 }
 
 /**
- * Check if post-click content matches target semantics
+ * Check if post-click content matches target semantics.
+ * When effectiveTarget is provided (e.g., alias-resolved short form),
+ * verify against that instead of the original target.
  */
 export function verifyPostClickSemanticMatch(
   target: string,
   visibleTexts: string[],
-  pageTitle?: string
+  pageTitle?: string,
+  effectiveTarget?: string,
 ): { matches: boolean; mismatchReason?: string; matchedTokens: string[]; missingTokens: string[] } {
-  const meaningfulTokens = extractMeaningfulTokens(target);
+  const verifyTarget = effectiveTarget ?? target;
+  const meaningfulTokens = extractMeaningfulTokens(verifyTarget);
   const allText = [pageTitle, ...visibleTexts].join(" ").toLowerCase();
   
   const matchedTokens: string[] = [];

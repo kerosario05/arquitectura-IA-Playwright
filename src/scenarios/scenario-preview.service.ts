@@ -58,14 +58,30 @@ function isEntryClickStep(step: string, entryLabels: string[]): boolean {
   return entryLabels.some((label) => stepIsClickOnLabel(step, label));
 }
 
-export function insertEntrySteps(scenario: McpScenario, entrySteps: string[]): McpScenario {
-  if (!entrySteps.length || !scenario.steps || scenario.steps.length === 0) return scenario;
+export function insertEntrySteps(
+  scenario: McpScenario,
+  entrySteps: string[],
+  entryStepConfigs?: EntryStepConfig[],
+): McpScenario {
+  const labels: string[] = [];
 
-  const formattedEntry = entrySteps.map((label, i) => formatEntryStep(label, i));
+  // Prefer new entrySteps format (action/target) over old entry labels
+  if (entryStepConfigs && entryStepConfigs.length > 0) {
+    for (const es of entryStepConfigs) {
+      if (es.action === "click" && es.target) labels.push(es.target);
+    }
+  }
+
+  // Fallback to old format (string labels from entry visibleLabels)
+  if (labels.length === 0) labels.push(...entrySteps);
+
+  if (!labels.length || !scenario.steps || scenario.steps.length === 0) return scenario;
+
+  const formattedEntry = labels.map((label, i) => formatEntryStep(label, i));
   const existingSteps = scenario.steps.map((s) => s.trim());
 
   // Remove ALL existing entry click steps (damaged or canonical) from anywhere in the list
-  const nonEntrySteps = existingSteps.filter((step) => !isEntryClickStep(step, entrySteps));
+  const nonEntrySteps = existingSteps.filter((step) => !isEntryClickStep(step, labels));
 
   // Prepend canonical entry steps
   const newSteps = [...formattedEntry, ...nonEntrySteps];
@@ -95,6 +111,13 @@ function loadAppConfigSync(appSlug: string): Record<string, unknown> | null {
   }
 }
 
+type EntryStepConfig = {
+  action: string;
+  target: string;
+  when?: string;
+  reason?: string;
+};
+
 function buildRouteProfileForPrompt(
   targetAppSlug: string,
   requestRouteProfile?: McpRouteProfile,
@@ -102,10 +125,12 @@ function buildRouteProfileForPrompt(
   jiraDescription?: string,
   testrailSectionName?: string,
   scenarioTitles?: string[],
-): { routeProfile: McpRouteProfile | null; source: string } {
+): { routeProfile: McpRouteProfile | null; source: string; entrySteps: EntryStepConfig[]; loginMode?: string } {
   // 1. Explicit routeProfile from request
   if (requestRouteProfile && requestRouteProfile.name) {
-    return { routeProfile: requestRouteProfile, source: "request" };
+    const rp = requestRouteProfile as Record<string, unknown>;
+    const es = Array.isArray(rp.entrySteps) ? rp.entrySteps as EntryStepConfig[] : [];
+    return { routeProfile: requestRouteProfile, source: "request", entrySteps: es };
   }
 
   // 2. Load from app.config.json
@@ -115,9 +140,12 @@ function buildRouteProfileForPrompt(
     const entry = configRp.entry as unknown[] | undefined;
     const aliases = configRp.aliases as Record<string, unknown> | undefined;
     if ((entry && entry.length > 0) || (aliases && Object.keys(aliases).length > 0)) {
+      const es = Array.isArray(configRp.entrySteps) ? configRp.entrySteps as EntryStepConfig[] : [];
       return {
         routeProfile: configRp as unknown as McpRouteProfile,
         source: "app_config",
+        entrySteps: es,
+        loginMode: appConfig?.loginMode as string | undefined,
       };
     }
   }
@@ -132,14 +160,17 @@ function buildRouteProfileForPrompt(
       scenarioTitles,
     })
   ) {
+    const seed = seedKioskoInfoProductosRouteProfile() as unknown as McpRouteProfile;
     return {
-      routeProfile: seedKioskoInfoProductosRouteProfile() as unknown as McpRouteProfile,
+      routeProfile: seed,
       source: "seed_kiosko_info_productos",
+      entrySteps: [],
+      loginMode: appConfig?.loginMode as string | undefined,
     };
   }
 
   // 4. Default empty
-  return { routeProfile: null, source: "default" };
+  return { routeProfile: null, source: "default", entrySteps: [], loginMode: appConfig?.loginMode as string | undefined };
 }
 
 export async function generateScenarioPreview(
@@ -224,6 +255,22 @@ export async function generateScenarioPreview(
 
   console.log(`[scenarios:preview] loaded ${issues.length} jira issues`);
 
+  // Filter by selectedIssueKeys if provided (from QA Lab UI selection)
+  if (req.selectedIssueKeys && req.selectedIssueKeys.length > 0) {
+    const selectedKeys = new Set(req.selectedIssueKeys);
+    const filtered = issues.filter((i) => selectedKeys.has(i.key));
+    console.log(`[scenario-preview] jira selectedIssueKeys=${JSON.stringify(req.selectedIssueKeys)} filtered=${filtered.length}/${issues.length}`);
+    if (filtered.length === 0) {
+      return { ok: false, error: "jira_issues_not_selected", message: "Ninguna de las historias seleccionadas coincide con los filtros aplicados." };
+    }
+    issues.length = 0;
+    issues.push(...filtered);
+  } else {
+    console.log(`[scenario-preview] jira selectedIssueKeys=none`);
+  }
+
+  console.log(`[jira] selected issues count=${issues.length} keys=${JSON.stringify(issues.map((i) => i.key))}`);
+
   const maxIssues = Number(process.env.SCENARIO_PREVIEW_MAX_ISSUES) || 5;
   if (issues.length > maxIssues) {
     console.log(`[scenarios:preview] limiting issues from ${issues.length} to ${maxIssues}`);
@@ -235,7 +282,7 @@ export async function generateScenarioPreview(
   const jiraDescription = issues.length > 0 ? issues[0].description : undefined;
 
   // Build initial routeProfile (before AI generation)
-  const { routeProfile: initialRouteProfile, source: rpSource } = buildRouteProfileForPrompt(
+  const { routeProfile: initialRouteProfile, source: rpSource, entrySteps: initialEntrySteps, loginMode } = buildRouteProfileForPrompt(
     appInference.appSlug,
     undefined,
     jiraSummary,
@@ -295,6 +342,8 @@ export async function generateScenarioPreview(
       appInference.appSlug,
       appInference.appName,
       initialRouteProfile,
+      initialEntrySteps,
+      loginMode,
     );
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -345,9 +394,11 @@ export async function generateScenarioPreview(
     resolvedRouteProfile = seedKioskoInfoProductosRouteProfile() as unknown as McpRouteProfile;
   }
 
-  // Log entry steps
-  const entrySteps = buildEntrySteps(resolvedRouteProfile as unknown as Record<string, unknown>);
-  console.log(`[scenarios:preview] entrySteps=${JSON.stringify(entrySteps)}`);
+  // Log entry steps — prefer new format, fallback to old
+  const oldEntrySteps = buildEntrySteps(resolvedRouteProfile as unknown as Record<string, unknown>);
+  const configRp = resolvedRouteProfile ? (resolvedRouteProfile as Record<string, unknown>).entrySteps : undefined;
+  const newEntrySteps = Array.isArray(configRp) && configRp.length > 0 ? configRp as EntryStepConfig[] : [];
+  console.log(`[scenarios:preview] oldEntrySteps=${JSON.stringify(oldEntrySteps)} newEntrySteps=${JSON.stringify(newEntrySteps)}`);
 
   // Log before normalize
   for (const sc of rawScenarios) {
@@ -357,14 +408,17 @@ export async function generateScenarioPreview(
     );
   }
 
-  // Insert entry steps if routeProfile has entry
-  if (entrySteps.length > 0) {
+  // Insert entry steps if routeProfile has entry — prefer new format
+  if (newEntrySteps.length > 0 || oldEntrySteps.length > 0) {
     rawScenarios = rawScenarios.map((sc) => {
-      const repaired = insertEntrySteps(sc, entrySteps);
+      const repaired = insertEntrySteps(sc, oldEntrySteps, newEntrySteps);
       if (repaired !== sc) {
         if (!generationResult.warnings) generationResult.warnings = [];
+        const labels = newEntrySteps.length > 0
+          ? newEntrySteps.filter((es) => es.action === "click").map((es) => es.target).join(" → ")
+          : oldEntrySteps.join(" → ");
         generationResult.warnings.push(
-          `Scenario "${sc.title}": entry_steps_inserted - Added missing entry steps: ${entrySteps.join(" → ")}`,
+          `Scenario "${sc.title}": entry_steps_inserted - Added missing entry steps: ${labels}`,
         );
       }
       return repaired;

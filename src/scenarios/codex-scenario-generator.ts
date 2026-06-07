@@ -193,6 +193,8 @@ export async function generateScenariosWithAi(
   targetAppSlug?: string,
   targetAppName?: string,
   routeProfile?: McpRouteProfile | null,
+  entrySteps?: Array<{ action: string; target: string; when?: string }>,
+  loginMode?: string,
 ): Promise<McpGenerationResponse> {
   const command = CODEX_CLI_COMMAND;
 
@@ -201,7 +203,7 @@ export async function generateScenariosWithAi(
     throw new Error(`AI_PROVIDER_UNAVAILABLE|Codex CLI is not available. Command: ${command}. Configure CODEX_CLI_COMMAND or install Codex CLI.`);
   }
 
-  const messages = await buildMcpScenarioMessages(issues, appSlug, testrailMeta, targetAppSlug, targetAppName, routeProfile);
+  const messages = await buildMcpScenarioMessages(issues, appSlug, testrailMeta, targetAppSlug, targetAppName, routeProfile, entrySteps, loginMode);
   const systemMessage = messages.find(m => m.role === "system")?.content ?? "";
   const userMessage = messages.find(m => m.role === "user")?.content ?? "";
 

@@ -1,22 +1,27 @@
 import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
-import { jobStore, type JobSummary } from "./job-store";
+import { jobStore, type JobSummary, type JobStatus } from "./job-store";
 import { toVirtualCase, type ScenarioPreviewRequest, type VirtualCase } from "../../types/scenario-preview.types";
 import { config, requireTestRailConfig } from "../../config/env";
 import { TestRailClient } from "../../clients/testrail.client";
 import {
   normalizeScenario,
   normalizeVirtualCase,
+  normalizeScenarioEntryStepsOrder,
+  filterUnsupportedClickTargets,
+  ensureDetailScenarioHasItemSelection,
+  convertUnsupportedPreOrdinalClicks,
   validateVirtualCases,
   canonicalizeText,
   buildCanonicalLabelMap,
   buildCanonicalLabelRegistry,
   loadAppConfig,
   normalizeForComparison,
+  stripStepNumbering,
   buildCanonicalEntrySteps,
 } from "../../automations/scenario-normalizer";
-import { normalizeSectionSlug } from "../../automations/app-profile";
+import { normalizeSectionSlug, resolveSectionProfileSync } from "../../automations/app-profile";
 import type { McpRouteProfile } from "../../scenarios/scenario-types";
 import {
   buildTestRailRunName,
@@ -24,6 +29,7 @@ import {
 } from "../services/testrail-run-reporter";
 import { publishScenariosToTestRail, readPersistedScenarioMappings } from "../services/testrail-case-publisher";
 import { buildScenarioPreviewScenarioId, type ScenarioPreviewTestRailResult } from "../services/testrail-sync-types";
+import { learnEntryStepsFromSnapshot } from "../services/entry-steps-learner";
 
 const TECHNICAL_SLUGS = new Set([
   "tests",
@@ -596,6 +602,30 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
 
   const artifactDir = ensureArtifactDir(jobId);
 
+  // ── Extract launch metadata for TestRail result sync (Fase 2) ──
+  const pRecord = p as Record<string, unknown>;
+  const launchId = (pRecord.launchId as string) || undefined;
+  const testRunId = pRecord.testRunId ? Number(pRecord.testRunId) : undefined;
+  const jiraKey = (pRecord.jiraKey as string) || undefined;
+  const publishedCases: Array<{ scenarioId: string; caseId: number; title?: string }> =
+    Array.isArray(pRecord.publishedCases) ? pRecord.publishedCases : [];
+  const scenarioToCaseMap = new Map<string, number>();
+  for (const pc of publishedCases) {
+    scenarioToCaseMap.set(pc.scenarioId, pc.caseId);
+  }
+  if (testRunId) {
+    const scenarioIds = publishedCases.map(pc => pc.scenarioId).join(",");
+    const caseIds = publishedCases.map(pc => pc.caseId).join(",");
+    console.log(`[launch-sync] metadata received launchId=${launchId} testRunId=${testRunId} publishedCases=${publishedCases.length} jiraKey=${jiraKey ?? '—'}`);
+    console.log(`[launch-sync] published scenarioIds=${scenarioIds}`);
+    console.log(`[launch-sync] published caseIds=${caseIds}`);
+    for (const pc of publishedCases) {
+      console.log(`[launch-sync] map ${pc.scenarioId} -> ${pc.caseId}`);
+    }
+  } else {
+    console.log(`[launch-sync] disabled reason="missing_launch_metadata"`);
+  }
+
   // ── FASE 1: Resolve effective appSlug with inference chain ──
   let resolved: ResolvedApp;
   try {
@@ -651,8 +681,10 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
 
   // ── FASE 2: Block technical slugs without valid routeProfile ──
   if (!hasNonDefaultRouteProfile(routeProfile)) {
+    const appConfigPath = `automations/apps/${appSlug}/app.config.json`;
     const errorMessage = `Resolved targetAppSlug="${appSlug}" has no valid routeProfile. ` +
-      `Cannot execute scenario-preview without routeProfile with domainTerms and entry steps.`;
+      `Cannot execute scenario-preview without routeProfile with domainTerms and entry steps. ` +
+      `Check app config at ${appConfigPath}. Expected routeProfile.shape: { name, entry, aliases, domainTerms, visibleControls }`;
     jobStore.appendLog(jobId, `[run:scenario-preview] ${errorMessage}`);
     saveLogFile(artifactDir, "stdout.log", "");
     saveLogFile(artifactDir, "stderr.log", "");
@@ -690,9 +722,81 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
     return;
   }
 
+  // ── FASE 2b: Resolve entrySteps from routeProfile, appConfig, or snapshot learning ──
+  let entrySteps: EntryStepConfig[] = [];
+
+  // Priority 1: explicit entrySteps in appConfig routeProfile (persisted from previous runs)
+  const fromConfig = readEntryStepsFromAppConfig(appConfig);
+  if (fromConfig.length > 0) {
+    entrySteps = fromConfig;
+    jobStore.appendLog(jobId, `[run:scenario-preview] entrySteps from appConfig (${fromConfig.length})`);
+  }
+
+  // Priority 2: entrySteps in the resolved routeProfile (provided by QA Lab in payload)
+  if (entrySteps.length === 0 && routeProfile) {
+    const rp = routeProfile as Record<string, unknown>;
+    const rpEntrySteps = rp.entrySteps;
+    if (Array.isArray(rpEntrySteps) && rpEntrySteps.length > 0) {
+      const valid = rpEntrySteps.filter(
+        (es: unknown): es is EntryStepConfig =>
+          typeof es === "object" && es !== null && typeof (es as EntryStepConfig).action === "string" && typeof (es as EntryStepConfig).target === "string",
+      );
+      if (valid.length > 0) {
+        entrySteps = valid;
+        jobStore.appendLog(jobId, `[run:scenario-preview] entrySteps from routeProfile (${valid.length})`);
+      }
+    }
+  }
+
+  // Priority 3: snapshot-based learning via Playwright if no explicit entrySteps
+  if (entrySteps.length === 0) {
+    const firstSteps = validScenarios
+      .filter((s) => s.steps && s.steps.length > 0)
+      .map((s) => s.steps![0])
+      .filter(Boolean);
+
+    if (firstSteps.length > 0 && appConfig?.baseUrl) {
+      jobStore.appendLog(jobId, `[run:scenario-preview] no entrySteps resolved; trying snapshot learning for baseUrl=${appConfig.baseUrl}`);
+      const learned = await learnEntryStepsFromSnapshot(
+        appConfig.baseUrl as string,
+        {
+          loginMode: appConfig.loginMode as string | undefined,
+          username: appConfig.username as string | undefined,
+          password: appConfig.password as string | undefined,
+          scenarioFirstSteps: firstSteps,
+        },
+      );
+      jobStore.appendLog(jobId, `[run:scenario-preview] snapshot learning: ${learned.reason}`);
+      if (learned.entrySteps.length > 0) {
+        entrySteps = learned.entrySteps;
+      }
+    }
+  }
+
+  // Priority 4: fallback — convert routeProfile.entry (old format) to entrySteps
+  if (entrySteps.length === 0) {
+    const fallback = resolveEntrySteps(routeProfile, appConfig);
+    if (fallback.length > 0) {
+      entrySteps = fallback;
+      jobStore.appendLog(jobId, `[run:scenario-preview] entrySteps fallback from entry conversion (${fallback.length})`);
+    }
+  }
+
+  if (entrySteps.length > 0) {
+    jobStore.appendLog(jobId, `[run:scenario-preview] applying ${entrySteps.length} entrySteps`);
+    applyEntryStepsToScenarios(validScenarios, entrySteps);
+  } else {
+    jobStore.appendLog(jobId, `[run:scenario-preview] no entrySteps resolved`);
+  }
+
+  // Persist routeProfile + entrySteps to app.config.json for child process
+  if (routeProfile) {
+    persistRouteProfileToAppConfig(appSlug, routeProfile, entrySteps);
+  }
+
   // Normalize scenarios before converting to virtual cases
   const normalizedScenarios = validScenarios.map((s) => {
-    const { scenario, stats } = normalizeScenario(s, routeProfile, appConfig);
+    const { scenario, stats } = normalizeScenario(s, routeProfile, appConfig, entrySteps);
     jobStore.appendLog(
       jobId,
       `[run:scenario-preview] normalized scenario=${s.sourceIssueKey} beforeSteps=${stats.beforeSteps} afterSteps=${stats.afterSteps} entryDeduped=${stats.entryDeduped} canonicalizedLabels=${stats.canonicalizedLabels}`,
@@ -700,18 +804,84 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
     return scenario;
   });
 
-  // Convert to virtual cases
-  const virtualCases = normalizedScenarios.map((s, i) => toVirtualCase(s, i));
+  // Resolve section profile from params (prefer explicit slug, then name, then fallback)
+  const paramsRecord = p as Record<string, unknown>;
+  const rawSectionSlug = (paramsRecord.sectionSlug as string) || undefined;
+  const rawSectionName = (paramsRecord.sectionName as string) || undefined;
+  const rawSectionId = (paramsRecord.sectionId as string | number) || undefined;
+  const sectionProfile = resolveSectionProfileSync(rawSectionName, rawSectionSlug, rawSectionId);
+  console.log(`[section-profile] source=${sectionProfile.source} sectionName="${sectionProfile.sectionName}" sectionSlug=${sectionProfile.sectionSlug}`);
+
+  // Convert to virtual cases with section metadata
+  const virtualCases = normalizedScenarios.map((s, i) => toVirtualCase(s, i, sectionProfile.sectionSlug, sectionProfile.sectionName, sectionProfile.sectionId));
 
   // Normalize virtual cases (second pass for safety)
   const normalizedCases: VirtualCase[] = [];
   for (const vc of virtualCases) {
-    const { vc: normalized, stats } = normalizeVirtualCase(vc, routeProfile, appConfig);
+    const { vc: normalized, stats } = normalizeVirtualCase(vc, routeProfile, appConfig, entrySteps);
     jobStore.appendLog(
       jobId,
       `[run:scenario-preview] normalized ${vc.displayId} beforeSteps=${stats.beforeSteps} afterSteps=${stats.afterSteps} entryDeduped=${stats.entryDeduped} canonicalizedLabels=${stats.canonicalizedLabels}`,
     );
     normalizedCases.push(normalized);
+  }
+
+  // Final ordering pass: ensure entrySteps are first in the correct order
+  if (entrySteps.length > 0) {
+    for (const vc of normalizedCases) {
+      const result = normalizeScenarioEntryStepsOrder(vc.steps, entrySteps);
+      vc.steps = result.steps;
+      jobStore.appendLog(
+        jobId,
+        `[entry-steps] normalizedOrder scenario=${vc.displayId} inserted=${result.inserted} moved=${result.moved} alreadyFirst=${result.alreadyFirst} deduped=${result.deduped}`,
+      );
+    }
+  }
+
+  // Guard: filter unsupported click targets not backed by routeProfile/snapshot
+  for (const vc of normalizedCases) {
+    const result = filterUnsupportedClickTargets(vc.steps, routeProfile, entrySteps);
+    if (result.skipped > 0) {
+      jobStore.appendLog(
+        jobId,
+        `[scenario-guard] scenario=${vc.displayId} skipped=${result.skipped} skippedReason=${result.skippedReason} allowlistSize=${result.allowlistSize} profileContextStrength=${result.profileContextStrength}`,
+      );
+    }
+    for (const target of result.convertedTargets) {
+      jobStore.appendLog(
+        jobId,
+        `[scenario-guard] actionTarget not backed by profile/snapshot target="${target}" handling=contextual_assertion`,
+      );
+    }
+    vc.steps = result.steps;
+  }
+
+  // Guard: convert unsupported short/generic click targets that appear right before ordinal selection
+  for (const vc of normalizedCases) {
+    const result = convertUnsupportedPreOrdinalClicks(vc.steps, routeProfile, entrySteps);
+    for (const diag of result.diagnostics) {
+      jobStore.appendLog(
+        jobId,
+        `[scenario-guard] unsupportedPreOrdinalClick target="${diag.target}" handling=contextual_assertion reason=${diag.reason}`,
+      );
+    }
+    vc.steps = result.steps;
+  }
+
+  // Guard: ensure detail scenarios have an item selection step before detail assertions
+  for (const vc of normalizedCases) {
+    const result = ensureDetailScenarioHasItemSelection(vc.steps, vc.expectedResult, routeProfile, entrySteps);
+    if (result.inserted) {
+      jobStore.appendLog(
+        jobId,
+        `[scenario-detail-guard] insertedOrdinalSelection scenario=${vc.displayId} target="${result.steps.find((s, i) => s !== vc.steps[i])}" reason=${result.reason}`,
+      );
+      vc.steps = result.steps;
+    } else if (result.reason === "already_has_selection") {
+      jobStore.appendLog(jobId, `[scenario-detail-guard] alreadyHasSelection scenario=${vc.displayId}`);
+    } else if (result.reason !== "no_detail_assertions") {
+      jobStore.appendLog(jobId, `[scenario-detail-guard] skipped scenario=${vc.displayId} reason=${result.reason}`);
+    }
   }
 
   // Log final steps for verification
@@ -879,6 +1049,10 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   let testRailRunUrl: string | undefined;
   let testRailMappings: Array<{ scenarioId: string; testRailCaseId: number; title?: string }> = [];
   const caseOutcomeMap = new Map<string, { status: "passed" | "failed" | "skipped" | "review_needed"; failureReason?: string }>();
+  const pendingSyncs: Promise<void>[] = [];
+  const syncKeys = new Set<string>();
+  const syncTimeoutMs = Number(process.env.TESTRAIL_RESULT_SYNC_TIMEOUT_MS) || 30000;
+  let syncFailedCount = 0;
 
   if (shouldPublishToTestRail || shouldCreateTestRun || shouldReportResults) {
     if (!selectedProjectId || !selectedSuiteId || !selectedSectionId) {
@@ -1105,6 +1279,49 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
     }, firstCaseTimeoutMs);
   };
 
+  // Async helper for TestRail result sync (Fase 2) — called from sync parseProgressLine
+  const syncSingleResult = async (
+    _jobId: string,
+    _testRunId: number,
+    _caseId: number,
+    json: Record<string, unknown>,
+    _launchId: string | undefined,
+    _p: ScenarioPreviewParams,
+    _pRecord: Record<string, unknown>,
+    _artifactDir: string,
+    _scenarioCount: number,
+  ): Promise<void> => {
+    const { syncDiscoveryResultToTestRail, updateLaunchManifestWithResult } = await import("./testrail-result-sync");
+    const rawStatus = String(json.status || "review_needed");
+    const st: "passed" | "failed" | "skipped" | "review_needed" =
+      rawStatus === "passed" ? "passed" :
+      rawStatus === "failed" ? "failed" :
+      rawStatus === "skipped" ? "skipped" : "review_needed";
+    const syncResult = await syncDiscoveryResultToTestRail({
+      runId: _testRunId,
+      caseId: _caseId,
+      scenarioId: json.caseId as string,
+      discoveryStatus: st,
+      title: json.title as string | undefined,
+      artifactsDir: _artifactDir,
+      errorMessage: json.error as string | undefined,
+      launchId: _launchId,
+      appSlug: _p.appSlug,
+    });
+    jobStore.appendLog(_jobId, `[testrail-sync] scenario=${json.caseId} caseId=${_caseId} status=${syncResult.syncStatus}`);
+    if (_launchId) {
+      updateLaunchManifestWithResult(_launchId, {
+        scenarioId: json.caseId as string,
+        caseId: _caseId,
+        discoveryStatus: st,
+        testRailStatusId: syncResult.statusId,
+        syncStatus: syncResult.syncStatus,
+        syncedAt: syncResult.syncedAt,
+        error: syncResult.error,
+      }, _scenarioCount);
+    }
+  };
+
   startFirstCaseTimeout();
 
   jobStore.update(jobId, {
@@ -1182,6 +1399,27 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
             summary: mergeScenarioPreviewSummary(jobStore.get(jobId)?.summary, applyCaseFinishedSummaryPatch(currentSummary, json.status)),
           });
           jobStore.appendLog(jobId, `[scenario-preview] case_finished: ${json.caseId} status=${json.status}`);
+
+          // TestRail result sync (Fase 2) — fire-and-forget, tracked for flush
+          if (testRunId && typeof json.caseId === "string" && typeof json.status === "string") {
+            const caseId = scenarioToCaseMap.get(json.caseId);
+            if (caseId) {
+              const syncKey = `${testRunId}:${caseId}:${json.caseId}`;
+              if (syncKeys.has(syncKey)) {
+                jobStore.appendLog(jobId, `[testrail-sync] duplicate skipped scenario=${json.caseId} caseId=${caseId}`);
+              } else {
+                syncKeys.add(syncKey);
+                jobStore.appendLog(jobId, `[testrail-sync] queued scenario=${json.caseId} caseId=${caseId} runId=${testRunId}`);
+                const promise = syncSingleResult(jobId, testRunId, caseId, json, launchId, p, pRecord, artifactDir, publishedCases.length)
+                  .catch((err: any) => { syncFailedCount++; });
+                pendingSyncs.push(promise);
+              }
+            } else {
+              const availableIds = Array.from(scenarioToCaseMap.keys()).join(",");
+              jobStore.appendLog(jobId, `[testrail-sync] skipped scenario=${json.caseId} reason="no_matching_case_id" availableScenarioIds=${availableIds}`);
+            }
+          }
+
           return;
         }
       } catch {
@@ -1356,6 +1594,27 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
       );
     }
 
+    // Flush pending TestRail result syncs before completing
+    if (pendingSyncs.length > 0) {
+      jobStore.appendLog(jobId, `[testrail-sync] flushing pending result syncs count=${pendingSyncs.length}`);
+      const startFlush = Date.now();
+      const results = await Promise.allSettled(
+        pendingSyncs.map(p =>
+          Promise.race([
+            p,
+            new Promise<void>((_, reject) =>
+              setTimeout(() => reject(new Error(`sync_timeout`)), syncTimeoutMs)
+            )
+          ])
+        )
+      );
+      const elapsed = Date.now() - startFlush;
+      const synced = results.filter(r => r.status === "fulfilled").length;
+      const syncedFailed = results.filter(r => r.status === "rejected").length;
+      syncFailedCount += syncedFailed;
+      jobStore.appendLog(jobId, `[testrail-sync] flush completed synced=${synced} failed=${syncedFailed} elapsed=${elapsed}ms`);
+    }
+
     // Determine final errorMessage
     const finalSummary = jobStore.get(jobId)?.summary;
     const promotionReason = (finalSummary as any)?.promotionReason as string | undefined;
@@ -1367,13 +1626,56 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
       ? (resultsErrorMessage || promotionReason || lastStderr || lastStdout || `discovery:preview exited with code ${code}`)
       : humanSummary || resultsErrorMessage || promotionReason || undefined;
 
-    const finalStatus = outcome === "completed_with_failures"
+    let finalStatus: JobStatus = outcome === "completed_with_failures"
       ? "completed_with_failures"
       : code === 0
         ? "done"
         : outcome === "passed"
           ? "done"
           : "failed";
+
+    // If discovery passed but some TestRail syncs failed, reflect it in status
+    if (syncFailedCount > 0 && finalStatus === "done") {
+      finalStatus = "completed_with_sync_errors";
+      jobStore.appendLog(jobId, `[testrail-sync] discovery passed but ${syncFailedCount} sync(s) failed; status=completed_with_sync_errors`);
+    }
+
+    // Finalize launch manifest with real terminal status
+    if (launchId) {
+      const { finalizeLaunchManifest } = await import("./testrail-result-sync");
+      finalizeLaunchManifest(launchId, finalStatus, syncFailedCount, publishedCases.length);
+    }
+
+    // Jira traceability (Fase 3): link TestRun to selected Jira issue after all syncs
+    if (launchId) {
+      const { updateLaunchManifestJiraLink } = await import("./testrail-result-sync");
+      if (testRunId && jiraKey) {
+        const { linkTestRunToJiraIssue } = await import("./jira-traceability");
+        const finalSummary = jobStore.get(jobId)?.summary;
+        const jiraResult = await linkTestRunToJiraIssue({
+          jiraKey,
+          testRunId,
+          launchId,
+          appSlug,
+          sectionSlug: (pRecord.sectionSlug as string) || undefined,
+          finalStatus,
+          summary: {
+            total: publishedCases.length,
+            passed: finalSummary?.passed ?? 0,
+            failed: finalSummary?.failed ?? 0,
+            synced: publishedCases.length - syncFailedCount,
+            syncFailed: syncFailedCount,
+          },
+        });
+        updateLaunchManifestJiraLink(launchId, jiraResult);
+      } else if (!jiraKey) {
+        console.log(`[jira-traceability] skipped reason="missing_jira_key"`);
+        updateLaunchManifestJiraLink(launchId, { jiraKey: "", linkStatus: "skipped", linkedAt: new Date().toISOString(), errorCode: "missing_jira_key" });
+      } else if (!testRunId) {
+        console.log(`[jira-traceability] skipped reason="missing_test_run_id"`);
+        updateLaunchManifestJiraLink(launchId, { jiraKey, linkStatus: "skipped", linkedAt: new Date().toISOString(), errorCode: "missing_test_run_id" });
+      }
+    }
 
     if (shouldReportResults && testRailRunId && publishedCaseIds.length > 0) {
       const runtimeResults = buildScenarioPreviewResults(caseOutcomeMap, normalizedCases);
@@ -1412,6 +1714,50 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
         const reportMessage = reportErr instanceof Error ? reportErr.message : String(reportErr);
         jobStore.appendLog(jobId, `[run:scenario-preview] TestRail reporting failed: ${reportMessage}`);
       }
+    }
+
+    // Write per-case outcomes to results.json for rerun support
+    const finalResultsPath = path.join(artifactDir, "results.json");
+    try {
+      const existingResults = fs.existsSync(finalResultsPath)
+        ? JSON.parse(fs.readFileSync(finalResultsPath, "utf-8"))
+        : {};
+      const caseResults = Array.from(caseOutcomeMap.entries()).map(([caseId, outcome]) => ({
+        id: caseId,
+        status: outcome.status,
+        failureReason: outcome.failureReason,
+      }));
+      fs.writeFileSync(
+        finalResultsPath,
+        JSON.stringify({ ...existingResults, caseResults, outcome: finalStatus }, null, 2),
+        "utf-8",
+      );
+    } catch {
+      // non-fatal; best-effort persistence of per-case outcomes
+    }
+
+    // Write job.json metadata for rerun support (survives server restart)
+    try {
+      const jobSnapshot = jobStore.get(jobId);
+      const params = (jobSnapshot?.params ?? {}) as Record<string, unknown>;
+      const jobMeta: Record<string, unknown> = {
+        createdAt: jobSnapshot?.createdAt ?? new Date().toISOString(),
+        completedAt: new Date().toISOString(),
+        status: finalStatus,
+        appSlug,
+        targetAppSlug: params.targetAppSlug ?? appSlug,
+        targetAppName: params.targetAppName ?? params.targetAppSlug ?? appSlug,
+        sourceJobId: params.sourceJobId,
+        rerunMode: params.rerunMode,
+        options: params.options,
+      };
+      fs.writeFileSync(
+        path.join(artifactDir, "job.json"),
+        JSON.stringify(jobMeta, null, 2),
+        "utf-8",
+      );
+    } catch {
+      // non-fatal; best-effort persistence
     }
 
     jobStore.update(jobId, {
@@ -1646,6 +1992,139 @@ function extractRouteProfileFromScenarios(
     representativeFixture: {},
     notes: [`Auto-inferred from ${scenarios.length} scenario(s) during run. Persist routeProfile in app.config.json for reuse.`],
   };
+}
+
+type EntryStepConfig = {
+  action: "click" | "type" | "select" | "navigate";
+  target: string;
+  when?: string;
+  reason?: string;
+};
+
+function readEntryStepsFromAppConfig(appConfig: Record<string, unknown> | null): EntryStepConfig[] {
+  if (!appConfig) return [];
+  const rp = appConfig.routeProfile;
+  if (!rp || typeof rp !== "object" || Array.isArray(rp)) return [];
+  const entrySteps = (rp as Record<string, unknown>).entrySteps;
+  if (!Array.isArray(entrySteps)) return [];
+  return entrySteps.filter(
+    (es): es is EntryStepConfig =>
+      typeof es === "object" && es !== null && typeof (es as EntryStepConfig).action === "string" && typeof (es as EntryStepConfig).target === "string",
+  );
+}
+
+function entryStepToText(entryStep: EntryStepConfig): string {
+  const label = entryStep.target.trim();
+  switch (entryStep.action) {
+    case "click":
+      return `Clic en "${label}".`;
+    case "type":
+      return `Escribir "${label}".`;
+    case "select":
+      return `Seleccionar "${label}".`;
+    case "navigate":
+      return `Ir a "${label}".`;
+    default:
+      return `Clic en "${label}".`;
+  }
+}
+
+function convertEntryToEntrySteps(entry: Array<{ visibleLabel?: string; businessLabel?: string }>): EntryStepConfig[] {
+  if (!entry || entry.length === 0) return [];
+  return entry
+    .filter((e): e is { visibleLabel: string; businessLabel?: string } => typeof e.visibleLabel === "string" && e.visibleLabel.length > 0)
+    .map((e) => ({
+      action: "click" as const,
+      target: e.visibleLabel,
+      when: "before_first_functional_step" as const,
+    }));
+}
+
+function resolveEntrySteps(
+  routeProfile: McpRouteProfile | null,
+  appConfig: Record<string, unknown> | null,
+): EntryStepConfig[] {
+  const fromConfig = readEntryStepsFromAppConfig(appConfig);
+  if (fromConfig.length > 0) return fromConfig;
+
+  if (routeProfile) {
+    const rp = routeProfile as Record<string, unknown>;
+    const rpEntrySteps = rp.entrySteps;
+    if (Array.isArray(rpEntrySteps) && rpEntrySteps.length > 0) {
+      const valid = rpEntrySteps.filter(
+        (es: unknown): es is EntryStepConfig =>
+          typeof es === "object" && es !== null && typeof (es as EntryStepConfig).action === "string" && typeof (es as EntryStepConfig).target === "string",
+      );
+      if (valid.length > 0) return valid;
+    }
+
+    if (routeProfile.entry && routeProfile.entry.length > 0) {
+      const converted = convertEntryToEntrySteps(routeProfile.entry);
+      if (converted.length > 0) return converted;
+    }
+  }
+
+  if (appConfig?.routeProfile) {
+    const rp = appConfig.routeProfile as Record<string, unknown>;
+    if (Array.isArray(rp.entry)) {
+      const converted = convertEntryToEntrySteps(rp.entry as Array<{ visibleLabel?: string; businessLabel?: string }>);
+      if (converted.length > 0) return converted;
+    }
+  }
+
+  return [];
+}
+
+function persistRouteProfileToAppConfig(
+  appSlug: string,
+  routeProfile: McpRouteProfile,
+  entrySteps: EntryStepConfig[],
+): void {
+  const appConfigPath = path.join(ROOT, "automations", "apps", appSlug, "app.config.json");
+  if (!fs.existsSync(appConfigPath)) return;
+
+  try {
+    const content = fs.readFileSync(appConfigPath, "utf-8");
+    const appConfig = JSON.parse(content);
+
+    appConfig.routeProfile = {
+      ...routeProfile,
+      entrySteps,
+      updatedAt: new Date().toISOString(),
+    };
+
+    fs.writeFileSync(appConfigPath, JSON.stringify(appConfig, null, 2), "utf-8");
+  } catch (err) {
+    console.error(`[scenario-preview] failed to persist routeProfile: ${err instanceof Error ? err.message : String(err)}`);
+  }
+}
+
+function normalizeStepForDedup(step: string): string {
+  return stripStepNumbering(step)
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/["""''«»]/g, "")
+    .trim();
+}
+
+function applyEntryStepsToScenarios(
+  scenarios: Array<{ steps?: string[] }>,
+  entrySteps: EntryStepConfig[],
+): void {
+  if (!entrySteps.length) return;
+  const entryTexts = entrySteps.map(entryStepToText);
+  const normalizedEntryTexts = entryTexts.map(normalizeStepForDedup);
+
+  for (const sc of scenarios) {
+    if (!sc.steps) continue;
+    const existingSteps = sc.steps;
+    const nonEntrySteps = existingSteps.filter((step) => {
+      const normalized = normalizeStepForDedup(step);
+      return !normalizedEntryTexts.some((net) => normalized.startsWith(net));
+    });
+    sc.steps = [...entryTexts, ...nonEntrySteps];
+  }
 }
 
 function extractRouteProfile(

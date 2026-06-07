@@ -387,6 +387,8 @@ async function loadVirtualCases(inputPath: string): Promise<VirtualCase[]> {
 }
 
 function virtualCaseToTestScenario(vc: VirtualCase): TestScenario {
+  const sectionName = vc.sectionName || undefined;
+  const sectionSlug = vc.sectionSlug || undefined;
   return {
     source: "jira",
     externalId: vc.displayId,
@@ -399,7 +401,9 @@ function virtualCaseToTestScenario(vc: VirtualCase): TestScenario {
       expected: "",
       dataHints: [],
     })),
-    sectionName: "scenario-preview",
+    sectionName,
+    sectionSlug,
+    sectionId: vc.sectionId,
     routeProfile: vc.routeProfile,
   } as any;
 }

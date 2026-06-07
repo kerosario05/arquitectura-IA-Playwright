@@ -41,3 +41,39 @@ jiraRouter.get("/projects/:key/sprint/active", async (req, res, next) => {
     next(err);
   }
 });
+
+jiraRouter.get("/issues", async (req, res, next) => {
+  try {
+    const projectId = req.query.projectId as string | undefined;
+    const sprintId = req.query.sprintId as string | undefined;
+    const status = req.query.status as string | undefined;
+
+    if (!projectId) {
+      res.status(400).json({ error: "projectId is required" });
+      return;
+    }
+
+    const jqlParts: string[] = [`project = "${projectId.replace(/"/g, '\\"')}"`];
+    if (sprintId) jqlParts.push(`sprint = ${parseInt(sprintId, 10)}`);
+    if (status) jqlParts.push(`status = "${status.replace(/"/g, '\\"')}"`);
+
+    const jql = jqlParts.join(" AND ");
+    const fields = ["summary", "status", "issuetype", "priority"];
+    const issues = await client().searchIssues(jql, fields);
+
+    const mapped = issues.map((issue) => ({
+      id: issue.id,
+      key: issue.key,
+      summary: issue.fields?.summary ?? "",
+      status: issue.fields?.status?.name ?? "",
+      issueType: issue.fields?.issuetype?.name ?? "",
+      projectId,
+      sprintId: sprintId ? parseInt(sprintId, 10) : undefined,
+    }));
+
+    console.log(`[jira] issues fetched count=${mapped.length} project=${projectId} sprint=${sprintId ?? "none"} status=${status ?? "none"}`);
+    res.json({ issues: mapped });
+  } catch (err) {
+    next(err);
+  }
+});

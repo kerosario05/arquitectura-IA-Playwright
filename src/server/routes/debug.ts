@@ -207,9 +207,9 @@ debugRouter.post("/testrail/publish-scenario", async (req, res) => {
       : "Precondiciones:\n- App disponible.\n- Usuario o ambiente de prueba configurado.\n- Datos de prueba disponibles según el escenario.",
     custom_expected: previewExpected,
     custom_case_oracle: caseOracle || undefined,
-    custom_steps_separated: steps.map((s, i) => ({
+    custom_steps_separated: steps.map((s) => ({
       content: s.replace(/^\d+[.)]\s*/, "").trim(),
-      expected: i === steps.length - 1 ? expectedResult : "",
+      expected: "",
     })),
     custom_source: "qa_lab_generated",
     custom_scenario_id: scenarioId,
@@ -326,6 +326,116 @@ debugRouter.post("/testrail/publish-scenario", async (req, res) => {
         ...(isPayloadDebugEnabled ? { attemptedPayload: previewPayload } : {}),
       },
     });
+  }
+});
+
+// ── Smoke test endpoint for isolating TestRail field issues ────────────────────
+debugRouter.post("/testrail/add-case-smoke", async (req, res) => {
+  if (!isDebugEnabled) {
+    res.status(403).json({ ok: false, error: "forbidden", message: "Debug endpoints are disabled in production." });
+    return;
+  }
+
+  const sectionId = Number(req.body?.sectionId);
+  const title = String(req.body?.title ?? "Smoke Test");
+  const refs = String(req.body?.refs ?? "");
+  const mode = String(req.body?.mode ?? "minimal");
+
+  if (!sectionId) {
+    res.status(400).json({ ok: false, error: "sectionId is required" });
+    return;
+  }
+
+  let trClient: TestRailClient;
+  try {
+    trClient = new TestRailClient(requireTestRailConfig(config));
+  } catch (err: any) {
+    res.status(500).json({ ok: false, error: "testrail_config", message: err.message });
+    return;
+  }
+
+  const buildPayload = (m: string): Record<string, unknown> => {
+    const base: Record<string, unknown> = { title };
+    const stepsText = "1. Clic en \"Iniciar\".\n2. Validar que se muestre \"Tarjetas\".";
+    const stepsSeparated = [
+      { content: "Clic en \"Iniciar\".", expected: "" },
+      { content: "Validar que se muestre \"Tarjetas\".", expected: "" },
+    ];
+    switch (m) {
+      case "minimal":
+        return { title };
+      case "refs_only":
+        return { ...base, refs };
+      case "custom_refs":
+        return { ...base, refs, custom_refs: refs };
+      case "steps_text":
+        return { ...base, refs, custom_steps: stepsText };
+      case "steps_preconds":
+        return { ...base, refs, custom_steps: stepsText, custom_preconds: "Precondiciones:\n- App disponible.\n- Usuario o ambiente de prueba configurado." };
+      case "steps_preconds_expected":
+        return { ...base, refs, custom_steps: stepsText, custom_preconds: "Precondiciones:\n- App disponible.\n- Usuario o ambiente de prueba configurado.", custom_expected: "Debe mostrarse Tarjetas." };
+      case "steps_preconds_expected_oracle":
+        return { ...base, refs, custom_steps: stepsText, custom_preconds: "Precondiciones:\n- App disponible.\n- Usuario o ambiente de prueba configurado.", custom_expected: "Debe mostrarse Tarjetas.", custom_case_oracle: process.env.TESTRAIL_DEFAULT_CASE_ORACLE || "QA" };
+      case "required_no_refs":
+        return { title, custom_steps: stepsText, custom_preconds: "Precondiciones:\n- App disponible.\n- Usuario o ambiente de prueba configurado.", custom_expected: "Debe mostrarse Tarjetas.", custom_case_oracle: process.env.TESTRAIL_DEFAULT_CASE_ORACLE || "QA" };
+      case "steps_separated":
+        return { ...base, refs, custom_steps_separated: stepsSeparated };
+      case "expected":
+        return { ...base, refs, custom_expected: "Resultado esperado smoke." };
+      case "full":
+        return {
+          title, refs, custom_refs: refs, custom_preconds: "Precondiciones smoke",
+          custom_expected: "Resultado esperado smoke.",
+          custom_steps: stepsText, custom_steps_separated: stepsSeparated,
+          custom_source: "smoke", custom_scenario_id: "SMOKE-001", custom_app_slug: "smoke",
+        };
+      default:
+        return { title };
+    }
+  };
+
+  const payload = buildPayload(mode);
+  const keys = Object.keys(payload).join(",");
+
+  // Log additional diagnostics for step modes
+  if (mode === "steps_text") {
+    const s = payload.custom_steps as string | undefined;
+    console.log(`[testrail-smoke] mode=steps_text keys=${keys} customStepsLength=${s?.length ?? 0}`);
+  }
+  if (mode === "steps_preconds") {
+    const s = payload.custom_steps as string | undefined;
+    const p = payload.custom_preconds as string | undefined;
+    console.log(`[testrail-smoke] mode=steps_preconds keys=${keys} customStepsLength=${s?.length ?? 0} precondsLength=${p?.length ?? 0}`);
+  }
+  if (mode === "steps_preconds_expected") {
+    const s = payload.custom_steps as string | undefined;
+    const p = payload.custom_preconds as string | undefined;
+    const e = payload.custom_expected as string | undefined;
+    console.log(`[testrail-smoke] mode=steps_preconds_expected keys=${keys} customStepsLength=${s?.length ?? 0} precondsLength=${p?.length ?? 0} expectedLength=${e?.length ?? 0}`);
+  }
+  if (mode === "steps_preconds_expected_oracle") {
+    const s = payload.custom_steps as string | undefined;
+    const p = payload.custom_preconds as string | undefined;
+    const e = payload.custom_expected as string | undefined;
+    const o = payload.custom_case_oracle as string | undefined;
+    console.log(`[testrail-smoke] mode=steps_preconds_expected_oracle keys=${keys} customStepsLength=${s?.length ?? 0} precondsLength=${p?.length ?? 0} expectedLength=${e?.length ?? 0} oracleLength=${o?.length ?? 0} oracleValue="${o ?? ""}"`);
+  }
+  if (mode === "required_no_refs") {
+    console.log(`[testrail-smoke] mode=required_no_refs keys=${keys}`);
+  }
+  if (mode === "steps_separated") {
+    const arr = payload.custom_steps_separated as any[] | undefined;
+    console.log(`[testrail-smoke] mode=steps_separated keys=${keys} separatedCount=${arr?.length ?? 0}`);
+  }
+
+  try {
+    const result = await trClient.addCase(String(sectionId), payload as any, { preservePayload: true });
+    console.log(`[testrail-smoke] mode=${mode} keys=${keys} status=ok caseId=${result.id}`);
+    res.json({ ok: true, mode, keys, caseId: result.id });
+  } catch (err: any) {
+    const msg = err.message ?? String(err);
+    console.log(`[testrail-smoke] mode=${mode} keys=${keys} status=error error="${msg.slice(0, 200)}"`);
+    res.status(502).json({ ok: false, mode, keys, error: msg });
   }
 });
 

@@ -1043,7 +1043,7 @@ export async function runCaseDiscoveryWorkflow(
       testCaseSectionName: scenario.sectionName
     });
     sectionProfile = sectionResult.sectionProfile;
-    console.log(`[section-profile] source=scenario sectionName="${sectionProfile.sectionName}" sectionSlug=${sectionProfile.sectionSlug}`);
+    console.log(`[section-profile] source=${sectionProfile.source} sectionName="${sectionProfile.sectionName}" sectionSlug=${sectionProfile.sectionSlug}`);
   }
   
   if (sectionProfile) {

@@ -54,6 +54,11 @@ function isDisallowedOrdinalCandidate(el: SnapshotElement, text: string, pattern
     return true;
   }
 
+  // Texts ending with ":" are typically instructions/labels, not product items
+  if (text.trim().endsWith(":") || text.trim().endsWith(":")) {
+    return true;
+  }
+
   if ((type === "heading" || role.includes("heading") || /^h[1-6]$/.test(tagName)) && !looksLikeProductTitle(text, pattern)) {
     return true;
   }
@@ -196,11 +201,17 @@ const INSTRUCTIONAL_PRODUCT_PATTERNS = [
   /selecciona\s+un\s+producto/i,
   /seleccione\s+un\s+producto/i,
   /elige\s+un\s+producto/i,
+  /elige\s+el\s+tipo\s+de\s+producto/i,
   /escoge\s+un\s+producto/i,
   /escoja\s+un\s+producto/i,
   /select\s+a\s+product/i,
   /choose\s+a\s+product/i,
-  /pick\s+a\s+product/i
+  /pick\s+a\s+product/i,
+  /selecciona\s+una?\s+opci[oó]n/i,
+  /seleccione\s+una?\s+opci[oó]n/i,
+  /elige\s+una?\s+opci[oó]n/i,
+  /choose\s+an?\s+option/i,
+  /select\s+an?\s+option/i,
 ];
 
 function isSelectionVerb(text: string): boolean {

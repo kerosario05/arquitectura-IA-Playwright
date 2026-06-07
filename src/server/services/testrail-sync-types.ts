@@ -10,7 +10,7 @@ export type ScenarioPreviewCaseMapping = {
   projectId: number;
   suiteId?: number;
   updatedAt: string;
-  source: "created" | "updated" | "reused" | "recovered";
+  source: "created" | "updated" | "reused" | "recovered" | "recovered_after_add_case_500" | "reused_from_same_launch_after_previous_500";
 };
 
 export type ScenarioPreviewTestRailResult = {
@@ -34,6 +34,7 @@ export type ScenarioPreviewPublishContext = {
   storyKey?: string;
   scenarios: McpScenario[];
   cacheKey: string;
+  publishStrategy?: "always_create" | "use_existing";
 };
 
 export function buildScenarioPreviewScenarioId(scenario: McpScenario, index: number): string {

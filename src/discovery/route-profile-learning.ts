@@ -258,6 +258,8 @@ export function observeRouteCompletionSuccess(
     return { status: "skipped", reason: "No inserted step target" };
   }
   
+  console.log(`[route-completion] navigationHints count=1 (learned from="${lastSuccessfulTarget}" to="${insertedStep.target}")`);
+  
   const suggestion: RouteProfileSuggestion = {
     appSlug,
     from: lastSuccessfulTarget,
@@ -296,6 +298,8 @@ export function observeAliasCandidate(
   if (normalizedReq === normalizedVisible) {
     return { status: "skipped", reason: "Labels match exactly, no alias needed" };
   }
+  
+  console.log(`[target-alias] target="${requirementLabel}" resolvedAlias="${visibleLabel}" source=learned confidence=${confidence}`);
   
   const suggestion: RouteProfileSuggestion = {
     appSlug,
@@ -454,6 +458,20 @@ export async function applyRouteProfileSuggestions(
         changes.push(`Added new route "${suggestion.from}" with intermediate "${suggestion.to}"`);
       }
     }
+    
+    // Also populate intermediates Record for prompt builder compatibility
+    const intermediatesRecord: Record<string, string[]> = {};
+    for (const route of routeProfile.routes) {
+      if (!intermediatesRecord[route.from]) {
+        intermediatesRecord[route.from] = [];
+      }
+      for (const step of route.intermediates) {
+        if (!intermediatesRecord[route.from].includes(step)) {
+          intermediatesRecord[route.from].push(step);
+        }
+      }
+    }
+    (routeProfile as any).intermediates = intermediatesRecord;
   }
   
   // Apply aliases

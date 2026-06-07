@@ -1,0 +1,10 @@
+{
+  "id": "preview-006-validar-controles-visibles-del-detalle-de-producto",
+  "externalId": "PREVIEW-006",
+  "caseId": 0,
+  "title": "Validar controles visibles del detalle de producto",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-06T15:10:34.209Z"
+}

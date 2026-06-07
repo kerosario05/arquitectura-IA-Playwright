@@ -965,6 +965,7 @@ const ORDINAL_GENERIC_TERMS = [
 
 const ORDINAL_INSTRUCTIONAL_PATTERNS = [
   /selecciona/i,
+  /elige\s+(el|la|un|una|el\s+tipo)/i,
   /elige/i,
   /escoge/i,
   /escoge/i,
@@ -975,6 +976,9 @@ const ORDINAL_INSTRUCTIONAL_PATTERNS = [
   /detalles?/i,
   /ayuda/i,
   /help/i,
+  /seleccione\s+una?\s+opci[oó]n/i,
+  /choose\s+an?\s+option/i,
+  /select\s+an?\s+option/i,
 ];
 
 function normalizeOrdinalText(text: string): string {
@@ -1021,6 +1025,7 @@ function isOrdinalCandidateText(text: string): boolean {
   if (!normalized) return false;
   if (isInstructionalText(normalized)) return false;
   if (/^(selecciona|elige|escoge|select|choose|pick)\b/i.test(normalized)) return false;
+  if (normalized.endsWith(":")) return false; // texts ending with colon are instructions, not items
   if (normalized.length > 80) return false;
   if ((normalized.match(/[.!?]/g) ?? []).length > 1) return false;
   if (normalized.length < 2) return false;
@@ -1154,50 +1159,107 @@ async function resolveOrdinalSelectionOnPage(
     }
   }
 
+  // Step 1: Prefer domain-related + product-like, then domain-related or product-like
   const safe = candidates.filter(c => c.visible && c.enabled && c.domainRelated && c.productLike);
-  const ordered = safe.length > 0 ? safe : candidates.filter(c => c.visible && c.enabled && c.domainRelated);
-  const fallback = ordered.length === 1 ? ordered[0] : ordered[0];
-  if (!fallback) {
-    const visibleButtons = pageDiag?.visibleButtons ?? [];
-    const visibleHeadings = pageDiag?.visibleHeadings ?? [];
-    const firstVisibleButton = visibleButtons.find(text =>
-      isOrdinalCandidateText(text) &&
-      !isGlobalOrdinalControl(text, options.routeProfile) &&
-      isProductLikeText(text, domainTerm)
-    );
-    if (firstVisibleButton) {
-      return {
-        locator: page.getByRole("button", { name: new RegExp(escapeRegex(firstVisibleButton), "i") }).first(),
-        text: firstVisibleButton,
-        selector: `visibleButton:${firstVisibleButton}`,
-        ordinal,
-        domainTerm,
-        candidateCount: Math.max(candidates.length, visibleButtons.length),
-      };
-    }
+  const ordered = safe.length > 0 ? safe : candidates.filter(c => c.visible && c.enabled && (c.domainRelated || c.productLike));
+  
+  // Step 2a: Exclude navigation controls like "Volver", "Salir"
+  const navRejected = ordered.filter(c => isGlobalOrdinalControl(c.text, options.routeProfile));
+  for (const nav of navRejected) {
+    console.log(`[ordinal-selection-runtime] rejected navigation candidate="${nav.text}"`);
+  }
+  let nonNav = ordered.filter(c => !isGlobalOrdinalControl(c.text, options.routeProfile));
+  
+  // Step 2b: For ordinal item selection, separate generic categories from specific items.
+  // A single-word label like "Tarjetas", "Cuentas", "Préstamos" is typically a section
+  // heading/category, not a selectable item. Multi-word labels like "Préstamo Personal",
+  // "Cuenta de Ahorro", "Tarjeta de Crédito" are specific items.
+  const CATEGORY_NOUNS = new Set([
+    "tarjetas", "cuentas", "prestamos", "préstamos", "depósitos", "depositos",
+    "productos", "servicios", "categorías", "categorias", "solicitudes",
+    "usuarios", "reportes", "documentos", "planes", "facturas", "ordenes", "órdenes",
+    "sucursales", "beneficiarios", "registros", "resultados"
+  ]);
 
-    const firstHeading = visibleHeadings.find(text => isOrdinalCandidateText(text) && !isInstructionalText(text));
-    if (firstHeading) {
-      const headingLocator = page.getByRole("heading", { name: new RegExp(escapeRegex(firstHeading), "i") }).first();
-      const headingContainer = headingLocator.locator('xpath=ancestor::article[1] | ancestor::li[1] | ancestor::section[1] | ancestor::div[contains(@class,"card")][1] | ancestor::div[contains(@class,"item")][1]').first();
-      return {
-        locator: headingContainer,
-        text: firstHeading,
-        selector: `visibleHeading:${firstHeading}`,
-        ordinal,
-        domainTerm,
-        candidateCount: Math.max(candidates.length, visibleHeadings.length),
-      };
+  const categoryRejected: typeof candidates = [];
+  const productCandidates: typeof candidates = [];
+  for (const c of nonNav) {
+    const text = c.text.trim().toLowerCase();
+    const wordCount = text.split(/\s+/).length;
+    const isSingleCategoryWord = wordCount === 1 && CATEGORY_NOUNS.has(text);
+    if (isSingleCategoryWord) {
+      categoryRejected.push(c);
+      console.log(`[ordinal-selection-runtime] rejected category candidate="${c.text}" reason=generic_category_not_item`);
+    } else {
+      productCandidates.push(c);
     }
-
-    const allProductLike = candidates.filter(c => c.visible && c.enabled && c.productLike);
-    if (allProductLike.length === 1) {
-      return { ...allProductLike[0], ordinal, domainTerm, candidateCount: candidates.length };
-    }
-    return null;
   }
 
-  return { ...fallback, ordinal, domainTerm, candidateCount: candidates.length };
+  // If only one non-nav candidate remains, accept it (even if single-word, it's the only option)
+  if (productCandidates.length === 0 && nonNav.length === 1) {
+    console.log(`[ordinal-selection-runtime] accepted only non-nav candidate="${nonNav[0].text}" reason=single_non_nav_candidate`);
+    productCandidates.push(nonNav[0]);
+  }
+  
+  // Prefer product candidates; for product domain, never fall back to categories
+  const isProductDomain = Boolean(domainTerm && normalizeOrdinalText(domainTerm) === "producto");
+  let candidatesToUse: typeof candidates;
+  if (productCandidates.length > 0) {
+    candidatesToUse = productCandidates;
+  } else if (isProductDomain) {
+    candidatesToUse = [];
+  } else {
+    candidatesToUse = nonNav;
+  }
+  const selected = candidatesToUse.length > 0 ? candidatesToUse[0] : undefined;
+  if (selected) {
+    console.log(`[ordinal-selection-runtime] ordinal=${ordinal} domainTerm=${domainTerm ?? "generic"} candidateCount=${candidates.length} selectedText="${selected.text}"`);
+    return { ...selected, ordinal, domainTerm, candidateCount: candidates.length };
+  }
+
+  // Step 3: Empty candidates or none passed filters — fall back to pageDiag
+  // Ensure pageDiag is available (retry if first capture failed)
+  const effectiveDiag = pageDiag ?? await capturePageDiagnostics(page).catch(() => null);
+  const visibleButtons = effectiveDiag?.visibleButtons ?? [];
+  const visibleHeadingsDiag = effectiveDiag?.visibleHeadings ?? [];
+
+  const firstVisibleButton = visibleButtons.find(text =>
+    isOrdinalCandidateText(text) &&
+    !isGlobalOrdinalControl(text, options.routeProfile) &&
+    isProductLikeText(text, domainTerm)
+  );
+  if (firstVisibleButton) {
+    return {
+      locator: page.getByRole("button", { name: new RegExp(escapeRegex(firstVisibleButton), "i") }).first(),
+      text: firstVisibleButton,
+      selector: `visibleButton:${firstVisibleButton}`,
+      ordinal,
+      domainTerm,
+      candidateCount: Math.max(candidates.length, visibleButtons.length),
+    };
+  }
+
+  const firstHeading = visibleHeadingsDiag.find(text => isOrdinalCandidateText(text) && !isInstructionalText(text));
+  if (firstHeading) {
+    const headingLocator = page.getByRole("heading", { name: new RegExp(escapeRegex(firstHeading), "i") }).first();
+    const headingContainer = headingLocator.locator('xpath=ancestor::article[1] | ancestor::li[1] | ancestor::section[1] | ancestor::div[contains(@class,"card")][1] | ancestor::div[contains(@class,"item")][1]').first();
+    return {
+      locator: headingContainer,
+      text: firstHeading,
+      selector: `visibleHeading:${firstHeading}`,
+      ordinal,
+      domainTerm,
+      candidateCount: Math.max(candidates.length, visibleHeadingsDiag.length),
+    };
+  }
+
+  // Step 4: Single product-like candidate from CSS selectors (no pageDiag needed)
+  const allProductLike = candidates.filter(c => c.visible && c.enabled && c.productLike);
+  if (allProductLike.length === 1) {
+    return { ...allProductLike[0], ordinal, domainTerm, candidateCount: candidates.length };
+  }
+  
+  return null;
 }
 
 export class PromotedSpecRuntime {

@@ -1,0 +1,10 @@
+{
+  "id": "preview-003-visualizar-subcategoria-de-prestamos-personales",
+  "externalId": "PREVIEW-003",
+  "caseId": 0,
+  "title": "Visualizar subcategoría de Préstamos personales",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-06T02:50:28.716Z"
+}

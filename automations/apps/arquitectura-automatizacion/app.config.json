@@ -2,11 +2,11 @@
   "appProfile": {
     "appSlug": "arquitectura-automatizacion",
     "source": "default",
-    "name": "Arquitectura automatización",
+    "name": "4",
     "baseUrl": "https://172.27.4.50",
     "baseUrlHash": "1423ba294517",
-    "createdAt": "2026-06-01T14:38:40.998Z",
-    "updatedAt": "2026-06-01T14:38:40.998Z"
+    "createdAt": "2026-06-07T01:46:39.840Z",
+    "updatedAt": "2026-06-07T01:46:39.840Z"
   },
   "baseUrl": "https://172.27.4.50",
   "loginMode": "password",
@@ -18,5 +18,50 @@
   "usernameRef": "APP_USERNAME",
   "passwordRef": "APP_PASSWORD",
   "missingInputBehavior": "auto_generate",
-  "updatedAt": "2026-06-01T14:38:40.998Z"
+  "routeProfile": {
+    "name": "inferred_from_scenarios",
+    "entry": [
+      {
+        "businessLabel": "información_de_productos",
+        "visibleLabel": "Información de productos"
+      }
+    ],
+    "aliases": {},
+    "intermediates": {},
+    "domainTerms": {},
+    "visibleControls": [
+      "Beneficios",
+      "Condiciones relevantes",
+      "Cuentas de Efectivo",
+      "Depósitos a Plazo",
+      "Descripción general",
+      "Dólares",
+      "Euros",
+      "Finalizar sesión",
+      "Información de productos",
+      "Información legal o notas aclaratorias",
+      "Nombre del producto",
+      "Pesos",
+      "Préstamos",
+      "Requisitos",
+      "Solicitar",
+      "Tarjetas",
+      "Tarjetas de crédito",
+      "Tasas",
+      "Volver al listado de productos"
+    ],
+    "representativeFixture": {},
+    "notes": [
+      "Auto-inferred from 7 scenario(s) during run. Persist routeProfile in app.config.json for reuse."
+    ],
+    "entrySteps": [
+      {
+        "action": "click",
+        "target": "Iniciar",
+        "when": "before_first_functional_step"
+      }
+    ],
+    "updatedAt": "2026-06-07T01:45:42.089Z"
+  },
+  "updatedAt": "2026-06-07T01:46:39.840Z"
 }

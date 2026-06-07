@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 import { EventEmitter } from "events";
 import type { ChildProcess } from "child_process";
 
-export type JobStatus = "queued" | "running" | "done" | "failed" | "cancelled" | "completed_with_failures";
+export type JobStatus = "queued" | "running" | "done" | "failed" | "cancelled" | "completed_with_failures" | "completed_with_sync_errors";
 
 export type JobSummary = {
   sprintLabel?: string;
@@ -30,6 +30,7 @@ export type Job = {
   createdAt: string;
   startedAt?: string;
   completedAt?: string;
+  durationMs?: number;
   exitCode?: number;
   logs: string[];
   summary?: JobSummary;
@@ -76,10 +77,14 @@ class JobStore {
       .map((j) => this.serialize(j));
   }
 
-  update(id: string, patch: Partial<Pick<JobInternal, "status" | "startedAt" | "completedAt" | "exitCode" | "summary" | "process" | "currentCase" | "errorMessage">>): void {
+  update(id: string, patch: Partial<Pick<JobInternal, "status" | "startedAt" | "completedAt" | "durationMs" | "exitCode" | "summary" | "process" | "currentCase" | "errorMessage">>): void {
     const job = this.jobs.get(id);
     if (!job) return;
     Object.assign(job, patch);
+    // Auto-compute durationMs when job completes (if not explicitly provided)
+    if (patch.completedAt && job.startedAt && !patch.durationMs && !job.durationMs) {
+      job.durationMs = new Date(patch.completedAt).getTime() - new Date(job.startedAt).getTime();
+    }
     job.emitter.emit("update", this.serialize(job));
   }
 

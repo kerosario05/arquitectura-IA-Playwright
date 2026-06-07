@@ -69,6 +69,16 @@ export type EnsureFunctionalAppProfileResult = {
   configCreated: boolean;
 };
 
+export function normalizeProjectNameToSlug(name: string): string {
+  let slug = name.trim().toLowerCase();
+  slug = slug.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  slug = slug.replace(/[^a-z0-9\s-]/g, "");
+  slug = slug.replace(/[\s_]+/g, "-");
+  slug = slug.replace(/-+/g, "-");
+  slug = slug.replace(/^-+|-+$/g, "");
+  return slug;
+}
+
 export function inferAppFromTestRailSection(sectionName: string): AppInferenceResult | null {
   if (!sectionName || !sectionName.trim()) return null;
 
@@ -211,8 +221,10 @@ export async function ensureFunctionalAppProfile(input: {
   appName: string;
   source: string;
   sectionName?: string;
+  testRailProjectId?: number;
+  testRailProjectName?: string;
 }): Promise<EnsureFunctionalAppProfileResult> {
-  const { appSlug, appName, source, sectionName } = input;
+  const { appSlug, appName, source, sectionName, testRailProjectId, testRailProjectName } = input;
 
   if (!isSafeSlug(appSlug)) {
     throw new Error(`Invalid appSlug: ${appSlug}. Path traversal or invalid characters detected.`);
@@ -289,26 +301,23 @@ export async function ensureFunctionalAppProfile(input: {
     .catch(() => false);
 
   if (!configExists) {
-    const initialConfig = {
+    const initialConfig: Record<string, unknown> = {
       appSlug,
       name: appName,
       source: {
         type: source,
         sectionName: sectionName || null,
       },
-      routeProfile: {
-        name: "default",
-        entry: [],
-        aliases: {},
-        intermediates: {},
-        domainTerms: {},
-        visibleControls: [],
-        representativeFixture: {},
-        notes: ["App creada automáticamente desde QA Lab."],
-      },
+      routeProfile: null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
+    if (testRailProjectId != null) {
+      initialConfig.testRailProjectId = testRailProjectId;
+    }
+    if (testRailProjectName?.trim()) {
+      initialConfig.testRailProjectName = testRailProjectName.trim();
+    }
     await fs.writeFile(appConfigPath, JSON.stringify(initialConfig, null, 2), "utf-8");
     configCreated = true;
   } else {

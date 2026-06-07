@@ -1,0 +1,10 @@
+{
+  "id": "preview-004-visualizar-detalle-del-primer-producto-visible-de-tarjetas-de-credito",
+  "externalId": "PREVIEW-004",
+  "caseId": 0,
+  "title": "Visualizar detalle del primer producto visible de Tarjetas de crédito",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-06T02:50:47.134Z"
+}

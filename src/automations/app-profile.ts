@@ -65,7 +65,7 @@ export type AppProfile = {
 
 export type SectionProfile = {
   sectionSlug: string;
-  source: "cli" | "env" | "testrail_case" | "default";
+  source: "cli" | "env" | "testrail_case" | "scenario" | "default";
   sectionId?: string | number;
   sectionName?: string;
   createdAt: string;
@@ -147,6 +147,67 @@ export function normalizeSectionSlug(input?: string): string {
   if (!normalized || normalized === "default") return "default-section";
 
   return normalized;
+}
+
+export type SectionProfileResult = {
+  sectionSlug: string;
+  sectionName?: string;
+  sectionId?: string | number;
+  source: "qa_lab" | "testrail" | "scenario" | "env" | "default" | "cli";
+};
+
+/**
+ * Synchronously resolve section profile from available metadata.
+ * Lightweight alternative to the async resolveSectionProfile() for cases
+ * where only sectionName/sectionSlug are available (not TestRail API).
+ */
+export function resolveSectionProfileSync(
+  sectionName?: string,
+  sectionSlug?: string,
+  sectionId?: string | number,
+): SectionProfileResult {
+  if (sectionSlug?.trim()) {
+    return {
+      sectionSlug: normalizeSectionSlug(sectionSlug),
+      sectionName,
+      sectionId,
+      source: "qa_lab",
+    };
+  }
+  if (sectionName?.trim()) {
+    return {
+      sectionSlug: normalizeSectionSlug(sectionName),
+      sectionName,
+      sectionId,
+      source: "scenario",
+    };
+  }
+  // No real section: return undefined slug. Downstream will use "default-section".
+  return {
+    sectionSlug: undefined as unknown as string,
+    source: "default",
+  };
+}
+
+export function resolveCaseSpecOutputPath(
+  appSlug: string,
+  caseSlug: string,
+  sectionSlug?: string,
+  outputRoot?: string,
+): { specPath: string; metaPath: string; caseDir: string; sectionsDir: string } {
+  const root = outputRoot ?? ".";
+  const appDir = path.join(root, "automations", "apps", appSlug);
+  const sectionsDir = path.join(appDir, "sections");
+  const effectiveSection = sectionSlug && sectionSlug !== "default-section" ? normalizeSectionSlug(sectionSlug) : "default-section";
+  const sectionDir = path.join(sectionsDir, effectiveSection);
+  const caseDir = path.join(sectionDir, "cases", caseSlug);
+
+  return {
+    specPath: path.join(caseDir, "case.spec.ts"),
+    metaPath: path.join(caseDir, "case.meta.json"),
+    caseDir,
+    sectionsDir,
+  };
 }
 
 export async function resolveProjectNameFromTestRail(options: {
@@ -255,6 +316,10 @@ export async function resolveSectionProfile(options: SectionProfileResolveOption
     if (options.testCaseSectionName) {
       sectionSlug = normalizeSectionSlug(options.testCaseSectionName);
     }
+  } else if (options.testCaseSectionName?.trim()) {
+    sectionSlug = normalizeSectionSlug(options.testCaseSectionName);
+    source = "scenario";
+    sectionName = options.testCaseSectionName;
   } else {
     sectionSlug = "default-section";
     source = "default";
@@ -287,8 +352,9 @@ export async function ensureAppStructure(baseDir: string, sectionSlug?: string):
     }
   }
 
-  // Create section folders if sectionSlug is provided
-  if (sectionSlug && sectionSlug !== "default-section") {
+  // Always create section folders when a sectionSlug is provided (including "default-section")
+  // This ensures new promotions always go to sections/<slug>/cases/, never to root cases/
+  if (sectionSlug) {
     const sectionsDir = path.join(baseDir, "sections");
     const sectionDir = path.join(sectionsDir, sectionSlug);
     const sectionSubdirs = ["cases", "evidence", "runs"];
@@ -592,22 +658,14 @@ export function getPromotedAppDirectory(appProfile: AppProfile, outputRoot?: str
 export function buildAppAutomationPaths(appProfile: AppProfile, automationId?: string, outputRoot?: string, sectionSlug?: string): AppAutomationPaths {
   const appDir = getPromotedAppDirectory(appProfile, outputRoot);
   
-  // Use section folder if sectionSlug is provided, otherwise use root cases/specs/evidence/runs
-  const casesDir = sectionSlug && sectionSlug !== "default-section"
-    ? path.join(appDir, "sections", sectionSlug, "cases")
-    : path.join(appDir, "cases");
-  const plansDir = sectionSlug && sectionSlug !== "default-section"
-    ? path.join(appDir, "sections", sectionSlug, "plans")
-    : path.join(appDir, "plans");
-  const specsDir = sectionSlug && sectionSlug !== "default-section"
-    ? path.join(appDir, "sections", sectionSlug, "specs")
-    : path.join(appDir, "specs");
-  const evidenceDir = sectionSlug && sectionSlug !== "default-section"
-    ? path.join(appDir, "sections", sectionSlug, "evidence")
-    : path.join(appDir, "evidence");
-  const runsDir = sectionSlug && sectionSlug !== "default-section"
-    ? path.join(appDir, "sections", sectionSlug, "runs")
-    : path.join(appDir, "runs");
+  // Always use sections/<section>/... paths. Never write to root cases/ dir.
+  // Legacy root cases/ is only for reading existing promoted specs.
+  const section = sectionSlug && sectionSlug !== "default-section" ? sectionSlug : "default-section";
+  const casesDir = path.join(appDir, "sections", section, "cases");
+  const plansDir = path.join(appDir, "sections", section, "plans");
+  const specsDir = path.join(appDir, "sections", section, "specs");
+  const evidenceDir = path.join(appDir, "sections", section, "evidence");
+  const runsDir = path.join(appDir, "sections", section, "runs");
   
   const pagesDir = path.join(appDir, "pages");
   const componentsDir = path.join(appDir, "components");

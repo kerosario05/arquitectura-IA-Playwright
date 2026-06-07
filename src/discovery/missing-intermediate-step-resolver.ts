@@ -4,12 +4,14 @@
  * Detects when a navigation step is missing and proposes a safe intermediate step
  * to insert before retrying the original failed step.
  * 
- * Two-level strategy:
- * 1. App route profile (if available) - uses configured routes from app.config.json
- * 2. Generic fallback - heuristic-based detection of subcategory navigation
+ * Three-level strategy:
+ * 1. App route profile routes[].intermediates (AppRouteProfile format)
+ * 2. App route profile intermediates Record (McpRouteProfile format - keyed by "from" target)
+ * 3. Generic fallback - heuristic-based detection of subcategory navigation
  */
 
 import type { AppRouteProfile } from "../types/env.types";
+import { resolveTargetWithAliases } from "./target-alias-resolver";
 
 export type DiscoveryCandidate = {
   candidateId: string;
@@ -227,6 +229,8 @@ function findIntermediateFromRouteProfile(
           };
         }
         
+        console.log(`[route-completion] matched navigationHint route=${route.from} target="${intermediate}" inserted="${intermediate}"`);
+        
         return {
           status: "repaired_plan",
           reason: `Route profile indicates intermediate step "${intermediate}" is required after "${route.from}"`,
@@ -244,11 +248,122 @@ function findIntermediateFromRouteProfile(
     }
   }
   
+  return null;
+}
+
+/**
+ * Forward-match strategy: when the current target (e.g., "Tarjetas de crédito")
+ * isn't found, check if any route's intermediates list contains a step that
+ * partially matches the target. If found, insert the pending intermediate steps
+ * before the target.
+ */
+function findIntermediateByForwardMatch(
+  input: MissingIntermediateStepInput
+): MissingIntermediateStepResolution | null {
+  const { routeProfile, currentRouteHistory, candidates, config, currentTarget } = input;
+  
+  if (!config.useAppProfile || !routeProfile?.routes || !currentTarget) {
+    return null;
+  }
+  
+  const lastRoute = currentRouteHistory?.[currentRouteHistory.length - 1];
+  if (!lastRoute) return null;
+  
+  const normalizedTarget = normalizeText(currentTarget);
+  
+  for (const route of routeProfile.routes) {
+    const fromMatch = normalizeText(lastRoute) === normalizeText(route.from);
+    if (!fromMatch) continue;
+    
+    // Find if any intermediate partially matches the current target
+    const targetIntermediateIdx = route.intermediates.findIndex((step) => {
+      const ns = normalizeText(step);
+      return normalizedTarget.includes(ns) || ns.includes(normalizedTarget) ||
+             extractSignificantTokens(step).some((t) => normalizedTarget.includes(t));
+    });
+    
+    if (targetIntermediateIdx === -1) continue;
+    
+    // Any intermediate steps before the matching one need to be inserted
+    const pendingSteps = route.intermediates.slice(0, targetIntermediateIdx);
+    if (pendingSteps.length === 0) return null;
+    
+    // Find a candidate for the first pending step
+    const firstPending = pendingSteps[0];
+    const candidate = candidates.find((c) => {
+      const text = normalizeText(c.name || c.text || "");
+      const np = normalizeText(firstPending);
+      return text === np || text.includes(np);
+    });
+    
+    if (!candidate) return null;
+    
+    const safety = isCandidateSafe(candidate, routeProfile);
+    if (!safety.safe) {
+      return {
+        status: "no_safe_action",
+        reason: `Candidate for intermediate "${firstPending}" blocked: ${safety.blockedReason}`,
+        source: "app_route_profile",
+        blockedReason: safety.blockedReason as any
+      };
+    }
+    
+    console.log(`[route-completion] navigationHints count=${route.intermediates.length}`);
+    console.log(`[route-completion] matched navigationHint route=${route.from} target="${firstPending}" inserted="${firstPending}" (forward match to "${currentTarget}")`);
+    
+    return {
+      status: "repaired_plan",
+      reason: `Route profile forward-match: "${currentTarget}" matches intermediate of route "${route.from}", inserting pending step "${firstPending}"`,
+      candidateId: candidate.candidateId,
+      insertedStepText: firstPending,
+      confidence: 0.8,
+      source: "app_route_profile",
+      routeProfileMatch: {
+        from: route.from,
+        intermediate: firstPending,
+        domain: route.domain
+      }
+    };
+  }
+  
+  return null;
+}
+
+/**
+ * Alias-based strategy: if the current target couldn't be found directly,
+ * check if routeProfile aliases can resolve it to a visible alternative.
+ */
+function findIntermediateByAlias(
+  input: MissingIntermediateStepInput
+): MissingIntermediateStepResolution | null {
+  const { routeProfile, candidates, currentTarget } = input;
+  
+  if (!routeProfile?.aliases || !currentTarget) return null;
+  
+  const aliasResult = resolveTargetWithAliases(currentTarget, routeProfile);
+  if (!aliasResult.resolved || !aliasResult.resolvedTarget) return null;
+  
+  // Check if the resolved target exists among visible candidates
+  const candidate = candidates.find((c) => {
+    const text = normalizeText(c.name || c.text || "");
+    const resolved = normalizeText(aliasResult.resolvedTarget!);
+    return text === resolved || text.includes(resolved) || resolved.includes(text);
+  });
+  
+  if (!candidate) return null;
+  
+  const safety = isCandidateSafe(candidate, routeProfile);
+  if (!safety.safe) return null;
+  
+  console.log(`[target-alias] target="${currentTarget}" resolvedAlias="${aliasResult.resolvedTarget}" source=routeProfile confidence=${aliasResult.confidence}`);
+  
   return {
-    status: "no_safe_action",
-    reason: "No route profile match found for current route history",
-    source: "app_route_profile",
-    blockedReason: "no_route_profile_match"
+    status: "repaired_plan",
+    reason: `Target "${currentTarget}" resolved via alias to "${aliasResult.resolvedTarget}"`,
+    candidateId: candidate.candidateId,
+    insertedStepText: aliasResult.resolvedTarget,
+    confidence: aliasResult.confidence,
+    source: "app_route_profile"
   };
 }
 
@@ -406,6 +521,18 @@ export function resolveMissingIntermediateStep(
   
   if (routeProfileResult && routeProfileResult.status === "repaired_plan") {
     return routeProfileResult;
+  }
+  
+  const forwardMatchResult = findIntermediateByForwardMatch(input);
+  
+  if (forwardMatchResult && forwardMatchResult.status === "repaired_plan") {
+    return forwardMatchResult;
+  }
+  
+  const aliasResult = findIntermediateByAlias(input);
+  
+  if (aliasResult && aliasResult.status === "repaired_plan") {
+    return aliasResult;
   }
   
   const genericResult = findIntermediateFromGenericHeuristics(input);

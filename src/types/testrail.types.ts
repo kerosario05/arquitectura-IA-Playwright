@@ -119,6 +119,7 @@ export type CreateRunInput = {
   name: string;
   description?: string;
   caseIds: number[];
+  refs?: string;
 };
 
 export type AddCaseInput = {
