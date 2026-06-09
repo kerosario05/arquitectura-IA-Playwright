@@ -1,0 +1,10 @@
+{
+  "id": "preview-005-visualizar-el-detalle-oficial-del-primer-deposito-a-plazo",
+  "externalId": "PREVIEW-005",
+  "caseId": 0,
+  "title": "Visualizar el detalle oficial del primer Depósito a Plazo",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-09T20:37:27.120Z"
+}

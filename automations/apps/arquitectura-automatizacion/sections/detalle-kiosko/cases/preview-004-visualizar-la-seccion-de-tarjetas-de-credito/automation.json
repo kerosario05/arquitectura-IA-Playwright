@@ -1,23 +1,23 @@
 {
-  "id": "preview-002-visualizar-las-opciones-de-cuentas-de-efectivo",
-  "externalId": "PREVIEW-002",
+  "id": "preview-004-visualizar-la-seccion-de-tarjetas-de-credito",
+  "externalId": "PREVIEW-004",
   "caseId": 0,
-  "title": "Visualizar las opciones de Cuentas de Efectivo",
-  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-002-visualizar-las-opciones-de-cuentas-de-efectivo\\plan.json",
-  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-002-visualizar-las-opciones-de-cuentas-de-efectivo\\case.spec.ts",
+  "title": "Visualizar la sección de Tarjetas de crédito",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-004-visualizar-la-seccion-de-tarjetas-de-credito\\plan.json",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-004-visualizar-la-seccion-de-tarjetas-de-credito\\case.spec.ts",
   "appSlug": "arquitectura-automatizacion",
   "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
   "status": "active",
   "source": "discovery",
   "appProfile": "arquitectura-automatizacion",
-  "createdAt": "2026-06-09T20:36:51.658Z",
-  "updatedAt": "2026-06-09T20:36:51.658Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-06-09T20-36-41-164Z\\discovered-plans.pending.json",
+  "createdAt": "2026-06-09T20:37:14.951Z",
+  "updatedAt": "2026-06-09T20:37:14.951Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-06-09T20-37-00-035Z\\discovered-plans.pending.json",
   "pomStatus": "promoted",
   "inlineDebugMode": false,
   "specVerificationStatus": "not_run",
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-06-09T20-36-41-164Z",
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-06-09T20-37-00-035Z",
     "pomDiagnostics": {
       "status": "promoted",
       "inlineFallbackUsed": false,
@@ -51,9 +51,6 @@
       "autoPomCreatedMethods": [],
       "fallbackUsed": false,
       "requirePomRuntime": false
-    },
-    "overwritten": true,
-    "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-002-visualizar-las-opciones-de-cuentas-de-efectivo\\plan.json",
-    "previousStatus": "active"
+    }
   }
 }

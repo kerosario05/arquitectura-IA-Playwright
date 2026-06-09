@@ -483,6 +483,9 @@ runsRouter.post("/:jobId/rerun", (req, res) => {
 runsRouter.post("/launch-execution", async (req, res, next) => {
   try {
     const body = req.body as Record<string, unknown>;
+    const appSlug = String(body.appSlug ?? "");
+    const scenariosCount = Array.isArray(body.selectedScenarios) ? body.selectedScenarios.length : 0;
+    console.log(`[launch-execution] received payload appSlug=${appSlug} scenarios=${scenariosCount} projectId=${body.projectId} sectionId=${body.sectionId}`);
     const result = await launchExecution({
       appSlug: String(body.appSlug ?? ""),
       sectionSlug: body.sectionSlug as string | undefined,
@@ -498,6 +501,7 @@ runsRouter.post("/launch-execution", async (req, res, next) => {
     });
 
     if (!result.ok) {
+      console.log(`[launch-execution] failed error=${result.error} message=${result.message}`);
       res.status(400).json(result);
       return;
     }

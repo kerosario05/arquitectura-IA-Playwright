@@ -6,7 +6,7 @@
     "source": "testrail",
     "externalId": "PREVIEW-001",
     "caseId": 0,
-    "title": "Visualizar las categorias principales de Información de productos"
+    "title": "Visualizar las categorías principales de Información de productos"
   },
   "requiredData": [],
   "steps": [
@@ -47,5 +47,5 @@
   "notes": [
     "Discovery completed successfully. All targets and concrete assertions passed."
   ],
-  "createdAt": "2026-06-07T00:25:42.226Z"
+  "createdAt": "2026-06-09T20:36:40.894Z"
 }

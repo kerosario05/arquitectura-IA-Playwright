@@ -26,11 +26,7 @@ function describe(_name: string, fn: () => void): void {
 
 const mockRouteProfile: McpRouteProfile = {
   name: "Login Flow Route",
-  url: "https://example.com/login",
-  entry: {
-    visibleLabel: "Iniciar sesión",
-    businessLabel: "Login",
-  },
+  entry: [{ businessLabel: "login", visibleLabel: "Iniciar sesión" }],
   intermediates: {
     dashboard: ["overview", "reports"],
     settings: ["profile"],
@@ -42,6 +38,8 @@ const mockRouteProfile: McpRouteProfile = {
     module: "dashboard",
   },
   visibleControls: ["button", "input", "dropdown"],
+  representativeFixture: {},
+  notes: [],
 };
 
 const mockEntrySteps = [
@@ -110,7 +108,16 @@ describe("buildAppProfilePromptContext", () => {
 
   test("builds context with routeProfile but no entrySteps", () => {
     const ctx = buildAppProfilePromptContext("test-app", {
-      routeProfile: { name: "Test Route", url: "https://x.com" } as McpRouteProfile,
+      routeProfile: {
+        name: "Test Route",
+        entry: [],
+        aliases: {},
+        intermediates: {},
+        domainTerms: {},
+        visibleControls: [],
+        representativeFixture: {},
+        notes: [],
+      } as McpRouteProfile,
     });
     assert.strictEqual(ctx.entrySteps.length, 0);
     assert.strictEqual(ctx.routeProfileName, "Test Route");
@@ -120,7 +127,16 @@ describe("buildAppProfilePromptContext", () => {
 
   test("routeProfile with no name is treated as absent", () => {
     const ctx = buildAppProfilePromptContext("test-app", {
-      routeProfile: {} as McpRouteProfile,
+      routeProfile: {
+        name: "",
+        entry: [],
+        aliases: {},
+        intermediates: {},
+        domainTerms: {},
+        visibleControls: [],
+        representativeFixture: {},
+        notes: [],
+      } as McpRouteProfile,
     });
     assert.strictEqual(ctx.routeProfileName, undefined);
     assert.strictEqual(ctx.present, false);

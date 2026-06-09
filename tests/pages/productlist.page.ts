@@ -1,5 +1,5 @@
 import { Page, expect } from '@playwright/test';
-import { waitForListReadiness, capturePageDiagnostics, buildListReadinessErrorMessage } from '../../../browser/promoted-spec-helpers';
+import { waitForListReadiness, capturePageDiagnostics, buildListReadinessErrorMessage } from '../../src/browser/promoted-spec-helpers';
 
 type VisibleCandidate = {
   text: string;
@@ -78,7 +78,7 @@ export class ProductListPage {
           return;
         }
 
-        const ancestor = await best.elementHandle.evaluateHandle((el) => {
+        const ancestor = await best.elementHandle.evaluateHandle((el: Element) => {
           let current: HTMLElement | null = el as HTMLElement;
           let depth = 0;
           const clickableTags = ['button', 'a', 'input', 'label'];
@@ -90,7 +90,7 @@ export class ProductListPage {
             const role = current.getAttribute('role');
             const hasOnClick = !!(current as any).onclick || current.getAttribute('onclick');
             const hasClickableClass = clickableClassPatterns.some(pattern => {
-              const className = current.className || '';
+              const className = (current && current.className) || '';
               return typeof className === 'string' && className.includes(pattern);
             });
 
@@ -121,7 +121,7 @@ export class ProductListPage {
       if (await headingLocator.count() > 0) {
         const headingHandle = await headingLocator.elementHandle({ timeout: 5000 });
         if (headingHandle) {
-          const ancestor = await headingHandle.evaluateHandle((el) => {
+          const ancestor = await headingHandle.evaluateHandle((el: Element) => {
             let current: HTMLElement | null = el as HTMLElement;
             let depth = 0;
             const clickableTags = ['button', 'a', 'input', 'label'];
@@ -133,7 +133,7 @@ export class ProductListPage {
               const role = current.getAttribute('role');
               const hasOnClick = !!(current as any).onclick || current.getAttribute('onclick');
               const hasClickableClass = clickableClassPatterns.some(pattern => {
-                const className = current.className || '';
+                const className = (current && current.className) || '';
                 return typeof className === 'string' && className.includes(pattern);
               });
 
@@ -482,7 +482,7 @@ export class ProductListPage {
       const isClickable = (el: HTMLElement): boolean => {
         const tagName = el.tagName.toLowerCase();
         const role = el.getAttribute('role');
-        const hasOnClick = !!(el as any).onclick || el.getAttribute('onclick');
+        const hasOnClick = !!((el as any).onclick || el.getAttribute('onclick'));
         const hasClickableClass = clickableClassPatterns.some(pattern => {
           const className = el.className || '';
           return typeof className === 'string' && className.includes(pattern);

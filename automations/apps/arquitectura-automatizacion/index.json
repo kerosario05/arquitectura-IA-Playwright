@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-06-07T01:46:39.855Z",
+  "updatedAt": "2026-06-09T20:37:38.449Z",
   "automations": [
     {
       "id": "c37869-generar-carta-de-referencia-con-cuenta-de-ahorro",
@@ -6252,13 +6252,13 @@
       "source": "discovery",
       "appProfile": "arquitectura-automatizacion",
       "createdAt": "2026-06-06T18:03:13.689Z",
-      "updatedAt": "2026-06-07T01:06:30.118Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-06-07T01-06-19-965Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-09T20:36:51.658Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-06-09T20-36-41-164Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-06-07T01-06-19-965Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-06-09T20-36-41-164Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -6292,7 +6292,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-002-visualizar-las-opciones-de-cuentas-de-efectivo\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -7251,7 +7254,7 @@
       "id": "preview-001-visualizar-las-categorias-principales-de-informacion-de-productos",
       "externalId": "PREVIEW-001",
       "caseId": 0,
-      "title": "Visualizar las categorias principales de Información de productos",
+      "title": "Visualizar las categorías principales de Información de productos",
       "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-001-visualizar-las-categorias-principales-de-informacion-de-productos\\plan.json",
       "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-001-visualizar-las-categorias-principales-de-informacion-de-productos\\case.spec.ts",
       "appSlug": "arquitectura-automatizacion",
@@ -7260,13 +7263,13 @@
       "source": "discovery",
       "appProfile": "arquitectura-automatizacion",
       "createdAt": "2026-06-07T00:25:42.330Z",
-      "updatedAt": "2026-06-07T00:25:42.330Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-06-07T00-25-26-856Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-09T20:36:41.030Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-06-09T20-36-25-157Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-06-07T00-25-26-856Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-06-09T20-36-25-157Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -7300,7 +7303,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-001-visualizar-las-categorias-principales-de-informacion-de-productos\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -7715,6 +7721,230 @@
       "specVerificationStatus": "not_run",
       "metadata": {
         "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-06-07T01-46-11-862Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "ProductDetailPage",
+            "FormPage",
+            "HomePage",
+            "LoginPage",
+            "CategoryPage",
+            "ProductInformationPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-003-visualizar-la-subopcion-de-prestamos-personales",
+      "externalId": "PREVIEW-003",
+      "caseId": 0,
+      "title": "Visualizar la subopción de Préstamos personales",
+      "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-003-visualizar-la-subopcion-de-prestamos-personales\\plan.json",
+      "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-003-visualizar-la-subopcion-de-prestamos-personales\\case.spec.ts",
+      "appSlug": "arquitectura-automatizacion",
+      "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "arquitectura-automatizacion",
+      "createdAt": "2026-06-09T20:36:59.867Z",
+      "updatedAt": "2026-06-09T20:36:59.867Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-06-09T20-36-51-807Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-06-09T20-36-51-807Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "ProductDetailPage",
+            "FormPage",
+            "HomePage",
+            "LoginPage",
+            "CategoryPage",
+            "ProductInformationPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-004-visualizar-la-seccion-de-tarjetas-de-credito",
+      "externalId": "PREVIEW-004",
+      "caseId": 0,
+      "title": "Visualizar la sección de Tarjetas de crédito",
+      "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-004-visualizar-la-seccion-de-tarjetas-de-credito\\plan.json",
+      "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-004-visualizar-la-seccion-de-tarjetas-de-credito\\case.spec.ts",
+      "appSlug": "arquitectura-automatizacion",
+      "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "arquitectura-automatizacion",
+      "createdAt": "2026-06-09T20:37:14.951Z",
+      "updatedAt": "2026-06-09T20:37:14.951Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-06-09T20-37-00-035Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-06-09T20-37-00-035Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "ProductDetailPage",
+            "FormPage",
+            "HomePage",
+            "LoginPage",
+            "CategoryPage",
+            "ProductInformationPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-005-visualizar-el-detalle-oficial-del-primer-deposito-a-plazo",
+      "externalId": "PREVIEW-005",
+      "caseId": 0,
+      "title": "Visualizar el detalle oficial del primer Depósito a Plazo",
+      "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-005-visualizar-el-detalle-oficial-del-primer-deposito-a-plazo\\plan.json",
+      "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-005-visualizar-el-detalle-oficial-del-primer-deposito-a-plazo\\case.spec.ts",
+      "appSlug": "arquitectura-automatizacion",
+      "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "arquitectura-automatizacion",
+      "createdAt": "2026-06-09T20:37:27.188Z",
+      "updatedAt": "2026-06-09T20:37:27.188Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-06-09T20-37-15-053Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-06-09T20-37-15-053Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "ProductDetailPage",
+            "FormPage",
+            "HomePage",
+            "LoginPage",
+            "CategoryPage",
+            "ProductInformationPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-006-regresar-al-listado-de-productos-desde-un-detalle",
+      "externalId": "PREVIEW-006",
+      "caseId": 0,
+      "title": "Regresar al listado de productos desde un detalle",
+      "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-006-regresar-al-listado-de-productos-desde-un-detalle\\plan.json",
+      "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-006-regresar-al-listado-de-productos-desde-un-detalle\\case.spec.ts",
+      "appSlug": "arquitectura-automatizacion",
+      "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "arquitectura-automatizacion",
+      "createdAt": "2026-06-09T20:37:38.449Z",
+      "updatedAt": "2026-06-09T20:37:38.449Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-006\\2026-06-09T20-37-27-328Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-006\\2026-06-09T20-37-27-328Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,

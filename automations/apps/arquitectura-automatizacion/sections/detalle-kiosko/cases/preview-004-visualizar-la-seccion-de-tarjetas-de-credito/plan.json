@@ -4,9 +4,9 @@
   "status": "validated",
   "scenario": {
     "source": "testrail",
-    "externalId": "PREVIEW-002",
+    "externalId": "PREVIEW-004",
     "caseId": 0,
-    "title": "Visualizar las opciones de Cuentas de Efectivo"
+    "title": "Visualizar la sección de Tarjetas de crédito"
   },
   "requiredData": [],
   "steps": [
@@ -46,18 +46,17 @@
     {
       "index": 5,
       "action": "click",
-      "description": "Clic en \"Cuentas de Efectivo\".",
+      "description": "Clic en \"Tarjetas\".",
       "target": {
         "strategy": "product_condition",
-        "value": "Cuentas de Efectivo",
+        "value": "Tarjetas",
         "exact": false
       },
       "locatorStrategy": "product_condition"
     }
   ],
   "notes": [
-    "Discovery partial: 3/6 navigations/assertions satisfied.",
-    "Review needed: 3 non-blocking assertion failure(s) were ignored for pass/fail reconciliation."
+    "Discovery completed successfully. All targets and concrete assertions passed."
   ],
-  "createdAt": "2026-06-09T20:36:51.522Z"
+  "createdAt": "2026-06-09T20:37:14.869Z"
 }

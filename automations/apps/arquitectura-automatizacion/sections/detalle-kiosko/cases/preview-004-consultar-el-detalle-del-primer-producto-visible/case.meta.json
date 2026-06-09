@@ -1,9 +1,0 @@
-{
-  "appSlug": "arquitectura-automatizacion",
-  "sectionSlug": "detalle-kiosko",
-  "sectionName": "Detalle_KIOSKO",
-  "sourceScenarioId": "PREVIEW-004",
-  "testRailCaseId": 0,
-  "generatedAt": "2026-06-07T01:06:57.579Z",
-  "title": "Consultar el detalle del primer producto visible"
-}

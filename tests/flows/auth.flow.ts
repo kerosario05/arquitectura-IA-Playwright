@@ -3,10 +3,10 @@ import { IdentificationPage } from '../pages/identification.page';
 import { PhoneConfirmationPage } from '../pages/phoneconfirmation.page';
 import { OtpComponent } from '../components/otp.component';
 import { OperationsMenuPage } from '../pages/operationsmenu.page';
-import type { AuthFlowOptions, AuthFlowResult, AuthFlowStage, AuthClientProfile } from '../../../../src/types/auth-flow.types';
-import { detectAuthGate } from '../../../../src/discovery/auth-gate-detector';
-import type { PageSnapshot } from '../../../../src/types/page-snapshot.types';
-import { scanCurrentPage } from '../../../../src/explorer/page-scanner';
+import type { AuthFlowOptions, AuthFlowResult, AuthFlowStage, AuthClientProfile } from '../../src/types/auth-flow.types';
+import { detectAuthGate } from '../../src/discovery/auth-gate-detector';
+import type { PageSnapshot } from '../../src/types/page-snapshot.types';
+import { scanCurrentPage } from '../../src/explorer/page-scanner';
 
 export class AuthFlow {
   private identificationPage: IdentificationPage;

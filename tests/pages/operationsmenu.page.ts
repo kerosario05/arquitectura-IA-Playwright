@@ -1,5 +1,5 @@
 import { Page, expect } from '@playwright/test';
-import { waitForPromotedSpecStepReady } from '../../../browser/promoted-spec-helpers';
+import { waitForPromotedSpecStepReady } from '../../src/browser/promoted-spec-helpers';
 
 export class OperationsMenuPage {
   constructor(private readonly page: Page) {}

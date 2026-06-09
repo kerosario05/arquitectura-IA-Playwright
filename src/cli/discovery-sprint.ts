@@ -1,7 +1,9 @@
 import { config, requireJiraConfig, requireTestRailConfig } from "../config/env";
-import { resolveAppProfile, ensureAppStructure } from "../automations/app-profile";
+import { resolveAppProfile, ensureAppStructure, logAppProfile, type AppProfile } from "../automations/app-profile";
 import { TestRailClient } from "../clients/testrail.client";
-import type { AppProfile } from "../types/app-profile.types";
+import { JiraClient } from "../clients/jira.client";
+import { normalizeJiraIssues } from "../jira/jira-normalizer";
+import { runCaseDiscoveryWorkflow } from "../discovery/case-discovery-workflow";
 import type { TestScenario } from "../types/testrail.types";
 import { sanitizeTestRailRef } from "../server/services/testrail-case-publisher";
 import type { AddResultForCaseInput } from "../types/testrail.types";

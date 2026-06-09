@@ -63,7 +63,7 @@ function buildLaunchRunName(jiraKey?: string, sprintName?: string): string {
   return parts.join(" - ");
 }
 
-function scenarioToMcpFormat(scenario: LaunchScenario, index: number): McpScenario {
+function scenarioToMcpFormat(scenario: LaunchScenario, index: number, appSlug: string): McpScenario {
   return {
     sourceIssueKey: scenario.sourceIssueKey ?? `launch-${index + 1}`,
     title: scenario.title,
@@ -75,7 +75,7 @@ function scenarioToMcpFormat(scenario: LaunchScenario, index: number): McpScenar
     isConverted: 0,
     automationType: "ui_with_auth_gate",
     setupStrategy: "auth_gate",
-    appSlug: "launch-execution",
+    appSlug,
     routeProfile: "",
     dataRequirements: "",
     nonExecutableCriteria: "",
@@ -125,7 +125,7 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
     const trConfig = requireTestRailConfig(config);
     const trClient = new TestRailClient(trConfig);
 
-    const mcpScenarios = input.selectedScenarios.map(scenarioToMcpFormat);
+    const mcpScenarios = input.selectedScenarios.map((s, i) => scenarioToMcpFormat(s, i, input.appSlug));
     const publishResult = await publishScenariosToTestRail(trClient, {
       projectId: input.projectId,
       suiteId: input.suiteId,

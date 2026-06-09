@@ -1,0 +1,10 @@
+{
+  "id": "preview-006-regresar-al-listado-de-productos-desde-un-detalle",
+  "externalId": "PREVIEW-006",
+  "caseId": 0,
+  "title": "Regresar al listado de productos desde un detalle",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-09T20:37:38.411Z"
+}
