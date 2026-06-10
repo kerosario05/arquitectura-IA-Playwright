@@ -1,0 +1,10 @@
+{
+  "id": "preview-006-visualizar-el-detalle-de-cuentas-de-efectivo",
+  "externalId": "PREVIEW-006",
+  "caseId": 0,
+  "title": "Visualizar el detalle de Cuentas de Efectivo",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-10T17:40:27.169Z"
+}

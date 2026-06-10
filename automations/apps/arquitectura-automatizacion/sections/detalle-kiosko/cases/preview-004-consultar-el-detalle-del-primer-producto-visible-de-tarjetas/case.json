@@ -1,0 +1,10 @@
+{
+  "id": "preview-004-consultar-el-detalle-del-primer-producto-visible-de-tarjetas",
+  "externalId": "PREVIEW-004",
+  "caseId": 0,
+  "title": "Consultar el detalle del primer producto visible de Tarjetas",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-10T19:07:04.520Z"
+}

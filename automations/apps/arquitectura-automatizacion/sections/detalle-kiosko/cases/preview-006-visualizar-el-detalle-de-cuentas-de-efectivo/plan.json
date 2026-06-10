@@ -1,0 +1,133 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-006",
+    "caseId": 0,
+    "title": "Visualizar el detalle de Cuentas de Efectivo"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Clic en \"Iniciar\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en \"Información de productos\".",
+      "target": {
+        "strategy": "product_condition",
+        "value": "Información de productos",
+        "exact": false
+      },
+      "locatorStrategy": "product_condition"
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Clic en \"Cuentas de Efectivo\".",
+      "target": {
+        "strategy": "product_condition",
+        "value": "Cuentas de Efectivo",
+        "exact": false
+      },
+      "locatorStrategy": "product_condition"
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Seleccionar el primer producto visible del listado.",
+      "target": {
+        "strategy": "ordinal_selection",
+        "value": "el primer producto visible del listado",
+        "exact": false,
+        "metadata": {
+          "resolvedTargetName": "Cuenta de Ahorro",
+          "resolvedCandidateId": "el-6",
+          "aiAssisted": false,
+          "repairType": "ordinal_selection",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "ordinal_selection",
+      "recoveryMetadata": {
+        "recoveredBy": "ordinal_selection",
+        "rationale": "ordinal_selection:first",
+        "ordinalSelectionDiagnostics": {
+          "selectionPatternDetected": true,
+          "ordinal": "first",
+          "domainTerm": "producto",
+          "domainTermSource": "routeProfile",
+          "selectedCandidateText": "Cuenta de Ahorro",
+          "selectedCandidateId": "el-6"
+        },
+        "selectedCandidateId": "el-6",
+        "selectedCandidateText": "Cuenta de Ahorro",
+        "segmentIndex": 0,
+        "transitionDetected": true,
+        "executedAction": "Seleccionar el primer producto visible del listado."
+      }
+    },
+    {
+      "index": 7,
+      "action": "assertText",
+      "description": "Assert: Beneficios",
+      "target": {
+        "strategy": "text",
+        "value": "Beneficios",
+        "exact": false
+      },
+      "expected": "Beneficios"
+    },
+    {
+      "index": 8,
+      "action": "assertText",
+      "description": "Assert: Tasas",
+      "target": {
+        "strategy": "text",
+        "value": "Tasas",
+        "exact": false
+      },
+      "expected": "Tasas"
+    },
+    {
+      "index": 9,
+      "action": "assertText",
+      "description": "Assert: Información legal o notas aclaratorias",
+      "target": {
+        "strategy": "text",
+        "value": "Información legal o notas aclaratorias",
+        "exact": false
+      },
+      "expected": "Información legal o notas aclaratorias"
+    }
+  ],
+  "notes": [
+    "Discovery partial: 7/14 navigations/assertions satisfied.",
+    "Review needed: 3 non-blocking assertion failure(s) were ignored for pass/fail reconciliation.",
+    "Recovered 6 transient assertion failure(s) - see step recovery metadata for details."
+  ],
+  "createdAt": "2026-06-10T17:40:27.063Z"
+}

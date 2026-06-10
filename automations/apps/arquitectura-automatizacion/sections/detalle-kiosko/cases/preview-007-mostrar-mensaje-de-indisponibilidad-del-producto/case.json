@@ -1,0 +1,10 @@
+{
+  "id": "preview-007-mostrar-mensaje-de-indisponibilidad-del-producto",
+  "externalId": "PREVIEW-007",
+  "caseId": 0,
+  "title": "Mostrar mensaje de indisponibilidad del producto",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-10T17:22:07.109Z"
+}

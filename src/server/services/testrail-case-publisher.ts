@@ -106,6 +106,43 @@ export function buildSafeTestRailRefs(
   return ref.replace(/[,|]/g, "").slice(0, 64) || `PREVIEW-${scenarioId}`.slice(0, 64);
 }
 
+function isLegacyPreviewPattern(id: string): boolean {
+  // Legacy patterns: PREVIEW-001, PREVIEW-002, LAUNCH-001, LAUNCH-002
+  // These are NOT globally unique and should not be used as persistent TestRail custom_scenario_id
+  return /^(PREVIEW-\d{3}|LAUNCH-\d+)$/.test(id);
+}
+
+function isNewLaunchPattern(id: string): boolean {
+  // New globally unique pattern: L-{hex8}-{3digits}
+  // Example: L-abe094d6-001, L-abe094d6-002
+  return /^L-[a-f0-9]{8}-\d{3}$/.test(id);
+}
+
+function shouldIgnoreLegacyAmbiguity(requestedId: string, candidateIds: Array<string | undefined>): boolean {
+  // If requested ID is new format (L-{hex8}-{3digits}) and all candidates are legacy (PREVIEW-* or LAUNCH-*),
+  // treat as not found instead of ambiguous
+  if (!isNewLaunchPattern(requestedId)) return false;
+
+  const validCandidates = candidateIds.filter((id): id is string => Boolean(id));
+  if (validCandidates.length === 0) return false;
+
+  const allLegacy = validCandidates.every(id => isLegacyPreviewPattern(id));
+  return allLegacy;
+}
+
+function shouldSelectFirstExactMatch(requestedId: string, candidateIds: Array<string | undefined>): boolean {
+  // If requested ID is new format and ALL candidates have the EXACT SAME ID as requested,
+  // this means there are duplicate cases in TestRail with the same custom_scenario_id.
+  // In this case, we should select one (first/most recent) instead of failing with ambiguous.
+  if (!isNewLaunchPattern(requestedId)) return false;
+
+  const validCandidates = candidateIds.filter((id): id is string => Boolean(id));
+  if (validCandidates.length === 0) return false;
+
+  const allExactMatch = validCandidates.every(id => id === requestedId);
+  return allExactMatch;
+}
+
 function isRefs500Error(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
   return message.includes("HTTP 500") && message.includes("Undefined array key refs");
@@ -139,6 +176,20 @@ async function recoverCaseAfterRefs500(
       }
       if (byCacheAndScenario.length > 1) {
         const ids = byCacheAndScenario.map((c) => c.id);
+        const candidateScenarioIds = byCacheAndScenario.map((c) => String(c.custom_scenario_id ?? ""));
+
+        // If requested ID is new format and all candidates are legacy PREVIEW, treat as not found
+        if (shouldIgnoreLegacyAmbiguity(scenarioId, candidateScenarioIds)) {
+          console.log(`[testrail-publish] ignoring legacy PREVIEW ambiguity requestedId=${scenarioId} legacyCount=${candidateScenarioIds.length}`);
+          return { found: false, reason: "no_candidates" };
+        }
+
+        // If all candidates have the EXACT SAME ID as requested, select first (duplicate cleanup needed in TestRail)
+        if (shouldSelectFirstExactMatch(scenarioId, candidateScenarioIds)) {
+          console.log(`[testrail-publish] selecting first of ${byCacheAndScenario.length} exact duplicates requestedId=${scenarioId} selectedCaseId=${byCacheAndScenario[0].id}`);
+          return { found: true, case: byCacheAndScenario[0], strength: "cache_key_and_scenario_id" };
+        }
+
         console.warn(`[testrail-publish] recovery ambiguous by cache_key+scenario_id candidates=${ids.length} ids=${ids.join(",")}`);
         return { found: false, reason: "ambiguous", candidateCount: ids.length, candidateIds: ids };
       }
@@ -151,6 +202,20 @@ async function recoverCaseAfterRefs500(
       }
       if (byScenarioId.length > 1) {
         const ids = byScenarioId.map((c) => c.id);
+        const candidateScenarioIds = byScenarioId.map((c) => String(c.custom_scenario_id ?? ""));
+
+        // If requested ID is new format and all candidates are legacy PREVIEW, treat as not found
+        if (shouldIgnoreLegacyAmbiguity(scenarioId, candidateScenarioIds)) {
+          console.log(`[testrail-publish] ignoring legacy PREVIEW ambiguity requestedId=${scenarioId} legacyCount=${candidateScenarioIds.length}`);
+          return { found: false, reason: "no_candidates" };
+        }
+
+        // If all candidates have the EXACT SAME ID as requested, select first (duplicate cleanup needed in TestRail)
+        if (shouldSelectFirstExactMatch(scenarioId, candidateScenarioIds)) {
+          console.log(`[testrail-publish] selecting first of ${byScenarioId.length} exact duplicates requestedId=${scenarioId} selectedCaseId=${byScenarioId[0].id}`);
+          return { found: true, case: byScenarioId[0], strength: "scenario_id_and_title" };
+        }
+
         console.warn(`[testrail-publish] recovery ambiguous by scenario_id only candidates=${ids.length} ids=${ids.join(",")}`);
         return { found: false, reason: "ambiguous", candidateCount: ids.length, candidateIds: ids };
       }
@@ -169,6 +234,20 @@ async function recoverCaseAfterRefs500(
     }
     if (byCacheAndScenario.length > 1) {
       const ids = byCacheAndScenario.map((c) => c.id);
+      const candidateScenarioIds = byCacheAndScenario.map((c) => String(c.custom_scenario_id ?? ""));
+
+      // If requested ID is new format and all candidates are legacy PREVIEW, treat as not found
+      if (shouldIgnoreLegacyAmbiguity(scenarioId, candidateScenarioIds)) {
+        console.log(`[testrail-publish] ignoring legacy PREVIEW ambiguity requestedId=${scenarioId} legacyCount=${candidateScenarioIds.length}`);
+        return { found: false, reason: "no_candidates" };
+      }
+
+      // If all candidates have the EXACT SAME ID as requested, select first (duplicate cleanup needed in TestRail)
+      if (shouldSelectFirstExactMatch(scenarioId, candidateScenarioIds)) {
+        console.log(`[testrail-publish] selecting first of ${byCacheAndScenario.length} exact duplicates requestedId=${scenarioId} selectedCaseId=${byCacheAndScenario[0].id}`);
+        return { found: true, case: byCacheAndScenario[0], strength: "cache_key_and_scenario_id" };
+      }
+
       console.warn(`[testrail-publish] recovery ambiguous by cache_key+scenario_id (title match) candidates=${ids.length} ids=${ids.join(",")}`);
       return { found: false, reason: "ambiguous", candidateCount: ids.length, candidateIds: ids };
     }
@@ -181,6 +260,20 @@ async function recoverCaseAfterRefs500(
     }
     if (byScenarioId.length > 1) {
       const ids = byScenarioId.map((c) => c.id);
+      const candidateScenarioIds = byScenarioId.map((c) => String(c.custom_scenario_id ?? ""));
+
+      // If requested ID is new format and all candidates are legacy PREVIEW, treat as not found
+      if (shouldIgnoreLegacyAmbiguity(scenarioId, candidateScenarioIds)) {
+        console.log(`[testrail-publish] ignoring legacy PREVIEW ambiguity requestedId=${scenarioId} legacyCount=${candidateScenarioIds.length}`);
+        return { found: false, reason: "no_candidates" };
+      }
+
+      // If all candidates have the EXACT SAME ID as requested, select first (duplicate cleanup needed in TestRail)
+      if (shouldSelectFirstExactMatch(scenarioId, candidateScenarioIds)) {
+        console.log(`[testrail-publish] selecting first of ${byScenarioId.length} exact duplicates requestedId=${scenarioId} selectedCaseId=${byScenarioId[0].id}`);
+        return { found: true, case: byScenarioId[0], strength: "scenario_id_and_title" };
+      }
+
       console.warn(`[testrail-publish] recovery ambiguous by scenario_id candidates=${ids.length} ids=${ids.join(",")}`);
       return { found: false, reason: "ambiguous", candidateCount: ids.length, candidateIds: ids };
     }
@@ -193,6 +286,14 @@ async function recoverCaseAfterRefs500(
 
     // Multiple title matches, no strong key disambiguation
     const ids = candidates.map((c) => c.id);
+    const candidateScenarioIds = candidates.map((c) => String(c.custom_scenario_id ?? ""));
+
+    // If requested ID is new format and all candidates are legacy PREVIEW, treat as not found
+    if (shouldIgnoreLegacyAmbiguity(scenarioId, candidateScenarioIds)) {
+      console.log(`[testrail-publish] ignoring legacy PREVIEW ambiguity requestedId=${scenarioId} legacyCount=${candidateScenarioIds.length}`);
+      return { found: false, reason: "no_candidates" };
+    }
+
     console.warn(`[testrail-publish] recovery ambiguous by title (no strong keys) candidates=${ids.length} ids=${ids.join(",")}`);
     return { found: false, reason: "ambiguous", candidateCount: ids.length, candidateIds: ids };
   } catch (searchError) {
@@ -207,7 +308,7 @@ function recoveryDiagnosticInfo(
   scenarioId: string,
   result: RecoveryResult,
 ): Record<string, unknown> {
-  return {
+  const diagnostic: Record<string, unknown> = {
     sectionId: ctx.sectionId,
     scenarioId,
     title: scenarioTitle,
@@ -215,6 +316,14 @@ function recoveryDiagnosticInfo(
     candidateCount: result.found ? undefined : ("candidateCount" in result ? result.candidateCount : undefined),
     candidateIds: result.found ? undefined : ("candidateIds" in result ? result.candidateIds : undefined),
   };
+
+  // Add suggestion if ambiguous and appears to be new format vs legacy duplicates
+  if (!result.found && result.reason === "ambiguous" && result.candidateIds) {
+    diagnostic.suggestion = "Multiple duplicate cases found in TestRail. This may be due to legacy PREVIEW runs. Consider cleaning up duplicate cases in TestRail section or using publishStrategy=always_create with unique scenario IDs.";
+    diagnostic.reason = "ambiguous_legacy_preview_duplicates_likely";
+  }
+
+  return diagnostic;
 }
 
 function parseFlatJsonObject(rawValue: string): Record<string, unknown> {
@@ -398,11 +507,21 @@ export async function publishScenariosToTestRail(
   let reused = 0;
   const requiredCaseFields = getConfiguredRequiredCaseFields();
 
-  const scenarioIds = ctx.scenarios.map((_, i) => buildScenarioPreviewScenarioId(_, i));
+  const idContext = {
+    launchId: (ctx as any).launchId,
+    cacheKey: ctx.cacheKey,
+  };
+  const scenarioIds = ctx.scenarios.map((s, i) => buildScenarioPreviewScenarioId(s, i, {
+    ...idContext,
+    sourceScenarioId: (s as any).launchScenarioId,
+  }));
   console.log(`[testrail-publish] input scenarios count=${ctx.scenarios.length} ids=${scenarioIds.join(",")}`);
 
   for (const [index, scenario] of ctx.scenarios.entries()) {
-    const scenarioId = buildScenarioPreviewScenarioId(scenario, index);
+    const scenarioId = buildScenarioPreviewScenarioId(scenario, index, {
+      ...idContext,
+      sourceScenarioId: (scenario as any).launchScenarioId,
+    });
     const key = scenarioCacheKey(scenarioId, ctx.cacheKey, ctx.projectId, ctx.suiteId, ctx.sectionId);
     const existingMapping = store.mappings.find((m) => scenarioCacheKey(m.scenarioId, m.cacheKey, m.projectId, m.suiteId, m.sectionId) === key);
 
@@ -474,7 +593,7 @@ export async function publishScenariosToTestRail(
               const diag = recoveryDiagnosticInfo(ctx, scenario.title, scenarioId, recovery1);
               throw new Error(`testrail_add_case_500_recovery_ambiguous: full addCase 500 produced multiple candidates. sectionId=${ctx.sectionId} scenarioId=${scenarioId} diagnostic=${JSON.stringify(diag)}`);
             } else {
-              // No candidates found — try compatibility without refs
+              // No candidates found — try compatibility without refs but WITH custom fields for strong key matching
               console.warn(`[testrail-publish] recovery after full addCase found no candidates; trying compatibility payload scenario=${scenarioId}`);
               const stepsText = stepsSeparated.map((s, i) => `${i + 1}. ${s.content}`).join("\n");
               const precondsText = typeof preconditions === "string" && preconditions.trim() ? preconditions : "Precondiciones:\n- App disponible.\n- Usuario o ambiente de prueba configurado.";
@@ -484,6 +603,11 @@ export async function publishScenariosToTestRail(
                 custom_preconds: precondsText,
                 custom_expected: customExpected || "Validación funcional automatizada.",
                 custom_case_oracle: customCaseOracle || process.env.TESTRAIL_DEFAULT_CASE_ORACLE || "QA",
+                // Include custom fields for strong key matching in recovery
+                custom_scenario_id: scenarioId,
+                custom_app_slug: ctx.appSlug,
+                custom_cache_key: ctx.cacheKey,
+                custom_story_key: ctx.storyKey ?? "",
               };
               const noRefsKeys = Object.keys(noRefsPayload).join(",");
               console.log(`[testrail-publish] compatibility no-refs payload keys=${noRefsKeys}`);
@@ -517,7 +641,10 @@ export async function publishScenariosToTestRail(
           } else if (addMsg.includes("refs")) {
             // full addCase failed with generic refs error (not Undefined array key)
             console.warn(`[testrail-publish] addCase full payload failed; retrying with compatibility payload reason=refs_error case=${scenarioId}`);
-            const minimalPayload = { title: scenario.title, refs: refs || "" };
+            const refsField = process.env.TESTRAIL_REFS_FIELD || "both";
+            const minimalPayload = refsField === "none"
+              ? { title: scenario.title }
+              : { title: scenario.title, refs: refs || "" };
             const compatKeys = Object.keys(minimalPayload).join(",");
             console.log(`[testrail-publish] compatibility payload keys=${compatKeys}`);
             try {

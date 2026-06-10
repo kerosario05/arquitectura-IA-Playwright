@@ -926,6 +926,8 @@ export type CaseDiscoveryOptions = {
   };
   env?: Record<string, unknown>;
   missingInputBehavior?: MissingInputBehavior;
+  /** Optional evidence recorder for per-step screenshots */
+  evidenceRecorder?: import("../evidence/evidence-recorder").EvidenceRecorder;
 };
 
 export function resolveCaseDiscoveryAppSlug(options: Pick<CaseDiscoveryOptions, "appSlug" | "env">): string {
@@ -1158,7 +1160,29 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     minOccurrences: 1,
     blockSensitive: true
   };
-  
+
+  // Evidence capture helper
+  const evidenceRec = options.evidenceRecorder;
+  let evidenceStepIndex = 0;
+  const captureEvStep = async (text: string, status: "passed" | "failed" | "skipped", error?: string): Promise<void> => {
+    if (!evidenceRec) return;
+
+    // Exclude validation steps from evidence capture
+    if (/^\s*validar\b/i.test(text)) {
+      console.log(`[evidence] skipping validation step: "${text}"`);
+      return;
+    }
+
+    evidenceStepIndex++;
+    try {
+      const target = text.match(/"([^"]+)"/)?.[1];
+      await evidenceRec.captureStep(page, evidenceStepIndex, text, { target, status, errorMessage: error });
+      console.log(`[evidence] step ${evidenceStepIndex}: "${text.substring(0, 60)}" status=${status}`);
+    } catch {
+      // evidence errors are non-fatal
+    }
+  };
+
   console.log(`[route-learning] config enabled=${routeProfileLearningConfig.enabled} autoApply=${routeProfileLearningConfig.autoApply} threshold=${routeProfileLearningConfig.autoApproveThreshold}`);
   
   let failedAtStep: number | undefined;
@@ -2234,6 +2258,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
       await clickResolvedTarget(resolution.locator, false);
       await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+
+      // Capture evidence after click completes and page stabilizes
+      await captureEvStep(nav.action, "passed");
+
       const scan = await scanAndCollectObjects(page, orderedItem.index, evidenceDir);
       currentSnapshot = scan.snapshot;
       allDiscoveredObjects.push(...scan.objects);
@@ -2716,6 +2744,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       currentSnapshot = scan.snapshot;
       allDiscoveredObjects.push(...scan.objects);
 
+      // Capture evidence after fill completes
+      await captureEvStep(actionTarget.action, "passed");
+
       if (authGateState?.completed) {
         markFunctionalStepAfterAuth(actionTarget.target, authGateState);
       }
@@ -3006,6 +3037,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       currentSnapshot = scan.snapshot;
       allDiscoveredObjects.push(...scan.objects);
 
+      // Capture evidence after direct fill completes
+      await captureEvStep(actionTarget.action, "passed");
+
       if (authGateState?.completed) {
         markFunctionalStepAfterAuth(actionTarget.target, authGateState);
       }
@@ -3077,6 +3111,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         currentSnapshot = scan.snapshot;
         allDiscoveredObjects.push(...scan.objects);
 
+        // Capture evidence after associated click completes
+        await captureEvStep(actionTarget.action, "passed");
+
         steps.push({
           index: actionTarget.index,
           action: actionTarget.action,
@@ -3139,6 +3176,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     }
 
     console.log(`[discovery:case] Resolving target: ${actionTarget.target}`);
+
+    // Capture evidence after the action completes (below, at step push points)
 
     const stabilityResult = await waitForStablePageState(page, {
       timeoutMs: 10000,
@@ -3819,6 +3858,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
                       const aiRecoveredScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
                       currentSnapshot = aiRecoveredScan.snapshot;
                       allDiscoveredObjects.push(...aiRecoveredScan.objects);
+
+                      // Capture evidence after route completion click completes
+                      await captureEvStep(actionTarget.action, "passed");
 
                       steps.push({
                         index: actionTarget.index,
@@ -4613,7 +4655,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     
     const postClickScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
     currentSnapshot = postClickScan.snapshot;
-    
+
+    // Capture evidence after click completes and page stabilizes
+    await captureEvStep(actionTarget.action, "passed");
+
     // Determine effective target from alias resolution
     const locatorStrategy = (resolution as any)?.locatorStrategy ?? "";
     const candidateText = (resolution as any)?.candidateText ?? "";

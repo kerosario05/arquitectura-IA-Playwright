@@ -27,6 +27,7 @@ export type PromotedRuntimeConfig = {
   stabilityTimeoutMs: number;
   retryEnabled: boolean;
   captureDiagnostics: boolean;
+  evidenceEnabled: boolean;
 };
 
 export type PromotedRuntimeDiagnostics = {
@@ -123,7 +124,8 @@ export function loadPromotedRuntimeConfigFromEnv(): PromotedRuntimeConfig {
     actionTimeoutMs: numberFromEnv("PROMOTED_RUNTIME_ACTION_TIMEOUT_MS", 15000),
     stabilityTimeoutMs: numberFromEnv("PROMOTED_RUNTIME_STABILITY_TIMEOUT_MS", 10000),
     retryEnabled: boolFromEnv("PROMOTED_RUNTIME_RETRY_ENABLED", true),
-    captureDiagnostics: boolFromEnv("PROMOTED_RUNTIME_CAPTURE_DIAGNOSTICS", true)
+    captureDiagnostics: boolFromEnv("PROMOTED_RUNTIME_CAPTURE_DIAGNOSTICS", true),
+    evidenceEnabled: boolFromEnv("EVIDENCE_ENABLED", true),
   };
 }
 
@@ -1268,6 +1270,8 @@ export class PromotedSpecRuntime {
   private activeContainer?: { selector: string; descriptor: string };
   private activeContainerDiscardReason?: string;
   private lastSelectionStep?: { selectedTarget: string; stepIndex: number; timestamp: number };
+  private evidenceRecorder?: any;
+  private evidenceStepIndex = 0;
 
   constructor(private readonly page: Page, config?: Partial<PromotedRuntimeConfig>) {
     this.config = { ...loadPromotedRuntimeConfigFromEnv(), ...config };
@@ -1282,6 +1286,76 @@ export class PromotedSpecRuntime {
         await dialog.accept().catch(() => undefined);
       }
     });
+
+    // Initialize evidence recorder if EVIDENCE_ENABLED
+    this.initEvidence().catch(err => console.log(`[evidence] init error: ${err.message}`));
+  }
+
+  /** Initialize evidence recorder from env config */
+  private async initEvidence(): Promise<void> {
+    try {
+      const { EvidenceRecorder } = await import("../../evidence/evidence-recorder");
+      const { loadEvidenceConfig } = await import("../../evidence/evidence-types");
+      const cfg = loadEvidenceConfig();
+      if (!cfg.enabled) return;
+      this.evidenceRecorder = new EvidenceRecorder(
+        {
+          appSlug: process.env.APP_SLUG || "unknown",
+          sectionSlug: process.env.SECTION_SLUG || "unknown",
+          sectionName: process.env.SECTION_NAME,
+          scenarioId: process.env.SCENARIO_ID || "unknown",
+          scenarioTitle: process.env.SCENARIO_TITLE || "unknown",
+          analystName: cfg.analystName || process.env.EVIDENCE_ANALYST_NAME,
+        },
+        cfg,
+      );
+      await this.evidenceRecorder.start();
+      console.log(`[evidence] recorder initialized scenario=${process.env.SCENARIO_ID || "unknown"}`);
+    } catch (err: any) {
+      console.log(`[evidence] init failed: ${err.message}`);
+    }
+  }
+
+  /** Capture evidence for a single step */
+  private async captureEvidenceStep(stepText: string, status: "passed" | "failed" | "skipped", errorMessage?: string): Promise<void> {
+    if (!this.evidenceRecorder) return;
+
+    // Exclude validation steps from evidence capture
+    if (/^\s*validar\b/i.test(stepText)) {
+      console.log(`[evidence] skipping validation step: "${stepText}"`);
+      return;
+    }
+
+    this.evidenceStepIndex++;
+    try {
+      const target = stepText.match(/"([^"]+)"/)?.[1];
+      await this.evidenceRecorder.captureStep(this.page, this.evidenceStepIndex, stepText, {
+        target, status, errorMessage,
+      });
+    } catch (err: any) {
+      console.log(`[evidence] step capture failed: ${err.message}`);
+    }
+  }
+
+  /** Capture evidence for a click target step */
+  private async captureClickStep(target: string, status: "passed" | "failed" | "skipped", errorMessage?: string): Promise<void> {
+    if (!this.evidenceRecorder) return;
+    const stepText = `Clic en "${target}".`;
+    await this.captureEvidenceStep(stepText, status, errorMessage);
+  }
+
+  /** Call at the end of a spec to finalize evidence (saves evidence.json and generates evidencia.docx) */
+  async finishEvidence(): Promise<void> {
+    if (!this.evidenceRecorder) {
+      console.log(`[evidence] disabled`);
+      return;
+    }
+    try {
+      const record = await this.evidenceRecorder.finish();
+      console.log(`[evidence] scenario=${record.scenarioId} status=${record.status} docx=${record.docxPath || "(template not available)"} screenshots=${record.steps.filter((s: any) => s.screenshotPath).length}`);
+    } catch (err: any) {
+      console.log(`[evidence] finish failed: ${err.message}`);
+    }
   }
 
   async waitForPromotedUiStable(stepIndex: number, target: string): Promise<void> {
@@ -1863,6 +1937,7 @@ export class PromotedSpecRuntime {
         );
       }
       
+      await this.captureClickStep(options.target, "failed", `clickPath=${clickPath} native=${nativeClickError || "?"} callback=${callbackError || "?"}`);
       throw new Error(
         `Promoted click failed at step ${options.stepIndex} target="${options.target}". ` +
         `clickPath=${clickPath} nativeClickAttempted=${nativeClickAttempted} nativeClickSucceeded=${nativeClickSucceeded} ` +
@@ -1870,6 +1945,9 @@ export class PromotedSpecRuntime {
         `retryAttempted=${String(retryAttempted)} diagnostics=${JSON.stringify(diagnostics)}`
       );
     }
+
+    // Capture evidence after successful click
+    await this.captureClickStep(options.target, "passed");
   }
 
   async fillPromotedField(options: PromotedFillOptions): Promise<void> {
@@ -2061,7 +2139,9 @@ export class PromotedSpecRuntime {
   async expectPromotedVisible(options: PromotedAssertOptions): Promise<void> {
     try {
       await withTimeout(options.assertion(), this.config.actionTimeoutMs, "assert visible");
+      await this.captureEvidenceStep(`Validar que se muestre "${options.target}".`, "passed");
     } catch (error) {
+      await this.captureEvidenceStep(`Validar que se muestre "${options.target}".`, "failed", error instanceof Error ? error.message : String(error));
       const diagnostics = await captureDiagnosticsIfNeeded(
         this.page,
         {

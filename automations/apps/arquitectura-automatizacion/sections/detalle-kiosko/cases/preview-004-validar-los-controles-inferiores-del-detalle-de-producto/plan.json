@@ -1,0 +1,98 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-004",
+    "caseId": 0,
+    "title": "Validar los controles inferiores del detalle de producto"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Clic en \"Iniciar\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en \"Información de productos\".",
+      "target": {
+        "strategy": "product_condition",
+        "value": "Información de productos",
+        "exact": false
+      },
+      "locatorStrategy": "product_condition"
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Clic en \"Depósitos a Plazo\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Depósitos a Plazo",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Seleccionar el primer producto visible del listado.",
+      "target": {
+        "strategy": "ordinal_selection",
+        "value": "el primer producto visible del listado",
+        "exact": false,
+        "metadata": {
+          "resolvedTargetName": "Depósitos a plazo en Pesos",
+          "resolvedCandidateId": "el-6",
+          "aiAssisted": false,
+          "repairType": "ordinal_selection",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "ordinal_selection",
+      "recoveryMetadata": {
+        "recoveredBy": "ordinal_selection",
+        "rationale": "ordinal_selection:first",
+        "ordinalSelectionDiagnostics": {
+          "selectionPatternDetected": true,
+          "ordinal": "first",
+          "domainTerm": "producto",
+          "domainTermSource": "routeProfile",
+          "selectedCandidateText": "Depósitos a plazo en Pesos",
+          "selectedCandidateId": "el-6"
+        },
+        "selectedCandidateId": "el-6",
+        "selectedCandidateText": "Depósitos a plazo en Pesos",
+        "segmentIndex": 0,
+        "transitionDetected": true,
+        "executedAction": "Seleccionar el primer producto visible del listado."
+      }
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-06-10T01:38:11.787Z"
+}

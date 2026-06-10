@@ -1,0 +1,10 @@
+{
+  "id": "preview-006-regresar-al-listado-desde-detalle-de-deposito-a-plazo",
+  "externalId": "PREVIEW-006",
+  "caseId": 0,
+  "title": "Regresar al listado desde detalle de depósito a plazo",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-10T18:28:44.171Z"
+}

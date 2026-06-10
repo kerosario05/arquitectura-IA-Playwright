@@ -1,3 +1,4 @@
+import "../config/env"; // Load .env before anything else
 import express from "express";
 import cors from "cors";
 import { healthRouter } from "./routes/health";

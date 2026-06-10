@@ -6,6 +6,8 @@ import { runCaseDiscoveryWorkflow } from "../discovery/case-discovery-workflow";
 import { resolveAppProfile, ensureAppStructure } from "../automations/app-profile";
 import type { VirtualCase } from "../types/scenario-preview.types";
 import type { TestScenario } from "../types/testrail.types";
+import { RunEvidenceRecorder } from "../evidence/run-evidence-recorder";
+import { loadEvidenceConfig } from "../evidence/evidence-types";
 
 export type PreviewCliArgs = {
   input: string;
@@ -415,6 +417,7 @@ async function runPreviewCase(
   appProfileObj: any,
   index: number,
   total: number,
+  evidenceRunId?: string,
 ): Promise<PreviewResult["cases"][number]> {
   const outputDir = path.resolve(`./.artifacts/preview/${vc.displayId}/${new Date().toISOString().replace(/[:.]/g, "-")}`);
 
@@ -448,6 +451,7 @@ async function runPreviewCase(
       autoPom: args.autoPom,
       testRailClient: trClient,
       appProfile: appProfileObj,
+      runId: evidenceRunId,
     });
 
     const passed = workflowResult.caseResult.status === "discovered_passed" || workflowResult.caseResult.status === "repaired_passed";
@@ -560,6 +564,65 @@ async function runPreviewCase(
 
 const TECHNICAL_SLUGS = new Set(["tests", "test", "default", "unknown", "undefined", "null"]);
 
+async function consolidateRunEvidence(
+  runId: string,
+  appSlug: string,
+  sectionSlug: string | undefined,
+  sectionName: string | undefined,
+): Promise<void> {
+  try {
+    const evidenceConfig = loadEvidenceConfig();
+    if (!evidenceConfig.enabled || !evidenceConfig.docxEnabled) {
+      console.log(`[evidence:run] skipped runId=${runId} reason=evidence_disabled`);
+      return;
+    }
+
+    console.log(`[evidence:run] starting consolidation runId=${runId} appSlug=${appSlug} sectionSlug=${sectionSlug || "default-section"}`);
+
+    const runRecorder = new RunEvidenceRecorder({
+      appSlug,
+      sectionSlug: sectionSlug || "default-section",
+      sectionName,
+      runId,
+    });
+
+    await runRecorder.start();
+
+    // Scan evidence directory for scenario evidence.json files
+    const evidenceRoot = evidenceConfig.outputRoot;
+    const sectionSlugNormalized = sectionSlug || "default-section";
+    const runDir = path.join(evidenceRoot, appSlug, sectionSlugNormalized, "runs", runId, "scenarios");
+
+    console.log(`[evidence:run] searching for scenarios in runDir=${runDir}`);
+
+    const fsSync = await import("node:fs");
+    if (fsSync.existsSync(runDir)) {
+      const scenarioDirs = fsSync.readdirSync(runDir, { withFileTypes: true })
+        .filter(dirent => dirent.isDirectory())
+        .map(dirent => dirent.name);
+
+      console.log(`[evidence:run] found ${scenarioDirs.length} scenario directories: ${scenarioDirs.join(", ")}`);
+
+      for (const scenarioDir of scenarioDirs) {
+        const evidenceJsonPath = path.join(runDir, scenarioDir, "evidence.json");
+        if (fsSync.existsSync(evidenceJsonPath)) {
+          console.log(`[evidence:run] loading scenario evidence from ${evidenceJsonPath}`);
+          await runRecorder.addScenarioFromFile(evidenceJsonPath);
+        } else {
+          console.log(`[evidence:run] evidence.json not found in ${scenarioDir}`);
+        }
+      }
+    } else {
+      console.log(`[evidence:run] runDir does not exist: ${runDir}`);
+    }
+
+    await runRecorder.finish();
+    console.log(`[evidence:run] consolidated runId=${runId} appSlug=${appSlug} sectionSlug=${sectionSlugNormalized}`);
+  } catch (err: any) {
+    console.log(`[evidence:run] consolidation failed runId=${runId}: ${err.message}`);
+  }
+}
+
 function isTechnicalSlug(slug: string): boolean {
   return TECHNICAL_SLUGS.has(slug.trim().toLowerCase());
 }
@@ -586,6 +649,19 @@ async function main(): Promise<void> {
     return;
   }
 
+  // Read EVIDENCE_RUN_ID from environment (set by scenario-preview-runner)
+  // If not set, generate one for standalone mode
+  let evidenceRunId = process.env.EVIDENCE_RUN_ID;
+  let runIdMode = "qalab";
+
+  if (!evidenceRunId) {
+    // Generate runId for standalone execution
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+    evidenceRunId = `preview-${timestamp}`;
+    runIdMode = "standalone_generated";
+  }
+
+  console.log(`[discovery:preview] evidenceRunId=${evidenceRunId} mode=${runIdMode}`);
   console.log(`[discovery:preview] app=${args.app}`);
   console.log("[discovery:preview] Starting preview execution");
   console.log(`[discovery:preview] input=${args.input}`);
@@ -640,11 +716,18 @@ async function main(): Promise<void> {
 
   for (let i = 0; i < cases.length; i++) {
     const vc = cases[i];
-    const result = await runPreviewCase(vc, args, resolvedAppSlug, appProfileObj, i, cases.length);
+    const result = await runPreviewCase(vc, args, resolvedAppSlug, appProfileObj, i, cases.length, evidenceRunId);
     results.push(result);
     if (result.status === "passed") passed++;
     else failed++;
   }
+
+  // Consolidate run evidence into single DOCX
+  // Extract sectionSlug from first case if available
+  const firstCase = cases[0];
+  const sectionSlug = firstCase?.sectionSlug;
+  const sectionName = firstCase?.sectionName;
+  await consolidateRunEvidence(evidenceRunId, resolvedAppSlug, sectionSlug, sectionName);
 
   // Aggregate failure groups (FASE 5)
   const failureGroups = buildPreviewFailureGroups(results);

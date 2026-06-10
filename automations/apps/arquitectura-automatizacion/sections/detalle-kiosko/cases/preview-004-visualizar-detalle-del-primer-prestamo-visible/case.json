@@ -1,0 +1,10 @@
+{
+  "id": "preview-004-visualizar-detalle-del-primer-prestamo-visible",
+  "externalId": "PREVIEW-004",
+  "caseId": 0,
+  "title": "Visualizar detalle del primer préstamo visible",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-10T03:26:07.942Z"
+}

@@ -1,0 +1,9 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "PREVIEW-004",
+  "testRailCaseId": 0,
+  "generatedAt": "2026-06-10T19:07:04.526Z",
+  "title": "Consultar el detalle del primer producto visible de Tarjetas"
+}

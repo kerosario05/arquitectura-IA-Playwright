@@ -1290,6 +1290,16 @@ export function generatePOMSpecFromPlan(
     : `test('${escapedTitle}', async ({ page }) => {`;
   lines.push(testName);
   lines.push(`  test.setTimeout(Number(process.env.PROMOTED_SPEC_TIMEOUT_MS ?? 90000));`);
+  
+  // Emit evidence metadata for this test scenario
+  const scenarioId = `C${plan.scenario.caseId ?? ""}`;
+  const sectionSlug = "default-section";
+  lines.push(`  // Evidence metadata`);
+  lines.push(`  process.env.APP_SLUG = '${escapeSpecString(appProfile.appSlug)}';`);
+  lines.push(`  process.env.SECTION_SLUG = '${escapeSpecString(sectionSlug)}';`);
+  lines.push(`  process.env.SCENARIO_ID = '${escapeSpecString(scenarioId)}';`);
+  lines.push(`  process.env.SCENARIO_TITLE = '${escapedTitle}';`);
+  lines.push(``);
 
   if (requiredDataUsed.size > 0) {
     lines.push("");
@@ -1315,6 +1325,9 @@ export function generatePOMSpecFromPlan(
     lines.push("");
     lines.push("  const promotedRuntime = createPromotedSpecRuntime(page);");
   }
+
+  // Wrap action execution in try/finally for evidence finalization
+  lines.push(`  try {`);
 
   if (preambleLines.length > 0) {
     lines.push("");
@@ -1364,6 +1377,9 @@ export function generatePOMSpecFromPlan(
     pomStatus = "needs_page_object";
   }
 
+  lines.push(`  } finally {`);
+  lines.push(`    await promotedRuntime.finishEvidence();`);
+  lines.push(`  }`);
   lines.push("});");
 
   const specContent = lines.join("\n");

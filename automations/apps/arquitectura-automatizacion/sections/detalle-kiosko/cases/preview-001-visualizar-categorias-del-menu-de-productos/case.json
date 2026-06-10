@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-visualizar-categorias-del-menu-de-productos",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Visualizar categorías del menú de productos",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-10T03:25:29.863Z"
+}

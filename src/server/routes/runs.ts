@@ -798,3 +798,87 @@ runsRouter.post("/:jobId/link-jira-run-ref", async (req, res) => {
     res.status(500).json({ ok: false, error: errMsg, testRunId, jiraKey });
   }
 });
+
+// ── Download evidence DOCX ──
+runsRouter.get("/:jobId/evidence-docx", (req, res) => {
+  const jobId = req.params.jobId;
+  const EVIDENCE_ROOT = path.resolve(__dirname, "..", "..", "..", ".artifacts", "evidence");
+
+  // Try to get appSlug and sectionSlug from job params
+  const job = jobStore.get(jobId);
+  let docxPath: string | undefined;
+
+  if (job) {
+    const params = job.params as Record<string, unknown>;
+    const appSlug = params.appSlug || params.targetAppSlug;
+    const sectionSlug = params.sectionSlug;
+
+    if (appSlug && sectionSlug) {
+      // Try structured path: .artifacts/evidence/{appSlug}/{sectionSlug}/runs/{jobId}/evidencia.docx
+      const structuredPath = path.join(EVIDENCE_ROOT, String(appSlug), String(sectionSlug), "runs", jobId, "evidencia.docx");
+      if (fs.existsSync(structuredPath)) {
+        docxPath = structuredPath;
+        console.log(`[evidence-docx] found at structured path jobId=${jobId}`);
+      }
+    }
+  }
+
+  // Fallback: search for evidencia.docx in evidence directory
+  if (!docxPath) {
+    console.log(`[evidence-docx] searching for evidencia.docx in evidence tree jobId=${jobId}`);
+    const searchPaths = [
+      path.join(EVIDENCE_ROOT, "**", "runs", jobId, "evidencia.docx"),
+      path.join(PREVIEW_ARTIFACTS_DIR, jobId, "evidencia.docx"),
+    ];
+
+    for (const pattern of searchPaths) {
+      const basePath = pattern.replace(/\*\*.*$/, "");
+      if (fs.existsSync(basePath)) {
+        const findPath = (dir: string, targetFile: string): string | null => {
+          const entries = fs.readdirSync(dir, { withFileTypes: true });
+          for (const entry of entries) {
+            const fullPath = path.join(dir, entry.name);
+            if (entry.isDirectory()) {
+              const found = findPath(fullPath, targetFile);
+              if (found) return found;
+            } else if (entry.name === targetFile && fullPath.includes(jobId)) {
+              return fullPath;
+            }
+          }
+          return null;
+        };
+
+        const found = findPath(EVIDENCE_ROOT, "evidencia.docx");
+        if (found) {
+          docxPath = found;
+          console.log(`[evidence-docx] found via search jobId=${jobId} path=${docxPath}`);
+          break;
+        }
+      }
+    }
+  }
+
+  if (!docxPath || !fs.existsSync(docxPath)) {
+    console.error(`[evidence-docx] file not found jobId=${jobId}`);
+    res.status(404).json({
+      error: "Evidence DOCX not found",
+      jobId,
+      message: "El documento de evidencia no está disponible. Verifique que la ejecución haya finalizado correctamente."
+    });
+    return;
+  }
+
+  const filename = `evidencia-${jobId}.docx`;
+  res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+
+  const stream = fs.createReadStream(docxPath);
+  stream.on("error", (err) => {
+    console.error(`[evidence-docx] stream error jobId=${jobId}:`, err);
+    if (!res.headersSent) {
+      res.status(500).json({ error: "Failed to stream evidence file" });
+    }
+  });
+
+  stream.pipe(res);
+});

@@ -1,0 +1,9 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "PREVIEW-005",
+  "testRailCaseId": 0,
+  "generatedAt": "2026-06-10T03:21:31.809Z",
+  "title": "Validar los controles inferiores visibles en el detalle de producto"
+}

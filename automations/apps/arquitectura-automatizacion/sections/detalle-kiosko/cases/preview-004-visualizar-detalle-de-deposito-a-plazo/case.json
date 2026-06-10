@@ -1,0 +1,10 @@
+{
+  "id": "preview-004-visualizar-detalle-de-deposito-a-plazo",
+  "externalId": "PREVIEW-004",
+  "caseId": 0,
+  "title": "Visualizar detalle de depósito a plazo",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-10T18:28:12.340Z"
+}

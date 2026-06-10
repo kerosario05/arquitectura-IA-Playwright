@@ -4,6 +4,7 @@ import { randomUUID } from "crypto";
 import { config, requireTestRailConfig } from "../../config/env";
 import { TestRailClient } from "../../clients/testrail.client";
 import { publishScenariosToTestRail } from "../services/testrail-case-publisher";
+import { buildScenarioPreviewScenarioId } from "../services/testrail-sync-types";
 import type { McpScenario } from "../../scenarios/scenario-types";
 
 const ROOT = path.resolve(__dirname, "..", "..", "..");
@@ -34,11 +35,13 @@ export type LaunchExecutionInput = {
 };
 
 export type PublishedCaseEntry = {
-  scenarioId: string;
+  scenarioId: string; // TestRail custom_scenario_id (same as testrailCustomScenarioId)
   caseId: number;
   title: string;
   sourceIssueKey?: string;
-  launchScenarioId?: string;
+  launchScenarioId?: string; // Frontend-provided ID (e.g., LAUNCH-001) - NOT globally unique, visual only
+  executionScenarioId?: string; // Discovery execution ID (e.g., PREVIEW-001) - what case_finished emits
+  testrailCustomScenarioId?: string; // Globally unique ID for TestRail (e.g., L-abe094d6-001)
 };
 
 export type LaunchExecutionResult = {
@@ -63,7 +66,7 @@ function buildLaunchRunName(jiraKey?: string, sprintName?: string): string {
   return parts.join(" - ");
 }
 
-function scenarioToMcpFormat(scenario: LaunchScenario, index: number, appSlug: string): McpScenario {
+function scenarioToMcpFormat(scenario: LaunchScenario, index: number, appSlug: string): McpScenario & { launchScenarioId?: string } {
   return {
     sourceIssueKey: scenario.sourceIssueKey ?? `launch-${index + 1}`,
     title: scenario.title,
@@ -80,6 +83,7 @@ function scenarioToMcpFormat(scenario: LaunchScenario, index: number, appSlug: s
     dataRequirements: "",
     nonExecutableCriteria: "",
     mcpExecutable: true,
+    launchScenarioId: scenario.scenarioId, // Pass through for unique TestRail ID generation
   };
 }
 
@@ -119,7 +123,16 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
 
   // ── 2. Publish scenarios to TestRail ──
   let publishedCaseIds: number[] = [];
-  let publishMappings: Array<{ scenarioId: string; testRailCaseId: number; title?: string }> = [];
+  type PublishMapping = {
+    scenarioId: string; // TestRail custom_scenario_id
+    testRailCaseId: number;
+    title?: string;
+    sourceIssueKey?: string;
+    launchScenarioId?: string; // Frontend ID (LAUNCH-001) - visual only
+    executionScenarioId?: string; // Discovery execution ID (PREVIEW-001)
+    testrailCustomScenarioId?: string; // Globally unique TestRail ID (L-xxx-001)
+  };
+  let publishMappings: PublishMapping[] = [];
 
   try {
     const trConfig = requireTestRailConfig(config);
@@ -134,19 +147,34 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
       appSlug: input.appSlug,
       cacheKey: `launch-${launchId}`,
       publishStrategy: input.publishStrategy ?? "always_create",
+      launchId, // Pass launchId for unique ID generation
     } as any);
 
     publishedCaseIds = publishResult.caseIds;
     publishMappings = publishResult.mappings.map((m: any, mi: number) => {
       const inputSc = input.selectedScenarios[mi];
-      const mapping = {
-        scenarioId: m.scenarioId,
+      const mcpSc = mcpScenarios[mi];
+
+      // executionScenarioId: what discovery will emit (PREVIEW-001)
+      const executionScenarioId = buildScenarioPreviewScenarioId(mcpSc, mi);
+
+      // testrailCustomScenarioId: globally unique ID stored in TestRail (L-abe094d6-001)
+      const testrailCustomScenarioId = m.scenarioId;
+
+      // launchScenarioId: frontend-provided ID (LAUNCH-001) - visual only, NOT globally unique
+      const launchScenarioId = inputSc?.scenarioId;
+
+      const mapping: PublishMapping = {
+        scenarioId: testrailCustomScenarioId, // TestRail custom_scenario_id
         testRailCaseId: m.testRailCaseId,
         title: m.title ?? inputSc?.title,
         sourceIssueKey: inputSc?.sourceIssueKey,
-        launchScenarioId: inputSc?.scenarioId,
+        launchScenarioId,
+        executionScenarioId,
+        testrailCustomScenarioId,
       };
-      console.log(`[launch-execution] id mapping source=${inputSc?.sourceIssueKey ?? "?"} launch=${inputSc?.scenarioId ?? "?"} execution=${m.scenarioId} caseId=${m.testRailCaseId}`);
+
+      console.log(`[launch-execution] id mapping source=${inputSc?.sourceIssueKey ?? "?"} launch=${launchScenarioId ?? "—"} testrailCustom=${testrailCustomScenarioId} execution=${executionScenarioId} caseId=${m.testRailCaseId}`);
       return mapping;
     });
 
@@ -207,9 +235,20 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
     scenarioId: m.scenarioId,
     caseId: m.testRailCaseId,
     title: m.title ?? input.selectedScenarios[i]?.title ?? "unknown",
-    sourceIssueKey: (m as any).sourceIssueKey,
-    launchScenarioId: (m as any).launchScenarioId,
+    sourceIssueKey: m.sourceIssueKey,
+    launchScenarioId: m.launchScenarioId,
+    executionScenarioId: m.executionScenarioId,
+    testrailCustomScenarioId: m.testrailCustomScenarioId,
   }));
+
+  // Log mapping validation
+  console.log(`[launch-execution] publishedCases count=${publishedCases.length}`);
+  for (const pc of publishedCases) {
+    const executionId = pc.executionScenarioId ?? "MISSING";
+    const launchId = pc.launchScenarioId ?? "—";
+    const testrailCustomId = pc.testrailCustomScenarioId ?? "MISSING";
+    console.log(`[launch-execution] publishedCase execution=${executionId} launch=${launchId} testrailCustom=${testrailCustomId} caseId=${pc.caseId}`);
+  }
 
   const manifest = {
     launchId,

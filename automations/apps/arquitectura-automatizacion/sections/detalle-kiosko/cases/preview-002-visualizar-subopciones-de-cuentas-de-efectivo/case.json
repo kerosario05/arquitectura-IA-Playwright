@@ -1,0 +1,10 @@
+{
+  "id": "preview-002-visualizar-subopciones-de-cuentas-de-efectivo",
+  "externalId": "PREVIEW-002",
+  "caseId": 0,
+  "title": "Visualizar subopciones de Cuentas de Efectivo",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-10T02:44:56.756Z"
+}

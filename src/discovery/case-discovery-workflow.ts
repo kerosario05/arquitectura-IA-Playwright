@@ -54,6 +54,7 @@ export type CaseDiscoveryWorkflowOptions = {
   appProfile?: AppProfile;
   sectionProfile?: SectionProfile;
   requirePomRuntime?: boolean;
+  runId?: string;
 };
 
 export type CaseDiscoveryWorkflowResult = {
@@ -1055,7 +1056,7 @@ export async function runCaseDiscoveryWorkflow(
   const headless = !options.headed;
 
   let browser;
-  let caseResult: CaseDiscoveryResult;
+  let caseResult: CaseDiscoveryResult | undefined;
   let promoted = false;
   let automationId: string | undefined;
   let appSlug: string | undefined;
@@ -1079,51 +1080,87 @@ export async function runCaseDiscoveryWorkflow(
     console.log(`[env-debug] loaded routeCompletion.enabled=${activeConfig.integrations.ai?.routeCompletion?.enabled}`);
     console.log(`[env-debug] appProfile appSlug=${workflowAppSlug ?? "undefined"}`);
 
-    caseResult = await runCaseDiscovery({
-      page,
-      scenario,
-      evidenceDir,
-      pendingObjectsPath,
-      pendingPlansPath,
-      appBaseUrl: activeConfig.app.baseUrl,
-      appSlug: workflowAppSlug,
-      testData: activeConfig.app.testData,
-      loginAction: async () => {
-        await loginStrategy.execute(page, activeConfig);
-      },
-      aiAssistedDiscovery: {
-        explorer: createAIExplorer({
-          provider: aiExplorerProvider
-        }),
-        config: {
-          enabled: activeConfig.integrations.ai?.discoveryEnabled ?? false,
-          confidenceThreshold: activeConfig.integrations.ai?.discoveryConfidenceThreshold ?? 0.85,
-          requireApprovalThreshold: activeConfig.integrations.ai?.discoveryRequireApprovalThreshold ?? 0.7,
-          maxAttempts: activeConfig.integrations.ai?.discoveryMaxAttempts ?? 3,
-          routeCompletion: activeConfig.integrations.ai?.routeCompletion,
-          routeProfileLearning: activeConfig.integrations.ai?.routeProfileLearning
-        }
-      },
-      env: {
-        APP_TEST_DATA_JSON: activeConfig.app.rawTestData,
-        APP_TEST_DATA_ALIASES_JSON: activeConfig.app.testDataAliases,
-        Identity_Provider: process.env.Identity_Provider,
-        OTP_SECRET: process.env.OTP_SECRET,
-        APP_USERNAME: activeConfig.app.username,
-        APP_PASSWORD: activeConfig.app.password,
-        APP_SLUG: workflowAppSlug,
-        APP_PROFILE: workflowAppSlug,
-        APP_EXTRA_LOGIN_FIELDS_JSON: activeConfig.app.extraLoginFields,
-        MISSING_INPUT_BEHAVIOR: activeConfig.app.missingInputBehavior,
-        AUTO_GENERATE_TEST_DATA: activeConfig.app.autoGenerateTestData,
-        AUTO_GENERATE_SENSITIVE_DATA: activeConfig.app.autoGenerateSensitiveData,
-        APP_TEST_DATA_PROFILE: activeConfig.app.testDataProfile,
-        AUTO_SELECT_SAFE_DEFAULTS: activeConfig.app.autoSelectSafeDefaults,
-        AUTO_ACCEPT_SAFE_CHECKBOXES: activeConfig.app.autoAcceptSafeCheckboxes
-      },
-      missingInputBehavior: activeConfig.app.missingInputBehavior,
-      loginMode: activeConfig.app.loginMode
-    });
+    // Initialize evidence recorder for this case
+    // Priority: 1. externalId (PREVIEW-001 or C38981), 2. caseId (>0 -> C<id>), 3. fallback
+    const scenarioId = scenario.externalId
+      ? scenario.externalId
+      : (scenario.caseId && scenario.caseId > 0 ? `C${scenario.caseId}` : "unknown");
+    // Use sectionProfile.sectionSlug if available, otherwise derive from sectionName
+    const effectiveSectionSlug = sectionProfile?.sectionSlug
+      ?? (scenario.sectionName ? scenario.sectionName.toLowerCase().replace(/[\s_]+/g, "-") : "default-section");
+    const evidenceRecorder = await (async () => {
+      try {
+        const { initDiscoveryEvidence } = await import("../evidence/discovery-evidence");
+        return initDiscoveryEvidence(page, {
+          appSlug: workflowAppSlug || activeConfig.app.appProfile || "unknown",
+          sectionSlug: effectiveSectionSlug,
+          sectionName: scenario.sectionName,
+          scenarioId,
+          scenarioTitle: scenario.title,
+          caseId: scenario.caseId,
+          runId: options.runId,
+        });
+      } catch {
+        return null;
+      }
+    })();
+
+    try {
+      caseResult = await runCaseDiscovery({
+        page,
+        scenario,
+        evidenceDir,
+        pendingObjectsPath,
+        pendingPlansPath,
+        appBaseUrl: activeConfig.app.baseUrl,
+        appSlug: workflowAppSlug,
+        testData: activeConfig.app.testData,
+        loginAction: async () => {
+          await loginStrategy.execute(page, activeConfig);
+        },
+        aiAssistedDiscovery: {
+          explorer: createAIExplorer({
+            provider: aiExplorerProvider
+          }),
+          config: {
+            enabled: activeConfig.integrations.ai?.discoveryEnabled ?? false,
+            confidenceThreshold: activeConfig.integrations.ai?.discoveryConfidenceThreshold ?? 0.85,
+            requireApprovalThreshold: activeConfig.integrations.ai?.discoveryRequireApprovalThreshold ?? 0.7,
+            maxAttempts: activeConfig.integrations.ai?.discoveryMaxAttempts ?? 3,
+            routeCompletion: activeConfig.integrations.ai?.routeCompletion,
+            routeProfileLearning: activeConfig.integrations.ai?.routeProfileLearning
+          }
+        },
+        env: {
+          APP_TEST_DATA_JSON: activeConfig.app.rawTestData,
+          APP_TEST_DATA_ALIASES_JSON: activeConfig.app.testDataAliases,
+          Identity_Provider: process.env.Identity_Provider,
+          OTP_SECRET: process.env.OTP_SECRET,
+          APP_USERNAME: activeConfig.app.username,
+          APP_PASSWORD: activeConfig.app.password,
+          APP_SLUG: workflowAppSlug,
+          APP_PROFILE: workflowAppSlug,
+          APP_EXTRA_LOGIN_FIELDS_JSON: activeConfig.app.extraLoginFields,
+          MISSING_INPUT_BEHAVIOR: activeConfig.app.missingInputBehavior,
+          AUTO_GENERATE_TEST_DATA: activeConfig.app.autoGenerateTestData,
+          AUTO_GENERATE_SENSITIVE_DATA: activeConfig.app.autoGenerateSensitiveData,
+          APP_TEST_DATA_PROFILE: activeConfig.app.testDataProfile,
+          AUTO_SELECT_SAFE_DEFAULTS: activeConfig.app.autoSelectSafeDefaults,
+          AUTO_ACCEPT_SAFE_CHECKBOXES: activeConfig.app.autoAcceptSafeCheckboxes
+        },
+        missingInputBehavior: activeConfig.app.missingInputBehavior,
+        loginMode: activeConfig.app.loginMode,
+        evidenceRecorder: evidenceRecorder || undefined,
+      });
+    } finally {
+      // Finalize evidence recording (always runs, even on failure)
+      try {
+        const { finalizeDiscoveryEvidence } = await import("../evidence/discovery-evidence");
+        await finalizeDiscoveryEvidence(evidenceRecorder, caseResult || undefined, page);
+      } catch (err: any) {
+        console.log(`[evidence] finalization error: ${err.message}`);
+      }
+    }
 
     const agentCfg = resolveAgentAutoRepairConfig(activeConfig);
 

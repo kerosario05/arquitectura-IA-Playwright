@@ -1,0 +1,9 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "PREVIEW-007",
+  "testRailCaseId": 0,
+  "generatedAt": "2026-06-10T19:08:12.528Z",
+  "title": "Consultar el detalle del primer producto visible de Préstamos"
+}

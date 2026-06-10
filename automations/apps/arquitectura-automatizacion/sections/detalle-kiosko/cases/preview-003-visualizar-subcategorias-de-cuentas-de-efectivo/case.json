@@ -1,0 +1,10 @@
+{
+  "id": "preview-003-visualizar-subcategorias-de-cuentas-de-efectivo",
+  "externalId": "PREVIEW-003",
+  "caseId": 0,
+  "title": "Visualizar subcategorías de Cuentas de Efectivo",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-10T03:25:49.477Z"
+}

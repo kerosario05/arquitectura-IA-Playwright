@@ -1,0 +1,10 @@
+{
+  "id": "preview-004-visualizar-el-detalle-de-un-producto-desde-la-lista",
+  "externalId": "PREVIEW-004",
+  "caseId": 0,
+  "title": "Visualizar el detalle de un producto desde la lista",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-10T03:21:22.904Z"
+}

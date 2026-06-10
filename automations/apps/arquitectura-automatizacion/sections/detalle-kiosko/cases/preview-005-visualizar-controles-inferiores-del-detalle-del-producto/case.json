@@ -1,0 +1,10 @@
+{
+  "id": "preview-005-visualizar-controles-inferiores-del-detalle-del-producto",
+  "externalId": "PREVIEW-005",
+  "caseId": 0,
+  "title": "Visualizar controles inferiores del detalle del producto",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-10T16:42:37.383Z"
+}

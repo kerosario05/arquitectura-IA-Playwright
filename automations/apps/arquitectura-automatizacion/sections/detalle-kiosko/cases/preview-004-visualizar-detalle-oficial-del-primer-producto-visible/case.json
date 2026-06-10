@@ -1,0 +1,10 @@
+{
+  "id": "preview-004-visualizar-detalle-oficial-del-primer-producto-visible",
+  "externalId": "PREVIEW-004",
+  "caseId": 0,
+  "title": "Visualizar detalle oficial del primer producto visible",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-10T16:42:26.991Z"
+}

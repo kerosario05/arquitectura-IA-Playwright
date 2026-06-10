@@ -5,8 +5,8 @@
     "name": "4",
     "baseUrl": "https://172.27.4.50",
     "baseUrlHash": "1423ba294517",
-    "createdAt": "2026-06-09T20:37:38.435Z",
-    "updatedAt": "2026-06-09T20:37:38.435Z"
+    "createdAt": "2026-06-10T19:27:09.983Z",
+    "updatedAt": "2026-06-10T19:27:09.983Z"
   },
   "baseUrl": "https://172.27.4.50",
   "loginMode": "no_login",
@@ -61,7 +61,7 @@
         "when": "before_first_functional_step"
       }
     ],
-    "updatedAt": "2026-06-09T20:36:22.973Z"
+    "updatedAt": "2026-06-10T19:25:50.869Z"
   },
-  "updatedAt": "2026-06-09T20:37:38.435Z"
+  "updatedAt": "2026-06-10T19:27:09.983Z"
 }

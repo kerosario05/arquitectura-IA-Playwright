@@ -1,7 +1,9 @@
 import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
+import { randomUUID } from "crypto";
 import { jobStore, type JobSummary, type JobStatus } from "./job-store";
+import type { PublishedCaseEntry } from "./launch-orchestrator";
 import { toVirtualCase, type ScenarioPreviewRequest, type VirtualCase } from "../../types/scenario-preview.types";
 import { config, requireTestRailConfig } from "../../config/env";
 import { TestRailClient } from "../../clients/testrail.client";
@@ -20,6 +22,7 @@ import {
   normalizeForComparison,
   stripStepNumbering,
   buildCanonicalEntrySteps,
+  applyFinalCanonicalization,
 } from "../../automations/scenario-normalizer";
 import { normalizeSectionSlug, resolveSectionProfileSync } from "../../automations/app-profile";
 import type { McpRouteProfile } from "../../scenarios/scenario-types";
@@ -30,6 +33,8 @@ import {
 import { publishScenariosToTestRail, readPersistedScenarioMappings } from "../services/testrail-case-publisher";
 import { buildScenarioPreviewScenarioId, type ScenarioPreviewTestRailResult } from "../services/testrail-sync-types";
 import { learnEntryStepsFromSnapshot } from "../services/entry-steps-learner";
+import { RunEvidenceRecorder } from "../../evidence/run-evidence-recorder";
+import { loadEvidenceConfig } from "../../evidence/evidence-types";
 
 const TECHNICAL_SLUGS = new Set([
   "tests",
@@ -43,6 +48,74 @@ const TECHNICAL_SLUGS = new Set([
   "undefined",
   "null",
 ]);
+
+async function consolidateRunEvidence(
+  jobId: string,
+  appSlug: string,
+  sectionSlug: string | undefined,
+  sectionName: string | undefined,
+  caseOutcomeMap?: Map<string, { status: "passed" | "failed" | "skipped" | "review_needed"; failureReason?: string }>,
+): Promise<void> {
+  try {
+    const evidenceConfig = loadEvidenceConfig();
+    if (!evidenceConfig.enabled || !evidenceConfig.docxEnabled) {
+      console.log(`[evidence:run] skipped jobId=${jobId} reason=evidence_disabled`);
+      return;
+    }
+
+    console.log(`[evidence:run] starting consolidation jobId=${jobId} appSlug=${appSlug} sectionSlug=${sectionSlug || "default-section"}`);
+
+    const runRecorder = new RunEvidenceRecorder({
+      appSlug,
+      sectionSlug: sectionSlug || "default-section",
+      sectionName,
+      runId: jobId,
+    });
+
+    await runRecorder.start();
+
+    // Scan artifact directory for scenario evidence.json files
+    const artifactDir = path.join(ARTIFACTS_DIR, jobId);
+    const evidenceRoot = evidenceConfig.outputRoot;
+    const sectionSlugNormalized = sectionSlug || "default-section";
+    const runDir = path.join(evidenceRoot, appSlug, sectionSlugNormalized, "runs", jobId, "scenarios");
+
+    console.log(`[evidence:run] searching for scenarios in runDir=${runDir}`);
+
+    if (fs.existsSync(runDir)) {
+      const scenarioDirs = fs.readdirSync(runDir, { withFileTypes: true })
+        .filter(dirent => dirent.isDirectory())
+        .map(dirent => dirent.name);
+
+      console.log(`[evidence:run] found ${scenarioDirs.length} scenario directories: ${scenarioDirs.join(", ")}`);
+
+      for (const scenarioDir of scenarioDirs) {
+        const evidenceJsonPath = path.join(runDir, scenarioDir, "evidence.json");
+        if (fs.existsSync(evidenceJsonPath)) {
+          console.log(`[evidence:run] loading scenario evidence from ${evidenceJsonPath}`);
+          await runRecorder.addScenarioFromFile(evidenceJsonPath);
+        } else {
+          console.log(`[evidence:run] evidence.json not found in ${scenarioDir}`);
+        }
+      }
+
+      // Apply final status overrides from case_finished events
+      if (caseOutcomeMap && caseOutcomeMap.size > 0) {
+        console.log(`[evidence:run] applying ${caseOutcomeMap.size} status overrides from case_finished events`);
+        for (const [scenarioId, outcome] of caseOutcomeMap.entries()) {
+          runRecorder.overrideScenarioStatus(scenarioId, outcome.status, "case_finished");
+        }
+      }
+    } else {
+      console.log(`[evidence:run] runDir does not exist: ${runDir}`);
+    }
+
+    await runRecorder.finish();
+    console.log(`[evidence:run] consolidated jobId=${jobId} appSlug=${appSlug} sectionSlug=${sectionSlugNormalized}`);
+  } catch (err: any) {
+    console.log(`[evidence:run] consolidation failed jobId=${jobId}: ${err.message}`);
+  }
+}
 
 function isTechnicalSlug(slug: string): boolean {
   const normalized = slug.trim().toLowerCase();
@@ -607,20 +680,49 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   const launchId = (pRecord.launchId as string) || undefined;
   const testRunId = pRecord.testRunId ? Number(pRecord.testRunId) : undefined;
   const jiraKey = (pRecord.jiraKey as string) || undefined;
-  const publishedCases: Array<{ scenarioId: string; caseId: number; title?: string }> =
-    Array.isArray(pRecord.publishedCases) ? pRecord.publishedCases : [];
+  const publishedCases: PublishedCaseEntry[] = Array.isArray(pRecord.publishedCases) ? pRecord.publishedCases : [];
+
+  // Log what we received from manifest
+  console.log(`[launch-sync] manifest publishedCases count=${publishedCases.length}`);
+  for (const pc of publishedCases) {
+    console.log(`[launch-sync] received publishedCase execution=${pc.executionScenarioId ?? "MISSING"} launch=${pc.launchScenarioId ?? "—"} testrailCustom=${pc.testrailCustomScenarioId ?? "MISSING"} caseId=${pc.caseId}`);
+  }
+
+  // Build dual mapping: executionScenarioId (PREVIEW-001) → caseId AND testrailCustomScenarioId (L-{hex8}-001) → caseId
   const scenarioToCaseMap = new Map<string, number>();
   for (const pc of publishedCases) {
+    // Primary key: TestRail custom_scenario_id (L-abe094d6-001) - globally unique
+    if (pc.testrailCustomScenarioId) {
+      scenarioToCaseMap.set(pc.testrailCustomScenarioId, pc.caseId);
+    }
+    // Fallback: scenarioId (should be same as testrailCustomScenarioId)
     scenarioToCaseMap.set(pc.scenarioId, pc.caseId);
+
+    // Secondary key: Execution scenario ID (PREVIEW-001) — what discovery emits
+    if (pc.executionScenarioId) {
+      scenarioToCaseMap.set(pc.executionScenarioId, pc.caseId);
+    }
+
+    // Tertiary key: Launch scenario ID (LAUNCH-001) - visual only, NOT unique
+    if (pc.launchScenarioId && pc.launchScenarioId !== pc.scenarioId) {
+      scenarioToCaseMap.set(pc.launchScenarioId, pc.caseId);
+    }
   }
+
   if (testRunId) {
     const scenarioIds = publishedCases.map(pc => pc.scenarioId).join(",");
     const caseIds = publishedCases.map(pc => pc.caseId).join(",");
+    const executionIds = publishedCases.map(pc => pc.executionScenarioId).filter(Boolean).join(",");
+    const testrailCustomIds = publishedCases.map(pc => pc.testrailCustomScenarioId).filter(Boolean).join(",");
+    const mapSize = scenarioToCaseMap.size;
     console.log(`[launch-sync] metadata received launchId=${launchId} testRunId=${testRunId} publishedCases=${publishedCases.length} jiraKey=${jiraKey ?? '—'}`);
     console.log(`[launch-sync] published scenarioIds=${scenarioIds}`);
     console.log(`[launch-sync] published caseIds=${caseIds}`);
+    console.log(`[launch-sync] published executionIds=${executionIds}`);
+    console.log(`[launch-sync] published testrailCustomIds=${testrailCustomIds}`);
+    console.log(`[launch-sync] scenarioToCaseMap size=${mapSize} entries`);
     for (const pc of publishedCases) {
-      console.log(`[launch-sync] map ${pc.scenarioId} -> ${pc.caseId}`);
+      console.log(`[launch-sync] map testrailCustom=${pc.testrailCustomScenarioId ?? "—"} execution=${pc.executionScenarioId ?? "—"} launch=${pc.launchScenarioId ?? "—"} -> caseId=${pc.caseId}`);
     }
   } else {
     console.log(`[launch-sync] disabled reason="missing_launch_metadata"`);
@@ -882,6 +984,32 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
     } else if (result.reason !== "no_detail_assertions") {
       jobStore.appendLog(jobId, `[scenario-detail-guard] skipped scenario=${vc.displayId} reason=${result.reason}`);
     }
+  }
+
+  // ── FINAL CANONICALIZATION (post-guards) ──
+  // Ensure all steps use canonical labels before saving and validation.
+  // This catches any steps inserted or modified by guards that may have non-canonical labels.
+  jobStore.appendLog(jobId, `[scenario-preview] applying final canonicalization to ${normalizedCases.length} cases`);
+  const finalCanonResult = applyFinalCanonicalization(normalizedCases, routeProfile, appConfig);
+
+  // Replace normalizedCases with canonicalized versions
+  normalizedCases.length = 0;
+  normalizedCases.push(...finalCanonResult.cases);
+
+  // Log canonicalization diagnostics
+  if (finalCanonResult.totalCanonicalized > 0) {
+    jobStore.appendLog(
+      jobId,
+      `[final-canonicalization] canonicalized ${finalCanonResult.totalCanonicalized} fields across ${finalCanonResult.diagnostics.length} changes`,
+    );
+  }
+
+  for (const diag of finalCanonResult.diagnostics) {
+    const fieldLabel = diag.field === "step" ? `step[${diag.stepIndex}]` : diag.field;
+    jobStore.appendLog(
+      jobId,
+      `[final-canonicalization] scenario=${diag.scenarioId} field=${fieldLabel} source=${diag.matchedSource} original="${diag.originalText}" canonical="${diag.canonicalText}"`,
+    );
   }
 
   // Log final steps for verification
@@ -1204,7 +1332,62 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   console.log(`[run:scenario-preview] command=${cmd} args=${args.join(" ")}`);
   console.log(`[run:scenario-preview] jobId=${jobId}`);
   console.log(`[run:scenario-preview] artifactsDir=${artifactDir}`);
+  console.log(`[run:scenario-preview] env EVIDENCE_RUN_ID=${jobId}`);
   console.log(`[run:scenario-preview] started`);
+
+  // ── Enrich publishedCases with executionScenarioId by index mapping ──
+  // This is critical for TestRail result sync: discovery emits case_finished with executionScenarioId (PREVIEW-001),
+  // and we need to map that to the TestRail caseId.
+  if (publishedCases.length > 0 && normalizedCases.length > 0) {
+    console.log(`[testrail-sync] enriching publishedCases with executionScenarioId by index count=${publishedCases.length}`);
+
+    // Rebuild scenarioToCaseMap with enriched execution IDs
+    scenarioToCaseMap.clear();
+
+    for (let i = 0; i < publishedCases.length; i++) {
+      const pc = publishedCases[i];
+      const normalizedCase = normalizedCases[i];
+
+      // Derive executionScenarioId from normalized case or fallback to PREVIEW-{i+1}
+      let executionScenarioId = pc.executionScenarioId;
+      if (!executionScenarioId) {
+        executionScenarioId = normalizedCase?.displayId ?? `PREVIEW-${String(i + 1).padStart(3, "0")}`;
+        // Update in place
+        pc.executionScenarioId = executionScenarioId;
+        console.log(`[testrail-sync] enriched publishedCase[${i}] executionScenarioId=${executionScenarioId} caseId=${pc.caseId}`);
+      }
+
+      // Rebuild map with all keys
+      // Primary: TestRail custom_scenario_id (L-{hex8}-001)
+      if (pc.testrailCustomScenarioId) {
+        scenarioToCaseMap.set(pc.testrailCustomScenarioId, pc.caseId);
+      }
+      // Fallback: scenarioId (should be same as testrailCustomScenarioId)
+      scenarioToCaseMap.set(pc.scenarioId, pc.caseId);
+
+      // Execution scenario ID (PREVIEW-001) - what discovery emits
+      scenarioToCaseMap.set(executionScenarioId, pc.caseId);
+
+      // Launch scenario ID (LAUNCH-001) - visual only
+      if (pc.launchScenarioId && pc.launchScenarioId !== pc.scenarioId) {
+        scenarioToCaseMap.set(pc.launchScenarioId, pc.caseId);
+      }
+    }
+
+    // Log final enriched state
+    const enrichedExecutionIds = publishedCases.map(pc => pc.executionScenarioId).filter(Boolean).join(",");
+    const mapKeys = Array.from(scenarioToCaseMap.keys()).join(",");
+    console.log(`[testrail-sync] enriched executionIds=${enrichedExecutionIds}`);
+    console.log(`[testrail-sync] map keys count=${scenarioToCaseMap.size} keys=${mapKeys}`);
+
+    // Validate that all execution IDs are present
+    const missingExecutionIds = publishedCases.filter(pc => !pc.executionScenarioId);
+    if (missingExecutionIds.length > 0) {
+      const errorMessage = `testrail_result_mapping_invalid: ${missingExecutionIds.length} publishedCases have no executionScenarioId after enrichment`;
+      console.error(`[testrail-sync] ${errorMessage}`);
+      jobStore.appendLog(jobId, `[testrail-sync] ERROR: ${errorMessage}`);
+    }
+  }
 
   jobStore.appendLog(jobId, `[run:scenario-preview] spawning discovery:preview`);
   jobStore.appendLog(jobId, `[run:scenario-preview] scenarios=${normalizedCases.length} appSlug=${appSlug}`);
@@ -1216,7 +1399,10 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   const child = spawn(cmd, args, {
     shell: true,
     cwd: ROOT,
-    env: process.env as NodeJS.ProcessEnv,
+    env: {
+      ...process.env,
+      EVIDENCE_RUN_ID: jobId,
+    } as NodeJS.ProcessEnv,
     stdio: ["ignore", "pipe", "pipe"],
   });
 
@@ -1409,14 +1595,23 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
                 jobStore.appendLog(jobId, `[testrail-sync] duplicate skipped scenario=${json.caseId} caseId=${caseId}`);
               } else {
                 syncKeys.add(syncKey);
-                jobStore.appendLog(jobId, `[testrail-sync] queued scenario=${json.caseId} caseId=${caseId} runId=${testRunId}`);
+                // Determine which ID type was used for resolution
+                const matchedCase = publishedCases.find(pc => pc.caseId === caseId);
+                const idType = matchedCase?.executionScenarioId === json.caseId ? "execution" :
+                               matchedCase?.testrailCustomScenarioId === json.caseId ? "testrailCustom" :
+                               matchedCase?.scenarioId === json.caseId ? "testrail" :
+                               matchedCase?.launchScenarioId === json.caseId ? "launch" : "unknown";
+                jobStore.appendLog(jobId, `[testrail-sync] queued scenario=${json.caseId} idType=${idType} caseId=${caseId} runId=${testRunId}`);
                 const promise = syncSingleResult(jobId, testRunId, caseId, json, launchId, p, pRecord, artifactDir, publishedCases.length)
                   .catch((err: any) => { syncFailedCount++; });
                 pendingSyncs.push(promise);
               }
             } else {
               const availableIds = Array.from(scenarioToCaseMap.keys()).join(",");
-              jobStore.appendLog(jobId, `[testrail-sync] skipped scenario=${json.caseId} reason="no_matching_case_id" availableScenarioIds=${availableIds}`);
+              const executionIds = publishedCases.map(pc => pc.executionScenarioId).filter(Boolean).join(",");
+              const testrailCustomIds = publishedCases.map(pc => pc.testrailCustomScenarioId).filter(Boolean).join(",");
+              const launchIds = publishedCases.map(pc => pc.launchScenarioId).filter(Boolean).join(",");
+              jobStore.appendLog(jobId, `[testrail-sync] skipped scenario=${json.caseId} reason="no_matching_case_id" executionIds=${executionIds} testrailCustomIds=${testrailCustomIds} launchIds=${launchIds}`);
             }
           }
 
@@ -1759,6 +1954,9 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
     } catch {
       // non-fatal; best-effort persistence
     }
+
+    // Consolidate run evidence into single DOCX
+    await consolidateRunEvidence(jobId, appSlug, sectionSlug, p.sectionName, caseOutcomeMap);
 
     jobStore.update(jobId, {
       status: finalStatus,

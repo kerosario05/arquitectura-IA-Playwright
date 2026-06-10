@@ -68,6 +68,11 @@ export class TestRailClient {
   constructor(private readonly config: RequiredTestRailRuntimeConfig) {
     this.baseApiUrl = `${config.url}/index.php?/api/v2`;
     this.authHeader = `Basic ${Buffer.from(`${config.email}:${config.apiKey}`).toString("base64")}`;
+
+    // Log refs configuration at startup
+    const refsField = process.env.TESTRAIL_REFS_FIELD || "both";
+    const sendCustomRefs = process.env.TESTRAIL_SEND_CUSTOM_REFS?.toLowerCase() !== "false";
+    console.log(`[testrail-config] url=${config.url} refsField=${refsField} sendCustomRefs=${sendCustomRefs}`);
   }
 
   async getCase(caseId: number): Promise<RawTestRailCase> {
@@ -162,7 +167,8 @@ export class TestRailClient {
     }
 
     const hasRefs = Boolean(input.refs);
-    if (hasRefs) {
+    const refsFieldForRun = process.env.TESTRAIL_REFS_FIELD || "both";
+    if (hasRefs && refsFieldForRun !== "none") {
       body.refs = input.refs;
     }
 
@@ -183,8 +189,9 @@ export class TestRailClient {
     const body: Record<string, unknown> = {};
     if (input.name) body.name = input.name;
     if (input.description) body.description = input.description;
-    if (input.refs) body.refs = input.refs;
-    console.log(`[testrail-client] update_run/${runId} keys=${Object.keys(body).join(",")} refs=${input.refs ?? "(none)"}`);
+    const refsFieldForUpdateRun = process.env.TESTRAIL_REFS_FIELD || "both";
+    if (input.refs && refsFieldForUpdateRun !== "none") body.refs = input.refs;
+    console.log(`[testrail-client] update_run/${runId} keys=${Object.keys(body).join(",")} refs=${input.refs ?? "(none)"} refsField=${refsFieldForUpdateRun}`);
     const payload = await this.requestJson<TestRailRun>(endpoint, "POST", body);
     if (!payload || typeof payload.id !== "number") {
       throw new Error("Invalid update_run response from TestRail.");
@@ -278,6 +285,8 @@ export class TestRailClient {
     console.log(`[testrail-debug] addCase invoked sectionId=${sectionId} title="${input.title?.substring(0, 50)}..." compatibilityMode=${isCompat} preservePayload=${isPreserve}`);
 
     const body: Record<string, unknown> = { title: input.title };
+    const refsField = process.env.TESTRAIL_REFS_FIELD || "both";
+    const refsDisabled = refsField === "none";
 
     if (isPreserve) {
       // Preserve mode: send exactly what's in the input (smoke/diagnostics)
@@ -297,8 +306,15 @@ export class TestRailClient {
         }
       }
     } else if (isCompat) {
-      // Compatibility mode: always ensure root refs is set
-      body.refs = input.refs || "";
+      // Compatibility mode: send refs according to TESTRAIL_REFS_FIELD
+      if (!refsDisabled) {
+        if (refsField === "both" || refsField === "refs") {
+          body.refs = input.refs || "";
+        }
+        if (TESTRAIL_SEND_CUSTOM_REFS && (refsField === "both" || refsField === "custom_refs")) {
+          body.custom_refs = input.refs || "";
+        }
+      }
       // Only send title + refs + explicitly allowed compat fields
       if (TESTRAIL_COMPAT_SEND_PRECONDS && input.preconditions) {
         body.custom_preconds = buildCustomPreconds(input.preconditions);
@@ -313,16 +329,22 @@ export class TestRailClient {
         body.custom_steps = input.stepsSeparated.map((s, i) => `${i + 1}. ${s.content}`).join("\n");
       }
     } else {
-      // Normal mode: always ensure root refs is set
-      body.refs = input.refs || "";
-      // Send all configured fields
-      const refsField = process.env.TESTRAIL_REFS_FIELD || "both";
+      // Normal mode: send refs according to TESTRAIL_REFS_FIELD configuration
       const refsValue = input.refs || "";
       const hasRefs = typeof refsValue === "string" && refsValue.trim().length > 0;
-      console.log(`[testrail-debug] addCase refs handling: refsField="${refsField}" refsValue="${refsValue}" hasRefs=${hasRefs}`);
+      console.log(`[testrail-debug] addCase refs handling: refsField="${refsField}" sendCustomRefs=${TESTRAIL_SEND_CUSTOM_REFS} hasRefs=${hasRefs}`);
 
-      if (TESTRAIL_SEND_CUSTOM_REFS && (refsField === "both" || refsField === "custom_refs")) {
-        body.custom_refs = refsValue;
+      if (!refsDisabled) {
+        // Send root refs only if configured to do so
+        if (refsField === "both" || refsField === "refs") {
+          body.refs = refsValue;
+        }
+        // Send custom_refs only if configured to do so
+        if (TESTRAIL_SEND_CUSTOM_REFS && (refsField === "both" || refsField === "custom_refs")) {
+          body.custom_refs = refsValue;
+        }
+      } else {
+        console.log(`[testrail-debug] addCase refs handling: refsField="none" sendCustomRefs=${TESTRAIL_SEND_CUSTOM_REFS} hasRootRefs=false hasCustomRefs=false`);
       }
 
       body.custom_preconds = buildCustomPreconds(input.preconditions);
@@ -372,9 +394,11 @@ export class TestRailClient {
     const customRefsIsNonEmpty = typeof body.custom_refs === "string" && (body.custom_refs as string).trim().length > 0;
     console.log(`[testrail-debug] addCase pre-send validation: refs=${JSON.stringify(body.refs)} custom_refs=${JSON.stringify(body.custom_refs)} refsIsNonEmpty=${refsIsNonEmpty} customRefsIsNonEmpty=${customRefsIsNonEmpty}`);
 
-    // Final safeguard: ensure root refs is never missing (skip preservePayload — intentionally may not have refs)
-    if (!isPreserve && typeof body.refs !== "string") {
-      console.warn(`[testrail-client] addCase refs was missing before send; setting to empty string`);
+    // Final safeguard: ensure root refs is set if configured (skip if refsDisabled or preservePayload)
+    const refsFieldForGuard = process.env.TESTRAIL_REFS_FIELD || "both";
+    const shouldHaveRootRefs = !refsDisabled && (refsFieldForGuard === "both" || refsFieldForGuard === "refs");
+    if (!isPreserve && shouldHaveRootRefs && typeof body.refs !== "string") {
+      console.warn(`[testrail-client] addCase refs was missing before send; setting to empty string (refsField=${refsFieldForGuard})`);
       body.refs = "";
     }
 
@@ -395,11 +419,20 @@ export class TestRailClient {
     const refsField = process.env.TESTRAIL_REFS_FIELD || "both";
     const refsValue = input.refs || "";
     const hasRefs = typeof refsValue === "string" && refsValue.trim().length > 0;
-    console.log(`[testrail-debug] updateCase refs handling: refsField="${refsField}" refsValue="${refsValue}" hasRefs=${hasRefs}`);
+    const refsDisabled = refsField === "none";
+    console.log(`[testrail-debug] updateCase refs handling: refsField="${refsField}" sendCustomRefs=${TESTRAIL_SEND_CUSTOM_REFS} hasRefs=${hasRefs}`);
 
-    body.refs = refsValue || "";
-    if (TESTRAIL_SEND_CUSTOM_REFS && (refsField === "both" || refsField === "custom_refs")) {
-      body.custom_refs = refsValue;
+    if (!refsDisabled) {
+      // Send root refs only if configured to do so
+      if (refsField === "both" || refsField === "refs") {
+        body.refs = refsValue || "";
+      }
+      // Send custom_refs only if configured to do so
+      if (TESTRAIL_SEND_CUSTOM_REFS && (refsField === "both" || refsField === "custom_refs")) {
+        body.custom_refs = refsValue;
+      }
+    } else {
+      console.log(`[testrail-debug] updateCase refs handling: refsField="none" sendCustomRefs=${TESTRAIL_SEND_CUSTOM_REFS} hasRootRefs=false hasCustomRefs=false`);
     }
 
     body.custom_preconds = buildCustomPreconds(input.preconditions);

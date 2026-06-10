@@ -1168,3 +1168,147 @@ export function validateVirtualCases(
 
   return { valid: issues.length === 0, issues };
 }
+
+// ── Final canonicalization (post-guards) ──
+
+export type FinalCanonicalizationDiagnostic = {
+  scenarioId: string;
+  stepIndex: number;
+  field: "title" | "step" | "expectedResult" | "precondition";
+  originalText: string;
+  canonicalText: string;
+  matchedSource: CanonicalLabelSource | "multiple";
+  phase: "final";
+};
+
+export type FinalCanonicalizationResult = {
+  cases: VirtualCase[];
+  diagnostics: FinalCanonicalizationDiagnostic[];
+  totalCanonicalized: number;
+};
+
+/**
+ * Apply final canonicalization to all virtual cases after guards have run.
+ * This ensures that any steps inserted or modified by guards use canonical labels.
+ *
+ * This function is generic and configurable:
+ * - Uses routeProfile, appConfig, domainTerms, aliases, visibleControls
+ * - No hardcoded labels or app-specific rules
+ * - Works for any app/profile using their own canonical sources
+ */
+export function applyFinalCanonicalization(
+  cases: VirtualCase[],
+  routeProfile: McpRouteProfile | null,
+  appConfig: Record<string, unknown> | null,
+): FinalCanonicalizationResult {
+  const labelMap = buildCanonicalLabelMap(routeProfile, appConfig);
+  const labelRegistry = buildCanonicalLabelRegistry(routeProfile, appConfig);
+  const diagnostics: FinalCanonicalizationDiagnostic[] = [];
+  let totalCanonicalized = 0;
+
+  const findMatchedSource = (normalizedText: string): CanonicalLabelSource | "multiple" | null => {
+    const matches = new Set<CanonicalLabelSource>();
+    for (const [normalizedForm, entry] of labelRegistry.entries()) {
+      if (normalizedForm.length >= 3 && normalizedText.includes(normalizedForm)) {
+        matches.add(entry.source);
+      }
+    }
+    if (matches.size === 0) return null;
+    if (matches.size === 1) return Array.from(matches)[0];
+    return "multiple";
+  };
+
+  const canonicalizedCases = cases.map((vc) => {
+    // Canonicalize title
+    const newTitle = canonicalizeText(vc.title, labelMap);
+    if (newTitle !== vc.title) {
+      const source = findMatchedSource(normalizeForComparison(vc.title));
+      if (source) {
+        diagnostics.push({
+          scenarioId: vc.displayId,
+          stepIndex: -1,
+          field: "title",
+          originalText: vc.title,
+          canonicalText: newTitle,
+          matchedSource: source,
+          phase: "final",
+        });
+        totalCanonicalized++;
+      }
+    }
+
+    // Canonicalize steps
+    const newSteps = vc.steps.map((step, index) => {
+      const canonicalized = canonicalizeText(step, labelMap);
+      if (canonicalized !== step) {
+        const source = findMatchedSource(normalizeForComparison(step));
+        if (source) {
+          diagnostics.push({
+            scenarioId: vc.displayId,
+            stepIndex: index,
+            field: "step",
+            originalText: step,
+            canonicalText: canonicalized,
+            matchedSource: source,
+            phase: "final",
+          });
+          totalCanonicalized++;
+        }
+      }
+      return canonicalized;
+    });
+
+    // Canonicalize expectedResult
+    const newExpected = canonicalizeText(vc.expectedResult, labelMap);
+    if (newExpected !== vc.expectedResult) {
+      const source = findMatchedSource(normalizeForComparison(vc.expectedResult));
+      if (source) {
+        diagnostics.push({
+          scenarioId: vc.displayId,
+          stepIndex: -1,
+          field: "expectedResult",
+          originalText: vc.expectedResult,
+          canonicalText: newExpected,
+          matchedSource: source,
+          phase: "final",
+        });
+        totalCanonicalized++;
+      }
+    }
+
+    // Canonicalize preconditions
+    const newPreconditions = vc.preconditions.map((precond, index) => {
+      const canonicalized = canonicalizeText(precond, labelMap);
+      if (canonicalized !== precond) {
+        const source = findMatchedSource(normalizeForComparison(precond));
+        if (source) {
+          diagnostics.push({
+            scenarioId: vc.displayId,
+            stepIndex: index,
+            field: "precondition",
+            originalText: precond,
+            canonicalText: canonicalized,
+            matchedSource: source,
+            phase: "final",
+          });
+          totalCanonicalized++;
+        }
+      }
+      return canonicalized;
+    });
+
+    return {
+      ...vc,
+      title: newTitle,
+      steps: newSteps,
+      expectedResult: newExpected,
+      preconditions: newPreconditions,
+    };
+  });
+
+  return {
+    cases: canonicalizedCases,
+    diagnostics,
+    totalCanonicalized,
+  };
+}

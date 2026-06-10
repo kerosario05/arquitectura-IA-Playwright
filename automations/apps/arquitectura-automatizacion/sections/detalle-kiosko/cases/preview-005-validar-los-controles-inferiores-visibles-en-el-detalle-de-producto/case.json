@@ -1,0 +1,10 @@
+{
+  "id": "preview-005-validar-los-controles-inferiores-visibles-en-el-detalle-de-producto",
+  "externalId": "PREVIEW-005",
+  "caseId": 0,
+  "title": "Validar los controles inferiores visibles en el detalle de producto",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-10T03:21:31.805Z"
+}

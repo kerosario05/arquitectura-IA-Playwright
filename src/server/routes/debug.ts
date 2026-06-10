@@ -439,6 +439,105 @@ debugRouter.post("/testrail/add-case-smoke", async (req, res) => {
   }
 });
 
+// ── Incremental add_case diagnostic ───────────────────────────────────────
+debugRouter.post("/testrail/diagnose-refs", async (req, res) => {
+  if (!isDebugEnabled) {
+    res.status(403).json({ ok: false, error: "forbidden", message: "Debug endpoints are disabled in production." });
+    return;
+  }
+  const sectionId = Number(req.body?.sectionId);
+  if (!sectionId) {
+    res.status(400).json({ ok: false, error: "sectionId is required" });
+    return;
+  }
+
+  let trClient: TestRailClient;
+  try {
+    trClient = new TestRailClient(requireTestRailConfig(config));
+  } catch (err: any) {
+    res.status(500).json({ ok: false, error: "testrail_config", message: err.message });
+    return;
+  }
+
+  const timestamp = Date.now().toString(36);
+  const results: Array<{ label: string; keys: string; status: string; error?: string; caseId?: number }> = [];
+  let lastCaseId: number | undefined;
+
+  const payloads: Array<{ label: string; payload: Record<string, unknown> }> = [
+    { label: "A: title only", payload: { title: `DEBUG refs diagnostic A ${timestamp}` } },
+    { label: "B: + custom_steps", payload: {
+      title: `DEBUG refs diagnostic B ${timestamp}`,
+      custom_steps: "1. Clic en Iniciar.\n2. Validar menu.",
+    }},
+    { label: "C: + custom_steps_separated", payload: {
+      title: `DEBUG refs diagnostic C ${timestamp}`,
+      custom_steps_separated: [
+        { content: "Clic en Iniciar.", expected: "" },
+        { content: "Validar menu.", expected: "Menu visible." },
+      ],
+    }},
+    { label: "D: + custom_preconds", payload: {
+      title: `DEBUG refs diagnostic D ${timestamp}`,
+      custom_steps: "1. Clic en Iniciar.\n2. Validar menu.",
+      custom_preconds: "Precondiciones:\n- App disponible.",
+    }},
+    { label: "E: + custom_expected", payload: {
+      title: `DEBUG refs diagnostic E ${timestamp}`,
+      custom_steps: "1. Clic en Iniciar.\n2. Validar menu.",
+      custom_preconds: "Precondiciones:\n- App disponible.",
+      custom_expected: "Menu visible.",
+    }},
+    { label: "F: + custom_case_oracle", payload: {
+      title: `DEBUG refs diagnostic F ${timestamp}`,
+      custom_steps: "1. Clic en Iniciar.\n2. Validar menu.",
+      custom_preconds: "Precondiciones:\n- App disponible.",
+      custom_expected: "Menu visible.",
+      custom_case_oracle: process.env.TESTRAIL_DEFAULT_CASE_ORACLE || "QA",
+    }},
+    { label: "G: + custom_fields (scenario_id, app_slug, cache_key)", payload: {
+      title: `DEBUG refs diagnostic G ${timestamp}`,
+      custom_steps: "1. Clic en Iniciar.\n2. Validar menu.",
+      custom_preconds: "Precondiciones:\n- App disponible.",
+      custom_expected: "Menu visible.",
+      custom_case_oracle: process.env.TESTRAIL_DEFAULT_CASE_ORACLE || "QA",
+      custom_scenario_id: `DEBUG-${timestamp}`,
+      custom_app_slug: "debug",
+      custom_cache_key: `debug-${timestamp}`,
+      custom_story_key: "",
+    }},
+  ];
+
+  for (const { label, payload } of payloads) {
+    const keys = Object.keys(payload).join(",");
+    try {
+      const result = await trClient.addCase(String(sectionId), payload as any, { preservePayload: true });
+      lastCaseId = result.id;
+      results.push({ label, keys, status: "passed", caseId: result.id });
+      console.log(`[testrail-diagnose] ${label} keys=${keys} status=passed caseId=${result.id}`);
+    } catch (err: any) {
+      const msg = err.message ?? String(err);
+      results.push({ label, keys, status: "failed", error: msg.slice(0, 300) });
+      console.log(`[testrail-diagnose] ${label} keys=${keys} status=failed error="${msg.slice(0, 200)}"`);
+      // Stop at first failure — subsequent payloads would likely fail too
+      break;
+    }
+  }
+
+  // Determine the likely cause
+  const firstFail = results.find(r => r.status === "failed");
+  let conclusion: string;
+  if (!firstFail) {
+    conclusion = "All payloads passed. The Undefined array key \"refs\" error is not triggered by standard fields. Check TestRail plugin/customization settings.";
+  } else if (firstFail.label === "A: title only") {
+    conclusion = "TestRail add_case fails with title alone. This is a TestRail configuration/plugin issue, not a framework issue. Contact TestRail admin.";
+  } else {
+    const prevPass = results[results.indexOf(firstFail) - 1];
+    conclusion = `First failure at ${firstFail.label}. Last passing was ${prevPass?.label ?? "none"}. The field(s) in "${firstFail.label}" but not in "${prevPass?.label ?? "none"}" may trigger the issue.`;
+  }
+
+  res.json({ ok: true, sectionId, results, conclusion });
+});
+
 // ── Status endpoint (sanity check that debug routes are active) ───────────────
 debugRouter.get("/testrail/status", (_req, res) => {
   if (!isDebugEnabled) {
