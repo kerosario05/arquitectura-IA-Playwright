@@ -1,0 +1,91 @@
+{
+  "ok": true,
+  "source": {
+    "mode": "jira",
+    "projectKey": "AA",
+    "sprintId": 123,
+    "status": "Desestimado",
+    "issuesFound": 1
+  },
+  "testrail": {
+    "projectId": null,
+    "suiteId": null,
+    "sectionId": null,
+    "sectionName": null
+  },
+  "appSlug": "arquitectura-automatizacion",
+  "targetAppSlug": "arquitectura-automatizacion",
+  "targetAppName": "Arquitectura Automatización",
+  "appInference": {
+    "appSlug": "arquitectura-automatizacion",
+    "appName": "Arquitectura Automatización",
+    "source": "default"
+  },
+  "appProfilePath": "automations/apps/arquitectura-automatizacion/app.config.json",
+  "summary": {
+    "generated": 0,
+    "valid": 0,
+    "invalid": 0,
+    "rejected": 1,
+    "blocked": 1
+  },
+  "routeProfile": {
+    "name": "inferred_from_scenarios",
+    "entry": [
+      {
+        "businessLabel": "información_de_productos",
+        "visibleLabel": "Información de productos"
+      }
+    ],
+    "aliases": {},
+    "intermediates": {},
+    "domainTerms": {},
+    "visibleControls": [
+      "Beneficios",
+      "Condiciones relevantes",
+      "Cuentas de Efectivo",
+      "Depósitos a Plazo",
+      "Descripción general",
+      "Información de productos",
+      "Nombre del producto",
+      "Préstamos",
+      "Requisitos",
+      "Tarjetas",
+      "Tarjetas de crédito"
+    ],
+    "representativeFixture": {},
+    "notes": []
+  },
+  "scenarios": [],
+  "rejected": [
+    {
+      "sourceIssueKey": "AA-82",
+      "reason": "needs_route_profile: Route profile not found. Scenario generation blocked until route profile is defined."
+    }
+  ],
+  "blockedScenarios": [
+    {
+      "sourceIssueKey": "AA-82",
+      "title": "Visualizar información del producto",
+      "status": "blocked",
+      "reasonCode": "needs_route_profile",
+      "reason": "needs_route_profile: Route profile not found. Scenario generation blocked until route profile is defined.",
+      "diagnostics": [
+        {
+          "level": "error",
+          "code": "needs_route_profile",
+          "message": "Route profile not found. Scenario generation blocked until route profile is defined.",
+          "context": {
+            "issue": "AA-82"
+          }
+        }
+      ],
+      "appSlug": "arquitectura-automatizacion",
+      "appProfilePath": "automations/apps/arquitectura-automatizacion/app.config.json",
+      "suggestedAction": "configure_route_profile"
+    }
+  ],
+  "warnings": [
+    "Blocked AA-82: needs_route_profile: Route profile not found. Scenario generation blocked until route profile is defined."
+  ]
+}

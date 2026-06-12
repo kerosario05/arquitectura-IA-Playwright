@@ -1,4 +1,4 @@
-export type AiProviderName = "openai_compatible" | "codex_cli" | "disabled" | "fake";
+export type AiProviderName = "openai_compatible" | "codex_cli" | "copilot_cli" | "disabled" | "fake";
 
 export type AiMessage = {
   role: "system" | "user" | "assistant";
@@ -10,6 +10,7 @@ export type AiCompletionRequest = {
   temperature?: number;
   requireJson?: boolean;
   requireJsonSchema?: boolean;
+  purpose?: string; // Purpose of the AI request (scenario_generation, repair, general)
 };
 
 export type AiCompletionResponse = {
@@ -64,8 +65,10 @@ export type AiProviderConfig = {
   timeoutMs: number;
   requireJson: boolean;
   requireJsonSchema: boolean;
-  // Codex CLI specific (optional)
-  command?: string;       // CODEX_CLI_COMMAND
-  extraArgs?: string[];   // CODEX_CLI_EXTRA_ARGS parsed
+  maxAttempts?: number;   // Number of retry attempts (purpose-specific)
+  purpose?: string;       // Purpose of the AI request (scenario_generation, repair, general)
+  // CLI provider specific (optional)
+  command?: string;       // CLI command (CODEX_CLI_COMMAND, COPILOT_CLI_COMMAND)
+  extraArgs?: string[];   // CLI extra args parsed
   allowStdoutJsonFallback?: boolean; // Only for test-ai-provider connectivity checks
 };

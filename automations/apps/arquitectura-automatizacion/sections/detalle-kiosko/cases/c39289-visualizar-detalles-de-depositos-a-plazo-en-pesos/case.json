@@ -1,0 +1,10 @@
+{
+  "id": "c39289-visualizar-detalles-de-depositos-a-plazo-en-pesos",
+  "externalId": "C39289",
+  "caseId": 39289,
+  "title": "Visualizar detalles de Depósitos a plazo en Pesos",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-12T15:32:27.605Z"
+}

@@ -39,7 +39,7 @@ function buildTopCandidateRecommendation(packPath?: string, packContent?: string
   }
 }
 
-function buildDeterministicRouteDecision(
+export function buildDeterministicRouteDecision(
   topCandidate: TopCandidateRecommendation,
   pack?: RouteRecoveryPack
 ): { decision: RouteRecoveryDecision; reason: string } | undefined {

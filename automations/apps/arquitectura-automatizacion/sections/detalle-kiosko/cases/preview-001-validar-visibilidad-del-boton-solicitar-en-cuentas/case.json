@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-validar-visibilidad-del-boton-solicitar-en-cuentas",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Validar visibilidad del botón Solicitar en Cuentas",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-12T15:57:35.744Z"
+}

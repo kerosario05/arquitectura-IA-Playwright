@@ -2,6 +2,7 @@ import { AiProviderError, type AiCompletionRequest, type AiCompletionResponse, t
 import { parseJsonObjectText } from "../ai-json-validator";
 import { runCodexCli } from "../../agent/codex-cli-runner";
 import type { CodexCliRunnerInput } from "../../types/codex-auto-repair.types";
+import { extractJsonFromSources, validateScenarioShape, type JsonExtractionSource } from "../json-output-extractor";
 import * as path from "node:path";
 import * as fs from "node:fs/promises";
 
@@ -38,7 +39,6 @@ export class CodexCliProvider {
   private readonly command: string;
   private readonly extraArgs: string[];
   private readonly timeoutMs: number;
-  private readonly allowStdoutJsonFallback: boolean;
 
   constructor(config: AiProviderConfig) {
     this.providerName = config.providerName;
@@ -46,7 +46,6 @@ export class CodexCliProvider {
     this.command = config.command ?? "codex";
     this.extraArgs = config.extraArgs ?? [];
     this.timeoutMs = config.timeoutMs;
-    this.allowStdoutJsonFallback = config.allowStdoutJsonFallback ?? false;
   }
 
   private buildFinalExtraArgs(): string[] {
@@ -67,8 +66,10 @@ export class CodexCliProvider {
 
   async completeJson(request: AiCompletionRequest): Promise<AiCompletionResponse> {
     const startedAt = Date.now();
-    const tempDir = await this.createTempDir();
-    const outputPath = path.join(tempDir, "repair-decision.json");
+    const purpose = request.purpose ?? "general";
+    const tempDir = await this.createTempDir(purpose);
+    const outputFileName = this.getOutputFileName(purpose);
+    const outputPath = path.join(tempDir, outputFileName);
     const promptPath = path.join(tempDir, "prompt.txt");
     const stdoutLogPath = path.join(tempDir, "codex-stdout.log");
     const stderrLogPath = path.join(tempDir, "codex-stderr.log");
@@ -79,7 +80,7 @@ export class CodexCliProvider {
       const systemMessage = request.messages.find(m => m.role === "system")?.content ?? "";
       const userMessage = request.messages.find(m => m.role === "user")?.content ?? "";
 
-      await this.writeInputFiles(tempDir, outputPath, promptPath, systemMessage, userMessage);
+      await this.writeInputFiles(tempDir, outputPath, promptPath, systemMessage, userMessage, purpose);
 
       const shortPrompt = `Read and follow the instructions in "${promptPath}". Write the output file exactly as instructed.`;
       const finalExtraArgs = this.buildFinalExtraArgs();
@@ -98,8 +99,15 @@ export class CodexCliProvider {
       processResult = result;
       const durationMs = Date.now() - startedAt;
 
+      // Log diagnostics for scenario_generation
+      if (purpose === "scenario_generation") {
+        console.log(`[codex-cli] purpose=scenario_generation exitCode=${result.exitCode} durationMs=${durationMs}`);
+        console.log(`[codex-cli] stdoutChars=${result.stdout?.length ?? 0} stderrChars=${result.stderr?.length ?? 0}`);
+      }
+
       if (result.timedOut) {
-        throw new AiProviderError("ai_provider_timeout", `Codex CLI timed out after ${this.timeoutMs}ms`, {
+        throw new AiProviderError("ai_provider_timeout", `AI provider timed out after ${this.timeoutMs}ms`, {
+          provider: this.providerName,
           timeoutMs: this.timeoutMs,
           durationMs,
           tempDir,
@@ -108,69 +116,136 @@ export class CodexCliProvider {
         });
       }
 
-      let outputContent: string;
-      let fileOutputExists = false;
-      try {
-        outputContent = await fs.readFile(outputPath, "utf-8");
-        fileOutputExists = true;
-      } catch {
-        if (this.allowStdoutJsonFallback) {
-          const stdoutJson = this.tryExtractJsonFromStdout(result.stdout);
-          if (stdoutJson) {
-            return {
-              rawText: stdoutJson.raw,
-              parsedJson: stdoutJson.parsed,
-              model: this.model,
-              providerName: this.providerName,
-              durationMs,
-              diagnostics: {
-                warning: "codex_stdout_fallback_used",
-                exitCode: result.exitCode,
-                stdout: this.sanitizeSecrets(result.stdout).slice(0, 1000),
-                stderr: this.sanitizeSecrets(result.stderr).slice(0, 1000)
-              }
-            };
+      // Use shared JSON extractor for robust extraction
+      const extractionSource: JsonExtractionSource = {
+        stdout: result.stdout,
+        stderr: result.stderr,
+        outputFilePath: outputPath
+      };
+
+      const extractionResult = await extractJsonFromSources(extractionSource, purpose, "codex-cli");
+
+      if (!extractionResult.success) {
+        processExitedNonZero = result.exitCode !== 0 || processExitedNonZero;
+
+        // Enhanced diagnostics for scenario generation failures
+        const stderrLower = result.stderr.toLowerCase();
+        const stdoutLower = result.stdout.toLowerCase();
+
+        // Detect common error patterns
+        const isModelError =
+          stderrLower.includes("unsupported model") ||
+          stderrLower.includes("invalid model") ||
+          stderrLower.includes("model not found") ||
+          stderrLower.includes("model") && stderrLower.includes("not supported");
+
+        const isAuthError =
+          stderrLower.includes("unauthorized") ||
+          stderrLower.includes("authentication") ||
+          stderrLower.includes("api key");
+
+        const isRateLimitError =
+          stderrLower.includes("rate limit") ||
+          stderrLower.includes("429") ||
+          stderrLower.includes("quota exceeded");
+
+        // Build actionable suggestions
+        const suggestions: string[] = [];
+        if (isModelError) {
+          suggestions.push("The specified model may not be supported by the Codex CLI");
+          suggestions.push(`Check AI_SCENARIO_MODEL env var (current: ${this.model})`);
+          suggestions.push("Try using a supported model like 'gpt-4o-mini' or 'gpt-4o'");
+        }
+        if (isAuthError) {
+          suggestions.push("Check API credentials in environment variables");
+        }
+        if (isRateLimitError) {
+          suggestions.push("Rate limit exceeded - wait and retry, or check API quota");
+        }
+        if (!isModelError && !isAuthError && !isRateLimitError) {
+          suggestions.push("Check stderr/stdout in debug artifacts for details");
+          suggestions.push("Ensure Codex CLI is properly installed and configured");
+        }
+
+        // Log enhanced diagnostics for scenario_generation
+        if (purpose === "scenario_generation") {
+          console.log(
+            `[codex-cli] scenario_generation failed exitCode=${result.exitCode} ` +
+            `modelError=${isModelError} authError=${isAuthError} rateLimitError=${isRateLimitError}`
+          );
+          console.log(`[codex-cli] stderr preview (first 1000 chars):\n${this.sanitizeSecrets(result.stderr).slice(0, 1000)}`);
+          if (suggestions.length > 0) {
+            console.log(`[codex-cli] suggestions:\n  ${suggestions.join("\n  ")}`);
           }
         }
-        processExitedNonZero = result.exitCode !== 0 || processExitedNonZero;
-        throw new AiProviderError("ai_provider_output_missing", `Codex did not write repair-decision.json`, {
+
+        // Save debug artifacts on failure
+        await this.saveDebugArtifacts(tempDir, result, purpose, extractionResult.attempts);
+
+        const errorDetails = {
+          provider: this.providerName,
           tempDir,
           promptPath,
           outputPath,
           exitCode: result.exitCode,
-          stdoutPreview: this.sanitizeSecrets(result.stdout).slice(0, 500),
-          stderrPreview: this.sanitizeSecrets(result.stderr).slice(0, 500),
+          stdoutPreview: this.sanitizeSecrets(result.stdout).slice(0, 1000),
+          stderrPreview: this.sanitizeSecrets(result.stderr).slice(0, 1000),
           command: this.command,
-          args: this.sanitizeArgs([...finalExtraArgs, shortPrompt])
-        });
+          model: this.model,
+          args: this.sanitizeArgs([...finalExtraArgs, shortPrompt]),
+          extractionAttempts: extractionResult.attempts,
+          errorPatterns: {
+            isModelError,
+            isAuthError,
+            isRateLimitError
+          },
+          suggestions
+        };
+
+        const errorMessage = [
+          this.getOutputMissingErrorMessage(purpose, outputFileName),
+          ...suggestions.map((s, i) => `  ${i + 1}. ${s}`)
+        ].join("\n");
+
+        throw new AiProviderError(
+          "ai_provider_output_missing",
+          errorMessage,
+          errorDetails
+        );
       }
 
-      let parsedJson: Record<string, unknown>;
-      try {
-        parsedJson = parseJsonObjectText(outputContent);
-      } catch (error) {
-        processExitedNonZero = result.exitCode !== 0 || processExitedNonZero;
-        throw new AiProviderError("ai_provider_invalid_json", `repair-decision.json contains invalid JSON`, {
-          tempDir,
-          promptPath,
-          outputPath,
-          exitCode: result.exitCode,
-          error: error instanceof Error ? error.message : String(error),
-          filePreview: outputContent.slice(0, 500),
-          stderrPreview: this.sanitizeSecrets(result.stderr).slice(0, 500)
-        });
+      // Validate scenario shape for scenario_generation
+      if (purpose === "scenario_generation") {
+        const shapeValidation = validateScenarioShape(extractionResult.parsed);
+        if (!shapeValidation.valid) {
+          processExitedNonZero = result.exitCode !== 0 || processExitedNonZero;
+
+          await this.saveDebugArtifacts(tempDir, result, purpose, extractionResult.attempts);
+
+          throw new AiProviderError(
+            "ai_provider_invalid_json",
+            `Scenario generation JSON has invalid shape: ${shapeValidation.reason}`,
+            {
+              provider: this.providerName,
+              tempDir,
+              exitCode: result.exitCode,
+              detectedKeys: shapeValidation.detectedKeys,
+              extractionStrategy: extractionResult.strategy
+            }
+          );
+        }
       }
 
       if (result.exitCode !== 0) {
         processExitedNonZero = true;
         return {
-          rawText: outputContent,
-          parsedJson,
+          rawText: extractionResult.raw,
+          parsedJson: extractionResult.parsed,
           model: this.model,
           providerName: this.providerName,
           durationMs,
           diagnostics: {
-            warning: "codex_exited_non_zero_but_output_valid",
+            warning: "ai_provider_exited_non_zero_but_output_valid",
             exitCode: result.exitCode,
             stdout: this.sanitizeSecrets(result.stdout).slice(0, 1000),
             stderr: this.sanitizeSecrets(result.stderr).slice(0, 1000)
@@ -179,8 +254,8 @@ export class CodexCliProvider {
       }
 
       return {
-        rawText: outputContent,
-        parsedJson,
+        rawText: extractionResult.raw,
+        parsedJson: extractionResult.parsed,
         model: this.model,
         providerName: this.providerName,
         durationMs
@@ -194,6 +269,54 @@ export class CodexCliProvider {
       if (!processExitedNonZero) {
         await this.cleanupTempDir(tempDir);
       }
+    }
+  }
+
+  private getOutputFileName(purpose: string): string {
+    if (purpose === "scenario_generation") {
+      return "scenario-generation-result.json";
+    }
+    // Default to repair-decision.json for repair and general purposes
+    return "repair-decision.json";
+  }
+
+  private getOutputMissingErrorMessage(purpose: string, fileName: string): string {
+    if (purpose === "scenario_generation") {
+      return `AI provider did not write ${fileName}. Check artifacts at tempDir for stdout/stderr logs.`;
+    }
+    return `AI provider did not write ${fileName}`;
+  }
+
+  private getInvalidJsonErrorMessage(purpose: string, fileName: string): string {
+    if (purpose === "scenario_generation") {
+      return `${fileName} contains invalid JSON. Check artifacts for raw output.`;
+    }
+    return `${fileName} contains invalid JSON`;
+  }
+
+  private async saveDebugArtifacts(
+    tempDir: string,
+    result: Awaited<ReturnType<typeof runCodexCli>>,
+    purpose: string,
+    extractionAttempts: string[]
+  ): Promise<void> {
+    if (purpose !== "scenario_generation") return;
+
+    try {
+      const debugDir = path.join(process.cwd(), ".artifacts", "ai", "scenario_generation", `codex-${Date.now()}`);
+      await fs.mkdir(debugDir, { recursive: true });
+
+      await fs.writeFile(path.join(debugDir, "stdout.log"), result.stdout, "utf-8");
+      await fs.writeFile(path.join(debugDir, "stderr.log"), result.stderr, "utf-8");
+      await fs.writeFile(
+        path.join(debugDir, "extraction-attempts.json"),
+        JSON.stringify({ attempts: extractionAttempts, exitCode: result.exitCode }, null, 2),
+        "utf-8"
+      );
+
+      console.log(`[codex-cli] debug artifacts saved to: ${debugDir}`);
+    } catch (error) {
+      console.error(`[codex-cli] failed to save debug artifacts:`, error);
     }
   }
 
@@ -224,9 +347,10 @@ export class CodexCliProvider {
     }
   }
 
-  private async createTempDir(): Promise<string> {
+  private async createTempDir(purpose: string): Promise<string> {
     const timestamp = Date.now();
-    const tempDir = path.join(process.cwd(), ".artifacts", "ai-provider", "codex", `${timestamp}`);
+    const purposeDir = purpose === "scenario_generation" ? "scenario" : "repair";
+    const tempDir = path.join(process.cwd(), ".artifacts", "ai-provider", "codex", purposeDir, `${timestamp}`);
     await fs.mkdir(tempDir, { recursive: true });
     return tempDir;
   }
@@ -236,12 +360,19 @@ export class CodexCliProvider {
     outputPath: string,
     promptPath: string,
     systemMessage: string,
-    userMessage: string
+    userMessage: string,
+    purpose: string
   ): Promise<void> {
-    const schemaPath = path.join(tempDir, "repair-decision.schema.json");
-    await fs.writeFile(schemaPath, JSON.stringify(REPAIR_DECISION_SCHEMA, null, 2), "utf-8");
+    // Write schema for repair and general purposes, not for scenario_generation
+    if (purpose !== "scenario_generation") {
+      const schemaPath = path.join(tempDir, "repair-decision.schema.json");
+      await fs.writeFile(schemaPath, JSON.stringify(REPAIR_DECISION_SCHEMA, null, 2), "utf-8");
+    }
 
-    const fileOutputPrompt = this.buildFileOutputPrompt(outputPath, promptPath, systemMessage, userMessage);
+    const fileOutputPrompt = purpose === "scenario_generation"
+      ? this.buildGenericFileOutputPrompt(outputPath, promptPath, systemMessage, userMessage)
+      : this.buildRepairFileOutputPrompt(outputPath, promptPath, systemMessage, userMessage);
+
     await fs.writeFile(promptPath, fileOutputPrompt, "utf-8");
 
     const contextPackMatch = userMessage.match(/\{[\s\S]*"appSlug"[\s\S]*\}/);
@@ -256,7 +387,7 @@ export class CodexCliProvider {
     }
   }
 
-  private buildFileOutputPrompt(outputPath: string, promptPath: string, systemMessage: string, userMessage: string): string {
+  private buildRepairFileOutputPrompt(outputPath: string, promptPath: string, systemMessage: string, userMessage: string): string {
     const lines: string[] = [
       "TASK: Write exactly ONE file at the absolute path below with valid JSON.",
       "",
@@ -302,6 +433,42 @@ export class CodexCliProvider {
     return lines.join("\n");
   }
 
+  private buildGenericFileOutputPrompt(outputPath: string, promptPath: string, systemMessage: string, userMessage: string): string {
+    const lines: string[] = [
+      "TASK: Write exactly ONE file at the absolute path below with valid JSON.",
+      "",
+      `OUTPUT FILE (absolute path): ${outputPath}`,
+      "",
+      "RULES:",
+      `- Write EXACTLY one file at: ${outputPath}`,
+      "- Do NOT modify any other files",
+      "- Do NOT execute shell commands",
+      "- Do NOT write markdown or explanations to the file",
+      "- Output must be valid JSON (no trailing commas, no comments, no markdown)",
+      "- If you need to explain your reasoning, write it as comments OUTSIDE the JSON in stdout",
+      "- The JSON file must be parseable with JSON.parse()",
+      ""
+    ];
+
+    if (systemMessage) {
+      lines.push("SYSTEM CONTEXT:", systemMessage, "");
+    }
+
+    if (userMessage) {
+      lines.push("USER REQUEST:", userMessage, "");
+    }
+
+    lines.push(
+      "INSTRUCTION: Use the SYSTEM CONTEXT and USER REQUEST above to generate the appropriate JSON response.",
+      `Write the JSON object to: ${outputPath}`,
+      "You may write explanations or reasoning to stdout, but the file must contain ONLY valid JSON.",
+      "",
+      "IMPORTANT: Write ONLY valid JSON to the OUTPUT FILE path."
+    );
+
+    return lines.join("\n");
+  }
+
   private async cleanupTempDir(tempDir: string): Promise<void> {
     try {
       await fs.rm(tempDir, { recursive: true, force: true });
@@ -320,49 +487,5 @@ export class CodexCliProvider {
 
   private sanitizeArgs(args: string[]): string[] {
     return args.map(a => this.sanitizeSecrets(a));
-  }
-
-  private tryExtractJsonFromStdout(stdout: string): { raw: string; parsed: Record<string, unknown> } | null {
-    if (!stdout?.trim()) return null;
-
-    const trimmed = stdout.trim();
-
-    // Try parsing entire stdout as JSON
-    try {
-      const parsed = JSON.parse(trimmed);
-      if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
-        return { raw: trimmed, parsed: parsed as Record<string, unknown> };
-      }
-    } catch {
-      // Not valid JSON as-is, try to find JSON object in text
-    }
-
-    // Try to find JSON object pattern { ... } in stdout
-    const jsonMatch = trimmed.match(/\{[\s\S]*"decision"\s*:[\s\S]*"reason"\s*:[\s\S]*\}/);
-    if (jsonMatch) {
-      try {
-        const parsed = JSON.parse(jsonMatch[0]);
-        if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
-          return { raw: jsonMatch[0], parsed: parsed as Record<string, unknown> };
-        }
-      } catch {
-        // Invalid JSON in match
-      }
-    }
-
-    // Try broader JSON object extraction
-    const braceMatch = trimmed.match(/\{[\s\S]*\}/);
-    if (braceMatch) {
-      try {
-        const parsed = JSON.parse(braceMatch[0]);
-        if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
-          return { raw: braceMatch[0], parsed: parsed as Record<string, unknown> };
-        }
-      } catch {
-        // Invalid JSON
-      }
-    }
-
-    return null;
   }
 }

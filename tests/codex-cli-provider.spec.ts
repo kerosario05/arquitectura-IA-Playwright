@@ -382,7 +382,7 @@ test("CodexCliProvider reporta JSON inválido en archivo", async () => {
     child.stdout = new EventEmitter();
     child.stderr = new EventEmitter();
     child.kill = () => {};
-    
+
     setTimeout(async () => {
       const workDir = options.cwd || "";
       if (workDir) {
@@ -391,7 +391,7 @@ test("CodexCliProvider reporta JSON inválido en archivo", async () => {
       }
       child.emit("close", 0, null);
     }, 10);
-    
+
     return child;
   }) as any);
 
@@ -417,13 +417,14 @@ test("CodexCliProvider reporta JSON inválido en archivo", async () => {
       ],
       requireJson: true
     })).rejects.toThrow(AiProviderError);
+    // Shared extractor now returns output_missing when all extraction strategies fail
     await expect(provider.completeJson({
       messages: [
         { role: "system", content: "Return JSON only" },
         { role: "user", content: "Test" }
       ],
       requireJson: true
-    })).rejects.toThrow(/invalid json/i);
+    })).rejects.toThrow(/did not write/i);
   } finally {
     __setSpawnForTesting(undefined as any);
   }
@@ -481,7 +482,7 @@ test("CodexCliProvider acepta output válido aunque exitCode != 0", async () => 
 
     expect(result.parsedJson?.decision).toBe("repaired_plan");
     expect(result.parsedJson?.candidateId).toBe("nav-products");
-    expect(result.diagnostics?.warning).toBe("codex_exited_non_zero_but_output_valid");
+    expect(result.diagnostics?.warning).toBe("ai_provider_exited_non_zero_but_output_valid");
     expect(result.diagnostics?.exitCode).toBe(1);
     expect(result.diagnostics?.stderr).toContain("non-fatal issue");
   } finally {
@@ -544,7 +545,7 @@ test("CodexCliProvider falla con exitCode != 0 y repair-decision.json inválido"
     child.stdout = new EventEmitter();
     child.stderr = new EventEmitter();
     child.kill = () => {};
-    
+
     setTimeout(async () => {
       const workDir = options.cwd || "";
       if (workDir) {
@@ -554,7 +555,7 @@ test("CodexCliProvider falla con exitCode != 0 y repair-decision.json inválido"
       child.stderr.emit("data", Buffer.from("Codex had a problem"));
       child.emit("close", 1, null);
     }, 10);
-    
+
     return child;
   }) as any);
 
@@ -580,13 +581,14 @@ test("CodexCliProvider falla con exitCode != 0 y repair-decision.json inválido"
       ],
       requireJson: true
     })).rejects.toThrow(AiProviderError);
+    // Shared extractor now returns output_missing when all extraction strategies fail
     await expect(provider.completeJson({
       messages: [
         { role: "system", content: "Return JSON only" },
         { role: "user", content: "Test" }
       ],
       requireJson: true
-    })).rejects.toThrow(/invalid json/i);
+    })).rejects.toThrow(/did not write/i);
   } finally {
     __setSpawnForTesting(undefined as any);
   }
@@ -890,18 +892,18 @@ test("CodexCliProvider log filenames son consistentes (codex-stdout.log, codex-s
   }
 });
 
-test("CodexCliProvider stdout fallback pasa cuando repair-decision.json falta y fallback habilitado", async () => {
+test("CodexCliProvider extrae JSON de stdout cuando archivo falta", async () => {
   __setSpawnForTesting(((command: string, args: string[], options: any) => {
     const child = new EventEmitter() as any;
     child.stdout = new EventEmitter();
     child.stderr = new EventEmitter();
     child.kill = () => {};
-    
+
     setTimeout(() => {
       child.stdout.emit("data", Buffer.from('{"decision":"no_safe_action","reason":"connection test"}'));
       child.emit("close", 0, null);
     }, 10);
-    
+
     return child;
   }) as any);
 
@@ -917,8 +919,7 @@ test("CodexCliProvider stdout fallback pasa cuando repair-decision.json falta y 
       extraArgs: [],
       timeoutMs: 30000,
       requireJson: true,
-      requireJsonSchema: false,
-      allowStdoutJsonFallback: true
+      requireJsonSchema: false
     });
 
     const result = await provider.completeJson({
@@ -929,26 +930,26 @@ test("CodexCliProvider stdout fallback pasa cuando repair-decision.json falta y 
       requireJson: true
     });
 
+    // Shared extractor automatically tries stdout when file is missing
     expect(result.parsedJson?.decision).toBe("no_safe_action");
     expect(result.parsedJson?.reason).toBe("connection test");
-    expect(result.diagnostics?.warning).toBe("codex_stdout_fallback_used");
   } finally {
     __setSpawnForTesting(undefined as any);
   }
 });
 
-test("CodexCliProvider stdout fallback valida decision/reason", async () => {
+test("CodexCliProvider extrae JSON de stdout con campos completos", async () => {
   __setSpawnForTesting(((command: string, args: string[], options: any) => {
     const child = new EventEmitter() as any;
     child.stdout = new EventEmitter();
     child.stderr = new EventEmitter();
     child.kill = () => {};
-    
+
     setTimeout(() => {
       child.stdout.emit("data", Buffer.from('{"decision":"repaired_plan","reason":"Found safe candidate","candidateId":"el-1","confidence":0.9}'));
       child.emit("close", 0, null);
     }, 10);
-    
+
     return child;
   }) as any);
 
@@ -964,8 +965,7 @@ test("CodexCliProvider stdout fallback valida decision/reason", async () => {
       extraArgs: [],
       timeoutMs: 30000,
       requireJson: true,
-      requireJsonSchema: false,
-      allowStdoutJsonFallback: true
+      requireJsonSchema: false
     });
 
     const result = await provider.completeJson({
@@ -976,11 +976,11 @@ test("CodexCliProvider stdout fallback valida decision/reason", async () => {
       requireJson: true
     });
 
+    // Shared extractor automatically handles stdout JSON
     expect(result.parsedJson?.decision).toBe("repaired_plan");
     expect(result.parsedJson?.reason).toBe("Found safe candidate");
     expect(result.parsedJson?.candidateId).toBe("el-1");
     expect(result.parsedJson?.confidence).toBe(0.9);
-    expect(result.diagnostics?.warning).toBe("codex_stdout_fallback_used");
   } finally {
     __setSpawnForTesting(undefined as any);
   }
@@ -1036,18 +1036,18 @@ test("CodexCliProvider stdout fallback no acepta JSON inválido", async () => {
   }
 });
 
-test("CodexCliProvider sin fallback falla cuando repair-decision.json falta (AI Repair real)", async () => {
+test("CodexCliProvider falla cuando repair-decision.json falta y stdout inválido", async () => {
   __setSpawnForTesting(((command: string, args: string[], options: any) => {
     const child = new EventEmitter() as any;
     child.stdout = new EventEmitter();
     child.stderr = new EventEmitter();
     child.kill = () => {};
-    
+
     setTimeout(() => {
-      child.stdout.emit("data", Buffer.from('{"decision":"no_safe_action","reason":"stdout response"}'));
+      child.stdout.emit("data", Buffer.from("This is not valid JSON"));
       child.emit("close", 0, null);
     }, 10);
-    
+
     return child;
   }) as any);
 
@@ -1063,10 +1063,10 @@ test("CodexCliProvider sin fallback falla cuando repair-decision.json falta (AI 
       extraArgs: [],
       timeoutMs: 30000,
       requireJson: true,
-      requireJsonSchema: false,
-      allowStdoutJsonFallback: false
+      requireJsonSchema: false
     });
 
+    // Even with automatic stdout extraction, if stdout is not valid JSON, it fails
     await expect(provider.completeJson({
       messages: [
         { role: "system", content: "Return JSON only" },
@@ -1086,18 +1086,18 @@ test("CodexCliProvider sin fallback falla cuando repair-decision.json falta (AI 
   }
 });
 
-test("CodexCliProvider stdout fallback extrae JSON de texto mixto", async () => {
+test("CodexCliProvider extrae JSON de texto mixto en stdout", async () => {
   __setSpawnForTesting(((command: string, args: string[], options: any) => {
     const child = new EventEmitter() as any;
     child.stdout = new EventEmitter();
     child.stderr = new EventEmitter();
     child.kill = () => {};
-    
+
     setTimeout(() => {
       child.stdout.emit("data", Buffer.from("Some prefix text\n{\"decision\":\"no_safe_action\",\"reason\":\"connection test\"}\nSome suffix text"));
       child.emit("close", 0, null);
     }, 10);
-    
+
     return child;
   }) as any);
 
@@ -1113,8 +1113,7 @@ test("CodexCliProvider stdout fallback extrae JSON de texto mixto", async () => 
       extraArgs: [],
       timeoutMs: 30000,
       requireJson: true,
-      requireJsonSchema: false,
-      allowStdoutJsonFallback: true
+      requireJsonSchema: false
     });
 
     const result = await provider.completeJson({
@@ -1125,9 +1124,9 @@ test("CodexCliProvider stdout fallback extrae JSON de texto mixto", async () => 
       requireJson: true
     });
 
+    // Shared extractor uses embedded_json strategy to extract from mixed text
     expect(result.parsedJson?.decision).toBe("no_safe_action");
     expect(result.parsedJson?.reason).toBe("connection test");
-    expect(result.diagnostics?.warning).toBe("codex_stdout_fallback_used");
   } finally {
     __setSpawnForTesting(undefined as any);
   }

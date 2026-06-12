@@ -229,6 +229,12 @@ export function evaluateEarlyCompletionPolicy(input: {
   skippedSteps: Array<{ targetText: string; status: string; recoveredBy?: string; index?: number }>;
   satisfiedAssertions: string[];
   pendingAssertions: string[];
+  // NEW: Critical assertions for detail scenarios
+  criticalAssertions?: {
+    target?: string; // Product name (e.g., "Tarjeta Crédito Visa Clásica")
+    detailSections?: string[]; // Expected sections (e.g., ["Beneficios", "Detalles"])
+    actionButtons?: string[]; // Expected buttons (e.g., ["Solicitar", "Volver"])
+  };
 }): EarlyCompletionPolicyResult {
   const classification = classifyPendingActionsForEarlyCompletion({
     pendingActions: input.pendingActions,
@@ -238,6 +244,92 @@ export function evaluateEarlyCompletionPolicy(input: {
   });
 
   const hasFunctionalRequired = classification.functionalRequired.length > 0;
+
+  // CRITICAL: Check for pending critical assertions in detail scenarios
+  if (input.criticalAssertions) {
+    const pendingCriticalAssertions: string[] = [];
+
+    // Check if product name assertion is pending
+    if (input.criticalAssertions.target) {
+      const targetNormalized = normalizeText(input.criticalAssertions.target);
+      const isTargetSatisfied = input.satisfiedAssertions.some(
+        (a) => normalizeText(a) === targetNormalized
+      );
+      const isTargetPending = input.pendingAssertions.some(
+        (a) => normalizeText(a).includes(targetNormalized) || targetNormalized.includes(normalizeText(a))
+      );
+
+      if (!isTargetSatisfied && isTargetPending) {
+        pendingCriticalAssertions.push(input.criticalAssertions.target);
+      }
+    }
+
+    // Check if detail sections assertions are pending
+    if (input.criticalAssertions.detailSections) {
+      for (const section of input.criticalAssertions.detailSections) {
+        const sectionNormalized = normalizeText(section);
+        const isSectionSatisfied = input.satisfiedAssertions.some(
+          (a) => normalizeText(a).includes(sectionNormalized)
+        );
+        const isSectionPending = input.pendingAssertions.some(
+          (a) => normalizeText(a).includes(sectionNormalized)
+        );
+
+        if (!isSectionSatisfied && isSectionPending) {
+          pendingCriticalAssertions.push(section);
+        }
+      }
+    }
+
+    // Check if action buttons assertions are pending
+    if (input.criticalAssertions.actionButtons) {
+      for (const button of input.criticalAssertions.actionButtons) {
+        const buttonNormalized = normalizeText(button);
+        const isButtonSatisfied = input.satisfiedAssertions.some(
+          (a) => normalizeText(a).includes(buttonNormalized)
+        );
+        const isButtonPending = input.pendingAssertions.some(
+          (a) => normalizeText(a).includes(buttonNormalized)
+        );
+
+        if (!isButtonSatisfied && isButtonPending) {
+          pendingCriticalAssertions.push(button);
+        }
+      }
+    }
+
+    // BLOCK early completion if critical assertions are pending
+    if (pendingCriticalAssertions.length > 0) {
+      console.log(
+        `[detail-assertion-gate] earlyCompletionBlocked=true reason=pending_critical_assertions ` +
+        `pendingCritical=[${pendingCriticalAssertions.join(", ")}]`
+      );
+
+      return {
+        allowed: false,
+        reason: "pending_critical_assertions",
+        classification,
+        pendingFunctionalTargets: [],
+        ignoredAuthConsumedTargets: classification.authConsumed.map(a => a.target),
+        diagnostics: {
+          evaluated: true,
+          allowed: false,
+          reason: "pending_critical_assertions",
+          pendingFunctionalTargets: [],
+          ignoredAuthConsumedTargets: classification.authConsumed.map(a => a.target),
+          satisfiedAssertions: input.satisfiedAssertions,
+          pendingActions: input.pendingActions.map(a => a.target),
+          classifications: {
+            authConsumed: classification.authConsumed.map(a => a.target),
+            optional: classification.optional.map(a => a.target),
+            duplicateAlreadyExecuted: classification.duplicateAlreadyExecuted.map(a => a.target),
+            functionalRequired: classification.functionalRequired.map(a => a.target)
+          },
+          executedStepIndices: Array.from(input.executedStepIndices)
+        }
+      };
+    }
+  }
 
   if (hasFunctionalRequired) {
     const pendingFunctionalTargets = classification.functionalRequired.map(a => a.target);

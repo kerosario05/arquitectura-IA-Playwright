@@ -2,7 +2,9 @@ import { AiProviderError, type AiProvider, type AiProviderConfig } from "./ai-pr
 export { AiProviderError, type AiProvider, type AiProviderConfig } from "./ai-provider.types";
 import { OpenAICompatibleProvider } from "./openai-compatible-provider";
 import { CodexCliProvider } from "./providers/codex-cli-provider";
+import { CopilotCliProvider } from "./providers/copilot-cli-provider";
 import { resolveCodexCliPath } from "../agent/codex-cli-resolver";
+import { resolveScenarioAiConfig, resolveRepairAiConfig, resolveGeneralAiConfig } from "./ai-config-resolver";
 
 function parseBool(value: string | undefined, defaultValue = false): boolean {
   if (!value) return defaultValue;
@@ -101,8 +103,23 @@ export async function createAiProviderFromEnv(): Promise<AiProvider | undefined>
   const config = readAiProviderConfigFromEnv();
   if (!config) return undefined;
 
+  return createAiProviderFromConfig(config);
+}
+
+/**
+ * Create an AI provider from a given configuration.
+ */
+export async function createAiProviderFromConfig(config: AiProviderConfig): Promise<AiProvider> {
   if (config.provider === "openai_compatible") {
     return new OpenAICompatibleProvider(config);
+  }
+
+  if (config.provider === "copilot_cli") {
+    // Command should already be resolved in config, but provide default
+    if (!config.command) {
+      config.command = "copilot";
+    }
+    return new CopilotCliProvider(config);
   }
 
   if (config.provider === "codex_cli") {
@@ -113,5 +130,32 @@ export async function createAiProviderFromEnv(): Promise<AiProvider | undefined>
     return new CodexCliProvider(config);
   }
 
-  return undefined;
+  throw new AiProviderError(
+    "ai_provider_unsupported",
+    `Unsupported provider "${config.provider}". Expected "openai_compatible", "copilot_cli", or "codex_cli".`
+  );
+}
+
+/**
+ * Shorthand for creating an AI provider for scenario generation.
+ */
+export async function createScenarioAiProvider(): Promise<AiProvider> {
+  const config = resolveScenarioAiConfig();
+  return createAiProviderFromConfig(config);
+}
+
+/**
+ * Shorthand for creating an AI provider for repair.
+ */
+export async function createRepairAiProvider(): Promise<AiProvider> {
+  const config = resolveRepairAiConfig();
+  return createAiProviderFromConfig(config);
+}
+
+/**
+ * Shorthand for creating a general AI provider.
+ */
+export async function createGeneralAiProvider(): Promise<AiProvider> {
+  const config = resolveGeneralAiConfig();
+  return createAiProviderFromConfig(config);
 }

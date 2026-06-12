@@ -1,0 +1,597 @@
+import { test, expect } from "@playwright/test";
+import {
+  validateScenarioCompliance,
+  validateScenariosCompliance,
+} from "../src/scenarios/scenario-route-compliance-validator";
+import type { McpScenario } from "../src/scenarios/scenario-types";
+import type { DerivedExecutionContext } from "../src/scenarios/route-profile-derived-context";
+
+test.describe("Scenario Route Compliance Validator - Multi-App", () => {
+  test("unbacked click is rejected", () => {
+    const context: DerivedExecutionContext = {
+      appSlug: "retail-app",
+      allowedExecutableClicks: ["Iniciar", "Productos", "Carrito"],
+      assertionOnlyTerms: [],
+      visibleButNotExecutableTerms: [],
+      sensitiveActions: [],
+      entryActionTargets: ["Iniciar"],
+      routeTargets: ["Iniciar", "Productos", "Carrito"],
+      aliasesByTarget: new Map(),
+      domainTerms: [],
+      profileConfidence: "high",
+      diagnostics: []
+    };
+
+    const scenario: McpScenario = {
+      sourceIssueKey: "TEST-1",
+      title: "Invalid scenario with unbacked click",
+      steps: [
+        '1. Clic en "Iniciar".',
+        '2. Clic en "Contenido X".', // Not in allowedExecutableClicks
+        '3. Validar que se muestre "Resultado".'
+      ],
+      preconditions: [],
+      expectedResult: "Should see result",
+      type: "Functional",
+      database: "QA",
+      isConverted: 0,
+      automationType: "ui_with_auth_gate",
+      setupStrategy: "auth_gate",
+      appSlug: "retail-app",
+      targetAppSlug: "retail-app",
+      targetAppName: "retail-app",
+      routeProfile: "retail-profile",
+      dataRequirements: "",
+      nonExecutableCriteria: "",
+      mcpExecutable: true
+    };
+
+    const result = validateScenarioCompliance(scenario, context);
+
+    expect(result.valid).toBe(false);
+    expect(result.reasonCode).toBe("unbacked_click_target");
+    expect(result.diagnostics.some(d =>
+      d.level === "error" && d.target === "Contenido X"
+    )).toBe(true);
+  });
+
+  test("assertion-only term used as click is rejected", () => {
+    const context: DerivedExecutionContext = {
+      appSlug: "banking-app",
+      allowedExecutableClicks: ["Iniciar", "Cuentas"],
+      assertionOnlyTerms: ["Saldo", "Nombre de cuenta", "Número de cuenta"],
+      visibleButNotExecutableTerms: [],
+      sensitiveActions: [],
+      entryActionTargets: ["Iniciar"],
+      routeTargets: ["Iniciar", "Cuentas"],
+      aliasesByTarget: new Map(),
+      domainTerms: [],
+      profileConfidence: "high",
+      diagnostics: []
+    };
+
+    const scenario: McpScenario = {
+      sourceIssueKey: "TEST-2",
+      title: "Invalid scenario with assertion term as click",
+      steps: [
+        '1. Clic en "Iniciar".',
+        '2. Clic en "Cuentas".',
+        '3. Clic en "Saldo".', // Assertion-only term used as click
+      ],
+      preconditions: [],
+      expectedResult: "Should see balance",
+      type: "Functional",
+      database: "QA",
+      isConverted: 0,
+      automationType: "ui_with_auth_gate",
+      setupStrategy: "auth_gate",
+      appSlug: "banking-app",
+      targetAppSlug: "banking-app",
+      targetAppName: "banking-app",
+      routeProfile: "banking-profile",
+      dataRequirements: "",
+      nonExecutableCriteria: "",
+      mcpExecutable: true
+    };
+
+    const result = validateScenarioCompliance(scenario, context);
+
+    expect(result.valid).toBe(false);
+    expect(result.reasonCode).toBe("assertion_term_used_as_click");
+    expect(result.diagnostics.some(d =>
+      d.level === "error" && d.message.includes("assertion-only term")
+    )).toBe(true);
+  });
+
+  test("validation of assertion-only term is allowed", () => {
+    const context: DerivedExecutionContext = {
+      appSlug: "public-info-app",
+      allowedExecutableClicks: ["Iniciar", "Información"],
+      assertionOnlyTerms: ["Descripción", "Beneficio", "Condición"],
+      visibleButNotExecutableTerms: [],
+      sensitiveActions: [],
+      entryActionTargets: ["Iniciar"],
+      routeTargets: ["Iniciar", "Información"],
+      aliasesByTarget: new Map(),
+      domainTerms: [],
+      profileConfidence: "high",
+      diagnostics: []
+    };
+
+    const scenario: McpScenario = {
+      sourceIssueKey: "TEST-3",
+      title: "Valid scenario with assertion-only validations",
+      steps: [
+        '1. Clic en "Iniciar".',
+        '2. Clic en "Información".',
+        '3. Validar que se muestre "Descripción".',
+        '4. Validar que se muestre "Beneficio".',
+      ],
+      preconditions: [],
+      expectedResult: "Information displayed",
+      type: "Functional",
+      database: "QA",
+      isConverted: 0,
+      automationType: "ui_with_auth_gate",
+      setupStrategy: "auth_gate",
+      appSlug: "public-info-app",
+      targetAppSlug: "public-info-app",
+      targetAppName: "public-info-app",
+      routeProfile: "info-profile",
+      dataRequirements: "",
+      nonExecutableCriteria: "",
+      mcpExecutable: true
+    };
+
+    const result = validateScenarioCompliance(scenario, context);
+
+    expect(result.valid).toBe(true);
+    expect(result.reasonCode).toBe("valid");
+  });
+
+  test("sensitive action click is rejected", () => {
+    const context: DerivedExecutionContext = {
+      appSlug: "banking-app",
+      allowedExecutableClicks: ["Iniciar", "Cuentas", "Solicitar"],
+      assertionOnlyTerms: [],
+      visibleButNotExecutableTerms: [],
+      sensitiveActions: ["Solicitar", "Pagar", "Transferir"],
+      entryActionTargets: ["Iniciar"],
+      routeTargets: ["Iniciar", "Cuentas"],
+      aliasesByTarget: new Map(),
+      domainTerms: [],
+      profileConfidence: "high",
+      diagnostics: []
+    };
+
+    const scenario: McpScenario = {
+      sourceIssueKey: "TEST-4",
+      title: "Invalid scenario with sensitive action click",
+      steps: [
+        '1. Clic en "Iniciar".',
+        '2. Clic en "Cuentas".',
+        '3. Clic en "Solicitar".', // Sensitive action
+      ],
+      preconditions: [],
+      expectedResult: "Request submitted",
+      type: "Functional",
+      database: "QA",
+      isConverted: 0,
+      automationType: "ui_with_auth_gate",
+      setupStrategy: "auth_gate",
+      appSlug: "banking-app",
+      targetAppSlug: "banking-app",
+      targetAppName: "banking-app",
+      routeProfile: "banking-profile",
+      dataRequirements: "",
+      nonExecutableCriteria: "",
+      mcpExecutable: true
+    };
+
+    const result = validateScenarioCompliance(scenario, context);
+
+    expect(result.valid).toBe(false);
+    expect(result.reasonCode).toBe("sensitive_click_not_allowed");
+  });
+
+  test("sensitive action validation is allowed", () => {
+    const context: DerivedExecutionContext = {
+      appSlug: "banking-app",
+      allowedExecutableClicks: ["Iniciar", "Productos"],
+      assertionOnlyTerms: [],
+      visibleButNotExecutableTerms: [],
+      sensitiveActions: ["Solicitar", "Contratar"],
+      entryActionTargets: ["Iniciar"],
+      routeTargets: ["Iniciar", "Productos"],
+      aliasesByTarget: new Map(),
+      domainTerms: [],
+      profileConfidence: "high",
+      diagnostics: []
+    };
+
+    const scenario: McpScenario = {
+      sourceIssueKey: "TEST-5",
+      title: "Valid scenario with sensitive action validation",
+      steps: [
+        '1. Clic en "Iniciar".',
+        '2. Clic en "Productos".',
+        '3. Validar que el botón "Solicitar" esté visible.',
+        '4. Validar que el botón "Contratar" esté deshabilitado.',
+      ],
+      preconditions: [],
+      expectedResult: "Buttons displayed correctly",
+      type: "Functional",
+      database: "QA",
+      isConverted: 0,
+      automationType: "ui_with_auth_gate",
+      setupStrategy: "auth_gate",
+      appSlug: "banking-app",
+      targetAppSlug: "banking-app",
+      targetAppName: "banking-app",
+      routeProfile: "banking-profile",
+      dataRequirements: "",
+      nonExecutableCriteria: "",
+      mcpExecutable: true
+    };
+
+    const result = validateScenarioCompliance(scenario, context);
+
+    expect(result.valid).toBe(true);
+    expect(result.reasonCode).toBe("valid");
+  });
+
+  test("alias backed by profile is allowed", () => {
+    const aliasesByTarget = new Map<string, string[]>();
+    aliasesByTarget.set("Inicio", ["Home", "Start"]);
+    aliasesByTarget.set("Home", ["Inicio"]);
+    aliasesByTarget.set("Start", ["Inicio"]);
+
+    const context: DerivedExecutionContext = {
+      appSlug: "app-a",
+      allowedExecutableClicks: ["Inicio", "Productos"],
+      assertionOnlyTerms: [],
+      visibleButNotExecutableTerms: [],
+      sensitiveActions: [],
+      entryActionTargets: ["Inicio"],
+      routeTargets: ["Inicio", "Productos"],
+      aliasesByTarget,
+      domainTerms: [],
+      profileConfidence: "high",
+      diagnostics: []
+    };
+
+    const scenario: McpScenario = {
+      sourceIssueKey: "TEST-6",
+      title: "Valid scenario with alias",
+      steps: [
+        '1. Clic en "Home".', // Alias of "Inicio"
+        '2. Clic en "Productos".',
+      ],
+      preconditions: [],
+      expectedResult: "Products displayed",
+      type: "Functional",
+      database: "QA",
+      isConverted: 0,
+      automationType: "ui_with_auth_gate",
+      setupStrategy: "auth_gate",
+      appSlug: "app-a",
+      targetAppSlug: "app-a",
+      targetAppName: "app-a",
+      routeProfile: "app-a-profile",
+      dataRequirements: "",
+      nonExecutableCriteria: "",
+      mcpExecutable: true
+    };
+
+    const result = validateScenarioCompliance(scenario, context);
+
+    expect(result.valid).toBe(true);
+    expect(result.reasonCode).toBe("valid");
+  });
+
+  test("valid scenario with existing route passes", () => {
+    const context: DerivedExecutionContext = {
+      appSlug: "retail-app",
+      allowedExecutableClicks: ["Iniciar", "Categorías", "Electrónicos", "Ver detalle"],
+      assertionOnlyTerms: ["Nombre", "Precio", "Descripción"],
+      visibleButNotExecutableTerms: [],
+      sensitiveActions: ["Comprar"],
+      entryActionTargets: ["Iniciar"],
+      routeTargets: ["Iniciar", "Categorías", "Electrónicos", "Ver detalle"],
+      aliasesByTarget: new Map(),
+      domainTerms: ["producto"],
+      profileConfidence: "high",
+      diagnostics: []
+    };
+
+    const scenario: McpScenario = {
+      sourceIssueKey: "TEST-7",
+      title: "Valid complete scenario",
+      steps: [
+        '1. Clic en "Iniciar".',
+        '2. Clic en "Categorías".',
+        '3. Clic en "Electrónicos".',
+        '4. Seleccionar el primer producto visible del listado.',
+        '5. Validar que se muestre "Nombre".',
+        '6. Validar que se muestre "Precio".',
+        '7. Validar que el botón "Comprar" esté visible.',
+      ],
+      preconditions: [],
+      expectedResult: "Product details displayed",
+      type: "Functional",
+      database: "QA",
+      isConverted: 0,
+      automationType: "ui_with_auth_gate",
+      setupStrategy: "auth_gate",
+      appSlug: "retail-app",
+      targetAppSlug: "retail-app",
+      targetAppName: "retail-app",
+      routeProfile: "retail-profile",
+      dataRequirements: "",
+      nonExecutableCriteria: "",
+      mcpExecutable: true
+    };
+
+    const result = validateScenarioCompliance(scenario, context);
+
+    expect(result.valid).toBe(true);
+    expect(result.reasonCode).toBe("valid");
+  });
+
+  test("validateScenariosCompliance filters invalid scenarios", () => {
+    const context: DerivedExecutionContext = {
+      appSlug: "app-b",
+      allowedExecutableClicks: ["Iniciar", "Módulo A"],
+      assertionOnlyTerms: ["Campo X"],
+      visibleButNotExecutableTerms: [],
+      sensitiveActions: ["Acción Sensible"],
+      entryActionTargets: ["Iniciar"],
+      routeTargets: ["Iniciar", "Módulo A"],
+      aliasesByTarget: new Map(),
+      domainTerms: [],
+      profileConfidence: "high",
+      diagnostics: []
+    };
+
+    const scenarios: McpScenario[] = [
+      {
+        sourceIssueKey: "TEST-8",
+        title: "Valid scenario",
+        steps: ['1. Clic en "Iniciar".', '2. Clic en "Módulo A".'],
+        preconditions: [],
+        expectedResult: "Module displayed",
+        type: "Functional",
+        database: "QA",
+        isConverted: 0,
+        automationType: "ui_with_auth_gate",
+        setupStrategy: "auth_gate",
+        appSlug: "app-b",
+        targetAppSlug: "app-b",
+        targetAppName: "app-b",
+        routeProfile: "app-b-profile",
+        dataRequirements: "",
+        nonExecutableCriteria: "",
+        mcpExecutable: true
+      },
+      {
+        sourceIssueKey: "TEST-9",
+        title: "Invalid scenario with unbacked click",
+        steps: ['1. Clic en "Iniciar".', '2. Clic en "Módulo X".'], // Not backed
+        preconditions: [],
+        expectedResult: "Module displayed",
+        type: "Functional",
+        database: "QA",
+        isConverted: 0,
+        automationType: "ui_with_auth_gate",
+        setupStrategy: "auth_gate",
+        appSlug: "app-b",
+        targetAppSlug: "app-b",
+        targetAppName: "app-b",
+        routeProfile: "app-b-profile",
+        dataRequirements: "",
+        nonExecutableCriteria: "",
+        mcpExecutable: true
+      }
+    ];
+
+    const result = validateScenariosCompliance(scenarios, context, new Map());
+
+    expect(result.validScenarios.length).toBe(1);
+    expect(result.invalidScenarios.length).toBe(1);
+    expect(result.validScenarios[0].sourceIssueKey).toBe("TEST-8");
+    expect(result.invalidScenarios[0].scenario.sourceIssueKey).toBe("TEST-9");
+    expect(result.invalidScenarios[0].result.reasonCode).toBe("unbacked_click_target");
+  });
+
+  test("entry step target is allowed via additionalEntryTargets", () => {
+    const context: DerivedExecutionContext = {
+      appSlug: "app-a",
+      allowedExecutableClicks: ["Iniciar", "Información de productos"],
+      assertionOnlyTerms: [],
+      visibleButNotExecutableTerms: [],
+      sensitiveActions: [],
+      entryActionTargets: ["Iniciar"],
+      routeTargets: ["Iniciar", "Información de productos"],
+      aliasesByTarget: new Map(),
+      domainTerms: [],
+      profileConfidence: "high",
+      diagnostics: []
+    };
+
+    const scenario: McpScenario = {
+      sourceIssueKey: "TEST-10",
+      title: "Valid scenario with entry step",
+      steps: [
+        '1. Clic en "Iniciar".',
+        '2. Clic en "Información de productos".',
+        '3. Validar que se muestre "Lista de productos".'
+      ],
+      preconditions: [],
+      expectedResult: "Products list displayed",
+      type: "Functional",
+      database: "QA",
+      isConverted: 0,
+      automationType: "ui_with_auth_gate",
+      setupStrategy: "auth_gate",
+      appSlug: "app-a",
+      targetAppSlug: "app-a",
+      targetAppName: "app-a",
+      routeProfile: "app-a-profile",
+      dataRequirements: "",
+      nonExecutableCriteria: "",
+      mcpExecutable: true
+    };
+
+    const result = validateScenarioCompliance(scenario, context);
+
+    expect(result.valid).toBe(true);
+    expect(result.reasonCode).toBe("valid");
+  });
+
+  test("mojibake target matches via normalization", () => {
+    const context: DerivedExecutionContext = {
+      appSlug: "arquitectura-automatizacion",
+      allowedExecutableClicks: ["Iniciar", "Información de productos"],
+      assertionOnlyTerms: [],
+      visibleButNotExecutableTerms: [],
+      sensitiveActions: [],
+      entryActionTargets: ["Iniciar"],
+      routeTargets: ["Iniciar", "Información de productos"],
+      aliasesByTarget: new Map(),
+      domainTerms: [],
+      profileConfidence: "high",
+      diagnostics: []
+    };
+
+    const scenario: McpScenario = {
+      sourceIssueKey: "TEST-11",
+      title: "Valid scenario with mojibake encoding",
+      steps: [
+        '1. Clic en "Iniciar".',
+        '2. Clic en "InformaciÃ³n de productos".', // Mojibake version
+        '3. Validar que se muestre "Lista".'
+      ],
+      preconditions: [],
+      expectedResult: "List displayed",
+      type: "Functional",
+      database: "QA",
+      isConverted: 0,
+      automationType: "ui_with_auth_gate",
+      setupStrategy: "auth_gate",
+      appSlug: "arquitectura-automatizacion",
+      targetAppSlug: "arquitectura-automatizacion",
+      targetAppName: "arquitectura-automatizacion",
+      routeProfile: "arq-profile",
+      dataRequirements: "",
+      nonExecutableCriteria: "",
+      mcpExecutable: true
+    };
+
+    const result = validateScenarioCompliance(scenario, context);
+
+    expect(result.valid).toBe(true);
+    expect(result.reasonCode).toBe("valid");
+    // Check that normalization strategy was logged
+    expect(result.diagnostics.some(d =>
+      d.level === "info" && d.message.includes("normalized_mojibake")
+    )).toBe(true);
+  });
+
+  test("accent-insensitive matching works", () => {
+    const context: DerivedExecutionContext = {
+      appSlug: "banking-app",
+      allowedExecutableClicks: ["Iniciar", "Depósitos a Plazo"],
+      assertionOnlyTerms: [],
+      visibleButNotExecutableTerms: [],
+      sensitiveActions: [],
+      entryActionTargets: ["Iniciar"],
+      routeTargets: ["Iniciar", "Depósitos a Plazo"],
+      aliasesByTarget: new Map(),
+      domainTerms: [],
+      profileConfidence: "high",
+      diagnostics: []
+    };
+
+    const scenario: McpScenario = {
+      sourceIssueKey: "TEST-12",
+      title: "Valid scenario with accent variation",
+      steps: [
+        '1. Clic en "Iniciar".',
+        '2. Clic en "Depositos a plazo".', // Missing accents, lowercase
+        '3. Validar que se muestre "Lista de depósitos".'
+      ],
+      preconditions: [],
+      expectedResult: "Deposits list displayed",
+      type: "Functional",
+      database: "QA",
+      isConverted: 0,
+      automationType: "ui_with_auth_gate",
+      setupStrategy: "auth_gate",
+      appSlug: "banking-app",
+      targetAppSlug: "banking-app",
+      targetAppName: "banking-app",
+      routeProfile: "banking-profile",
+      dataRequirements: "",
+      nonExecutableCriteria: "",
+      mcpExecutable: true
+    };
+
+    const result = validateScenarioCompliance(scenario, context);
+
+    expect(result.valid).toBe(true);
+    expect(result.reasonCode).toBe("valid");
+    // Check that normalization strategy was logged
+    expect(result.diagnostics.some(d =>
+      d.level === "info" && d.message.includes("normalized_accent")
+    )).toBe(true);
+  });
+
+  test("unbacked click still rejected after normalization", () => {
+    const context: DerivedExecutionContext = {
+      appSlug: "retail-app",
+      allowedExecutableClicks: ["Iniciar", "Información de productos"],
+      assertionOnlyTerms: [],
+      visibleButNotExecutableTerms: [],
+      sensitiveActions: [],
+      entryActionTargets: ["Iniciar"],
+      routeTargets: ["Iniciar", "Información de productos"],
+      aliasesByTarget: new Map(),
+      domainTerms: [],
+      profileConfidence: "high",
+      diagnostics: []
+    };
+
+    const scenario: McpScenario = {
+      sourceIssueKey: "TEST-13",
+      title: "Invalid scenario with truly unbacked click",
+      steps: [
+        '1. Clic en "Iniciar".',
+        '2. Clic en "Contenido informativo".', // Not backed, even with normalization
+        '3. Validar que se muestre "Resultado".'
+      ],
+      preconditions: [],
+      expectedResult: "Result displayed",
+      type: "Functional",
+      database: "QA",
+      isConverted: 0,
+      automationType: "ui_with_auth_gate",
+      setupStrategy: "auth_gate",
+      appSlug: "retail-app",
+      targetAppSlug: "retail-app",
+      targetAppName: "retail-app",
+      routeProfile: "retail-profile",
+      dataRequirements: "",
+      nonExecutableCriteria: "",
+      mcpExecutable: true
+    };
+
+    const result = validateScenarioCompliance(scenario, context);
+
+    expect(result.valid).toBe(false);
+    expect(result.reasonCode).toBe("unbacked_click_target");
+    expect(result.diagnostics.some(d =>
+      d.level === "error" && d.target === "Contenido informativo"
+    )).toBe(true);
+  });
+});
+

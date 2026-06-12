@@ -14,6 +14,17 @@ import {
   resolveFillTarget,
   type ActiveContainerContext
 } from "./target-resolver";
+import {
+  isProductCardTarget,
+  findProductCardClickCandidates,
+  tryProductCardClickStrategies,
+  type ProductCardClickResult
+} from "./product-card-click-resolver";
+import {
+  recoverMissingIntermediateForFinalTarget,
+  type IntermediateRecoveryResult
+} from "./intermediate-step-recovery";
+import { findBestProductNameMatch, type ProductNameMatchResult } from "./product-name-matcher";
 import { isSelectionLikeTarget as isSelectionLikeTargetNew, shouldBlockSemanticFallback, getSelectionConfidenceThreshold, verifyPostClickSemanticMatch, buildSelectionCandidatesFromSnapshot } from "./selection-resolution";
 import { resolveLoginForm, type LoginFormResolution } from "./login-resolver";
 import { runAiAssistedDiscovery, type AiAssistedDiscoveryConfig } from "./ai-assisted-discovery";
@@ -1227,20 +1238,363 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   console.log(`[discovery:case] Action targets details: ${parsed.actionTargets.map((t) => `${t.target}(valueSource=${t.valueSource ?? 'none'},valueKey=${t.valueKey ?? 'none'})`).join(", ")}`);
   console.log(`[discovery:case] Setup intents: ${parsed.setupIntents.map((si) => `${si.type}(valueKey=${si.valueKey ?? 'none'},valueKeys=${si.valueKeys?.join(",") ?? 'none'})`).join(", ")}`);
 
-  if (parsed.setupIntents.length > 0) {
-    for (const si of parsed.setupIntents) {
-      if (si.type === "navigation_path" && si.path) {
-        console.log(`[discovery:case] Parsed setup route (navigation): ${si.path.join(" > ")}`);
-      } else if (si.type === "precondition_context") {
-        console.log(`[discovery:case] Parsed setup route (context): ${si.context}`);
-      } else if (si.type === "setup_route") {
-        const target = si.actionTarget === "APP_BASE_URL" ? appBaseUrl : si.actionTarget ?? appBaseUrl;
-        console.log(`[discovery:case] Setup route detected: using ${target}`);
+  // CRITICAL: Detect detail scenario and identify final product click with robust fallbacks
+  let detailTarget: string | undefined;
+  let finalProductClickStepIndex: number | undefined;
+  let detailCriticalAssertions: { target?: string; detailSections?: string[]; actionButtons?: string[] } | undefined;
+  let detailTargetSource: "targetPath" | "lastAction" | "productAssertion" | "ordinalAssertionFallback" | undefined;
+
+  console.log(`[detail-runtime] candidates actionTargets=[${parsed.actionTargets.map(t => `"${t.target}"`).join(", ")}]`);
+  console.log(`[detail-runtime] candidates assertionTargets=[${parsed.assertionTargets.map(t => `"${t.target}"`).join(", ")}]`);
+
+  // Entry and intermediate terms that should NOT be considered as detail targets
+  const entryTerms = new Set(["iniciar", "inicio", "home", "menú", "menu", "información de productos", "productos", "información"]);
+  const intermediateCategoryTerms = new Set([
+    "tarjetas", "tarjetas de crédito", "tarjeta de crédito",
+    "cuentas", "cuentas de efectivo", "cuenta de efectivo",
+    "préstamos", "prestamos",
+    "depósitos", "depositos", "depósitos a plazo", "depositos a plazo",
+    "seguros", "inversiones"
+  ]);
+
+  // Section terms that should NOT be considered as detail targets
+  const detailSectionTerms = new Set([
+    "detalles", "beneficios", "requisitos", "condiciones",
+    "información del producto", "informacion del producto",
+    "términos y condiciones", "terminos y condiciones",
+    "tasas", "información legal", "informacion legal"
+  ]);
+
+  // Button terms that should NOT be considered as detail targets
+  const actionButtonTerms = new Set([
+    "volver", "solicitar", "contratar", "finalizar sesión", "finalizar sesion",
+    "cerrar", "cancelar", "aceptar", "continuar"
+  ]);
+
+  const routeProfileWithPaths = routeProfile as any;
+
+  // FALLBACK A: Try exact targetPath match
+  if (routeProfileWithPaths?.targetPaths) {
+    console.log(`[detail-runtime] targetPathMatches found=${Object.keys(routeProfileWithPaths.targetPaths).length}`);
+
+    for (const actionTarget of parsed.actionTargets) {
+      const actionLabel = actionTarget.target.toLowerCase().trim();
+
+      for (const [pathKey, tp] of Object.entries(routeProfileWithPaths.targetPaths)) {
+        const typedTp = tp as any;
+        const clickableToDetail = typedTp.productMetadata?.clickableToDetail === true ||
+                                   typedTp.productMetadata?.presentationType === "detail_page";
+
+        if (clickableToDetail) {
+          const productLabel = (typedTp.productMetadata.productLabel || typedTp.target).toLowerCase().trim();
+
+          if (actionLabel.includes(productLabel) || productLabel.includes(actionLabel)) {
+            detailTarget = typedTp.productMetadata.productLabel || typedTp.target;
+            finalProductClickStepIndex = actionTarget.index;
+            detailTargetSource = "targetPath";
+            detailCriticalAssertions = {
+              target: detailTarget,
+              detailSections: typedTp.productMetadata.detailSections,
+              actionButtons: typedTp.productMetadata.actionButtons
+            };
+            console.log(
+              `[detail-runtime] targetPathMatch found pathKey="${pathKey}" ` +
+              `actionTarget="${actionTarget.target}" productLabel="${typedTp.productMetadata.productLabel || typedTp.target}"`
+            );
+            break;
+          }
+        }
+      }
+      if (detailTarget) break;
+    }
+  } else {
+    console.log(`[detail-runtime] targetPathMatches found=0 (no routeProfile.targetPaths)`);
+  }
+
+  // FALLBACK B: Use last action target that's not entry/intermediate
+  if (!detailTarget) {
+    console.log(`[detail-runtime] fallback=B trying lastAction`);
+
+    for (let i = parsed.actionTargets.length - 1; i >= 0; i--) {
+      const actionTarget = parsed.actionTargets[i];
+      const targetLower = actionTarget.target.toLowerCase().trim();
+
+      // Skip ordinal selection patterns
+      if (/seleccionar|primer|primera|elemento.*visible|listado/i.test(actionTarget.target)) {
+        console.log(`[detail-runtime] fallback=B skipped actionIndex=${i} target="${actionTarget.target}" reason=ordinal_pattern`);
+        continue;
+      }
+
+      // Skip entry terms
+      if (entryTerms.has(targetLower)) {
+        console.log(`[detail-runtime] fallback=B skipped actionIndex=${i} target="${actionTarget.target}" reason=entry_term`);
+        continue;
+      }
+
+      // Skip intermediate category terms
+      if (intermediateCategoryTerms.has(targetLower)) {
+        console.log(`[detail-runtime] fallback=B skipped actionIndex=${i} target="${actionTarget.target}" reason=intermediate_term`);
+        continue;
+      }
+
+      // This is likely the product target
+      detailTarget = actionTarget.target;
+      finalProductClickStepIndex = actionTarget.index;
+      detailTargetSource = "lastAction";
+      console.log(
+        `[detail-runtime] fallback=B selected actionIndex=${i} target="${actionTarget.target}" ` +
+        `index=${actionTarget.index} finalProductClickStepIndex=${finalProductClickStepIndex}`
+      );
+      break;
+    }
+  }
+
+  // FALLBACK C: Use main product assertion (exclude sections/buttons)
+  if (!detailTarget) {
+    console.log(`[detail-runtime] fallback=C trying productAssertion`);
+
+    for (const assertionTarget of parsed.assertionTargets) {
+      const assertionLower = assertionTarget.target.toLowerCase().trim();
+
+      // Skip section terms
+      if (detailSectionTerms.has(assertionLower)) {
+        console.log(`[detail-runtime] fallback=C skipped assertion="${assertionTarget.target}" reason=detail_section`);
+        continue;
+      }
+
+      // Skip button terms
+      if (actionButtonTerms.has(assertionLower)) {
+        console.log(`[detail-runtime] fallback=C skipped assertion="${assertionTarget.target}" reason=action_button`);
+        continue;
+      }
+
+      // Skip entry/intermediate terms
+      if (entryTerms.has(assertionLower) || intermediateCategoryTerms.has(assertionLower)) {
+        console.log(`[detail-runtime] fallback=C skipped assertion="${assertionTarget.target}" reason=entry_or_intermediate`);
+        continue;
+      }
+
+      // This is likely the product assertion
+      detailTarget = assertionTarget.target;
+      detailTargetSource = "productAssertion";
+
+      // Try to find corresponding action index
+      const matchingAction = parsed.actionTargets.find(at =>
+        at.target.toLowerCase().includes(assertionLower) ||
+        assertionLower.includes(at.target.toLowerCase())
+      );
+
+      if (matchingAction) {
+        finalProductClickStepIndex = matchingAction.index;
+      } else {
+        // If no matching action, use the last action before this assertion
+        const assertionIndex = assertionTarget.index;
+        const actionsBeforeAssertion = parsed.actionTargets.filter(at => at.index < assertionIndex);
+        if (actionsBeforeAssertion.length > 0) {
+          finalProductClickStepIndex = actionsBeforeAssertion[actionsBeforeAssertion.length - 1].index;
+        }
+      }
+
+      console.log(
+        `[detail-runtime] fallback=C selected assertion="${assertionTarget.target}" ` +
+        `finalProductClickStepIndex=${finalProductClickStepIndex}`
+      );
+      break;
+    }
+  }
+
+  // FALLBACK D: If ordinal exists, use first product assertion
+  if (!detailTarget) {
+    const hasOrdinal = parsed.actionTargets.some(at =>
+      /seleccionar|primer|primera|elemento.*visible|listado/i.test(at.target)
+    );
+
+    if (hasOrdinal) {
+      console.log(`[detail-runtime] fallback=D ordinal detected, trying ordinalAssertionFallback`);
+
+      for (const assertionTarget of parsed.assertionTargets) {
+        const assertionLower = assertionTarget.target.toLowerCase().trim();
+
+        if (!detailSectionTerms.has(assertionLower) &&
+            !actionButtonTerms.has(assertionLower) &&
+            !entryTerms.has(assertionLower) &&
+            !intermediateCategoryTerms.has(assertionLower)) {
+
+          detailTarget = assertionTarget.target;
+          detailTargetSource = "ordinalAssertionFallback";
+
+          // Find ordinal action index
+          const ordinalAction = parsed.actionTargets.find(at =>
+            /seleccionar|primer|primera|elemento.*visible|listado/i.test(at.target)
+          );
+          finalProductClickStepIndex = ordinalAction?.index;
+
+          console.log(
+            `[detail-runtime] fallback=D selected assertion="${assertionTarget.target}" ` +
+            `ordinalStepIndex=${finalProductClickStepIndex}`
+          );
+          break;
+        }
       }
     }
   }
 
-  const expandedActionTargets = [...parsed.actionTargets];
+  // Log final resolution
+  if (detailTarget) {
+    console.log(
+      `[detail-runtime] scenario="${scenario.title}" detailTarget="${detailTarget}" ` +
+      `source=${detailTargetSource} finalProductClickStepIndex=${finalProductClickStepIndex ?? 'undefined'} ` +
+      `criticalAssertions={target:"${detailTarget}", detailSections:[${detailCriticalAssertions?.detailSections?.join(", ") || "inferred"}], ` +
+      `actionButtons:[${detailCriticalAssertions?.actionButtons?.join(", ") || "inferred"}]}`
+    );
+
+    // Set finalProductClickStepIndex in evidence recorder for validation
+    if (evidenceRec && finalProductClickStepIndex !== undefined) {
+      evidenceRec.setFinalProductClickStepIndex(finalProductClickStepIndex);
+    }
+  } else {
+    console.log(
+      `[detail-runtime] scenario="${scenario.title}" detailTarget=undefined ` +
+      `reason=no_fallback_matched actionTargets=${parsed.actionTargets.length} ` +
+      `assertionTargets=${parsed.assertionTargets.length}`
+    );
+  }
+
+  // Detect if this is a detail scenario even if detailTarget wasn't resolved
+  const hasDetailAssertions = parsed.assertionTargets.some(at => {
+    const lower = at.target.toLowerCase().trim();
+    return detailSectionTerms.has(lower) ||
+           (lower.length > 5 && !entryTerms.has(lower) && !intermediateCategoryTerms.has(lower));
+  });
+
+  if (hasDetailAssertions && !detailTarget) {
+    console.log(
+      `[detail-runtime] WARNING scenario="${scenario.title}" hasDetailAssertions=true ` +
+      `detailTarget=undefined status=will_block_early_completion`
+    );
+  }
+
+  // Mark detail evidence as required if this is a detail scenario
+  if (detailTarget && evidenceRec) {
+    evidenceRec.markDetailScreenshotRequired(detailTarget);
+  }
+
+  // TASK A: Expand targetPath route to eliminate ordinal selection
+  let expandedActionTargets = [...parsed.actionTargets];
+  let detailRouteExpanded = false;
+
+  if (detailTarget && routeProfileWithPaths?.targetPaths) {
+    const targetPathEntry = routeProfileWithPaths.targetPaths[detailTarget];
+    const clickableToDetail = targetPathEntry?.productMetadata?.clickableToDetail === true ||
+                               targetPathEntry?.productMetadata?.presentationType === "detail_page";
+
+    if (targetPathEntry && clickableToDetail) {
+      const requiredIntermediates = targetPathEntry.requiredIntermediates || [];
+      const fullNavigationPath = [...requiredIntermediates, detailTarget];
+
+      console.log(
+        `[detail-route-expansion-runtime] scenario="${scenario.title}" target="${detailTarget}" ` +
+        `source=targetPath requiredIntermediates=[${requiredIntermediates.join(", ")}] ` +
+        `fullPath=[${fullNavigationPath.join(" → ")}]`
+      );
+
+      // Build map of existing targets (normalized)
+      const existingTargets = new Set(
+        expandedActionTargets.map(at => at.target.toLowerCase().trim())
+      );
+
+      // Remove ordinal selection steps that would be replaced by exact navigation
+      const ordinalPattern = /seleccionar|primer|primera|elemento.*visible|listado/i;
+      const targetsToRemove: number[] = [];
+
+      expandedActionTargets.forEach((at, idx) => {
+        if (ordinalPattern.test(at.target) || ordinalPattern.test(at.action)) {
+          targetsToRemove.push(idx);
+          console.log(
+            `[detail-route-expansion-runtime] removedOrdinal=true step=${at.index} ` +
+            `originalTarget="${at.target}" reason=replaced_with_exact_path`
+          );
+        }
+      });
+
+      // Remove ordinal steps in reverse order to maintain indices
+      targetsToRemove.reverse().forEach(idx => {
+        expandedActionTargets.splice(idx, 1);
+      });
+
+      // Add missing intermediate steps and final detail target
+      const stepsToAdd: ActionTargetItem[] = [];
+      let maxIndex = Math.max(...expandedActionTargets.map(at => at.index), 0);
+
+      fullNavigationPath.forEach((pathSegment, pathIdx) => {
+        const normalizedSegment = pathSegment.toLowerCase().trim();
+
+        // Check if this step already exists
+        const alreadyExists = existingTargets.has(normalizedSegment);
+
+        if (!alreadyExists) {
+          maxIndex++;
+          stepsToAdd.push({
+            index: maxIndex,
+            action: `Clic en "${pathSegment}".`,
+            target: pathSegment,
+            semanticRole: pathIdx === fullNavigationPath.length - 1 ? "product" : "category"
+          });
+
+          console.log(
+            `[detail-route-expansion-runtime] addedStep=true index=${maxIndex} ` +
+            `target="${pathSegment}" reason=missing_intermediate`
+          );
+        } else {
+          console.log(
+            `[detail-route-expansion-runtime] stepExists=true target="${pathSegment}" ` +
+            `reason=already_present`
+          );
+        }
+      });
+
+      // Append new steps
+      if (stepsToAdd.length > 0) {
+        expandedActionTargets.push(...stepsToAdd);
+        detailRouteExpanded = true;
+
+        // Update finalProductClickStepIndex to the exact target click
+        const exactTargetStep = stepsToAdd.find(
+          step => step.target.toLowerCase().trim() === detailTarget.toLowerCase().trim()
+        );
+        if (exactTargetStep) {
+          finalProductClickStepIndex = exactTargetStep.index;
+          console.log(
+            `[detail-route-expansion-runtime] updatedFinalProductClickStepIndex=${finalProductClickStepIndex} ` +
+            `target="${detailTarget}"`
+          );
+        }
+
+        console.log(
+          `[detail-route-expansion-runtime] expansionComplete=true addedSteps=${stepsToAdd.length} ` +
+          `removedOrdinalSteps=${targetsToRemove.length} finalPath=[${fullNavigationPath.join(" → ")}]`
+        );
+      }
+    } else if (detailTarget && !targetPathEntry) {
+      // Detail scenario detected but no targetPath defined - mark as blocked
+      console.log(
+        `[detail-route-expansion-runtime] blocked=true scenario="${scenario.title}" ` +
+        `detailTarget="${detailTarget}" reason=needs_route_profile ` +
+        `suggestion="Add targetPath for '${detailTarget}' to routeProfile"`
+      );
+    }
+  }
+
+  for (const si of parsed.setupIntents) {
+    if (si.type === "navigation_path" && si.path) {
+      console.log(`[discovery:case] Parsed setup route (navigation): ${si.path.join(" > ")}`);
+    } else if (si.type === "precondition_context") {
+      console.log(`[discovery:case] Parsed setup route (context): ${si.context}`);
+    } else if (si.type === "setup_route") {
+      const target = si.actionTarget === "APP_BASE_URL" ? appBaseUrl : si.actionTarget ?? appBaseUrl;
+      console.log(`[discovery:case] Setup route detected: using ${target}`);
+    }
+  }
 
   for (const si of parsed.setupIntents) {
     if (si.type === "navigation_path" && si.path) {
@@ -1293,11 +1647,277 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   orderedItems.sort((a, b) => a.index - b.index || 0);
 
   let currentSnapshot = initialScan.snapshot;
-  const evaluateAndApplyEarlyCompletionAfterAction = (
+  const evaluateAndApplyEarlyCompletionAfterAction = async (
     currentIndex: number,
     currentTarget: string,
-    currentActionOrder?: number
-  ): boolean => {
+    currentActionOrder?: number,
+    evidenceIndexOverride?: number  // NEW: Allow passing evidence index explicitly
+  ): Promise<boolean> => {
+    // Use evidence index for screenshot capture to match the actual step index displayed
+    const effectiveEvidenceIndex = evidenceIndexOverride ?? evidenceStepIndex;
+
+    // CRITICAL: Capture detail screenshot after final product click
+    console.log(
+      `[detail-final-click] check currentIndex=${currentIndex} evidenceIndex=${effectiveEvidenceIndex} currentTarget="${currentTarget}" ` +
+      `detailTarget="${detailTarget ?? 'undefined'}" ` +
+      `finalProductClickStepIndex=${finalProductClickStepIndex ?? 'undefined'} ` +
+      `evidenceRec=${evidenceRec ? 'defined' : 'undefined'}`
+    );
+
+    if (detailTarget && finalProductClickStepIndex === currentIndex && evidenceRec) {
+      console.log(`[detail-final-click] matched=true target="${detailTarget}" planIndex=${currentIndex} evidenceIndex=${effectiveEvidenceIndex}`);
+      console.log(`[detail-screenshot] afterFinalClick=true target="${detailTarget}" evidenceIndex=${effectiveEvidenceIndex}`);
+
+      try {
+        // Wait for detail screen to load with polling for strong signals
+        console.log(`[detail-wait] started target="${detailTarget}" timeoutMs=5000`);
+        const waitStartTime = Date.now();
+        let detailReady = false;
+        let lastSnapshot: any;
+        let strongSignalFound = false;
+
+        // Poll for detail screen signals
+        while (Date.now() - waitStartTime < 5000 && !detailReady) {
+          const elapsedMs = Date.now() - waitStartTime;
+
+          // Re-scan to check for detail signals
+          const pollScan = await scanAndCollectObjects(page, effectiveEvidenceIndex, evidenceDir);
+          lastSnapshot = pollScan.snapshot;
+
+          // Check for product name - exact or semantic alias
+          let productNameVisible = lastSnapshot.elements.some((el: any) =>
+            (el.text || el.label || el.name || "").toLowerCase().includes(detailTarget.toLowerCase())
+          );
+          if (!productNameVisible) {
+            const pollNameMatch = findBestProductNameMatch(detailTarget, lastSnapshot.elements, { minSemanticScore: 0.7, preferHeadings: true });
+            productNameVisible = pollNameMatch.matches;
+          }
+
+          // Check for strong detail heading signals
+          const exclusiveDetailHeadings = [
+            "más detalles", "mas detalles",
+            "detalle del producto", "detalle de producto",
+            "información del producto", "informacion del producto",
+            "detalles de", "detalle de"
+          ];
+          const detailHeadingVisible = exclusiveDetailHeadings.some(heading =>
+            lastSnapshot.elements.some((el: any) => {
+              const text = (el.text || el.label || el.name || "").toLowerCase();
+              return text.includes(heading) && (el.role === "heading" || el.tagName === "h1" || el.tagName === "h2" || el.tagName === "h3");
+            })
+          );
+
+          // Check for strong detail section signals
+          const exclusiveDetailSections = [
+            "beneficios", "detalles", "requisitos", "condiciones",
+            "información del producto", "informacion del producto",
+            "características", "caracteristicas"
+          ];
+          const detailSectionsVisible = exclusiveDetailSections.some(section =>
+            lastSnapshot.elements.some((el: any) =>
+              (el.text || el.label || el.name || "").toLowerCase().includes(section)
+            )
+          );
+
+          // Check for action buttons (weaker signal, not sufficient alone)
+          const exclusiveActionButtons = ["volver", "solicitar", "contratar", "finalizar sesión", "finalizar sesion"];
+          const actionButtonsVisible = exclusiveActionButtons.some(button =>
+            lastSnapshot.elements.some((el: any) =>
+              (el.text || el.label || el.name || "").toLowerCase().includes(button)
+            )
+          );
+
+          // Strong signal = heading OR sections (NOT just buttons)
+          strongSignalFound = detailHeadingVisible || detailSectionsVisible;
+          detailReady = productNameVisible && strongSignalFound;
+
+          console.log(
+            `[detail-wait] poll elapsedMs=${elapsedMs} productName=${productNameVisible} ` +
+            `detailHeading=${detailHeadingVisible} detailSections=${detailSectionsVisible} ` +
+            `actionButtons=${actionButtonsVisible} strongSignal=${strongSignalFound} ready=${detailReady}`
+          );
+
+          if (detailReady) {
+            console.log(`[detail-wait] completed ready=true elapsedMs=${elapsedMs}`);
+            break;
+          }
+
+          // Wait before next poll
+          await page.waitForTimeout(250);
+        }
+
+        if (!detailReady) {
+          const elapsedMs = Date.now() - waitStartTime;
+          console.log(`[detail-wait] completed ready=false reason=timeout_without_strong_detail_signal elapsedMs=${elapsedMs}`);
+        }
+
+        // Capture after state
+        const afterUrl = page.url();
+        console.log(`[click-proof] afterUrl=${afterUrl}`);
+
+        // Use last polled snapshot for oracle evaluation
+        const detailSnapshot = lastSnapshot;
+
+        // Oracle: Validate detail opened with STRONG signals only
+        // Re-evaluate from final snapshot to ensure consistency
+        const productNameExact = detailSnapshot.elements.some((el: any) =>
+          (el.text || el.label || el.name || "").toLowerCase().includes(detailTarget.toLowerCase())
+        );
+
+        // Semantic alias matching: handles cases where detail page uses a different
+        // commercial name (e.g., "Depósitos a plazo en Pesos" vs "Depósito a Plazo Digital en Pesos")
+        let productNameVisible = productNameExact;
+        let productNameMatchMode: "exact" | "normalized" | "semantic_alias" | "none" = productNameExact ? "exact" : "none";
+        let productNameMatchResult: ProductNameMatchResult | undefined;
+
+        if (!productNameExact) {
+          productNameMatchResult = findBestProductNameMatch(
+            detailTarget,
+            detailSnapshot.elements,
+            { minSemanticScore: 0.7, preferHeadings: true }
+          );
+          if (productNameMatchResult.matches) {
+            productNameVisible = true;
+            productNameMatchMode = productNameMatchResult.mode;
+            console.log(
+              `[product-name-match] expected="${detailTarget}" actual="${productNameMatchResult.actualText}" ` +
+              `mode=${productNameMatchResult.mode} score=${productNameMatchResult.score.toFixed(2)} ` +
+              `matched=[${productNameMatchResult.matchedTokens.join(",")}] extra=[${productNameMatchResult.extraTokens.join(",")}]`
+            );
+          }
+        }
+
+        // Check for exclusive detail heading/title signals
+        const exclusiveDetailHeadings = [
+          "más detalles", "mas detalles",
+          "detalle del producto", "detalle de producto",
+          "información del producto", "informacion del producto",
+          "detalles de", "detalle de"
+        ];
+        const detailHeadingVisible = exclusiveDetailHeadings.some(heading =>
+          detailSnapshot.elements.some((el: any) => {
+            const text = (el.text || el.label || el.name || "").toLowerCase();
+            return text.includes(heading) && (el.role === "heading" || el.tagName === "h1" || el.tagName === "h2" || el.tagName === "h3");
+          })
+        );
+
+        // Check for exclusive detail section signals
+        const exclusiveDetailSections = [
+          "beneficios", "detalles", "requisitos", "condiciones",
+          "información del producto", "informacion del producto",
+          "características", "caracteristicas"
+        ];
+        const detailSectionsVisible = exclusiveDetailSections.some(section =>
+          detailSnapshot.elements.some((el: any) =>
+            (el.text || el.label || el.name || "").toLowerCase().includes(section)
+          )
+        );
+
+        // Check for action buttons (diagnostic only, NOT sufficient alone)
+        const exclusiveActionButtons = ["volver", "solicitar", "contratar", "finalizar sesión", "finalizar sesion"];
+        const actionButtonsVisible = exclusiveActionButtons.some(button =>
+          detailSnapshot.elements.some((el: any) =>
+            (el.text || el.label || el.name || "").toLowerCase().includes(button)
+          )
+        );
+
+        // Check for navigation transition (URL/DOM change) - additional evidence, not gate
+        const urlChanged = afterUrl !== currentSnapshot.url;
+        const elementsCountChanged = Math.abs(detailSnapshot.elements.length - currentSnapshot.elements.length) > 5;
+        const navigationTransitionDetected = urlChanged || elementsCountChanged;
+
+        // HARDENED ORACLE: Accept detail ONLY with STRONG signals
+        // strongDetailSignal = heading OR sections (NOT just buttons)
+        // actionButtons alone are NOT sufficient (can be in listing/cards)
+        const strongDetailSignal = detailHeadingVisible || detailSectionsVisible;
+        const detailScreenVisible = productNameVisible && strongDetailSignal;
+        const detailOpened = detailScreenVisible;
+
+        console.log(
+          `[detail-oracle] target="${detailTarget}" ` +
+          `productName=${productNameVisible} productNameMatchMode=${productNameMatchMode} ` +
+          `detailHeading=${detailHeadingVisible} detailSections=${detailSectionsVisible} ` +
+          `actionButtons=${actionButtonsVisible} urlChanged=${urlChanged} domChanged=${elementsCountChanged} ` +
+          `navigationTransition=${navigationTransitionDetected} strongSignal=${strongDetailSignal} ` +
+          `detailScreenVisible=${detailScreenVisible} opened=${detailOpened}`
+        );
+
+        // Record detailOpened result for evidence gate
+        evidenceRec.setDetailOpened(detailOpened);
+
+        // Persist semantic alias learned during detail oracle
+        if (detailOpened && productNameMatchMode === "semantic_alias" && productNameMatchResult?.actualText) {
+          const aliasSuggestion: RouteProfileSuggestion = {
+            appSlug: options.appSlug ?? "default",
+            from: detailTarget,
+            to: productNameMatchResult.actualText,
+            relation: "alias_candidate",
+            source: "successful_resolution",
+            confidence: productNameMatchResult.score,
+            evidence: {
+              afterUrl: afterUrl,
+              candidateText: productNameMatchResult.actualText,
+            },
+            status: "pending",
+            createdAt: new Date().toISOString()
+          };
+          routeProfileSuggestions.push(aliasSuggestion);
+          console.log(
+            `[route-learning] detail alias learned expected="${detailTarget}" ` +
+            `actual="${productNameMatchResult.actualText}" score=${productNameMatchResult.score.toFixed(2)} source=detail_oracle`
+          );
+        }
+
+        if (!detailOpened) {
+          const reason = !productNameVisible ? "product_name_not_visible" :
+                        !strongDetailSignal ? "insufficient_detail_signals" :
+                        "no_page_transition";  // Should not reach with new logic
+          console.log(`[detail-oracle] opened=false reason=${reason}`);
+
+          // Do NOT capture detail screenshot if detail didn't open
+          console.log(`[detail-screenshot] skipped reason=detail_not_opened`);
+        } else {
+          // Detail opened successfully - capture screenshot with evidence index and oracle signals
+          console.log(`[detail-screenshot] required=true target="${detailTarget}" evidenceIndex=${effectiveEvidenceIndex}`);
+          const screenshotResult = await evidenceRec.captureDetailScreenshot(
+            page,
+            detailTarget,
+            effectiveEvidenceIndex,
+            {
+              validateText: detailTarget,
+              detailHeading: detailHeadingVisible,
+              detailSections: detailSectionsVisible,
+              actionButtons: actionButtonsVisible,
+              oracleReason: "detail_loaded"
+            }
+          );
+
+          if (screenshotResult.captured) {
+            console.log(`[detail-screenshot] captured=true target="${detailTarget}" evidenceIndex=${effectiveEvidenceIndex} path=${screenshotResult.screenshotPath}`);
+            // Register step record pointing to detail screenshot to avoid duplicating generic screenshot
+            evidenceRec.addStepRecord(effectiveEvidenceIndex, `Clic en "${detailTarget}".`, {
+              target: detailTarget,
+              status: "passed",
+              screenshotPath: screenshotResult.screenshotPath,
+            });
+            console.log(`[detail-screenshot] stepEvidenceReused=true step=${effectiveEvidenceIndex} path=${screenshotResult.screenshotPath}`);
+          } else {
+            console.log(`[detail-screenshot] captured=false target="${detailTarget}" evidenceIndex=${effectiveEvidenceIndex} reason=${screenshotResult.reason}`);
+          }
+        }
+      } catch (err) {
+        console.log(`[detail-screenshot] error target="${detailTarget}" evidenceIndex=${effectiveEvidenceIndex} error=${err instanceof Error ? err.message : String(err)}`);
+      }
+    } else {
+      if (!detailTarget) {
+        console.log(`[detail-final-click] matched=false reason=no_detailTarget`);
+      } else if (finalProductClickStepIndex !== currentIndex) {
+        console.log(`[detail-final-click] matched=false reason=index_mismatch expect=${finalProductClickStepIndex} got=${currentIndex}`);
+      } else if (!evidenceRec) {
+        console.log(`[detail-final-click] matched=false reason=no_evidenceRecorder`);
+      }
+    }
+
     const remainingActionTargets = typeof currentActionOrder === "number"
       ? parsed.actionTargets.filter((a) => {
           const order = actionOrderIndexByTarget.get(a);
@@ -1312,6 +1932,38 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       })()
     }));
     const earlyCompletion = evaluateEarlyCompletion(currentSnapshot, parsed.assertionTargets, remainingActionTargets);
+
+    // CRITICAL: Extract critical assertions from targetPath metadata for detail scenarios
+    let criticalAssertions: { target?: string; detailSections?: string[]; actionButtons?: string[] } | undefined;
+    const routeProfileWithPaths = routeProfile as any; // Type assertion: app config can have targetPaths
+    if (routeProfileWithPaths?.targetPaths) {
+      // Find matching targetPath by checking assertion targets against product labels
+      for (const assertionTarget of parsed.assertionTargets) {
+        const assertionLabel = assertionTarget.target.toLowerCase().trim();
+        for (const [pathKey, tp] of Object.entries(routeProfileWithPaths.targetPaths)) {
+          const typedTp = tp as any;
+          if (typedTp.productMetadata?.clickableToDetail) {
+            const productLabel = (typedTp.productMetadata.productLabel || typedTp.target).toLowerCase().trim();
+            if (assertionLabel.includes(productLabel) || productLabel.includes(assertionLabel)) {
+              criticalAssertions = {
+                target: typedTp.productMetadata.productLabel || typedTp.target,
+                detailSections: typedTp.productMetadata.detailSections,
+                actionButtons: typedTp.productMetadata.actionButtons
+              };
+              console.log(
+                `[detail-assertion-gate] scenario=${scenario.title} ` +
+                `target="${criticalAssertions.target}" ` +
+                `detailSections=[${criticalAssertions.detailSections?.join(", ") || "none"}] ` +
+                `actionButtons=[${criticalAssertions.actionButtons?.join(", ") || "none"}]`
+              );
+              break;
+            }
+          }
+        }
+        if (criticalAssertions) break;
+      }
+    }
+
     const earlyCompletionPolicy = evaluateEarlyCompletionPolicy({
       pendingActions: policyPendingActions,
       executedStepIndices: executedActionOrders,
@@ -1323,13 +1975,57 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         index: order
       })),
       satisfiedAssertions: earlyCompletion.satisfiedAssertions,
-      pendingAssertions: earlyCompletion.pendingAssertions
+      pendingAssertions: earlyCompletion.pendingAssertions,
+      criticalAssertions: criticalAssertions
     });
 
     const policyDiag = earlyCompletionPolicy.diagnostics;
     console.log(
       `[discovery:case] Early completion evaluation: currentTarget="${currentTarget}", currentIndex=${currentIndex}, executedStepIndices=[${Array.from(executedStepIndices).sort((a, b) => a - b).join(", ")}], pendingActions=[${remainingActionTargets.map(a => `${a.index}:${a.target}`).join(" | ")}], authConsumed=[${policyDiag.classifications.authConsumed.map(t => `"${t}"`).join(", ")}], optional=[${policyDiag.classifications.optional.map(t => `"${t}"`).join(", ")}], duplicateAlreadyExecuted=[${policyDiag.classifications.duplicateAlreadyExecuted.map(t => `"${t}"`).join(", ")}], functionalRequired=[${policyDiag.classifications.functionalRequired.map(t => `"${t}"`).join(", ")}].`
     );
+
+    // CRITICAL: Block early completion if detail screenshot is required but not captured
+    // OR if detail scenario detected but detailTarget unresolved
+    if (detailTarget && evidenceRec) {
+      const detailEvidence = (evidenceRec as any).detailEvidence;
+      const detailScreenshotCaptured = detailEvidence?.captured === true && detailEvidence?.screenshotPath;
+
+      if (!detailScreenshotCaptured) {
+        console.log(
+          `[detail-early-completion-gate] blocked=true scenario="${scenario.title}" ` +
+          `detailTarget="${detailTarget}" reason=detail_screenshot_not_captured_yet ` +
+          `currentStep=${currentIndex}`
+        );
+
+        // Don't allow early completion until detail screenshot is captured
+        if (earlyCompletion.satisfied && earlyCompletionPolicy.allowed) {
+          console.log(
+            `[detail-early-completion-gate] overriding early completion policy ` +
+            `originalAllowed=true newAllowed=false reason=missing_detail_screenshot`
+          );
+          return false; // Block early completion
+        }
+      } else {
+        console.log(
+          `[detail-early-completion-gate] passed detailScreenshotCaptured=true ` +
+          `path=${detailEvidence.screenshotPath}`
+        );
+      }
+    } else if (!detailTarget && hasDetailAssertions) {
+      // Detail scenario detected but detailTarget unresolved
+      console.log(
+        `[detail-early-completion-gate] blocked=true scenario="${scenario.title}" ` +
+        `reason=detail_target_unresolved hasDetailAssertions=true currentStep=${currentIndex}`
+      );
+
+      if (earlyCompletion.satisfied && earlyCompletionPolicy.allowed) {
+        console.log(
+          `[detail-early-completion-gate] overriding early completion policy ` +
+          `originalAllowed=true newAllowed=false reason=detail_target_unresolved`
+        );
+        return false; // Block early completion
+      }
+    }
 
     if (earlyCompletion.satisfied && earlyCompletionPolicy.allowed) {
       earlyCompletionSatisfied = true;
@@ -2197,10 +2893,16 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           const retryResolution = await resolveActionTarget(page, currentSnapshot, nav.target, { routeProfile });
           if (retryResolution.status === "resolved" && retryResolution.locator) {
             await clickResolvedTarget(retryResolution.locator, false);
+            console.log(`[post-click-screenshot] waitingAfterClick step=${orderedItem.index} target="${nav.target}"`);
             await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+            await page.waitForTimeout(1000);
+
             const postClickScan = await scanAndCollectObjects(page, orderedItem.index, evidenceDir);
             currentSnapshot = postClickScan.snapshot;
             allDiscoveredObjects.push(...postClickScan.objects);
+
+            // Capture evidence after click completes and page stabilizes
+            await captureEvStep(nav.action, "passed");
 
             if (authGateState?.completed) {
               markFunctionalStepAfterAuth(nav.target, authGateState);
@@ -3416,7 +4118,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         if (typeof currentActionOrder === "number") {
           executedActionOrders.add(currentActionOrder);
         }
-        if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
+        if (await evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder, evidenceStepIndex)) {
           break;
         }
 
@@ -3503,10 +4205,16 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           const retryResolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target, { routeProfile, actionText: actionTarget.action });
           if (retryResolution.status === "resolved" && retryResolution.locator) {
             await clickResolvedTarget(retryResolution.locator, false);
+            console.log(`[post-click-screenshot] waitingAfterClick step=${actionTarget.index} target="${actionTarget.target}"`);
             await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+            await page.waitForTimeout(1000);
+
             const postClickScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
             currentSnapshot = postClickScan.snapshot;
             allDiscoveredObjects.push(...postClickScan.objects);
+
+            // Capture evidence after click completes and page stabilizes
+            await captureEvStep(actionTarget.action, "passed");
 
             if (authGateState?.completed) {
               markFunctionalStepAfterAuth(actionTarget.target, authGateState);
@@ -3536,7 +4244,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
               description: actionTarget.action,
               target: { strategy: "text", value: actionTarget.target, exact: false }
             });
-            if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
+            if (await evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder, evidenceStepIndex)) {
               break;
             }
             continue;
@@ -3640,10 +4348,16 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
                 await clickResolvedTarget(resolvedFromAi.locator, false).catch(async () => {
                   await clickResolvedTarget(resolvedFromAi.locator!, true);
                 });
+                console.log(`[post-click-screenshot] waitingAfterClick step=${actionTarget.index} target="${actionTarget.target}"`);
                 await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+                await page.waitForTimeout(1000);
+
                 const aiRecoveredScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
                 currentSnapshot = aiRecoveredScan.snapshot;
                 allDiscoveredObjects.push(...aiRecoveredScan.objects);
+
+                // Capture evidence after AI repair click completes
+                await captureEvStep(actionTarget.action, "passed");
 
                 steps.push({
                   index: actionTarget.index,
@@ -3669,7 +4383,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
                 executedStepIndices.add(actionTarget.index);
                 if (typeof currentActionOrder === "number") executedActionOrders.add(currentActionOrder);
-                if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
+                if (await evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder, evidenceStepIndex)) {
                   break;
                 }
                 continue;
@@ -3750,7 +4464,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             console.log(`[route-completion] selected candidate="${selectedCandidate?.name ?? selectedCandidate?.text}" source=${routeCompletionResolution.source} confidence=${routeCompletionResolution.confidence}`);
 
             const selectedElement = currentSnapshot.elements.find((el) => el.id === routeCompletionResolution!.candidateId);
-            
+
             if (selectedElement) {
               const resolvedInserted = await resolveSnapshotElementLocator(page, {
                 element: selectedElement,
@@ -3765,8 +4479,14 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
               if (resolvedInserted.locator) {
                 try {
                   await clickResolvedTarget(resolvedInserted.locator, false);
+                  console.log(`[post-click-screenshot] waitingAfterClick step=${actionTarget.index} target="${routeCompletionResolution.insertedStepText ?? actionTarget.target}"`);
                   await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+                  await page.waitForTimeout(1000);
                   console.log(`[route-completion] inserted step executed`);
+
+                  // Capture evidence for inserted route completion step
+                  const insertedActionDesc = `Clic en "${routeCompletionResolution.insertedStepText ?? actionTarget.target}".`;
+                  await captureEvStep(insertedActionDesc, "passed");
 
                   const insertedStepResult = {
                     originalStepIndex: actionTarget.index,
@@ -3850,8 +4570,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
                   if (resolvedRetry.status === "resolved" && resolvedRetry.locator) {
                     try {
                       await clickResolvedTarget(resolvedRetry.locator, false);
+                      console.log(`[post-click-screenshot] waitingAfterClick step=${actionTarget.index} target="${actionTarget.target}"`);
                       await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+                      await page.waitForTimeout(1000);
                       console.log(`[route-completion] retry succeeded`);
+
+                      // Capture evidence for retry after route completion
+                      await captureEvStep(actionTarget.action, "passed");
 
                       insertedStepResult.retrySucceeded = true;
 
@@ -3913,7 +4638,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
                         }
                       }
                       
-                      if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
+                      if (await evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder, evidenceStepIndex)) {
                         break;
                       }
                       continue;
@@ -4091,10 +4816,16 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
                 await clickResolvedTarget(resolvedFromAi.locator, false).catch(async () => {
                   await clickResolvedTarget(resolvedFromAi.locator!, true);
                 });
+                console.log(`[post-click-screenshot] waitingAfterClick step=${actionTarget.index} target="${actionTarget.target}"`);
                 await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+                await page.waitForTimeout(1000);
+
                 const aiRecoveredScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
                 currentSnapshot = aiRecoveredScan.snapshot;
                 allDiscoveredObjects.push(...aiRecoveredScan.objects);
+
+                // Capture evidence after AI selection resolution
+                await captureEvStep(actionTarget.action, "passed");
 
                 // Resolved target name from AI selection
                 const resolvedTargetName = selected.name ?? selected.label ?? selected.text ?? actionTarget.target;
@@ -4147,7 +4878,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
                 executedStepIndices.add(actionTarget.index);
                 if (typeof currentActionOrder === "number") executedActionOrders.add(currentActionOrder);
-                if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
+                if (await evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder, evidenceStepIndex)) {
                   break;
                 }
                 continue;
@@ -4397,8 +5128,14 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             if (resolvedInserted.locator) {
               try {
                 await clickResolvedTarget(resolvedInserted.locator, false);
+                console.log(`[post-click-screenshot] waitingAfterClick step=${actionTarget.index} target="${preClickRouteCompletionResolution.insertedStepText ?? actionTarget.target}"`);
                 await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+                await page.waitForTimeout(1000);
                 console.log(`[route-completion] inserted step executed`);
+
+                // Capture evidence for pre-click route completion inserted step
+                const insertedActionDesc = `Clic en "${preClickRouteCompletionResolution.insertedStepText ?? actionTarget.target}".`;
+                await captureEvStep(insertedActionDesc, "passed");
 
                 const insertedStepResult = {
                   originalStepIndex: actionTarget.index,
@@ -4481,8 +5218,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
                 if (resolvedRetry.status === "resolved" && resolvedRetry.locator) {
                   try {
                     await clickResolvedTarget(resolvedRetry.locator, false);
+                    console.log(`[post-click-screenshot] waitingAfterClick step=${actionTarget.index} target="${actionTarget.target}"`);
                     await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+                    await page.waitForTimeout(1000);
                     console.log(`[route-completion] retry succeeded`);
+
+                    // Capture evidence for pre-click route completion retry
+                    await captureEvStep(actionTarget.action, "passed");
 
                     insertedStepResult.retrySucceeded = true;
                     routeCompletionPreventedWeakClick = true;
@@ -4545,7 +5287,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
                       }
                     }
                     
-                    if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
+                    if (await evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder, evidenceStepIndex)) {
                       break;
                     }
                     continue;
@@ -4593,13 +5335,345 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
     const beforeState = await capturePageState(page);
 
-    try {
-      await clickResolvedTarget(finalLocator, false);
-    } catch {
+    // PRODUCT CARD CLICK: Try escalated click strategies ONLY for final product click
+    let productCardClickResult: ProductCardClickResult | undefined;
+    const isFinalProductClick = detailTarget && finalProductClickStepIndex === actionTarget.index;
+
+    // Strong gate: only activate for final detail click
+    const normalizeForComparison = (s: string) => s.toLowerCase().trim().replace(/[^a-z0-9áéíóúñü]/g, "");
+    const targetMatchesDetail = detailTarget && (
+      normalizeForComparison(actionTarget.target).includes(normalizeForComparison(detailTarget)) ||
+      normalizeForComparison(detailTarget).includes(normalizeForComparison(actionTarget.target))
+    );
+
+    // Check if this is an ordinal step bound to detail target
+    const isOrdinalBoundToDetail = isFinalProductClick &&
+      (resolution.locatorStrategy === "ordinal_selection" ||
+       (resolution as any).ordinalSelectionDiagnostics?.selectionPatternDetected === true);
+
+    const shouldUseProductCardClick =
+      isFinalProductClick &&
+      (targetMatchesDetail || isOrdinalBoundToDetail) &&
+      finalLocator;
+
+    if (shouldUseProductCardClick) {
+      console.log(
+        `[product-card-click] activated target="${actionTarget.target}" ` +
+        `detailTarget="${detailTarget}" stepIndex=${actionTarget.index} ` +
+        `finalProductClickStepIndex=${finalProductClickStepIndex} ` +
+        `targetMatches=${targetMatchesDetail} isOrdinal=${isOrdinalBoundToDetail}`
+      );
+
+      // INTERMEDIATE RECOVERY: Check if target is visible, if not try to recover missing intermediate step
+      let intermediateRecoveryResult: IntermediateRecoveryResult | undefined;
+
       try {
-        console.log(`[discovery:case] Retrying with force click...`);
-        await clickResolvedTarget(finalLocator, true);
+        intermediateRecoveryResult = await recoverMissingIntermediateForFinalTarget(
+          page,
+          actionTarget.target,
+          currentSnapshot,
+          routeProfile as any, // Cast to satisfy type - routeProfile is compatible
+          evidenceDir
+        );
+
+        if (intermediateRecoveryResult.recovered) {
+          console.log(
+            `[intermediate-recovery] success recovered=true ` +
+            `selectedText="${intermediateRecoveryResult.selectedCandidate?.text}" ` +
+            `score=${intermediateRecoveryResult.selectedCandidate?.score.toFixed(2)} ` +
+            `urlAfter="${intermediateRecoveryResult.urlAfter}"`
+          );
+
+          // Rescan after recovery to get updated snapshot
+          const postRecoveryScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+          currentSnapshot = postRecoveryScan.snapshot;
+
+          // Record the intermediate step as inserted
+          const insertedStep: DiscoveryStepResult = {
+            index: actionTarget.index - 0.5, // Fractional index to indicate insertion
+            action: `Clic en "${intermediateRecoveryResult.selectedCandidate!.text}".`,
+            targetText: intermediateRecoveryResult.selectedCandidate!.text,
+            status: "found",
+            confidence: intermediateRecoveryResult.selectedCandidate!.score,
+            locatorStrategy: "intermediate_recovery",
+            recoveryStatus: "recovered",
+            recoveredBy: "route_completion",
+            recoveryMetadata: {
+              selectedCandidateText: intermediateRecoveryResult.selectedCandidate!.text,
+              score: intermediateRecoveryResult.selectedCandidate!.score,
+              rationale: `Intermediate subcategory recovery: URL before="${intermediateRecoveryResult.urlBefore}", after="${intermediateRecoveryResult.urlAfter}"`
+            }
+          };
+
+          steps.push(insertedStep);
+
+          // Normalize the inserted text for reuse in evidence and route learning
+          const normalizedInsertedText = intermediateRecoveryResult.selectedCandidate!.text.replace(/\n/g, " ").trim();
+
+          // Capture evidence screenshot for the intermediate recovered step
+          if (evidenceRec) {
+            try {
+              const intermediateStepIndex = actionTarget.index - 0.5;
+              const intermediateStepText = `Clic en "${normalizedInsertedText}"`;
+              const intermediateRecord = await evidenceRec.captureStep(
+                page,
+                intermediateStepIndex,
+                intermediateStepText,
+                { target: normalizedInsertedText, status: "passed" }
+              );
+              if (intermediateRecord.screenshotPath) {
+                insertedStep.evidencePath = intermediateRecord.screenshotPath;
+                console.log(`[intermediate-recovery] evidence screenshot captured step=${intermediateStepIndex} path=${intermediateRecord.screenshotPath}`);
+              }
+            } catch (evErr: any) {
+              console.log(`[intermediate-recovery] evidence screenshot failed: ${evErr.message}`);
+            }
+          }
+
+          // Persist route profile suggestion
+          if (routeProfile) {
+            const previousTarget = steps[steps.length - 2]?.targetText?.replace(/\n/g, " ").trim() || "unknown";
+            const suggestion: RouteProfileSuggestion = {
+              appSlug: options.appSlug ?? "default",
+              from: previousTarget,
+              to: normalizedInsertedText,
+              relation: "intermediate_step",
+              source: "successful_transition",
+              confidence: intermediateRecoveryResult.selectedCandidate!.score,
+              evidence: {
+                beforeUrl: intermediateRecoveryResult.urlBefore,
+                afterUrl: intermediateRecoveryResult.urlAfter,
+                candidateText: normalizedInsertedText,
+              },
+              status: "pending",
+              createdAt: new Date().toISOString()
+            };
+
+            routeProfileSuggestions.push(suggestion);
+
+            console.log(
+              `[route-learning] intermediate recovery suggestion ` +
+              `from="${suggestion.from}" ` +
+              `inserted="${suggestion.to}" ` +
+              `final="${actionTarget.target}"`
+            );
+          }
+        } else if (!intermediateRecoveryResult.detailTargetVisible) {
+          console.log(
+            `[intermediate-recovery] failed recovered=false ` +
+            `detailTargetVisible=false ` +
+            `candidates=${intermediateRecoveryResult.visibleCandidatesCount} ` +
+            `reason=no_matching_intermediate_or_target_still_not_visible`
+          );
+
+          // If target still not visible after recovery attempt, fail early
+          // Don't proceed with product-card-click as it will timeout with exact_text
+          const failureReason = "missing_intermediate_step_to_final_target";
+
+          steps.push({
+            index: actionTarget.index,
+            action: actionTarget.action || `Clic en "${actionTarget.target}".`,
+            targetText: actionTarget.target,
+            status: "not_found",
+            error: `Target "${actionTarget.target}" not visible. Attempted intermediate recovery but no suitable subcategory found. Visible candidates: ${intermediateRecoveryResult.visibleCandidatesCount}. URL: ${intermediateRecoveryResult.urlBefore}`,
+            confidence: 0,
+            locatorStrategy: "none"
+          });
+
+          failedReason = failureReason;
+          console.log(`[discovery:case] Failed at step ${actionTarget.index}: ${failureReason}`);
+          break;
+        }
+      } catch (recoveryErr: any) {
+        console.log(
+          `[intermediate-recovery] error during recovery attempt: ${recoveryErr.message}`
+        );
+        // Continue with product-card-click if recovery throws
+      }
+
+      try {
+        // Find clickable candidates within the product card
+        const candidates = await findProductCardClickCandidates(
+          page,
+          finalLocator,
+          actionTarget.target,
+          currentSnapshot
+        );
+
+        if (candidates.length > 0) {
+          console.log(`[product-card-click] found ${candidates.length} clickable candidates`);
+
+          // Define detail oracle check for this product
+          const checkDetailOpened = async (): Promise<boolean> => {
+            // Re-scan to get current state
+            const checkScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+            const checkSnapshot = checkScan.snapshot;
+
+            // Check for product name - first exact, then semantic alias
+            let productNameVisible = checkSnapshot.elements.some((el: any) =>
+              (el.text || el.label || el.name || "").toLowerCase().includes(actionTarget.target.toLowerCase())
+            );
+            let matchMode: "exact" | "normalized" | "semantic_alias" | "none" = productNameVisible ? "exact" : "none";
+
+            if (!productNameVisible) {
+              const nameMatch = findBestProductNameMatch(
+                actionTarget.target,
+                checkSnapshot.elements,
+                { minSemanticScore: 0.7, preferHeadings: true }
+              );
+              if (nameMatch.matches) {
+                productNameVisible = true;
+                matchMode = nameMatch.mode;
+                console.log(
+                  `[product-name-match] expected="${actionTarget.target}" actual="${nameMatch.actualText}" ` +
+                  `mode=${nameMatch.mode} score=${nameMatch.score.toFixed(2)} ` +
+                  `matched=[${nameMatch.matchedTokens.join(",")}] extra=[${nameMatch.extraTokens.join(",")}]`
+                );
+              }
+            }
+
+            // Check for strong detail heading signals
+            const exclusiveDetailHeadings = [
+              "más detalles", "mas detalles",
+              "detalle del producto", "detalle de producto",
+              "información del producto", "informacion del producto",
+              "detalles de", "detalle de"
+            ];
+            const detailHeadingVisible = exclusiveDetailHeadings.some(heading =>
+              checkSnapshot.elements.some((el: any) => {
+                const text = (el.text || el.label || el.name || "").toLowerCase();
+                return text.includes(heading) && (el.role === "heading" || el.tagName === "h1" || el.tagName === "h2" || el.tagName === "h3");
+              })
+            );
+
+            // Check for strong detail section signals
+            const exclusiveDetailSections = [
+              "beneficios", "detalles", "requisitos", "condiciones",
+              "información del producto", "informacion del producto",
+              "características", "caracteristicas"
+            ];
+            const detailSectionsVisible = exclusiveDetailSections.some(section =>
+              checkSnapshot.elements.some((el: any) =>
+                (el.text || el.label || el.name || "").toLowerCase().includes(section)
+              )
+            );
+
+            // Strong signal = heading OR sections (NOT just buttons)
+            const strongDetailSignal = detailHeadingVisible || detailSectionsVisible;
+            const detailOpened = productNameVisible && strongDetailSignal;
+
+            console.log(
+              `[product-card-click] detail-check productName=${productNameVisible} productNameMatchMode=${matchMode} ` +
+              `detailHeading=${detailHeadingVisible} detailSections=${detailSectionsVisible} ` +
+              `strongSignal=${strongDetailSignal} opened=${detailOpened}`
+            );
+
+            return detailOpened;
+          };
+
+          // Try escalated click strategies
+          productCardClickResult = await tryProductCardClickStrategies(
+            page,
+            candidates,
+            actionTarget.target,
+            checkDetailOpened,
+            evidenceDir
+          );
+
+          console.log(
+            `[product-card-click] completed success=${productCardClickResult.success} ` +
+            `strategy=${productCardClickResult.strategy ?? "none"} ` +
+            `attempts=${productCardClickResult.attemptedStrategies.length}`
+          );
+
+          // If product click succeeded, skip standard click
+          if (productCardClickResult.success) {
+            console.log(
+              `[product-card-click] success=true skipping standard click ` +
+              `strategy=${productCardClickResult.strategy}`
+            );
+
+            // Update current snapshot after successful product click
+            const afterProductClick = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+            currentSnapshot = afterProductClick.snapshot;
+
+            // Wait for page to stabilize
+            await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+            console.log("[discovery:case] Waiting after product card click...");
+          } else {
+            // Product click failed - all strategies tried but detail didn't open
+            console.log(
+              `[product-card-click] failed=true reason=${productCardClickResult.reason} ` +
+              `attemptedStrategies=[${productCardClickResult.attemptedStrategies.map(s => s.strategy).join(", ")}]`
+            );
+
+            // Mark as failed - target click did not open detail
+            const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+            currentSnapshot = scan.snapshot;
+
+            steps.push({
+              index: actionTarget.index,
+              action: actionTarget.action,
+              status: "not_found",
+              targetText: actionTarget.target,
+              snapshotUrl: scan.url,
+              snapshotTitle: scan.title,
+              elementsFound: scan.elementsCount,
+              error: `Product click did not open detail. Tried strategies: ${productCardClickResult.attemptedStrategies.map(s => s.strategy).join(", ")}`,
+              evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+              productCardClickDiagnostics: {
+                attemptedStrategies: productCardClickResult.attemptedStrategies,
+                reason: productCardClickResult.reason
+              }
+            } as any);
+
+            failedAtStep = actionTarget.index;
+            failedTarget = actionTarget.target;
+            failedReason = "target_click_did_not_open_detail";
+
+            await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
+            await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
+              scenario, steps, allDiscoveredObjects, planSteps,
+              pendingObjectsPath, pendingPlansPath, evidenceDir,
+              failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+            ).candidatePlan ?? {}, null, 2), "utf-8");
+
+            return buildFailureResult(
+              scenario, steps, allDiscoveredObjects, planSteps,
+              pendingObjectsPath, pendingPlansPath, evidenceDir,
+              failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+            );
+          }
+        }
       } catch (err) {
+        console.log(
+          `[product-card-click] error during escalated click: ` +
+          `${err instanceof Error ? err.message : String(err)}`
+        );
+        // Fall through to standard click
+      }
+    } else if (isFinalProductClick && !shouldUseProductCardClick) {
+      // Log why product-card-click was not activated
+      console.log(
+        `[product-card-click] skipped target="${actionTarget.target}" ` +
+        `reason=not_final_detail_click isFinalClick=${isFinalProductClick} ` +
+        `targetMatches=${targetMatchesDetail ?? false} isOrdinal=${isOrdinalBoundToDetail ?? false}`
+      );
+    }
+
+    // Skip standard click if product card click succeeded
+    if (productCardClickResult?.success) {
+      // Product card click already executed and validated
+      console.log(`[discovery:case] Standard click skipped - product card click succeeded`);
+    } else {
+      // Standard click execution
+      try {
+        await clickResolvedTarget(finalLocator, false);
+      } catch {
+        try {
+          console.log(`[discovery:case] Retrying with force click...`);
+          await clickResolvedTarget(finalLocator, true);
+        } catch (err) {
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
 
@@ -4634,6 +5708,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         );
       }
     }
+    } // End of standard click else block
 
     await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
     console.log("[discovery:case] Waiting after click...");
@@ -4646,7 +5721,68 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       console.log(`[discovery:case] Ordinal selection detected - skipping instructive token verification`);
       console.log(`[discovery:case] Ordinal: ${(resolution as any).ordinalSelectionDiagnostics?.ordinal ?? "unknown"}`);
       console.log(`[discovery:case] Domain term: ${(resolution as any).ordinalSelectionDiagnostics?.domainTerm ?? "none"}`);
-      console.log(`[discovery:case] Selected candidate: ${(resolution as any).ordinalSelectionDiagnostics?.selectedCandidateText ?? "unknown"}`);
+      const selectedCandidateText = (resolution as any).ordinalSelectionDiagnostics?.selectedCandidateText ?? "unknown";
+      console.log(`[discovery:case] Selected candidate: ${selectedCandidateText}`);
+
+      // CRITICAL: Validate ordinal selected correct product for detail scenarios
+      if (detailTarget && finalProductClickStepIndex === actionTarget.index) {
+        const selectedNormalized = selectedCandidateText.toLowerCase().trim();
+        const expectedNormalized = detailTarget.toLowerCase().trim();
+
+        // Check if selected candidate matches expected detail target
+        const candidateMatches = selectedNormalized.includes(expectedNormalized) ||
+                                expectedNormalized.includes(selectedNormalized) ||
+                                selectedNormalized === expectedNormalized;
+
+        console.log(
+          `[ordinal-selection] expectedTarget="${detailTarget}" ` +
+          `selectedCandidate="${selectedCandidateText}" match=${candidateMatches}`
+        );
+
+        if (!candidateMatches) {
+          // Wrong candidate selected - this is a failure
+          console.log(
+            `[ordinal-selection] MISMATCH detected! expectedTarget="${detailTarget}" ` +
+            `selectedCandidate="${selectedCandidateText}" status=failed`
+          );
+
+          // Capture current page state for diagnostics
+          const postClickScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+          currentSnapshot = postClickScan.snapshot;
+
+          // Mark as failed
+          steps.push({
+            index: actionTarget.index,
+            action: actionTarget.action,
+            status: "not_found",
+            targetText: actionTarget.target,
+            snapshotUrl: postClickScan.url,
+            snapshotTitle: postClickScan.title,
+            elementsFound: postClickScan.elementsCount,
+            error: `Wrong ordinal candidate selected. Expected: "${detailTarget}", Selected: "${selectedCandidateText}"`,
+            evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`)
+          });
+
+          failedAtStep = actionTarget.index;
+          failedTarget = actionTarget.target;
+          failedReason = "wrong_ordinal_candidate";
+
+          await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
+          await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
+            scenario, steps, allDiscoveredObjects, planSteps,
+            pendingObjectsPath, pendingPlansPath, evidenceDir,
+            failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+          ).candidatePlan ?? {}, null, 2), "utf-8");
+
+          return buildFailureResult(
+            scenario, steps, allDiscoveredObjects, planSteps,
+            pendingObjectsPath, pendingPlansPath, evidenceDir,
+            failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+          );
+        } else {
+          console.log(`[ordinal-selection] candidate match verified ✓`);
+        }
+      }
     }
 
     // Post-click semantic verification for selection-like targets
@@ -4657,7 +5793,15 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     currentSnapshot = postClickScan.snapshot;
 
     // Capture evidence after click completes and page stabilizes
-    await captureEvStep(actionTarget.action, "passed");
+    // Skip generic screenshot when detail screenshot will capture the same state
+    const willCaptureDetailScreenshot = detailTarget && finalProductClickStepIndex === actionTarget.index && evidenceRec;
+    if (willCaptureDetailScreenshot) {
+      // Increment evidence index without capturing screenshot - detail capture will use this index
+      evidenceStepIndex++;
+      console.log(`[detail-screenshot] genericStepScreenshotSkipped=true reason=detail_loaded_screenshot_already_captured step=${actionTarget.index}`);
+    } else {
+      await captureEvStep(actionTarget.action, "passed");
+    }
 
     // Determine effective target from alias resolution
     const locatorStrategy = (resolution as any)?.locatorStrategy ?? "";
@@ -4805,7 +5949,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             console.log(`[route-completion] selected candidate="${selectedCandidate?.name ?? selectedCandidate?.text}" source=${postClickRouteCompletionResolution.source} confidence=${postClickRouteCompletionResolution.confidence}`);
 
             const selectedElement = postClickScan.snapshot.elements.find((el) => el.id === postClickRouteCompletionResolution!.candidateId);
-            
+
             if (selectedElement) {
               const resolvedInserted = await resolveSnapshotElementLocator(page, {
                 element: selectedElement,
@@ -4820,8 +5964,14 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
               if (resolvedInserted.locator) {
                 try {
                   await clickResolvedTarget(resolvedInserted.locator, false);
+                  console.log(`[post-click-screenshot] waitingAfterClick step=${actionTarget.index} target="${postClickRouteCompletionResolution.insertedStepText ?? actionTarget.target}"`);
                   await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+                  await page.waitForTimeout(1000);
                   console.log(`[route-completion] inserted step executed`);
+
+                  // Capture evidence for post-click route completion inserted step
+                  const insertedActionDesc = `Clic en "${postClickRouteCompletionResolution.insertedStepText ?? actionTarget.target}".`;
+                  await captureEvStep(insertedActionDesc, "passed");
 
                   const insertedStepResult = {
                     originalStepIndex: actionTarget.index,
@@ -4904,8 +6054,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
                   if (resolvedRetry.status === "resolved" && resolvedRetry.locator) {
                     try {
                       await clickResolvedTarget(resolvedRetry.locator, false);
+                      console.log(`[post-click-screenshot] waitingAfterClick step=${actionTarget.index} target="${actionTarget.target}"`);
                       await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
-                      
+                      await page.waitForTimeout(1000);
+
+                      // Capture evidence for post-click route completion retry
+                      await captureEvStep(actionTarget.action, "passed");
+
                       // Verify semantic match again after retry
                       const retryScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
                       const retryVisibleTexts = retryScan.snapshot.elements
@@ -4979,7 +6134,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
                         executedStepIndices.add(actionTarget.index);
                         if (typeof currentActionOrder === "number") executedActionOrders.add(currentActionOrder);
-                        if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
+                        if (await evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder, evidenceStepIndex)) {
                           break;
                         }
                         continue;
@@ -5121,7 +6276,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
               if (typeof currentActionOrder === "number") {
                 executedActionOrders.add(currentActionOrder);
               }
-              if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
+              if (await evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder, evidenceStepIndex)) {
                 break;
               }
               continue;
@@ -5220,7 +6375,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
               executedActionOrders.add(currentActionOrder);
             }
             executedStepIndices.add(actionTarget.index);
-            if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
+            if (await evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder, evidenceStepIndex)) {
               break;
             }
             continue;
@@ -5246,13 +6401,18 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           if (retryResolution.status === "resolved" && retryResolution.locator) {
             console.log(`[discovery:case] Target found after stability retry: ${actionTarget.target}`);
             await clickResolvedTarget(retryResolution.locator, false);
+            console.log(`[post-click-screenshot] waitingAfterClick step=${actionTarget.index} target="${actionTarget.target}"`);
             await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+            await page.waitForTimeout(1000);
             const afterState = await capturePageState(page);
             const transitionDetected = hasPageTransition(beforeState, afterState, actionTarget.target);
 
             const postClickScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
             currentSnapshot = postClickScan.snapshot;
             allDiscoveredObjects.push(...postClickScan.objects);
+
+            // Capture evidence after stability retry click
+            await captureEvStep(actionTarget.action, "passed");
 
             steps.push({
               index: actionTarget.index,
@@ -5276,7 +6436,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             if (typeof currentActionOrder === "number") {
               executedActionOrders.add(currentActionOrder);
             }
-            if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
+            if (await evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder, evidenceStepIndex)) {
               break;
             }
             continue;
@@ -5311,10 +6471,16 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           });
             if (retryResolution.status === "resolved" && retryResolution.locator) {
               await clickResolvedTarget(retryResolution.locator, false);
+              console.log(`[post-click-screenshot] waitingAfterClick step=${actionTarget.index} target="${actionTarget.target}"`);
               await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+              await page.waitForTimeout(1000);
+
               const postClickScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
               currentSnapshot = postClickScan.snapshot;
               allDiscoveredObjects.push(...postClickScan.objects);
+
+              // Capture evidence after auth gate recovery retry
+              await captureEvStep(actionTarget.action, "passed");
 
               steps.push({
                 index: actionTarget.index,
@@ -5338,7 +6504,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
               if (typeof currentActionOrder === "number") {
                 executedActionOrders.add(currentActionOrder);
               }
-              if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
+              if (await evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder, evidenceStepIndex)) {
                 break;
               }
               continue;
@@ -5617,7 +6783,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           : undefined
       });
 
-    if (evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder)) {
+    if (await evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder, evidenceStepIndex)) {
       break;
     }
   }
@@ -5692,11 +6858,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             ? "needs_associated_target_resolution"
             : effectiveFailedReason === "associated_action_not_found"
               ? "needs_associated_target_resolution"
-              : allFound
-                ? "discovered_passed"
-                : someFound
-                  ? "discovered_partial"
-                  : "exploration_failed";
+              : effectiveFailedReason === "missing_intermediate_step_to_final_target"
+                ? "exploration_failed"
+                : allFound
+                  ? "discovered_passed"
+                  : someFound
+                    ? "discovered_partial"
+                    : "exploration_failed";
   
   // Log status reconciliation
   if (failedReason && !effectiveFailedReason) {

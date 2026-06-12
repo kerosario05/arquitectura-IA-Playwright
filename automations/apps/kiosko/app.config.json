@@ -75,7 +75,25 @@
     "representativeFixture": {},
     "notes": [
       "RouteProfile para KIOSKO / Información de productos."
-    ]
+    ],
+    "entrySteps": [
+      {
+        "action": "click",
+        "target": "Iniciar",
+        "when": "before_first_functional_step"
+      },
+      {
+        "action": "click",
+        "target": "Información de productos",
+        "when": "before_first_functional_step"
+      }
+    ],
+    "updatedAt": "2026-06-11T19:11:25.497Z"
   },
-  "updatedAt": "2026-06-03T14:37:41.326Z"
+  "updatedAt": "2026-06-11T19:13:21.714Z",
+  "lastUsedSource": {
+    "type": "explicit",
+    "sectionName": null,
+    "updatedAt": "2026-06-11T19:13:21.714Z"
+  }
 }

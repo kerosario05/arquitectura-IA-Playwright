@@ -1,0 +1,9 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "PREVIEW-001",
+  "testRailCaseId": 0,
+  "generatedAt": "2026-06-12T15:57:35.748Z",
+  "title": "Validar visibilidad del botón Solicitar en Cuentas"
+}

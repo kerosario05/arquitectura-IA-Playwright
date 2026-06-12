@@ -843,6 +843,114 @@ function findDominantDomainTerm(routeProfile: McpRouteProfile | null): string | 
   return best;
 }
 
+/**
+ * Extract target labels mentioned in assertion steps
+ * Returns a list of all quoted strings from validation/assertion steps
+ */
+function extractAssertionTargets(steps: string[]): string[] {
+  const targets: string[] = [];
+
+  for (const step of steps) {
+    const stripped = stripStepNumbering(step);
+
+    // Only check assertion steps
+    if (!/^(validar|verificar|comprobar|esperar|should|verify|check|assert)\b/i.test(stripped)) {
+      continue;
+    }
+
+    // Extract all quoted strings from this assertion
+    const quotedMatches = stripped.match(/"([^"]+)"/g);
+    if (quotedMatches) {
+      for (const match of quotedMatches) {
+        const target = match.slice(1, -1); // Remove quotes
+        if (target.length > 2) { // Ignore very short strings
+          targets.push(target);
+        }
+      }
+    }
+  }
+
+  return targets;
+}
+
+/**
+ * Find a targetPath that matches one of the assertion targets
+ * Returns the matched targetPath and the matching label
+ */
+function findMatchingTargetPath(
+  assertionTargets: string[],
+  routeProfile: McpRouteProfile | null
+): { targetPath: any; matchedLabel: string } | null {
+  if (!routeProfile?.targetPaths) {
+    return null;
+  }
+
+  for (const [pathKey, tp] of Object.entries(routeProfile.targetPaths)) {
+    // Check if this targetPath has clickableToDetail metadata
+    const clickableToDetail = tp.productMetadata?.clickableToDetail ?? false;
+    const productLabel = tp.productMetadata?.productLabel || tp.target;
+
+    if (!clickableToDetail) {
+      continue; // Skip non-clickable products
+    }
+
+    // Check if any assertion target matches this product label
+    for (const assertionTarget of assertionTargets) {
+      const normalizedAssertion = normalizeForComparison(assertionTarget);
+      const normalizedProduct = normalizeForComparison(productLabel);
+
+      if (normalizedAssertion === normalizedProduct) {
+        return { targetPath: tp, matchedLabel: productLabel };
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Expand a targetPath into full navigation steps
+ * Returns array of click steps from entrySteps → requiredIntermediates → target
+ */
+function expandTargetPathToSteps(
+  targetPath: any,
+  routeProfile: McpRouteProfile | null,
+  entrySteps?: EntryStepConfig[]
+): string[] {
+  const expandedSteps: string[] = [];
+
+  // Add entry steps
+  if (entrySteps) {
+    for (const es of entrySteps) {
+      if (es.action === "click" && es.target) {
+        expandedSteps.push(`Clic en "${es.target}".`);
+      }
+    }
+  }
+
+  // Add routeProfile entry points
+  if (routeProfile?.entry) {
+    for (const entryPoint of routeProfile.entry) {
+      if (entryPoint.visibleLabel) {
+        expandedSteps.push(`Clic en "${entryPoint.visibleLabel}".`);
+      }
+    }
+  }
+
+  // Add required intermediates
+  if (targetPath.requiredIntermediates) {
+    for (const intermediate of targetPath.requiredIntermediates) {
+      expandedSteps.push(`Clic en "${intermediate}".`);
+    }
+  }
+
+  // Add final target
+  const finalTarget = targetPath.productMetadata?.productLabel || targetPath.target;
+  expandedSteps.push(`Clic en "${finalTarget}".`);
+
+  return expandedSteps;
+}
+
 export function ensureDetailScenarioHasItemSelection(
   steps: string[],
   expectedResult: string,
@@ -879,6 +987,83 @@ export function ensureDetailScenarioHasItemSelection(
   }
 
   const result = [...steps];
+
+  // CRITICAL FIX: Try to expand exact targetPath before falling back to ordinal
+  // Extract targets mentioned in assertions
+  const assertionTargets = extractAssertionTargets(steps);
+
+  if (assertionTargets.length > 0) {
+    // Try to find a matching targetPath
+    const match = findMatchingTargetPath(assertionTargets, routeProfile ?? null);
+
+    if (match) {
+      console.log(
+        `[detail-route-expansion] found targetPath match for "${match.matchedLabel}" ` +
+        `with ${match.targetPath.requiredIntermediates?.length || 0} intermediates`
+      );
+
+      // Expand the full navigation path
+      const expandedSteps = expandTargetPathToSteps(match.targetPath, routeProfile ?? null, entrySteps);
+
+      // Find where to insert: before first assertion
+      let insertIdx = result.length;
+      for (let i = result.length - 1; i >= 0; i--) {
+        const stripped = stripStepNumbering(result[i]);
+        if (/^(validar|verificar|comprobar|esperar|should|verify|check|assert)\b/i.test(stripped)) {
+          insertIdx = i;
+        } else {
+          break;
+        }
+      }
+
+      // Remove existing navigation steps that will be replaced
+      // Keep only the steps up to the insertion point
+      const existingNavigation = result.slice(0, insertIdx);
+      const assertions = result.slice(insertIdx);
+
+      // Deduplicate: remove steps from expandedSteps that already exist in existingNavigation
+      const existingTargets = new Set<string>();
+      for (const step of existingNavigation) {
+        const clickMatch = step.match(/Clic en "(.+)"\.?$/i);
+        if (clickMatch) {
+          existingTargets.add(normalizeForComparison(clickMatch[1]));
+        }
+      }
+
+      const newSteps: string[] = [];
+      for (const expandedStep of expandedSteps) {
+        const clickMatch = expandedStep.match(/Clic en "(.+)"\.?$/i);
+        if (clickMatch) {
+          const target = clickMatch[1];
+          const normalized = normalizeForComparison(target);
+          if (!existingTargets.has(normalized)) {
+            newSteps.push(expandedStep);
+            existingTargets.add(normalized);
+          }
+        } else {
+          newSteps.push(expandedStep);
+        }
+      }
+
+      // Combine: existing navigation + new steps + assertions
+      const finalSteps = [...existingNavigation, ...newSteps, ...assertions];
+
+      console.log(
+        `[detail-route-expansion] expanded targetPath to ${newSteps.length} steps ` +
+        `(${finalSteps.length} total including existing ${existingNavigation.length} nav + ${assertions.length} assertions)`
+      );
+
+      return {
+        steps: finalSteps,
+        inserted: true,
+        reason: "expanded_exact_targetPath"
+      };
+    } else {
+      console.log(
+        `[detail-route-expansion] no targetPath match found for assertion targets: ${assertionTargets.slice(0, 3).join(", ")}${assertionTargets.length > 3 ? "..." : ""}`
+      );
+    }
+  }
 
   // STEP A: Try to recover parent category/list navigation for unsupported detail targets
   let parentRecovery = findRecoverableParentCategory(steps, routeProfile, entrySteps);

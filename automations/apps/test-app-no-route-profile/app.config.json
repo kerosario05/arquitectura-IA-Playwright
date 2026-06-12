@@ -1,0 +1,16 @@
+{
+  "appSlug": "test-app-no-route-profile",
+  "name": "test-app-no-route-profile",
+  "source": {
+    "type": "request",
+    "sectionName": null
+  },
+  "routeProfile": null,
+  "createdAt": "2026-06-11T01:42:18.206Z",
+  "updatedAt": "2026-06-11T19:13:20.743Z",
+  "lastUsedSource": {
+    "type": "request",
+    "sectionName": null,
+    "updatedAt": "2026-06-11T19:13:20.740Z"
+  }
+}

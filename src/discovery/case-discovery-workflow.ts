@@ -1157,6 +1157,14 @@ export async function runCaseDiscoveryWorkflow(
       try {
         const { finalizeDiscoveryEvidence } = await import("../evidence/discovery-evidence");
         await finalizeDiscoveryEvidence(evidenceRecorder, caseResult || undefined, page);
+
+        // Log status after finalization to verify evidence gate status propagation
+        if (caseResult) {
+          console.log(
+            `[discovery:workflow] status after evidence finalize: ${caseResult.status} ` +
+            `candidatePlanStatus=${caseResult.candidatePlan?.status ?? "none"}`
+          );
+        }
       } catch (err: any) {
         console.log(`[evidence] finalization error: ${err.message}`);
       }

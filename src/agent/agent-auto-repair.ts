@@ -4,7 +4,8 @@ import type { FullConfig } from "../types/env.types";
 import { buildDataContext } from "../data/data-context";
 import { buildAgentHandoffRequest } from "./handoff-builder";
 import { writeAgentHandoffPackage } from "./handoff-writer";
-import { runCodexAutoRepair } from "./codex-auto-repair";
+import { runAiAutoRepair } from "./ai-auto-repair";
+import { runCodexAutoRepair } from "./codex-auto-repair"; // Keep for legacy fallback
 import { normalizeAgentHandoffResponse, validateAgentHandoffResponse } from "./agent-response-validator";
 import { validateExecutionPlan } from "../plans";
 import type { ExecutionPlan } from "../types/execution-plan.types";
@@ -20,6 +21,7 @@ import { validateRouteRecoveryPlan } from "./agent-response-validator";
 import type { CodexAutoRepairInput, PlanningBudget, SemanticGoal, RecoveryDecision } from "../types/codex-auto-repair.types";
 import { DEFAULT_PLANNING_BUDGET } from "../types/codex-auto-repair.types";
 import { resolveCodexCliPath } from "./codex-cli-resolver";
+import { resolveRepairAiConfig } from "../ai/ai-config-resolver";
 
 export type AgentAutoRepairConfig = {
   enabled: boolean;
@@ -68,6 +70,27 @@ export function resolveAgentAutoRepairConfig(fullConfig: FullConfig): AgentAutoR
   const agent = fullConfig.integrations.agent;
   const legacy = fullConfig.integrations.codex;
 
+  // Log the resolved repair AI config for visibility
+  // NEW: Agent-auto-repair now uses runAiAutoRepair() which uses createRepairAiProvider()
+  let shouldUseLegacyPath = false;
+  try {
+    const repairAiConfig = resolveRepairAiConfig();
+    console.log(`[ai-repair] purpose=repair provider=${repairAiConfig.provider} model=${repairAiConfig.model} timeoutMs=${repairAiConfig.timeoutMs} maxAttempts=${repairAiConfig.maxAttempts}`);
+
+    // Use legacy path ONLY if explicitly configured as codex_cli
+    shouldUseLegacyPath = repairAiConfig.provider === "codex_cli";
+
+    if (shouldUseLegacyPath) {
+      console.log(`[ai-repair] using legacy runCodexAutoRepair path for provider=${repairAiConfig.provider}`);
+    } else {
+      console.log(`[ai-repair] using provider factory path via runAiAutoRepair for provider=${repairAiConfig.provider}`);
+    }
+  } catch (error) {
+    console.error("[ai-repair] Failed to resolve repair AI config:", error instanceof Error ? error.message : String(error));
+    console.log("[ai-repair] falling back to legacy path due to config resolution failure");
+    shouldUseLegacyPath = true;
+  }
+
   const enabled = agent?.autoRepairEnabled ?? legacy?.autoRepairEnabled ?? false;
   const command = agent?.command ?? legacy?.command ?? "codex";
   const extraArgsRaw = agent?.extraArgs ?? legacy?.extraArgs ?? "--skip-git-repo-check --sandbox workspace-write";
@@ -79,7 +102,7 @@ export function resolveAgentAutoRepairConfig(fullConfig: FullConfig): AgentAutoR
   const maxCandidates = agent?.maxCandidates;
   const maxProposedActions = agent?.maxProposedActions;
 
-  const config: AgentAutoRepairConfig = {
+  const config: AgentAutoRepairConfig & { _shouldUseLegacyPath?: boolean } = {
     enabled,
     provider: agent?.provider,
     command,
@@ -90,7 +113,8 @@ export function resolveAgentAutoRepairConfig(fullConfig: FullConfig): AgentAutoR
     compactPrompt,
     promptBudgetSeconds,
     maxCandidates,
-    maxProposedActions
+    maxProposedActions,
+    _shouldUseLegacyPath: shouldUseLegacyPath
   };
 
   if (config.compactPrompt || config.promptMode === "compact-route-recovery") {
@@ -319,83 +343,87 @@ export async function runAgentAutoRepairAttempt(input: {
   };
 
   try {
-    const codexCli = await resolveCodexCliPath({
-      env: {
-        ...process.env,
-        ...(cfg.command && (cfg.command.includes("\\") || cfg.command.includes("/") || cfg.command.endsWith(".cmd") || cfg.command.endsWith(".exe"))
-          ? { CODEX_CLI_PATH: cfg.command }
-          : {})
-      },
-      platform: process.platform,
-      cwd: process.cwd(),
-      logger: { log: (message: string) => console.log(message) },
-      commandHint: cfg.command
-    });
+    // Check if we should use legacy path or provider factory path
+    const shouldUseLegacyPath = (cfg as any)._shouldUseLegacyPath ?? false;
 
-    if (!codexCli.found) {
-      console.log(`[auto-repair] Codex CLI not found. Set CODEX_CLI_PATH or install Codex CLI globally.`);
-      console.log(`[auto-repair] Auto-repair skipped: reason="${codexCli.reason}"`);
-      await writeAttemptResult({
-        timestamp: new Date().toISOString(),
-        attemptNumber: attempt,
-        repairStatus: "auto_repair_unavailable",
-        success: false,
-        error: codexCli.message,
-        responsePath,
-        selectedSkill: selectedSkillId,
-        diagnostics: {
-          autoRepairSkippedReason: codexCli.reason,
-          codexCli: {
-            found: false,
-            reason: codexCli.reason,
-            attempted: codexCli.attempted,
-            recommendation: codexCli.recommendation
-          }
-        }
+    let repair;
+
+    if (shouldUseLegacyPath) {
+      // Legacy path: use runCodexAutoRepair with resolveCodexCliPath
+      const codexCli = await resolveCodexCliPath({
+        env: {
+          ...process.env,
+          ...(cfg.command && (cfg.command.includes("\\") || cfg.command.includes("/") || cfg.command.endsWith(".cmd") || cfg.command.endsWith(".exe"))
+            ? { CODEX_CLI_PATH: cfg.command }
+            : {})
+        },
+        platform: process.platform,
+        cwd: process.cwd(),
+        logger: { log: (message: string) => console.log(message) },
+        commandHint: cfg.command
       });
-      return {
-        attempted: true,
-        status: "unavailable",
-        success: false,
-        reason: codexCli.reason,
+
+      if (!codexCli.found) {
+        console.log(`[auto-repair] Codex CLI not found. Set CODEX_CLI_PATH or install Codex CLI globally.`);
+        console.log(`[auto-repair] Auto-repair skipped: reason="${codexCli.reason}"`);
+        await writeAttemptResult({
+          timestamp: new Date().toISOString(),
+          attemptNumber: attempt,
+          repairStatus: "auto_repair_unavailable",
+          success: false,
+          error: codexCli.message,
+          responsePath,
+          selectedSkill: selectedSkillId,
+          diagnostics: {
+            autoRepairSkippedReason: codexCli.reason,
+            codexCli: {
+              found: false,
+              reason: codexCli.reason,
+              attempted: codexCli.attempted,
+              recommendation: codexCli.recommendation
+            }
+          }
+        });
+        return {
+          attempted: true,
+          status: "unavailable",
+          success: false,
+          reason: codexCli.reason,
+          handoffDir,
+          responsePath,
+          error: codexCli.message
+        };
+      }
+
+      console.log(`[auto-repair] Legacy path: Codex CLI resolved: source=${codexCli.source} command=${codexCli.displayCommand}`);
+
+      const skillPrompt = (selectedSkillId && cfg.promptMode !== "compact-route-recovery") ? buildSkillAwarePrompt({
         handoffDir,
+        requestPath,
+        instructionsPath,
         responsePath,
-        error: codexCli.message
-      };
-    }
+        schemaPath,
+        contextPackPath,
+        projectRoot: process.cwd(),
+        skillId: selectedSkillId,
+        promptMode: cfg.promptMode
+      }) : undefined;
 
-    console.log(`[auto-repair] Codex CLI resolved: source=${codexCli.source} command=${codexCli.displayCommand}`);
-
-    // For compact-route-recovery, buildCodexPrompt dispatches to
-    // buildCompactRouteRecoveryPrompt which already references selected-skill.md.
-    // Do not override with skillAwarePromptOverride.
-    const skillPrompt = (selectedSkillId && cfg.promptMode !== "compact-route-recovery") ? buildSkillAwarePrompt({
-      handoffDir,
-      requestPath,
-      instructionsPath,
-      responsePath,
-      schemaPath,
-      contextPackPath,
-      projectRoot: process.cwd(),
-      skillId: selectedSkillId,
-      promptMode: cfg.promptMode
-    }) : undefined;
-
-    const repair = await runCodexAutoRepair({
-      handoffDir,
-      requestPath,
-      instructionsPath,
-      responsePath,
-      schemaPath,
-      contextPackPath,
-      projectRoot: process.cwd(),
-      timeoutMs: cfg.timeoutMs,
-      codexCommand: codexCli.command,
-      codexExtraArgs: cfg.extraArgs,
-      promptMode: cfg.promptMode,
-      skillId: selectedSkillId,
-      skillPath: selectedSkillId ? path.join(handoffDir, "selected-skill.md") : undefined,
-      skillAwarePromptOverride: skillPrompt,
+      repair = await runCodexAutoRepair({
+        handoffDir,
+        requestPath,
+        instructionsPath,
+        responsePath,
+        schemaPath,
+        contextPackPath,
+        projectRoot: process.cwd(),
+        timeoutMs: cfg.timeoutMs,
+        codexCommand: codexCli.command,
+        codexExtraArgs: cfg.extraArgs,
+        promptMode: cfg.promptMode,
+        skillId: selectedSkillId,
+        skillPath: selectedSkillId ? path.join(handoffDir, "selected-skill.md") : undefined,
+        skillAwarePromptOverride: skillPrompt,
       showAgentLog: input.showAgentLog ?? false,
       heartbeatMs: input.heartbeatMs,
       stdoutLogPath,
@@ -410,13 +438,56 @@ export async function runAgentAutoRepairAttempt(input: {
       planningBudget: cfg.planningBudget
     } as CodexAutoRepairInput & { skillAwarePromptOverride?: string });
 
-    if (repair.diagnostics) {
+    } else {
+      // Provider factory path: use runAiAutoRepair
+      console.log(`[auto-repair] Provider factory path: using runAiAutoRepair`);
+
+      const skillPrompt = (selectedSkillId && cfg.promptMode !== "compact-route-recovery") ? buildSkillAwarePrompt({
+        handoffDir,
+        requestPath,
+        instructionsPath,
+        responsePath,
+        schemaPath,
+        contextPackPath,
+        projectRoot: process.cwd(),
+        skillId: selectedSkillId,
+        promptMode: cfg.promptMode
+      }) : undefined;
+
+      repair = await runAiAutoRepair({
+        handoffDir,
+        requestPath,
+        instructionsPath,
+        responsePath,
+        schemaPath,
+        contextPackPath,
+        projectRoot: process.cwd(),
+        timeoutMs: cfg.timeoutMs,
+        codexCommand: cfg.command, // Still needed for interface compatibility
+        codexExtraArgs: cfg.extraArgs, // Still needed for interface compatibility
+        promptMode: cfg.promptMode,
+        skillId: selectedSkillId,
+        skillPath: selectedSkillId ? path.join(handoffDir, "selected-skill.md") : undefined,
+        skillAwarePromptOverride: skillPrompt,
+        showAgentLog: input.showAgentLog ?? false,
+        heartbeatMs: input.heartbeatMs,
+        stdoutLogPath,
+        stderrLogPath,
+        attempt,
+        compactPrompt: cfg.compactPrompt,
+        promptBudgetSeconds: cfg.promptBudgetSeconds,
+        maxCandidates: cfg.maxCandidates,
+        maxProposedActions: cfg.maxProposedActions,
+        maxAttemptsOverride: cfg.maxAttempts,
+        routeRecoveryPackPath,
+        planningBudget: cfg.planningBudget
+      } as CodexAutoRepairInput & { skillAwarePromptOverride?: string });
+    }
+
+    if (repair.diagnostics && shouldUseLegacyPath) {
+      // Only add codexCli diagnostics if using legacy path
       (repair.diagnostics as Record<string, unknown>).autoRepairDiagnostics = {
-        codexCli: {
-          found: true,
-          source: codexCli.source,
-          displayCommand: codexCli.displayCommand
-        }
+        legacyPath: true
       };
     }
 

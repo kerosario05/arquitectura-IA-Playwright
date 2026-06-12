@@ -1,0 +1,10 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sectionId": 4903,
+  "sourceScenarioId": "C39287",
+  "testRailCaseId": 39287,
+  "generatedAt": "2026-06-12T15:31:50.466Z",
+  "title": "Visualizar detalles de Cuenta de Ahorros Personal en Pesos"
+}

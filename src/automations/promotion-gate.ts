@@ -3,6 +3,8 @@ import type { ExecutionPlan } from "../types/execution-plan.types";
 import type { CaseDiscoveryResult, DiscoveryStepResult } from "../types/discovery.types";
 import type { PromotionPolicy, POMPromotionStatus } from "../types/automation-promotion.types";
 import { DEFAULT_PROMOTION_POLICY } from "../types/automation-promotion.types";
+import { readFileSync, existsSync } from "node:fs";
+import { join } from "node:path";
 
 function detectFillValueLiteralFieldNameAntiPattern(specContent: string): string[] {
   const errors: string[] = [];
@@ -238,7 +240,7 @@ export function evaluatePromotionGate(input: PromotionGateInput): PromotionGateR
   if (plan.metadata?.authFlowRequired && input.specContent) {
     const hasAuthFlowImport = input.specContent.includes("AuthFlow");
     const hasAuthFlowCall = input.specContent.includes("authFlow.ensureAuthenticated");
-    
+
     if (!hasAuthFlowImport || !hasAuthFlowCall) {
       reasons.push(
         `Plan requires AuthFlow (authGate detected during discovery at step ${plan.metadata.authFlowInsertionAfterStepIndex ?? "unknown"}), ` +
@@ -247,6 +249,67 @@ export function evaluatePromotionGate(input: PromotionGateInput): PromotionGateR
       );
       pomStatus = "needs_auth_flow_in_spec";
     }
+  }
+
+  // --- Evidence Gate: Detail Screenshot Requirement Check ---
+  // If this is a detail scenario and detail screenshot is required but not captured,
+  // block promotion
+
+  // Try to use evidenceJsonPath from discovery result (set by finalizeDiscoveryEvidence)
+  // Fall back to evidenceDir/evidence.json for backward compatibility
+  const evidenceJsonPath = (discovery as any).evidenceJsonPath
+    ?? (discovery.evidenceDir ? join(discovery.evidenceDir, "evidence.json") : undefined);
+
+  if (evidenceJsonPath && existsSync(evidenceJsonPath)) {
+    try {
+      const evidenceJsonContent = readFileSync(evidenceJsonPath, "utf-8");
+      const evidenceRecord = JSON.parse(evidenceJsonContent);
+      const detailEvidence = evidenceRecord?.detailEvidence;
+
+      if (detailEvidence?.required === true) {
+        // Detail screenshot was required for this scenario
+        const detailScreenshotCaptured = detailEvidence.captured === true && detailEvidence.screenshotPath;
+        const detailActuallyOpened = detailEvidence.detailOpened === true;
+
+        console.log(
+          `[promotion-gate] evidence-gate check evidenceJsonPath=${evidenceJsonPath} ` +
+          `detailRequired=true captured=${detailScreenshotCaptured} opened=${detailActuallyOpened}`
+        );
+
+        if (!detailScreenshotCaptured) {
+          reasons.push(
+            `Evidence gate failed: Detail screenshot was required but not captured. ` +
+            `Target="${detailEvidence.target ?? "unknown"}". ` +
+            `Reason: ${detailEvidence.reason ?? "missing_detail_screenshot"}`
+          );
+          pomStatus = "needs_manual_review";
+        } else if (!detailActuallyOpened) {
+          reasons.push(
+            `Evidence gate failed: Detail screen did not open. ` +
+            `Target="${detailEvidence.target ?? "unknown"}". ` +
+            `Screenshot was captured but oracle detected insufficient detail signals. ` +
+            `detailHeading=${detailEvidence.detailHeading ?? false} ` +
+            `detailSections=${detailEvidence.detailSections ?? false} ` +
+            `actionButtons=${detailEvidence.actionButtons ?? false}. ` +
+            `Reason: ${detailEvidence.oracleReason ?? detailEvidence.reason ?? "detail_not_opened"}`
+          );
+          pomStatus = "needs_manual_review";
+        } else {
+          console.log(
+            `[promotion-gate] evidence-gate passed detailScreenshot captured and validated ` +
+            `path=${detailEvidence.screenshotPath}`
+          );
+        }
+      }
+    } catch (err) {
+      warnings.push(
+        `Evidence gate check failed to read evidence.json: ${err instanceof Error ? err.message : String(err)}`
+      );
+    }
+  } else if (evidenceJsonPath) {
+    console.log(
+      `[promotion-gate] evidence-gate skipped (evidence.json not found) path=${evidenceJsonPath}`
+    );
   }
 
   return {

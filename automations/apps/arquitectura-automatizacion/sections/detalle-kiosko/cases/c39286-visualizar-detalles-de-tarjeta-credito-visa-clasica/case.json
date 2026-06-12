@@ -1,0 +1,10 @@
+{
+  "id": "c39286-visualizar-detalles-de-tarjeta-credito-visa-clasica",
+  "externalId": "C39286",
+  "caseId": 39286,
+  "title": "Visualizar detalles de Tarjeta Crédito Visa Clásica",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-12T15:30:56.282Z"
+}

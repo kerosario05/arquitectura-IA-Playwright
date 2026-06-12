@@ -1,4 +1,5 @@
 import type { McpScenario, ScenarioValidationResult, McpRouteProfile } from "./scenario-types";
+import { detectMojibake } from "./target-normalization";
 
 const ALLOWED_AUTOMATION_TYPES = [
   "ui_discovery",
@@ -64,6 +65,7 @@ const SENSITIVE_ACTION_VERBS = [
 const MCP_STEP_VERBS = [
   /^(\d+[\.)]\s*)?Clic en\s+"/i,
   /^(\d+[\.)]\s*)?Validar que se muestre\s+"/i,
+  /^(\d+[\.)]\s*)?Validar que se muestre\s+(la secci[oó]n|el texto)\s+"/i, // Sections and text
   /^(\d+[\.)]\s*)?Validar que el bot[oó]n\s+".*"\s+est[eé]\s+(visible|habilitado|deshabilitado)/i,
   /^(\d+[\.)]\s*)?Validar que la opci[oó]n\s+".*"\s+est[eé]\s+disponible/i,
   /^(\d+[\.)]\s*)?Esperar que se muestre\s+"/i,
@@ -102,10 +104,15 @@ function containsSensitiveAction(step: string): string | null {
     return null;
   }
 
-  // Block imperative sensitive actions (Clic en "Solicitar", etc.)
-  for (const verb of SENSITIVE_ACTION_VERBS) {
-    if (verb.test(trimmed)) {
-      return `sensitive_action_not_allowed: No se permite ejecutar "${trimmed.slice(0, 80)}" por defecto. Use validación de visibilidad (e.g., "Validar que el botón esté visible").`;
+  // Block imperative sensitive actions (Clic en "Solicitar", Seleccionar "Solicitar", etc.)
+  // Only check if it's an executable action, NOT a validation/assertion
+  const isExecutableAction = /^(\d+[\.)]\s*)?(Clic en|Seleccionar|Hacer clic en)\s+["']/i.test(trimmed);
+
+  if (isExecutableAction) {
+    for (const verb of SENSITIVE_ACTION_VERBS) {
+      if (verb.test(trimmed)) {
+        return `sensitive_action_not_allowed: No se permite ejecutar "${trimmed.slice(0, 80)}" por defecto. Use validación de visibilidad (e.g., "Validar que el botón esté visible").`;
+      }
     }
   }
 
@@ -118,17 +125,102 @@ function matchesMcpPattern(step: string): boolean {
 }
 
 function validateEntrySteps(scenario: McpScenario, routeProfile: McpRouteProfile | null): string | null {
-  if (!routeProfile || !routeProfile.entry || routeProfile.entry.length === 0) return null;
+  if (!routeProfile) return null;
   if (!scenario.steps || scenario.steps.length === 0) return null;
 
-  const firstStep = scenario.steps[0].trim();
-  const firstEntryLabel = routeProfile.entry[0]?.visibleLabel;
+  const requiredEntryLabelsSet = new Set<string>();
 
-  if (!firstEntryLabel) return null;
+  // Collect entry steps (optional pre-functional steps)
+  if (routeProfile.entrySteps) {
+    for (const entryStep of routeProfile.entrySteps) {
+      if (entryStep.action === "click" && entryStep.target) {
+        requiredEntryLabelsSet.add(entryStep.target);
+      }
+    }
+  }
 
-  // Check if the first step references the first entry label
-  if (!firstStep.includes(`"${firstEntryLabel}"`)) {
-    return `missing_required_entry_step: Falta el paso obligatorio inicial: Clic en "${firstEntryLabel}".`;
+  // Collect entry labels (required navigation entry points)
+  if (routeProfile.entry && routeProfile.entry.length > 0) {
+    for (const entryPoint of routeProfile.entry) {
+      if (entryPoint.visibleLabel) {
+        requiredEntryLabelsSet.add(entryPoint.visibleLabel);
+      }
+    }
+  }
+
+  const requiredEntryLabels = Array.from(requiredEntryLabelsSet);
+
+  if (requiredEntryLabels.length === 0) return null;
+
+  // Verify all required entry labels appear in the first N steps of the scenario
+  // where N = number of required entry labels
+  const firstNSteps = scenario.steps.slice(0, requiredEntryLabels.length + 2).join(" ");
+
+  const missingLabels: string[] = [];
+  for (const label of requiredEntryLabels) {
+    // Check with quotes (standard MCP format)
+    if (!firstNSteps.includes(`"${label}"`) && !firstNSteps.includes(`'${label}'`)) {
+      missingLabels.push(label);
+    }
+  }
+
+  if (missingLabels.length > 0) {
+    return `missing_required_entry_step: Faltan los pasos obligatorios iniciales: ${missingLabels.map((l) => `Clic en "${l}"`).join(", ")}.`;
+  }
+
+  return null;
+}
+
+/**
+ * Validate product-specific rules against discovered products in routeProfile
+ *
+ * Checks:
+ * - Clicks on product cards respect clickableToDetail flag
+ * - Product navigation follows discovered paths
+ * - Product names match discovered catalog
+ */
+function validateProductRules(scenario: McpScenario, routeProfile: McpRouteProfile | null): string | null {
+  if (!routeProfile || !routeProfile.targetPaths) {
+    return null; // No validation if no route profile
+  }
+
+  // Extract discovered products from targetPaths
+  const discoveredProducts = Object.entries(routeProfile.targetPaths)
+    .filter(([_, tp]: [string, any]) => tp.productMetadata && tp.source === "runtime_discovery")
+    .map(([target, tp]: [string, any]) => ({
+      target,
+      normalizedTarget: target.toLowerCase(),
+      presentationType: tp.productMetadata?.presentationType || "unknown",
+      clickableToDetail: tp.productMetadata?.clickableToDetail ?? true, // Default true for backward compat
+      validationStatus: tp.productMetadata?.validationStatus,
+    }));
+
+  if (discoveredProducts.length === 0) {
+    return null; // No products to validate against
+  }
+
+  // Check each step for product clicks
+  for (const step of scenario.steps || []) {
+    const clickMatch = step.match(/Clic en [""]([^""]+)[""]|Clic en ['']([^'']+)['']/i);
+    if (!clickMatch) continue;
+
+    const clickTarget = (clickMatch[1] || clickMatch[2]).trim();
+    const normalizedTarget = clickTarget.toLowerCase();
+
+    // Find matching product
+    const matchedProduct = discoveredProducts.find(
+      (p) => p.normalizedTarget === normalizedTarget || p.target === clickTarget
+    );
+
+    if (!matchedProduct) continue; // Not a product click
+
+    // Check if it's a product_card that's not clickable
+    if (
+      matchedProduct.presentationType === "product_card" &&
+      matchedProduct.clickableToDetail === false
+    ) {
+      return `Cannot click on product card "${matchedProduct.target}" - it's marked as not clickable (clickableToDetail=false). Use validation instead: "Validar que se muestre \\"${matchedProduct.target}\\""`;
+    }
   }
 
   return null;
@@ -148,11 +240,26 @@ export function validateScenario(scenario: McpScenario, routeProfile?: McpRouteP
     errors.push(entryError);
   }
 
+  // Product-specific validation
+  const productError = validateProductRules(scenario, routeProfile ?? null);
+  if (productError) {
+    errors.push(productError);
+  }
+
   if (!scenario.steps || scenario.steps.length === 0) {
     errors.push("steps must not be empty");
   } else {
     for (let i = 0; i < scenario.steps.length; i++) {
-      const step = scenario.steps[i];
+      // CRITICAL: Apply mojibake correction before validation
+      const rawStep = scenario.steps[i];
+      const mojibakeResult = detectMojibake(rawStep);
+      const step = mojibakeResult.corrected;
+
+      if (mojibakeResult.hasMojibake) {
+        console.log(
+          `[validator:mojibake] corrected step ${i + 1}: "${rawStep.substring(0, 50)}" → "${step.substring(0, 50)}"`
+        );
+      }
 
       if (!isNumbered(step)) {
         errors.push(`Step ${i + 1} is not numbered: "${step.slice(0, 60)}..."`);

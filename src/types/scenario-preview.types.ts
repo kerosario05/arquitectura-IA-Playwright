@@ -1,4 +1,4 @@
-import type { McpScenario, McpRouteProfile } from "../scenarios/scenario-types";
+import type { McpScenario, McpRouteProfile, AutomatabilityClassification } from "../scenarios/scenario-types";
 
 export type VirtualCaseSource = "scenario_preview";
 
@@ -26,6 +26,53 @@ export type VirtualCase = {
   sectionId?: string | number;
 };
 
+export type CatalogOptions = {
+  useDiscoveredCatalog?: boolean;
+  catalogMode?: "existing" | "refresh";
+  coverageMode?: "representative" | "exhaustive";
+  maxProductsPerCategory?: number;
+};
+
+export type CatalogDiagnostics = {
+  catalogUsed: boolean;
+  discoveryRefreshed: boolean;
+  discoveredProductCount: number;
+  representativeProductCount: number;
+  discoveryTimestamp?: string;
+  warnings: string[];
+  fallbackReason?: string;
+  // HU scope filtering diagnostics
+  issueAlignedTargetCount?: number; // Number of products aligned with HU scope
+  issueAlignedCategories?: string[]; // Categories aligned with HU scope
+  explicitlyMentionedCategories?: string[]; // Categories explicitly mentioned in HU
+  // Scenario budget diagnostics
+  scenarioBudgetResolved?: number; // Dynamic scenario limit calculated for this HU
+  scenarioBudgetSource?: "env_override" | "dynamic_broad_hu" | "dynamic_failure_scenarios" | "default"; // How limit was determined
+  // Seed context diagnostics
+  seedContextCount?: number; // Number of deterministic seeds generated as context
+  seedContextByCategory?: Record<string, number>; // Seeds per category
+  seedGeneratedCount?: number; // Total seeds generated
+  seedValidCount?: number; // Valid seeds (passed validation)
+  seedInvalidCount?: number; // Invalid seeds (failed validation)
+  seedInvalidReasons?: Array<{ title: string; errors: string[] }>; // Why seeds failed
+  // Coverage diagnostics
+  categoryCoverage?: Record<string, { total: number; covered: number; seeded: number }>; // Coverage per category
+  // Failure scenario diagnostics
+  failureScenarioCountDetected?: number; // Number of failure scenarios detected in HU
+  failureScenarioCountGenerated?: number; // Number of failure scenarios actually generated
+  // Automatability filtering diagnostics
+  excludedRequirements?: Array<{
+    sourceRequirement: string;
+    sourceIssueKey: string;
+    reason: string;
+    classification: AutomatabilityClassification;
+    suggestedHandling: string;
+    detectedPatterns?: string[];
+  }>;
+  nonAutomatableRequirementCount?: number;
+  uiAutomatableRequirementCount?: number;
+};
+
 export type ScenarioPreviewRequest = {
   appSlug: string;
   targetAppSlug?: string;
@@ -46,6 +93,7 @@ export type ScenarioPreviewRequest = {
   };
   routeProfile?: McpRouteProfile;
   scenarios: McpScenario[];
+  catalogOptions?: CatalogOptions;
   options?: {
     overwrite?: boolean;
     autoPromote?: boolean;
@@ -61,6 +109,7 @@ export type ScenarioPreviewResponse = {
   status: string;
   mode: "scenario-preview";
   scenarioCount: number;
+  catalogDiagnostics?: CatalogDiagnostics;
 };
 
 export type ScenarioPreviewError = {

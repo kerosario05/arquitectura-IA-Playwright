@@ -55,7 +55,7 @@ export function normalizeAppSlug(input: string): string {
 export type AppInferenceResult = {
   appName: string;
   appSlug: string;
-  source: "explicit" | "testrail_section" | "testrail_project" | "jira" | "fallback";
+  source: "explicit" | "request" | "testrail_section" | "testrail_project" | "jira" | "fallback";
   confidence: "high" | "medium" | "low";
   reason: string;
 };
@@ -131,7 +131,19 @@ export function resolveAppForPreview(req: {
     };
   }
 
-  // 3. TestRail section name
+  // 3. Request appSlug (explicit from request body)
+  if (req.requestAppSlug?.trim()) {
+    const slug = normalizeAppSlug(req.requestAppSlug.trim());
+    return {
+      appName: slug,
+      appSlug: slug,
+      source: "request",
+      confidence: "high",
+      reason: `Request appSlug: ${req.requestAppSlug}`,
+    };
+  }
+
+  // 4. TestRail section name
   if (req.testrailSectionName?.trim()) {
     const inferred = inferAppFromTestRailSection(req.testrailSectionName);
     if (inferred) {
@@ -144,7 +156,7 @@ export function resolveAppForPreview(req: {
     }
   }
 
-  // 4. TestRail project name
+  // 5. TestRail project name
   if (req.testrailProjectName?.trim()) {
     const inferred = inferAppFromTestRailSection(req.testrailProjectName);
     if (inferred) {
@@ -157,7 +169,7 @@ export function resolveAppForPreview(req: {
     }
   }
 
-  // 5. Jira project key
+  // 6. Jira project key
   if (req.jiraProjectKey?.trim()) {
     const slug = normalizeAppSlug(req.jiraProjectKey.trim());
     return {
@@ -166,18 +178,6 @@ export function resolveAppForPreview(req: {
       source: "jira",
       confidence: "low",
       reason: `Fallback to Jira project key: ${req.jiraProjectKey}`,
-    };
-  }
-
-  // 6. Request appSlug
-  if (req.requestAppSlug?.trim()) {
-    const slug = normalizeAppSlug(req.requestAppSlug.trim());
-    return {
-      appName: slug,
-      appSlug: slug,
-      source: "fallback",
-      confidence: "low",
-      reason: `Fallback to request appSlug: ${req.requestAppSlug}`,
     };
   }
 
