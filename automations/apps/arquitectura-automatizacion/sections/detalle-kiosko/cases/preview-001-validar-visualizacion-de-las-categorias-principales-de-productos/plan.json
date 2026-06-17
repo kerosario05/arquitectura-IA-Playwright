@@ -1,0 +1,106 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-001",
+    "caseId": 0,
+    "title": "Validar visualización de las categorías principales de productos"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Clic en \"Iniciar\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en \"Información de productos\".",
+      "target": {
+        "strategy": "product_condition",
+        "value": "Información de productos",
+        "exact": false
+      },
+      "locatorStrategy": "product_condition"
+    },
+    {
+      "index": 5,
+      "action": "assertText",
+      "description": "Assert: Tarjetas de crédito",
+      "target": {
+        "strategy": "text",
+        "value": "Tarjetas de crédito",
+        "exact": false
+      },
+      "expected": "Tarjetas de crédito"
+    },
+    {
+      "index": 6,
+      "action": "assertText",
+      "description": "Assert: Depósitos a Plazo",
+      "target": {
+        "strategy": "text",
+        "value": "Depósitos a Plazo",
+        "exact": false
+      },
+      "expected": "Depósitos a Plazo"
+    },
+    {
+      "index": 7,
+      "action": "assertText",
+      "description": "Assert: Cuentas de Efectivo",
+      "target": {
+        "strategy": "text",
+        "value": "Cuentas de Efectivo",
+        "exact": false
+      },
+      "expected": "Cuentas de Efectivo"
+    },
+    {
+      "index": 8,
+      "action": "assertText",
+      "description": "Assert: Préstamos",
+      "target": {
+        "strategy": "text",
+        "value": "Préstamos",
+        "exact": false
+      },
+      "expected": "Préstamos"
+    },
+    {
+      "index": 9,
+      "action": "assertText",
+      "description": "Assert: Solicitar",
+      "target": {
+        "strategy": "text",
+        "value": "Solicitar",
+        "exact": false
+      },
+      "expected": "Solicitar"
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-06-12T18:41:56.719Z"
+}

@@ -67,7 +67,8 @@
     }
   ],
   "notes": [
-    "Discovery completed successfully. All targets and concrete assertions passed."
+    "Discovery completed successfully. All targets and concrete assertions passed.",
+    "Recovered 1 transient assertion failure(s) - see step recovery metadata for details."
   ],
-  "createdAt": "2026-06-12T12:57:26.688Z"
+  "createdAt": "2026-06-17T13:51:27.331Z"
 }

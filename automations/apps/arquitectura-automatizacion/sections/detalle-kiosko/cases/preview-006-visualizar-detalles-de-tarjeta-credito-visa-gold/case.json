@@ -1,0 +1,10 @@
+{
+  "id": "preview-006-visualizar-detalles-de-tarjeta-credito-visa-gold",
+  "externalId": "PREVIEW-006",
+  "caseId": 0,
+  "title": "Visualizar detalles de Tarjeta Crédito Visa Gold",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-12T19:30:04.182Z"
+}

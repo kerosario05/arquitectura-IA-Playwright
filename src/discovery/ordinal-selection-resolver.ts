@@ -402,7 +402,8 @@ export function resolveOrdinalSelection(
   snapshot: PageSnapshot,
   pattern: OrdinalSelectionPattern,
   routeProfile?: AppRouteProfile,
-  actionText?: string
+  actionText?: string,
+  expectedTarget?: string,
 ): OrdinalSelectionResult {
   const domainTermsList = buildDomainTermsList(routeProfile);
   const excludedCandidates: string[] = [];
@@ -493,7 +494,49 @@ export function resolveOrdinalSelection(
     };
   }
 
-  const sortedCandidates = safeCandidates.sort((a, b) => {
+  let finalCandidates = safeCandidates;
+
+  // If expectedTarget is specified, prefer candidates that match it (variant-aware)
+  if (expectedTarget && finalCandidates.length > 0) {
+    const normalizedExpected = expectedTarget.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    console.log(`[ordinal-selection] expectedTarget="${expectedTarget}"`);
+
+    // Score and sort by expectedTarget match
+    const variantTokens = ["pesos", "dólares", "dolares", "euros", "personal", "comercial", "clásica", "clasica", "gold", "platinum", "infinite"];
+    const scored = finalCandidates.map(c => {
+      const text = (c.element.text || c.element.label || c.element.name || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+      let score = 0;
+      let hasVariantConflict = false;
+
+      if (text === normalizedExpected) score = 1.0;
+      else if (text.includes(normalizedExpected) || normalizedExpected.includes(text)) score = 0.9;
+      else {
+        const expectedTokens = normalizedExpected.split(/\s+/).filter(t => t.length > 2);
+        const candidateTokens = text.split(/\s+/).filter(t => t.length > 2);
+        let matches = 0;
+        for (const et of expectedTokens) {
+          if (candidateTokens.some(ct => ct.includes(et) || et.includes(ct))) matches++;
+        }
+        score = expectedTokens.length > 0 ? matches / expectedTokens.length : 0;
+      }
+
+      for (const vt of variantTokens) {
+        const inExpected = normalizedExpected.includes(vt);
+        const inCandidate = text.includes(vt);
+        if (inCandidate && !inExpected) { hasVariantConflict = true; score *= 0.3; console.log(`[ordinal-selection] candidate text="${text}" match=false reason=variant_conflict expectedVariant="${normalizedExpected.match(/pesos|dólares|dolares|euros|personal|comercial|clásica|clasica/)?.[0] ?? "?"}" actualVariant="${vt}"`); }
+      }
+      return { candidate: c, score, text };
+    });
+
+    scored.sort((a, b) => b.score - a.score);
+    const bestScore = scored[0].score;
+    if (bestScore >= 0.7) {
+      finalCandidates = scored.filter(s => s.score >= bestScore * 0.9).map(s => s.candidate);
+      console.log(`[ordinal-selection] selected best match score=${bestScore.toFixed(2)} candidate="${scored[0].text}"`);
+    }
+  }
+
+  const sortedCandidates = finalCandidates.sort((a, b) => {
     const aIndex = snapshot.elements.findIndex(el => el.id === a.element.id);
     const bIndex = snapshot.elements.findIndex(el => el.id === b.element.id);
     return aIndex - bIndex;

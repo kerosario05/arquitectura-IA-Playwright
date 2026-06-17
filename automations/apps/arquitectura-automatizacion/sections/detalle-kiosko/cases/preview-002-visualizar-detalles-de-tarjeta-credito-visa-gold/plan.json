@@ -1,0 +1,74 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-002",
+    "caseId": 0,
+    "title": "Visualizar detalles de Tarjeta Crédito Visa Gold"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Clic en \"Iniciar\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en \"Información de productos\".",
+      "target": {
+        "strategy": "product_condition",
+        "value": "Información de productos",
+        "exact": false
+      },
+      "locatorStrategy": "product_condition"
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Clic en \"Tarjetas\".",
+      "target": {
+        "strategy": "product_condition",
+        "value": "Tarjetas",
+        "exact": false
+      },
+      "locatorStrategy": "product_condition"
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Clic en \"Tarjeta Crédito Visa Gold\".",
+      "target": {
+        "strategy": "product_condition",
+        "value": "Tarjeta Crédito Visa Gold",
+        "exact": false
+      },
+      "locatorStrategy": "product_condition"
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed.",
+    "Recovered 1 transient assertion failure(s) - see step recovery metadata for details."
+  ],
+  "createdAt": "2026-06-17T13:52:23.424Z"
+}

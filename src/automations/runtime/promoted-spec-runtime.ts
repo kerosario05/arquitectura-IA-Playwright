@@ -1063,7 +1063,7 @@ function isOrdinalSelectionActionIntent(actionIntent?: string): boolean {
 
 async function resolveOrdinalSelectionOnPage(
   page: Page,
-  options: { target: string; actionIntent: string; routeProfile?: AppRouteProfile }
+  options: { target: string; actionIntent: string; routeProfile?: AppRouteProfile; expectedTarget?: string }
 ): Promise<{ locator: any; text: string; selector: string; ordinal: string; domainTerm?: string; candidateCount: number } | null> {
   if (!isOrdinalSelectionActionIntent(options.actionIntent)) return null;
 
@@ -1194,6 +1194,58 @@ async function resolveOrdinalSelectionOnPage(
       console.log(`[ordinal-selection-runtime] rejected category candidate="${c.text}" reason=generic_category_not_item`);
     } else {
       productCandidates.push(c);
+    }
+  }
+
+  // Step 2c: If expectedTarget is specified (from detailTarget), rank candidates by match
+  const expectedTarget = options.expectedTarget;
+  if (expectedTarget && productCandidates.length > 0) {
+    console.log(`[ordinal-selection] expectedTarget="${expectedTarget}"`);
+    const normalizedExpected = normalizeOrdinalText(expectedTarget);
+
+    // Score each candidate by match with expectedTarget
+    const scored = productCandidates.map(c => {
+      const normalizedText = normalizeOrdinalText(c.text);
+      let score = 0;
+      let reason = "no_match";
+      let hasVariantConflict = false;
+
+      // Exact match after normalization
+      if (normalizedText === normalizedExpected) { score = 1.0; reason = "exact_match"; }
+      else if (normalizedText.includes(normalizedExpected) || normalizedExpected.includes(normalizedText)) { score = 0.9; reason = "expected_target_match"; }
+      else {
+        // Token-based matching
+        const expectedTokens = normalizedExpected.split(/\s+/).filter(t => t.length > 2);
+        const candidateTokens = normalizedText.split(/\s+/).filter(t => t.length > 2);
+        let matches = 0;
+        for (const et of expectedTokens) {
+          if (candidateTokens.some(ct => ct.includes(et) || et.includes(ct))) matches++;
+        }
+        const tokenScore = expectedTokens.length > 0 ? matches / expectedTokens.length : 0;
+        if (tokenScore >= 0.6) { score = 0.7 + 0.2 * tokenScore; reason = "token_match"; }
+
+        // Detect variant conflict: candidate has variant token that expected doesn't
+        const variantTokens = ["pesos", "dólares", "dolares", "euros", "personal", "comercial", "clásica", "clasica", "gold", "platinum", "infinite"];
+        for (const vt of variantTokens) {
+          const inExpected = normalizedExpected.includes(vt);
+          const inCandidate = normalizedText.includes(vt);
+          if (inCandidate && !inExpected) { hasVariantConflict = true; score *= 0.3; reason = "variant_conflict"; console.log(`[ordinal-selection] candidate text="${c.text}" match=false reason=variant_conflict expectedVariant="${normalizedExpected.match(/pesos|dólares|dolares|euros|personal|comercial|clásica|clasica|gold|platinum|infinite/)?.[0] ?? "?"}" actualVariant="${vt}"`); }
+        }
+      }
+
+      return { candidate: c, score, reason };
+    });
+
+    scored.sort((a, b) => b.score - a.score);
+    const bestScore = scored[0].score;
+
+    if (bestScore >= 0.7) {
+      // Reorder productCandidates by score
+      productCandidates.length = 0;
+      for (const s of scored) {
+        if (s.score === bestScore) productCandidates.push(s.candidate);
+      }
+      console.log(`[ordinal-selection] selected best match score=${bestScore.toFixed(2)} reason="${scored[0].reason}"`);
     }
   }
 
@@ -1715,7 +1767,8 @@ export class PromotedSpecRuntime {
       const ordinalResolved = await resolveOrdinalSelectionOnPage(this.page, {
         target: options.target,
         actionIntent: options.actionIntent,
-        routeProfile: options.routeProfile
+        routeProfile: options.routeProfile,
+        expectedTarget: (options as any).expectedTarget,
       });
 
       if (ordinalResolved) {

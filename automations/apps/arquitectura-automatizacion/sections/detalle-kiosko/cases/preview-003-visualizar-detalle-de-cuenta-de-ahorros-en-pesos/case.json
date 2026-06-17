@@ -1,0 +1,10 @@
+{
+  "id": "preview-003-visualizar-detalle-de-cuenta-de-ahorros-en-pesos",
+  "externalId": "PREVIEW-003",
+  "caseId": 0,
+  "title": "Visualizar detalle de cuenta de ahorros en Pesos",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-12T20:33:01.478Z"
+}

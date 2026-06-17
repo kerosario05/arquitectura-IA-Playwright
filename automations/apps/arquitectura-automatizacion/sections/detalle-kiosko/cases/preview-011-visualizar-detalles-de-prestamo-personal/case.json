@@ -1,0 +1,10 @@
+{
+  "id": "preview-011-visualizar-detalles-de-prestamo-personal",
+  "externalId": "PREVIEW-011",
+  "caseId": 0,
+  "title": "Visualizar detalles de Préstamo Personal",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-16T20:27:21.641Z"
+}

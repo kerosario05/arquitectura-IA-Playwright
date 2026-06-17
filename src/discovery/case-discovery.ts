@@ -1175,7 +1175,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   // Evidence capture helper
   const evidenceRec = options.evidenceRecorder;
   let evidenceStepIndex = 0;
-  const captureEvStep = async (text: string, status: "passed" | "failed" | "skipped", error?: string): Promise<void> => {
+  const captureEvStep = async (text: string, status: "passed" | "failed" | "skipped", error?: string, indexOverride?: number): Promise<void> => {
     if (!evidenceRec) return;
 
     // Exclude validation steps from evidence capture
@@ -1184,7 +1184,11 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       return;
     }
 
-    evidenceStepIndex++;
+    if (indexOverride !== undefined) {
+      evidenceStepIndex = indexOverride;
+    } else {
+      evidenceStepIndex++;
+    }
     try {
       const target = text.match(/"([^"]+)"/)?.[1];
       await evidenceRec.captureStep(page, evidenceStepIndex, text, { target, status, errorMessage: error });
@@ -1260,9 +1264,20 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   // Section terms that should NOT be considered as detail targets
   const detailSectionTerms = new Set([
     "detalles", "beneficios", "requisitos", "condiciones",
+    "condiciones relevantes",
     "información del producto", "informacion del producto",
     "términos y condiciones", "terminos y condiciones",
-    "tasas", "información legal", "informacion legal"
+    "tasas", "información legal", "informacion legal",
+    "notas aclaratorias",
+  ]);
+
+  // Generic field labels that are NOT concrete product names
+  const genericFieldLabels = new Set([
+    "nombre del producto", "descripción general", "descripcion general",
+    "información de productos", "informacion de productos",
+    "controles", "opciones disponibles", "detalles del producto",
+    "acciones disponibles", "botón de retorno", "botón de solicitud",
+    "boton de retorno", "boton de solicitud",
   ]);
 
   // Button terms that should NOT be considered as detail targets
@@ -1374,24 +1389,61 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         continue;
       }
 
+      // Skip generic field labels (not concrete product names)
+      if (genericFieldLabels.has(assertionLower)) {
+        console.log(`[detail-runtime] fallback=C skipped assertion="${assertionTarget.target}" reason=generic_field_label`);
+        continue;
+      }
+
+      // Skip navigation/control only texts
+      if (/^(volver|regresar|atrás|salir|finalizar|solicitar|imprimir|enviar)\b/i.test(assertionLower)) {
+        console.log(`[detail-runtime] fallback=C skipped assertion="${assertionTarget.target}" reason=navigation_control`);
+        continue;
+      }
+
+      // Skip single currency/variant words
+      if (/^(pesos|dólares|dolares|euros)$/i.test(assertionLower)) {
+        console.log(`[detail-runtime] fallback=C skipped assertion="${assertionTarget.target}" reason=currency_variant_only`);
+        continue;
+      }
+
       // This is likely the product assertion
       detailTarget = assertionTarget.target;
       detailTargetSource = "productAssertion";
 
-      // Try to find corresponding action index
-      const matchingAction = parsed.actionTargets.find(at =>
-        at.target.toLowerCase().includes(assertionLower) ||
-        assertionLower.includes(at.target.toLowerCase())
-      );
+      // Find the final executable action for this product assertion
+      // Priority: ordinal > semantic match > last non-intermediate action
+      const assertionIdx = assertionTarget.index;
+      const actionCandidates = parsed.actionTargets.filter(at => at.index <= assertionIdx);
 
-      if (matchingAction) {
-        finalProductClickStepIndex = matchingAction.index;
+      // Priority 1: last ordinal action (ordinal selections are the product click)
+      const isOrdinalAction = (t: string) => /seleccionar|primer|primera|segundo|tercer|último|siguiente|visible/i.test(t);
+      const ordinalAction = [...actionCandidates].reverse().find(at => isOrdinalAction(at.target));
+
+      if (ordinalAction) {
+        finalProductClickStepIndex = ordinalAction.index;
+        console.log(`[detail-runtime] fallback=C selected ordinal="${ordinalAction.target}" finalProductClickStepIndex=${ordinalAction.index}`);
       } else {
-        // If no matching action, use the last action before this assertion
-        const assertionIndex = assertionTarget.index;
-        const actionsBeforeAssertion = parsed.actionTargets.filter(at => at.index < assertionIndex);
-        if (actionsBeforeAssertion.length > 0) {
-          finalProductClickStepIndex = actionsBeforeAssertion[actionsBeforeAssertion.length - 1].index;
+        // Priority 2: last action that semantically matches the assertion AND is not intermediate
+        const matchingAction = [...actionCandidates].reverse().find(at =>
+          !entryTerms.has(at.target.toLowerCase().trim()) &&
+          !intermediateCategoryTerms.has(at.target.toLowerCase().trim()) &&
+          (
+            at.target.toLowerCase().includes(assertionLower) ||
+            assertionLower.includes(at.target.toLowerCase())
+          )
+        );
+        if (matchingAction) {
+          finalProductClickStepIndex = matchingAction.index;
+        } else {
+          // Priority 3: last non-intermediate, non-entry action
+          const lastRealAction = [...actionCandidates].reverse().find(at =>
+            !entryTerms.has(at.target.toLowerCase().trim()) &&
+            !intermediateCategoryTerms.has(at.target.toLowerCase().trim())
+          );
+          if (lastRealAction) {
+            finalProductClickStepIndex = lastRealAction.index;
+          }
         }
       }
 
@@ -3911,7 +3963,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       actionText: actionTarget.action,
       nextTarget,
       previousTarget,
-      routeHistory
+      routeHistory,
+      expectedTarget: detailTarget && finalProductClickStepIndex === actionTarget.index ? detailTarget : undefined,
     });
 
     let finalLocator = resolution.locator;
@@ -5357,22 +5410,36 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       finalLocator;
 
     if (shouldUseProductCardClick) {
+      const clickTarget = isOrdinalBoundToDetail && detailTarget ? detailTarget : actionTarget.target;
       console.log(
-        `[product-card-click] activated target="${actionTarget.target}" ` +
+        `[product-card-click] activated target="${clickTarget}" ` +
+        `originalTarget="${actionTarget.target}" ` +
         `detailTarget="${detailTarget}" stepIndex=${actionTarget.index} ` +
         `finalProductClickStepIndex=${finalProductClickStepIndex} ` +
-        `targetMatches=${targetMatchesDetail} isOrdinal=${isOrdinalBoundToDetail}`
+        `isOrdinal=${isOrdinalBoundToDetail}`
       );
 
       // INTERMEDIATE RECOVERY: Check if target is visible, if not try to recover missing intermediate step
       let intermediateRecoveryResult: IntermediateRecoveryResult | undefined;
 
+      // When ordinal is bound to a concrete detail target, use the detail target for recovery
+      const effectiveRecoveryTarget = isOrdinalBoundToDetail && detailTarget
+        ? detailTarget
+        : actionTarget.target;
+
+      if (isOrdinalBoundToDetail && detailTarget) {
+        console.log(
+          `[detail-ordinal-binding] originalTarget="${actionTarget.target}" ` +
+          `effectiveTarget="${detailTarget}"`
+        );
+      }
+
       try {
         intermediateRecoveryResult = await recoverMissingIntermediateForFinalTarget(
           page,
-          actionTarget.target,
+          effectiveRecoveryTarget,
           currentSnapshot,
-          routeProfile as any, // Cast to satisfy type - routeProfile is compatible
+          routeProfile as any,
           evidenceDir
         );
 
@@ -5390,7 +5457,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
           // Record the intermediate step as inserted
           const insertedStep: DiscoveryStepResult = {
-            index: actionTarget.index - 0.5, // Fractional index to indicate insertion
+            index: actionTarget.index + 0.5, // Fractional index to indicate insertion (after current step)
             action: `Clic en "${intermediateRecoveryResult.selectedCandidate!.text}".`,
             targetText: intermediateRecoveryResult.selectedCandidate!.text,
             status: "found",
@@ -5413,7 +5480,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           // Capture evidence screenshot for the intermediate recovered step
           if (evidenceRec) {
             try {
-              const intermediateStepIndex = actionTarget.index - 0.5;
+              const intermediateStepIndex = actionTarget.index + 0.5;
               const intermediateStepText = `Clic en "${normalizedInsertedText}"`;
               const intermediateRecord = await evidenceRec.captureStep(
                 page,

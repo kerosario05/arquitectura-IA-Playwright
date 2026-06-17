@@ -1,0 +1,10 @@
+{
+  "id": "preview-009-visualizar-detalles-de-depositos-a-plazo-en-pesos",
+  "externalId": "PREVIEW-009",
+  "caseId": 0,
+  "title": "Visualizar detalles de Depósitos a Plazo en Pesos",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-17T13:58:27.103Z"
+}

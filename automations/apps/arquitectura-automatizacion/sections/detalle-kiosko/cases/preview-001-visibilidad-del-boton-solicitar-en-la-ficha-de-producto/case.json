@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-visibilidad-del-boton-solicitar-en-la-ficha-de-producto",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Visibilidad del botón Solicitar en la ficha de producto",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-12T16:56:45.921Z"
+}

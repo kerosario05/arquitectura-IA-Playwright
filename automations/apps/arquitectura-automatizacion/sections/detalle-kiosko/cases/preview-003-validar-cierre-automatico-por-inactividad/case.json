@@ -1,0 +1,10 @@
+{
+  "id": "preview-003-validar-cierre-automatico-por-inactividad",
+  "externalId": "PREVIEW-003",
+  "caseId": 0,
+  "title": "Validar cierre automático por inactividad",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-16T13:40:30.950Z"
+}

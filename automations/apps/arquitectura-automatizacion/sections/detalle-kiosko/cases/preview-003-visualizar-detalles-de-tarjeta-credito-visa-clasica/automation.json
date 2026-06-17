@@ -10,14 +10,14 @@
   "status": "active",
   "source": "discovery",
   "appProfile": "arquitectura-automatizacion",
-  "createdAt": "2026-06-12T15:49:36.187Z",
-  "updatedAt": "2026-06-12T15:49:36.187Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-06-12T15-48-40-900Z\\discovered-plans.pending.json",
+  "createdAt": "2026-06-12T18:44:02.496Z",
+  "updatedAt": "2026-06-12T18:44:02.496Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-06-12T18-43-06-725Z\\discovered-plans.pending.json",
   "pomStatus": "promoted",
   "inlineDebugMode": false,
   "specVerificationStatus": "not_run",
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-06-12T15-48-40-900Z",
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-06-12T18-43-06-725Z",
     "pomDiagnostics": {
       "status": "promoted",
       "inlineFallbackUsed": false,
@@ -51,6 +51,9 @@
       "autoPomCreatedMethods": [],
       "fallbackUsed": false,
       "requirePomRuntime": false
-    }
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-003-visualizar-detalles-de-tarjeta-credito-visa-clasica\\plan.json",
+    "previousStatus": "active"
   }
 }

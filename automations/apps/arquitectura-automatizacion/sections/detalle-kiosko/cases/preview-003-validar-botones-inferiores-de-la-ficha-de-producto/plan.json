@@ -1,0 +1,75 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-003",
+    "caseId": 0,
+    "title": "Validar botones inferiores de la ficha de producto"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Clic en \"Iniciar\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en \"Información de productos\".",
+      "target": {
+        "strategy": "product_condition",
+        "value": "Información de productos",
+        "exact": false
+      },
+      "locatorStrategy": "product_condition"
+    },
+    {
+      "index": 5,
+      "action": "assertText",
+      "description": "Assert: Cuentas",
+      "target": {
+        "strategy": "text",
+        "value": "Cuentas",
+        "exact": false
+      },
+      "expected": "Cuentas"
+    },
+    {
+      "index": 6,
+      "action": "assertText",
+      "description": "Assert: Solicitar",
+      "target": {
+        "strategy": "text",
+        "value": "Solicitar",
+        "exact": false
+      },
+      "expected": "Solicitar"
+    }
+  ],
+  "notes": [
+    "Discovery partial: 4/6 navigations/assertions satisfied.",
+    "Review needed: 1 non-blocking assertion failure(s) were ignored for pass/fail reconciliation.",
+    "Recovered 1 transient assertion failure(s) - see step recovery metadata for details."
+  ],
+  "createdAt": "2026-06-16T12:55:05.453Z"
+}

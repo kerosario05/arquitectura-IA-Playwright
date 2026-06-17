@@ -1,0 +1,10 @@
+{
+  "id": "preview-007-visualizar-detalles-de-cuenta-de-ahorros-personal-en-euros",
+  "externalId": "PREVIEW-007",
+  "caseId": 0,
+  "title": "Visualizar detalles de Cuenta de Ahorros Personal en Euros",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-17T13:57:27.228Z"
+}

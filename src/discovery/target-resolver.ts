@@ -728,7 +728,7 @@ export async function resolveActionTarget(
   if (ordinalPattern) {
     console.log(`[target-resolver] Ordinal selection pattern detected: ordinal=${ordinalPattern.ordinal} domainTerm=${ordinalPattern.domainTerm || "none"} target="${target}"`);
     
-    const ordinalResult = resolveOrdinalSelection(snapshot, ordinalPattern, opts.routeProfile, opts.actionText);
+    const ordinalResult = resolveOrdinalSelection(snapshot, ordinalPattern, opts.routeProfile, opts.actionText, (opts as any).expectedTarget);
     
     if (ordinalResult.status === "resolved" && ordinalResult.candidateId) {
       const element = snapshot.elements.find(e => e.id === ordinalResult.candidateId);

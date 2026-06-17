@@ -232,6 +232,27 @@ async function recoverCaseAfterRefs500(
       console.log(`[testrail-publish] recovered by cache_key+scenario_id caseId=${byCacheAndScenario[0].id}`);
       return { found: true, case: byCacheAndScenario[0], strength: "cache_key_and_scenario_id" };
     }
+
+    // If multiple title-cache-scenario matches, try unique marker in custom_preconds
+    const launchId = (ctx as any).launchId as string | undefined;
+    const uniqueMarker = launchId ? `[automationScenarioId: ${launchId.slice(0, 8)}-${scenarioId.replace(/^L-/, "")}]` : "";
+    if (uniqueMarker && candidates.length > 1) {
+      console.log(`[testrail-recovery] addCase500 candidates=${candidates.length} title="${scenarioTitle}" checking unique marker`);
+      const byMarker = candidates.filter((c) => {
+        const preconds = String(c.custom_preconds ?? "");
+        return preconds.includes(uniqueMarker);
+      });
+      if (byMarker.length === 1) {
+        console.log(`[testrail-recovery] selectedByUniqueMarker caseId=${byMarker[0].id} marker="${uniqueMarker}"`);
+        return { found: true, case: byMarker[0], strength: "unique_marker" };
+      }
+      if (byMarker.length > 1) {
+        console.warn(`[testrail-recovery] multiple candidates with same unique marker, selecting first caseId=${byMarker[0].id}`);
+        return { found: true, case: byMarker[0], strength: "unique_marker_ambiguous" };
+      }
+      console.log(`[testrail-recovery] no candidate found with unique marker "${uniqueMarker}"`);
+    }
+
     if (byCacheAndScenario.length > 1) {
       const ids = byCacheAndScenario.map((c) => c.id);
       const candidateScenarioIds = byCacheAndScenario.map((c) => String(c.custom_scenario_id ?? ""));
@@ -527,7 +548,12 @@ export async function publishScenariosToTestRail(
 
     const stepsSeparated = toStepsSeparated(scenario);
     const customFields = buildCustomFields(ctx, scenarioId);
-    const preconditions = sanitizeText(scenario.preconditions.join(" | "));
+    const preconditionsBase = sanitizeText(scenario.preconditions.join(" | "));
+    const launchId = (ctx as any).launchId as string | undefined;
+    const uniqueMarker = launchId ? `[automationScenarioId: ${launchId.slice(0, 8)}-${scenarioId.replace(/^L-/, "")}]` : "";
+    const preconditions = uniqueMarker
+      ? (preconditionsBase ? `${preconditionsBase}\n${uniqueMarker}` : uniqueMarker)
+      : preconditionsBase;
     const customExpected = buildCustomExpected(scenario);
     const customCaseOracle = buildCustomCaseOracle(scenario, requiredCaseFields);
         const refs = existingMapping?.testRailRef ?? buildSafeTestRailRefs(scenario, scenarioId, ctx.storyKey);
@@ -590,8 +616,43 @@ export async function publishScenariosToTestRail(
               created += 1;
               console.log(`[testrail-publish] recovery after full addCase succeeded scenario=${scenarioId} caseId=${testRailCase.id} strength=${recovery1.strength}`);
             } else if (recovery1.reason === "ambiguous") {
-              const diag = recoveryDiagnosticInfo(ctx, scenario.title, scenarioId, recovery1);
-              throw new Error(`testrail_add_case_500_recovery_ambiguous: full addCase 500 produced multiple candidates. sectionId=${ctx.sectionId} scenarioId=${scenarioId} diagnostic=${JSON.stringify(diag)}`);
+              // Ambiguous recovery: retry with unique title containing the automationScenarioId
+              const launchId = (ctx as any).launchId as string | undefined;
+              const markerId = launchId ? `${launchId.slice(0, 8)}-${scenarioId.replace(/^L-/, "")}` : scenarioId;
+              const uniqueTitle = `${scenario.title} [${markerId}]`;
+              console.log(`[testrail-recovery] no marker match among legacy duplicates; retrying with unique title`);
+              console.log(`[testrail-publish] retryWithUniqueTitle title="${uniqueTitle}" scenario=${scenarioId}`);
+              try {
+                testRailCase = await client.addCase(String(ctx.sectionId), {
+                  title: uniqueTitle,
+                  refs,
+                  preconditions,
+                  customExpected,
+                  customCaseOracle,
+                  stepsSeparated,
+                  customFields,
+                });
+                mappingSource = "created_with_unique_title";
+                created += 1;
+                console.log(`[testrail-publish] createdWithUniqueTitle caseId=${testRailCase.id} scenario=${scenarioId}`);
+              } catch (uniqueErr: any) {
+                const uniqueMsg = uniqueErr.message ?? String(uniqueErr);
+                // If even unique title fails with 500, try recovery with the new title
+                if (uniqueMsg.includes("Undefined array key") && uniqueMsg.includes("refs")) {
+                  const recoveryUnique = await recoverCaseAfterRefs500(client, ctx, uniqueTitle, scenarioId);
+                  if (recoveryUnique.found) {
+                    testRailCase = recoveryUnique.case;
+                    mappingSource = "recovered_after_unique_title_500";
+                    created += 1;
+                    console.log(`[testrail-publish] recovery after unique title 500 succeeded caseId=${testRailCase.id}`);
+                  } else {
+                    const diag = recoveryDiagnosticInfo(ctx, scenario.title, scenarioId, recoveryUnique);
+                    throw new Error(`testrail_add_case_500_recovery_ambiguous: unique title also ambiguous. sectionId=${ctx.sectionId} scenarioId=${scenarioId} diagnostic=${JSON.stringify(diag)}`);
+                  }
+                } else {
+                  throw uniqueErr;
+                }
+              }
             } else {
               // No candidates found — try compatibility without refs but WITH custom fields for strong key matching
               console.warn(`[testrail-publish] recovery after full addCase found no candidates; trying compatibility payload scenario=${scenarioId}`);

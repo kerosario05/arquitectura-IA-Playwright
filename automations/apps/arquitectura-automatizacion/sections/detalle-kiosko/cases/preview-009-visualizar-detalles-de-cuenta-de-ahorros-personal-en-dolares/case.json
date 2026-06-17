@@ -1,0 +1,10 @@
+{
+  "id": "preview-009-visualizar-detalles-de-cuenta-de-ahorros-personal-en-dolares",
+  "externalId": "PREVIEW-009",
+  "caseId": 0,
+  "title": "Visualizar detalles de Cuenta de Ahorros Personal en Dólares",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-16T20:25:55.340Z"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-visualizar-detalles-de-tarjeta-de-credito-visa-platinum",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Visualizar detalles de Tarjeta de Crédito Visa Platinum",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-17T12:54:40.907Z"
+}

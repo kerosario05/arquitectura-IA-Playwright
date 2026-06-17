@@ -1,0 +1,10 @@
+{
+  "id": "preview-002-validar-las-opciones-visibles-de-cuentas-de-efectivo",
+  "externalId": "PREVIEW-002",
+  "caseId": 0,
+  "title": "Validar las opciones visibles de Cuentas de Efectivo",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-12T17:20:33.075Z"
+}

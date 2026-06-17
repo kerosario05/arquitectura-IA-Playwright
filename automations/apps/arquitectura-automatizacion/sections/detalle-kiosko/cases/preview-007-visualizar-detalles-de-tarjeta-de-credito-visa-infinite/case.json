@@ -1,0 +1,10 @@
+{
+  "id": "preview-007-visualizar-detalles-de-tarjeta-de-credito-visa-infinite",
+  "externalId": "PREVIEW-007",
+  "caseId": 0,
+  "title": "Visualizar detalles de Tarjeta de Crédito Visa Infinite",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-16T20:24:01.082Z"
+}
