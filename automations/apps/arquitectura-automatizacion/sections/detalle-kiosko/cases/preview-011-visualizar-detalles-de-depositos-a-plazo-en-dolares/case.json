@@ -1,0 +1,10 @@
+{
+  "id": "preview-011-visualizar-detalles-de-depositos-a-plazo-en-dolares",
+  "externalId": "PREVIEW-011",
+  "caseId": 0,
+  "title": "Visualizar detalles de Depósitos a Plazo en Dólares",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-24T16:04:07.297Z"
+}

@@ -1280,6 +1280,20 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     "boton de retorno", "boton de solicitud",
   ]);
 
+  // Attribute/field terms that are NOT clickable product targets but valid assertions
+  // Used when ordinal selection is detected to exclude field-level assertions as detail targets
+  const attributeFieldTerms = new Set([
+    "tasa", "tasa de interes", "tasa de interés", "tasa de interés anual",
+    "plazo", "plazo del producto", "plazo disponible",
+    "monto", "monto mínimo", "monto máximo",
+    "fecha", "fecha de vencimiento", "fecha de inicio", "fecha de cierre",
+    "moneda", "divisa",
+    "rentabilidad", "rendimiento",
+    "comisión", "comisiones",
+    "saldo", "saldo disponible",
+    "límite", "límite de crédito"
+  ]);
+
   // Button terms that should NOT be considered as detail targets
   const actionButtonTerms = new Set([
     "volver", "solicitar", "contratar", "finalizar sesión", "finalizar sesion",
@@ -1455,7 +1469,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     }
   }
 
-  // FALLBACK D: If ordinal exists, use first product assertion
+  // FALLBACK D: If ordinal exists, use first product assertion (excluding field terms)
   if (!detailTarget) {
     const hasOrdinal = parsed.actionTargets.some(at =>
       /seleccionar|primer|primera|elemento.*visible|listado/i.test(at.target)
@@ -1467,10 +1481,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       for (const assertionTarget of parsed.assertionTargets) {
         const assertionLower = assertionTarget.target.toLowerCase().trim();
 
+        // Exclude field/attribute terms when ordinal is detected
         if (!detailSectionTerms.has(assertionLower) &&
             !actionButtonTerms.has(assertionLower) &&
             !entryTerms.has(assertionLower) &&
-            !intermediateCategoryTerms.has(assertionLower)) {
+            !intermediateCategoryTerms.has(assertionLower) &&
+            !attributeFieldTerms.has(assertionLower)) {
 
           detailTarget = assertionTarget.target;
           detailTargetSource = "ordinalAssertionFallback";
@@ -1486,7 +1502,17 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             `ordinalStepIndex=${finalProductClickStepIndex}`
           );
           break;
+        } else if (attributeFieldTerms.has(assertionLower)) {
+          console.log(
+            `[detail-runtime] skipped assertion="${assertionTarget.target}" reason=attribute_or_field`
+          );
         }
+      }
+
+      // If no suitable assertion found for ordinal, defer to ordinal itself as detail target
+      if (!detailTarget && hasOrdinal) {
+        console.log(`[detail-runtime] ordinal detail target deferred (no suitable assertion found)`);
+        detailTargetSource = "ordinalAssertionFallback";
       }
     }
   }
