@@ -1,9 +1,13 @@
+import { spawn as nodeSpawn } from "node:child_process";
 import { AiProviderError, type AiCompletionRequest, type AiCompletionResponse, type AiProviderConfig, type AiMessage } from "../ai-provider.types";
-import { parseJsonObjectText } from "../ai-json-validator";
-import { runCodexCli } from "../../agent/codex-cli-runner";
-import type { CodexCliRunnerInput } from "../../types/codex-auto-repair.types";
 import * as path from "node:path";
 import * as fs from "node:fs/promises";
+
+// Test seam: allows unit tests to replace spawn without spawning real processes.
+let spawnFn: typeof nodeSpawn = nodeSpawn;
+export function __setSpawnForTesting(fn: typeof nodeSpawn): void {
+  spawnFn = fn;
+}
 
 const SENSITIVE_PATTERNS = [
   /api[_-]?key\s*[=:]\s*\S+/gi,
@@ -49,55 +53,102 @@ export class CopilotCliProvider {
     this.allowStdoutJsonFallback = config.allowStdoutJsonFallback ?? false;
   }
 
-  private buildFinalExtraArgs(): string[] {
-    const hasModelFlag = this.extraArgs.some((arg, i) => {
-      return arg === "--model" || arg === "-m" || (i > 0 && (this.extraArgs[i - 1] === "--model" || this.extraArgs[i - 1] === "-m"));
+  private filterModelArgs(args: string[]): string[] {
+    const result: string[] = [];
+    let i = 0;
+    while (i < args.length) {
+      if (args[i] === "--model" || args[i] === "-m") {
+        i += 2;
+      } else {
+        result.push(args[i]);
+        i++;
+      }
+    }
+    return result;
+  }
+
+  private buildCopilotPromptContent(systemMessage: string, userMessage: string): string {
+    const parts: string[] = [];
+    if (systemMessage) parts.push("SYSTEM:\n" + systemMessage);
+    if (userMessage) parts.push("USER:\n" + userMessage);
+    parts.push("OUTPUT: Respond with ONLY valid JSON. No explanations, no markdown fences.");
+    return parts.join("\n\n");
+  }
+
+  private spawnCopilot(
+    fullPrompt: string,
+    promptPath: string,
+    tempDir: string,
+    timeoutMs: number
+  ): Promise<{ exitCode: number; stdout: string; stderr: string; timedOut: boolean }> {
+    const command = process.env.COPILOT_CLI_COMMAND?.trim() || this.command;
+    const filteredExtra = this.filterModelArgs(this.extraArgs);
+
+    // Short prompt that references the file - keep it simple without internal punctuation that confuses shell parsers
+    const shortPrompt = `Read prompt.txt and return only valid JSON to stdout. No markdown. No explanations.`;
+    const args = ["-p", shortPrompt, "-s", "--model", this.model, "--no-ask-user", ...filteredExtra];
+    const env: NodeJS.ProcessEnv = { ...process.env, COPILOT_MODEL: this.model };
+
+    let spawnCmd = command;
+    let spawnArgs = args;
+    let spawnOptions: any = { env, cwd: tempDir };
+
+    if (process.platform === "win32" && (command.endsWith(".cmd") || command.endsWith(".bat"))) {
+      // Pass explicitly to cmd.exe without shell mode - preserves args as independent parameters
+      spawnCmd = "cmd.exe";
+      spawnArgs = ["/d", "/s", "/c", command, ...args];
+      spawnOptions.windowsHide = true;
+    }
+
+    return new Promise((resolve) => {
+      let stdout = "";
+      let stderr = "";
+      let timedOut = false;
+
+      const child = spawnFn(spawnCmd, spawnArgs, spawnOptions);
+
+      const timer = setTimeout(() => {
+        timedOut = true;
+        child.kill("SIGTERM");
+      }, timeoutMs);
+
+      child.stdout.on("data", (chunk: Buffer) => { stdout += chunk.toString("utf-8"); });
+      child.stderr.on("data", (chunk: Buffer) => { stderr += chunk.toString("utf-8"); });
+
+      child.on("close", (code: number | null) => {
+        clearTimeout(timer);
+        resolve({ exitCode: code ?? 1, stdout, stderr, timedOut });
+      });
+
+      child.on("error", (err: Error) => {
+        clearTimeout(timer);
+        resolve({ exitCode: 1, stdout, stderr: stderr + err.message, timedOut });
+      });
     });
-
-    if (hasModelFlag) {
-      return [...this.extraArgs];
-    }
-
-    if (this.model) {
-      return ["--model", this.model, ...this.extraArgs];
-    }
-
-    return [...this.extraArgs];
   }
 
   async completeJson(request: AiCompletionRequest): Promise<AiCompletionResponse> {
     const startedAt = Date.now();
     const tempDir = await this.createTempDir();
     const purpose = request.purpose ?? "general";
-    const outputFileName = this.getOutputFileName(purpose);
-    const outputPath = path.join(tempDir, outputFileName);
     const promptPath = path.join(tempDir, "prompt.txt");
-    const stdoutLogPath = path.join(tempDir, "copilot-stdout.log");
-    const stderrLogPath = path.join(tempDir, "copilot-stderr.log");
-    let processExitedNonZero = false;
-    let processResult: Awaited<ReturnType<typeof runCodexCli>> | null = null;
 
     try {
       const systemMessage = request.messages.find(m => m.role === "system")?.content ?? "";
       const userMessage = request.messages.find(m => m.role === "user")?.content ?? "";
 
-      await this.writeInputFiles(tempDir, outputPath, promptPath, systemMessage, userMessage, purpose);
+      const fullPrompt = this.buildCopilotPromptContent(systemMessage, userMessage);
 
-      const shortPrompt = `Read and follow the instructions in "${promptPath}". Write the output file exactly as instructed.`;
-      const finalExtraArgs = this.buildFinalExtraArgs();
+      // Write full prompt to file to handle long prompts in Windows
+      await fs.writeFile(promptPath, fullPrompt, "utf-8");
 
-      const runnerInput: CodexCliRunnerInput = {
-        command: this.command,
-        extraArgs: finalExtraArgs,
-        prompt: shortPrompt,
-        cwd: tempDir,
-        timeoutMs: this.timeoutMs,
-        stdoutLogPath,
-        stderrLogPath
-      };
+      const shortPrompt = `Read and follow the instructions in prompt.txt. Return only valid JSON to stdout. Do not include markdown fences or explanations.`;
 
-      const result = await runCodexCli(runnerInput);
-      processResult = result;
+      if (purpose === "scenario_generation") {
+        console.log(`[copilot-cli] purpose=scenario_generation promptMode=file promptChars=${fullPrompt.length} shortPromptChars=${shortPrompt.length}`);
+      }
+
+      const result = await this.spawnCopilot(fullPrompt, promptPath, tempDir, this.timeoutMs);
       const durationMs = Date.now() - startedAt;
 
       if (result.timedOut) {
@@ -106,79 +157,82 @@ export class CopilotCliProvider {
           timeoutMs: this.timeoutMs,
           durationMs,
           tempDir,
-          promptPath,
-          outputPath
+          promptPath
         });
       }
 
-      // Log diagnostics for scenario_generation
       if (purpose === "scenario_generation") {
-        console.log(`[copilot-cli] purpose=scenario_generation exitCode=${result.exitCode} durationMs=${durationMs}`);
+        console.log(`[copilot-cli] exitCode=${result.exitCode} durationMs=${durationMs}`);
         console.log(`[copilot-cli] stdoutChars=${result.stdout?.length ?? 0} stderrChars=${result.stderr?.length ?? 0}`);
       }
 
-      // Try to extract JSON from multiple sources with strategy logging
+      if (result.exitCode !== 0) {
+        const stderrPreview = this.sanitizeSecrets(result.stderr).slice(0, 500);
+        let artifactDir: string | undefined;
+        if (purpose === "scenario_generation") {
+          artifactDir = await this.saveDebugArtifacts(result.stdout, result.stderr, "", request.messages, purpose);
+        }
+        throw new AiProviderError("copilot_cli_execution_failed",
+          `Copilot CLI exited with code ${result.exitCode}`, {
+          provider: this.providerName,
+          purpose,
+          exitCode: result.exitCode,
+          stderrPreview,
+          artifactDir,
+          reasonCode: "copilot_cli_execution_failed"
+        });
+      }
+
+      const stdoutTrimmed = result.stdout?.trim() ?? "";
+      if (!stdoutTrimmed) {
+        let artifactDir: string | undefined;
+        if (purpose === "scenario_generation") {
+          artifactDir = await this.saveDebugArtifacts(result.stdout, result.stderr, "", request.messages, purpose);
+        }
+        throw new AiProviderError("copilot_cli_empty_output",
+          "Copilot CLI returned empty stdout", {
+          provider: this.providerName,
+          purpose,
+          exitCode: result.exitCode,
+          stderrPreview: this.sanitizeSecrets(result.stderr).slice(0, 500),
+          artifactDir,
+          reasonCode: "copilot_cli_empty_output"
+        });
+      }
+
+      // JSON parser only runs when stdout has content
       const extractionResult = await this.extractJsonFromSources(
         result.stdout,
         result.stderr,
-        outputPath,
+        "",
         purpose
       );
 
       if (!extractionResult.success) {
-        processExitedNonZero = result.exitCode !== 0 || processExitedNonZero;
-
-        // Save debug artifacts for scenario_generation failures
         let artifactDir: string | undefined;
         if (purpose === "scenario_generation") {
-          artifactDir = await this.saveDebugArtifacts(
-            result.stdout,
-            result.stderr,
-            outputPath,
-            request.messages,
-            purpose
-          );
+          artifactDir = await this.saveDebugArtifacts(result.stdout, result.stderr, "", request.messages, purpose);
           console.log(`[copilot-cli] parseStrategy failed - saved debug artifacts to ${artifactDir}`);
         }
-
-        const errorMessage = this.getOutputMissingErrorMessage(purpose);
-        throw new AiProviderError("ai_provider_output_missing", errorMessage, {
+        throw new AiProviderError("ai_provider_output_missing", this.getOutputMissingErrorMessage(purpose), {
           provider: this.providerName,
           purpose,
-          tempDir,
-          promptPath,
-          outputPath,
           artifactDir,
           exitCode: result.exitCode,
           stdoutPreview: this.sanitizeSecrets(result.stdout).slice(0, 500),
           stderrPreview: this.sanitizeSecrets(result.stderr).slice(0, 500),
-          command: this.command,
-          args: this.sanitizeArgs([...finalExtraArgs, shortPrompt]),
           extractionAttempts: extractionResult.attempts
         });
       }
 
-      // Validate shape for scenario_generation
       if (purpose === "scenario_generation") {
         const shapeValidation = this.validateScenarioShape(extractionResult.parsed);
         if (!shapeValidation.valid) {
-          processExitedNonZero = result.exitCode !== 0 || processExitedNonZero;
-
-          const artifactDir = await this.saveDebugArtifacts(
-            result.stdout,
-            result.stderr,
-            outputPath,
-            request.messages,
-            purpose
-          );
-
+          const artifactDir = await this.saveDebugArtifacts(result.stdout, result.stderr, "", request.messages, purpose);
           throw new AiProviderError("ai_provider_invalid_json",
             `AI provider returned JSON but scenario shape is invalid: ${shapeValidation.reason}`, {
             provider: this.providerName,
             purpose,
-            tempDir,
-            promptPath,
-            outputPath,
             artifactDir,
             exitCode: result.exitCode,
             detectedKeys: shapeValidation.detectedKeys,
@@ -189,23 +243,6 @@ export class CopilotCliProvider {
         console.log(`[copilot-cli] shape validation passed for scenario_generation`);
       }
 
-      if (result.exitCode !== 0) {
-        processExitedNonZero = true;
-        return {
-          rawText: extractionResult.raw,
-          parsedJson: extractionResult.parsed,
-          model: this.model,
-          providerName: this.providerName,
-          durationMs,
-          diagnostics: {
-            warning: "ai_provider_exited_non_zero_but_output_valid",
-            exitCode: result.exitCode,
-            stdout: this.sanitizeSecrets(result.stdout).slice(0, 1000),
-            stderr: this.sanitizeSecrets(result.stderr).slice(0, 1000)
-          }
-        };
-      }
-
       return {
         rawText: extractionResult.raw,
         parsedJson: extractionResult.parsed,
@@ -213,15 +250,8 @@ export class CopilotCliProvider {
         providerName: this.providerName,
         durationMs
       };
-    } catch (error) {
-      if (processExitedNonZero && processResult) {
-        await this.preserveArtifactsOnError(tempDir, processResult, stdoutLogPath, stderrLogPath);
-      }
-      throw error;
     } finally {
-      if (!processExitedNonZero) {
-        await this.cleanupTempDir(tempDir);
-      }
+      await this.cleanupTempDir(tempDir);
     }
   }
 
@@ -441,33 +471,6 @@ export class CopilotCliProvider {
     } catch (error) {
       console.error(`[copilot-cli] Failed to save debug artifacts: ${error}`);
       return "";
-    }
-  }
-
-  private async preserveArtifactsOnError(
-    tempDir: string,
-    result: Awaited<ReturnType<typeof runCodexCli>>,
-    stdoutLogPath: string,
-    stderrLogPath: string
-  ): Promise<void> {
-    try {
-      if (result.stdout && !await this.fileExists(stdoutLogPath)) {
-        await fs.writeFile(stdoutLogPath, result.stdout, "utf-8");
-      }
-      if (result.stderr && !await this.fileExists(stderrLogPath)) {
-        await fs.writeFile(stderrLogPath, result.stderr, "utf-8");
-      }
-    } catch {
-      // Ignorar errores al preservar artifacts
-    }
-  }
-
-  private async fileExists(p: string): Promise<boolean> {
-    try {
-      await fs.access(p);
-      return true;
-    } catch {
-      return false;
     }
   }
 

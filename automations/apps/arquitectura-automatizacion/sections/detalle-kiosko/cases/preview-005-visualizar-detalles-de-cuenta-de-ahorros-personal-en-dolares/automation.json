@@ -1,23 +1,23 @@
 {
-  "id": "preview-001-visualizar-detalles-de-tarjeta-credito-visa-clasica",
-  "externalId": "PREVIEW-001",
+  "id": "preview-005-visualizar-detalles-de-cuenta-de-ahorros-personal-en-dolares",
+  "externalId": "PREVIEW-005",
   "caseId": 0,
-  "title": "Visualizar detalles de Tarjeta Crédito Visa Clásica",
-  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-001-visualizar-detalles-de-tarjeta-credito-visa-clasica\\plan.json",
-  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-001-visualizar-detalles-de-tarjeta-credito-visa-clasica\\case.spec.ts",
+  "title": "Visualizar detalles de Cuenta de Ahorros Personal en Dólares",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-005-visualizar-detalles-de-cuenta-de-ahorros-personal-en-dolares\\plan.json",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-005-visualizar-detalles-de-cuenta-de-ahorros-personal-en-dolares\\case.spec.ts",
   "appSlug": "arquitectura-automatizacion",
   "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
   "status": "active",
   "source": "discovery",
   "appProfile": "arquitectura-automatizacion",
-  "createdAt": "2026-06-24T15:32:33.755Z",
-  "updatedAt": "2026-06-24T15:32:33.755Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-06-24T15-31-34-240Z\\discovered-plans.pending.json",
+  "createdAt": "2026-06-24T15:36:36.148Z",
+  "updatedAt": "2026-06-24T15:36:36.148Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-06-24T15-35-38-853Z\\discovered-plans.pending.json",
   "pomStatus": "promoted",
   "inlineDebugMode": false,
   "specVerificationStatus": "not_run",
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-06-24T15-31-34-240Z",
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-06-24T15-35-38-853Z",
     "pomDiagnostics": {
       "status": "promoted",
       "inlineFallbackUsed": false,
@@ -51,9 +51,6 @@
       "autoPomCreatedMethods": [],
       "fallbackUsed": false,
       "requirePomRuntime": false
-    },
-    "overwritten": true,
-    "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-001-visualizar-detalles-de-tarjeta-credito-visa-clasica\\plan.json",
-    "previousStatus": "active"
+    }
   }
 }

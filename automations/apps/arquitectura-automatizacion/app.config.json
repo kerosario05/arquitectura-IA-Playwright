@@ -5,11 +5,11 @@
     "name": "4",
     "baseUrl": "https://172.27.4.50",
     "baseUrlHash": "1423ba294517",
-    "createdAt": "2026-06-17T13:58:47.300Z",
-    "updatedAt": "2026-06-17T13:58:47.300Z"
+    "createdAt": "2026-06-24T15:38:26.886Z",
+    "updatedAt": "2026-06-24T15:38:26.886Z"
   },
   "baseUrl": "https://172.27.4.50",
-  "loginMode": "no_login",
+  "loginMode": "password",
   "testData": {},
   "testDataAliases": {},
   "testDataRefs": {},
@@ -61,7 +61,7 @@
         "when": "before_first_functional_step"
       }
     ],
-    "updatedAt": "2026-06-17T13:50:22.012Z",
+    "updatedAt": "2026-06-24T15:31:31.875Z",
     "targetPaths": {
       "Tarjeta Crédito Visa Clásica": {
         "target": "Tarjeta Crédito Visa Clásica",
@@ -215,81 +215,6 @@
           "clickableToDetail": true
         }
       },
-      "Tarjeta de Crédito Visa Joven": {
-        "target": "Tarjeta de Crédito Visa Joven",
-        "requiredIntermediates": [
-          "Información de productos",
-          "Tarjetas"
-        ],
-        "confidence": "high",
-        "source": "runtime_discovery",
-        "productMetadata": {
-          "category": "Tarjeta",
-          "subcategory": "Información de productos",
-          "productLabel": "Tarjeta de Crédito Visa Joven",
-          "normalizedLabel": "tarjeta de credito visa joven",
-          "isRepresentative": true,
-          "groupKey": "tarjeta_de_credito_visa_joven",
-          "discoveredAt": "2026-06-11T21:04:16.170Z",
-          "detailSections": [
-            "Beneficios",
-            "Detalles",
-            "Información del Producto"
-          ],
-          "actionButtons": [
-            "Finalizar sesión",
-            "Volver",
-            "Solicitar"
-          ],
-          "presentationType": "detail_page",
-          "validationStatus": "validated_detail",
-          "expectedCardSignals": {
-            "cardTextPreview": "2% de devolución del pago en universidades, papelerías, centros de fotocopiados, librerías. 2% de devolución del pago en fast foods, restaurantes. 2% de devolución del pago en couriers, tiendas de tec",
-            "bulletCount": 0,
-            "hasImageOrIcon": true,
-            "visibleSignals": [],
-            "cardIndex": 5
-          },
-          "clickableToDetail": true
-        }
-      },
-      "Tarjeta Multicrédito": {
-        "target": "Tarjeta Multicrédito",
-        "requiredIntermediates": [
-          "Información de productos",
-          "Tarjetas"
-        ],
-        "confidence": "high",
-        "source": "runtime_discovery",
-        "productMetadata": {
-          "category": "General",
-          "subcategory": "Información de productos",
-          "productLabel": "Tarjeta Multicrédito",
-          "normalizedLabel": "tarjeta multicredito",
-          "isRepresentative": true,
-          "groupKey": "tarjeta_multicredito",
-          "discoveredAt": "2026-06-11T21:04:16.170Z",
-          "detailSections": [
-            "Detalles",
-            "Información del Producto"
-          ],
-          "actionButtons": [
-            "Finalizar sesión",
-            "Volver",
-            "Solicitar"
-          ],
-          "presentationType": "detail_page",
-          "validationStatus": "validated_detail",
-          "expectedCardSignals": {
-            "cardTextPreview": "Tecnología para pago sin contacto (contactless). Un saldo (Límite en pesos dominicanos RD$). Permite realizar pagos desde tus cuentas, a través de BSC en línea y App BSC.",
-            "bulletCount": 0,
-            "hasImageOrIcon": true,
-            "visibleSignals": [],
-            "cardIndex": 6
-          },
-          "clickableToDetail": true
-        }
-      },
       "Tarjeta de Crédito Bravo Santa Cruz": {
         "target": "Tarjeta de Crédito Bravo Santa Cruz",
         "requiredIntermediates": [
@@ -324,82 +249,6 @@
             "hasImageOrIcon": true,
             "visibleSignals": [],
             "cardIndex": 7
-          },
-          "clickableToDetail": true
-        }
-      },
-      "Tarjeta de Crédito PriceSmart": {
-        "target": "Tarjeta de Crédito PriceSmart",
-        "requiredIntermediates": [
-          "Información de productos",
-          "Tarjetas"
-        ],
-        "confidence": "high",
-        "source": "runtime_discovery",
-        "productMetadata": {
-          "category": "Tarjeta",
-          "subcategory": "Información de productos",
-          "productLabel": "Tarjeta de Crédito PriceSmart",
-          "normalizedLabel": "tarjeta de credito pricesmart",
-          "isRepresentative": true,
-          "groupKey": "tarjeta_de_credito_pricesmart",
-          "discoveredAt": "2026-06-11T21:04:16.170Z",
-          "detailSections": [
-            "Beneficios",
-            "Detalles",
-            "Información del Producto"
-          ],
-          "actionButtons": [
-            "Finalizar sesión",
-            "Volver",
-            "Solicitar"
-          ],
-          "presentationType": "detail_page",
-          "validationStatus": "validated_detail",
-          "expectedCardSignals": {
-            "cardTextPreview": "Acumulas 6% de SmartCash en todos los clubes y página web de PriceSmart de Rep. Dom. Tope mensual RD$6,000.00. o Cada SmartCash equivale a un peso dominicano (RD$1) para redimir en los clubes de Price",
-            "bulletCount": 0,
-            "hasImageOrIcon": false,
-            "visibleSignals": [],
-            "cardIndex": 8
-          },
-          "clickableToDetail": true
-        }
-      },
-      "Cuenta de Ahorros Personal en Pesos": {
-        "target": "Cuenta de Ahorros Personal en Pesos",
-        "requiredIntermediates": [
-          "Información de productos",
-          "Cuentas"
-        ],
-        "confidence": "high",
-        "source": "runtime_discovery",
-        "productMetadata": {
-          "category": "Cuenta de Ahorros Personal",
-          "subcategory": "Información de productos",
-          "variant": "Pesos",
-          "productLabel": "Cuenta de Ahorros Personal en Pesos",
-          "normalizedLabel": "cuenta de ahorros personal en pesos",
-          "isRepresentative": true,
-          "groupKey": "cuenta_de_ahorros_personal_en_pesos",
-          "discoveredAt": "2026-06-11T21:04:16.170Z",
-          "detailSections": [
-            "Detalles",
-            "Información del Producto"
-          ],
-          "actionButtons": [
-            "Finalizar sesión",
-            "Volver",
-            "Solicitar"
-          ],
-          "presentationType": "detail_page",
-          "validationStatus": "validated_detail",
-          "expectedCardSignals": {
-            "cardTextPreview": "Liquidez total, retiros y transferencias en cualquier momento. TIN 0.25% anual, acreditados mensualmente sobre el balance promedio. Alertas de movimientos y transacciones seguras por BSC en línea y Ap",
-            "bulletCount": 0,
-            "hasImageOrIcon": true,
-            "visibleSignals": [],
-            "cardIndex": 1
           },
           "clickableToDetail": true
         }
@@ -442,44 +291,6 @@
           "clickableToDetail": true
         }
       },
-      "Cuenta de Ahorros Personal en Euros": {
-        "target": "Cuenta de Ahorros Personal en Euros",
-        "requiredIntermediates": [
-          "Información de productos",
-          "Cuentas"
-        ],
-        "confidence": "high",
-        "source": "runtime_discovery",
-        "productMetadata": {
-          "category": "Cuenta de Ahorros Personal",
-          "subcategory": "Información de productos",
-          "variant": "Euros",
-          "productLabel": "Cuenta de Ahorros Personal en Euros",
-          "normalizedLabel": "cuenta de ahorros personal en euros",
-          "isRepresentative": true,
-          "groupKey": "cuenta_de_ahorros_personal_en_euros",
-          "discoveredAt": "2026-06-11T21:04:16.170Z",
-          "detailSections": [
-            "Detalles",
-            "Información del Producto"
-          ],
-          "actionButtons": [
-            "Finalizar sesión",
-            "Volver",
-            "Solicitar"
-          ],
-          "presentationType": "detail_page",
-          "validationStatus": "validated_detail",
-          "expectedCardSignals": {
-            "cardTextPreview": "Liquidez total: retiros y transferencias en cualquier momento. Interés nominal anual (TIN): 0.01%, acreditado mensualmente sobre el balance promedio. Alertas de movimientos y transacciones seguras por",
-            "bulletCount": 0,
-            "hasImageOrIcon": false,
-            "visibleSignals": [],
-            "cardIndex": 3
-          },
-          "clickableToDetail": true
-        }
-      },
       "Préstamo Personal": {
         "target": "Préstamo Personal",
         "requiredIntermediates": [
@@ -495,7 +306,7 @@
           "normalizedLabel": "prestamo personal",
           "isRepresentative": true,
           "groupKey": "prestamo_personal",
-          "discoveredAt": "2026-06-11T21:04:16.171Z",
+          "discoveredAt": "2026-06-24T14:26:45.214Z",
           "detailSections": [
             "Beneficios",
             "Información del Producto"
@@ -507,6 +318,163 @@
           ],
           "presentationType": "detail_page",
           "validationStatus": "validated_detail"
+        }
+      },
+      "Tarjeta Multicrédito": {
+        "target": "Tarjeta Multicrédito",
+        "requiredIntermediates": [
+          "Información de productos",
+          "Tarjetas",
+          "Tarjeta de Crédito"
+        ],
+        "confidence": "high",
+        "source": "runtime_discovery",
+        "productMetadata": {
+          "category": "General",
+          "subcategory": "Información de productos",
+          "productLabel": "Tarjeta Multicrédito",
+          "normalizedLabel": "tarjeta multicredito",
+          "isRepresentative": true,
+          "groupKey": "tarjeta_multicredito",
+          "discoveredAt": "2026-06-24T14:26:45.215Z",
+          "detailSections": [],
+          "actionButtons": [],
+          "presentationType": "product_card",
+          "validationStatus": "validated_card",
+          "expectedCardSignals": {
+            "cardTextPreview": "Tecnología para pago sin contacto (contactless). Un saldo (Límite en pesos dominicanos RD$). Permite realizar pagos desde tus cuentas, a través de BSC en línea y App BSC.",
+            "bulletCount": 0,
+            "hasImageOrIcon": true,
+            "visibleSignals": [],
+            "cardIndex": 6
+          },
+          "clickableToDetail": false
+        }
+      },
+      "Tarjeta de Crédito Visa Joven": {
+        "target": "Tarjeta de Crédito Visa Joven",
+        "requiredIntermediates": [
+          "Información de productos",
+          "Tarjetas",
+          "Tarjeta de Crédito"
+        ],
+        "confidence": "high",
+        "source": "runtime_discovery",
+        "productMetadata": {
+          "category": "Tarjeta",
+          "subcategory": "Información de productos",
+          "productLabel": "Tarjeta de Crédito Visa Joven",
+          "normalizedLabel": "tarjeta de credito visa joven",
+          "isRepresentative": true,
+          "groupKey": "tarjeta_de_credito_visa_joven",
+          "discoveredAt": "2026-06-24T14:26:45.216Z",
+          "detailSections": [],
+          "actionButtons": [],
+          "presentationType": "product_card",
+          "validationStatus": "validated_card",
+          "expectedCardSignals": {
+            "cardTextPreview": "2% de devolución del pago en universidades, papelerías, centros de fotocopiados, librerías. 2% de devolución del pago en fast foods, restaurantes. 2% de devolución del pago en couriers, tiendas de tec",
+            "bulletCount": 0,
+            "hasImageOrIcon": true,
+            "visibleSignals": [],
+            "cardIndex": 5
+          },
+          "clickableToDetail": false
+        }
+      },
+      "Tarjeta de Crédito PriceSmart": {
+        "target": "Tarjeta de Crédito PriceSmart",
+        "requiredIntermediates": [
+          "Información de productos",
+          "Tarjetas",
+          "Tarjeta de Crédito"
+        ],
+        "confidence": "high",
+        "source": "runtime_discovery",
+        "productMetadata": {
+          "category": "Tarjeta",
+          "subcategory": "Información de productos",
+          "productLabel": "Tarjeta de Crédito PriceSmart",
+          "normalizedLabel": "tarjeta de credito pricesmart",
+          "isRepresentative": true,
+          "groupKey": "tarjeta_de_credito_pricesmart",
+          "discoveredAt": "2026-06-24T14:26:45.217Z",
+          "detailSections": [],
+          "actionButtons": [],
+          "presentationType": "product_card",
+          "validationStatus": "validated_card",
+          "expectedCardSignals": {
+            "cardTextPreview": "Acumulas 6% de SmartCash en todos los clubes y página web de PriceSmart de Rep. Dom. Tope mensual RD$6,000.00. o Cada SmartCash equivale a un peso dominicano (RD$1) para redimir en los clubes de Price",
+            "bulletCount": 0,
+            "hasImageOrIcon": false,
+            "visibleSignals": [],
+            "cardIndex": 8
+          },
+          "clickableToDetail": false
+        }
+      },
+      "Cuenta de Ahorros Personal en Pesos": {
+        "target": "Cuenta de Ahorros Personal en Pesos",
+        "requiredIntermediates": [
+          "Información de productos",
+          "Cuentas",
+          "Cuenta de Ahorro"
+        ],
+        "confidence": "high",
+        "source": "runtime_discovery",
+        "productMetadata": {
+          "category": "Cuenta de Ahorros Personal",
+          "subcategory": "Información de productos",
+          "variant": "Pesos",
+          "productLabel": "Cuenta de Ahorros Personal en Pesos",
+          "normalizedLabel": "cuenta de ahorros personal en pesos",
+          "isRepresentative": true,
+          "groupKey": "cuenta_de_ahorros_personal_en_pesos",
+          "discoveredAt": "2026-06-24T14:26:45.219Z",
+          "detailSections": [],
+          "actionButtons": [],
+          "presentationType": "product_card",
+          "validationStatus": "validated_card",
+          "expectedCardSignals": {
+            "cardTextPreview": "Liquidez total, retiros y transferencias en cualquier momento. TIN 0.25% anual, acreditados mensualmente sobre el balance promedio. Alertas de movimientos y transacciones seguras por BSC en línea y Ap",
+            "bulletCount": 0,
+            "hasImageOrIcon": true,
+            "visibleSignals": [],
+            "cardIndex": 1
+          },
+          "clickableToDetail": false
+        }
+      },
+      "Cuenta de Ahorros Personal en Euros": {
+        "target": "Cuenta de Ahorros Personal en Euros",
+        "requiredIntermediates": [
+          "Información de productos",
+          "Cuentas",
+          "Cuenta de Ahorro"
+        ],
+        "confidence": "high",
+        "source": "runtime_discovery",
+        "productMetadata": {
+          "category": "Cuenta de Ahorros Personal",
+          "subcategory": "Información de productos",
+          "variant": "Euros",
+          "productLabel": "Cuenta de Ahorros Personal en Euros",
+          "normalizedLabel": "cuenta de ahorros personal en euros",
+          "isRepresentative": true,
+          "groupKey": "cuenta_de_ahorros_personal_en_euros",
+          "discoveredAt": "2026-06-24T14:26:45.220Z",
+          "detailSections": [],
+          "actionButtons": [],
+          "presentationType": "product_card",
+          "validationStatus": "validated_card",
+          "expectedCardSignals": {
+            "cardTextPreview": "Liquidez total: retiros y transferencias en cualquier momento. Interés nominal anual (TIN): 0.01%, acreditado mensualmente sobre el balance promedio. Alertas de movimientos y transacciones seguras por",
+            "bulletCount": 0,
+            "hasImageOrIcon": false,
+            "visibleSignals": [],
+            "cardIndex": 3
+          },
+          "clickableToDetail": false
         }
       },
       "Depósitos a plazo en Pesos": {
@@ -525,7 +493,7 @@
           "normalizedLabel": "depositos a plazo en pesos",
           "isRepresentative": true,
           "groupKey": "depositos_a_plazo_en_pesos",
-          "discoveredAt": "2026-06-11T21:04:16.171Z",
+          "discoveredAt": "2026-06-24T14:26:45.221Z",
           "detailSections": [
             "Detalles",
             "Información del Producto"
@@ -555,7 +523,7 @@
           "normalizedLabel": "depositos a plazo en dolares",
           "isRepresentative": true,
           "groupKey": "depositos_a_plazo_en_dolares",
-          "discoveredAt": "2026-06-11T21:04:16.171Z",
+          "discoveredAt": "2026-06-24T14:26:45.222Z",
           "detailSections": [
             "Detalles",
             "Información del Producto"
@@ -571,5 +539,5 @@
       }
     }
   },
-  "updatedAt": "2026-06-17T13:58:47.300Z"
+  "updatedAt": "2026-06-24T15:38:26.886Z"
 }

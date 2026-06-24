@@ -4,9 +4,9 @@
   "status": "validated",
   "scenario": {
     "source": "testrail",
-    "externalId": "PREVIEW-004",
+    "externalId": "PREVIEW-005",
     "caseId": 0,
-    "title": "Visualizar detalles de Tarjeta de Crédito Visa Infinite"
+    "title": "Visualizar detalles de Cuenta de Ahorros Personal en Dólares"
   },
   "requiredData": [],
   "steps": [
@@ -46,10 +46,10 @@
     {
       "index": 5,
       "action": "click",
-      "description": "Clic en \"Tarjetas\".",
+      "description": "Clic en \"Cuentas\".",
       "target": {
         "strategy": "product_condition",
-        "value": "Tarjetas",
+        "value": "Cuentas",
         "exact": false
       },
       "locatorStrategy": "product_condition"
@@ -57,10 +57,10 @@
     {
       "index": 6,
       "action": "click",
-      "description": "Clic en \"Tarjeta de Crédito Visa Infinite\".",
+      "description": "Clic en \"Cuenta de Ahorros Personal en Dólares\".",
       "target": {
         "strategy": "product_condition",
-        "value": "Tarjeta de Crédito Visa Infinite",
+        "value": "Cuenta de Ahorros Personal en Dólares",
         "exact": false
       },
       "locatorStrategy": "product_condition"
@@ -70,5 +70,5 @@
     "Discovery completed successfully. All targets and concrete assertions passed.",
     "Recovered 1 transient assertion failure(s) - see step recovery metadata for details."
   ],
-  "createdAt": "2026-06-24T15:35:38.660Z"
+  "createdAt": "2026-06-24T15:36:35.984Z"
 }

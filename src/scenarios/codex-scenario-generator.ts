@@ -190,6 +190,50 @@ function dedupeConsecutiveSteps(steps: any[]): any[] {
 }
 
 /**
+ * Remove or convert unbacked click targets to validations
+ * Prevents scenarios from being rejected due to unbacked clicks like "Volver"
+ */
+function repairUnbackedClicks(steps: any[], allowedTargets: string[]): any[] {
+  if (steps.length === 0) return steps;
+
+  const repaired: any[] = [];
+
+  for (const step of steps) {
+    // Extract click target
+    let clickTarget: string | null = null;
+    if (typeof step === "string") {
+      const match = step.match(/Clic en "([^"]+)"/i);
+      if (match) {
+        clickTarget = match[1];
+      }
+    }
+
+    if (clickTarget) {
+      // Check if target is in allowedTargets (case-insensitive)
+      const isAllowed = allowedTargets.some(t => t.toLowerCase() === clickTarget!.toLowerCase());
+
+      if (!isAllowed) {
+        // For unbacked targets, remove if "Volver", convert to validation otherwise
+        if (clickTarget.toLowerCase() === "volver") {
+          console.log(`[scenarios:repair] removing unbacked navigation click: "Clic en ${clickTarget}"`);
+          continue;
+        } else {
+          // For other unbacked targets, convert to validation
+          const validationStep = `Validar que se muestre "${clickTarget}"`;
+          console.log(`[scenarios:repair] converting unbacked click to validation: "Clic en ${clickTarget}" → "${validationStep}"`);
+          repaired.push(validationStep);
+          continue;
+        }
+      }
+    }
+
+    repaired.push(step);
+  }
+
+  return repaired;
+}
+
+/**
  * Get scenario generation mode from environment
  *
  * Default: ai_supported_by_deterministic
@@ -622,9 +666,27 @@ export async function generateScenariosWithAi(
       return scenario;
     });
 
+    // Repair unbacked clicks before validation
+    const repairedScenarios = enrichedScenarios.map(scenario => {
+      const originalStepCount = scenario.steps?.length ?? 0;
+      const repairedSteps = repairUnbackedClicks(scenario.steps ?? [], derivedContext.allowedExecutableClicks);
+      const removedCount = originalStepCount - repairedSteps.length;
+
+      if (removedCount > 0) {
+        console.log(`[scenarios:repair] source=ai scenarioTitle="${scenario.title}" removed=${removedCount}`);
+      }
+
+      return {
+        ...scenario,
+        steps: repairedSteps
+      };
+    });
+
+    console.log(`[scenarios:repair] afterUnbackedClickRepair=${repairedScenarios.length}`);
+
     // Validate compliance: ensure generated scenarios respect route profile
     const complianceValidation = validateScenariosCompliance(
-      enrichedScenarios,
+      repairedScenarios,
       derivedContext,
       routeResolutions
     );
@@ -659,7 +721,7 @@ export async function generateScenariosWithAi(
     ];
 
     // Update generation diagnostics
-    generationDiagnostics.aiGenerated = dedupedScenarios.length;
+    generationDiagnostics.aiGenerated = repairedScenarios.length;
     generationDiagnostics.finalValid = complianceValidation.validScenarios.length;
     generationDiagnostics.finalRejected = allRejected.length;
 

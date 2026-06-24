@@ -35,7 +35,9 @@ export type AiProviderErrorCode =
   | "ai_provider_process_error"
   | "ai_provider_schema_invalid"
   | "ai_provider_unsupported"
-  | "ai_provider_output_missing";
+  | "ai_provider_output_missing"
+  | "copilot_cli_execution_failed"
+  | "copilot_cli_empty_output";
 
 export class AiProviderError extends Error {
   constructor(
