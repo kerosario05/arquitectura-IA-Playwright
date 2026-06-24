@@ -10,14 +10,14 @@
   "status": "active",
   "source": "discovery",
   "appProfile": "arquitectura-automatizacion",
-  "createdAt": "2026-06-12T16:02:03.076Z",
-  "updatedAt": "2026-06-12T16:02:03.076Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-006\\2026-06-12T16-01-08-610Z\\discovered-plans.pending.json",
+  "createdAt": "2026-06-17T19:45:02.950Z",
+  "updatedAt": "2026-06-17T19:45:02.950Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-006\\2026-06-17T19-44-08-016Z\\discovered-plans.pending.json",
   "pomStatus": "promoted",
   "inlineDebugMode": false,
   "specVerificationStatus": "not_run",
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-006\\2026-06-12T16-01-08-610Z",
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-006\\2026-06-17T19-44-08-016Z",
     "pomDiagnostics": {
       "status": "promoted",
       "inlineFallbackUsed": false,
@@ -51,6 +51,9 @@
       "autoPomCreatedMethods": [],
       "fallbackUsed": false,
       "requirePomRuntime": false
-    }
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-006-visualizar-detalles-de-cuenta-de-ahorros-personal-en-pesos\\plan.json",
+    "previousStatus": "active"
   }
 }

@@ -92,6 +92,8 @@ export type ScenarioPreviewRequest = {
   createTestRun?: boolean;
   reportResults?: boolean;
   catalogOptions?: CatalogOptions;
+  privateDiscoveryArtifacts?: PrivateDiscoveryArtifacts;
+  scenarioRouteEvidence?: ScenarioRouteEvidence;
 };
 
 export type AppInferenceMeta = {
@@ -196,6 +198,86 @@ export type TargetPathDefinition = {
 export type McpRejectedScenario = {
   sourceIssueKey: string;
   reason: string;
+};
+
+export type PrivateDiscoveryArtifacts = {
+  accessMode?: "private";
+  resolvedIntent?: {
+    source?: string;
+    text?: string;
+    category?: string;
+    confidence?: string;
+    matched?: string[];
+    reason?: string;
+  };
+  selectedModule?: {
+    text?: string;
+    score?: number;
+    reason?: string;
+    terms?: string[];
+    category?: string;
+    urlAfterClick?: string;
+  };
+  moduleSnapshot?: {
+    url?: string;
+    buttons?: number;
+    links?: number;
+    cards?: number;
+    headings?: number;
+    sampleTexts?: string[];
+  };
+  selectedInternalOption?: {
+    text?: string;
+    score?: number;
+    reason?: string;
+    terms?: string[];
+    category?: string;
+    urlAfterClick?: string;
+  };
+  detailSnapshot?: {
+    url?: string;
+    buttons?: number;
+    links?: number;
+    cards?: number;
+    headings?: number;
+    sampleTexts?: string[];
+  };
+  coverageSignals?: string[];
+};
+
+export type ScenarioRouteEvidence = {
+  accessMode: "public" | "private";
+  source: "routeProfile" | "privateDiscoveryArtifacts";
+  confidence?: "low" | "medium" | "high";
+  resolvedIntent?: {
+    text?: string;
+    category?: string;
+    matched?: string[];
+    reason?: string;
+  };
+  routeSteps: Array<{
+    label: string;
+    kind: "entry" | "auth" | "module" | "internal_option" | "listing" | "detail" | "assertion";
+    evidence?: string;
+    url?: string;
+    confidence?: "low" | "medium" | "high";
+  }>;
+  snapshots?: Array<{
+    name: string;
+    url?: string;
+    buttons?: number;
+    links?: number;
+    cards?: number;
+    headings?: number;
+    sampleTexts?: string[];
+  }>;
+  coverageLevels: {
+    level1ModuleNavigation: boolean;
+    level2InternalListing: boolean;
+    level3SpecificDetail: boolean;
+  };
+  coverageSignals?: string[];
+  coverageGaps?: string[];
 };
 
 export type McpGenerationResponse = {

@@ -717,7 +717,9 @@ export async function buildMcpScenarioMessages(
   entrySteps?: Array<{ action: string; target: string; when?: string }>,
   loginMode?: string,
   routeResolutions?: Map<string, ScenarioRouteResolution>,
-  deterministicSeeds?: DeterministicSeedScenario[]
+  deterministicSeeds?: DeterministicSeedScenario[],
+  privateDiscoveryArtifacts?: import("./scenario-types").PrivateDiscoveryArtifacts,
+  scenarioRouteEvidence?: import("./scenario-types").ScenarioRouteEvidence
 ): Promise<Array<{ role: "system" | "user"; content: string }>> {
   const skillMd = await loadSkillMarkdown();
 
@@ -830,6 +832,46 @@ export async function buildMcpScenarioMessages(
 
     systemContent += seedsSection.join("");
     console.log(`[scenarios:prompt] added ${deterministicSeeds.length} deterministic seeds as context`);
+  }
+  if (privateDiscoveryArtifacts) {
+    const pda = privateDiscoveryArtifacts;
+    const pdSection: string[] = [];
+    pdSection.push("\n## PRIVATE DISCOVERY ARTIFACTS\n");
+    pdSection.push("- Use these as runtime evidence for private/authenticated scenarios.");
+    pdSection.push("- Do not invent controls, products, accounts, balances, tables, cards, or detail screens not supported by these artifacts.");
+    pdSection.push("- Distinguish coverage levels:");
+    pdSection.push("  Level 1: private module navigation");
+    pdSection.push("  Level 2: internal option/listing");
+    pdSection.push("  Level 3: specific product/account detail");
+    pdSection.push("- If artifacts only support Level 1 or Level 2, do not generate Level 3 validations.");
+    pdSection.push("- If a requested HU requires Level 3 but no detail evidence exists, create a blocked/pending coverage note instead of inventing steps.\n");
+    if (pda.resolvedIntent) pdSection.push(`resolvedIntent: source=${pda.resolvedIntent.source} category=${pda.resolvedIntent.category} confidence=${pda.resolvedIntent.confidence} matched=${(pda.resolvedIntent.matched||[]).join(",")} reason=${pda.resolvedIntent.reason}`);
+    if (pda.selectedModule) pdSection.push(`selectedModule: "${pda.selectedModule.text}" score=${pda.selectedModule.score} reason=${pda.selectedModule.reason} url=${pda.selectedModule.urlAfterClick || "?"}`);
+    if (pda.moduleSnapshot?.sampleTexts?.length) pdSection.push(`moduleSnapshot samples: ${pda.moduleSnapshot.sampleTexts.join(" | ")}`);
+    if (pda.selectedInternalOption) pdSection.push(`selectedInternalOption: "${pda.selectedInternalOption.text}" score=${pda.selectedInternalOption.score} reason=${pda.selectedInternalOption.reason} url=${pda.selectedInternalOption.urlAfterClick || "?"}`);
+    if (pda.detailSnapshot?.sampleTexts?.length) pdSection.push(`detailSnapshot samples: ${pda.detailSnapshot.sampleTexts.join(" | ")}`);
+    if (pda.coverageSignals?.length) pdSection.push(`coverageSignals: ${pda.coverageSignals.join(", ")}`);
+    systemContent += pdSection.join("\n");
+  }
+
+  // Add scenario route evidence if available
+  if (scenarioRouteEvidence) {
+    const sre = scenarioRouteEvidence;
+    const evSection: string[] = [];
+    evSection.push("\n## SCENARIO ROUTE EVIDENCE\n");
+    evSection.push("- Use this evidence as the real discovered step-by-step route.");
+    evSection.push("- Generate scenarios only up to the supported coverage level.");
+    evSection.push("- Do not invent accounts, products, balances, tables, cards, or specific detail not present in this evidence.");
+    evSection.push("- If the HU requires Level 3 detail but evidence only supports Level 2, add a pending coverage note.");
+    evSection.push("- Justify each scenario with a brief reason based on HU + evidence.\n");
+    evSection.push(`accessMode: ${sre.accessMode} source: ${sre.source} confidence: ${sre.confidence || "?"}`);
+    if (sre.resolvedIntent) evSection.push(`resolvedIntent: category=${sre.resolvedIntent.category} text="${(sre.resolvedIntent.text||"").slice(0,100)}"`);
+    evSection.push(`coverage: L1=${sre.coverageLevels.level1ModuleNavigation} L2=${sre.coverageLevels.level2InternalListing} L3=${sre.coverageLevels.level3SpecificDetail}`);
+    if (sre.coverageGaps?.length) evSection.push(`coverageGaps: ${sre.coverageGaps.join(", ")}`);
+    evSection.push("routeSteps:");
+    for (const step of sre.routeSteps) evSection.push(`  [${step.kind}] "${step.label}" ev=${step.evidence||"?"} url=${step.url||"?"}`);
+    if (sre.snapshots) for (const snap of sre.snapshots) evSection.push(`snapshot[${snap.name}]: buttons=${snap.buttons} cards=${snap.cards} samples="${(snap.sampleTexts||[]).join(" | ")}"`);
+    systemContent += evSection.join("\n");
   }
 
   const safeUserContent = sanitizeForPrompt(formatIssues(issues));

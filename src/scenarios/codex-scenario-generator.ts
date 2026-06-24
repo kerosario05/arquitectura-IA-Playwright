@@ -1,4 +1,4 @@
-import type { McpGenerationResponse, McpRouteProfile, ScenarioRouteResolution, DeterministicSeedScenario, ScenarioGenerationMode } from "./scenario-types";
+import type { McpGenerationResponse, McpRouteProfile, ScenarioRouteResolution, DeterministicSeedScenario, ScenarioGenerationMode, PrivateDiscoveryArtifacts, ScenarioRouteEvidence } from "./scenario-types";
 import { buildMcpScenarioMessages } from "./mcp-scenario-prompt-builder";
 import { parseAiResponse } from "./scenario-output-parser";
 import type { JiraIssueSource } from "./scenario-types";
@@ -326,6 +326,47 @@ function tryDeterministicGeneration(
 }
 
 
+function convertPrivateDiscoveryToRouteEvidence(artifacts: PrivateDiscoveryArtifacts): ScenarioRouteEvidence {
+  const routeSteps: ScenarioRouteEvidence["routeSteps"] = [];
+  const snapshots: ScenarioRouteEvidence["snapshots"] = [];
+  const coverageLevels: ScenarioRouteEvidence["coverageLevels"] = { level1ModuleNavigation: false, level2InternalListing: false, level3SpecificDetail: false };
+  const coverageGaps: string[] = [];
+  const coverageSignals: string[] = artifacts.coverageSignals || [];
+
+  if (artifacts.selectedModule) {
+    routeSteps.push({ label: artifacts.selectedModule.text || "selected-module", kind: "module", evidence: `score=${artifacts.selectedModule.score} reason=${artifacts.selectedModule.reason}`, url: artifacts.selectedModule.urlAfterClick });
+    coverageLevels.level1ModuleNavigation = true;
+    coverageSignals.push("module_selected");
+  }
+  if (artifacts.moduleSnapshot) {
+    snapshots.push({ name: "module", url: artifacts.moduleSnapshot.url, buttons: artifacts.moduleSnapshot.buttons, links: artifacts.moduleSnapshot.links, cards: artifacts.moduleSnapshot.cards, headings: artifacts.moduleSnapshot.headings, sampleTexts: artifacts.moduleSnapshot.sampleTexts });
+  }
+  if (artifacts.selectedInternalOption) {
+    routeSteps.push({ label: artifacts.selectedInternalOption.text || "selected-internal-option", kind: "internal_option", evidence: `score=${artifacts.selectedInternalOption.score} reason=${artifacts.selectedInternalOption.reason}`, url: artifacts.selectedInternalOption.urlAfterClick });
+    coverageLevels.level2InternalListing = true;
+    coverageSignals.push("internal_option_selected");
+  }
+  if (artifacts.detailSnapshot) {
+    snapshots.push({ name: "detail", url: artifacts.detailSnapshot.url, buttons: artifacts.detailSnapshot.buttons, links: artifacts.detailSnapshot.links, cards: artifacts.detailSnapshot.cards, headings: artifacts.detailSnapshot.headings, sampleTexts: artifacts.detailSnapshot.sampleTexts });
+    const hasDetailSignals = (artifacts.detailSnapshot.sampleTexts?.length || 0) > 0 || (artifacts.detailSnapshot.cards || 0) > 0 || (artifacts.detailSnapshot.headings || 0) > 0;
+    if (hasDetailSignals) { coverageLevels.level3SpecificDetail = true; coverageSignals.push("detail_evidence_present"); }
+    else { coverageGaps.push("specific_detail_not_confirmed"); }
+  }
+  if (!coverageLevels.level3SpecificDetail && coverageLevels.level2InternalListing) coverageGaps.push("specific_detail_not_confirmed");
+
+  return {
+    accessMode: "private",
+    source: "privateDiscoveryArtifacts",
+    confidence: artifacts.resolvedIntent?.confidence as any || "medium",
+    resolvedIntent: artifacts.resolvedIntent ? { text: artifacts.resolvedIntent.text, category: artifacts.resolvedIntent.category, matched: artifacts.resolvedIntent.matched, reason: artifacts.resolvedIntent.reason } : undefined,
+    routeSteps,
+    snapshots: snapshots.length > 0 ? snapshots : undefined,
+    coverageLevels,
+    coverageSignals: coverageSignals.length > 0 ? coverageSignals : undefined,
+    coverageGaps: coverageGaps.length > 0 ? coverageGaps : undefined,
+  };
+}
+
 export async function generateScenariosWithAi(
   issues: JiraIssueSource[],
   appSlug: string,
@@ -335,7 +376,9 @@ export async function generateScenariosWithAi(
   routeProfile?: McpRouteProfile | null,
   entrySteps?: Array<{ action: string; target: string; when?: string }>,
   loginMode?: string,
-  _testProvider?: AiProvider // Optional test-only provider injection
+  _testProvider?: AiProvider,
+  privateDiscoveryArtifacts?: PrivateDiscoveryArtifacts,
+  scenarioRouteEvidence?: ScenarioRouteEvidence
 ): Promise<McpGenerationResponse> {
   // Extract additional entry targets from entrySteps parameter
   const additionalEntryTargets: string[] = [];
@@ -366,9 +409,28 @@ export async function generateScenariosWithAi(
   const routeBackedIssues: JiraIssueSource[] = [];
   const blockedIssues: Array<{ key: string; title: string; reason: string }> = [];
 
+  // Compute effective route evidence before route resolution to decide bypass
+  const effectiveRouteEvidenceBefore: ScenarioRouteEvidence | undefined = scenarioRouteEvidence || (privateDiscoveryArtifacts ? convertPrivateDiscoveryToRouteEvidence(privateDiscoveryArtifacts) : undefined);
+  if (effectiveRouteEvidenceBefore) console.log(`[scenario-route] private route evidence present source=${effectiveRouteEvidenceBefore.source} — bypassing routeProfile validation`);
+
   console.log(`[scenario-route] resolving routes for ${issues.length} issues routeProfile=${routeProfile?.name ?? "none"}`);
 
   for (const issue of issues) {
+    if (effectiveRouteEvidenceBefore) {
+      // Private route evidence present — bypass routeProfile validation
+      const bypassResolution: ScenarioRouteResolution = {
+        canGenerate: true,
+        scenarioMode: (effectiveRouteEvidenceBefore.coverageLevels.level3SpecificDetail ? "detail_navigation" : effectiveRouteEvidenceBefore.coverageLevels.level2InternalListing ? "listing_validation" : "entry_only") as any,
+        routeConfidence: (effectiveRouteEvidenceBefore.confidence === "high" ? "high" : effectiveRouteEvidenceBefore.confidence === "medium" ? "medium" : "low") as any,
+        executableRouteSteps: effectiveRouteEvidenceBefore.routeSteps.map(s => s.label),
+        diagnostics: [],
+        missingRouteReason: undefined,
+      };
+      routeResolutions.set(issue.key, bypassResolution);
+      routeBackedIssues.push(issue);
+      console.log(`[scenario-route] bypassed issue=${issue.key} mode=${bypassResolution.scenarioMode} confidence=${bypassResolution.routeConfidence}`);
+      continue;
+    }
     const resolution = resolveScenarioRoute(issue, routeProfile ?? null, appSlug);
     routeResolutions.set(issue.key, resolution);
 
@@ -399,9 +461,9 @@ export async function generateScenariosWithAi(
   const profileQuality = validateRouteProfileQuality(appSlug, routeProfile ?? null, routeResolutions, derivedContext);
   logRouteProfileQuality(profileQuality);
 
-  // If profile quality prevents generation, return early
-  if (!profileQuality.canGenerate) {
-    console.log(`[scenario-preview] profile quality prevents generation status=${profileQuality.status}`);
+  // If profile quality prevents generation, return early (skip if private route evidence present)
+  if (!profileQuality.canGenerate && !effectiveRouteEvidenceBefore) {
+    console.log(`[scenario-preview] profile quality prevents generation status=${profileQuality.status} hasRuntimeEvidence=false`);
     return {
       appSlug,
       targetAppSlug,
@@ -538,6 +600,12 @@ export async function generateScenariosWithAi(
 
   console.log(`[scenarios:ai] purpose=scenario_generation provider=${provider.providerType} model=${provider.model}`);
 
+  // Auto-convert privateDiscoveryArtifacts to scenarioRouteEvidence if not provided
+  const effectiveRouteEvidence: ScenarioRouteEvidence | undefined = scenarioRouteEvidence || (privateDiscoveryArtifacts ? convertPrivateDiscoveryToRouteEvidence(privateDiscoveryArtifacts) : undefined);
+  if (effectiveRouteEvidence) {
+    console.log(`[scenarios:route-evidence] source=${effectiveRouteEvidence.source} steps=${effectiveRouteEvidence.routeSteps.length} snapshots=${effectiveRouteEvidence.snapshots?.length ?? 0} L1=${effectiveRouteEvidence.coverageLevels.level1ModuleNavigation} L2=${effectiveRouteEvidence.coverageLevels.level2InternalListing} L3=${effectiveRouteEvidence.coverageLevels.level3SpecificDetail} gaps=${(effectiveRouteEvidence.coverageGaps||[]).join(",")}`);
+  }
+
   // Build messages with route resolution context and deterministic seeds
   const messages = await buildMcpScenarioMessages(
     routeBackedIssues,
@@ -549,7 +617,9 @@ export async function generateScenariosWithAi(
     entrySteps,
     loginMode,
     routeResolutions, // Pass route resolutions to prompt builder
-    deterministicSeeds || undefined // Pass deterministic seeds if available
+    deterministicSeeds || undefined,
+    privateDiscoveryArtifacts,
+    effectiveRouteEvidence
   );
 
   console.log(`[scenarios:prompt] messages built system=${messages[0]?.content.length ?? 0} user=${messages[1]?.content.length ?? 0} issues=${routeBackedIssues.length}`);

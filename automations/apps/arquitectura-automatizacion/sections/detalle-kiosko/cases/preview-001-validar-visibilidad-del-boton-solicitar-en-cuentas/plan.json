@@ -6,7 +6,7 @@
     "source": "testrail",
     "externalId": "PREVIEW-001",
     "caseId": 0,
-    "title": "Validar visibilidad del botón Solicitar en Cuentas"
+    "title": "Validar visibilidad del boton Solicitar en Cuentas"
   },
   "requiredData": [],
   "steps": [
@@ -69,5 +69,5 @@
   "notes": [
     "Discovery completed successfully. All targets and concrete assertions passed."
   ],
-  "createdAt": "2026-06-16T20:19:02.924Z"
+  "createdAt": "2026-06-17T19:40:33.536Z"
 }

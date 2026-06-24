@@ -5,11 +5,99 @@
     "name": "4",
     "baseUrl": "https://172.27.4.50",
     "baseUrlHash": "1423ba294517",
-    "createdAt": "2026-06-17T13:58:47.300Z",
-    "updatedAt": "2026-06-17T13:58:47.300Z"
+    "createdAt": "2026-06-17T19:48:12.858Z",
+    "updatedAt": "2026-06-17T19:48:12.859Z"
   },
   "baseUrl": "https://172.27.4.50",
   "loginMode": "no_login",
+  "authProfile": {
+    "mode": "protected_navigation",
+    "entryHint": "requires_authenticated_session",
+    "steps": [
+      {
+        "action": "click",
+        "target": "Iniciar"
+      },
+      {
+        "action": "click",
+        "target": "Transacciones y servicios"
+      },
+      {
+        "action": "click",
+        "target": "Cédula de identidad dominicana"
+      },
+      {
+        "action": "virtualKeyboardFill",
+        "field": "activeCredentialField",
+        "envVar": "$Identity_Provider"
+      },
+      {
+        "action": "fill",
+        "target": "otp-input",
+        "envVar": "$OTP_SECRET"
+      }
+    ],
+    "successSignals": [
+      "Estado de cuenta",
+      "Consulta de balance",
+      "Pago de productos",
+      "Transacciones y servicios"
+    ]
+  },
+  "intentRules": {
+    "public": {
+      "signals": [
+        "información de productos",
+        "beneficios",
+        "requisitos",
+        "tasas públicas",
+        "detalle informativo público",
+        "solicitar producto"
+      ]
+    },
+    "private": {
+      "signals": [
+        "consulta de balance",
+        "transacciones y servicios",
+        "depósitos a plazos",
+        "mis productos",
+        "certificado",
+        "monto invertido",
+        "finalizar sesión"
+      ]
+    }
+  },
+  "publicRoutes": [
+    {
+      "module": "Información de productos",
+      "path": [
+        "Información de productos"
+      ],
+      "signals": [
+        "información de productos",
+        "beneficios",
+        "requisitos",
+        "tasas públicas"
+      ]
+    }
+  ],
+  "privateRoutes": [
+    {
+      "module": "Transacciones y servicios",
+      "path": [
+        "Transacciones y servicios",
+        "Consulta de balance",
+        "Depósitos a plazos"
+      ],
+      "signals": [
+        "consulta de balance",
+        "depósitos a plazo",
+        "monto invertido",
+        "mis depósitos a plazo"
+      ],
+      "requiresAuth": true
+    }
+  ],
   "testData": {},
   "testDataAliases": {},
   "testDataRefs": {},
@@ -61,7 +149,7 @@
         "when": "before_first_functional_step"
       }
     ],
-    "updatedAt": "2026-06-17T13:50:22.012Z",
+    "updatedAt": "2026-06-17T19:40:12.585Z",
     "targetPaths": {
       "Tarjeta Crédito Visa Clásica": {
         "target": "Tarjeta Crédito Visa Clásica",
@@ -571,5 +659,10 @@
       }
     }
   },
-  "updatedAt": "2026-06-17T13:58:47.300Z"
+  "updatedAt": "2026-06-24T13:39:50.689Z",
+  "lastUsedSource": {
+    "type": "request",
+    "sectionName": null,
+    "updatedAt": "2026-06-24T13:39:50.688Z"
+  }
 }

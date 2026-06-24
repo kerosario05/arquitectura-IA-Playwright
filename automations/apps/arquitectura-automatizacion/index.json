@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-06-17T13:58:47.319Z",
+  "updatedAt": "2026-06-17T19:48:12.877Z",
   "automations": [
     {
       "id": "c37869-generar-carta-de-referencia-con-cuenta-de-ahorro",
@@ -11300,7 +11300,7 @@
       "id": "preview-001-validar-visibilidad-del-boton-solicitar-en-cuentas",
       "externalId": "PREVIEW-001",
       "caseId": 0,
-      "title": "Validar visibilidad del botón Solicitar en Cuentas",
+      "title": "Validar visibilidad del boton Solicitar en Cuentas",
       "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-001-validar-visibilidad-del-boton-solicitar-en-cuentas\\plan.json",
       "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-001-validar-visibilidad-del-boton-solicitar-en-cuentas\\case.spec.ts",
       "appSlug": "arquitectura-automatizacion",
@@ -11309,13 +11309,13 @@
       "source": "discovery",
       "appProfile": "arquitectura-automatizacion",
       "createdAt": "2026-06-12T15:47:49.841Z",
-      "updatedAt": "2026-06-16T20:19:03.051Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-06-16T20-18-43-847Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-17T19:40:33.725Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-06-17T19-40-14-216Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-06-16T20-18-43-847Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-06-17T19-40-14-216Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -11483,13 +11483,13 @@
       "source": "discovery",
       "appProfile": "arquitectura-automatizacion",
       "createdAt": "2026-06-12T15:58:21.235Z",
-      "updatedAt": "2026-06-12T15:58:21.235Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-06-12T15-57-35-950Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-17T19:41:22.704Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-06-17T19-40-33-852Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-06-12T15-57-35-950Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-06-17T19-40-33-852Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -11523,7 +11523,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-002-visualizar-detalles-de-tarjeta-credito-visa-clasica\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -11539,13 +11542,13 @@
       "source": "discovery",
       "appProfile": "arquitectura-automatizacion",
       "createdAt": "2026-06-12T15:59:16.910Z",
-      "updatedAt": "2026-06-12T15:59:16.910Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-06-12T15-58-21-372Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-17T19:42:10.916Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-06-17T19-41-22-817Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-06-12T15-58-21-372Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-06-17T19-41-22-817Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -11579,7 +11582,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-003-visualizar-detalles-de-tarjeta-credito-visa-gold\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -11595,13 +11601,13 @@
       "source": "discovery",
       "appProfile": "arquitectura-automatizacion",
       "createdAt": "2026-06-12T16:00:13.059Z",
-      "updatedAt": "2026-06-12T16:00:13.059Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-06-12T15-59-17-043Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-17T19:43:09.280Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-06-17T19-42-11-011Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-06-12T15-59-17-043Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-06-17T19-42-11-011Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -11635,7 +11641,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-004-visualizar-detalles-de-tarjeta-de-credito-visa-platinum\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -11651,13 +11660,13 @@
       "source": "discovery",
       "appProfile": "arquitectura-automatizacion",
       "createdAt": "2026-06-12T16:01:08.474Z",
-      "updatedAt": "2026-06-12T16:01:08.474Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-06-12T16-00-13-192Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-17T19:44:07.917Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-06-17T19-43-09-407Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-06-12T16-00-13-192Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-06-17T19-43-09-407Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -11691,7 +11700,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-005-visualizar-detalles-de-tarjeta-de-credito-visa-infinite\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -11707,13 +11719,13 @@
       "source": "discovery",
       "appProfile": "arquitectura-automatizacion",
       "createdAt": "2026-06-12T16:02:03.076Z",
-      "updatedAt": "2026-06-12T16:02:03.076Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-006\\2026-06-12T16-01-08-610Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-17T19:45:02.950Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-006\\2026-06-17T19-44-08-016Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-006\\2026-06-12T16-01-08-610Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-006\\2026-06-17T19-44-08-016Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -11747,7 +11759,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-006-visualizar-detalles-de-cuenta-de-ahorros-personal-en-pesos\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -11763,13 +11778,13 @@
       "source": "discovery",
       "appProfile": "arquitectura-automatizacion",
       "createdAt": "2026-06-12T16:02:56.930Z",
-      "updatedAt": "2026-06-12T16:02:56.930Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-007\\2026-06-12T16-02-03-186Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-17T19:46:00.387Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-007\\2026-06-17T19-45-03-038Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-007\\2026-06-12T16-02-03-186Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-007\\2026-06-17T19-45-03-038Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -11803,7 +11818,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-007-visualizar-detalles-de-cuenta-de-ahorros-personal-en-dolares\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -11819,13 +11837,13 @@
       "source": "discovery",
       "appProfile": "arquitectura-automatizacion",
       "createdAt": "2026-06-12T16:03:51.763Z",
-      "updatedAt": "2026-06-12T16:03:51.763Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-008\\2026-06-12T16-02-57-035Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-06-17T19:46:57.316Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-008\\2026-06-17T19-46-00-490Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-008\\2026-06-12T16-02-57-035Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-008\\2026-06-17T19-46-00-490Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -11859,7 +11877,10 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false
-        }
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-008-visualizar-detalles-de-cuenta-de-ahorros-personal-en-euros\\plan.json",
+        "previousStatus": "active"
       }
     },
     {
@@ -15332,6 +15353,174 @@
       "specVerificationStatus": "not_run",
       "metadata": {
         "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-010\\2026-06-17T13-58-27-307Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "ProductDetailPage",
+            "FormPage",
+            "HomePage",
+            "LoginPage",
+            "CategoryPage",
+            "ProductInformationPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-009-visualizar-detalles-de-prestamo-personal",
+      "externalId": "PREVIEW-009",
+      "caseId": 0,
+      "title": "Visualizar detalles de Préstamo Personal",
+      "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-009-visualizar-detalles-de-prestamo-personal\\plan.json",
+      "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-009-visualizar-detalles-de-prestamo-personal\\case.spec.ts",
+      "appSlug": "arquitectura-automatizacion",
+      "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "arquitectura-automatizacion",
+      "createdAt": "2026-06-17T19:47:25.893Z",
+      "updatedAt": "2026-06-17T19:47:25.893Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-009\\2026-06-17T19-46-57-420Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-009\\2026-06-17T19-46-57-420Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "ProductDetailPage",
+            "FormPage",
+            "HomePage",
+            "LoginPage",
+            "CategoryPage",
+            "ProductInformationPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-010-visualizar-detalles-de-depositos-a-plazo-en-pesos",
+      "externalId": "PREVIEW-010",
+      "caseId": 0,
+      "title": "Visualizar detalles de Depósitos a Plazo en Pesos",
+      "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-010-visualizar-detalles-de-depositos-a-plazo-en-pesos\\plan.json",
+      "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-010-visualizar-detalles-de-depositos-a-plazo-en-pesos\\case.spec.ts",
+      "appSlug": "arquitectura-automatizacion",
+      "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "arquitectura-automatizacion",
+      "createdAt": "2026-06-17T19:47:44.674Z",
+      "updatedAt": "2026-06-17T19:47:44.674Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-010\\2026-06-17T19-47-25-980Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-010\\2026-06-17T19-47-25-980Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "ProductDetailPage",
+            "FormPage",
+            "HomePage",
+            "LoginPage",
+            "CategoryPage",
+            "ProductInformationPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-011-visualizar-detalles-de-depositos-a-plazo-en-dolares",
+      "externalId": "PREVIEW-011",
+      "caseId": 0,
+      "title": "Visualizar detalles de Depósitos a Plazo en Dólares",
+      "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-011-visualizar-detalles-de-depositos-a-plazo-en-dolares\\plan.json",
+      "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-011-visualizar-detalles-de-depositos-a-plazo-en-dolares\\case.spec.ts",
+      "appSlug": "arquitectura-automatizacion",
+      "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "arquitectura-automatizacion",
+      "createdAt": "2026-06-17T19:48:12.876Z",
+      "updatedAt": "2026-06-17T19:48:12.877Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-011\\2026-06-17T19-47-44-797Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-011\\2026-06-17T19-47-44-797Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,

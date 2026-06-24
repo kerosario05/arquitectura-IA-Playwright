@@ -177,6 +177,8 @@ export function validateScenarioCompliance(
   let valid = true;
   let reasonCode: ComplianceReasonCode = "valid";
 
+  console.log(`[scenario-compliance] usingRouteProfile=${derivedContext.appSlug} allowedClicks=${derivedContext.allowedExecutableClicks.length} scenario=${scenario.title}`);
+
   if (!scenario.steps || scenario.steps.length === 0) {
     return {
       valid: true,

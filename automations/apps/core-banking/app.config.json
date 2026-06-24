@@ -1,0 +1,16 @@
+{
+  "appSlug": "core-banking",
+  "name": "core-banking",
+  "source": {
+    "type": "request",
+    "sectionName": null
+  },
+  "routeProfile": null,
+  "createdAt": "2026-06-24T02:03:23.005Z",
+  "updatedAt": "2026-06-24T02:04:46.882Z",
+  "lastUsedSource": {
+    "type": "request",
+    "sectionName": null,
+    "updatedAt": "2026-06-24T02:04:46.882Z"
+  }
+}

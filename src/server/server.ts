@@ -7,6 +7,7 @@ import { testrailRouter } from "./routes/testrail";
 import { runsRouter } from "./routes/runs";
 import { scenariosRouter } from "./routes/scenarios";
 import { debugRouter } from "./routes/debug";
+import { discoveryRouter } from "./routes/discovery";
 import { resolveServerPort } from "./config";
 
 const PORT = resolveServerPort(process.env as Record<string, string | undefined>);
@@ -41,6 +42,7 @@ app.use("/api/jira", jiraRouter);
 app.use("/api/testrail", testrailRouter);
 app.use("/api/runs", runsRouter);
 app.use("/api/scenarios", scenariosRouter);
+app.use("/api/discovery", discoveryRouter);
 
 const isDebugEnabled =
   process.env.NODE_ENV !== "production" ||
@@ -80,6 +82,7 @@ app.listen(PORT, HOST, () => {
   console.log(`  POST /api/runs/launch-execution  { appSlug, projectId, sectionId, selectedScenarios }`);
   console.log(`  GET  /api/scenarios/preview?projectKey=AA&sprintId=42&status=...`);
   console.log(`  POST /api/scenarios/preview  { projectKey, sprintId|activeSprint, status }`);
+  console.log(`  POST /api/discovery/private  { appSlug, issueKey?, intent?, dryRun? }`);
   if (isDebugEnabled) {
     console.log(`\n[server] Debug endpoints (dev-only):`);
     console.log(`  GET  /api/debug/testrail/status`);

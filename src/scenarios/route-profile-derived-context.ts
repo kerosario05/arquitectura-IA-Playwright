@@ -286,7 +286,20 @@ function deriveAllowedExecutableClicks(
     }
   }
 
-  // NOTE: visibleControls are NOT automatically included here
+  // 6. For private routes, include visibleControls as allowed executable actions
+  // (actionControls are stored in visibleControls for private profiles)
+  if (routeProfile.name === "private_from_app_config" && routeProfile.visibleControls) {
+    for (const control of routeProfile.visibleControls) {
+      if (!allowed.has(control)) {
+        allowed.add(control);
+        if (!sources.has(control)) {
+          sources.set(control, "privateRouteAction");
+        }
+      }
+    }
+  }
+
+  // NOTE: visibleControls are NOT automatically included here for public routes
   // They must be backed by entry, intermediates, targetPaths, or executableRouteSteps
   // to be considered executable clicks
 

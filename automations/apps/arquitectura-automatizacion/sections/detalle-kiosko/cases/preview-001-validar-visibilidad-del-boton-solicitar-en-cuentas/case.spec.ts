@@ -7,13 +7,13 @@ import { ProductDetailPage } from '../../../../pages/productdetail.page';
 
 export const PROMOTED_SPEC_STRATEGY = "pom_runtime";
 
-test('Validar visibilidad del botón Solicitar en Cuentas', async ({ page }) => {
+test('Validar visibilidad del boton Solicitar en Cuentas', async ({ page }) => {
   test.setTimeout(Number(process.env.PROMOTED_SPEC_TIMEOUT_MS ?? 90000));
   // Evidence metadata
   process.env.APP_SLUG = 'arquitectura-automatizacion';
   process.env.SECTION_SLUG = 'default-section';
   process.env.SCENARIO_ID = 'C0';
-  process.env.SCENARIO_TITLE = 'Validar visibilidad del botón Solicitar en Cuentas';
+  process.env.SCENARIO_TITLE = 'Validar visibilidad del boton Solicitar en Cuentas';
 
 
   const homePage = new HomePage(page);

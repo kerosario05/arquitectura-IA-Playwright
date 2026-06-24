@@ -13,6 +13,12 @@ import {
   detectKioskoInfoProductos,
   seedKioskoInfoProductosRouteProfile,
 } from "../automations/app-auto-resolver";
+import {
+  classifyScenarioIntent,
+  hasPrivateIntentConfiguration,
+  logScenarioIntentClassification,
+  type ScenarioIntentClassification,
+} from "./scenario-intent-classifier";
 import { buildDerivedExecutionContext } from "./route-profile-derived-context";
 import { repairMissingIntermediates, logIntermediateRepair } from "./scenario-intermediate-repair";
 import type {
@@ -121,6 +127,229 @@ type EntryStepConfig = {
   reason?: string;
 };
 
+type PrivateRouteConfig = {
+  module?: string;
+  path?: string[] | string;
+  route?: string[] | string;
+  steps?: string[] | string;
+  actionControls?: string[];
+  actions?: string[];
+  allowedActions?: string[];
+  controls?: string[];
+  assertionTerms?: string[];
+  assertions?: string[];
+  validationTerms?: string[];
+  signals?: string[];
+};
+
+/**
+ * Extract navigation path from private route config (tolerant of multiple property names)
+ */
+function extractNavigationPath(route: PrivateRouteConfig): string[] {
+  const path = route.path || route.route || route.steps;
+  if (!path) return [];
+  return Array.isArray(path) ? path : [path];
+}
+
+/**
+ * Extract action controls from private route config (tolerant of multiple property names)
+ * Only actions go to allowedExecutableClicks
+ */
+function extractActionControls(route: PrivateRouteConfig): string[] {
+  const actions = route.actionControls || route.actions || route.allowedActions || route.controls || [];
+  return Array.isArray(actions) ? actions : [actions];
+}
+
+/**
+ * Extract assertion terms from private route config (tolerant of multiple property names)
+ * Assertions are validation-only, do NOT go to allowedExecutableClicks
+ */
+function extractAssertionTerms(route: PrivateRouteConfig): string[] {
+  const assertions = route.assertionTerms || route.assertions || route.validationTerms || [];
+  return Array.isArray(assertions) ? assertions : [assertions];
+}
+
+/**
+ * Normalize text for comparison (accents, case, whitespace)
+ */
+function normalizeForComparison(text?: string): string {
+  if (!text) return "";
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Validate that private catalog configuration is complete
+ */
+type PrivateCatalogValidation = {
+  valid: boolean;
+  authProfileResolved: boolean;
+  privateRouteResolved: boolean;
+  missingActionControls: boolean;
+  missingAssertionTerms: boolean;
+};
+
+function validatePrivateCatalogComplete(
+  appConfig?: any,
+  privateRoutes?: PrivateRouteConfig[]
+): PrivateCatalogValidation {
+  // 1. Check authProfile
+  const authProfileResolved = Boolean(appConfig?.authProfile && Object.keys(appConfig.authProfile).length > 0);
+
+  // 2. Check privateRoutes exists
+  const privateRouteResolved = Boolean(privateRoutes && privateRoutes.length > 0);
+
+  // 3. Check actionControls
+  let missingActionControls = true;
+  if (privateRoutes && privateRoutes.length > 0) {
+    const firstRoute = privateRoutes[0];
+    const routeActions = extractActionControls(firstRoute);
+    if (routeActions.length > 0) {
+      missingActionControls = false;
+    }
+  }
+  // Fallback to app.config defaults
+  if (missingActionControls && appConfig?.privateActionControls) {
+    const fallback = appConfig.privateActionControls as string[] | string | undefined;
+    const actions = Array.isArray(fallback) ? fallback : (fallback ? [fallback] : []);
+    if (actions.length > 0) {
+      missingActionControls = false;
+    }
+  }
+
+  // 4. Check assertionTerms or visible detail signals
+  let missingAssertionTerms = true;
+  if (privateRoutes && privateRoutes.length > 0) {
+    const firstRoute = privateRoutes[0];
+    const routeAssertions = extractAssertionTerms(firstRoute);
+    if (routeAssertions.length > 0) {
+      missingAssertionTerms = false;
+    }
+  }
+  // Fallback to app.config defaults or visible detail signals
+  if (missingAssertionTerms && appConfig?.privateAssertionTerms) {
+    const fallback = appConfig.privateAssertionTerms as string[] | string | undefined;
+    const assertions = Array.isArray(fallback) ? fallback : (fallback ? [fallback] : []);
+    if (assertions.length > 0) {
+      missingAssertionTerms = false;
+    }
+  }
+  // Also check visibleControls as detail signal fallback
+  if (missingAssertionTerms && appConfig?.routeProfile?.visibleControls) {
+    const visibleControls = appConfig.routeProfile.visibleControls as string[] | undefined;
+    const detailPatterns = [/detalles?/i, /requisitos?/i, /beneficios?/i, /condiciones?/i, /informaci[oó]n/i];
+    const hasDetailSignals = visibleControls?.some((control: string) =>
+      detailPatterns.some(p => p.test(control))
+    );
+    if (hasDetailSignals) {
+      missingAssertionTerms = false;
+    }
+  }
+
+  const valid = authProfileResolved && privateRouteResolved && !missingActionControls && !missingAssertionTerms;
+
+  return {
+    valid,
+    authProfileResolved,
+    privateRouteResolved,
+    missingActionControls,
+    missingAssertionTerms,
+  };
+}
+
+
+/**
+ * Build route profile from private route configuration
+ */
+function buildPrivateRouteProfile(
+  appSlug: string,
+  privateRoutes: PrivateRouteConfig[] | undefined,
+  appConfig?: any,
+  issue?: { summary?: string; description?: string }
+): { profile: McpRouteProfile | null; resolved: boolean; selectedRoute: PrivateRouteConfig | null } {
+  if (!privateRoutes || privateRoutes.length === 0) {
+    return { profile: null, resolved: false, selectedRoute: null };
+  }
+
+  // Select first matching private route (simple strategy for MVP)
+  const selectedRoute = privateRoutes[0];
+  const pathSegments = extractNavigationPath(selectedRoute);
+  let actionControls = extractActionControls(selectedRoute);
+  let assertionTerms = extractAssertionTerms(selectedRoute);
+
+  // Apply fallbacks from app.config if empty
+  if (actionControls.length === 0 && appConfig?.privateActionControls) {
+    const fallback = appConfig.privateActionControls as string[] | string | undefined;
+    actionControls = Array.isArray(fallback) ? fallback : (fallback ? [fallback] : []);
+  }
+  if (assertionTerms.length === 0 && appConfig?.privateAssertionTerms) {
+    const fallback = appConfig.privateAssertionTerms as string[] | string | undefined;
+    assertionTerms = Array.isArray(fallback) ? fallback : (fallback ? [fallback] : []);
+  }
+
+  // Build navigation path without duplicating module
+  let navigationSegments: string[] = [];
+  if (selectedRoute.module) {
+    navigationSegments.push(selectedRoute.module);
+  }
+  // Avoid duplicating module if it's the first path segment (after normalization)
+  const normalizedModule = normalizeForComparison(selectedRoute.module);
+  for (const segment of pathSegments) {
+    const normalizedSegment = normalizeForComparison(segment);
+    if (normalizedSegment && normalizedSegment !== normalizedModule) {
+      navigationSegments.push(segment);
+    }
+  }
+
+  // Build intermediates from path segments (excluding module)
+  const intermediates: Record<string, string[]> = {};
+  if (pathSegments.length > 0) {
+    intermediates["private_navigation"] = pathSegments;
+  }
+
+  // Build a minimal profile that will be validated properly by route-profile-derived-context
+  // IMPORTANT: Only actionControls go to visibleControls (as executable clicks)
+  // assertionTerms are NOT executable clicks, only validations
+  const profile: any = {
+    name: "private_from_app_config",
+    source: "app_config.privateRoutes",
+    entry: [],
+    aliases: {},
+    intermediates,
+    targetPaths: {},  // Keep empty, actions go to visibleControls
+    visibleControls: actionControls,  // Only actionControls as executable; assertions are validation-only
+    domainTerms: {},
+    representativeFixture: {},
+    notes: [
+      `built from privateRoute module=${selectedRoute.module}`,
+      `actionControls=${actionControls.length} assertionTerms=${assertionTerms.length}`,
+    ],
+    requiresAuth: true,
+  };
+
+  const navigationRoute = navigationSegments.join(" → ");
+  console.log(
+    `[private-route] resolved=true route="${navigationRoute}" actionControls=${actionControls.length} assertionTerms=${assertionTerms.length}`
+  );
+
+  // Warn if actionControls is empty
+  if (actionControls.length === 0) {
+    console.log(
+      `[private-route-profile] WARNING missing_action_controls route="${navigationRoute}"`
+    );
+  } else {
+    console.log(
+      `[private-route-profile] built navigationPath=${navigationSegments.length} actionControls=${actionControls.length} assertionTerms=${assertionTerms.length}`
+    );
+  }
+
+  return { profile: profile as McpRouteProfile, resolved: true, selectedRoute };
+}
+
 function buildRouteProfileForPrompt(
   targetAppSlug: string,
   requestRouteProfile?: McpRouteProfile,
@@ -128,8 +357,9 @@ function buildRouteProfileForPrompt(
   jiraDescription?: string,
   testrailSectionName?: string,
   scenarioTitles?: string[],
+  storyIntent?: ScenarioIntentClassification,
 ): { routeProfile: McpRouteProfile | null; source: string; entrySteps: EntryStepConfig[]; loginMode?: string } {
-  console.log(`[route-profile] resolving routeProfile targetAppSlug=${targetAppSlug} requestRouteProfile=${requestRouteProfile?.name ?? "none"}`);
+  console.log(`[route-profile] resolving routeProfile targetAppSlug=${targetAppSlug} requestRouteProfile=${requestRouteProfile?.name ?? "none"} intent=${storyIntent?.intent ?? "none"}`);
 
   // 1. Explicit routeProfile from request
   if (requestRouteProfile && requestRouteProfile.name) {
@@ -142,6 +372,61 @@ function buildRouteProfileForPrompt(
   // 2. Load from app.config.json
   const appConfig = loadAppConfigSync(targetAppSlug);
   console.log(`[route-profile] appConfig loaded=${appConfig !== null} hasRouteProfile=${appConfig?.routeProfile !== undefined}`);
+
+  // 2a. Check for private intent with privateRoutes
+  if (storyIntent?.intent === "private/authenticated_transaction") {
+    const privateRoutes = appConfig?.privateRoutes as PrivateRouteConfig[] | undefined;
+
+    // Validate private catalog completeness
+    const validation = validatePrivateCatalogComplete(appConfig, privateRoutes);
+
+    console.log(
+      `[private-catalog] status=${validation.valid ? "complete" : "missing_or_incomplete"} ` +
+      `authProfileResolved=${validation.authProfileResolved} ` +
+      `privateRouteResolved=${validation.privateRouteResolved} ` +
+      `missingActionControls=${validation.missingActionControls} ` +
+      `missingAssertionTerms=${validation.missingAssertionTerms}`
+    );
+
+    if (!validation.valid) {
+      // Block generation with clear diagnostics
+      console.log(
+        `[private-catalog] actionRequired=run_authenticated_private_discovery`
+      );
+      console.log(
+        `[scenario-routing] blocked=true reasonCode=private_catalog_required`
+      );
+
+      // Return null to indicate private route not ready
+      return {
+        routeProfile: null,
+        source: "private_blocked",
+        entrySteps: [],
+        loginMode: appConfig?.loginMode as string | undefined
+      };
+    }
+
+    // Private catalog is valid, proceed with building profile
+    if (privateRoutes && privateRoutes.length > 0) {
+      const { profile: privateProfile, resolved } = buildPrivateRouteProfile(
+        targetAppSlug,
+        privateRoutes,
+        appConfig,
+        { summary: jiraSummary, description: jiraDescription }
+      );
+      if (privateProfile) {
+        console.log(`[scenario-routing] selectedRouteProfile=private_from_app_config intent=private/authenticated_transaction`);
+        return {
+          routeProfile: privateProfile,
+          source: "app_config.privateRoutes",
+          entrySteps: [],
+          loginMode: appConfig?.loginMode as string | undefined,
+        };
+      }
+    }
+  }
+
+  // 2b. Try public routeProfile from app.config
   const configRp = getRouteProfileFromConfig(appConfig);
   if (configRp) {
     const entry = configRp.entry as unknown[] | undefined;
@@ -155,6 +440,7 @@ function buildRouteProfileForPrompt(
     if ((entry && entry.length > 0) || (aliases && Object.keys(aliases).length > 0)) {
       const es = Array.isArray(configRp.entrySteps) ? configRp.entrySteps as EntryStepConfig[] : [];
       console.log(`[route-profile] source=app_config returning routeProfile name=${configRp.name}`);
+      console.log(`[scenario-routing] selectedRouteProfile=${(configRp as Record<string, unknown>).name ?? "unknown"}`);
       return {
         routeProfile: configRp as unknown as McpRouteProfile,
         source: "app_config",
@@ -170,6 +456,7 @@ function buildRouteProfileForPrompt(
 
   // 3. Seed for KIOSKO / Información de productos
   if (
+    storyIntent?.intent === "public/product_information" &&
     detectKioskoInfoProductos({
       targetAppSlug,
       jiraSummary,
@@ -180,6 +467,7 @@ function buildRouteProfileForPrompt(
   ) {
     const seed = seedKioskoInfoProductosRouteProfile() as unknown as McpRouteProfile;
     console.log(`[route-profile] source=seed_kiosko_info_productos name=${seed.name}`);
+    console.log(`[scenario-routing] selectedRouteProfile=${(seed as Record<string, unknown>).name ?? "unknown"}`);
     return {
       routeProfile: seed,
       source: "seed_kiosko_info_productos",
@@ -296,6 +584,8 @@ export async function generateScenarioPreview(
 
   console.log(`[jira] selected issues count=${issues.length} keys=${JSON.stringify(issues.map((i) => i.key))}`);
 
+  const rawAppConfig = loadAppConfigSync(appInference.appSlug);
+
   const maxIssues = Number(process.env.SCENARIO_PREVIEW_MAX_ISSUES) || 5;
   if (issues.length > maxIssues) {
     console.log(`[scenarios:preview] limiting issues from ${issues.length} to ${maxIssues}`);
@@ -305,6 +595,93 @@ export async function generateScenarioPreview(
   // Gather jira context for routeProfile seeding
   const jiraSummary = issues.length > 0 ? issues[0].summary : undefined;
   const jiraDescription = issues.length > 0 ? issues[0].description : undefined;
+  const routeProfileFromConfig = getRouteProfileFromConfig(rawAppConfig) as McpRouteProfile | null;
+  const issueIntentClassifications = new Map(
+    issues.map(issue => {
+      const classification = classifyScenarioIntent({
+        issue,
+        appSlug: appInference.appSlug,
+        appConfig: rawAppConfig as Record<string, unknown> | null,
+        routeProfile: routeProfileFromConfig,
+      });
+      logScenarioIntentClassification({
+        appSlug: appInference.appSlug,
+        issue,
+        classification,
+      });
+      return [issue.key, classification] as const;
+    }),
+  );
+  const primaryIssueIntent = issues.length > 0 ? issueIntentClassifications.get(issues[0].key) : undefined;
+
+  const hasRuntimePrivateEvidence = Boolean(req.scenarioRouteEvidence) || Boolean(req.privateDiscoveryArtifacts);
+  const blockedByMissingConfig = primaryIssueIntent?.intent === "private/authenticated_transaction" && !hasPrivateIntentConfiguration(rawAppConfig as Record<string, unknown> | null) && !hasRuntimePrivateEvidence;
+  console.log(`[scenario-preview:route-evidence-gate] hasRuntimePrivateEvidence=${hasRuntimePrivateEvidence} blocked=${blockedByMissingConfig} reason=${blockedByMissingConfig ? "missing_private_configuration" : "has_evidence"}`);
+
+  if (blockedByMissingConfig) {
+    const blockedReason =
+      "private intent requires appProfile.authProfile and appProfile.privateRoutes; public catalog generation is blocked";
+    console.log(
+      `[scenario-intent] appSlug=${appInference.appSlug} issue=${issues[0]?.key ?? "unknown"} intent=${primaryIssueIntent.intent} ` +
+        `requiresAuth=${primaryIssueIntent.requiresAuth} confidence=${primaryIssueIntent.confidence} source=${primaryIssueIntent.source} ` +
+        `reason="missing_private_configuration"`,
+    );
+    return {
+      ok: true,
+      source: {
+        mode: req.sourceMode ?? "jira",
+        projectKey: req.projectKey,
+        sprintId,
+        status: req.status ?? null,
+        issuesFound: issues.length,
+      },
+      testrail: {
+        projectId: req.testrailProjectId ?? null,
+        suiteId: req.testrailSuiteId ?? null,
+        sectionId: req.testrailSectionId ?? null,
+        sectionName: req.testrailSectionName ?? null,
+      },
+      appSlug: effectiveAppSlug,
+      targetAppSlug: appInference.appSlug,
+      targetAppName: appInference.appName,
+      appInference,
+      appProfilePath: appProfileResult.appConfigPath,
+      summary: { generated: 0, valid: 0, invalid: 0, rejected: issues.length, blocked: issues.length },
+      routeProfile: routeProfileFromConfig,
+      scenarios: [],
+      rejected: issues.map(issue => ({
+        sourceIssueKey: issue.key,
+        reason: blockedReason,
+      })),
+      blockedScenarios: issues.map(issue => ({
+        sourceIssueKey: issue.key,
+        title: issue.summary,
+        status: "blocked" as const,
+        reasonCode: "needs_route_profile" as const,
+        reason: blockedReason,
+        diagnostics: [
+          {
+            level: "error" as const,
+            code: "needs_route_profile" as const,
+            message: blockedReason,
+            context: { intent: primaryIssueIntent.intent, requiresAuth: true },
+          },
+        ],
+        appSlug: appInference.appSlug,
+        appProfilePath: appProfileResult.appConfigPath,
+        suggestedAction: "configure_private_routes_and_auth_profile",
+      })),
+      warnings: [blockedReason],
+      catalogDiagnostics: {
+        catalogUsed: false,
+        discoveryRefreshed: false,
+        discoveredProductCount: 0,
+        representativeProductCount: 0,
+        warnings: [blockedReason],
+        fallbackReason: "private_intent_missing_configuration",
+      },
+    };
+  }
 
   // Build initial routeProfile (before AI generation)
   const { routeProfile: initialRouteProfile, source: rpSource, entrySteps: initialEntrySteps, loginMode } = buildRouteProfileForPrompt(
@@ -313,21 +690,110 @@ export async function generateScenarioPreview(
     jiraSummary,
     jiraDescription,
     req.testrailSectionName,
+    undefined,
+    primaryIssueIntent,
   );
 
   console.log(`[scenarios:preview] routeProfile source=${rpSource}`);
   console.log(`[scenarios:preview] routeProfileName=${initialRouteProfile?.name ?? "null"}`);
   console.log(`[scenarios:preview] routeProfileEntry=${JSON.stringify(initialRouteProfile?.entry ?? [])}`);
 
-  // Ensure catalog context for scenario generation (enrichment phase)
+  // Check if private catalog is blocked
+  if (rpSource === "private_blocked" && !hasRuntimePrivateEvidence) {
+    const blockedReason =
+      "private/authenticated_transaction intent requires complete authProfile, privateRoutes, actionControls, and assertionTerms configuration. Run authenticated discovery to configure privately accessible routes and controls.";
+    console.log(
+      `[scenarios:preview] private_catalog_blocked appSlug=${appInference.appSlug} intent=${primaryIssueIntent?.intent}`,
+    );
+
+    // Check if auto-discovery can be triggered
+    const canAutoDiscoverPrivateCatalog =
+      process.env.AI_CATALOG_AUTO_DISCOVER === "true" &&
+      primaryIssueIntent?.requiresAuth === true;
+
+    return {
+      ok: true,
+      source: {
+        mode: req.sourceMode ?? "jira",
+        projectKey: req.projectKey,
+        sprintId,
+        status: req.status ?? null,
+        issuesFound: issues.length,
+      },
+      testrail: {
+        projectId: req.testrailProjectId ?? null,
+        suiteId: req.testrailSuiteId ?? null,
+        sectionId: req.testrailSectionId ?? null,
+        sectionName: req.testrailSectionName ?? null,
+      },
+      appSlug: effectiveAppSlug,
+      targetAppSlug: appInference.appSlug,
+      targetAppName: appInference.appName,
+      appInference,
+      appProfilePath: appProfileResult.appConfigPath,
+      summary: { generated: 0, valid: 0, invalid: 0, rejected: issues.length, blocked: issues.length },
+      routeProfile: null,
+      scenarios: [],
+      rejected: issues.map(issue => ({
+        sourceIssueKey: issue.key,
+        reason: blockedReason,
+      })),
+      blockedScenarios: issues.map(issue => ({
+        sourceIssueKey: issue.key,
+        title: issue.summary,
+        status: "blocked" as const,
+        reasonCode: "needs_route_profile" as const,
+        reason: blockedReason,
+        diagnostics: [
+          {
+            level: "error" as const,
+            code: "needs_route_profile" as const,
+            message: blockedReason,
+            context: {
+              intent: primaryIssueIntent?.intent,
+              requiresAuth: true,
+              reasonCode: "private_catalog_required",
+              canAutoDiscoverPrivateCatalog,
+              discoveryEndpoint: canAutoDiscoverPrivateCatalog ? "/api/discovery/private" : undefined,
+            },
+          },
+        ],
+        appSlug: appInference.appSlug,
+        appProfilePath: appProfileResult.appConfigPath,
+        suggestedAction: "run_authenticated_private_discovery",
+      })),
+      warnings: [blockedReason],
+      catalogDiagnostics: {
+        catalogUsed: false,
+        discoveryRefreshed: false,
+        discoveredProductCount: 0,
+        representativeProductCount: 0,
+        warnings: [blockedReason],
+        fallbackReason: "private_catalog_incomplete",
+      },
+    };
+  }
   const { ensureScenarioGenerationContext } = await import("./scenario-catalog-context");
 
-  const catalogOptions = req.catalogOptions ?? {
+  const requestedCatalogOptions = req.catalogOptions ?? {
     useDiscoveredCatalog: process.env.AI_CATALOG_AUTO_DISCOVER === "true",
     catalogMode: process.env.AI_CATALOG_MODE === "refresh" ? "refresh" : "existing",
     coverageMode: process.env.AI_CATALOG_COVERAGE_MODE as "representative" | "exhaustive" || "representative",
     maxProductsPerCategory: parseInt(process.env.AI_CATALOG_MAX_PER_CATEGORY || "2", 10),
   };
+  const catalogOptions =
+    primaryIssueIntent?.intent === "public/product_information"
+      ? requestedCatalogOptions
+      : {
+          ...requestedCatalogOptions,
+          useDiscoveredCatalog: false,
+        };
+  if (primaryIssueIntent?.intent !== "public/product_information") {
+    console.log(
+      `[scenario-intent] catalogStrategy=skip_public_catalog intent=${primaryIssueIntent?.intent ?? "ambiguous"} ` +
+        `requiresAuth=${primaryIssueIntent?.requiresAuth ?? false}`,
+    );
+  }
 
   const { routeProfile: enrichedRouteProfile, diagnostics: catalogDiagnostics } = await ensureScenarioGenerationContext(
     appInference.appSlug,
@@ -382,6 +848,9 @@ export async function generateScenarioPreview(
 
   let generationResult;
   try {
+  console.log(`[scenario-preview:route-evidence-input] privateArtifacts=${Boolean(req.privateDiscoveryArtifacts)} routeEvidence=${Boolean(req.scenarioRouteEvidence)}`);
+  console.log(`[scenario-preview:route-profile-quality-gate] quality=missing hasRuntimePrivateEvidence=${hasRuntimePrivateEvidence} rejected=${hasRuntimePrivateEvidence ? false : true}`);
+
     generationResult = await generateScenariosWithAi(
       issues,
       effectiveAppSlug,
@@ -391,6 +860,9 @@ export async function generateScenarioPreview(
       routeProfileForGeneration,
       initialEntrySteps,
       loginMode,
+      undefined, // _testProvider
+      req.privateDiscoveryArtifacts,
+      req.scenarioRouteEvidence,
     );
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
