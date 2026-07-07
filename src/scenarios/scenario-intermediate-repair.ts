@@ -151,7 +151,8 @@ export function repairMissingIntermediates(
         // Check if target is already reachable (no intermediates needed)
         const isReachable =
           navigationContext.length === 0 || // First click
-          derivedContext.entryActionTargets.some((entry) => targetsMatch(entry, clickTarget)); // Entry point
+          derivedContext.entryActionTargets.some((entry) => targetsMatch(entry, clickTarget)) || // Entry points
+          derivedContext.allowedExecutableClicks.some((entry) => targetsMatch(entry, clickTarget)); // Navigation authority / private route targets
 
         if (!isReachable) {
           diagnostics.push({

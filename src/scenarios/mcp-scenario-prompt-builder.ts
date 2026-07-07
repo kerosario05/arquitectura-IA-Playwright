@@ -16,7 +16,9 @@ import {
   type DerivedExecutionContext,
 } from "./route-profile-derived-context";
 
-const SKILL_DIR = path.join(process.cwd(), "src", "agent", "skills", "mcp-testrail-case-generator-v2");
+const SKILL_DIR = path.join(process.cwd(), "src", "agent", "skills", "mcp-scenario-generator-universal");
+
+const LEGACY_SKILL_DIR = path.join(process.cwd(), "src", "agent", "skills", "mcp-testrail-case-generator-v2");
 
 /**
  * Get maximum scenarios to generate per issue (configurable via env)
@@ -162,15 +164,19 @@ export function calculateDynamicScenarioLimit(
 }
 
 async function loadSkillMarkdown(): Promise<string | null> {
-  const skillPath = path.join(SKILL_DIR, "SKILL.md");
-  try {
-    const content = await fs.readFile(skillPath, "utf-8");
-    console.log(`[scenarios:prompt] full skill loaded path=${skillPath} chars=${content.length}`);
-    return content;
-  } catch {
-    console.error(`[scenarios:prompt] skill not found at ${skillPath}`);
-    return null;
+  // Try universal skill first, fallback to legacy
+  for (const dir of [SKILL_DIR, LEGACY_SKILL_DIR]) {
+    const skillPath = path.join(dir, "SKILL.md");
+    try {
+      const content = await fs.readFile(skillPath, "utf-8");
+      console.log(`[scenarios:prompt] skill=mcp-scenario-generator-universal loaded=true path=${skillPath} chars=${content.length}`);
+      return content;
+    } catch {
+      // try next
+    }
   }
+  console.error(`[scenarios:prompt] skill not found at ${SKILL_DIR} or ${LEGACY_SKILL_DIR}`);
+  return null;
 }
 
 /**
@@ -185,12 +191,26 @@ function buildCompactMcpRules(scenarioLimit: number): string {
 - Every scenario must have mcpExecutable: true
 - Steps use ONLY these patterns:
   1. Clic en "X" (ONLY if X in ALLOWED_EXECUTABLE_CLICKS)
-  2. Validar que se muestre "X"
+  2. Validar que se muestre "X" (X must be specific label from HU, NOT "Nombre", "Información", "Detalle")
   3. Validar que el botón "X" esté visible/habilitado/deshabilitado
-  4. Seleccionar el primer <domainTerm> visible del listado (ONLY if backed by profile)
+  4. Seleccionar el primer <domainTerm> visible del listado (domainTerm from entity name: préstamo, cuenta, producto, tarjeta — NEVER "elemento")
   5. Ingresar <campo> usando <dataKey>
 
 **Step Numbering**: Steps MUST be numbered: "1. Clic en...", "2. Validar..."
+
+**Forbidden Patterns — REJECT immediately** (IMPORTANT):
+- Seleccionar el primer elemento visible del listado. → USE entity name
+- Validar que se muestre "Nombre". → USE specific label from HU fields
+- Validar que se muestre "Información". / Validar que se muestre "Detalle". → too vague
+- Validar que funcione correctamente. / Validar resultado esperado. → abstract
+- Completar datos requeridos. / Ejecutar acción de la HU. → no target
+- Gestionar la solicitud. / Continuar con el flujo. → narrative
+
+**Coverage Requirements**:
+- Simple HU (1-2 screens): minimum 3 scenarios
+- Rich HU (detail + financial fields + options): minimum 6 scenarios
+- Always include: list view, selection, detail fields, formats (if applicable), post-options, return flow
+- If HU has explicit error cases, generate them as routePending scenarios
 
 **Forbidden Scenarios**:
 - DO NOT generate: backend-only, manual, OTP, login, PIN, password, token, database, Core Banking, API, log, auditoría scenarios
@@ -201,15 +221,9 @@ function buildCompactMcpRules(scenarioLimit: number): string {
 - visible ≠ clickable, domain term ≠ clickable, mentioned in story ≠ clickable
 - When in doubt: use "Validar que se muestre" not "Clic en"
 
-**Scenario Limit**:
-- Generate maximum ${scenarioLimit} scenarios per issue
-- Prioritize positive UI flows
-- Reject backend/negative/non-UI scenarios to rejected array
+**Scenario Limit**: Generate maximum ${scenarioLimit} scenarios per issue. Prioritize positive UI flows.
 
-**Expected Result**:
-- Must be short contextual phrase
-- NOT a source of executable steps or validation targets
-- Context only`;
+**Expected Result**: Must be short contextual phrase. NOT a source of executable steps.`;
 }
 
 function formatIssues(issues: JiraIssueSource[]): string {
@@ -436,7 +450,8 @@ function buildSystemPrompt(
   profileCtx?: AppProfilePromptContext,
   derivedCtx?: DerivedExecutionContext,
   useCompactMode?: boolean,
-  scenarioLimit?: number
+  scenarioLimit?: number,
+  suppressRouteProfile?: boolean,
 ): string {
   const testrailSection = testrailMeta
     ? `\n\n## TestRail Target\n- Project ID: ${testrailMeta.projectId}\n- Suite ID: ${testrailMeta.suiteId}${testrailMeta.sectionId ? `\n- Section ID: ${testrailMeta.sectionId}` : ""}${testrailMeta.sectionName ? `\n- Section Name: ${testrailMeta.sectionName}` : ""}`
@@ -446,16 +461,16 @@ function buildSystemPrompt(
     ? `\n\n## Target Functional App\n- targetAppSlug: ${targetAppSlug}\n- targetAppName: ${targetAppName ?? targetAppSlug}`
     : "";
 
-  const routeProfileBlock = profileCtx?.present
+  const routeProfileBlock = profileCtx?.present && !suppressRouteProfile
     ? `\n\n## App Configuration / RouteProfile\n${formatAppProfileContext(profileCtx)}`
     : "";
 
-  const derivedContextBlock = derivedCtx
+  const derivedContextBlock = derivedCtx && !suppressRouteProfile
     ? `\n\n${formatDerivedContextForPrompt(derivedCtx)}`
     : "";
 
   // Build discovered products block
-  const discoveredProductsBlock = buildDiscoveredProductsBlock(profileCtx);
+  const discoveredProductsBlock = suppressRouteProfile ? "" : buildDiscoveredProductsBlock(profileCtx);
 
   const entryPathBlock = buildEntryPathBlockFromContext(profileCtx ?? { appSlug, entrySteps: [], navigationHints: {}, aliases: {}, domainTerms: {}, visibleControls: [], present: false });
 
@@ -467,7 +482,7 @@ function buildSystemPrompt(
 
   const skillRules = compactMode
     ? buildCompactMcpRules(limit)
-    : (skillMd ? `## Skill Rules (from mcp-testrail-case-generator-v2)\n\n${skillMd}\n\n` : "");
+    : (skillMd ? `## Skill Rules (from mcp-scenario-generator-universal)\n\n${skillMd}\n\n` : "");
 
   console.log(`[scenarios:prompt] compactMode=${compactMode} skillCharsIncluded=${skillRules.length} maxScenariosPerIssue=${limit}`);
 
@@ -531,17 +546,17 @@ Sensitive actions include: Solicitar, Confirmar, Enviar, Pagar, Transferir, Firm
 
 ${entryPathBlock}
 ## COVERAGE EXPECTATIONS
-- If the Jira story describes a module with multiple visible categories/subcategories, generate separate scenarios by functional route.
+- If the Jira story describes a functional area with multiple visible layers (list+detail+actions), generate separate scenarios per layer.
 - Do not collapse all paths into one scenario.
 - Generate scenarios for:
-  - visualización de categorías principales
-  - navegación a subcategorías
-  - selección de primer producto visible
-  - detalle de producto
-  - controles visibles no sensibles
-  - regresar desde detalle
-  - finalizar sesión si es visible y seguro
-  - estados vacíos/no disponible solo si son visibles por UI y tienen fixture clara
+  - visualización del área funcional principal
+  - navegación a opciones disponibles
+  - selección de primer elemento disponible (only if backed by route or HU text)
+  - detalle de información con campos específicos de la HU
+  - validación de formatos (moneda/fecha/porcentaje) si la HU los menciona
+  - controles y opciones posteriores visibles
+  - regresar o volver desde el detalle
+  - estados vacíos solo si son visibles por UI y la HU los menciona
 - Prefer 6 to 12 scenarios when the story contains enough UI material.
 - Reject backend/manual/integration/log/audit/external website checks.
 - Do not reject valid UI routes only because they require controlled data.
@@ -576,14 +591,11 @@ ${entryPathBlock}
 - If term is visible/domain/content but NOT in allowed clicks → "Validar que se muestre \"<term>\""
 - If term is from expectedResult/story sections → "Validar que se muestre \"<term>\""
 
-**Content/Assertion Terms**:
+ **Content/Assertion Terms**:
 Content sections, expected results, messages, conditions, field names, legal notes, and informational sections must ALWAYS become validations:
-- Wrong: Clic en "Beneficios"
-- Right: Validar que se muestre "Beneficios"
-- Wrong: Clic en "Requisitos"
-- Right: Validar que se muestre "Requisitos"
-- Wrong: Clic en "Tasas de interés"
-- Right: Validar que se muestre "Tasas de interés"
+- Wrong: Clic en contenido no ejecutable
+- Right: Validar que se muestre el label especifico de la HU
+- Never: generate assertions for labels NOT mentioned in the HU text
 
 **When in Doubt**: If you are uncertain whether a target is executable, use "Validar que se muestre" instead of "Clic en". The post-generation validator will reject scenarios with unbacked clicks.
 
@@ -595,10 +607,10 @@ Content sections, expected results, messages, conditions, field names, legal not
 - ONLY if domainTerm explicitly indicates selectable items (e.g., "producto seleccionable", "tarjeta clickeable")
 - ONLY if ALLOWED_EXECUTABLE_CLICKS includes the specific item type
 
-**When NOT to Use Selection** (use validation instead):
-- Listing of informational sections (Beneficios, Requisitos, Condiciones)
+ **When NOT to Use Selection** (use validation instead):
+- Listing of informational sections (secciones informativas, contenido estático)
 - Listing of data/content blocks without interactive elements
-- Category names that are text content, not navigation targets
+- Category/label names that are text content, not navigation targets
 - Detail fields displayed on current page (no selection needed)
 
 **Pattern for Informational Listings**:
@@ -610,9 +622,7 @@ Instead of:
 Use:
 1. Navigate to module
 2. Validar que se muestre lista de secciones
-3. Validar que se muestre "Beneficios"
-4. Validar que se muestre "Requisitos"
-5. Validar que se muestre "Condiciones"
+3. Validar que se muestre cada campo especifico mencionado en la HU
 
 **Pattern for Interactive Listings** (ONLY when backed):
 1. Navigate to module
@@ -721,6 +731,40 @@ export async function buildMcpScenarioMessages(
 ): Promise<Array<{ role: "system" | "user"; content: string }>> {
   const skillMd = await loadSkillMarkdown();
 
+  // Detect intent from annotated issues
+  const primaryHuIntent = ((issues[0] as any)?._huIntent as string) ?? "unknown_flow";
+  const isNonCatalogIntent = primaryHuIntent !== "catalog_listing_flow" &&
+    primaryHuIntent !== "product_detail_flow";
+
+  // Detect routeProfile catalog orientation via structural signals
+  let routeProfileIsCatalog = false;
+  if (routeProfile) {
+    const rp = routeProfile as any;
+    const targetPathKeys = Object.keys(rp.targetPaths ?? {});
+    const hasProductMetadata = targetPathKeys.some(
+      (k: string) => !!(rp.targetPaths?.[k] as any)?.productMetadata?.subcategory
+    );
+    const entryLabels = (rp.entry ?? []).map((e: any) =>
+      (e.businessLabel ?? e.visibleLabel ?? "").toLowerCase()
+    ).join(" ");
+    const hasCatalogEntry = /informacion_de_productos|productos|catalogo/i.test(entryLabels);
+    const controls = (rp.visibleControls ?? []) as string[];
+    const catalogControls = controls.filter((c: string) =>
+      /beneficios|requisitos|condiciones relevantes|descripci[oó]n general|informaci[oó]n legal|nombre del producto|solicitar/i.test(c));
+    const controlRatio = catalogControls.length / Math.max(controls.length, 1);
+    const score = (targetPathKeys.length >= 3 ? 3 : targetPathKeys.length >= 1 ? 2 : 0) +
+      (hasProductMetadata ? 3 : 0) + (hasCatalogEntry ? 1 : 0) + (controlRatio >= 0.3 ? 1 : 0);
+    routeProfileIsCatalog = score >= 3;
+  }
+
+  // Suppress incompatible routeProfile from prompt for non-catalog intents
+  const suppressRouteProfile = isNonCatalogIntent && routeProfileIsCatalog;
+  if (suppressRouteProfile) {
+    console.log(`[scenarios:prompt] routeProfile compatibility=incompatible intent=${primaryHuIntent} diagnosticOnly=true`);
+    console.log(`[scenarios:prompt] routeProfile suppressed allowedClicks, assertionTerms, routeResolutions for prompt`);
+    console.log(`[scenarios:prompt] promptSources primary=hu+knowledge+explicitRoute routeProfile=diagnostic_only`);
+  }
+
   const profileCtx = buildAppProfilePromptContext(appSlug, {
     targetAppSlug,
     targetAppName,
@@ -797,13 +841,17 @@ export async function buildMcpScenarioMessages(
   const useCompactMode = derivedCtx && derivedCtx.allowedExecutableClicks.length > 0;
 
   // Build system prompt with route resolution context and derived context
-  let systemContent = buildSystemPrompt(skillMd, appSlug, testrailMeta, targetAppSlug, targetAppName, profileCtx, derivedCtx, useCompactMode, dynamicScenarioLimit);
+  let systemContent = buildSystemPrompt(skillMd, appSlug, testrailMeta, targetAppSlug, targetAppName, profileCtx, derivedCtx, useCompactMode, dynamicScenarioLimit, suppressRouteProfile);
 
   // Add route resolution context if available
-  const routeContext = buildRouteResolutionContext(issues, routeResolutions);
-  if (routeContext) {
-    systemContent += routeContext;
-    console.log(`[scenarios:prompt] route resolution context added for ${routeResolutions?.size ?? 0} issues`);
+  if (!suppressRouteProfile) {
+    const routeContext = buildRouteResolutionContext(issues, routeResolutions);
+    if (routeContext) {
+      systemContent += routeContext;
+      console.log(`[scenarios:prompt] route resolution context added for ${routeResolutions?.size ?? 0} issues`);
+    }
+  } else if (routeResolutions && routeResolutions.size > 0) {
+    console.log(`[scenarios:prompt] routeResolution suppressed count=${routeResolutions.size} reason=incompatibleRouteProfile`);
   }
 
   // Add deterministic seeds if available
@@ -839,10 +887,23 @@ export async function buildMcpScenarioMessages(
   const systemChars = systemContent.length;
   const userChars = userContent.length;
   const totalChars = systemChars + userChars;
-  const allowedClicksCount = derivedCtx?.allowedExecutableClicks.length ?? 0;
-  const assertionTermsCount = derivedCtx?.assertionOnlyTerms.length ?? 0;
-  const routeResolutionCount = routeResolutions?.size ?? 0;
-  const estimatedTokenChars = Math.ceil(totalChars / 4); // rough token estimate (4 chars per token)
+  const estimatedTokens = Math.ceil(totalChars / 4); // rough token estimate (4 chars per token)
+  // Compute effective counts (reflect what actually goes into the prompt)
+  const rawAllowedClicksCount = derivedCtx?.allowedExecutableClicks.length ?? 0;
+  const rawAssertionTermsCount = derivedCtx?.assertionOnlyTerms.length ?? 0;
+  const rawRouteResolutionCount = routeResolutions?.size ?? 0;
+  const effectiveAllowedClicksCount = suppressRouteProfile ? 0 : rawAllowedClicksCount;
+  const effectiveAssertionTermsCount = suppressRouteProfile ? 0 : rawAssertionTermsCount;
+  const effectiveRouteResolutionCount = suppressRouteProfile ? 0 : rawRouteResolutionCount;
+
+  if (suppressRouteProfile) {
+    console.log(
+      `[scenarios:prompt] promptEffectiveContext ` +
+      `allowedClicks=${effectiveAllowedClicksCount} assertionTerms=${effectiveAssertionTermsCount} routeResolutions=${effectiveRouteResolutionCount} ` +
+      `suppressed=true ` +
+      `(rawAllowedClicks=${rawAllowedClicksCount} rawAssertionTerms=${rawAssertionTermsCount} rawRouteResolutions=${rawRouteResolutionCount})`
+    );
+  }
 
   console.log(
     `[scenarios:prompt] prompt built ` +
@@ -850,11 +911,11 @@ export async function buildMcpScenarioMessages(
     `systemChars=${systemChars} ` +
     `userChars=${userChars} ` +
     `totalChars=${totalChars} ` +
-    `estimatedTokens=${estimatedTokenChars} ` +
+    `estimatedTokens=${estimatedTokens} ` +
     `issues=${issues.length} ` +
-    `allowedClicksCount=${allowedClicksCount} ` +
-    `assertionTermsCount=${assertionTermsCount} ` +
-    `routeResolutionCount=${routeResolutionCount} ` +
+    `allowedClicksCount=${effectiveAllowedClicksCount} ` +
+    `assertionTermsCount=${effectiveAssertionTermsCount} ` +
+    `routeResolutionCount=${effectiveRouteResolutionCount} ` +
     `maxScenariosPerIssue=${dynamicScenarioLimit} ` +
     `expectedResultAsContext=true`
   );

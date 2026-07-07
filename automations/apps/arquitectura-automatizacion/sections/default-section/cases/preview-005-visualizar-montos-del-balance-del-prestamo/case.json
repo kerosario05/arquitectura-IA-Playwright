@@ -1,0 +1,10 @@
+{
+  "id": "preview-005-visualizar-montos-del-balance-del-prestamo",
+  "externalId": "PREVIEW-005",
+  "caseId": 0,
+  "title": "Visualizar montos del balance del prestamo",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-07-02T21:57:17.635Z"
+}

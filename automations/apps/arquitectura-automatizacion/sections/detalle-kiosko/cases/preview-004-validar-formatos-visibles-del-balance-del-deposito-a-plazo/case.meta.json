@@ -1,0 +1,9 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "PREVIEW-004",
+  "testRailCaseId": 0,
+  "generatedAt": "2026-07-01T19:00:47.776Z",
+  "title": "Validar formatos visibles del balance del deposito a plazo"
+}

@@ -118,12 +118,150 @@ const NAVIGATION_CONTROLS = /^(volver|atras|atrás|finalizar|cerrar|salir|menu|m
 const GIANT_CONTAINER_TAGS = new Set(["html", "body", "main", "header", "footer", "nav"]);
 
 /**
- * Attempt to recover missing intermediate step before final product click.
+ * Attempt to recover by clicking a parent intermediate when target is not directly visible.
  *
- * Scans the live DOM broadly (not just snapshot) to find clickable elements
- * that semantically match the final target. Uses token overlap scoring to
- * select the best intermediate subcategory/card.
+ * Scans the live DOM for clickable elements that are semantic parents of the target
+ * (e.g., "Depósito" is parent of "Depósitos a plazos"). If found, clicks the parent
+ * and retries the target.
  */
+export async function recoverWithParentIntermediate(
+  page: Page,
+  detailTarget: string,
+  currentSnapshot: PageSnapshot,
+  evidenceDir?: string
+): Promise<IntermediateRecoveryResult> {
+  console.log(`[intermediate-recovery] started target="${detailTarget}" reason=target_not_visible`);
+  const urlBefore = page.url();
+
+  // First check if target is already visible
+  const targetLocator = page.getByText(detailTarget, { exact: false }).first();
+  const alreadyVisible = await targetLocator.isVisible({ timeout: 500 }).catch(() => false);
+  if (alreadyVisible) {
+    console.log(`[intermediate-recovery] targetAlreadyVisible target="${detailTarget}"`);
+    return { recovered: false, detailTargetVisible: true, urlBefore, visibleCandidatesCount: 0 };
+  }
+
+  // Scan page for clickable elements
+  const allElements = await page.locator("*").all().catch(() => []);
+  const scannedElements: ScannedElement[] = [];
+  const targetTokens = extractSignificantTokens(detailTarget);
+  const rejectedElements: Array<{ text: string; reason: string }> = [];
+  let totalElements = 0;
+  let visibleCount = 0;
+  let textBearingCount = 0;
+  let clickableLikeCount = 0;
+  const parentCandidates: Array<{ element: ScannedElement; score: number; reason: string }> = [];
+
+  for (const element of allElements) {
+    totalElements++;
+    try {
+      const effectiveText = await element.textContent({ timeout: 200 }).catch(() => "");
+      if (!effectiveText || effectiveText.trim().length < 2) continue;
+      const isVisible = await element.isVisible({ timeout: 200 }).catch(() => false);
+      if (!isVisible) continue;
+      visibleCount++;
+      textBearingCount++;
+
+      const bbox = await element.boundingBox().catch(() => null);
+      if (bbox && (bbox.width > 800 || bbox.height > 600)) continue;
+      if (bbox && (bbox.width < 30 || bbox.height < 20)) continue;
+
+      const tagName = await element.evaluate((el: Element) => el.tagName.toLowerCase()).catch(() => "");
+      const className = await element.getAttribute("class").catch(() => "") || "";
+      const cursor = await element.evaluate((el: Element) => window.getComputedStyle(el).cursor).catch(() => "auto");
+      const role = await element.getAttribute("role").catch(() => "") || "";
+
+      if (GIANT_CONTAINER_TAGS.has(tagName)) continue;
+
+      const isButton = tagName === "button" || role === "button";
+      const isLink = tagName === "a";
+      const hasPointer = cursor === "pointer";
+      const hasClickClass = CLICKABLE_CLASS_PATTERNS.test(className);
+      const hasTabIndex = await element.getAttribute("tabindex").catch(() => null) !== null;
+      const isClickableLike = isButton || isLink || hasPointer || hasClickClass || hasTabIndex;
+      if (!isClickableLike) continue;
+      clickableLikeCount++;
+
+      let primaryText = effectiveText.trim();
+      if (primaryText.length > 50) {
+        const inner = await element.locator("h1, h2, h3, h4, h5, h6").first().textContent({ timeout: 200 }).catch(() => "");
+        if (inner && inner.trim().length > 3 && inner.trim().length < 50) primaryText = inner.trim();
+        else primaryText = primaryText.split("\n")[0].trim();
+      }
+
+      if (NAVIGATION_CONTROLS.test(primaryText)) { rejectedElements.push({ text: primaryText, reason: "navigation_control" }); continue; }
+      if (primaryText.length > 80) { rejectedElements.push({ text: primaryText.substring(0, 40) + "...", reason: "text_too_long" }); continue; }
+
+      const scanned: ScannedElement = { text: primaryText, tagName, className: className.substring(0, 100), cursor, role, ariaLabel: "", bbox, isVisible, isClickableLike };
+      scannedElements.push(scanned);
+
+      // Score as PARENT candidate: candidate's normalized text should be a prefix/stem of target tokens
+      const candNorm = normalizeToken(primaryText);
+      const isEntryLike = /^(iniciar|start|login|home|volver|atras|salir|menu|finalizar)/i.test(candNorm);
+      if (isEntryLike) { rejectedElements.push({ text: primaryText, reason: "entry_or_navigation_control" }); continue; }
+
+      // Check semantic parent relationship: candidate text is prefix/stem of target
+      const targetNorm = normalizeToken(detailTarget);
+      const isParent = targetNorm.startsWith(candNorm) || candNorm.startsWith(targetNorm);
+      const tokenOverlap = targetTokens.filter(t => candNorm.includes(t) || t.includes(candNorm)).length;
+      const parentScore = tokenOverlap / Math.max(targetTokens.length, 1);
+      const isGoodParent = isParent || parentScore >= 0.4;
+
+      if (isGoodParent) {
+        const reason = isParent ? "semantic_parent_prefix" : "token_overlap_parent";
+        parentCandidates.push({ element: scanned, score: Math.min(1, parentScore + 0.3), reason });
+        console.log(`[intermediate-recovery] candidate parent="${primaryText}" target="${detailTarget}" score=${(Math.min(1, parentScore + 0.3)).toFixed(2)} reason=${reason}`);
+      } else if (tokenOverlap > 0) {
+        console.log(`[intermediate-recovery] candidateRejected parent="${primaryText}" target="${detailTarget}" reason=semantic_mismatch`);
+        rejectedElements.push({ text: primaryText, reason: "semantic_mismatch" });
+      }
+    } catch { continue; }
+  }
+
+  // Deduplicate by normalized text
+  const seen = new Set<string>();
+  const uniqueParents = parentCandidates.filter(c => { const k = normalizeToken(c.element.text); if (seen.has(k)) return false; seen.add(k); return true; });
+  uniqueParents.sort((a, b) => b.score - a.score);
+
+  console.log(`[intermediate-recovery] scan total=${totalElements} visible=${visibleCount} clickable=${clickableLikeCount} parentCandidates=${uniqueParents.length}`);
+
+  if (uniqueParents.length === 0) {
+    console.log(`[intermediate-recovery] failed reason=no_parent_candidate target="${detailTarget}"`);
+    return { recovered: false, detailTargetVisible: false, urlBefore, visibleCandidatesCount: 0 };
+  }
+
+  const selected = uniqueParents[0];
+  console.log(`[intermediate-recovery] clicked parent="${selected.element.text}" forTarget="${detailTarget}"`);
+
+  try {
+    const candidateLocator = page.getByText(selected.element.text, { exact: false }).first();
+    await candidateLocator.click({ timeout: 5000 });
+    await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(500);
+
+    const urlAfter = page.url();
+    console.log(`[intermediate-recovery] retryTarget target="${detailTarget}"`);
+
+    let targetNowVisible = false;
+    for (let retry = 0; retry < 5; retry++) {
+      targetNowVisible = await targetLocator.isVisible({ timeout: 1000 }).catch(() => false);
+      if (targetNowVisible) break;
+      await page.waitForTimeout(500);
+    }
+
+    if (targetNowVisible) {
+      console.log(`[intermediate-recovery] targetResolvedAfterParent target="${detailTarget}" parent="${selected.element.text}"`);
+      console.log(`[route-learning] observed intermediate parent="${selected.element.text}" target="${detailTarget}" status=pending`);
+      return { recovered: true, selectedCandidate: { text: selected.element.text, score: selected.score, reason: selected.reason }, detailTargetVisible: true, urlBefore, urlAfter, visibleCandidatesCount: uniqueParents.length };
+    } else {
+      console.log(`[intermediate-recovery] failed reason=target_not_found_after_parent_click target="${detailTarget}" parent="${selected.element.text}"`);
+      return { recovered: false, detailTargetVisible: false, urlBefore, urlAfter, visibleCandidatesCount: uniqueParents.length };
+    }
+  } catch (err: any) {
+    console.log(`[intermediate-recovery] click failed error="${err.message}"`);
+    return { recovered: false, detailTargetVisible: false, urlBefore, visibleCandidatesCount: uniqueParents.length, error: err.message };
+  }
+}
 export async function recoverMissingIntermediateForFinalTarget(
   page: Page,
   detailTarget: string,

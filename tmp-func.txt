@@ -1,0 +1,176 @@
+function generateRoutePendingScenarios(
+  issue: any,
+  huIntent: string,
+  reasonCode: string,
+  routeStatus: "knowledge_prefix_pending" | "missing_initial_route",
+  appSlug?: string,
+  candidatePrefixSteps?: string[],
+): any[] {
+  const summary = issue.summary ?? "";
+  const description = issue.description ?? "";
+  const criteria = issue.acceptanceCriteria ?? "";
+  const huText = [summary, description, criteria].filter(Boolean).join(" ");
+  const huLower = huText.toLowerCase();
+
+  // Extract entities from HU text
+  const entities = extractHuEntities(huText);
+  const documentType = entities.documentType; // "carta de referencia bancaria", "certificacion", etc.
+  const action = entities.action; // "generar", "emitir", "solicitar", etc.
+  const requiredData = entities.requiredData; // ["destinatario", "cuenta", "monto", ...]
+  const hasPreview = entities.hasPreview;
+  const hasConfirmation = entities.hasConfirmation;
+  const hasCancel = entities.hasCancel;
+
+  console.log(`[scenario-preview] routePendingBuilder architecture=hu_generates_scenarios_knowledge_completes_route`);
+  console.log(`[scenario-preview] routePendingBuilder extractedEntities documentType=${documentType ?? "generic"} action=${action ?? "generic"} requiredData=${requiredData.length} hasPreview=${hasPreview} hasConfirmation=${hasConfirmation}`);
+
+  const scenarios: any[] = [];
+  const key = issue.key;
+  const docLabel = documentType ?? "el documento";
+  const actionLabel = action ?? "Ejecutar la accion principal";
+
+  const baseFields = {
+    type: "functional", database: "", isConverted: 0,
+    automationType: "ui_discovery", setupStrategy: "no_login",
+    appSlug: appSlug ?? "unknown", targetAppSlug: appSlug ?? "unknown",
+    routeProfile: "", dataRequirements: "", nonExecutableCriteria: "requires_route_discovery",
+    mcpExecutable: false, generationSource: "fallback" as const,
+  };
+
+  // Build prefix steps from knowledge
+  function prefixSteps(): string[] {
+    const steps: string[] = [];
+    if (candidatePrefixSteps && candidatePrefixSteps.length > 0) {
+      steps.push(...candidatePrefixSteps.map((t) => `Clic en "${t}".`));
+    } else if (routeStatus === "knowledge_prefix_pending") {
+      steps.push("Ingresar al area funcional usando el prefijo de navegacion validado.");
+    }
+    // Check if auth step is needed based on coverageRefs / routeSignature patterns
+    if (/auth/i.test(huLower) || /identificaci/i.test(huLower) || /login/i.test(huLower) || /otp/i.test(huLower) || /contrase/i.test(huLower)) {
+      steps.push("Completar la autenticacion requerida.");
+    }
+    return steps;
+  }
+
+  console.log(`[scenario-preview] routePendingBuilder scenarioPlan intent=${huIntent} variants=success_flow,required_fields_validation,confirmation_or_cancel`);
+  const prefixApplied = prefixSteps();
+  console.log(`[scenario-preview] routePendingBuilder prefixApplied source=knowledge_base steps=${candidatePrefixSteps?.length ?? 0} authStep=${prefixApplied.some(s => s.includes("autenticacion"))}`);
+
+  // --- Scenario 1: Success flow ---
+  const successSteps: string[] = [
+    ...prefixApplied,
+    `Acceder a la funcionalidad de ${docLabel}.`,
+  ];
+  if (requiredData.length > 0) {
+    successSteps.push(`Completar los datos requeridos: ${requiredData.join(", ")}.`);
+  }
+  if (hasPreview) {
+    successSteps.push(`Revisar la vista previa de ${docLabel}.`);
+  }
+  if (hasConfirmation) {
+    successSteps.push(`Confirmar la generacion de ${docLabel}.`);
+  } else {
+    successSteps.push(`${actionLabel} ${docLabel}.`);
+  }
+  successSteps.push(`Validar que ${docLabel} se genere correctamente o quede disponible.`);
+
+  scenarios.push({
+    ...baseFields,
+    sourceIssueKey: key,
+    title: `${summary || "Flujo principal"} — flujo exitoso`,
+    steps: successSteps,
+    preconditions: ["El usuario esta autenticado en la aplicacion.", "La aplicacion esta disponible y accesible."],
+    expectedResult: `La operacion se completa exitosamente y ${docLabel} se genera/visualiza/descarga correctamente.`,
+  });
+
+  // --- Scenario 2: Required fields validation ---
+  if (requiredData.length > 0) {
+    scenarios.push({
+      ...baseFields,
+      sourceIssueKey: key,
+      title: `${summary || "Flujo principal"} — validacion de datos obligatorios`,
+      steps: [
+        ...prefixApplied,
+        `Acceder a la funcionalidad de ${docLabel}.`,
+        `Intentar continuar sin completar ${requiredData[0]}.`,
+        "Validar que se muestre el mensaje de campo requerido o bloqueo correspondiente.",
+      ],
+      preconditions: ["El usuario esta autenticado en la aplicacion."],
+      expectedResult: `El sistema muestra una validacion indicando que ${requiredData[0]} es requerido y no permite continuar.`,
+    });
+  } else {
+    // Fallback validation scenario
+    scenarios.push({
+      ...baseFields,
+      sourceIssueKey: key,
+      title: `${summary || "Flujo principal"} — validacion de campos requeridos`,
+      steps: [
+        ...prefixApplied,
+        `Acceder a la funcionalidad de ${docLabel}.`,
+        "Intentar ejecutar la accion sin completar los datos requeridos.",
+        "Validar que se muestre la validacion correspondiente.",
+      ],
+      preconditions: ["El usuario esta autenticado en la aplicacion."],
+      expectedResult: "El sistema muestra las validaciones correspondientes para los campos requeridos.",
+    });
+  }
+
+  // --- Scenario 3: Confirmation / cancel / return ---
+  if (hasConfirmation || hasCancel || hasPreview) {
+    const cancelSteps: string[] = [
+      ...prefixApplied,
+      `Acceder a la funcionalidad de ${docLabel}.`,
+    ];
+    if (requiredData.length > 0) {
+      cancelSteps.push(`Completar los datos requeridos: ${requiredData.join(", ")}.`);
+    }
+    if (hasPreview) {
+      cancelSteps.push(`Revisar la vista previa de ${docLabel}.`);
+    }
+    if (hasConfirmation) {
+      cancelSteps.push("Cancelar o volver antes de confirmar.");
+      cancelSteps.push("Validar que no se realice la accion y el usuario permanezca en la pantalla anterior.");
+    } else if (hasCancel) {
+      cancelSteps.push("Cancelar la operacion.");
+      cancelSteps.push("Validar que la operacion se cancela sin efectos secundarios.");
+    } else {
+      cancelSteps.push("Confirmar la generacion.");
+      cancelSteps.push(`Validar que ${docLabel} se genere correctamente.`);
+    }
+
+    scenarios.push({
+      ...baseFields,
+      sourceIssueKey: key,
+      title: `${summary || "Flujo principal"} — confirmacion o cancelacion`,
+      steps: cancelSteps,
+      preconditions: ["El usuario esta autenticado en la aplicacion.", "Los datos requeridos estan disponibles."],
+      expectedResult: hasConfirmation || hasCancel
+        ? "La operacion se cancela sin generar el documento o el usuario puede volver sin cambios."
+        : `La operacion se completa y ${docLabel} queda disponible.`,
+    });
+  } else {
+    scenarios.push({
+      ...baseFields,
+      sourceIssueKey: key,
+      title: `${summary || "Flujo principal"} — finalizacion y resultado`,
+      steps: [
+        ...prefixApplied,
+        `Acceder a la funcionalidad de ${docLabel}.`,
+        ...(requiredData.length > 0 ? [`Completar los datos requeridos: ${requiredData.join(", ")}.`] : []),
+        `${actionLabel} ${docLabel}.`,
+        `Validar que ${docLabel} se genere, muestre o quede disponible.`,
+      ],
+      preconditions: ["El usuario esta autenticado en la aplicacion.", "Los datos requeridos estan disponibles."],
+      expectedResult: `La operacion se completa y ${docLabel} se genera o muestra correctamente.`,
+    });
+  }
+
+  console.log(`[scenario-preview] routePendingBuilder generated=${scenarios.length} quality=functional_route_pending automationStatus=requires_route_discovery`);
+
+  return scenarios;
+}
+
+/**
+ * Extract structured entities from HU text for scenario generation.
+ * Returns document type, action, required data fields, preview/confirmation/cancel signals.
+ */

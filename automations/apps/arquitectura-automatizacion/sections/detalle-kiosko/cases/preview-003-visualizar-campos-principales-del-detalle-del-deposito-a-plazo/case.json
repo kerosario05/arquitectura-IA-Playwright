@@ -1,0 +1,10 @@
+{
+  "id": "preview-003-visualizar-campos-principales-del-detalle-del-deposito-a-plazo",
+  "externalId": "PREVIEW-003",
+  "caseId": 0,
+  "title": "Visualizar campos principales del detalle del depósito a plazo",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-07-01T20:20:25.818Z"
+}

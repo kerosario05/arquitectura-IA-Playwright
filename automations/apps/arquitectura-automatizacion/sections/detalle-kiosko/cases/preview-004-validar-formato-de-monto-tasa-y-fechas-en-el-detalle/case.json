@@ -1,0 +1,10 @@
+{
+  "id": "preview-004-validar-formato-de-monto-tasa-y-fechas-en-el-detalle",
+  "externalId": "PREVIEW-004",
+  "caseId": 0,
+  "title": "Validar formato de monto, tasa y fechas en el detalle",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-30T18:16:45.805Z"
+}

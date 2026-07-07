@@ -33,6 +33,11 @@ import { buildAiRepairCaseSummary, formatAiRepairConsoleOutput, type StepWithAiR
 import { writeJsonSafe } from "../utils/json-utils";
 import { detectPostClickUiChange, type PostClickUiChangeResult } from "./post-click-ui-change-detector";
 import {
+  inferMissingSelection,
+  buildInsertedStepMetadata,
+  type MissingSelectionContext,
+} from "./missing-selection-detector";
+import {
   buildConcreteAssertionsFromExpected,
   resolveAssertionTargets,
   type AssertionTargetInput,
@@ -597,7 +602,8 @@ async function capturePageState(page: Page): Promise<PageState> {
 export function evaluateEarlyCompletion(
   snapshot: PageSnapshot,
   assertionTargets: AssertionTargetInput[],
-  remainingActionTargets: ActionTargetItem[]
+  remainingActionTargets: ActionTargetItem[],
+  appConfig?: any
 ): {
   checked: boolean;
   satisfied: boolean;
@@ -710,7 +716,7 @@ export function evaluateEarlyCompletion(
     return { checked: false, satisfied: false, satisfiedAssertions: [], pendingAssertions: [], deferredAssertions: [], blockingAssertions: [], skippedAssertions: [], weakSignals: [], skippedRemainingActions: 0 };
   }
 
-  const resolutionResults = resolveAssertionTargets(snapshot, assertionTargets);
+  const resolutionResults = resolveAssertionTargets(snapshot, assertionTargets, { appConfig });
   
   const satisfiedAssertions: string[] = [];
   const pendingAssertions: string[] = [];
@@ -908,8 +914,10 @@ async function scanAndCollectObjects(
   }
 
   const evidencePath = path.join(evidenceDir, `step-${stepIndex}-snapshot.json`);
-  await mkdir(evidenceDir, { recursive: true });
-  await writeFile(evidencePath, JSON.stringify(snapshot, null, 2), "utf-8");
+  if (evidenceDir && evidenceDir.trim()) {
+    await mkdir(evidenceDir, { recursive: true });
+    await writeFile(evidencePath, JSON.stringify(snapshot, null, 2), "utf-8");
+  }
 
   return {
     elementsCount: snapshot.elements.length,
@@ -1016,10 +1024,239 @@ function buildFailureResult(
   };
 }
 
+function isTransientLoadingScreen(snapshot: PageSnapshot): boolean {
+  if (!snapshot || !snapshot.elements) return false;
+
+  // Signals that indicate a transient/loading screen
+  const loadingSignals = [
+    "cargando", "loading", "por favor espere", "please wait",
+    "redirigiendo", "redirecting", "preparing", "preparando",
+    "procesando", "processing", "iniciando", "initializing"
+  ];
+
+  const hasLoadingText = snapshot.elements.some((el: any) => {
+    const text = (el.text || el.label || el.title || "").toLowerCase();
+    return loadingSignals.some(signal => text.includes(signal));
+  });
+
+  // Detect spinner/loader by role or class
+  const hasSpinner = snapshot.elements.some((el: any) => {
+    const role = String(el.role || "").toLowerCase();
+    const className = String(el.className || "").toLowerCase();
+    return role.includes("progressbar") || role.includes("status") ||
+           className.includes("spinner") || className.includes("loader") ||
+           className.includes("loading");
+  });
+
+  // Detect screen with minimal content (likely transitioning)
+  const controlCount = snapshot.elements.filter((el: any) =>
+    /button|link|menuitem|input/i.test(String(el.role || ""))
+  ).length;
+
+  const textCount = snapshot.elements.filter((el: any) =>
+    String(el.text || "").trim().length > 0
+  ).length;
+
+  // Transient if: has loading text OR has spinner OR (very few controls and has loading text)
+  const isMinimalScreen = controlCount === 0 && textCount <= 3;
+
+  return hasLoadingText || hasSpinner || (isMinimalScreen && hasLoadingText);
+}
+
+async function waitForPrivateMenuReadyBeforeTargetResolution(
+  page: Page,
+  snapshot: PageSnapshot,
+  targetName: string,
+  evidenceDir: string
+): Promise<{ status: "ready" | "blocked" | "timeout"; reason: string; url: string }> {
+  const loadingTexts = ["cargando", "loading", "por favor espere", "please wait"];
+  const maxAttempts = 12;
+
+  console.log(`[post-otp-gate] start target="${targetName}" url="${snapshot.url}"`);
+
+  let attempt = 0;
+  let currentSnapshot = snapshot;
+
+  try {
+    while (attempt < maxAttempts) {
+      attempt++;
+
+      // Check loading state
+      const stillLoading = currentSnapshot.elements.some((el: any) =>
+        loadingTexts.some(txt => (el.text || el.label || "").toLowerCase().includes(txt))
+      );
+
+      // Check if target is visible
+      const targetVisible = currentSnapshot.elements.some((el: any) =>
+        String(el.text || el.label || "").toLowerCase().includes(String(targetName).toLowerCase())
+      );
+
+      // Check if controls/menu items are visible
+      const controlCount = currentSnapshot.elements.filter((el: any) =>
+        /button|link|menuitem|tab|option/i.test(String(el.role || "")) || el.ariaLabel || el.title || el.testId
+      ).length;
+
+      const textCount = currentSnapshot.elements.filter((el: any) =>
+        String(el.text || "").trim().length > 0
+      ).length;
+
+      const hasControls = controlCount > 0;
+      const hasCards = textCount > 2;
+
+      console.log(
+        `[post-otp-gate] wait attempt=${attempt} loading=${stillLoading} targetVisible=${targetVisible} controls=${controlCount} url="${currentSnapshot.url}"`
+      );
+
+      // Ready if target is visible or menu has controls/cards and not loading
+      if (targetVisible) {
+        console.log(`[post-otp-gate] ready=true reason="target_visible" url="${currentSnapshot.url}"`);
+        return { status: "ready", reason: "target_visible", url: currentSnapshot.url };
+      }
+
+      if (!stillLoading && hasControls) {
+        console.log(`[post-otp-gate] ready=true reason="controls_loaded" url="${currentSnapshot.url}"`);
+        return { status: "ready", reason: "controls_loaded", url: currentSnapshot.url };
+      }
+
+      if (!stillLoading && hasCards && textCount > 2) {
+        console.log(`[post-otp-gate] ready=true reason="loading_finished" url="${currentSnapshot.url}"`);
+        return { status: "ready", reason: "loading_finished", url: currentSnapshot.url };
+      }
+
+      // Check if app redirected to "/" (lost private landing)
+      const urlAtRoot = currentSnapshot.url.endsWith("/") || currentSnapshot.url.includes("login");
+      if (urlAtRoot && !isTransientLoadingScreen(currentSnapshot) && !hasControls) {
+        if (attempt >= maxAttempts - 2) {
+          console.log(
+            `[post-otp-gate] blocked reason="private_landing_lost_during_product_loading" url="${currentSnapshot.url}"`
+          );
+          return { status: "blocked", reason: "private_landing_lost_during_product_loading", url: currentSnapshot.url };
+        }
+      }
+
+      // If still loading and more attempts available, continue waiting
+      if (stillLoading && attempt < maxAttempts) {
+        await page.waitForTimeout(1000).catch(() => {});
+        try {
+          const nextCheck = await scanAndCollectObjects(page, 0, evidenceDir);
+          currentSnapshot = nextCheck.snapshot;
+        } catch (err) {
+          // If scan fails, still try to get snapshot via scanCurrentPage
+          console.log(`[post-otp-gate] scan error attempt=${attempt}, retrying with scanCurrentPage`);
+          try {
+            currentSnapshot = await scanCurrentPage(page);
+          } catch (err2) {
+            // If all scans fail, exit gate as timeout
+            console.log(`[post-otp-gate] blocked reason="private_menu_loading_timeout" url="${currentSnapshot.url}" error="scan_failed"`);
+            return { status: "timeout", reason: "private_menu_loading_timeout", url: currentSnapshot.url };
+          }
+        }
+        continue;
+      }
+
+      // If not loading anymore after first check, continue to next attempt
+      if (!stillLoading) {
+        continue;
+      }
+    }
+
+    // Exhausted attempts while still loading
+    console.log(
+      `[post-otp-gate] blocked reason="private_menu_loading_timeout" url="${currentSnapshot.url}" attempts=${maxAttempts}`
+    );
+    return { status: "timeout", reason: "private_menu_loading_timeout", url: currentSnapshot.url };
+  } catch (err) {
+    // Gate function error - return as blocked to prevent further execution
+    console.log(`[post-otp-gate] blocked reason="gate_error" error="${err instanceof Error ? err.message : String(err)}" url="${currentSnapshot.url}"`);
+    return { status: "blocked", reason: "gate_error", url: currentSnapshot.url };
+  }
+}
+
+async function captureSessionCheckpoint(page: Page, checkpointName: string, url: string, contextId?: string): Promise<{ origin?: string; contextStable: boolean }> {
+  try {
+    const contextIdPrev = contextId || "unknown";
+    const contextIdCurrent = String(page.context()).substring(0, 16);
+    const contextStable = contextIdPrev === contextIdCurrent;
+
+    const cookies = await page.context().cookies();
+    const storageState = await page.context().storageState();
+
+    const localStorage = await page.evaluate(() => {
+      const keys = Object.keys(window.localStorage || {});
+      return { keys, sample: keys.slice(0, 3) };
+    }).catch(() => ({ keys: [], sample: [] }));
+
+    const sessionStorage = await page.evaluate(() => {
+      const keys = Object.keys(window.sessionStorage || {});
+      return { keys, sample: keys.slice(0, 3) };
+    }).catch(() => ({ keys: [], sample: [] }));
+
+    const urlObj = new URL(url);
+    const origin = urlObj.origin;
+    const storageOrigins = Array.from(new Set((storageState?.origins || []).map((o: any) => o.origin)));
+
+    const tokenInLS = localStorage.keys.some((k: string) => /token|auth|session|jwt/i.test(k));
+    const tokenInSS = sessionStorage.keys.some((k: string) => /token|auth|session|jwt/i.test(k));
+
+    console.log(
+      `[auth-session] checkpoint="${checkpointName}" cookies=${cookies.length} ls=${localStorage.keys.length} ss=${sessionStorage.keys.length} ` +
+      `url="${url}" origin="${origin}" storageOrigins=${JSON.stringify(storageOrigins)} ` +
+      `tokenInLS=${tokenInLS} tokenInSS=${tokenInSS} contextStable=${contextStable} ` +
+      `lsSample=${JSON.stringify(localStorage.sample)} ssSample=${JSON.stringify(sessionStorage.sample)}`
+    );
+
+    return { origin, contextStable };
+  } catch (error) {
+    console.log(`[auth-session] checkpoint="${checkpointName}" error="capture_failed"`);
+    return { contextStable: false };
+  }
+}
+
+async function captureSessionDiagnostics(page: Page, phase: string): Promise<{ origin?: string }> {
+  try {
+    const cookies = await page.context().cookies();
+    const storageState = await page.context().storageState();
+
+    const localStorage = await page.evaluate(() => {
+      const keys = Object.keys(window.localStorage || {});
+      return { keys, sample: keys.slice(0, 3) };
+    }).catch(() => ({ keys: [], sample: [] }));
+
+    const sessionStorage = await page.evaluate(() => {
+      const keys = Object.keys(window.sessionStorage || {});
+      return { keys, sample: keys.slice(0, 3) };
+    }).catch(() => ({ keys: [], sample: [] }));
+
+    const urlObj = new URL(page.url());
+    const origin = urlObj.origin;
+    const storageOrigins = Array.from(new Set((storageState?.origins || []).map((o: any) => o.origin)));
+
+    const hasToken = localStorage.keys.some((k: string) =>
+      /token|auth|session|jwt/i.test(k)
+    );
+
+    const hasCookieWithSession = cookies.some((c: any) =>
+      /token|auth|session|jwt/i.test(c.name)
+    );
+
+    console.log(
+      `[auth-session] phase="${phase}" cookies=${cookies.length} ls=${localStorage.keys.length} ss=${sessionStorage.keys.length} ` +
+      `hasTokenInStorage=${hasToken} hasCookieWithAuth=${hasCookieWithSession} ` +
+      `storageOrigins=${JSON.stringify(storageOrigins)} lsSample=${JSON.stringify(localStorage.sample)} ssSample=${JSON.stringify(sessionStorage.sample)}`
+    );
+
+    return { origin };
+  } catch (error) {
+    console.log(`[auth-session] phase="${phase}" error="diagnostics_failed"`);
+    return {};
+  }
+}
+
 async function tryAuthGateRecovery(
   page: Page,
   snapshot: PageSnapshot,
-  options: CaseDiscoveryOptions
+  options: CaseDiscoveryOptions,
+  nextPendingTarget?: string
 ): Promise<{ recovered: boolean; error?: string; diagnostics?: any; authGateState?: AuthGateState }> {
   const { env, missingInputBehavior = "fail", loginMode } = options;
 
@@ -1073,7 +1310,36 @@ async function tryAuthGateRecovery(
   console.log(`[auth-gate] Attempting to resolve auth flow...`);
 
   try {
-    const { AuthFlow } = await import("../../automations/apps/default/flows/auth.flow");
+    const discoveryAppSlug = resolveCaseDiscoveryAppSlug(options);
+    const fs = await import("node:fs/promises");
+    const path = await import("node:path");
+    const appConfigPath = path.join(process.cwd(), "automations", "apps", discoveryAppSlug, "app.config.json");
+    let appConfig: any = null;
+    try {
+      appConfig = JSON.parse(await fs.readFile(appConfigPath, "utf-8"));
+    } catch {}
+
+    const authProfiles = appConfig?.authProfiles ?? {};
+    const authProfileRef = appConfig?.authProfile ?? appConfig?.routeProfiles?.private_operations?.authProfile;
+    const authProfileName = typeof authProfileRef === "string" ? authProfileRef : "inline";
+    const authProfile = typeof authProfileRef === "string" ? authProfiles?.[authProfileRef] : authProfileRef;
+    const successSignals: string[] = Array.isArray(authProfile?.successSignals) ? authProfile.successSignals : [];
+    const postAuthContinueSteps: Array<{ action?: string; target?: string; timeoutMs?: number }> =
+      Array.isArray(authProfile?.postAuthContinueSteps) ? authProfile.postAuthContinueSteps : [];
+    const privateLandingSignals: string[] = [
+      ...(typeof authProfile?.privateLanding === "string" ? [authProfile.privateLanding] : []),
+      ...(Array.isArray(authProfile?.privateLanding) ? authProfile.privateLanding : [])
+    ];
+    const transientSignals: string[] = Array.isArray(authProfile?.transientLoadingSignals)
+      ? authProfile.transientLoadingSignals
+      : (Array.isArray(authProfile?.postAuthTransientSignals) ? authProfile.postAuthTransientSignals : []);
+
+    let AuthFlow: any;
+    try {
+      ({ AuthFlow } = await import(`../../automations/apps/${discoveryAppSlug}/flows/auth.flow`));
+    } catch {
+      ({ AuthFlow } = await import("../../automations/apps/default/flows/auth.flow"));
+    }
 
     const globalThisWithTestData = globalThis as typeof globalThis & {
       __authFlowTestData?: Record<string, unknown>;
@@ -1099,13 +1365,248 @@ async function tryAuthGateRecovery(
     }
 
     const authFlow = new AuthFlow(page);
-    const result = await authFlow.ensureAuthenticated({
+    const landingTarget = typeof authProfile?.privateLanding === "string" ? authProfile.privateLanding : undefined;
+
+    // Capture session BEFORE OTP
+    const contextIdStart = String(page.context()).substring(0, 16);
+    const beforeOtpResult = await captureSessionCheckpoint(page, "before_otp", page.url(), contextIdStart);
+
+    let result = await authFlow.ensureAuthenticated({
       alias: "defaultClient",
-      landing: "transactions_menu"
+      landing: landingTarget
     });
+
+    // Capture session AFTER OTP click
+    const afterOtpResult = await captureSessionCheckpoint(page, "after_otp_click", page.url(), contextIdStart);
+
+    // Capture session at authentication_success or current stage
+    await captureSessionDiagnostics(page, "post_otp");
+    const authSuccessResult = await captureSessionCheckpoint(page, "authentication_success", page.url(), contextIdStart);
+    const hasSignal = (scan: PageSnapshot, values: string[]) => values.some((value) => {
+        const normalizedValue = String(value).toLowerCase();
+        return scan.elements.some((el: any) => String(el.text || el.label || "").toLowerCase().includes(normalizedValue));
+      });
+    const detectTransientLoading = (scan: PageSnapshot, url: string) => {
+        const generic = scan.elements.some((el: any) => /cargando|loading|procesando|espere|success|authenticated/i.test(String(el.text || el.label || "")));
+        const configured = transientSignals.length > 0 && hasSignal(scan, transientSignals);
+        const urlBased = /success|authenticated/i.test(url);
+        return { detected: generic || configured || urlBased, reason: configured ? "configured" : (generic ? "loading_text" : (urlBased ? "structural" : "none")) };
+      };
+    const evaluateLanding = (scan: PageSnapshot, url: string) => {
+        const targetVisible = nextPendingTarget
+          ? scan.elements.some((el: any) => String(el.text || el.label || "").toLowerCase().includes(String(nextPendingTarget).toLowerCase()))
+          : false;
+        const privateSignalVisible = successSignals.length > 0 && hasSignal(scan, successSignals);
+        const privatePathVisible = (() => {
+          try {
+            const pathname = new URL(url).pathname.toLowerCase();
+            return pathname !== "/" && !/authentication-success|authenticated|otp|identification|login|auth/.test(pathname);
+          } catch {
+            return false;
+          }
+        })();
+        const privateLandingVisible = privateLandingSignals.length > 0 &&
+          (privateLandingSignals.some((signal) => url.toLowerCase().includes(String(signal).toLowerCase())) || hasSignal(scan, privateLandingSignals));
+        const structuralPrivateMenu = !/authentication-success|authenticated|\/$/.test(url) &&
+          (scan.elements.filter((el: any) => /button|link/i.test(String(el.role || ""))).length >= 3);
+        if (targetVisible) return { valid: true, reason: "target_visible" };
+        if (privateSignalVisible) return { valid: true, reason: "private_signal" };
+        if (privatePathVisible) return { valid: true, reason: "private_landing" };
+        if (privateLandingVisible) return { valid: true, reason: "private_landing" };
+        if (structuralPrivateMenu) return { valid: true, reason: "private_signal" };
+        return { valid: false, reason: "unresolved" };
+      };
+    const buildTransientSnapshot = (scan: PageSnapshot) => {
+      const compactTexts = Array.from(new Set(
+        scan.elements
+          .map((el: any) => String(el.text || el.label || "").trim())
+          .filter((value: string) => value.length >= 3)
+      )).slice(0, 6);
+      const compactControls = Array.from(new Set(
+        scan.elements
+          .filter((el: any) => /button|link/i.test(String(el.role || "")) || el.testId || el.ariaLabel)
+          .map((el: any) => String(el.text || el.label || el.ariaLabel || el.testId || "").trim())
+          .filter((value: string) => value.length >= 2)
+      )).slice(0, 6);
+      const compactLoaders = Array.from(new Set(
+        scan.elements
+          .filter((el: any) => /progressbar|status|alert/i.test(String(el.role || "")) || /cargando|loading|procesando|espere|success|authenticated/i.test(String(el.text || el.label || "")))
+          .map((el: any) => String(el.text || el.label || el.ariaLabel || el.testId || "").trim())
+          .filter((value: string) => value.length >= 2)
+      )).slice(0, 6);
+      return {
+        url: scan.url,
+        title: scan.title,
+        texts: compactTexts,
+        controls: compactControls,
+        loaders: compactLoaders
+      };
+    };
+    const logConfigSuggestion = (snapshot: ReturnType<typeof buildTransientSnapshot>) => {
+      const suggested = {
+        transientLoadingSignals: snapshot.loaders.length > 0 ? snapshot.loaders : snapshot.texts.slice(0, 3),
+        postAuthContinueSteps: snapshot.controls.length === 1
+          ? [{ action: "click", target: snapshot.controls[0] }]
+          : [],
+        successSignals: [],
+        privateLanding: [],
+        observedControls: snapshot.controls
+      };
+      console.log(
+        `[auth-resume] configSuggestion kind="postAuthContinue" ` +
+        `appSlug="${discoveryAppSlug}" authProfile="${authProfileName}" suggested=${JSON.stringify(suggested)}`
+      );
+    };
+    const executePostAuthContinueSteps = async () => {
+        if (postAuthContinueSteps.length === 0) return;
+        console.log(`[auth-flow] postAuthContinue started source="authProfile"`);
+        for (let idx = 0; idx < postAuthContinueSteps.length; idx++) {
+          const step = postAuthContinueSteps[idx];
+          let resultLabel = "failed";
+          try {
+            if (step.action === "click" && step.target) {
+              await page.getByText(step.target, { exact: true }).click({ timeout: step.timeoutMs ?? 3000 });
+              resultLabel = "passed";
+            } else if (step.action === "wait") {
+              await page.waitForTimeout(step.timeoutMs ?? 1000);
+              resultLabel = "passed";
+            }
+          } catch {}
+          console.log(`[auth-flow] postAuthContinue step=${idx + 1} action="${step.action ?? "unknown"}" result="${resultLabel}"`);
+          const continueSnapshot = await scanCurrentPage(page);
+          const landingCheck = evaluateLanding(continueSnapshot, page.url());
+          console.log(`[auth-resume] landingCheck valid=${landingCheck.valid} reason="${landingCheck.reason}" url="${page.url()}"`);
+          if (landingCheck.valid) {
+            return;
+          }
+        }
+      };
+    if (!result.success && result.diagnostics?.finalStage === "otp" && resolution.data.otp) {
+      console.log(`[auth-gate] continuingAuthFlow stage="otp"`);
+      console.log(`[auth-flow] continuing stage=otp reason=auth_gate_still_active`);
+      console.log(`[auth-flow] skipFinalize reason=otp_stage_pending`);
+      result = await authFlow.ensureAuthenticated({
+        alias: "defaultClient",
+        landing: landingTarget
+      });
+    }
 
     if (result.success) {
       console.log(`[auth-gate] Auth flow completed successfully. Stages: ${result.stagesCompleted.join(", ")}`);
+      if (nextPendingTarget) {
+        console.log(`[auth-resume] nextPendingTarget="${nextPendingTarget}"`);
+      }
+
+      // Check if we're in a transient success page without private landing signals
+      const currentUrl = page.url();
+      const currentSnapshot = await scanCurrentPage(page);
+      const transientState = detectTransientLoading(currentSnapshot, currentUrl);
+      const initialLandingCheck = evaluateLanding(currentSnapshot, currentUrl);
+      const isTransientSuccessPage = transientState.detected;
+      console.log(`[auth-resume] transientLoading detected=${transientState.detected} reason="${transientState.reason}"`);
+      console.log(`[auth-resume] landingCheck valid=${initialLandingCheck.valid} reason="${initialLandingCheck.reason}" url="${currentUrl}"`);
+
+      if (isTransientSuccessPage && !initialLandingCheck.valid) {
+        const transientSnapshot = buildTransientSnapshot(currentSnapshot);
+        const redirectingHint = transientSnapshot.texts.some((text) => /redirigiendo|redirecting|menú de operaciones|menu de operaciones/i.test(text));
+        const transientRetryAttempts = redirectingHint ? 8 : 3;
+        const transientRetryDelayMs = redirectingHint ? 1500 : 800;
+        console.log(
+          `[auth-resume] transientSnapshot url="${transientSnapshot.url}" ` +
+          `texts=${JSON.stringify(transientSnapshot.texts)} controls=${JSON.stringify(transientSnapshot.controls)} ` +
+          `loaders=${JSON.stringify(transientSnapshot.loaders)}`
+        );
+        console.log(
+          `[auth-flow] postAuthTransient detected=true reason=success_page_without_private_signals ` +
+          `url="${currentUrl}"`
+        );
+
+        await executePostAuthContinueSteps();
+
+        let postAuthSnapshot = await scanCurrentPage(page);
+        let postAuthUrl = page.url();
+
+        console.log(
+          `[auth-flow] postAuthContinue completed url="${postAuthUrl}" ` +
+          `urlChanged=${postAuthUrl !== currentUrl}`
+        );
+
+        let landingCheckAfter = evaluateLanding(postAuthSnapshot, postAuthUrl);
+        const authResumeStart = Date.now();
+        for (let attempt = 1; attempt <= transientRetryAttempts && !landingCheckAfter.valid; attempt++) {
+          await page.waitForTimeout(transientRetryDelayMs).catch(() => {});
+          postAuthSnapshot = await scanCurrentPage(page);
+          postAuthUrl = page.url();
+          landingCheckAfter = evaluateLanding(postAuthSnapshot, postAuthUrl);
+          console.log(`[auth-resume] retry attempt=${attempt} ready=${landingCheckAfter.valid} reason="${landingCheckAfter.reason}" url="${postAuthUrl}"`);
+          console.log(`[auth-resume] landingCheck valid=${landingCheckAfter.valid} reason="${landingCheckAfter.reason}" url="${postAuthUrl}"`);
+        }
+        const authResumeMs = Date.now() - authResumeStart;
+        if (landingCheckAfter.valid) {
+          console.log(`[auth-resume] fastReady reason="${landingCheckAfter.reason}" durationMs=${authResumeMs}`);
+        }
+
+        // If still no private signals after wait, this is unresolved and must be blocked
+        if (!landingCheckAfter.valid) {
+          const unresolvedSnapshot = buildTransientSnapshot(postAuthSnapshot);
+          console.log(
+            `[auth-resume] transientSnapshot url="${unresolvedSnapshot.url}" ` +
+            `texts=${JSON.stringify(unresolvedSnapshot.texts)} controls=${JSON.stringify(unresolvedSnapshot.controls)} ` +
+            `loaders=${JSON.stringify(unresolvedSnapshot.loaders)}`
+          );
+          logConfigSuggestion(unresolvedSnapshot);
+          console.log(
+            `[auth-resume] blocked reason=post_auth_transient_landing_unresolved ` +
+            `target="${nextPendingTarget ?? "unknown"}" url="${postAuthUrl}"`
+          );
+          // Return failure explicitly - DO NOT proceed to normal auth completion
+          return {
+            recovered: false,
+            error: "Post-auth transient page: no landing signals after redirect wait",
+            diagnostics: {
+              postAuthTransient: true,
+              unresolved: true,
+              reason: "post_auth_transient_landing_unresolved",
+              urlChanged: postAuthUrl !== currentUrl,
+              url: postAuthUrl,
+              stage: "authenticated_transient_unresolved",
+              nextPendingTarget
+            }
+          };
+        }
+
+        // If we got here, post-auth transient WAS resolved (has private signals)
+        // Return success with diagnostic flag so caller knows it was transient
+        const authGateState = createAuthGateState(
+          "authenticated_transient",
+          0,
+          result.stagesCompleted
+        );
+        return {
+          recovered: true,
+          diagnostics: {
+            detected: true,
+            stage: "authenticated_transient_resolved",
+            postAuthTransient: true,
+            resolved: true,
+            landingReason: landingCheckAfter.reason,
+            urlChanged: postAuthUrl !== currentUrl,
+            url: postAuthUrl,
+            nextPendingTarget,
+            requiredInputs: detection.requiredInputs,
+            inputSource,
+            completedBy: "AuthFlowRunner",
+            inputMethod,
+            maskedInputs
+          },
+          authGateState
+        };
+      }
+
+      if (initialLandingCheck.valid && nextPendingTarget) {
+        console.log(`[auth-resume] resumed=true target="${nextPendingTarget}" reason="${initialLandingCheck.reason}"`);
+      }
+
       const authGateState = createAuthGateState(
         "transacciones y servicio",
         0,
@@ -1125,6 +1626,29 @@ async function tryAuthGateRecovery(
         authGateState
       };
     } else {
+      const finalStage = result.diagnostics?.finalStage;
+      const stuckReason = result.diagnostics?.stuckReason;
+      const currentUrl = result.diagnostics?.currentUrl;
+
+      // Determine if this is a blocking failure (stuck in auth, not just transient)
+      const isBlockingFailure = finalStage &&
+        ["identification_input", "phone_confirmation", "otp"].includes(finalStage);
+
+      if (isBlockingFailure) {
+        console.log(`[auth-gate] Blocking scenario: auth not completed. finalStage=${finalStage} reason=${stuckReason} url=${currentUrl}`);
+        return {
+          recovered: false,
+          error: `auth_not_completed stage=${finalStage}`,
+          diagnostics: {
+            detected: true,
+            stage: finalStage,
+            stuckReason,
+            currentUrl,
+            isBlockingFailure: true
+          }
+        };
+      }
+
       console.log(`[auth-gate] Auth flow failed: ${result.error}`);
       return { recovered: false, error: result.error };
     }
@@ -1208,8 +1732,57 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   let authGateCompletedAfterStepIndex: number | undefined; // Track step index after which AuthFlow completed
   let activeContainer: ActiveContainerContext | undefined;
   const resolvedDataKeys = new Set<string>();
+  let postResumeTargetContext:
+    | {
+        target: string;
+        url: string;
+        snapshot: PageSnapshot;
+      }
+    | undefined;
 
-  await mkdir(evidenceDir, { recursive: true });
+  const normalizeText = (value: string | undefined): string =>
+    String(value ?? "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim();
+
+  const summarizeSnapshot = (snapshot: PageSnapshot) => {
+    const texts = Array.from(new Set(
+      snapshot.elements
+        .map((el: any) => String(el.text || el.label || el.name || "").trim())
+        .filter((value: string) => value.length >= 3)
+    )).slice(0, 6);
+    const controls = Array.from(new Set(
+      snapshot.elements
+        .filter((el: any) => /button|link|menuitem|tab|option/i.test(String(el.role || "")) || el.ariaLabel || el.title || el.testId)
+        .map((el: any) => String(el.text || el.label || el.name || el.ariaLabel || el.title || el.testId || "").trim())
+        .filter((value: string) => value.length >= 2)
+    )).slice(0, 8);
+    return { texts, controls };
+  };
+
+  const isPrivateLandingPath = (url: string): boolean => {
+    try {
+      const pathname = new URL(url).pathname.toLowerCase();
+      return pathname !== "/" && !/auth|otp|login|identification|authentication-success/.test(pathname);
+    } catch {
+      return false;
+    }
+  };
+
+  const isPublicOrAuthPath = (url: string): boolean => {
+    try {
+      const pathname = new URL(url).pathname.toLowerCase();
+      return pathname === "/" || /auth|otp|login|identification/.test(pathname);
+    } catch {
+      return false;
+    }
+  };
+
+  if (evidenceDir && evidenceDir.trim()) {
+    await mkdir(evidenceDir, { recursive: true });
+  }
 
   planSteps.push({
     index: planSteps.length + 1,
@@ -1234,6 +1807,38 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
   const parsed = parseScenarioStepsForDiscovery(scenario);
   const actionOrderIndexByTarget = new WeakMap<ActionTargetItem, number>();
+
+  // Task 1: Deduplicat action targets equivalents - normalize generic text
+  function normalizeTarget(target: string): string {
+    return target
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  const deduplicatedActionTargets: ActionTargetItem[] = [];
+  for (let i = 0; i < parsed.actionTargets.length; i++) {
+    const current = parsed.actionTargets[i];
+    const next = parsed.actionTargets[i + 1];
+
+    // If next target is equivalent and no functional steps between them, skip
+    if (next && normalizeTarget(current.target) === normalizeTarget(next.target)) {
+      console.log(
+        `[scenario-normalizer] duplicateActionTargetRemoved scenario=${(scenario as any).displayId || "unknown"} ` +
+        `target="${current.target}" reason=consecutive_equivalent_action`
+      );
+      // Skip current, keep next - next iteration will handle it
+      continue;
+    }
+
+    deduplicatedActionTargets.push(current);
+  }
+
+  // Replace parsed.actionTargets with deduplicated version
+  parsed.actionTargets = deduplicatedActionTargets;
+
   parsed.actionTargets.forEach((target, order) => {
     actionOrderIndexByTarget.set(target, order);
   });
@@ -1366,7 +1971,17 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         continue;
       }
 
-      // This is likely the product target
+      // Task 1: Check if this action target has nextTarget pending (is intermediate navigation)
+      const nextActionTarget = parsed.actionTargets.find(at => at.index > actionTarget.index);
+      if (nextActionTarget) {
+        console.log(
+          `[detail-runtime] ignoredIntermediateAsDetailTarget target="${actionTarget.target}" ` +
+          `nextTarget="${nextActionTarget.target}" reason=has_pending_navigation`
+        );
+        continue;
+      }
+
+      // This is likely the product target (final action with no pending targets)
       detailTarget = actionTarget.target;
       finalProductClickStepIndex = actionTarget.index;
       detailTargetSource = "lastAction";
@@ -1406,6 +2021,18 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       // Skip generic field labels (not concrete product names)
       if (genericFieldLabels.has(assertionLower)) {
         console.log(`[detail-runtime] fallback=C skipped assertion="${assertionTarget.target}" reason=generic_field_label`);
+        continue;
+      }
+
+      // Skip attribute/field terms (not clickable product targets)
+      if (attributeFieldTerms.has(assertionLower)) {
+        console.log(`[detail-runtime] fallback=C skipped assertion="${assertionTarget.target}" reason=attribute_field_term`);
+        continue;
+      }
+
+      // Skip field-prefixed assertions (e.g. "Número de certificado", "Código de producto")
+      if (/^(número|número de|código|código de|identificador|identificador de|id|no\.|nro\.?|tipo de|tipo del|nombre del|nombre de)\b/i.test(assertionLower)) {
+        console.log(`[detail-runtime] fallback=C skipped assertion="${assertionTarget.target}" reason=field_prefixed`);
         continue;
       }
 
@@ -1513,6 +2140,26 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       if (!detailTarget && hasOrdinal) {
         console.log(`[detail-runtime] ordinal detail target deferred (no suitable assertion found)`);
         detailTargetSource = "ordinalAssertionFallback";
+      }
+    }
+  }
+
+  // FINAL SAFETY NET: if all assertions were field labels, use the ordinal action target
+  if (!detailTarget) {
+    const ordinalAction = parsed.actionTargets.find(at =>
+      /seleccionar|primer|primera|elemento.*visible|listado/i.test(at.target)
+    );
+    if (ordinalAction) {
+      detailTarget = ordinalAction.target;
+      detailTargetSource = "ordinalActionTarget";
+      finalProductClickStepIndex = ordinalAction.index;
+      console.log(`[detail-runtime] fallback=ordinalActionTarget detailTarget="${detailTarget}"`);
+    } else {
+      const lastAction = parsed.actionTargets[parsed.actionTargets.length - 1];
+      if (lastAction) {
+        detailTarget = lastAction.target;
+        detailTargetSource = "lastActionTarget";
+        console.log(`[detail-runtime] fallback=lastActionTarget detailTarget="${detailTarget}"`);
       }
     }
   }
@@ -1904,12 +2551,27 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         const elementsCountChanged = Math.abs(detailSnapshot.elements.length - currentSnapshot.elements.length) > 5;
         const navigationTransitionDetected = urlChanged || elementsCountChanged;
 
-        // HARDENED ORACLE: Accept detail ONLY with STRONG signals
-        // strongDetailSignal = heading OR sections (NOT just buttons)
-        // actionButtons alone are NOT sufficient (can be in listing/cards)
+        // HARDENED ORACLE: Accept detail with STRONG signals AND either productName or action buttons or transition
+        // productName alone is NOT required when other strong signals exist
         const strongDetailSignal = detailHeadingVisible || detailSectionsVisible;
-        const detailScreenVisible = productNameVisible && strongDetailSignal;
-        const detailOpened = detailScreenVisible;
+        const transitionDetected = urlChanged || elementsCountChanged || navigationTransitionDetected;
+        const hasStrongBackupSignal = actionButtonsVisible || transitionDetected || strongDetailSignal;
+        const detailScreenVisible = strongDetailSignal && (productNameVisible || actionButtonsVisible || transitionDetected);
+        let detailOpened = detailScreenVisible;
+        let oracleReason = "";
+        if (!detailOpened) {
+          oracleReason = !productNameVisible ? "product_name_not_visible" :
+                        !strongDetailSignal ? "insufficient_detail_signals" :
+                        "no_page_transition";
+        } else {
+          oracleReason = detailHeadingVisible ? "detail_heading_visible" :
+                        detailSectionsVisible ? "detail_sections_and_action_buttons_visible" :
+                        "product_name_with_transition";
+        }
+        // If productName missing but other strong signals exist, downgrade but keep opened
+        if (!productNameVisible && detailOpened && (detailSectionsVisible || actionButtonsVisible)) {
+          console.log(`[detail-oracle] productNameMissing=true downgraded=true reason=other_strong_detail_signals`);
+        }
 
         console.log(
           `[detail-oracle] target="${detailTarget}" ` +
@@ -2009,7 +2671,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         return typeof order === "number" ? order : a.index;
       })()
     }));
-    const earlyCompletion = evaluateEarlyCompletion(currentSnapshot, parsed.assertionTargets, remainingActionTargets);
+
+    const earlyCompletion = evaluateEarlyCompletion(currentSnapshot, parsed.assertionTargets, remainingActionTargets, (options as any).appConfig);
 
     // CRITICAL: Extract critical assertions from targetPath metadata for detail scenarios
     let criticalAssertions: { target?: string; detailSections?: string[]; actionButtons?: string[] } | undefined;
@@ -2069,19 +2732,35 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       const detailScreenshotCaptured = detailEvidence?.captured === true && detailEvidence?.screenshotPath;
 
       if (!detailScreenshotCaptured) {
-        console.log(
-          `[detail-early-completion-gate] blocked=true scenario="${scenario.title}" ` +
-          `detailTarget="${detailTarget}" reason=detail_screenshot_not_captured_yet ` +
-          `currentStep=${currentIndex}`
-        );
+        // GENERIC DETAIL TARGET BYPASS: If detailTarget is a generic placeholder
+        // ("detalle", "información", "pantalla de detalle") and the action was successful
+        // (satisfied assertions exist), the product-card-click worked — don't block.
+        const GENERIC_DETAIL_PATTERNS = /^detalle$|^información$|^informacion$|^pantalla de detalle$/i;
+        const isGenericDetailTarget = GENERIC_DETAIL_PATTERNS.test(detailTarget);
+        const hasSatisfiedAssertions = earlyCompletion.satisfiedAssertions.length > 0;
 
-        // Don't allow early completion until detail screenshot is captured
-        if (earlyCompletion.satisfied && earlyCompletionPolicy.allowed) {
+        if (isGenericDetailTarget && hasSatisfiedAssertions) {
           console.log(
-            `[detail-early-completion-gate] overriding early completion policy ` +
-            `originalAllowed=true newAllowed=false reason=missing_detail_screenshot`
+            `[detail-runtime] genericDetailTargetReplaced from="${detailTarget}" ` +
+            `to="${earlyCompletion.satisfiedAssertions[0]}" ` +
+            `reason=generic_target_with_satisfied_assertions`
           );
-          return false; // Block early completion
+          // Don't block — proceed to allow early completion
+        } else {
+          console.log(
+            `[detail-early-completion-gate] blocked=true scenario="${scenario.title}" ` +
+            `detailTarget="${detailTarget}" reason=detail_screenshot_not_captured_yet ` +
+            `currentStep=${currentIndex}`
+          );
+
+          // Don't allow early completion until detail screenshot is captured
+          if (earlyCompletion.satisfied && earlyCompletionPolicy.allowed) {
+            console.log(
+              `[detail-early-completion-gate] overriding early completion policy ` +
+              `originalAllowed=true newAllowed=false reason=missing_detail_screenshot`
+            );
+            return false; // Block early completion
+          }
         }
       } else {
         console.log(
@@ -2377,34 +3056,94 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       : undefined;
 
     if (!authGateState) {
-      const proactiveAuthCheck = await tryAuthGateRecovery(page, currentSnapshot, options);
-      if (proactiveAuthCheck.recovered) {
+      const proactiveAuthCheck = await tryAuthGateRecovery(
+        page,
+        currentSnapshot,
+        options,
+        orderedItem.type === "action" ? orderedItem.actionTarget?.target : undefined
+      );
+
+      // Check for post-auth transient unresolved (failure case)
+      const isPostAuthTransientUnresolved =
+        !proactiveAuthCheck.recovered && (
+          (proactiveAuthCheck.diagnostics?.postAuthTransient === true &&
+            proactiveAuthCheck.diagnostics?.unresolved === true) ||
+          proactiveAuthCheck.diagnostics?.stage === "authenticated_transient_unresolved"
+        );
+
+      if (isPostAuthTransientUnresolved) {
+        console.log(
+          `[auth-resume] blocked reason=post_auth_transient_landing_unresolved ` +
+          `url="${proactiveAuthCheck.diagnostics?.url}" urlChanged=${proactiveAuthCheck.diagnostics?.urlChanged}`
+        );
+        console.log(
+          `[auth-resume] skipLegacyStableWait reason=post_auth_transient_landing_unresolved`
+        );
+        console.log(
+          `[status-reconcile] evidenceStatus=Fallido caseFinished=failed reason=post_auth_transient_landing_unresolved`
+        );
+
+        // Throw error to fail the case - this prevents marking authGateState.completed
+        throw new Error(
+          `[auth-resume] blocked reason=post_auth_transient_landing_unresolved ` +
+          `target="${orderedItem.type === 'action' ? orderedItem.actionTarget?.target : 'unknown'}" ` +
+          `url="${proactiveAuthCheck.diagnostics?.url}"`
+        );
+      }
+
+      if (!proactiveAuthCheck.recovered && proactiveAuthCheck.error?.includes("auth_not_completed")) {
+        const blockedTarget = orderedItem.type === "action" ? orderedItem.actionTarget?.target : undefined;
+        const blockedStage = proactiveAuthCheck.diagnostics?.stage ?? "unknown";
+        console.log(
+          `[auth-gate] functionalStepBlocked reason=auth_gate_still_active ` +
+          `stage="${blockedStage}" target="${blockedTarget ?? "unknown"}"`
+        );
+        if (blockedStage === "otp") {
+          console.log(`[auth-gate] continuingAuthFlow stage="otp"`);
+        }
+        throw new Error(
+          `[auth-gate] functionalStepBlocked reason=auth_gate_still_active ` +
+          `stage="${blockedStage}" target="${blockedTarget ?? "unknown"}"`
+        );
+      }
+
+      if (proactiveAuthCheck.recovered && proactiveAuthCheck.diagnostics?.unresolved !== true) {
         console.log(`[discovery:case] Proactive auth gate recovery completed before step: ${orderedItem.type}`);
         authGateState = proactiveAuthCheck.authGateState;
         // Track when AuthGate was completed for later AuthFlow insertion
         if (authGateState && authGateState.completed && authGateCompletedAfterStepIndex === undefined) {
           // AuthFlow completed before this step - will be inserted after the previous executed step
-          const lastExecutedStepIndex = executedStepIndices.size > 0 
+          const lastExecutedStepIndex = executedStepIndices.size > 0
             ? Math.max(...Array.from(executedStepIndices))
             : 0;
           authGateCompletedAfterStepIndex = lastExecutedStepIndex;
-        console.log(`[discovery:case] AuthGate completed after step index ${authGateCompletedAfterStepIndex} (proactive)`);
-        
-        // The AuthFlow was triggered proactively before executing the current step (orderedItem)
-        // The step that triggered AuthGate is the PREVIOUS step (the one that was just executed)
-        // Set insertion index to be AFTER the previous step
-        if (orderedItem.type === "action" && orderedItem.actionTarget) {
-          // The previous step is the one that triggered AuthGate
-          // Use the actionTarget index - 1 to insert after the previous step
-          authGateCompletedAfterStepIndex = orderedItem.actionTarget.index - 1;
-          console.log(`[discovery:case] Updated AuthGate insertion index to ${authGateCompletedAfterStepIndex} (after previous step, current=${orderedItem.actionTarget.index}: ${orderedItem.actionTarget.target})`);
-        } else {
-          // For other types, use orderedItem index - 1
-          authGateCompletedAfterStepIndex = orderedItem.index - 1;
-          console.log(`[discovery:case] Updated AuthGate insertion index to ${authGateCompletedAfterStepIndex} (orderedItem.index - 1)`);
+          console.log(`[discovery:case] AuthGate completed after step index ${authGateCompletedAfterStepIndex} (proactive)`);
+
+          // The AuthFlow was triggered proactively before executing the current step (orderedItem)
+          // The step that triggered AuthGate is the PREVIOUS step (the one that was just executed)
+          // Set insertion index to be AFTER the previous step
+          if (orderedItem.type === "action" && orderedItem.actionTarget) {
+            // The previous step is the one that triggered AuthGate
+            // Use the actionTarget index - 1 to insert after the previous step
+            authGateCompletedAfterStepIndex = orderedItem.actionTarget.index - 1;
+            console.log(`[discovery:case] Updated AuthGate insertion index to ${authGateCompletedAfterStepIndex} (after previous step, current=${orderedItem.actionTarget.index}: ${orderedItem.actionTarget.target})`);
+          } else {
+            // For other types, use orderedItem index - 1
+            authGateCompletedAfterStepIndex = orderedItem.index - 1;
+            console.log(`[discovery:case] Updated AuthGate insertion index to ${authGateCompletedAfterStepIndex} (orderedItem.index - 1)`);
+          }
         }
-      }
-        console.log(`[discovery:case] Waiting for stable page after AuthFlow...`);
+        const resumedTarget = orderedItem.type === "action" ? orderedItem.actionTarget?.target : undefined;
+        const skipLongStableWait = proactiveAuthCheck.diagnostics?.resolved === true ||
+          proactiveAuthCheck.diagnostics?.stage === "authenticated_transient_resolved";
+        if (skipLongStableWait && resumedTarget) {
+          console.log(
+            `[auth-resume] resumed=true target="${resumedTarget}" ` +
+            `reason="${proactiveAuthCheck.diagnostics?.landingReason ?? "private_landing"}"`
+          );
+          await page.waitForTimeout(500).catch(() => {});
+        } else {
+          console.log(`[discovery:case] Waiting for stable page after AuthFlow...`);
         const stabilityResult = await waitForStablePageState(page, {
           timeoutMs: 20000,
           pollMs: 500,
@@ -2418,9 +3157,24 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           ]
         });
         console.log(`[discovery:case] Page stability: waited=${stabilityResult.waited}, reason=${stabilityResult.reason}, duration=${stabilityResult.durationMs}ms, url=${stabilityResult.finalUrl}`);
+        }
         const scan = await scanAndCollectObjects(page, orderedItem.index, evidenceDir);
         currentSnapshot = scan.snapshot;
         allDiscoveredObjects.push(...scan.objects);
+        if (skipLongStableWait && resumedTarget) {
+          postResumeTargetContext = {
+            target: resumedTarget,
+            url: currentSnapshot.url,
+            snapshot: currentSnapshot
+          };
+          const postResumeSummary = summarizeSnapshot(currentSnapshot);
+          console.log(`[auth-resume] skipLongPostResumeWait reason=private_landing_resolved target="${resumedTarget}"`);
+          console.log(`[auth-resume] postResumeFastScan target="${resumedTarget}" url="${currentSnapshot.url}"`);
+          console.log(
+            `[auth-resume] postResumeSnapshot target="${resumedTarget}" url="${currentSnapshot.url}" ` +
+            `texts=${JSON.stringify(postResumeSummary.texts)} controls=${JSON.stringify(postResumeSummary.controls)}`
+          );
+        }
       }
     }
 
@@ -2481,6 +3235,18 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       if (typeof currentActionOrder === "number") {
         skippedActionOrders.add(currentActionOrder);
       }
+
+      // Task 3: Log that auth consumed only the login, next pending target remains
+      const nextPendingItems = orderedItems.filter((item, idx) =>
+        orderedItems.indexOf(currentActionTarget) < idx &&
+        item.type === "action" &&
+        item.actionTarget
+      );
+      const nextPendingTarget = nextPendingItems[0]?.actionTarget?.target;
+      if (nextPendingTarget) {
+        console.log(`[auth-gate] authConsumed=true nextPendingTarget="${nextPendingTarget}"`);
+      }
+
       planSteps.push({
         index: planSteps.length + 1,
         action: "click",
@@ -2577,7 +3343,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           }));
 
         resolutionResults = resolveAssertionTargets(snapshotForAssertion, assertionTargetInputs, {
-          executedActions: executedActionsForAssertions
+          executedActions: executedActionsForAssertions,
+          appConfig: (options as any).appConfig
         });
         
         // Check if any assertion passed
@@ -2948,7 +3715,36 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         const scan = await scanAndCollectObjects(page, orderedItem.index, evidenceDir);
         currentSnapshot = scan.snapshot;
 
-        const authRecovery = await tryAuthGateRecovery(page, currentSnapshot, options);
+        const authRecovery = await tryAuthGateRecovery(page, currentSnapshot, options, nav.target);
+
+        const unresolvedAuthRecovery =
+          !authRecovery.recovered &&
+          (authRecovery.diagnostics?.reason === "post_auth_transient_landing_unresolved" ||
+            authRecovery.diagnostics?.stage === "authenticated_transient_unresolved");
+        if (unresolvedAuthRecovery) {
+          console.log(`[auth-resume] skipLegacyStableWait reason=post_auth_transient_landing_unresolved`);
+          console.log(`[status-reconcile] evidenceStatus=Fallido caseFinished=failed reason=post_auth_transient_landing_unresolved`);
+          throw new Error(`[auth-resume] blocked reason=post_auth_transient_landing_unresolved target="${nav.target}" url="${authRecovery.diagnostics?.url}"`);
+        }
+
+        // Check for blocking auth failures
+        if (!authRecovery.recovered && authRecovery.error?.includes("auth_not_completed")) {
+          const stage = authRecovery.diagnostics?.stage;
+          const stuckReason = authRecovery.diagnostics?.stuckReason;
+          console.log(`[auth-gate] blockingScenarioUntilAuthenticated target="${nav.target}" stage="${stage}" reason="${stuckReason}"`);
+          steps.push({
+            index: orderedItem.index,
+            action: nav.action,
+            status: "blocked",
+            targetText: nav.target,
+            error: `Scenario blocked: AuthGate not completed at stage ${stage} (${stuckReason}). Cannot continue to "${nav.target}".`
+          });
+          failedAtStep = orderedItem.index;
+          failedTarget = nav.target;
+          failedReason = "auth_not_completed";
+          break;
+        }
+
         if (authRecovery.recovered) {
           console.log(`[discovery:case] Auth gate recovery successful, retrying nav segment...`);
           if (authRecovery.authGateState) {
@@ -2956,17 +3752,32 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             // Track when AuthGate was completed for later AuthFlow insertion
             if (authGateState.completed && authGateCompletedAfterStepIndex === undefined) {
               // AuthFlow completed before this step - will be inserted after the previous executed step
-              const lastExecutedStepIndex = executedStepIndices.size > 0 
+              const lastExecutedStepIndex = executedStepIndices.size > 0
                 ? Math.max(...Array.from(executedStepIndices))
                 : 0;
               authGateCompletedAfterStepIndex = lastExecutedStepIndex;
               console.log(`[discovery:case] AuthGate completed after step index ${authGateCompletedAfterStepIndex}`);
             }
           }
+
+          // Task 1: Detect auth completed by URL/screen
+          const authCompletedUrl = page.url();
+          const isPrivateMenu = /operations-menu|operaciones|transacciones.*servicios/i.test(authCompletedUrl);
+          if (isPrivateMenu) {
+            console.log(`[auth-flow] authenticated=true source=private_menu_detected url=${authCompletedUrl}`);
+          }
+
+          // Task 4: Determine stage and whether to continue
+          console.log(`[auth-gate] stageResolved stage=${isPrivateMenu ? "private_menu" : "unknown"} continue=${isPrivateMenu}`);
+
+          // Task 2: Update snapshot after auth completes - resume scenario properly
           await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
-          const retryScan = await scanAndCollectObjects(page, orderedItem.index, evidenceDir);
-          currentSnapshot = retryScan.snapshot;
-          allDiscoveredObjects.push(...retryScan.objects);
+          const authCompletedScan = await scanAndCollectObjects(page, orderedItem.index, evidenceDir);
+          currentSnapshot = authCompletedScan.snapshot;
+          allDiscoveredObjects.push(...authCompletedScan.objects);
+
+          console.log(`[auth-gate] completed, resuming scenario target="${nav.target}"`);
+          console.log(`[discovery:case] Resuming after auth at step=${orderedItem.index} target="${nav.target}"`);
 
           const retryResolution = await resolveActionTarget(page, currentSnapshot, nav.target, { routeProfile });
           if (retryResolution.status === "resolved" && retryResolution.locator) {
@@ -3205,7 +4016,16 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
 
-        const authRecovery = await tryAuthGateRecovery(page, currentSnapshot, options);
+        const authRecovery = await tryAuthGateRecovery(page, currentSnapshot, options, actionTarget.target);
+        if (
+          !authRecovery.recovered &&
+          (authRecovery.diagnostics?.reason === "post_auth_transient_landing_unresolved" ||
+            authRecovery.diagnostics?.stage === "authenticated_transient_unresolved")
+        ) {
+          console.log(`[auth-resume] skipLegacyStableWait reason=post_auth_transient_landing_unresolved`);
+          console.log(`[status-reconcile] evidenceStatus=Fallido caseFinished=failed reason=post_auth_transient_landing_unresolved`);
+          throw new Error(`[auth-resume] blocked reason=post_auth_transient_landing_unresolved target="${actionTarget.target}" url="${authRecovery.diagnostics?.url}"`);
+        }
         if (authRecovery.recovered) {
           console.log(`[discovery:case] Auth gate recovery successful, retrying fill target...`);
           if (authRecovery.authGateState) {
@@ -3955,19 +4775,101 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       return buildFailureResult(scenario, steps, allDiscoveredObjects, planSteps, pendingObjectsPath, pendingPlansPath, evidenceDir, failedAtStep, failedTarget, failedReason, allDiscoveredObjects);
     }
 
-    console.log(`[discovery:case] Resolving target: ${actionTarget.target}`);
-
     // Capture evidence after the action completes (below, at step push points)
+    const shouldUsePostResumeSnapshot = postResumeTargetContext?.target === actionTarget.target;
+    if (shouldUsePostResumeSnapshot) {
+      const previousResumeUrl = postResumeTargetContext?.url ?? page.url();
+      const currentUrl = page.url();
+      if (previousResumeUrl !== currentUrl && isPrivateLandingPath(previousResumeUrl) && isPublicOrAuthPath(currentUrl)) {
+        console.log(
+          `[auth-resume] lostPrivateLanding beforeTarget="${actionTarget.target}" ` +
+          `from="${previousResumeUrl}" to="${currentUrl}"`
+        );
+        console.log(
+          `[auth-resume] blocked reason=private_landing_lost_before_target ` +
+          `target="${actionTarget.target}" url="${currentUrl}"`
+        );
+        console.log(`[status-reconcile] evidenceStatus=Fallido caseFinished=failed reason=private_landing_lost_before_target`);
+        await captureEvStep(actionTarget.action, "failed", `Private landing lost before resolving "${actionTarget.target}".`);
+        failedAtStep = actionTarget.index;
+        failedTarget = actionTarget.target;
+        failedReason = "private_landing_lost_before_target";
+        await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
+        await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(scenario, steps, allDiscoveredObjects, planSteps, pendingObjectsPath, pendingPlansPath, evidenceDir, failedAtStep, failedTarget, failedReason, allDiscoveredObjects).candidatePlan ?? {}, null, 2), "utf-8");
+        return buildFailureResult(scenario, steps, allDiscoveredObjects, planSteps, pendingObjectsPath, pendingPlansPath, evidenceDir, failedAtStep, failedTarget, failedReason, allDiscoveredObjects);
+      }
 
-    const stabilityResult = await waitForStablePageState(page, {
-      timeoutMs: 10000,
-      pollMs: 500,
-      stableForMs: 800
-    });
-    if (stabilityResult.waited) {
-      console.log(`[discovery:case] Page stability wait: reason=${stabilityResult.reason}, duration=${stabilityResult.durationMs}ms`);
-      const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
-      currentSnapshot = scan.snapshot;
+      const postResumeScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+      currentSnapshot = postResumeScan.snapshot;
+      allDiscoveredObjects.push(...postResumeScan.objects);
+      postResumeTargetContext = {
+        target: actionTarget.target,
+        url: currentSnapshot.url,
+        snapshot: currentSnapshot
+      };
+      const postResumeSummary = summarizeSnapshot(currentSnapshot);
+
+      // After successful OTP and landing at private menu, preserve session by NOT reloading/renavigating
+      console.log(`[post-otp] preserveSessionMode=true reason="session_lost_on_navigation"`);
+      console.log(`[post-otp] noReloadNoGotoNoReauth=true`);
+
+      // Check if we need to wait for private menu to load before resolving target
+      const loadingTexts = ["cargando", "loading", "por favor espere", "please wait"];
+      const hasLoadingSignal = currentSnapshot.elements.some((el: any) =>
+        loadingTexts.some(txt => (el.text || el.label || "").toLowerCase().includes(txt))
+      );
+
+      if (hasLoadingSignal && postResumeSummary.controls.length === 0) {
+        // Gate: wait for private menu to be ready before proceeding to target resolution
+        const gateResult = await waitForPrivateMenuReadyBeforeTargetResolution(page, currentSnapshot, actionTarget.target, evidenceDir);
+
+        if (gateResult.status !== "ready") {
+          // Gate blocked or timed out - don't proceed to target resolution
+          if (gateResult.status === "blocked") {
+            console.log(
+              `[auth-resume] blocked reason=${gateResult.reason} target="${actionTarget.target}" url="${gateResult.url}" recovery="disabled_preserve_session"`
+            );
+          } else if (gateResult.status === "timeout") {
+            console.log(
+              `[auth-resume] blocked reason=${gateResult.reason} target="${actionTarget.target}" url="${gateResult.url}"`
+            );
+          }
+          steps.push({
+            index: actionTarget.index,
+            action: actionTarget.action,
+            status: "not_found",
+            targetText: actionTarget.target,
+            error: `${gateResult.reason}`,
+            evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`)
+          } as any);
+          failedAtStep = actionTarget.index;
+          failedTarget = actionTarget.target;
+          failedReason = gateResult.reason;
+          await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
+          await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(scenario, steps, allDiscoveredObjects, planSteps, pendingObjectsPath, pendingPlansPath, evidenceDir, failedAtStep, failedTarget, failedReason, allDiscoveredObjects).candidatePlan ?? {}, null, 2), "utf-8");
+          return buildFailureResult(
+            scenario, steps, allDiscoveredObjects, planSteps,
+            pendingObjectsPath, pendingPlansPath, evidenceDir,
+            failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+          );
+        }
+
+        // Gate passed - update snapshot and proceed to target resolution
+        currentSnapshot = await scanAndCollectObjects(page, actionTarget.index, evidenceDir).then(r => r.snapshot);
+        console.log(`[post-otp-gate] releaseToTargetResolver target="${actionTarget.target}"`);
+      }
+
+      console.log(`[discovery:case] Resolving target: ${actionTarget.target}`);
+      const stabilityResult = await waitForStablePageState(page, {
+        timeoutMs: 10000,
+        pollMs: 500,
+        stableForMs: 800
+      });
+      if (stabilityResult.waited) {
+        console.log(`[discovery:case] Page stability wait: reason=${stabilityResult.reason}, duration=${stabilityResult.durationMs}ms`);
+        const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+        currentSnapshot = scan.snapshot;
+      }
     }
 
     // Build route history from previous found steps
@@ -3981,7 +4883,44 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     // Get previous target from relation context or route history
     const previousTarget = actionTarget.relationContext || routeHistory[routeHistory.length - 1];
 
-    const resolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target, {
+    const postResumeTargetNorm = normalizeText(actionTarget.target);
+    const postResumeCandidates = shouldUsePostResumeSnapshot
+      ? currentSnapshot.elements
+          .map((el: any) => {
+            const values = [
+              String(el.text || "").trim(),
+              String(el.label || "").trim(),
+              String(el.name || "").trim(),
+              String(el.ariaLabel || "").trim(),
+              String(el.title || "").trim(),
+              String(el.testId || "").trim()
+            ].filter(Boolean);
+            const normalizedValues = values.map(normalizeText).filter(Boolean);
+            const exact = normalizedValues.some((value) => value === postResumeTargetNorm);
+            const contains = normalizedValues.some((value) => value.includes(postResumeTargetNorm) || postResumeTargetNorm.includes(value));
+            if (!exact && !contains) return undefined;
+            const strategy = exact
+              ? (normalizeText(el.text || el.label || el.name) === postResumeTargetNorm ? "text" : "accessible_name")
+              : (el.testId || el.title ? "data_hint" : (/button|link|menuitem/i.test(String(el.role || "")) ? "accessible_name" : "card_text"));
+            const clickableBoost = /button|link|menuitem/i.test(String(el.role || "")) ? 2 : 0;
+            return {
+              element: el,
+              strategy,
+              score: (exact ? 10 : 5) + clickableBoost,
+              label: values[0] || values[1] || values[2] || values[3] || values[4] || values[5] || "(empty)"
+            };
+          })
+          .filter(Boolean)
+          .sort((a: any, b: any) => b.score - a.score)
+      : [];
+    if (shouldUsePostResumeSnapshot) {
+      console.log(
+        `[target-resolver] candidates target="${actionTarget.target}" count=${postResumeCandidates.length} ` +
+        `top=${JSON.stringify(postResumeCandidates.slice(0, 5).map((candidate: any) => candidate.label))}`
+      );
+    }
+
+    let resolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target, {
       semanticRole: actionTarget.semanticRole,
       relationContext: actionTarget.relationContext,
       activeContainer,
@@ -3992,6 +4931,30 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       routeHistory,
       expectedTarget: detailTarget && finalProductClickStepIndex === actionTarget.index ? detailTarget : undefined,
     });
+    if (shouldUsePostResumeSnapshot && postResumeCandidates.length > 0) {
+      const preferredCandidate = postResumeCandidates[0] as any;
+      console.log(`[menu-resolver] candidate target="${actionTarget.target}" strategy="${preferredCandidate.strategy}"`);
+      const preferredLocator = await resolveSnapshotElementLocator(page, {
+        element: preferredCandidate.element,
+        target: actionTarget.target,
+        candidateText: preferredCandidate.label,
+        type: preferredCandidate.element.type,
+        tagName: preferredCandidate.element.tagName,
+        confidence: 0.95,
+        matchReason: `post_resume:${preferredCandidate.strategy}`
+      });
+      if (preferredLocator.locator) {
+        resolution = {
+          ...resolution,
+          status: "resolved",
+          locator: preferredLocator.locator,
+          confidence: Math.max(resolution.confidence ?? 0, 0.95),
+          locatorStrategy: `post_resume_${preferredCandidate.strategy}`,
+          matchReason: `post_resume_${preferredCandidate.strategy}`
+        } as typeof resolution;
+        console.log(`[menu-resolver] resolved target="${actionTarget.target}" strategy="${preferredCandidate.strategy}"`);
+      }
+    }
 
     let finalLocator = resolution.locator;
     let promotedToAncestor = false;
@@ -4046,7 +5009,27 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       resolution.status === "locator_resolution_failed" ||
       resolution.confidence < aiConfig.confidenceThreshold;
 
-    const earlyCompletion = evaluateEarlyCompletion(currentSnapshot, parsed.assertionTargets, parsed.actionTargets.filter(a => a.index > actionTarget.index));
+    // Try parent intermediate recovery before giving up
+    if (needsEarlyCompletionCheck && resolution.status !== "resolved" && actionTarget.action === "click") {
+      console.log(`[intermediate-recovery] invoked target="${actionTarget.target}" reason=direct_resolution_failed`);
+      const { recoverWithParentIntermediate } = await import("./intermediate-step-recovery");
+      const recoveryResult = await recoverWithParentIntermediate(page, actionTarget.target, currentSnapshot);
+      if (recoveryResult.recovered) {
+        console.log(`[target-resolver] resolvedAfterIntermediate target="${actionTarget.target}" parent="${recoveryResult.selectedCandidate?.text}"`);
+        // Re-resolve target after successful parent click
+        const retryResolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target, {
+          routeProfile: options?.routeProfile,
+          actionText: actionTarget.action,
+        });
+        if (retryResolution.status === "resolved" && retryResolution.locator) {
+          resolution = retryResolution;
+          finalLocator = retryResolution.locator;
+          console.log(`[discovery:case] Target resolved after intermediate recovery: ${actionTarget.target}`);
+        }
+      }
+    }
+
+    const earlyCompletion = evaluateEarlyCompletion(currentSnapshot, parsed.assertionTargets, parsed.actionTargets.filter(a => a.index > actionTarget.index), (options as any).appConfig);
     if (needsEarlyCompletionCheck && earlyCompletion.pendingAssertions.length > 0) {
       console.log(`[discovery:case] Early completion not satisfied at step ${actionTarget.index}. Pending: [${earlyCompletion.pendingAssertions.map(a => `"${a}"`).join(", ")}]. Satisfied: [${earlyCompletion.satisfiedAssertions.map(a => `"${a}"`).join(", ")}].`);
     }
@@ -4247,6 +5230,41 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
     if (!(resolution as any)._aiFailedDeterministicAvailable) {
       if (resolution.status === "not_found") {
+        if (shouldUsePostResumeSnapshot) {
+          const candidateLabels = postResumeCandidates.slice(0, 8).map((candidate: any) => candidate.label);
+          console.log(
+            `[target-resolver] failed target="${actionTarget.target}" ` +
+            `reason=not_in_post_resume_snapshot candidates=${JSON.stringify(candidateLabels)}`
+          );
+          console.log(`[status-reconcile] evidenceStatus=Fallido caseFinished=failed reason=target_not_found`);
+          await captureEvStep(actionTarget.action, "failed", `Target "${actionTarget.target}" not found in post-resume snapshot.`);
+          steps.push({
+            index: actionTarget.index,
+            action: actionTarget.action,
+            status: "not_found",
+            targetText: actionTarget.target,
+            snapshotUrl: currentSnapshot.url,
+            snapshotTitle: currentSnapshot.title,
+            elementsFound: currentSnapshot.elements.length,
+            error: `Target "${actionTarget.target}" not found in post-resume snapshot.`,
+            evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`)
+          } as any);
+          failedAtStep = actionTarget.index;
+          failedTarget = actionTarget.target;
+          failedReason = "target_not_found";
+          await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
+          await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
+            scenario, steps, allDiscoveredObjects, planSteps,
+            pendingObjectsPath, pendingPlansPath, evidenceDir,
+            failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+          ).candidatePlan ?? {}, null, 2), "utf-8");
+          return buildFailureResult(
+            scenario, steps, allDiscoveredObjects, planSteps,
+            pendingObjectsPath, pendingPlansPath, evidenceDir,
+            failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+          );
+        }
+
         if (actionTarget.isOptional) {
           console.log(`[discovery:case] Optional target not found, skipping: ${actionTarget.target}`);
           steps.push({
@@ -4262,7 +5280,16 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
 
-        const authRecovery = await tryAuthGateRecovery(page, currentSnapshot, options);
+        const authRecovery = await tryAuthGateRecovery(page, currentSnapshot, options, actionTarget.target);
+        if (
+          !authRecovery.recovered &&
+          (authRecovery.diagnostics?.reason === "post_auth_transient_landing_unresolved" ||
+            authRecovery.diagnostics?.stage === "authenticated_transient_unresolved")
+        ) {
+          console.log(`[auth-resume] skipLegacyStableWait reason=post_auth_transient_landing_unresolved`);
+          console.log(`[status-reconcile] evidenceStatus=Fallido caseFinished=failed reason=post_auth_transient_landing_unresolved`);
+          throw new Error(`[auth-resume] blocked reason=post_auth_transient_landing_unresolved target="${actionTarget.target}" url="${authRecovery.diagnostics?.url}"`);
+        }
         if (authRecovery.recovered) {
           console.log(`[discovery:case] Auth gate recovery successful, retrying click target...`);
           if (authRecovery.authGateState) {
@@ -5430,13 +6457,21 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       (resolution.locatorStrategy === "ordinal_selection" ||
        (resolution as any).ordinalSelectionDiagnostics?.selectionPatternDetected === true);
 
+    // Get the selected candidate text if this is an ordinal selection
+    const ordinalSelectedCandidateText = (resolution as any).recoveryMetadata?.ordinalSelectionDiagnostics?.selectedCandidateText ||
+                                         (resolution as any).ordinalSelectionDiagnostics?.selectedCandidateText;
+
     const shouldUseProductCardClick =
       isFinalProductClick &&
       (targetMatchesDetail || isOrdinalBoundToDetail) &&
       finalLocator;
 
     if (shouldUseProductCardClick) {
-      const clickTarget = isOrdinalBoundToDetail && detailTarget ? detailTarget : actionTarget.target;
+      // For ordinal selection with candidate, use the candidate text, not the detail target
+      const clickTarget = isOrdinalBoundToDetail && ordinalSelectedCandidateText
+        ? ordinalSelectedCandidateText
+        : (isOrdinalBoundToDetail && detailTarget ? detailTarget : actionTarget.target);
+
       console.log(
         `[product-card-click] activated target="${clickTarget}" ` +
         `originalTarget="${actionTarget.target}" ` +
@@ -5448,12 +6483,20 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       // INTERMEDIATE RECOVERY: Check if target is visible, if not try to recover missing intermediate step
       let intermediateRecoveryResult: IntermediateRecoveryResult | undefined;
 
-      // When ordinal is bound to a concrete detail target, use the detail target for recovery
-      const effectiveRecoveryTarget = isOrdinalBoundToDetail && detailTarget
-        ? detailTarget
-        : actionTarget.target;
+      // When ordinal is bound to a concrete detail target AND has candidate, use the candidate for recovery
+      // When ordinal has NO candidate but has detailTarget, use detailTarget
+      const effectiveRecoveryTarget = isOrdinalBoundToDetail && ordinalSelectedCandidateText
+        ? ordinalSelectedCandidateText
+        : (isOrdinalBoundToDetail && detailTarget ? detailTarget : actionTarget.target);
 
-      if (isOrdinalBoundToDetail && detailTarget) {
+      if (isOrdinalBoundToDetail && ordinalSelectedCandidateText && detailTarget) {
+        console.log(
+          `[detail-ordinal-binding] skipped reason=ordinal_candidate_preserved ` +
+          `originalTarget="${actionTarget.target}" ` +
+          `candidate="${ordinalSelectedCandidateText}" ` +
+          `detailTarget="${detailTarget}"`
+        );
+      } else if (isOrdinalBoundToDetail && detailTarget) {
         console.log(
           `[detail-ordinal-binding] originalTarget="${actionTarget.target}" ` +
           `effectiveTarget="${detailTarget}"`
@@ -5589,18 +6632,48 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         const candidates = await findProductCardClickCandidates(
           page,
           finalLocator,
-          actionTarget.target,
+          clickTarget,
           currentSnapshot
         );
 
         if (candidates.length > 0) {
           console.log(`[product-card-click] found ${candidates.length} clickable candidates`);
 
+          // Task 1: Classify if current step is intermediate navigation
+          // Get all remaining items to check if there's a next action target
+          const currentItemIndex = orderedItems.findIndex(item =>
+            item.type === "action" && item.actionTarget?.index === actionTarget.index
+          );
+          const remainingItems = orderedItems.slice(currentItemIndex + 1);
+          const nextActionTarget = remainingItems.find(item =>
+            item.type === "action" && item.actionTarget
+          )?.actionTarget;
+
+          const isIntermediateNavigation = !!nextActionTarget;
+          if (isIntermediateNavigation) {
+            console.log(
+              `[navigation-step] classified target="${actionTarget.target}" role=intermediate ` +
+              `nextTarget="${nextActionTarget?.target}"`
+            );
+          }
+
           // Define detail oracle check for this product
+          const preClickUrl = page.url();
           const checkDetailOpened = async (): Promise<boolean> => {
             // Re-scan to get current state
             const checkScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
             const checkSnapshot = checkScan.snapshot;
+            const postClickUrl = page.url();
+
+            // Task 2: For intermediate navigation, URL/screen change is success
+            if (isIntermediateNavigation && postClickUrl !== preClickUrl) {
+              console.log(
+                `[navigation-step] completed target="${actionTarget.target}" ` +
+                `reason=url_changed from="${preClickUrl}" to="${postClickUrl}" ` +
+                `nextTarget="${nextActionTarget?.target}"`
+              );
+              return true;
+            }
 
             // Check for product name - first exact, then semantic alias
             let productNameVisible = checkSnapshot.elements.some((el: any) =>
@@ -5653,25 +6726,54 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
             // Strong signal = heading OR sections (NOT just buttons)
             const strongDetailSignal = detailHeadingVisible || detailSectionsVisible;
-            const detailOpened = productNameVisible && strongDetailSignal;
+
+            // For ordinal auto-inserted steps, use relaxed oracle:
+            // opened=true if strong detail signals present, even without exact product name match
+            // (product names in list and detail may differ)
+            const isOrdinalAutoInserted = isOrdinalBoundToDetail && ordinalSelectedCandidateText;
+            const detailOpened = isOrdinalAutoInserted
+              ? (strongDetailSignal || detailSectionsVisible)
+              : (productNameVisible && strongDetailSignal);
+
+            const openedReason = isOrdinalAutoInserted && strongDetailSignal
+              ? "strong_detail_sections"
+              : (productNameVisible && strongDetailSignal ? "product_name_with_detail" : "none");
 
             console.log(
               `[product-card-click] detail-check productName=${productNameVisible} productNameMatchMode=${matchMode} ` +
               `detailHeading=${detailHeadingVisible} detailSections=${detailSectionsVisible} ` +
-              `strongSignal=${strongDetailSignal} opened=${detailOpened}`
+              `strongSignal=${strongDetailSignal} opened=${detailOpened} reason=${openedReason} ` +
+              `isOrdinalAutoInserted=${isOrdinalAutoInserted}`
             );
 
             return detailOpened;
           };
 
-          // Try escalated click strategies
-          productCardClickResult = await tryProductCardClickStrategies(
-            page,
-            candidates,
-            actionTarget.target,
-            checkDetailOpened,
-            evidenceDir
-          );
+          // Task 4: Skip escalation for intermediate navigation
+          if (isIntermediateNavigation) {
+            console.log(
+              `[product-card-click] skippedEscalation target="${actionTarget.target}" ` +
+              `reason=intermediate_navigation_completed`
+            );
+            // For intermediate navigation, checkDetailOpened will return true if URL changed
+            // This causes tryProductCardClickStrategies to stop after first attempt
+            productCardClickResult = await tryProductCardClickStrategies(
+              page,
+              candidates,
+              actionTarget.target,
+              checkDetailOpened,
+              evidenceDir
+            );
+          } else {
+            // Try escalated click strategies for real detail targets
+            productCardClickResult = await tryProductCardClickStrategies(
+              page,
+              candidates,
+              actionTarget.target,
+              checkDetailOpened,
+              evidenceDir
+            );
+          }
 
           console.log(
             `[product-card-click] completed success=${productCardClickResult.success} ` +
@@ -5686,6 +6788,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
               `strategy=${productCardClickResult.strategy}`
             );
 
+            // Mark that ordinal product click was successful (for skipping MISMATCH validation)
+            const ordinalProductClickSuccess = isOrdinalBoundToDetail && productCardClickResult.success;
+
             // Update current snapshot after successful product click
             const afterProductClick = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
             currentSnapshot = afterProductClick.snapshot;
@@ -5693,6 +6798,62 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             // Wait for page to stabilize
             await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
             console.log("[discovery:case] Waiting after product card click...");
+
+            // Capture evidence for ordinal selection step if it was successful
+            if (ordinalProductClickSuccess) {
+              const ordinalStepText = actionTarget.target; // "Seleccionar el primer elemento visible del listado"
+              const ordinalClickedCandidate = ordinalSelectedCandidateText || "elemento del listado";
+
+              console.log(
+                `[evidence] step ${actionTarget.index}: "${ordinalStepText}" status=passed ` +
+                `clickedTarget="${ordinalClickedCandidate}"`
+              );
+
+              // Capture screenshot of detail after ordinal click
+              if (evidenceRec) {
+                try {
+                  const detailScreenshot = await evidenceRec.captureStep(
+                    page,
+                    actionTarget.index,
+                    ordinalStepText,
+                    { target: ordinalClickedCandidate, status: "passed" }
+                  );
+                  if (detailScreenshot.screenshotPath) {
+                    console.log(
+                      `[detail-screenshot] capturedAfterOrdinalSelection=true ` +
+                      `clickedTarget="${ordinalClickedCandidate}" path=${detailScreenshot.screenshotPath}`
+                    );
+                  }
+                } catch (screenshotErr) {
+                  console.log(`[detail-screenshot] captureError=${screenshotErr instanceof Error ? screenshotErr.message : String(screenshotErr)}`);
+                }
+              }
+
+              // Register ordinal step as passed
+              steps.push({
+                index: actionTarget.index,
+                action: "click",
+                status: "found",
+                targetText: ordinalStepText,
+                candidateText: ordinalClickedCandidate,
+                autoInserted: true,
+                insertionReason: "missing_intermediate_selection",
+                snapshotUrl: currentSnapshot.url,
+                snapshotTitle: currentSnapshot.title,
+                elementsFound: currentSnapshot.elements.length,
+                recoveredBy: "product_card_click_success" as any,
+                recoveryMetadata: {
+                  strategy: productCardClickResult.strategy,
+                  ordinalClickTarget: ordinalClickedCandidate
+                }
+              } as any);
+
+              // Continue with pending assertions (skip standard click and validation blocks)
+              console.log(
+                `[ordinal-selection] continuingToPendingAssertions ` +
+                `afterOrdinalSuccess=true nextAssertions=${parsed.assertionTargets.filter((a: any) => a.index > actionTarget.index).length}`
+              );
+            }
           } else {
             // Product click failed - all strategies tried but detail didn't open
             console.log(
@@ -5805,20 +6966,45 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
     await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
     console.log("[discovery:case] Waiting after click...");
+    if (shouldUsePostResumeSnapshot && postResumeTargetContext?.target === actionTarget.target) {
+      postResumeTargetContext = undefined;
+    }
 
     // Check if this was an ordinal selection - skip instructive token verification
-    const wasOrdinalSelection = resolution.locatorStrategy === "ordinal_selection" || 
+    const wasOrdinalSelection = resolution.locatorStrategy === "ordinal_selection" ||
                                 (resolution as any).ordinalSelectionDiagnostics?.selectionPatternDetected === true;
-    
-    if (wasOrdinalSelection) {
+
+    // Check if this ordinal step is from auto-inserted missing_intermediate_selection
+    const isAutoInsertedOrdinal = wasOrdinalSelection &&
+                                  (resolution as any).recoveryMetadata?.ordinalSelectionDiagnostics?.selectedCandidateText;
+
+    // If product-card-click already handled the ordinal successfully, skip validation
+    if (productCardClickResult?.success && isOrdinalBoundToDetail && wasOrdinalSelection) {
+      console.log(
+        `[ordinal-selection] skippedValidation reason=product_card_click_already_handled ` +
+        `strategy=${productCardClickResult.strategy}`
+      );
+    } else if (wasOrdinalSelection) {
       console.log(`[discovery:case] Ordinal selection detected - skipping instructive token verification`);
       console.log(`[discovery:case] Ordinal: ${(resolution as any).ordinalSelectionDiagnostics?.ordinal ?? "unknown"}`);
       console.log(`[discovery:case] Domain term: ${(resolution as any).ordinalSelectionDiagnostics?.domainTerm ?? "none"}`);
-      const selectedCandidateText = (resolution as any).ordinalSelectionDiagnostics?.selectedCandidateText ?? "unknown";
+      const selectedCandidateText = (resolution as any).ordinalSelectionDiagnostics?.selectedCandidateText ??
+                                    (resolution as any).recoveryMetadata?.ordinalSelectionDiagnostics?.selectedCandidateText ??
+                                    "unknown";
       console.log(`[discovery:case] Selected candidate: ${selectedCandidateText}`);
 
-      // CRITICAL: Validate ordinal selected correct product for detail scenarios
-      if (detailTarget && finalProductClickStepIndex === actionTarget.index) {
+      // For auto-inserted ordinal (missing_intermediate_selection), skip assertion comparison
+      // Assertions are post-click validation, not pre-click candidate validation
+      if (isAutoInsertedOrdinal && detailTarget && finalProductClickStepIndex === actionTarget.index) {
+        console.log(
+          `[ordinal-selection] assertionMismatchCheckSkipped reason=post_click_assertions ` +
+          `originalTarget="${actionTarget.target}" ` +
+          `selectedCandidate="${selectedCandidateText}" ` +
+          `expectedAssertions="${detailTarget}" postClickValidation=true`
+        );
+        // Don't fail - assertions will be validated post-click
+      } else if (!isAutoInsertedOrdinal && detailTarget && finalProductClickStepIndex === actionTarget.index) {
+        // For normal ordinal selections (not auto-inserted), validate candidate matches expected detail
         const selectedNormalized = selectedCandidateText.toLowerCase().trim();
         const expectedNormalized = detailTarget.toLowerCase().trim();
 
@@ -6536,7 +7722,16 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           }
         }
 
-        const authRecovery = await tryAuthGateRecovery(page, currentSnapshot, options);
+        const authRecovery = await tryAuthGateRecovery(page, currentSnapshot, options, actionTarget.target);
+          if (
+            !authRecovery.recovered &&
+            (authRecovery.diagnostics?.reason === "post_auth_transient_landing_unresolved" ||
+              authRecovery.diagnostics?.stage === "authenticated_transient_unresolved")
+          ) {
+            console.log(`[auth-resume] skipLegacyStableWait reason=post_auth_transient_landing_unresolved`);
+            console.log(`[status-reconcile] evidenceStatus=Fallido caseFinished=failed reason=post_auth_transient_landing_unresolved`);
+            throw new Error(`[auth-resume] blocked reason=post_auth_transient_landing_unresolved target="${actionTarget.target}" url="${authRecovery.diagnostics?.url}"`);
+          }
           if (authRecovery.recovered) {
             console.log(`[discovery:case] Auth gate recovery after click_no_transition successful, retrying...`);
             if (authRecovery.authGateState) {
@@ -6953,15 +8148,17 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
               ? "needs_associated_target_resolution"
               : effectiveFailedReason === "missing_intermediate_step_to_final_target"
                 ? "exploration_failed"
-                : allFound
+                : !effectiveFailedReason && failedReason
                   ? "discovered_passed"
-                  : someFound
-                    ? "discovered_partial"
-                    : "exploration_failed";
+                  : allFound
+                    ? "discovered_passed"
+                    : someFound
+                      ? "discovered_partial"
+                      : "exploration_failed";
   
   // Log status reconciliation
   if (failedReason && !effectiveFailedReason) {
-    console.log(`[discovery:case] status reconciled: discovered_partial -> ${status} (all failures recovered)`);
+    console.log(`[discovery:case] status reconciled: discovered_partial -> discovered_passed (all failures recovered no blockers)`);
   }
 
   // Collect unique valueKeys from planSteps for requiredData

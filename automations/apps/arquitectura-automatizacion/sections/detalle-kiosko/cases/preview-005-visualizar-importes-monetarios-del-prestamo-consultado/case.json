@@ -1,0 +1,10 @@
+{
+  "id": "preview-005-visualizar-importes-monetarios-del-prestamo-consultado",
+  "externalId": "PREVIEW-005",
+  "caseId": 0,
+  "title": "Visualizar importes monetarios del préstamo consultado",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-07-03T00:06:14.567Z"
+}

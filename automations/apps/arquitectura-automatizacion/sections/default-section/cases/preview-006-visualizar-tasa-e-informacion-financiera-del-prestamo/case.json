@@ -1,0 +1,10 @@
+{
+  "id": "preview-006-visualizar-tasa-e-informacion-financiera-del-prestamo",
+  "externalId": "PREVIEW-006",
+  "caseId": 0,
+  "title": "Visualizar tasa e informacion financiera del prestamo",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-07-02T21:59:46.376Z"
+}

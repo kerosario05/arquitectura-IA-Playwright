@@ -7,6 +7,7 @@ import type { PublishedCaseEntry } from "./launch-orchestrator";
 import { toVirtualCase, type ScenarioPreviewRequest, type VirtualCase } from "../../types/scenario-preview.types";
 import { config, requireTestRailConfig } from "../../config/env";
 import { TestRailClient } from "../../clients/testrail.client";
+import { defectChecklistStore } from "../services/defect-checklist-store";
 import {
   normalizeScenario,
   normalizeVirtualCase,
@@ -100,9 +101,35 @@ async function consolidateRunEvidence(
       }
 
       // Apply final status overrides from case_finished events
+      // BUT: evidence gate failures (Fallido) must not be overridden to Exitoso
       if (caseOutcomeMap && caseOutcomeMap.size > 0) {
         console.log(`[evidence:run] applying ${caseOutcomeMap.size} status overrides from case_finished events`);
         for (const [scenarioId, outcome] of caseOutcomeMap.entries()) {
+          // Get recorded scenario - handle both Map and object/array structures
+          let recordedScenario: any = null;
+          if (runRecorder.scenarios instanceof Map) {
+            recordedScenario = runRecorder.scenarios.get(scenarioId);
+          } else if (Array.isArray(runRecorder.scenarios)) {
+            recordedScenario = runRecorder.scenarios.find((s: any) => s?.scenarioId === scenarioId || s?.id === scenarioId);
+          } else if (typeof runRecorder.scenarios === "object" && runRecorder.scenarios !== null) {
+            recordedScenario = runRecorder.scenarios[scenarioId];
+          }
+
+          // Check if this scenario was previously marked as failed by evidence gate
+          const currentEvidenceStatus = recordedScenario?.status;
+          const isEvidenceGateFailed = currentEvidenceStatus === "Fallido" &&
+            (recordedScenario?.failureReasons?.some((r: string) =>
+              r.includes("evidence_gate") || r.includes("missing_detail_screenshot") || r.includes("promotion_gate")
+            ) ?? false);
+
+          // Don't allow case_finished to improve Fallido (from evidence gate) to Exitoso
+          if (isEvidenceGateFailed && outcome.status === "passed") {
+            console.log(
+              `[evidence:run] statusOverrideSkipped scenarioId=${scenarioId} from="Fallido" attempted="Exitoso" reason=evidence_gate_failed`,
+            );
+            continue;
+          }
+
           runRecorder.overrideScenarioStatus(scenarioId, outcome.status, "case_finished");
         }
       }
@@ -940,22 +967,117 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
     }
   }
 
+  // PRE-GUARDS: Capture original scenario steps as authoritative source
+  const originalScenarioSteps = new Map<string, string[]>();
+  for (const vc of normalizedCases) {
+    originalScenarioSteps.set(vc.displayId, [...vc.steps]);
+  }
+
   // Guard: filter unsupported click targets not backed by routeProfile/snapshot
+  // but PRESERVE clicks that are part of required entry steps navigation
+  const entryStepsTargets = new Set(
+    entrySteps
+      .filter(es => es.action === "click")
+      .map(es => es.target.toLowerCase())
+  );
+
   for (const vc of normalizedCases) {
     const result = filterUnsupportedClickTargets(vc.steps, routeProfile, entrySteps);
+
+    // Filter out converted targets that are actually required navigation
+    const actuallyConverted = result.convertedTargets.filter(
+      target => !entryStepsTargets.has(target.toLowerCase())
+    );
+
     if (result.skipped > 0) {
       jobStore.appendLog(
         jobId,
         `[scenario-guard] scenario=${vc.displayId} skipped=${result.skipped} skippedReason=${result.skippedReason} allowlistSize=${result.allowlistSize} profileContextStrength=${result.profileContextStrength}`,
       );
     }
-    for (const target of result.convertedTargets) {
+
+    // Restore required navigation clicks that were converted to validations
+    const restoredSteps = result.steps.map((step: string) => {
+      const validationMatch = step.match(/^Validar que se muestre "([^"]+)"\.?$/i);
+      if (validationMatch) {
+        const target = validationMatch[1];
+        if (entryStepsTargets.has(target.toLowerCase())) {
+          const restoredStep = `Clic en "${target}".`;
+          jobStore.appendLog(
+            jobId,
+            `[scenario-guard] requiredNavigationActionRestored target="${target}" reason=required_navigation`,
+          );
+          return restoredStep;
+        }
+      }
+      return step;
+    });
+
+    // Log preserved required navigation
+    const preservedNavigation = result.convertedTargets.filter(
+      target => entryStepsTargets.has(target.toLowerCase())
+    );
+    for (const target of preservedNavigation) {
+      jobStore.appendLog(
+        jobId,
+        `[scenario-guard] requiredNavigationActionPreserved target="${target}" reason=required_navigation`,
+      );
+    }
+
+    for (const target of actuallyConverted) {
       jobStore.appendLog(
         jobId,
         `[scenario-guard] actionTarget not backed by profile/snapshot target="${target}" handling=contextual_assertion`,
       );
     }
-    vc.steps = result.steps;
+    vc.steps = restoredSteps;
+  }
+
+  // POST-GUARDS: Enforce scenario steps as authoritative (FINAL AUTHORITY PASS)
+  // Any click that exists in original scenario MUST be preserved as click, not converted
+  for (const vc of normalizedCases) {
+    const originalSteps = originalScenarioSteps.get(vc.displayId) || [];
+    const originalClicks = new Map<string, string>();
+
+    // Extract all explicit clicks from original scenario
+    for (const step of originalSteps) {
+      const clickMatch = step.match(/^Clic en "([^"]+)"/i);
+      if (clickMatch) {
+        originalClicks.set(clickMatch[1].toLowerCase(), step);
+      }
+    }
+
+    // Restore any original click that was converted to validation by ANY guard
+    let restoredCount = 0;
+    const enforcedSteps = vc.steps.map((step: string) => {
+      const validationMatch = step.match(/^Validar que se muestre "([^"]+)"\.?$/i);
+      if (validationMatch) {
+        const target = validationMatch[1];
+        const originalClick = originalClicks.get(target.toLowerCase());
+        if (originalClick) {
+          restoredCount++;
+          jobStore.appendLog(
+            jobId,
+            `[scenario-guard] explicitScenarioClickPreserved target="${target}" reason=scenario_steps_authority`,
+          );
+          return originalClick;
+        }
+      }
+      return step;
+    });
+
+    if (restoredCount > 0) {
+      jobStore.appendLog(
+        jobId,
+        `[mcp-execution] scenarioStepAuthority scenario=${vc.displayId} action=restored_explicit_clicks count=${restoredCount}`,
+      );
+      vc.steps = enforcedSteps;
+    }
+
+    jobStore.appendLog(
+      jobId,
+      `[mcp-execution] routeProfileUsedAsResolverOnly appSlug=${appSlug} scenario=${vc.displayId}`,
+    );
   }
 
   // Guard: convert unsupported short/generic click targets that appear right before ordinal selection
@@ -970,8 +1092,40 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
     vc.steps = result.steps;
   }
 
+  // Post-guards: Restore any required navigation that was converted to assertions by guards
+  // This runs AFTER all guards to catch re-conversions
+  for (const vc of normalizedCases) {
+    vc.steps = vc.steps.map((step: string) => {
+      const validationMatch = step.match(/^Validar que se muestre "([^"]+)"\.?$/i);
+      if (validationMatch) {
+        const target = validationMatch[1];
+        if (entryStepsTargets.has(target.toLowerCase())) {
+          const restoredStep = `Clic en "${target}".`;
+          jobStore.appendLog(
+            jobId,
+            `[scenario-guard] requiredNavigationActionRestored target="${target}" source=post_guards`,
+          );
+          return restoredStep;
+        }
+      }
+      return step;
+    });
+  }
+
   // Guard: ensure detail scenarios have an item selection step before detail assertions
   for (const vc of normalizedCases) {
+    // Skip list-only scenarios — they should not get ordinal selection
+    const isListOnly =
+      /^visualiz(?:aci[oó]n|ar)\s+(?:\w+\s+)*listado/i.test(vc.title) ||
+      /^validar\s+(?:el\s+)?listado/i.test(vc.title) ||
+      /^mostrar\s+listado/i.test(vc.title) ||
+      /listado\s+de\s+\w+/i.test(vc.title) ||
+      vc.steps.some(s => /^validar que se muestre el listado/i.test(stripStepNumbering(s))) ||
+      (/\blistado\b/i.test(vc.title) && !/\bdetalle\b/i.test(vc.title));
+    if (isListOnly) {
+      jobStore.appendLog(jobId, `[scenario-detail-guard] skipped scenario=${vc.displayId} reason=list_only`);
+      continue;
+    }
     const result = ensureDetailScenarioHasItemSelection(vc.steps, vc.expectedResult, routeProfile, entrySteps);
     if (result.inserted) {
       jobStore.appendLog(
@@ -1058,8 +1212,103 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   }
 
   // Validate artifacts before execution (FASE 3)
+  // Expected navigation clicks = all entry steps that are clicks (minimum navigation for any route)
+  const expectedNavigationTargets = new Set(
+    entrySteps.map((es) => es.target.toLowerCase())
+  );
+  const expectedRequiredNavigationCount = entrySteps.filter((es) => es.action === "click").length;
+
+  let hasNavigationBlockage = false;
+
   for (const vc of normalizedCases) {
     jobStore.appendLog(jobId, `[scenario-preview-runner] beforeWrite scenario=${vc.displayId} steps=${JSON.stringify(vc.steps)}`);
+
+    // Verify that required navigation is preserved as clicks, not converted to assertions
+    // Step 1: Repair ANY assertions that correspond to navigation entry points
+    let repairedCount = 0;
+    const repairedSteps = vc.steps.map((step: string) => {
+      const validationMatch = step.match(/^Validar que se muestre "([^"]+)"\.?$/i);
+      if (validationMatch) {
+        const target = validationMatch[1];
+        // Repair if target is ANY entry step (not just clicks, any action)
+        if (expectedNavigationTargets.has(target.toLowerCase())) {
+          const repairedStep = `Clic en "${target}".`;
+          repairedCount++;
+          jobStore.appendLog(
+            jobId,
+            `[scenario-preview-runner] requiredNavigationRepairApplied scenario=${vc.displayId} target="${target}" from=assertion to=click`,
+          );
+          return repairedStep;
+        }
+      }
+      return step;
+    });
+
+    if (repairedCount > 0) {
+      vc.steps = repairedSteps;
+    }
+
+    // Step 2: Validate that we have the correct number of navigation clicks
+    const actualNavigationClicks = vc.steps.filter((s: string) => s.match(/^Clic en/i) && expectedNavigationTargets.has(
+      (s.match(/^Clic en "([^"]+)"/i)?.[1] || "").toLowerCase()
+    )).length;
+
+    if (expectedRequiredNavigationCount > 0 && actualNavigationClicks !== expectedRequiredNavigationCount) {
+      const missingTargets = Array.from(expectedNavigationTargets).filter(
+        target => !vc.steps.some(s => s.match(new RegExp(`^Clic en "${target}"`, "i")))
+      );
+      jobStore.appendLog(
+        jobId,
+        `[scenario-preview-runner] requiredNavigationVerified scenario=${vc.displayId} status=error clicks=${actualNavigationClicks} expected=${expectedRequiredNavigationCount}`,
+      );
+      jobStore.appendLog(
+        jobId,
+        `[scenario-preview-runner] requiredNavigationBlocked scenario=${vc.displayId} missing="${missingTargets.join(", ")}" action=abort_before_discovery`,
+      );
+      hasNavigationBlockage = true;
+    } else {
+      jobStore.appendLog(
+        jobId,
+        `[scenario-preview-runner] requiredNavigationExpected scenario=${vc.displayId} expected=${expectedRequiredNavigationCount} source=full_private_navigation targets="${Array.from(expectedNavigationTargets).join("|")}"`,
+      );
+      jobStore.appendLog(
+        jobId,
+        `[scenario-preview-runner] requiredNavigationVerified scenario=${vc.displayId} status=ok clicks=${actualNavigationClicks} expected=${expectedRequiredNavigationCount}`,
+      );
+    }
+  }
+
+  // FAIL-FAST: If navigation is blocked, abort before writing and executing
+  if (hasNavigationBlockage) {
+    jobStore.appendLog(jobId, `[run:scenario-preview] aborting execution: required navigation incomplete`);
+    const resultsPath = path.join(artifactDir, "results.json");
+    fs.writeFileSync(
+      resultsPath,
+      JSON.stringify({
+        ok: false,
+        error: "required_navigation_incomplete",
+        message: "Scenarios have missing required navigation steps. Execution aborted.",
+        details: normalizedCases.map(vc => ({
+          scenarioId: vc.displayId,
+          title: vc.title,
+          steps: vc.steps
+        }))
+      }, null, 2),
+      "utf-8",
+    );
+    jobStore.update(jobId, {
+      status: "failed",
+      completedAt: new Date().toISOString(),
+      errorMessage: "Scenarios have missing required navigation steps",
+      summary: {
+        totalStories: normalizedCases.length,
+        synced: 0,
+        passed: 0,
+        failed: 0,
+        errorMessage: "Navigation validation failed - execution blocked"
+      }
+    });
+    return;
   }
 
   const previewPath = savePreviewScenarios(artifactDir, normalizedCases);
@@ -1460,6 +1709,10 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
           } catch {
             // ignore
           }
+          jobStore.appendLog(jobId, `[defect-checklist] completed issueKey=${issueKey} defectCount=${list.defects.length}`);
+          jobStore.update(jobId, { defectCount: list.defects.length } as any);
+        } else {
+          jobStore.appendLog(jobId, `[defect-checklist] skipped reason=missing_issue_key jobId=${jobId}`);
         }
       }
     }, firstCaseTimeoutMs);
@@ -1929,6 +2182,139 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
       );
     } catch {
       // non-fatal; best-effort persistence of per-case outcomes
+    }
+
+    // Helper: build human-readable defect description from technical failure reason
+    function buildHumanDefectDescription(scenarioTitle: string, failureReason?: string): string {
+      const reason = (failureReason ?? "").toLowerCase();
+      let problem = "El escenario falló durante la ejecución automatizada y requiere revisión.";
+      if (reason.includes("assertion_not_found") || reason.includes("assertion")) {
+        problem = "Durante la ejecución del escenario, no se encontró en pantalla la información esperada para completar la validación.";
+      } else if (reason.includes("timeout")) {
+        problem = "El escenario no pudo completarse porque la pantalla o acción esperada tardó más de lo permitido.";
+      } else if (reason.includes("target_not_found") || reason.includes("element_not_found")) {
+        problem = "No se encontró en pantalla la opción o elemento necesario para continuar con el escenario.";
+      } else if (reason.includes("click_failed")) {
+        problem = "No fue posible seleccionar la opción requerida durante la ejecución del escenario.";
+      } else if (reason.includes("auth_failed") || reason.includes("authentication")) {
+        problem = "No se pudo completar correctamente el flujo de autenticación requerido para ejecutar el escenario.";
+      }
+      const lines: string[] = [];
+      lines.push(`Escenario: ${scenarioTitle}`);
+      lines.push(problem);
+      lines.push("Acción sugerida: revisar la evidencia y confirmar si corresponde a un defecto funcional o ajuste del caso de prueba.");
+      return lines.join("\n\n");
+    }
+
+    // Helper: infer defect severity and severityReason from failure context
+    function inferDefectSeverity(failureReason?: string, _scenarioId?: string, _scenarioTitle?: string): { severity: "low" | "medium" | "high" | "critical"; severityReason: string } {
+      const reason = (failureReason ?? "").toLowerCase();
+      // critical: auth failures, total blockage
+      if (reason.includes("auth_failed") || reason.includes("authentication") || reason.includes("login") || reason.includes("otp")) {
+        return { severity: "critical", severityReason: "Fallo de autenticación o bloqueo total que impide ejecutar el flujo." };
+      }
+      // high: product/detail loading failures, missing key fields
+      if (reason.includes("target_not_found") || reason.includes("element_not_found") || reason.includes("selection") || reason.includes("no carga") ||
+          reason.includes("producto") || reason.includes("balance") || reason.includes("monto") || reason.includes("tasa") ||
+          reason.includes("fecha") || reason.includes("estado") || reason.includes("certificado") || reason.includes("detalle") ||
+          reason.includes("listado")) {
+        return { severity: "high", severityReason: "El fallo afecta información principal esperada por la Historia de Usuario." };
+      }
+      // low: formatting, labels, copy, warnings
+      if (reason.includes("formato") || reason.includes("formato") || reason.includes("copy") || reason.includes("label") ||
+          reason.includes("warning") || reason.includes("texto secundario")) {
+        return { severity: "low", severityReason: "El fallo corresponde a un aspecto visual o de formato menor." };
+      }
+      // default: medium
+      return { severity: "medium", severityReason: "Validación esperada no encontrada. Requiere revisión funcional." };
+    }
+
+    // Auto-create defects in HU checklist for failed cases
+    try {
+      const finalFailed = finalSummary?.failed ?? 0;
+      if (finalFailed > 0) {
+        const jobParams = (jobStore.get(jobId)?.params ?? {}) as Record<string, unknown>;
+        const issueKey = String(jobParams.issueKey ?? jobParams.jiraKey ?? p.jiraKey ?? "");
+        if (issueKey && issueKey !== "undefined" && issueKey !== "") {
+          jobStore.appendLog(jobId, `[defect-checklist] resolved issueKey=${issueKey} jobId=${jobId} failed=${finalFailed}`);
+
+          // Collect failed cases: first from caseOutcomeMap, then from results.json as fallback
+          const failedCases: Array<{ id: string; status: string; failureReason?: string }> = [];
+          const mapSize = caseOutcomeMap.size;
+          jobStore.appendLog(jobId, `[defect-checklist] caseOutcomeMap size=${mapSize}`);
+          for (const [caseId, outcome] of caseOutcomeMap.entries()) {
+            if (outcome.status === "failed") {
+              failedCases.push({ id: caseId, status: outcome.status, failureReason: outcome.failureReason });
+            }
+          }
+
+          // Fallback: read from results.json if caseOutcomeMap was empty
+          if (failedCases.length === 0) {
+            try {
+              const resultsPath = path.join(artifactDir, "results.json");
+              if (fs.existsSync(resultsPath)) {
+                const resultsFile = JSON.parse(fs.readFileSync(resultsPath, "utf-8"));
+                const caseResults = resultsFile.caseResults || resultsFile.results || [];
+                if (Array.isArray(caseResults)) {
+                  for (const cr of caseResults) {
+                    if (cr.status === "failed") {
+                      failedCases.push({ id: cr.id || cr.caseId || cr.scenarioId, status: cr.status, failureReason: cr.failureReason || cr.error });
+                    }
+                  }
+                }
+                jobStore.appendLog(jobId, `[defect-checklist] results.json fallback cases=${caseResults.length} failed=${failedCases.length}`);
+              }
+            } catch (_) { /* non-fatal */ }
+          }
+
+          jobStore.appendLog(jobId, `[defect-checklist] failedCases count=${failedCases.length} ids=${failedCases.map(f => f.id).join(",") || "none"}`);
+
+          if (failedCases.length === 0) {
+            jobStore.appendLog(jobId, `[defect-checklist] skipped reason=no_failed_cases_found jobId=${jobId}`);
+          } else {
+            const list = defectChecklistStore.getOrCreate(issueKey);
+            const checklistUrl = `/checklist/${list.urlSlug}`;
+
+            for (const fc of failedCases) {
+              const scenarioTitle = normalizedCases.find((nc: any) => nc.displayId === fc.id)?.title ?? fc.id;
+              const existingDefect = list.defects.find(d => d.jobId === jobId && d.scenarioId === fc.id);
+      if (existingDefect) {
+        existingDefect.updatedAt = new Date().toISOString();
+        if (fc.failureReason && fc.failureReason.length > 10) {
+          existingDefect.description = buildHumanDefectDescription(scenarioTitle, fc.failureReason);
+          const sv = inferDefectSeverity(fc.failureReason, fc.id, scenarioTitle);
+          existingDefect.severity = sv.severity;
+          existingDefect.severityReason = sv.severityReason;
+        }
+        jobStore.appendLog(jobId, `[defect-checklist] upsert key=${jobId}:${fc.id} issueKey=${issueKey} scenarioId=${fc.id} jobId=${jobId} action=updated`);
+        continue;
+      }
+      const humanDescription = buildHumanDefectDescription(scenarioTitle, fc.failureReason);
+      const sv = inferDefectSeverity(fc.failureReason, fc.id, scenarioTitle);
+      defectChecklistStore.addDefect(issueKey, {
+        description: humanDescription,
+        severity: sv.severity,
+        severityReason: sv.severityReason,
+        jobId,
+        scenarioId: fc.id,
+        scenarioTitle,
+        evidenceUrl: undefined,
+      });
+      jobStore.appendLog(jobId, `[defect-checklist] upsert key=${jobId}:${fc.id} issueKey=${issueKey} scenarioId=${fc.id} jobId=${jobId} action=created`);
+            }
+
+            // Refresh checklist to get accurate defectCount after upserts
+            const updatedList = defectChecklistStore.get(issueKey);
+            const defectCount = updatedList ? updatedList.defects.length : failedCases.length;
+            jobStore.update(jobId, { issueKey, checklistUrl, defectCount } as any);
+            jobStore.appendLog(jobId, `[defect-checklist] completed issueKey=${issueKey} defectCount=${defectCount}`);
+          }
+        } else {
+          jobStore.appendLog(jobId, `[defect-checklist] skipped reason=missing_issue_key jobId=${jobId}`);
+        }
+      }
+    } catch (_defectErr) {
+      jobStore.appendLog(jobId, `[defect-checklist] error message=${_defectErr instanceof Error ? _defectErr.message : String(_defectErr)}`);
     }
 
     // Write job.json metadata for rerun support (survives server restart)

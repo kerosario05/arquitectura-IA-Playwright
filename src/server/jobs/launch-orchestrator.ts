@@ -6,6 +6,7 @@ import { TestRailClient } from "../../clients/testrail.client";
 import { publishScenariosToTestRail } from "../services/testrail-case-publisher";
 import { buildScenarioPreviewScenarioId } from "../services/testrail-sync-types";
 import type { McpScenario } from "../../scenarios/scenario-types";
+import { defectChecklistStore } from "../services/defect-checklist-store";
 
 const ROOT = path.resolve(__dirname, "..", "..", "..");
 const LAUNCH_ARTIFACTS_DIR = path.join(ROOT, ".artifacts", "scenario-launch-runs");
@@ -276,10 +277,24 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
   fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), "utf-8");
   console.log(`[launch-execution] manifest written path=${manifestPath}`);
 
+  const issueKey = input.jiraKey || (input.selectedScenarios[0] as any)?.sourceIssueKey || "";
+
+  let checklistUrl: string | undefined;
+  if (issueKey) {
+    const list = defectChecklistStore.getOrCreate(issueKey);
+    checklistUrl = `/checklist/${list.urlSlug}`;
+  }
+  if (issueKey) {
+    const list = defectChecklistStore.getOrCreate(issueKey);
+    checklistUrl = `/checklist/${list.urlSlug}`;
+  }
+
   return {
     ok: true,
     launchId,
     status: "test_run_created",
+    issueKey: issueKey || undefined,
+    checklistUrl,
     publishedCases,
     testRunId,
     manifestPath,

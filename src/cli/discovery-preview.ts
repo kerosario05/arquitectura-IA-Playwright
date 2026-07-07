@@ -569,6 +569,7 @@ async function consolidateRunEvidence(
   appSlug: string,
   sectionSlug: string | undefined,
   sectionName: string | undefined,
+  results: Array<{ caseId?: string; displayId?: string; status?: string }>,
 ): Promise<void> {
   try {
     const evidenceConfig = loadEvidenceConfig();
@@ -614,6 +615,15 @@ async function consolidateRunEvidence(
       }
     } else {
       console.log(`[evidence:run] runDir does not exist: ${runDir}`);
+    }
+
+    if (results.length > 0) {
+      console.log(`[evidence:run] applying ${results.length} status overrides from preview results`);
+      for (const result of results) {
+        const scenarioId = result.displayId ?? result.caseId;
+        if (!scenarioId || !result.status) continue;
+        runRecorder.overrideScenarioStatus(scenarioId, result.status, "case_finished");
+      }
     }
 
     await runRecorder.finish();
@@ -727,7 +737,7 @@ async function main(): Promise<void> {
   const firstCase = cases[0];
   const sectionSlug = firstCase?.sectionSlug;
   const sectionName = firstCase?.sectionName;
-  await consolidateRunEvidence(evidenceRunId, resolvedAppSlug, sectionSlug, sectionName);
+  await consolidateRunEvidence(evidenceRunId, resolvedAppSlug, sectionSlug, sectionName, results);
 
   // Aggregate failure groups (FASE 5)
   const failureGroups = buildPreviewFailureGroups(results);

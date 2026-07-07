@@ -1,0 +1,9 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "PREVIEW-001",
+  "testRailCaseId": 0,
+  "generatedAt": "2026-07-01T13:10:29.925Z",
+  "title": "Validar acceso al módulo de consulta de balance de Depósitos a Plazo"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "preview-005-validar-opciones-visibles-posteriores-a-la-consulta-del-detalle",
+  "externalId": "PREVIEW-005",
+  "caseId": 0,
+  "title": "Validar opciones visibles posteriores a la consulta del detalle",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-07-01T17:57:50.718Z"
+}

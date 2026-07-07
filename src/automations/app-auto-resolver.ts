@@ -375,6 +375,15 @@ export function getRouteProfileFromConfig(config: Record<string, unknown> | null
   return null;
 }
 
+export function getRouteProfilesFromConfig(config: Record<string, unknown> | null): Record<string, unknown> | null {
+  if (!config) return null;
+  const rps = config.routeProfiles;
+  if (rps && typeof rps === "object" && !Array.isArray(rps)) {
+    return rps as Record<string, unknown>;
+  }
+  return null;
+}
+
 export function buildEntrySteps(routeProfile: Record<string, unknown> | null): string[] {
   if (!routeProfile) return [];
   const entry = routeProfile.entry;

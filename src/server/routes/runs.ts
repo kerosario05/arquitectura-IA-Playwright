@@ -7,6 +7,7 @@ import { startDiscoveryBatchRun } from "../jobs/discovery-batch-runner";
 import { startScenarioPreviewRun } from "../jobs/scenario-preview-runner";
 import { prepareRerun } from "../jobs/rerun-runner";
 import { launchExecution } from "../jobs/launch-orchestrator";
+import { defectChecklistStore } from "../services/defect-checklist-store";
 import type { McpScenario } from "../../scenarios/scenario-types";
 
 export const runsRouter = Router();
@@ -83,6 +84,9 @@ export function buildRunStreamPayload(
     startedAt?: string;
     completedAt?: string;
     durationMs?: number;
+    issueKey?: string;
+    checklistUrl?: string;
+    defectCount?: number;
   },
   terminal = false,
 ) {
@@ -91,6 +95,9 @@ export function buildRunStreamPayload(
     summary: job.summary,
     currentCase: job.currentCase,
     startedAt: job.startedAt,
+    issueKey: job.issueKey,
+    checklistUrl: job.checklistUrl,
+    defectCount: job.defectCount,
     ...(terminal ? {
       exitCode: job.exitCode,
       errorMessage: job.errorMessage ?? (job.summary as any)?.errorMessage,
@@ -197,8 +204,18 @@ runsRouter.post("/scenario-preview", (req, res) => {
     }
   }
 
+  const issueKey = ((validScenarios[0] as any)?.sourceIssueKey || body.source?.projectKey || body.jiraKey || "").trim();
+
+  let checklistUrl: string | undefined;
+  if (issueKey) {
+    const list = defectChecklistStore.getOrCreate(issueKey);
+    checklistUrl = `/checklist/${list.urlSlug}`;
+  }
+
   const jobPayload = {
     ...body,
+    issueKey,
+    checklistUrl,
     targetAppSlug: inferredTargetAppSlug,
     targetAppName: inferredTargetAppName,
   };
@@ -218,11 +235,16 @@ runsRouter.post("/scenario-preview", (req, res) => {
   }
 
   const job = jobStore.create("scenario-preview", jobPayload as Record<string, unknown>);
+  if (issueKey) {
+    jobStore.update(job.id, { issueKey, checklistUrl } as any);
+  }
   setImmediate(() => startScenarioPreviewRun(job.id));
 
   res.status(202).json({
     ok: true,
     jobId: job.id,
+    issueKey,
+    checklistUrl,
     status: job.status,
     mode: "scenario-preview",
     scenarioCount: validScenarios.length,
@@ -336,6 +358,9 @@ runsRouter.get("/:jobId/logs", (req, res) => {
       startedAt: current.startedAt,
       completedAt: current.completedAt,
       durationMs: current.durationMs,
+      issueKey: (current as any).issueKey,
+      checklistUrl: (current as any).checklistUrl,
+      defectCount: (current as any).defectCount,
     }, true));
     res.end();
     return;
@@ -351,6 +376,9 @@ runsRouter.get("/:jobId/logs", (req, res) => {
       startedAt: current.startedAt,
       completedAt: current.completedAt,
       durationMs: current.durationMs,
+      issueKey: (current as any).issueKey,
+      checklistUrl: (current as any).checklistUrl,
+      defectCount: (current as any).defectCount,
     }, true));
     res.end();
     return;
@@ -369,6 +397,9 @@ runsRouter.get("/:jobId/logs", (req, res) => {
           startedAt: (job as any).startedAt,
           completedAt: (job as any).completedAt,
           durationMs: (job as any).durationMs,
+          issueKey: (job as any).issueKey,
+          checklistUrl: (job as any).checklistUrl,
+          defectCount: (job as any).defectCount,
         }, true));
         res.end();
       } else {
@@ -377,6 +408,9 @@ runsRouter.get("/:jobId/logs", (req, res) => {
           summary: job.summary,
           currentCase: (job as any).currentCase,
           startedAt: (job as any).startedAt,
+          issueKey: (job as any).issueKey,
+          checklistUrl: (job as any).checklistUrl,
+          defectCount: (job as any).defectCount,
         }));
       }
     }
@@ -385,7 +419,7 @@ runsRouter.get("/:jobId/logs", (req, res) => {
   req.on("close", unsubscribe);
 });
 
-runsRouter.post("/:jobId/rerun", (req, res) => {
+runsRouter.post("/:jobId/rerun", async (req, res) => {
   const jobId = req.params.jobId;
   const mode = (req.body?.mode as string) === "failed_only" ? "failed_only" : "all";
   const ARTIFACTS_DIR = path.resolve(__dirname, "..", "..", "..", ".artifacts", "scenario-preview-runs");
@@ -420,6 +454,31 @@ runsRouter.post("/:jobId/rerun", (req, res) => {
   console.log(`[runs:rerun] sourceJobId=${jobId} memoryJob=${!memoryJobMiss} artifactFallback=${memoryJobMiss}`);
   console.log(`[runs:rerun] artifactDir=${artifactDir}`);
 
+  // Resolve issueKey: body > sourceJob > sourceJob.params > artifact > scenarios
+  let issueKey = String(req.body?.issueKey || req.body?.jiraKey || "");
+  if (!issueKey && previous) {
+    issueKey = String((previous as any).issueKey || (previous.params as any)?.issueKey || (previous.params as any)?.jiraKey || "");
+  }
+  if (!issueKey) {
+    // Try to infer from the first scenario in prepared.scenarios
+    const firstSc = Array.isArray(prepared.scenarios) ? (prepared.scenarios[0] as any) : null;
+    if (firstSc) {
+      issueKey = String(firstSc.sourceIssueKey || firstSc.issueKey || firstSc.jiraKey || firstSc.refs || "");
+    }
+  }
+  const source = issueKey ? (req.body?.issueKey ? "body" : previous ? "sourceJob" : "artifact") : "missing";
+  console.log(`[runs:rerun] resolved issueKey=${issueKey || "missing"} source=${source}`);
+
+  // Build checklistUrl if issueKey resolved
+  let checklistUrl: string | undefined;
+  if (issueKey && issueKey !== "undefined" && issueKey !== "") {
+    const { defectChecklistStore } = await import("../services/defect-checklist-store");
+    const list = defectChecklistStore.getOrCreate(issueKey);
+    checklistUrl = `/checklist/${list.urlSlug}`;
+  } else {
+    console.log(`[runs:rerun] warning missing_issue_key sourceJobId=${jobId}`);
+  }
+
   // 4. Build new job payload
   let newPayload: Record<string, unknown>;
 
@@ -432,6 +491,10 @@ runsRouter.post("/:jobId/rerun", (req, res) => {
       sourceJobId: jobId,
       rerunMode: mode,
       rerun: true,
+      issueKey,
+      checklistUrl,
+      sectionName: prevParams.sectionName,
+      sectionSlug: prevParams.sectionSlug,
       publishToTestRail: prevParams.publishToTestRail ?? false,
       createTestRun: prevParams.createTestRun ?? false,
       reportResults: prevParams.reportResults ?? false,
@@ -446,6 +509,10 @@ runsRouter.post("/:jobId/rerun", (req, res) => {
       sourceJobId: jobId,
       rerunMode: mode,
       rerun: true,
+      issueKey,
+      checklistUrl,
+      sectionName: prepared.sectionName,
+      sectionSlug: prepared.sectionSlug,
       publishToTestRail: false,
       createTestRun: false,
       reportResults: false,
@@ -460,8 +527,11 @@ runsRouter.post("/:jobId/rerun", (req, res) => {
   }
 
   const newJob = jobStore.create("scenario-preview", newPayload);
+  if (issueKey && issueKey !== "undefined" && issueKey !== "") {
+    jobStore.update(newJob.id, { issueKey, checklistUrl } as any);
+  }
   jobStore.appendLog(newJob.id, `[runs:rerun] sourceJobId=${jobId} mode=${mode} selected=${prepared.selectedCount} total=${prepared.totalCount}`);
-  jobStore.appendLog(newJob.id, `[runs:rerun] newJobId=${newJob.id}`);
+  jobStore.appendLog(newJob.id, `[runs:rerun] newJobId=${newJob.id} issueKey=${issueKey || "?"} checklistUrl=${checklistUrl || "?"}`);
   jobStore.appendLog(newJob.id, `[runs:rerun] appSlug=${prepared.appSlug}`);
   jobStore.appendLog(newJob.id, `[runs:rerun] artifactDir=${artifactDir}`);
 
@@ -471,6 +541,8 @@ runsRouter.post("/:jobId/rerun", (req, res) => {
     ok: true,
     jobId: newJob.id,
     status: newJob.status,
+    issueKey,
+    checklistUrl,
     mode: "rerun",
     rerunMode: mode,
     scenarioCount: prepared.selectedCount,

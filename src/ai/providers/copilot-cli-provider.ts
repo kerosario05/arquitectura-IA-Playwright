@@ -228,6 +228,11 @@ export class CopilotCliProvider {
       if (purpose === "scenario_generation") {
         const shapeValidation = this.validateScenarioShape(extractionResult.parsed);
         if (!shapeValidation.valid) {
+          const receivedKeys = (shapeValidation.detectedKeys || []).join(",");
+          console.log(
+            `[scenarios:ai] invalidShape receivedKeys=${receivedKeys} ` +
+            `stdoutChars=${result.stdout.length} parseStrategy=${extractionResult.strategy}`
+          );
           const artifactDir = await this.saveDebugArtifacts(result.stdout, result.stderr, "", request.messages, purpose);
           throw new AiProviderError("ai_provider_invalid_json",
             `AI provider returned JSON but scenario shape is invalid: ${shapeValidation.reason}`, {

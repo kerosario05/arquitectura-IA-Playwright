@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-validar-acceso-al-modulo-de-consulta-de-balance-de-deposito-a-plazo",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Validar acceso al modulo de consulta de balance de deposito a plazo",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-07-01T13:47:15.617Z"
+}

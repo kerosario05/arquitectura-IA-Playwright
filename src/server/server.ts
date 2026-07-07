@@ -7,6 +7,7 @@ import { testrailRouter } from "./routes/testrail";
 import { runsRouter } from "./routes/runs";
 import { scenariosRouter } from "./routes/scenarios";
 import { debugRouter } from "./routes/debug";
+import { checklistRouter } from "./routes/checklist";
 import { resolveServerPort } from "./config";
 
 const PORT = resolveServerPort(process.env as Record<string, string | undefined>);
@@ -41,6 +42,7 @@ app.use("/api/jira", jiraRouter);
 app.use("/api/testrail", testrailRouter);
 app.use("/api/runs", runsRouter);
 app.use("/api/scenarios", scenariosRouter);
+app.use(checklistRouter);
 
 const isDebugEnabled =
   process.env.NODE_ENV !== "production" ||

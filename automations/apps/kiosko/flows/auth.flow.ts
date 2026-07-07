@@ -294,28 +294,85 @@ export class AuthFlow {
       currentStage = await this.detectCurrentStage();
     }
 
-    // Stage 3: OTP
-    if (currentStage === 'otp' || currentStage === 'phone_confirmation') {
+    // Stage 3: OTP — only if currentStage is otp, skip if still phone_confirmation
+    if (currentStage === 'otp') {
       console.log(`[auth-flow] Processing OTP stage...`);
       await this.completeOtp(client, stagesCompleted);
       currentStage = await this.detectCurrentStage();
     }
 
-    // Finalize
-    return this.finalizeAuth(stagesCompleted, alias, landing);
+    // Finalize — skip if we know OTP is still pending
+    if (currentStage === 'otp') {
+      console.log(`[auth-flow] skipFinalize reason=otp_stage_pending`);
+      return this.finalizeAuth(stagesCompleted, alias, landing);
+    } else {
+      return this.finalizeAuth(stagesCompleted, alias, landing);
+    }
   }
 
   private async completeIdentification(client: AuthClientProfile, stagesCompleted: AuthFlowStage[]): Promise<void> {
     console.log(`[auth-flow] action=completeIdentification`);
+    const idStart = Date.now();
     
-    // Wait for identification page to be ready
+    // Interactive readiness check: wait for controls we can act on, not page load
+    const idReadyStart = Date.now();
+    let interactiveReady = false;
+    let readySignal = 'none';
     try {
-      await this.identificationPage.expectLoaded();
-      console.log(`[auth-flow] Identification page loaded`);
+      // Wait briefly for any interactive element: input, keyboard, or button
+      interactiveReady = await this.page.waitForFunction(() => {
+        // Look for interactive controls
+        const inputs = document.querySelectorAll('input[type="text"], input[type="tel"], input:not([type])');
+        for (const inp of inputs) {
+          const ctx = inp as HTMLInputElement;
+          if (/identificaci[óo]n|cedula|cédula|n[úu]mero|numero/i.test(ctx.name || ctx.id || ctx.placeholder || '')) {
+            return 'native_input';
+          }
+        }
+        const buttons = document.querySelectorAll('button, [role="button"]');
+        for (const btn of buttons) {
+          if (/continuar|continue|cedula|cédula|identificaci[óo]n/i.test(btn.textContent || '')) {
+            return 'continue_button';
+          }
+        }
+        // Virtual keyboard detection (digit buttons)
+        const digitBtns = document.querySelectorAll('button');
+        let digitCount = 0;
+        for (const db of digitBtns) {
+          if (/^[0-9]$/.test(db.textContent?.trim() || '')) digitCount++;
+          if (digitCount >= 8) return 'virtual_keyboard';
+        }
+        // Identification-related text as weak signal
+        const body = document.body?.innerText || '';
+        if (/identificaci[óo]n|n[úu]mero de identificación|numero de identificacion|cedula|c[eé]dula|tipo de identificaci[óo]n/i.test(body)) {
+          return 'dom_text';
+        }
+        return false;
+      }, { timeout: 1500 }).then((result) => {
+        if (result) {
+          readySignal = String(result);
+          return true;
+        }
+        return false;
+      }).catch(() => false);
     } catch {
-      console.log(`[auth-flow] Waiting for identification page...`);
-      await this.page.waitForLoadState('domcontentloaded', { timeout: 3000 });
+      // fallback below
     }
+    
+    if (interactiveReady) {
+      console.log(`[auth-flow] identificationPageReady signal=${readySignal} waitedMs=${Date.now() - idReadyStart}`);
+      console.log(`[auth-flow] skippedLegacyIdentificationWait reason=interactive_ready`);
+    } else {
+      // Legacy fallback: short wait for page load
+      console.log(`[auth-flow] identificationPageReady signal=legacy_wait waitedMs=${Date.now() - idReadyStart}`);
+      try {
+        await this.identificationPage.expectLoaded();
+      } catch {
+        console.log(`[auth-flow] Waiting for identification page...`);
+        await this.page.waitForLoadState('domcontentloaded', { timeout: 2000 });
+      }
+    }
+    console.log(`[auth-flow:timing] stage=identification_input action=waitIdentificationPage durationMs=${Date.now() - idStart} result=${interactiveReady ? 'interactive_ready' : 'legacy_wait'}`);
 
     try {
       await this.identificationPage.selectIdentificationType(client.identificationType);
@@ -330,12 +387,29 @@ export class AuthFlow {
       stagesCompleted.push('identification');
       console.log(`[auth-flow] completed stage=identification`);
       
-      // Wait for transition
-      await this.page.waitForLoadState('domcontentloaded', { timeout: 5000 });
+      // Wait for transition — signal-based instead of fixed 5s
+      const afterSubmitUrl = this.page.url();
+      try {
+        await this.page.waitForFunction(
+          (prevUrl) => {
+            if (window.location.href !== prevUrl) return true;
+            const body = document.body?.innerText || '';
+            if (/tel[eé]fono|phone|otp|c[oó]digo|confirmaci[oó]n/i.test(body)) return true;
+            return false;
+          },
+          afterSubmitUrl,
+          { timeout: 6000 }
+        );
+        console.log(`[auth-flow] afterIdentificationSubmit signal=stage_advanced waitedMs=${Date.now() - idStart}`);
+      } catch {
+        await this.page.waitForLoadState('domcontentloaded', { timeout: 3000 });
+        console.log(`[auth-flow] afterIdentificationSubmit signal=timeout_fallback waitedMs=${Date.now() - idStart}`);
+      }
     } catch (error) {
       console.log(`[auth-flow] Identification step skipped or already completed: ${error instanceof Error ? error.message : String(error)}`);
       // Identification may already be done or not visible
     }
+    console.log(`[auth-flow:timing] stage=identification_input durationMs=${Date.now() - idStart} result=${stagesCompleted.includes('identification') ? 'ok' : 'failed'}`);
   }
 
   private async completePhoneConfirmation(client: AuthClientProfile, stagesCompleted: AuthFlowStage[]): Promise<void> {
@@ -366,6 +440,7 @@ export class AuthFlow {
 
   private async completeOtp(client: AuthClientProfile, stagesCompleted: AuthFlowStage[]): Promise<void> {
     console.log(`[auth-flow] action=completeOtp`);
+    const otpStart = Date.now();
     
     // Wait for OTP input to be ready
     try {
@@ -385,18 +460,54 @@ export class AuthFlow {
       stagesCompleted.push('otp');
       console.log(`[auth-flow] completed stage=otp`);
       
-      // Wait for authentication to complete
-      await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 });
+      // Wait for authentication to complete — use signal-based wait instead of fixed 10s
+      const postOtpUrl = this.page.url();
+      try {
+        await this.page.waitForFunction(
+          (prevUrl) => {
+            const url = window.location.href;
+            if (url !== prevUrl) return true;
+            // Check for common authentication success signals
+            const body = document.body?.innerText || '';
+            if (/success|autenticaci[óo]n|operaciones|transacciones|menú|menu|bienvenido/i.test(body)) return true;
+            return false;
+          },
+          postOtpUrl,
+          { timeout: 8000 }
+        );
+        console.log(`[auth-flow] afterOtpSubmit signal=page_transition waitedMs=${Date.now() - otpStart}`);
+      } catch {
+        await this.page.waitForLoadState('domcontentloaded', { timeout: 3000 });
+        console.log(`[auth-flow] afterOtpSubmit signal=timeout_fallback waitedMs=${Date.now() - otpStart}`);
+      }
     } catch (error) {
       console.log(`[auth-flow] OTP entry failed: ${error instanceof Error ? error.message : String(error)}`);
     }
+    console.log(`[auth-flow:timing] stage=otp durationMs=${Date.now() - otpStart} result=${stagesCompleted.includes('otp') ? 'ok' : 'failed'}`);
   }
 
   private async finalizeAuth(stagesCompleted: AuthFlowStage[], alias: string, landing: string): Promise<AuthFlowResult> {
     console.log(`[auth-flow] action=finalizeAuth`);
+    const finalStart = Date.now();
     
-    // Wait for final page to stabilize
-    await this.page.waitForLoadState('domcontentloaded', { timeout: 5000 });
+    // Wait for final page to stabilize — use signal-based wait
+    const finalUrl = this.page.url();
+    try {
+      await this.page.waitForFunction(
+        (prevUrl) => {
+          if (window.location.href !== prevUrl) return true;
+          const body = document.body?.innerText || '';
+          if (/operaciones|transacciones|men[uú]|menu|bienvenido|success|autenticaci[óo]n/i.test(body)) return true;
+          return false;
+        },
+        finalUrl,
+        { timeout: 6000 }
+      );
+      console.log(`[auth-flow] finalizeAuth signal=landing_detected waitedMs=${Date.now() - finalStart}`);
+    } catch {
+      await this.page.waitForLoadState('domcontentloaded', { timeout: 3000 });
+      console.log(`[auth-flow] finalizeAuth signal=timeout_fallback waitedMs=${Date.now() - finalStart}`);
+    }
     
     const finalStage = await this.detectCurrentStage();
     const isMenuVisible = await this.isOperationsMenuVisible();
@@ -411,6 +522,17 @@ export class AuthFlow {
         stagesCompleted,
         clientAlias: alias,
         landingDetected: landing
+      };
+    }
+
+    if (finalStage === 'otp') {
+      console.log(`[auth-flow] OTP pending, returning for continuation`);
+      return {
+        success: false,
+        stagesCompleted,
+        clientAlias: alias,
+        landingDetected: undefined,
+        error: 'otp_pending'
       };
     }
 

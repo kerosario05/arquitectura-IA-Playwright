@@ -1,0 +1,1127 @@
+;
+import { JiraClient } from "../clients/jira.client";
+import { loadJiraIssues } from "./jira-scenario-source";
+import { generateScenariosWithAi } from "./codex-scenario-generator";
+import { validateScenario } from "./scenario-validator";
+import {
+  resolveAppForPreview,
+  ensureFunctionalAppProfile,
+  loadAppConfig,
+  getRouteProfileFromConfig,
+  buildEntrySteps,
+  detectKioskoInfoProductos,
+  seedKioskoInfoProductosRouteProfile,
+} from "../automations/app-auto-resolver";
+import { buildDerivedExecutionContext } from "./route-profile-derived-context";
+import { repairMissingIntermediates, logIntermediateRepair } from "./scenario-intermediate-repair";
+import { detectHuIntent, isTransactionalDocumentIntent, isCatalogListingIntent, type HuIntent, type HuIntentDetection } from "./hu-intent-classifier";
+import { runGuidedRouteDiscovery } from "./guided-route-discovery";
+import type {
+  ScenarioPreviewRequest,
+  ScenarioPreviewResponse,
+  ScenarioPreviewError,
+  ValidatedScenario,
+  McpRejectedScenario,
+  McpScenario,
+  McpRouteProfile,
+} from "./scenario-types";
+
+function resolveAppSlug(requestAppSlug?: string): string {
+  if (requestAppSlug?.trim()) return requestAppSlug.trim();
+  const envSlug = process.env.APP_SLUG?.trim();
+  if (envSlug) return envSlug;
+  return "arquitectura-automatizacion";
+}
+
+function normalizeScenariosToTargetApp(scenarios: McpScenario[], targetAppSlug: string): McpScenario[] {
+  if (!targetAppSlug) return scenarios;
+  return scenarios.map((sc) => ({
+    ...sc,
+    appSlug: targetAppSlug,
+    targetAppSlug,
+  }));
+}
+
+function formatEntryStep(label: string, index: number): string {
+  return `${index + 1}. Clic en "${label}".`;
+}
+
+function stepsMatch(a: string, b: string): boolean {
+  const norm = (s: string) => s.replace(/^\d+[\.)]\s*/, "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return norm(a) === norm(b);
+}
+
+function stepIsClickOnLabel(step: string, label: string): boolean {
+  const normalized = step.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return normalized.includes(`clic en "${label.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}"`);
+}
+
+function isEntryClickStep(step: string, entryLabels: string[]): boolean {
+  const stripped = step.replace(/^\d+[\.)]\s*/, "").trim();
+  if (!/^clic en "/i.test(stripped)) return false;
+  return entryLabels.some((label) => stepIsClickOnLabel(step, label));
+}
+
+export function insertEntrySteps(
+  scenario: McpScenario,
+  entrySteps: string[],
+  entryStepConfigs?: EntryStepConfig[],
+): McpScenario {
+  const labels: string[] = [];
+
+  // Prefer new entrySteps format (action/target) over old entry labels
+  if (entryStepConfigs && entryStepConfigs.length > 0) {
+    for (const es of entryStepConfigs) {
+      if (es.action === "click" && es.target) labels.push(es.target);
+    }
+  }
+
+  // Fallback to old format (string labels from entry visibleLabels)
+  if (labels.length === 0) labels.push(...entrySteps);
+
+  if (!labels.length || !scenario.steps || scenario.steps.length === 0) return scenario;
+
+  const formattedEntry = labels.map((label, i) => formatEntryStep(label, i));
+  const existingSteps = scenario.steps.map((s) => s.trim());
+
+  // Remove ALL existing entry click steps (damaged or canonical) from anywhere in the list
+  const nonEntrySteps = existingSteps.filter((step) => !isEntryClickStep(step, labels));
+
+  // Prepend canonical entry steps
+  const newSteps = [...formattedEntry, ...nonEntrySteps];
+
+  // Re-number all steps
+  const renumbered = newSteps.map((step, idx) => {
+    return step.replace(/^\d+[\.)]\s*/, `${idx + 1}. `);
+  });
+
+  return {
+    ...scenario,
+    steps: renumbered,
+  };
+}
+
+function loadAppConfigSync(appSlug: string): Record<string, unknown> | null {
+  try {
+    const fs = require("node:fs");
+    const path = require("node:path");
+    const appsDir = path.join(process.cwd(), "automations", "apps");
+    const appConfigPath = path.join(appsDir, appSlug, "app.config.json");
+    if (!fs.existsSync(appConfigPath)) return null;
+    const content = fs.readFileSync(appConfigPath, "utf-8");
+    return JSON.parse(content);
+  } catch {
+    return null;
+  }
+}
+
+type EntryStepConfig = {
+  action: string;
+  target: string;
+  when?: string;
+  reason?: string;
+};
+
+function buildRouteProfileForPrompt(
+  targetAppSlug: string,
+  requestRouteProfile?: McpRouteProfile,
+  jiraSummary?: string,
+  jiraDescription?: string,
+  testrailSectionName?: string,
+  scenarioTitles?: string[],
+): { routeProfile: McpRouteProfile | null; source: string; entrySteps: EntryStepConfig[]; loginMode?: string } {
+  console.log(`[route-profile] resolving routeProfile targetAppSlug=${targetAppSlug} requestRouteProfile=${requestRouteProfile?.name ?? "none"}`);
+
+  // 1. Explicit routeProfile from request
+  if (requestRouteProfile && requestRouteProfile.name) {
+    const rp = requestRouteProfile as Record<string, unknown>;
+    const es = Array.isArray(rp.entrySteps) ? rp.entrySteps as EntryStepConfig[] : [];
+    console.log(`[route-profile] source=request name=${requestRouteProfile.name} entry=${requestRouteProfile.entry?.length ?? 0} entrySteps=${es.length} domainTerms=${Object.keys(requestRouteProfile.domainTerms ?? {}).length} visibleControls=${requestRouteProfile.visibleControls?.length ?? 0}`);
+    return { routeProfile: requestRouteProfile, source: "request", entrySteps: es };
+  }
+
+  // 2. Load from app.config.json
+  const appConfig = loadAppConfigSync(targetAppSlug);
+  console.log(`[route-profile] appConfig loaded=${appConfig !== null} hasRouteProfile=${appConfig?.routeProfile !== undefined}`);
+  const configRp = getRouteProfileFromConfig(appConfig);
+  if (configRp) {
+    const entry = configRp.entry as unknown[] | undefined;
+    const aliases = configRp.aliases as Record<string, unknown> | undefined;
+    const domainTerms = configRp.domainTerms as Record<string, unknown> | undefined;
+    const visibleControls = configRp.visibleControls as unknown[] | undefined;
+    const entrySteps = configRp.entrySteps as unknown[] | undefined;
+
+    console.log(`[route-profile] configRp found name=${configRp.name} entry=${entry?.length ?? 0} aliases=${Object.keys(aliases ?? {}).length} domainTerms=${Object.keys(domainTerms ?? {}).length} visibleControls=${visibleControls?.length ?? 0} entrySteps=${entrySteps?.length ?? 0}`);
+
+    if ((entry && entry.length > 0) || (aliases && Object.keys(aliases).length > 0)) {
+      const es = Array.isArray(configRp.entrySteps) ? configRp.entrySteps as EntryStepConfig[] : [];
+      console.log(`[route-profile] source=app_config returning routeProfile name=${configRp.name}`);
+      return {
+        routeProfile: configRp as unknown as McpRouteProfile,
+        source: "app_config",
+        entrySteps: es,
+        loginMode: appConfig?.loginMode as string | undefined,
+      };
+    } else {
+      console.log(`[route-profile] configRp found but entry/aliases validation failed - entry.length=${entry?.length ?? 0} aliases.keys=${Object.keys(aliases ?? {}).length}`);
+    }
+  } else {
+    console.log(`[route-profile] configRp=null after getRouteProfileFromConfig`);
+  }
+
+  // 3. Seed for KIOSKO / Información de productos
+  if (
+    detectKioskoInfoProductos({
+      targetAppSlug,
+      jiraSummary,
+      jiraDescription,
+      testrailSectionName,
+      scenarioTitles,
+    })
+  ) {
+    const seed = seedKioskoInfoProductosRouteProfile() as unknown as McpRouteProfile;
+    console.log(`[route-profile] source=seed_kiosko_info_productos name=${seed.name}`);
+    return {
+      routeProfile: seed,
+      source: "seed_kiosko_info_productos",
+      entrySteps: [],
+      loginMode: appConfig?.loginMode as string | undefined,
+    };
+  }
+
+  // 4. Default empty
+  console.log(`[route-profile] source=default returning null routeProfile`);
+  return { routeProfile: null, source: "default", entrySteps: [], loginMode: appConfig?.loginMode as string | undefined };
+}
+
+export async function generateScenarioPreview(
+  req: ScenarioPreviewRequest,
+): Promise<ScenarioPreviewResponse | ScenarioPreviewError> {
+  if (!req.projectKey) {
+    return { ok: false, error: "invalid_request", message: "projectKey is required" };
+  }
+  if (!req.activeSprint && !req.sprintId) {
+    return { ok: false, error: "invalid_request", message: "activeSprint: true or sprintId is required" };
+  }
+
+  // Resolve effective appSlug using fallback chain (request → APP_SLUG env → hardcoded default)
+  const effectiveAppSlug = resolveAppSlug(req.appSlug);
+
+  // Pass the resolved appSlug to the app resolver for priority resolution
+  const appInference = resolveAppForPreview({
+    targetAppSlug: req.targetAppSlug,
+    targetAppName: req.targetAppName,
+    testrailSectionName: req.testrailSectionName,
+    requestAppSlug: effectiveAppSlug,
+  });
+
+  console.log(
+    `[app-resolution] requestAppSlug=${effectiveAppSlug} requestTargetAppSlug=${req.targetAppSlug ?? "none"} inferenceSource=${appInference.source} inferredAppSlug=${appInference.appSlug} effectiveTargetAppSlug=${appInference.appSlug}`,
+  );
+  console.log(
+    `[scenarios:preview] projectKey=${req.projectKey} sprintId=${req.sprintId ?? "active"} status=${req.status ?? "any"} appSlug=${effectiveAppSlug} targetAppSlug=${appInference.appSlug} inferenceSource=${appInference.source}`,
+  );
+  console.log(
+    `[scenarios:preview] targetAppSlug=${appInference.appSlug} targetAppName=${appInference.appName}`,
+  );
+  console.log(
+    `[scenarios:preview] appInference=${JSON.stringify(appInference)}`,
+  );
+
+  // Ensure functional app profile exists
+  let appProfileResult;
+  try {
+    appProfileResult = await ensureFunctionalAppProfile({
+      appSlug: appInference.appSlug,
+      appName: appInference.appName,
+      source: appInference.source,
+      sectionName: req.testrailSectionName,
+    });
+  } catch (err) {
+    console.error(`[scenarios:preview] ensureFunctionalAppProfile failed: ${err}`);
+    appProfileResult = {
+      appSlug: appInference.appSlug,
+      appName: appInference.appName,
+      appDir: "",
+      appConfigPath: "",
+      created: false,
+      configCreated: false,
+    };
+  }
+
+  const jiraConfig = requireJiraConfig(config);
+  const jira = new JiraClient(jiraConfig);
+
+  let sprintId: number;
+  let sprintName: string;
+
+  if (req.activeSprint) {
+    const active = await jira.getActiveSprint(req.projectKey);
+    if (!active) {
+      return {
+        ok: false,
+        error: "no_active_sprint",
+        message: `No hay sprint activo para el proyecto ${req.projectKey}`,
+      };
+    }
+    sprintId = active.id;
+    sprintName = active.name;
+  } else {
+    sprintId = req.sprintId!;
+    sprintName = `Sprint ${sprintId}`;
+  }
+
+  const issues = await loadJiraIssues(
+    jiraConfig,
+    req.projectKey,
+    sprintId,
+    req.status,
+    req.maxResults ?? 50,
+  );
+
+  console.log(`[scenarios:preview] loaded ${issues.length} jira issues`);
+
+  // -- Detect HU intent early � guard against catalog-route mismatch for transactional flows --
+  const issueIntentMap = new Map<string, HuIntentDetection>();
+  for (const issue of issues) {
+    const detection = detectHuIntent(
+      {
+        summary: issue.summary,
+        description: issue.description,
+        acceptanceCriteria: issue.acceptanceCriteria,
+        labels: (issue as any).labels,
+        components: (issue as any).components
+      },
+      issue.key
+    );
+    issueIntentMap.set(issue.key, detection);
+    console.log(
+      `[hu-intent] detected issue=${issue.key} intent=${detection.intent} confidence=${detection.confidence} reason=${detection.reason}`
+    );
+  }
+  const primaryIssueIntent: HuIntentDetection = issues.length > 0
+    ? (issueIntentMap.get(issues[0].key) ?? { intent: "unknown_flow", confidence: "low", reason: "no_issue", matchedSignals: [] })
+    : { intent: "unknown_flow", confidence: "low", reason: "no_issue", matchedSignals: [] };
+
+  // Filter by selectedIssueKeys if provided (from QA Lab UI selection)
+  if (req.selectedIssueKeys && req.selectedIssueKeys.length > 0) {
+    const selectedKeys = new Set(req.selectedIssueKeys);
+    const filtered = issues.filter((i) => selectedKeys.has(i.key));
+    console.log(`[scenario-preview] jira selectedIssueKeys=${JSON.stringify(req.selectedIssueKeys)} filtered=${filtered.length}/${issues.length}`);
+    if (filtered.length === 0) {
+      return { ok: false, error: "jira_issues_not_selected", message: "Ninguna de las historias seleccionadas coincide con los filtros aplicados." };
+    }
+    issues.length = 0;
+    issues.push(...filtered);
+  } else {
+    console.log(`[scenario-preview] jira selectedIssueKeys=none`);
+  }
+
+  console.log(`[jira] selected issues count=${issues.length} keys=${JSON.stringify(issues.map((i) => i.key))}`);
+
+  const maxIssues = Number(process.env.SCENARIO_PREVIEW_MAX_ISSUES) || 5;
+  if (issues.length > maxIssues) {
+    console.log(`[scenarios:preview] limiting issues from ${issues.length} to ${maxIssues}`);
+    issues.length = maxIssues;
+  }
+
+  // Gather jira context for routeProfile seeding
+  const jiraSummary = issues.length > 0 ? issues[0].summary : undefined;
+  const jiraDescription = issues.length > 0 ? issues[0].description : undefined;
+
+  // Build initial routeProfile (before AI generation)
+  const { routeProfile: initialRouteProfile, source: rpSource, entrySteps: initialEntrySteps, loginMode } = buildRouteProfileForPrompt(
+    appInference.appSlug,
+    undefined,
+    jiraSummary,
+    jiraDescription,
+    req.testrailSectionName,
+  );
+
+  console.log(`[scenarios:preview] routeProfile source=${rpSource}`);
+  console.log(`[scenarios:preview] routeProfileName=${initialRouteProfile?.name ?? "null"}`);
+  console.log(`[scenarios:preview] routeProfileEntry=${JSON.stringify(initialRouteProfile?.entry ?? [])}`);
+
+  // -- Route profile compatibility guard: reject catalog/listing routeProfile for transactional intents --
+  const initialRpName = initialRouteProfile?.name ?? "null";
+  const initialRpEntryHasCatalog = JSON.stringify(initialRouteProfile?.entry ?? []).toLowerCase().includes("informaci");
+  if (isTransactionalDocumentIntent(primaryIssueIntent.intent) && initialRpEntryHasCatalog) {
+    console.log(
+      `[route-profile-compatibility] compatible=false issue=${issues[0]?.key ?? "unknown"} huIntent=${primaryIssueIntent.intent} routeMode=listing_validation routeProfile=${initialRpName} reason=intent_mismatch`
+    );
+    console.log(`[scenario-route] blocked issue=${issues[0]?.key ?? "unknown"} reason=route_profile_intent_mismatch`);
+    console.log(`[hu-scope-filter] skipped reason=hu_intent_not_catalog_listing huIntent=${primaryIssueIntent.intent}`);
+    console.log(`[catalog-seeds] skipped reason=hu_intent_not_catalog_listing huIntent=${primaryIssueIntent.intent}`);
+    console.log(`[scenarios:onboarding-required] issue=${issues[0]?.key ?? "unknown"} huIntent=${primaryIssueIntent.intent} reason=missing_transactional_route_profile suggestedDiscoveryType=transactional_route_discovery`);
+  }
+
+  // Ensure catalog context for scenario generation (enrichment phase)
+  const { ensureScenarioGenerationContext } = await import("./scenario-catalog-context");
+
+  const catalogOptions = req.catalogOptions ?? {
+    useDiscoveredCatalog: process.env.AI_CATALOG_AUTO_DISCOVER === "true",
+    catalogMode: process.env.AI_CATALOG_MODE === "refresh" ? "refresh" : "existing",
+    coverageMode: process.env.AI_CATALOG_COVERAGE_MODE as "representative" | "exhaustive" || "representative",
+    maxProductsPerCategory: parseInt(process.env.AI_CATALOG_MAX_PER_CATEGORY || "2", 10),
+  };
+
+  // -- Early check: detect explicit private path BEFORE catalog discovery --
+  let hasExplicitPrivatePath = false;
+  if (issues.length > 0) {
+    const huText = (issues[0].summary + " " + issues[0].description + " " + (issues[0].acceptanceCriteria || "")).toLowerCase();
+    const navPat = /(?:men[�u]|ruta|m[o�]dulo|opci[o�]n|seleccion[�o]|seleccionar\s+(?:en\s+)?(?:el\s+)?(?:men[�u])?)\s*:?\s*(.+)/i;
+    for (const sent of huText.split(/[.;!?]/).filter(Boolean)) {
+      const m = sent.toLowerCase().match(navPat);
+      if (m && m[1]) {
+        const clean = m[1].trim().replace(/^(en\s+el\s+men[�u]\s*:\s*|men[�u]\s*:\s*|ruta\s*:\s*)/i, "");
+        if (clean && clean.split(/\s*[>?\/]\s*/).filter(s => s.trim().length > 1).length >= 2) { hasExplicitPrivatePath = true; break; }
+      }
+    }
+  }
+  if (hasExplicitPrivatePath) {
+    catalogOptions.useDiscoveredCatalog = false;
+    console.log(`[catalog-context] skipped reason=private_hu_explicit_path before_discovery=true`);
+  }
+
+  const { routeProfile: enrichedRouteProfile, diagnostics: catalogDiagnostics } = await ensureScenarioGenerationContext(
+    appInference.appSlug,
+    initialRouteProfile,
+    catalogOptions,
+    (loginMode || "no_login") as LoginMode,
+    config
+  );
+
+  // Use enriched routeProfile for scenario generation (may be overridden by explicit private path)
+  let routeProfileForGeneration = enrichedRouteProfile ?? initialRouteProfile;
+
+  // Detect explicit private navigation path from HU and override route profile
+  if (issues.length > 0) {
+    const primaryIssue = issues[0];
+    const huText = (primaryIssue.summary + " " + primaryIssue.description + " " + (primaryIssue.acceptanceCriteria || "")).toLowerCase();
+    const navPrefixPatterns = /(?:men[�u]|ruta|m[o�]dulo|opci[o�]n|seleccion[�o]|seleccionar\s+(?:en\s+)?(?:el\s+)?(?:men[�u])?)\s*:?\s*(.+)/i;
+    const huSentences = huText.split(/[.;!?]/).filter(Boolean);
+    let rawPathText = "";
+    for (const sent of huSentences) {
+      const m = sent.toLowerCase().match(navPrefixPatterns);
+      if (m && m[1]) { rawPathText = m[1].trim(); break; }
+    }
+    const cleanPath = rawPathText.replace(/^(en\s+el\s+men[�u]\s*:\s*|men[�u]\s*:\s*|ruta\s*:\s*|m[o�]dulo\s*:\s*|opci[o�]n\s*:\s*)/i, "");
+    if (cleanPath !== rawPathText && rawPathText) { console.log(`[route-selection] explicitNavigationPath cleaned from="${rawPathText}" to="${cleanPath}"`); }
+    let huExplicitNavigationPath: string[] = cleanPath ? cleanPath.split(/\s*[>?\/]\s*/).map(s => s.trim().replace(/^["""'']|["""'']$/g, '').replace(/\.$/, '')).filter(s => s.length > 1) : [];
+    if (huExplicitNavigationPath.length >= 2) {
+      console.log(`[route-selection] explicitNavigationPath beforeParentInference="${huExplicitNavigationPath.join(" ? ")}"`);
+      const SW = new Set(["de","del","la","el","los","las","un","una","en","al","por","con","para","a","e","o","y","que","se","su","no"]);
+      const _n = (s: string) => s.toLowerCase().trim();
+      const relations: Array<{ parent: string; child: string; source: string }> = [];
+      const cfg = loadAppConfigSync(appInference.appSlug);
+      const configPrefix: string[] = [];
+      const rpCfgs = (cfg as any)?.routeProfiles;
+      if (rpCfgs) {
+        for (const [, p] of Object.entries(rpCfgs)) {
+          for (const arr of [(p as any)?.entryPath || [], (p as any)?.authenticatedPath || []]) {
+            for (const s of arr) { if (s?.action === "click" && s?.target) { const t = s.target.trim(); if (t && !configPrefix.some(x => _n(x) === _n(t))) configPrefix.push(t); } }
+          }
+        }
+      }
+      const vc = (cfg as any)?.appProfile?.visibleControls;
+      if (Array.isArray(vc)) { for (const v1 of vc) { for (const v2 of vc) { if (v1 !== v2 && v2.toLowerCase().startsWith(v1.toLowerCase() + " ")) relations.push({ parent: v1, child: v2, source: "visibleControls" }); } } }
+      if (rpCfgs) {
+        for (const [, p] of Object.entries(rpCfgs)) {
+          const tps = (p as any)?.targetPaths;
+          if (tps) { for (const [target, def] of Object.entries(tps)) { if (def?.requiredIntermediates?.length > 0) { const parent = def.requiredIntermediates[def.requiredIntermediates.length - 1]; if (parent && target) relations.push({ parent, child: target, source: "targetPaths" }); } } }
+        }
+      }
+      for (const rel of relations) { console.log(`[parent-route] relationCandidate parent="${rel.parent}" child="${rel.child}" source=${rel.source}`); }
+      const enrichedPath = [...huExplicitNavigationPath];
+      for (let i = 0; i < huExplicitNavigationPath.length - 1; i++) {
+        const a = _n(huExplicitNavigationPath[i]); const c = _n(huExplicitNavigationPath[i + 1]);
+        const existingIdx = enrichedPath.findIndex((seg, idx) => idx > i && idx <= i + 2 && _n(seg) !== a && _n(seg) !== c && _n(seg).length > 1);
+        if (existingIdx > i) { console.log(`[parent-route] skipped reason=parent_already_present parent="${enrichedPath[existingIdx]}" previous="${a}" child="${c}"`); continue; }
+        const cSig = c.split(/\s+/).filter(t => t.length > 2 && !SW.has(t));
+        let best: { parent: string; sim: number } | null = null;
+        for (const rel of relations) {
+          const rcl = _n(rel.child); if (rcl === c) continue;
+          const rcSig = rcl.split(/\s+/).filter(t => t.length > 2 && !SW.has(t));
+          if (rcSig.length === 1 && cSig.length >= 2) { console.log(`[parent-route] ignoredSimilarChild child="${c}" matchedChild="${rel.child}" reason=too_short_or_partial_match`); continue; }
+          const mc = rcSig.filter(rt => cSig.some(cs => cs.includes(rt) || rt.includes(cs))).length;
+          const sim = mc / Math.max(rcSig.length, cSig.length);
+          if (sim >= 0.4 && (!best || sim > best.sim)) { best = { parent: rel.parent, sim }; console.log(`[parent-route] similarChildMatch child="${c}" matchedChild="${rel.child}" source=${rel.source} similarity=${sim.toFixed(2)} parent="${rel.parent}"`); }
+        }
+        if (best && best.parent && enrichedPath.every((seg, idx) => idx <= i || _n(seg) !== _n(best!.parent))) {
+          enrichedPath.splice(i + 1, 0, best.parent);
+          console.log(`[parent-route] inferredIntermediate parent="${best.parent}" previous="${a}" child="${c}" confidence=${Math.round(best.sim * 100)}`);
+          console.log(`[route-selection] insertedInferredParent previous="${a}" parent="${best.parent}" child="${c}"`);
+        }
+      }
+      if (enrichedPath.length !== huExplicitNavigationPath.length) { console.log(`[route-selection] explicitNavigationPath enriched from="${huExplicitNavigationPath.join(" ? ")}" to="${enrichedPath.join(" ? ")}"`); }
+      // Clip configPrefix at the first explicit HU path segment to avoid historical contamination
+      const firstExplicitTarget = _n(enrichedPath[0]);
+      const clipIdx = configPrefix.findIndex(t => _n(t) === firstExplicitTarget);
+      let clippedPrefix = clipIdx >= 0 ? configPrefix.slice(0, clipIdx + 1) : [];
+      if (clipIdx >= 0 && clipIdx + 1 < configPrefix.length) {
+        console.log(`[route-prefix] clippedAtExplicitStart target="${firstExplicitTarget}" before=${configPrefix.length} after=${clippedPrefix.length} removed=${JSON.stringify(configPrefix.slice(clipIdx + 1))}`);
+      }
+      // If first HU segment is not a real entry point and no prefix found, search broader sources
+      const isEntrySegment = /^iniciar|^start|^login|^home|^begin|^entrar|^acceder/i.test(firstExplicitTarget);
+      if (!isEntrySegment && clippedPrefix.length === 0) {
+        console.log(`[route-prefix] partialPrivateHuPath detected firstSegment="${enrichedPath[0]}"`);
+        // Collect broader prefix candidates from trusted routes and visibleControls
+        const broaderPrefix: string[] = [];
+        // 1. trusted learned routes from appKnowledge
+        try {
+          const fs3 = require("node:fs") as typeof import("fs");
+          const p3 = require("node:path") as typeof import("path");
+          const kp2 = p3.join(process.cwd(), "automations", "apps", appInference.appSlug, "app.knowledge.json");
+          if (fs3.existsSync(kp2)) {
+            const knowledge: { items: Array<{ coverageRefs: string[]; clickTargets: string[]; trustedForReuse?: boolean; issueKey?: string }> } = JSON.parse(fs3.readFileSync(kp2, "utf-8"));
+            for (const item of knowledge.items || []) {
+              if (!item.coverageRefs?.includes("learned_navigation_path")) continue;
+              const clicks = (item.clickTargets || []).map((t: string) => _n(t));
+              const fi = clicks.indexOf(firstExplicitTarget);
+              if (fi > 0) {
+                const prefix = clicks.slice(0, fi);
+                if (prefix.length > broaderPrefix.length) { broaderPrefix.length = 0; broaderPrefix.push(...prefix); }
+              }
+              // Also search superseded routes (trustedForReuse=false) for prefix only
+              if (clippedPrefix.length === 0 && fi > 0 && item.trustedForReuse === false && item.rejectedReason === "superseded_by_private_explicit_path") {
+                const prefix = clicks.slice(0, fi);
+                if (prefix.length > 0 && prefix.length > broaderPrefix.length) {
+                  broaderPrefix.length = 0; broaderPrefix.push(...prefix);
+                  console.log(`[route-prefix] reusablePrefixFoundFromSuperseded firstSegment="${firstExplicitTarget}" prefix=${JSON.stringify(prefix)} source=app_knowledge_superseded_prefix_only`);
+      }
+      // Also try to recover intermediate targets from superseded routes with matching final target
+      if (clippedPrefix.length > 0 && enrichedPath.length >= 2) {
+        const huFinalTarget = _n(enrichedPath[enrichedPath.length - 1]);
+        try {
+          const fs4 = require("node:fs") as typeof import("fs");
+          const p4 = require("node:path") as typeof import("path");
+          const kp3 = p4.join(process.cwd(), "automations", "apps", appInference.appSlug, "app.knowledge.json");
+          if (fs4.existsSync(kp3)) {
+            const knowledge: { items: Array<{ coverageRefs: string[]; clickTargets: string[]; trustedForReuse?: boolean; rejectedReason?: string; issueKey?: string }> } = JSON.parse(fs4.readFileSync(kp3, "utf-8"));
+            for (const item of knowledge.items || []) {
+              if (!item.coverageRefs?.includes("learned_navigation_path")) continue;
+              if (!(item.trustedForReuse === false && item.rejectedReason === "superseded_by_private_explicit_path")) continue;
+              const clicks = (item.clickTargets || []).map((t: string) => _n(t));
+              const fi = clicks.indexOf(firstExplicitTarget);
+              const lastClick = clicks.length > 0 ? clicks[clicks.length - 1] : "";
+              const huLastNorm = _n(huFinalTarget);
+              // Check if superseded route's final target matches the HU final target (exact or token overlap >= 0.5)
+              const huLastTokens = huLastNorm.split(/\s+/).filter(t => t.length > 2);
+              const lastClickTokens = lastClick.split(/\s+/).filter(t => t.length > 2);
+              const tokenOverlap = huLastTokens.filter(t => lastClickTokens.some(lt => lt.includes(t) || t.includes(lt))).length;
+              const targetSimilarity = lastClick && huLastNorm ? (lastClick === huLastNorm ? 1 : tokenOverlap / Math.max(huLastTokens.length, lastClickTokens.length)) : 0;
+              if (fi >= 0 && fi + 1 < clicks.length && targetSimilarity >= 0.4) {
+                const intermediates = clicks.slice(fi + 1, clicks.length - 1);
+                console.log(`[route-completion] supersededTargetPathMatched targetFinal="${enrichedPath[enrichedPath.length - 1]}" matchedFinal="${lastClick}" similarity=${targetSimilarity.toFixed(2)}`);
+                if (intermediates.length > 0) {
+                  // Insert intermediates that are not already in the enriched path
+                  for (const intermediate of intermediates) {
+                    if (!enrichedPath.some((seg: string) => _n(seg) === intermediate)) {
+                      enrichedPath.splice(enrichedPath.length - 1, 0, intermediate.charAt(0).toUpperCase() + intermediate.slice(1));
+                    }
+                  }
+                  console.log(`[route-completion] insertedIntermediateTargets targets=${JSON.stringify(intermediates.map((t: string) => t.charAt(0).toUpperCase() + t.slice(1)))}`);
+                }
+                break;
+              }
+            }
+          }
+        } catch { /* non-fatal */ }
+      }
+              }
+            }
+          }
+        } catch { /* non-fatal */ }
+        // 2. visibleControls as fallback � any control before the first segment
+        if (broaderPrefix.length === 0 && Array.isArray(vc)) {
+          const vcLower = vc.map((v: string) => _n(v));
+          const fi = vcLower.indexOf(firstExplicitTarget);
+          if (fi > 0) {
+            broaderPrefix.push(...vc.slice(0, fi));
+          }
+        }
+        if (broaderPrefix.length > 0) {
+          clippedPrefix = broaderPrefix.map(t => t.charAt(0).toUpperCase() + t.slice(1));
+          console.log(`[route-prefix] reusablePrefixFound firstSegment="${enrichedPath[0]}" prefix=${JSON.stringify(clippedPrefix)} source=${broaderPrefix.length > 0 ? "trusted_learned_routes" : "visibleControls"}`);
+        } else {
+          console.log(`[route-prefix] reusablePrefixNotFound firstSegment="${enrichedPath[0]}" action=keep_explicit_hu_path`);
+        }
+      }
+      const allTargets: string[] = [];
+      for (const t of clippedPrefix) { if (!allTargets.some(x => _n(x) === _n(t))) allTargets.push(t); }
+      for (const t of enrichedPath) { if (!allTargets.some(x => _n(x) === _n(t))) allTargets.push(t); }
+      // Resolve aliases for typos: match HU targets against clean visible controls
+      const aliasSource: Array<{ original: string; source: string }> = [];
+      const vcArr = (cfg as any)?.appProfile?.visibleControls;
+      if (Array.isArray(vcArr) && vcArr.length > 0) {
+        const cleanLabels = vcArr.map((v: string) => ({ raw: v, lower: v.toLowerCase().trim(), norm: v.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() }));
+        for (let ti = 0; ti < allTargets.length; ti++) {
+          const tLower = _n(allTargets[ti]);
+          const tNorm = tLower.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+          if (cleanLabels.some(cl => cl.lower === tLower)) continue; // exact match, no alias needed
+          const candidates = cleanLabels
+            .map(cl => {
+              const cTokens = cl.lower.split(/\s+/).filter((w: string) => w.length > 2 && !SW.has(w));
+              const tTokens = tLower.split(/\s+/).filter(w => w.length > 2 && !SW.has(w));
+              const matching = cTokens.filter((ct: string) => tTokens.some((tt: string) => tt.includes(ct) || ct.includes(tt)));
+              const sim = matching.length / Math.max(cTokens.length, tTokens.length);
+              return { alias: cl.raw, similarity: sim };
+            })
+            .filter(c => c.similarity >= 0.6)
+            .sort((a, b) => b.similarity - a.similarity);
+          if (candidates.length === 1) {
+            allTargets[ti] = candidates[0].alias;
+            aliasSource.push({ original: tLower, source: "visibleControls" });
+            console.log(`[target-alias] accepted original="${tLower}" alias="${candidates[0].alias}" source=visibleControls similarity=${candidates[0].similarity.toFixed(2)} reason=clean_visible_match`);
+            console.log(`[target-alias] coveragePreserved original="${tLower}" executableTarget="${candidates[0].alias}"`);
+          } else if (candidates.length > 1) {
+            console.log(`[target-alias] rejected original="${tLower}" alias="${candidates[0].alias}" reason=unsafe_or_ambiguous_source candidates=${candidates.length}`);
+          }
+        }
+      }
+      const syntheticSteps = allTargets.map(t => ({ action: "click" as const, target: t.charAt(0).toUpperCase() + t.slice(1) }));
+      routeProfileForGeneration = {
+        name: "hu_private_explicit_path",
+        entry: [], entrySteps: syntheticSteps, entryPath: [], authenticatedPath: syntheticSteps,
+        aliases: {}, intermediates: {}, domainTerms: {}, visibleControls: [], targetPaths: {}, representativeFixture: {}, notes: [],
+        _accessMode: "private", _huComposedPath: true, _inferredParentCount: enrichedPath.length - huExplicitNavigationPath.length,
+      } as any;
+      console.log(`[scenario-route] routeProfileSafeDefaults applied=true reason=private_explicit_path keys=${Object.keys(routeProfileForGeneration).join(",")}`);
+      console.log(`[scenario-route] syntheticEntrySteps count=${syntheticSteps.length} targets=${JSON.stringify(syntheticSteps.map(s => s.target))}`);
+      console.log(`[scenario-route] activeRouteProfile name=${(routeProfileForGeneration as any).name} entrySteps=${syntheticSteps.length} source=private_explicit_path`);
+      console.log(`[scenario-route] usingHuComposedPath reason=private_explicit_path steps=${syntheticSteps.length}`);
+      console.log(`[catalog-context] skipped reason=private_hu_explicit_path`);
+      console.log(`[catalog-seeds] skipped reason=private_hu_explicit_path`);
+      console.log(`[path-selector] skipped reason=private_hu_explicit_path`);
+      // Downgrade contaminated routes from the same issue in app.knowledge
+      try {
+        const fs2 = require("node:fs") as typeof import("fs");
+        const p2 = require("node:path") as typeof import("path");
+        const kp = p2.join(process.cwd(), "automations", "apps", appInference.appSlug, "app.knowledge.json");
+        if (fs2.existsSync(kp)) {
+          const knowledge: { items: Array<Record<string, any>> } = JSON.parse(fs2.readFileSync(kp, "utf-8"));
+          let modified = false;
+          for (const item of knowledge.items) {
+            if (item.issueKey !== primaryIssue.key) continue;
+            const cl = (item.clickTargets || []).map((t: string) => _n(t)).join("::");
+            const sl = (syntheticSteps || []).map(s => _n(s.target)).join("::");
+            if (cl !== sl && item.trustedForReuse !== false) {
+              item.trustedForReuse = false;
+              item.confidenceScore = Math.min(item.confidenceScore ?? 100, 35);
+              item.validationStatus = "pending";
+              item.rejectedReason = "superseded_by_private_explicit_path";
+              modified = true;
+              console.log(`[route-learning] downgraded reason=superseded_by_private_explicit_path route=${item.id} issue=${item.issueKey}`);
+              console.log(`[app-knowledge] cleanup downgradedCurrentIssueRoute issue=${item.issueKey} route=${item.id}`);
+            }
+          }
+          if (modified) {
+            fs2.writeFileSync(kp, JSON.stringify(knowledge, null, 2), "utf-8");
+            console.log(`[app-knowledge] downgradedContaminatedRoutes issue=${primaryIssue.key}`);
+          }
+        }
+      } catch { /* non-fatal */ }
+    }
+  }
+  if (issues.length === 0) {
+    return {
+      ok: true,
+      source: {
+        mode: req.sourceMode ?? "jira",
+        projectKey: req.projectKey,
+        sprintId,
+        status: req.status ?? null,
+        issuesFound: 0,
+      },
+      testrail: {
+        projectId: req.testrailProjectId ?? null,
+        suiteId: req.testrailSuiteId ?? null,
+        sectionId: req.testrailSectionId ?? null,
+        sectionName: req.testrailSectionName ?? null,
+      },
+      appSlug: effectiveAppSlug,
+      targetAppSlug: appInference.appSlug,
+      targetAppName: appInference.appName,
+      appInference,
+      appProfilePath: appProfileResult.appConfigPath,
+      summary: { generated: 0, valid: 0, invalid: 0, rejected: 0, blocked: 0 },
+      routeProfile: initialRouteProfile,
+      scenarios: [],
+      rejected: [],
+      blockedScenarios: [],
+      warnings: [`No Jira issues found for project ${req.projectKey}, sprint ${sprintName}`],
+    };
+  }
+
+  const testrailMeta =
+    req.testrailProjectId && req.testrailSuiteId
+      ? {
+          projectId: req.testrailProjectId,
+          suiteId: req.testrailSuiteId,
+          sectionId: req.testrailSectionId,
+          sectionName: req.testrailSectionName,
+        }
+      : undefined;
+
+  let generationResult;
+  try {
+    generationResult = await generateScenariosWithAi(
+      issues,
+      effectiveAppSlug,
+      testrailMeta,
+      appInference.appSlug,
+      appInference.appName,
+      routeProfileForGeneration,
+      routeProfileForGeneration?.entrySteps?.length ? routeProfileForGeneration.entrySteps as Array<{ action: string; target: string; when?: string }> : initialEntrySteps,
+      loginMode,
+    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`[scenarios:preview] failed error=${message}`);
+
+    const [code, ...rest] = message.split("|");
+    const detail = rest.join("|") || message;
+
+    const errorMap: Record<string, { error: string; status: number }> = {
+      AI_PROVIDER_UNAVAILABLE: { error: "ai_provider_unavailable", status: 503 },
+      AI_GENERATION_TIMEOUT: { error: "ai_generation_timeout", status: 504 },
+      AI_GENERATION_FAILED: { error: "ai_generation_failed", status: 502 },
+      EMPTY_AI_RESPONSE: { error: "empty_ai_response", status: 502 },
+      INVALID_AI_RESPONSE: { error: "invalid_ai_response", status: 502 },
+      SKILL_NOT_FOUND: { error: "skill_not_found", status: 500 },
+      AI_RETURNED_CSV: { error: "ai_returned_csv_instead_of_json", status: 502 },
+    };
+
+    const mapped = errorMap[code] || { error: "scenario_generation_failed", status: 502 };
+
+    return {
+      ok: false,
+      error: mapped.error,
+      message: detail,
+    } as ScenarioPreviewError;
+  }
+
+  // Normalize scenarios to targetAppSlug
+  let rawScenarios = generationResult.scenarios ?? [];
+  if (appInference.appSlug && appInference.appSlug !== effectiveAppSlug) {
+    rawScenarios = normalizeScenariosToTargetApp(rawScenarios, appInference.appSlug);
+  }
+
+  // Post-Codex: re-detect routeProfile from generated scenario titles
+  // This catches cases where Jira summary didn't contain the module name but scenarios do
+  const scenarioTitles = rawScenarios.map((s) => s.title);
+  const postCodexDetection = detectKioskoInfoProductos({
+    targetAppSlug: appInference.appSlug,
+    jiraSummary,
+    jiraDescription,
+    testrailSectionName: req.testrailSectionName,
+    scenarioTitles,
+  });
+
+  let resolvedRouteProfile = (routeProfileForGeneration as any)?._huComposedPath ? routeProfileForGeneration : initialRouteProfile;
+  if (!(routeProfileForGeneration as any)?._huComposedPath && postCodexDetection && (!initialRouteProfile || !initialRouteProfile.name)) {
+    console.log(`[scenarios:preview] post-codex detection: KIOSKO/InfoProductos detected from scenario titles`);
+    resolvedRouteProfile = seedKioskoInfoProductosRouteProfile() as unknown as McpRouteProfile;
+  }
+
+  // Log entry steps — prefer new format, fallback to old
+  const oldEntrySteps = buildEntrySteps(resolvedRouteProfile as unknown as Record<string, unknown>);
+  const configRp = resolvedRouteProfile ? (resolvedRouteProfile as Record<string, unknown>).entrySteps : undefined;
+  const newEntrySteps = Array.isArray(configRp) && configRp.length > 0 ? configRp as EntryStepConfig[] : [];
+  console.log(`[scenarios:preview] oldEntrySteps=${JSON.stringify(oldEntrySteps)} newEntrySteps=${JSON.stringify(newEntrySteps)}`);
+
+  // Log before normalize
+  for (const sc of rawScenarios) {
+    const firstSteps = (sc.steps ?? []).slice(0, 3);
+    console.log(
+      `[scenarios:preview] beforeNormalize scenarioTitle="${sc.title}" firstSteps=${JSON.stringify(firstSteps)}`,
+    );
+  }
+
+  // Insert entry steps if routeProfile has entry — prefer new format
+  if (newEntrySteps.length > 0 || oldEntrySteps.length > 0) {
+    rawScenarios = rawScenarios.map((sc) => {
+      const repaired = insertEntrySteps(sc, oldEntrySteps, newEntrySteps);
+      if (repaired !== sc) {
+        if (!generationResult.warnings) generationResult.warnings = [];
+        const labels = newEntrySteps.length > 0
+          ? newEntrySteps.filter((es) => es.action === "click").map((es) => es.target).join(" → ")
+          : oldEntrySteps.join(" → ");
+        generationResult.warnings.push(
+          `Scenario "${sc.title}": entry_steps_inserted - Added missing entry steps: ${labels}`,
+        );
+      }
+      return repaired;
+    });
+  }
+
+  // Log after normalize
+  for (const sc of rawScenarios) {
+    const firstSteps = (sc.steps ?? []).slice(0, 3);
+    console.log(
+      `[scenarios:preview] afterNormalize scenarioTitle="${sc.title}" firstSteps=${JSON.stringify(firstSteps)}`,
+    );
+  }
+
+  // Declare rejected and routeResolutions early
+  const rejected: McpRejectedScenario[] = generationResult.rejected ?? [];
+  const warnings: string[] = generationResult.warnings ?? [];
+  const routeResolutions = generationResult.routeResolutions;
+
+  // -- scenario-intent-validation: reject AI scenarios that don't match HU intent --
+  if (primaryIssueIntent.intent === "transactional_document_flow" && rawScenarios.length > 0) {
+    const catalogListingTitlePattern = /informaci[o�]n de productos|detalle de (tarjeta|cuenta|pr[e�]stamo|dep[o�]sito)|cat[�a]logo de productos|listado de (productos|tarjetas|cuentas|pr[e�]stamos)/i;
+    const catalogListingStepPattern = /informaci[o�]n de productos|cat[�a]logo|listado de productos/i;
+    const kept: typeof rawScenarios = [];
+    for (const sc of rawScenarios) {
+      const title = sc.title ?? "";
+      const stepsText = (sc.steps ?? []).join(" ");
+      const isCatalogListing = catalogListingTitlePattern.test(title) || catalogListingStepPattern.test(stepsText);
+      if (isCatalogListing) {
+        console.log(
+          `[scenario-intent-validation] rejected reason=scenario_intent_mismatch huIntent=${primaryIssueIntent.intent} scenarioIntent=catalog_listing_flow title="${title}"`
+        );
+        rejected.push({
+          sourceIssueKey: sc.sourceIssueKey,
+          reason: "scenario_intent_mismatch",
+          reasonCode: "scenario_intent_mismatch",
+          details: { huIntent: primaryIssueIntent.intent, scenarioIntent: "catalog_listing_flow", title }
+        } as McpRejectedScenario);
+      } else {
+        kept.push(sc);
+      }
+    }
+    rawScenarios = kept;
+  }
+
+  // Repair missing intermediate steps
+  if (resolvedRouteProfile) {
+    const derivedContext = buildDerivedExecutionContext(
+      appInference.appSlug,
+      resolvedRouteProfile,
+      routeResolutions ?? new Map(),
+      newEntrySteps.length > 0
+        ? newEntrySteps.filter((es) => es.action === "click").map((es) => es.target)
+        : oldEntrySteps
+    );
+
+    console.log(
+      `[scenarios:preview] intermediate-repair starting appSlug=${appInference.appSlug} ` +
+        `scenariosCount=${rawScenarios.length} ` +
+        `allowedClicks=${derivedContext.allowedExecutableClicks.length}`
+    );
+
+    rawScenarios = rawScenarios.map((sc) => {
+      const resolution = routeResolutions?.get(sc.sourceIssueKey);
+      const repairResult = repairMissingIntermediates(
+        sc,
+        resolvedRouteProfile,
+        derivedContext,
+        resolution,
+        "medium" // Confidence threshold
+      );
+
+      logIntermediateRepair(sc.sourceIssueKey, sc.title, repairResult, appInference.appSlug);
+
+      if (repairResult.repaired) {
+        if (!generationResult.warnings) generationResult.warnings = [];
+        generationResult.warnings.push(
+          `Scenario "${sc.title}": intermediate_steps_inserted - Added ${repairResult.insertedCount} intermediate step(s)`
+        );
+        return {
+          ...sc,
+          steps: repairResult.repairedSteps,
+        };
+      } else if (repairResult.reasonCode !== "no_repair_needed") {
+        // Repair failed - mark as rejected
+        const errorDiag = repairResult.diagnostics.find((d) => d.level === "error");
+        if (errorDiag) {
+          rejected.push({
+            sourceIssueKey: sc.sourceIssueKey,
+            reason: `${repairResult.reasonCode}: ${errorDiag.message}`,
+          });
+          return null; // Will be filtered out
+        }
+      }
+
+      return sc;
+    }).filter((sc): sc is McpScenario => sc !== null);
+
+    console.log(
+      `[scenarios:preview] intermediate-repair complete ` +
+        `remainingScenarios=${rawScenarios.length} ` +
+        `rejected=${rejected.length}`
+    );
+  }
+
+  // Generate deterministic seeds for coverage guarantee (both representative and exhaustive modes)
+  // Seeds fill coverage gaps for aligned products/categories not covered by AI
+  if (catalogOptions.useDiscoveredCatalog && routeProfileForGeneration) {
+    // Guard: catalog-seeds are only valid for catalog_listing_flow intents.
+    // For transactional_document_flow, private_navigation_flow, etc. the products
+    // mentioned in the HU are dataRequirements/options, not catalog targets.
+    if (!isCatalogListingIntent(primaryIssueIntent.intent)) {
+      console.log(
+        `[catalog-seeds] skipped reason=hu_intent_not_catalog_listing huIntent=${primaryIssueIntent.intent} issue=${issues[0]?.key ?? "unknown"}`
+      );
+      console.log(
+        `[scenarios:preview] deterministicSeedsSkipped reason=hu_intent_not_catalog_listing`
+      );
+    } else {
+      const { generateDeterministicSeeds } = await import("./scenario-deterministic-seeds");
+
+      // Use first issue as context for HU scope filtering
+      // Seeds will only be generated for products aligned with HU scope
+      const issueContext = issues.length > 0 ? issues[0] : null;
+
+      // Load appConfig to get valid automationType and setupStrategy for seeds
+      const appConfig = loadAppConfigSync(appInference.appSlug);
+      const seedAppConfig = {
+        automationType: (appConfig?.automationType as string) || "ui_discovery",
+        setupStrategy: (appConfig?.setupStrategy as string) || "no_login",
+      };
+
+      const seeds = generateDeterministicSeeds(
+        routeProfileForGeneration,
+        rawScenarios,
+        issueContext,
+        appInference.appSlug,
+        catalogOptions.coverageMode ?? "representative",
+        seedAppConfig,
+        undefined,
+        primaryIssueIntent.intent
+      );
+
+      if (seeds.length > 0) {
+        console.log(
+          `[scenarios:preview] adding ${seeds.length} deterministic seeds for coverage guarantee ` +
+            `(mode=${catalogOptions.coverageMode ?? "representative"})`
+        );
+        rawScenarios.push(...seeds);
+      } else {
+        console.log(
+          `[scenarios:preview] no seeds needed - AI coverage complete for aligned categories/products ` +
+            `(mode=${catalogOptions.coverageMode ?? "representative"})`
+        );
+      }
+    }
+  }
+
+  // Build blockedScenarios from routeResolutions
+  const blockedScenarios: import("./scenario-types").BlockedScenario[] = [];
+
+  if (routeResolutions) {
+    for (const [issueKey, resolution] of routeResolutions.entries()) {
+      if (!resolution.canGenerate) {
+        const issue = issues.find(i => i.key === issueKey);
+        const errorDiagnostic = resolution.diagnostics.find(d => d.level === "error");
+        const reasonCode = (errorDiagnostic?.code ?? "unknown") as import("./scenario-types").DiagnosticCode;
+
+        let suggestedAction = "review_route_profile";
+        if (reasonCode === "needs_route_profile") {
+          suggestedAction = "configure_route_profile";
+        } else if (reasonCode === "missing_parent_route") {
+          suggestedAction = "add_parent_route";
+        } else if (reasonCode === "missing_intermediate_step") {
+          suggestedAction = "add_intermediate_steps";
+        } else if (reasonCode === "route_profile_intent_mismatch" || reasonCode === "missing_transactional_route_profile") {
+          suggestedAction = "run_transactional_route_discovery";
+        }
+
+        // For transactional/document flow blocks, emit targeted onboarding diagnostic
+        if (reasonCode === "route_profile_intent_mismatch" || reasonCode === "missing_transactional_route_profile") {
+          console.log(`[blocked-scenarios] issue=${issueKey} reason=${reasonCode} recommendedAction=${suggestedAction}`);
+        }
+
+        blockedScenarios.push({
+          sourceIssueKey: issueKey,
+          title: issue?.summary ?? `Issue ${issueKey}`,
+          status: "blocked",
+          reasonCode,
+          reason: resolution.missingRouteReason ?? "Route not backed",
+          diagnostics: resolution.diagnostics,
+          appSlug: appInference.appSlug,
+          appProfilePath: appProfileResult.appConfigPath,
+          suggestedAction
+        });
+      }
+    }
+  }
+
+  console.log(`[scenarios:preview] blockedScenarios=${blockedScenarios.length} from routeResolutions`);
+
+  // Fallback: build blockedScenarios from rejected if routeResolutions didn't provide them
+  const blockedFromRejected = new Set(blockedScenarios.map(b => b.sourceIssueKey));
+  let fallbackCount = 0;
+
+  for (const rej of rejected) {
+    // Skip if already in blockedScenarios
+    if (blockedFromRejected.has(rej.sourceIssueKey)) continue;
+
+    // Detect route-first reasons
+    const reasonLower = rej.reason.toLowerCase();
+    let reasonCode: import("./scenario-types").DiagnosticCode | null = null;
+
+    if (reasonLower.includes("needs_route_profile")) {
+      reasonCode = "needs_route_profile";
+    } else if (reasonLower.includes("missing_parent_route")) {
+      reasonCode = "missing_parent_route";
+    } else if (reasonLower.includes("missing_intermediate_step")) {
+      reasonCode = "missing_intermediate_step";
+    } else if (reasonLower.includes("missing_detail_selection_step")) {
+      reasonCode = "missing_detail_selection_step";
+    } else if (reasonLower.includes("ambiguous_route_target")) {
+      reasonCode = "ambiguous_route_target";
+    } else if (reasonLower.includes("unsupported_route_target")) {
+      reasonCode = "unsupported_route_target";
+    }
+
+    // If route-first reason detected, create BlockedScenario
+    if (reasonCode) {
+      const issue = issues.find(i => i.key === rej.sourceIssueKey);
+      const isError = reasonCode === "needs_route_profile" || reasonCode === "missing_parent_route";
+
+      let suggestedAction = "review_route_profile";
+      if (reasonCode === "needs_route_profile") {
+        suggestedAction = "configure_route_profile";
+      } else if (reasonCode === "missing_parent_route") {
+        suggestedAction = "add_parent_route";
+      } else if (reasonCode === "missing_intermediate_step") {
+        suggestedAction = "add_intermediate_steps";
+      }
+
+      blockedScenarios.push({
+        sourceIssueKey: rej.sourceIssueKey,
+        title: issue?.summary ?? `Issue ${rej.sourceIssueKey}`,
+        status: "blocked",
+        reasonCode,
+        reason: rej.reason,
+        diagnostics: [
+          {
+            level: isError ? "error" : "warning",
+            code: reasonCode,
+            message: rej.reason.replace(`${reasonCode}: `, ""),
+            context: { source: "rejected_fallback" }
+          }
+        ],
+        appSlug: appInference.appSlug,
+        appProfilePath: appProfileResult.appConfigPath,
+        suggestedAction
+      });
+
+      fallbackCount++;
+      console.log(`[blocked-scenarios] added sourceIssueKey=${rej.sourceIssueKey} reasonCode=${reasonCode} source=rejected_fallback`);
+    }
+  }
+
+  console.log(`[blocked-scenarios] fromRouteResolutions=${blockedScenarios.length - fallbackCount} fromRejectedFallback=${fallbackCount} total=${blockedScenarios.length}`);
+
+  // -- Build onboardingRequired summary if any blocked scenario suggests transactional route discovery --
+  let onboardingRequired: import("./scenario-types").OnboardingRequired | undefined;
+  const transactionalBlocked = blockedScenarios.filter(
+    (b) => b.suggestedAction === "run_transactional_route_discovery"
+  );
+  if (transactionalBlocked.length > 0) {
+    const reasonCode = transactionalBlocked[0].reasonCode === "missing_transactional_route_profile"
+      ? "missing_transactional_route_profile" as const
+      : "route_profile_intent_mismatch" as const;
+    onboardingRequired = {
+      required: true,
+      type: "transactional_route_discovery",
+      reasonCode,
+      recommendedAction: "run_transactional_route_discovery",
+      issueKeys: transactionalBlocked.map((b) => b.sourceIssueKey),
+      message: `Se requiere discovery de ruta transaccional. La HU ${transactionalBlocked[0].sourceIssueKey} tiene intenci�n documental pero el routeProfile actual es de cat�logo. Ejecute discovery para mapear la ruta real.`
+    };
+    console.log(
+      `[scenarios:onboarding-summary] required=true type=transactional_route_discovery ` +
+      `issues=${transactionalBlocked.length} recommendedAction=run_transactional_route_discovery`
+    );
+  }
+
+  // -- Auto-generate guided route discovery plan when onboarding is required --
+  let guidedRouteDiscovery: import("./scenario-types").GuidedRouteDiscoveryResponse | undefined;
+  if (onboardingRequired && onboardingRequired.required) {
+    const firstBlocked = transactionalBlocked[0];
+    const firstIssue = issues.find((i) => i.key === firstBlocked?.sourceIssueKey);
+    guidedRouteDiscovery = await runGuidedRouteDiscovery({
+      appSlug: appInference.appSlug,
+      issueKey: firstBlocked?.sourceIssueKey ?? issues[0]?.key ?? "unknown",
+      huIntent: primaryIssueIntent.intent,
+      reasonCode: onboardingRequired.reasonCode,
+      currentRouteProfileName: resolvedRouteProfile?.name ?? initialRouteProfile?.name ?? undefined,
+      jiraSummary: firstIssue?.summary ?? undefined,
+      jiraDescription: firstIssue?.description ?? undefined,
+      acceptanceCriteria: firstIssue?.acceptanceCriteria ?? undefined,
+      dryRun: true,
+    });
+  }
+
+  const validated: ValidatedScenario[] = [];
+  let validCount = 0;
+  let invalidCount = 0;
+
+  console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.length}`);
+
+  // Normalize encoding before validation to fix mojibake
+  const { detectMojibake } = await import("./target-normalization");
+  const encodingNormalizedScenarios = rawScenarios.map((sc) => {
+    const normalizedSteps = sc.steps?.map((step) => {
+      const fixed = detectMojibake(step);
+      return fixed.hasMojibake ? fixed.corrected : step;
+    }) ?? [];
+
+    const fixedTitle = detectMojibake(sc.title);
+
+    return {
+      ...sc,
+      steps: normalizedSteps,
+      title: fixedTitle.hasMojibake ? fixedTitle.corrected : sc.title,
+    };
+  });
+
+  console.log(`[scenarios:preview] encodingNormalized=${encodingNormalizedScenarios.length}`);
+
+  // Apply automatability filter BEFORE validation
+  // Only UI-automatable scenarios can proceed to preview
+  const { filterScenariosByAutomatability } = await import("./scenario-automatability-classifier");
+
+  // Use first issue as HU context for classification
+  const huContextForClassification = issues.length > 0 ? issues[0] : undefined;
+
+  const { automatable: automatableScenarios, excluded: excludedRequirements } =
+    filterScenariosByAutomatability(encodingNormalizedScenarios, huContextForClassification);
+
+  console.log(
+    `[scenarios:automatability] total=${encodingNormalizedScenarios.length} ` +
+      `automatable=${automatableScenarios.length} excluded=${excludedRequirements.length}`
+  );
+
+  // Update catalogDiagnostics with excluded requirements
+  if (catalogDiagnostics) {
+    catalogDiagnostics.excludedRequirements = excludedRequirements;
+    catalogDiagnostics.nonAutomatableRequirementCount = excludedRequirements.length;
+    catalogDiagnostics.uiAutomatableRequirementCount = automatableScenarios.length;
+  }
+
+  // Only validate and process automatable scenarios
+  for (const sc of automatableScenarios) {
+    const validation = validateScenario(sc, resolvedRouteProfile);
+    if (validation.valid) {
+      validCount++;
+    } else {
+      invalidCount++;
+      console.log(
+        `[scenarios:preview] scenarioValidationFailed sourceIssueKey=${sc.sourceIssueKey} ` +
+        `title="${sc.title}" errors=${JSON.stringify(validation.errors)}`
+      );
+      warnings.push(`Scenario "${sc.title}" failed validation: ${validation.errors.join("; ")}`);
+    }
+    validated.push({ ...sc, validation });
+  }
+
+  // -- Generate fallback business scenarios when route is missing --
+  let routePendingCount = 0;
+  let candidatePrefixSteps: string[] | undefined;
+  let knownRouteStatus: "knowledge_prefix_pending" | "missing_initial_route" = "missing_initial_route";
+  

@@ -1,0 +1,9 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "PREVIEW-005",
+  "testRailCaseId": 0,
+  "generatedAt": "2026-07-01T19:03:46.316Z",
+  "title": "Validar opciones visibles posteriores al detalle del deposito a plazo"
+}

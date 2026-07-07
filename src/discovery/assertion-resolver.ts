@@ -72,7 +72,8 @@ export type AssertionClassification =
   | "expected_only"
   | "optional_assertion"
   | "ambiguous_assertion"
-  | "precondition_check";
+  | "precondition_check"
+  | "passive_visibility";
 
 export type AssertionResolutionStatus =
   | "passed"
@@ -921,6 +922,7 @@ export function resolveAssertionTargets(
   options?: {
     childSignalsByIndex?: Record<number, string[]>;
     executedActions?: Array<{ action: string; target: string; status: string }>;
+    appConfig?: any; // app.config.json with assertionAliases/uiAliases
   }
 ): AssertionResolutionResult[] {
   const visibleTexts = uniqueVisibleTexts(snapshot);
@@ -928,13 +930,56 @@ export function resolveAssertionTargets(
   const executedActions = options?.executedActions ?? [];
   const currentContext = inferCurrentContext(snapshot, executedActions);
   let successMessageFound = false;
-  
+  const appConfig = options?.appConfig;
+
+  // Helper: normalize text for comparison
+  function normalizeForComparison(text: string): string {
+    return text
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  // Helper: extract target name from assertion like "Validar que el botón X esté visible"
+  function extractAssertionTarget(assertion: string): { target: string; kind: "button" | "option" | "text" | "control" } {
+    const patterns = [
+      /validar que el botón "([^"]+)" esté visible/i,
+      /validar que el botón "([^"]+)" est[á]?\s+/i,
+      /validar que la opción "([^"]+)" est[á]?\s+/i,
+      /validar que se muestre "([^"]+)"/i,
+      /validar que "([^"]+)"/i
+    ];
+    for (const pattern of patterns) {
+      const match = assertion.match(pattern);
+      if (match) {
+        // Determine kind from original assertion text
+        let kind: "button" | "option" | "text" | "control" = "text";
+        if (assertion.toLowerCase().includes("botón")) kind = "button";
+        else if (assertion.toLowerCase().includes("opción")) kind = "option";
+        else if (assertion.toLowerCase().includes("control")) kind = "control";
+        return { target: match[1], kind };
+      }
+    }
+    return { target: assertion, kind: "text" };
+  }
+
+  // Task 1: Classify assertions
+  for (const assertion of assertionTargets) {
+    const isPassiveVisibility = /validar que|assertion.*visible/i.test(assertion.action || assertion.target);
+    if (isPassiveVisibility) {
+      const { target, kind } = extractAssertionTarget(assertion.target);
+      console.log(
+        `[assertion] classified target="${target}" type=passive_visibility kind="${kind}"`
+      );
+    }
+  }
+
   // First pass: detect if any confirmation success message is validated
-  // Check both assertion targets AND visible texts in snapshot
   for (const assertion of assertionTargets) {
     if (isConfirmationSuccessMessage(assertion.target)) {
       const literalMatch = isTextVisible(snapshot, assertion.target);
-      // Lower threshold for success message detection (0.4 instead of 0.6)
       if (literalMatch.confidence >= 0.4) {
         successMessageFound = true;
         console.log(`[assertion-resolver] Success confirmation detected in first pass: "${assertion.target}" confidence=${literalMatch.confidence}`);
@@ -942,8 +987,8 @@ export function resolveAssertionTargets(
       }
     }
   }
-  
-  // Also check visible texts in snapshot for success messages (for batches that don't include the success message)
+
+  // Also check visible texts for success messages
   if (!successMessageFound) {
     const visibleTexts = uniqueVisibleTexts(snapshot);
     for (const text of visibleTexts) {
@@ -954,8 +999,117 @@ export function resolveAssertionTargets(
       }
     }
   }
-  
+
   return assertionTargets.map((assertion, index) => {
+    const { target: extractedTarget, kind } = extractAssertionTarget(assertion.target);
+    const isPassiveVisibility = /validar que|assertion.*visible/i.test(assertion.action || assertion.target);
+
+    // Task 2 & 3: Resolve target with aliases
+    console.log(`[assertion] resolving target="${extractedTarget}" candidates=${snapshot.elements?.length ?? 0}`);
+
+    let bestMatch: { text: string; source: string; confidence: number } | null = null;
+
+    // Try exact match first
+    const normalizedTarget = normalizeForComparison(extractedTarget);
+    const candidates: Array<{ text: string; source: string; confidence: number }> = [];
+
+    for (const el of snapshot.elements || []) {
+      const texts = [
+        el.text,
+        el.label,
+        el.accessibleName,
+        el.ariaLabel,
+        el.title,
+        el.placeholder,
+        el.name
+      ].filter(Boolean);
+
+      for (const text of texts) {
+        const normalizedText = normalizeForComparison(text);
+        if (normalizedText === normalizedTarget) {
+          const source = el.text === text ? "text" :
+                        el.accessibleName === text ? "accessible_name" :
+                        el.ariaLabel === text ? "aria_label" : "attribute";
+          candidates.push({ text, source, confidence: 1.0 });
+          if (!bestMatch || bestMatch.confidence < 1.0) {
+            bestMatch = { text, source, confidence: 1.0 };
+          }
+        }
+      }
+    }
+
+    // Task 3: Check app.config for aliases
+    if (!bestMatch && appConfig) {
+      const uiAliases = appConfig.uiAliases || appConfig.assertionAliases || {};
+      const aliasForTarget = uiAliases[extractedTarget];
+      if (aliasForTarget) {
+        const normalizedAlias = normalizeForComparison(aliasForTarget);
+        for (const el of snapshot.elements || []) {
+          const texts = [el.text, el.label, el.accessibleName, el.ariaLabel].filter(Boolean);
+          for (const text of texts) {
+            const normalizedText = normalizeForComparison(text);
+            if (normalizedText === normalizedAlias) {
+              console.log(
+                `[assertion] aliasResolved target="${extractedTarget}" alias="${aliasForTarget}" source=app_config confidence=0.95`
+              );
+              bestMatch = { text, source: "app_config_alias", confidence: 0.95 };
+            }
+          }
+        }
+      }
+    }
+
+    // Task 4: If passive visibility assertion and found match, pass
+    if (isPassiveVisibility) {
+      if (bestMatch) {
+        console.log(
+          `[assertion] passed target="${extractedTarget}" matched="${bestMatch.text}" source="${bestMatch.source}"`
+        );
+        return {
+          assertionText: assertion.target,
+          normalizedAssertion: normalizeText(assertion.target),
+          classification: "passive_visibility",
+          status: "passed",
+          matchedText: bestMatch.text,
+          confidence: bestMatch.confidence,
+          reason: `visibility_assertion_satisfied (${bestMatch.source})`,
+          closestCandidates: candidates,
+          visibleTexts
+        } as any;
+      } else if (candidates.length > 1) {
+        // Task 4: Ambiguous candidates
+        console.log(
+          `[assertion] failed target="${extractedTarget}" reason=ambiguous_assertion_target candidates=${candidates.length}`
+        );
+        return {
+          assertionText: assertion.target,
+          normalizedAssertion: normalizeText(assertion.target),
+          classification: "passive_visibility",
+          status: "failed",
+          confidence: 0,
+          reason: "ambiguous_assertion_target",
+          closestCandidates: candidates,
+          visibleTexts
+        } as any;
+      } else {
+        // Task 5: Not found
+        console.log(
+          `[assertion] failed target="${extractedTarget}" reason=assertion_not_found`
+        );
+        return {
+          assertionText: assertion.target,
+          normalizedAssertion: normalizeText(assertion.target),
+          classification: "passive_visibility",
+          status: "failed",
+          confidence: 0,
+          reason: "assertion_not_found",
+          closestCandidates: candidates,
+          visibleTexts
+        } as any;
+      }
+    }
+
+    // Continue with existing logic for non-passive assertions
     const childSignals = options?.childSignalsByIndex?.[assertion.index] ?? [];
     const classification = classifyAssertion(assertion.target, { childSignals });
     const normalized = normalizeText(assertion.target);
@@ -968,7 +1122,7 @@ export function resolveAssertionTargets(
     const subject = extractSubject(assertion.target);
     const subjectSignal = matchSubjectSignals(snapshot, subject);
     const structuralSignals: string[] = [];
-    
+
     const cartState = buildCartExecutionState(executedActions);
     const precondition = detectPrecondition(assertion.target);
     const requiredContext = inferRequiredContext(assertion.target);

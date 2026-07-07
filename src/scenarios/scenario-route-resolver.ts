@@ -58,8 +58,10 @@ function collectDiagnostics(
     return diagnostics;
   }
 
-  // ERROR: Entry exists but list missing
+  // ERROR: Entry exists but list missing (skip for huComposedPath — path is self-contained)
+  const isHuComposed = !!(routeProfile as any)?._huComposedPath;
   if (
+    !isHuComposed &&
     classification.missingSteps.includes("list_target") &&
     (classification.mode === "listing_validation" || classification.mode === "detail_navigation")
   ) {

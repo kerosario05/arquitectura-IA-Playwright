@@ -460,6 +460,13 @@ export function classifyAssertionImportance(
     return "contextual";
   }
 
+  // Field label: capitalized noun phrase (no action verb) like "Tipo de Depósito"
+  // These are context-dependent and should not block when not visible
+  const ACTION_VERB_START = /^(?:click|seleccionar|ingresar|validar|esperar|llenar|confirmar|cerrar|aceptar|cancelar|buscar|agregar|editar|eliminar|navegar|regresar|volver|continuar|abrir|mostrar|ocultar|haga|realice|ejecute|elija|escoja)/i;
+  if (!ACTION_VERB_START.test(assertionText.trim()) && /^[A-ZÁÉÍÓÚÑ][a-záéíóúñA-ZÁÉÍÓÚÑ]/.test(assertionText.trim())) {
+    return "contextual";
+  }
+
   return "blocking";
 }
 

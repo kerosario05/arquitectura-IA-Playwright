@@ -188,31 +188,96 @@ async function tryWordComGeneration(
         );
       }
 
-      // Get functional step screenshots (exclude validation steps)
+      // Get functional step screenshots (exclude validation steps, deduplicate by path)
+      const seenFuncPaths = new Set<string>();
       const functionalScreenshots = sc.steps
         .filter(step => {
           if (!step.screenshotPath || !isImageFile(step.screenshotPath)) return false;
           if (!fs.existsSync(step.screenshotPath)) return false;
-          // Exclude steps starting with "Validar" (case-insensitive)
           if (/^\s*validar\b/i.test(step.stepText)) return false;
+          const resolvedPath = path.resolve(step.screenshotPath);
+          if (seenFuncPaths.has(resolvedPath)) {
+            console.log(`[evidence-docx] skippedDuplicateImage scenario=${sc.scenarioId} step=${step.stepIndex ?? "?"} reason=same_step_screenshot`);
+            return false;
+          }
+          seenFuncPaths.add(resolvedPath);
           return true;
         })
         .map(step => ({
           path: path.resolve(step.screenshotPath!),
           stepText: step.stepText,
+          stepIndex: step.stepIndex,
         }));
 
       // If no functional screenshots, use last screenshot as fallback
       let images = functionalScreenshots;
       if (images.length === 0) {
+        const seenAllPaths = new Set<string>();
         const allScreenshots = sc.steps
-          .filter(step => step.screenshotPath && isImageFile(step.screenshotPath) && fs.existsSync(step.screenshotPath))
+          .filter(step => {
+            if (!step.screenshotPath || !isImageFile(step.screenshotPath) || !fs.existsSync(step.screenshotPath)) return false;
+            const resolvedPath = path.resolve(step.screenshotPath);
+            if (seenAllPaths.has(resolvedPath)) return false;
+            seenAllPaths.add(resolvedPath);
+            return true;
+          })
           .map(step => ({
             path: path.resolve(step.screenshotPath!),
             stepText: step.stepText,
+            stepIndex: step.stepIndex,
           }));
         const fallbackImage = allScreenshots.length > 0 ? allScreenshots[allScreenshots.length - 1] : null;
         images = fallbackImage ? [fallbackImage] : [];
+      }
+
+      // Dedup final-phase images: keep only the dominant final screenshot per scenario.
+      // The final phase = last N images around the dominant stepIndex.
+      // Mode "detail_or_ordinal" removes adjacent steps (click → ordinal → detail).
+      // Mode "simple_final" only removes same-step duplicates.
+      if (images.length > 2) {
+        const detailEvidencePath = sc.detailEvidence?.screenshotPath
+          ? path.resolve(sc.detailEvidence.screenshotPath) : null;
+        // Find the dominant final image: detailEvidence path, or first with detailloaded/detalle, or last image
+        let dominantIdx = images.length - 1;
+        for (let i = images.length - 1; i >= 0; i--) {
+          const img = images[i];
+          const isDominant = (detailEvidencePath !== null && path.resolve(img.path) === detailEvidencePath) ||
+            /\bdetalle\b|detailloaded/i.test(img.stepText);
+          if (isDominant) { dominantIdx = i; break; }
+        }
+        const dominantStepIdx = images[dominantIdx].stepIndex;
+        if (dominantStepIdx !== undefined && dominantStepIdx !== null) {
+          // Determine mode: detail/ordinal if the dominant image has detail signals
+          const domImg = images[dominantIdx];
+          const hasDetailSignals = (detailEvidencePath !== null && path.resolve(domImg.path) === detailEvidencePath) ||
+            /\bdetalle\b|detailloaded/i.test(domImg.stepText);
+          // Check if any image between the last clear boundary and dominant has ordinal/detail text
+          let hasOrdinalOrDetail = hasDetailSignals;
+          if (!hasOrdinalOrDetail) {
+            for (let i = dominantIdx; i >= Math.max(0, dominantIdx - 2); i--) {
+              if (/(?:primer|primera|ordinal|seleccionar|selecci).*visible|detalle|detailloaded/i.test(images[i]?.stepText || "")) {
+                hasOrdinalOrDetail = true; break;
+              }
+            }
+          }
+          const threshold = dominantStepIdx - (hasOrdinalOrDetail ? 1 : 0);
+          console.log(`[evidence-docx] finalPhaseDedupe thresholdStep=${threshold} mode=${hasOrdinalOrDetail ? "detail_or_ordinal" : "simple_final"}`);
+          const removed: number[] = [];
+          for (let i = dominantIdx - 1; i >= 0; i--) {
+            const imgIdx = images[i].stepIndex;
+            if (imgIdx === undefined || imgIdx === null) break;
+            if (imgIdx >= threshold) {
+              removed.push(i);
+            } else {
+              break;
+            }
+          }
+          for (const idx of removed.sort((a, b) => b - a)) {
+            console.log(`[evidence-docx] duplicateFinalPhaseImageSkipped scenario=${sc.scenarioId} reason=covered_by_final_phase_image`);
+            images.splice(idx, 1);
+          }
+          console.log(`[evidence-docx] finalPhaseImageKept scenario=${sc.scenarioId} path=${images[images.length - 1]?.path ?? "none"}`);
+        }
       }
 
       // Append detailEvidence screenshot as final image if it exists and is not already in images
@@ -236,6 +301,38 @@ async function tryWordComGeneration(
         } else {
           console.log(`[evidence-docx] detail screenshot file not accessible scenario=${sc.scenarioId} path=${detailPath}`);
         }
+      }
+
+      // ── DEDUP: remove duplicate images by absolute path within the same scenario ──
+      if (images.length > 1) {
+        const before = images.length;
+        const seenPaths = new Set<string>();
+        const deduped: Array<{ path: string; stepText: string }> = [];
+        for (const img of images) {
+          const abs = path.resolve(img.path);
+          if (seenPaths.has(abs)) {
+            console.log(`[evidence-docx] skippedDuplicate scenario=${sc.scenarioId} reason=exact_path path=${abs}`);
+            continue;
+          }
+          seenPaths.add(abs);
+          deduped.push(img);
+        }
+        // If detailEvidence exists and its path appears multiple times, keep only the last occurrence
+        if (sc.detailEvidence?.screenshotPath && deduped.length > 1) {
+          const detailAbs = path.resolve(sc.detailEvidence.screenshotPath);
+          const detailIndexes = deduped.map((img, i) => path.resolve(img.path) === detailAbs ? i : -1).filter(i => i >= 0);
+          if (detailIndexes.length > 1) {
+            // Remove all but the last occurrence
+            for (let i = detailIndexes.length - 2; i >= 0; i--) {
+              console.log(`[evidence-docx] skippedDuplicate scenario=${sc.scenarioId} reason=detail_loaded path=${deduped[detailIndexes[i]].path}`);
+              deduped.splice(detailIndexes[i], 1);
+            }
+          }
+        }
+        if (deduped.length < before) {
+          console.log(`[evidence-docx] imageDedupe scenario=${sc.scenarioId} before=${before} after=${deduped.length} removed=${before - deduped.length}`);
+        }
+        images = deduped;
       }
 
       const preparedImages = finalizeScenarioImagesForDocx(sc, images);
@@ -365,22 +462,70 @@ function prepareScenarioDocxInput(scenario: EvidenceScenarioRecord): PreparedSce
     );
   }
 
+  const seenFuncPaths = new Set<string>();
   const functionalScreenshots = scenario.steps
     .filter(step => {
       if (!step.screenshotPath || !isImageFile(step.screenshotPath)) return false;
       if (!fs.existsSync(step.screenshotPath)) return false;
       if (/^\s*validar\b/i.test(step.stepText)) return false;
+      const resolvedPath = path.resolve(step.screenshotPath);
+      if (seenFuncPaths.has(resolvedPath)) {
+        console.log(`[evidence-docx] skippedDuplicateImage scenario=${scenario.scenarioId} step=${step.stepIndex ?? "?"} reason=same_step_screenshot`);
+        return false;
+      }
+      seenFuncPaths.add(resolvedPath);
       return true;
     })
     .map(step => ({
       path: path.resolve(step.screenshotPath!),
       stepText: step.stepText,
+      stepIndex: step.stepIndex,
     }));
+
+  // Dedup: if the last images are from the same detail phase (same stepIndex or
+  // detailloaded follows ordinal/click), keep only the best final screenshot.
+  if (functionalScreenshots.length > 2) {
+    const detailEvidencePath = scenario.detailEvidence?.screenshotPath
+      ? path.resolve(scenario.detailEvidence.screenshotPath) : null;
+    // Find the last detail-loaded image
+    let lastDetailIdx = -1;
+    for (let i = functionalScreenshots.length - 1; i >= 0; i--) {
+      const img = functionalScreenshots[i];
+      const isDetail = /\bdetalle\b|detailloaded/i.test(img.stepText) ||
+        (detailEvidencePath !== null && path.resolve(img.path) === detailEvidencePath);
+      if (isDetail) { lastDetailIdx = i; break; }
+    }
+    if (lastDetailIdx > 0) {
+      const removed: number[] = [];
+      const lastIdx = functionalScreenshots[lastDetailIdx].stepIndex;
+      if (lastIdx !== undefined && lastIdx !== null) {
+        for (let i = lastDetailIdx - 1; i >= 0; i--) {
+          const img = functionalScreenshots[i];
+          const imgIdx = img.stepIndex;
+          if (imgIdx === undefined || imgIdx === null) break;
+          if (imgIdx === lastIdx) { removed.push(i); continue; }
+          if (imgIdx === lastIdx - 1 && removed.length >= 0) { removed.push(i); continue; }
+          break;
+        }
+      }
+      for (const idx of removed.sort((a, b) => b - a)) {
+        console.log(`[evidence-docx] duplicateDetailScreenSkipped scenario=${scenario.scenarioId} step=${functionalScreenshots[idx].stepIndex ?? "?"} reason=covered_by_final_detail`);
+        functionalScreenshots.splice(idx, 1);
+      }
+    }
+  }
 
   let images = functionalScreenshots;
   if (images.length === 0) {
+    const seenAllPaths = new Set<string>();
     const allScreenshots = scenario.steps
-      .filter(step => step.screenshotPath && isImageFile(step.screenshotPath) && fs.existsSync(step.screenshotPath))
+      .filter(step => {
+        if (!step.screenshotPath || !isImageFile(step.screenshotPath) || !fs.existsSync(step.screenshotPath)) return false;
+        const resolvedPath = path.resolve(step.screenshotPath);
+        if (seenAllPaths.has(resolvedPath)) return false;
+        seenAllPaths.add(resolvedPath);
+        return true;
+      })
       .map(step => ({
         path: path.resolve(step.screenshotPath!),
         stepText: step.stepText,
@@ -893,6 +1038,14 @@ async function jsZipFallbackGeneration(
   let documentXml = await documentXmlFile.async("string");
   documentXml = ensureImageNamespaces(documentXml);
 
+  // Remove base table (contains "Estado: Exitoso") — it's only for Word COM cloning
+  // The generated scenario tables already include status rows
+  const baseTableMatch = documentXml.match(/<w:tbl[\s\S]*?<w:t>Estado: Exitoso<\/w:t>[\s\S]*?<\/w:tbl>/);
+  if (baseTableMatch) {
+    console.log(`[evidence-docx] removed base table from template for jsZip fallback`);
+    documentXml = documentXml.replace(baseTableMatch[0], "");
+  }
+
   const { xml: scenariosXml, images } = buildSimplifiedScenarioBlocks(scenarios);
 
   const replacedDocumentXml = replacePlaceholderInXml(documentXml, "{{ESCENARIOS_EVIDENCIA}}", scenariosXml);
@@ -918,6 +1071,112 @@ async function jsZipFallbackGeneration(
   return { success: true, outputPath };
 }
 
+/**
+ * Post-process the DOCX XML to remove duplicate image embeds within each scenario block.
+ * Parses the XML by paragraphs (w:p), detects "Caso de prueba:" to delimit scenarios,
+ * extracts scenario titles, and deduplicates r:embed references per block.
+ */
+function deduplicateEmbeddedImagesPerScenario(
+  documentXml: string,
+  relsXml: string,
+  scenarios: EvidenceScenarioRecord[],
+): string {
+  // Build rid → target map
+  const relsMap = new Map<string, string>();
+  const relRegex = /<Relationship\b[^>]*\bId="([^"]+)"[^>]*\bTarget="([^"]+)"[^>]*\/>/g;
+  let m: RegExpExecArray | null;
+  while ((m = relRegex.exec(relsXml)) !== null) {
+    relsMap.set(m[1], m[2]);
+  }
+
+  // Parse paragraphs from document
+  const paragraphRegex = /<w:p\b[\s\S]*?<\/w:p>/g;
+  const allParagraphs: Array<{ xml: string; text: string }> = [];
+  let paraMatch: RegExpExecArray | null;
+  while ((paraMatch = paragraphRegex.exec(documentXml)) !== null) {
+    const paraXml = paraMatch[0];
+    const texts: string[] = [];
+    const textRegex = /<w:t[^>]*>([^<]*)<\/w:t>/g;
+    let t: RegExpExecArray | null;
+    while ((t = textRegex.exec(paraXml)) !== null) {
+      texts.push(t[1]);
+    }
+    allParagraphs.push({ xml: paraXml, text: texts.join('') });
+  }
+
+  // Group paragraphs into scenario blocks
+  interface ScenarioBlock { title: string; paragraphs: typeof allParagraphs; }
+  const blocks: ScenarioBlock[] = [];
+  let currentBlock: ScenarioBlock | null = null;
+  let currentTitle = 'preamble';
+
+  for (const para of allParagraphs) {
+    const caseMatch = para.text.match(/Caso de prueba:\s*(.*)/);
+    if (caseMatch) {
+      if (currentBlock) blocks.push(currentBlock);
+      currentTitle = caseMatch[1].trim() || 'unknown';
+      currentBlock = { title: currentTitle, paragraphs: [] };
+    }
+    if (currentBlock) {
+      currentBlock.paragraphs.push(para);
+    }
+  }
+  if (currentBlock) blocks.push(currentBlock);
+
+  console.log(`[evidence-docx] wordComXmlDedupe blocks=${blocks.length} embedsBefore=${allParagraphs.length}`);
+
+  // Process each scenario block and collect deduped XML
+  const containerRegex = /<(?:wp:(?:inline|anchor)\b[\s\S]*?<a:blip\b[^>]*r:embed="([^"]+)"[\s\S]*?<\/wp:\2|w:drawing\b[\s\S]*?<a:blip\b[^>]*r:embed="([^"]+)"[\s\S]*?<\/w:drawing>|w:p\b[\s\S]*?<a:blip\b[^>]*r:embed="([^"]+)"[\s\S]*?<\/w:p>)/g;
+  const dedupedXmlByOrig = new Map<string, string>();
+
+  for (let bi = 0; bi < blocks.length; bi++) {
+    const block = blocks[bi];
+    const seenTargets = new Set<string>();
+    const seenRids = new Set<string>();
+    let beforeCount = 0;
+    let afterCount = 0;
+
+    for (const para of block.paragraphs) {
+      const dedupedXml = para.xml.replace(containerRegex, (fullMatch, ...groups) => {
+        const rid = groups.slice(0, -2).find((g: any) => typeof g === 'string' && g.length > 0) as string || '';
+        beforeCount++;
+        const target = relsMap.get(rid) || '';
+        const targetKey = target.replace(/^.*[\\/]/, '').toLowerCase();
+
+        if (seenRids.has(rid)) {
+          console.log(`[evidence-docx] xmlSkippedDuplicate scenario="${block.title}" reason=same_rid rid=${rid} target=${target}`);
+          return '';
+        }
+        if (seenTargets.has(targetKey)) {
+          console.log(`[evidence-docx] xmlSkippedDuplicate scenario="${block.title}" reason=same_target rid=${rid} target=${target}`);
+          return '';
+        }
+        seenTargets.add(targetKey);
+        seenRids.add(rid);
+        afterCount++;
+        return fullMatch;
+      });
+      // Store deduped version keyed by original XML (unique per paragraph)
+      dedupedXmlByOrig.set(para.xml, dedupedXml);
+    }
+
+    if (beforeCount !== afterCount) {
+      console.log(`[evidence-docx] xmlImageDedupe scenario="${block.title}" before=${beforeCount} after=${afterCount} removed=${beforeCount - afterCount}`);
+    }
+  }
+
+  // Rebuild document: replace each original paragraph with its deduped version
+  let resultXml = documentXml;
+  for (const [origXml, dedupedXml] of dedupedXmlByOrig) {
+    if (dedupedXml !== origXml) {
+      resultXml = resultXml.replace(origXml, dedupedXml);
+    }
+  }
+
+  console.log(`[evidence-docx] wordComXmlDedupe wroteXml=true`);
+  return resultXml;
+}
+
 async function normalizeWordComDocxOutput(
   outputPath: string,
   scenarios: EvidenceScenarioRecord[],
@@ -935,9 +1194,15 @@ async function normalizeWordComDocxOutput(
   let documentXml = await documentXmlFile.async("string");
   const relsXml = await relsXmlFile.async("string");
 
+  // Fix "Estado: Fallido Exitoso" — single element case
   documentXml = documentXml.replace(
-    /<w:t>(Estado:\s+)(Exitoso|Fallido)\s+\2<\/w:t>/g,
+    /<w:t>(Estado:\s+)(Exitoso|Fallido)\s+(?:Exitoso|Fallido)<\/w:t>/g,
     "<w:t>$1$2</w:t>",
+  );
+  // Fix "Estado: Fallido Exitoso" — separate adjacent runs case
+  documentXml = documentXml.replace(
+    /(<w:t>Estado:\s*(?:Exitoso|Fallido))<\/w:t>[\s\S]*?<w:t>\s*(?:Exitoso|Fallido)\s*<\/w:t>/g,
+    "$1</w:t>",
   );
 
   documentXml = documentXml.replace(
@@ -949,6 +1214,9 @@ async function normalizeWordComDocxOutput(
   const relsMap = parseDocumentRelationships(relsXml);
   const normalization = await normalizeZeroImageExtents(documentXml, zip, relsMap);
   documentXml = normalization.documentXml;
+
+  // ── XML-level dedup: remove duplicate image embeds within each scenario block ──
+  documentXml = deduplicateEmbeddedImagesPerScenario(documentXml, relsXml, scenarios);
 
   zip.file("word/document.xml", documentXml);
 
@@ -1216,7 +1484,7 @@ async function validateNormalizedDocx(
   ).replace(/\s+/g, " ");
   const requirementFilled = /Requerimiento:\s+\S+/.test(textContent);
   const analystFilled = /Analista:\s+\S+/.test(textContent);
-  const statusDuplicated = textContent.includes("Estado: Exitoso Exitoso");
+  const statusDuplicated = /Estado:\s+(?:Exitoso|Fallido)\s+(?:Exitoso|Fallido)/.test(textContent);
   const relsMap = parseDocumentRelationships(relsXml);
   const mediaHashes = await buildDocxMediaHashIndex(zip, relsMap);
   const finalImageChecks = await Promise.all(
@@ -1352,21 +1620,37 @@ function buildSimplifiedScenarioBlocks(
     // Add spacing after table
     blocks.push(`<w:p><w:pPr><w:spacing w:after="200"/></w:pPr></w:p>`);
 
-    // Get functional screenshots (exclude validation steps)
+    // Get functional screenshots (exclude validation steps, dedup by absolute path)
+    const seenBlockPaths = new Set<string>();
     const functionalScreenshots = sc.steps.filter(
       step => {
         if (!step.screenshotPath || !isImageFile(step.screenshotPath)) return false;
         if (!fs.existsSync(step.screenshotPath)) return false;
         // Exclude steps starting with "Validar" (case-insensitive)
         if (/^\s*validar\b/i.test(step.stepText)) return false;
+        const resolvedPath = path.resolve(step.screenshotPath);
+        if (seenBlockPaths.has(resolvedPath)) {
+          console.log(`[evidence-docx] skippedDuplicateImage scenario=${sc.scenarioId} step=${step.stepIndex ?? "?"} reason=same_step_screenshot`);
+          return false;
+        }
+        seenBlockPaths.add(resolvedPath);
         return true;
       }
     );
 
-    // If no functional screenshots, use last screenshot as fallback
+    // If no functional screenshots, use last screenshot as fallback (deduped by path)
     const screenshotsToUse = functionalScreenshots.length > 0
       ? functionalScreenshots
-      : sc.steps.filter(step => step.screenshotPath && isImageFile(step.screenshotPath) && fs.existsSync(step.screenshotPath));
+      : (() => {
+          const seenFallbackPaths = new Set<string>();
+          return sc.steps.filter(step => {
+            if (!step.screenshotPath || !isImageFile(step.screenshotPath) || !fs.existsSync(step.screenshotPath)) return false;
+            const resolvedPath = path.resolve(step.screenshotPath);
+            if (seenFallbackPaths.has(resolvedPath)) return false;
+            seenFallbackPaths.add(resolvedPath);
+            return true;
+          });
+        })();
 
     // Prefer detailEvidence screenshot: move it last in output (as final/primary image)
     let detailScreenshotFound = false;

@@ -307,7 +307,7 @@ export class AuthFlow {
 
   private async completeIdentification(client: AuthClientProfile, stagesCompleted: AuthFlowStage[]): Promise<void> {
     console.log(`[auth-flow] action=completeIdentification`);
-    
+
     // Wait for identification page to be ready
     try {
       await this.identificationPage.expectLoaded();
@@ -320,22 +320,130 @@ export class AuthFlow {
     try {
       await this.identificationPage.selectIdentificationType(client.identificationType);
       console.log(`[auth-flow] Selected identification type: ${client.identificationType}`);
-      
+
       await this.identificationPage.enterIdentificationNumber(client.identificationNumber);
       console.log(`[auth-flow] Entered identification number`);
-      
+
+      const preClickUrl = this.page.url();
       await this.identificationPage.continue();
       console.log(`[auth-flow] Clicked continue`);
-      
+
+      // Task 2: Wait for post-continue transition
+      const postClickStage = await this.detectPostIdentificationTransition(preClickUrl);
+      console.log(`[auth-flow] postIdentificationWait result=${postClickStage.transitionType} url=${postClickStage.currentUrl}`);
+
+      // Task 3: Check if identification is still active (stuck in identification_input)
+      if (postClickStage.transitionType === "same_stage" && postClickStage.detectedStage === "identification") {
+        console.log(`[auth-flow] identificationStillActive reason=${postClickStage.reason} retryable=${postClickStage.retryable}`);
+        // Don't mark as completed - need to diagnose
+        return;
+      }
+
       stagesCompleted.push('identification');
       console.log(`[auth-flow] completed stage=identification`);
-      
-      // Wait for transition
-      await this.page.waitForLoadState('domcontentloaded', { timeout: 5000 });
     } catch (error) {
       console.log(`[auth-flow] Identification step skipped or already completed: ${error instanceof Error ? error.message : String(error)}`);
-      // Identification may already be done or not visible
     }
+  }
+
+  private async detectPostIdentificationTransition(preClickUrl: string): Promise<{
+    transitionType: string;
+    currentUrl: string;
+    detectedStage?: AuthFlowStage;
+    reason?: string;
+    retryable?: boolean;
+    visibleError?: string;
+  }> {
+    let urlChanged = false;
+    let elapsedMs = 0;
+    const maxWaitMs = 6000;
+
+    // Wait for URL change or stage change
+    while (elapsedMs < maxWaitMs) {
+      const currentUrl = this.page.url();
+      if (currentUrl !== preClickUrl) {
+        urlChanged = true;
+        console.log(`[auth-flow] URL changed from ${preClickUrl} to ${currentUrl}`);
+        break;
+      }
+      await this.page.waitForTimeout(500);
+      elapsedMs += 500;
+    }
+
+    // Detect current stage after wait
+    const snapshot = await this.captureSnapshot();
+    const currentUrl = snapshot.url;
+    const currentStage = await this.detectCurrentStage();
+
+    // Check for errors/messages
+    let visibleError = undefined;
+    try {
+      const errorText = await this.page.locator('[role="alert"], .error, .alert-danger, [class*="error"]').first().textContent({ timeout: 1000 });
+      if (errorText?.trim()) {
+        visibleError = errorText.trim();
+      }
+    } catch { /* no error element */ }
+
+    // Detect OTP/phone confirmation screen
+    if (currentStage === "otp") {
+      return { transitionType: "otp", currentUrl, detectedStage: currentStage };
+    }
+    if (currentStage === "phone_confirmation") {
+      return { transitionType: "phone_confirmation", currentUrl, detectedStage: currentStage };
+    }
+
+    // Check if we advanced to operations/authenticated
+    if (currentStage === "authenticated") {
+      return { transitionType: "private_menu", currentUrl, detectedStage: currentStage };
+    }
+
+    // Still in identification - check why
+    if (currentStage === "identification") {
+      let reason = "unknown";
+      let retryable = false;
+
+      // Check if continue button is still visible (form not submitted)
+      try {
+        const continueBtn = this.page.getByRole('button', { name: /continuar|continue|enviar|submit/i }).first();
+        if (await continueBtn.isVisible({ timeout: 1000 })) {
+          reason = "continue_button_still_visible";
+          retryable = true;
+        }
+      } catch { /* button not found */ }
+
+      // Check if ID field is still visible and focused (form reset)
+      try {
+        const idInput = this.page.locator('input[name*="identification"], input[name*="cedula"], input[name*="id"]').first();
+        if (await idInput.isVisible({ timeout: 1000 })) {
+          reason = "identification_field_still_visible";
+          retryable = true;
+        }
+      } catch { /* field not found */ }
+
+      // Check for visible error
+      if (visibleError) {
+        reason = `visible_error: ${visibleError}`;
+        retryable = visibleError.toLowerCase().includes("invalido") || visibleError.toLowerCase().includes("invalid");
+      }
+
+      return {
+        transitionType: "same_stage",
+        currentUrl,
+        detectedStage: currentStage,
+        reason,
+        retryable,
+        visibleError
+      };
+    }
+
+    // Timeout or unexpected stage
+    return {
+      transitionType: urlChanged ? "url_changed_unexpected_stage" : "timeout",
+      currentUrl,
+      detectedStage: currentStage,
+      reason: `Unexpected stage after continue: ${currentStage}`,
+      retryable: false
+    };
   }
 
   private async completePhoneConfirmation(client: AuthClientProfile, stagesCompleted: AuthFlowStage[]): Promise<void> {
@@ -394,12 +502,17 @@ export class AuthFlow {
 
   private async finalizeAuth(stagesCompleted: AuthFlowStage[], alias: string, landing: string): Promise<AuthFlowResult> {
     console.log(`[auth-flow] action=finalizeAuth`);
-    
+
     // Wait for final page to stabilize
-    await this.page.waitForLoadState('domcontentloaded', { timeout: 5000 });
-    
+    try {
+      await this.page.waitForLoadState('domcontentloaded', { timeout: 5000 });
+    } catch {
+      console.log(`[auth-flow] Timeout waiting for domcontentloaded in finalizeAuth`);
+    }
+
     const finalStage = await this.detectCurrentStage();
     const isMenuVisible = await this.isOperationsMenuVisible();
+    const snapshot = await this.captureSnapshot();
 
     console.log(`[auth-flow] Final stage: ${finalStage}, menu visible: ${isMenuVisible}`);
 
@@ -414,17 +527,32 @@ export class AuthFlow {
       };
     }
 
-    // Get diagnostic info for error
-    const snapshot = await this.captureSnapshot();
-    const error = `Authentication did not reach expected landing. Final stage: ${finalStage}, menu visible: ${isMenuVisible}, currentUrl: ${snapshot.url}`;
+    // Authentication failed - capture diagnostics for case-discovery
+    let stuckReason = "unknown";
+    if (finalStage === "identification" || finalStage === "identification_input") {
+      stuckReason = "identification_not_submitted_or_rejected";
+    } else if (finalStage === "phone_confirmation") {
+      stuckReason = "phone_confirmation_not_completed";
+    } else if (finalStage === "otp") {
+      stuckReason = "otp_not_confirmed";
+    } else if (finalStage === "not_started") {
+      stuckReason = "auth_not_started";
+    }
+
+    const error = `Authentication did not reach expected landing. Final stage: ${finalStage}, menu visible: ${isMenuVisible}`;
     console.log(`[auth-flow] ${error}`);
-    
+
     return {
       success: false,
       stagesCompleted,
       clientAlias: alias,
       landingDetected: undefined,
-      error
+      error,
+      diagnostics: {
+        finalStage,
+        currentUrl: snapshot.url,
+        stuckReason
+      }
     };
   }
 }

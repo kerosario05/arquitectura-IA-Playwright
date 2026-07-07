@@ -1,0 +1,10 @@
+{
+  "id": "preview-002-visualizar-monto-y-plazo-en-el-detalle-del-deposito-a-plazo",
+  "externalId": "PREVIEW-002",
+  "caseId": 0,
+  "title": "Visualizar monto y plazo en el detalle del deposito a plazo",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-07-02T22:47:24.621Z"
+}

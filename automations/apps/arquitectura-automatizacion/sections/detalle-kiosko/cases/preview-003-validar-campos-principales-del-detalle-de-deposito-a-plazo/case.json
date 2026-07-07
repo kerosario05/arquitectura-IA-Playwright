@@ -1,0 +1,10 @@
+{
+  "id": "preview-003-validar-campos-principales-del-detalle-de-deposito-a-plazo",
+  "externalId": "PREVIEW-003",
+  "caseId": 0,
+  "title": "Validar campos principales del detalle de depósito a plazo",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-07-01T15:07:28.925Z"
+}

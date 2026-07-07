@@ -1,5 +1,6 @@
 import type { McpGenerationResponse, McpRouteProfile, ScenarioRouteResolution, DeterministicSeedScenario, ScenarioGenerationMode } from "./scenario-types";
 import { buildMcpScenarioMessages } from "./mcp-scenario-prompt-builder";
+import { detectOptionFlows } from "./hu-scope-guard";
 import { parseAiResponse } from "./scenario-output-parser";
 import type { JiraIssueSource } from "./scenario-types";
 import { createScenarioAiProvider } from "../ai/ai-provider-factory";
@@ -20,6 +21,7 @@ import {
   logComplianceSummary,
 } from "./scenario-route-compliance-validator";
 import { ensureStepStrings, normalizeScenarioSteps } from "./step-formatter";
+import { detectHuIntent, isTransactionalDocumentIntent, type HuIntentDetection } from "./hu-intent-classifier";
 
 /**
  * Convert deterministic seeds to full scenarios and validate them
@@ -146,15 +148,415 @@ function normalizeAiScenario(scenario: any, appSlug: string): any {
   return normalized;
 }
 
+function extractHuTerms(issue: JiraIssueSource): { validations: string[]; actions: string[] } {
+  const corpus = [issue.summary, issue.description, issue.acceptanceCriteria].filter(Boolean).join(" ");
+  const validationMatches = corpus.match(/monto|tasa|fecha|estado|certificado|inter[eé]s|dato|campo/gi) || [];
+  const actionMatches = corpus.match(/enviar|imprimir|descargar|consultar|volver|regresar|finalizar/gi) || [];
+  return {
+    validations: [...new Set(validationMatches)].slice(0, 2),
+    actions: [...new Set(actionMatches)].slice(0, 1),
+  };
+}
+
+function extractHuCoverage(issue: JiraIssueSource, pathSelection?: any): {
+  domainTerm: string;
+  singularTerm: string;
+  hasExpiryAlert: boolean;
+  hasNoDataCase: boolean;
+} {
+  const corpus = [issue.summary, issue.description, issue.acceptanceCriteria].filter(Boolean).join(" ").toLowerCase();
+  const rawTarget = String(pathSelection?.selectedPath?.target || "depósito a plazo").replace(/"/g, "").trim();
+  let singularTerm = rawTarget.toLowerCase();
+
+  // Simple singularization: remove 's' at end for common Spanish plurals
+  if (singularTerm.endsWith("os")) {
+    singularTerm = singularTerm.slice(0, -1); // depósitos → depósito
+  } else if (singularTerm.endsWith("as")) {
+    singularTerm = singularTerm.slice(0, -1); // cuentas → cuenta
+  }
+
+  return {
+    domainTerm: rawTarget.toLowerCase(),
+    singularTerm,
+    hasExpiryAlert: corpus.includes("alerta") || corpus.includes("vencimiento"),
+    hasNoDataCase: corpus.includes("sin depósitos") || corpus.includes("sin depositos"),
+  };
+}
+
+function buildHuFallbackScenarios(
+  issues: JiraIssueSource[],
+  appSlug: string,
+  routeProfile: McpRouteProfile | null,
+  routeResolutions: Map<string, ScenarioRouteResolution>,
+  entrySteps?: Array<{ action: string; target: string; when?: string }>,
+  pathSelectionMap?: Map<string, any>
+): any[] {
+  const primaryIssue = issues[0];
+  if (!primaryIssue) {
+    return [];
+  }
+
+  const resolution = routeResolutions.get(primaryIssue.key);
+  const pathSelection = pathSelectionMap?.get(primaryIssue.key);
+  const isPrivateSynthetic = pathSelection?.accessMode === "private" &&
+    (pathSelection?.source === "synthetic" || pathSelection?.selectedPath?.targetPathKey?.startsWith("synthetic_"));
+  const entryPrefix = isPrivateSynthetic
+    ? (entrySteps || [])
+        .filter(step => step.action === "click" && !/informaci[oó]n de productos/i.test(step.target))
+        .slice(0, 1)
+        .map(step => `Clic en "${step.target}".`)
+    : (entrySteps || []).slice(0, 2).map(step =>
+        step.action === "click"
+          ? `Clic en "${step.target}".`
+          : `Validar que se muestre "${step.target}".`
+      );
+  const routePrefix = (resolution?.executableRouteSteps || []).slice(0, 3);
+  const syntheticPrefix = ((pathSelection?.selectedPath?.requiredIntermediates || []) as string[])
+    .filter(step => !/informaci[oó]n de productos/i.test(step))
+    .slice(0, 3)
+    .map(step => `Clic en "${step}".`);
+  const navigationPrefix = [...entryPrefix, ...(routePrefix.length > 0 && !isPrivateSynthetic ? routePrefix : syntheticPrefix)]
+    .filter((step, index, allSteps) =>
+      !/informaci[oó]n de productos/i.test(step) &&
+      allSteps.findIndex(candidate => candidate.toLowerCase() === step.toLowerCase()) === index
+    );
+  const coverage = extractHuCoverage(primaryIssue, pathSelection);
+  const { actions } = extractHuTerms(primaryIssue);
+  const actionTarget = actions[0] || "continuar";
+  const selectionStep = `Seleccionar el primer ${coverage.singularTerm} visible del listado.`;
+
+  const scenarios = [
+    {
+      sourceIssueKey: primaryIssue.key,
+      title: `Consultar listado de ${coverage.domainTerm}`,
+      steps: [...navigationPrefix, `Validar que se muestre "${coverage.domainTerm}".`],
+      expectedResult: `Listado de ${coverage.domainTerm} disponible`,
+    },
+    {
+      sourceIssueKey: primaryIssue.key,
+      title: `Consultar detalle de ${coverage.singularTerm} seleccionado`,
+      steps: [...navigationPrefix, selectionStep, `Validar que se muestre "${coverage.domainTerm}".`],
+      expectedResult: `Detalle de ${coverage.singularTerm} disponible`,
+    },
+    {
+      sourceIssueKey: primaryIssue.key,
+      title: `Validar número de certificado enmascarado`,
+      steps: [...navigationPrefix, selectionStep, `Validar que el botón "${actionTarget}" esté visible.`],
+      expectedResult: "Acción disponible para el usuario",
+    },
+    {
+      sourceIssueKey: primaryIssue.key,
+      title: `Validar monto, tasa y fechas del ${coverage.singularTerm}`,
+      steps: [...navigationPrefix, selectionStep, `Validar que se muestre "monto".`, `Validar que se muestre "tasa".`, `Validar que se muestre "fechas".`],
+      expectedResult: "Datos financieros visibles",
+    },
+    {
+      sourceIssueKey: primaryIssue.key,
+      title: `Validar estado, intereses y tipo del ${coverage.singularTerm}`,
+      steps: [...navigationPrefix, selectionStep, `Validar que se muestre "estado".`, `Validar que se muestre "intereses".`, `Validar que se muestre "tipo".`],
+      expectedResult: "Estado e intereses visibles",
+    },
+    {
+      sourceIssueKey: primaryIssue.key,
+      title: `Validar opciones disponibles en detalle del ${coverage.singularTerm}`,
+      steps: [...navigationPrefix, selectionStep, `Validar que el botón "Volver" esté visible.`, `Validar que el botón "Enviar correo" esté visible.`, `Validar que el botón "Imprimir" esté visible.`],
+      expectedResult: "Opciones de navegación y acción disponibles",
+    },
+    ...(coverage.hasExpiryAlert ? [{
+      sourceIssueKey: primaryIssue.key,
+      title: `Validar alerta de vencimiento próximo`,
+      steps: [...navigationPrefix, selectionStep, `Validar que se muestre "alerta de vencimiento próximo".`],
+      expectedResult: "Alerta visible cuando aplica",
+    }] : []),
+    ...(coverage.hasNoDataCase ? [{
+      sourceIssueKey: primaryIssue.key,
+      title: `Validar cliente sin ${coverage.domainTerm}`,
+      steps: [...navigationPrefix, `Validar que se muestre "sin ${coverage.domainTerm}".`],
+      expectedResult: "Mensaje sin datos visible",
+    }] : [])
+  ];
+
+  const sanitizedScenarios = scenarios.map((scenario) => ({
+    ...scenario,
+    steps: scenario.steps.filter((step: string) => !/informaci[oó]n de productos/i.test(step)),
+    preconditions: ["AuthGate"],
+    caseOracle: "assert_visible",
+    type: "Automated",
+    database: "",
+    isConverted: 1,
+    automationType: "ui_with_controlled_data",
+    setupStrategy: "controlled_data",
+    appSlug,
+    routeProfile: routeProfile?.name || "default",
+    dataRequirements: "",
+    nonExecutableCriteria: "",
+    mcpExecutable: true,
+    syntheticNavigationAuthority: isPrivateSynthetic,
+  }));
+
+  const removedPublicSteps = scenarios.reduce((total, scenario, index) =>
+    total + (scenario.steps.length - sanitizedScenarios[index].steps.length), 0);
+  console.log(`[scenario-preview] selectedPathFallback sanitized issue=${primaryIssue.key} removedPublicSteps=${removedPublicSteps} steps=${sanitizedScenarios[0]?.steps.length ?? 0}`);
+  console.log(`[scenario-preview] huFallbackRich generated issue=${primaryIssue.key} count=${sanitizedScenarios.length} fields=monto,tasa,fechas,estado,intereses,tipo`);
+
+  return sanitizedScenarios;
+}
+
+function looksEnglish(text: string): boolean {
+  const normalized = text.toLowerCase();
+  return /\b(validate|check|view|details|balance|available|print|send|expired|main|flow|data)\b/.test(normalized);
+}
+
+function normalizeSpanishTitle(title: string): string {
+  return title
+    .replace(/\bValidate\b/gi, "Validar")
+    .replace(/\bCheck\b/gi, "Validar")
+    .replace(/\bView\b/gi, "Consultar")
+    .replace(/\bDetails\b/gi, "detalle")
+    .replace(/\bBalance\b/gi, "balance")
+    .replace(/\bPrint\b/gi, "Imprimir")
+    .replace(/\bSend\b/gi, "Enviar")
+    .trim();
+}
+
+function repairUnquotedValidationStep(normalized: string): string | null {
+  // Repair "Validar que se muestre X" → "Validar que se muestre "X"."
+  const unquotedMatch = normalized.match(/^Validar que se muestre\s+([^"]+?)\.?$/i);
+  if (unquotedMatch) {
+    const valueToQuote = unquotedMatch[1].trim();
+    if (valueToQuote && !valueToQuote.startsWith('"') && valueToQuote.length > 0) {
+      return `Validar que se muestre "${valueToQuote}".`;
+    }
+  }
+  return null;
+}
+
+function normalizeScenarioStep(step: string): { step: string; changed: boolean; rejectReason?: string } {
+  const stripped = step.replace(/^\d+[\.)]\s*/, "").trim();
+  let normalized = stripped;
+
+  // Fix common Spanish typos before pattern matching
+  normalized = normalized
+    .replace(/\bmustre\b/gi, "muestre")
+    .replace(/\bmuetra\b/gi, "muestra")
+    .replace(/\bvalidar que se muestre\b/gi, "Validar que se muestre")
+    .replace(/\bvalidar que el boton\b/gi, "Validar que el botón")
+    .replace(/\bvalidar que el botón\b/gi, "Validar que el botón");
+
+  if (/^Hacer clic en /i.test(normalized) || /^Seleccionar la opci[oó]n /i.test(normalized)) {
+    normalized = normalized
+      .replace(/^Hacer clic en /i, "Clic en ")
+      .replace(/^Seleccionar la opci[oó]n /i, "Clic en ");
+  } else if (/^Verificar /i.test(normalized)) {
+    normalized = normalized.replace(/^Verificar /i, "Validar que se muestre ");
+  }
+
+  if (/^(Completar autentic|Navegar a|El usuario debe|Sistema muestra|Acceder a|Ir a)/i.test(normalized)) {
+    return { step, changed: false, rejectReason: "forbidden_narrative_step" };
+  }
+
+  const allowedPatterns = [
+    /^Clic en ".+"\.$/,
+    /^Ingresar ".+" en ".+"\.$/,
+    /^Validar que se muestre ".+"\.$/,
+    /^Esperar que se muestre ".+"\.$/,
+    /^Seleccionar ".+"\.$/,
+    /^Seleccionar el (primer|primera|último|última) .+ visible del listado\.$/i,
+    /^Validar que el bot[oó]n ".+" est[eé] visible\.?$/,
+    /^Validar que el bot[oó]n ".+" est[eé] habilitado\.?$/,
+    /^Validar que el bot[oó]n ".+" est[eé] deshabilitado\.?$/
+  ];
+
+  // Reject abstract phrases that reference no concrete target
+  const abstractPatterns = [
+    /^Validar que funcione correctamente\.?$/i,
+    /^Validar resultado esperado\.?$/i,
+    /^Validar que se genere correctamente\.?$/i,
+    /^Completar datos requeridos\.?$/i,
+    /^Ejecutar acci[oó]n de la HU\.?$/i,
+  ];
+  if (abstractPatterns.some((p) => p.test(normalized))) {
+    return { step, changed: false, rejectReason: "abstract_target_step" };
+  }
+
+  if (!allowedPatterns.some((pattern) => pattern.test(normalized))) {
+    // Try repair for unquoted validation steps before rejecting
+    const repaired = repairUnquotedValidationStep(normalized);
+    if (repaired && allowedPatterns.some((pattern) => pattern.test(repaired))) {
+      console.log(`[scenarios:quality] stepPatternNormalized original="${normalized}" repaired="${repaired}"`);
+      return { step: repaired, changed: true };
+    }
+    return { step, changed: false, rejectReason: "invalid_mcp_step_pattern" };
+  }
+
+  return { step: normalized, changed: normalized !== stripped };
+}
+
+function applyScenarioQualityGate(
+  scenarios: any[],
+  issues: JiraIssueSource[],
+  routeProfile: McpRouteProfile | null,
+  pathSelectionMap?: Map<string, any>,
+  huEvidenceMap?: Map<string, any>
+): { scenarios: any[]; rejected: Array<{ sourceIssueKey: string; reason: string }>; normalizedCount: number; rejectedReasons: string[] } {
+  const normalizedScenarios: any[] = [];
+  const rejected: Array<{ sourceIssueKey: string; reason: string }> = [];
+  const rejectedReasons = new Set<string>();
+  let normalizedCount = 0;
+
+  for (const scenario of scenarios) {
+    const issueKey = scenario.sourceIssueKey;
+    const pathSelection = pathSelectionMap?.get(issueKey);
+    const huEvidence = huEvidenceMap?.get(issueKey);
+    const normalizedTitle = looksEnglish(scenario.title || "") ? normalizeSpanishTitle(scenario.title || "") : scenario.title;
+    if (normalizedTitle !== scenario.title) {
+      normalizedCount++;
+      console.log(`[scenarios:quality] language=en rejected_or_normalized title="${scenario.title}"`);
+    }
+
+    const normalizedSteps: string[] = [];
+    const seenSteps = new Set<string>();
+    let rejectedReason: string | undefined;
+    const visibleControls = new Set(((routeProfile?.visibleControls || []) as string[]).map((value) => value.toLowerCase()));
+    const requiredNavigation = new Set<string>();
+
+    // Collect required navigation from selectedPath to preserve during filtering
+    if (pathSelection?.selectedPath?.requiredIntermediates) {
+      for (const intermediate of pathSelection.selectedPath.requiredIntermediates) {
+        requiredNavigation.add(intermediate.toLowerCase());
+      }
+    }
+
+    let removedVisibleNavigation = 0;
+
+    for (const rawStep of scenario.steps || []) {
+      const result = normalizeScenarioStep(String(rawStep));
+      if (result.rejectReason) {
+        console.log(`[scenarios:quality] invalidStepPattern scenario="${scenario.title}" step="${rawStep}" reason="${result.rejectReason}"`);
+        rejectedReason = result.rejectReason;
+        rejectedReasons.add(result.rejectReason);
+        break;
+      }
+
+      let normalized = result.step;
+      // Normalize ordinal selection: "Seleccionar el primer elemento..." → "Seleccionar el primer [domain term]..."
+      const ordinalMatch = normalized.match(/^Seleccionar el (primer|primera|[uú]ltimo|[uú]ltima)\s+elemento\s+(visible del listado)\.?$/i);
+      if (ordinalMatch) {
+        const ordinal = ordinalMatch[1];
+        const suffix = ordinalMatch[2];
+        const domainTerm = pathSelection?.selectedPath?.target ||
+          (routeProfile as any)?._selectionTarget ||
+          (routeProfile as any)?.domainTerms?.ORDINAL_SELECTION;
+        if (domainTerm && typeof domainTerm === "string") {
+          normalized = `Seleccionar el ${ordinal} ${domainTerm.toLowerCase()} ${suffix}.`;
+          console.log(`[scenarios:quality] ordinalSelectionNormalized scenario="${scenario.title}" from="${result.step}" to="${normalized}"`);
+          const termSource = pathSelection?.selectedPath?.target ? "pathSelection.target" :
+            (routeProfile as any)?._selectionTarget ? "routeProfile.selectionTarget" : "routeProfile.domainTerms";
+          console.log(`[scenario-coverage] ordinalSelectionDomainTerm term="${domainTerm.toLowerCase()}" source=${termSource}`);
+          normalizedCount++;
+        }
+      }
+
+      const numbered = `${normalizedSteps.length + 1}. ${normalized.replace(/^\d+[\.)]\s*/, "")}`;
+      const canonical = numbered.replace(/^\d+[\.)]\s*/, "").toLowerCase();
+      const clickMatch = canonical.match(/^clic en "(.+)"\.$/);
+      if (seenSteps.has(canonical)) {
+        normalizedCount++;
+        continue;
+      }
+      // Don't remove required navigation steps
+      if (clickMatch && visibleControls.has(clickMatch[1].toLowerCase()) && !requiredNavigation.has(clickMatch[1].toLowerCase())) {
+        removedVisibleNavigation++;
+        normalizedCount++;
+        continue;
+      }
+      if (clickMatch && requiredNavigation.has(clickMatch[1].toLowerCase())) {
+        console.log(`[scenarios:quality] visibleNavigationPreserved scenario="${scenario.title}" target="${clickMatch[1]}" reason=required_navigation`);
+      }
+      if (
+        huEvidence?.accessMode === "private" &&
+        huEvidence?.businessIntent !== "product_information" &&
+        /informaci[oó]n de productos/i.test(numbered)
+      ) {
+        normalizedCount++;
+        continue;
+      }
+      seenSteps.add(canonical);
+      normalizedSteps.push(numbered);
+      if (result.changed) normalizedCount++;
+    }
+    if (removedVisibleNavigation > 0) {
+      console.log(`[scenarios:quality] visibleNavigationRemoved scenario="${scenario.title}" removed=${removedVisibleNavigation}`);
+    }
+
+    if (!rejectedReason && pathSelection?.selectedPath?.targetPathKey?.startsWith("synthetic_") && huEvidence?.accessMode === "private") {
+      const publicCatalogTerms = /beneficios|requisitos|informaci[oó]n legal|condiciones/i;
+      if (publicCatalogTerms.test(normalizedTitle || "") || normalizedSteps.some((step) => publicCatalogTerms.test(step))) {
+        rejectedReason = "public_catalog_scenario_for_private_hu";
+        rejectedReasons.add(rejectedReason);
+      }
+    }
+    if (!rejectedReason && huEvidence?.accessMode === "private" && huEvidence?.businessIntent !== "product_information") {
+      const garbageTerms = /beneficios|requisitos|condiciones relevantes|informaci[oó]n legal|descripci[oó]n general|tasas comerciales|solicitar|monedas/i;
+      if (garbageTerms.test(normalizedTitle || "") || normalizedSteps.some((step) => garbageTerms.test(step))) {
+        rejectedReason = "public_catalog_scenario_for_private_hu";
+        rejectedReasons.add(rejectedReason);
+        console.log(`[scenarios:quality] rejected reason=public_catalog_scenario_for_private_hu title="${normalizedTitle}"`);
+      }
+    }
+    if (!rejectedReason && huEvidence?.accessMode === "private" && pathSelection?.selectedPath) {
+      const functionalTerms = /dep[oó]sito a plazo|certificado|monto|tasa|fecha|vencimiento|apertura|estado|intereses|tipo|alerta|volver|correo|imprimir|sesi[oó]n/i;
+      const combinedText = `${normalizedTitle} ${normalizedSteps.join(" ")}`;
+      if (!functionalTerms.test(combinedText)) {
+        rejectedReason = "navigation_only_scenario";
+        rejectedReasons.add(rejectedReason);
+        console.log(`[scenarios:quality] rejected reason=navigation_only_scenario title="${normalizedTitle}"`);
+      }
+    }
+    if (!rejectedReason && normalizedSteps.length === 0) {
+      rejectedReason = "no_functional_steps_after_cleanup";
+      rejectedReasons.add(rejectedReason);
+    }
+
+    if (rejectedReason) {
+      rejected.push({ sourceIssueKey: issueKey, reason: rejectedReason });
+      continue;
+    }
+
+    normalizedScenarios.push({
+      ...scenario,
+      title: normalizedTitle,
+      steps: normalizedSteps,
+    });
+  }
+
+  return {
+    scenarios: normalizedScenarios,
+    rejected,
+    normalizedCount,
+    rejectedReasons: [...rejectedReasons],
+  };
+}
+
 /**
  * Deduplicate consecutive steps with the same click target
  * Removes duplicate steps like:
  *   "1. Clic en X"
  *   "2. Clic en X"
  * Keeps only the first occurrence
+ * Uses generic text normalization (lowercase, trim, remove accents)
  */
 function dedupeConsecutiveSteps(steps: any[]): any[] {
   if (steps.length === 0) return steps;
+
+  function normalizeTarget(target: string): string {
+    return target
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
 
   const deduped: any[] = [steps[0]];
 
@@ -166,10 +568,10 @@ function dedupeConsecutiveSteps(steps: any[]): any[] {
     const getCurrentTarget = (step: any): string | null => {
       if (typeof step === "string") {
         const match = step.match(/Clic en "([^"]+)"/i);
-        return match ? match[1].toLowerCase().trim() : null;
+        return match ? normalizeTarget(match[1]) : null;
       }
       if (typeof step === "object" && step.action === "click" && step.target) {
-        return step.target.toLowerCase().trim();
+        return normalizeTarget(step.target);
       }
       return null;
     };
@@ -177,7 +579,7 @@ function dedupeConsecutiveSteps(steps: any[]): any[] {
     const currentTarget = getCurrentTarget(current);
     const previousTarget = getCurrentTarget(previous);
 
-    // Skip if same click target as previous step
+    // Skip if same click target as previous step (normalized comparison)
     if (currentTarget && previousTarget && currentTarget === previousTarget) {
       console.log(`[scenarios:dedupe] skipping duplicate consecutive click: "${currentTarget}"`);
       continue;
@@ -192,10 +594,24 @@ function dedupeConsecutiveSteps(steps: any[]): any[] {
 /**
  * Remove or convert unbacked click targets to validations
  * Prevents scenarios from being rejected due to unbacked clicks like "Volver"
+ * Preserves clicks for required navigation intermediates
  */
-function repairUnbackedClicks(steps: any[], allowedTargets: string[]): any[] {
+function repairUnbackedClicks(
+  steps: any[],
+  allowedTargets: string[],
+  requiredIntermediates?: string[],
+  preservedPrivateTargets?: string[],
+): any[] {
   if (steps.length === 0) return steps;
 
+  const _norm = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  const requiredNavigation = new Set(
+    (requiredIntermediates || []).map(intermediate => _norm(intermediate))
+  );
+  const privateNavNormalized = new Set(
+    (preservedPrivateTargets || []).map(t => _norm(t))
+  );
+  const allowedNormalized = allowedTargets.map(t => _norm(t));
   const repaired: any[] = [];
 
   for (const step of steps) {
@@ -209,12 +625,27 @@ function repairUnbackedClicks(steps: any[], allowedTargets: string[]): any[] {
     }
 
     if (clickTarget) {
-      // Check if target is in allowedTargets (case-insensitive)
-      const isAllowed = allowedTargets.some(t => t.toLowerCase() === clickTarget!.toLowerCase());
+      const clickNorm = _norm(clickTarget);
+      // Preserve required navigation clicks (functional path)
+      if (requiredNavigation.has(clickNorm)) {
+        console.log(`[scenarios:repair] requiredNavigationClickPreserved target="${clickTarget}" reason=required_navigation`);
+        repaired.push(step);
+        continue;
+      }
+
+      // Preserve private navigation clicks (entry/auth steps needed to reach private state)
+      if (privateNavNormalized.has(clickNorm)) {
+        console.log(`[scenarios:repair] preservedPrivateRouteStep target="${clickTarget}" source=private_execution_path`);
+        repaired.push(step);
+        continue;
+      }
+
+      // Check if target is in allowedTargets (Unicode-normalized, case-insensitive)
+      const isAllowed = allowedNormalized.some(t => t === clickNorm);
 
       if (!isAllowed) {
         // For unbacked targets, remove if "Volver", convert to validation otherwise
-        if (clickTarget.toLowerCase() === "volver") {
+        if (clickNorm === "volver") {
           console.log(`[scenarios:repair] removing unbacked navigation click: "Clic en ${clickTarget}"`);
           continue;
         } else {
@@ -379,8 +810,22 @@ export async function generateScenariosWithAi(
   routeProfile?: McpRouteProfile | null,
   entrySteps?: Array<{ action: string; target: string; when?: string }>,
   loginMode?: string,
-  _testProvider?: AiProvider // Optional test-only provider injection
+  _testProvider?: AiProvider,
+  huEvidenceMap?: Map<string, any>, // HU-driven evidence per issue
+  pathSelectionMap?: Map<string, any>, // HU-driven path selections per issue
+  huScopeGuard?: any, // HU scope guard for prompt guidance (NEW)
+  preservedPrivateTargets?: string[], // Private navigation targets to preserve as clicks
+  huScenarioModel?: any,
+  routePendingScenarioPlan?: any,
 ): Promise<McpGenerationResponse> {
+  const primaryIssue = issues[0];
+  const primaryHuEvidence = primaryIssue ? huEvidenceMap?.get(primaryIssue.key) : null;
+  const primaryPathSelection = primaryIssue ? pathSelectionMap?.get(primaryIssue.key) : null;
+  const privateSyntheticSelectedPath = !!primaryHuEvidence &&
+    primaryHuEvidence.accessMode === "private" &&
+    !!primaryPathSelection?.selectedPath &&
+    (primaryPathSelection?.source === "synthetic" || primaryPathSelection?.selectedPath?.targetPathKey?.startsWith("synthetic_"));
+
   // Extract additional entry targets from entrySteps parameter
   const additionalEntryTargets: string[] = [];
   if (entrySteps) {
@@ -394,13 +839,27 @@ export async function generateScenariosWithAi(
   // Also extract from old-style entry labels (from routeProfile.entry)
   if (routeProfile?.entry) {
     for (const entry of routeProfile.entry) {
+      if (privateSyntheticSelectedPath && /informaci[oó]n de productos/i.test(entry.visibleLabel || "")) {
+        continue;
+      }
       if (entry.visibleLabel && !additionalEntryTargets.includes(entry.visibleLabel)) {
         additionalEntryTargets.push(entry.visibleLabel);
+      }
+      if (privateSyntheticSelectedPath && /informaci[oó]n de productos/i.test(entry.businessLabel || "")) {
+        continue;
       }
       if (entry.businessLabel && !additionalEntryTargets.includes(entry.businessLabel)) {
         additionalEntryTargets.push(entry.businessLabel);
       }
     }
+  }
+  if (privateSyntheticSelectedPath) {
+    const beforeFilter = additionalEntryTargets.length;
+    const filteredTargets = additionalEntryTargets.filter((target) => !/informaci[oó]n de productos/i.test(target));
+    const removed = beforeFilter - filteredTargets.length;
+    additionalEntryTargets.length = 0;
+    additionalEntryTargets.push(...filteredTargets);
+    console.log(`[scenario-route] privateSynthetic ignoresPublicEntryTargets=true removed=${removed}`);
   }
 
   console.log(`[scenario-route] additionalEntryTargets=${JSON.stringify(additionalEntryTargets)}`);
@@ -413,11 +872,62 @@ export async function generateScenariosWithAi(
   console.log(`[scenario-route] resolving routes for ${issues.length} issues routeProfile=${routeProfile?.name ?? "none"}`);
 
   for (const issue of issues) {
+    // Detect HU intent per-issue and guard against catalog/listing routeProfile mismatch
+    const issueIntent: HuIntentDetection = detectHuIntent(
+      {
+        summary: issue.summary,
+        description: issue.description,
+        acceptanceCriteria: issue.acceptanceCriteria,
+        labels: (issue as any).labels,
+        components: (issue as any).components
+      },
+      issue.key
+    );
+    // Annotate issue with intent for downstream prompt builder
+    (issue as any)._huIntent = issueIntent.intent;
+    (issue as any)._huIntentConfidence = issueIntent.confidence;
+
+    const routeProfileEntry = (routeProfile as any)?.entry ?? [];
+    const entryStr = JSON.stringify(routeProfileEntry).toLowerCase();
+    const routeIsCatalogListing = entryStr.includes("informaci") || resolutionIsCatalogListing(routeProfile);
+
+    if (isTransactionalDocumentIntent(issueIntent.intent) && routeIsCatalogListing) {
+      console.log(
+        `[route-profile-compatibility] compatible=false issue=${issue.key} huIntent=${issueIntent.intent} routeMode=listing_validation routeProfile=${(routeProfile as any)?.name ?? "unknown"} reason=intent_mismatch`
+      );
+      blockedIssues.push({
+        key: issue.key,
+        title: issue.summary,
+        reason: "route_profile_intent_mismatch"
+      });
+      routeResolutions.set(issue.key, {
+        scenarioMode: "listing_validation",
+        routeConfidence: "low",
+        executableRouteSteps: [],
+        diagnostics: [{
+          level: "error",
+          code: "route_profile_intent_mismatch",
+          message: `Route profile is catalog/listing but HU intent is ${issueIntent.intent}`,
+          context: { huIntent: issueIntent.intent, routeProfileName: (routeProfile as any)?.name }
+        }],
+        canGenerate: false,
+        missingRouteReason: "route_profile_intent_mismatch"
+      });
+      console.log(`[scenario-route] blocked issue=${issue.key} reason=route_profile_intent_mismatch`);
+      console.log(`[scenarios:onboarding-required] issue=${issue.key} huIntent=${issueIntent.intent} reason=missing_transactional_route_profile suggestedDiscoveryType=transactional_route_discovery`);
+      continue;
+    }
+
     const resolution = resolveScenarioRoute(issue, routeProfile ?? null, appSlug);
     routeResolutions.set(issue.key, resolution);
 
     if (resolution.canGenerate) {
       routeBackedIssues.push(issue);
+      const isHuComposed = !!(routeProfile as any)?._huComposedPath;
+      if (isHuComposed) {
+        const steps = ((routeProfile as any)?.entrySteps?.length ?? 0);
+        console.log(`[scenario-route] huComposedPath accepted issue=${issue.key} steps=${steps} reason=explicit_hu_path_authority`);
+      }
       console.log(`[scenario-route] resolved issue=${issue.key} mode=${resolution.scenarioMode} confidence=${resolution.routeConfidence} canGenerate=true`);
     } else {
       blockedIssues.push({
@@ -439,6 +949,45 @@ export async function generateScenariosWithAi(
     additionalEntryTargets
   );
   logDerivedContext(derivedContext);
+
+  // Pre-populate allowedExecutableClicks with option flow labels from ALL issues
+  // This gives the AI a chance to generate correct clicks during scenario generation.
+  // Unicode NFC normalization handles encoding inconsistencies between HU and route profile.
+  const normalizeStr = (s: string) => s.normalize("NFC").toLowerCase();
+  const previouslyPreserved = new Set(derivedContext.allowedExecutableClicks.map(normalizeStr));
+  const seenLabels = new Set<string>();
+  for (const issue of issues) {
+    const optionFlowsCheck = detectOptionFlows(issue);
+    for (const flow of optionFlowsCheck.flows) {
+      if (!flow.optionLabel) continue;
+      const key = normalizeStr(flow.optionLabel);
+      if (seenLabels.has(key)) continue;
+      seenLabels.add(key);
+      if (!previouslyPreserved.has(key)) {
+        derivedContext.allowedExecutableClicks.push(flow.optionLabel);
+        console.log(`[coverage-contract] preserveExecutableClick target="${flow.optionLabel}" source=coverage_contract stage="pre_generation_hint"`);
+      }
+    }
+  }
+
+  // Supplement allowedExecutableClicks with preserved private targets (selected learned navigation path)
+  const learnedPathNormalizedTargets = new Set<string>();
+  if (preservedPrivateTargets && preservedPrivateTargets.length > 0) {
+    const existingNorm = new Set(derivedContext.allowedExecutableClicks.map(t => t.normalize("NFC").toLowerCase().trim()));
+    let addedCount = 0;
+    for (const target of preservedPrivateTargets) {
+      const norm = target.normalize("NFC").toLowerCase().trim();
+      if (!existingNorm.has(norm)) {
+        derivedContext.allowedExecutableClicks.push(target);
+        existingNorm.add(norm);
+        addedCount++;
+      }
+      learnedPathNormalizedTargets.add(norm);
+    }
+    if (addedCount > 0) {
+      console.log(`[navigation-authority] learnedPathClicks added=${addedCount} source=appKnowledge issue=${primaryIssue?.key ?? "unknown"}`);
+    }
+  }
 
   const profileQuality = validateRouteProfileQuality(appSlug, routeProfile ?? null, routeResolutions, derivedContext);
   logRouteProfileQuality(profileQuality);
@@ -470,8 +1019,96 @@ export async function generateScenariosWithAi(
     };
   }
 
-  // If all issues are blocked, return early with diagnostics
+  // If all issues are blocked, try route_pending mode
   if (routeBackedIssues.length === 0) {
+    const hasIntentMismatch = blockedIssues.some(b => b.reason?.includes("route_profile_intent_mismatch"));
+    if (hasIntentMismatch && issues.length > 0) {
+      console.log(`[scenario-preview] aiGeneration mode=route_pending reason=route_profile_intent_mismatch issues=${issues.length} planTarget=${routePendingScenarioPlan?.scenarioCountTarget ?? "?"}`);
+      // Use the original issues for route_pending generation
+      const routePendingIssues = issues;
+      const routePendingResolutions = routeResolutions;
+
+      const pendingDeterministicSeeds = tryDeterministicGeneration(routePendingIssues, appSlug, routePendingResolutions, entrySteps);
+      const pendingSeedCount = pendingDeterministicSeeds?.length || 0;
+      if (pendingSeedCount > 0) {
+        console.log(`[scenarios:deterministic] generated ${pendingSeedCount} seed scenarios as context for AI`);
+      }
+
+      const genDiag: any = {
+        generationMode: "route_pending",
+        deterministicSeedsGenerated: pendingSeedCount,
+        aiCalled: false, aiGenerated: 0, finalValid: 0, finalRejected: 0,
+        finalBlocked: blockedIssues.length, fallbackUsed: false
+      };
+
+      try {
+        const messages = await buildMcpScenarioMessages(
+          routePendingIssues, appSlug, testrailMeta, targetAppSlug, targetAppName,
+          null, entrySteps, loginMode, routePendingResolutions,
+          pendingDeterministicSeeds || undefined, huEvidenceMap, pathSelectionMap, huScopeGuard,
+          huScenarioModel, routePendingScenarioPlan
+        );
+        console.log(`[scenario-preview] routePendingPrompt incompatibleRouteProfile=true routeProfileUsedAsExecutable=false`);
+        console.log(`[scenarios:prompt] messages built system=${messages[0]?.content.length ?? 0} user=${messages[1]?.content.length ?? 0}`);
+
+        const provider = _testProvider ?? await createScenarioAiProvider();
+        console.log(`[scenarios:ai] purpose=route_pending_generation provider=${provider.providerType} model=${provider.model}`);
+
+        genDiag.aiCalled = true;
+        const response = await provider.completeJson({
+          messages,
+          temperature: 0.4,
+          requireJson: true
+        });
+
+        if (!response.parsedJson) {
+          console.log(`[scenario-preview] aiGeneration routePending empty fallback=plan_based`);
+          return {
+            appSlug, targetAppSlug, targetAppName, confidence: "low",
+            reason: "Route pending — AI returned no scenarios",
+            functionalRoute: "", routeProfile: routeProfile || { name: "", entry: [], aliases: {}, intermediates: {}, domainTerms: {}, visibleControls: [], representativeFixture: {}, notes: [] },
+            scenarios: [],
+            warnings: blockedIssues.map(b => `Route pending — ${b.key}: ${b.reason}`),
+            rejected: blockedIssues.map(b => ({ sourceIssueKey: b.key, reason: b.reason })),
+            routeResolutions, generationDiagnostics: genDiag,
+          };
+        }
+
+        const parsed = parseAiResponseWithMode(response.parsedJson, "route_pending");
+        const routePendingScenarios = parsed.scenarios.map((sc: any) => ({
+          ...sc,
+          mcpExecutable: false,
+          nonExecutableCriteria: "requires_route_discovery",
+        }));
+
+        genDiag.aiGenerated = routePendingScenarios.length;
+        genDiag.finalValid = routePendingScenarios.length;
+        console.log(`[scenario-preview] aiGeneration routePending generated=${routePendingScenarios.length}`);
+
+        return {
+          appSlug, targetAppSlug, targetAppName, confidence: "low",
+          reason: "Route pending — scenarios generated without validated route",
+          functionalRoute: "", routeProfile: routeProfile || { name: "", entry: [], aliases: {}, intermediates: {}, domainTerms: {}, visibleControls: [], representativeFixture: {}, notes: [] },
+          scenarios: routePendingScenarios,
+          warnings: [`Route pending: scenarios require route validation before MCP execution. ${blockedIssues.length} issue(s) blocked.`],
+          rejected: blockedIssues.map(b => ({ sourceIssueKey: b.key, reason: b.reason })),
+          routeResolutions, generationDiagnostics: genDiag,
+        };
+      } catch (err) {
+        console.log(`[scenario-preview] aiGeneration routePending empty fallback=plan_based error=${(err as Error)?.message ?? "unknown"}`);
+        return {
+          appSlug, targetAppSlug, targetAppName, confidence: "low",
+          reason: "Route pending — AI generation failed, fallback to plan-based",
+          functionalRoute: "", routeProfile: routeProfile || { name: "", entry: [], aliases: {}, intermediates: {}, domainTerms: {}, visibleControls: [], representativeFixture: {}, notes: [] },
+          scenarios: [],
+          warnings: blockedIssues.map(b => `Route pending — ${b.key}: ${b.reason}`),
+          rejected: blockedIssues.map(b => ({ sourceIssueKey: b.key, reason: b.reason })),
+          routeResolutions, generationDiagnostics: genDiag,
+        };
+      }
+    }
+
+    // No route_pending mode — return empty
     console.log(`[scenario-preview] no route-backed issues, skipping AI generation`);
     return {
       appSlug,
@@ -593,7 +1230,12 @@ export async function generateScenariosWithAi(
     entrySteps,
     loginMode,
     routeResolutions, // Pass route resolutions to prompt builder
-    deterministicSeeds || undefined // Pass deterministic seeds if available
+    deterministicSeeds || undefined, // Pass deterministic seeds if available
+    huEvidenceMap, // Pass HU-driven evidence
+    pathSelectionMap, // Pass HU-driven path selections
+    huScopeGuard, // Pass HU scope guard for prompt guidance (NEW)
+    huScenarioModel,
+    routePendingScenarioPlan,
   );
 
   console.log(`[scenarios:prompt] messages built system=${messages[0]?.content.length ?? 0} user=${messages[1]?.content.length ?? 0} issues=${routeBackedIssues.length}`);
@@ -652,8 +1294,19 @@ export async function generateScenariosWithAi(
 
     console.log(`[scenarios:dedupe] afterDedupe=${dedupedScenarios.length}`);
 
+    const qualityGate = applyScenarioQualityGate(
+      dedupedScenarios,
+      routeBackedIssues,
+      routeProfile || null,
+      pathSelectionMap,
+      huEvidenceMap
+    );
+    console.log(
+      `[scenarios:quality] normalized=${qualityGate.normalizedCount} rejected=${qualityGate.rejected.length} reasons=${qualityGate.rejectedReasons.join("|") || "none"}`
+    );
+
     // Enrich generated scenarios with route-first metadata
-    const enrichedScenarios = dedupedScenarios.map(scenario => {
+    const enrichedScenarios = qualityGate.scenarios.map(scenario => {
       const resolution = routeResolutions.get(scenario.sourceIssueKey);
       if (resolution) {
         return {
@@ -666,10 +1319,66 @@ export async function generateScenariosWithAi(
       return scenario;
     });
 
+    // Pre-scan: extract all click targets from generated scenarios and match them
+    // against option flows from ALL issues. Only targets that actually appear as
+    // Clic en "..." in AI-generated steps are preserved in this stage.
+    // CRITICAL: use the SCENARIO's own click target text (preserving original casing/encoding)
+    // to guarantee exact match with repairUnbackedClicks. Compare via Unicode NFC normalization.
+    const normalizeStr = (s: string) => s.normalize("NFC").toLowerCase().trim();
+    const allOptionLabelsFromIssues = new Set<string>();
+    for (const issue of issues) {
+      const flowsCheck = detectOptionFlows(issue);
+      for (const flow of flowsCheck.flows) {
+        if (!flow.optionLabel) continue;
+        allOptionLabelsFromIssues.add(normalizeStr(flow.optionLabel));
+      }
+    }
+    const beforeSize = derivedContext.allowedExecutableClicks.length;
+    const allowedSet = new Set(derivedContext.allowedExecutableClicks.map(normalizeStr));
+    let addedCount = 0;
+    for (const scenario of enrichedScenarios) {
+      for (const step of (scenario.steps ?? [])) {
+        if (typeof step !== "string") continue;
+        const clickMatch = step.match(/Clic en "([^"]+)"/i);
+        if (!clickMatch) continue;
+        const target = clickMatch[1];
+        const targetKey = normalizeStr(target);
+        if (allowedSet.has(targetKey)) continue;
+        // Exact match against option flows from ALL issues
+        if (allOptionLabelsFromIssues.has(targetKey)) {
+          derivedContext.allowedExecutableClicks.push(target);
+          allowedSet.add(targetKey);
+          addedCount++;
+          console.log(`[coverage-contract] preserveExecutableClick target="${target}" source=coverage_contract stage="before_unbacked_click_repair"`);
+        } else {
+          // Fuzzy fallback: only accept if exactly ONE candidate option flow matches
+          const targetWords = targetKey.split(/\s+/).filter(w => w.length > 3);
+          const candidates = [...allOptionLabelsFromIssues].filter(labelKey =>
+            targetWords.length > 0 && (
+              labelKey.includes(targetKey) || targetKey.includes(labelKey) ||
+              targetWords.some(w => labelKey.includes(w))
+            )
+          );
+          if (candidates.length === 1) {
+            derivedContext.allowedExecutableClicks.push(target);
+            allowedSet.add(targetKey);
+            addedCount++;
+            console.log(`[coverage-contract] preserveExecutableClick target="${target}" source=coverage_contract stage="before_unbacked_click_repair" match=fuzzy`);
+          } else if (candidates.length > 1) {
+            console.log(`[coverage-contract] preserveExecutableClick target="${target}" source=coverage_contract stage="before_unbacked_click_repair" action=skipped reason="ambiguous_fuzzy_match" candidates=${candidates.length}`);
+          }
+        }
+      }
+    }
+    const totalAfter = derivedContext.allowedExecutableClicks.length;
+    console.log(`[coverage-contract] preservedExecutableClicksBeforeUnbackedRepair added=${addedCount} totalAllowed=${totalAfter}`);
+
     // Repair unbacked clicks before validation
     const repairedScenarios = enrichedScenarios.map(scenario => {
       const originalStepCount = scenario.steps?.length ?? 0;
-      const repairedSteps = repairUnbackedClicks(scenario.steps ?? [], derivedContext.allowedExecutableClicks);
+      const pathSelection = pathSelectionMap?.get(scenario.sourceIssueKey);
+      const requiredIntermediates = pathSelection?.selectedPath?.requiredIntermediates || [];
+      const repairedSteps = repairUnbackedClicks(scenario.steps ?? [], derivedContext.allowedExecutableClicks, requiredIntermediates, preservedPrivateTargets);
       const removedCount = originalStepCount - repairedSteps.length;
 
       if (removedCount > 0) {
@@ -707,6 +1416,18 @@ export async function generateScenariosWithAi(
       complianceValidation.invalidScenarios.length
     );
 
+    // Log acceptance of learned path clicks
+    if (learnedPathNormalizedTargets.size > 0) {
+      for (const scenario of complianceValidation.validScenarios) {
+        for (const step of scenario.steps || []) {
+          const clickMatch = typeof step === "string" ? step.match(/Clic en\s+"([^"]+)"/i) : null;
+          if (clickMatch && learnedPathNormalizedTargets.has(clickMatch[1].normalize("NFC").toLowerCase().trim())) {
+            console.log(`[scenario-compliance] learnedPathClick accepted target="${clickMatch[1]}" source=appKnowledge`);
+          }
+        }
+      }
+    }
+
     // Build rejected array including invalid scenarios
     const invalidRejected = complianceValidation.invalidScenarios.map(entry => ({
       sourceIssueKey: entry.scenario.sourceIssueKey,
@@ -716,6 +1437,7 @@ export async function generateScenariosWithAi(
     // Merge blocked issues into rejected array
     const allRejected = [
       ...(parsed.rejected || []),
+      ...qualityGate.rejected,
       ...blockedIssues.map(b => ({ sourceIssueKey: b.key, reason: b.reason })),
       ...invalidRejected
     ];
@@ -724,6 +1446,65 @@ export async function generateScenariosWithAi(
     generationDiagnostics.aiGenerated = repairedScenarios.length;
     generationDiagnostics.finalValid = complianceValidation.validScenarios.length;
     generationDiagnostics.finalRejected = allRejected.length;
+
+    const primaryIssue = routeBackedIssues[0];
+    const hasHuEvidence = !!primaryIssue && !!huEvidenceMap?.get(primaryIssue.key);
+    const hasSelectedPath = !!pathSelectionMap?.get(primaryIssue?.key || "")?.selectedPath;
+
+    if (complianceValidation.validScenarios.length === 0 && hasHuEvidence && hasSelectedPath) {
+      const fallbackScenarios = buildHuFallbackScenarios(
+        routeBackedIssues,
+        appSlug,
+        routeProfile || null,
+        routeResolutions,
+        entrySteps,
+        pathSelectionMap
+      );
+
+      if (fallbackScenarios.length > 0) {
+        generationDiagnostics.fallbackUsed = true;
+        generationDiagnostics.fallbackReason = "selected_path_hu_evidence_minimal";
+        generationDiagnostics.fallbackScenarioCount = fallbackScenarios.length;
+        generationDiagnostics.finalValid = fallbackScenarios.length;
+        console.log(`[scenario-preview] selectedPathFallback generated issue=${primaryIssue.key} count=${fallbackScenarios.length} source=hu_evidence_selected_path`);
+        console.log(`[scenario-preview] selectedPathFallback routeProfilePublicIgnored reason=private_selected_path`);
+
+        return {
+          ...parsed,
+          scenarios: fallbackScenarios,
+          rejected: allRejected,
+          routeResolutions,
+          generationDiagnostics
+        };
+      }
+    }
+
+    if (complianceValidation.validScenarios.length > 0 && complianceValidation.validScenarios.length < 3 && hasHuEvidence && hasSelectedPath) {
+      const fallbackScenarios = buildHuFallbackScenarios(
+        routeBackedIssues,
+        appSlug,
+        routeProfile || null,
+        routeResolutions,
+        entrySteps,
+        pathSelectionMap
+      );
+      const existingTitles = new Set(complianceValidation.validScenarios.map((scenario: any) => String(scenario.title).toLowerCase()));
+      const fallbackToAdd = fallbackScenarios.filter((scenario: any) => !existingTitles.has(String(scenario.title).toLowerCase()));
+      if (fallbackToAdd.length > 0) {
+        generationDiagnostics.fallbackUsed = true;
+        generationDiagnostics.fallbackReason = "ai_below_minimum";
+        generationDiagnostics.fallbackScenarioCount = fallbackToAdd.length;
+        generationDiagnostics.finalValid = complianceValidation.validScenarios.length + fallbackToAdd.length;
+        console.log(`[scenarios:coverage] insufficientFunctionalCoverage issue=${primaryIssue.key} valid=${complianceValidation.validScenarios.length} minimum=3 fallback=true`);
+        return {
+          ...parsed,
+          scenarios: [...complianceValidation.validScenarios, ...fallbackToAdd],
+          rejected: allRejected,
+          routeResolutions,
+          generationDiagnostics
+        };
+      }
+    }
 
     console.log(
       `[scenarios:ai] success ` +
@@ -853,9 +1634,12 @@ export async function generateScenariosWithAi(
       ) {
         // Detect error type
         const errorMessage = error.message || "";
-        let fallbackReason: "ai_generation_error" | "ai_parse_failed" = "ai_generation_error";
+        let fallbackReason: "ai_generation_error" | "ai_parse_failed" | "ai_invalid_shape" = "ai_generation_error";
 
-        if (errorMessage.includes("AI_GENERATION_ERROR") || errorMessage.includes("scenario-generation-result.json")) {
+        if (errorMessage.includes("ai_provider_invalid_json")) {
+          fallbackReason = "ai_invalid_shape";
+          console.log(`[scenarios:ai] invalid_shape_non_fatal fallback=true using_deterministic_seeds=${deterministicSeeds.length}`);
+        } else if (errorMessage.includes("AI_GENERATION_ERROR") || errorMessage.includes("scenario-generation-result.json")) {
           fallbackReason = "ai_parse_failed";
         }
 
@@ -911,4 +1695,31 @@ export async function generateScenariosWithAi(
     }
     throw error;
   }
+}
+
+/**
+ * Check if a route profile is catalog/listing (used for intent compatibility guard).
+ * Generic check: looks for catalog-root patterns in entry/intermediates/domainTerms.
+ */
+function resolutionIsCatalogListing(routeProfile: McpRouteProfile | null | undefined): boolean {
+  if (!routeProfile) return false;
+  const rp = routeProfile as any;
+  const blob = JSON.stringify({
+    name: rp.name ?? "",
+    entry: rp.entry ?? [],
+    intermediates: rp.intermediates ?? {},
+    domainTerms: rp.domainTerms ?? {},
+    visibleControls: rp.visibleControls ?? []
+  }).toLowerCase();
+  return /informaci[oó]n de productos|cat[áa]logo de productos|listado de productos/.test(blob);
+}
+
+/**
+ * Parse AI response with an explicit mode flag.
+ * For route_pending mode, marks scenarios as non-executable.
+ */
+function parseAiResponseWithMode(parsedJson: Record<string, unknown>, mode: string): { scenarios: any[] } {
+  const raw = Array.isArray(parsedJson["scenarios"]) ? parsedJson["scenarios"] : [];
+  const scenarios = raw.filter((s: any) => s && typeof s === "object" && s.title && Array.isArray(s.steps) && s.steps.length > 0);
+  return { scenarios };
 }

@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-validar-monto-tasa-y-fechas-del-depositos-a-plazo",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Validar monto, tasa y fechas del Depósitos a Plazo",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-06-25T19:04:33.339Z"
+}

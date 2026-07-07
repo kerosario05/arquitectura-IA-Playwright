@@ -30,23 +30,24 @@ export class VirtualKeyboardComponent {
   }
 
   async enterDigits(value: string, options?: { delayMs?: number }): Promise<void> {
-    const delay = options?.delayMs ?? 100;
+    const delay = options?.delayMs ?? 50;
+    const startTime = Date.now();
+    const chars = value.split('');
 
-    for (const char of value) {
+    for (const char of chars) {
       if (!/^[0-9]$/.test(char)) {
         throw new Error(`VirtualKeyboardComponent: Invalid digit "${char}". Expected 0-9.`);
       }
-
       const button = await this.getDigitButton(char);
       if (!button) {
         throw new Error(`VirtualKeyboardComponent: Could not find button for digit "${char}".`);
       }
-
       await button.click();
       if (delay > 0) {
         await this.page.waitForTimeout(delay);
       }
     }
+    console.log(`[auth-input] fastFill method=virtual_keys durationMs=${Date.now() - startTime} valueLength=${value.length}`);
   }
 
   async clear(options?: { clearButtonName?: string }): Promise<void> {

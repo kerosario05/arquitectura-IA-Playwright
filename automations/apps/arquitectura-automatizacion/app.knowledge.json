@@ -1,0 +1,1288 @@
+{
+  "version": 1,
+  "appSlug": "arquitectura-automatizacion",
+  "createdAt": "2026-06-29T17:29:48.426Z",
+  "updatedAt": "2026-07-06T15:47:47.929Z",
+  "items": [
+    {
+      "id": "arquitectura-automatizacion_AA-88_p6hvfn",
+      "source": "scenario_derived",
+      "issueKey": "AA-88",
+      "scenarioTitle": "Redirigir al módulo de información de productos",
+      "coverageRefs": [
+        "option_0"
+      ],
+      "steps": [
+        "Clic en \"Iniciar\".",
+        "Clic en \"Informacion de productos\".",
+        "Clic en \"información de productos\""
+      ],
+      "clickTargets": [
+        "Iniciar",
+        "Informacion de productos",
+        "información de productos"
+      ],
+      "assertionTargets": [],
+      "negativeAssertions": [],
+      "optionLabels": [
+        "información de productos"
+      ],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-06-29T20:50:35.986Z",
+      "updatedAt": "2026-06-29T20:50:35.986Z",
+      "lastSeenAt": "2026-06-29T20:50:35.986Z",
+      "runCount": 1,
+      "coverageSignature": "AA-88::option_0::clic en iniciar::clic en informacion de productos::clic en informacion de productos",
+      "knowledgeKind": "scenario_validated",
+      "confidenceScore": 55,
+      "sourceQuality": "high",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "successCount": 1,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T15:32:04.404Z"
+    },
+    {
+      "id": "arquitectura-automatizacion_AA-88_e0d9r4",
+      "source": "scenario_derived",
+      "issueKey": "AA-88",
+      "scenarioTitle": "Seleccionar \"transacciones y servicios\" → iniciar el flujo de autenticación antes ",
+      "coverageRefs": [
+        "option_1"
+      ],
+      "steps": [
+        "Clic en \"Iniciar\"",
+        "Validar que se muestre \"transacciones y servicios\"",
+        "Clic en \"transacciones y servicios\"",
+        "Validar que se muestre \"autenticación\""
+      ],
+      "clickTargets": [
+        "Iniciar",
+        "transacciones y servicios"
+      ],
+      "assertionTargets": [
+        "transacciones y servicios",
+        "autenticación"
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [
+        "transacciones y servicios"
+      ],
+      "authTerms": [
+        "autenticación"
+      ],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-06-29T20:50:35.986Z",
+      "updatedAt": "2026-06-29T21:35:15.663Z",
+      "lastSeenAt": "2026-06-29T21:35:15.663Z",
+      "runCount": 4,
+      "coverageSignature": "AA-88::option_1::clic en iniciar::validar que se muestre transacciones y servicios::clic en transacciones y servicios::validar que se muestre autenticacion",
+      "knowledgeKind": "scenario_validated",
+      "confidenceScore": 65,
+      "sourceQuality": "high",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "successCount": 4,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T15:32:04.404Z"
+    },
+    {
+      "id": "learned_path_2c0465b",
+      "source": "scenario_derived",
+      "issueKey": "AA-88",
+      "scenarioTitle": "Ruta private/auth_entry: transacciones y servicios",
+      "coverageRefs": [
+        "learned_navigation_path",
+        "accessLevel:private",
+        "intent:auth_entry",
+        "startsFrom:public_initial",
+        "endsAt:auth_gate"
+      ],
+      "steps": [
+        "Clic en \"iniciar\"",
+        "Clic en \"transacciones y servicios\"",
+        "Validar que se muestre \"autenticación\""
+      ],
+      "clickTargets": [
+        "iniciar",
+        "transacciones y servicios"
+      ],
+      "assertionTargets": [
+        "Transacciones y servicios",
+        "flujo de autenticación",
+        "consulta o gestión personalizada",
+        "autenticación"
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [
+        "transacciones y servicios"
+      ],
+      "authTerms": [
+        "autenticación"
+      ],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-06-29T21:12:37.749Z",
+      "updatedAt": "2026-06-29T21:35:15.663Z",
+      "lastSeenAt": "2026-06-29T21:35:15.663Z",
+      "runCount": 3,
+      "routeSignature": "arquitectura-automatizacion::iniciar::transacciones y servicios::private::public_initial::auth_gate",
+      "knowledgeKind": "route_prefix",
+      "confidenceScore": 85,
+      "sourceQuality": "high",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "successCount": 3,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T15:32:04.404Z"
+    },
+    {
+      "id": "rp_learned_2jxis7n",
+      "source": "scenario_derived",
+      "issueKey": "AA-89",
+      "scenarioTitle": "Ruta private/balance_inquiry: iniciar → transacciones y servicios → consulta de balance → depósito → depósito a plazo",
+      "coverageRefs": [
+        "learned_navigation_path",
+        "accessLevel:private",
+        "intent:balance_inquiry",
+        "startsFrom:authenticated_home",
+        "endsAt:business_detail"
+      ],
+      "steps": [
+        "Clic en \"iniciar\"",
+        "Clic en \"transacciones y servicios\"",
+        "Clic en \"consulta de balance\"",
+        "Clic en \"depósito\"",
+        "Clic en \"depósito a plazo\"",
+        "Seleccionar el primer depósito a plazo visible del listado.",
+        "Validar que se muestre \"tipo\""
+      ],
+      "clickTargets": [
+        "iniciar",
+        "transacciones y servicios",
+        "consulta de balance",
+        "depósito",
+        "depósito a plazo"
+      ],
+      "assertionTargets": [
+        "monto",
+        "tasa de interés",
+        "fecha de vencimiento",
+        "fecha de apertura",
+        "estado",
+        "intereses",
+        "tipo"
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [
+        "depósito a plazo"
+      ],
+      "authTerms": [
+        "autenticación"
+      ],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-06-30T17:53:31.212Z",
+      "updatedAt": "2026-07-02T12:57:56.723Z",
+      "lastSeenAt": "2026-07-02T12:57:56.723Z",
+      "runCount": 21,
+      "routeSignature": "arquitectura-automatizacion::iniciar::transacciones y servicios::consulta de balance::deposito::deposito a plazo::private::authenticated_home::business_detail",
+      "knowledgeKind": "route_functional",
+      "confidenceScore": 35,
+      "sourceQuality": "high",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "successCount": 21,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T15:32:04.404Z",
+      "rejectedReason": "superseded_by_private_explicit_path"
+    },
+    {
+      "id": "learned_path_3n6rw42",
+      "source": "scenario_derived",
+      "issueKey": "AA-89",
+      "scenarioTitle": "Ruta authenticated/functional: iniciar → transacciones y servicios",
+      "coverageRefs": [
+        "learned_navigation_path",
+        "accessLevel:authenticated",
+        "intent:functional",
+        "startsFrom:authenticated_state",
+        "endsAt:functional_area"
+      ],
+      "steps": [
+        "Clic en \"iniciar\"",
+        "Clic en \"transacciones y servicios\"",
+        "Seleccionar el primer depósito a plazo visible del listado.",
+        "Validar que se muestre \"Depósitos a Plazo\""
+      ],
+      "clickTargets": [
+        "iniciar",
+        "transacciones y servicios"
+      ],
+      "assertionTargets": [
+        "Consulta de balance",
+        "Depósitos a Plazo"
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-06-30T19:10:50.371Z",
+      "updatedAt": "2026-06-30T19:10:50.371Z",
+      "lastSeenAt": "2026-06-30T19:10:50.371Z",
+      "runCount": 1,
+      "routeSignature": "arquitectura-automatizacion::iniciar::transacciones y servicios::authenticated::authenticated_state::functional_area",
+      "knowledgeKind": "route_functional",
+      "confidenceScore": 35,
+      "sourceQuality": "high",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "successCount": 1,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T15:32:04.404Z",
+      "rejectedReason": "superseded_by_private_explicit_path"
+    },
+    {
+      "id": "arquitectura-automatizacion_AA-89_hxtp09",
+      "source": "scenario_derived",
+      "issueKey": "AA-89",
+      "scenarioTitle": "Visualizar listado de depósitos a plazo disponibles",
+      "coverageRefs": [
+        "list_screen_0"
+      ],
+      "steps": [
+        "Clic en \"iniciar\".",
+        "Clic en \"transacciones y servicios\".",
+        "Clic en \"consulta de balance\".",
+        "Clic en \"depósito\".",
+        "Clic en \"depósito a plazo\".",
+        "Validar que se muestre \"Depósitos a Plazo\".",
+        "Validar que se muestre \"Consulta de balance\"."
+      ],
+      "clickTargets": [
+        "iniciar",
+        "transacciones y servicios",
+        "consulta de balance",
+        "deposito",
+        "deposito a plazo"
+      ],
+      "assertionTargets": [
+        "Depósitos a Plazo",
+        "Consulta de balance"
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-07-01T20:10:12.096Z",
+      "updatedAt": "2026-07-01T20:10:12.096Z",
+      "lastSeenAt": "2026-07-01T20:10:12.096Z",
+      "runCount": 1,
+      "coverageSignature": "AA-89::list_screen_0::clic en iniciar::clic en transacciones y servicios::clic en consulta de balance::clic en deposito::clic en deposito a plazo::validar que se muestre depositos a plazo::validar que se muestre consulta de balance",
+      "knowledgeKind": "scenario_candidate",
+      "confidenceScore": 35,
+      "sourceQuality": "medium",
+      "validationStatus": "validated",
+      "trustedForReuse": false,
+      "successCount": 1,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T15:32:04.404Z"
+    },
+    {
+      "id": "arquitectura-automatizacion_AA-89_ylrx55",
+      "source": "scenario_derived",
+      "issueKey": "AA-89",
+      "scenarioTitle": "Seleccionar el primer depósito a plazo del listado",
+      "coverageRefs": [
+        "selection_flow_0"
+      ],
+      "steps": [
+        "Clic en \"iniciar\".",
+        "Clic en \"transacciones y servicios\".",
+        "Clic en \"consulta de balance\".",
+        "Clic en \"depósito\".",
+        "Clic en \"depósito a plazo\".",
+        "Validar que se muestre \"Depósitos a Plazo\".",
+        "Seleccionar el primer depósito a plazo visible del listado."
+      ],
+      "clickTargets": [
+        "iniciar",
+        "transacciones y servicios",
+        "consulta de balance",
+        "deposito",
+        "deposito a plazo"
+      ],
+      "assertionTargets": [
+        "Depósitos a Plazo"
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-07-01T20:10:12.096Z",
+      "updatedAt": "2026-07-01T20:10:12.096Z",
+      "lastSeenAt": "2026-07-01T20:10:12.096Z",
+      "runCount": 1,
+      "coverageSignature": "AA-89::selection_flow_0::clic en iniciar::clic en transacciones y servicios::clic en consulta de balance::clic en deposito::clic en deposito a plazo::validar que se muestre depositos a plazo::seleccionar el primer deposito a plazo visible del listado",
+      "knowledgeKind": "scenario_validated",
+      "confidenceScore": 35,
+      "sourceQuality": "high",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "successCount": 1,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T15:32:04.404Z",
+      "rejectedReason": "superseded_by_private_explicit_path"
+    },
+    {
+      "id": "arquitectura-automatizacion_AA-89_9ngann",
+      "source": "scenario_derived",
+      "issueKey": "AA-89",
+      "scenarioTitle": "Visualizar campos principales del detalle del depósito a plazo",
+      "coverageRefs": [
+        "detail_fields_0"
+      ],
+      "steps": [
+        "Clic en \"iniciar\".",
+        "Clic en \"transacciones y servicios\".",
+        "Clic en \"consulta de balance\".",
+        "Clic en \"depósito\".",
+        "Clic en \"depósito a plazo\".",
+        "Validar que se muestre \"Depósitos a Plazo\".",
+        "Seleccionar el primer depósito a plazo visible del listado.",
+        "Validar que se muestre \"Número de certificado\".",
+        "Validar que se muestre \"Monto del Depósito a Plazo\".",
+        "Validar que se muestre \"Tasa de Interés\".",
+        "Validar que se muestre \"Fecha de Vencimiento\".",
+        "Validar que se muestre \"Estado\".",
+        "Validar que se muestre \"Intereses Generados\"."
+      ],
+      "clickTargets": [
+        "iniciar",
+        "transacciones y servicios",
+        "consulta de balance",
+        "deposito",
+        "deposito a plazo"
+      ],
+      "assertionTargets": [
+        "Depósitos a Plazo",
+        "Número de certificado",
+        "Monto del Depósito a Plazo",
+        "Tasa de Interés",
+        "Fecha de Vencimiento",
+        "Estado",
+        "Intereses Generados"
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-07-01T20:10:12.096Z",
+      "updatedAt": "2026-07-01T20:10:12.096Z",
+      "lastSeenAt": "2026-07-01T20:10:12.096Z",
+      "runCount": 1,
+      "coverageSignature": "AA-89::detail_fields_0::clic en iniciar::clic en transacciones y servicios::clic en consulta de balance::clic en deposito::clic en deposito a plazo::validar que se muestre depositos a plazo::seleccionar el primer deposito a plazo visible del listado::validar que se muestre numero de certificado::validar que se muestre monto del deposito a plazo::validar que se muestre tasa de interes::validar que se muestre fecha de vencimiento::validar que se muestre estado::validar que se muestre intereses generados",
+      "knowledgeKind": "scenario_candidate",
+      "confidenceScore": 35,
+      "sourceQuality": "medium",
+      "validationStatus": "validated",
+      "trustedForReuse": false,
+      "successCount": 1,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T15:32:04.404Z"
+    },
+    {
+      "id": "arquitectura-automatizacion_AA-89_1isu2x",
+      "source": "scenario_derived",
+      "issueKey": "AA-89",
+      "scenarioTitle": "Visualizar formatos de monto, tasa y fecha en el detalle",
+      "coverageRefs": [
+        "format_rule_0"
+      ],
+      "steps": [
+        "Clic en \"iniciar\".",
+        "Clic en \"transacciones y servicios\".",
+        "Clic en \"consulta de balance\".",
+        "Clic en \"depósito\".",
+        "Clic en \"depósito a plazo\".",
+        "Validar que se muestre \"Depósitos a Plazo\".",
+        "Seleccionar el primer depósito a plazo visible del listado.",
+        "Validar que se muestre \"Dólares\".",
+        "Validar que se muestre \"Tasa de Interés\".",
+        "Validar que se muestre \"Fecha de Vencimiento\"."
+      ],
+      "clickTargets": [
+        "iniciar",
+        "transacciones y servicios",
+        "consulta de balance",
+        "deposito",
+        "deposito a plazo"
+      ],
+      "assertionTargets": [
+        "Depósitos a Plazo",
+        "Dólares",
+        "Tasa de Interés",
+        "Fecha de Vencimiento"
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-07-01T20:10:12.096Z",
+      "updatedAt": "2026-07-01T20:10:12.096Z",
+      "lastSeenAt": "2026-07-01T20:10:12.096Z",
+      "runCount": 1,
+      "coverageSignature": "AA-89::format_rule_0::clic en iniciar::clic en transacciones y servicios::clic en consulta de balance::clic en deposito::clic en deposito a plazo::validar que se muestre depositos a plazo::seleccionar el primer deposito a plazo visible del listado::validar que se muestre dolares::validar que se muestre tasa de interes::validar que se muestre fecha de vencimiento",
+      "knowledgeKind": "scenario_candidate",
+      "confidenceScore": 35,
+      "sourceQuality": "medium",
+      "validationStatus": "validated",
+      "trustedForReuse": false,
+      "successCount": 1,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T15:32:04.404Z"
+    },
+    {
+      "id": "arquitectura-automatizacion_AA-89_cdftus",
+      "source": "scenario_derived",
+      "issueKey": "AA-89",
+      "scenarioTitle": "Visualizar datos disponibles cuando faltan tasa o intereses",
+      "coverageRefs": [
+        "format_rule_0"
+      ],
+      "steps": [
+        "Clic en \"iniciar\".",
+        "Clic en \"transacciones y servicios\".",
+        "Clic en \"consulta de balance\".",
+        "Clic en \"depósito\".",
+        "Clic en \"depósito a plazo\".",
+        "Validar que se muestre \"Depósitos a Plazo\".",
+        "Seleccionar el primer depósito a plazo visible del listado.",
+        "Validar que se muestre \"Número de certificado\".",
+        "Validar que se muestre \"Estado\"."
+      ],
+      "clickTargets": [
+        "iniciar",
+        "transacciones y servicios",
+        "consulta de balance",
+        "deposito",
+        "deposito a plazo"
+      ],
+      "assertionTargets": [
+        "Depósitos a Plazo",
+        "Número de certificado",
+        "Estado"
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-07-01T20:10:12.096Z",
+      "updatedAt": "2026-07-01T20:10:12.096Z",
+      "lastSeenAt": "2026-07-01T20:10:12.096Z",
+      "runCount": 1,
+      "coverageSignature": "AA-89::format_rule_0::clic en iniciar::clic en transacciones y servicios::clic en consulta de balance::clic en deposito::clic en deposito a plazo::validar que se muestre depositos a plazo::seleccionar el primer deposito a plazo visible del listado::validar que se muestre numero de certificado::validar que se muestre estado",
+      "knowledgeKind": "scenario_candidate",
+      "confidenceScore": 35,
+      "sourceQuality": "medium",
+      "validationStatus": "validated",
+      "trustedForReuse": false,
+      "successCount": 1,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T15:32:04.404Z"
+    },
+    {
+      "id": "arquitectura-automatizacion_AA-89_bzfr7l",
+      "source": "scenario_derived",
+      "issueKey": "AA-89",
+      "scenarioTitle": "Validar visualización restringida del certificado enmascarado",
+      "coverageRefs": [
+        "format_rule_0"
+      ],
+      "steps": [
+        "Clic en \"iniciar\".",
+        "Clic en \"transacciones y servicios\".",
+        "Clic en \"consulta de balance\".",
+        "Clic en \"depósito\".",
+        "Clic en \"depósito a plazo\".",
+        "Validar que se muestre \"Depósitos a Plazo\".",
+        "Seleccionar el primer depósito a plazo visible del listado.",
+        "Validar que se muestre \"Número de certificado\"."
+      ],
+      "clickTargets": [
+        "iniciar",
+        "transacciones y servicios",
+        "consulta de balance",
+        "deposito",
+        "deposito a plazo"
+      ],
+      "assertionTargets": [
+        "Depósitos a Plazo",
+        "Número de certificado"
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-07-01T20:10:12.096Z",
+      "updatedAt": "2026-07-01T20:10:12.096Z",
+      "lastSeenAt": "2026-07-01T20:10:12.096Z",
+      "runCount": 1,
+      "coverageSignature": "AA-89::format_rule_0::clic en iniciar::clic en transacciones y servicios::clic en consulta de balance::clic en deposito::clic en deposito a plazo::validar que se muestre depositos a plazo::seleccionar el primer deposito a plazo visible del listado::validar que se muestre numero de certificado",
+      "knowledgeKind": "scenario_candidate",
+      "confidenceScore": 35,
+      "sourceQuality": "medium",
+      "validationStatus": "validated",
+      "trustedForReuse": false,
+      "successCount": 1,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T15:32:04.404Z"
+    },
+    {
+      "id": "arquitectura-automatizacion_AA-89_mzuzrn",
+      "source": "scenario_derived",
+      "issueKey": "AA-89",
+      "scenarioTitle": "Visualizar alerta de certificado próximo a vencer",
+      "coverageRefs": [
+        "conditional_alert_0"
+      ],
+      "steps": [
+        "Clic en \"iniciar\".",
+        "Clic en \"transacciones y servicios\".",
+        "Clic en \"consulta de balance\".",
+        "Clic en \"depósito\".",
+        "Clic en \"depósito a plazo\".",
+        "Validar que se muestre \"Depósitos a Plazo\".",
+        "Seleccionar el primer depósito a plazo visible del listado.",
+        "Validar que se muestre \"Su certificado vence próximamente\"."
+      ],
+      "clickTargets": [
+        "iniciar",
+        "transacciones y servicios",
+        "consulta de balance",
+        "deposito",
+        "deposito a plazo"
+      ],
+      "assertionTargets": [
+        "Depósitos a Plazo",
+        "Su certificado vence próximamente"
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-07-01T20:10:12.096Z",
+      "updatedAt": "2026-07-01T20:10:12.096Z",
+      "lastSeenAt": "2026-07-01T20:10:12.096Z",
+      "runCount": 1,
+      "coverageSignature": "AA-89::conditional_alert_0::clic en iniciar::clic en transacciones y servicios::clic en consulta de balance::clic en deposito::clic en deposito a plazo::validar que se muestre depositos a plazo::seleccionar el primer deposito a plazo visible del listado::validar que se muestre su certificado vence proximamente",
+      "knowledgeKind": "scenario_candidate",
+      "confidenceScore": 35,
+      "sourceQuality": "medium",
+      "validationStatus": "validated",
+      "trustedForReuse": false,
+      "successCount": 1,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T15:32:04.404Z"
+    },
+    {
+      "id": "arquitectura-automatizacion_AA-89_x5vdb4",
+      "source": "scenario_derived",
+      "issueKey": "AA-89",
+      "scenarioTitle": "Visualizar mensaje de indisponibilidad parcial en la consulta",
+      "coverageRefs": [
+        "failure_case_0"
+      ],
+      "steps": [
+        "Clic en \"iniciar\".",
+        "Clic en \"transacciones y servicios\".",
+        "Clic en \"consulta de balance\".",
+        "Clic en \"depósito\".",
+        "Clic en \"depósito a plazo\".",
+        "Validar que se muestre \"Depósitos a Plazo\".",
+        "Seleccionar el primer depósito a plazo visible del listado.",
+        "Validar que se muestre \"Mostrar mensaje de indisponibilidad parcial\"."
+      ],
+      "clickTargets": [
+        "iniciar",
+        "transacciones y servicios",
+        "consulta de balance",
+        "deposito",
+        "deposito a plazo"
+      ],
+      "assertionTargets": [
+        "Depósitos a Plazo",
+        "Mostrar mensaje de indisponibilidad parcial"
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-07-01T20:10:12.096Z",
+      "updatedAt": "2026-07-01T20:10:12.096Z",
+      "lastSeenAt": "2026-07-01T20:10:12.096Z",
+      "runCount": 1,
+      "coverageSignature": "AA-89::failure_case_0::clic en iniciar::clic en transacciones y servicios::clic en consulta de balance::clic en deposito::clic en deposito a plazo::validar que se muestre depositos a plazo::seleccionar el primer deposito a plazo visible del listado::validar que se muestre mostrar mensaje de indisponibilidad parcial",
+      "knowledgeKind": "scenario_candidate",
+      "confidenceScore": 35,
+      "sourceQuality": "medium",
+      "validationStatus": "validated",
+      "trustedForReuse": false,
+      "successCount": 1,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T15:32:04.404Z"
+    },
+    {
+      "id": "learned_path_1vtg34l",
+      "source": "scenario_derived",
+      "issueKey": "AA-81",
+      "scenarioTitle": "Ruta authenticated/functional: iniciar → transacciones y servicios → estados de cuenta → cuentas de efectivo",
+      "coverageRefs": [
+        "learned_navigation_path",
+        "accessLevel:authenticated",
+        "intent:functional",
+        "startsFrom:authenticated_state",
+        "endsAt:functional_area"
+      ],
+      "steps": [
+        "Clic en \"iniciar\"",
+        "Clic en \"transacciones y servicios\"",
+        "Clic en \"estados de cuenta\"",
+        "Clic en \"cuentas de efectivo\"",
+        "Validar que se muestre \"estado de cuenta\""
+      ],
+      "clickTargets": [
+        "iniciar",
+        "transacciones y servicios",
+        "estados de cuenta",
+        "cuentas de efectivo"
+      ],
+      "assertionTargets": [
+        "listado de cuentas",
+        "estado de cuenta"
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-07-02T15:37:46.125Z",
+      "updatedAt": "2026-07-02T16:00:20.059Z",
+      "lastSeenAt": "2026-07-02T16:00:20.059Z",
+      "runCount": 2,
+      "routeSignature": "arquitectura-automatizacion::iniciar::transacciones y servicios::estados de cuenta::cuentas de efectivo::authenticated::authenticated_state::functional_area",
+      "knowledgeKind": "route_functional",
+      "confidenceScore": 65,
+      "sourceQuality": "high",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "successCount": 1,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T16:00:20.059Z"
+    },
+    {
+      "id": "learned_path_ptr8j6",
+      "source": "scenario_derived",
+      "issueKey": "AA-81",
+      "scenarioTitle": "Ruta authenticated/functional: iniciar → estados de cuenta → cuentas de efectivo",
+      "coverageRefs": [
+        "learned_navigation_path",
+        "accessLevel:authenticated",
+        "intent:functional",
+        "startsFrom:authenticated_state",
+        "endsAt:functional_area"
+      ],
+      "steps": [
+        "Clic en \"iniciar\"",
+        "Clic en \"estados de cuenta\"",
+        "Clic en \"cuentas de efectivo\"",
+        "Validar que se muestre \"principal\""
+      ],
+      "clickTargets": [
+        "iniciar",
+        "estados de cuenta",
+        "cuentas de efectivo"
+      ],
+      "assertionTargets": [
+        "cuenta",
+        "principal"
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-07-02T14:33:40.670Z",
+      "updatedAt": "2026-07-02T14:33:40.670Z",
+      "lastSeenAt": "2026-07-02T14:33:40.670Z",
+      "runCount": 1,
+      "routeSignature": "arquitectura-automatizacion::iniciar::estados de cuenta::cuentas de efectivo::authenticated::authenticated_state::functional_area",
+      "knowledgeKind": "route_functional",
+      "confidenceScore": 65,
+      "sourceQuality": "high",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "successCount": 1,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T15:32:04.404Z"
+    },
+    {
+      "id": "arquitectura-automatizacion_AA-81_2dpgqr",
+      "source": "scenario_derived",
+      "issueKey": "AA-81",
+      "scenarioTitle": "Visualizar listado de cuentas de efectivo disponibles",
+      "coverageRefs": [
+        "list_screen_0"
+      ],
+      "steps": [
+        "Clic en \"iniciar\".",
+        "Clic en \"transacciones y servicios\".",
+        "Clic en \"estados de cuenta\".",
+        "Clic en \"cuentas de efectivo\".",
+        "Validar que se muestre \"listado de cuentas\".",
+        "Validar que se muestre \"estado de cuenta\"."
+      ],
+      "clickTargets": [
+        "iniciar",
+        "transacciones y servicios",
+        "estados de cuenta",
+        "cuentas de efectivo"
+      ],
+      "assertionTargets": [
+        "listado de cuentas",
+        "estado de cuenta"
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-07-02T16:00:20.059Z",
+      "updatedAt": "2026-07-02T16:00:20.059Z",
+      "lastSeenAt": "2026-07-02T16:00:20.059Z",
+      "runCount": 1,
+      "coverageSignature": "AA-81::list_screen_0::clic en iniciar::clic en transacciones y servicios::clic en estados de cuenta::clic en cuentas de efectivo::validar que se muestre listado de cuentas::validar que se muestre estado de cuenta",
+      "knowledgeKind": "scenario_candidate",
+      "confidenceScore": 35,
+      "sourceQuality": "medium",
+      "validationStatus": "validated",
+      "trustedForReuse": false,
+      "successCount": 1,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T16:00:20.059Z"
+    },
+    {
+      "id": "arquitectura-automatizacion_AA-81_mwxao4",
+      "source": "scenario_derived",
+      "issueKey": "AA-81",
+      "scenarioTitle": "Seleccionar la primera cuenta de efectivo del listado",
+      "coverageRefs": [
+        "selection_flow_0"
+      ],
+      "steps": [
+        "Clic en \"iniciar\".",
+        "Clic en \"transacciones y servicios\".",
+        "Clic en \"estados de cuenta\".",
+        "Clic en \"cuentas de efectivo\".",
+        "Seleccionar el primer cuentas de efectivo visible del listado.",
+        "Validar que se muestre \"rango de fecha\"."
+      ],
+      "clickTargets": [
+        "iniciar",
+        "transacciones y servicios",
+        "estados de cuenta",
+        "cuentas de efectivo"
+      ],
+      "assertionTargets": [
+        "rango de fecha"
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-07-02T16:00:20.059Z",
+      "updatedAt": "2026-07-02T16:00:20.059Z",
+      "lastSeenAt": "2026-07-02T16:00:20.059Z",
+      "runCount": 3,
+      "coverageSignature": "AA-81::selection_flow_0::clic en iniciar::clic en transacciones y servicios::clic en estados de cuenta::clic en cuentas de efectivo::seleccionar el primer cuentas de efectivo visible del listado::validar que se muestre rango de fecha",
+      "knowledgeKind": "scenario_validated",
+      "confidenceScore": 55,
+      "sourceQuality": "high",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "successCount": 1,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T16:00:20.059Z"
+    },
+    {
+      "id": "arquitectura-automatizacion_AA-81_yycl5o",
+      "source": "scenario_derived",
+      "issueKey": "AA-81",
+      "scenarioTitle": "Validar mensaje de generacion del estado de cuenta",
+      "coverageRefs": [
+        "selection_flow_0"
+      ],
+      "steps": [
+        "Clic en \"iniciar\".",
+        "Clic en \"transacciones y servicios\".",
+        "Clic en \"estados de cuenta\".",
+        "Clic en \"cuentas de efectivo\".",
+        "Seleccionar el primer cuentas de efectivo visible del listado.",
+        "Validar que se muestre \"Estamos generando tu estado de cuenta...\"."
+      ],
+      "clickTargets": [
+        "iniciar",
+        "transacciones y servicios",
+        "estados de cuenta",
+        "cuentas de efectivo"
+      ],
+      "assertionTargets": [
+        "Estamos generando tu estado de cuenta..."
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-07-02T16:00:20.059Z",
+      "updatedAt": "2026-07-02T16:00:20.059Z",
+      "lastSeenAt": "2026-07-02T16:00:20.059Z",
+      "runCount": 1,
+      "coverageSignature": "AA-81::selection_flow_0::clic en iniciar::clic en transacciones y servicios::clic en estados de cuenta::clic en cuentas de efectivo::seleccionar el primer cuentas de efectivo visible del listado::validar que se muestre estamos generando tu estado de cuenta",
+      "knowledgeKind": "scenario_validated",
+      "confidenceScore": 55,
+      "sourceQuality": "high",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "successCount": 1,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T16:00:20.059Z"
+    },
+    {
+      "id": "learned_path_afxrh4x",
+      "source": "scenario_derived",
+      "issueKey": "AA-90",
+      "scenarioTitle": "Ruta authenticated/functional: iniciar → transacciones y servicios → consulta de balance → credito → tartejas de credito",
+      "coverageRefs": [
+        "learned_navigation_path",
+        "accessLevel:authenticated",
+        "intent:functional",
+        "startsFrom:authenticated_state",
+        "endsAt:functional_area"
+      ],
+      "steps": [
+        "Clic en \"iniciar\"",
+        "Clic en \"transacciones y servicios\"",
+        "Clic en \"consulta de balance\"",
+        "Clic en \"credito\"",
+        "Clic en \"tartejas de credito\"",
+        "Validar que se muestre \"Número de tarjeta\""
+      ],
+      "clickTargets": [
+        "iniciar",
+        "transacciones y servicios",
+        "consulta de balance",
+        "credito",
+        "tartejas de credito"
+      ],
+      "assertionTargets": [
+        "Tarjetas de Crédito",
+        "Número de tarjeta"
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-07-02T17:30:07.685Z",
+      "updatedAt": "2026-07-02T17:34:57.078Z",
+      "lastSeenAt": "2026-07-02T17:34:57.078Z",
+      "runCount": 1,
+      "routeSignature": "arquitectura-automatizacion::iniciar::transacciones y servicios::consulta de balance::credito::tartejas de credito::authenticated::authenticated_state::functional_area",
+      "knowledgeKind": "route_functional",
+      "confidenceScore": 35,
+      "sourceQuality": "high",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "successCount": 1,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T17:34:57.078Z",
+      "rejectedReason": "superseded_by_private_explicit_path"
+    },
+    {
+      "id": "learned_path_a1vpd7u",
+      "source": "scenario_derived",
+      "issueKey": "AA-90",
+      "scenarioTitle": "Ruta authenticated/functional: iniciar → transacciones y servicios → consulta de balance → deposito → tartejas de credito",
+      "coverageRefs": [
+        "learned_navigation_path",
+        "accessLevel:authenticated",
+        "intent:functional",
+        "startsFrom:authenticated_state",
+        "endsAt:functional_area"
+      ],
+      "steps": [
+        "Clic en \"iniciar\"",
+        "Clic en \"transacciones y servicios\"",
+        "Clic en \"consulta de balance\"",
+        "Clic en \"deposito\"",
+        "Clic en \"tartejas de credito\"",
+        "Validar que se muestre \"Número de tarjeta\""
+      ],
+      "clickTargets": [
+        "iniciar",
+        "transacciones y servicios",
+        "consulta de balance",
+        "deposito",
+        "tartejas de credito"
+      ],
+      "assertionTargets": [
+        "Tarjetas de Crédito",
+        "Número de tarjeta"
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-07-02T16:11:09.020Z",
+      "updatedAt": "2026-07-02T17:22:21.434Z",
+      "lastSeenAt": "2026-07-02T17:22:21.434Z",
+      "runCount": 3,
+      "routeSignature": "arquitectura-automatizacion::iniciar::transacciones y servicios::consulta de balance::deposito::tartejas de credito::authenticated::authenticated_state::functional_area",
+      "knowledgeKind": "route_functional",
+      "confidenceScore": 35,
+      "sourceQuality": "high",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "successCount": 1,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T17:22:21.434Z",
+      "rejectedReason": "superseded_by_private_explicit_path"
+    },
+    {
+      "id": "arquitectura-automatizacion_AA-90_5041tg",
+      "source": "scenario_derived",
+      "issueKey": "AA-90",
+      "scenarioTitle": "Visualización del listado de tarjetas con opción de consulta de Cuotas Santa Cruz",
+      "coverageRefs": [
+        "list_screen_0"
+      ],
+      "steps": [
+        "Clic en \"iniciar\".",
+        "Clic en \"transacciones y servicios\".",
+        "Clic en \"consulta de balance\".",
+        "Clic en \"tartejas de crédito\".",
+        "Validar que se muestre \"Tarjetas de Crédito\".",
+        "Validar que se muestre \"Número de tarjeta\"."
+      ],
+      "clickTargets": [
+        "iniciar",
+        "transacciones y servicios",
+        "consulta de balance",
+        "tartejas de credito"
+      ],
+      "assertionTargets": [
+        "Tarjetas de Crédito",
+        "Número de tarjeta"
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-07-02T17:40:29.255Z",
+      "updatedAt": "2026-07-02T17:40:29.255Z",
+      "lastSeenAt": "2026-07-02T17:40:29.255Z",
+      "runCount": 1,
+      "coverageSignature": "AA-90::list_screen_0::clic en iniciar::clic en transacciones y servicios::clic en consulta de balance::clic en tartejas de credito::validar que se muestre tarjetas de credito::validar que se muestre numero de tarjeta",
+      "knowledgeKind": "scenario_candidate",
+      "confidenceScore": 35,
+      "sourceQuality": "medium",
+      "validationStatus": "validated",
+      "trustedForReuse": false,
+      "successCount": 1,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T17:40:29.255Z"
+    },
+    {
+      "id": "arquitectura-automatizacion_AA-90_80i5ql",
+      "source": "scenario_derived",
+      "issueKey": "AA-90",
+      "scenarioTitle": "Selección del primer producto visible para consultar el detalle de Cuotas Santa Cruz",
+      "coverageRefs": [
+        "selection_flow_0"
+      ],
+      "steps": [
+        "Clic en \"iniciar\".",
+        "Clic en \"transacciones y servicios\".",
+        "Clic en \"consulta de balance\".",
+        "Clic en \"tartejas de crédito\".",
+        "Seleccionar el primer registro visible del listado.",
+        "Validar que se muestre \"Condiciones\".",
+        "Validar que se muestre \"Monto\".",
+        "Validar que se muestre \"Fecha\".",
+        "Validar que se muestre \"Informacion\"."
+      ],
+      "clickTargets": [
+        "iniciar",
+        "transacciones y servicios",
+        "consulta de balance",
+        "tartejas de credito"
+      ],
+      "assertionTargets": [
+        "Condiciones",
+        "Monto",
+        "Fecha",
+        "Informacion"
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-07-02T17:40:29.255Z",
+      "updatedAt": "2026-07-02T17:40:29.255Z",
+      "lastSeenAt": "2026-07-02T17:40:29.255Z",
+      "runCount": 1,
+      "coverageSignature": "AA-90::selection_flow_0::clic en iniciar::clic en transacciones y servicios::clic en consulta de balance::clic en tartejas de credito::seleccionar el primer registro visible del listado::validar que se muestre condiciones::validar que se muestre monto::validar que se muestre fecha::validar que se muestre informacion",
+      "knowledgeKind": "scenario_validated",
+      "confidenceScore": 35,
+      "sourceQuality": "high",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "successCount": 1,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T17:40:29.255Z",
+      "rejectedReason": "superseded_by_private_explicit_path"
+    },
+    {
+      "id": "arquitectura-automatizacion_AA-90_dv7npn",
+      "source": "scenario_derived",
+      "issueKey": "AA-90",
+      "scenarioTitle": "Visualización de secciones y campos principales del detalle de Cuotas Santa Cruz",
+      "coverageRefs": [
+        "detail_fields_0"
+      ],
+      "steps": [
+        "Clic en \"iniciar\".",
+        "Clic en \"transacciones y servicios\".",
+        "Clic en \"consulta de balance\".",
+        "Clic en \"tartejas de crédito\".",
+        "Seleccionar el primer registro visible del listado.",
+        "Validar que se muestre \"Pesos\".",
+        "Validar que se muestre \"Dólares\".",
+        "Validar que se muestre \"Cuotas Santa Cruz\".",
+        "Validar que se muestre \"Pago mínimo\".",
+        "Validar que se muestre \"Pago al corte\".",
+        "Validar que se muestre \"Pago total\".",
+        "Validar que se muestre \"Fecha límite de pago\".",
+        "Validar que se muestre \"Límite\".",
+        "Validar que se muestre \"Disponible\".",
+        "Validar que se muestre \"Fecha de corte\"."
+      ],
+      "clickTargets": [
+        "iniciar",
+        "transacciones y servicios",
+        "consulta de balance",
+        "tartejas de credito"
+      ],
+      "assertionTargets": [
+        "Pesos",
+        "Dólares",
+        "Cuotas Santa Cruz",
+        "Pago mínimo",
+        "Pago al corte",
+        "Pago total",
+        "Fecha límite de pago",
+        "Límite",
+        "Disponible",
+        "Fecha de corte"
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-07-02T17:40:29.255Z",
+      "updatedAt": "2026-07-02T17:40:29.255Z",
+      "lastSeenAt": "2026-07-02T17:40:29.255Z",
+      "runCount": 1,
+      "coverageSignature": "AA-90::detail_fields_0::clic en iniciar::clic en transacciones y servicios::clic en consulta de balance::clic en tartejas de credito::seleccionar el primer registro visible del listado::validar que se muestre pesos::validar que se muestre dolares::validar que se muestre cuotas santa cruz::validar que se muestre pago minimo::validar que se muestre pago al corte::validar que se muestre pago total::validar que se muestre fecha limite de pago::validar que se muestre limite::validar que se muestre disponible::validar que se muestre fecha de corte",
+      "knowledgeKind": "scenario_candidate",
+      "confidenceScore": 35,
+      "sourceQuality": "medium",
+      "validationStatus": "validated",
+      "trustedForReuse": false,
+      "successCount": 1,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T17:40:29.255Z"
+    },
+    {
+      "id": "arquitectura-automatizacion_AA-90_f3hbpd",
+      "source": "scenario_derived",
+      "issueKey": "AA-90",
+      "scenarioTitle": "Visualización de datos monetarios y fechas en el detalle de Cuotas Santa Cruz",
+      "coverageRefs": [
+        "format_rule_0"
+      ],
+      "steps": [
+        "Clic en \"iniciar\".",
+        "Clic en \"transacciones y servicios\".",
+        "Clic en \"consulta de balance\".",
+        "Clic en \"tartejas de crédito\".",
+        "Seleccionar el primer registro visible del listado.",
+        "Validar que se muestre \"Pago mínimo\".",
+        "Validar que se muestre \"Pago al corte\".",
+        "Validar que se muestre \"Pago total\".",
+        "Validar que se muestre \"Fecha límite de pago\".",
+        "Validar que se muestre \"Fecha de corte\"."
+      ],
+      "clickTargets": [
+        "iniciar",
+        "transacciones y servicios",
+        "consulta de balance",
+        "tartejas de credito"
+      ],
+      "assertionTargets": [
+        "Pago mínimo",
+        "Pago al corte",
+        "Pago total",
+        "Fecha límite de pago",
+        "Fecha de corte"
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-07-02T17:40:29.255Z",
+      "updatedAt": "2026-07-02T17:40:29.255Z",
+      "lastSeenAt": "2026-07-02T17:40:29.255Z",
+      "runCount": 1,
+      "coverageSignature": "AA-90::format_rule_0::clic en iniciar::clic en transacciones y servicios::clic en consulta de balance::clic en tartejas de credito::seleccionar el primer registro visible del listado::validar que se muestre pago minimo::validar que se muestre pago al corte::validar que se muestre pago total::validar que se muestre fecha limite de pago::validar que se muestre fecha de corte",
+      "knowledgeKind": "scenario_candidate",
+      "confidenceScore": 35,
+      "sourceQuality": "medium",
+      "validationStatus": "validated",
+      "trustedForReuse": false,
+      "successCount": 1,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T17:40:29.255Z"
+    },
+    {
+      "id": "learned_path_8z3vkij",
+      "source": "scenario_derived",
+      "issueKey": "AA-90",
+      "scenarioTitle": "Ruta authenticated/functional: iniciar → transacciones y servicios → consulta de balance → tartejas de credito",
+      "coverageRefs": [
+        "learned_navigation_path",
+        "accessLevel:authenticated",
+        "intent:functional",
+        "startsFrom:authenticated_state",
+        "endsAt:functional_area"
+      ],
+      "steps": [
+        "Clic en \"iniciar\".",
+        "Clic en \"transacciones y servicios\".",
+        "Clic en \"consulta de balance\".",
+        "Clic en \"tartejas de crédito\".",
+        "Validar que se muestre \"Tarjetas de Crédito\".",
+        "Validar que se muestre \"Número de tarjeta\"."
+      ],
+      "clickTargets": [
+        "iniciar",
+        "transacciones y servicios",
+        "consulta de balance",
+        "tartejas de credito"
+      ],
+      "assertionTargets": [
+        "Tarjetas de Crédito",
+        "Número de tarjeta"
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-07-02T17:40:29.255Z",
+      "updatedAt": "2026-07-02T17:40:29.255Z",
+      "lastSeenAt": "2026-07-02T17:40:29.255Z",
+      "runCount": 1,
+      "routeSignature": "arquitectura-automatizacion::iniciar::transacciones y servicios::consulta de balance::tartejas de credito::authenticated::authenticated_state::functional_area",
+      "knowledgeKind": "route_functional",
+      "confidenceScore": 35,
+      "sourceQuality": "high",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "successCount": 1,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-02T17:40:29.255Z",
+      "rejectedReason": "superseded_by_private_explicit_path"
+    },
+    {
+      "id": "rp_letter_reference_manual",
+      "source": "manual_validation",
+      "issueKey": "AA-92",
+      "scenarioTitle": "Ruta authenticated/functional: iniciar → transacciones y servicios → generar cartas → carta de referencia",
+      "coverageRefs": [
+        "learned_navigation_path",
+        "accessLevel:authenticated",
+        "intent:functional",
+        "startsFrom:authenticated_state",
+        "endsAt:functional_area",
+        "intent:document_generation"
+      ],
+      "steps": [
+        "Clic en \"Iniciar\".",
+        "Clic en \"Transacciones y servicios\".",
+        "Clic en \"Generar cartas\".",
+        "Clic en \"Carta de referencia\"."
+      ],
+      "clickTargets": [
+        "Iniciar",
+        "Transacciones y servicios",
+        "Generar cartas",
+        "Carta de referencia"
+      ],
+      "assertionTargets": [
+        "Generar cartas",
+        "Carta de referencia"
+      ],
+      "negativeAssertions": [],
+      "optionLabels": [
+        "Generar cartas",
+        "Carta de referencia"
+      ],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-07-06T15:47:47.927Z",
+      "updatedAt": "2026-07-06T15:47:47.929Z",
+      "lastSeenAt": "2026-07-06T15:47:47.929Z",
+      "runCount": 1,
+      "routeSignature": "arquitectura-automatizacion::iniciar::transacciones y servicios::generar cartas::carta de referencia::authenticated::authenticated_state::functional_area",
+      "knowledgeKind": "route_functional",
+      "confidenceScore": 85,
+      "sourceQuality": "high",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "successCount": 1,
+      "failureCount": 0,
+      "lastValidatedAt": "2026-07-06T15:47:47.929Z"
+    }
+  ]
+}

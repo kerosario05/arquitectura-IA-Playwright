@@ -5,6 +5,9 @@ import { normalizeJiraIssues } from "../../jira/jira-normalizer";
 import type { TestScenario } from "../../types/testrail.types";
 import { generateScenarioPreview } from "../../scenarios/scenario-preview.service";
 import type { ScenarioPreviewRequest } from "../../scenarios/scenario-types";
+import { planRouteDiscovery } from "../../scenarios/route-discovery-planner";
+import { runGuidedRouteDiscovery } from "../../scenarios/guided-route-discovery";
+import type { RouteDiscoveryPlanRequest, GuidedRouteDiscoveryRequest } from "../../scenarios/scenario-types";
 
 export const scenariosRouter = Router();
 
@@ -36,6 +39,13 @@ function toTestRailFormat(scenario: TestScenario) {
 scenariosRouter.post("/preview", async (req, res, next) => {
   try {
     const body = req.body as ScenarioPreviewRequest;
+    // NEW: Log incoming request to diagnose issue selection
+    console.log(
+      `[scenarios:endpoint] POST /preview received projectKey=${body.projectKey} ` +
+      `sprintId=${body.sprintId} activeSprint=${body.activeSprint} ` +
+      `selectedIssueKeys=${body.selectedIssueKeys ? JSON.stringify(body.selectedIssueKeys) : "undefined"} ` +
+      `status=${body.status ?? "any"}`
+    );
     const result = await generateScenarioPreview(body);
 
     if (!result.ok) {
@@ -46,6 +56,92 @@ scenariosRouter.post("/preview", async (req, res, next) => {
     }
 
     res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/scenarios/route-discovery/plan — Generic route discovery planner
+// Does NOT execute browser navigation. Returns a contract for guided route discovery.
+scenariosRouter.post("/route-discovery/plan", async (req, res, next) => {
+  try {
+    const body = req.body as RouteDiscoveryPlanRequest;
+
+    if (!body.appSlug || !body.issueKey || !body.huIntent || !body.reasonCode) {
+      console.log(`[route-discovery-plan] skipped reason=insufficient_payload`);
+      res.status(400).json({
+        ok: false,
+        error: "insufficient_payload",
+        message: "appSlug, issueKey, huIntent, reasonCode are required"
+      });
+      return;
+    }
+
+    const result = planRouteDiscovery(body);
+
+    if (!result.ok) {
+      const errorResult = result as Extract<typeof result, { ok: false }>;
+      res.status(400).json(errorResult);
+      return;
+    }
+
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/scenarios/route-discovery/run — Generic guided route discovery execution
+//
+// dryRun=true: returns a plan (status="planned")
+// dryRun=false:
+//   status="candidate_found"       → 200
+//   status="no_candidate_found"    → 200
+//   status="insufficient_runtime_context" → 409
+//   status="execution_failed"      → 500
+scenariosRouter.post("/route-discovery/run", async (req, res, next) => {
+  try {
+    const body = req.body as GuidedRouteDiscoveryRequest;
+
+    if (!body.appSlug || !body.issueKey || !body.huIntent || !body.reasonCode) {
+      console.log(`[guided-route-discovery] skipped reason=insufficient_payload`);
+      res.status(400).json({
+        ok: false,
+        status: "insufficient_payload",
+        discoveryType: "intent_route_discovery",
+        recommendedMode: "guided_route_discovery",
+        nextAction: "provide_required_fields",
+        appSlug: body.appSlug ?? "",
+        issueKey: body.issueKey ?? "",
+        huIntent: body.huIntent ?? "",
+        reasonCode: body.reasonCode ?? "",
+        candidateRoute: null,
+        observations: [],
+        warnings: ["appSlug, issueKey, huIntent, reasonCode are required"],
+        message: "insufficient_payload",
+        dryRun: body.dryRun !== false
+      });
+      return;
+    }
+
+    const result = await runGuidedRouteDiscovery(body);
+
+    if (result.status === "insufficient_payload") {
+      res.status(400).json(result);
+      return;
+    }
+
+    if (result.status === "insufficient_runtime_context") {
+      res.status(409).json(result);
+      return;
+    }
+
+    if (result.status === "execution_failed") {
+      res.status(500).json(result);
+      return;
+    }
+
+    res.status(200).json(result);
   } catch (err) {
     next(err);
   }

@@ -1,0 +1,10 @@
+{
+  "id": "preview-004-validar-formato-de-datos-del-detalle-del-deposito-a-plazo",
+  "externalId": "PREVIEW-004",
+  "caseId": 0,
+  "title": "Validar formato de datos del detalle del depósito a plazo",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-07-01T17:54:48.137Z"
+}

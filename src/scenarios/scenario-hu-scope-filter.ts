@@ -1,4 +1,5 @@
 import type { McpRouteProfile, TargetPathDefinition, JiraIssueSource } from "./scenario-types";
+import { isCatalogListingIntent, type HuIntent } from "./hu-intent-classifier";
 
 /**
  * Filter targetPaths to only those aligned with HU/issue scope.
@@ -24,7 +25,8 @@ import type { McpRouteProfile, TargetPathDefinition, JiraIssueSource } from "./s
 export function filterTargetPathsByIssueScope(
   issueContext: JiraIssueSource | null,
   targetPaths: Record<string, TargetPathDefinition>,
-  routeProfile: McpRouteProfile | null
+  routeProfile: McpRouteProfile | null,
+  huIntent?: HuIntent
 ): {
   alignedTargetPaths: Record<string, TargetPathDefinition>;
   diagnostics: {
@@ -42,6 +44,15 @@ export function filterTargetPathsByIssueScope(
     matchedKeywords: [] as string[],
     warnings: [] as string[],
   };
+
+  // Guard: hu-scope-filter as a catalog product filter only applies to catalog_listing_flow.
+  // For transactional_document_flow, private_navigation_flow, product_detail_flow, unknown_flow
+  // the products mentioned in the HU are dataRequirements/options, not catalog targets.
+  if (huIntent && !isCatalogListingIntent(huIntent)) {
+    const issueKey = (issueContext as any)?.key ?? "unknown";
+    console.log(`[hu-scope-filter] skipped reason=hu_intent_not_catalog_listing huIntent=${huIntent} issue=${issueKey}`);
+    return { alignedTargetPaths: {}, diagnostics };
+  }
 
   // If no issue context, return all (fallback to AI judgment)
   if (!issueContext) {

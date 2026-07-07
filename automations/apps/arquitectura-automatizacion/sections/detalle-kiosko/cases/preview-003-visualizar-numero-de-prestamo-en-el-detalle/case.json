@@ -1,0 +1,10 @@
+{
+  "id": "preview-003-visualizar-numero-de-prestamo-en-el-detalle",
+  "externalId": "PREVIEW-003",
+  "caseId": 0,
+  "title": "Visualizar número de préstamo en el detalle",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-07-03T00:01:23.515Z"
+}

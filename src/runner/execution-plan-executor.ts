@@ -7,6 +7,14 @@ import type { FullConfig } from "../types/env.types";
 import { resolveLocatorFromPlanTarget } from "./plan-target-resolver";
 import { resolveStepValue } from "./plan-value-resolver";
 import { captureStepScreenshot } from "./step-evidence";
+import { extractRuntimeUiSnapshot } from "../knowledge/runtime-knowledge-extractor";
+import { persistRuntimeSnapshot, persistRuntimeRoute } from "../knowledge/runtime-knowledge-persister";
+
+function extractTargetLabel(target: ExecutionPlanStep["target"]): string {
+  if (!target || target === "APP_BASE_URL") return "";
+  if (typeof target === "string") return target;
+  return target.value ?? target.hint ?? target.name ?? "";
+}
 
 export async function executeExecutionPlan(input: {
   page: Page;
@@ -24,6 +32,9 @@ export async function executeExecutionPlan(input: {
   const stepResults: StepExecutionResult[] = [];
   let fatalError: string | undefined;
   let aborted = false;
+  const runtimeSnapshots: Awaited<ReturnType<typeof extractRuntimeUiSnapshot>>[] = [];
+  const executedClickTargets: string[] = [];
+  const executedSteps: string[] = [];
 
   for (const step of steps) {
     if (aborted) {
@@ -54,12 +65,16 @@ export async function executeExecutionPlan(input: {
               throw new Error("navigate APP_BASE_URL requires appBaseUrl in executor input.");
             }
             await input.page.goto(runtimeBaseUrl, { waitUntil: "domcontentloaded" });
+            executedSteps.push(`Navegar a "${runtimeBaseUrl}".`);
           } else if (step.target) {
             const locator = resolveLocatorFromPlanTarget(input.page, step.target);
             await locator.first().click();
+            const navLabel = extractTargetLabel(step.target);
+            if (navLabel) executedSteps.push(`Navegar a "${navLabel}".`);
           } else {
             throw new Error("navigate requires target.");
           }
+          runtimeSnapshots.push(await extractRuntimeUiSnapshot(input.page));
           break;
         }
         case "login":
@@ -69,6 +84,12 @@ export async function executeExecutionPlan(input: {
             throw new Error("click requires concrete target.");
           }
           await resolveLocatorFromPlanTarget(input.page, step.target).first().click();
+          const targetLabel = extractTargetLabel(step.target);
+          if (targetLabel) {
+            executedSteps.push(`Clic en "${targetLabel}".`);
+            executedClickTargets.push(targetLabel);
+          }
+          runtimeSnapshots.push(await extractRuntimeUiSnapshot(input.page));
           break;
         }
         case "fill": {
@@ -184,13 +205,17 @@ export async function executeExecutionPlan(input: {
     };
 
     if ((step.evidence && stepStatus !== "skipped") || stepStatus === "failed" || step.action === "screenshot") {
-      result.screenshotPath = await captureStepScreenshot({
-        page: input.page,
-        evidenceDir: input.evidenceDir,
-        stepIndex: step.index,
-        action: step.action,
-        status: stepStatus === "failed" ? "failed" : "passed"
-      });
+      try {
+        result.screenshotPath = await captureStepScreenshot({
+          page: input.page,
+          evidenceDir: input.evidenceDir,
+          stepIndex: step.index,
+          action: step.action,
+          status: stepStatus === "failed" ? "failed" : "passed"
+        });
+      } catch (screenshotError) {
+        console.log(`[executor] screenshot failed for step ${step.index}: ${screenshotError instanceof Error ? screenshotError.message : String(screenshotError)}`);
+      }
     }
 
     stepResults.push(result);
@@ -210,6 +235,28 @@ export async function executeExecutionPlan(input: {
     status = "partial";
   } else {
     status = "failed";
+  }
+
+  // Persist runtime knowledge if any snapshots were captured
+  if (runtimeSnapshots.length > 0 && input.runtimeConfig?.app) {
+    const appSlug = input.runtimeConfig.app.appProfile ?? input.runtimeConfig.app.name ?? "default";
+    const issueKey = input.plan.scenario.externalId ?? String(input.plan.scenario.caseId ?? "");
+    const scenarioTitle = input.plan.scenario.title;
+    const fromSnapshot = runtimeSnapshots[runtimeSnapshots.length - 1];
+
+    persistRuntimeSnapshot(appSlug, fromSnapshot, {
+      issueKey,
+      scenarioTitle,
+      status: status as "passed" | "failed" | "partial",
+    });
+
+    if (executedClickTargets.length > 0 && executedSteps.length > 0) {
+      persistRuntimeRoute(appSlug, executedSteps, [...new Set(executedClickTargets)], {
+        issueKey,
+        scenarioTitle,
+        status: status as "passed" | "failed" | "partial",
+      });
+    }
   }
 
   return {

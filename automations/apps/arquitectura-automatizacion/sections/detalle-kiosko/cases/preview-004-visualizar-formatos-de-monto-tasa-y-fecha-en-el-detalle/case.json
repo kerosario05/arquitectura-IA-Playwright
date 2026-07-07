@@ -1,0 +1,10 @@
+{
+  "id": "preview-004-visualizar-formatos-de-monto-tasa-y-fecha-en-el-detalle",
+  "externalId": "PREVIEW-004",
+  "caseId": 0,
+  "title": "Visualizar formatos de monto, tasa y fecha en el detalle",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-07-01T20:23:44.597Z"
+}

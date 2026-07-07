@@ -1,6 +1,7 @@
 import type { McpScenario, McpRouteProfile, TargetPathDefinition, JiraIssueSource } from "./scenario-types";
 import { filterTargetPathsByIssueScope } from "./scenario-hu-scope-filter";
 import { normalizeTarget } from "./target-normalization";
+import { isCatalogListingIntent, type HuIntent } from "./hu-intent-classifier";
 
 /**
  * Normalize a label for deduplication
@@ -162,18 +163,67 @@ export function generateDeterministicSeeds(
   issueContext: JiraIssueSource | null,
   appSlug: string,
   coverageMode: "representative" | "exhaustive",
-  appConfig?: { automationType?: string; setupStrategy?: string }
+  appConfig?: { automationType?: string; setupStrategy?: string },
+  huEvidence?: { productCategory: string; accessMode: "public" | "private" },
+  huIntent?: HuIntent
 ): McpScenario[] {
+
+  // Guard: catalog-seeds are only valid for catalog_listing_flow. For transactional/documental
+  // or private_navigation intents, products mentioned in the HU are dataRequirements, not targets.
+  if (huIntent && !isCatalogListingIntent(huIntent)) {
+    const issueKey = (issueContext as any)?.key ?? "unknown";
+    console.log(`[catalog-seeds] skipped issue=${issueKey} reason=hu_intent_not_catalog_listing huIntent=${huIntent}`);
+    return [];
+  }
 
   if (!routeProfile?.targetPaths) {
     console.log(`[catalog-seeds] no targetPaths available, skipping seeds`);
     return [];
   }
 
+  // NEW: If HU evidence exists, apply strong product category filter BEFORE HU scope filter
+  let targetPathsToFilter = routeProfile.targetPaths;
+
+  if (huEvidence) {
+    const beforeFilter = Object.keys(targetPathsToFilter).length;
+
+    // Map HU productCategory to acceptable product category keywords
+    const categoryMapping: Record<string, string[]> = {
+      term_deposit: ["depósito", "plazo", "certificado"],
+      credit_card: ["tarjeta", "crédito"],
+      cash_account: ["cuenta", "ahorro", "corriente", "efectivo"],
+      loan: ["préstamo", "crédito personal"],
+    };
+
+    const acceptedCategoryKeywords = categoryMapping[huEvidence.productCategory] || [];
+
+    targetPathsToFilter = Object.fromEntries(
+      Object.entries(targetPathsToFilter).filter(([_, tp]) => {
+        const category = (tp.productMetadata?.category || "").toLowerCase();
+        const isAccepted = acceptedCategoryKeywords.length === 0 ||
+          acceptedCategoryKeywords.some(kw => category.includes(kw.toLowerCase()));
+        return isAccepted;
+      })
+    );
+
+    const afterFilter = Object.keys(targetPathsToFilter).length;
+    const filteredOut = beforeFilter - afterFilter;
+
+    console.log(
+      `[catalog-seeds] huEvidenceScope=true product=${huEvidence.productCategory} ` +
+      `before=${beforeFilter} after=${afterFilter} filteredOut=${filteredOut}`
+    );
+
+    if (afterFilter === 0) {
+      console.log(`[catalog-seeds] no target paths remain after HU product category filter`);
+      return [];
+    }
+  }
+
   // CRITICAL: Filter targetPaths by HU scope BEFORE generating seeds
   const { alignedTargetPaths, diagnostics: scopeDiagnostics } = filterTargetPathsByIssueScope(
     issueContext,
-    routeProfile.targetPaths,
+    targetPathsToFilter,
     routeProfile
   );
 

@@ -1,0 +1,10 @@
+{
+  "id": "preview-004-validar-formatos-visibles-del-balance-del-deposito-a-plazo",
+  "externalId": "PREVIEW-004",
+  "caseId": 0,
+  "title": "Validar formatos visibles del balance del deposito a plazo",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-07-01T19:35:34.096Z"
+}

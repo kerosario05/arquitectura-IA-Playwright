@@ -1,0 +1,10 @@
+{
+  "id": "preview-003-visualizar-tasa-de-interes-en-la-consulta-del-deposito-a-plazo",
+  "externalId": "PREVIEW-003",
+  "caseId": 0,
+  "title": "Visualizar tasa de interes en la consulta del deposito a plazo",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-07-02T22:49:55.395Z"
+}

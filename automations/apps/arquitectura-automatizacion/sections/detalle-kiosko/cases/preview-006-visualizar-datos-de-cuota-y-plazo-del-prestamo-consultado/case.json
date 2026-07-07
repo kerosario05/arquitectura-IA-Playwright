@@ -1,0 +1,10 @@
+{
+  "id": "preview-006-visualizar-datos-de-cuota-y-plazo-del-prestamo-consultado",
+  "externalId": "PREVIEW-006",
+  "caseId": 0,
+  "title": "Visualizar datos de cuota y plazo del préstamo consultado",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-07-03T00:08:40.944Z"
+}

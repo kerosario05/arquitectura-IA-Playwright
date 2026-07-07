@@ -290,6 +290,13 @@ function deriveAllowedExecutableClicks(
   // They must be backed by entry, intermediates, targetPaths, or executableRouteSteps
   // to be considered executable clicks
 
+  if (allowed.size > 0) {
+    const entryCount = [...sources.values()].filter(s => s === "entry").length;
+    const entryStepCount = [...sources.values()].filter(s => s === "entryStep").length;
+    console.log(`[route-profile-derived] allowedClicks sources: entry=${entryCount} entryStep=${entryStepCount}`);
+    console.log(`[route-profile-derived] allowedClicks sample: ${Array.from(allowed).slice(0, 5).join(", ")}${allowed.size > 5 ? "..." : ""}`);
+  }
+
   return { allowed: Array.from(allowed).sort(), sources };
 }
 

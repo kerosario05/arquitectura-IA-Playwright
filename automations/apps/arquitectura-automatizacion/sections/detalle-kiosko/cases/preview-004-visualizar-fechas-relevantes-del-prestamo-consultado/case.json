@@ -1,0 +1,10 @@
+{
+  "id": "preview-004-visualizar-fechas-relevantes-del-prestamo-consultado",
+  "externalId": "PREVIEW-004",
+  "caseId": 0,
+  "title": "Visualizar fechas relevantes del préstamo consultado",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-07-03T00:03:49.878Z"
+}

@@ -27,6 +27,9 @@ export type Job = {
   type: "sprint" | "discovery-batch" | "scenario-preview";
   status: JobStatus;
   params: Record<string, unknown>;
+  issueKey?: string;
+  checklistUrl?: string;
+  defectCount?: number;
   createdAt: string;
   startedAt?: string;
   completedAt?: string;
@@ -77,7 +80,7 @@ class JobStore {
       .map((j) => this.serialize(j));
   }
 
-  update(id: string, patch: Partial<Pick<JobInternal, "status" | "startedAt" | "completedAt" | "durationMs" | "exitCode" | "summary" | "process" | "currentCase" | "errorMessage">>): void {
+  update(id: string, patch: Partial<Pick<JobInternal, "status" | "startedAt" | "completedAt" | "durationMs" | "exitCode" | "summary" | "process" | "currentCase" | "errorMessage" | "issueKey" | "checklistUrl" | "defectCount">>): void {
     const job = this.jobs.get(id);
     if (!job) return;
     Object.assign(job, patch);

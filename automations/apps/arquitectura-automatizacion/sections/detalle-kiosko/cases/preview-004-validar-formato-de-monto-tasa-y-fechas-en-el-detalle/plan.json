@@ -1,0 +1,136 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-004",
+    "caseId": 0,
+    "title": "Validar formato de monto, tasa y fechas en el detalle"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Clic en \"Iniciar\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en \"transacciones y servicios\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "transacciones y servicios",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Clic en \"consulta de balance\".",
+      "target": {
+        "strategy": "post_resume_text",
+        "value": "consulta de balance",
+        "exact": false
+      },
+      "locatorStrategy": "post_resume_text"
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Clic en \"depósito\".",
+      "target": {
+        "strategy": "text",
+        "value": "Depósitos a PlazosConsulta tus depósitos a plazos",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "depósito",
+          "resolvedTargetName": "Depósitos a PlazosConsulta tus depósitos a plazos",
+          "resolvedCandidateId": "el-12",
+          "aiAssisted": true,
+          "aiReason": "ai_selection_resolution",
+          "repairType": "selection_resolution",
+          "decisionStatus": "repaired_plan",
+          "validationStatus": "valid"
+        }
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Clic en \"depósito a plazo\".",
+      "target": {
+        "strategy": "product_condition",
+        "value": "depósito a plazo",
+        "exact": false
+      },
+      "locatorStrategy": "product_condition"
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Seleccionar el primer depósito a plazo visible del listado.",
+      "target": {
+        "strategy": "ordinal_selection",
+        "value": "el primer depósito a plazo visible del listado",
+        "exact": false,
+        "metadata": {
+          "resolvedTargetName": "Depósito a Plazo **** 7348 - Pesos Dominicanos",
+          "resolvedCandidateId": "el-5",
+          "aiAssisted": false,
+          "repairType": "ordinal_selection",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "ordinal_selection",
+      "recoveryMetadata": {
+        "recoveredBy": "ordinal_selection",
+        "rationale": "ordinal_selection:first",
+        "ordinalSelectionDiagnostics": {
+          "selectionPatternDetected": true,
+          "ordinal": "first",
+          "domainTermSource": "generic_fallback",
+          "selectedCandidateText": "Depósito a Plazo **** 7348 - Pesos Dominicanos",
+          "selectedCandidateId": "el-5"
+        },
+        "selectedCandidateId": "el-5",
+        "selectedCandidateText": "Depósito a Plazo **** 7348 - Pesos Dominicanos",
+        "segmentIndex": 0,
+        "transitionDetected": true,
+        "executedAction": "Seleccionar el primer depósito a plazo visible del listado."
+      }
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed.",
+    "Recovered 1 transient assertion failure(s) - see step recovery metadata for details."
+  ],
+  "createdAt": "2026-06-30T18:16:45.688Z",
+  "metadata": {
+    "authFlowRequired": true,
+    "authFlowInsertionAfterStepIndex": 1,
+    "authFlowAlias": "defaultClient",
+    "authFlowLanding": "transactions_menu",
+    "authGateDetectedDuringDiscovery": true
+  }
+}

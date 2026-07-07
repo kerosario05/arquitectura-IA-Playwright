@@ -1,0 +1,9 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "PREVIEW-003",
+  "testRailCaseId": 0,
+  "generatedAt": "2026-07-01T15:07:28.929Z",
+  "title": "Validar campos principales del detalle de depósito a plazo"
+}

@@ -2,6 +2,7 @@ import type { Page, Locator } from "@playwright/test";
 import type { PageSnapshot } from "../types/page-snapshot.types";
 import { writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
+import { scanCurrentPage } from "../explorer/page-scanner";
 
 /**
  * Product card click strategy - describes how to click on a product card/list item
@@ -634,15 +635,62 @@ export async function tryProductCardClickStrategies(
         await candidate.locator.click({ timeout: 5000 });
       }
 
-      // Wait briefly for navigation/transition
-      await page.waitForTimeout(800);
-      await page.waitForLoadState("domcontentloaded", { timeout: 3000 }).catch(() => {});
+      // Custom detail-ready wait: poll until detail signals appear or timeout
+      const DETAIL_TIMEOUT_MS = 20000;
+      const DETAIL_POLL_MS = 600;
+      console.log(`[detail-wait] started reason=post_selection_click target="${target}" timeoutMs=${DETAIL_TIMEOUT_MS}`);
+      const detailPollStart = Date.now();
+      let detailReady = false;
+      let detailReadyReason = "";
+      let loadingLogged = false;
+      let pollingLogged = false;
+      while (Date.now() - detailPollStart < DETAIL_TIMEOUT_MS) {
+        await page.waitForTimeout(DETAIL_POLL_MS);
+        const currentSnapshot = await scanCurrentPage(page).catch(() => null);
+        // Detect loading
+        const hasLoading = currentSnapshot ? (() => {
+          const texts: string[] = [];
+          if ((currentSnapshot as any).elements) {
+            for (const el of (currentSnapshot as any).elements) {
+              if (el.text) texts.push(el.text.toLowerCase());
+            }
+          }
+          return texts.some(t => /cargando|loading|procesando|processing|espere/i.test(t));
+        })() : false;
+        if (hasLoading && !loadingLogged) {
+          loadingLogged = true;
+          console.log(`[detail-wait] loadingDetected=true source=text`);
+        }
+        // Check detail-ready signals
+        const dc = await checkDetailOpened();
+        if (dc) { detailReady = true; detailReadyReason = "checkDetailOpened"; break; }
+        // Alert/dialog signal
+        const hasAlert = currentSnapshot && (currentSnapshot as any).elements?.some((e: any) =>
+          e.visible && (e.role === "alert" || e.role === "alertdialog" || e.tagName === "dialog")
+        );
+        const buttonCount = currentSnapshot ? (currentSnapshot as any).elements?.filter((e: any) =>
+          (e.role === "button" || e.tagName === "button") && e.visible
+        ).length || 0 : 0;
+        if (hasAlert && buttonCount >= 1) { detailReady = true; detailReadyReason = "alert_with_buttons"; break; }
+        // Button increase as detail signal
+        if (buttonCount >= 3) { detailReady = true; detailReadyReason = "detail_buttons_visible"; break; }
+        // Log still waiting periodically
+        const elapsed = Date.now() - detailPollStart;
+        if (elapsed > 3000 && !pollingLogged) {
+          pollingLogged = true;
+          console.log(`[detail-wait] stillWaiting reason=no_detail_signals waitedMs=${elapsed} loading=${hasLoading} buttons=${buttonCount} alert=${hasAlert}`);
+        }
+      }
+      if (detailReady) {
+        console.log(`[detail-wait] detailReady=true reason=${detailReadyReason} waitedMs=${Date.now() - detailPollStart}`);
+        console.log(`[product-card-click] detailOpened=true reason=post_click_detail_wait`);
+      } else {
+        const reason = loadingLogged ? "timeout_still_loading" : "timeout_no_detail_signals";
+        console.log(`[detail-wait] detailReady=false reason=${reason} waitedMs=${Date.now() - detailPollStart}`);
+      }
 
-      // Check current URL
       const currentUrl = page.url();
-
-      // Check if detail opened
-      const detailOpened = await checkDetailOpened();
+      const detailOpened = detailReady;
 
       console.log(
         `[product-card-click] attempt=${i + 1} strategy=${candidate.strategy} ` +
@@ -654,7 +702,7 @@ export async function tryProductCardClickStrategies(
         success: detailOpened
       });
 
-      if (detailOpened) {
+      if (detailReady) {
         console.log(
           `[product-card-click] success=true strategy=${candidate.strategy} ` +
           `attempts=${i + 1}/${candidates.length}`
