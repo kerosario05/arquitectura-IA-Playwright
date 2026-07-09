@@ -727,12 +727,15 @@ export async function buildMcpScenarioMessages(
   entrySteps?: Array<{ action: string; target: string; when?: string }>,
   loginMode?: string,
   routeResolutions?: Map<string, ScenarioRouteResolution>,
-  deterministicSeeds?: DeterministicSeedScenario[]
+  deterministicSeeds?: DeterministicSeedScenario[],
+  effectiveIntent?: string,
 ): Promise<Array<{ role: "system" | "user"; content: string }>> {
   const skillMd = await loadSkillMarkdown();
 
-  // Detect intent from annotated issues
-  const primaryHuIntent = ((issues[0] as any)?._huIntent as string) ?? "unknown_flow";
+  // Detect intent from explicit effectiveIntent first, fallback to annotated issues
+  const classifierIntent = ((issues[0] as any)?._huIntent as string) ?? "unknown_flow";
+  const primaryHuIntent = effectiveIntent || classifierIntent;
+  console.log(`[scenarios:prompt] intentResolution primaryHuIntent=${primaryHuIntent} source=${effectiveIntent ? "effectiveIntent" : "classifier"} classifier=${classifierIntent}`);
   const isNonCatalogIntent = primaryHuIntent !== "catalog_listing_flow" &&
     primaryHuIntent !== "product_detail_flow";
 
@@ -754,13 +757,13 @@ export async function buildMcpScenarioMessages(
     const controlRatio = catalogControls.length / Math.max(controls.length, 1);
     const score = (targetPathKeys.length >= 3 ? 3 : targetPathKeys.length >= 1 ? 2 : 0) +
       (hasProductMetadata ? 3 : 0) + (hasCatalogEntry ? 1 : 0) + (controlRatio >= 0.3 ? 1 : 0);
-    routeProfileIsCatalog = score >= 3;
+    routeProfileIsCatalog = score >= 2;
   }
 
   // Suppress incompatible routeProfile from prompt for non-catalog intents
   const suppressRouteProfile = isNonCatalogIntent && routeProfileIsCatalog;
+  console.log(`[scenarios:prompt] promptRouteProfileSuppressed=${suppressRouteProfile} reason=${suppressRouteProfile ? "non_catalog_intent" : isNonCatalogIntent ? "routeProfile_not_catalog" : "catalog_intent"} effectiveIntent=${primaryHuIntent} routeProfileIsCatalog=${routeProfileIsCatalog}`);
   if (suppressRouteProfile) {
-    console.log(`[scenarios:prompt] routeProfile compatibility=incompatible intent=${primaryHuIntent} diagnosticOnly=true`);
     console.log(`[scenarios:prompt] routeProfile suppressed allowedClicks, assertionTerms, routeResolutions for prompt`);
     console.log(`[scenarios:prompt] promptSources primary=hu+knowledge+explicitRoute routeProfile=diagnostic_only`);
   }
@@ -896,14 +899,8 @@ export async function buildMcpScenarioMessages(
   const effectiveAssertionTermsCount = suppressRouteProfile ? 0 : rawAssertionTermsCount;
   const effectiveRouteResolutionCount = suppressRouteProfile ? 0 : rawRouteResolutionCount;
 
-  if (suppressRouteProfile) {
-    console.log(
-      `[scenarios:prompt] promptEffectiveContext ` +
-      `allowedClicks=${effectiveAllowedClicksCount} assertionTerms=${effectiveAssertionTermsCount} routeResolutions=${effectiveRouteResolutionCount} ` +
-      `suppressed=true ` +
-      `(rawAllowedClicks=${rawAllowedClicksCount} rawAssertionTerms=${rawAssertionTermsCount} rawRouteResolutions=${rawRouteResolutionCount})`
-    );
-  }
+  console.log(
+    `[scenarios:prompt] promptRouteProfileSuppressed=${suppressRouteProfile} reason=${suppressRouteProfile ? "non_catalog_intent" : "catalog_intent_or_route_not_catalog"} effectiveIntent=${primaryHuIntent} allowedClicksBefore=${rawAllowedClicksCount} allowedClicksAfter=${effectiveAllowedClicksCount} assertionTermsBefore=${rawAssertionTermsCount} assertionTermsAfter=${effectiveAssertionTermsCount} routeResolutionsBefore=${rawRouteResolutionCount} routeResolutionsAfter=${effectiveRouteResolutionCount}`);
 
   console.log(
     `[scenarios:prompt] prompt built ` +

@@ -72,10 +72,64 @@ function normalize(text: string): string {
 }
 
 /**
- * Score a knowledge item for compatibility with the current HU context.
- * Multiproject — no hardcoded apps, modules or labels.
+ * Extract semantic concepts from any text (generic — no hardcoded domains).
+ * Returns significant words (>3 chars), quoted phrases, and compound terms.
  */
-function scoreKnowledgeItem(item: any, huNorm: string, huIntent: string): { score: number; reason: string } {
+function extractSemanticConcepts(text: string): Set<string> {
+  const t = normalize(text);
+  const concepts = new Set<string>();
+
+  // Quoted phrases (high signal)
+  for (const m of t.matchAll(/"(.*?)"/g)) {
+    const phrase = m[1].trim();
+    if (phrase.length >= 3) concepts.add(phrase);
+  }
+
+  // Compound multi-word phrases (2-4 consecutive words >3 chars)
+  const words = t.split(/\s+/).filter(w => w.length >= 3);
+  for (let i = 0; i < words.length; i++) {
+    concepts.add(words[i]);
+    if (i + 1 < words.length) concepts.add(`${words[i]} ${words[i + 1]}`);
+    if (i + 2 < words.length) concepts.add(`${words[i]} ${words[i + 1]} ${words[i + 2]}`);
+  }
+
+  return concepts;
+}
+
+/**
+ * Extract concepts from HU text including explicit route path.
+ */
+function extractHuConcepts(huText: string): Set<string> {
+  return extractSemanticConcepts(huText);
+}
+
+/**
+ * Extract concepts from a knowledge item's combined fields.
+ */
+function extractItemConcepts(item: any): Set<string> {
+  const text = [
+    ...(item.clickTargets ?? []),
+    ...(item.optionLabels ?? []),
+    ...(item.assertionTargets ?? []),
+    item.scenarioTitle ?? "",
+    ...(item.steps ?? []),
+  ].join(" ");
+  return extractSemanticConcepts(text);
+}
+
+/**
+ * Score a knowledge item for compatibility with the current HU context.
+ * Uses generic semantic overlap with route-aware weighting.
+ * No hardcoded domains, routes, or labels — works for any HU/project.
+ */
+function scoreKnowledgeItem(
+  item: any,
+  huNorm: string,
+  huIntent: string,
+  huSubIntent: string | undefined,
+  huConcepts: Set<string> | undefined,
+  huRouteTokens: string[] | undefined,
+): { score: number; reason: string } {
   let score = 0;
   const reasons: string[] = [];
 
@@ -91,31 +145,83 @@ function scoreKnowledgeItem(item: any, huNorm: string, huIntent: string): { scor
 
   // ── Knowledge kind priority ──
   const kind = item.knowledgeKind ?? "";
-  // Runtime-observed validated knowledge gets highest priority
   if (kind === "route_menu_snapshot" && item.validationStatus === "validated") { score += 40; reasons.push("kind=route_menu_snapshot_validated"); }
   else if (kind === "route_functional_observed" && item.validationStatus === "validated") { score += 35; reasons.push("kind=route_functional_observed_validated"); }
   else if (kind === "route_functional") { score += 25; reasons.push("kind=route_functional"); }
   else if (kind === "scenario_validated") { score += 15; reasons.push("kind=scenario_validated"); }
   else if (kind === "route_prefix") { score += 10; reasons.push("kind=route_prefix"); }
   else if (kind === "scenario_candidate") { score += 5; reasons.push("kind=scenario_candidate"); }
-  // Runtime pending items score lower than validated but still above pure preview
   else if (kind === "route_menu_snapshot") { score += 8; reasons.push("kind=route_menu_snapshot"); }
   else if (kind === "route_functional_observed") { score += 8; reasons.push("kind=route_functional_observed"); }
   else if (kind === "runtime_click_target") { score += 6; reasons.push("kind=runtime_click_target"); }
   else if (kind === "runtime_screen_snapshot") { score += 6; reasons.push("kind=runtime_screen_snapshot"); }
 
-  // ── Textual similarity with HU ──
+  // ── Extract item concepts and combined text ──
+  const itemConcepts = huConcepts ? extractItemConcepts(item) : new Set<string>();
   const targets = (item.clickTargets ?? []).map(normalize).join(" ");
   const asserts = (item.assertionTargets ?? []).map(normalize).join(" ");
-  const options = (item.optionLabels ?? []).map(normalize).join(" ");
-  const combinedText = [targets, asserts, options].filter(Boolean).join(" ");
+  const optionsText = (item.optionLabels ?? []).map(normalize).join(" ");
+  const combinedText = [targets, asserts, optionsText].filter(Boolean).join(" ");
 
+  // ── Route overlap: explicit HU route vs item text ──
+  let routeOverlapCount = 0;
+  if (huRouteTokens && huRouteTokens.length > 0) {
+    for (const rt of huRouteTokens) {
+      if (combinedText.includes(rt)) routeOverlapCount++;
+    }
+  }
+
+  if (routeOverlapCount >= 2) {
+    score += 50; reasons.push(`route_overlap=${routeOverlapCount}`);
+  } else if (routeOverlapCount >= 1) {
+    score += 35; reasons.push(`route_segment_match=${routeOverlapCount}`);
+  }
+
+  // ── Generic semantic overlap (absolute + ratio) ──
+  let overlapCount = 0;
+  let foreignCount = 0;
+  if (huConcepts && huConcepts.size > 0 && itemConcepts.size > 0) {
+    overlapCount = [...huConcepts].filter(c => itemConcepts.has(c)).length;
+    foreignCount = [...itemConcepts].filter(c => !huConcepts.has(c)).length;
+
+    // Absolute overlap bonus: reward items that share concepts with HU, regardless of HU size
+    if (overlapCount >= 8) { score += 35; reasons.push(`overlap_strong=${overlapCount}`); }
+    else if (overlapCount >= 4) { score += 20; reasons.push(`overlap_good=${overlapCount}`); }
+    else if (overlapCount >= 2) { score += 10; reasons.push(`overlap_ok=${overlapCount}`); }
+
+    // Ratio-based bonus (capped to avoid punishing long HUs)
+    const effectiveRatio = overlapCount / Math.min(itemConcepts.size, huConcepts.size);
+    if (effectiveRatio >= 0.3) {
+      score += Math.round(Math.min(effectiveRatio, 0.6) * 40);
+      reasons.push(`overlap_ratio=${effectiveRatio.toFixed(2)}`);
+    }
+
+    // Foreign concept penalty — only if NO route overlap (route-compatible items may have navigation parents)
+    if (routeOverlapCount === 0) {
+      const foreignRatio = foreignCount / Math.max(itemConcepts.size, 1);
+      if (foreignRatio > 0.7) {
+        score -= 50; reasons.push(`foreign_dominant=${foreignRatio.toFixed(2)}`);
+        console.log(`[knowledge-context] rejected reason=foreign_dominant_concepts foreignRatio=${foreignRatio.toFixed(2)} itemConcepts=${[...new Set([...itemConcepts].filter(c => !huConcepts!.has(c)))].slice(0,5).join(",")}`);
+      } else if (foreignRatio > 0.5) {
+        score -= 20; reasons.push(`foreign_significant=${foreignRatio.toFixed(2)}`);
+      }
+    } else {
+      // With route overlap, only penalize if foreign concepts are VERY dominant
+      const foreignRatio = foreignCount / Math.max(itemConcepts.size, 1);
+      if (foreignRatio > 0.85 && overlapCount < 3) {
+        score -= 30; reasons.push(`foreign_despite_route=${foreignRatio.toFixed(2)}`);
+        console.log(`[knowledge-context] weak_rejection reason=foreign_despite_route foreignRatio=${foreignRatio.toFixed(2)} routeOverlap=${routeOverlapCount} overlapCount=${overlapCount}`);
+      }
+    }
+  }
+
+  // ── Textual similarity (token-level) ──
   if (combinedText) {
     const huTokens = huNorm.split(/\s+/).filter((t: string) => t.length > 3);
     const matchCount = huTokens.filter((t: string) => combinedText.includes(t)).length;
     if (matchCount > 0) {
       const sim = matchCount / Math.max(huTokens.length, 1);
-      score += Math.round(sim * 30);
+      score += Math.round(sim * 25);
       if (sim > 0.3) reasons.push(`text_sim=${sim.toFixed(2)}`);
     }
   }
@@ -126,41 +232,24 @@ function scoreKnowledgeItem(item: any, huNorm: string, huIntent: string): { scor
   if (/startsFrom:public_initial|startsFrom:authenticated_state/.test(refs)) { score += 5; reasons.push("starts_from_known"); }
   if (/endsAt:auth_gate/.test(refs)) { score += 5; reasons.push("ends_at_auth"); }
 
-  // Auth terms present
   if (Array.isArray(item.authTerms) && item.authTerms.length > 0) { score += 10; reasons.push("has_auth_terms"); }
 
-  // ── Intent alignment via huIntent ──
-  if (huIntent === "transactional_document_flow" && /document|carta|certific|constancia|comprobante/.test(combinedText)) {
-    score += 20; reasons.push("intent_match_document");
-  }
-  if (huIntent === "catalog_listing_flow" && /productos?|tarjetas?|cuentas?|catalogo|listado/.test(combinedText)) {
-    score += 20; reasons.push("intent_match_catalog");
-  }
-  if (huIntent === "product_detail_flow" && /detalle|informacion/.test(combinedText)) {
-    score += 15; reasons.push("intent_match_detail");
-  }
-  // Balance/loan inquiry — favor loan/balance terms
-  if ((huIntent === "balance_inquiry" || /balance|loan/.test(huIntent)) && /prestamo|balance|saldo|cuota|tasa/.test(combinedText)) {
-    score += 20; reasons.push("intent_match_balance");
+  // ── Intent alignment (generic) ──
+  const intentTermCount = huIntent.split(/[_\-\s]+/).filter((t: string) => t.length > 2 && combinedText.includes(normalize(t))).length;
+  if (intentTermCount > 0) {
+    score += intentTermCount * 10;
+    reasons.push(`intent_term_match=${intentTermCount}`);
   }
 
-  // ── Incompatible route penalties ──
-  // For balance/loan inquiry, penalize carta/document/catalog routes
-  if ((huIntent === "balance_inquiry" || /balance|loan/.test(huIntent)) && /generar\s+cartas|carta\s+de\s+referencia|carta\s+consular|informacion\s+de\s+productos|beneficios|requisitos/i.test(combinedText)) {
-    score -= 80; reasons.push("incompatible_route");
-    console.log(`[knowledge-context] rejected item kind=${kind} reason=intent_mismatch itemIntent=document_or_catalog huIntent=${huIntent}`);
-  }
-  // For document flows, penalize catalog routes
-  if (huIntent === "transactional_document_flow" && /informacion de productos|catalogo|listado de productos|beneficios|requisitos|solicitar/i.test(combinedText)) {
-    score -= 80; reasons.push("incompatible_catalog_route");
-    console.log(`[knowledge-context] rejected item kind=${kind} reason=intent_mismatch itemIntent=catalog huIntent=${huIntent}`);
+  // ── SubIntent low overlap penalty ──
+  if (huSubIntent && huSubIntent !== "standard" && routeOverlapCount === 0) {
+    if (itemConcepts.size > 0 && overlapCount < 3) {
+      score -= 60; reasons.push("subintent_low_overlap");
+      console.log(`[knowledge-context] rejected reason=subintent_mismatch no_route_overlap overlapCount=${overlapCount} huSubIntent=${huSubIntent}`);
+    }
   }
 
-  // ── Penalties ──
-  // Catalog terms penalty when intent is not catalog
-  if (huIntent !== "catalog_listing_flow" && /informacion de productos|catalogo|listado de productos/.test(combinedText)) {
-    score -= 30; reasons.push("catalog_penalty");
-  }
+  // ── Generic penalties ──
   if (item.rejectedReason) { score -= 20; reasons.push("rejected"); }
   if (item.manual === true) { score -= 15; reasons.push("manual"); }
 
@@ -176,6 +265,8 @@ export function buildKnowledgeContextForScenarioGeneration(
   appSlug: string,
   huText: string,
   huIntent: string,
+  huSubIntent?: string,
+  huExplicitRoutePath?: string[],
 ): KnowledgeContext {
   const raw = loadKnowledgeRaw(appSlug);
   const allItems: any[] = raw && Array.isArray(raw.items) ? raw.items : [];
@@ -187,12 +278,15 @@ export function buildKnowledgeContextForScenarioGeneration(
   }
 
   const huNorm = normalize(huText);
+  const huConcepts = extractHuConcepts(huText);
+  // Route tokens: normalize segments of explicit route path for matching
+  const huRouteTokens = (huExplicitRoutePath ?? []).map(s => normalize(s)).filter(s => s.length >= 3);
   const MIN_SCORE = 20;
 
   // Score all items
   const scored = allItems
     .map((item: any) => {
-      const { score, reason } = scoreKnowledgeItem(item, huNorm, huIntent);
+      const { score, reason } = scoreKnowledgeItem(item, huNorm, huIntent, huSubIntent, huConcepts, huRouteTokens);
       return { item, score, reason };
     })
     .sort((a: any, b: any) => b.score - a.score);
@@ -210,7 +304,7 @@ export function buildKnowledgeContextForScenarioGeneration(
   const eligibleCount = eligible.length;
   const rejectedCount = scanned - eligibleCount;
 
-  console.log(`[knowledge-context] candidates scanned=${scanned} eligible=${eligibleCount} selected=${Math.min(eligibleCount, 5)} rejected=${rejectedCount} huIntent=${huIntent}`);
+  console.log(`[knowledge-context] candidates scanned=${scanned} eligible=${eligibleCount} selected=${Math.min(eligibleCount, 5)} rejected=${rejectedCount} huIntent=${huIntent} huSubIntent=${huSubIntent ?? "none"} routeTokens=${huRouteTokens.join("|") || "none"}`);
 
   if (eligibleCount === 0) {
     console.log(`[knowledge-context] no compatible history selected reason=below_min_score_or_invalid`);

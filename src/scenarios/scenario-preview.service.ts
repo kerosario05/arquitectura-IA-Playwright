@@ -310,6 +310,17 @@ export async function generateScenarioPreview(
   if (issues.length > 0) {
     console.log(`[scenario-preview] primaryHuIntent issue=${issues[0].key} intent=${primaryIssueIntent.intent}`);
   }
+  // Derive effective intent from HU text analysis — this overrides the
+  // classifier for catalog/private decisions. Multiproject-safe.
+  let effectiveIntent = primaryIssueIntent.intent;
+  if (issues.length > 0) {
+    const huTextEarly = [issues[0].summary, issues[0].description, issues[0].acceptanceCriteria || ""].filter(Boolean).join(" ");
+    const earlyModel = extractHuScenarioModel(huTextEarly);
+    if (earlyModel?.mainIntent && earlyModel.mainIntent !== "generic") {
+      effectiveIntent = earlyModel.mainIntent;
+    }
+  }
+  console.log(`[scenario-preview] effectiveIntent=${effectiveIntent} primaryIssueIntent=${primaryIssueIntent.intent}`);
 
 
   const maxIssues = Number(process.env.SCENARIO_PREVIEW_MAX_ISSUES) || 5;
@@ -336,7 +347,7 @@ export async function generateScenarioPreview(
   console.log(`[scenarios:preview] routeProfileEntry=${JSON.stringify(initialRouteProfile?.entry ?? [])}`);
 
   // Ensure catalog context for scenario generation (enrichment phase)
-  const shouldSkipCatalogContext = primaryIssueIntent.intent !== "catalog_listing_flow" && primaryIssueIntent.intent !== "product_detail_flow";
+  const shouldSkipCatalogContext = effectiveIntent !== "catalog_listing_flow" && effectiveIntent !== "product_detail_flow";
   let enrichedRouteProfile, catalogDiagnostics;
   let catalogOptions;
 
@@ -507,7 +518,11 @@ export async function generateScenarioPreview(
   }
 
   // Insert entry steps if routeProfile has entry — prefer new format
-  if (newEntrySteps.length > 0 || oldEntrySteps.length > 0) {
+  // Skip catalog entry insertion for non-catalog intents to avoid contaminating
+  // balance_inquiry / document_generation / payment_transfer / private scenarios
+  // with steps like "Información de productos" from a catalog routeProfile.
+  const isNonCatalogForInsertion = effectiveIntent !== "catalog_listing_flow" && effectiveIntent !== "product_detail_flow";
+  if ((newEntrySteps.length > 0 || oldEntrySteps.length > 0) && !isNonCatalogForInsertion) {
     rawScenarios = rawScenarios.map((sc) => {
       const repaired = insertEntrySteps(sc, oldEntrySteps, newEntrySteps);
       if (repaired !== sc) {
@@ -521,6 +536,11 @@ export async function generateScenarioPreview(
       }
       return repaired;
     });
+  } else if (isNonCatalogForInsertion && (newEntrySteps.length > 0 || oldEntrySteps.length > 0)) {
+    const skippedLabels = newEntrySteps.length > 0
+      ? newEntrySteps.filter((es: EntryStepConfig) => es.action === "click").map((es: EntryStepConfig) => es.target).join(" → ")
+      : oldEntrySteps.join(" → ");
+    console.log(`[scenarios:preview] insertEntryStepsSkipped=true reason=non_catalog_intent effectiveIntent=${effectiveIntent} requiredEntrySource=skipped_catalog_routeProfile_entry skippedLabels="${skippedLabels}"`);
   }
 
   // Log after normalize
@@ -597,7 +617,7 @@ export async function generateScenarioPreview(
   }
 
   // -- Quick catalog intent check --
-  const isCatalogIntent = primaryIssueIntent.intent === "catalog_listing_flow" || primaryIssueIntent.intent === "product_detail_flow";
+  const isCatalogIntent = effectiveIntent === "catalog_listing_flow" || effectiveIntent === "product_detail_flow";
 
   // Generate deterministic seeds for coverage guarantee
   if (catalogOptions.useDiscoveredCatalog && routeProfileForGeneration && isCatalogIntent) {
@@ -666,8 +686,13 @@ export async function generateScenarioPreview(
           appSlug: appInference.appSlug,
           appProfilePath: appProfileResult.appConfigPath,
           suggestedAction
-        });
-      }
+    });
+  } else if (isNonCatalogForInsertion && (newEntrySteps.length > 0 || oldEntrySteps.length > 0)) {
+    const skippedLabels = newEntrySteps.length > 0
+      ? newEntrySteps.filter((es: EntryStepConfig) => es.action === "click").map((es: EntryStepConfig) => es.target).join(" → ")
+      : oldEntrySteps.join(" → ");
+    console.log(`[scenarios:preview] insertEntryStepsSkipped=true reason=non_catalog_intent effectiveIntent=${effectiveIntent} requiredEntrySource=skipped_catalog_routeProfile_entry skippedLabels="${skippedLabels}"`);
+  }
     }
   }
 
@@ -776,8 +801,8 @@ export async function generateScenarioPreview(
   const resolverIntent = huModel?.mainIntent && huModel.mainIntent !== "generic"
     ? huModel.mainIntent
     : primaryIssueIntent.intent;
-  console.log(`[scenario-preview] resolverIntent=${resolverIntent} source=${huModel?.mainIntent !== "generic" && huModel?.mainIntent ? "huModel" : "primaryIssueIntent"}`);
-  const knowledgeCtx = buildKnowledgeContextForScenarioGeneration(appInference.appSlug, huTextForContext, resolverIntent);
+  console.log(`[scenario-preview] resolverIntent=${resolverIntent} source=${huModel?.mainIntent !== "generic" && huModel?.mainIntent ? "huModel" : "primaryIssueIntent"} subIntent=${huModel?.subIntent ?? "none"} routePath="${huExplicitRoutePath.join(" > ")}"`);
+  const knowledgeCtx = buildKnowledgeContextForScenarioGeneration(appInference.appSlug, huTextForContext, resolverIntent, huModel?.subIntent, huExplicitRoutePath);
 
   // -- Check if route profile mismatch generate routePending fallback scenarios --
   const hasRouteMismatch = blockedScenarios.some(b => b.reasonCode === "route_profile_intent_mismatch" || b.reason === "route_profile_intent_mismatch" || b.suggestedAction === "run_transactional_route_discovery");
@@ -868,13 +893,13 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
 
   // ── AI scenario prefix repair: inject knowledge prefix + HU explicit route ──
   // For non-catalog intents, also filter catalog-contaminated labels
-  const isPrivateOrBalanceIntent = primaryIssueIntent.intent !== "catalog_listing_flow" &&
-    primaryIssueIntent.intent !== "product_detail_flow";
+  const isPrivateOrBalanceIntent = effectiveIntent !== "catalog_listing_flow" &&
+    effectiveIntent !== "product_detail_flow";
 
   // Detect routeProfile catalog orientation via structural signals (not just label heuristics)
   const routeProfileFlavor = detectRouteProfileIsCatalog(resolvedRouteProfile, knowledgeCtx.available ? undefined : undefined);
   const routeProfileIsCatalog = routeProfileFlavor.isCatalog;
-  console.log(`[scenario-preview] routeProfile compatibility=${routeProfileIsCatalog ? "compatible" : "incompatible"} intent=${primaryIssueIntent.intent} reason=${routeProfileFlavor.reason} confidence=${routeProfileFlavor.confidence}`);
+  console.log(`[scenario-preview] routeProfile compatibility=${routeProfileIsCatalog ? "compatible" : "incompatible"} effectiveIntent=${effectiveIntent} classifierIntent=${primaryIssueIntent.intent} reason=${routeProfileFlavor.reason} confidence=${routeProfileFlavor.confidence}`);
 
   if (isPrivateOrBalanceIntent && routeProfileIsCatalog) {
     console.log(`[scenario-preview] ignoredRequiredEntryStep reason=private_intent_catalog_profile compatibility=${routeProfileFlavor.confidence} signals="${routeProfileFlavor.reason}"`);
@@ -1044,6 +1069,7 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
       isPrivateOrBalanceIntent ? null : resolvedRouteProfile,
       undefined, undefined, undefined,
       isPrivateOrBalanceIntent ? true : undefined,
+      effectiveIntent,
     );
     if (validation.valid) {
       validCount++;
@@ -1723,20 +1749,22 @@ function extractHuScenarioModel(huText: string): HuScenarioModel {
   const t = huText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
   // Detect main intent (mutually exclusive, prioritized)
-  // Loan balance signals: prestamo + balance/saldo or loan financial fields
-  const isLoanBalance = /prestamo/.test(t) && (/balance|saldo/.test(t) || /monto|tasa|plazo|cuota|desembolsado/.test(t));
-  const isDoc = /carta|certificacion|constancia|comprobante|documento/.test(t) && /generar|emitir|descargar/.test(t);
+  // Priority: statement > document > balance > payment > request > crud > catalog
+  // "estado de cuenta" must dominate over incidental "balance" references
   const isStatement = /estado de cuenta|extracto|movimiento/.test(t);
-  const isBalance = (/balance|saldo/.test(t) && /\b(cuenta|producto|tarjeta|prestamo|prestamos)\b/.test(t)) || isLoanBalance;
-  const isPayment = /pagar|pago|transferir|transferencia|monto/.test(t);
+  const isDoc = (isStatement && (/generar|emitir|descargar|enviar|correo/.test(t) || /estamos generando/.test(t)))
+    || (/carta|certificacion|constancia|comprobante|documento/.test(t) && /generar|emitir|descargar/.test(t));
+  const isLoanBalance = /prestamo/.test(t) && (/balance|saldo/.test(t) || /monto|tasa|plazo|cuota|desembolsado/.test(t));
+  const isBalance = (!isStatement && /balance|saldo/.test(t) && /\b(cuenta|producto|tarjeta|prestamo|prestamos)\b/.test(t)) || isLoanBalance;
+  const isPayment = /pagar|pago|transferir|transferencia|monto/.test(t) && !isStatement;
   const isRequest = /solicitar|contratar|apertura|registrar/.test(t) && /\b(cuenta|tarjeta|producto|servicio)\b/.test(t);
   const isCrud = /editar|modificar|cambiar|actualizar|eliminar|desactivar/.test(t) && !t.includes("no podra ser modificada");
   const isCatalog = /listado|catalogo|productos?|categorias/.test(t);
 
   let mainIntent = "generic";
-  if (isLoanBalance || isBalance) mainIntent = "balance_inquiry";
+  if (isStatement) mainIntent = "statement_generation";
   else if (isDoc) mainIntent = "document_generation";
-  else if (isStatement) mainIntent = "statement_generation";
+  else if (isLoanBalance || isBalance) mainIntent = "balance_inquiry";
   else if (isPayment) mainIntent = "payment_transfer";
   else if (isRequest) mainIntent = "product_request";
   else if (isCrud) mainIntent = "maintenance_crud";
@@ -1745,8 +1773,10 @@ function extractHuScenarioModel(huText: string): HuScenarioModel {
   // Sub-intent refinement
   let subIntent = "standard";
   if (/prestamo/.test(t) && (mainIntent === "balance_inquiry" || /balance|saldo/.test(t))) subIntent = "loan_balance";
-  else if (/certificacion|certificado/.test(t)) subIntent = "certification";
-  else if (/referencia/.test(t)) subIntent = "reference_letter";
+  else if (/certificacion|certificado/.test(t) && mainIntent !== "statement_generation") subIntent = "certification";
+  else if (/referencia/.test(t) && mainIntent !== "statement_generation") subIntent = "reference_letter";
+  else if (mainIntent === "statement_generation" && /cuentas de efectivo|efectivo/.test(t)) subIntent = "cash_account_statement";
+  else if (mainIntent === "statement_generation") subIntent = "account_statement";
   else if (/vista previa/.test(t)) subIntent = "with_preview";
   else if (/qr/.test(t)) subIntent = "with_qr";
   else if (/codigo de autenticacion/.test(t)) subIntent = "with_auth_code";
@@ -1795,6 +1825,12 @@ function extractHuScenarioModel(huText: string): HuScenarioModel {
   if (/prestamo|prestamos/.test(t)) { selectableEntities.push("loan"); uiObligations.push("loan_selection"); }
   if (/deposito/.test(t)) { selectableEntities.push("deposit"); uiObligations.push("deposit_selection"); }
   if (/(mas de un|multiples|varios)\s+(producto|cuenta|tarjeta|prestamo|deposito)/.test(t)) { multiSelectEntities.push("multiple"); uiObligations.push("multi_select"); }
+  // Statement-specific: period/month selection
+  if (isStatement && /periodo|rango/.test(t)) { selectableEntities.push("period"); uiObligations.push("period_selection"); }
+  if (isStatement && /(personalizado|3\s+meses|6\s+meses|12\s+meses|ultimos)/.test(t)) { selectableEntities.push("months_range"); uiObligations.push("months_range_selection"); }
+  if (isStatement && /generando/.test(t)) uiObligations.push("generating_message");
+  if (isStatement && /no\s+editable/.test(t)) uiObligations.push("non_editable");
+  if (/numero\s+(unico\s+)?de\s+referencia/.test(t)) { selectableEntities.push("reference_number"); uiObligations.push("reference_number_display"); }
 
   // Visible buttons / labels / warnings
   if (/\"(.+?)\"/g.test(t)) {
@@ -1810,12 +1846,17 @@ function extractHuScenarioModel(huText: string): HuScenarioModel {
   if (/generar/.test(t)) { visibleButtons.push("Generar"); uiObligations.push("generate_button"); }
   if (/descargar/.test(t)) { visibleButtons.push("Descargar"); uiObligations.push("download_button"); }
 
-  // Warnings
+  // Warnings — always human-readable Spanish, matching actual UI text
   if (/advertencia|alerta|mensaje|importante|no podra ser modificada|no podra ser cambiada/.test(t)) {
-    visibleWarnings.push("irreversible_action_warning");
+    visibleWarnings.push("Esta accion no podra ser modificada despues de completada");
     uiObligations.push("warning_message");
   }
-  if (/enmascarado|oculto|parcial/.test(t)) { visibleWarnings.push("masked_data"); uiObligations.push("masked_data_warning"); }
+  if (/enmascarado|oculto|parcial/.test(t)) { visibleWarnings.push("Algunos datos pueden estar enmascarados por seguridad"); uiObligations.push("masked_data_warning"); }
+  if (isStatement && /generando/.test(t)) { visibleWarnings.push("Estamos generando tu estado de cuenta, esto puede tomar unos minutos"); }
+  if (isStatement && /no\s+editable/.test(t)) { visibleWarnings.push("El documento no es editable"); }
+  if (/no\s+imprimir|no\s+impresion|sin\s+impresion|no\s+se\s+puede\s+imprimir/.test(t) && !visibleWarnings.includes("La impresion no esta disponible para este documento")) {
+    visibleWarnings.push("La impresion no esta disponible para este documento");
+  }
 
   // Flow signals
   const previewSignals = /vista previa/.test(t);
@@ -1841,6 +1882,11 @@ function extractHuScenarioModel(huText: string): HuScenarioModel {
   if (/firma\s+(fisica|electronica|digital)/.test(t)) nonUiRequirements.push("physical_signature");
   if (/envio real|correo real/.test(t)) nonUiRequirements.push("real_email_send");
   if (/integracion/.test(t)) nonUiRequirements.push("internal_integration");
+  // Statement-specific non-UI constraints
+  if (isStatement && /generando/.test(t)) nonUiRequirements.push("async_generation_wait");
+  if (isStatement && /correo\s+registrado/.test(t)) nonUiRequirements.push("registered_email_only");
+  if (/no\s+imprimir|no\s+impresion|sin\s+impresion|no\s+se\s+puede\s+imprimir/.test(t)) nonUiRequirements.push("no_printing");
+  if (/no\s+podra\s+ser\s+modificad|no\s+modificable|inmutable/.test(t)) nonUiRequirements.push("immutable_after_generation");
 
   // Data requirements
   const dataRequirements: string[] = [];
@@ -1953,6 +1999,9 @@ function buildRoutePendingScenarioPlan(huModel: HuScenarioModel): RoutePendingSc
   addIf("return_or_cancel_flow", m.returnOrCancelSignals);
   addIf("delivery_flow", m.deliverySignals);
   addIf("visible_warning_flow", m.visibleWarnings.length > 0);
+  addIf("generating_in_progress_flow", m.uiObligations.includes("generating_message"));
+  addIf("period_range_selection_flow", m.uiObligations.includes("months_range_selection"));
+  addIf("reference_number_display_flow", m.uiObligations.includes("reference_number_display"));
   if (baseVariants.length <= 2) baseVariants.push("generic_validation_flow");
 
   // Determine target count
@@ -1968,6 +2017,13 @@ function buildRoutePendingScenarioPlan(huModel: HuScenarioModel): RoutePendingSc
   }
   if (m.visibleWarnings.length > 0 && !mustHave.includes("preview_review_flow")) {
     mustHave.push("visible_warning_flow");
+  }
+  // Statement-specific must-haves
+  if (m.mainIntent === "statement_generation" && m.uiObligations.includes("generating_message")) {
+    mustHave.push("generating_in_progress_flow");
+  }
+  if (m.mainIntent === "statement_generation" && m.uiObligations.includes("months_range_selection")) {
+    mustHave.push("period_range_selection_flow");
   }
 
   const minCount = complexity === "simple" ? 2 : complexity === "medium" ? 4 : 5;
@@ -2072,11 +2128,78 @@ function buildPlanBasedScenarios(
     const map: Record<string, string> = {
       product: "producto",
       account: "cuenta",
+      cash_account: "cuenta de efectivo",
       card: "tarjeta",
+      credit_card: "tarjeta de credito",
       loan: "prestamo",
       deposit: "deposito",
+      certificate: "certificado",
+      document: "documento",
     };
     return map[entity.toLowerCase()] ?? entity;
+  }
+
+  // Helper: resolve the best business-readable entity label from multiple signals
+  function resolveSelectableEntityLabel(): string {
+    // 1. explicitRoutePath last segment
+    const rp = huExplicitRoutePath ?? (huModel as any)?.explicitRoutePath ?? [];
+    if (rp.length > 0) {
+      const last = normalizeDisplay(rp[rp.length - 1]);
+      if (last.length >= 4) return last;
+    }
+    // 2. selectableEntities — find first non-generic entity
+    const raw = huModel?.selectableEntities ?? [];
+    for (const e of raw) {
+      const label = toSelectionEntity(e);
+      if (label !== "producto" && label !== "elemento") return label;
+    }
+    // 3. huModel featureName / documentType
+    if (huModel?.featureName && !/operacion/.test(huModel.featureName)) return huModel.featureName;
+    // 4. last word fallback
+    return "producto";
+  }
+
+  function normalizeDisplay(s: string): string {
+    return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+  }
+
+  // Convert a Spanish entity phrase from plural to singular using generic
+  // linguistic rules. No hardcoded HUs — pure Spanish grammar.
+  function singularizeEntityLabel(label: string): string {
+    const words = label.split(/\s+/);
+    if (words.length === 0) return label;
+
+    // Irregular plurals where stem changes (linguistic, not domain-specific)
+    const irregular: Record<string, string> = { veces: "vez" };
+
+    const singularized = words.map(w => {
+      const l = w.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      const orig = w; // preserve original casing/accents
+      if (irregular[l]) return irregular[l];
+
+      // Plural -es after consonant: árbol→árboles, solicitud→solicitudes
+      if (l.endsWith("es") && l.length > 3 && /[bcdfghjklmnpqrstvwxyz]es$/.test(l)) {
+        return orig.length > 2 ? orig.slice(0, -2) : orig;
+      }
+      // Plural -s after vowel: cuenta→cuentas, tarjeta→tarjetas
+      if (l.endsWith("s") && l.length > 3 && /[aeiou]s$/.test(l)) {
+        return orig.length > 2 ? orig.slice(0, -1) : orig;
+      }
+      return orig;
+    });
+
+    return singularized.join(" ");
+  }
+
+  // Detect Spanish grammatical gender for article agreement.
+  // Returns "f" for feminine, "m" for masculine.
+  function detectEntityGender(word: string): "f" | "m" {
+    const l = word.toLowerCase();
+    // Feminine by suffix
+    if (/(?:cion|sion|dad|tad|tud|umbre|ie|cia|ncia|eza)$/.test(l)) return "f";
+    // Feminine by ending in 'a'
+    if (/a$/.test(l) && !/(?:ma|pa|ta|grama|problema|sistema|tema|idioma|poema|drama|clima|mapa|planeta|cometa|dia)$/.test(l)) return "f";
+    return "m";
   }
 
   // Helper: build field entry step
@@ -2097,39 +2220,81 @@ function buildPlanBasedScenarios(
   function buildVariantScenarios(): any[] {
     const variants = scenarioPlan?.variants ?? ["happy_path"];
     const target = scenarioPlan?.scenarioCountTarget ?? Math.min(variants.length, 3);
-    const result: any[] = [];
     const pfx = prefix();
     const m = huModel;
 
-    // Only generate up to target variants
-    const toGenerate = variants.slice(0, target);
+    // ── Title builder: produces business-readable Spanish, no variant IDs ──
+    const feat = featureName;
+    const entity = resolveSelectableEntityLabel();
+    const scopes: Record<string, string> = {
+      happy_path: `Ejecutar flujo completo de ${feat}`,
+      selection_flow: `Seleccionar ${entity} para generar ${feat}`,
+      multi_selection_flow: `Seleccionar multiples ${entity}s para ${feat}`,
+      required_fields_flow: `Completar datos requeridos para generar ${feat}`,
+      search_flow: `Buscar ${entity} para ${feat}`,
+      dropdown_selection_flow: `Seleccionar opcion de ${feat}`,
+      preview_review_flow: `Revisar vista previa de ${feat}`,
+      confirmation_flow: `Confirmar generacion de ${feat}`,
+      confirmation_return_or_cancel_flow: `Confirmar o cancelar generacion de ${feat}`,
+      return_or_cancel_flow: `Cancelar generacion de ${feat}`,
+      delivery_flow: `Validar envio de ${feat} al correo registrado`,
+      visible_warning_flow: `Validar restricciones de impresion y modificacion de ${feat}`,
+      generating_in_progress_flow: `Validar mensaje de generacion del ${feat}`,
+      period_range_selection_flow: `Seleccionar periodo para ${feat}`,
+      reference_number_display_flow: `Validar numero unico de referencia del ${feat}`,
+    };
 
-    for (const v of toGenerate) {
+    // ── Build all variant entries ──
+    const allVariantEntries: Array<{ id: string; title: string }> = [];
+    for (const v of variants) {
+      if (v === "period_range_selection_flow" && m?.selectableEntities?.includes("months_range")) {
+        allVariantEntries.push(
+          { id: "period_range_selection_flow", title: `Seleccionar rango personalizado para generar ${feat}` },
+          { id: "period_range_selection_flow", title: `Generar ${feat} de los ultimos tres meses` },
+          { id: "period_range_selection_flow", title: `Generar ${feat} de los ultimos seis meses` },
+          { id: "period_range_selection_flow", title: `Generar ${feat} de los ultimos doce meses` },
+        );
+      } else if (v === "period_range_selection_flow") {
+        allVariantEntries.push({ id: v, title: `Generar ${feat} con rango de fecha personalizado` });
+      } else {
+        allVariantEntries.push({ id: v, title: scopes[v] ?? `Validar ${feat}` });
+      }
+    }
+
+    // ── Suppress happy_path when enough specific variants exist ──
+    const specificCount = allVariantEntries.filter(e => e.id !== "happy_path").length;
+    const toGenerate = specificCount >= 5
+      ? allVariantEntries.filter(e => e.id !== "happy_path")
+      : allVariantEntries;
+    const truncated = toGenerate.slice(0, target + Math.max(0, specificCount - target));
+    const result: any[] = [];
+
+    if (allVariantEntries.find(e => e.id === "happy_path") && specificCount >= 5) {
+      console.log(`[scenario-preview] routePendingBuilder happyPathSuppressed reason=high_specific_coverage specificVariants=${specificCount}`);
+    }
+
+    for (const { id: v, title } of truncated) {
       let steps: string[] = [...pfx];
-      let titlePostfix = "";
       let expected = "La operacion se completa correctamente.";
 
       switch (v) {
         case "happy_path":
-          titlePostfix = "flujo principal";
           if (m?.visibleButtons?.length) steps.push(`Clic en "${m.visibleButtons[0]}".`);
           else if (m?.primaryAction) steps.push(`${m.primaryAction} ${m?.featureName ?? ""}.`);
           if (m?.visibleWarnings?.length) steps.push(`Validar que se muestre "${m.visibleWarnings[0]}".`);
           if (m?.confirmationSignals || m?.visibleButtons?.includes("Confirmar")) steps.push('Clic en "Confirmar".');
           steps.push(`Validar que ${m?.featureName ?? "la operacion"} se complete correctamente.`);
-          expected = `El flujo principal de ${featureName} se completa exitosamente.`;
+          expected = `El flujo de ${feat} se completa exitosamente.`;
           break;
 
         case "selection_flow":
-          titlePostfix = `seleccion de ${toSelectionEntity(m?.selectableEntities?.[0] ?? "elemento")}`;
           steps.push(buildSelectionStep(m?.selectableEntities?.[0] ?? "elemento"));
           if (m?.visibleButtons?.includes("Continuar")) steps.push('Clic en "Continuar".');
           steps.push(`Validar que se muestre la confirmacion de seleccion.`);
-          expected = `La seleccion de ${toSelectionEntity(m?.selectableEntities?.[0] ?? "elemento")} se completa correctamente.`;
+          expected = `La seleccion de ${entity} para ${feat} se completa correctamente.`;
           break;
 
         case "multi_selection_flow":
-          titlePostfix = "seleccion multiple";
           steps.push(buildSelectionStep(m?.selectableEntities?.[0] ?? "elemento", "primer"));
           steps.push(buildSelectionStep(m?.selectableEntities?.[0] ?? "elemento", "segundo"));
           steps.push("Validar que ambos elementos esten seleccionados.");
@@ -2137,7 +2302,6 @@ function buildPlanBasedScenarios(
           break;
 
         case "required_fields_flow":
-          titlePostfix = "validacion de campos obligatorios";
           if (m?.requiredFields?.length) {
             steps.push(buildFieldStep(m.requiredFields[0]));
             steps.push('Clic en "Continuar".');
@@ -2151,7 +2315,6 @@ function buildPlanBasedScenarios(
           break;
 
         case "search_flow":
-          titlePostfix = "busqueda y seleccion";
           if (m?.requiredFields?.includes("rnc") || m?.requiredFields?.includes("RNC")) {
             steps.push(buildFieldStep("rnc"));
           } else if (m?.requiredFields?.includes("destinatario")) {
@@ -2167,7 +2330,6 @@ function buildPlanBasedScenarios(
           break;
 
         case "dropdown_selection_flow":
-          titlePostfix = "seleccion de opcion";
           if (m?.visibleOptions?.length) {
             steps.push(`Validar que se muestre "${m.visibleOptions[0]}".`);
             steps.push(`Clic en "${m.visibleOptions[0]}".`);
@@ -2180,28 +2342,25 @@ function buildPlanBasedScenarios(
           break;
 
         case "preview_review_flow":
-          titlePostfix = "vista previa";
           steps.push('Validar que se muestre "Vista previa".');
           if (m?.visibleWarnings?.length) {
             for (const w of m.visibleWarnings) steps.push(`Validar que se muestre "${w}".`);
           }
           if (m?.visibleButtons?.includes("Volver")) steps.push('Clic en "Volver".');
           else if (m?.visibleButtons?.includes("Confirmar")) steps.push('Clic en "Confirmar".');
-          expected = `La vista previa de ${featureName} se muestra correctamente.`;
+          expected = `La vista previa de ${feat} se muestra correctamente.`;
           break;
 
         case "confirmation_flow":
-          titlePostfix = "confirmacion";
           if (m?.visibleButtons?.includes("Confirmar")) steps.push('Clic en "Confirmar".');
-          steps.push(`Validar que se muestre la confirmacion de ${featureName}.`);
-          expected = `La confirmacion de ${featureName} se completa correctamente.`;
+          steps.push(`Validar que se muestre la confirmacion de ${feat}.`);
+          expected = `La confirmacion de ${feat} se completa correctamente.`;
           break;
 
         case "confirmation_return_or_cancel_flow":
-          titlePostfix = "confirmacion o cancelacion";
           if (m?.visibleButtons?.includes("Confirmar")) {
             steps.push('Clic en "Confirmar".');
-            steps.push(`Validar que se muestre la confirmacion de ${featureName}.`);
+            steps.push(`Validar que se muestre la confirmacion de ${feat}.`);
           }
           if (m?.visibleButtons?.includes("Cancelar")) steps.push('Clic en "Cancelar".');
           else if (m?.visibleButtons?.includes("Volver")) steps.push('Clic en "Volver".');
@@ -2209,11 +2368,10 @@ function buildPlanBasedScenarios(
             steps.push("Cancelar la operacion.");
           }
           steps.push("Validar que la operacion no se ejecute.");
-          expected = `La confirmacion se completa y el usuario puede cancelar o volver.`;
+          expected = `La confirmacion de ${feat} se completa y el usuario puede cancelar o volver.`;
           break;
 
         case "return_or_cancel_flow":
-          titlePostfix = "cancelacion o retorno";
           if (m?.visibleButtons?.includes("Cancelar")) steps.push('Clic en "Cancelar".');
           else if (m?.visibleButtons?.includes("Volver")) steps.push('Clic en "Volver".');
           steps.push("Validar que la operacion no se ejecute.");
@@ -2221,7 +2379,6 @@ function buildPlanBasedScenarios(
           break;
 
         case "delivery_flow":
-          titlePostfix = "envio o notificacion";
           steps.push('Validar que se muestre "Correo electronico".');
           if (m?.visibleWarnings?.some((w: string) => w.includes("enmascar") || w.includes("ocult"))) {
             steps.push("Validar que se muestre el correo enmascarado.");
@@ -2229,42 +2386,135 @@ function buildPlanBasedScenarios(
           steps.push("Seleccionar la primera opcion de correo visible del listado.");
           if (m?.visibleButtons?.includes("Continuar")) steps.push('Validar que el boton "Continuar" este visible.');
           if (m?.visibleButtons?.includes("Cancelar")) steps.push('Validar que el boton "Cancelar" este visible.');
-          expected = `El envio de ${featureName} se completa correctamente.`;
+          expected = `El envio de ${feat} se completa correctamente.`;
           break;
 
         case "visible_warning_flow":
-          titlePostfix = "advertencia visible";
           if (m?.visibleWarnings?.length) {
             for (const w of m.visibleWarnings) steps.push(`Validar que se muestre "${w}".`);
           }
           if (m?.visibleButtons?.includes("Continuar")) steps.push('Clic en "Continuar".');
           else if (m?.visibleButtons?.includes("Aceptar")) steps.push('Clic en "Aceptar".');
-          expected = "La advertencia se muestra correctamente.";
+          expected = "Las restricciones visibles se muestran correctamente.";
+          break;
+
+        case "generating_in_progress_flow":
+          steps.push('Validar que se muestre "Estamos generando tu estado de cuenta".');
+          if (m?.visibleWarnings?.length) steps.push(`Validar que se muestre "${m.visibleWarnings.find((w: string) => w.includes("generando")) ?? m.visibleWarnings[0]}".`);
+          steps.push("Validar que se muestre un indicador de progreso o espera.");
+          expected = `Se muestra el mensaje de generacion de ${feat}.`;
+          break;
+
+        case "period_range_selection_flow":
+          steps.push('Seleccionar la opcion de rango de fecha correspondiente.');
+          steps.push('Validar que se muestren las opciones de periodo: ultimos 3 meses, ultimos 6 meses, ultimos 12 meses, rango personalizado.');
+          if (m?.visibleOptions?.length) steps.push(`Seleccionar la opcion "${m.visibleOptions[0]}".`);
+          else steps.push("Seleccionar la primera opcion de periodo visible del listado.");
+          if (m?.visibleButtons?.includes("Continuar")) steps.push('Clic en "Continuar".');
+          expected = `El periodo para ${feat} se selecciona correctamente.`;
+          break;
+
+        case "reference_number_display_flow":
+          steps.push("Validar que se muestre un numero unico de referencia en el documento generado.");
+          steps.push("Validar que el numero de referencia sea visible y no este vacio.");
+          expected = "El numero unico de referencia se muestra correctamente.";
           break;
 
         default:
-          titlePostfix = "validacion general";
-          if (m?.visibleButtons?.length) steps.push(`Clic en "${m.visibleButtons[0]}".`);
-          else if (m?.primaryAction) steps.push(`${m.primaryAction} ${m?.featureName ?? ""}.`);
-          if (m?.visibleWarnings?.length) steps.push(`Validar que se muestre "${m.visibleWarnings[0]}".`);
           steps.push(`Validar que ${m?.featureName ?? "la operacion"} se complete correctamente.`);
+          if (m?.visibleWarnings?.length) steps.push(`Validar que se muestre "${m.visibleWarnings[0]}".`);
           expected = "La operacion se completa correctamente.";
       }
 
       result.push({
         ...baseFields,
         sourceIssueKey: key,
-        title: `${featureName} — ${titlePostfix}`,
+        title,
         steps,
         preconditions: ["El usuario esta autenticado en la aplicacion.", "La aplicacion esta disponible y accesible."],
         expectedResult: expected,
       });
     }
 
+    // ── Controlled data scenario: single entity skip list ──
+    // Trigger when HU has selectable entities but no multi-select or explicit multi-option signal
+    const hasSingleEntity = (m?.selectableEntities?.length ?? 0) > 0 && !m?.multiSelectEntities?.length;
+    const entityPlural = resolveSelectableEntityLabel();
+    if (hasSingleEntity) {
+      const entitySingular = singularizeEntityLabel(entityPlural);
+      const gender = detectEntityGender(entitySingular);
+      const article = gender === "f" ? "una" : "un";
+      const articleDef = gender === "f" ? "la" : "el";
+      result.push({
+        ...baseFields,
+        sourceIssueKey: key,
+        title: `Validar avance automatico cuando el cliente posee ${article} sola ${entitySingular}`,
+        steps: [...pfx, `Validar que sin lista intermedia ${articleDef} ${entitySingular} unica sea reconocida como seleccionada.`],
+        preconditions: [`El cliente posee exactamente ${article} ${entitySingular}.`, "El sistema debe aplicar controlledData para forzar ese escenario."],
+        expectedResult: `El sistema avanza automaticamente sin mostrar listado de ${entityPlural}.`,
+        controlledDataRequired: true,
+        automationStatus: "requires_controlled_data",
+        nonExecutableCriteria: "single_entity_required",
+      });
+      console.log(`[scenario-preview] routePendingBuilder controlledDataRequired added reason=single_entity_required entityPlural=${entityPlural} entitySingular=${entitySingular}`);
+    }
+
     return result;
   }
 
   const scenarios = buildVariantScenarios();
+
+  // ── MCP contract: validate steps ──
+  const MCP_VALID_VERBS = /^(Clic en|Validar que|Seleccionar|Ingresar|Esperar|Confirmar|Volver|Cancelar|Completar)/i;
+  const INTERNAL_TOKEN_PATTERNS = /_[a-z]{3,}_|[a-z]+_[a-z]+_(flow|message|display|warning|error|data|field|pipe|event|signal|token|flag)/i;
+  let mcpPassed = 0;
+  let mcpFailed = 0;
+  for (const sc of scenarios) {
+    for (const step of (sc.steps ?? [])) {
+      let ok = true;
+      if (!MCP_VALID_VERBS.test(step)) {
+        console.log(`[scenario-mcp-contract] invalidStep reason=missing_mcp_verb step="${step.slice(0, 80)}"`);
+        ok = false;
+      }
+      if (INTERNAL_TOKEN_PATTERNS.test(step)) {
+        const match = step.match(INTERNAL_TOKEN_PATTERNS)?.[0] ?? "?";
+        console.log(`[scenario-mcp-contract] invalidStep reason=internal_variant_token token="${match}" step="${step.slice(0, 80)}"`);
+        ok = false;
+      }
+      ok ? mcpPassed++ : mcpFailed++;
+    }
+  }
+  console.log(`[scenario-mcp-contract] passed scenarios=${scenarios.length} stepsPassed=${mcpPassed} stepsFailed=${mcpFailed}`);
+
+  // ── Title contract: validate scenario titles ──
+  const TITLE_HYPHEN = /—/;
+  const TITLE_SNAKE = /[a-z]+_[a-z]+_[a-z]+/i;
+  const TITLE_INTERNAL = /(flow|message|display|warning|error|data|field|pipe|event|signal|token|flag)$/i;
+  let titlePassed = 0;
+  let titleFailed = 0;
+  for (const sc of scenarios) {
+    let ok = true;
+    const t = sc.title ?? "";
+    if (TITLE_HYPHEN.test(t)) {
+      console.log(`[scenario-title-contract] invalidTitle reason=contains_hyphen title="${t}"`);
+      ok = false;
+    }
+    if (TITLE_SNAKE.test(t)) {
+      console.log(`[scenario-title-contract] invalidTitle reason=snake_case title="${t}"`);
+      ok = false;
+    }
+    if (TITLE_INTERNAL.test(t)) {
+      console.log(`[scenario-title-contract] invalidTitle reason=internal_variant_token title="${t}"`);
+      ok = false;
+    }
+    if (t.length < 20 || /^(flujo|validacion|operacion) /i.test(t)) {
+      console.log(`[scenario-title-contract] invalidTitle reason=too_generic title="${t}"`);
+      ok = false;
+    }
+    ok ? titlePassed++ : titleFailed++;
+  }
+  console.log(`[scenario-title-contract] passed scenarios=${scenarios.length} titlesPassed=${titlePassed} titlesFailed=${titleFailed}`);
+
   console.log(`[scenario-preview] routePendingBuilder planBased=true target=${scenarioPlan?.scenarioCountTarget ?? "?"} variants=${scenarioPlan?.variants?.length ?? "?"}`);
   console.log(`[scenario-preview] routePendingBuilder generated=${scenarios.length} quality=plan_based_route_pending automationStatus=requires_route_discovery`);
   return scenarios;

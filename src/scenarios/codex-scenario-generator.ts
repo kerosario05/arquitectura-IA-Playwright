@@ -887,11 +887,12 @@ export async function generateScenariosWithAi(
     (issue as any)._huIntent = issueIntent.intent;
     (issue as any)._huIntentConfidence = issueIntent.confidence;
 
-    const routeProfileEntry = (routeProfile as any)?.entry ?? [];
-    const entryStr = JSON.stringify(routeProfileEntry).toLowerCase();
-    const routeIsCatalogListing = entryStr.includes("informaci") || resolutionIsCatalogListing(routeProfile);
+    const routeIsCatalogListing = resolutionIsCatalogListing(routeProfile);
 
-    if (isTransactionalDocumentIntent(issueIntent.intent) && routeIsCatalogListing) {
+    const isNonCatalogIntent = issueIntent.intent !== "catalog_listing_flow" &&
+      issueIntent.intent !== "product_detail_flow";
+
+    if (isNonCatalogIntent && routeIsCatalogListing) {
       console.log(
         `[route-profile-compatibility] compatible=false issue=${issue.key} huIntent=${issueIntent.intent} routeMode=listing_validation routeProfile=${(routeProfile as any)?.name ?? "unknown"} reason=intent_mismatch`
       );
@@ -1045,7 +1046,8 @@ export async function generateScenariosWithAi(
         const messages = await buildMcpScenarioMessages(
           routePendingIssues, appSlug, testrailMeta, targetAppSlug, targetAppName,
           null, entrySteps, loginMode, routePendingResolutions,
-          pendingDeterministicSeeds || undefined, huEvidenceMap, pathSelectionMap, huScopeGuard,
+          pendingDeterministicSeeds || undefined, huScenarioModel?.mainIntent,
+          huEvidenceMap, pathSelectionMap, huScopeGuard,
           huScenarioModel, routePendingScenarioPlan
         );
         console.log(`[scenario-preview] routePendingPrompt incompatibleRouteProfile=true routeProfileUsedAsExecutable=false`);
@@ -1231,6 +1233,7 @@ export async function generateScenariosWithAi(
     loginMode,
     routeResolutions, // Pass route resolutions to prompt builder
     deterministicSeeds || undefined, // Pass deterministic seeds if available
+    huScenarioModel?.mainIntent, // effectiveIntent — overrides classifier for prompt suppression
     huEvidenceMap, // Pass HU-driven evidence
     pathSelectionMap, // Pass HU-driven path selections
     huScopeGuard, // Pass HU scope guard for prompt guidance (NEW)
@@ -1698,20 +1701,45 @@ export async function generateScenariosWithAi(
 }
 
 /**
- * Check if a route profile is catalog/listing (used for intent compatibility guard).
- * Generic check: looks for catalog-root patterns in entry/intermediates/domainTerms.
+ * Check if a route profile is catalog/listing using structural signals,
+ * not hardcoded label patterns. Multiproject-safe.
  */
 function resolutionIsCatalogListing(routeProfile: McpRouteProfile | null | undefined): boolean {
   if (!routeProfile) return false;
   const rp = routeProfile as any;
-  const blob = JSON.stringify({
-    name: rp.name ?? "",
-    entry: rp.entry ?? [],
-    intermediates: rp.intermediates ?? {},
-    domainTerms: rp.domainTerms ?? {},
-    visibleControls: rp.visibleControls ?? []
-  }).toLowerCase();
-  return /informaci[oó]n de productos|cat[áa]logo de productos|listado de productos/.test(blob);
+
+  // Structural signals (same scoring as scenario-preview.service.ts)
+  let score = 0;
+
+  // 1. targetPaths with product groups → strong catalog signal
+  const targetPaths = (rp.targetPaths ?? {});
+  const targetPathKeys = Object.keys(targetPaths);
+  if (targetPathKeys.length >= 3) score += 3;
+  else if (targetPathKeys.length >= 1) score += 2;
+
+  // 2. productMetadata.subcategory → very strong catalog signal
+  const hasProductMetadata = targetPathKeys.some(
+    (k: string) => !!(targetPaths[k] as any)?.productMetadata?.subcategory
+  );
+  if (hasProductMetadata) score += 3;
+
+  // 3. entry labels contain catalog-pattern business keys
+  const entries = (rp.entry ?? []) as any[];
+  const entryLabels = entries.map((e: any) =>
+    (e.businessLabel ?? e.visibleLabel ?? "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  );
+  const catalogEntryPatterns = [/informacion_de_productos/, /productos/, /catalogo/];
+  if (entryLabels.some(l => catalogEntryPatterns.some(p => p.test(l)))) score += 1;
+
+  // 4. visibleControls dominated by catalog section labels
+  const controls = (rp.visibleControls ?? []) as string[];
+  if (controls.length >= 5) {
+    const catalogSectionTerms = /beneficios|requisitos|condiciones relevantes|descripci[oó]n general|informaci[oó]n legal|nombre del producto|solicitar|tasas/i;
+    const catalogControls = controls.filter((c: string) => catalogSectionTerms.test(c));
+    if (catalogControls.length / Math.max(controls.length, 1) >= 0.3) score += 1;
+  }
+
+  return score >= 2;
 }
 
 /**

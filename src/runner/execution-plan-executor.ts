@@ -240,6 +240,9 @@ export async function executeExecutionPlan(input: {
   // Persist runtime knowledge if any snapshots were captured
   if (runtimeSnapshots.length > 0 && input.runtimeConfig?.app) {
     const appSlug = input.runtimeConfig.app.appProfile ?? input.runtimeConfig.app.name ?? "default";
+    if (appSlug === "default") {
+      console.warn(`[knowledge-persister] appSlugFallback=default reason=missing_appProfile_and_appName caseId=${input.plan.scenario.caseId ?? "unknown"} scenario="${input.plan.scenario.title.slice(0, 60)}"`);
+    }
     const issueKey = input.plan.scenario.externalId ?? String(input.plan.scenario.caseId ?? "");
     const scenarioTitle = input.plan.scenario.title;
     const fromSnapshot = runtimeSnapshots[runtimeSnapshots.length - 1];

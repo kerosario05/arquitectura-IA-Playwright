@@ -174,10 +174,22 @@ function validateEntrySteps(
   functionalScope?: string,
   optionFlows?: OptionFlow[],
   authenticatedPrecondition?: boolean,
+  effectiveIntent?: string,
 ): string | null {
   // If HU has multiple option flows, entry validation is option-dependent, not global
   if (optionFlows && optionFlows.length > 1) {
     return null; // No global entry requirement when options vary outcomes
+  }
+
+  // Skip catalog entry validation for non-catalog intents
+  // RouteProfile entries like "Información de productos" belong to catalog domains
+  // and must not be enforced for transactional/private/balance HUs
+  const isNonCatalog = effectiveIntent
+    && effectiveIntent !== "catalog_listing_flow"
+    && effectiveIntent !== "product_detail_flow";
+  if (isNonCatalog) {
+    console.log(`[scenario-validation] skippedEntryStep reason=non_catalog_intent effectiveIntent=${effectiveIntent} requiredEntrySource=none_catalogRouteProfileEntrySkipped`);
+    return null;
   }
 
   if (huDrivenNavigationPath) {
@@ -477,6 +489,7 @@ export function validateScenario(
   functionalScope?: string,
   optionFlows?: OptionFlow[],
   authenticatedPrecondition?: boolean,
+  effectiveIntent?: string,
 ): ScenarioValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
@@ -489,7 +502,7 @@ export function validateScenario(
   if (huDrivenNavigationPath && huDrivenNavigationPath.length > 0) {
     console.log(`[scenario-validator] using hu_driven_navigation_path entries=${huDrivenNavigationPath.length} ignoring_public_route_profile`);
   }
-  const entryError = validateEntrySteps(scenario, routeProfile ?? null, huDrivenNavigationPath, functionalScope, optionFlows, authenticatedPrecondition);
+  const entryError = validateEntrySteps(scenario, routeProfile ?? null, huDrivenNavigationPath, functionalScope, optionFlows, authenticatedPrecondition, effectiveIntent);
   if (entryError) {
     errors.push(entryError);
   }
