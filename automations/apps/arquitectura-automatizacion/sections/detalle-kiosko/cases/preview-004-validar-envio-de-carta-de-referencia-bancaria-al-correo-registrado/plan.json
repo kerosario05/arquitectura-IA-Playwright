@@ -1,0 +1,118 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-004",
+    "caseId": 0,
+    "title": "Validar envio de carta de referencia bancaria al correo registrado"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Clic en \"Iniciar\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en \"Transacciones y servicios\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Transacciones y servicios",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Clic en \"Generar cartas\".",
+      "target": {
+        "strategy": "post_resume_text",
+        "value": "Generar cartas",
+        "exact": false
+      },
+      "locatorStrategy": "post_resume_text"
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Clic en \"Carta de referencia\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Carta de referencia",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Seleccionar la primera opcion de correo visible del listado.",
+      "target": {
+        "strategy": "ordinal_selection",
+        "value": "la primera opcion de correo visible del listado",
+        "exact": false,
+        "metadata": {
+          "resolvedTargetName": "Seleccionar todos los productos(0 de 17 seleccionados)",
+          "resolvedCandidateId": "el-6",
+          "aiAssisted": false,
+          "repairType": "ordinal_selection",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "ordinal_selection",
+      "recoveryMetadata": {
+        "recoveredBy": "ordinal_selection",
+        "rationale": "ordinal_selection:first",
+        "ordinalSelectionDiagnostics": {
+          "selectionPatternDetected": true,
+          "ordinal": "first",
+          "domainTerm": "opción",
+          "domainTermSource": "routeProfile",
+          "selectedCandidateText": "Seleccionar todos los productos(0 de 17 seleccionados)",
+          "selectedCandidateId": "el-6"
+        },
+        "selectedCandidateId": "el-6",
+        "selectedCandidateText": "Seleccionar todos los productos(0 de 17 seleccionados)",
+        "segmentIndex": 0,
+        "transitionDetected": true,
+        "executedAction": "Seleccionar la primera opcion de correo visible del listado."
+      }
+    }
+  ],
+  "notes": [
+    "Discovery partial: 6/9 navigations/assertions satisfied.",
+    "Review needed: 2 non-blocking assertion failure(s) were ignored for pass/fail reconciliation.",
+    "Recovered 3 transient assertion failure(s) - see step recovery metadata for details."
+  ],
+  "createdAt": "2026-07-10T14:12:08.200Z",
+  "metadata": {
+    "authFlowRequired": true,
+    "authFlowInsertionAfterStepIndex": 1,
+    "authFlowAlias": "defaultClient",
+    "authFlowLanding": "transactions_menu",
+    "authGateDetectedDuringDiscovery": true
+  }
+}

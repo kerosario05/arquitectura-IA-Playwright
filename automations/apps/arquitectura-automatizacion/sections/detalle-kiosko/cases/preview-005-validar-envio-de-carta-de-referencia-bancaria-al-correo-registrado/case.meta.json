@@ -1,0 +1,9 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "PREVIEW-005",
+  "testRailCaseId": 0,
+  "generatedAt": "2026-07-10T13:23:18.996Z",
+  "title": "Validar envio de carta de referencia bancaria al correo registrado"
+}

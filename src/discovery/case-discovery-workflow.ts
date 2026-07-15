@@ -55,6 +55,15 @@ export type CaseDiscoveryWorkflowOptions = {
   sectionProfile?: SectionProfile;
   requirePomRuntime?: boolean;
   runId?: string;
+  executionMode?: string;
+  adaptiveContext?: {
+    targetScreen?: string;
+    knownSteps?: string[];
+    remainingSteps?: string[];
+    expectedScreenSignals?: { allOf?: string[]; anyOf?: string[] };
+    actualChain?: string;
+    requiredChain?: string;
+  };
 };
 
 export type CaseDiscoveryWorkflowResult = {
@@ -1151,11 +1160,27 @@ export async function runCaseDiscoveryWorkflow(
         missingInputBehavior: activeConfig.app.missingInputBehavior,
         loginMode: activeConfig.app.loginMode,
         evidenceRecorder: evidenceRecorder || undefined,
+        executionMode: options.executionMode,
+        adaptiveContext: options.adaptiveContext,
       });
     } finally {
       // Finalize evidence recording (always runs, even on failure)
       try {
         const { finalizeDiscoveryEvidence } = await import("../evidence/discovery-evidence");
+        // Classify evidence from discovery steps when available
+        if (evidenceRecorder && caseResult?.steps?.length) {
+          const lastStep = caseResult.steps[caseResult.steps.length - 1];
+          const lastAction = lastStep?.action ?? "";
+          const lastTarget = lastStep?.targetText ?? lastStep?.target ?? "";
+          let kind = "routeEvidence";
+          let isDetail = false;
+          if (lastAction === "assert" || lastAction === "assertVisible") { kind = "assertionEvidence"; }
+          else if (lastAction === "click" && /Continuar|Confirmar|Cancelar|Enviar|Volver|Generar|Imprimir/i.test(lastTarget)) { kind = "formEvidence"; }
+          else if (lastAction === "click" && /seleccionar\s+(?:el|la)\s+primer/i.test(lastTarget)) { kind = "selectionEvidence"; }
+          else if (lastAction === "click" && /detalle|consultar\s+detalle/i.test(lastTarget)) { kind = "detailEvidence"; isDetail = true; }
+          evidenceRecorder.setEvidenceClassification(kind, isDetail, lastTarget);
+          console.log(`[evidence:scenario] classificationFromPlan scenario=${caseResult.scenarioId} evidenceKind=${kind} isDetail=${isDetail} lastActionTarget="${lastTarget}"`);
+        }
         await finalizeDiscoveryEvidence(evidenceRecorder, caseResult || undefined, page);
 
         // Log status after finalization to verify evidence gate status propagation

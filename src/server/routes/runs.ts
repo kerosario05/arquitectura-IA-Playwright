@@ -569,6 +569,7 @@ runsRouter.post("/launch-execution", async (req, res, next) => {
       jiraKey: body.jiraKey as string | undefined,
       sprintName: body.sprintName as string | undefined,
       selectedScenarios: Array.isArray(body.selectedScenarios) ? body.selectedScenarios : [],
+      adaptiveScenarios: Array.isArray(body.adaptiveScenarios) ? body.adaptiveScenarios : undefined,
       publishStrategy: (body.publishStrategy as string) === "use_existing" ? "use_existing" : "always_create",
     });
 

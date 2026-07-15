@@ -1,0 +1,10 @@
+{
+  "id": "preview-004-validar-campos-financieros-del-prestamo",
+  "externalId": "PREVIEW-004",
+  "caseId": 0,
+  "title": "Validar campos financieros del préstamo",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-07-13T17:38:15.442Z"
+}

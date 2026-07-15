@@ -1,0 +1,56 @@
+{
+  "id": "preview-001-seleccionar-cuenta-para-generar-carta-de-referencia-bancaria",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Seleccionar cuenta para generar carta de referencia bancaria",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-001-seleccionar-cuenta-para-generar-carta-de-referencia-bancaria\\plan.json",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-001-seleccionar-cuenta-para-generar-carta-de-referencia-bancaria\\case.spec.ts",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "arquitectura-automatizacion",
+  "createdAt": "2026-07-10T14:04:12.953Z",
+  "updatedAt": "2026-07-10T14:04:12.953Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-07-10T14-01-32-623Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "not_run",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-07-10T14-01-32-623Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [],
+      "availablePageObjects": [
+        "ProductListPage",
+        "ProductDetailPage",
+        "FormPage",
+        "HomePage",
+        "LoginPage",
+        "CategoryPage",
+        "ProductInformationPage",
+        "OperationsMenuPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    }
+  }
+}

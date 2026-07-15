@@ -454,16 +454,38 @@ async function runPreviewCase(
       runId: evidenceRunId,
     });
 
-    const passed = workflowResult.caseResult.status === "discovered_passed" || workflowResult.caseResult.status === "repaired_passed";
+    const discoveryStatus = workflowResult.caseResult.status;
+    const isPassed = discoveryStatus === "discovered_passed" || discoveryStatus === "repaired_passed" || discoveryStatus === "discovered_partial";
+    const eventStatus = isPassed ? "passed" : "failed";
+
+    console.log(`[preview-status-map] discoveryStatus=${discoveryStatus} eventStatus=${eventStatus} reason=${discoveryStatus === "discovered_partial" ? "observable_assertion_requires_discovery" : discoveryStatus === "discovered_passed" ? "all_targets_validated" : "blocking_failures"}`);
+
+    // Build compact step results projection (no secrets, no form values)
+    const cr = workflowResult.caseResult;
+    const stepResults = (cr.steps || []).map(s => ({
+      stepIndex: s.index,
+      action: s.action ?? undefined,
+      target: s.targetText ?? undefined,
+      status: s.status ?? undefined,
+      reason: s.error ?? undefined,
+      evidencePath: s.evidencePath ?? undefined,
+    }));
 
     // Emit JSON line for progress tracking
     console.log(JSON.stringify({
       type: "case_finished",
       caseId: vc.displayId,
-      status: passed ? "passed" : "failed",
+      status: eventStatus,
+      discoveryStatus,
+      failedAtStep: cr.failedAtStep,
+      failedTarget: cr.failedTarget,
+      failedReason: cr.failedReason,
+      evidenceDir: cr.evidenceDir,
+      stepResults,
     }));
+    console.log(`[case-finished-enriched] caseId=${vc.displayId} hasFailedAtStep=${cr.failedAtStep != null} hasFailedTarget=${cr.failedTarget != null} hasFailedReason=${cr.failedReason != null} hasEvidenceDir=${cr.evidenceDir != null} stepResults=${stepResults.length}`);
 
-    console.log(`[discovery:preview] completed ${vc.displayId} status=${passed ? "passed" : "failed"}`);
+    console.log(`[discovery:preview] completed ${vc.displayId} status=${eventStatus} discoveryStatus=${discoveryStatus}`);
 
     const failedSteps = workflowResult.caseResult.steps.filter(
       (s) => s.status !== "found" && s.status !== "satisfied_by_previous_assertion" && s.status !== "satisfied_by_children" && s.status !== "skipped" && s.status !== "skipped_after_completion" && s.status !== "skipped_redundant"
@@ -496,7 +518,7 @@ async function runPreviewCase(
       caseId: vc.displayId,
       displayId: vc.displayId,
       title: vc.title,
-      status: passed ? "passed" : "failed",
+      status: eventStatus,
       discoveryStatus: workflowResult.caseResult.status,
       promotionStatus: workflowResult.promotionStatus,
       promotionReason: (workflowResult as any).promotionReason ?? "",
@@ -518,7 +540,9 @@ async function runPreviewCase(
       durationMs: workflowResult.durationMs,
     } as any;
 
-    if (passed) {
+    console.log(`[preview-case-finish] caseId=${vc.displayId} eventStatus=${eventStatus} emitted=true duplicate=false`);
+
+    if (isPassed) {
       return failedCaseResult;
     }
 
@@ -538,6 +562,8 @@ async function runPreviewCase(
       caseId: vc.displayId,
       status: "failed",
       error: message,
+      rawError: message,
+      failedReason: "execution_exception",
     }));
 
     const failedCaseResult = {

@@ -1,0 +1,10 @@
+{
+  "id": "preview-005-validar-envio-de-carta-de-referencia-bancaria-al-correo-registrado",
+  "externalId": "PREVIEW-005",
+  "caseId": 0,
+  "title": "Validar envio de carta de referencia bancaria al correo registrado",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-07-10T13:23:18.993Z"
+}

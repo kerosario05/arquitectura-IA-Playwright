@@ -1,0 +1,9 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "PREVIEW-017",
+  "testRailCaseId": 0,
+  "generatedAt": "2026-07-13T14:08:03.739Z",
+  "title": "Validar mensaje cuando el cliente no posee Préstamos"
+}

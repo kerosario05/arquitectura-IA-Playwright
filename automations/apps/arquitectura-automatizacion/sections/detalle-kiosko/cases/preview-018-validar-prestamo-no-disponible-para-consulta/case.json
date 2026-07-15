@@ -1,0 +1,10 @@
+{
+  "id": "preview-018-validar-prestamo-no-disponible-para-consulta",
+  "externalId": "PREVIEW-018",
+  "caseId": 0,
+  "title": "Validar préstamo no disponible para consulta",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-07-13T14:10:27.606Z"
+}

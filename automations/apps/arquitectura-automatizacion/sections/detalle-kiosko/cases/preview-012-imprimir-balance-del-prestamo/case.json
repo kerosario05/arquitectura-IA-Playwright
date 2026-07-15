@@ -1,0 +1,10 @@
+{
+  "id": "preview-012-imprimir-balance-del-prestamo",
+  "externalId": "PREVIEW-012",
+  "caseId": 0,
+  "title": "Imprimir balance del préstamo",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-07-13T13:55:41.185Z"
+}

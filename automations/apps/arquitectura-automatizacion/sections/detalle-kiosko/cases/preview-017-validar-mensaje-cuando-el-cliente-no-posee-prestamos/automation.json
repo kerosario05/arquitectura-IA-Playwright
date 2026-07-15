@@ -1,0 +1,56 @@
+{
+  "id": "preview-017-validar-mensaje-cuando-el-cliente-no-posee-prestamos",
+  "externalId": "PREVIEW-017",
+  "caseId": 0,
+  "title": "Validar mensaje cuando el cliente no posee Préstamos",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-017-validar-mensaje-cuando-el-cliente-no-posee-prestamos\\plan.json",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-017-validar-mensaje-cuando-el-cliente-no-posee-prestamos\\case.spec.ts",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "arquitectura-automatizacion",
+  "createdAt": "2026-07-13T14:08:03.772Z",
+  "updatedAt": "2026-07-13T14:08:03.772Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-017\\2026-07-13T14-05-45-680Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "not_run",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-017\\2026-07-13T14-05-45-680Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [],
+      "availablePageObjects": [
+        "ProductListPage",
+        "ProductDetailPage",
+        "FormPage",
+        "HomePage",
+        "LoginPage",
+        "CategoryPage",
+        "ProductInformationPage",
+        "OperationsMenuPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    }
+  }
+}

@@ -32,6 +32,7 @@ export type LaunchExecutionInput = {
   jiraKey?: string;
   sprintName?: string;
   selectedScenarios: LaunchScenario[];
+  adaptiveScenarios?: LaunchScenario[];
   publishStrategy?: "always_create" | "use_existing";
 };
 
@@ -97,8 +98,31 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
   if (!input.testrailSectionId && !input.sectionId) {
     return { ok: false, error: "missing_section_id", message: "TestRail sectionId is required." };
   }
-  if (!input.selectedScenarios || input.selectedScenarios.length === 0) {
-    return { ok: false, error: "missing_selected_scenarios", message: "At least one scenario must be selected." };
+  const standardCount = input.selectedScenarios?.length ?? 0;
+  const adaptiveCount = input.adaptiveScenarios?.length ?? 0;
+  if (standardCount === 0 && adaptiveCount === 0) {
+    return { ok: false, error: "missing_selected_scenarios", message: "At least one standard or adaptive scenario must be selected." };
+  }
+  console.log(`[runs:launch] standard=${standardCount} adaptive=${adaptiveCount} mode=${adaptiveCount > 0 ? "automatic_mixed_execution" : "standard"}`);
+
+  // Validate adaptive scenarios have required metadata
+  const validAdaptive: LaunchScenario[] = [];
+  const blockedAdaptive: Array<{ sourceIssueKey?: string; title?: string; reasonCode: string; reason: string }> = [];
+  for (const sc of input.adaptiveScenarios ?? []) {
+    const asAny = sc as any;
+    if (!asAny.targetScreen || !asAny.actualChain || !asAny.requiredChain) {
+      blockedAdaptive.push({
+        sourceIssueKey: asAny.sourceIssueKey ?? "",
+        title: asAny.title ?? "",
+        reasonCode: "adaptive_metadata_incomplete",
+        reason: `Missing: ${!asAny.targetScreen ? "targetScreen " : ""}${!asAny.actualChain ? "actualChain " : ""}${!asAny.requiredChain ? "requiredChain " : ""}`,
+      });
+    } else {
+      validAdaptive.push(sc);
+    }
+  }
+  if (blockedAdaptive.length > 0) {
+    console.log(`[runs:launch] blockedAdaptive count=${blockedAdaptive.length} reason=adaptive_metadata_incomplete`);
   }
 
   // Validate unique scenarioIds
@@ -269,8 +293,14 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
     sprintName: input.sprintName,
     publishStrategy: input.publishStrategy ?? "always_create",
     selectedScenarioCount: input.selectedScenarios.length,
+    adaptiveScenarioCount: input.adaptiveScenarios?.length ?? 0,
+    executionMode: (input.adaptiveScenarios?.length ?? 0) > 0 ? "automatic_mixed_execution" : "standard",
     publishedCases,
     status: "test_run_created",
+    executionPlan: {
+      standardScenarios: input.selectedScenarios,
+      adaptiveScenarios: input.adaptiveScenarios ?? [],
+    },
   };
 
   const manifestPath = path.join(artifactDir, "launch-manifest.json");

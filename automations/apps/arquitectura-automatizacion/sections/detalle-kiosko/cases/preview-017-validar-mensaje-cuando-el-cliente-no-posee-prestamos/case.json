@@ -1,0 +1,10 @@
+{
+  "id": "preview-017-validar-mensaje-cuando-el-cliente-no-posee-prestamos",
+  "externalId": "PREVIEW-017",
+  "caseId": 0,
+  "title": "Validar mensaje cuando el cliente no posee Préstamos",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-07-13T14:08:03.736Z"
+}

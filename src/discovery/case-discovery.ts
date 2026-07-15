@@ -189,7 +189,13 @@ function findAssertionRecoveryByLaterSuccess(
  * Get unresolved blocking failures - ignores steps that were recovered or marked as non-blocking
  */
 function getUnresolvedBlockingFailures(steps: DiscoveryStepResult[]): DiscoveryStepResult[] {
-  return steps.filter((s) => {
+  let total = 0;
+  let blocking = 0;
+  let pendingDiscoveryCount = 0;
+  let contextualCount = 0;
+
+  const result = steps.filter((s) => {
+    total++;
     // Skip if recovered
     if (s.recoveryStatus === "recovered" || s.recoveryStatus === "repaired") {
       return false;
@@ -210,12 +216,20 @@ function getUnresolvedBlockingFailures(steps: DiscoveryStepResult[]): DiscoveryS
       return false;
     }
 
+    // Skip pendingDiscovery — requires actual discovery, not a failure
+    if ((s as any)?.pendingDiscovery === true) {
+      pendingDiscoveryCount++;
+      return false;
+    }
+
     if (!s.assertionClassification) {
+      blocking++;
       return true;
     }
 
     const importance = s.assertionImportance ?? "blocking";
     if (importance === "contextual" || importance === "optional") {
+      contextualCount++;
       return false;
     }
 
@@ -223,8 +237,13 @@ function getUnresolvedBlockingFailures(steps: DiscoveryStepResult[]): DiscoveryS
       return false;
     }
 
+    blocking++;
     return true;
   });
+
+  console.log(`[blocking-failure-filter] total=${total} blocking=${blocking} pendingDiscovery=${pendingDiscoveryCount} contextual=${contextualCount}`);
+
+  return result;
 }
 
 function countNonBlockingAssertionFailures(steps: DiscoveryStepResult[]): number {
@@ -1107,10 +1126,15 @@ async function waitForPrivateMenuReadyBeforeTargetResolution(
         `[post-otp-gate] wait attempt=${attempt} loading=${stillLoading} targetVisible=${targetVisible} controls=${controlCount} url="${currentSnapshot.url}"`
       );
 
-      // Ready if target is visible or menu has controls/cards and not loading
-      if (targetVisible) {
-        console.log(`[post-otp-gate] ready=true reason="target_visible" url="${currentSnapshot.url}"`);
-        return { status: "ready", reason: "target_visible", url: currentSnapshot.url };
+      // Ready if target is visible AND screen is stable (no loading indicators)
+      if (targetVisible && !stillLoading) {
+        console.log(`[post-otp-gate] ready=true reason="target_visible_and_screen_stable" url="${currentSnapshot.url}"`);
+        return { status: "ready", reason: "target_visible_and_screen_stable", url: currentSnapshot.url };
+      }
+
+      // Target visible but still loading — log and continue waiting
+      if (targetVisible && stillLoading) {
+        console.log(`[post-otp-gate] ready=false reason="target_visible_but_screen_not_stable" loading=${stillLoading} url="${currentSnapshot.url}"`);
       }
 
       if (!stillLoading && hasControls) {
@@ -1808,6 +1832,62 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   const parsed = parseScenarioStepsForDiscovery(scenario);
   const actionOrderIndexByTarget = new WeakMap<ActionTargetItem, number>();
 
+  // ── Runtime sanitizer: remove action/assertion steps using fields from wrong target screens ──
+  // Runs even on rerun artifacts — protects against cached scenarios with old field assignments.
+  const SCREEN_INVALID_FIELDS = new Set(["email", "correo", "rnc", "recipient", "destinatario"]);
+  const GENERIC_FIELD_STEPS = /^(completar|ingresar|llenar)\s+(los\s+campos\s+requeridos|datos\s+requeridos|campos\s+obligatorios)\.?$/i;
+  const GENERIC_VALIDATION_STEPS = /^validar\s+que\s+se\s+(muestren|muestre)\s+(las\s+validaciones\s+de\s+campos\s+obligatorios|las?\s+validaci[oó]n\s+de\s+campos?)/i;
+  const sanitizedActionTargets: ActionTargetItem[] = [];
+  for (const at of parsed.actionTargets) {
+    const fieldMatch = at.target?.match(/^(?:completar|ingresar|llenar)\s+(?:el\s+campo\s+)?(.+?)(?:\.?\s*$)/i);
+    const field = fieldMatch?.[1]?.toLowerCase();
+    if (field && SCREEN_INVALID_FIELDS.has(field)) {
+      console.log(`[scenario-sanitizer] removedInvalidFieldStep scenario="${scenario.title?.slice(0,60)}" field="${field}" reason=field_not_allowed_for_target_screen`);
+      continue;
+    }
+    // Remove generic "Completar los campos requeridos" — no locator exists for this
+    if (GENERIC_FIELD_STEPS.test(at.target ?? "")) {
+      console.log(`[scenario-sanitizer] removedGenericFieldAction scenario="${scenario.title?.slice(0,60)}" step="${at.target?.slice(0,60)}" reason=no_concrete_field_target`);
+      continue;
+    }
+    // Remove generic "Validar que se muestren las validaciones..." — not observable
+    if (GENERIC_VALIDATION_STEPS.test(at.target ?? "")) {
+      console.log(`[scenario-sanitizer] removedGenericValidation step="${at.target?.slice(0,60)}" reason=not_observable`);
+      continue;
+    }
+    sanitizedActionTargets.push(at);
+  }
+  if (sanitizedActionTargets.length < parsed.actionTargets.length) {
+    console.log(`[scenario-sanitizer] sanitized scenario="${scenario.title?.slice(0,60)}" removed=${parsed.actionTargets.length - sanitizedActionTargets.length} actions=${parsed.actionTargets.length}→${sanitizedActionTargets.length}`);
+
+  // Proactive adaptive mode: if executionMode is adaptive, start route discovery now
+  const executionMode = (options as any)?.executionMode as string | undefined;
+  if (executionMode === "adaptive") {
+    console.log(`[adaptive-route] proactiveStart scenario="${scenario.title?.slice(0,60)}" executionMode=adaptive`);
+    const targetScreen = (options as any)?.adaptiveContext?.targetScreen as string | undefined;
+    const expectedSignals = (options as any)?.adaptiveContext?.expectedScreenSignals as string[] | undefined;
+    console.log(`[adaptive-route] targetScreen=${targetScreen ?? "unknown"} expectedSignals=${expectedSignals?.join(",") ?? "none"}`);
+  }
+
+  // Visual signal verification helper (check after adaptive steps)
+  function verifyTargetScreenSignals(snapshot: any, expectedSignals?: string[]): boolean {
+    if (!expectedSignals || expectedSignals.length === 0) return true;
+    const texts = (snapshot.elements ?? []).map((e: any) => (e.text || e.label || "").toLowerCase());
+    const allText = texts.join(" ");
+    return expectedSignals.every(s => allText.includes(s.toLowerCase()));
+  }
+
+  function detectProgress(prevSnapshot: any, currentSnapshot: any): boolean {
+    if (!prevSnapshot || !currentSnapshot) return false;
+    if (prevSnapshot.url !== currentSnapshot.url) return true;
+    const prevCount = prevSnapshot.elements?.length ?? 0;
+    const currCount = currentSnapshot.elements?.length ?? 0;
+    return Math.abs(currCount - prevCount) > 5; // significant DOM change
+  }
+    parsed.actionTargets.length = 0;
+    parsed.actionTargets.push(...sanitizedActionTargets);
+  }
+
   // Task 1: Deduplicat action targets equivalents - normalize generic text
   function normalizeTarget(target: string): string {
     return target
@@ -2048,50 +2128,25 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         continue;
       }
 
-      // This is likely the product assertion
-      detailTarget = assertionTarget.target;
-      detailTargetSource = "productAssertion";
+      // Skip assertions that appear functional but have no concrete entity target.
+      // Only assertions backed by ordinal selection or entity metadata can become detailTarget.
+      // This prevents screen descriptions ("Listado de X") from being treated as product details.
 
-      // Find the final executable action for this product assertion
-      // Priority: ordinal > semantic match > last non-intermediate action
+      // Find the action that immediately precedes this assertion
       const assertionIdx = assertionTarget.index;
-      const actionCandidates = parsed.actionTargets.filter(at => at.index <= assertionIdx);
+      const precedingAction = [...parsed.actionTargets].reverse().find(at => at.index < assertionIdx);
 
-      // Priority 1: last ordinal action (ordinal selections are the product click)
-      const isOrdinalAction = (t: string) => /seleccionar|primer|primera|segundo|tercer|último|siguiente|visible/i.test(t);
-      const ordinalAction = [...actionCandidates].reverse().find(at => isOrdinalAction(at.target));
-
-      if (ordinalAction) {
-        finalProductClickStepIndex = ordinalAction.index;
-        console.log(`[detail-runtime] fallback=C selected ordinal="${ordinalAction.target}" finalProductClickStepIndex=${ordinalAction.index}`);
+      // Use preceding action as detail target if it exists and is a selection (ordinal/entity)
+      if (precedingAction &&
+          (/seleccionar|primer|primera|elemento.*visible/i.test(precedingAction.target) ||
+           /consultar|abrir|detalle/i.test(precedingAction.target))) {
+        detailTarget = precedingAction.target;
+        detailTargetSource = "precedingActionViaAssertion";
+        finalProductClickStepIndex = precedingAction.index;
+        console.log(`[detail-runtime] fallback=C assertionUsedAsDetail=false precedingAction="${precedingAction.target}" index=${precedingAction.index} source=${detailTargetSource}`);
       } else {
-        // Priority 2: last action that semantically matches the assertion AND is not intermediate
-        const matchingAction = [...actionCandidates].reverse().find(at =>
-          !entryTerms.has(at.target.toLowerCase().trim()) &&
-          !intermediateCategoryTerms.has(at.target.toLowerCase().trim()) &&
-          (
-            at.target.toLowerCase().includes(assertionLower) ||
-            assertionLower.includes(at.target.toLowerCase())
-          )
-        );
-        if (matchingAction) {
-          finalProductClickStepIndex = matchingAction.index;
-        } else {
-          // Priority 3: last non-intermediate, non-entry action
-          const lastRealAction = [...actionCandidates].reverse().find(at =>
-            !entryTerms.has(at.target.toLowerCase().trim()) &&
-            !intermediateCategoryTerms.has(at.target.toLowerCase().trim())
-          );
-          if (lastRealAction) {
-            finalProductClickStepIndex = lastRealAction.index;
-          }
-        }
+        console.log(`[detail-runtime] fallback=C assertionUsedAsDetail=false reason=no_preceding_selection assertion="${assertionTarget.target}"`);
       }
-
-      console.log(
-        `[detail-runtime] fallback=C selected assertion="${assertionTarget.target}" ` +
-        `finalProductClickStepIndex=${finalProductClickStepIndex}`
-      );
       break;
     }
   }
@@ -2197,6 +2252,22 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       `[detail-runtime] WARNING scenario="${scenario.title}" hasDetailAssertions=true ` +
       `detailTarget=undefined status=will_block_early_completion`
     );
+  }
+
+  // Pre-classify evidence kind BEFORE detail-runtime and markDetailScreenshotRequired.
+  // Prevents non-detail scenarios from setting detailEvidence.required=true.
+  if (evidenceRec) {
+    const lastAction = parsed.actionTargets[parsed.actionTargets.length - 1];
+    const lastTarget = lastAction?.target ?? "";
+    const lastActionText = lastAction?.action ?? "";
+    let kind = "routeEvidence";
+    let isDetail = false;
+    if (lastActionText === "assert" || lastActionText === "assertVisible") { kind = "assertionEvidence"; }
+    else if (lastActionText === "click" && /Continuar|Confirmar|Cancelar|Enviar|Volver|Generar|Imprimir|Descargar/i.test(lastTarget)) { kind = "formEvidence"; }
+    else if (lastActionText === "click" && /seleccionar\s+(?:el|la)\s+primer/i.test(lastTarget)) { kind = "selectionEvidence"; }
+    else if (lastActionText === "click" && /detalle|consultar\s+detalle/i.test(lastTarget)) { kind = "detailEvidence"; isDetail = true; }
+    evidenceRec.setEvidenceClassification(kind, isDetail, lastTarget);
+    console.log(`[evidence-classifier] phase=pre_detail_runtime scenario="${scenario.title?.slice(0,60)}" evidenceKind=${kind} isDetail=${isDetail} lastTarget="${lastTarget}"`);
   }
 
   // Mark detail evidence as required if this is a detail scenario
@@ -2389,13 +2460,23 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       `evidenceRec=${evidenceRec ? 'defined' : 'undefined'}`
     );
 
-    if (detailTarget && finalProductClickStepIndex === currentIndex && evidenceRec) {
+    // Classify screen intent — requires typed action/assertion metadata from parser.
+    // No text heuristics (regex/words). Metadata not yet available at parse time.
+    let screenIntent: string = "unknown";
+    // Future: when parser produces action.kind, assertion.intent, enable:
+    //   selector executed + entity_attribute assertions → "detail"
+    //   selector executed + collection assertions → "list"
+    //   selector executed alone → "list" (default)
+    if (detailTarget && finalProductClickStepIndex === currentIndex) {
+      console.log(`[screen-intent] scenario="${scenario.title?.slice(0,50)}" intent=unknown (metadata pending)`);
+    }
+
+    if (detailTarget && finalProductClickStepIndex === currentIndex && evidenceRec && screenIntent === "detail") {
       console.log(`[detail-final-click] matched=true target="${detailTarget}" planIndex=${currentIndex} evidenceIndex=${effectiveEvidenceIndex}`);
       console.log(`[detail-screenshot] afterFinalClick=true target="${detailTarget}" evidenceIndex=${effectiveEvidenceIndex}`);
+      console.log(`[detail-wait] started target="${detailTarget}" timeoutMs=5000`);
 
       try {
-        // Wait for detail screen to load with polling for strong signals
-        console.log(`[detail-wait] started target="${detailTarget}" timeoutMs=5000`);
         const waitStartTime = Date.now();
         let detailReady = false;
         let lastSnapshot: any;
@@ -2731,7 +2812,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       const detailEvidence = (evidenceRec as any).detailEvidence;
       const detailScreenshotCaptured = detailEvidence?.captured === true && detailEvidence?.screenshotPath;
 
-      if (!detailScreenshotCaptured) {
+      // Skip detail gate entirely for non-detail evidence
+      if ((evidenceRec as any).isDetailEvidence === false) {
+        console.log(`[detail-early-completion-gate] skipped reason=not_detail_evidence evidenceKind=${(evidenceRec as any).evidenceKind}`);
+      } else if (!detailScreenshotCaptured) {
         // GENERIC DETAIL TARGET BYPASS: If detailTarget is a generic placeholder
         // ("detalle", "información", "pantalla de detalle") and the action was successful
         // (satisfied assertions exist), the product-card-click worked — don't block.
@@ -3350,6 +3434,25 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         // Check if any assertion passed
         const anyPassed = resolutionResults.some(r => r.status === "passed" || r.status === "satisfied_by_children" || r.status === "satisfied_by_previous_assertion");
         
+        // Semantic assertion pre-check: resolve by DOM signal before falling back to text matching
+        if (!anyPassed && resolutionResults.length > 0) {
+          for (const r of resolutionResults) {
+            if (r.status === "failed" || r.status === "needs_assertion_resolution") {
+              try {
+                const { resolveSemanticAssertion } = await import("../runner/semantic-assertion");
+                const result = await resolveSemanticAssertion(page, r.assertionText);
+                if (result === "passed") {
+                  r.status = "passed";
+                  r.reason = "semantic_dom_signal";
+                  console.log(`[assertion-semantic] intent=selection_confirmation result=passed reason=semantic_dom_signal text="${r.assertionText.slice(0,60)}"`);
+                } else if (result === "not_found") {
+                  console.log(`[assertion-semantic] intent=selection_confirmation result=failed reason=no_selection_signal text="${r.assertionText.slice(0,60)}"`);
+                }
+              } catch { /* semantic resolver not available in this context */ }
+            }
+          }
+        }
+        
         if (anyPassed) {
           break; // Success, no need to retry
         }
@@ -3480,8 +3583,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             expectedResult: (scenario as any).expectedResult ?? "",
           });
 
-          // Classify assertion importance
-          const assertionImportance = classifyAssertionImportance(assertionResult.assertionText, {
+          // Classify assertion importance (let — may be downgraded to contextual)
+          let assertionImportance = classifyAssertionImportance(assertionResult.assertionText, {
             scenarioTitle: scenario.title,
             expectedResult: (scenario as any).expectedResult ?? "",
             routeProfile,
@@ -3520,7 +3623,51 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             (steps[steps.length - 1] as any).conditionalRisk = conditionalRisk.risk;
             (steps[steps.length - 1] as any).conditionalReason = conditionalRisk.reason;
 
-            // Only mark as blocking failure if importance is blocking and not conditional
+            // isBlockingRequirement: contract marked this assertion as functionally important
+            // hasObservableBacking: real observable evidence exists — NOT derived from assertionImportance
+            // runtimeFound: resolver found matching text/tokens during execution
+            const isBlockingRequirement = assertionImportance === "blocking";
+
+            const hasObservableBacking =
+              (assertionResult.structuralSignals?.length ?? 0) > 0 ||
+              assertionResult.classification === "literal_observable" ||
+              assertionResult.classification === "structural_assertion" ||
+              assertionResult.isWeakSignal === false ||
+              (() => {
+                if (!routeProfile) return false;
+                const rp = routeProfile as unknown as Record<string, unknown>;
+                const lower = assertionResult.assertionText.toLowerCase();
+                const controls = rp.visibleControls;
+                if (Array.isArray(controls) && (controls as string[]).some((c: string) => lower.includes(c.toLowerCase()))) return true;
+                return false;
+              })();
+
+            const runtimeFound =
+              assertionResult.matchedText != null ||
+              (assertionResult.matchedTokens?.length ?? 0) > 0;
+
+            console.log(`[assertion-contract] target="${assertionResult.assertionText}" blocking=${isBlockingRequirement}`);
+            console.log(`[assertion-backing] target="${assertionResult.assertionText}" backed=${hasObservableBacking} source=${hasObservableBacking ? "structural" : "none"}`);
+            console.log(`[assertion-runtime] target="${assertionResult.assertionText}" found=${runtimeFound}`);
+
+            if (runtimeFound) {
+              console.log(`[assertion-decision] target="${assertionResult.assertionText}" result=passed runtimeFound=true`);
+            } else if (isBlockingRequirement && hasObservableBacking) {
+              console.log(`[assertion-decision] target="${assertionResult.assertionText}" result=failed blocking=true backed=true runtimeFound=false`);
+            } else if (isBlockingRequirement && !hasObservableBacking) {
+              console.log(`[assertion-decision] target="${assertionResult.assertionText}" result=discovery_required blocking=true backed=false runtimeFound=false`);
+              assertionImportance = "contextual";
+              (steps[steps.length - 1] as any).assertionImportance = "contextual";
+              (steps[steps.length - 1] as any).pendingDiscovery = true;
+              console.log(`[assertion-failure-record] target="${assertionResult.assertionText}" blocking=false importance=contextual pendingDiscovery=true reason=observable_assertion_requires_discovery`);
+            } else {
+              console.log(`[assertion-decision] target="${assertionResult.assertionText}" result=contextual blocking=false runtimeFound=false`);
+              assertionImportance = "contextual";
+              (steps[steps.length - 1] as any).assertionImportance = "contextual";
+              (steps[steps.length - 1] as any).pendingDiscovery = true;
+              console.log(`[assertion-failure-record] target="${assertionResult.assertionText}" blocking=false importance=contextual pendingDiscovery=true reason=observable_assertion_requires_discovery`);
+            }
+
             if (assertionImportance === "blocking" && !conditionalRisk.isConditional) {
               if (!failedAtStep && es.source === "action") {
                 failedAtStep = es.stepIndex;
@@ -3528,14 +3675,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
                 failedReason = "assertion_not_found_unrecovered";
               }
             } else if (conditionalRisk.isConditional && conditionalRisk.risk === "high") {
-              // Conditional assertion without data requirement - mark as review needed
               if (!failedAtStep && es.source === "action") {
                 failedAtStep = es.stepIndex;
                 failedTarget = assertionResult.assertionText;
                 failedReason = "conditional_assertion_without_data";
               }
             } else if (assertionImportance === "contextual" || assertionImportance === "optional") {
-              // Non-blocking assertion - don't fail the scenario
               console.log(`[assertion-recovery] non-blocking assertion "${assertionResult.assertionText}" importance=${assertionImportance} - not failing scenario`);
             }
 
@@ -5763,6 +5908,26 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             }
           } else {
             console.log(`[route-completion] blocked: ${routeCompletionResolution.blockedReason ?? "no_safe_action"}`);
+            // Attempt adaptive route discovery
+            try {
+              const { initAdaptiveRoute, runAdaptiveRouteDiscovery } = await import("./adaptive-route");
+              const currentChain = ["navigation", "selection"];
+              const required = [["navigation","selection","submit"],["navigation","fill","submit"]];
+              const state = initAdaptiveRoute("target_screen", currentChain, required);
+              const visibleTexts = currentSnapshot.elements.map((e: any) => e.text || e.label || "").filter(Boolean);
+              // Provide AI provider if available for scenario generation
+              let aiProvider: any = undefined;
+              try {
+                const { createScenarioAiProvider } = await import("../scenarios/codex-scenario-generator");
+                aiProvider = await createScenarioAiProvider();
+              } catch { /* no AI provider */ }
+              const result = await runAdaptiveRouteDiscovery(page, state, visibleTexts, aiProvider);
+              if (result.result === "reached") {
+                console.log(`[adaptive-route] reached targetScreen steps=${result.stepsTaken} learned=${result.learnedSteps.length}`);
+              } else {
+                console.log(`[adaptive-route] blocked reason=${result.reason} steps=${result.stepsTaken}`);
+              }
+            } catch { /* adaptive route not available */ }
           }
 
           routeCompletionDiagnostics = {
@@ -6966,6 +7131,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
     await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
     console.log("[discovery:case] Waiting after click...");
+    // Check for loading indicators post-click before proceeding
+    const { waitForStableInteractiveScreen } = await import("../runner/execution-plan-executor");
+    const stability = await waitForStableInteractiveScreen(page);
+    if (stability.signals.length > 0) {
+      console.log(`[screen-stability] phase=after_click target="${actionTarget.target}" stable=${stability.stable} signals=${stability.signals.join(",")} waitedMs=${stability.waitedMs}`);
+    }
     if (shouldUsePostResumeSnapshot && postResumeTargetContext?.target === actionTarget.target) {
       postResumeTargetContext = undefined;
     }
@@ -7980,6 +8151,11 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           const postLoadScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
           currentSnapshot = postLoadScan.snapshot;
           allDiscoveredObjects.push(...postLoadScan.objects);
+          // Extra stability check: ensure no spinners/skeleton remain
+          const postLoadStability = await waitForStableInteractiveScreen(page);
+          if (postLoadStability.signals.length > 0) {
+            console.log(`[screen-stability] phase=after_loading_complete stable=${postLoadStability.stable} signals=${postLoadStability.signals.join(",")} waitedMs=${postLoadStability.waitedMs}`);
+          }
         }
       } catch {
         console.log("[discovery:case] Loading state wait timed out, continuing with current snapshot.");
@@ -8127,6 +8303,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     effectiveFailedTarget = firstUnresolved.targetText;
     console.log(`[discovery:case] unresolvedBlockingFailures=${unresolvedBlockingFailures.length}, using failedReason='${effectiveFailedReason}'`);
   } else {
+    // No unresolved blocking failures (all were pendingDiscovery or contextual)
     console.log(`[discovery:case] unresolvedBlockingFailures=0 after assertion recovery`);
   }
 
@@ -8134,7 +8311,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     console.log(`[discovery:case] nonBlockingAssertionFailures=${nonBlockingAssertionFailures} ignored for blocking status`);
   }
 
-  const status: CaseDiscoveryResult["status"] = effectiveFailedReason === "needs_approval"
+  let status: CaseDiscoveryResult["status"] = effectiveFailedReason === "needs_approval"
     ? "needs_approval"
     : effectiveFailedReason === "needs_assertion_resolution"
       ? "needs_assertion_resolution"
@@ -8148,14 +8325,22 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
               ? "needs_associated_target_resolution"
               : effectiveFailedReason === "missing_intermediate_step_to_final_target"
                 ? "exploration_failed"
-                : !effectiveFailedReason && failedReason
+              : !effectiveFailedReason && failedReason
+                ? "discovered_passed"
+                : allFound
                   ? "discovered_passed"
-                  : allFound
-                    ? "discovered_passed"
-                    : someFound
-                      ? "discovered_partial"
-                      : "exploration_failed";
-  
+                  : someFound
+                    ? "discovered_partial"
+                    : "exploration_failed";
+
+  // Prevent discovered_passed when assertions require discovery
+  const pendingDiscoveryCount = steps.filter(s => (s as any)?.pendingDiscovery === true).length;
+  if (pendingDiscoveryCount > 0 && status === "discovered_passed") {
+    console.log(`[status-reconcile] before=${status} pendingDiscovery=${pendingDiscoveryCount}`);
+    status = "discovered_partial";
+    console.log(`[status-reconcile] after=${status} reason=observable_assertion_requires_discovery`);
+  }
+   
   // Log status reconciliation
   if (failedReason && !effectiveFailedReason) {
     console.log(`[discovery:case] status reconciled: discovered_partial -> discovered_passed (all failures recovered no blockers)`);

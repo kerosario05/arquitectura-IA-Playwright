@@ -16,6 +16,24 @@ export type Defect = {
   status: DefectStatus;
   createdAt: string;
   updatedAt: string;
+  technicalContext?: {
+    reasonCode?: string;
+    discoveryStatus?: string;
+    failedAtStep?: number;
+    failedTarget?: string;
+    expectedResult?: string;
+    rawError?: string;
+    evidenceDir?: string;
+    evidencePath?: string;
+    lastSuccessfulStep?: {
+      stepIndex: number;
+      action?: string;
+      target?: string;
+      evidencePath?: string;
+    };
+    testRailCaseId?: number | string;
+    testRailRunId?: number | string;
+  };
 };
 
 export type Checklist = {
@@ -89,7 +107,7 @@ class DefectChecklistStore {
 
   addDefect(
     issueKey: string,
-    params: { description: string; severity: Severity; severityReason?: string; jobId?: string; scenarioId?: string; scenarioTitle?: string; evidenceUrl?: string }
+    params: { description: string; severity: Severity; severityReason?: string; jobId?: string; scenarioId?: string; scenarioTitle?: string; evidenceUrl?: string; technicalContext?: Defect["technicalContext"] }
   ): Defect | null {
     if (!VALID_SEVERITIES.includes(params.severity)) return null;
     const list = this.getOrCreate(issueKey);
@@ -104,6 +122,7 @@ class DefectChecklistStore {
       scenarioId: params.scenarioId,
       scenarioTitle: params.scenarioTitle,
       evidenceUrl: params.evidenceUrl,
+      technicalContext: params.technicalContext,
       createdAt: now,
       updatedAt: now,
     };

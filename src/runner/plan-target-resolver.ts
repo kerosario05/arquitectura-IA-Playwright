@@ -9,6 +9,9 @@ function requireTargetValue(target: PlanTarget, context: string): string {
   return value;
 }
 
+/** Global control patterns that should never be selected as ordinal items. */
+const GLOBAL_CONTROL_PATTERNS = /seleccionar\s+todos?\b|todos?\s+los\s+(?:elementos|productos|items|registros|resultados)|todas\s+las\s+opciones|\d+\s+de\s+\d+\s+seleccionados?/i;
+
 export function resolveLocatorFromPlanTarget(page: Page, target: PlanTarget): Locator {
   if (target.strategy === "semantic") {
     throw new Error("semantic target is not executable yet. Enrich or resolve target before execution.");
@@ -26,7 +29,31 @@ export function resolveLocatorFromPlanTarget(page: Page, target: PlanTarget): Lo
   }
 
   if (target.strategy === "text") {
-    return page.getByText(requireTargetValue(target, "text"), { exact: target.exact });
+    const rawText = requireTargetValue(target, "text");
+    // Ordinal selection: exclude global "Seleccionar todos" controls
+    if (/seleccionar\s+(?:el|la)\s+primer[oa]?\b/i.test(rawText)) {
+      const entity = rawText.replace(/seleccionar\s+(?:el|la)\s+primer[oa]?\s*/i, "").replace(/\s+visible\s+del\s+listado\.?\s*$/i, "").trim();
+      if (entity && entity.length > 2) {
+        console.log(`[ordinal-selection] resolved entity="${entity}" strategy=text+filter exclusion=global_controls ordinal=first`);
+        return page.locator(`[role="listitem"], [role="row"], .card, [class*="item"], [class*="row"], li, tr`)
+          .filter({ hasText: entity })
+          .filter({ hasNotText: GLOBAL_CONTROL_PATTERNS })
+          .first();
+      }
+    }
+    // Second ordinal: exclude the already-selected item and global controls
+    if (/seleccionar\s+(?:el|la)\s+segund[oa]?\b/i.test(rawText)) {
+      const entity = rawText.replace(/seleccionar\s+(?:el|la)\s+segund[oa]?\s*/i, "").replace(/\s+visible\s+del\s+listado\.?\s*$/i, "").trim();
+      if (entity && entity.length > 2) {
+        console.log(`[ordinal-selection] resolved entity="${entity}" strategy=text+filter exclusion=global_controls+already_selected ordinal=second`);
+        return page.locator(`[role="listitem"], [role="row"], .card, [class*="item"], [class*="row"], li, tr`)
+          .filter({ hasText: entity })
+          .filter({ hasNotText: GLOBAL_CONTROL_PATTERNS })
+          .filter({ hasNot: page.locator('[aria-checked="true"], [aria-selected="true"], input:checked, .selected') })
+          .first();
+      }
+    }
+    return page.getByText(rawText, { exact: target.exact });
   }
 
   if (target.strategy === "label") {

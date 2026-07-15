@@ -139,7 +139,11 @@ export async function startCaseAutomationWorkflow(
       finishedAt: executionResult.finishedAt,
       durationMs: executionResult.durationMs,
       evidenceDir: executionResult.evidenceDir,
-      steps: executionResult.steps
+      steps: executionResult.steps,
+      evidenceKind: (executionResult as any).evidenceKind,
+      isDetailEvidence: (executionResult as any).isDetailEvidence,
+      detailScreenshotRequired: (executionResult as any).detailScreenshotRequired,
+      lastActionTarget: (executionResult as any).lastActionTarget,
     };
 
     const summary: PlansExecutionSummary = {

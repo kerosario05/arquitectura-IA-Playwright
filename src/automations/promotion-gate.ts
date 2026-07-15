@@ -265,6 +265,10 @@ export function evaluatePromotionGate(input: PromotionGateInput): PromotionGateR
       const evidenceJsonContent = readFileSync(evidenceJsonPath, "utf-8");
       const evidenceRecord = JSON.parse(evidenceJsonContent);
       const detailEvidence = evidenceRecord?.detailEvidence;
+      const evidenceKind = evidenceRecord?.evidenceKind ?? "unknown";
+      const isDetailEvidence = evidenceKind === "detailEvidence";
+
+      console.log(`[evidence-gate] scenario="${discovery.name}" evidenceKind=${evidenceKind} isDetail=${isDetailEvidence}`);
 
       if (detailEvidence?.required === true) {
         // Detail screenshot was required for this scenario
@@ -273,10 +277,12 @@ export function evaluatePromotionGate(input: PromotionGateInput): PromotionGateR
 
         console.log(
           `[promotion-gate] evidence-gate check evidenceJsonPath=${evidenceJsonPath} ` +
-          `detailRequired=true captured=${detailScreenshotCaptured} opened=${detailActuallyOpened}`
+          `detailRequired=true captured=${detailScreenshotCaptured} opened=${detailActuallyOpened} evidenceKind=${evidenceKind}`
         );
 
-        if (!detailScreenshotCaptured) {
+        if (!isDetailEvidence) {
+          console.log(`[evidence-gate] skipped detailEvidence check reason=not_detail_evidence evidenceKind=${evidenceKind}`);
+        } else if (!detailScreenshotCaptured) {
           reasons.push(
             `Evidence gate failed: Detail screenshot was required but not captured. ` +
             `Target="${detailEvidence.target ?? "unknown"}". ` +

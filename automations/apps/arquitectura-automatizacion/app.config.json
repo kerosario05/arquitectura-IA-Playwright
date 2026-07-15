@@ -5,8 +5,8 @@
     "name": "4",
     "baseUrl": "https://172.27.4.50",
     "baseUrlHash": "1423ba294517",
-    "createdAt": "2026-07-03T00:08:40.967Z",
-    "updatedAt": "2026-07-03T00:08:40.967Z"
+    "createdAt": "2026-07-13T19:59:41.416Z",
+    "updatedAt": "2026-07-13T19:59:41.416Z"
   },
   "baseUrl": "https://172.27.4.50",
   "loginMode": "password",
@@ -61,7 +61,7 @@
         "when": "before_first_functional_step"
       }
     ],
-    "updatedAt": "2026-07-08T18:38:45.716Z",
+    "updatedAt": "2026-07-13T20:08:53.757Z",
     "targetPaths": {
       "Tarjeta Crédito Visa Clásica": {
         "target": "Tarjeta Crédito Visa Clásica",
@@ -539,10 +539,5 @@
       }
     }
   },
-  "updatedAt": "2026-07-09T13:35:55.884Z",
-  "lastUsedSource": {
-    "type": "request",
-    "sectionName": null,
-    "updatedAt": "2026-07-09T13:35:55.882Z"
-  }
+  "updatedAt": "2026-07-13T19:59:41.416Z"
 }

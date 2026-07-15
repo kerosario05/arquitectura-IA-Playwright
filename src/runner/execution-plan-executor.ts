@@ -10,10 +10,102 @@ import { captureStepScreenshot } from "./step-evidence";
 import { extractRuntimeUiSnapshot } from "../knowledge/runtime-knowledge-extractor";
 import { persistRuntimeSnapshot, persistRuntimeRoute } from "../knowledge/runtime-knowledge-persister";
 
+/**
+ * Classify scenario evidence kind from its steps — no hardcoded HUs or entities.
+ * Determines whether detail screenshots are required.
+ */
+function classifyEvidenceKind(steps: ExecutionPlanStep[]): { kind: string; lastActionTarget: string; isDetail: boolean } {
+  const lastStep = steps[steps.length - 1];
+  const lastAction = lastStep?.action ?? "";
+  const lastTarget = extractTargetLabel(lastStep?.target);
+
+  // Assertion-only scenarios are not detail flows
+  if (lastAction === "assert" || lastAction === "assertVisible" || lastAction === "assertText") {
+    return { kind: "assertionEvidence", lastActionTarget: lastTarget, isDetail: false };
+  }
+
+  // Button-click endings indicate wizard/form/confirmation, not detail
+  if (lastAction === "click" && /Continuar|Confirmar|Cancelar|Enviar|Volver|Generar|Imprimir|Descargar/i.test(lastTarget)) {
+    return { kind: "formEvidence", lastActionTarget: lastTarget, isDetail: false };
+  }
+
+  // Selection flows: ordinal entity selection is selectionEvidence, not detail
+  if (lastAction === "click" && /seleccionar\s+el\s+primer|seleccionar\s+la\s+primer/i.test(lastTarget)) {
+    return { kind: "selectionEvidence", lastActionTarget: lastTarget, isDetail: false };
+  }
+
+  // Detail flows: the last action is opening/viewing a specific entity's detail page
+  if (lastAction === "click" && /detalle|consultar\s+(?:el\s+)?detalle|abrir\s+detalle/i.test(lastTarget)) {
+    return { kind: "detailEvidence", lastActionTarget: lastTarget, isDetail: true };
+  }
+
+  return { kind: "routeEvidence", lastActionTarget: lastTarget, isDetail: false };
+}
+
 function extractTargetLabel(target: ExecutionPlanStep["target"]): string {
   if (!target || target === "APP_BASE_URL") return "";
   if (typeof target === "string") return target;
   return target.value ?? target.hint ?? target.name ?? "";
+}
+
+import { resolveSemanticAssertion } from "./semantic-assertion";
+
+/**
+ * Wait for the page to be stable — no loading spinners, skeleton screens, or transition text.
+ * Universal: detects loading states by aria attributes, common text patterns, and DOM elements.
+ * Timeout is configurable via env LOADING_STABILITY_TIMEOUT_MS (default 8000ms).
+ */
+export async function waitForStableInteractiveScreen(page: Page): Promise<{ stable: boolean; waitedMs: number; signals: string[] }> {
+  const start = Date.now();
+  const timeout = Number(process.env.LOADING_STABILITY_TIMEOUT_MS) || 8000;
+  const pollMs = 250;
+  const signals: string[] = [];
+
+  // Loading text patterns (lowercase for matching)
+  const LOADING_TEXTS = /cargando|procesando|consultando|buscando|generando|espere|por favor espere|redirigiendo|loading|please wait/i;
+
+  while (Date.now() - start < timeout) {
+    let loadingDetected = false;
+
+    try {
+      // 1. aria-busy on body or main containers
+      const busyElements = await page.locator('[aria-busy="true"]').count();
+      if (busyElements > 0) { loadingDetected = true; if (!signals.includes("aria-busy")) signals.push("aria-busy"); }
+
+      // 2. Common loading text visible anywhere on the page
+      const loadingTextEl = page.locator("text=" + /cargando|procesando|consultando|buscando|generando|espere|redirigiendo|loading/i.source);
+      const loadingTextCount = await loadingTextEl.count();
+      if (loadingTextCount > 0) {
+        const isVisible = await loadingTextEl.first().isVisible().catch(() => false);
+        if (isVisible) { loadingDetected = true; if (!signals.includes("loading_text")) signals.push("loading_text"); }
+      }
+
+      // 3. Spinner/progress elements
+      const spinnerCount = await page.locator('[role="progressbar"], .spinner, .loader, .skeleton, .shimmer, [class*="spin"], [class*="load"]').count();
+      const visibleSpinners = await page.locator('[role="progressbar"], .spinner, .loader, .skeleton, .shimmer, [class*="spin"]:visible, [class*="load"]:visible').count();
+      if (visibleSpinners > 0) { loadingDetected = true; if (!signals.includes("spinner")) signals.push("spinner"); }
+
+      // 4. Button/input disabled during loading (overlay pattern)
+      const disabledDuringLoad = await page.locator('button[disabled], input[disabled]').count();
+      if (disabledDuringLoad > 5 && spinnerCount > 0) { loadingDetected = true; if (!signals.includes("disabled_overlay")) signals.push("disabled_overlay"); }
+
+    } catch {
+      // Page may have navigated or closed — exit wait
+      break;
+    }
+
+    if (!loadingDetected) {
+      // Extra stability: wait one more poll cycle to confirm DOM settled
+      await page.waitForTimeout(pollMs);
+      const waited = Date.now() - start;
+      return { stable: true, waitedMs: waited, signals };
+    }
+
+    await page.waitForTimeout(pollMs);
+  }
+
+  const waited = Date.now() - start;
+  return { stable: false, waitedMs: waited, signals };
 }
 
 export async function executeExecutionPlan(input: {
@@ -57,6 +149,19 @@ export async function executeExecutionPlan(input: {
     let errorMessage: string | undefined;
 
     try {
+      // Wait for screen stability before resolving targets/clicks/assertions.
+      // Skip for navigate (already waits for domcontentloaded) and login steps.
+      const needsStabilityWait = step.action !== "navigate" && step.action !== "login";
+      if (needsStabilityWait) {
+        const stability = await waitForStableInteractiveScreen(input.page);
+        const targetLabel = extractTargetLabel(step.target);
+        if (!stability.stable) {
+          console.log(`[screen-stability] stable=false reason=timeout signals=${stability.signals.join(",")} waitedMs=${stability.waitedMs} target="${targetLabel}"`);
+        } else if (stability.signals.length > 0) {
+          console.log(`[screen-stability] stable=true signals=${stability.signals.join(",")} waitedMs=${stability.waitedMs} target="${targetLabel}"`);
+        }
+      }
+
       switch (step.action) {
         case "navigate": {
           if (step.target === "APP_BASE_URL") {
@@ -71,6 +176,11 @@ export async function executeExecutionPlan(input: {
             await locator.first().click();
             const navLabel = extractTargetLabel(step.target);
             if (navLabel) executedSteps.push(`Navegar a "${navLabel}".`);
+            // Post-navigation: wait for screen to stabilize
+            const navStability = await waitForStableInteractiveScreen(input.page);
+            if (navStability.signals.length > 0) {
+              console.log(`[screen-stability] phase=after_navigate target="${navLabel}" stable=${navStability.stable} signals=${navStability.signals.join(",")} waitedMs=${navStability.waitedMs}`);
+            }
           } else {
             throw new Error("navigate requires target.");
           }
@@ -88,6 +198,11 @@ export async function executeExecutionPlan(input: {
           if (targetLabel) {
             executedSteps.push(`Clic en "${targetLabel}".`);
             executedClickTargets.push(targetLabel);
+          }
+          // Wait for post-click screen stability before capturing evidence
+          const postStability = await waitForStableInteractiveScreen(input.page);
+          if (postStability.signals.length > 0) {
+            console.log(`[screen-stability] phase=after_click target="${targetLabel}" stable=${postStability.stable} signals=${postStability.signals.join(",")} waitedMs=${postStability.waitedMs}`);
           }
           runtimeSnapshots.push(await extractRuntimeUiSnapshot(input.page));
           break;
@@ -151,6 +266,17 @@ export async function executeExecutionPlan(input: {
           if (!step.target || step.target === "APP_BASE_URL") {
             throw new Error("assertVisible requires concrete target.");
           }
+          const targetLabel = extractTargetLabel(step.target);
+          // Try semantic assertion first (observable patterns, not literal text)
+          const semanticResult = await resolveSemanticAssertion(input.page, targetLabel);
+          if (semanticResult === "passed") {
+            console.log(`[assertion] semantic resolved target="${targetLabel}" result=passed`);
+            break;
+          }
+          if (semanticResult === "not_found") {
+            throw new Error(`Semantic assertion failed for "${targetLabel}". Expected observable DOM signal not found.`);
+          }
+          // Fallback: default text-based visibility check
           await expect(resolveLocatorFromPlanTarget(input.page, step.target).first()).toBeVisible({ timeout: step.timeoutMs });
           break;
         }
@@ -237,6 +363,11 @@ export async function executeExecutionPlan(input: {
     status = "failed";
   }
 
+  // Classify evidence kind — determines whether detail screenshot is required
+  const evidence = classifyEvidenceKind(steps);
+
+  console.log(`[evidence-classifier] scenario="${input.plan.scenario.title?.slice(0,60)}" evidenceKind=${evidence.kind} isDetail=${evidence.isDetail} lastActionTarget="${evidence.lastActionTarget}"`);
+
   // Persist runtime knowledge if any snapshots were captured
   if (runtimeSnapshots.length > 0 && input.runtimeConfig?.app) {
     const appSlug = input.runtimeConfig.app.appProfile ?? input.runtimeConfig.app.name ?? "default";
@@ -270,6 +401,10 @@ export async function executeExecutionPlan(input: {
     durationMs: endedAt.getTime() - startedAt.getTime(),
     evidenceDir: input.evidenceDir,
     steps: stepResults,
-    error: fatalError
+    error: fatalError,
+    evidenceKind: evidence.kind,
+    isDetailEvidence: evidence.isDetail,
+    detailScreenshotRequired: evidence.isDetail,
+    lastActionTarget: evidence.lastActionTarget,
   };
 }

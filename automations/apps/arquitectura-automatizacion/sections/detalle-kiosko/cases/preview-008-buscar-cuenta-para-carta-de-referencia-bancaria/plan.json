@@ -1,0 +1,127 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-008",
+    "caseId": 0,
+    "title": "Buscar cuenta para carta de referencia bancaria"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Clic en \"Iniciar\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en \"Transacciones y servicios\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Transacciones y servicios",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Clic en \"Generar cartas\".",
+      "target": {
+        "strategy": "post_resume_text",
+        "value": "Generar cartas",
+        "exact": false
+      },
+      "locatorStrategy": "post_resume_text"
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Clic en \"Carta de referencia\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Carta de referencia",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Ingresar el termino de busqueda en el campo de busqueda.",
+      "target": {
+        "strategy": "text",
+        "value": "el termino de busqueda en el campo de busqueda",
+        "exact": false
+      },
+      "locatorStrategy": "text"
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Seleccionar la primera cuenta visible del listado.",
+      "target": {
+        "strategy": "ordinal_selection",
+        "value": "la primera cuenta visible del listado",
+        "exact": false,
+        "metadata": {
+          "resolvedTargetName": "Cuenta de Ahorros ****0989",
+          "resolvedCandidateId": "el-10",
+          "aiAssisted": false,
+          "repairType": "ordinal_selection",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "ordinal_selection",
+      "recoveryMetadata": {
+        "recoveredBy": "ordinal_selection",
+        "rationale": "ordinal_selection:first",
+        "ordinalSelectionDiagnostics": {
+          "selectionPatternDetected": true,
+          "ordinal": "first",
+          "domainTermSource": "generic_fallback",
+          "selectedCandidateText": "Cuenta de Ahorros ****0989",
+          "selectedCandidateId": "el-10"
+        },
+        "selectedCandidateId": "el-10",
+        "selectedCandidateText": "Cuenta de Ahorros ****0989",
+        "segmentIndex": 0,
+        "transitionDetected": true,
+        "executedAction": "Seleccionar la primera cuenta visible del listado."
+      }
+    }
+  ],
+  "notes": [
+    "Discovery partial: 6/7 navigations/assertions satisfied.",
+    "Recovered 1 transient assertion failure(s) - see step recovery metadata for details."
+  ],
+  "createdAt": "2026-07-11T22:11:59.351Z",
+  "metadata": {
+    "authFlowRequired": true,
+    "authFlowInsertionAfterStepIndex": 1,
+    "authFlowAlias": "defaultClient",
+    "authFlowLanding": "transactions_menu",
+    "authGateDetectedDuringDiscovery": true
+  }
+}

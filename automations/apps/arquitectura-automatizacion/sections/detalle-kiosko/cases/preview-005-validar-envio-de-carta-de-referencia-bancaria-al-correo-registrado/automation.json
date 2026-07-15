@@ -1,0 +1,59 @@
+{
+  "id": "preview-005-validar-envio-de-carta-de-referencia-bancaria-al-correo-registrado",
+  "externalId": "PREVIEW-005",
+  "caseId": 0,
+  "title": "Validar envio de carta de referencia bancaria al correo registrado",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-005-validar-envio-de-carta-de-referencia-bancaria-al-correo-registrado\\plan.json",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-005-validar-envio-de-carta-de-referencia-bancaria-al-correo-registrado\\case.spec.ts",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "arquitectura-automatizacion",
+  "createdAt": "2026-07-10T13:23:19.035Z",
+  "updatedAt": "2026-07-10T13:23:19.035Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-07-10T13-20-39-255Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "not_run",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-07-10T13-20-39-255Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [],
+      "availablePageObjects": [
+        "ProductListPage",
+        "ProductDetailPage",
+        "FormPage",
+        "HomePage",
+        "LoginPage",
+        "CategoryPage",
+        "ProductInformationPage",
+        "OperationsMenuPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-005-validar-envio-de-carta-de-referencia-bancaria-al-correo-registrado\\plan.json",
+    "previousStatus": "active"
+  }
+}

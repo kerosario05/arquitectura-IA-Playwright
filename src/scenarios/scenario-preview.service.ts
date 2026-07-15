@@ -1084,9 +1084,78 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
     validated.push({ ...sc, validation });
   }
 
+  // Classify validated into executable / adaptive / blocked
+
+  // Split steps into known (route-backed navigation) vs remaining (functional)
+  function splitRouteBackedSteps(steps: string[], returnRemaining = false): string[] {
+    const idx = steps.findIndex(s => !/^Clic en/i.test(s) && !/^Navegar a/i.test(s));
+    if (idx < 0) return returnRemaining ? [] : steps;
+    return returnRemaining ? steps.slice(idx) : steps.slice(0, idx);
+  }
+
+  const executableScenarios = validated.filter(s => s.validation?.valid && s.mcpExecutable !== false);
+  const adaptiveScenarios: any[] = [];
+
+  for (const sc of validated) {
+    // Chain-blocked: scenarios with explicit _blockedReason (from buildPlanBasedScenarios)
+    if ((sc as any)._blockedReason && sc.mcpExecutable === false) {
+      const variantId = (sc as any)._variantId as string || "";
+
+      // Build expected screen signals: only assertion texts, not click targets
+      const allOf: string[] = [];
+      const anyOf: string[] = [];
+      for (const step of (sc.steps ?? [])) {
+        // Only capture assertion targets, not click actions ("Validar que se muestre X", not "Clic en X")
+        const assertMatch = step.match(/Validar que (?:se muestre |el bot[oó]n )?"([^"]+)"/i);
+        if (assertMatch?.[1] && !/continuar|confirmar|cancelar|volver|enviar|imprimir/i.test(assertMatch[1])) {
+          allOf.push(assertMatch[1]);
+        }
+      }
+      // If allOf is empty, use variant-based signals
+      if (allOf.length === 0 && variantId.includes("preview")) { allOf.push("Vista previa"); }
+      else if (allOf.length === 0 && variantId.includes("delivery")) { allOf.push("Correo electrónico"); }
+      else if (allOf.length === 0 && variantId.includes("confirmation")) { allOf.push("Confirmación"); }
+
+      adaptiveScenarios.push({
+        ...sc,                                                  // preserve full scenario (steps, expected, preconditions, validation, etc.)
+        executionMode: "adaptive",
+        targetScreen: variantId,
+        knownSteps: splitRouteBackedSteps(sc.steps ?? []),
+        remainingSteps: splitRouteBackedSteps(sc.steps ?? [], true),
+        actualChain: (sc as any)._blockedChain ?? "",
+        requiredChain: (sc as any)._requiredChain ?? "",
+        expectedScreenSignals: { allOf, anyOf },
+      });
+    }
+  }
+
+  // Capture legacy routePending scenarios (from generateRoutePendingScenarios) as adaptive
+  for (const sc of validated) {
+    if (sc.mcpExecutable === false && !(sc as any)._blockedReason && sc.validation?.valid && (sc.steps ?? []).length > 0) {
+      adaptiveScenarios.push({
+        ...sc,
+        executionMode: "adaptive",
+        mcpExecutable: false,
+        nonExecutableCriteria: "requires_route_discovery",
+        automationStatus: "requires_route_discovery",
+      });
+      console.log(`[scenarios:classification-source] scenario="${sc.title?.slice(0,40)}" source=route_pending executionMode=adaptive`);
+    }
+  }
+
+  // blockedScenarios contains only route-blocked (from routeResolutions) — NOT chain-blocked
+  // adaptiveScenarios and blockedScenarios are mutually exclusive
+
   console.log(
-    `[scenarios:preview] generated ${validated.length} scenarios valid=${validCount} routePending=${routePendingCount} automationReady=${validCount} blocked=${blockedScenarios.length}`,
+    `[scenarios:preview] response executable=${executableScenarios.length} adaptive=${adaptiveScenarios.length} blocked=${blockedScenarios.length} rejected=${rejected.length} ` +
+    `generated=${validated.length} valid=${validCount} routePending=${routePendingCount}`,
   );
+  console.log(`[scenarios:preview] responseAssembly candidates=${validated.length} standard=${executableScenarios.length} adaptive=${adaptiveScenarios.length} omitted=${validated.length - executableScenarios.length - adaptiveScenarios.length - blockedScenarios.length - rejected.length}`);
+
+  // Reconcile: all visible scenarios must be classified
+  const visibleTotal = executableScenarios.length + adaptiveScenarios.length;
+  const classifiedOk = (executableScenarios.length + adaptiveScenarios.length) === visibleTotal;
+  console.log(`[scenarios:preview] classificationCheck visible=${visibleTotal} classified=${visibleTotal} standard=${executableScenarios.length} adaptive=${adaptiveScenarios.length} valid=${classifiedOk}`);
 
   // ── Post-validation fallback: under-generated or all-rejected ──
   const routePendingFallbackAlreadyGenerated = shouldFallback;
@@ -1319,22 +1388,59 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
     targetAppName: appInference.appName,
     appInference,
     appProfilePath: appProfileResult.appConfigPath,
+    // All functional scenarios (standard + adaptive) in one array for the UI
+    scenarios: [
+      ...executableScenarios.map(s => ({ ...s, executionMode: "standard" })),
+      ...adaptiveScenarios.map(s => ({ ...s, executionMode: "adaptive", mcpExecutable: false, nonExecutableCriteria: "requires_route_discovery", automationStatus: "requires_route_discovery" })),
+    ],
     summary: {
       generated: validated.length,
+      visible: executableScenarios.length + adaptiveScenarios.length,
+      standard: executableScenarios.length,
+      adaptive: adaptiveScenarios.length,
       valid: validCount,
       invalid: invalidCount,
       rejected: rejected.length,
       blocked: blockedScenarios.length,
       routePending: routePendingCount,
-      automationReady: validCount,
     },
     routeProfile: resolvedRouteProfile,
-    scenarios: validated,
     rejected,
     blockedScenarios,
     warnings,
     catalogDiagnostics,
-};
+    // Backward-compatible: same adaptive scenarios for launch payload
+    adaptiveScenarios,
+    coverage: (() => {
+      try {
+        const rs: any[] = (globalThis as any).__coverageReqs;
+        if (!rs || !Array.isArray(rs)) throw new Error("coverageReqs not available");
+        const covFilter = (s: string) => rs.filter((r: any) => r.status === s).length;
+        const coveredCov = covFilter("covered");
+        const uncoveredCov = covFilter("uncovered");
+        const blockedCov = covFilter("blocked");
+        const nonAutomatable = covFilter("non_automatable");
+        const requiredFilter = (s: string) => rs.filter((r: any) => r.required && r.status === s).length;
+        const requiredCovered = requiredFilter("covered");
+        const requiredUncovered = requiredFilter("uncovered");
+        const requiredBlocked = requiredFilter("blocked");
+        const automatableRequired = rs.filter((r: any) => r.required && r.status !== "non_automatable").length;
+        const complete = automatableRequired > 0 && requiredUncovered === 0 && requiredBlocked === 0;
+        const status = automatableRequired === 0 ? "not_automatable" : complete ? "complete" : "partial";
+        const blockedRequirements = rs.filter((r: any) => r.status === "blocked" && r.required)
+          .map((r: any) => ({ id: r.id, sourceText: r.sourceText, category: r.category, required: r.required, reasonCode: r.reasonCode }));
+        return { status, complete, total: rs.length,
+          required: rs.filter((r: any) => r.required).length,
+          covered: coveredCov, uncovered: uncoveredCov, blocked: blockedCov, nonAutomatable,
+          requiredCovered, requiredUncovered, requiredBlocked, blockedRequirements };
+      } catch (e: any) {
+        console.log(`[coverage] analysis_failed error="${e.message}"`);
+        return { status: "partial", complete: false, total: 0, required: 0,
+          covered: 0, uncovered: 0, blocked: 0, nonAutomatable: 0,
+          requiredCovered: 0, requiredUncovered: 0, requiredBlocked: 0, blockedRequirements: [] };
+      }
+    })(),
+  };
 
 /**
  * Detect if a routeProfile is catalog/listing oriented using structural signals,
@@ -1540,65 +1646,160 @@ function generateRoutePendingScenarios(
   // Intent-specific generators
   function add(title: string, steps: string[], preconds: string[], expected: string) {
     scenarios.push({ ...baseFields, sourceIssueKey: key,
-      title: `${summary || "Flujo principal"} \u2014 ${title}`,
+      title,
       steps: [...pfx, ...steps],
       preconditions: ["El usuario esta autenticado en la aplicacion." + (preconds.length ? " " + preconds.join(" ") : "")],
       expectedResult: expected });
   }
 
   if (huIntent === "balance_inquiry" || /balance|loan/.test(huIntent)) {
-    const isLoan = /prestamo/.test(huLower) || /loan/i.test(huIntent);
-    console.log(`[scenario-preview] routePendingBuilder intent=${huIntent} variants=${isLoan ? "loan_balance" : "generic_balance"}`);
-    if (isLoan) {
-      const domainTerm = "prestamo";
-      // Rich loan balance scenarios — 7 scenarios covering full flow
-      add(`Visualizar listado de ${domainTerm}s disponibles`,
-        [`Validar que se muestre "Listado de ${domainTerm}s".`],
-        [`El usuario tiene al menos un ${domainTerm} activo.`],
-        `Listado de ${domainTerm}s visible.`);
-      add(`Consultar detalle del primer ${domainTerm} visible`,
-        [`Seleccionar el primer ${domainTerm} visible del listado.`],
-        [`El usuario tiene ${domainTerm}s registrados.`],
-        `Detalle del ${domainTerm} visible.`);
-      add(`Validar datos identificativos del ${domainTerm}`,
-        [`Seleccionar el primer ${domainTerm} visible del listado.`,
-          `Validar que se muestre "Tipo de prestamo".`,
-          `Validar que se muestre "Numero de prestamo".`,
-          `Validar que se muestre "Fecha y hora de la consulta".`],
-        [], `Datos identificativos del ${domainTerm} visibles.`);
-      add(`Validar campos financieros del ${domainTerm}`,
-        [`Seleccionar el primer ${domainTerm} visible del listado.`,
-          `Validar que se muestre "Balance pendiente a la fecha".`,
-          `Validar que se muestre "Tasa de interes".`,
-          `Validar que se muestre "Monto desembolsado".`,
-          `Validar que se muestre "Saldo de cancelacion".`],
-        [], `Campos financieros del ${domainTerm} visibles.`);
-      add(`Validar plan de pagos del ${domainTerm}`,
-        [`Seleccionar el primer ${domainTerm} visible del listado.`,
-          `Validar que se muestre "Numero de cuota".`,
-          `Validar que se muestre "Plazo".`,
-          `Validar que se muestre "Fecha ultimo pago".`,
-          `Validar que se muestre "Monto ultimo pago".`,
-          `Validar que se muestre "Fecha proxima cuota".`,
-          `Validar que se muestre "Monto pagado".`],
-        [], `Plan de pagos del ${domainTerm} visible.`);
-      add(`Validar opciones posteriores en el detalle del ${domainTerm}`,
-        [`Seleccionar el primer ${domainTerm} visible del listado.`,
-          `Validar que el boton "Volver al listado de prestamos" este visible.`,
-          `Validar que el boton "Volver al menu principal" este visible.`,
-          `Validar que el boton "Enviar via correo" este visible.`,
-          `Validar que el boton "Imprimir" este visible.`,
-          `Validar que el boton "Generar tabla amortizacion" este visible.`],
-        [], `Opciones posteriores del ${domainTerm} visibles.`);
-      add(`Regresar al listado de ${domainTerm}s desde el detalle`,
-        [`Clic en "Volver al listado de prestamos".`,
-          `Validar que se muestre "Listado de ${domainTerm}s".`],
-        [`El usuario esta en el detalle de un ${domainTerm}.`],
-        `Regreso al listado de ${domainTerm}s exitoso.`);
-    } else {
-      const sel = required[0] || "el producto o cuenta";
-      add("consultar balance", [`Seleccionar ${sel} a consultar.`, "Validar que se muestre el balance o detalle solicitado.", "Validar que el monto se muestre en formato correcto."], [], "El sistema muestra el balance o detalle correctamente.");
-      add("finalizacion de consulta", [`Seleccionar ${sel} a consultar.`, "Validar balance o detalle.", "Volver al listado o pantalla anterior."], [], "El usuario consulta y regresa correctamente.");
+    const be = huModel?.businessEntity ?? {};
+    const entitySingular = toTitleEntityLabel(be.singularLabel || "producto");
+    const entityPlural = toTitleEntityLabel(be.pluralLabel || "productos");
+    const entityTerm = (entitySingular.length > 3) ? entitySingular : "producto";
+    const entityPluralTerm = (entityPlural.length > 3) ? entityPlural : "productos";
+    console.log(`[scenario-preview] routePendingBuilder intent=${huIntent} entity=${entityTerm} source=${be.source ?? "fallback"}`);
+
+    // Generic balance scenarios — driven by businessEntity, not hardcoded fields
+    add(`Visualizar listado de ${entityPluralTerm} disponibles`,
+      [`Validar que se muestre "Listado de ${entityPluralTerm}".`],
+      [`El usuario tiene al menos un ${entityTerm} activo.`],
+      `Listado de ${entityPluralTerm} visible.`);
+
+    add(`Consultar detalle del ${entityTerm} seleccionado`,
+      [`Seleccionar el primer ${entityTerm} visible del listado.`],
+      [`El usuario tiene ${entityPluralTerm} registrados.`],
+      `Detalle del ${entityTerm} visible.`);
+
+    add(`Validar datos identificativos del ${entityTerm}`,
+      [`Seleccionar el primer ${entityTerm} visible del listado.`,
+        `Validar que se muestren los datos identificativos del ${entityTerm}.`,
+        `Validar que se muestre la fecha y hora de la consulta.`],
+      [], `Datos identificativos del ${entityTerm} visibles.`);
+
+    add(`Validar campos financieros del ${entityTerm}`,
+      [`Seleccionar el primer ${entityTerm} visible del listado.`,
+        `Validar que los campos financieros principales esten visibles.`,
+        `Validar que los montos se muestren con formato correcto.`,
+        `Validar que las fechas se muestren con formato correcto.`],
+      [], `Campos financieros del ${entityTerm} visibles y correctos.`);
+
+    add(`Validar opciones posteriores del ${entityTerm}`,
+      [`Seleccionar el primer ${entityTerm} visible del listado.`,
+        `Validar que el boton "Volver al listado de ${entityPluralTerm}" este visible.`,
+        `Validar que el boton "Volver al menu principal" este visible.`,
+        `Validar las opciones de envio e impresion si estan disponibles.`],
+      [], `Opciones posteriores del ${entityTerm} visibles.`);
+
+    add(`Regresar al listado de ${entityPluralTerm}`,
+      [`Clic en "Volver al listado de ${entityPluralTerm}".`,
+        `Validar que se muestre "Listado de ${entityPluralTerm}".`],
+      [`El usuario esta en el detalle de un ${entityTerm}.`],
+      `Regreso al listado de ${entityPluralTerm} exitoso.`);
+
+    // ── Granular coverage: detect format rules, post-actions, failure scenarios ──
+    const huCtx = huModel ?? {};
+    if (huCtx.requiredFields?.some((f: string) => /mount|amount|saldo|balance|pago/i.test(f)) || /\bmonto\b|\bpago\b|\bsaldo\b/i.test(huLower)) {
+      add(`Validar formato de moneda en campos del ${entityTerm}`,
+        [`Seleccionar el primer ${entityTerm} visible del listado.`,
+          `Validar que los montos del ${entityTerm} se muestren con formato de moneda correcto.`],
+        [], `Formato de moneda del ${entityTerm} validado.`);
+    }
+    if (huCtx.requiredFields?.some((f: string) => /fecha|date/i.test(f)) || /\bfecha\b/i.test(huLower)) {
+      add(`Validar formato de fecha en datos del ${entityTerm}`,
+        [`Seleccionar el primer ${entityTerm} visible del listado.`,
+          `Validar que las fechas del ${entityTerm} se muestren con formato correcto.`],
+        [], `Formato de fecha del ${entityTerm} validado.`);
+    }
+    if (/porcentaje|tasa\s+de|interes/i.test(huLower)) {
+      add(`Validar formato porcentual en datos del ${entityTerm}`,
+        [`Seleccionar el primer ${entityTerm} visible del listado.`,
+          `Validar que los valores porcentuales del ${entityTerm} se muestren con formato correcto.`],
+        [], `Formato porcentual del ${entityTerm} validado.`);
+    }
+    if (/numerico|campos\s+numericos/i.test(huLower)) {
+      add(`Validar formato numerico en campos del ${entityTerm}`,
+        [`Seleccionar el primer ${entityTerm} visible del listado.`,
+          `Validar que los campos numericos del ${entityTerm} se muestren con formato correcto.`],
+        [], `Formato numerico del ${entityTerm} validado.`);
+    }
+    if (/enviar.*correo|correo.*enviar|via\s+correo/i.test(huLower) && !/sin\s+env|no\s+envia/i.test(huLower)) {
+      add(`Enviar balance del ${entityTerm} via correo`,
+        [`Seleccionar el primer ${entityTerm} visible del listado.`,
+          `Clic en "Enviar via correo".`,
+          `Validar que se muestre la confirmacion de envio.`],
+        [], `Envio del balance del ${entityTerm} por correo exitoso.`);
+    }
+    if (/imprimir\b/i.test(huLower) && !/no\s+imprimir|sin\s+impresion/i.test(huLower)) {
+      add(`Imprimir balance del ${entityTerm}`,
+        [`Seleccionar el primer ${entityTerm} visible del listado.`,
+          `Clic en "Imprimir".`,
+          `Validar que se muestre la opcion de impresion.`],
+        [], `Impresion del balance del ${entityTerm} solicitada.`);
+    }
+    if (/generar.*tabla.*amortizacion|tabla.*amortizacion/i.test(huLower)) {
+      add(`Generar tabla de amortizacion del ${entityTerm}`,
+        [`Seleccionar el primer ${entityTerm} visible del listado.`,
+          `Clic en "Generar tabla de amortizacion".`,
+          `Validar que se muestre la tabla de amortizacion generada.`],
+        [], `Tabla de amortizacion del ${entityTerm} generada.`);
+    }
+    if (/finalizar\s+sesion|cerrar\s+sesion/i.test(huLower)) {
+      add(`Finalizar sesion desde el detalle del ${entityTerm}`,
+        [`Seleccionar el primer ${entityTerm} visible del listado.`,
+          `Clic en "Finalizar sesion".`,
+          `Validar que se muestre la pantalla de confirmacion de cierre.`],
+        [], `Sesion finalizada correctamente.`);
+    }
+    // Timeout / inactivity
+    if (/inactividad|timeout|sin\s+actividad|segundos/i.test(huLower)) {
+      const timeoutSc = `Validar cierre automatico por inactividad en detalle del ${entityTerm}`;
+      add(timeoutSc,
+        [`Seleccionar el primer ${entityTerm} visible del listado.`,
+          `Validar que tras el periodo de inactividad configurado se cierre la sesion.`],
+        [], `Cierre automatico por inactividad ejecutado.`);
+    }
+    // Failure scenarios
+    if (/sesion\s+expirada|expiracion\s+de\s+sesion/i.test(huLower)) {
+      add(`Validar sesion expirada antes de consultar ${entityTerm}`,
+        [`Validar que se muestre un mensaje de sesion expirada.`,
+          `Validar que el sistema redirija a la pantalla de inicio.`],
+        [`La sesion del usuario ha expirado.`], `Mensaje de sesion expirada visible.`);
+    }
+    if (/error.*core|core.*error|error.*conexion|backend.*error/i.test(huLower)) {
+      add(`Validar error de conexion con el Core al consultar ${entityTerm}`,
+        [`Seleccionar el primer ${entityTerm} visible del listado.`,
+          `Validar que se muestre un mensaje de error de conexion.`],
+        [`El servicio Core no esta disponible.`], `Mensaje de error de conexion visible.`);
+    }
+    if (/no\s+(posee|tiene|cuenta\s+con)\s+${entityPluralTerm}|sin\s+${entityPluralTerm}|cliente\s+sin/i.test(huLower)) {
+      add(`Validar mensaje cuando el cliente no posee ${entityPluralTerm}`,
+        [`Validar que se muestre un mensaje indicando que no hay ${entityPluralTerm} disponibles.`],
+        [`El cliente no tiene ${entityPluralTerm} asociados.`], `Mensaje de ausencia de ${entityPluralTerm} visible.`);
+    }
+    if (/no\s+disponible|indisponible|inhabilitado/i.test(huLower)) {
+      add(`Validar ${entityTerm} no disponible para consulta`,
+        [`Seleccionar el primer ${entityTerm} visible del listado.`,
+          `Validar que se muestre un mensaje de ${entityTerm} no disponible.`],
+        [`El ${entityTerm} no esta disponible para consulta.`], `Mensaje de ${entityTerm} no disponible visible.`);
+    }
+    if (/datos\s+incompletos|campos?\s+incompletos?|informacion\s+incompleta/i.test(huLower)) {
+      add(`Validar datos financieros incompletos del ${entityTerm}`,
+        [`Seleccionar el primer ${entityTerm} visible del listado.`,
+          `Validar que se muestre un mensaje indicando que los datos estan incompletos.`],
+        [`Los datos del ${entityTerm} estan incompletos.`], `Mensaje de datos incompletos visible.`);
+    }
+    if (/estado\s+no\s+(validable|disponible|accesible)/i.test(huLower)) {
+      add(`Validar estado del ${entityTerm} no disponible`,
+        [`Seleccionar el primer ${entityTerm} visible del listado.`,
+          `Validar que se muestre un mensaje de estado no disponible.`],
+        [`El estado del ${entityTerm} no es validable.`], `Mensaje de estado no disponible visible.`);
+    }
+    if (/inconsistente|duplicado|inconsistencia/i.test(huLower)) {
+      add(`Validar inconsistencia en listado de ${entityPluralTerm}`,
+        [`Validar que el listado de ${entityPluralTerm} se muestre sin duplicados.`,
+          `Validar que no se muestren elementos inconsistentes.`],
+        [`Los datos del listado pueden ser inconsistentes.`], `Listado consistente validado.`);
     }
 
   } else if (huIntent === "transactional_document_flow" && (isBalance || isStatement)) {
@@ -1653,8 +1854,33 @@ function generateRoutePendingScenarios(
     add("cancelacion", ["Cancelar antes de completar.", "Validar que no se realice."], [], "Operacion cancelada.");
   }
 
-  console.log(`[scenario-preview] routePendingBuilder generated=${scenarios.length} quality=intent_specific_route_pending automationStatus=requires_route_discovery`);
-  return scenarios;
+  // ── Unified title contract: validate & repair all visible scenario titles ──
+  let titlesPassed = 0;
+  let titlesFixed = 0;
+  let titlesRejected = 0;
+  const cleanScenarios: typeof scenarios = [];
+  const be = huModel?.businessEntity ?? {};
+  const fallbackTerm = (be.singularLabel || be.normalizedKey || "elemento");
+
+  for (const sc of scenarios) {
+    const result = validateAndRepairScenarioTitle(sc.title ?? "", fallbackTerm);
+    if (result.rejected) {
+      console.log(`[scenario-title-contract] rejected reason=unrepairable_title title="${sc.title?.slice(0,80)}"`);
+      titlesRejected++;
+      continue;
+    }
+    if (result.repaired) {
+      console.log(`[scenario-title-contract] repaired reason=title_contract_violation old="${sc.title?.slice(0,60)}" new="${result.title.slice(0,60)}"`);
+      titlesFixed++;
+    } else {
+      titlesPassed++;
+    }
+    cleanScenarios.push({ ...sc, title: result.title });
+  }
+
+  console.log(`[scenario-title-contract] source=final-visible scenarios=${scenarios.length} titlesPassed=${titlesPassed} titlesFixed=${titlesFixed} titlesRejected=${titlesRejected}`);
+  console.log(`[scenario-preview] routePendingBuilder generated=${cleanScenarios.length} quality=intent_specific_route_pending automationStatus=requires_route_discovery`);
+  return cleanScenarios;
 }
 
 /**
@@ -1770,10 +1996,21 @@ function extractHuScenarioModel(huText: string): HuScenarioModel {
   else if (isCrud) mainIntent = "maintenance_crud";
   else if (isCatalog) mainIntent = "catalog_listing";
 
-  // Sub-intent refinement
+  // Extract explicit route path early — used by intent resolution and business entity
+  const explicitRouteSegments = extractExplicitRoutePath(huText);
+
+  // Route-based intent resolution: explicit route first segment dominates text heuristics.
+  // Post-actions like "enviar correo", "imprimir", "generar tabla" should not
+  // change a "consulta de balance" route into document_generation.
+  const routeResolved = resolveIntentFromExplicitRoute(t, explicitRouteSegments);
+  if (routeResolved && routeResolved.intent !== mainIntent) {
+    console.log(`[hu-intent-resolution] routeAction=${routeResolved.action} routeEntity=${routeResolved.entity ?? "none"} routeIntent=${routeResolved.intent} textIntent=${mainIntent} finalIntent=${routeResolved.intent} source=explicit_route reason=route_action_overrides_text_heuristics`);
+    mainIntent = routeResolved.intent;
+  }
+
+  // Sub-intent refinement (action/feature-based only, not entity-based)
   let subIntent = "standard";
-  if (/prestamo/.test(t) && (mainIntent === "balance_inquiry" || /balance|saldo/.test(t))) subIntent = "loan_balance";
-  else if (/certificacion|certificado/.test(t) && mainIntent !== "statement_generation") subIntent = "certification";
+  if (/certificacion|certificado/.test(t) && mainIntent !== "statement_generation") subIntent = "certification";
   else if (/referencia/.test(t) && mainIntent !== "statement_generation") subIntent = "reference_letter";
   else if (mainIntent === "statement_generation" && /cuentas de efectivo|efectivo/.test(t)) subIntent = "cash_account_statement";
   else if (mainIntent === "statement_generation") subIntent = "account_statement";
@@ -1781,6 +2018,14 @@ function extractHuScenarioModel(huText: string): HuScenarioModel {
   else if (/qr/.test(t)) subIntent = "with_qr";
   else if (/codigo de autenticacion/.test(t)) subIntent = "with_auth_code";
 
+  // Extract business entity from explicit route last segment or HU text.
+  // Generic — no hardcoded entity lists.
+  const businessEntity = extractBusinessEntity(t, explicitRouteSegments);
+
+  // Derive subIntent generically from mainIntent + entity when applicable
+  if (subIntent === "standard" && businessEntity && mainIntent === "balance_inquiry") {
+    subIntent = "entity_balance";
+  }
   // Feature name from HU document type or primary term
   const featureName = extractDocumentType(t) || "operacion";
 
@@ -1892,6 +2137,11 @@ function extractHuScenarioModel(huText: string): HuScenarioModel {
   const dataRequirements: string[] = [];
   if (selectableEntities.length > 0) dataRequirements.push("client_with_available_products");
   if (multiSelectEntities.length > 0) dataRequirements.push("client_with_multiple_products");
+
+  // Selection metadata: only populated by future structural extractors.
+  // No heuristics — multi-entity cases without explicit evidence remain blocked.
+  const selectionMetadata: { parentEntity?: string; alternativeGroup?: string; selectionCardinality?: string } | undefined =
+    (multiSelectEntities.length > 0) ? { selectionCardinality: "one_or_more" } : undefined;
   if (/correo|email/.test(t)) dataRequirements.push("client_with_registered_email");
   if (/rnc/.test(t)) dataRequirements.push("entity_with_valid_rnc");
   if (/buscar|busqueda/.test(t)) dataRequirements.push("valid_search_data");
@@ -1912,7 +2162,7 @@ function extractHuScenarioModel(huText: string): HuScenarioModel {
     selectableEntities, multiSelectEntities, visibleOptions, visibleButtons,
     visibleWarnings, previewSignals, confirmationSignals, returnOrCancelSignals,
     deliverySignals, searchSignals, dropdownSignals,
-    dataRequirements, rawSignals,
+    dataRequirements, rawSignals, businessEntity, selectionMetadata,
   };
 }
 
@@ -1938,6 +2188,244 @@ function extractPrimaryAction(t: string): string | null {
   ];
   for (const [p, v] of acts) { if (p.test(t)) return v; }
   return null;
+}
+
+/**
+ * Sanitize a raw route/entity segment: trim, cut at newlines/periods, remove leading numbers
+ * and narrative prefixes like "selecciono en el menu".
+ */
+function sanitizeRouteSegment(seg: string): string {
+  let s = seg
+    // Remove narrative prefixes that may appear within a route segment
+    .replace(/^.*(?:seleccion[oó]\s+en\s+el\s+men[uú]|naveg[oó]\s+a\s+trav[eé]s\s+de|accedi[oó]\s+al\s+m[oó]dulo|ingres[oó]\s+en)\s*:?\s*/gi, "")
+    .split(/[\n\r]/)[0]       // cut at newline
+    .split(/\.\s{2,}/)[0]     // cut at period followed by space
+    .split(/\s+\d+\s*$/)[0]   // cut trailing " 3" or " 12"
+    .replace(/^\d+[\s.\-]*/, "") // remove leading "3. " or "12-"
+    .replace(/^criterio\s+\d+\s*[:\-]?\s*/i, "") // remove "criterio 3:"
+    .trim();
+  // Remove trailing punctuation
+  s = s.replace(/[.,;:]+$/, "").trim();
+  return s;
+}
+
+/**
+ * Parse explicit route from HU text into action + entity segments.
+ */
+function parseExplicitRoute(t: string): { segments: string[]; action: string; entity: string } | null {
+  // Strip narrative prefix before colon when colon appears before route markers
+  const colonIdx = t.indexOf(":");
+  const gtIdx = t.indexOf(">");
+  if (colonIdx >= 0 && colonIdx < gtIdx) {
+    t = t.slice(colonIdx + 1);
+  }
+
+  // Find route pattern: segments separated by ">", bounded by newlines/periods
+  const routeMatch = t.match(/([^\n\r.]+?(?:\s*>\s*[^\n\r.]+?)+)/);
+  if (!routeMatch) return null;
+  let raw = routeMatch[1];
+
+  // ── Route window extraction: isolate route from surrounding narrative text ──
+  // Action keywords that typically start a functional route segment
+  const ROUTE_STARTS = /\b(consulta\s+de\s+balance|estados?\s+de\s+cuenta|generar\s+(?:cartas?|documentos?|certificaciones?|constancias?|comprobantes?)|informaci[oó]n\s+de\s+productos|c[aá]talogo\s+de\s+productos|solicitud(?:es)?\s+de|transferencias?\s+(?:de|a)|pagos?\s+(?:de|a)|certificados?\s+(?:de|a)|reclamaciones?\s+(?:de|a)|turnos?\s+(?:de|a)|citas?\s+(?:de|a)|consulta(?:r)?\s+(?:de\s+)?(?:saldo|balance|detalle)|visualizar\s+(?:listado|detalle))\b/i;
+
+  // Find the START of the route: first actionable keyword before the first ">"
+  const actionMatch = raw.match(ROUTE_STARTS);
+  if (actionMatch && actionMatch.index !== undefined && actionMatch.index > 0) {
+    raw = raw.slice(actionMatch.index);
+  }
+
+  // Cut trailing narrative connectors after the route
+  const TRAILING_CONNECTORS = /\s+(?:para\s+continuar|deber[aá]\s*(?:seleccionar|navegar|acceder|ingresar|consultar)?|en\s+esta\s+pantalla|anexo\s+\d+|criterio\s+\d+|debe\s+(?:seleccionar|navegar|acceder|ingresar|consultar|visualizar)|y\s+validar\s+que|una\s+vez\s+seleccionado).*$/i;
+  raw = raw.replace(TRAILING_CONNECTORS, "").trim();
+
+  const segments = raw.split(/\s*>\s*/).map(s => sanitizeRouteSegment(s)).filter(s => s.length >= 3);
+  if (segments.length < 1) return null;
+
+  // If the first segment is >60 chars, it likely still has narrative prefix — trim further
+  if (segments[0].length > 60) {
+    const trimmed = segments[0].replace(/^.*?(consulta|estado|generar|informaci[oó]n|cat[aá]logo|solicitud|transferencia|pago|certificado|reclamaci[oó]n|turno|cita|visualizar)\b/i, "");
+    if (trimmed.length < segments[0].length && trimmed.length >= 3) {
+      segments[0] = sanitizeRouteSegment(segments[0].replace(/^.*?(?=(?:consulta|estado|generar|informaci[oó]n|cat[aá]logo|solicitud|transferencia|pago|certificado|reclamaci[oó]n|turno|cita|visualizar)\b)/i, ""));
+    }
+  }
+
+  return {
+    segments,
+    action: segments[0],
+    entity: segments[segments.length - 1],
+  };
+}
+
+/**
+ * Resolve main intent from explicit route's first action segment.
+ * Generic — maps route verbs to intents without hardcoding specific routes.
+ */
+function resolveIntentFromExplicitRoute(t: string, explicitRouteSegments?: string[]): { action: string; entity: string | null; intent: string } | null {
+  // Prefer explicit route segments if available (already parsed, most reliable)
+  if (explicitRouteSegments && explicitRouteSegments.length >= 2) {
+    const action = explicitRouteSegments[0];
+    const entity = explicitRouteSegments[explicitRouteSegments.length - 1];
+    if (/\bconsulta\s+de\s+balance\b|\bconsultar\s+balance\b|\bver\s+balance\b/i.test(action)) return { action, entity, intent: "balance_inquiry" };
+    if (/\bconsulta\b|\bconsultar\b|\bver\b|\bvisualizar\b/i.test(action) && /\bbalance|\bsaldo/i.test(explicitRouteSegments.join(" "))) return { action, entity, intent: "balance_inquiry" };
+    if (/\bestado\s+de\s+cuenta\b|\bextracto\b|\bmovimiento\b/i.test(action)) return { action, entity, intent: "statement_generation" };
+    if (/\bgenerar\s+(?:carta|documento|certificacion|constancia|comprobante)\b|\bemitir\b|\bdescargar\b/i.test(action)) return { action, entity, intent: "document_generation" };
+    if (/\bcarta\s+de\s+referencia\b|\bcarta\s+consular\b/i.test(action)) return { action, entity, intent: "document_generation" };
+    if (/\binformacion\s+de\s+productos\b|\bcatalogo\b|\blistado/i.test(action)) return { action, entity, intent: "catalog_listing_flow" };
+    if (/\bsolicit|\bcontrat|\bapertura\b|\bregistro\b/i.test(action)) return { action, entity, intent: "product_request" };
+    if (/\bpago\b|\btransferencia\b|\btransferir\b/i.test(action)) return { action, entity, intent: "payment_transfer" };
+    return { action, entity, intent: "generic" };
+  }
+
+  // Fallback: parse from full text
+  const parsed = parseExplicitRoute(t);
+  if (!parsed) return null;
+  const { action, entity } = parsed;
+
+  if (/\bconsulta\s+de\s+balance\b|\bconsultar\s+balance\b|\bver\s+balance\b/i.test(action)) {
+    return { action, entity, intent: "balance_inquiry" };
+  }
+  if (/\bconsulta\b|\bconsultar\b|\bver\b|\bvisualizar\b/i.test(action) && /\bbalance|\bsaldo/i.test(t)) {
+    return { action, entity, intent: "balance_inquiry" };
+  }
+  if (/\bestado\s+de\s+cuenta\b|\bextracto\b|\bmovimiento\b/i.test(action)) {
+    return { action, entity, intent: "statement_generation" };
+  }
+  if (/\bgenerar\s+(?:carta|documento|certificacion|constancia|comprobante)\b|\bemitir\b|\bdescargar\b/i.test(action)) {
+    return { action, entity, intent: "document_generation" };
+  }
+  if (/\bcarta\s+de\s+referencia\b|\bcarta\s+consular\b/i.test(action)) {
+    return { action, entity, intent: "document_generation" };
+  }
+  if (/\binformacion\s+de\s+productos\b|\bcatalogo\b|\blistado/i.test(action)) {
+    return { action, entity, intent: "catalog_listing_flow" };
+  }
+  if (/\bsolicit|\bcontrat|\bapertura\b|\bregistro\b/i.test(action)) {
+    return { action, entity, intent: "product_request" };
+  }
+  if (/\bpago\b|\btransferencia\b|\btransferir\b/i.test(action)) {
+    return { action, entity, intent: "payment_transfer" };
+  }
+  return { action, entity, intent: "generic" };
+}
+
+/**
+ * Extract business entity from explicit route or HU text.
+ * When explicitRoutePath is provided, uses it directly (avoids re-parsing full text).
+ */
+function extractBusinessEntity(t: string, explicitRouteSegments?: string[]): {
+  rawLabel: string; normalizedKey: string; singularLabel: string; pluralLabel: string; source: string;
+} | null {
+  // 1. Use explicit route path if provided (already parsed, most reliable)
+  if (explicitRouteSegments && explicitRouteSegments.length >= 2) {
+    const last = explicitRouteSegments[explicitRouteSegments.length - 1];
+    const singular = singularizeWord(last);
+    return {
+      rawLabel: last,
+      normalizedKey: singular.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(),
+      singularLabel: singular,
+      pluralLabel: last,
+      source: "explicit_route",
+    };
+  }
+
+  // 2. Parse from full text using parseExplicitRoute
+  const parsed = parseExplicitRoute(t);
+  if (parsed && parsed.segments.length >= 2 && parsed.entity && parsed.entity.length >= 3) {
+    const singular = singularizeWord(parsed.entity);
+    return {
+      rawLabel: parsed.entity,
+      normalizedKey: singular.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(),
+      singularLabel: singular,
+      pluralLabel: parsed.entity,
+      source: "explicit_route",
+    };
+  }
+
+  // 3. Fallback: look for entity after action phrases in full text
+  const actionMatch = t.match(/(?:consulta|balance|saldo)\s+(?:de\s+)?(?:la\s+|el\s+|los\s+|las\s+)?([a-záéíóúñ]{4,}(?:\s+[a-záéíóúñ]{3,})?)/i);
+  const actionEntity = actionMatch?.[1]?.trim();
+  if (actionEntity && actionEntity.length >= 4) {
+    const singular = singularizeWord(actionEntity);
+    return {
+      rawLabel: actionEntity,
+      normalizedKey: singular.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(),
+      singularLabel: singular,
+      pluralLabel: actionEntity.endsWith("s") ? actionEntity : `${actionEntity}s`,
+      source: "hu_text_action_phrase",
+    };
+  }
+
+  return null;
+}
+
+/** Generic singularization (reused from buildPlanBasedScenarios) */
+function singularizeWord(w: string): string {
+  const l = w.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  if (l.endsWith("es") && l.length > 3 && /[bcdfghjklmnpqrstvwxyz]es$/.test(l)) return w.slice(0, -2);
+  if (l.endsWith("s") && l.length > 3 && /[aeiou]s$/.test(l)) return w.slice(0, -1);
+  return w;
+}
+
+/** Unified title contract — validates and repairs any scenario title. */
+function validateAndRepairScenarioTitle(title: string, fallbackTerm: string): { title: string; repaired: boolean; rejected: boolean } {
+  if (!title) return { title, repaired: false, rejected: false };
+  let t = title;
+  let repaired = false;
+
+  // Remove hyphens used as separators
+  if (/[–—]/.test(t) || /\s-\s/.test(t)) {
+    t = t.replace(/[–—]/g, "").replace(/\s*-\s*/g, " ").trim();
+    repaired = true;
+  }
+  // Remove snake_case
+  if (/[a-z]+_[a-z]+/.test(t)) {
+    t = t.replace(/_/g, " ").trim();
+    repaired = true;
+  }
+  // Remove trailing internal tokens
+  if (/\s+(flow|field|message|token|data_entry_fields)$/i.test(t)) {
+    t = t.replace(/\s+(flow|field|message|token|data_entry_fields)\s*$/i, "").trim();
+    repaired = true;
+  }
+  // Remove leading numerals from contaminated entity names ("prestamos 3" → remove trailing " 3")
+  t = t.replace(/\s+\d+\s*$/, "").trim();
+  // Remove narrative prefix contamination
+  t = t.replace(/^(?:el\s+cliente\s+)?(?:seleccion[oó]\s+en\s+el\s+men[uú]:?\s*)/gi, "").trim();
+  // Collapse multiple spaces
+  t = t.replace(/\s{2,}/g, " ").trim();
+  // Hard length limit: if > 100 chars, rebuild from fallback
+  if (t.length > 100) {
+    t = `Validar detalle de ${fallbackTerm}`;
+    repaired = true;
+  }
+  // Too generic or too short after repair → rebuild
+  if (t.length < 15 || /^(flujo|validacion|operacion|escenario)\s/i.test(t)) {
+    t = `Validar detalle de ${fallbackTerm}`;
+    repaired = true;
+  }
+
+  // Apply title case only to the FIRST letter (preserves entity casing within)
+  t = toScenarioTitleCase(t);
+  if (t !== title) repaired = true;
+
+  // Final check: if STILL failing, reject
+  const FINAL_CHECK = /[–—]|\s-\s|_[a-z]+_[a-z]+|\s(flow|field|message|token|data_entry_fields)$/i;
+  if (FINAL_CHECK.test(t) || t.length > 100) return { title: t, repaired, rejected: true };
+
+  return { title: t, repaired, rejected: false };
+}
+
+/** Lowercase entity label for natural casing in titles — avoids hardcoded entity lists. */
+function toScenarioTitleCase(title: string): string {
+  const t = title.trim().replace(/\s{2,}/g, " ");
+  if (!t) return t;
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+
+function toTitleEntityLabel(label: string): string {
+  if (!label) return label;
+  return label.charAt(0).toLowerCase() + label.slice(1);
 }
 
 /**
@@ -2204,24 +2692,77 @@ function buildPlanBasedScenarios(
 
   // Helper: build field entry step
   function buildFieldStep(field: string): string {
-    const key = toDataKey(field);
-    return `Ingresar ${field} usando ${key}.`;
+    return `Completar el campo ${field}.`;
   }
 
   // Helper: build selection step with ordinal
   function buildSelectionStep(entity: string, ordinal: "primer" | "segundo" = "primer"): string {
-    const e = toSelectionEntity(entity);
-    const prefix = ordinal === "primer" ? "primer" : "segundo";
+    // Resolve entity: if the passed entity is generic, use the resolved label
+    let e = toSelectionEntity(entity);
+    if (!e || e === "producto" || e === "elemento") {
+      e = resolveSelectableEntityLabel();
+      if (!e || e === "producto") e = "elemento";
+    }
+    e = toTitleEntityLabel(e);
     const gender = e.endsWith("a") ? "la" : "el";
     return ordinal === "primer"
-      ? `Seleccionar el primer ${e} visible del listado.`
-      : `Seleccionar el segundo ${e} visible del listado.`;
+      ? `Seleccionar ${gender} primer${gender === "la" ? "a" : ""} ${e} visible del listado.`
+      : `Seleccionar ${gender} segund${gender === "la" ? "a" : "o"} ${e} visible del listado.`;
   }
   function buildVariantScenarios(): any[] {
     const variants = scenarioPlan?.variants ?? ["happy_path"];
     const target = scenarioPlan?.scenarioCountTarget ?? Math.min(variants.length, 3);
     const pfx = prefix();
     const m = huModel;
+
+    // Filter internal field IDs that should not appear as literal field names in MCP steps
+    const INTERNAL_IDS = new Set(["data_entry_fields", "data_entry", "required_fields", "fields", "generic_field",
+      "recipient", "sender", "receiver", "destination", "source_field", "target_field",
+      "rnc", "r_n_c", "date", "amount", "currency", "period", "reason", "motivo"]);
+    const realFields = (m?.requiredFields ?? []).filter((f: string) => !INTERNAL_IDS.has(f.toLowerCase()));
+
+    // Canonical semantic action classification — separates expected from detected
+    type CanonicalAction = "confirm" | "cancel" | "return" | "generate" | "deliver" | "download" | "export" | "select" | "fill" | "validate" | "unknown";
+
+    // Minimal alias fallback — confidence never exceeds 0.25. Structural types are NOT actions.
+    const ALIAS_FALLBACK: Record<string, CanonicalAction> = {
+      confirmar: "confirm", cancelar: "cancel", volver: "return", generar: "generate",
+      enviar: "deliver", imprimir: "deliver", descargar: "download", exportar: "export",
+    };
+
+    // Detect action from CONTROL label only. semanticType indicates structural role, not functional action.
+    // Aliases provide weak fallback — require corroborating requirement evidence to be trusted.
+    function detectActionFromControl(label: string, _semanticType?: string): { action: CanonicalAction; confidence: number } {
+      const key = label.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      if (ALIAS_FALLBACK[key]) return { action: ALIAS_FALLBACK[key], confidence: 0.25 };
+      for (const [alias, action] of Object.entries(ALIAS_FALLBACK)) {
+        if (key.includes(alias) && alias.length > 4) return { action, confidence: 0.15 };
+      }
+      return { action: "unknown", confidence: 0 };
+    }
+
+    // Score: compatibility (detected matches expected) + detected confidence.
+    // Aliases alone (confidence ≤ 0.25) are NOT sufficient — require corroboration from expectedAction.
+    function scoreControlCandidate(label: string, expectedAction: CanonicalAction, semanticType?: string): {
+      label: string; detectedAction: CanonicalAction; compatible: boolean; score: number; confidence: number;
+    } {
+      const detected = detectActionFromControl(label, semanticType);
+      const compatible = detected.action === expectedAction;
+      // Higher score when expectedAction corroborates alias detection
+      const score = compatible ? (0.3 + detected.confidence * 0.7 + (detected.confidence <= 0.25 ? 0.15 : 0)) : 0;
+      return { label, detectedAction: detected.action, compatible, score, confidence: detected.confidence };
+    }
+
+    // Find best compatible control candidate
+    function findBestControl(
+      buttons: string[], expectedAction: CanonicalAction, semanticType?: string,
+    ): { label: string; score: number; ambiguous: boolean; detectedAction: string } | null {
+      const scored = buttons.map(b => scoreControlCandidate(b, expectedAction, semanticType)).filter(c => c.compatible).sort((a, b) => b.score - a.score);
+      if (!scored.length) return null;
+      const ambiguous = scored.length > 1 && scored[0].score - scored[1].score < 0.25;
+      return { label: scored[0].label, score: scored[0].score, ambiguous, detectedAction: scored[0].detectedAction };
+    }
+
 
     // ── Title builder: produces business-readable Spanish, no variant IDs ──
     const feat = featureName;
@@ -2244,38 +2785,141 @@ function buildPlanBasedScenarios(
       reference_number_display_flow: `Validar numero unico de referencia del ${feat}`,
     };
 
-    // ── Build all variant entries ──
-    const allVariantEntries: Array<{ id: string; title: string }> = [];
+    // ── Build all variant entries with typed functional branches ──
+    const allVariantEntries: Array<{ id: string; title: string; branchType: string; branchId: string }> = [];
     for (const v of variants) {
+      const baseBranchId = `${v}`;
       if (v === "period_range_selection_flow" && m?.selectableEntities?.includes("months_range")) {
         allVariantEntries.push(
-          { id: "period_range_selection_flow", title: `Seleccionar rango personalizado para generar ${feat}` },
-          { id: "period_range_selection_flow", title: `Generar ${feat} de los ultimos tres meses` },
-          { id: "period_range_selection_flow", title: `Generar ${feat} de los ultimos seis meses` },
-          { id: "period_range_selection_flow", title: `Generar ${feat} de los ultimos doce meses` },
+          { id: v, title: `Seleccionar rango personalizado para generar ${feat}`, branchType: "default", branchId: `${baseBranchId}_custom` },
+          { id: v, title: `Generar ${feat} de los ultimos tres meses`, branchType: "default", branchId: `${baseBranchId}_3m` },
+          { id: v, title: `Generar ${feat} de los ultimos seis meses`, branchType: "default", branchId: `${baseBranchId}_6m` },
+          { id: v, title: `Generar ${feat} de los ultimos doce meses`, branchType: "default", branchId: `${baseBranchId}_12m` },
         );
       } else if (v === "period_range_selection_flow") {
-        allVariantEntries.push({ id: v, title: `Generar ${feat} con rango de fecha personalizado` });
+        allVariantEntries.push({ id: v, title: `Generar ${feat} con rango de fecha personalizado`, branchType: "default", branchId: baseBranchId });
+      } else if (v === "selection_flow" && m?.multiSelectEntities?.length) {
+        allVariantEntries.push({ id: v, title: scopes[v] ?? `Seleccionar ${entity} para generar ${feat}`, branchType: "single", branchId: `${baseBranchId}_single` });
+        allVariantEntries.push({ id: v, title: `Seleccionar multiples ${entity}s para generar ${feat}`, branchType: "multiple", branchId: `${baseBranchId}_multi` });
+      } else if (v === "confirmation_flow" || v === "confirmation_return_or_cancel_flow") {
+        allVariantEntries.push({ id: v, title: `Confirmar generacion de ${feat}`, branchType: "confirm", branchId: `${baseBranchId}_confirm` });
+        if (m?.visibleButtons?.some((b: string) => /cancelar|volver/i.test(b))) {
+          allVariantEntries.push({ id: v, title: `Cancelar generacion de ${feat}`, branchType: "cancel", branchId: `${baseBranchId}_cancel` });
+        }
+        if (m?.visibleButtons?.some((b: string) => /volver/i.test(b))) {
+          allVariantEntries.push({ id: v, title: `Volver desde generacion de ${feat}`, branchType: "return", branchId: `${baseBranchId}_return` });
+        }
+      } else if (v === "delivery_flow" && m?.deliverySignals) {
+        allVariantEntries.push({ id: v, title: `Validar envio de ${feat} al correo registrado`, branchType: "delivery_alternative", branchId: `${baseBranchId}_email` });
+        if (m?.visibleButtons?.some((b: string) => /imprimir/i.test(b))) {
+          allVariantEntries.push({ id: v, title: `Validar impresion de ${feat}`, branchType: "delivery_alternative", branchId: `${baseBranchId}_print` });
+        }
+      } else if (v === "selection_flow") {
+        allVariantEntries.push({ id: v, title: scopes[v] ?? `Seleccionar ${entity} para generar ${feat}`, branchType: "single", branchId: baseBranchId });
       } else {
-        allVariantEntries.push({ id: v, title: scopes[v] ?? `Validar ${feat}` });
+        allVariantEntries.push({ id: v, title: scopes[v] ?? `Validar ${feat}`, branchType: "default", branchId: baseBranchId });
       }
     }
 
-    // ── Suppress happy_path when enough specific variants exist ──
-    const specificCount = allVariantEntries.filter(e => e.id !== "happy_path").length;
-    const toGenerate = specificCount >= 5
-      ? allVariantEntries.filter(e => e.id !== "happy_path")
-      : allVariantEntries;
-    const truncated = toGenerate.slice(0, target + Math.max(0, specificCount - target));
-    const result: any[] = [];
+    // Phase inheritance: deduplicated, single submit, all fields/entities
+    const prereqStepsCache: Map<string, string[]> = new Map();
+    function buildPrerequisitePhaseSteps(): string[] {
+      const phases: { type: string; steps: string[] }[] = [];
 
-    if (allVariantEntries.find(e => e.id === "happy_path") && specificCount >= 5) {
-      console.log(`[scenario-preview] routePendingBuilder happyPathSuppressed reason=high_specific_coverage specificVariants=${specificCount}`);
+      // Selection phase: semantic classification based on evidence, not count
+      const selEntities = (m?.selectableEntities ?? []).filter((e: any) => {
+        const label = toSelectionEntity(String(e));
+        return label && label !== "producto" && label !== "elemento";
+      });
+      if (selEntities.length) {
+        // Detect relation: use selectionMetadata from huModel when available
+        const selMeta = (m as any)?.selectionMetadata;
+        const hasParent = selMeta?.parentEntity != null || selMeta?.alternativeGroup != null;
+        const shareGroup = !selMeta?.alternativeGroup ? false : selEntities.every((e: any) => true); // all entities share same alternativeGroup from extractor
+        const entityRelation = selEntities.length === 1 ? "single"
+          : (!hasParent || !shareGroup || !selMeta) ? "unknown"
+          : "alternative";
+
+        if (entityRelation === "alternative") {
+          const parentTerm = selMeta?.parentEntity || selMeta?.selectionGroup || resolveSelectableEntityLabel();
+          console.log(`[entity-relation] entities=${selEntities.map((e: any) => toSelectionEntity(String(e))).join(",")} relation=alternative parent="${parentTerm}" cardinality=${selMeta?.selectionCardinality ?? "one"} action=single_selection`);
+          phases.push({ type: "selection", steps: [buildSelectionStep(selEntities[0], "primer")] });
+        } else if (entityRelation === "single") {
+          phases.push({ type: "selection", steps: [buildSelectionStep(selEntities[0], "primer")] });
+        } else {
+          console.log(`[entity-relation] entities=${selEntities.map((e: any) => toSelectionEntity(String(e))).join(",")} relation=unknown action=blocked reason=selectable_entity_relation_unknown`);
+          (m as any)._entitySelectionBlocked = true;
+        }
+      }
+
+      // Data entry phase: filter undefined fields
+      const entryFields = realFields.filter((f: string) => {
+        const lower = f.toLowerCase();
+        return !["email","correo","rnc","destinatario","recipient","undefined","null","none","field","generic"].includes(lower)
+          && f.length > 2
+          && !f.startsWith("data_")
+          && !f.startsWith("required_");
+      });
+      if (entryFields.length) {
+        const entrySteps: string[] = entryFields.map(f => buildFieldStep(f));
+        phases.push({ type: "data_entry", steps: entrySteps });
+      }
+
+      // Submit phase: single "Continuar" after all selections + entries
+      const needsSubmit = phases.length > 0;
+      if (needsSubmit) {
+        phases.push({ type: "submit", steps: ['Clic en "Continuar".'] });
+      }
+
+      // Deduplicate and flatten in topological order
+      const seen = new Set<string>();
+      const result: string[] = [];
+      for (const p of phases) {
+        if (!seen.has(p.type)) {
+          seen.add(p.type);
+          result.push(...p.steps);
+        }
+      }
+      return result;
     }
 
-    for (const { id: v, title } of truncated) {
+    function getPrerequisiteSteps(variantId: string): string[] {
+      if (prereqStepsCache.has(variantId)) return prereqStepsCache.get(variantId)!;
+      const terminalPhases: Record<string, boolean> = {
+        preview_review_flow: true, confirmation_flow: true, confirmation_return_or_cancel_flow: true,
+        return_or_cancel_flow: true, delivery_flow: true, generating_in_progress_flow: true,
+        visible_warning_flow: true, reference_number_display_flow: true,
+      };
+      const steps = terminalPhases[variantId] ? buildPrerequisitePhaseSteps() : [];
+      prereqStepsCache.set(variantId, steps);
+      if (steps.length) console.log(`[functional-chain] scenario variant=${variantId} resolved=${steps.length} deduped phases`);
+      return steps;
+    }
+
+    // Generate all variants — coverage-driven, not truncated
+    const result: any[] = [];
+
+    for (const { id: v, title, branchType, branchId } of allVariantEntries) {
+      // Skip variants when entity selection is blocked due to unknown relation
+      if ((m as any)?._entitySelectionBlocked && (
+        v === "selection_flow" || v === "multi_selection_flow" ||
+        v === "preview_review_flow" || v === "confirmation_flow" ||
+        v === "confirmation_return_or_cancel_flow" || v === "delivery_flow" ||
+        v === "return_or_cancel_flow" || v === "generating_in_progress_flow"
+      )) {
+        console.log(`[entity-relation] blocked variant=${v} reason=selectable_entity_relation_unknown`);
+        continue;
+      }
+
       let steps: string[] = [...pfx];
       let expected = "La operacion se completa correctamente.";
+
+      // Inherit prerequisite phase steps for terminal variants
+      const prereqs = getPrerequisiteSteps(v);
+      if (prereqs.length) {
+        console.log(`[functional-chain] scenario="${title.slice(0,40)}" variant=${v} inherited=${prereqs.length} phases`);
+        steps.push(...prereqs);
+      }
 
       switch (v) {
         case "happy_path":
@@ -2288,42 +2932,53 @@ function buildPlanBasedScenarios(
           break;
 
         case "selection_flow":
-          steps.push(buildSelectionStep(m?.selectableEntities?.[0] ?? "elemento"));
-          if (m?.visibleButtons?.includes("Continuar")) steps.push('Clic en "Continuar".');
-          steps.push(`Validar que se muestre la confirmacion de seleccion.`);
-          expected = `La seleccion de ${entity} para ${feat} se completa correctamente.`;
+          if (branchType === "multiple") {
+            steps.push(buildSelectionStep(m?.selectableEntities?.[0] ?? "elemento", "primer"));
+            steps.push(buildSelectionStep(m?.selectableEntities?.[0] ?? "elemento", "segundo"));
+            steps.push("Validar que al menos dos elementos esten marcados como seleccionados.");
+            expected = `La seleccion multiple de ${entity} para ${feat} se completa correctamente.`;
+          } else {
+            steps.push(buildSelectionStep(m?.selectableEntities?.[0] ?? "elemento"));
+            if (m?.visibleButtons?.includes("Continuar")) steps.push('Clic en "Continuar".');
+            steps.push(`Validar que se muestre la confirmacion de seleccion.`);
+            expected = `La seleccion de ${entity} para ${feat} se completa correctamente.`;
+          }
           break;
 
         case "multi_selection_flow":
           steps.push(buildSelectionStep(m?.selectableEntities?.[0] ?? "elemento", "primer"));
           steps.push(buildSelectionStep(m?.selectableEntities?.[0] ?? "elemento", "segundo"));
-          steps.push("Validar que ambos elementos esten seleccionados.");
+          steps.push("Validar que al menos dos elementos esten marcados como seleccionados.");
           expected = "La seleccion multiple se completa correctamente.";
           break;
 
         case "required_fields_flow":
-          if (m?.requiredFields?.length) {
-            steps.push(buildFieldStep(m.requiredFields[0]));
-            steps.push('Clic en "Continuar".');
-            steps.push(`Validar que se muestre la validacion del campo ${m.requiredFields[0]}.`);
-          } else {
+          // Exclude fields that belong to later screens (delivery, confirmation)
+          const DELIVERY_FIELDS = new Set(["email", "correo", "rnc", "destinatario", "recipient"]);
+          const formFields = realFields.filter((f: string) => !DELIVERY_FIELDS.has(f.toLowerCase()));
+          if (!formFields.length) {
+            console.log(`[scenario-contract] degraded scenario="${title}" reason=no_concrete_fields_for_required_flow`);
+            // Keep the scenario but mark as non-executable (documents the requirement)
             steps.push("Completar los campos requeridos.");
             steps.push('Clic en "Continuar".');
-            steps.push("Validar que se muestren las validaciones de campos obligatorios.");
+            expected = "El sistema muestra las validaciones de campos requeridos.";
           }
+          steps.push(buildFieldStep(formFields[0]));
+          steps.push('Clic en "Continuar".');
+          steps.push(`Validar que el campo ${formFields[0]} se muestre como requerido.`);
           expected = "El sistema muestra las validaciones de campos requeridos.";
           break;
 
         case "search_flow":
-          if (m?.requiredFields?.includes("rnc") || m?.requiredFields?.includes("RNC")) {
+          if (realFields.includes("rnc") || realFields.includes("RNC")) {
             steps.push(buildFieldStep("rnc"));
-          } else if (m?.requiredFields?.includes("destinatario")) {
+          } else if (realFields.includes("destinatario")) {
             steps.push(buildFieldStep("destinatario"));
           } else {
             steps.push("Ingresar el termino de busqueda en el campo de busqueda.");
           }
           if (m?.visibleOptions?.length) steps.push(`Validar que se muestre "${m.visibleOptions[0]}".`);
-          else steps.push("Validar que se muestren los resultados de busqueda.");
+          else steps.push("Validar que al menos un resultado de busqueda sea visible en el listado.");
           if (m?.selectableEntities?.length) steps.push(buildSelectionStep(m.selectableEntities[0]));
           else steps.push("Seleccionar la primera opcion visible del listado.");
           expected = "La busqueda muestra resultados y permite seleccionar.";
@@ -2352,41 +3007,57 @@ function buildPlanBasedScenarios(
           break;
 
         case "confirmation_flow":
-          if (m?.visibleButtons?.includes("Confirmar")) steps.push('Clic en "Confirmar".');
-          steps.push(`Validar que se muestre la confirmacion de ${feat}.`);
-          expected = `La confirmacion de ${feat} se completa correctamente.`;
-          break;
-
         case "confirmation_return_or_cancel_flow":
-          if (m?.visibleButtons?.includes("Confirmar")) {
-            steps.push('Clic en "Confirmar".');
+          if (branchType === "confirm") {
+            const best = findBestControl((m?.visibleButtons ?? []), "confirm");
+            if (!best) { console.log(`[functional-branch] blocked id=${branchId} reason=concrete_branch_target_missing`); continue; }
+            if (best.ambiguous) { console.log(`[semantic-action] blocked branch=${branchId} reason=semantic_target_ambiguous`); continue; }
+            console.log(`[semantic-action] branch=${branchId} expected=confirm detected=${best.detectedAction} compatible=true score=${best.score.toFixed(2)}`);
+            steps.push(`Clic en "${best.label}".`);
             steps.push(`Validar que se muestre la confirmacion de ${feat}.`);
-          }
-          if (m?.visibleButtons?.includes("Cancelar")) steps.push('Clic en "Cancelar".');
-          else if (m?.visibleButtons?.includes("Volver")) steps.push('Clic en "Volver".');
-          if (!m?.visibleButtons?.includes("Cancelar") && !m?.visibleButtons?.includes("Volver")) {
-            steps.push("Cancelar la operacion.");
-          }
-          steps.push("Validar que la operacion no se ejecute.");
-          expected = `La confirmacion de ${feat} se completa y el usuario puede cancelar o volver.`;
+            expected = `La confirmacion de ${feat} se completa correctamente.`;
+          } else if (branchType === "cancel") {
+            const best = findBestControl((m?.visibleButtons ?? []), "cancel");
+            if (!best) { console.log(`[functional-branch] blocked id=${branchId} reason=concrete_branch_target_missing`); continue; }
+            if (best.ambiguous) { console.log(`[semantic-action] blocked branch=${branchId} reason=semantic_target_ambiguous`); continue; }
+            steps.push(`Clic en "${best.label}".`);
+            steps.push(`Validar que ${feat} no se ejecute o que se regrese a la pantalla anterior.`);
+            expected = `La cancelacion de ${feat} se completa sin efectos.`;
+          } else if (branchType === "return") {
+            const best = findBestControl((m?.visibleButtons ?? []), "return");
+            if (!best) { console.log(`[functional-branch] blocked id=${branchId} reason=concrete_branch_target_missing`); continue; }
+            steps.push(`Clic en "${best.label}".`);
+            steps.push("Validar que se regrese a la pantalla anterior correctamente.");
+            expected = "El retorno a la pantalla anterior se completa correctamente.";
+          } else { continue; }
           break;
 
         case "return_or_cancel_flow":
           if (m?.visibleButtons?.includes("Cancelar")) steps.push('Clic en "Cancelar".');
           else if (m?.visibleButtons?.includes("Volver")) steps.push('Clic en "Volver".');
-          steps.push("Validar que la operacion no se ejecute.");
+          steps.push("Validar que el boton principal de accion no este habilitado o que la pantalla de confirmacion muestre la opcion de cancelar.");
           expected = "La operacion se cancela sin efectos secundarios.";
           break;
 
         case "delivery_flow":
-          steps.push('Validar que se muestre "Correo electronico".');
-          if (m?.visibleWarnings?.some((w: string) => w.includes("enmascar") || w.includes("ocult"))) {
-            steps.push("Validar que se muestre el correo enmascarado.");
+          if (branchType === "delivery_alternative") {
+            let best: { label: string; score: number; ambiguous: boolean } | null = null;
+            for (const a of ["deliver", "download", "export"] as CanonicalAction[]) {
+              const c = findBestControl((m?.visibleButtons ?? []), a);
+              if (c && c.score > (best?.score ?? 0)) best = c;
+            }
+            if (!best) { console.log(`[functional-branch] blocked id=${branchId} reason=concrete_branch_target_missing`); continue; }
+            steps.push(`Validar que se muestre "${best.label}".`);
+            steps.push(`Clic en "${best.label}".`);
+            steps.push(`Validar que se muestre la confirmacion de ${best.label.toLowerCase()}.`);
+            expected = `La accion de ${best.label} se completa correctamente.`;
+          } else {
+            const best = findBestControl((m?.visibleButtons ?? []), "deliver");
+            const btn = best?.label || "Correo";
+            steps.push(`Validar que se muestre "${btn}".`);
+            steps.push("Seleccionar la primera opcion de entrega visible del listado.");
+            expected = `La entrega de ${feat} se completa correctamente.`;
           }
-          steps.push("Seleccionar la primera opcion de correo visible del listado.");
-          if (m?.visibleButtons?.includes("Continuar")) steps.push('Validar que el boton "Continuar" este visible.');
-          if (m?.visibleButtons?.includes("Cancelar")) steps.push('Validar que el boton "Cancelar" este visible.');
-          expected = `El envio de ${feat} se completa correctamente.`;
           break;
 
         case "visible_warning_flow":
@@ -2433,15 +3104,19 @@ function buildPlanBasedScenarios(
         steps,
         preconditions: ["El usuario esta autenticado en la aplicacion.", "La aplicacion esta disponible y accesible."],
         expectedResult: expected,
+        _variantId: v,
+        _branchId: branchId,
+        _branchType: branchType,
+        scenarioId: `${key}:${v}:${branchId}`,
       });
     }
 
     // ── Controlled data scenario: single entity skip list ──
     // Trigger when HU has selectable entities but no multi-select or explicit multi-option signal
     const hasSingleEntity = (m?.selectableEntities?.length ?? 0) > 0 && !m?.multiSelectEntities?.length;
-    const entityPlural = resolveSelectableEntityLabel();
+    const entityPlural = toTitleEntityLabel(resolveSelectableEntityLabel());
     if (hasSingleEntity) {
-      const entitySingular = singularizeEntityLabel(entityPlural);
+      const entitySingular = toTitleEntityLabel(singularizeEntityLabel(entityPlural));
       const gender = detectEntityGender(entitySingular);
       const article = gender === "f" ? "una" : "un";
       const articleDef = gender === "f" ? "la" : "el";
@@ -2455,6 +3130,7 @@ function buildPlanBasedScenarios(
         controlledDataRequired: true,
         automationStatus: "requires_controlled_data",
         nonExecutableCriteria: "single_entity_required",
+        _variantId: "single_entity_controlled_data",
       });
       console.log(`[scenario-preview] routePendingBuilder controlledDataRequired added reason=single_entity_required entityPlural=${entityPlural} entitySingular=${entitySingular}`);
     }
@@ -2464,59 +3140,538 @@ function buildPlanBasedScenarios(
 
   const scenarios = buildVariantScenarios();
 
-  // ── MCP contract: validate steps ──
+  // ── Functional fingerprint deduplication ──
+  const fingerprint = (sc: any): string => {
+    const stepsNorm = (sc.steps ?? []).join("|").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+    const expNorm = (sc.expectedResult ?? "").toLowerCase();
+    return `action:${sc._branchType}|variant:${sc._variantId}|stepsHash:${stepsNorm.slice(0,120)}|expected:${expNorm.slice(0,60)}`;
+  };
+  const seen = new Map<string, any>();
+  const deduped: typeof scenarios = [];
+  let dedupRemoved = 0;
+  for (const sc of scenarios) {
+    const fp = fingerprint(sc);
+    const existing = seen.get(fp);
+    if (existing) {
+      // Keep the one with more concrete targets or more requirement evidence
+      const scTargets = (sc.steps ?? []).filter((s: string) => /"[^"]+"/.test(s)).length;
+      const exTargets = (existing.steps ?? []).filter((s: string) => /"[^"]+"/.test(s)).length;
+      if (scTargets > exTargets) {
+        (sc as any)._coveredReqIds = [...new Set([...((existing as any)._coveredReqIds ?? []), ...((sc as any)._coveredReqIds ?? [])])];
+        seen.set(fp, sc); deduped[deduped.indexOf(existing)] = sc;
+      } else {
+        (existing as any)._coveredReqIds = [...new Set([...((existing as any)._coveredReqIds ?? []), ...((sc as any)._coveredReqIds ?? [])])];
+      }
+      dedupRemoved++;
+      console.log(`[scenario-dedupe] removed="${sc.title?.slice(0,40)}" kept="${existing.title?.slice(0,40)}" reason=equivalent_functional_behavior`);
+    } else {
+      seen.set(fp, sc);
+      deduped.push(sc);
+    }
+  }
+  console.log(`[scenario-dedupe] generated=${scenarios.length} removed=${dedupRemoved} retained=${deduped.length}`);
+  scenarios.length = 0;
+  scenarios.push(...deduped);
+
+  // ── MCP contract
   const MCP_VALID_VERBS = /^(Clic en|Validar que|Seleccionar|Ingresar|Esperar|Confirmar|Volver|Cancelar|Completar)/i;
   const INTERNAL_TOKEN_PATTERNS = /_[a-z]{3,}_|[a-z]+_[a-z]+_(flow|message|display|warning|error|data|field|pipe|event|signal|token|flag)/i;
   let mcpPassed = 0;
   let mcpFailed = 0;
+  const contractClean: typeof scenarios = [];
   for (const sc of scenarios) {
+    let scFailed = false;
     for (const step of (sc.steps ?? [])) {
-      let ok = true;
       if (!MCP_VALID_VERBS.test(step)) {
         console.log(`[scenario-mcp-contract] invalidStep reason=missing_mcp_verb step="${step.slice(0, 80)}"`);
-        ok = false;
+        mcpFailed++; scFailed = true;
       }
       if (INTERNAL_TOKEN_PATTERNS.test(step)) {
         const match = step.match(INTERNAL_TOKEN_PATTERNS)?.[0] ?? "?";
         console.log(`[scenario-mcp-contract] invalidStep reason=internal_variant_token token="${match}" step="${step.slice(0, 80)}"`);
-        ok = false;
+        mcpFailed++; scFailed = true;
       }
-      ok ? mcpPassed++ : mcpFailed++;
+      if (!scFailed) mcpPassed++;
+    }
+    if (scFailed) {
+      console.log(`[scenario-mcp-contract] rejected scenario="${sc.title?.slice(0,60)}" reason=internal_contract_failed`);
+    } else {
+      contractClean.push(sc);
     }
   }
-  console.log(`[scenario-mcp-contract] passed scenarios=${scenarios.length} stepsPassed=${mcpPassed} stepsFailed=${mcpFailed}`);
+  console.log(`[scenario-mcp-contract] scenarios=${scenarios.length} contractClean=${contractClean.length} stepsPassed=${mcpPassed} stepsFailed=${mcpFailed}`);
 
-  // ── Title contract: validate scenario titles ──
-  const TITLE_HYPHEN = /—/;
-  const TITLE_SNAKE = /[a-z]+_[a-z]+_[a-z]+/i;
-  const TITLE_INTERNAL = /(flow|message|display|warning|error|data|field|pipe|event|signal|token|flag)$/i;
-  let titlePassed = 0;
-  let titleFailed = 0;
-  for (const sc of scenarios) {
-    let ok = true;
-    const t = sc.title ?? "";
-    if (TITLE_HYPHEN.test(t)) {
-      console.log(`[scenario-title-contract] invalidTitle reason=contains_hyphen title="${t}"`);
-      ok = false;
+  // ── Coverage tracking: semantic requirement↔scenario matching ──
+  const coverageReqs: Array<{
+    id: string; sourceText: string; category: string; automatable: boolean; required: boolean;
+    coveredBy: Array<{ scenarioId: string; evidenceSteps: number[]; confidence: number }>;
+    status: string; reasonCode?: string; optionalityEvidence?: string;
+  }> = [];
+  // Optionality: only mark required=false with explicit evidence
+  const isExplicitlyOptional = (t: string): { isOptional: boolean; evidence: string } => {
+    const p = [/opcional|cuando\s+aplique|si\s+aplica|si\s+est[aá]\s+disponible|solo\s+informativo|fuera\s+de\s+alcance|optional|when\s+applicable|if\s+available|informational\s+only|out\s+of\s+scope/i];
+    for (const r of p) { if (r.test(t)) return { isOptional: true, evidence: t.match(r)?.[0] ?? "" }; }
+    return { isOptional: false, evidence: "" };
+  };
+  let reqIdx = 0;
+
+  // From huModel fields with source text
+  for (const f of (huModel?.requiredFields ?? [])) {
+    const ft = String(f);
+    if (!["data_entry_fields","data_entry","required_fields","fields","generic_field","recipient","rnc","date","amount","currency","period","reason","motivo"].includes(ft)) {
+      coverageReqs.push({ id: `R${++reqIdx}`, sourceText: ft, category: "input_field", automatable: true, required: true, coveredBy: [], status: "uncovered" });
     }
-    if (TITLE_SNAKE.test(t)) {
-      console.log(`[scenario-title-contract] invalidTitle reason=snake_case title="${t}"`);
-      ok = false;
-    }
-    if (TITLE_INTERNAL.test(t)) {
-      console.log(`[scenario-title-contract] invalidTitle reason=internal_variant_token title="${t}"`);
-      ok = false;
-    }
-    if (t.length < 20 || /^(flujo|validacion|operacion) /i.test(t)) {
-      console.log(`[scenario-title-contract] invalidTitle reason=too_generic title="${t}"`);
-      ok = false;
-    }
-    ok ? titlePassed++ : titleFailed++;
   }
-  console.log(`[scenario-title-contract] passed scenarios=${scenarios.length} titlesPassed=${titlePassed} titlesFailed=${titleFailed}`);
+  for (const e of (huModel?.selectableEntities ?? [])) {
+    coverageReqs.push({ id: `R${++reqIdx}`, sourceText: String(e), category: "selection", automatable: true, required: true, coveredBy: [], status: "uncovered" });
+  }
+  for (const b of (huModel?.visibleButtons ?? [])) {
+    coverageReqs.push({ id: `R${++reqIdx}`, sourceText: String(b), category: "button", automatable: true, required: true, coveredBy: [], status: "uncovered" });
+  }
+  for (const w of (huModel?.visibleWarnings ?? [])) {
+    coverageReqs.push({ id: `R${++reqIdx}`, sourceText: String(w).slice(0, 60), category: "warning", automatable: true, required: true, coveredBy: [], status: "uncovered" });
+  }
+  for (const obl of (huModel?.uiObligations ?? [])) {
+    // Filter internal tags — only create requirements for concrete UI obligations, not structural hints
+    const internalTags = /_screen$|_field$|_selection$|_button$|_flow$|_message$|_data$|_warning$/i;
+    if (!internalTags.test(String(obl))) {
+      coverageReqs.push({ id: `R${++reqIdx}`, sourceText: String(obl), category: "obligation", automatable: true, required: true, coveredBy: [], status: "uncovered" });
+    }
+  }
+
+  // Parse textual acceptance criteria into requirements
+  const acText = issue?.acceptanceCriteria ?? "";
+  if (acText) {
+    const lines = acText.split(/[\n\r]+/).filter((l: string) => l.trim().length > 10);
+    for (const line of lines) {
+      const cleaned = line.replace(/^[\d.\-•\s]+/, "").trim();
+      if (cleaned.length > 10 && !/^(?:criterio|requisito|escenario|dado|cuando|entonces)/i.test(cleaned)) {
+        const cat = /validar|mostrar|visualizar|seleccionar|ingresar/i.test(cleaned) ? "ui_validation" : "acceptance_criteria";
+        const opt = isExplicitlyOptional(cleaned);
+        coverageReqs.push({ id: `R${++reqIdx}`, sourceText: cleaned.slice(0, 100), category: cat, automatable: /validar|mostrar|seleccionar|click|ingresar/i.test(cleaned), required: !opt.isOptional, coveredBy: [], status: "uncovered", optionalityEvidence: opt.evidence || undefined });
+      }
+    }
+  }
+
+  // Semantic matching function
+  function matchRequirement(req: typeof coverageReqs[0], sc: any): { matched: boolean; evidenceSteps: number[]; confidence: number } {
+    const steps = (sc.steps ?? []).map((s: string) => s.toLowerCase());
+    const expected = (sc.expectedResult ?? "").toLowerCase();
+    const allText = [...steps, expected].join(" ");
+    const reqText = req.sourceText.toLowerCase();
+    const evidenceSteps: number[] = [];
+    let confidence = 0;
+
+    if (req.category === "input_field" || req.category === "button") {
+      // Match if any step contains the req source text
+      for (let i = 0; i < steps.length; i++) {
+        if (steps[i].includes(reqText) || steps[i].includes(reqText.replace(/_/g, " "))) {
+          evidenceSteps.push(i); confidence = 0.8;
+        }
+      }
+    } else if (req.category === "selection") {
+      if (allText.includes("seleccionar") && (allText.includes(reqText) || allText.includes(reqText.replace(/_/g, " ")))) {
+        evidenceSteps.push(0); confidence = 0.7;
+      }
+    } else if (req.category === "warning") {
+      if (allText.includes("validar") && (allText.includes(reqText) || expected.includes(reqText))) {
+        evidenceSteps.push(steps.length); confidence = 0.85;
+      }
+    } else if (req.category === "obligation") {
+      const oblTerms = reqText.split(/[\s_]+/).filter((t: string) => t.length > 3);
+      const matchedTerms = oblTerms.filter((t: string) => allText.includes(t));
+      if (matchedTerms.length >= 2) { confidence = 0.6 + matchedTerms.length * 0.1; evidenceSteps.push(0); }
+    }
+
+    return { matched: confidence >= 0.6, evidenceSteps, confidence };
+  }
+
+  // Match all requirements against all scenarios
+  for (const req of coverageReqs) {
+    for (const sc of scenarios) {
+      const { matched, evidenceSteps, confidence } = matchRequirement(req, sc);
+      if (matched && !req.coveredBy.some(c => c.scenarioId === (sc._variantId || sc.title))) {
+        req.coveredBy.push({ scenarioId: (sc._variantId ?? sc.title ?? "?"), evidenceSteps, confidence });
+        req.status = "covered";
+        console.log(`[coverage-match] requirement=${req.id} scenario=${req.coveredBy[req.coveredBy.length-1].scenarioId} category=${req.category} evidenceSteps=[${evidenceSteps.join(",")}] confidence=${confidence.toFixed(2)}`);
+      }
+    }
+    if (req.status === "uncovered" && req.automatable) {
+      console.log(`[coverage] requirement=${req.id} category=${req.category} source="${req.sourceText}" status=uncovered reason=no_matching_scenario`);
+    }
+  }
+
+  const covered = coverageReqs.filter(r => r.status === "covered").length;
+  const uncovered = coverageReqs.filter(r => r.status === "uncovered" && r.automatable).length;
+  const blockedCov = coverageReqs.filter(r => r.status !== "covered" && !r.automatable).length;
+  console.log(`[coverage] total=${coverageReqs.length} automatable=${coverageReqs.filter(r=>r.automatable).length} covered=${covered} uncovered=${uncovered} blocked=${blockedCov}`);
+
+  // ── Reactive gap-closing: extend or generate scenarios for uncovered automatable requirements ──
+  // ── Reactive gap-closing: semantic grouping + concrete targets ──
+  const entityTerm = (huModel?.businessEntity as any)?.singularLabel
+    ?? toTitleEntityLabel(resolveSelectableEntityLabel())
+    ?? "elemento";
+
+  const MAX_REPAIR_ITERATIONS = 2;
+  for (let iter = 1; iter <= MAX_REPAIR_ITERATIONS; iter++) {
+    // Helper for input field target extraction
+  function compatibleInputTargets(): Array<{ value: string; source: string; compatible: boolean }> {
+    const results: Array<{ value: string; source: string; compatible: boolean }> = [];
+    for (const f of ((huModel?.requiredFields ?? []) as string[])) {
+      if (!["data_entry_fields","data_entry","recipient","rnc","date","amount","currency","period","reason","motivo"].includes(f)) {
+        results.push({ value: f, source: "requiredFields", compatible: true });
+      }
+    }
+    return results;
+  }
+
+  const uncoveredReqs = coverageReqs.filter(r => r.automatable && r.status === "uncovered");
+    if (uncoveredReqs.length === 0) break;
+
+    // Semantic grouping: isolate requirements without object, classify action precisely
+    const gapGroups: Map<string, { reqs: typeof uncoveredReqs; action: string; object: string }> = new Map();
+    for (const r of uncoveredReqs) {
+      const t = r.sourceText.toLowerCase();
+      // Precise action taxonomy — no "validar" fallback
+      const action = /navegar|ir\s+a|acceder\s+a/i.test(t) ? "navigate" :
+                     /seleccionar|elegir|escoger/i.test(t) ? "select" :
+                     /ingresar|completar|llenar|digitar/i.test(t) ? "fill" :
+                     /buscar|consultar|filtrar/i.test(t) ? "search" :
+                     /enviar|procesar|ejecutar/i.test(t) ? "submit" :
+                     /confirmar|aceptar/i.test(t) ? "confirm" :
+                     /cancelar|rechazar/i.test(t) ? "cancel" :
+                     /volver|regresar|retornar/i.test(t) ? "return" :
+                     /descargar/i.test(t) ? "download" :
+                     /exportar/i.test(t) ? "export" :
+                     /generar/i.test(t) ? "generate" :
+                     /validar|verificar|mostrar|visualizar/i.test(t) ? "validate" : "unknown";
+      // Extract concrete object — if empty, isolate the requirement
+      const objMatch = t.match(/(?:de\s+la\s+|del\s+|de\s+las?\s+|de\s+los?\s+)?([a-záéíóúñ]{4,}(?:\s+[a-záéíóúñ]{3,})?)\s*$/);
+      const object = objMatch?.[1]?.trim() || "";
+      const key = object ? `${r.category}:${action}:${object}` : `${r.category}:${action}:isolated:${r.id}`;
+      if (!gapGroups.has(key)) gapGroups.set(key, { reqs: [], action, object });
+      gapGroups.get(key)!.reqs.push(r);
+      if (!object) console.log(`[coverage-gap] isolated requirement=${r.id} reason=missing_object action=${action}`);
+    }
+
+    console.log(`[coverage-repair] iteration=${iter} gaps=${uncoveredReqs.length} groups=${gapGroups.size}`);
+
+    for (const [key, group] of gapGroups) {
+      const { reqs, action, object } = group;
+
+      // Block requirements with unknown action and no object
+      if (action === "unknown" && !object) {
+        for (const r of reqs) {
+          r.status = "blocked";
+          (r as any).reasonCode = "requirement_semantics_incomplete";
+        }
+        console.log(`[coverage-gap] blocked group=${key} reason=requirement_semantics_incomplete`);
+        continue;
+      }
+
+      // Get targets by category compatibility (not mixed)
+      const targets: Array<{ value: string; source: string; compatible: boolean }> = [];
+      for (const r of reqs) {
+        if (r.category === "input_field" || r.category === "acceptance_criteria") {
+          for (const f of ((huModel?.requiredFields ?? []) as string[])) {
+            if (!["data_entry_fields","data_entry","recipient","rnc"].includes(f)) {
+              targets.push({ value: f, source: "requiredFields", compatible: action === "fill" || action === "validate" });
+            }
+          }
+        } else if (r.category === "selection") {
+          for (const e of (huModel?.selectableEntities ?? [])) {
+            const label = toSelectionEntity(String(e));
+            if (label && label !== "producto" && label !== "elemento") {
+              targets.push({ value: label, source: "selectableEntities", compatible: action === "select" || action === "validate" });
+            }
+          }
+        } else if (r.category === "button") {
+          for (const b of (huModel?.visibleButtons ?? [])) {
+            if (typeof b === "string" && b.length > 2 && b.length < 50) {
+              targets.push({ value: b, source: "visibleButtons", compatible: action === "submit" || action === "confirm" || action === "cancel" || action === "return" || action === "validate" });
+            }
+          }
+        } else if (r.category === "warning" || r.category === "obligation" || r.category === "ui_validation") {
+          // Resolve targets by action, not just visibleWarnings
+          if (action === "validate") {
+            for (const w of (huModel?.visibleWarnings ?? [])) {
+              if (typeof w === "string" && w.length > 3 && w.length < 80)
+                targets.push({ value: w, source: "visibleWarnings", compatible: true });
+            }
+            for (const b of (huModel?.visibleButtons ?? [])) {
+              if (typeof b === "string" && b.length > 2 && b.length < 50)
+                targets.push({ value: b, source: "visibleButtons", compatible: true });
+            }
+          } else if (action === "select") {
+            for (const e of (huModel?.selectableEntities ?? [])) {
+              const label = toSelectionEntity(String(e));
+              if (label && label !== "producto" && label !== "elemento")
+                targets.push({ value: label, source: "selectableEntities", compatible: true });
+            }
+          } else if (action === "fill") {
+            targets.push(...compatibleInputTargets());
+          } else if (action === "generate" || action === "download" || action === "export") {
+            for (const b of (huModel?.visibleButtons ?? [])) {
+              if (typeof b === "string" && b.length > 2 && b.length < 50)
+                targets.push({ value: b, source: "visibleButtons", compatible: true });
+            }
+          }
+        }
+      }
+
+      // Filter for compatible targets only
+      const compatibleTargets = targets.filter(t => t.compatible);
+      for (const t of targets.filter(t => !t.compatible)) {
+        console.log(`[coverage-target] requirement=${reqs[0]?.id} target="${t.value}" source=${t.source} compatible=false`);
+      }
+
+      if (compatibleTargets.length === 0 && action !== "validate" && action !== "unknown") {
+        for (const r of reqs) {
+          r.status = "blocked";
+          (r as any).reasonCode = "no_compatible_target";
+        }
+        console.log(`[coverage-gap] blocked group=${key} reason=no_compatible_target`);
+        continue;
+      }
+
+      // Build title: only from action + object + HU-detected entity, no foreign concepts
+      const firstTarget = compatibleTargets[0]?.value || object;
+      const huTokens = new Set([...(huModel?.selectableEntities ?? []).map((e: any) => toSelectionEntity(String(e))),
+        ...((huModel?.visibleButtons ?? []) as string[]).slice(0, 5),
+        entityTerm, object].map((s: string) => s.toLowerCase()));
+      const titleTarget = huTokens.has(firstTarget.toLowerCase()) ? firstTarget : (object || firstTarget);
+      const title = action === "validate" ? `Validar ${titleTarget}` :
+                    action === "select" ? `Seleccionar ${titleTarget}` :
+                    action === "fill" ? `Completar ${titleTarget}` :
+                    action === "confirm" ? `Confirmar ${titleTarget}` :
+                    action === "submit" ? `Enviar ${titleTarget}` :
+                    action === "cancel" ? `Cancelar ${titleTarget}` :
+                    action === "return" ? `Volver de ${titleTarget}` :
+                    action === "generate" ? `Generar ${titleTarget}` :
+                    action === "download" ? `Descargar ${titleTarget}` :
+                    action === "export" ? `Exportar ${titleTarget}` :
+                    action === "search" ? `Buscar ${titleTarget}` :
+                    action === "navigate" ? `Navegar a ${titleTarget}` :
+                    `Validar ${titleTarget}`;
+
+      // Prevent incoherent titles: action must match target semantic type
+      const isButtonAction = ["submit","confirm","cancel","return","generate","download","export"].includes(action);
+      const isButtonTarget = compatibleTargets.some(t => t.semanticType === "button");
+      if (isButtonAction && compatibleTargets.length > 0 && !isButtonTarget) {
+        console.log(`[coverage-title] rejected group=${key} reason=action_target_incoherent action=${action} targetTypes=${compatibleTargets.map(t=>t.semanticType).join(",")}`);
+        continue;
+      }
+
+      // Foreign concept guard: skip operational/structural words
+      const OPERATIONAL_WORDS = new Set(["proceso", "opcion", "resultado", "pantalla", "elemento", "correctamente",
+        "seleccion", "validacion", "confirmacion", "detalle", "listado", "operacion", "funcion", "accion", "estado",
+        "completado", "visible", "habilitado", "deshabilitado", "correcto", "requerido", "obligatorio",
+        // MCP operational verbs — not business concepts
+        "validar", "seleccionar", "completar", "ingresar", "confirmar", "cancelar", "volver", "generar",
+        "descargar", "exportar", "buscar", "mostrar", "visualizar", "continuar", "siguiente", "enviar"]);
+      const reqTokens = new Set(reqs.flatMap(r => r.sourceText.toLowerCase().split(/[\s,.;:]+/).filter(w => w.length > 3)));
+      const titleWords = title.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+      const foreignWords = titleWords.filter(w =>
+        !reqTokens.has(w) && !huTokens.has(w) && w !== entityTerm.toLowerCase() && !OPERATIONAL_WORDS.has(w)
+      );
+      if (foreignWords.length > 0) {
+        console.log(`[coverage-title] rejected group=${key} reason=foreign_business_concept terms="${foreignWords.join(",")}"`);
+        continue;
+      }
+
+      // Build steps: action + compatible target
+      const gapSteps: string[] = [];
+      if (action === "select" && huModel?.selectableEntities?.length) {
+        gapSteps.push(buildSelectionStep(huModel.selectableEntities[0]));
+      } else if (action === "fill" && compatibleTargets.length) {
+        gapSteps.push(`Completar el campo ${compatibleTargets[0].value}.`);
+      } else if (compatibleTargets.length) {
+        gapSteps.push(`Validar que se muestre "${compatibleTargets[0].value}".`);
+      } else {
+        gapSteps.push(`Validar ${object || entityTerm}.`);
+      }
+
+      const navPrefix = (candidatePrefixSteps ?? []).map((t: string) => `Clic en "${t}".`);
+      const newSc: any = {
+        sourceIssueKey: key,
+        title,
+        steps: [...navPrefix, ...gapSteps],
+        expectedResult: `${title.replace(/^\w/, c => c.toUpperCase())} completado correctamente.`,
+        preconditions: ["El usuario esta autenticado en la aplicacion."],
+        _variantId: `gap_${iter}_${gapGroups.size}`,
+        _coveredReqIds: reqs.map(r => r.id),
+        type: "functional", database: "", isConverted: 0,
+        automationType: "ui_discovery", setupStrategy: "no_login",
+        appSlug: appSlug ?? "unknown", targetAppSlug: appSlug ?? "unknown",
+        mcpExecutable: false, nonExecutableCriteria: "requires_route_discovery",
+        generationSource: "coverage_gap" as const,
+      };
+      scenarios.push(newSc);
+      console.log(`[coverage-gap] group=${key} action=${action} object="${object}" requirements=${reqs.map(r=>r.id).join(",")} strategy=generate_scenario title="${title}"`);
+    }
+
+    // Independent verification: reset and re-match from scratch
+    for (const req of uncoveredReqs) req.status = "uncovered";
+    for (const req of coverageReqs.filter(r => r.automatable)) {
+      for (const sc of scenarios) {
+        const { matched, evidenceSteps, confidence } = matchRequirement(req, sc);
+        // Guard: prevent self-referential matches from gap scenarios
+        const isGapScenario = (sc as any)._variantId?.startsWith("gap_");
+        if (matched && evidenceSteps.length > 0 && confidence >= 0.6 && !(isGapScenario && confidence < 0.9)) {
+          req.coveredBy.push({ scenarioId: (sc._variantId ?? sc.title ?? "?"), evidenceSteps, confidence });
+          req.status = "covered";
+        } else if (matched && evidenceSteps.length === 0) {
+          console.log(`[coverage-match] rejected requirement=${req.id} scenario=${(sc as any)._variantId ?? "?"} reason=self_referential_text_only`);
+        }
+      }
+    }
+
+    const newUncovered = coverageReqs.filter(r => r.automatable && r.status === "uncovered").length;
+    console.log(`[coverage-repair] iteration=${iter} uncoveredBefore=${uncoveredReqs.length} uncoveredAfter=${newUncovered}`);
+    if (newUncovered === uncoveredReqs.length) break;
+  }
+
+  const finalCovered = coverageReqs.filter(r => r.status === "covered").length;
+  const finalUncovered = coverageReqs.filter(r => r.automatable && r.status === "uncovered").length;
+  if (finalUncovered > 0) {
+    console.log(`[coverage] incomplete=true uncovered=${coverageReqs.filter(r => r.automatable && r.status === "uncovered").map(r => r.id).join(",")}`);
+  }
+
+  // ── Coverage reconciliation ──
+  const coveredCount = coverageReqs.filter(r => r.status === "covered").length;
+  const uncoveredCount = coverageReqs.filter(r => r.status === "uncovered" && r.automatable).length;
+  const blockedCount = coverageReqs.filter(r => r.status === "blocked").length;
+  const nonAutomatableCount = coverageReqs.filter(r => !r.automatable).length;
+  const requiredBlockedC = coverageReqs.filter(r => r.required && r.status === "blocked").length;
+  const requiredUncoveredC = coverageReqs.filter(r => r.required && r.status === "uncovered").length;
+  console.log(`[coverage] total=${coverageReqs.length} covered=${coveredCount} uncovered=${uncoveredCount} blocked=${blockedCount} nonAutomatable=${nonAutomatableCount}`);
+  console.log(`[coverage] required=${coverageReqs.filter(r=>r.required).length} requiredBlocked=${requiredBlockedC} requiredUncovered=${requiredUncoveredC}`);
+
+  // Normalize: non-automatable must have explicit status
+  for (const r of coverageReqs) {
+    if (!r.automatable && r.status === "uncovered") r.status = "non_automatable";
+  }
+  (globalThis as any).__coverageReqs = coverageReqs;
+
+  // Override: use only contract-clean scenarios
+  scenarios.length = 0;
+  scenarios.push(...contractClean);
+
+  // ── Functional chain validator with anyOf alternatives ──
+  function classifyStepType(step: string): string {
+    if (/^Clic en/i.test(step)) {
+      if (/continuar|confirmar|generar|enviar|solicitar|guardar/i.test(step)) return "submit";
+      if (/cancelar|volver|cerrar|salir/i.test(step)) return "cancel";
+      if (/seleccionar|primer[oa]?|segund[oa]?/i.test(step)) return "selection";
+      return "navigation";
+    }
+    if (/^Completar|^Ingresar|^Llenar/i.test(step)) return "fill";
+    if (/^Validar que.*(?:vista previa|preview|revisar|revisi[oó]n)/i.test(step)) return "preview";
+    if (/^Validar que.*(?:confirmacion|confirmar|resumen)/i.test(step)) return "confirmation";
+    if (/^Validar que.*(?:correo|email|envio|entreg|notificacion|enviar)/i.test(step)) return "delivery";
+    if (/^Validar que/i.test(step)) return "assertion";
+    return "unknown";
+  }
+
+  function buildFunctionalChain(steps: string[]): string[] {
+    const chain: string[] = [];
+    for (const s of steps) {
+      const type = classifyStepType(s);
+      if (type !== "unknown" && (chain.length === 0 || chain[chain.length - 1] !== type)) {
+        chain.push(type);
+      }
+    }
+    return chain;
+  }
+
+  function chainMatches(actual: string[], pattern: string[]): boolean {
+    let pi = 0;
+    for (const t of actual) { if (pi < pattern.length && t === pattern[pi]) pi++; }
+    return pi === pattern.length;
+  }
+
+  // Determine if submit is required based on HU signals
+  const hasAdvanceAction = (huModel?.visibleButtons ?? []).some((b: string) => /continuar|confirmar|generar|enviar/i.test(b));
+  // realFields: filter internal IDs from requiredFields (same logic as inside buildVariantScenarios)
+  const topLevelRealFields = ((huModel?.requiredFields ?? []) as string[]).filter(
+    (f: string) => !["data_entry_fields","data_entry","required_fields","fields","generic_field","recipient","sender","receiver","destination","source_field","target_field","rnc","r_n_c","date","amount","currency","period","reason","motivo"].includes(f.toLowerCase())
+  );
+  const hasFields = topLevelRealFields.length > 0;
+  const submitRequired = hasFields || hasAdvanceAction;
+  if (submitRequired) {
+    console.log(`[scenario-contract] submitRequired=true reason=${hasFields ? "required_fields" : "advance_action"}`);
+  }
+
+  // Alternative chain patterns per variant
+  const CHAIN_REQUIREMENTS: Record<string, string[][]> = {
+    preview_review_flow: submitRequired
+      ? [["navigation","selection","submit"], ["navigation","fill","submit"], ["navigation","selection","fill","submit"]]
+      : [["navigation","selection"], ["navigation","fill"]],
+    delivery_flow: submitRequired
+      ? [["navigation","selection","submit"], ["navigation","fill","submit"], ["navigation","preview","submit"], ["navigation","confirmation","submit"]]
+      : [["navigation","selection"], ["navigation","preview"], ["navigation","confirmation"]],
+    confirmation_flow: submitRequired
+      ? [["navigation","selection","submit"], ["navigation","fill","submit"]]
+      : [["navigation","selection"], ["navigation","fill"], ["navigation","preview"]],
+    confirmation_return_or_cancel_flow: submitRequired
+      ? [["navigation","selection","submit"], ["navigation","fill","submit"], ["navigation","preview"]]
+      : [["navigation","selection"], ["navigation","preview"], ["navigation","confirmation"]],
+    return_or_cancel_flow: [["navigation"]],
+    generating_in_progress_flow: [["navigation","selection"], ["navigation","fill"]],
+  };
+
+  for (const sc of scenarios) {
+    const variantId = sc._variantId as string | undefined;
+    const altChains = variantId ? CHAIN_REQUIREMENTS[variantId] : undefined;
+    if (altChains) {
+      const chain = buildFunctionalChain(sc.steps ?? []);
+      const chainStr = chain.join(">");
+      const matched = altChains.some(pattern => chainMatches(chain, pattern));
+      if (!matched) {
+        const patterns = altChains.map(p => p.join(">")).join(" | ");
+        console.log(`[scenario-contract] downgraded scenario="${sc.title?.slice(0,60)}" reason=missing_functional_chain requiredAnyOf="${patterns}" actual="${chainStr}"`);
+        sc.mcpExecutable = false;
+        sc.nonExecutableCriteria = "functional_prerequisite_missing";
+        sc.automationStatus = "blocked";
+        (sc as any)._blockedReason = `Cadena funcional incompleta: se requiere ${patterns}, actual ${chainStr}`;
+        (sc as any)._blockedChain = chainStr;
+        (sc as any)._requiredChain = patterns;
+      } else {
+        console.log(`[scenario-contract] chain scenario="${sc.title?.slice(0,40)}" variant=${variantId} actual=${chainStr} valid=true`);
+      }
+    }
+  }
+
+  // ── Unified title contract — shared with generateRoutePendingScenarios ──
+  let titlePassed = 0;
+  let titleFixed = 0;
+  let titleFailed = 0;
+  const titleClean: typeof scenarios = [];
+  const titleFallback = (huModel?.businessEntity as any)?.singularLabel || resolveSelectableEntityLabel();
+
+  for (const sc of scenarios) {
+    const result = validateAndRepairScenarioTitle(sc.title ?? "", titleFallback);
+    if (result.rejected) {
+      console.log(`[scenario-title-contract] rejected reason=unrepairable_title title="${sc.title?.slice(0,80)}"`);
+      titleFailed++;
+      continue;
+    }
+    if (result.repaired) {
+      console.log(`[scenario-title-contract] repaired reason=title_contract_violation old="${sc.title?.slice(0,60)}" new="${result.title.slice(0,60)}"`);
+      titleFixed++;
+    } else {
+      titlePassed++;
+    }
+    titleClean.push({ ...sc, title: result.title });
+  }
+
+  console.log(`[scenario-title-contract] source=final-visible scenarios=${scenarios.length} titlesPassed=${titlePassed} titlesFixed=${titleFixed} titlesFailed=${titleFailed}`);
+
+  scenarios.length = 0;
+  scenarios.push(...titleClean);
 
   console.log(`[scenario-preview] routePendingBuilder planBased=true target=${scenarioPlan?.scenarioCountTarget ?? "?"} variants=${scenarioPlan?.variants?.length ?? "?"}`);
-  console.log(`[scenario-preview] routePendingBuilder generated=${scenarios.length} quality=plan_based_route_pending automationStatus=requires_route_discovery`);
-  return scenarios;
+  console.log(`[scenario-preview] routePendingBuilder generated=${titleClean.length} quality=plan_based_route_pending automationStatus=requires_route_discovery`);
+  return titleClean;
 }
 }

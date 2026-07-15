@@ -1,0 +1,10 @@
+{
+  "id": "preview-003-buscar-cuenta-para-carta-de-referencia-bancaria",
+  "externalId": "PREVIEW-003",
+  "caseId": 0,
+  "title": "Buscar cuenta para carta de referencia bancaria",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-07-09T21:20:04.490Z"
+}

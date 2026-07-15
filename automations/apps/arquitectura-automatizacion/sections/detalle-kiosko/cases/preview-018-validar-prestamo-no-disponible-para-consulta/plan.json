@@ -1,0 +1,116 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-018",
+    "caseId": 0,
+    "title": "Validar préstamo no disponible para consulta"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Clic en \"Iniciar\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en \"transacciones y servicios\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "transacciones y servicios",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Clic en \"Consulta de balance\".",
+      "target": {
+        "strategy": "post_resume_text",
+        "value": "Consulta de balance",
+        "exact": false
+      },
+      "locatorStrategy": "post_resume_text"
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Clic en \"Préstamos\".",
+      "target": {
+        "strategy": "product_condition",
+        "value": "Préstamos",
+        "exact": false
+      },
+      "locatorStrategy": "product_condition"
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Seleccionar el primer préstamo visible del listado.",
+      "target": {
+        "strategy": "ordinal_selection",
+        "value": "el primer préstamo visible del listado",
+        "exact": false,
+        "metadata": {
+          "resolvedTargetName": "Préstamo 140279 - Pesos Dominicanos",
+          "resolvedCandidateId": "el-6",
+          "aiAssisted": false,
+          "repairType": "ordinal_selection",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "ordinal_selection",
+      "recoveryMetadata": {
+        "recoveredBy": "ordinal_selection",
+        "rationale": "ordinal_selection:first",
+        "ordinalSelectionDiagnostics": {
+          "selectionPatternDetected": true,
+          "ordinal": "first",
+          "domainTermSource": "generic_fallback",
+          "selectedCandidateText": "Préstamo 140279 - Pesos Dominicanos",
+          "selectedCandidateId": "el-6"
+        },
+        "selectedCandidateId": "el-6",
+        "selectedCandidateText": "Préstamo 140279 - Pesos Dominicanos",
+        "segmentIndex": 0,
+        "transitionDetected": true,
+        "executedAction": "Seleccionar el primer préstamo visible del listado."
+      }
+    }
+  ],
+  "notes": [
+    "Discovery partial: 6/7 navigations/assertions satisfied.",
+    "Review needed: 1 non-blocking assertion failure(s) were ignored for pass/fail reconciliation."
+  ],
+  "createdAt": "2026-07-13T14:10:27.568Z",
+  "metadata": {
+    "authFlowRequired": true,
+    "authFlowInsertionAfterStepIndex": 1,
+    "authFlowAlias": "defaultClient",
+    "authFlowLanding": "transactions_menu",
+    "authGateDetectedDuringDiscovery": true
+  }
+}

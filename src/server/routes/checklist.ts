@@ -24,6 +24,7 @@ router.get("/api/checklists/:issueKey", (req: Request, res: Response) => {
     return res.json({ issueKey, defects: [], checklistUrl: `/checklist/${issueKey}`, createdAt: null, updatedAt: null });
   }
   const resp = defectChecklistStore.toResponse(list, jobId);
+  console.log(`[checklist-query] issueKey=${issueKey} jobId=${jobId ?? 'none'} scope=${jobId ? 'job' : 'issue'} total=${resp.defects.length}`);
   return res.json(resp);
 });
 

@@ -13,6 +13,8 @@ export type StepExecutionResult = {
   screenshotPath?: string;
 };
 
+export type EvidenceKind = "selectionEvidence" | "formEvidence" | "assertionEvidence" | "detailEvidence" | "routeEvidence";
+
 export type PlanExecutionResult = {
   scenario: {
     source: "testrail" | "jira" | "manual";
@@ -27,6 +29,10 @@ export type PlanExecutionResult = {
   evidenceDir: string;
   steps: StepExecutionResult[];
   error?: string;
+  evidenceKind?: EvidenceKind;
+  isDetailEvidence?: boolean;
+  detailScreenshotRequired?: boolean;
+  lastActionTarget?: string;
 };
 
 export type PlansExecutionSummary = {

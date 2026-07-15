@@ -1,0 +1,10 @@
+{
+  "id": "preview-002-seleccionar-cuenta-para-generar-carta-de-referencia-bancaria",
+  "externalId": "PREVIEW-002",
+  "caseId": 0,
+  "title": "Seleccionar cuenta para generar carta de referencia bancaria",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-07-10T13:01:15.777Z"
+}
