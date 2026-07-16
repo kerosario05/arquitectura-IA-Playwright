@@ -1,23 +1,23 @@
 {
-  "id": "preview-004-validar-campos-financieros-del-prestamo",
-  "externalId": "PREVIEW-004",
+  "id": "preview-006-buscar-cuenta-para-carta-de-referencia-bancaria",
+  "externalId": "PREVIEW-006",
   "caseId": 0,
-  "title": "Validar campos financieros del préstamo",
-  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-004-validar-campos-financieros-del-prestamo\\plan.json",
-  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-004-validar-campos-financieros-del-prestamo\\case.spec.ts",
+  "title": "Buscar cuenta para carta de referencia bancaria",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-006-buscar-cuenta-para-carta-de-referencia-bancaria\\plan.json",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-006-buscar-cuenta-para-carta-de-referencia-bancaria\\case.spec.ts",
   "appSlug": "arquitectura-automatizacion",
   "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
   "status": "active",
   "source": "discovery",
   "appProfile": "arquitectura-automatizacion",
-  "createdAt": "2026-07-15T14:46:11.698Z",
-  "updatedAt": "2026-07-15T14:46:11.698Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-07-15T14-43-50-959Z\\discovered-plans.pending.json",
+  "createdAt": "2026-07-15T17:53:02.536Z",
+  "updatedAt": "2026-07-15T17:53:02.536Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-006\\2026-07-15T17-50-34-678Z\\discovered-plans.pending.json",
   "pomStatus": "promoted",
   "inlineDebugMode": false,
   "specVerificationStatus": "not_run",
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-07-15T14-43-50-959Z",
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-006\\2026-07-15T17-50-34-678Z",
     "pomDiagnostics": {
       "status": "promoted",
       "inlineFallbackUsed": false,
@@ -51,9 +51,6 @@
       "autoPomCreatedMethods": [],
       "fallbackUsed": false,
       "requirePomRuntime": false
-    },
-    "overwritten": true,
-    "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-004-validar-campos-financieros-del-prestamo\\plan.json",
-    "previousStatus": "active"
+    }
   }
 }

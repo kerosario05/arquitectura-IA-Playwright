@@ -16,6 +16,8 @@ export type Defect = {
   status: DefectStatus;
   createdAt: string;
   updatedAt: string;
+  jiraIssueKey?: string;
+  jiraIssueUrl?: string;
   technicalContext?: {
     reasonCode?: string;
     discoveryStatus?: string;
@@ -147,6 +149,15 @@ class DefectChecklistStore {
     list.updatedAt = defect.updatedAt;
     this.save();
     return defect;
+  }
+
+  findDefect(issueKey: string, defectId: string): Defect | undefined {
+    const list = this.load().find(c => c.issueKey === issueKey);
+    return list?.defects.find(d => d.id === defectId);
+  }
+
+  persist(): void {
+    this.save();
   }
 
   toResponse(list: Checklist, jobId?: string): { issueKey: string; title?: string; checklistUrl: string; defects: Defect[]; createdAt: string; updatedAt: string } {

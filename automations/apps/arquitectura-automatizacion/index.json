@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-07-13T19:59:41.430Z",
+  "updatedAt": "2026-07-15T17:53:02.536Z",
   "automations": [
     {
       "id": "c37869-generar-carta-de-referencia-con-cuenta-de-ahorro",
@@ -18212,13 +18212,13 @@
       "source": "discovery",
       "appProfile": "arquitectura-automatizacion",
       "createdAt": "2026-07-13T13:31:26.599Z",
-      "updatedAt": "2026-07-13T19:55:01.406Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-07-13T19-52-44-415Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-07-15T14:41:30.529Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-07-15T14-39-13-541Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-07-13T19-52-44-415Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-07-15T14-39-13-541Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -18271,13 +18271,13 @@
       "source": "discovery",
       "appProfile": "arquitectura-automatizacion",
       "createdAt": "2026-07-13T13:34:04.126Z",
-      "updatedAt": "2026-07-13T19:57:20.123Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-07-13T19-55-01-509Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-07-15T14:43:50.803Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-07-15T14-41-30-850Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-07-13T19-55-01-509Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-07-15T14-41-30-850Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -18498,13 +18498,13 @@
       "source": "discovery",
       "appProfile": "arquitectura-automatizacion",
       "createdAt": "2026-07-13T17:23:53.400Z",
-      "updatedAt": "2026-07-13T19:59:41.430Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-07-13T19-57-20-242Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-07-15T14:46:11.698Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-07-15T14-43-50-959Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "not_run",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-07-13T19-57-20-242Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-07-15T14-43-50-959Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -18542,6 +18542,174 @@
         "overwritten": true,
         "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-004-validar-campos-financieros-del-prestamo\\plan.json",
         "previousStatus": "active"
+      }
+    },
+    {
+      "id": "preview-004-seleccionar-cuenta-para-generar-carta-de-referencia-bancaria",
+      "externalId": "PREVIEW-004",
+      "caseId": 0,
+      "title": "Seleccionar cuenta para generar carta de referencia bancaria",
+      "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-004-seleccionar-cuenta-para-generar-carta-de-referencia-bancaria\\plan.json",
+      "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-004-seleccionar-cuenta-para-generar-carta-de-referencia-bancaria\\case.spec.ts",
+      "appSlug": "arquitectura-automatizacion",
+      "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "arquitectura-automatizacion",
+      "createdAt": "2026-07-15T17:48:07.955Z",
+      "updatedAt": "2026-07-15T17:48:07.956Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-07-15T17-45-35-088Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-07-15T17-45-35-088Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "ProductDetailPage",
+            "FormPage",
+            "HomePage",
+            "LoginPage",
+            "CategoryPage",
+            "ProductInformationPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-005-seleccionar-multiples-cuentas-para-generar-carta-de-referencia-bancaria",
+      "externalId": "PREVIEW-005",
+      "caseId": 0,
+      "title": "Seleccionar multiples cuentas para generar carta de referencia bancaria",
+      "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-005-seleccionar-multiples-cuentas-para-generar-carta-de-referencia-bancaria\\plan.json",
+      "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-005-seleccionar-multiples-cuentas-para-generar-carta-de-referencia-bancaria\\case.spec.ts",
+      "appSlug": "arquitectura-automatizacion",
+      "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "arquitectura-automatizacion",
+      "createdAt": "2026-07-15T17:50:34.487Z",
+      "updatedAt": "2026-07-15T17:50:34.487Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-07-15T17-48-08-079Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-07-15T17-48-08-079Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "ProductDetailPage",
+            "FormPage",
+            "HomePage",
+            "LoginPage",
+            "CategoryPage",
+            "ProductInformationPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-006-buscar-cuenta-para-carta-de-referencia-bancaria",
+      "externalId": "PREVIEW-006",
+      "caseId": 0,
+      "title": "Buscar cuenta para carta de referencia bancaria",
+      "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-006-buscar-cuenta-para-carta-de-referencia-bancaria\\plan.json",
+      "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-006-buscar-cuenta-para-carta-de-referencia-bancaria\\case.spec.ts",
+      "appSlug": "arquitectura-automatizacion",
+      "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "arquitectura-automatizacion",
+      "createdAt": "2026-07-15T17:53:02.536Z",
+      "updatedAt": "2026-07-15T17:53:02.536Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-006\\2026-07-15T17-50-34-678Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "not_run",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-006\\2026-07-15T17-50-34-678Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "ProductDetailPage",
+            "FormPage",
+            "HomePage",
+            "LoginPage",
+            "CategoryPage",
+            "ProductInformationPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
       }
     }
   ]

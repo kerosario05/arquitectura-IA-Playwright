@@ -4,6 +4,6 @@
   "sectionName": "Detalle_KIOSKO",
   "sourceScenarioId": "PREVIEW-004",
   "testRailCaseId": 0,
-  "generatedAt": "2026-07-15T14:46:11.655Z",
-  "title": "Validar campos financieros del préstamo"
+  "generatedAt": "2026-07-15T17:48:07.904Z",
+  "title": "Seleccionar cuenta para generar carta de referencia bancaria"
 }

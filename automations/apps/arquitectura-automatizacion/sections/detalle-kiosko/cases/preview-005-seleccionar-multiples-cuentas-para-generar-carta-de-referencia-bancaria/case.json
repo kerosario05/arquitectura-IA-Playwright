@@ -1,0 +1,10 @@
+{
+  "id": "preview-005-seleccionar-multiples-cuentas-para-generar-carta-de-referencia-bancaria",
+  "externalId": "PREVIEW-005",
+  "caseId": 0,
+  "title": "Seleccionar multiples cuentas para generar carta de referencia bancaria",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-07-15T17:50:34.435Z"
+}

@@ -1338,10 +1338,105 @@
         },
         "createdAt": "2026-07-13T20:11:47.630Z",
         "updatedAt": "2026-07-13T20:11:47.630Z"
+      },
+      {
+        "id": "1784128068557-maob76b",
+        "description": "Escenario:\nPREVIEW-001 — Visualizar listado de Préstamos disponibles\n\nResultado:\nFallido\n\nResultado esperado:\nListado de Préstamos visible.\n\nResultado actual:\npage.goto: net::ERR_CONNECTION_TIMED_OUT at https://172.27.4.50/ Call log: - navigating to \"https://172.27.4.50/\", waiting until \"domcontentloaded\"\n\nCódigo técnico:\nexecution_exception\n\nEjecución:\ncdc39062-335e-4b6f-9dfe-31388436bfff\n\nTestRail:\nCaso C41827 · Run 3614\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "cdc39062-335e-4b6f-9dfe-31388436bfff",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Visualizar listado de Préstamos disponibles",
+        "technicalContext": {
+          "reasonCode": "execution_exception",
+          "expectedResult": "Listado de Préstamos visible.",
+          "rawError": "page.goto: net::ERR_CONNECTION_TIMED_OUT at https://172.27.4.50/\nCall log:\n\u001b[2m  - navigating to \"https://172.27.4.50/\", waiting until \"domcontentloaded\"\u001b[22m\n",
+          "testRailCaseId": 41827,
+          "testRailRunId": 3614
+        },
+        "createdAt": "2026-07-15T15:07:48.557Z",
+        "updatedAt": "2026-07-15T15:07:48.557Z"
+      },
+      {
+        "id": "1784128068564-vkl40wu",
+        "description": "Escenario:\nPREVIEW-002 — Consultar detalle del préstamo seleccionado\n\nResultado:\nFallido\n\nResultado esperado:\nDetalle del préstamo visible.\n\nResultado actual:\npage.goto: net::ERR_CONNECTION_TIMED_OUT at https://172.27.4.50/ Call log: - navigating to \"https://172.27.4.50/\", waiting until \"domcontentloaded\"\n\nCódigo técnico:\nexecution_exception\n\nEjecución:\ncdc39062-335e-4b6f-9dfe-31388436bfff\n\nTestRail:\nCaso C41828 · Run 3614\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "cdc39062-335e-4b6f-9dfe-31388436bfff",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-002",
+        "scenarioTitle": "Consultar detalle del préstamo seleccionado",
+        "technicalContext": {
+          "reasonCode": "execution_exception",
+          "expectedResult": "Detalle del préstamo visible.",
+          "rawError": "page.goto: net::ERR_CONNECTION_TIMED_OUT at https://172.27.4.50/\nCall log:\n\u001b[2m  - navigating to \"https://172.27.4.50/\", waiting until \"domcontentloaded\"\u001b[22m\n",
+          "testRailCaseId": 41828,
+          "testRailRunId": 3614
+        },
+        "createdAt": "2026-07-15T15:07:48.564Z",
+        "updatedAt": "2026-07-15T15:07:48.564Z"
+      },
+      {
+        "id": "1784128068569-94k8imz",
+        "description": "Escenario:\nPREVIEW-003 — Validar datos identificativos del préstamo\n\nResultado:\nFallido\n\nResultado esperado:\nDatos identificativos del préstamo visibles.\n\nResultado actual:\npage.goto: net::ERR_CONNECTION_TIMED_OUT at https://172.27.4.50/ Call log: - navigating to \"https://172.27.4.50/\", waiting until \"domcontentloaded\"\n\nCódigo técnico:\nexecution_exception\n\nEjecución:\ncdc39062-335e-4b6f-9dfe-31388436bfff\n\nTestRail:\nCaso C41829 · Run 3614\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "cdc39062-335e-4b6f-9dfe-31388436bfff",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-003",
+        "scenarioTitle": "Validar datos identificativos del préstamo",
+        "technicalContext": {
+          "reasonCode": "execution_exception",
+          "expectedResult": "Datos identificativos del préstamo visibles.",
+          "rawError": "page.goto: net::ERR_CONNECTION_TIMED_OUT at https://172.27.4.50/\nCall log:\n\u001b[2m  - navigating to \"https://172.27.4.50/\", waiting until \"domcontentloaded\"\u001b[22m\n",
+          "testRailCaseId": 41829,
+          "testRailRunId": 3614
+        },
+        "createdAt": "2026-07-15T15:07:48.569Z",
+        "updatedAt": "2026-07-15T15:07:48.569Z"
+      },
+      {
+        "id": "1784128068573-pxlwi0x",
+        "description": "Escenario:\nPREVIEW-004 — Validar campos financieros del préstamo\n\nResultado:\nFallido\n\nResultado esperado:\nCampos financieros del préstamo visibles y correctos.\n\nResultado actual:\npage.goto: net::ERR_CONNECTION_TIMED_OUT at https://172.27.4.50/ Call log: - navigating to \"https://172.27.4.50/\", waiting until \"domcontentloaded\"\n\nCódigo técnico:\nexecution_exception\n\nEjecución:\ncdc39062-335e-4b6f-9dfe-31388436bfff\n\nTestRail:\nCaso C41830 · Run 3614\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "cdc39062-335e-4b6f-9dfe-31388436bfff",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-004",
+        "scenarioTitle": "Validar campos financieros del préstamo",
+        "technicalContext": {
+          "reasonCode": "execution_exception",
+          "expectedResult": "Campos financieros del préstamo visibles y correctos.",
+          "rawError": "page.goto: net::ERR_CONNECTION_TIMED_OUT at https://172.27.4.50/\nCall log:\n\u001b[2m  - navigating to \"https://172.27.4.50/\", waiting until \"domcontentloaded\"\u001b[22m\n",
+          "testRailCaseId": 41830,
+          "testRailRunId": 3614
+        },
+        "createdAt": "2026-07-15T15:07:48.573Z",
+        "updatedAt": "2026-07-15T15:07:48.573Z"
+      },
+      {
+        "id": "1784128068576-nkgri0t",
+        "description": "Escenario:\nPREVIEW-005 — Validar opciones posteriores del préstamo\n\nResultado:\nFallido\n\nResultado esperado:\nOpciones posteriores del préstamo visibles.\n\nResultado actual:\npage.goto: net::ERR_CONNECTION_TIMED_OUT at https://172.27.4.50/ Call log: - navigating to \"https://172.27.4.50/\", waiting until \"domcontentloaded\"\n\nCódigo técnico:\nexecution_exception\n\nEjecución:\ncdc39062-335e-4b6f-9dfe-31388436bfff\n\nTestRail:\nCaso C41831 · Run 3614\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "cdc39062-335e-4b6f-9dfe-31388436bfff",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-005",
+        "scenarioTitle": "Validar opciones posteriores del préstamo",
+        "technicalContext": {
+          "reasonCode": "execution_exception",
+          "expectedResult": "Opciones posteriores del préstamo visibles.",
+          "rawError": "page.goto: net::ERR_CONNECTION_TIMED_OUT at https://172.27.4.50/\nCall log:\n\u001b[2m  - navigating to \"https://172.27.4.50/\", waiting until \"domcontentloaded\"\u001b[22m\n",
+          "testRailCaseId": 41831,
+          "testRailRunId": 3614
+        },
+        "createdAt": "2026-07-15T15:07:48.576Z",
+        "updatedAt": "2026-07-15T15:07:48.576Z"
       }
     ],
     "createdAt": "2026-07-02T20:31:30.026Z",
-    "updatedAt": "2026-07-13T20:11:47.630Z"
+    "updatedAt": "2026-07-15T15:07:48.576Z"
   },
   {
     "id": "1783515493607-o831bjc",
@@ -1871,9 +1966,312 @@
         "scenarioTitle": "Seleccionar multiples cuentas para carta de referencia bancaria",
         "createdAt": "2026-07-11T22:14:51.336Z",
         "updatedAt": "2026-07-11T22:14:51.336Z"
+      },
+      {
+        "id": "1784138014653-qu9eone",
+        "description": "Escenario:\nPREVIEW-001 — Revisar vista previa de carta de referencia bancaria\n\nResultado:\nFallido\n\nPaso fallido:\nPaso 7: Confirmar\n\nÚltimo paso exitoso:\nPaso 3: Clic en \"Carta de referencia\".: Carta de referencia\n\nResultado esperado:\nLa vista previa de carta de referencia bancaria se muestra correctamente.\n\nResultado actual:\nSe encontraron múltiples opciones coincidentes y no fue posible determinar la correcta.\n\nCódigo técnico:\nambiguous_target\n\nEjecución:\n510292e3-bd9f-4f62-b4c2-ccc048cf54ba\n\nTestRail:\nCaso C41837 · Run 3618\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "510292e3-bd9f-4f62-b4c2-ccc048cf54ba",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Revisar vista previa de carta de referencia bancaria",
+        "technicalContext": {
+          "reasonCode": "ambiguous_target",
+          "discoveryStatus": "exploration_failed",
+          "failedAtStep": 7,
+          "failedTarget": "Confirmar",
+          "expectedResult": "La vista previa de carta de referencia bancaria se muestra correctamente.",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-07-15T17-35-55-915Z\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-07-15T17-35-55-915Z\\evidence\\step-3-snapshot.json",
+          "lastSuccessfulStep": {
+            "stepIndex": 3,
+            "action": "Clic en \"Carta de referencia\".",
+            "target": "Carta de referencia",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-07-15T17-35-55-915Z\\evidence\\step-3-snapshot.json"
+          },
+          "testRailCaseId": 41837,
+          "testRailRunId": 3618
+        },
+        "createdAt": "2026-07-15T17:53:34.652Z",
+        "updatedAt": "2026-07-15T17:53:34.652Z"
+      },
+      {
+        "id": "1784138014660-peoqgj7",
+        "description": "Escenario:\nPREVIEW-002 — Ejecutar flujo completo de carta de referencia bancaria\n\nResultado:\nFallido\n\nPaso fallido:\nPaso 6: Confirmar\n\nÚltimo paso exitoso:\nPaso 3: Clic en \"Carta de referencia\".: Carta de referencia\n\nResultado esperado:\nEl flujo de carta de referencia bancaria se completa exitosamente.\n\nResultado actual:\nSe encontraron múltiples opciones coincidentes y no fue posible determinar la correcta.\n\nCódigo técnico:\nambiguous_target\n\nEjecución:\n510292e3-bd9f-4f62-b4c2-ccc048cf54ba\n\nTestRail:\nCaso C41838 · Run 3618\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "510292e3-bd9f-4f62-b4c2-ccc048cf54ba",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-002",
+        "scenarioTitle": "Ejecutar flujo completo de carta de referencia bancaria",
+        "technicalContext": {
+          "reasonCode": "ambiguous_target",
+          "discoveryStatus": "exploration_failed",
+          "failedAtStep": 6,
+          "failedTarget": "Confirmar",
+          "expectedResult": "El flujo de carta de referencia bancaria se completa exitosamente.",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-07-15T17-38-58-511Z\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-07-15T17-38-58-511Z\\evidence\\step-3-snapshot.json",
+          "lastSuccessfulStep": {
+            "stepIndex": 3,
+            "action": "Clic en \"Carta de referencia\".",
+            "target": "Carta de referencia",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-07-15T17-38-58-511Z\\evidence\\step-3-snapshot.json"
+          },
+          "testRailCaseId": 41838,
+          "testRailRunId": 3618
+        },
+        "createdAt": "2026-07-15T17:53:34.660Z",
+        "updatedAt": "2026-07-15T17:53:34.660Z"
+      },
+      {
+        "id": "1784138014665-764ir4r",
+        "description": "Escenario:\nPREVIEW-003 — Completar datos requeridos para generar carta de referencia bancaria\n\nResultado:\nFallido\n\nPaso fallido:\nPaso 4: los campos requeridos\n\nÚltimo paso exitoso:\nPaso 3: Clic en \"Carta de referencia\".: Carta de referencia\n\nResultado esperado:\nEl sistema muestra las validaciones de campos requeridos.\n\nResultado actual:\nNo se encontró el elemento necesario para continuar la ejecución.\n\nCódigo técnico:\ntarget_not_found\n\nEjecución:\n510292e3-bd9f-4f62-b4c2-ccc048cf54ba\n\nTestRail:\nCaso C41839 · Run 3618\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "510292e3-bd9f-4f62-b4c2-ccc048cf54ba",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-003",
+        "scenarioTitle": "Completar datos requeridos para generar carta de referencia bancaria",
+        "technicalContext": {
+          "reasonCode": "target_not_found",
+          "discoveryStatus": "exploration_failed",
+          "failedAtStep": 4,
+          "failedTarget": "los campos requeridos",
+          "expectedResult": "El sistema muestra las validaciones de campos requeridos.",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-07-15T17-42-14-509Z\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-07-15T17-42-14-509Z\\evidence\\step-3-snapshot.json",
+          "lastSuccessfulStep": {
+            "stepIndex": 3,
+            "action": "Clic en \"Carta de referencia\".",
+            "target": "Carta de referencia",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-07-15T17-42-14-509Z\\evidence\\step-3-snapshot.json"
+          },
+          "testRailCaseId": 41839,
+          "testRailRunId": 3618
+        },
+        "createdAt": "2026-07-15T17:53:34.665Z",
+        "updatedAt": "2026-07-15T17:53:34.665Z"
+      },
+      {
+        "id": "1784157632479-cwd1kx8",
+        "description": "Escenario:\nPREVIEW-001 — Revisar vista previa de carta de referencia bancaria\n\nResultado:\nFallido\n\nResultado esperado:\nLa vista previa de carta de referencia bancaria se muestra correctamente.\n\nResultado actual:\n[auth-gate] functionalStepBlocked reason=auth_gate_still_active stage=\"otp\" target=\"Generar cartas\"\n\nCódigo técnico:\nexecution_exception\n\nEjecución:\nd1976691-f546-41ac-a93c-982a09804c92\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "critical",
+        "severityReason": "Fallo de autenticación o bloqueo total que impide ejecutar el flujo.",
+        "jobId": "d1976691-f546-41ac-a93c-982a09804c92",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Revisar vista previa de carta de referencia bancaria",
+        "technicalContext": {
+          "reasonCode": "execution_exception",
+          "expectedResult": "La vista previa de carta de referencia bancaria se muestra correctamente.",
+          "rawError": "[auth-gate] functionalStepBlocked reason=auth_gate_still_active stage=\"otp\" target=\"Generar cartas\""
+        },
+        "createdAt": "2026-07-15T23:20:32.478Z",
+        "updatedAt": "2026-07-15T23:20:32.478Z"
+      },
+      {
+        "id": "1784157632485-pk58u73",
+        "description": "Escenario:\nPREVIEW-002 — Ejecutar flujo completo de carta de referencia bancaria\n\nResultado:\nFallido\n\nResultado esperado:\nEl flujo de carta de referencia bancaria se completa exitosamente.\n\nResultado actual:\n[auth-gate] functionalStepBlocked reason=auth_gate_still_active stage=\"otp\" target=\"Generar cartas\"\n\nCódigo técnico:\nexecution_exception\n\nEjecución:\nd1976691-f546-41ac-a93c-982a09804c92\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "critical",
+        "severityReason": "Fallo de autenticación o bloqueo total que impide ejecutar el flujo.",
+        "jobId": "d1976691-f546-41ac-a93c-982a09804c92",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-002",
+        "scenarioTitle": "Ejecutar flujo completo de carta de referencia bancaria",
+        "technicalContext": {
+          "reasonCode": "execution_exception",
+          "expectedResult": "El flujo de carta de referencia bancaria se completa exitosamente.",
+          "rawError": "[auth-gate] functionalStepBlocked reason=auth_gate_still_active stage=\"otp\" target=\"Generar cartas\""
+        },
+        "createdAt": "2026-07-15T23:20:32.485Z",
+        "updatedAt": "2026-07-15T23:20:32.485Z"
+      },
+      {
+        "id": "1784157632489-tbg2mhd",
+        "description": "Escenario:\nPREVIEW-003 — Completar datos requeridos para generar carta de referencia bancaria\n\nResultado:\nFallido\n\nResultado esperado:\nEl sistema muestra las validaciones de campos requeridos.\n\nResultado actual:\n[auth-gate] functionalStepBlocked reason=auth_gate_still_active stage=\"otp\" target=\"Generar cartas\"\n\nCódigo técnico:\nexecution_exception\n\nEjecución:\nd1976691-f546-41ac-a93c-982a09804c92\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "critical",
+        "severityReason": "Fallo de autenticación o bloqueo total que impide ejecutar el flujo.",
+        "jobId": "d1976691-f546-41ac-a93c-982a09804c92",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-003",
+        "scenarioTitle": "Completar datos requeridos para generar carta de referencia bancaria",
+        "technicalContext": {
+          "reasonCode": "execution_exception",
+          "expectedResult": "El sistema muestra las validaciones de campos requeridos.",
+          "rawError": "[auth-gate] functionalStepBlocked reason=auth_gate_still_active stage=\"otp\" target=\"Generar cartas\""
+        },
+        "createdAt": "2026-07-15T23:20:32.489Z",
+        "updatedAt": "2026-07-15T23:20:32.489Z"
+      },
+      {
+        "id": "1784157632492-c3fyqno",
+        "description": "Escenario:\nPREVIEW-004 — Seleccionar cuenta para generar carta de referencia bancaria\n\nResultado:\nFallido\n\nResultado esperado:\nLa seleccion de cuenta para carta de referencia bancaria se completa correctamente.\n\nResultado actual:\n[auth-gate] functionalStepBlocked reason=auth_gate_still_active stage=\"otp\" target=\"Generar cartas\"\n\nCódigo técnico:\nexecution_exception\n\nEjecución:\nd1976691-f546-41ac-a93c-982a09804c92\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "critical",
+        "severityReason": "Fallo de autenticación o bloqueo total que impide ejecutar el flujo.",
+        "jobId": "d1976691-f546-41ac-a93c-982a09804c92",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-004",
+        "scenarioTitle": "Seleccionar cuenta para generar carta de referencia bancaria",
+        "technicalContext": {
+          "reasonCode": "execution_exception",
+          "expectedResult": "La seleccion de cuenta para carta de referencia bancaria se completa correctamente.",
+          "rawError": "[auth-gate] functionalStepBlocked reason=auth_gate_still_active stage=\"otp\" target=\"Generar cartas\""
+        },
+        "createdAt": "2026-07-15T23:20:32.492Z",
+        "updatedAt": "2026-07-15T23:20:32.492Z"
+      },
+      {
+        "id": "1784157632496-x6yo70a",
+        "description": "Escenario:\nPREVIEW-005 — Seleccionar multiples cuentas para generar carta de referencia bancaria\n\nResultado:\nFallido\n\nResultado esperado:\nLa seleccion multiple de cuenta para carta de referencia bancaria se completa correctamente.\n\nResultado actual:\n[auth-gate] functionalStepBlocked reason=auth_gate_still_active stage=\"otp\" target=\"Generar cartas\"\n\nCódigo técnico:\nexecution_exception\n\nEjecución:\nd1976691-f546-41ac-a93c-982a09804c92\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "critical",
+        "severityReason": "Fallo de autenticación o bloqueo total que impide ejecutar el flujo.",
+        "jobId": "d1976691-f546-41ac-a93c-982a09804c92",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-005",
+        "scenarioTitle": "Seleccionar multiples cuentas para generar carta de referencia bancaria",
+        "technicalContext": {
+          "reasonCode": "execution_exception",
+          "expectedResult": "La seleccion multiple de cuenta para carta de referencia bancaria se completa correctamente.",
+          "rawError": "[auth-gate] functionalStepBlocked reason=auth_gate_still_active stage=\"otp\" target=\"Generar cartas\""
+        },
+        "createdAt": "2026-07-15T23:20:32.496Z",
+        "updatedAt": "2026-07-15T23:20:32.496Z"
+      },
+      {
+        "id": "1784157632499-88qs24z",
+        "description": "Escenario:\nPREVIEW-006 — Buscar cuenta para carta de referencia bancaria\n\nResultado:\nFallido\n\nResultado esperado:\nLa busqueda muestra resultados y permite seleccionar.\n\nResultado actual:\n[auth-gate] functionalStepBlocked reason=auth_gate_still_active stage=\"otp\" target=\"Generar cartas\"\n\nCódigo técnico:\nexecution_exception\n\nEjecución:\nd1976691-f546-41ac-a93c-982a09804c92\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "critical",
+        "severityReason": "Fallo de autenticación o bloqueo total que impide ejecutar el flujo.",
+        "jobId": "d1976691-f546-41ac-a93c-982a09804c92",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-006",
+        "scenarioTitle": "Buscar cuenta para carta de referencia bancaria",
+        "technicalContext": {
+          "reasonCode": "execution_exception",
+          "expectedResult": "La busqueda muestra resultados y permite seleccionar.",
+          "rawError": "[auth-gate] functionalStepBlocked reason=auth_gate_still_active stage=\"otp\" target=\"Generar cartas\""
+        },
+        "createdAt": "2026-07-15T23:20:32.499Z",
+        "updatedAt": "2026-07-15T23:20:32.499Z"
+      },
+      {
+        "id": "1784204819675-2s8tz19",
+        "description": "Escenario:\nPREVIEW-001 — Revisar vista previa de carta de referencia bancaria\n\nResultado:\nFallido\n\nResultado esperado:\nLa vista previa de carta de referencia bancaria se muestra correctamente.\n\nResultado actual:\n[auth-gate] functionalStepBlocked reason=auth_gate_still_active stage=\"otp\" target=\"Generar cartas\"\n\nCódigo técnico:\nexecution_exception\n\nEjecución:\n4b29c044-ee84-4bdc-9995-e4742582a387\n\nTestRail:\nCaso C41851 · Run 3627\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "critical",
+        "severityReason": "Fallo de autenticación o bloqueo total que impide ejecutar el flujo.",
+        "jobId": "4b29c044-ee84-4bdc-9995-e4742582a387",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Revisar vista previa de carta de referencia bancaria",
+        "technicalContext": {
+          "reasonCode": "execution_exception",
+          "expectedResult": "La vista previa de carta de referencia bancaria se muestra correctamente.",
+          "rawError": "[auth-gate] functionalStepBlocked reason=auth_gate_still_active stage=\"otp\" target=\"Generar cartas\"",
+          "testRailCaseId": 41851,
+          "testRailRunId": 3627
+        },
+        "createdAt": "2026-07-16T12:26:59.675Z",
+        "updatedAt": "2026-07-16T12:26:59.675Z"
+      },
+      {
+        "id": "1784204819682-ozkcxdu",
+        "description": "Escenario:\nPREVIEW-002 — Ejecutar flujo completo de carta de referencia bancaria\n\nResultado:\nFallido\n\nResultado esperado:\nEl flujo de carta de referencia bancaria se completa exitosamente.\n\nResultado actual:\n[auth-gate] functionalStepBlocked reason=auth_gate_still_active stage=\"otp\" target=\"Generar cartas\"\n\nCódigo técnico:\nexecution_exception\n\nEjecución:\n4b29c044-ee84-4bdc-9995-e4742582a387\n\nTestRail:\nCaso C41852 · Run 3627\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "critical",
+        "severityReason": "Fallo de autenticación o bloqueo total que impide ejecutar el flujo.",
+        "jobId": "4b29c044-ee84-4bdc-9995-e4742582a387",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-002",
+        "scenarioTitle": "Ejecutar flujo completo de carta de referencia bancaria",
+        "technicalContext": {
+          "reasonCode": "execution_exception",
+          "expectedResult": "El flujo de carta de referencia bancaria se completa exitosamente.",
+          "rawError": "[auth-gate] functionalStepBlocked reason=auth_gate_still_active stage=\"otp\" target=\"Generar cartas\"",
+          "testRailCaseId": 41852,
+          "testRailRunId": 3627
+        },
+        "createdAt": "2026-07-16T12:26:59.681Z",
+        "updatedAt": "2026-07-16T12:26:59.681Z"
+      },
+      {
+        "id": "1784204819686-60f292a",
+        "description": "Escenario:\nPREVIEW-003 — Completar datos requeridos para generar carta de referencia bancaria\n\nResultado:\nFallido\n\nResultado esperado:\nEl sistema muestra las validaciones de campos requeridos.\n\nResultado actual:\n[auth-gate] functionalStepBlocked reason=auth_gate_still_active stage=\"otp\" target=\"Generar cartas\"\n\nCódigo técnico:\nexecution_exception\n\nEjecución:\n4b29c044-ee84-4bdc-9995-e4742582a387\n\nTestRail:\nCaso C41853 · Run 3627\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "critical",
+        "severityReason": "Fallo de autenticación o bloqueo total que impide ejecutar el flujo.",
+        "jobId": "4b29c044-ee84-4bdc-9995-e4742582a387",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-003",
+        "scenarioTitle": "Completar datos requeridos para generar carta de referencia bancaria",
+        "technicalContext": {
+          "reasonCode": "execution_exception",
+          "expectedResult": "El sistema muestra las validaciones de campos requeridos.",
+          "rawError": "[auth-gate] functionalStepBlocked reason=auth_gate_still_active stage=\"otp\" target=\"Generar cartas\"",
+          "testRailCaseId": 41853,
+          "testRailRunId": 3627
+        },
+        "createdAt": "2026-07-16T12:26:59.685Z",
+        "updatedAt": "2026-07-16T12:26:59.685Z"
+      },
+      {
+        "id": "1784204819690-rftk70u",
+        "description": "Escenario:\nPREVIEW-004 — Seleccionar cuenta para generar carta de referencia bancaria\n\nResultado:\nFallido\n\nResultado esperado:\nLa seleccion de cuenta para carta de referencia bancaria se completa correctamente.\n\nResultado actual:\n[auth-gate] functionalStepBlocked reason=auth_gate_still_active stage=\"otp\" target=\"Generar cartas\"\n\nCódigo técnico:\nexecution_exception\n\nEjecución:\n4b29c044-ee84-4bdc-9995-e4742582a387\n\nTestRail:\nCaso C41854 · Run 3627\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "critical",
+        "severityReason": "Fallo de autenticación o bloqueo total que impide ejecutar el flujo.",
+        "jobId": "4b29c044-ee84-4bdc-9995-e4742582a387",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-004",
+        "scenarioTitle": "Seleccionar cuenta para generar carta de referencia bancaria",
+        "technicalContext": {
+          "reasonCode": "execution_exception",
+          "expectedResult": "La seleccion de cuenta para carta de referencia bancaria se completa correctamente.",
+          "rawError": "[auth-gate] functionalStepBlocked reason=auth_gate_still_active stage=\"otp\" target=\"Generar cartas\"",
+          "testRailCaseId": 41854,
+          "testRailRunId": 3627
+        },
+        "createdAt": "2026-07-16T12:26:59.690Z",
+        "updatedAt": "2026-07-16T12:26:59.690Z"
+      },
+      {
+        "id": "1784204819696-3dff3dr",
+        "description": "Escenario:\nPREVIEW-005 — Seleccionar multiples cuentas para generar carta de referencia bancaria\n\nResultado:\nFallido\n\nResultado esperado:\nLa seleccion multiple de cuenta para carta de referencia bancaria se completa correctamente.\n\nResultado actual:\n[auth-gate] functionalStepBlocked reason=auth_gate_still_active stage=\"otp\" target=\"Generar cartas\"\n\nCódigo técnico:\nexecution_exception\n\nEjecución:\n4b29c044-ee84-4bdc-9995-e4742582a387\n\nTestRail:\nCaso C41855 · Run 3627\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "critical",
+        "severityReason": "Fallo de autenticación o bloqueo total que impide ejecutar el flujo.",
+        "jobId": "4b29c044-ee84-4bdc-9995-e4742582a387",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-005",
+        "scenarioTitle": "Seleccionar multiples cuentas para generar carta de referencia bancaria",
+        "technicalContext": {
+          "reasonCode": "execution_exception",
+          "expectedResult": "La seleccion multiple de cuenta para carta de referencia bancaria se completa correctamente.",
+          "rawError": "[auth-gate] functionalStepBlocked reason=auth_gate_still_active stage=\"otp\" target=\"Generar cartas\"",
+          "testRailCaseId": 41855,
+          "testRailRunId": 3627
+        },
+        "createdAt": "2026-07-16T12:26:59.696Z",
+        "updatedAt": "2026-07-16T12:26:59.696Z"
+      },
+      {
+        "id": "1784204819700-3ejjvur",
+        "description": "Escenario:\nPREVIEW-006 — Buscar cuenta para carta de referencia bancaria\n\nResultado:\nFallido\n\nResultado esperado:\nLa busqueda muestra resultados y permite seleccionar.\n\nResultado actual:\n[auth-gate] functionalStepBlocked reason=auth_gate_still_active stage=\"otp\" target=\"Generar cartas\"\n\nCódigo técnico:\nexecution_exception\n\nEjecución:\n4b29c044-ee84-4bdc-9995-e4742582a387\n\nTestRail:\nCaso C41856 · Run 3627\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "critical",
+        "severityReason": "Fallo de autenticación o bloqueo total que impide ejecutar el flujo.",
+        "jobId": "4b29c044-ee84-4bdc-9995-e4742582a387",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-006",
+        "scenarioTitle": "Buscar cuenta para carta de referencia bancaria",
+        "technicalContext": {
+          "reasonCode": "execution_exception",
+          "expectedResult": "La busqueda muestra resultados y permite seleccionar.",
+          "rawError": "[auth-gate] functionalStepBlocked reason=auth_gate_still_active stage=\"otp\" target=\"Generar cartas\"",
+          "testRailCaseId": 41856,
+          "testRailRunId": 3627
+        },
+        "createdAt": "2026-07-16T12:26:59.700Z",
+        "updatedAt": "2026-07-16T12:26:59.700Z"
       }
     ],
     "createdAt": "2026-07-09T17:09:47.343Z",
-    "updatedAt": "2026-07-11T22:14:51.336Z"
+    "updatedAt": "2026-07-16T12:26:59.700Z"
   }
 ]

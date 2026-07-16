@@ -1,4 +1,6 @@
 import type { RequiredJiraRuntimeConfig, RawJiraIssue, JiraSearchResult, JiraProject, JiraBoard, JiraSprint } from "../types/jira.types";
+import * as fs from "fs";
+import * as path from "path";
 
 type ApiErrorPayload = {
   errorMessages?: string[];
@@ -141,9 +143,95 @@ export class JiraClient {
     return sprints.find((s) => s.state === "active");
   }
 
+  async createIssue(params: {
+    projectKey: string;
+    summary: string;
+    description: string;
+    issueType?: string;
+    assigneeAccountId?: string;
+  }): Promise<{ ok: boolean; issueKey?: string; issueUrl?: string; error?: string }> {
+    try {
+      const fields: Record<string, unknown> = {
+        project: { key: params.projectKey },
+        summary: params.summary,
+        description: {
+          type: "doc",
+          version: 1,
+          content: [
+            {
+              type: "paragraph",
+              content: [{ type: "text", text: params.description }],
+            },
+          ],
+        },
+        issuetype: { name: params.issueType || "Bug" },
+      };
+      if (params.assigneeAccountId) {
+        fields.assignee = { accountId: params.assigneeAccountId };
+      }
+
+      const body = { fields };
+      const response = await this.requestJson<{ key: string; id: string; self: string }>("issue", "POST", body);
+      const base = this.config.baseUrl.replace(/\/+$/, "");
+      return {
+        ok: true,
+        issueKey: response.key,
+        issueUrl: `${base}/browse/${response.key}`,
+      };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      return { ok: false, error: message };
+    }
+  }
+
   async testConnection(): Promise<{ ok: boolean; displayName?: string; email?: string }> {
     const payload = await this.requestJson<{ displayName?: string; emailAddress?: string }>("myself");
     return { ok: true, displayName: payload.displayName, email: payload.emailAddress };
+  }
+
+  async attachFileToIssue(issueKey: string, filePath: string, attachmentName?: string): Promise<{ ok: boolean; attachmentId?: string; error?: string }> {
+    try {
+      const resolved = path.resolve(filePath);
+      if (!fs.existsSync(resolved)) {
+        return { ok: false, error: `File not found: ${resolved}` };
+      }
+      const stat = fs.statSync(resolved);
+      if (!stat.isFile() || stat.size === 0) {
+        return { ok: false, error: `Invalid file: ${resolved}` };
+      }
+      const ext = path.extname(resolved).toLowerCase();
+      if (ext !== ".docx") {
+        return { ok: false, error: `Unsupported file type: ${ext}` };
+      }
+
+      const name = attachmentName || path.basename(resolved);
+      const buffer = fs.readFileSync(resolved);
+
+      const formData = new FormData();
+      formData.append("file", new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" }), name);
+
+      const url = `${this.baseApiUrl}/issue/${encodeURIComponent(issueKey)}/attachments`;
+      const response = await globalThis.fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: this.authHeader,
+          "X-Atlassian-Token": "no-check",
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const text = await response.text().catch(() => "");
+        return { ok: false, error: `Jira attachment failed (HTTP ${response.status}): ${text.slice(0, 200)}` };
+      }
+
+      const result = await response.json() as Array<{ id: string }>;
+      const attachmentId = result?.[0]?.id;
+      return { ok: true, attachmentId };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      return { ok: false, error: message };
+    }
   }
 
   private async requestJson<T>(

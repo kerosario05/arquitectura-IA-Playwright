@@ -557,6 +557,7 @@ async function runPreviewCase(
     console.error(`[discovery:preview] ${vc.displayId} failed: ${message}`);
 
     // Emit JSON line for progress tracking
+    const crCatch = (workflowResult as any)?.caseResult;
     console.log(JSON.stringify({
       type: "case_finished",
       caseId: vc.displayId,
@@ -564,6 +565,17 @@ async function runPreviewCase(
       error: message,
       rawError: message,
       failedReason: "execution_exception",
+      ...(crCatch?.evidenceDir ? { evidenceDir: crCatch.evidenceDir } : {}),
+      ...(crCatch?.steps?.length ? {
+        stepResults: crCatch.steps.map((s: any) => ({
+          stepIndex: s.index,
+          action: s.action ?? undefined,
+          target: s.targetText ?? undefined,
+          status: s.status ?? undefined,
+          reason: s.error ?? undefined,
+          evidencePath: s.evidencePath ?? undefined,
+        }))
+      } : {}),
     }));
 
     const failedCaseResult = {
