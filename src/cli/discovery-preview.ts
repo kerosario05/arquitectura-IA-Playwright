@@ -433,13 +433,15 @@ async function runPreviewCase(
   console.log(`\n[discovery:preview] starting ${vc.displayId}: ${vc.title}`);
   console.log(`[discovery:preview] appSlug=${appSlug} outputDir=${outputDir}`);
 
+  let workflowResult: any;
+
   try {
     const scenario = virtualCaseToTestScenario(vc);
 
     const testRailConfig = requireTestRailConfig(config);
     const trClient = new TestRailClient(testRailConfig);
 
-    const workflowResult = await runCaseDiscoveryWorkflow({
+    workflowResult = await runCaseDiscoveryWorkflow({
       scenario,
       headed: args.headed,
       outputDir,
