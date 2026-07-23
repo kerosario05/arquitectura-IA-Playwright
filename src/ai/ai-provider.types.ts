@@ -1,4 +1,4 @@
-export type AiProviderName = "openai_compatible" | "codex_cli" | "copilot_cli" | "disabled" | "fake";
+export type AiProviderName = "openai_compatible" | "codex_cli" | "copilot_cli" | "claude_cli" | "disabled" | "fake";
 
 export type AiMessage = {
   role: "system" | "user" | "assistant";
@@ -37,7 +37,9 @@ export type AiProviderErrorCode =
   | "ai_provider_unsupported"
   | "ai_provider_output_missing"
   | "copilot_cli_execution_failed"
-  | "copilot_cli_empty_output";
+  | "copilot_cli_empty_output"
+  | "claude_cli_execution_failed"
+  | "claude_cli_empty_output";
 
 export class AiProviderError extends Error {
   constructor(

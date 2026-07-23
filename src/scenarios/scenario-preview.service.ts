@@ -195,7 +195,119 @@ function buildRouteProfileForPrompt(
   return { routeProfile: null, source: "default", entrySteps: [], loginMode: appConfig?.loginMode as string | undefined };
 }
 
+/**
+ * Public entry point. The underlying generator (generateScenarioPreviewForIssue) is
+ * architecturally single-issue: intent detection, route resolution and the
+ * route-pending fallback builder are all anchored to one representative issue.
+ * When a request matches multiple Jira issues (e.g. a whole sprint/status batch),
+ * this wrapper runs the generator once per issue and merges the results, instead
+ * of silently generating scenarios for only the first issue.
+ */
 export async function generateScenarioPreview(
+  req: ScenarioPreviewRequest,
+): Promise<ScenarioPreviewResponse | ScenarioPreviewError> {
+  if (!req.projectKey) {
+    return { ok: false, error: "invalid_request", message: "projectKey is required" };
+  }
+  if (!req.activeSprint && !req.sprintId) {
+    return { ok: false, error: "invalid_request", message: "activeSprint: true or sprintId is required" };
+  }
+
+  // Discover which issue keys to process. If the caller already selected specific
+  // issues, honor that selection; otherwise query Jira with the same filters that
+  // generateScenarioPreviewForIssue applies internally.
+  let issueKeys = req.selectedIssueKeys?.filter(Boolean) ?? [];
+  if (issueKeys.length === 0) {
+    const discoveryJiraConfig = requireJiraConfig(config);
+    const discoveryJira = new JiraClient(discoveryJiraConfig);
+    let discoverySprintId: number;
+    if (req.activeSprint) {
+      const active = await discoveryJira.getActiveSprint(req.projectKey);
+      if (!active) {
+        return { ok: false, error: "no_active_sprint", message: `No hay sprint activo para el proyecto ${req.projectKey}` };
+      }
+      discoverySprintId = active.id;
+    } else {
+      discoverySprintId = req.sprintId!;
+    }
+    const discovered = await loadJiraIssues(discoveryJiraConfig, req.projectKey, discoverySprintId, req.status, req.maxResults ?? 50);
+    issueKeys = discovered.map((i) => i.key);
+  }
+
+  const maxIssues = Number(process.env.SCENARIO_PREVIEW_MAX_ISSUES) || 5;
+  if (issueKeys.length > maxIssues) {
+    console.log(`[scenarios:preview] limiting issues from ${issueKeys.length} to ${maxIssues}`);
+    issueKeys = issueKeys.slice(0, maxIssues);
+  }
+
+  if (issueKeys.length === 0) {
+    // Preserve the original "no issues found" response shape.
+    return generateScenarioPreviewForIssue(req);
+  }
+
+  console.log(`[scenarios:preview] batch processing ${issueKeys.length} issue(s): ${issueKeys.join(", ")}`);
+
+  const perIssueResults: ScenarioPreviewResponse[] = [];
+  const issueFailures: McpRejectedScenario[] = [];
+
+  for (let i = 0; i < issueKeys.length; i++) {
+    const key = issueKeys[i];
+    console.log(`[scenarios:preview] processing issue ${key} (${i + 1}/${issueKeys.length})`);
+    const result = await generateScenarioPreviewForIssue({ ...req, selectedIssueKeys: [key] });
+    if (!result.ok) {
+      const errorResult = result as Extract<typeof result, { ok: false }>;
+      console.error(`[scenarios:preview] issue ${key} failed: ${errorResult.error} - ${errorResult.message}`);
+      issueFailures.push({ sourceIssueKey: key, reason: `generation_failed: ${errorResult.error} - ${errorResult.message}` });
+      continue;
+    }
+    perIssueResults.push(result as ScenarioPreviewResponse);
+  }
+
+  if (perIssueResults.length === 0) {
+    return {
+      ok: false,
+      error: "scenario_generation_failed",
+      message: `All ${issueKeys.length} issue(s) failed to generate scenarios. First error: ${issueFailures[0]?.reason ?? "unknown"}`,
+    };
+  }
+
+  return mergeScenarioPreviewResults(perIssueResults, issueFailures);
+}
+
+/**
+ * Merge per-issue ScenarioPreviewResponse objects into a single batch response.
+ * App-level fields (appSlug, routeProfile, testrail, ...) are taken from the first
+ * result since they're identical across issues of the same request; per-issue
+ * arrays (scenarios, rejected, blockedScenarios, warnings) are concatenated and
+ * the summary counters are summed.
+ */
+function mergeScenarioPreviewResults(
+  results: ScenarioPreviewResponse[],
+  extraRejected: McpRejectedScenario[] = [],
+): ScenarioPreviewResponse {
+  const first = results[0];
+  const summary = results.reduce((acc, r) => {
+    const s = r.summary as unknown as Record<string, number>;
+    for (const key of Object.keys(s)) {
+      acc[key] = (acc[key] ?? 0) + (s[key] ?? 0);
+    }
+    return acc;
+  }, {} as Record<string, number>);
+  summary.rejected = (summary.rejected ?? 0) + extraRejected.length;
+
+  return {
+    ...first,
+    source: { ...first.source, issuesFound: results.length },
+    scenarios: results.flatMap((r) => r.scenarios),
+    summary: summary as unknown as ScenarioPreviewResponse["summary"],
+    rejected: [...results.flatMap((r) => r.rejected), ...extraRejected],
+    blockedScenarios: results.flatMap((r) => r.blockedScenarios ?? []),
+    warnings: results.flatMap((r) => r.warnings),
+    adaptiveScenarios: results.flatMap((r) => (r as unknown as { adaptiveScenarios?: unknown[] }).adaptiveScenarios ?? []),
+  } as ScenarioPreviewResponse;
+}
+
+async function generateScenarioPreviewForIssue(
   req: ScenarioPreviewRequest,
 ): Promise<ScenarioPreviewResponse | ScenarioPreviewError> {
   if (!req.projectKey) {

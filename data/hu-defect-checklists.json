@@ -1433,10 +1433,29 @@
         },
         "createdAt": "2026-07-15T15:07:48.576Z",
         "updatedAt": "2026-07-15T15:07:48.576Z"
+      },
+      {
+        "id": "1784772468656-gd0odwy",
+        "description": "Escenario:\nPREVIEW-001 — Visualizar listado de Préstamos disponibles\n\nResultado:\nFallido\n\nResultado esperado:\nListado de Préstamos visible.\n\nResultado actual:\nbrowserType.launch: Executable doesn't exist at /Users/Krosario/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell ╔════════════════════════════════════════════════════════════╗ ║ Looks like Playwright was just installed or updated. ║ ║ Please run the following command to download new browsers: ║ ║ ║ ║ npx playwright install ║ ║ ║ ║ <3 Playwright Team ║ ╚════════════════════════════════════════════════════════════╝\n\nCódigo técnico:\nexecution_exception\n\nEjecución:\n04f6aa33-5bdf-4236-8887-a505840cfca1\n\nTestRail:\nCaso C42373 · Run 3706\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "04f6aa33-5bdf-4236-8887-a505840cfca1",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Visualizar listado de Préstamos disponibles",
+        "technicalContext": {
+          "reasonCode": "execution_exception",
+          "expectedResult": "Listado de Préstamos visible.",
+          "rawError": "browserType.launch: Executable doesn't exist at /Users/Krosario/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     npx playwright install                                 ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝",
+          "testRailCaseId": 42373,
+          "testRailRunId": 3706
+        },
+        "createdAt": "2026-07-23T02:07:48.656Z",
+        "updatedAt": "2026-07-23T02:07:48.656Z"
       }
     ],
     "createdAt": "2026-07-02T20:31:30.026Z",
-    "updatedAt": "2026-07-15T15:07:48.576Z"
+    "updatedAt": "2026-07-23T02:07:48.656Z"
   },
   {
     "id": "1783515493607-o831bjc",
@@ -2273,5 +2292,71 @@
     ],
     "createdAt": "2026-07-09T17:09:47.343Z",
     "updatedAt": "2026-07-16T12:26:59.700Z"
+  },
+  {
+    "id": "1784777439500-knc9smp",
+    "issueKey": "AA-84",
+    "urlSlug": "AA-84",
+    "defects": [
+      {
+        "id": "1784777441961-j7brdv9",
+        "description": "Escenario:\nPREVIEW-001 — Ejecutar flujo completo de documento\n\nResultado:\nFallido\n\nResultado esperado:\nEl flujo de documento se completa exitosamente.\n\nResultado actual:\nbrowserType.launch: Executable doesn't exist at /Users/Krosario/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell ╔════════════════════════════════════════════════════════════╗ ║ Looks like Playwright was just installed or updated. ║ ║ Please run the following command to download new browsers: ║ ║ ║ ║ npx playwright install ║ ║ ║ ║ <3 Playwright Team ║ ╚════════════════════════════════════════════════════════════╝\n\nCódigo técnico:\nexecution_exception\n\nEjecución:\nc2f8f639-bffd-4af6-b022-b79dd3e4b226\n\nTestRail:\nCaso C42374 · Run 3707\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "c2f8f639-bffd-4af6-b022-b79dd3e4b226",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Ejecutar flujo completo de documento",
+        "technicalContext": {
+          "reasonCode": "execution_exception",
+          "expectedResult": "El flujo de documento se completa exitosamente.",
+          "rawError": "browserType.launch: Executable doesn't exist at /Users/Krosario/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     npx playwright install                                 ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝",
+          "testRailCaseId": 42374,
+          "testRailRunId": 3707
+        },
+        "createdAt": "2026-07-23T03:30:41.961Z",
+        "updatedAt": "2026-07-23T03:30:41.961Z"
+      },
+      {
+        "id": "1784777473721-xa6imuq",
+        "description": "Escenario:\nPREVIEW-001 — Ejecutar flujo completo de documento\n\nResultado:\nFallido\n\nResultado esperado:\nEl flujo de documento se completa exitosamente.\n\nResultado actual:\nbrowserType.launch: Executable doesn't exist at /Users/Krosario/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell ╔════════════════════════════════════════════════════════════╗ ║ Looks like Playwright was just installed or updated. ║ ║ Please run the following command to download new browsers: ║ ║ ║ ║ npx playwright install ║ ║ ║ ║ <3 Playwright Team ║ ╚════════════════════════════════════════════════════════════╝\n\nCódigo técnico:\nexecution_exception\n\nEjecución:\n45f130c4-1c6d-4ff2-b602-39a2ca83eb6f\n\nTestRail:\nCaso C42374 · Run 3707\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "45f130c4-1c6d-4ff2-b602-39a2ca83eb6f",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Ejecutar flujo completo de documento",
+        "technicalContext": {
+          "reasonCode": "execution_exception",
+          "expectedResult": "El flujo de documento se completa exitosamente.",
+          "rawError": "browserType.launch: Executable doesn't exist at /Users/Krosario/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     npx playwright install                                 ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝",
+          "testRailCaseId": 42374,
+          "testRailRunId": 3707
+        },
+        "createdAt": "2026-07-23T03:31:13.721Z",
+        "updatedAt": "2026-07-23T03:31:13.721Z"
+      },
+      {
+        "id": "1784778199621-7luyuni",
+        "description": "Escenario:\nPREVIEW-001 — Ejecutar flujo completo de documento\n\nResultado:\nFallido\n\nResultado esperado:\nEl flujo de documento se completa exitosamente.\n\nResultado actual:\npage.goto: Timeout 60000ms exceeded. Call log: - navigating to \"https://172.27.4.50/\", waiting until \"domcontentloaded\"\n\nCódigo técnico:\nexecution_exception\n\nEjecución:\n2af4ae4e-25ca-4c76-90cc-4a29d38b8a0e\n\nTestRail:\nCaso C42374 · Run 3707\n\nEvidencia:\nNo se registró evidencia visual.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "2af4ae4e-25ca-4c76-90cc-4a29d38b8a0e",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-001",
+        "scenarioTitle": "Ejecutar flujo completo de documento",
+        "technicalContext": {
+          "reasonCode": "execution_exception",
+          "expectedResult": "El flujo de documento se completa exitosamente.",
+          "rawError": "page.goto: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://172.27.4.50/\", waiting until \"domcontentloaded\"\u001b[22m\n",
+          "testRailCaseId": 42374,
+          "testRailRunId": 3707
+        },
+        "createdAt": "2026-07-23T03:43:19.621Z",
+        "updatedAt": "2026-07-23T03:43:19.621Z"
+      }
+    ],
+    "createdAt": "2026-07-23T03:30:39.500Z",
+    "updatedAt": "2026-07-23T03:43:19.621Z"
   }
 ]

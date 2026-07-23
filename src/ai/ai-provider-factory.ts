@@ -3,6 +3,7 @@ export { AiProviderError, type AiProvider, type AiProviderConfig } from "./ai-pr
 import { OpenAICompatibleProvider } from "./openai-compatible-provider";
 import { CodexCliProvider } from "./providers/codex-cli-provider";
 import { CopilotCliProvider } from "./providers/copilot-cli-provider";
+import { ClaudeCliProvider } from "./providers/claude-cli-provider";
 import { resolveCodexCliPath } from "../agent/codex-cli-resolver";
 import { resolveScenarioAiConfig, resolveRepairAiConfig, resolveGeneralAiConfig } from "./ai-config-resolver";
 
@@ -130,9 +131,16 @@ export async function createAiProviderFromConfig(config: AiProviderConfig): Prom
     return new CodexCliProvider(config);
   }
 
+  if (config.provider === "claude_cli") {
+    if (!config.command) {
+      config.command = "claude";
+    }
+    return new ClaudeCliProvider(config);
+  }
+
   throw new AiProviderError(
     "ai_provider_unsupported",
-    `Unsupported provider "${config.provider}". Expected "openai_compatible", "copilot_cli", or "codex_cli".`
+    `Unsupported provider "${config.provider}". Expected "openai_compatible", "copilot_cli", "codex_cli", or "claude_cli".`
   );
 }
 

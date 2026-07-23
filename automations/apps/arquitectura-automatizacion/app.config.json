@@ -61,7 +61,7 @@
         "when": "before_first_functional_step"
       }
     ],
-    "updatedAt": "2026-07-17T13:52:44.682Z",
+    "updatedAt": "2026-07-23T03:42:14.338Z",
     "targetPaths": {
       "Tarjeta Crédito Visa Clásica": {
         "target": "Tarjeta Crédito Visa Clásica",
@@ -539,10 +539,10 @@
       }
     }
   },
-  "updatedAt": "2026-07-17T13:57:00.958Z",
+  "updatedAt": "2026-07-23T03:23:15.499Z",
   "lastUsedSource": {
     "type": "request",
     "sectionName": null,
-    "updatedAt": "2026-07-17T13:57:00.956Z"
+    "updatedAt": "2026-07-23T03:23:15.499Z"
   }
 }

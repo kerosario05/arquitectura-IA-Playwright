@@ -147,6 +147,27 @@ export function resolveAiConfig(purpose: AiPurpose): AiProviderConfig {
     };
   }
 
+  if (providerLower === "claude_cli" || providerLower === "claude") {
+    const command = env.CLAUDE_CLI_COMMAND?.trim() || "claude";
+    const extraArgs = parseExtraArgs(env.CLAUDE_CLI_EXTRA_ARGS);
+
+    return {
+      enabled: true,
+      provider: "claude_cli",
+      providerName,
+      baseUrl: "",
+      apiKey: "",
+      model,
+      timeoutMs,
+      maxAttempts,
+      purpose,
+      command,
+      extraArgs,
+      requireJson: parseBool(env.AI_REQUIRE_JSON, true),
+      requireJsonSchema: parseBool(env.AI_REQUIRE_JSON_SCHEMA, true)
+    };
+  }
+
   if (providerLower === "codex_cli" || providerLower === "codex") {
     const command = env.CODEX_CLI_COMMAND?.trim();
     const extraArgs = parseExtraArgs(env.CODEX_CLI_EXTRA_ARGS);
@@ -204,7 +225,7 @@ export function resolveAiConfig(purpose: AiPurpose): AiProviderConfig {
 
   throw new AiProviderError(
     "ai_provider_unsupported",
-    `Unsupported AI provider "${provider}". Expected "copilot_cli", "codex_cli", or "openai_compatible".`
+    `Unsupported AI provider "${provider}". Expected "claude_cli", "copilot_cli", "codex_cli", or "openai_compatible".`
   );
 }
 
