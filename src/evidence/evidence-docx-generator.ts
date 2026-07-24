@@ -1046,7 +1046,15 @@ async function jsZipFallbackGeneration(
     documentXml = documentXml.replace(baseTableMatch[0], "");
   }
 
-  const { xml: scenariosXml, images } = buildSimplifiedScenarioBlocks(scenarios);
+  // Compute the next free relationship ID from the template's ACTUAL rels so generated
+  // image relationships don't collide with template ones (footers/headers/fontTable
+  // already occupy rId10+). A collision left images referencing non-image relationships,
+  // so they never rendered in Word.
+  const existingRelsXml = (await zip.file("word/_rels/document.xml.rels")?.async("string")) ?? "";
+  const startRid = nextFreeRid(existingRelsXml);
+  console.log(`[evidence-docx] jsZip image relationships start at rId${startRid} (template max computed)`);
+
+  const { xml: scenariosXml, images } = buildSimplifiedScenarioBlocks(scenarios, startRid);
 
   const replacedDocumentXml = replacePlaceholderInXml(documentXml, "{{ESCENARIOS_EVIDENCIA}}", scenariosXml);
   if (!replacedDocumentXml) {
@@ -1559,13 +1567,29 @@ async function hashFileIfExists(filePath: string): Promise<string | null> {
  * Build simplified scenario blocks (no step-by-step text).
  * Only metadata table + primary screenshot per scenario.
  */
+/**
+ * Returns the next free relationship ID (max numeric rId in the rels XML + 1). Falls
+ * back to 100 when the rels can't be parsed, well above any typical template's IDs.
+ */
+function nextFreeRid(relsXml: string): number {
+  let max = 0;
+  const re = /Id="rId(\d+)"/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(relsXml)) !== null) {
+    const n = parseInt(m[1], 10);
+    if (Number.isFinite(n) && n > max) max = n;
+  }
+  return max > 0 ? max + 1 : 100;
+}
+
 function buildSimplifiedScenarioBlocks(
   scenarios: EvidenceScenarioRecord[],
+  startRid = 100,
 ): { xml: string; images: Array<{ rId: string; path: string; filename: string }> } {
   const blocks: string[] = [];
   const images: Array<{ rId: string; path: string; filename: string }> = [];
   let imageCounter = 1;
-  let rIdCounter = 10;
+  let rIdCounter = startRid;
 
   for (let i = 0; i < scenarios.length; i++) {
     const sc = scenarios[i];
@@ -1698,7 +1722,9 @@ function buildSimplifiedScenarioBlocks(
     // Insert all functional screenshots
     for (const screenshot of screenshotsToUse) {
       const rId = `rId${rIdCounter++}`;
-      const filename = `image${imageCounter++}${path.extname(screenshot.screenshotPath!)}`;
+      // Distinct prefix so generated screenshots never overwrite the template's own
+      // media (e.g. its logo at word/media/image1.png).
+      const filename = `evd_image_${imageCounter++}${path.extname(screenshot.screenshotPath!)}`;
       images.push({ rId, path: screenshot.screenshotPath!, filename });
 
       blocks.push(`

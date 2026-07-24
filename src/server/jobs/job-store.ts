@@ -24,7 +24,7 @@ export type JobSummary = {
 
 export type Job = {
   id: string;
-  type: "sprint" | "discovery-batch" | "scenario-preview";
+  type: "sprint" | "discovery-batch" | "scenario-preview" | "mobile-emulator-boot" | "mobile-test-run" | "mobile-launch-execution";
   status: JobStatus;
   params: Record<string, unknown>;
   issueKey?: string;
@@ -49,7 +49,7 @@ export type JobInternal = Job & {
 class JobStore {
   private readonly jobs = new Map<string, JobInternal>();
 
-  create(type: "sprint" | "discovery-batch" | "scenario-preview", params: Record<string, unknown>): Job {
+  create(type: "sprint" | "discovery-batch" | "scenario-preview" | "mobile-emulator-boot" | "mobile-test-run" | "mobile-launch-execution", params: Record<string, unknown>): Job {
     const id = randomUUID();
     const job: JobInternal = {
       id,

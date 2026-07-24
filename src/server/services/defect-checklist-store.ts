@@ -8,6 +8,8 @@ export type Defect = {
   id: string;
   scenarioId?: string;
   scenarioTitle?: string;
+  /** Personalized defect headline (cause + step + scenario). Falls back to scenarioTitle when absent. */
+  title?: string;
   jobId?: string;
   description: string;
   severity: Severity;
@@ -109,7 +111,7 @@ class DefectChecklistStore {
 
   addDefect(
     issueKey: string,
-    params: { description: string; severity: Severity; severityReason?: string; jobId?: string; scenarioId?: string; scenarioTitle?: string; evidenceUrl?: string; technicalContext?: Defect["technicalContext"] }
+    params: { description: string; severity: Severity; severityReason?: string; jobId?: string; scenarioId?: string; scenarioTitle?: string; title?: string; evidenceUrl?: string; technicalContext?: Defect["technicalContext"] }
   ): Defect | null {
     if (!VALID_SEVERITIES.includes(params.severity)) return null;
     const list = this.getOrCreate(issueKey);
@@ -123,6 +125,7 @@ class DefectChecklistStore {
       status: "pending_review",
       scenarioId: params.scenarioId,
       scenarioTitle: params.scenarioTitle,
+      title: params.title,
       evidenceUrl: params.evidenceUrl,
       technicalContext: params.technicalContext,
       createdAt: now,

@@ -2138,8 +2138,13 @@ function extractHuScenarioModel(huText: string): HuScenarioModel {
   if (subIntent === "standard" && businessEntity && mainIntent === "balance_inquiry") {
     subIntent = "entity_balance";
   }
-  // Feature name from HU document type or primary term
-  const featureName = extractDocumentType(t) || "operacion";
+  // Feature name from HU document type, falling back to the real business entity (e.g. "registro
+  // de usuario", "prestamo") before the ultra-generic "operacion". Avoids labeling a registration/
+  // validation HU as "documento" just because it mentions a document input field.
+  const featureName =
+    extractDocumentType(t) ||
+    (businessEntity?.singularLabel && businessEntity.singularLabel.length >= 3 ? businessEntity.singularLabel : undefined) ||
+    "operacion";
 
   // Primary action verb
   const primaryAction = extractPrimaryAction(t);
@@ -2279,14 +2284,33 @@ function extractHuScenarioModel(huText: string): HuScenarioModel {
 }
 
 function extractDocumentType(t: string): string | null {
-  const docs: [RegExp, string][] = [
+  // Specific document types — a match here is unambiguous (the HU is about THIS document).
+  const specific: [RegExp, string][] = [
     [/(?:carta\s+de\s+referencia\s+bancaria|carta\s+de\s+referencia)/i, "carta de referencia bancaria"],
     [/(?:estado\s+de\s+cuenta|extracto)/i, "estado de cuenta"],
-    [/carta/i, "carta"], [/certificacion|certificado/i, "certificacion"],
+    [/certificacion|certificado/i, "certificacion"],
     [/constancia/i, "constancia"], [/comprobante/i, "comprobante"],
-    [/documento/i, "documento"], [/reporte/i, "reporte"],
   ];
-  for (const [p, l] of docs) { if (p.test(t)) return l; }
+  for (const [p, l] of specific) { if (p.test(t)) return l; }
+
+  // Generic terms ("documento", "carta", "reporte") are only a real FEATURE when the HU is about
+  // producing that artifact. Otherwise words like "documento de identidad" / "tipo de documento"
+  // are just input fields and must NOT become the feature name. Require a generation/emission
+  // context near the term.
+  const generationContext = /(?:generar|emitir|generacion|emision|descargar|exportar|imprimir|solicitar)/i.test(t);
+  // Exclude the common identity-document input phrasing so it never counts as the feature.
+  const isIdentityDocInput = /documento\s+de\s+identidad|tipo\s+de\s+documento|numero\s+de\s+documento/i.test(t);
+  if (generationContext) {
+    const generic: [RegExp, string][] = [
+      [/\bcarta\b/i, "carta"],
+      [/\bdocumento\b/i, "documento"],
+      [/\breporte\b/i, "reporte"],
+    ];
+    for (const [p, l] of generic) {
+      if (l === "documento" && isIdentityDocInput) continue;
+      if (p.test(t)) return l;
+    }
+  }
   return null;
 }
 

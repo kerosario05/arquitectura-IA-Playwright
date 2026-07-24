@@ -31,7 +31,7 @@ router.get("/api/checklists/:issueKey", (req: Request, res: Response) => {
 // POST /api/checklists/:issueKey/defects — add a defect
 router.post("/api/checklists/:issueKey/defects", (req: Request, res: Response) => {
   const { issueKey } = req.params;
-  const { description, severity, scenarioId, scenarioTitle, evidenceUrl } = req.body || {};
+  const { description, severity, scenarioId, scenarioTitle, title, evidenceUrl } = req.body || {};
   if (!description || typeof description !== "string" || description.trim().length === 0) {
     return res.status(400).json({ ok: false, error: "description_required" });
   }
@@ -43,6 +43,7 @@ router.post("/api/checklists/:issueKey/defects", (req: Request, res: Response) =
     severity,
     scenarioId: scenarioId || undefined,
     scenarioTitle: scenarioTitle || undefined,
+    title: (typeof title === "string" && title.trim()) ? title.trim() : undefined,
     evidenceUrl: evidenceUrl || undefined,
   });
   if (!defect) {

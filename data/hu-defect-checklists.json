@@ -2358,5 +2358,36 @@
     ],
     "createdAt": "2026-07-23T03:30:39.500Z",
     "updatedAt": "2026-07-23T03:43:19.621Z"
+  },
+  {
+    "id": "1784854222861-kwx76oc",
+    "issueKey": "AA-93",
+    "urlSlug": "AA-93",
+    "defects": [
+      {
+        "id": "1784862411351-29lwmge",
+        "description": "Escenario:\nMOBILE-AA-93-001 — Validación exitosa de cliente existente con cédula\n\nResultado:\nFallido\n\nPaso fallido:\nPaso 7: Continuar con la validación del documento\n\nResultado actual:\nNo se encontró el elemento necesario para continuar la ejecución.\n\nCódigo técnico:\ntarget_not_found\n\nEjecución:\n52c66cd2-3de9-40a2-afd1-3971ddc199e4\n\nTestRail:\nCaso C42403 · Run 3730\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "high",
+        "severityReason": "El fallo afecta información principal esperada por la Historia de Usuario.",
+        "jobId": "52c66cd2-3de9-40a2-afd1-3971ddc199e4",
+        "status": "pending_review",
+        "scenarioId": "MOBILE-AA-93-001",
+        "scenarioTitle": "Validación exitosa de cliente existente con cédula",
+        "title": "[Alta] No se encontró \"Continuar con la validación del documento\" (paso 7) — Validación exitosa de cliente existente con cédula",
+        "technicalContext": {
+          "reasonCode": "target_not_found",
+          "failedAtStep": 7,
+          "failedTarget": "Continuar con la validación del documento",
+          "rawError": "click target not found (even after closing any blocking modal): {\"strategy\":\"accessibilityId\",\"value\":\"Continuar\"}",
+          "evidenceDir": ".artifacts/evidence/mobile/com_appconversacionalbsc/runs/52c66cd2-3de9-40a2-afd1-3971ddc199e4/scenarios/MOBILE-AA-93-001",
+          "testRailCaseId": 42403,
+          "testRailRunId": 3730
+        },
+        "createdAt": "2026-07-24T03:06:51.351Z",
+        "updatedAt": "2026-07-24T03:06:51.351Z"
+      }
+    ],
+    "createdAt": "2026-07-24T00:50:22.860Z",
+    "updatedAt": "2026-07-24T03:06:51.351Z"
   }
 ]

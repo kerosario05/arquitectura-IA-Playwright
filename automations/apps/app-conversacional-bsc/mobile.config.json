@@ -1,0 +1,161 @@
+{
+  "appSlug": "app-conversacional-bsc",
+  "packageName": "com.appconversacionalbsc",
+  "appName": "Banco Santa Cruz",
+  "platform": "android",
+  "mainActivity": "com.appconversacionalbsc.MainActivity",
+  "framework": "react-native",
+  "updatedAt": "2026-07-23T14:10:00.000Z",
+  "flows": {
+    "login": {
+      "description": "Inicio de sesión de un cliente que YA está registrado en la app (tiene usuario y contraseña). Aplica cuando la historia habla de autenticarse, acceder con credenciales existentes, acceso biométrico, recuperar/olvidé contraseña.",
+      "triggerKeywords": ["iniciar sesion", "iniciar sesión", "login", "inicio de sesion", "autenticar", "autenticacion", "acceso biometrico", "biometrico", "cliente registrado", "usuario y contrasena", "usuario y contraseña", "credenciales"],
+      "entryFromScreen": "login",
+      "entrySteps": []
+    },
+    "user_registration": {
+      "description": "Registro de un NUEVO usuario / validación de que el documento corresponde a un cliente del banco antes de crear la cuenta. Aplica cuando la historia habla de: registrarse, crear cuenta, nuevo usuario, onboarding, validación del cliente, comprobar/verificar que existe como cliente, validar identidad con cédula o pasaporte, elegibilidad para continuar el registro, cliente existente/no existente/fallecido, ingresar documento de identidad, aceptar términos y condiciones para registrarse. IMPORTANTE: estas historias NO empiezan en el login con usuario/contraseña — empiezan tocando el enlace '¿Aún no tienes usuario o cuenta?' desde la pantalla de bienvenida, luego 'Continuar' en la pantalla de requisitos, para llegar a la pantalla de ingreso de documento.",
+      "triggerKeywords": ["registr", "crear cuenta", "crear una cuenta", "nuevo usuario", "nueva cuenta", "onboarding", "validacion del cliente", "validación del cliente", "validar cliente", "validar al cliente", "comprobar", "verificar identidad", "validar identidad", "documento de identidad", "cedula", "cédula", "pasaporte", "existe como cliente", "es cliente", "cliente del banco", "elegib", "elegible", "no existente", "fallecido", "terminos y condiciones", "términos y condiciones", "queremos conocerte"],
+      "entryFromScreen": "registration_document_entry",
+      "entrySteps": [
+        { "action": "click", "description": "Ir a registro de nuevo usuario desde la pantalla de bienvenida", "target": { "strategy": "accessibilityId", "value": "¿Aún no tienes usuario o cuenta?" } },
+        { "action": "click", "description": "Continuar desde la pantalla de requisitos del registro", "target": { "strategy": "accessibilityId", "value": "Continuar" } }
+      ]
+    }
+  },
+  "screens": {
+    "login": {
+      "screenId": "login",
+      "title": "Bienvenido - Accede a tu Canal Conversacional BSC",
+      "isEntryScreen": true,
+      "discoveredAt": "2026-07-23T04:35:33.796Z",
+      "discoverySource": "manual_exploration",
+      "elements": [
+        {
+          "label": "Usuario",
+          "role": "input",
+          "locator": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().className(\"android.widget.EditText\").instance(0)"
+          },
+          "hasAccessibilityLabel": false,
+          "notes": "RN EditText sin content-desc/resource-id — solo distinguible por posición. La etiqueta 'Usuario' es un TextView separado arriba del campo."
+        },
+        {
+          "label": "Contraseña",
+          "role": "input",
+          "locator": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().className(\"android.widget.EditText\").instance(1)"
+          },
+          "hasAccessibilityLabel": false,
+          "notes": "Mismo caso que Usuario. El elemento tiene password=true. Tiene un toggle mostrar/ocultar adyacente con content-desc vacío (tampoco automatable por accessibilityId)."
+        },
+        {
+          "label": "Iniciar sesión",
+          "role": "button",
+          "locator": { "strategy": "accessibilityId", "value": "Iniciar sesión" },
+          "hasAccessibilityLabel": true
+        },
+        {
+          "label": "Acceso Biométrico",
+          "role": "button",
+          "locator": { "strategy": "accessibilityId", "value": "Acceso\nBiométrico" },
+          "hasAccessibilityLabel": true,
+          "notes": "El content-desc contiene un salto de línea literal entre las dos palabras."
+        },
+        {
+          "label": "¿Aún no tienes usuario o cuenta?",
+          "role": "link",
+          "locator": { "strategy": "accessibilityId", "value": "¿Aún no tienes usuario o cuenta?" },
+          "hasAccessibilityLabel": true,
+          "notes": "Punto de entrada al flujo de registro de nuevo usuario."
+        }
+      ]
+    },
+    "registration_requirements": {
+      "screenId": "registration_requirements",
+      "title": "Lo que debes tener en cuenta (requisitos del registro)",
+      "discoveredAt": "2026-07-23T14:05:00.000Z",
+      "discoverySource": "manual_exploration",
+      "elements": [
+        {
+          "label": "Continuar",
+          "role": "button",
+          "locator": { "strategy": "accessibilityId", "value": "Continuar" },
+          "hasAccessibilityLabel": true,
+          "notes": "Avanza desde la pantalla de requisitos hacia el ingreso de documento."
+        },
+        {
+          "label": "Salir",
+          "role": "button",
+          "locator": { "strategy": "accessibilityId", "value": "Salir" },
+          "hasAccessibilityLabel": true,
+          "notes": "El content-desc puede venir como ' Salir' con un espacio inicial en algunas pantallas."
+        }
+      ]
+    },
+    "registration_document_entry": {
+      "screenId": "registration_document_entry",
+      "title": "Queremos conocerte - Ingreso de datos de identidad",
+      "discoveredAt": "2026-07-23T14:05:00.000Z",
+      "discoverySource": "manual_exploration",
+      "dataFields": [
+        {
+          "key": "tipo_documento",
+          "label": "Tipo de documento",
+          "kind": "select",
+          "options": ["Cédula de identidad", "Pasaporte"],
+          "defaultValue": "Cédula de identidad",
+          "sensitive": false,
+          "matchLocator": { "strategy": "androidUiAutomator", "value": "new UiSelector().descriptionContains(\"Cédula de identidad\")" },
+          "applyTargetTemplate": { "strategy": "androidUiAutomator", "value": "new UiSelector().text(\"{{value}}\")" }
+        },
+        {
+          "key": "numero_identificacion",
+          "label": "Número de identificación",
+          "kind": "text",
+          "exampleValue": "402-12345678-9",
+          "sensitive": true,
+          "matchLocator": { "strategy": "androidUiAutomator", "value": "new UiSelector().className(\"android.widget.EditText\").instance(0)" }
+        }
+      ],
+      "elements": [
+        {
+          "label": "Tipo de documento",
+          "role": "toggle",
+          "locator": { "strategy": "androidUiAutomator", "value": "new UiSelector().descriptionContains(\"Cédula de identidad\")" },
+          "hasAccessibilityLabel": true,
+          "notes": "Selector desplegable. Por defecto muestra 'Cédula de identidad'. Al tocarlo se despliegan las opciones (Cédula / Pasaporte). El content-desc del elemento es 'Cédula de identidad, '."
+        },
+        {
+          "label": "Número de identificación",
+          "role": "input",
+          "locator": { "strategy": "androidUiAutomator", "value": "new UiSelector().className(\"android.widget.EditText\").instance(0)" },
+          "hasAccessibilityLabel": false,
+          "notes": "Único EditText de la pantalla. Placeholder de ejemplo: 402-12345678-9 (formato de cédula dominicana). No tiene content-desc/resource-id, se ubica por posición."
+        },
+        {
+          "label": "Acepto los Términos y Condiciones",
+          "role": "toggle",
+          "locator": { "strategy": "androidUiAutomator", "value": "new UiSelector().descriptionContains(\"Acepto los Términos y Condiciones\")" },
+          "hasAccessibilityLabel": true,
+          "notes": "Checkbox obligatorio para habilitar 'Continuar'. content-desc largo que empieza con 'Acepto los Términos y Condiciones de la Aplicación Móvil...'."
+        },
+        {
+          "label": "Continuar",
+          "role": "button",
+          "locator": { "strategy": "accessibilityId", "value": "Continuar" },
+          "hasAccessibilityLabel": true,
+          "notes": "Deshabilitado hasta que se acepten los Términos y Condiciones. Envía el documento para validar si existe como cliente."
+        },
+        {
+          "label": "Salir",
+          "role": "button",
+          "locator": { "strategy": "accessibilityId", "value": "Salir" },
+          "hasAccessibilityLabel": true
+        }
+      ]
+    }
+  }
+}

@@ -453,6 +453,24 @@ export const config: FullConfig = {
         : undefined,
       autoRepairEnabled: (process.env.CODEX_AUTO_REPAIR_ENABLED ?? "false").toLowerCase() === "true",
       autoRepairPromptMode: (process.env.CODEX_AUTO_REPAIR_PROMPT_MODE?.trim().toLowerCase() as "compact" | "verbose") || "compact"
+    },
+    android: {
+      sdkHome: process.env.ANDROID_HOME?.trim() || process.env.ANDROID_SDK_ROOT?.trim() || undefined,
+      avdName: process.env.ANDROID_AVD_NAME?.trim() || "Pixel_7_Pro",
+      apkPath: process.env.ANDROID_APK_PATH?.trim() || undefined,
+      appPackage: process.env.ANDROID_APP_PACKAGE?.trim() || undefined,
+      appActivity: process.env.ANDROID_APP_ACTIVITY?.trim() || undefined,
+      headless: (process.env.ANDROID_EMULATOR_HEADLESS ?? "true").toLowerCase() === "true",
+      bootTimeoutMs: parseOptionalPositiveNumber(
+        process.env.ANDROID_EMULATOR_BOOT_TIMEOUT_MS,
+        "ANDROID_EMULATOR_BOOT_TIMEOUT_MS"
+      ) ?? 120000,
+      appiumPort: parseOptionalPositiveNumber(
+        process.env.APPIUM_SERVER_PORT,
+        "APPIUM_SERVER_PORT"
+      ) ?? 4723,
+      appiumBin: process.env.APPIUM_BIN?.trim() || "appium",
+      knowledgeLearningEnabled: (process.env.MOBILE_KNOWLEDGE_LEARNING_ENABLED ?? "true").toLowerCase() === "true"
     }
   }
 };

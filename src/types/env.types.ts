@@ -161,6 +161,18 @@ export type FutureIntegrationsConfig = {
     autoRepairEnabled?: boolean;
     autoRepairPromptMode?: "compact" | "verbose" | "compact-route-recovery";
   };
+  android?: {
+    sdkHome?: string;
+    avdName: string;
+    apkPath?: string;
+    appPackage?: string;
+    appActivity?: string;
+    headless: boolean;
+    bootTimeoutMs: number;
+    appiumPort: number;
+    appiumBin: string;
+    knowledgeLearningEnabled: boolean;
+  };
 };
 
 export type FullConfig = {

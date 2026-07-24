@@ -338,8 +338,20 @@ runsRouter.get("/:jobId/logs", (req, res) => {
   res.setHeader("X-Accel-Buffering", "no");
   res.flushHeaders();
 
+  // Prevent an unhandled 'error' event (e.g. writing after the client disconnected
+  // mid-stream) from crashing the whole process — Node re-throws unhandled 'error'
+  // events on EventEmitters, which takes down the server otherwise.
+  res.on("error", (err) => {
+    console.error(`[runs:logs] SSE write error jobId=${jobId}: ${err.message}`);
+  });
+
   const send = (event: string, data: unknown) => {
-    res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    if (res.writableEnded) return;
+    try {
+      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    } catch (err) {
+      console.error(`[runs:logs] SSE write failed jobId=${jobId}: ${err instanceof Error ? err.message : err}`);
+    }
   };
 
   // Replay buffered logs immediately
@@ -401,6 +413,7 @@ runsRouter.get("/:jobId/logs", (req, res) => {
           checklistUrl: (job as any).checklistUrl,
           defectCount: (job as any).defectCount,
         }, true));
+        unsubscribe();
         res.end();
       } else {
         send("status", buildRunStreamPayload({

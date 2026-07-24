@@ -1,0 +1,170 @@
+{
+  "items": [
+    {
+      "id": "mob_screen_4cd6c2914887",
+      "knowledgeKind": "screen_observed",
+      "matchKey": "screen",
+      "screenKey": "screen",
+      "title": "",
+      "clickTargets": [
+        "Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica",
+        "",
+        "Continuar",
+        "Salir"
+      ],
+      "assertionTargets": [
+        "",
+        "Lo que debes tener en cuenta",
+        "Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo.",
+        "",
+        "Indicar tu cédula",
+        "",
+        "Conexión a internet estable",
+        "",
+        "Validar tu documento de identidad",
+        "",
+        "Comprobación biométrica",
+        "Continuar",
+        "Salir"
+      ],
+      "issueKey": "AA-84",
+      "scenarioTitle": "Cliente existente y habilitado puede continuar el registro",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "failureCount": 0,
+      "successCount": 11,
+      "runCount": 11,
+      "createdAt": "2026-07-23T17:10:04.605Z",
+      "lastSeenAt": "2026-07-24T03:06:51.328Z",
+      "lastValidatedAt": "2026-07-24T03:06:51.328Z"
+    },
+    {
+      "id": "mob_screen_01f11df122d9",
+      "knowledgeKind": "screen_observed",
+      "matchKey": "bienvenido",
+      "screenKey": "bienvenido",
+      "title": "Bienvenido",
+      "clickTargets": [
+        "",
+        "Iniciar sesión",
+        "Acceso Biométrico",
+        "¿Aún no tienes usuario o cuenta?"
+      ],
+      "assertionTargets": [
+        "Bienvenido",
+        "Accede a tu Canal Conversacional BSC",
+        "Usuario",
+        "Contraseña",
+        "",
+        "Iniciar sesión",
+        "Acceso Biométrico",
+        "¿Aún no tienes usuario o cuenta?",
+        "v1.0.0"
+      ],
+      "issueKey": "AA-84",
+      "scenarioTitle": "Registro exitoso - documento válido de cliente existente y habilitado",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "failureCount": 0,
+      "successCount": 8,
+      "runCount": 8,
+      "createdAt": "2026-07-23T17:16:30.189Z",
+      "lastSeenAt": "2026-07-24T03:06:51.327Z",
+      "lastValidatedAt": "2026-07-24T03:06:51.327Z"
+    },
+    {
+      "id": "mob_screen_901c4cbb1c98",
+      "knowledgeKind": "screen_observed",
+      "matchKey": "cedula_de_identidad",
+      "screenKey": "cedula_de_identidad",
+      "title": "Cédula de identidad",
+      "clickTargets": [
+        "Cédula de identidad",
+        "Pasaporte"
+      ],
+      "assertionTargets": [
+        "Cédula de identidad",
+        "Pasaporte"
+      ],
+      "issueKey": "AA-84",
+      "scenarioTitle": "Registro exitoso - documento válido de cliente existente y habilitado",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "failureCount": 0,
+      "successCount": 9,
+      "runCount": 9,
+      "createdAt": "2026-07-23T17:16:30.193Z",
+      "lastSeenAt": "2026-07-24T03:06:51.328Z",
+      "lastValidatedAt": "2026-07-24T03:06:51.328Z"
+    },
+    {
+      "id": "mob_route_79beaf1cebe9",
+      "knowledgeKind": "route_observed",
+      "matchKey": "79beaf1cebe9",
+      "clickTargets": [
+        "¿Aún no tienes usuario o cuenta?",
+        "Continuar",
+        "new UiSelector().descriptionContains(\"Cédula de identidad\")",
+        "new UiSelector().text(\"Cédula de identidad\")",
+        "new UiSelector().text(\"Cédula de identidad\")",
+        "new UiSelector().text(\"Cédula de identidad\")",
+        "new UiSelector().descriptionContains(\"Acepto los Términos y Condiciones\")"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-84",
+      "scenarioTitle": "Registro exitoso - documento válido de cliente existente y habilitado",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "failureCount": 1,
+      "successCount": 0,
+      "runCount": 1,
+      "createdAt": "2026-07-23T17:16:30.193Z",
+      "lastSeenAt": "2026-07-23T17:16:30.193Z"
+    },
+    {
+      "id": "mob_route_d3a2547ff599",
+      "knowledgeKind": "route_observed",
+      "matchKey": "d3a2547ff599",
+      "clickTargets": [
+        "¿Aún no tienes usuario o cuenta?",
+        "Continuar",
+        "new UiSelector().text(\"Cédula de identidad\")",
+        "new UiSelector().text(\"Cédula de identidad\")",
+        "new UiSelector().descriptionContains(\"Acepto los Términos y Condiciones\")"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-84",
+      "scenarioTitle": "Validación exitosa de documento de cliente existente y habilitado",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "failureCount": 7,
+      "successCount": 0,
+      "runCount": 7,
+      "createdAt": "2026-07-23T18:08:26.933Z",
+      "lastSeenAt": "2026-07-24T03:06:51.328Z"
+    },
+    {
+      "id": "mob_route_60143815282f",
+      "knowledgeKind": "route_observed",
+      "matchKey": "60143815282f",
+      "clickTargets": [
+        "¿Aún no tienes usuario o cuenta?",
+        "Continuar",
+        "new UiSelector().text(\"Cédula de identidad\")",
+        "new UiSelector().text(\"Cédula de identidad\")",
+        "new UiSelector().descriptionContains(\"Acepto los Términos y Condiciones\")",
+        "Continuar"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-84",
+      "scenarioTitle": "Validacion exitosa de cliente existente y habilitado para continuar el registro",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "failureCount": 1,
+      "successCount": 0,
+      "runCount": 1,
+      "createdAt": "2026-07-23T18:25:46.195Z",
+      "lastSeenAt": "2026-07-23T18:25:46.195Z"
+    }
+  ]
+}

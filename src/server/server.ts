@@ -6,6 +6,7 @@ import { jiraRouter } from "./routes/jira";
 import { testrailRouter } from "./routes/testrail";
 import { runsRouter } from "./routes/runs";
 import { scenariosRouter } from "./routes/scenarios";
+import { mobileRouter } from "./routes/mobile";
 import { debugRouter } from "./routes/debug";
 import { checklistRouter } from "./routes/checklist";
 import { resolveServerPort } from "./config";
@@ -42,6 +43,7 @@ app.use("/api/jira", jiraRouter);
 app.use("/api/testrail", testrailRouter);
 app.use("/api/runs", runsRouter);
 app.use("/api/scenarios", scenariosRouter);
+app.use("/api/mobile", mobileRouter);
 app.use(checklistRouter);
 
 const isDebugEnabled =
@@ -57,7 +59,7 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
   res.status(500).json({ error: message });
 });
 
-app.listen(PORT, HOST, () => {
+const server = app.listen(PORT, HOST, () => {
   console.log(`\n[server] Automation Engine API → http://${HOST === "0.0.0.0" ? "localhost" : HOST}:${PORT}`);
   console.log(`[server] CORS origin : ${CORS_ORIGIN}`);
   console.log(`[server] Auth        : ${API_KEY ? "API key enabled (X-Api-Key header)" : "disabled"}`);
@@ -82,6 +84,14 @@ app.listen(PORT, HOST, () => {
   console.log(`  POST /api/runs/launch-execution  { appSlug, projectId, sectionId, selectedScenarios }`);
   console.log(`  GET  /api/scenarios/preview?projectKey=AA&sprintId=42&status=...`);
   console.log(`  POST /api/scenarios/preview  { projectKey, sprintId|activeSprint, status }`);
+  console.log(`  POST /api/mobile/emulator/start  { avdName?, headless? }`);
+  console.log(`  GET  /api/mobile/emulator/status`);
+  console.log(`  POST /api/mobile/emulator/stop`);
+  console.log(`  GET  /api/mobile/appium/status`);
+  console.log(`  POST /api/mobile/tests/run  { apkPath|appPackage, appActivity?, steps, dataOverrides? }`);
+  console.log(`  POST /api/mobile/scenarios/preview  { projectKey, sprintId|activeSprint, status }`);
+  console.log(`  POST /api/mobile/runs/launch-execution  { appSlug, projectId, sectionId, scenarios }`);
+  console.log(`  POST /api/mobile/runs/execute  { launchId, testRunId, publishedCases, scenarios, dataOverrides? }`);
   if (isDebugEnabled) {
     console.log(`\n[server] Debug endpoints (dev-only):`);
     console.log(`  GET  /api/debug/testrail/status`);
@@ -89,4 +99,14 @@ app.listen(PORT, HOST, () => {
     console.log(`         DEBUG_TESTRAIL_PAYLOAD=${process.env.DEBUG_TESTRAIL_PAYLOAD ?? "false"} (set to true for full payload in response)`);
   }
   console.log("");
+});
+
+server.on("error", (err: NodeJS.ErrnoException) => {
+  if (err.code === "EADDRINUSE") {
+    console.error(`\n[server] Error: port ${PORT} is already in use — another process (possibly a previous "npm run server" instance) is already listening there.`);
+    console.error(`[server] Run "lsof -i :${PORT}" to find it, or set PORT/API_PORT in .env to use a different port.`);
+  } else {
+    console.error(`\n[server] Failed to start:`, err.message);
+  }
+  process.exit(1);
 });
