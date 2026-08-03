@@ -9,6 +9,7 @@ import { scenariosRouter } from "./routes/scenarios";
 import { mobileRouter } from "./routes/mobile";
 import { debugRouter } from "./routes/debug";
 import { checklistRouter } from "./routes/checklist";
+import { executionsRouter } from "./routes/executions";
 import { resolveServerPort } from "./config";
 
 const PORT = resolveServerPort(process.env as Record<string, string | undefined>);
@@ -45,6 +46,7 @@ app.use("/api/runs", runsRouter);
 app.use("/api/scenarios", scenariosRouter);
 app.use("/api/mobile", mobileRouter);
 app.use(checklistRouter);
+app.use(executionsRouter);
 
 const isDebugEnabled =
   process.env.NODE_ENV !== "production" ||

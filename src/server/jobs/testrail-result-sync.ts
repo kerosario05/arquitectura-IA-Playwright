@@ -119,6 +119,26 @@ export async function syncDiscoveryResultToTestRail(
   }
 }
 
+/**
+ * Persists the executing job's id onto the launch manifest. The manifest is created at publish
+ * time (before execution) without a jobId, but the Executions summary needs it to (a) filter the
+ * defects registered for THIS run and (b) download the evidence docx (keyed by jobId). Best-effort.
+ */
+export function updateLaunchManifestJobId(launchId: string | undefined, jobId: string): void {
+  if (!launchId) return;
+  const manifestPath = path.join(LAUNCH_ARTIFACTS_DIR, launchId, "launch-manifest.json");
+  if (!fs.existsSync(manifestPath)) return;
+  try {
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+    if (manifest.jobId === jobId) return;
+    manifest.jobId = jobId;
+    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), "utf-8");
+    console.log(`[launch-manifest] jobId persisted launchId=${launchId} jobId=${jobId}`);
+  } catch (err) {
+    console.error(`[launch-manifest] failed to persist jobId for launchId=${launchId}: ${err}`);
+  }
+}
+
 export function updateLaunchManifestJiraLink(
   launchId: string,
   jiraResult: { jiraKey: string; linkStatus: string; linkedAt?: string; errorCode?: string; errorMessage?: string },

@@ -1,4 +1,5 @@
 import type { MobileStep } from "./mobile-step-types";
+import { dismissBlockingModal, detectBlockingModal } from "./mobile-modal-dismisser";
 
 /**
  * Consent-checkbox auto-handling for mobile execution.
@@ -122,6 +123,61 @@ export function isConsentCheckboxAutoTickEnabled(): boolean {
   return (process.env.MOBILE_AUTO_CONSENT_CHECKBOX_ENABLED ?? "true").toLowerCase() !== "false";
 }
 
+type Bounds = { x1: number; y1: number; x2: number; y2: number };
+function parseBounds(raw: string): Bounds | null {
+  const m = raw.match(/\[(\d+),(\d+)\]\[(\d+),(\d+)\]/);
+  if (!m) return null;
+  return { x1: +m[1], y1: +m[2], x2: +m[3], y2: +m[4] };
+}
+
+const SUBMIT_GATE_KEYWORDS = ["continuar", "aceptar", "confirmar", "siguiente", "finalizar", "registrar", "enviar"];
+
+/**
+ * True when a submit/continue control is on screen but disabled — the signal that a required
+ * acceptance (checkbox) still needs to be marked before the flow can advance.
+ */
+export function isSubmitGated(pageSourceXml: string): boolean {
+  let m: RegExpExecArray | null;
+  ELEMENT_RE.lastIndex = 0;
+  while ((m = ELEMENT_RE.exec(pageSourceXml)) !== null) {
+    const attrs = parseAttrs(m[2]);
+    const label = normalize(attrs["content-desc"] || attrs.text || "");
+    if (!label) continue;
+    if (SUBMIT_GATE_KEYWORDS.some((kw) => label === normalize(kw))) {
+      const disabled = attrs.enabled === "false" || attrs.clickable === "false";
+      if (disabled) return true;
+    }
+  }
+  return false;
+}
+
+export type ConsentAcceptanceRow = { bounds: Bounds; label: string };
+
+/**
+ * Finds a consent ACCEPTANCE ROW: a wide clickable element (not a standard checkbox) whose
+ * content-desc is the acceptance sentence ("Acepto los términos…"). In com.appconversacionalbsc
+ * the checkbox and the "Términos y Condiciones" link share one native row — tapping its centre hits
+ * the link and opens the modal, so this must be tapped on its LEFT edge (the checkbox square).
+ */
+export function findConsentAcceptanceRow(pageSourceXml: string): ConsentAcceptanceRow | null {
+  let m: RegExpExecArray | null;
+  ELEMENT_RE.lastIndex = 0;
+  while ((m = ELEMENT_RE.exec(pageSourceXml)) !== null) {
+    const attrs = parseAttrs(m[2]);
+    if (attrs.clickable !== "true") continue;
+    const desc = (attrs["content-desc"] || "").trim();
+    if (!desc) continue;
+    const nd = normalize(desc);
+    // Must read like an acceptance ("acepto …") of terms/consent, and be a real row (wide).
+    const isAcceptance = nd.startsWith("acepto") || (nd.includes("acepto") && (nd.includes("termino") || nd.includes("condicion")));
+    if (!isAcceptance) continue;
+    const b = parseBounds(attrs.bounds || "");
+    if (!b || b.x2 - b.x1 < 300) continue;
+    return { bounds: b, label: desc.slice(0, 60) };
+  }
+  return null;
+}
+
 /**
  * Best-effort: before an accept/continue button is pressed, detect and tick any un-checked
  * consent/required checkbox on the current screen. Never throws — a detection or tap failure
@@ -141,10 +197,19 @@ export async function ensureConsentCheckboxChecked(
     return { ticked };
   }
 
-  const candidates = findUncheckedConsentCheckboxes(xml);
-  if (candidates.length === 0) return { ticked };
+  // 1) If a terms modal is covering the screen, close it first so the acceptance row is reachable.
+  if (detectBlockingModal(xml).isTermsModal) {
+    const closed = await dismissBlockingModal(browser, log);
+    if (closed) {
+      // Wait for the close transition to settle before re-reading, otherwise the screen underneath
+      // (the acceptance row + Continuar) is caught mid-animation and detection misses it.
+      try { await browser.pause(900); } catch { /* pause may be unavailable in tests */ }
+      try { xml = await browser.getPageSource(); } catch { /* keep previous */ }
+    }
+  }
 
-  // Tick at most a few, re-checking existence each time (bounded to avoid loops on flaky trees).
+  // 2) Tick any standard (checkable) un-checked checkboxes.
+  const candidates = findUncheckedConsentCheckboxes(xml);
   for (const candidate of candidates.slice(0, 5)) {
     try {
       const el = await browser.$(candidate.selector);
@@ -157,5 +222,26 @@ export async function ensureConsentCheckboxChecked(
       log(`[mobile:consent] could not tick checkbox "${candidate.label}": ${message}`);
     }
   }
+
+  // 3) Custom acceptance row (checkbox + terms link share one native element): only act when the
+  // submit control is still gated, and tap the LEFT edge (the checkbox square) so we mark it
+  // instead of hitting the link that opens the terms modal.
+  if (isSubmitGated(xml)) {
+    const row = findConsentAcceptanceRow(xml);
+    if (row) {
+      const x = row.bounds.x1 + 55;
+      const y = Math.round((row.bounds.y1 + row.bounds.y2) / 2);
+      try {
+        await (browser as WebdriverIO.Browser & { execute: (s: string, a: unknown) => Promise<unknown> })
+          .execute("mobile: clickGesture", { x, y });
+        ticked.push(row.label);
+        log(`[mobile:consent] marked acceptance checkbox (left edge ${x},${y}) for "${row.label}" — enables the gated button`);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        log(`[mobile:consent] could not mark acceptance row "${row.label}": ${message}`);
+      }
+    }
+  }
+
   return { ticked };
 }

@@ -30,6 +30,7 @@ export type LaunchExecutionInput = {
   suiteId?: number;
   testrailSectionId?: number;
   jiraKey?: string;
+  jiraTitle?: string;
   sprintName?: string;
   selectedScenarios: LaunchScenario[];
   adaptiveScenarios?: LaunchScenario[];
@@ -289,7 +290,7 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
       runId: testRunId,
       refs: runRefs || undefined,
     },
-    jira: input.jiraKey ? { key: input.jiraKey } : undefined,
+    jira: input.jiraKey ? { key: input.jiraKey, ...(input.jiraTitle ? { title: input.jiraTitle } : {}) } : undefined,
     sprintName: input.sprintName,
     publishStrategy: input.publishStrategy ?? "always_create",
     selectedScenarioCount: input.selectedScenarios.length,

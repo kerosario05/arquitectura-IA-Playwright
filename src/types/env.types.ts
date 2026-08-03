@@ -172,6 +172,7 @@ export type FutureIntegrationsConfig = {
     appiumPort: number;
     appiumBin: string;
     knowledgeLearningEnabled: boolean;
+    restartAppBetweenScenarios: boolean;
   };
 };
 

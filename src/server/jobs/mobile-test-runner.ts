@@ -143,10 +143,22 @@ export async function runOneScenario(
   });
   onLog("[mobile:scenario] session created");
 
-  // Session-creation capabilities (appPackage/appActivity) don't reliably bring the
-  // app to the foreground if the activity name is slightly off — explicitly activate
-  // it so step execution doesn't silently run against the home screen instead.
+  // Start each scenario from 0: noReset keeps the app installed, so between scenarios it would
+  // otherwise resume wherever the previous one left it (mid-flow, a modal open, etc.). Terminate
+  // the app first, then relaunch it fresh from its launch screen. Best-effort; gated by flag.
   if (opts.appPackage) {
+    const restartBetweenScenarios = config.integrations.android?.restartAppBetweenScenarios ?? true;
+    if (restartBetweenScenarios) {
+      try {
+        await browser.terminateApp(opts.appPackage);
+        onLog(`[mobile:scenario] terminated app package=${opts.appPackage} (fresh start from 0)`);
+      } catch (err) {
+        onLog(`[mobile:scenario] terminateApp failed (continuing anyway): ${err instanceof Error ? err.message : err}`);
+      }
+    }
+    // Session-creation capabilities (appPackage/appActivity) don't reliably bring the app to the
+    // foreground if the activity name is slightly off — explicitly (re)launch it so step execution
+    // doesn't silently run against the home screen instead.
     try {
       await browser.activateApp(opts.appPackage);
       onLog(`[mobile:scenario] activated app package=${opts.appPackage}`);

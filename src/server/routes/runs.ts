@@ -580,6 +580,7 @@ runsRouter.post("/launch-execution", async (req, res, next) => {
       suiteId: body.suiteId ? Number(body.suiteId) : undefined,
       testrailSectionId: body.testrailSectionId ? Number(body.testrailSectionId) : undefined,
       jiraKey: body.jiraKey as string | undefined,
+      jiraTitle: (body.jiraTitle ?? body.storyTitle ?? body.huTitle) as string | undefined,
       sprintName: body.sprintName as string | undefined,
       selectedScenarios: Array.isArray(body.selectedScenarios) ? body.selectedScenarios : [],
       adaptiveScenarios: Array.isArray(body.adaptiveScenarios) ? body.adaptiveScenarios : undefined,

@@ -470,7 +470,8 @@ export const config: FullConfig = {
         "APPIUM_SERVER_PORT"
       ) ?? 4723,
       appiumBin: process.env.APPIUM_BIN?.trim() || "appium",
-      knowledgeLearningEnabled: (process.env.MOBILE_KNOWLEDGE_LEARNING_ENABLED ?? "true").toLowerCase() === "true"
+      knowledgeLearningEnabled: (process.env.MOBILE_KNOWLEDGE_LEARNING_ENABLED ?? "true").toLowerCase() === "true",
+      restartAppBetweenScenarios: (process.env.MOBILE_RESTART_APP_BETWEEN_SCENARIOS ?? "true").toLowerCase() !== "false"
     }
   }
 };

@@ -10,6 +10,8 @@ export type MobileStepAction =
   | "click"
   | "fill"
   | "assertVisible"
+  | "assertEnabled"
+  | "assertDisabled"
   | "waitFor"
   | "screenshot";
 

@@ -1,13 +1,24 @@
 import type { MobileLocatorStrategy } from "./mobile-step-types";
 
-export type MobileElementRole = "input" | "button" | "link" | "text" | "toggle" | "other";
+export type MobileElementRole = "input" | "button" | "link" | "text" | "toggle" | "modal" | "other";
 
 export type MobileElement = {
   label: string;
   role: MobileElementRole;
-  locator: { strategy: MobileLocatorStrategy; value: string };
-  hasAccessibilityLabel: boolean;
+  /** Tappable target. Absent for elements that are guidance-only (e.g. a modal/overlay note). */
+  locator?: { strategy: MobileLocatorStrategy; value: string };
+  hasAccessibilityLabel?: boolean;
   notes?: string;
+  /** Optional interaction hints (e.g. tap the checkbox on its left edge). Free-form. */
+  interaction?: Record<string, unknown>;
+  /** For role "modal": how the overlay is closed. */
+  close?: { hint?: string; note?: string };
+  /** True when the control is disabled until a gate is satisfied (e.g. a submit button). */
+  gated?: boolean;
+  /** Conditions that ENABLE a gated control. */
+  enabledWhen?: string[];
+  /** Conditions under which a gated control STAYS disabled (used by negative scenarios). */
+  disabledWhen?: string[];
 };
 
 /**
@@ -42,6 +53,8 @@ export type MobileScreen = {
   discoverySource: "manual_exploration" | "automated_discovery";
   /** Data fields this screen needs (surfaced to the user for editing). */
   dataFields?: MobileScreenDataField[];
+  /** Free-form flow guidance for the generator (ordering, pitfalls to avoid). */
+  flowNotes?: string[];
 };
 
 export type MobileStepHint = {

@@ -9,17 +9,72 @@
   "flows": {
     "login": {
       "description": "Inicio de sesión de un cliente que YA está registrado en la app (tiene usuario y contraseña). Aplica cuando la historia habla de autenticarse, acceder con credenciales existentes, acceso biométrico, recuperar/olvidé contraseña.",
-      "triggerKeywords": ["iniciar sesion", "iniciar sesión", "login", "inicio de sesion", "autenticar", "autenticacion", "acceso biometrico", "biometrico", "cliente registrado", "usuario y contrasena", "usuario y contraseña", "credenciales"],
+      "triggerKeywords": [
+        "iniciar sesion",
+        "iniciar sesión",
+        "login",
+        "inicio de sesion",
+        "autenticar",
+        "autenticacion",
+        "acceso biometrico",
+        "biometrico",
+        "cliente registrado",
+        "usuario y contrasena",
+        "usuario y contraseña",
+        "credenciales"
+      ],
       "entryFromScreen": "login",
       "entrySteps": []
     },
     "user_registration": {
       "description": "Registro de un NUEVO usuario / validación de que el documento corresponde a un cliente del banco antes de crear la cuenta. Aplica cuando la historia habla de: registrarse, crear cuenta, nuevo usuario, onboarding, validación del cliente, comprobar/verificar que existe como cliente, validar identidad con cédula o pasaporte, elegibilidad para continuar el registro, cliente existente/no existente/fallecido, ingresar documento de identidad, aceptar términos y condiciones para registrarse. IMPORTANTE: estas historias NO empiezan en el login con usuario/contraseña — empiezan tocando el enlace '¿Aún no tienes usuario o cuenta?' desde la pantalla de bienvenida, luego 'Continuar' en la pantalla de requisitos, para llegar a la pantalla de ingreso de documento.",
-      "triggerKeywords": ["registr", "crear cuenta", "crear una cuenta", "nuevo usuario", "nueva cuenta", "onboarding", "validacion del cliente", "validación del cliente", "validar cliente", "validar al cliente", "comprobar", "verificar identidad", "validar identidad", "documento de identidad", "cedula", "cédula", "pasaporte", "existe como cliente", "es cliente", "cliente del banco", "elegib", "elegible", "no existente", "fallecido", "terminos y condiciones", "términos y condiciones", "queremos conocerte"],
+      "triggerKeywords": [
+        "registr",
+        "crear cuenta",
+        "crear una cuenta",
+        "nuevo usuario",
+        "nueva cuenta",
+        "onboarding",
+        "validacion del cliente",
+        "validación del cliente",
+        "validar cliente",
+        "validar al cliente",
+        "comprobar",
+        "verificar identidad",
+        "validar identidad",
+        "documento de identidad",
+        "cedula",
+        "cédula",
+        "pasaporte",
+        "existe como cliente",
+        "es cliente",
+        "cliente del banco",
+        "elegib",
+        "elegible",
+        "no existente",
+        "fallecido",
+        "terminos y condiciones",
+        "términos y condiciones",
+        "queremos conocerte"
+      ],
       "entryFromScreen": "registration_document_entry",
       "entrySteps": [
-        { "action": "click", "description": "Ir a registro de nuevo usuario desde la pantalla de bienvenida", "target": { "strategy": "accessibilityId", "value": "¿Aún no tienes usuario o cuenta?" } },
-        { "action": "click", "description": "Continuar desde la pantalla de requisitos del registro", "target": { "strategy": "accessibilityId", "value": "Continuar" } }
+        {
+          "action": "click",
+          "description": "Ir a registro de nuevo usuario desde la pantalla de bienvenida",
+          "target": {
+            "strategy": "accessibilityId",
+            "value": "¿Aún no tienes usuario o cuenta?"
+          }
+        },
+        {
+          "action": "click",
+          "description": "Continuar desde la pantalla de requisitos del registro",
+          "target": {
+            "strategy": "accessibilityId",
+            "value": "Continuar"
+          }
+        }
       ]
     }
   },
@@ -54,20 +109,29 @@
         {
           "label": "Iniciar sesión",
           "role": "button",
-          "locator": { "strategy": "accessibilityId", "value": "Iniciar sesión" },
+          "locator": {
+            "strategy": "accessibilityId",
+            "value": "Iniciar sesión"
+          },
           "hasAccessibilityLabel": true
         },
         {
           "label": "Acceso Biométrico",
           "role": "button",
-          "locator": { "strategy": "accessibilityId", "value": "Acceso\nBiométrico" },
+          "locator": {
+            "strategy": "accessibilityId",
+            "value": "Acceso\nBiométrico"
+          },
           "hasAccessibilityLabel": true,
           "notes": "El content-desc contiene un salto de línea literal entre las dos palabras."
         },
         {
           "label": "¿Aún no tienes usuario o cuenta?",
           "role": "link",
-          "locator": { "strategy": "accessibilityId", "value": "¿Aún no tienes usuario o cuenta?" },
+          "locator": {
+            "strategy": "accessibilityId",
+            "value": "¿Aún no tienes usuario o cuenta?"
+          },
           "hasAccessibilityLabel": true,
           "notes": "Punto de entrada al flujo de registro de nuevo usuario."
         }
@@ -82,14 +146,20 @@
         {
           "label": "Continuar",
           "role": "button",
-          "locator": { "strategy": "accessibilityId", "value": "Continuar" },
+          "locator": {
+            "strategy": "accessibilityId",
+            "value": "Continuar"
+          },
           "hasAccessibilityLabel": true,
           "notes": "Avanza desde la pantalla de requisitos hacia el ingreso de documento."
         },
         {
           "label": "Salir",
           "role": "button",
-          "locator": { "strategy": "accessibilityId", "value": "Salir" },
+          "locator": {
+            "strategy": "accessibilityId",
+            "value": "Salir"
+          },
           "hasAccessibilityLabel": true,
           "notes": "El content-desc puede venir como ' Salir' con un espacio inicial en algunas pantallas."
         }
@@ -105,11 +175,20 @@
           "key": "tipo_documento",
           "label": "Tipo de documento",
           "kind": "select",
-          "options": ["Cédula de identidad", "Pasaporte"],
+          "options": [
+            "Cédula de identidad",
+            "Pasaporte"
+          ],
           "defaultValue": "Cédula de identidad",
           "sensitive": false,
-          "matchLocator": { "strategy": "androidUiAutomator", "value": "new UiSelector().descriptionContains(\"Cédula de identidad\")" },
-          "applyTargetTemplate": { "strategy": "androidUiAutomator", "value": "new UiSelector().text(\"{{value}}\")" }
+          "matchLocator": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"Cédula de identidad\")"
+          },
+          "applyTargetTemplate": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().text(\"{{value}}\")"
+          }
         },
         {
           "key": "numero_identificacion",
@@ -117,44 +196,96 @@
           "kind": "text",
           "exampleValue": "402-12345678-9",
           "sensitive": true,
-          "matchLocator": { "strategy": "androidUiAutomator", "value": "new UiSelector().className(\"android.widget.EditText\").instance(0)" }
+          "matchLocator": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().className(\"android.widget.EditText\").instance(0)"
+          }
         }
       ],
       "elements": [
         {
           "label": "Tipo de documento",
           "role": "toggle",
-          "locator": { "strategy": "androidUiAutomator", "value": "new UiSelector().descriptionContains(\"Cédula de identidad\")" },
+          "locator": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"Cédula de identidad\")"
+          },
           "hasAccessibilityLabel": true,
           "notes": "Selector desplegable. Por defecto muestra 'Cédula de identidad'. Al tocarlo se despliegan las opciones (Cédula / Pasaporte). El content-desc del elemento es 'Cédula de identidad, '."
         },
         {
           "label": "Número de identificación",
           "role": "input",
-          "locator": { "strategy": "androidUiAutomator", "value": "new UiSelector().className(\"android.widget.EditText\").instance(0)" },
+          "locator": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().className(\"android.widget.EditText\").instance(0)"
+          },
           "hasAccessibilityLabel": false,
           "notes": "Único EditText de la pantalla. Placeholder de ejemplo: 402-12345678-9 (formato de cédula dominicana). No tiene content-desc/resource-id, se ubica por posición."
         },
         {
           "label": "Acepto los Términos y Condiciones",
           "role": "toggle",
-          "locator": { "strategy": "androidUiAutomator", "value": "new UiSelector().descriptionContains(\"Acepto los Términos y Condiciones\")" },
+          "locator": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"Acepto los Términos y Condiciones\")"
+          },
           "hasAccessibilityLabel": true,
-          "notes": "Checkbox obligatorio para habilitar 'Continuar'. content-desc largo que empieza con 'Acepto los Términos y Condiciones de la Aplicación Móvil...'."
+          "notes": "Casilla OBLIGATORIA para habilitar Continuar. Es UN solo elemento nativo que combina la casilla (izquierda) y el enlace Términos y Condiciones (centro/texto). MARCAR tocando la IZQUIERDA (la casilla), NO el centro: tocar el centro/enlace abre el modal de Términos y NO marca la casilla, dejando Continuar deshabilitado. content-desc largo que empieza con Acepto los Terminos y Condiciones de la Aplicacion Movil...",
+          "interaction": {
+            "tapArea": "left_edge",
+            "opensModalOnCenterTap": true,
+            "enablesButton": "Continuar",
+            "checkableAttr": false,
+            "autoHandledByRuntime": true
+          }
         },
         {
           "label": "Continuar",
           "role": "button",
-          "locator": { "strategy": "accessibilityId", "value": "Continuar" },
+          "locator": {
+            "strategy": "accessibilityId",
+            "value": "Continuar"
+          },
           "hasAccessibilityLabel": true,
-          "notes": "Deshabilitado hasta que se acepten los Términos y Condiciones. Envía el documento para validar si existe como cliente."
+          "notes": "Deshabilitado (enabled=false) hasta cumplir el gate. Happy path: cumplir el gate y luego CLICK. Escenarios NEGATIVOS (datos inválidos/incompletos): NO hacer click (quedaría deshabilitado y el paso fallaría); en su lugar usar assertDisabled sobre Continuar como resultado esperado.",
+          "gated": true,
+          "enabledWhen": [
+            "Tipo de documento seleccionado",
+            "Número de identificación con formato válido",
+            "Casilla de Términos y Condiciones marcada"
+          ],
+          "disabledWhen": [
+            "Número de identificación con formato inválido",
+            "Campos incompletos",
+            "Casilla de Términos sin marcar"
+          ]
         },
         {
           "label": "Salir",
           "role": "button",
-          "locator": { "strategy": "accessibilityId", "value": "Salir" },
+          "locator": {
+            "strategy": "accessibilityId",
+            "value": "Salir"
+          },
           "hasAccessibilityLabel": true
+        },
+        {
+          "label": "Modal de Términos y Condiciones",
+          "role": "modal",
+          "notes": "Overlay que se abre al tocar el enlace/centro del row de aceptación o el texto Términos y Condiciones. Muestra el texto de términos (TERMINOS Y CONDICIONES DE USO...). NO contiene la casilla ni Continuar. Cerrarlo con la X en la esquina superior derecha (ícono sin texto). El runtime lo cierra automáticamente cuando tapa el siguiente paso.",
+          "close": {
+            "hint": "top_right_x_icon",
+            "note": "El ícono X no tiene content-desc de texto (glyph de icon-font); se cierra por posición (esquina sup. der.)."
+          }
         }
+      ],
+      "flowNotes": [
+        "Happy path: seleccionar Tipo de documento -> ingresar Número válido -> MARCAR la casilla de aceptación (tocar su IZQUIERDA, no el enlace) -> CLICK Continuar.",
+        "NO generar un paso que toque el enlace Términos y Condiciones (abre un modal). Si aparece el modal, cerrarlo (X sup. der.).",
+        "Continuar está DESHABILITADO (enabled=false) hasta cumplir el gate; hacer click cuando está deshabilitado FALLA.",
+        "Escenarios NEGATIVOS (documento con formato inválido, campos incompletos, casilla sin marcar): NO generes un paso click sobre Continuar. Genera un paso action:assertDisabled con target Continuar para validar que queda deshabilitado (ese es el resultado esperado).",
+        "Para validar que el gate se cumplió puedes usar action:assertEnabled sobre Continuar antes de clickearlo."
       ]
     }
   }

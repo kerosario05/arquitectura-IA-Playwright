@@ -61,6 +61,15 @@ export function mapReasonCodeToHuman(reasonCode?: string, rawError?: string): st
   if (code.includes("assertion_not_found") || code.includes("assertion") && !code.includes("assertion")) {
     return "La validación esperada no fue encontrada en la pantalla.";
   }
+  if (code.includes("target_disabled")) {
+    return "El botón/elemento estaba deshabilitado y no se pudo accionar (no se cumplió una condición previa).";
+  }
+  if (code.includes("assert_enabled_failed")) {
+    return "Se esperaba que el elemento estuviera habilitado, pero estaba deshabilitado.";
+  }
+  if (code.includes("assert_disabled_failed")) {
+    return "Se esperaba que el elemento estuviera deshabilitado, pero estaba habilitado.";
+  }
   if (code.includes("target_not_found") || code.includes("element_not_found") || code.includes("locator_resolution_failed")) {
     return "No se encontró el elemento necesario para continuar la ejecución.";
   }
@@ -124,19 +133,12 @@ export function buildStructuredDefectDescription(params: {
   // Fallback to legacy builder when no technicalContext
   if (!hasTc) return buildLegacyDefectDescription(params.scenarioTitle, params.failureReason);
 
+  // Focused on WHERE it failed exactly: only the failed step + what happened + expected + evidence.
+  // Technical/traceability data (reasonCode, jobId, TestRail case/run, last successful step) stays in
+  // technicalContext for traceability but is intentionally kept OUT of the human description.
   const lines: string[] = [];
 
-  // Scenario header
-  lines.push(`Escenario:`);
-  lines.push(`${params.scenarioId} — ${params.scenarioTitle}`);
-  lines.push("");
-
-  // Result
-  lines.push("Resultado:");
-  lines.push("Fallido");
-  lines.push("");
-
-  // Failed step
+  // Failed step — the exact point of failure.
   const failedAtStep = typeof tc.failedAtStep === "number" ? tc.failedAtStep : undefined;
   const failedTarget = typeof tc.failedTarget === "string" ? tc.failedTarget : undefined;
   if (failedAtStep != null || failedTarget) {
@@ -148,75 +150,30 @@ export function buildStructuredDefectDescription(params: {
     lines.push("");
   }
 
-  // Last successful step
-  const ls = tc.lastSuccessfulStep as Record<string, unknown> | undefined;
-  if (ls && typeof ls.stepIndex === "number") {
-    lines.push("Último paso exitoso:");
-    const lsParts: string[] = [`Paso ${ls.stepIndex}`];
-    if (typeof ls.action === "string") lsParts.push(ls.action);
-    if (typeof ls.target === "string") lsParts.push(ls.target);
-    lines.push(lsParts.join(": "));
+  // Qué pasó — the cause.
+  const reasonCode = typeof tc.reasonCode === "string" ? tc.reasonCode : undefined;
+  const rawError = typeof tc.rawError === "string" ? tc.rawError : undefined;
+  const actualSummary = mapReasonCodeToHuman(reasonCode, rawError);
+  if (actualSummary) {
+    lines.push("Qué pasó:");
+    lines.push(actualSummary);
     lines.push("");
   }
 
-  // Expected result
+  // Resultado esperado.
   if (typeof tc.expectedResult === "string" && tc.expectedResult.trim().length > 0) {
     lines.push("Resultado esperado:");
     lines.push(tc.expectedResult);
     lines.push("");
   }
 
-  // Actual result / reason
-  const reasonCode = typeof tc.reasonCode === "string" ? tc.reasonCode : undefined;
-  const rawError = typeof tc.rawError === "string" ? tc.rawError : undefined;
-  const actualSummary = mapReasonCodeToHuman(reasonCode, rawError);
-  if (actualSummary) {
-    lines.push("Resultado actual:");
-    lines.push(actualSummary);
-    lines.push("");
-  }
-
-  // Technical code
-  if (reasonCode) {
-    lines.push("Código técnico:");
-    lines.push(reasonCode);
-    lines.push("");
-  }
-
-  // Execution
-  if (params.jobId) {
-    lines.push("Ejecución:");
-    lines.push(params.jobId);
-    lines.push("");
-  }
-
-  // TestRail
-  const trCaseId = typeof tc.testRailCaseId === "number" || typeof tc.testRailCaseId === "string" ? String(tc.testRailCaseId) : undefined;
-  const trRunId = typeof tc.testRailRunId === "number" || typeof tc.testRailRunId === "string" ? String(tc.testRailRunId) : undefined;
-  if (trCaseId || trRunId) {
-    const trParts: string[] = [];
-    if (trCaseId) trParts.push(`Caso ${formatTestRailId(trCaseId)}`);
-    if (trRunId) trParts.push(`Run ${trRunId}`);
-    lines.push("TestRail:");
-    lines.push(trParts.join(" · "));
-    lines.push("");
-  }
-
-  // Evidence
+  // Evidencia.
+  const ls = tc.lastSuccessfulStep as Record<string, unknown> | undefined;
   const hasEvidence = Boolean(tc.evidenceDir) || Boolean(tc.evidencePath) || Boolean(ls?.evidencePath);
   lines.push("Evidencia:");
   lines.push(hasEvidence ? "Evidencia técnica disponible." : "No se registró evidencia visual.");
-  lines.push("");
 
-  // Diagnostic counters
-  let sections = 0;
-  if (failedAtStep != null || failedTarget) sections++;
-  if (ls) sections++;
-  if (tc.expectedResult) sections++;
-  if (actualSummary) sections++;
-  if (reasonCode) sections++;
-  if (trCaseId || trRunId) sections++;
-  console.log(`[defect-description] scenarioId=${params.scenarioId} source=technical_context sections=${sections} hasFailedStep=${failedAtStep != null || Boolean(failedTarget)} hasExpectedResult=${Boolean(tc.expectedResult)} hasActualResult=${Boolean(actualSummary)} hasEvidence=${hasEvidence} hasTestRail=${Boolean(trCaseId || trRunId)}`);
+  console.log(`[defect-description] scenarioId=${params.scenarioId} source=technical_context_focused hasFailedStep=${failedAtStep != null || Boolean(failedTarget)} hasExpectedResult=${Boolean(tc.expectedResult)} hasActualResult=${Boolean(actualSummary)} hasEvidence=${hasEvidence}`);
 
   return lines.join("\n").trim();
 }

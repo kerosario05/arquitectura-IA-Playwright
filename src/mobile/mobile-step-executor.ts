@@ -55,6 +55,39 @@ async function locateTarget(
   return null;
 }
 
+/** Reads the enable-before-click flag (default ON; only "false" disables). */
+function requireEnabledBeforeClick(): boolean {
+  return (process.env.MOBILE_REQUIRE_ENABLED_BEFORE_CLICK ?? "true").toLowerCase() !== "false";
+}
+
+/**
+ * Whether the element for `selector` is currently ENABLED. Only the `enabled` attribute is used —
+ * NOT `clickable`, because many tappable RN rows have a `clickable="false"` inner TextView yet the
+ * tap works via a clickable ancestor. Re-queries each call so a disabled→enabled transition (e.g.
+ * a form validating, or a consent checkbox getting marked) is picked up. If state can't be read,
+ * returns true so we never block a legitimate click.
+ */
+async function isEnabledNow(browser: WebdriverIO.Browser, selector: string): Promise<boolean> {
+  try {
+    const el = await browser.$(selector);
+    if (!(await el.isExisting())) return true; // let the click path handle a missing element
+    return await el.isEnabled();
+  } catch {
+    return true;
+  }
+}
+
+/** Polls (briefly) until the element becomes enabled, or the timeout elapses. */
+async function waitUntilEnabled(browser: WebdriverIO.Browser, selector: string, timeoutMs: number): Promise<boolean> {
+  const deadline = Date.now() + timeoutMs;
+  if (await isEnabledNow(browser, selector)) return true;
+  while (Date.now() < deadline) {
+    await new Promise((r) => setTimeout(r, 300));
+    if (await isEnabledNow(browser, selector)) return true;
+  }
+  return false;
+}
+
 export async function executeMobileStep(
   browser: WebdriverIO.Browser,
   step: MobileStep,
@@ -78,9 +111,20 @@ export async function executeMobileStep(
         if (isSubmitLikeClick(step)) {
           await ensureConsentCheckboxChecked(browser, (line) => console.log(line));
         }
-        const el = await locateTarget(browser, selectorFromTarget(step.target), step.timeoutMs ?? 10000, "displayed");
+        const clickSelector = selectorFromTarget(step.target);
+        const el = await locateTarget(browser, clickSelector, step.timeoutMs ?? 10000, "displayed");
         if (!el) throw new Error(`click target not found (even after closing any blocking modal): ${JSON.stringify(step.target)}`);
-        await el.click();
+        // A visible button can still be DISABLED (e.g. "Continuar" until the form gate is satisfied).
+        // Give it a brief window to become enabled (the consent/checkbox handling above may satisfy
+        // the gate), then decide on the `enabled` attribute ONLY — never `clickable`, which is
+        // `false` on many tappable inner TextViews. If it stays genuinely disabled, tapping it is a
+        // no-op, so fail with a precise reason instead of silently "passing" an action that couldn't
+        // happen. (Negative scenarios must assert the disabled state via assertDisabled, not click.)
+        if (requireEnabledBeforeClick() && !(await waitUntilEnabled(browser, clickSelector, Math.min(step.timeoutMs ?? 10000, 4000)))) {
+          throw new Error(`target_disabled: el botón/elemento está deshabilitado y no se puede clickear (no se cumplió la condición para habilitarlo): ${JSON.stringify(step.target)}`);
+        }
+        // Re-query in case the tree re-rendered while waiting for the enabled state.
+        await (await browser.$(clickSelector)).click();
         break;
       }
       case "fill": {
@@ -96,6 +140,26 @@ export async function executeMobileStep(
         if (!el) {
           throw new Error(`Expected element to be visible: ${JSON.stringify(step.target)}`);
         }
+        break;
+      }
+      case "assertEnabled": {
+        // Validate that a control IS enabled (actionable). Used to confirm a gate was satisfied.
+        if (!step.target) throw new Error("assertEnabled step requires a target");
+        const el = await locateTarget(browser, selectorFromTarget(step.target), step.timeoutMs ?? 10000, "displayed");
+        if (!el) throw new Error(`Expected element to be present and enabled but not found: ${JSON.stringify(step.target)}`);
+        const enabled = await el.isEnabled().catch(() => false);
+        if (!enabled) throw new Error(`Expected element to be ENABLED but it is disabled: ${JSON.stringify(step.target)}`);
+        break;
+      }
+      case "assertDisabled": {
+        // Validate that a control IS disabled — the expected outcome of negative scenarios (e.g. the
+        // submit button stays disabled with invalid input). Uses `exist` since a disabled control is
+        // still present; passes only when the element exists and reports enabled=false.
+        if (!step.target) throw new Error("assertDisabled step requires a target");
+        const el = await locateTarget(browser, selectorFromTarget(step.target), step.timeoutMs ?? 10000, "exist");
+        if (!el) throw new Error(`Expected element to be present but disabled; not found: ${JSON.stringify(step.target)}`);
+        const enabled = await el.isEnabled().catch(() => true);
+        if (enabled) throw new Error(`Expected element to be DISABLED but it is enabled: ${JSON.stringify(step.target)}`);
         break;
       }
       case "waitFor": {

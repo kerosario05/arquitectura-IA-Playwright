@@ -396,9 +396,14 @@ function getConfiguredRequiredCaseFields(): Record<string, string> {
 function toStepsSeparated(scenario: ScenarioPreviewPublishContext["scenarios"][number]): Array<{ content: string; expected?: string }> {
   // Build clean steps: never mix global expectedResult into step-level expected.
   // Global expectedResult is sent separately via custom_expected.
-  return scenario.steps.map((step) => ({
-    content: step.replace(/^\d+[\.)]\s*/, "").trim(),
-  }));
+  const steps = scenario.steps
+    .map((step) => ({ content: step.replace(/^\d+[\.)]\s*/, "").trim() }))
+    .filter((s) => s.content.length > 0);
+  // TestRail requires custom_steps to be non-empty — never return an empty steps list.
+  if (steps.length === 0) {
+    return [{ content: sanitizeText(stripHtml(scenario.title)) || "Ejecutar el escenario de prueba automatizado." }];
+  }
+  return steps;
 }
 
 function buildCustomFields(ctx: ScenarioPreviewPublishContext, scenarioId: string): Record<string, unknown> {
@@ -551,9 +556,12 @@ export async function publishScenariosToTestRail(
     const preconditionsBase = sanitizeText(scenario.preconditions.join(" | "));
     const launchId = (ctx as any).launchId as string | undefined;
     const uniqueMarker = launchId ? `[automationScenarioId: ${launchId.slice(0, 8)}-${scenarioId.replace(/^L-/, "")}]` : "";
+    // TestRail requires custom_preconds to be non-empty — fall back to a default when the scenario
+    // has no preconditions (common for mobile/sparse scenarios).
+    const preconditionsBody = preconditionsBase || "Precondiciones:\n- Aplicación disponible.\n- Usuario o datos de prueba configurados.";
     const preconditions = uniqueMarker
-      ? (preconditionsBase ? `${preconditionsBase}\n${uniqueMarker}` : uniqueMarker)
-      : preconditionsBase;
+      ? `${preconditionsBody}\n${uniqueMarker}`
+      : preconditionsBody;
     const customExpected = buildCustomExpected(scenario);
     const customCaseOracle = buildCustomCaseOracle(scenario, requiredCaseFields);
         const refs = existingMapping?.testRailRef ?? buildSafeTestRailRefs(scenario, scenarioId, ctx.storyKey);

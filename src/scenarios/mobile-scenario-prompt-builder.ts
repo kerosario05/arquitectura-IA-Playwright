@@ -17,7 +17,8 @@ FORMATO DE SALIDA (JSON estricto, sin explicaciones, sin markdown, sin texto ant
         { "action": "launchApp", "description": "Abrir la aplicacion" },
         { "action": "click", "description": "Descripcion de la accion", "target": { "strategy": "accessibilityId", "value": "Texto visible del boton" } },
         { "action": "fill", "description": "Descripcion", "target": { "strategy": "accessibilityId", "value": "Etiqueta del campo" }, "value": "valor de ejemplo" },
-        { "action": "assertVisible", "description": "Descripcion", "target": { "strategy": "accessibilityId", "value": "Texto esperado en pantalla" } }
+        { "action": "assertVisible", "description": "Descripcion", "target": { "strategy": "accessibilityId", "value": "Texto esperado en pantalla" } },
+        { "action": "assertDisabled", "description": "Verificar que el boton queda deshabilitado", "target": { "strategy": "accessibilityId", "value": "Continuar" } }
       ],
       "expectedResult": "Resultado esperado del escenario completo, en 1-2 frases",
       "preconditions": ["Precondicion 1 (puede ser un array vacio si no aplica)"]
@@ -30,7 +31,11 @@ REGLAS:
 - "strategy" debe ser exactamente uno de: accessibilityId | id | xpath | androidUiAutomator | className.
 - Preferir SIEMPRE "accessibilityId" usando el texto visible mencionado o implicito en la historia — es la estrategia mas confiable sin conocer la jerarquia real de la app.
 - NO inventes resource-id (strategy "id") ni XPaths especificos — no tienes visibilidad de la app real, solo del texto de la historia.
-- "action" debe ser exactamente uno de: launchApp | click | fill | assertVisible | waitFor | screenshot.
+- "action" debe ser exactamente uno de: launchApp | click | fill | assertVisible | assertEnabled | assertDisabled | waitFor | screenshot.
+- BOTONES CON GATE (deshabilitados hasta cumplir una condicion): si un elemento del contexto tiene "gated": true, esta DESHABILITADO hasta cumplir su "enabledWhen". Un paso "click" sobre un boton deshabilitado FALLA. Reglas:
+  * Happy path: primero genera los pasos que cumplen el gate (segun "enabledWhen") y LUEGO el "click" sobre el boton.
+  * Escenarios NEGATIVOS (datos invalidos/incompletos que caen en "disabledWhen"): NO generes "click" sobre ese boton; genera un paso {"action":"assertDisabled","target":{...}} para validar que queda deshabilitado (ese es el resultado esperado del escenario negativo).
+  * Opcional: usa {"action":"assertEnabled","target":{...}} para confirmar que el gate se cumplio antes de clickear.
 - El primer paso de cada escenario debe ser siempre {"action":"launchApp"}.
 - "expectedResult" es OBLIGATORIO en cada escenario — describe el resultado final esperado, no un paso mas.
 - "preconditions" es un array de strings (puede ser vacio []) con lo que debe cumplirse antes de ejecutar el escenario.
@@ -80,8 +85,18 @@ function formatRouteProfile(routeProfile: MobileRouteProfile): string {
     const entryTag = screen.isEntryScreen ? " (pantalla de entrada de la app)" : "";
     lines.push(`### Pantalla [${screen.screenId}]: ${screen.title}${entryTag}`);
     for (const el of screen.elements) {
-      const loc = `{"strategy":"${el.locator.strategy}","value":${JSON.stringify(el.locator.value)}}`;
-      lines.push(`- [${el.role}] "${el.label}" -> target: ${loc}${el.notes ? ` (${el.notes})` : ""}`);
+      if (el.locator?.strategy) {
+        const loc = `{"strategy":"${el.locator.strategy}","value":${JSON.stringify(el.locator.value)}}`;
+        const hint = el.interaction ? ` [interaccion: ${JSON.stringify(el.interaction)}]` : "";
+        const gate = el.gated
+          ? ` [GATED: deshabilitado hasta ${JSON.stringify(el.enabledWhen ?? [])}${el.disabledWhen ? `; permanece deshabilitado si ${JSON.stringify(el.disabledWhen)}` : ""}. En escenarios negativos usa assertDisabled en vez de click]`
+          : "";
+        lines.push(`- [${el.role}] "${el.label}" -> target: ${loc}${el.notes ? ` (${el.notes})` : ""}${hint}${gate}`);
+      } else {
+        // Guidance-only element (e.g. a modal/overlay) — no tappable target, surface as a note.
+        const closeNote = el.close ? ` [cierre: ${el.close.hint ?? ""}${el.close.note ? ` — ${el.close.note}` : ""}]` : "";
+        lines.push(`- [${el.role}] "${el.label}" (sin target directo)${el.notes ? `: ${el.notes}` : ""}${closeNote}`);
+      }
     }
     if (screen.dataFields && screen.dataFields.length > 0) {
       lines.push(`  DATOS OBLIGATORIOS de esta pantalla (SIEMPRE genera pasos para cada uno, sin importar el fraseo de la historia):`);
@@ -93,6 +108,10 @@ function formatRouteProfile(routeProfile: MobileRouteProfile): string {
           lines.push(`  - "${df.label}" (texto): genera un paso "fill" con target ${JSON.stringify(df.matchLocator.value)} strategy "${df.matchLocator.strategy}" y value de ejemplo ${JSON.stringify(df.exampleValue ?? "")}.`);
         }
       }
+    }
+    if (screen.flowNotes && screen.flowNotes.length > 0) {
+      lines.push(`  FLUJO de esta pantalla (respeta el orden y evita los errores indicados):`);
+      for (const note of screen.flowNotes) lines.push(`  - ${note}`);
     }
     lines.push("");
   }

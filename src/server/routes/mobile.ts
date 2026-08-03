@@ -189,6 +189,7 @@ mobileRouter.post("/runs/launch-execution", async (req, res, next) => {
       testrailSectionId: body.testrailSectionId,
       suiteId: body.suiteId,
       jiraKey: body.jiraKey,
+      jiraTitle: (body as { jiraTitle?: string; storyTitle?: string }).jiraTitle ?? (body as { storyTitle?: string }).storyTitle,
       sprintName: body.sprintName,
       publishStrategy: body.publishStrategy,
       selectedScenarios: body.scenarios.map(mobileScenarioToLaunchScenario)

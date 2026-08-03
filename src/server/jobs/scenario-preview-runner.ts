@@ -722,6 +722,12 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   const jiraKey = (pRecord.jiraKey as string) || undefined;
   const publishedCases: PublishedCaseEntry[] = Array.isArray(pRecord.publishedCases) ? pRecord.publishedCases : [];
 
+  // Persist this job's id onto the launch manifest (when this run belongs to a launch) so the
+  // Executions summary can tie the run to its defects (keyed by jobId) and evidence docx.
+  if (launchId) {
+    void import("./testrail-result-sync").then(({ updateLaunchManifestJobId }) => updateLaunchManifestJobId(launchId, jobId)).catch(() => {});
+  }
+
   // Log what we received from manifest
   console.log(`[launch-sync] manifest publishedCases count=${publishedCases.length}`);
   for (const pc of publishedCases) {
@@ -2310,9 +2316,12 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
               }
               const hasTc = Object.keys(technicalContext).length > 0;
 
-              const existingDefect = list.defects.find(d => d.jobId === jobId && d.scenarioId === fc.id);
+              // One defect per SCENARIO (not per run): match on scenarioId only so re-running the HU
+              // UPDATES the scenario's existing defect instead of accumulating a new one each run.
+              const existingDefect = list.defects.find(d => d.scenarioId === fc.id);
               if (existingDefect) {
                 existingDefect.updatedAt = new Date().toISOString();
+                existingDefect.jobId = jobId;
                 if (fc.failureReason && fc.failureReason.length > 10) {
                   existingDefect.description = buildStructuredDefectDescription({ scenarioId: fc.id, scenarioTitle, failureReason: fc.failureReason, technicalContext, jobId });
                   const sv = inferDefectSeverity(fc.failureReason, fc.id, scenarioTitle);

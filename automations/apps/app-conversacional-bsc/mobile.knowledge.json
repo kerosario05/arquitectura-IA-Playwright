@@ -32,11 +32,11 @@
       "validationStatus": "validated",
       "trustedForReuse": true,
       "failureCount": 0,
-      "successCount": 11,
-      "runCount": 11,
+      "successCount": 45,
+      "runCount": 45,
       "createdAt": "2026-07-23T17:10:04.605Z",
-      "lastSeenAt": "2026-07-24T03:06:51.328Z",
-      "lastValidatedAt": "2026-07-24T03:06:51.328Z"
+      "lastSeenAt": "2026-07-25T13:58:07.774Z",
+      "lastValidatedAt": "2026-07-25T13:58:07.774Z"
     },
     {
       "id": "mob_screen_01f11df122d9",
@@ -66,11 +66,11 @@
       "validationStatus": "validated",
       "trustedForReuse": true,
       "failureCount": 0,
-      "successCount": 8,
-      "runCount": 8,
+      "successCount": 40,
+      "runCount": 40,
       "createdAt": "2026-07-23T17:16:30.189Z",
-      "lastSeenAt": "2026-07-24T03:06:51.327Z",
-      "lastValidatedAt": "2026-07-24T03:06:51.327Z"
+      "lastSeenAt": "2026-07-25T14:03:50.338Z",
+      "lastValidatedAt": "2026-07-25T14:03:50.338Z"
     },
     {
       "id": "mob_screen_901c4cbb1c98",
@@ -91,11 +91,11 @@
       "validationStatus": "validated",
       "trustedForReuse": true,
       "failureCount": 0,
-      "successCount": 9,
-      "runCount": 9,
+      "successCount": 37,
+      "runCount": 37,
       "createdAt": "2026-07-23T17:16:30.193Z",
-      "lastSeenAt": "2026-07-24T03:06:51.328Z",
-      "lastValidatedAt": "2026-07-24T03:06:51.328Z"
+      "lastSeenAt": "2026-07-25T13:58:07.774Z",
+      "lastValidatedAt": "2026-07-25T13:58:07.774Z"
     },
     {
       "id": "mob_route_79beaf1cebe9",
@@ -135,13 +135,14 @@
       "assertionTargets": [],
       "issueKey": "AA-84",
       "scenarioTitle": "Validación exitosa de documento de cliente existente y habilitado",
-      "validationStatus": "pending",
-      "trustedForReuse": false,
-      "failureCount": 7,
-      "successCount": 0,
-      "runCount": 7,
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "failureCount": 17,
+      "successCount": 5,
+      "runCount": 22,
       "createdAt": "2026-07-23T18:08:26.933Z",
-      "lastSeenAt": "2026-07-24T03:06:51.328Z"
+      "lastSeenAt": "2026-07-25T13:57:01.578Z",
+      "lastValidatedAt": "2026-07-25T13:57:01.578Z"
     },
     {
       "id": "mob_route_60143815282f",
@@ -158,13 +159,119 @@
       "assertionTargets": [],
       "issueKey": "AA-84",
       "scenarioTitle": "Validacion exitosa de cliente existente y habilitado para continuar el registro",
+      "validationStatus": "validated",
+      "trustedForReuse": false,
+      "failureCount": 9,
+      "successCount": 3,
+      "runCount": 12,
+      "createdAt": "2026-07-23T18:25:46.195Z",
+      "lastSeenAt": "2026-07-25T13:58:07.774Z",
+      "lastValidatedAt": "2026-07-24T16:01:14.440Z"
+    },
+    {
+      "id": "mob_route_bb3b5a141b6f",
+      "knowledgeKind": "route_observed",
+      "matchKey": "bb3b5a141b6f",
+      "clickTargets": [
+        "Continuar",
+        "Continuar"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-93",
+      "scenarioTitle": "Validar cliente existente con documento en formato correcto",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "failureCount": 2,
+      "successCount": 0,
+      "runCount": 2,
+      "createdAt": "2026-07-24T04:39:29.482Z",
+      "lastSeenAt": "2026-07-24T15:40:58.663Z"
+    },
+    {
+      "id": "mob_route_996a9f55a445",
+      "knowledgeKind": "route_observed",
+      "matchKey": "996a9f55a445",
+      "clickTargets": [
+        "Continuar",
+        "new UiSelector().text(\"Cédula de identidad\")",
+        "new UiSelector().descriptionContains(\"Acepto los Términos y Condiciones\")"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-93",
+      "scenarioTitle": "Validación exitosa de documento de cliente existente y habilitado",
       "validationStatus": "pending",
       "trustedForReuse": false,
       "failureCount": 1,
       "successCount": 0,
       "runCount": 1,
-      "createdAt": "2026-07-23T18:25:46.195Z",
-      "lastSeenAt": "2026-07-23T18:25:46.195Z"
+      "createdAt": "2026-07-24T13:52:39.378Z",
+      "lastSeenAt": "2026-07-24T13:52:39.378Z"
+    },
+    {
+      "id": "mob_route_22b9a7cc9b50",
+      "knowledgeKind": "route_observed",
+      "matchKey": "22b9a7cc9b50",
+      "clickTargets": [
+        "¿Aún no tienes usuario o cuenta?",
+        "Continuar",
+        "new UiSelector().descriptionContains(\"Cédula de identidad\")",
+        "new UiSelector().text(\"Cédula de identidad\")",
+        "new UiSelector().text(\"Cédula de identidad\")",
+        "new UiSelector().text(\"Cédula de identidad\")",
+        "new UiSelector().descriptionContains(\"Acepto los Términos y Condiciones\")",
+        "Continuar"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-93",
+      "scenarioTitle": "Registro exitoso - cliente existente y habilitado con documento válido",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "failureCount": 1,
+      "successCount": 0,
+      "runCount": 1,
+      "createdAt": "2026-07-24T15:03:35.954Z",
+      "lastSeenAt": "2026-07-24T15:03:35.954Z"
+    },
+    {
+      "id": "mob_route_893eae6c9ee9",
+      "knowledgeKind": "route_observed",
+      "matchKey": "893eae6c9ee9",
+      "clickTargets": [
+        "¿Aún no tienes usuario o cuenta?",
+        "Continuar",
+        "new UiSelector().descriptionContains(\"Acepto los Términos y Condiciones\")",
+        "Continuar"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-93",
+      "scenarioTitle": "Validación exitosa de cliente existente y habilitado",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "failureCount": 2,
+      "successCount": 0,
+      "runCount": 2,
+      "createdAt": "2026-07-24T16:23:29.480Z",
+      "lastSeenAt": "2026-07-24T16:34:38.108Z"
+    },
+    {
+      "id": "mob_route_b28fc7cebb64",
+      "knowledgeKind": "route_observed",
+      "matchKey": "b28fc7cebb64",
+      "clickTargets": [
+        "¿Aún no tienes usuario o cuenta?",
+        "Continuar",
+        "new UiSelector().descriptionContains(\"Acepto los Términos y Condiciones\")"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-93",
+      "scenarioTitle": "Rechazo por formato de documento inválido",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "failureCount": 2,
+      "successCount": 0,
+      "runCount": 2,
+      "createdAt": "2026-07-24T16:24:22.122Z",
+      "lastSeenAt": "2026-07-24T16:35:27.259Z"
     }
   ]
 }
