@@ -1,0 +1,10 @@
+{
+  "id": "preview-003-validacion-de-ausencia-de-informacion-financiera-en-el-flujo-inicial",
+  "externalId": "PREVIEW-003",
+  "caseId": 0,
+  "title": "Validación de ausencia de información financiera en el flujo inicial",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-04T13:20:57.567Z"
+}

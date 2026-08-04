@@ -1,4 +1,11 @@
-import type { McpGenerationResponse, McpRouteProfile, ScenarioRouteResolution, DeterministicSeedScenario, ScenarioGenerationMode } from "./scenario-types";
+import type {
+  McpGenerationResponse,
+  McpRouteProfile,
+  ScenarioRouteResolution,
+  DeterministicSeedScenario,
+  ScenarioGenerationMode,
+  FunctionalBranchRef,
+} from "./scenario-types";
 import { buildMcpScenarioMessages } from "./mcp-scenario-prompt-builder";
 import { detectOptionFlows } from "./hu-scope-guard";
 import { parseAiResponse } from "./scenario-output-parser";
@@ -22,6 +29,10 @@ import {
 } from "./scenario-route-compliance-validator";
 import { ensureStepStrings, normalizeScenarioSteps } from "./step-formatter";
 import { detectHuIntent, isTransactionalDocumentIntent, type HuIntentDetection } from "./hu-intent-classifier";
+import {
+  collectBranchRequiredClicks,
+  mergeEffectiveAllowedClicks,
+} from "./effective-click-authority";
 
 /**
  * Convert deterministic seeds to full scenarios and validate them
@@ -392,7 +403,7 @@ function normalizeScenarioStep(step: string): { step: string; changed: boolean; 
   return { step: normalized, changed: normalized !== stripped };
 }
 
-function applyScenarioQualityGate(
+export function applyScenarioQualityGate(
   scenarios: any[],
   issues: JiraIssueSource[],
   routeProfile: McpRouteProfile | null,
@@ -403,6 +414,16 @@ function applyScenarioQualityGate(
   const rejected: Array<{ sourceIssueKey: string; reason: string }> = [];
   const rejectedReasons = new Set<string>();
   let normalizedCount = 0;
+  const optionFlowLabelsByIssue = new Map<string, Set<string>>();
+  for (const issue of issues) {
+    const flowLabels = new Set<string>();
+    const detected = detectOptionFlows(issue);
+    for (const flow of detected.flows) {
+      if (!flow.optionLabel?.trim()) continue;
+      flowLabels.add(flow.optionLabel.trim().toLowerCase());
+    }
+    optionFlowLabelsByIssue.set(issue.key, flowLabels);
+  }
 
   for (const scenario of scenarios) {
     const issueKey = scenario.sourceIssueKey;
@@ -425,6 +446,9 @@ function applyScenarioQualityGate(
       for (const intermediate of pathSelection.selectedPath.requiredIntermediates) {
         requiredNavigation.add(intermediate.toLowerCase());
       }
+    }
+    for (const optionLabel of optionFlowLabelsByIssue.get(issueKey) ?? []) {
+      requiredNavigation.add(optionLabel);
     }
 
     let removedVisibleNavigation = 0;
@@ -817,6 +841,7 @@ export async function generateScenariosWithAi(
   preservedPrivateTargets?: string[], // Private navigation targets to preserve as clicks
   huScenarioModel?: any,
   routePendingScenarioPlan?: any,
+  functionalBranches?: FunctionalBranchRef[],
 ): Promise<McpGenerationResponse> {
   const primaryIssue = issues[0];
   const primaryHuEvidence = primaryIssue ? huEvidenceMap?.get(primaryIssue.key) : null;
@@ -971,6 +996,16 @@ export async function generateScenariosWithAi(
     }
   }
 
+  const branchRequiredClicks = collectBranchRequiredClicks(functionalBranches);
+  const branchRequiredMerge = mergeEffectiveAllowedClicks(
+    derivedContext.allowedExecutableClicks,
+    branchRequiredClicks,
+  );
+  derivedContext.allowedExecutableClicks = branchRequiredMerge.effectiveAllowedClicks;
+  console.log(
+    `[coverage-contract] branchRequiredClicks=${branchRequiredClicks.length} added=${branchRequiredMerge.addedFromBranchRequired} effectiveAllowedClicksBeforeRepair=${derivedContext.allowedExecutableClicks.length}`,
+  );
+
   // Supplement allowedExecutableClicks with preserved private targets (selected learned navigation path)
   const learnedPathNormalizedTargets = new Set<string>();
   if (preservedPrivateTargets && preservedPrivateTargets.length > 0) {
@@ -989,6 +1024,9 @@ export async function generateScenariosWithAi(
       console.log(`[navigation-authority] learnedPathClicks added=${addedCount} source=appKnowledge issue=${primaryIssue?.key ?? "unknown"}`);
     }
   }
+  console.log(
+    `[coverage-contract] effectiveAllowedClicks source=route_profile+branch_required+protected_private total=${derivedContext.allowedExecutableClicks.length} branchRequiredClicks=${branchRequiredClicks.length}`,
+  );
 
   const profileQuality = validateRouteProfileQuality(appSlug, routeProfile ?? null, routeResolutions, derivedContext);
   logRouteProfileQuality(profileQuality);
@@ -1048,7 +1086,7 @@ export async function generateScenariosWithAi(
           null, entrySteps, loginMode, routePendingResolutions,
           pendingDeterministicSeeds || undefined, huScenarioModel?.mainIntent,
           huEvidenceMap, pathSelectionMap, huScopeGuard,
-          huScenarioModel, routePendingScenarioPlan
+          huScenarioModel, routePendingScenarioPlan, functionalBranches,
         );
         console.log(`[scenario-preview] routePendingPrompt incompatibleRouteProfile=true routeProfileUsedAsExecutable=false`);
         console.log(`[scenarios:prompt] messages built system=${messages[0]?.content.length ?? 0} user=${messages[1]?.content.length ?? 0}`);
@@ -1148,7 +1186,10 @@ export async function generateScenariosWithAi(
     finalValid: 0,
     finalRejected: 0,
     finalBlocked: blockedIssues.length,
-    fallbackUsed: false
+    fallbackUsed: false,
+    branchRequiredClicks,
+    effectiveAllowedClicks: [...derivedContext.allowedExecutableClicks],
+    effectiveAllowedClicksBeforeRepair: derivedContext.allowedExecutableClicks.length,
   };
 
   // Check if we should skip AI (only in deterministic_only mode)
@@ -1239,6 +1280,7 @@ export async function generateScenariosWithAi(
     huScopeGuard, // Pass HU scope guard for prompt guidance (NEW)
     huScenarioModel,
     routePendingScenarioPlan,
+    functionalBranches,
   );
 
   console.log(`[scenarios:prompt] messages built system=${messages[0]?.content.length ?? 0} user=${messages[1]?.content.length ?? 0} issues=${routeBackedIssues.length}`);
@@ -1374,6 +1416,8 @@ export async function generateScenariosWithAi(
       }
     }
     const totalAfter = derivedContext.allowedExecutableClicks.length;
+    generationDiagnostics.effectiveAllowedClicks = [...derivedContext.allowedExecutableClicks];
+    generationDiagnostics.effectiveAllowedClicksBeforeRepair = totalAfter;
     console.log(`[coverage-contract] preservedExecutableClicksBeforeUnbackedRepair added=${addedCount} totalAllowed=${totalAfter}`);
 
     // Repair unbacked clicks before validation

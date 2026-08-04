@@ -1,0 +1,10 @@
+{
+  "id": "preview-002-validacion-de-opciones-disponibles-tras-iniciar-el-kiosco",
+  "externalId": "PREVIEW-002",
+  "caseId": 0,
+  "title": "Validación de opciones disponibles tras iniciar el kiosco",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-04T13:18:48.155Z"
+}

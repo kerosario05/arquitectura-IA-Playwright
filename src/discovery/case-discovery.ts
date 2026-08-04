@@ -1359,10 +1359,41 @@ async function tryAuthGateRecovery(
       : (Array.isArray(authProfile?.postAuthTransientSignals) ? authProfile.postAuthTransientSignals : []);
 
     let AuthFlow: any;
+    let AUTH_FLOW_IMPLEMENTATION_ID: string | undefined;
+    const requestedSpecifier = `../../automations/apps/${discoveryAppSlug}/flows/auth.flow`;
+    let selectedSource: "primary" | "fallback" | "none" = "none";
+    let fallbackAllowed = false;
+
+    console.log(`[auth-loader] appSlug=${discoveryAppSlug} requestedSpecifier=${requestedSpecifier} cwd=${process.cwd()}`);
     try {
-      ({ AuthFlow } = await import(`../../automations/apps/${discoveryAppSlug}/flows/auth.flow`));
-    } catch {
-      ({ AuthFlow } = await import("../../automations/apps/default/flows/auth.flow"));
+      const mod = await import(requestedSpecifier);
+      // Handle both ESM named exports and CJS default wrapper (tsx interop)
+      AuthFlow = mod.AuthFlow || mod.default?.AuthFlow || mod.default;
+      AUTH_FLOW_IMPLEMENTATION_ID = mod.AUTH_FLOW_IMPLEMENTATION_ID || mod.default?.AUTH_FLOW_IMPLEMENTATION_ID;
+      selectedSource = "primary";
+    } catch (loaderErr: any) {
+      console.log(`[auth-loader] primaryImportFailed appSlug=${discoveryAppSlug} error=${loaderErr.message}`);
+    }
+
+    // Fallback to default only for apps without a specific flow
+    if (!AuthFlow && (discoveryAppSlug === "default" || !AUTH_FLOW_IMPLEMENTATION_ID)) {
+      try {
+        const mod = await import("../../automations/apps/default/flows/auth.flow");
+        AuthFlow = mod.AuthFlow || mod.default?.AuthFlow || mod.default;
+        AUTH_FLOW_IMPLEMENTATION_ID = mod.AUTH_FLOW_IMPLEMENTATION_ID || mod.default?.AUTH_FLOW_IMPLEMENTATION_ID;
+        selectedSource = "fallback";
+        fallbackAllowed = discoveryAppSlug === "default";
+      } catch { /* non-fatal */ }
+    }
+
+    // Validate implementation
+    const verified = Boolean(AuthFlow && AUTH_FLOW_IMPLEMENTATION_ID);
+    console.log(`[auth-loader] appSlug=${discoveryAppSlug} selected=${selectedSource} requestedSpecifier=${requestedSpecifier} implementationId=${AUTH_FLOW_IMPLEMENTATION_ID || 'missing'} verified=${verified} fallbackAllowed=${fallbackAllowed}`);
+
+    if (!verified) {
+      throw new Error(`auth_flow_implementation_unverified: Could not load verified AuthFlow for appSlug=${discoveryAppSlug}. ` +
+        `Primary import: ${selectedSource === 'primary' ? 'resolved without implementationId' : 'failed'}. ` +
+        `Fallback: ${fallbackAllowed ? 'not allowed for this appSlug' : 'not loaded'}.`);
     }
 
     const globalThisWithTestData = globalThis as typeof globalThis & {

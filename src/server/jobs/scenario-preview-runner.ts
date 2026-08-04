@@ -2379,6 +2379,8 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
         appSlug,
         targetAppSlug: params.targetAppSlug ?? appSlug,
         targetAppName: params.targetAppName ?? params.targetAppSlug ?? appSlug,
+        sectionName: p.sectionName,
+        sectionSlug: sectionSlug ?? null,
         sourceJobId: params.sourceJobId,
         rerunMode: params.rerunMode,
         options: params.options,

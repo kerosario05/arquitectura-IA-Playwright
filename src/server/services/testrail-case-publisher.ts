@@ -21,6 +21,36 @@ function ensureDir(filePath: string): void {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
 }
 
+async function recoverCaseCreatedAfterHttp500(params: {
+  client: TestRailClient;
+  ctx: ScenarioPreviewPublishContext;
+  scenarioTitle: string;
+  marker: string | undefined;
+}): Promise<{ found: true; case: RawTestRailCase } | { found: false; matches: number }> {
+  const { client, ctx, scenarioTitle, marker } = params;
+  if (!marker || typeof client.getCases !== "function") {
+    return { found: false, matches: 0 };
+  }
+
+  const sectionCases = await client.getCases(
+    String(ctx.projectId),
+    ctx.suiteId ? String(ctx.suiteId) : undefined,
+    String(ctx.sectionId),
+  );
+  const normalizedScenarioTitle = normalizeTitle(scenarioTitle);
+  const matches = sectionCases.filter((testCase) => {
+    const sameSection = testCase.section_id === ctx.sectionId;
+    const sameTitle = normalizeTitle(testCase.title) === normalizedScenarioTitle;
+    const preconditions = String(testCase.custom_preconds ?? "");
+    return sameSection && sameTitle && preconditions.includes(marker);
+  });
+
+  if (matches.length === 1) {
+    return { found: true, case: matches[0] };
+  }
+  return { found: false, matches: matches.length };
+}
+
 function readStore(): MappingStore {
   try {
     if (!fs.existsSync(STORE_PATH)) {
@@ -235,7 +265,7 @@ async function recoverCaseAfterRefs500(
 
     // If multiple title-cache-scenario matches, try unique marker in custom_preconds
     const launchId = (ctx as any).launchId as string | undefined;
-    const uniqueMarker = launchId ? `[automationScenarioId: ${launchId.slice(0, 8)}-${scenarioId.replace(/^L-/, "")}]` : "";
+    const uniqueMarker = buildAutomationScenarioMarker(scenarioId, launchId) ?? "";
     if (uniqueMarker && candidates.length > 1) {
       console.log(`[testrail-recovery] addCase500 candidates=${candidates.length} title="${scenarioTitle}" checking unique marker`);
       const byMarker = candidates.filter((c) => {
@@ -466,6 +496,26 @@ function normalizeTitle(value: string): string {
   return value.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
+function buildAutomationScenarioMarkerId(scenarioId: string, launchId?: string): string | undefined {
+  if (!launchId) return undefined;
+  const launchShortId = launchId.slice(0, 8);
+  const scenarioToken = scenarioId.replace(/^L-/, "");
+  if (scenarioToken.startsWith(`${launchShortId}-`)) {
+    return scenarioToken;
+  }
+  return `${launchShortId}-${scenarioToken}`;
+}
+
+function buildAutomationScenarioMarker(scenarioId: string, launchId?: string): string | undefined {
+  const markerId = buildAutomationScenarioMarkerId(scenarioId, launchId);
+  return markerId ? `[automationScenarioId: ${markerId}]` : undefined;
+}
+
+function isAddCaseHttp500Error(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes("HTTP 500") && message.includes("add_case/");
+}
+
 function stripHtml(value: string): string {
   return value
     .replace(/<br\s*\/?>/gi, "\n")
@@ -555,10 +605,10 @@ export async function publishScenariosToTestRail(
     const customFields = buildCustomFields(ctx, scenarioId);
     const preconditionsBase = sanitizeText(scenario.preconditions.join(" | "));
     const launchId = (ctx as any).launchId as string | undefined;
-    const uniqueMarker = launchId ? `[automationScenarioId: ${launchId.slice(0, 8)}-${scenarioId.replace(/^L-/, "")}]` : "";
-    // TestRail requires custom_preconds to be non-empty — fall back to a default when the scenario
-    // has no preconditions (common for mobile/sparse scenarios).
-    const preconditionsBody = preconditionsBase || "Precondiciones:\n- Aplicación disponible.\n- Usuario o datos de prueba configurados.";
+    const uniqueMarker = buildAutomationScenarioMarker(scenarioId, launchId);
+    const preconditionsBody =
+      preconditionsBase ||
+      "Precondiciones:\n- Aplicación disponible.\n- Usuario o datos de prueba configurados.";
     const preconditions = uniqueMarker
       ? `${preconditionsBody}\n${uniqueMarker}`
       : preconditionsBody;
@@ -614,7 +664,24 @@ export async function publishScenariosToTestRail(
             created += 1;
           } catch (addErr: any) {
           const addMsg = addErr.message ?? String(addErr);
-          if (addMsg.includes("Undefined array key") && addMsg.includes("refs")) {
+          if (isAddCaseHttp500Error(addErr)) {
+            console.warn(`[testrail-publish-recovery] status=started scenario=${scenarioId} sectionId=${ctx.sectionId}`);
+            const recovered = await recoverCaseCreatedAfterHttp500({
+              client,
+              ctx,
+              scenarioTitle: scenario.title,
+              marker: uniqueMarker,
+            });
+            if (recovered.found) {
+              testRailCase = recovered.case;
+              mappingSource = "recovered_after_add_case_500";
+              created += 1;
+              console.log(`[testrail-publish-recovery] status=recovered caseId=${testRailCase.id}`);
+            } else {
+              console.warn(`[testrail-publish-recovery] status=failed matches=${recovered.matches}`);
+              throw addErr;
+            }
+          } else if (addMsg.includes("Undefined array key") && addMsg.includes("refs")) {
             // RECOVERY #1: full addCase 500 — try to find the case that was created
             console.warn(`[testrail-publish] full addCase failed; attempting immediate recovery scenario=${scenarioId} reason=refs_error`);
             const recovery1 = await recoverCaseAfterRefs500(client, ctx, scenario.title, scenarioId);
@@ -625,8 +692,7 @@ export async function publishScenariosToTestRail(
               console.log(`[testrail-publish] recovery after full addCase succeeded scenario=${scenarioId} caseId=${testRailCase.id} strength=${recovery1.strength}`);
             } else if (recovery1.reason === "ambiguous") {
               // Ambiguous recovery: retry with unique title containing the automationScenarioId
-              const launchId = (ctx as any).launchId as string | undefined;
-              const markerId = launchId ? `${launchId.slice(0, 8)}-${scenarioId.replace(/^L-/, "")}` : scenarioId;
+              const markerId = buildAutomationScenarioMarkerId(scenarioId, (ctx as any).launchId as string | undefined) ?? scenarioId;
               const uniqueTitle = `${scenario.title} [${markerId}]`;
               console.log(`[testrail-recovery] no marker match among legacy duplicates; retrying with unique title`);
               console.log(`[testrail-publish] retryWithUniqueTitle title="${uniqueTitle}" scenario=${scenarioId}`);

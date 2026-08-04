@@ -1,0 +1,10 @@
+{
+  "id": "preview-002-visualizacion-de-opciones-de-gestion-despues-de-iniciar",
+  "externalId": "PREVIEW-002",
+  "caseId": 0,
+  "title": "Visualizacion de opciones de gestion despues de iniciar",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-04T13:27:52.569Z"
+}

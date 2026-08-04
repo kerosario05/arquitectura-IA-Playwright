@@ -1,0 +1,51 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-001",
+    "caseId": 0,
+    "title": "Visualizacion de opciones principales del kiosco"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Clic en \"Iniciar\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en \"transacciones y servicios\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "transacciones y servicios",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-08-03T18:21:41.131Z"
+}

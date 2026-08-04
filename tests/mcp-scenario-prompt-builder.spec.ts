@@ -1,6 +1,11 @@
 import { test, expect } from "@playwright/test";
 import { buildMcpScenarioMessages } from "../src/scenarios/mcp-scenario-prompt-builder";
-import type { JiraIssueSource, McpRouteProfile, ScenarioRouteResolution } from "../src/scenarios/scenario-types";
+import type {
+  JiraIssueSource,
+  McpRouteProfile,
+  ScenarioRouteResolution,
+  FunctionalBranchRef,
+} from "../src/scenarios/scenario-types";
 
 test.describe("MCP Scenario Prompt Builder - Multiproject Rules", () => {
   const mockIssue: JiraIssueSource = {
@@ -37,6 +42,36 @@ test.describe("MCP Scenario Prompt Builder - Multiproject Rules", () => {
     canGenerate: true,
     missingRouteReason: undefined
   });
+
+  const mockFunctionalBranches: FunctionalBranchRef[] = [
+    {
+      branchId: "branch-alfa",
+      sourceLabel: "Opción Alfa",
+      sourceRequirementId: "option:1",
+      actionIntent: "select_option",
+      expectedDestination: "Destino Público Alfa",
+      accessIntent: "public",
+      evidenceSource: "acceptance_criteria",
+    },
+    {
+      branchId: "branch-beta",
+      sourceLabel: "Opción Beta",
+      sourceRequirementId: "option:2",
+      actionIntent: "select_option",
+      expectedDestination: "Destino Privado Beta",
+      accessIntent: "authenticated",
+      evidenceSource: "acceptance_criteria",
+    },
+    {
+      branchId: "branch-gamma",
+      sourceLabel: "Opción Gamma",
+      sourceRequirementId: "option:3",
+      actionIntent: "select_option",
+      expectedDestination: "Destino Público Gamma",
+      accessIntent: "public",
+      evidenceSource: "acceptance_criteria",
+    },
+  ];
 
   test("system prompt does NOT say visibleControls are clickable by default", async () => {
     const messages = await buildMcpScenarioMessages(
@@ -77,7 +112,8 @@ test.describe("MCP Scenario Prompt Builder - Multiproject Rules", () => {
 
     // Should contain new strict rule
     expect(systemPrompt).toContain("ONLY allowed when X is explicitly listed in ALLOWED_EXECUTABLE_CLICKS");
-    expect(systemPrompt).toContain("ALLOWED_EXECUTABLE_CLICKS is the ONLY source of truth for click actions");
+    expect(systemPrompt).toContain("ALLOWED_EXECUTABLE_CLICKS is the primary route-profile source of truth for click actions");
+    expect(systemPrompt).toContain("BRANCH_REQUIRED_CLICKS");
   });
 
   test("system prompt includes enforceable execution context", async () => {
@@ -295,5 +331,100 @@ test.describe("MCP Scenario Prompt Builder - Multiproject Rules", () => {
     expect(systemPrompt).toContain("visibleControls are for VALIDATIONS unless also in ALLOWED_EXECUTABLE_CLICKS");
     expect(systemPrompt).toContain("domainTerms are for VALIDATIONS unless also in ALLOWED_EXECUTABLE_CLICKS");
     expect(systemPrompt).toContain("When in doubt: \"Validar que se muestre\" not \"Clic en\"");
+  });
+
+  test("system prompt includes functional branch contract with all required fields", async () => {
+    const messages = await buildMcpScenarioMessages(
+      [mockIssue],
+      "test-app",
+      undefined,
+      "test-app",
+      "Test App",
+      mockRouteProfile,
+      [{ action: "click", target: "Iniciar" }],
+      "password",
+      mockRouteResolutions,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      mockFunctionalBranches,
+    );
+
+    const systemPrompt = messages[0].content;
+    expect(systemPrompt).toContain("Functional Branch Coverage Contract");
+    expect(systemPrompt).toContain("branchId: branch-alfa");
+    expect(systemPrompt).toContain("actionIntent: select_option");
+    expect(systemPrompt).toContain("expectedDestination: Destino Privado Beta");
+    expect(systemPrompt).toContain("accessIntent: authenticated");
+    expect(systemPrompt).toContain("visibleObligation: Destino Público Gamma");
+    expect(systemPrompt).toContain('requiredAction: { type: "click", target: "Opción Alfa", source: "user_story" }');
+    expect(systemPrompt).toContain("requiredObservableResult: Destino Privado Beta");
+    expect(systemPrompt).toContain("generate at least one UI-automatable scenario per branchId");
+  });
+
+  test("branch required clicks remain available when routeProfile is suppressed", async () => {
+    const catalogRouteProfile: McpRouteProfile = {
+      ...mockRouteProfile,
+      entry: [{ businessLabel: "Información de productos", visibleLabel: "Información de productos" }],
+    } as McpRouteProfile;
+
+    const messages = await buildMcpScenarioMessages(
+      [mockIssue],
+      "test-app",
+      undefined,
+      "test-app",
+      "Test App",
+      catalogRouteProfile,
+      [{ action: "click", target: "Iniciar" }],
+      "password",
+      mockRouteResolutions,
+      undefined,
+      "authenticated_flow",
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      mockFunctionalBranches,
+    );
+
+    const systemPrompt = messages[0].content;
+    expect(systemPrompt).toContain("Branch Required Clicks (HU-derived)");
+    expect(systemPrompt).toContain("BRANCH_REQUIRED_CLICKS:");
+    expect(systemPrompt).toContain("- Opción Alfa");
+    expect(systemPrompt).toContain("- Opción Beta");
+    expect(systemPrompt).toContain("routeProfile context is suppressed for compatibility, but BRANCH_REQUIRED_CLICKS remain mandatory.");
+  });
+
+  test("system prompt output schema requires scenarioId and functionalBranch payload", async () => {
+    const messages = await buildMcpScenarioMessages(
+      [mockIssue],
+      "test-app",
+      undefined,
+      "test-app",
+      "Test App",
+      mockRouteProfile,
+      [{ action: "click", target: "Iniciar" }],
+      "password",
+      mockRouteResolutions,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      mockFunctionalBranches,
+    );
+
+    const systemPrompt = messages[0].content;
+    expect(systemPrompt).toContain('"scenarioId": "AA-123:branch-example:01"');
+    expect(systemPrompt).toContain('"functionalBranch": {');
+    expect(systemPrompt).toContain('"branchId": "branch-example"');
+    expect(systemPrompt).toContain('"accessIntent": "public|authenticated|unknown"');
   });
 });

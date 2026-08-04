@@ -1,0 +1,10 @@
+{
+  "id": "preview-004-validacion-de-ruta-inicial-hacia-transacciones-y-servicios-como-opcion-visible",
+  "externalId": "PREVIEW-004",
+  "caseId": 0,
+  "title": "Validacion de ruta inicial hacia transacciones y servicios como opcion visible",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-03T18:25:31.407Z"
+}

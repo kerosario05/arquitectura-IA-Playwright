@@ -18,6 +18,8 @@ export type RerunPrepareResult = {
   appSlug: string;
   targetAppSlug?: string;
   targetAppName?: string;
+  sectionName?: string;
+  sectionSlug?: string;
   options?: {
     overwrite?: boolean;
     autoPromote?: boolean;
@@ -35,6 +37,8 @@ type JobMetadata = {
   appSlug?: string;
   targetAppSlug?: string;
   targetAppName?: string;
+  sectionName?: string;
+  sectionSlug?: string;
   createdAt?: string;
   completedAt?: string;
   status?: string;
@@ -110,6 +114,8 @@ export function prepareRerun(
   const appSlug = metadata.appSlug || allScenarios[0]?.appSlug || "unknown";
   const targetAppSlug = metadata.targetAppSlug || allScenarios[0]?.targetAppSlug || appSlug;
   const targetAppName = metadata.targetAppName || allScenarios[0]?.targetAppName || targetAppSlug;
+  const sectionName = metadata.sectionName;
+  const sectionSlug = metadata.sectionSlug;
 
   let selectedVcs: VirtualCase[];
 
@@ -162,6 +168,8 @@ export function prepareRerun(
     appSlug,
     targetAppSlug,
     targetAppName,
+    sectionName,
+    sectionSlug,
     options: metadata.options,
   };
 }

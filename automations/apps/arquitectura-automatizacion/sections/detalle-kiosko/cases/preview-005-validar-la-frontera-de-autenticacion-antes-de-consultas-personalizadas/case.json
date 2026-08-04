@@ -1,0 +1,10 @@
+{
+  "id": "preview-005-validar-la-frontera-de-autenticacion-antes-de-consultas-personalizadas",
+  "externalId": "PREVIEW-005",
+  "caseId": 0,
+  "title": "Validar la frontera de autenticacion antes de consultas personalizadas",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-04T14:48:21.052Z"
+}

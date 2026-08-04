@@ -50,7 +50,10 @@ test.describe("Scenario Automatability Classifier", () => {
       classification.classification === "non_automatable_backend" ||
         classification.classification === "non_automatable_infra"
     ).toBe(true);
-    expect(classification.reason).toContain("manipulation");
+    expect(
+      classification.reason?.includes("manipulation")
+      || classification.reason?.includes("inactivity trigger")
+    ).toBe(true);
     expect(classification.detectedPatterns).toBeDefined();
     expect(classification.detectedPatterns!.length).toBeGreaterThan(0);
 
@@ -429,5 +432,171 @@ test.describe("Scenario Automatability Classifier", () => {
     console.log(
       `[test] artificial discontinued product: classification=${classification.classification}`
     );
+  });
+
+  test("Test 9: Reinicio físico o pérdida de energía queda non_automatable_infra", async () => {
+    const scenario: McpScenario = {
+      sourceIssueKey: "AA-500",
+      title: "Validar recuperación tras reinicio del kiosko por pérdida de energía",
+      steps: [
+        '1. Clic en "Iniciar".',
+        "2. Simular pérdida de energía del dispositivo.",
+        '3. Validar que se muestre "Iniciar".',
+      ],
+      preconditions: [],
+      expectedResult: "El kiosko vuelve al inicio tras reinicio físico",
+      type: "negative",
+      database: "",
+      isConverted: 0,
+      automationType: "ui_discovery",
+      setupStrategy: "no_login",
+      appSlug: "kiosko",
+      routeProfile: "home",
+      dataRequirements: "N/A",
+      nonExecutableCriteria: "",
+      mcpExecutable: false,
+    };
+
+    const classification = classifyScenarioAutomatability(scenario);
+    expect(classification.isAutomatable).toBe(false);
+    expect(classification.classification).toBe("non_automatable_infra");
+  });
+
+  test("Test 10: Reinicio UI soportado por acción visible permanece automatable_ui", async () => {
+    const scenario: McpScenario = {
+      sourceIssueKey: "AA-501",
+      title: "Reiniciar sesión desde opción visible de la interfaz",
+      steps: [
+        '1. Clic en "Menú".',
+        '2. Clic en "Reiniciar sesión".',
+        '3. Validar que se muestre "Inicio".',
+      ],
+      preconditions: [],
+      expectedResult: "La sesión vuelve a inicio por acción UI soportada",
+      type: "functional",
+      database: "",
+      isConverted: 0,
+      automationType: "ui_discovery",
+      setupStrategy: "no_login",
+      appSlug: "kiosko",
+      routeProfile: "home",
+      dataRequirements: "N/A",
+      nonExecutableCriteria: "",
+      mcpExecutable: true,
+    };
+
+    const classification = classifyScenarioAutomatability(scenario);
+    expect(classification.isAutomatable).toBe(true);
+    expect(classification.classification).toBe("automatable_ui");
+  });
+
+  test("Test 11: Inactividad sin espera soportada queda non_automatable_infra", async () => {
+    const scenario: McpScenario = {
+      sourceIssueKey: "AA-502",
+      title: "Validar reinicio automático por inactividad",
+      steps: [
+        '1. Clic en "Iniciar".',
+        '2. Validar que se muestre "Iniciar".',
+      ],
+      preconditions: [],
+      expectedResult: "Tras inactividad el flujo retorna al inicio",
+      type: "negative",
+      database: "",
+      isConverted: 0,
+      automationType: "ui_discovery",
+      setupStrategy: "no_login",
+      appSlug: "kiosko",
+      routeProfile: "home",
+      dataRequirements: "N/A",
+      nonExecutableCriteria: "",
+      mcpExecutable: false,
+    };
+
+    const classification = classifyScenarioAutomatability(scenario);
+    expect(classification.isAutomatable).toBe(false);
+    expect(classification.classification).toBe("non_automatable_infra");
+  });
+
+  test("Test 12: mención contextual de reinicio en HU no excluye escenario UI válido", async () => {
+    const huContext: JiraIssueSource = {
+      key: "AA-600",
+      summary: "Recuperación ante reinicio físico del kiosko",
+      description: "La HU menciona reinicio físico como contexto de negocio",
+      acceptanceCriteria: "Validar reinicio físico y pérdida de energía en pruebas manuales",
+      labels: [],
+      components: [],
+      status: "Open",
+      issueType: "Story",
+    };
+    const scenario: McpScenario = {
+      sourceIssueKey: "AA-600",
+      title: "Visualizar pantalla inicial",
+      steps: [
+        '1. Clic en "Iniciar".',
+        '2. Validar que se muestre "¿Qué deseas realizar hoy?".',
+      ],
+      preconditions: [],
+      expectedResult: "Pantalla inicial visible",
+      type: "functional",
+      database: "",
+      isConverted: 0,
+      automationType: "ui_discovery",
+      setupStrategy: "no_login",
+      appSlug: "kiosko",
+      routeProfile: "home",
+      dataRequirements: "N/A",
+      nonExecutableCriteria: "",
+      mcpExecutable: true,
+    };
+
+    const classification = classifyScenarioAutomatability(scenario, huContext);
+    expect(classification.isAutomatable).toBe(true);
+    expect(classification.classification).toBe("automatable_ui");
+  });
+
+  test("Test 13: filtro conserva escenarios UI cuando otro escenario sí exige control externo", async () => {
+    const scenarios: McpScenario[] = [
+      {
+        sourceIssueKey: "AA-610",
+        title: "Escenario UI válido",
+        steps: ['1. Clic en "Iniciar".', '2. Validar que se muestre "Inicio".'],
+        preconditions: [],
+        expectedResult: "Inicio visible",
+        type: "functional",
+        database: "",
+        isConverted: 0,
+        automationType: "ui_discovery",
+        setupStrategy: "no_login",
+        appSlug: "kiosko",
+        routeProfile: "home",
+        dataRequirements: "N/A",
+        nonExecutableCriteria: "",
+        mcpExecutable: true,
+      },
+      {
+        sourceIssueKey: "AA-611",
+        title: "Escenario con reinicio físico",
+        steps: ['1. Clic en "Iniciar".', "2. Reiniciar físicamente el kiosko."],
+        preconditions: [],
+        expectedResult: "Recuperación física validada",
+        type: "negative",
+        database: "",
+        isConverted: 0,
+        automationType: "ui_discovery",
+        setupStrategy: "no_login",
+        appSlug: "kiosko",
+        routeProfile: "home",
+        dataRequirements: "N/A",
+        nonExecutableCriteria: "",
+        mcpExecutable: false,
+      },
+    ];
+
+    const { automatable, excluded } = filterScenariosByAutomatability(scenarios);
+    expect(automatable).toHaveLength(1);
+    expect(excluded).toHaveLength(1);
+    expect(excluded[0].reasonCode).toBeDefined();
+    expect(excluded[0].matchedRule).toBeDefined();
+    expect(excluded[0].matchedText).toBeDefined();
   });
 });

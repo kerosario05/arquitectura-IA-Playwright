@@ -1,6 +1,12 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import type { JiraIssueSource, McpRouteProfile, ScenarioRouteResolution, DeterministicSeedScenario } from "./scenario-types";
+import type {
+  JiraIssueSource,
+  McpRouteProfile,
+  ScenarioRouteResolution,
+  DeterministicSeedScenario,
+  FunctionalBranchRef,
+} from "./scenario-types";
 import {
   buildAppProfilePromptContext,
   formatAppProfileContext,
@@ -190,7 +196,7 @@ function buildCompactMcpRules(scenarioLimit: number): string {
 - Return ONLY valid JSON (no markdown, no fences, no explanations)
 - Every scenario must have mcpExecutable: true
 - Steps use ONLY these patterns:
-  1. Clic en "X" (ONLY if X in ALLOWED_EXECUTABLE_CLICKS)
+  1. Clic en "X" (ONLY if X in ALLOWED_EXECUTABLE_CLICKS, executableRouteSteps, or BRANCH_REQUIRED_CLICKS)
   2. Validar que se muestre "X" (X must be specific label from HU, NOT "Nombre", "Información", "Detalle")
   3. Validar que el botón "X" esté visible/habilitado/deshabilitado
   4. Seleccionar el primer <domainTerm> visible del listado (domainTerm from entity name: préstamo, cuenta, producto, tarjeta — NEVER "elemento")
@@ -217,7 +223,7 @@ function buildCompactMcpRules(scenarioLimit: number): string {
 - If not UI-automatable, add to "rejected" array with reason
 
 **Click Authorization** (CRITICAL):
-- "Clic en X" requires X to be in ALLOWED_EXECUTABLE_CLICKS or executableRouteSteps
+- "Clic en X" requires X to be in ALLOWED_EXECUTABLE_CLICKS, executableRouteSteps, or BRANCH_REQUIRED_CLICKS
 - visible ≠ clickable, domain term ≠ clickable, mentioned in story ≠ clickable
 - When in doubt: use "Validar que se muestre" not "Clic en"
 
@@ -441,6 +447,67 @@ function buildDiscoveredProductsBlock(profileCtx?: AppProfilePromptContext): str
   return content;
 }
 
+function buildFunctionalBranchBlock(functionalBranches?: FunctionalBranchRef[]): string {
+  if (!functionalBranches || functionalBranches.length === 0) return "";
+
+  const lines: string[] = [];
+  lines.push("\n\n## Functional Branch Coverage Contract");
+  lines.push("Each branch below represents a distinct UI-functional obligation.");
+  lines.push("You MUST generate at least one UI-automatable scenario per branchId.");
+  lines.push("Do NOT merge two different branches into one scenario.");
+  lines.push("Do NOT use two scenarios from one branch to claim coverage of another branch.");
+  lines.push("");
+  lines.push("For EACH generated scenario that maps to a listed branch:");
+  lines.push("- Include `scenarioId`.");
+  lines.push("- Include `functionalBranch` object with EXACT `branchId` from this list.");
+  lines.push("- Preserve branch `actionIntent`, `expectedDestination`, and `accessIntent`.");
+  lines.push("- REQUIRED: include decisive click on sourceLabel and observable validation of expectedDestination.");
+  lines.push("- Do NOT claim branch coverage with only sourceLabel visibility assertions.");
+  lines.push("- For auth-start branches, destination may be satisfied by observable authentication boundary evidence.");
+  lines.push("");
+  lines.push("### Required Branches");
+
+  for (const branch of functionalBranches) {
+    const visibleObligation = branch.expectedDestination || branch.sourceLabel || "visible_branch_obligation_required";
+    lines.push(`- branchId: ${branch.branchId}`);
+    lines.push(`  actionIntent: ${branch.actionIntent}`);
+    lines.push(`  expectedDestination: ${branch.expectedDestination ?? "unknown"}`);
+    lines.push(`  accessIntent: ${branch.accessIntent}`);
+    lines.push(`  visibleObligation: ${visibleObligation}`);
+    lines.push(`  requiredAction: { type: "click", target: "${branch.sourceLabel ?? "unknown"}", source: "user_story" }`);
+    lines.push(`  requiredObservableResult: ${branch.expectedDestination ?? "unknown"}`);
+  }
+
+  return lines.join("\n");
+}
+
+function buildBranchRequiredClicksBlock(
+  functionalBranches?: FunctionalBranchRef[],
+  suppressRouteProfile?: boolean,
+): string {
+  if (!functionalBranches || functionalBranches.length === 0) return "";
+  const requiredClicks = Array.from(
+    new Set(
+      functionalBranches
+        .map((branch) => branch.sourceLabel?.trim())
+        .filter((label): label is string => Boolean(label)),
+    ),
+  );
+  if (requiredClicks.length === 0) return "";
+  const lines: string[] = [];
+  lines.push("\n\n## Branch Required Clicks (HU-derived)");
+  lines.push("These targets are mandatory branch actions extracted from the HU.");
+  lines.push("Treat BRANCH_REQUIRED_CLICKS as executable click authority (same level as ALLOWED_EXECUTABLE_CLICKS).");
+  if (suppressRouteProfile) {
+    lines.push("routeProfile context is suppressed for compatibility, but BRANCH_REQUIRED_CLICKS remain mandatory.");
+  }
+  lines.push("BRANCH_REQUIRED_CLICKS:");
+  for (const label of requiredClicks) {
+    lines.push(`- ${label}`);
+  }
+  return lines.join("\n");
+}
+
 function buildSystemPrompt(
   skillMd: string | null,
   appSlug: string,
@@ -452,6 +519,7 @@ function buildSystemPrompt(
   useCompactMode?: boolean,
   scenarioLimit?: number,
   suppressRouteProfile?: boolean,
+  functionalBranches?: FunctionalBranchRef[],
 ): string {
   const testrailSection = testrailMeta
     ? `\n\n## TestRail Target\n- Project ID: ${testrailMeta.projectId}\n- Suite ID: ${testrailMeta.suiteId}${testrailMeta.sectionId ? `\n- Section ID: ${testrailMeta.sectionId}` : ""}${testrailMeta.sectionName ? `\n- Section Name: ${testrailMeta.sectionName}` : ""}`
@@ -471,6 +539,8 @@ function buildSystemPrompt(
 
   // Build discovered products block
   const discoveredProductsBlock = suppressRouteProfile ? "" : buildDiscoveredProductsBlock(profileCtx);
+  const functionalBranchBlock = buildFunctionalBranchBlock(functionalBranches);
+  const branchRequiredClicksBlock = buildBranchRequiredClicksBlock(functionalBranches, suppressRouteProfile);
 
   const entryPathBlock = buildEntryPathBlockFromContext(profileCtx ?? { appSlug, entrySteps: [], navigationHints: {}, aliases: {}, domainTerms: {}, visibleControls: [], present: false });
 
@@ -505,6 +575,7 @@ ${skillRules}
 6. expectedResult must be a short contextual phrase, not new validation targets.
 7. If an issue is not UI-automatable, add it to "rejected" array with reason.
 8. Forbidden step phrases: "El sistema permite", "El cliente accede", "Validar correctamente", "Verificar que funcione", "Se procesa exitosamente", "Validar backend", "Validar Core Banking", "Validar base de datos", "Validar cálculo exacto", "Validar auditoría".
+9. If Functional Branch Coverage Contract is present, generate independent coverage for each listed branchId and return branchId in functionalBranch.
 
 ## Entry Steps Rules
 - If entrySteps are provided in the App Configuration section, EVERY scenario MUST start with them.
@@ -517,7 +588,7 @@ ${skillRules}
 ## Multiproject Execution Rules
 **CRITICAL - Apply to ALL projects/apps without exception**:
 
-1. **Click Authorization**: "Clic en X" requires X to be in ALLOWED_EXECUTABLE_CLICKS or executableRouteSteps
+1. **Click Authorization**: "Clic en X" requires X to be in ALLOWED_EXECUTABLE_CLICKS, executableRouteSteps, or BRANCH_REQUIRED_CLICKS
    - NO clicks on visibleControls unless also in ALLOWED_EXECUTABLE_CLICKS
    - NO clicks on domainTerms unless also in ALLOWED_EXECUTABLE_CLICKS
    - NO clicks on story content sections (Beneficios, Requisitos, Condiciones, etc.)
@@ -545,6 +616,8 @@ Sensitive actions include: Solicitar, Confirmar, Enviar, Pagar, Transferir, Firm
 - DO allow "Validar que se muestre 'X'" for sensitive action labels.
 
 ${entryPathBlock}
+${functionalBranchBlock}
+${branchRequiredClicksBlock}
 ## COVERAGE EXPECTATIONS
 - If the Jira story describes a functional area with multiple visible layers (list+detail+actions), generate separate scenarios per layer.
 - Do not collapse all paths into one scenario.
@@ -563,11 +636,12 @@ ${entryPathBlock}
 - Prefer \`ui_with_controlled_data\` when a realistic fixture is needed.
 
 ## Valid Action Targets - MULTIPROJECT RULES
-**CRITICAL**: "Clic en X" is ONLY allowed when X is explicitly listed in ALLOWED_EXECUTABLE_CLICKS (from Enforceable Execution Context) OR appears in executableRouteSteps (from Route Resolution Context).
+**CRITICAL**: "Clic en X" is ONLY allowed when X is explicitly listed in ALLOWED_EXECUTABLE_CLICKS (from Enforceable Execution Context), appears in executableRouteSteps (from Route Resolution Context), or is listed in BRANCH_REQUIRED_CLICKS.
 
 **Source of Truth for Clicks**:
 1. ALLOWED_EXECUTABLE_CLICKS - The ONLY authorized click targets
 2. executableRouteSteps - Pre-validated route steps that can be used as-is
+3. BRANCH_REQUIRED_CLICKS - Mandatory click actions derived from Functional Branches
 
 **NOT Sources for Clicks** (these are for validations/assertions only):
 - visibleControls - Visible elements that may or may not be clickable (default: validation only)
@@ -582,10 +656,12 @@ ${entryPathBlock}
 - "mentioned in user story" does NOT mean "clickable"
 - "domain term" does NOT mean "clickable"
 - "appears in visibleControls" does NOT mean "clickable"
-- ALLOWED_EXECUTABLE_CLICKS is the ONLY source of truth for click actions
+- ALLOWED_EXECUTABLE_CLICKS is the primary route-profile source of truth for click actions
+- BRANCH_REQUIRED_CLICKS are mandatory HU-derived clicks that must be preserved for branch coverage
 
 **How to Use Terms**:
 - If term is in ALLOWED_EXECUTABLE_CLICKS → "Clic en \"<term>\""
+- If term is in BRANCH_REQUIRED_CLICKS → "Clic en \"<term>\"" (mandatory for that branch)
 - If term is in ASSERTION_ONLY_TERMS → ONLY "Validar que se muestre \"<term>\""
 - If term is in SENSITIVE_ACTIONS → ONLY "Validar que el botón \"<term>\" esté visible"
 - If term is visible/domain/content but NOT in allowed clicks → "Validar que se muestre \"<term>\""
@@ -594,7 +670,9 @@ ${entryPathBlock}
  **Content/Assertion Terms**:
 Content sections, expected results, messages, conditions, field names, legal notes, and informational sections must ALWAYS become validations:
 - Wrong: Clic en contenido no ejecutable
+- Wrong: Clic en "Beneficios"
 - Right: Validar que se muestre el label especifico de la HU
+- Right: Validar que se muestre "Beneficios"
 - Never: generate assertions for labels NOT mentioned in the HU text
 
 **When in Doubt**: If you are uncertain whether a target is executable, use "Validar que se muestre" instead of "Clic en". The post-generation validator will reject scenarios with unbacked clicks.
@@ -689,6 +767,7 @@ Return a JSON object with this exact structure:
   "scenarios": [
     {
       "sourceIssueKey": "AA-123",
+      "scenarioId": "AA-123:branch-example:01",
       "title": "Scenario title",
       "steps": ["1. Clic en \"X\".", "2. Validar que se muestre \"Y\"."],
       "preconditions": ["1. BASE_URL configurado.", "2. App available.", "3. APP_LOGIN_MODE=password.", "4. AuthGate/AuthFlow enabled.", "5. Test client meets dataRequirements.", "6. App Slug: ${appSlug}."],
@@ -704,7 +783,16 @@ Return a JSON object with this exact structure:
       "routeProfile": "generated_profile_name",
       "dataRequirements": "cliente_fixture_requerido",
       "nonExecutableCriteria": "",
-      "mcpExecutable": true
+      "mcpExecutable": true,
+      "functionalBranch": {
+        "branchId": "branch-example",
+        "sourceLabel": "Visible option label from HU",
+        "sourceRequirementId": "option:1",
+        "actionIntent": "select_option",
+        "expectedDestination": "Expected visible destination",
+        "accessIntent": "public|authenticated|unknown",
+        "evidenceSource": "user_story|acceptance_criteria|route_profile|knowledge|discovery"
+      }
     }
   ],
   "warnings": [],
@@ -729,6 +817,12 @@ export async function buildMcpScenarioMessages(
   routeResolutions?: Map<string, ScenarioRouteResolution>,
   deterministicSeeds?: DeterministicSeedScenario[],
   effectiveIntent?: string,
+  _huEvidenceMap?: Map<string, any>,
+  _pathSelectionMap?: Map<string, any>,
+  _huScopeGuard?: any,
+  _huScenarioModel?: any,
+  _routePendingScenarioPlan?: any,
+  functionalBranches?: FunctionalBranchRef[],
 ): Promise<Array<{ role: "system" | "user"; content: string }>> {
   const skillMd = await loadSkillMarkdown();
 
@@ -844,7 +938,20 @@ export async function buildMcpScenarioMessages(
   const useCompactMode = derivedCtx && derivedCtx.allowedExecutableClicks.length > 0;
 
   // Build system prompt with route resolution context and derived context
-  let systemContent = buildSystemPrompt(skillMd, appSlug, testrailMeta, targetAppSlug, targetAppName, profileCtx, derivedCtx, useCompactMode, dynamicScenarioLimit, suppressRouteProfile);
+  let systemContent = buildSystemPrompt(
+    skillMd,
+    appSlug,
+    testrailMeta,
+    targetAppSlug,
+    targetAppName,
+    profileCtx,
+    derivedCtx,
+    useCompactMode,
+    dynamicScenarioLimit,
+    suppressRouteProfile,
+    functionalBranches,
+  );
+  console.log(`[scenarios:prompt] functionalBranches=${functionalBranches?.length ?? 0}`);
 
   // Add route resolution context if available
   if (!suppressRouteProfile) {
@@ -893,14 +1000,26 @@ export async function buildMcpScenarioMessages(
   const estimatedTokens = Math.ceil(totalChars / 4); // rough token estimate (4 chars per token)
   // Compute effective counts (reflect what actually goes into the prompt)
   const rawAllowedClicksCount = derivedCtx?.allowedExecutableClicks.length ?? 0;
+  const rawBranchRequiredClicksCount = new Set(
+    (functionalBranches ?? [])
+      .map((branch) => branch.sourceLabel?.trim())
+      .filter((label): label is string => Boolean(label)),
+  ).size;
   const rawAssertionTermsCount = derivedCtx?.assertionOnlyTerms.length ?? 0;
   const rawRouteResolutionCount = routeResolutions?.size ?? 0;
-  const effectiveAllowedClicksCount = suppressRouteProfile ? 0 : rawAllowedClicksCount;
+  const effectiveAllowedClicksCount = suppressRouteProfile
+    ? rawBranchRequiredClicksCount
+    : new Set([
+        ...(derivedCtx?.allowedExecutableClicks ?? []),
+        ...((functionalBranches ?? [])
+          .map((branch) => branch.sourceLabel?.trim())
+          .filter((label): label is string => Boolean(label))),
+      ]).size;
   const effectiveAssertionTermsCount = suppressRouteProfile ? 0 : rawAssertionTermsCount;
   const effectiveRouteResolutionCount = suppressRouteProfile ? 0 : rawRouteResolutionCount;
 
   console.log(
-    `[scenarios:prompt] promptRouteProfileSuppressed=${suppressRouteProfile} reason=${suppressRouteProfile ? "non_catalog_intent" : "catalog_intent_or_route_not_catalog"} effectiveIntent=${primaryHuIntent} allowedClicksBefore=${rawAllowedClicksCount} allowedClicksAfter=${effectiveAllowedClicksCount} assertionTermsBefore=${rawAssertionTermsCount} assertionTermsAfter=${effectiveAssertionTermsCount} routeResolutionsBefore=${rawRouteResolutionCount} routeResolutionsAfter=${effectiveRouteResolutionCount}`);
+    `[scenarios:prompt] promptRouteProfileSuppressed=${suppressRouteProfile} reason=${suppressRouteProfile ? "non_catalog_intent" : "catalog_intent_or_route_not_catalog"} effectiveIntent=${primaryHuIntent} allowedClicksBefore=${rawAllowedClicksCount} branchRequiredClicks=${rawBranchRequiredClicksCount} allowedClicksAfter=${effectiveAllowedClicksCount} assertionTermsBefore=${rawAssertionTermsCount} assertionTermsAfter=${effectiveAssertionTermsCount} routeResolutionsBefore=${rawRouteResolutionCount} routeResolutionsAfter=${effectiveRouteResolutionCount}`);
 
   console.log(
     `[scenarios:prompt] prompt built ` +

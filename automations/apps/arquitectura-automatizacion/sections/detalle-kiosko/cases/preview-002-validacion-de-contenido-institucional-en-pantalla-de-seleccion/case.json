@@ -1,0 +1,10 @@
+{
+  "id": "preview-002-validacion-de-contenido-institucional-en-pantalla-de-seleccion",
+  "externalId": "PREVIEW-002",
+  "caseId": 0,
+  "title": "Validacion de contenido institucional en pantalla de seleccion",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-03T18:21:52.798Z"
+}

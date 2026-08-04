@@ -273,7 +273,7 @@ async function resolveAndAttachEvidence(params: {
 
   if (jobId) {
     for (const root of uniqueRoots) {
-      const result = await tryGenerateScenarioDocx(jobId, scenarioId, root, templatePath, defectId);
+      const result = await tryGenerateScenarioDocx(jobId, scenarioId, root, templatePath, defectId, stored?.status);
       if (result) {
         canonicalDirFound = true;
         screenshotCount = result.screenshots;
@@ -362,6 +362,15 @@ function resolveScreenshotPath(
   return undefined;
 }
 
+function resolveFinalEvidenceStatus(defectStatus: string, evidenceJsonStatus: string): string {
+  const s = defectStatus.toLowerCase();
+  if (s === "failed" || s === "fallido" || s === "exploration_failed" || s === "error" || s === "failure") return "Fallido";
+  if (s === "blocked" || s === "bloqueado") return "Bloqueado";
+  if (s === "passed" || s === "success" || s === "successful" || s === "exitoso" || s.includes("passed")) return "Exitoso";
+  if (s === "pending_review") return evidenceJsonStatus || "Pendiente";
+  return evidenceJsonStatus || "Exitoso";
+}
+
 function isSafePath(filePath: string, allowedRoot: string): boolean {
   try {
     const resolved = path.resolve(filePath);
@@ -384,6 +393,7 @@ async function tryGenerateScenarioDocx(
   evidenceRoot: string,
   templatePath: string,
   defectId: string,
+  defectFinalStatus?: string,
 ): Promise<{ docxPath?: string; screenshots: number; source: string } | undefined> {
   try {
     const root = path.resolve(evidenceRoot);
@@ -416,6 +426,17 @@ async function tryGenerateScenarioDocx(
         try {
           const record = JSON.parse(fs.readFileSync(evidenceJson, "utf-8"));
           const rawSteps: any[] = record.steps || [];
+
+          // Override status from defect final outcome (evidence.json may have provisional "Exitoso")
+          const evidenceJsonStatus = record.status;
+          if (defectFinalStatus) {
+            const docxStatus = resolveFinalEvidenceStatus(defectFinalStatus, evidenceJsonStatus);
+            record.status = docxStatus;
+            console.log(`[jira-evidence-status] scenarioId=${scenarioId} evidenceJsonStatus=${evidenceJsonStatus} finalExecutionStatus=${defectFinalStatus} docxStatus=${docxStatus} source=defect_final_outcome`);
+          } else {
+            console.log(`[jira-evidence-status] scenarioId=${scenarioId} evidenceJsonStatus=${evidenceJsonStatus} docxStatus=${evidenceJsonStatus} source=evidence_json_fallback`);
+          }
+
           const screenshotsDir = path.join(scenarioDir, "screenshots");
 
           // Resolve screenshot paths with multi-base fallback

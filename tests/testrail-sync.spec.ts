@@ -639,9 +639,16 @@ test("updateCase: customFields.custom_preconds no sobrescribe body.custom_precon
   }
 });
 
-// ── Refs 500 recovery tests ──
+// ── add_case HTTP 500 recovery tests ──
 
-function makeRefs500RecoveryClient(existingInSection: Array<{ id: number; title: string; section_id: number; custom_scenario_id?: string }>, returnOnFirstGetCases: boolean = false): any {
+function makeAddCaseRecoveryClient(options?: {
+  existingInSection?: Array<{ id: number; title: string; section_id: number; custom_scenario_id?: string; custom_preconds?: string }>;
+  returnOnFirstGetCases?: boolean;
+  addCaseResult?: { id: number; title: string };
+  addCaseErrorMessage?: string;
+}): any {
+  const existingInSection = options?.existingInSection ?? [];
+  const returnOnFirstGetCases = options?.returnOnFirstGetCases ?? false;
   const captured = {
     addCaseInputs: [] as Array<Record<string, unknown>>,
     updateCaseInputs: [] as Array<Record<string, unknown>>,
@@ -665,11 +672,15 @@ function makeRefs500RecoveryClient(existingInSection: Array<{ id: number; title:
         title: c.title,
         section_id: c.section_id,
         custom_scenario_id: c.custom_scenario_id,
+        custom_preconds: c.custom_preconds,
       }));
     },
     async addCase(_sectionId: string, input: Record<string, unknown>) {
       captured.addCaseInputs.push(input);
-      throw new Error("TestRail API error (HTTP 500) at add_case/4903: Undefined array key refs");
+      if (options?.addCaseResult) {
+        return options.addCaseResult;
+      }
+      throw new Error(options?.addCaseErrorMessage ?? "TestRail API error (HTTP 500) at add_case/4903: backend plugin failure");
     },
     async updateCase(caseId: number, input: Record<string, unknown>) {
       captured.updateCaseInputs.push(input);
@@ -685,10 +696,10 @@ function makeRefs500RecoveryClient(existingInSection: Array<{ id: number; title:
   };
 }
 
-test("publishScenariosToTestRail recupera caso creado aunque addCase devuelva 500 por refs", async () => {
-  const client = makeRefs500RecoveryClient([
-    { id: 3801, title: "Escenario recuperado", section_id: 4903, custom_scenario_id: "PREVIEW-001" },
-  ]);
+test("publishScenariosToTestRail mantiene flujo normal cuando addCase responde OK", async () => {
+  const client = makeAddCaseRecoveryClient({
+    addCaseResult: { id: 3800, title: "Escenario normal" },
+  });
 
   const result = await testrailPublisher.publishScenariosToTestRail(client, {
     projectId: 56,
@@ -696,23 +707,62 @@ test("publishScenariosToTestRail recupera caso creado aunque addCase devuelva 50
     sectionId: 4903,
     appSlug: "kiosko",
     storyKey: "AA-81",
-    cacheKey: "cache-recovery",
+    cacheKey: "cache-success",
     scenarios: [
       makeScenario({
-        sourceIssueKey: "JIRA-500",
+        sourceIssueKey: "JIRA-600",
+        title: "Escenario normal",
+      }),
+    ],
+    publishStrategy: "always_create",
+    launchId: "23cd1ead-9ca2-4b24-ae14-37b6f5837373",
+  });
+
+  expect(result.caseIds).toContain(3800);
+  expect(result.created).toBe(1);
+  expect(result.mappings[0].testRailCaseId).toBe(3800);
+  expect(result.mappings[0].source).toBe("created");
+  expect(client.__captured.addCaseInputs.length).toBe(1);
+});
+
+test("publishScenariosToTestRail recupera caso ya creado cuando addCase devuelve HTTP 500 y hay match exacto por marca", async () => {
+  const marker = "[automationScenarioId: 23cd1ead-001]";
+  const client = makeAddCaseRecoveryClient({
+    existingInSection: [
+      { id: 3801, title: "Escenario recuperado", section_id: 4903, custom_preconds: `Precondiciones\n${marker}` },
+    ],
+  });
+
+  const result = await testrailPublisher.publishScenariosToTestRail(client, {
+    projectId: 56,
+    suiteId: 1731,
+    sectionId: 4903,
+    appSlug: "kiosko",
+    storyKey: "AA-81",
+    cacheKey: "cache-recovery-exact",
+    scenarios: [
+      makeScenario({
+        sourceIssueKey: "JIRA-601",
         title: "Escenario recuperado",
       }),
     ],
+    publishStrategy: "always_create",
+    launchId: "23cd1ead-9ca2-4b24-ae14-37b6f5837373",
   });
 
   expect(result.caseIds).toContain(3801);
   expect(result.created).toBe(1);
   expect(result.mappings[0].testRailCaseId).toBe(3801);
-  expect(result.mappings[0].source).toBe("recovered");
+  expect(result.mappings[0].source).toBe("recovered_after_add_case_500");
+  expect(client.__captured.addCaseInputs.length).toBe(1);
 });
 
-test("publishScenariosToTestRail falla si addCase devuelve 500 refs y no se encuentra el caso", async () => {
-  const client = makeRefs500RecoveryClient([]); // no existing cases in section
+test("publishScenariosToTestRail falla en HTTP 500 cuando no hay matches exactos por marca", async () => {
+  const client = makeAddCaseRecoveryClient({
+    existingInSection: [
+      { id: 3802, title: "Escenario perdido", section_id: 4903, custom_preconds: "Precondiciones sin marca" },
+    ],
+  });
 
   await expect(
     testrailPublisher.publishScenariosToTestRail(client, {
@@ -721,26 +771,28 @@ test("publishScenariosToTestRail falla si addCase devuelve 500 refs y no se encu
       sectionId: 4903,
       appSlug: "kiosko",
       storyKey: "AA-81",
-      cacheKey: "cache-recovery-fail",
+      cacheKey: "cache-recovery-zero",
       scenarios: [
         makeScenario({
-          sourceIssueKey: "JIRA-501",
+          sourceIssueKey: "JIRA-602",
           title: "Escenario perdido",
         }),
       ],
+      publishStrategy: "always_create",
+      launchId: "23cd1ead-9ca2-4b24-ae14-37b6f5837373",
     })
-  ).rejects.toThrow("Undefined array key refs");
+  ).rejects.toThrow("HTTP 500");
+  expect(client.__captured.addCaseInputs.length).toBe(1);
 });
 
-test("publishScenariosToTestRail no recupera si error no es refs 500", async () => {
-  const client = makeRefs500RecoveryClient([
-    { id: 3802, title: "Escenario otro error", section_id: 4903 },
-  ]);
-
-  // Override addCase to throw a different error
-  client.addCase = async () => {
-    throw new Error("TestRail API error (HTTP 400) at add_case/4903: custom_sprint_id es obligatorio");
-  };
+test("publishScenariosToTestRail falla en HTTP 500 cuando hay múltiples matches exactos por marca", async () => {
+  const marker = "[automationScenarioId: 23cd1ead-001]";
+  const client = makeAddCaseRecoveryClient({
+    existingInSection: [
+      { id: 3803, title: "Escenario duplicado", section_id: 4903, custom_preconds: `A\n${marker}` },
+      { id: 3804, title: "Escenario duplicado", section_id: 4903, custom_preconds: `B\n${marker}` },
+    ],
+  });
 
   await expect(
     testrailPublisher.publishScenariosToTestRail(client, {
@@ -749,64 +801,68 @@ test("publishScenariosToTestRail no recupera si error no es refs 500", async () 
       sectionId: 4903,
       appSlug: "kiosko",
       storyKey: "AA-81",
-      cacheKey: "cache-recovery-other-error",
+      cacheKey: "cache-recovery-multi",
       scenarios: [
         makeScenario({
-          sourceIssueKey: "JIRA-502",
-          title: "Escenario otro error",
+          sourceIssueKey: "JIRA-603",
+          title: "Escenario duplicado",
         }),
       ],
+      publishStrategy: "always_create",
+      launchId: "23cd1ead-9ca2-4b24-ae14-37b6f5837373",
     })
-  ).rejects.toThrow("custom_sprint_id");
+  ).rejects.toThrow("HTTP 500");
+  expect(client.__captured.addCaseInputs.length).toBe(1);
 });
 
-test("publishScenariosToTestRail no duplica casos en retry tras refs 500", async () => {
-  const initialCases = [
-    { id: 3801, title: "Escenario sin duplicado", section_id: 4903 },
-  ];
-  const client = makeRefs500RecoveryClient(initialCases);
+test("publishScenariosToTestRail no activa recuperación para HTTP 401", async () => {
+  const client = makeAddCaseRecoveryClient({
+    addCaseErrorMessage: "TestRail API error (HTTP 401) at add_case/4903: Unauthorized",
+  });
 
-  // First call — addCase fails with 500 refs, recovery finds the case
-  const result1 = await testrailPublisher.publishScenariosToTestRail(client, {
+  await expect(
+    testrailPublisher.publishScenariosToTestRail(client, {
+      projectId: 56,
+      suiteId: 1731,
+      sectionId: 4903,
+      appSlug: "kiosko",
+      storyKey: "AA-81",
+      cacheKey: "cache-http-401",
+      scenarios: [
+        makeScenario({
+          sourceIssueKey: "JIRA-604",
+          title: "Escenario 401",
+        }),
+      ],
+      publishStrategy: "always_create",
+      launchId: "23cd1ead-9ca2-4b24-ae14-37b6f5837373",
+    })
+  ).rejects.toThrow("HTTP 401");
+  expect(client.__captured.getCasesCalls).toBe(1);
+});
+
+test("publishScenariosToTestRail construye automationScenarioId sin prefijo duplicado", async () => {
+  const client = makeAddCaseRecoveryClient({
+    addCaseErrorMessage: "TestRail API error (HTTP 401) at add_case/4903: Unauthorized",
+  });
+  await expect(testrailPublisher.publishScenariosToTestRail(client, {
     projectId: 56,
     suiteId: 1731,
     sectionId: 4903,
     appSlug: "kiosko",
     storyKey: "AA-81",
-    cacheKey: "cache-nodup",
+    cacheKey: "cache-marker",
     scenarios: [
       makeScenario({
-        sourceIssueKey: "JIRA-503",
-        title: "Escenario sin duplicado",
+        sourceIssueKey: "JIRA-605",
+        title: "Escenario marcador",
       }),
     ],
-  });
+    publishStrategy: "always_create",
+    launchId: "23cd1ead-9ca2-4b24-ae14-37b6f5837373",
+  })).rejects.toThrow("HTTP 401");
 
-  expect(result1.caseIds).toContain(3801);
-  expect(result1.created).toBe(1);
-  expect(client.__captured.addCaseInputs.length).toBe(1); // only 1 addCase attempt
-
-  // Second call — mapping persisted, should reuse (updateCase path)
-  const result2 = await testrailPublisher.publishScenariosToTestRail(client, {
-    projectId: 56,
-    suiteId: 1731,
-    sectionId: 4903,
-    appSlug: "kiosko",
-    storyKey: "AA-81",
-    cacheKey: "cache-nodup",
-    scenarios: [
-      makeScenario({
-        sourceIssueKey: "JIRA-503",
-        title: "Escenario sin duplicado actualizado",
-      }),
-    ],
-  });
-
-  // Should reuse existing mapping, not attempt addCase again
-  expect(client.__captured.addCaseInputs.length).toBe(1); // still 1
-  expect(client.__captured.updateCaseInputs.length).toBe(1); // 1 update
-  expect(result2.updated + result2.reused).toBe(1);
-  expect(result2.created).toBe(0); // no new cases in second call
-  // Total created across both calls:
-  expect(result1.created).toBe(1); // recovered in first call
+  const preconditions = String(client.__captured.addCaseInputs[0].preconditions ?? "");
+  expect(preconditions.includes("[automationScenarioId: 23cd1ead-23cd1ead-001]")).toBe(false);
+  expect(preconditions.includes("[automationScenarioId: 23cd1ead-001]")).toBe(true);
 });

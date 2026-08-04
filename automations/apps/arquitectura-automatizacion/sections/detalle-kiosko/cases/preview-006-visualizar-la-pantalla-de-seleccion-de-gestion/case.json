@@ -1,0 +1,10 @@
+{
+  "id": "preview-006-visualizar-la-pantalla-de-seleccion-de-gestion",
+  "externalId": "PREVIEW-006",
+  "caseId": 0,
+  "title": "Visualizar la pantalla de seleccion de gestion",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-04T14:48:30.003Z"
+}

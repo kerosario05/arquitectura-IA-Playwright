@@ -1,0 +1,9 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "PREVIEW-003",
+  "testRailCaseId": 0,
+  "generatedAt": "2026-08-03T18:23:53.496Z",
+  "title": "Validacion de ruta inicial hacia Información de productos como opcion visible"
+}

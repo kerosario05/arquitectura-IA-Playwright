@@ -68,6 +68,13 @@ const INFRA_PATTERNS = [
   /reiniciar.*f[ií]sicamente/i,
   /reiniciar.*kiosko/i,
   /reiniciar.*dispositivo/i,
+  /reinicio.*kiosko/i,
+  /reinicio.*dispositivo/i,
+  /p[eé]rdida.*energ[ií]a/i,
+  /p[eé]rdida.*corriente/i,
+  /apag[oó]n/i,
+  /restaurar.*energ[ií]a/i,
+  /power\s+(loss|failure|outage)/i,
   /apagar.*kiosko/i,
   /reset.*hardware/i,
 
@@ -76,6 +83,52 @@ const INFRA_PATTERNS = [
   /modificar.*sitio.*externo/i,
   /manipular.*p[aá]gina.*externa/i,
 ];
+
+function hasSupportedUiWaitStep(steps: string[]): boolean {
+  return steps.some((step) =>
+    /^(?:\d+[\.)]\s*)?(esperar|wait)/i.test(step)
+    && /\b(\d+)\s*(segundos?|minutos?|ms|s|m)\b/i.test(step),
+  );
+}
+
+type MatchedPattern = {
+  rule: string;
+  matchedText: string;
+  source: "steps" | "metadata" | "context";
+};
+
+type AutomatabilityDecision = {
+  classification: AutomatabilityClassification;
+  isAutomatable: boolean;
+  reason?: string;
+  detectedPatterns?: string[];
+  reasonCode?: string;
+  matchedRule?: string;
+  matchedText?: string;
+  matchedSource?: "steps" | "metadata" | "context" | "none";
+};
+
+function normalizeWhitespace(value: string): string {
+  return value.replace(/\s+/g, " ").trim();
+}
+
+function findPatternMatch(
+  patterns: RegExp[],
+  sources: Array<{ text: string; source: "steps" | "metadata" | "context" }>,
+): MatchedPattern | null {
+  for (const pattern of patterns) {
+    for (const sourceInfo of sources) {
+      const match = sourceInfo.text.match(pattern);
+      if (!match) continue;
+      return {
+        rule: pattern.source,
+        matchedText: normalizeWhitespace(match[0]).slice(0, 120),
+        source: sourceInfo.source,
+      };
+    }
+  }
+  return null;
+}
 
 /**
  * Patterns that indicate manual or out-of-scope requirements
@@ -155,22 +208,18 @@ const UI_AUTOMATABLE_PATTERNS = [
 export function classifyScenarioAutomatability(
   scenario: McpScenario,
   huContext?: JiraIssueSource
-): {
-  classification: AutomatabilityClassification;
-  isAutomatable: boolean;
-  reason?: string;
-  detectedPatterns?: string[];
-} {
+): AutomatabilityDecision {
   const detectedPatterns: string[] = [];
 
-  // Build searchable text from scenario + HU context
-  const scenarioText = [
+  // Evaluate actionable scenario content first (steps + scenario metadata).
+  const scenarioStepsText = normalizeWhitespace((scenario.steps || []).join(" "));
+  const scenarioMetadataText = normalizeWhitespace([
     scenario.title,
-    ...(scenario.steps || []),
     scenario.expectedResult,
     scenario.preconditions?.join(" ") || "",
     scenario.nonExecutableCriteria || "",
-  ].join(" ");
+    scenario.automationType || "",
+  ].join(" "));
 
   const huText = huContext
     ? [
@@ -180,64 +229,130 @@ export function classifyScenarioAutomatability(
       ].join(" ")
     : "";
 
-  const fullText = scenarioText + " " + huText;
+  const actionableSources: Array<{ text: string; source: "steps" | "metadata" }> = [
+    { text: scenarioStepsText, source: "steps" },
+    { text: scenarioMetadataText, source: "metadata" },
+  ];
+  const allSources: Array<{ text: string; source: "steps" | "metadata" | "context" }> = [
+    ...actionableSources,
+    { text: normalizeWhitespace(huText), source: "context" },
+  ];
 
-  // Check backend patterns
-  for (const pattern of BACKEND_PATTERNS) {
-    if (pattern.test(fullText)) {
-      detectedPatterns.push(pattern.source);
-      return {
-        classification: "non_automatable_backend",
-        isAutomatable: false,
-        reason: `Requires backend manipulation: pattern matched "${pattern.source}"`,
-        detectedPatterns,
-      };
-    }
+  const actionableText = `${scenarioStepsText} ${scenarioMetadataText}`;
+  const hasPhysicalRestartSignal = /\b(reinicio|reiniciar|apag[oó]n|power\s+(loss|failure|outage)|p[eé]rdida\s+de\s+(energ[ií]a|corriente)|restauraci[oó]n\s+de\s+energ[ií]a)\b/i.test(actionableText);
+  const hasExternalInfrastructureSignal = /\b(kiosko|dispositivo|terminal|equipo|hardware|infraestructura|energ[ií]a|corriente)\b/i.test(actionableText);
+  const hasInactivitySignal = /\b(inactividad|sin\s+actividad|sin\s+interacci[oó]n|timeout|tiempo\s+de\s+espera)\b/i.test(actionableText);
+  const hasExplicitSupportedWait = hasSupportedUiWaitStep(scenario.steps ?? []);
+  if ((hasPhysicalRestartSignal && hasExternalInfrastructureSignal)
+    || (hasInactivitySignal && !hasExplicitSupportedWait)) {
+    detectedPatterns.push("physical_restart_or_inactivity_without_supported_wait");
+    const matchedRule = hasInactivitySignal && !hasExplicitSupportedWait
+      ? "inactivity_without_supported_wait"
+      : "physical_restart_or_power_recovery";
+    const matchedText = hasInactivitySignal && !hasExplicitSupportedWait
+      ? "inactividad/timeout sin paso de espera soportado"
+      : "reinicio físico o recuperación de energía";
+    return {
+      classification: "non_automatable_infra",
+      isAutomatable: false,
+      reasonCode: hasInactivitySignal && !hasExplicitSupportedWait
+        ? "inactivity_without_supported_wait"
+        : "physical_restart_or_power_recovery",
+      reason: hasInactivitySignal && !hasExplicitSupportedWait
+        ? "Requires infrastructure/manual inactivity trigger without supported wait step"
+        : "Requires infrastructure manipulation for physical restart/power recovery",
+      matchedRule,
+      matchedText,
+      matchedSource: "steps",
+      detectedPatterns,
+    };
   }
 
-  // Check infra patterns
-  for (const pattern of INFRA_PATTERNS) {
-    if (pattern.test(fullText)) {
-      detectedPatterns.push(pattern.source);
-      return {
-        classification: "non_automatable_infra",
-        isAutomatable: false,
-        reason: `Requires infrastructure manipulation: pattern matched "${pattern.source}"`,
-        detectedPatterns,
-      };
-    }
+  // Check backend patterns (actionable sources only; context matches are diagnostic only).
+  const backendMatch = findPatternMatch(BACKEND_PATTERNS, actionableSources);
+  if (backendMatch) {
+    detectedPatterns.push(backendMatch.rule);
+    return {
+      classification: "non_automatable_backend",
+      isAutomatable: false,
+      reasonCode: "backend_rule_match",
+      reason: `Requires backend manipulation: pattern matched "${backendMatch.rule}"`,
+      matchedRule: backendMatch.rule,
+      matchedText: backendMatch.matchedText,
+      matchedSource: backendMatch.source,
+      detectedPatterns,
+    };
   }
 
-  // Check manual patterns
-  for (const pattern of MANUAL_PATTERNS) {
-    if (pattern.test(fullText)) {
-      detectedPatterns.push(pattern.source);
-      return {
-        classification: "non_automatable_manual",
-        isAutomatable: false,
-        reason: `Requires manual intervention: pattern matched "${pattern.source}"`,
-        detectedPatterns,
-      };
-    }
+  // Check infra patterns (actionable sources only; context matches are diagnostic only).
+  const infraMatch = findPatternMatch(INFRA_PATTERNS, actionableSources);
+  if (infraMatch) {
+    detectedPatterns.push(infraMatch.rule);
+    return {
+      classification: "non_automatable_infra",
+      isAutomatable: false,
+      reasonCode: "infrastructure_rule_match",
+      reason: `Requires infrastructure manipulation: pattern matched "${infraMatch.rule}"`,
+      matchedRule: infraMatch.rule,
+      matchedText: infraMatch.matchedText,
+      matchedSource: infraMatch.source,
+      detectedPatterns,
+    };
   }
 
-  // Check missing hook patterns
-  for (const pattern of MISSING_HOOK_PATTERNS) {
-    if (pattern.test(fullText)) {
-      detectedPatterns.push(pattern.source);
-      return {
-        classification: "blocked_by_missing_test_hook",
-        isAutomatable: false,
-        reason: `Requires test hook that doesn't exist: pattern matched "${pattern.source}"`,
-        detectedPatterns,
-      };
+  // Check manual patterns (actionable sources only; context matches are diagnostic only).
+  const manualMatch = findPatternMatch(MANUAL_PATTERNS, actionableSources);
+  if (manualMatch) {
+    detectedPatterns.push(manualMatch.rule);
+    return {
+      classification: "non_automatable_manual",
+      isAutomatable: false,
+      reasonCode: "manual_rule_match",
+      reason: `Requires manual intervention: pattern matched "${manualMatch.rule}"`,
+      matchedRule: manualMatch.rule,
+      matchedText: manualMatch.matchedText,
+      matchedSource: manualMatch.source,
+      detectedPatterns,
+    };
+  }
+
+  // Check missing hook patterns (actionable sources only; context matches are diagnostic only).
+  const missingHookMatch = findPatternMatch(MISSING_HOOK_PATTERNS, actionableSources);
+  if (missingHookMatch) {
+    detectedPatterns.push(missingHookMatch.rule);
+    return {
+      classification: "blocked_by_missing_test_hook",
+      isAutomatable: false,
+      reasonCode: "missing_test_hook_rule_match",
+      reason: `Requires test hook that doesn't exist: pattern matched "${missingHookMatch.rule}"`,
+      matchedRule: missingHookMatch.rule,
+      matchedText: missingHookMatch.matchedText,
+      matchedSource: missingHookMatch.source,
+      detectedPatterns,
+    };
+  }
+
+  const contextOnlyMatches: string[] = [];
+  for (const patterns of [BACKEND_PATTERNS, INFRA_PATTERNS, MANUAL_PATTERNS, MISSING_HOOK_PATTERNS]) {
+    const match = findPatternMatch(patterns, allSources);
+    if (match && match.source === "context") {
+      contextOnlyMatches.push(match.rule);
     }
+  }
+  if (contextOnlyMatches.length > 0) {
+    console.log(
+      `[automatability-filter] contextOnlySignals ignored rules=${contextOnlyMatches.slice(0, 3).join("|")} issue=${huContext?.key ?? "none"}`,
+    );
   }
 
   // If no blocking patterns found, classify as automatable
   return {
     classification: "automatable_ui",
     isAutomatable: true,
+    reasonCode: "automatable_ui",
+    matchedRule: "none",
+    matchedText: "",
+    matchedSource: "none",
   };
 }
 
@@ -260,6 +375,14 @@ export function filterScenariosByAutomatability(
 
   for (const scenario of scenarios) {
     const classification = classifyScenarioAutomatability(scenario, huContext);
+    const scenarioId = scenario.scenarioId ?? `${scenario.sourceIssueKey}:${scenario.title}`;
+    const safeTitle = String(scenario.title ?? "").replace(/\s+/g, " ").trim().slice(0, 120);
+    console.log(
+      `[automatability-filter] scenarioId="${scenarioId}" title="${safeTitle}" automatable=${classification.isAutomatable} ` +
+      `reasonCode=${classification.reasonCode ?? "none"} matchedRule=${classification.matchedRule ?? "none"} ` +
+      `matchedText="${classification.matchedText ?? ""}" matchedSource=${classification.matchedSource ?? "none"} ` +
+      `automationType=${scenario.automationType ?? "unknown"} mcpExecutableBeforeFilter=${scenario.mcpExecutable !== false}`,
+    );
 
     if (classification.isAutomatable) {
       automatable.push(scenario);
@@ -283,6 +406,11 @@ export function filterScenariosByAutomatability(
         classification: classification.classification,
         suggestedHandling,
         detectedPatterns: classification.detectedPatterns,
+        scenarioId,
+        reasonCode: classification.reasonCode,
+        matchedRule: classification.matchedRule,
+        matchedText: classification.matchedText,
+        matchedSource: classification.matchedSource,
       });
     }
   }

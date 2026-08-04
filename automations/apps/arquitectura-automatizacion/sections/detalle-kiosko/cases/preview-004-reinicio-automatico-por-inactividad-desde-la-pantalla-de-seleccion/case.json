@@ -1,0 +1,10 @@
+{
+  "id": "preview-004-reinicio-automatico-por-inactividad-desde-la-pantalla-de-seleccion",
+  "externalId": "PREVIEW-004",
+  "caseId": 0,
+  "title": "Reinicio automático por inactividad desde la pantalla de selección",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-04T12:30:43.896Z"
+}

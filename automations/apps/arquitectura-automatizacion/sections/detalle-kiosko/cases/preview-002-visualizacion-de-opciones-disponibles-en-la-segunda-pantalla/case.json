@@ -1,0 +1,10 @@
+{
+  "id": "preview-002-visualizacion-de-opciones-disponibles-en-la-segunda-pantalla",
+  "externalId": "PREVIEW-002",
+  "caseId": 0,
+  "title": "Visualización de opciones disponibles en la segunda pantalla",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-04T15:26:33.820Z"
+}

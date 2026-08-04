@@ -15,8 +15,13 @@ import {
 } from "../automations/app-auto-resolver";
 import { buildDerivedExecutionContext } from "./route-profile-derived-context";
 import { repairMissingIntermediates, logIntermediateRepair } from "./scenario-intermediate-repair";
+import {
+  collectBranchRequiredClicks,
+  mergeEffectiveAllowedClicks,
+} from "./effective-click-authority";
 import { loadOrCreateKnowledgeContext, buildKnowledgeContextForScenarioGeneration, type KnowledgeContext } from "./knowledge-context-resolver";
 import { detectHuIntent, isCatalogListingIntent, isTransactionalDocumentIntent, type HuIntentDetection } from "./hu-intent-classifier";
+import { detectOptionFlows, type OptionFlow } from "./hu-scope-guard";
 import type {
   ScenarioPreviewRequest,
   ScenarioPreviewResponse,
@@ -25,6 +30,10 @@ import type {
   McpRejectedScenario,
   McpScenario,
   McpRouteProfile,
+  FunctionalBranchRef,
+  BranchAccessIntent,
+  FunctionalBranchEvidenceSource,
+  IntermediateRepairResult,
 } from "./scenario-types";
 
 function resolveAppSlug(requestAppSlug?: string): string {
@@ -99,6 +108,1507 @@ export function insertEntrySteps(
   return {
     ...scenario,
     steps: renumbered,
+  };
+}
+
+export type BranchRouteCandidate = {
+  routeId: string;
+  clickTargets: string[];
+  accessIntent: BranchAccessIntent;
+  source: "knowledge" | "hu_route";
+};
+
+export type BranchCoverageCheck = {
+  required: number;
+  covered: number;
+  missing: string[];
+  unexpected: string[];
+  requiredBranchIds: string[];
+  coveredBranchIds: string[];
+  insufficientEvidenceBranchIds?: string[];
+  reasonCode?: "branch_extraction_mismatch" | "coverage_requirements_unavailable";
+  valid: boolean;
+};
+
+export type GenerationSuccessCheck = {
+  generationSuccess: boolean;
+  blockedReasons: Array<
+    "response_visibility_mismatch"
+    | "branch_coverage_invalid"
+    | "coverage_requirements_unavailable"
+    | "omitted_invalid"
+    | "category_overlap_detected"
+  >;
+};
+
+const GENERIC_ROUTE_TOKENS = new Set([
+  "iniciar", "continuar", "siguiente", "menu", "opcion", "opciones", "informacion",
+  "servicio", "servicios", "pantalla", "modulo", "seccion", "seleccionar", "validar",
+  "mostrar", "acceder", "navegar", "ir", "volver", "aceptar",
+]);
+
+function normalizeBranchText(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\w\s-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function tokenizeBranchText(value: string): string[] {
+  return normalizeBranchText(value)
+    .split(/\s+/)
+    .filter((token) => token.length > 2);
+}
+
+function nonGenericTokens(value: string): string[] {
+  return tokenizeBranchText(value).filter((token) => !GENERIC_ROUTE_TOKENS.has(token));
+}
+
+const ACTION_OPERATIONAL_TOKENS = new Set([
+  "clic", "click", "hacer", "pulsar", "pulse", "presionar", "seleccionar", "selecciona", "seleccione",
+  "opcion", "opciones", "boton", "menu", "ir", "acceder", "navegar", "abrir",
+  "el", "la", "los", "las", "un", "una", "unos", "unas", "de", "del", "al", "a", "en", "por", "para",
+]);
+
+function normalizeActionIdentity(value: string): string {
+  const tokens = tokenizeBranchText(value)
+    .filter((token) => !ACTION_OPERATIONAL_TOKENS.has(token))
+    .filter((token) => token.length > 2);
+  return tokens.join(" ");
+}
+
+function actionIdentityIsDistinctive(identity: string): boolean {
+  const tokens = identity.split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return false;
+  if (tokens.length > 1) return true;
+  return tokens[0].length >= 4 && !GENERIC_ROUTE_TOKENS.has(tokens[0]);
+}
+
+function extractExecutedClickTarget(step: string): string | undefined {
+  const normalizedStep = step.replace(/^\d+[\.)]\s*/, "").trim();
+  const clickMatch = normalizedStep.match(/^clic en\s+"([^"]+)"/i);
+  return clickMatch?.[1]?.trim();
+}
+
+function inferAccessIntentFromText(value: string): BranchAccessIntent {
+  const normalized = normalizeBranchText(value);
+  const authSignals = /\b(auth|autentic(?:ad[oa]|acion)?|login|sesion|otp|password|clave|token|identificacion|privad[oa]?)\b/i.test(normalized);
+  const publicSignals = /\b(public[oa]?|catalog|informativ[oa]?|consulta|ayuda|contacto|about)\b/i.test(normalized);
+  if (authSignals && !publicSignals) return "authenticated";
+  if (publicSignals && !authSignals) return "public";
+  return "unknown";
+}
+
+function inferEvidenceSource(line: string): FunctionalBranchEvidenceSource {
+  if (/^\s*(?:\d+[\).\s-]|[-*•])/i.test(line) || /\b(criterio|acceptance|entonces|dado|cuando)\b/i.test(line)) {
+    return "acceptance_criteria";
+  }
+  return "user_story";
+}
+
+function stableBranchSlug(value: string): string {
+  const normalized = normalizeBranchText(value).replace(/[^a-z0-9]+/g, "-");
+  return normalized.replace(/^-+|-+$/g, "").slice(0, 64) || "branch";
+}
+
+function branchIdFromParts(base: string, seen: Map<string, number>): string {
+  const slug = stableBranchSlug(base);
+  const current = (seen.get(slug) ?? 0) + 1;
+  seen.set(slug, current);
+  return current === 1 ? `branch-${slug}` : `branch-${slug}-${current}`;
+}
+
+function extractExpectedDestination(label: string, huText: string): string | undefined {
+  const quoted = `"${label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`;
+  const direct = new RegExp(`${quoted}[^\\n.]{0,120}(?:conduce a|dirige a|lleva a|accede a|navega a|abre|muestra)\\s+"?([^"\\n.]+)"?`, "i");
+  const inverse = new RegExp(`(?:conduce a|dirige a|lleva a|accede a|navega a|abre|muestra)\\s+"?([^"\\n.]+)"?[^\\n.]{0,120}${quoted}`, "i");
+  const m1 = huText.match(direct)?.[1]?.trim();
+  if (m1) return m1;
+  const m2 = huText.match(inverse)?.[1]?.trim();
+  return m2 || undefined;
+}
+
+function normalizeOptionFlowKey(label?: string, expectedDestination?: string): string {
+  return `${normalizeBranchText(label ?? "")}|${normalizeBranchText(expectedDestination ?? "")}`;
+}
+
+function scoreBranchCompleteness(branch: FunctionalBranchRef): number {
+  let score = 0;
+  if (branch.sourceLabel) score += 2;
+  if (branch.expectedDestination) score += 3;
+  if (branch.accessIntent !== "unknown") score += 2;
+  if (branch.sourceRequirementId?.startsWith("option-flow:")) score += 2;
+  return score;
+}
+
+function mapOptionFlowToFunctionalBranch(
+  flow: OptionFlow,
+  index: number,
+  seenIds: Map<string, number>,
+): FunctionalBranchRef | null {
+  const sourceLabel = flow.optionLabel?.trim();
+  const expectedDestination = flow.expectedResult?.trim();
+  if (!sourceLabel || !expectedDestination) return null;
+  const accessIntent: BranchAccessIntent = flow.requiresAuth === true
+    ? "authenticated"
+    : flow.requiresAuth === false
+      ? "public"
+      : inferAccessIntentFromText(`${sourceLabel} ${expectedDestination}`);
+  const branchId = branchIdFromParts(`${sourceLabel}|${expectedDestination}|${accessIntent}`, seenIds);
+  return {
+    branchId,
+    sourceLabel,
+    sourceRequirementId: `option-flow:${index + 1}`,
+    actionIntent: "select_option",
+    expectedDestination,
+    accessIntent,
+    evidenceSource: "user_story",
+  };
+}
+
+function mergeFunctionalBranchSets(
+  huDerivedBranches: FunctionalBranchRef[],
+  optionFlowBranches: FunctionalBranchRef[],
+): FunctionalBranchRef[] {
+  const merged = new Map<string, FunctionalBranchRef>();
+  for (const branch of [...huDerivedBranches, ...optionFlowBranches]) {
+    const key = normalizeOptionFlowKey(branch.sourceLabel, branch.expectedDestination);
+    const existing = merged.get(key);
+    if (!existing) {
+      merged.set(key, branch);
+      continue;
+    }
+    if (scoreBranchCompleteness(branch) > scoreBranchCompleteness(existing)) {
+      merged.set(key, branch);
+    }
+  }
+  return Array.from(merged.values());
+}
+
+function isLikelyBranchOption(label: string, huText: string, optionCount: number): boolean {
+  const normalizedLabel = normalizeBranchText(label);
+  const isSimpleCta = /^(continuar|confirmar|cancelar|volver|aceptar|guardar|enviar|imprimir|descargar)$/.test(normalizedLabel);
+  if (isSimpleCta) return false;
+  if (optionCount > 1) return true;
+  const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const ctx = huText.match(new RegExp(`[^\\n.]{0,80}"${escaped}"[^\\n.]{0,80}`, "i"))?.[0] ?? "";
+  return /\b(opcion|elige|selecciona|escoge|menu|conduce|dirige|lleva|ruta|destino)\b/i.test(ctx);
+}
+
+export function extractFunctionalBranchesFromHu(
+  huText: string,
+  visibleOptions: string[],
+  explicitRoutePath: string[],
+  optionFlows: OptionFlow[] = [],
+): FunctionalBranchRef[] {
+  const dedupedOptions = Array.from(new Set((visibleOptions ?? []).map((option) => option.trim()).filter(Boolean)));
+  const branches: FunctionalBranchRef[] = [];
+  const seenIds = new Map<string, number>();
+
+  for (const label of dedupedOptions) {
+    if (!isLikelyBranchOption(label, huText, dedupedOptions.length)) continue;
+    const expectedDestination = extractExpectedDestination(label, huText);
+    const evidenceLine = huText.split(/[\n\r]+/).find((line) => line.includes(label)) ?? "";
+    const contextText = [label, expectedDestination ?? "", evidenceLine || huText].join(" ");
+    const accessIntent = inferAccessIntentFromText(contextText);
+    const evidenceSource = inferEvidenceSource(evidenceLine);
+    const branchId = branchIdFromParts(`${label}|${expectedDestination ?? "none"}|${accessIntent}`, seenIds);
+    branches.push({
+      branchId,
+      sourceLabel: label,
+      sourceRequirementId: `option:${branches.length + 1}`,
+      actionIntent: "select_option",
+      expectedDestination,
+      accessIntent,
+      evidenceSource,
+    });
+  }
+
+  const optionFlowBranches = optionFlows
+    .map((flow, index) => mapOptionFlowToFunctionalBranch(flow, index, seenIds))
+    .filter((branch): branch is FunctionalBranchRef => branch !== null);
+  const mergedBranches = mergeFunctionalBranchSets(branches, optionFlowBranches);
+
+  if (mergedBranches.length === 0 && explicitRoutePath.length > 0) {
+    const target = explicitRoutePath[explicitRoutePath.length - 1] ?? explicitRoutePath[0];
+    const routeText = explicitRoutePath.join(" > ");
+    mergedBranches.push({
+      branchId: branchIdFromParts(`${routeText}|route`, seenIds),
+      sourceLabel: explicitRoutePath[0],
+      sourceRequirementId: "route:1",
+      actionIntent: "navigate",
+      expectedDestination: target,
+      accessIntent: inferAccessIntentFromText(routeText),
+      evidenceSource: "user_story",
+    });
+  }
+
+  return mergedBranches;
+}
+
+function inferScenarioAccessIntent(scenario: McpScenario): BranchAccessIntent {
+  const text = [scenario.title, ...(scenario.steps ?? []), scenario.expectedResult ?? ""].filter(Boolean).join(" ");
+  return inferAccessIntentFromText(text);
+}
+
+function sourceIssueKeyFromBranch(branch: FunctionalBranchRef): string | undefined {
+  const sourceRequirementId = (branch.sourceRequirementId ?? "").trim();
+  if (!sourceRequirementId) return undefined;
+  const parts = sourceRequirementId.split(":");
+  if (parts.length < 3) return undefined;
+  return parts[1]?.trim().toUpperCase() || undefined;
+}
+
+function branchMatchesScenarioIssueKey(branch: FunctionalBranchRef, scenario: McpScenario): boolean {
+  const scenarioIssueKey = scenario.sourceIssueKey?.trim().toUpperCase();
+  if (!scenarioIssueKey) return true;
+  const branchIssueKey = sourceIssueKeyFromBranch(branch);
+  return !branchIssueKey || branchIssueKey === scenarioIssueKey;
+}
+
+function expectedActionIdentity(branch: FunctionalBranchRef): string {
+  const sourceIdentity = normalizeActionIdentity(branch.sourceLabel ?? "");
+  if (sourceIdentity) return sourceIdentity;
+  return normalizeActionIdentity(branch.actionIntent ?? "");
+}
+
+function collectScenarioActionIdentities(scenario: McpScenario): string[] {
+  const identities = new Set<string>();
+  for (const step of scenario.steps ?? []) {
+    const executedTarget = extractExecutedClickTarget(step);
+    if (!executedTarget) continue;
+    const identity = normalizeActionIdentity(executedTarget);
+    if (identity) identities.add(identity);
+  }
+  return Array.from(identities);
+}
+
+function actionIdentityOverlap(expected: string, actual: string): number {
+  if (!expected || !actual) return 0;
+  const expectedTokens = new Set(expected.split(/\s+/).filter(Boolean));
+  const actualTokens = new Set(actual.split(/\s+/).filter(Boolean));
+  let overlap = 0;
+  for (const token of expectedTokens) {
+    if (actualTokens.has(token)) overlap++;
+  }
+  return overlap;
+}
+
+function actionIdentityMatched(expected: string, actualIdentities: string[]): boolean {
+  if (!expected) return actualIdentities.length > 0;
+  return actualIdentities.some((actual) => {
+    if (actual === expected) return true;
+    if (actual.includes(expected) || expected.includes(actual)) return true;
+    return actionIdentityOverlap(expected, actual) > 0;
+  });
+}
+
+function actionIdentityMatchStrength(expected: string, actual: string): number {
+  if (!expected || !actual) return 0;
+  if (actual === expected) return 100;
+  if (actual.includes(expected) || expected.includes(actual)) return 80;
+  const expectedTokens = expected.split(/\s+/).filter(Boolean);
+  const overlap = actionIdentityOverlap(expected, actual);
+  if (expectedTokens.length === 1) return overlap === 1 ? 40 : 0;
+  return overlap === expectedTokens.length ? 60 : 0;
+}
+
+type ScenarioActionMatch = {
+  expectedActionIdentity: string;
+  actualActionIdentity: string;
+  actionMatched: boolean;
+};
+
+function evaluateScenarioActionMatch(
+  scenario: McpScenario,
+  requiredBranch: FunctionalBranchRef,
+): ScenarioActionMatch {
+  const expectedIdentity = expectedActionIdentity(requiredBranch);
+  const actionIdentities = collectScenarioActionIdentities(scenario);
+  if (actionIdentities.length === 0) {
+    return {
+      expectedActionIdentity: expectedIdentity,
+      actualActionIdentity: "",
+      actionMatched: false,
+    };
+  }
+  if (!expectedIdentity) {
+    return {
+      expectedActionIdentity: expectedIdentity,
+      actualActionIdentity: actionIdentities[0] ?? "",
+      actionMatched: true,
+    };
+  }
+  let strongestActual = actionIdentities[0] ?? "";
+  let strongestScore = actionIdentityMatchStrength(expectedIdentity, strongestActual);
+  for (const actualIdentity of actionIdentities.slice(1)) {
+    const score = actionIdentityMatchStrength(expectedIdentity, actualIdentity);
+    if (score > strongestScore) {
+      strongestActual = actualIdentity;
+      strongestScore = score;
+    }
+  }
+  return {
+    expectedActionIdentity: expectedIdentity,
+    actualActionIdentity: strongestActual,
+    actionMatched: strongestScore > 0,
+  };
+}
+
+function structuredBranchMetadataMatch(
+  scenario: McpScenario,
+  candidates: FunctionalBranchRef[],
+): FunctionalBranchRef | null {
+  const metadata = scenario.functionalBranch;
+  if (!metadata) return null;
+  const normalizedSource = normalizeBranchText(metadata.sourceLabel ?? "");
+  const normalizedDestination = normalizeBranchText(metadata.expectedDestination ?? "");
+  const normalizedAction = normalizeActionIdentity(metadata.sourceLabel ?? metadata.actionIntent ?? "");
+  const accessIntent = metadata.accessIntent ?? "unknown";
+  const matches = candidates.filter((branch) => {
+    const sourceMatches = normalizedSource.length > 0
+      && normalizeBranchText(branch.sourceLabel ?? "") === normalizedSource;
+    const destinationMatches = normalizedDestination.length > 0
+      && normalizeBranchText(branch.expectedDestination ?? "") === normalizedDestination;
+    const actionMatches = normalizedAction.length > 0
+      && expectedActionIdentity(branch) === normalizedAction;
+    const accessMatches = accessIntent === "unknown" || branch.accessIntent === accessIntent;
+    const signalCount = [sourceMatches, destinationMatches, actionMatches].filter(Boolean).length;
+    return accessMatches && signalCount >= 2;
+  });
+  return matches.length === 1 ? matches[0] : null;
+}
+
+type BranchAssociationDecision = {
+  branch: FunctionalBranchRef | null;
+  associationMethod: "branch_id" | "structured_metadata" | "normalized_action" | "textual_fallback" | "none";
+  expectedActionIdentity: string;
+  actualActionIdentity: string;
+  actionMatched: boolean;
+  reasonCode?: string;
+};
+
+function decideScenarioBranchAssociation(
+  scenario: McpScenario,
+  branches: FunctionalBranchRef[],
+  branchById: Map<string, FunctionalBranchRef>,
+): BranchAssociationDecision {
+  const scenarioActionIdentities = collectScenarioActionIdentities(scenario);
+  const actualActionIdentity = scenarioActionIdentities[0] ?? "";
+  const issueScopedBranches = branches.filter((branch) => branchMatchesScenarioIssueKey(branch, scenario));
+  const aiBranchId = scenario.functionalBranch?.branchId
+    || (typeof (scenario as any).branchId === "string" ? (scenario as any).branchId : undefined);
+
+  if (aiBranchId && branchById.has(aiBranchId)) {
+    const selected = branchById.get(aiBranchId)!;
+    if (branchMatchesScenarioIssueKey(selected, scenario)) {
+      const actionEvidence = evaluateScenarioActionMatch(scenario, selected);
+      return {
+        branch: selected,
+        associationMethod: "branch_id",
+        expectedActionIdentity: actionEvidence.expectedActionIdentity,
+        actualActionIdentity: actionEvidence.actualActionIdentity,
+        actionMatched: actionEvidence.actionMatched,
+      };
+    }
+  }
+
+  const structuredMatch = structuredBranchMetadataMatch(scenario, issueScopedBranches);
+  if (structuredMatch) {
+    const actionEvidence = evaluateScenarioActionMatch(scenario, structuredMatch);
+    return {
+      branch: structuredMatch,
+      associationMethod: "structured_metadata",
+      expectedActionIdentity: actionEvidence.expectedActionIdentity,
+      actualActionIdentity: actionEvidence.actualActionIdentity,
+      actionMatched: actionEvidence.actionMatched,
+    };
+  }
+
+  const normalizedCandidates = issueScopedBranches
+    .map((branch) => {
+      const expectedIdentity = expectedActionIdentity(branch);
+      if (!expectedIdentity || !actionIdentityIsDistinctive(expectedIdentity)) return null;
+      let overlap = 0;
+      for (const actualIdentity of scenarioActionIdentities) {
+        overlap = Math.max(overlap, actionIdentityOverlap(expectedIdentity, actualIdentity));
+      }
+      return overlap > 0 ? { branch, expectedIdentity, overlap } : null;
+    })
+    .filter((entry): entry is { branch: FunctionalBranchRef; expectedIdentity: string; overlap: number } => entry !== null)
+    .sort((a, b) => b.overlap - a.overlap);
+
+  if (normalizedCandidates.length > 0) {
+    const top = normalizedCandidates[0];
+    const second = normalizedCandidates[1];
+    if (!second || top.overlap > second.overlap) {
+      const actionEvidence = evaluateScenarioActionMatch(scenario, top.branch);
+      return {
+        branch: top.branch,
+        associationMethod: "normalized_action",
+        expectedActionIdentity: actionEvidence.expectedActionIdentity,
+        actualActionIdentity: actionEvidence.actualActionIdentity,
+        actionMatched: actionEvidence.actionMatched,
+      };
+    }
+    return {
+      branch: null,
+      associationMethod: "none",
+      expectedActionIdentity: "",
+      actualActionIdentity,
+      actionMatched: false,
+      reasonCode: "branch_association_ambiguous",
+    };
+  }
+
+  const scoredCandidates = issueScopedBranches
+    .map((branch) => ({ branch, score: scoreScenarioToBranch(scenario, branch) }))
+    .sort((a, b) => b.score - a.score);
+  if (scoredCandidates.length > 0) {
+    const top = scoredCandidates[0];
+    const second = scoredCandidates[1];
+    const uniqueTopScore = !second || top.score > second.score + 15;
+    if (top.score >= 90 && uniqueTopScore) {
+      const actionEvidence = evaluateScenarioActionMatch(scenario, top.branch);
+      return {
+        branch: top.branch,
+        associationMethod: "textual_fallback",
+        expectedActionIdentity: actionEvidence.expectedActionIdentity,
+        actualActionIdentity: actionEvidence.actualActionIdentity,
+        actionMatched: actionEvidence.actionMatched,
+      };
+    }
+  }
+
+  return {
+    branch: null,
+    associationMethod: "none",
+    expectedActionIdentity: "",
+    actualActionIdentity,
+    actionMatched: false,
+  };
+}
+
+function scoreScenarioToBranch(scenario: McpScenario, branch: FunctionalBranchRef): number {
+  const steps = scenario.steps ?? [];
+  const scenarioText = normalizeBranchText([scenario.title, ...steps, scenario.expectedResult ?? ""].join(" "));
+  let score = 0;
+  if (branch.sourceLabel && scenarioText.includes(normalizeBranchText(branch.sourceLabel))) score += 80;
+  if (branch.expectedDestination && scenarioText.includes(normalizeBranchText(branch.expectedDestination))) score += 35;
+  const branchTokens = new Set(nonGenericTokens([branch.sourceLabel ?? "", branch.actionIntent].join(" ")));
+  if (branchTokens.size > 0) {
+    const scenarioTokens = new Set(nonGenericTokens(scenarioText));
+    let overlap = 0;
+    for (const token of branchTokens) {
+      if (scenarioTokens.has(token)) overlap++;
+    }
+    score += overlap * 10;
+  }
+  const scenarioAccess = inferScenarioAccessIntent(scenario);
+  if (
+    branch.accessIntent !== "unknown" &&
+    scenarioAccess !== "unknown" &&
+    branch.accessIntent !== scenarioAccess
+  ) {
+    score -= 15;
+  }
+  return score;
+}
+
+export function assignFunctionalBranchesToScenarios(
+  scenarios: McpScenario[],
+  branches: FunctionalBranchRef[],
+): McpScenario[] {
+  if (branches.length === 0) return scenarios;
+  const branchById = new Map(branches.map((branch) => [branch.branchId, branch]));
+  return scenarios.map((scenario) => {
+    const decision = decideScenarioBranchAssociation(scenario, branches, branchById);
+    if (decision.branch) {
+      return {
+        ...scenario,
+        functionalBranch: decision.branch,
+        branchAssociation: {
+          branchId: decision.branch.branchId,
+          sourceIssueKey: scenario.sourceIssueKey,
+          associationMethod: decision.associationMethod,
+          associationMatched: true,
+          expectedActionIdentity: decision.expectedActionIdentity,
+          actualActionIdentity: decision.actualActionIdentity,
+          actionMatched: decision.actionMatched,
+          destinationEvidenceKind: "none",
+          destinationEvidenceSource: "association_only",
+          reasonCode: decision.reasonCode,
+        },
+      };
+    }
+    return {
+      ...scenario,
+      branchAssociation: {
+        branchId: "none",
+        sourceIssueKey: scenario.sourceIssueKey,
+        associationMethod: "none",
+        associationMatched: false,
+        expectedActionIdentity: decision.expectedActionIdentity,
+        actualActionIdentity: decision.actualActionIdentity,
+        actionMatched: false,
+        destinationEvidenceKind: "none",
+        destinationEvidenceSource: "association_missing",
+        reasonCode: decision.reasonCode,
+      },
+    };
+  });
+}
+
+function buildBranchRouteCandidates(
+  knowledgeCtx: KnowledgeContext,
+  explicitRoutePath: string[],
+): BranchRouteCandidate[] {
+  const candidates: BranchRouteCandidate[] = [];
+  for (let i = 0; i < (knowledgeCtx.navigationHints ?? []).length; i++) {
+    const hint = knowledgeCtx.navigationHints[i];
+    const accessFromText = inferAccessIntentFromText([
+      ...(hint.clickTargets ?? []),
+      ...(hint.authTerms ?? []),
+    ].join(" "));
+    const accessIntent: BranchAccessIntent = hint.authTerms.length > 0
+      ? "authenticated"
+      : accessFromText;
+    if (Array.isArray(hint.clickTargets) && hint.clickTargets.length > 0) {
+      candidates.push({
+        routeId: `knowledge-${i + 1}`,
+        clickTargets: hint.clickTargets,
+        accessIntent,
+        source: "knowledge",
+      });
+    }
+  }
+
+  if (explicitRoutePath.length > 0) {
+    candidates.push({
+      routeId: "hu-route",
+      clickTargets: explicitRoutePath,
+      accessIntent: inferAccessIntentFromText(explicitRoutePath.join(" ")),
+      source: "hu_route",
+    });
+  }
+  return candidates;
+}
+
+type BranchRouteCompatibility = {
+  compatible: boolean;
+  reason: "branch_action_mismatch" | "destination_mismatch" | "access_mismatch" | "ok";
+  score: number;
+};
+
+function evaluateBranchRouteCompatibility(
+  branch: FunctionalBranchRef | undefined,
+  scenario: McpScenario,
+  candidate: BranchRouteCandidate,
+): BranchRouteCompatibility {
+  if (!branch) return { compatible: true, reason: "ok", score: 1 };
+
+  const routeText = candidate.clickTargets.join(" ");
+  const routeTokenSet = new Set(nonGenericTokens(routeText));
+  const branchActionTokens = new Set(nonGenericTokens([branch.sourceLabel ?? "", branch.actionIntent].join(" ")));
+  const branchDestinationTokens = new Set(nonGenericTokens(branch.expectedDestination ?? ""));
+  const scenarioActionIdentities = collectScenarioActionIdentities(scenario);
+  const branchExpectedIdentity = expectedActionIdentity(branch);
+  const association = scenario.branchAssociation;
+
+  let actionOverlap = 0;
+  for (const token of branchActionTokens) {
+    if (routeTokenSet.has(token)) actionOverlap++;
+  }
+  for (const identity of scenarioActionIdentities) {
+    actionOverlap = Math.max(actionOverlap, actionIdentityOverlap(branchExpectedIdentity, identity));
+  }
+  const matchesByAssociation = association?.branchId === branch.branchId && association.actionMatched === true;
+  const matchesBranchAction = matchesByAssociation
+    || (branchActionTokens.size === 0 ? true : actionOverlap > 0);
+
+  let destinationOverlap = 0;
+  for (const token of branchDestinationTokens) {
+    if (routeTokenSet.has(token)) destinationOverlap++;
+  }
+  const matchesExpectedDestination = branchDestinationTokens.size === 0 ? true : destinationOverlap > 0;
+
+  let accessIntentCompatible = true;
+  if (branch.accessIntent === "public" && candidate.accessIntent === "authenticated") {
+    accessIntentCompatible = false;
+  } else if (branch.accessIntent === "authenticated" && candidate.accessIntent === "public") {
+    accessIntentCompatible = false;
+  }
+
+  const compatible = matchesBranchAction && matchesExpectedDestination && accessIntentCompatible;
+  if (!matchesBranchAction) {
+    return { compatible: false, reason: "branch_action_mismatch", score: 0 };
+  }
+  if (!matchesExpectedDestination) {
+    return { compatible: false, reason: "destination_mismatch", score: actionOverlap };
+  }
+  if (!accessIntentCompatible) {
+    return { compatible: false, reason: "access_mismatch", score: actionOverlap + destinationOverlap };
+  }
+  return { compatible, reason: "ok", score: actionOverlap * 2 + destinationOverlap };
+}
+
+function renumberScenarioSteps(steps: string[]): string[] {
+  return steps.map((step, index) => `${index + 1}. ${step.replace(/^\d+[\.)]\s*/, "").trim()}`);
+}
+
+function stripStepNumbering(steps: string[]): string[] {
+  return steps.map((step) => step.replace(/^\d+[\.)]\s*/, "").trim()).filter(Boolean);
+}
+
+function uniqueClickPrefixFromCandidate(candidate: BranchRouteCandidate): string[] {
+  const seen = new Set<string>();
+  const prefix: string[] = [];
+  for (const target of candidate.clickTargets) {
+    const normalized = normalizeBranchText(target);
+    if (!normalized || seen.has(normalized)) continue;
+    seen.add(normalized);
+    prefix.push(`Clic en "${target}".`);
+  }
+  return prefix;
+}
+
+function scenarioIdentity(scenario: Pick<McpScenario, "scenarioId" | "sourceIssueKey" | "title">): string {
+  return scenario.scenarioId ?? `${scenario.sourceIssueKey}:${scenario.title}`;
+}
+
+type BranchCoverageComputationOptions = {
+  automatableOptionFlowsCount?: number;
+  coverageRequirementsAvailable?: boolean;
+};
+
+function quotedTargets(step: string): string[] {
+  return Array.from(step.matchAll(/"([^"]+)"/g)).map((match) => normalizeBranchText(match[1]));
+}
+
+function extractClickTargets(scenario: McpScenario): string[] {
+  const targets: string[] = [];
+  for (const rawStep of scenario.steps ?? []) {
+    const step = rawStep.replace(/^\d+[\.)]\s*/, "").trim();
+    if (!/^clic en\s+"/i.test(step)) continue;
+    for (const target of quotedTargets(step)) {
+      if (target) targets.push(target);
+    }
+  }
+  return targets;
+}
+
+function extractAssertionTargets(scenario: McpScenario): string[] {
+  const targets = new Set<string>();
+  for (const rawStep of scenario.steps ?? []) {
+    const step = rawStep.replace(/^\d+[\.)]\s*/, "").trim();
+    if (!/^(validar que|verificar que|comprobar que|visualizar que|esperar que)/i.test(step)) continue;
+    for (const target of quotedTargets(step)) {
+      if (target) targets.add(target);
+    }
+  }
+  return Array.from(targets).sort();
+}
+
+function isAuthStartBranchDestination(requiredBranch: FunctionalBranchRef): boolean {
+  if (requiredBranch.accessIntent !== "authenticated") return false;
+  const expectedDestination = normalizeBranchText(requiredBranch.expectedDestination ?? "");
+  const actionIntent = normalizeBranchText(requiredBranch.actionIntent ?? "");
+  return /\b(auth|autentic\w*|login|sesion|identific\w*|acceso|ingreso)\b/i.test(expectedDestination)
+    || /\b(auth|autentic\w*|login|sesion|identific\w*|acceso|ingreso)\b/i.test(actionIntent);
+}
+
+function hasObservableAuthBoundary(assertionTargets: string[], scenario: McpScenario): boolean {
+  const conceptualOnlyPattern = /\b(flujo|proceso|inicio)\s+de\s+autentic\w*\b/i;
+  const boundaryPatterns = [
+    /\b(authgate|authflow)\b/i,
+    /\b(login|iniciar sesion|inicio de sesion)\b/i,
+    /\b(tipo de identific\w*|seleccione tipo de identific\w*)\b/i,
+    /\b(identific\w*|documento|cedula|credencial)\b/i,
+  ];
+
+  for (const target of assertionTargets) {
+    const normalizedTarget = normalizeBranchText(target);
+    if (conceptualOnlyPattern.test(normalizedTarget)) continue;
+    if (boundaryPatterns.some((pattern) => pattern.test(normalizedTarget))) {
+      return true;
+    }
+  }
+
+  const normalizedSteps = normalizeBranchText((scenario.steps ?? []).join(" "));
+  return /\b(authgate|authflow)\b/i.test(normalizedSteps)
+    || /\b(tipo de identific\w*|seleccione tipo de identific\w*|identific\w*)\b/i.test(normalizedSteps);
+}
+
+function hasBranchActionAndDestination(
+  scenario: McpScenario,
+  requiredBranch: FunctionalBranchRef,
+): { hasAction: boolean; hasDestination: boolean } {
+  const actionMatch = evaluateScenarioActionMatch(scenario, requiredBranch);
+  const assertionTargets = extractAssertionTargets(scenario);
+  const expectedDestination = normalizeBranchText(requiredBranch.expectedDestination ?? "");
+  const hasAction = actionMatch.actionMatched;
+  let hasDestination = expectedDestination.length > 0
+    ? assertionTargets.some((target) => target === expectedDestination || target.includes(expectedDestination) || expectedDestination.includes(target))
+    : false;
+  if (!hasDestination && isAuthStartBranchDestination(requiredBranch)) {
+    hasDestination = hasObservableAuthBoundary(assertionTargets, scenario);
+  }
+
+  return { hasAction, hasDestination };
+}
+
+type DestinationEvidenceAssessment = {
+  destinationMatched: boolean;
+  destinationEvidenceKind: "route" | "heading" | "marker" | "auth_gate" | "structured_metadata" | "none";
+  destinationEvidenceSource: string;
+};
+
+function evaluateScenarioDestinationEvidence(
+  scenario: McpScenario,
+  requiredBranch: FunctionalBranchRef,
+): DestinationEvidenceAssessment {
+  const expectedDestination = normalizeBranchText(requiredBranch.expectedDestination ?? "");
+  const assertionTargets = extractAssertionTargets(scenario);
+  const routeCompatibility = (scenario as any)._branchRouteCompatibility as
+    | { compatible?: boolean; reason?: string; routeId?: string | null }
+    | undefined;
+  const hasAssertionDestination = expectedDestination.length > 0
+    ? assertionTargets.some((target) => target === expectedDestination || target.includes(expectedDestination) || expectedDestination.includes(target))
+    : false;
+  const isAuthBoundary = isAuthStartBranchDestination(requiredBranch);
+  const hasAuthBoundary = isAuthBoundary && hasObservableAuthBoundary(assertionTargets, scenario);
+  const routeId = routeCompatibility?.routeId ?? "none";
+
+  // If route compatibility explicitly failed by destination, keep it as definitive negative.
+  if (routeCompatibility?.compatible === false && routeCompatibility.reason === "destination_mismatch") {
+    return {
+      destinationMatched: false,
+      destinationEvidenceKind: "none",
+      destinationEvidenceSource: `route:${routeId}:destination_mismatch`,
+    };
+  }
+
+  if (isAuthBoundary) {
+    if (hasAuthBoundary) {
+      return {
+        destinationMatched: true,
+        destinationEvidenceKind: "auth_gate",
+        destinationEvidenceSource: "observable_auth_boundary",
+      };
+    }
+    return {
+      destinationMatched: false,
+      destinationEvidenceKind: "none",
+      destinationEvidenceSource: "observable_auth_boundary_missing",
+    };
+  }
+
+  if (routeCompatibility?.compatible === true) {
+    return {
+      destinationMatched: true,
+      destinationEvidenceKind: "route",
+      destinationEvidenceSource: `route:${routeId}`,
+    };
+  }
+
+  if (!routeCompatibility && hasAssertionDestination) {
+    return {
+      destinationMatched: true,
+      destinationEvidenceKind: "heading",
+      destinationEvidenceSource: "assertion_observable",
+    };
+  }
+
+  return {
+    destinationMatched: false,
+    destinationEvidenceKind: "none",
+    destinationEvidenceSource: hasAssertionDestination ? "assertion_without_route_support" : "destination_not_observed",
+  };
+}
+
+function evaluateScenarioBranchCoverageSignals(
+  scenario: McpScenario,
+  requiredBranch: FunctionalBranchRef,
+): {
+  associationMatched: boolean;
+  accessCompatible: boolean;
+  hasAction: boolean;
+  expectedActionIdentity: string;
+  actualActionIdentity: string;
+  hasDestination: boolean;
+  hasRouteEvidence: boolean;
+  complete: boolean;
+  destinationEvidenceKind: "route" | "heading" | "marker" | "auth_gate" | "structured_metadata" | "none";
+  destinationEvidenceSource: string;
+  reasonCode: "ok" | "branch_action_mismatch" | "destination_mismatch" | "access_mismatch" | "route_evidence_insufficient";
+} {
+  const associationMatched = scenario.functionalBranch?.branchId === requiredBranch.branchId;
+  const accessCompatible =
+    requiredBranch.accessIntent === "unknown"
+    || scenario.functionalBranch?.accessIntent === undefined
+    || scenario.functionalBranch.accessIntent === requiredBranch.accessIntent;
+  const actionEvidence = evaluateScenarioActionMatch(scenario, requiredBranch);
+  const hasAction = actionEvidence.actionMatched;
+  const destinationEvidence = evaluateScenarioDestinationEvidence(scenario, requiredBranch);
+  const hasDestination = destinationEvidence.destinationMatched;
+  const routeCompatible = (scenario as any)._branchRouteCompatibility?.compatible === true;
+  const hasIntermediateFailure = Boolean((scenario as any)._intermediateRepairFailure);
+  const hasRouteEvidence = !hasIntermediateFailure
+    && scenario.nonExecutableCriteria !== "route_evidence_insufficient"
+    && (scenario.mcpExecutable !== false || routeCompatible);
+  const reasonCode = !accessCompatible
+    ? "access_mismatch"
+    : !hasAction
+      ? "branch_action_mismatch"
+      : !hasDestination
+        ? "destination_mismatch"
+        : !hasRouteEvidence
+          ? "route_evidence_insufficient"
+          : "ok";
+  return {
+    associationMatched,
+    accessCompatible,
+    hasAction,
+    expectedActionIdentity: actionEvidence.expectedActionIdentity,
+    actualActionIdentity: actionEvidence.actualActionIdentity,
+    hasDestination,
+    hasRouteEvidence,
+    complete: reasonCode === "ok",
+    destinationEvidenceKind: destinationEvidence.destinationEvidenceKind,
+    destinationEvidenceSource: destinationEvidence.destinationEvidenceSource,
+    reasonCode,
+  };
+}
+
+function semanticScenarioStrength(scenario: McpScenario): number {
+  const steps = scenario.steps ?? [];
+  const executableSteps = steps.filter((step) => /^(?:\d+[\.)]\s*)?(Clic en|Validar que|Verificar que|Comprobar que|Visualizar que|Esperar que|Seleccionar|Ingresar|Completar)/i.test(step)).length;
+  const clickTargets = extractClickTargets(scenario);
+  const assertionTargets = extractAssertionTargets(scenario);
+  const branch = scenario.functionalBranch;
+  const branchChecks = branch ? hasBranchActionAndDestination(scenario, branch) : { hasAction: clickTargets.length > 0, hasDestination: assertionTargets.length > 0 };
+  const routeCompatibility = (scenario as any)._branchRouteCompatibility;
+  let routeEvidenceScore = 0;
+  if (routeCompatibility?.compatible === true) routeEvidenceScore += 2;
+  if (routeCompatibility?.routeId) routeEvidenceScore += 1;
+  return executableSteps * 2
+    + (branchChecks.hasAction ? 4 : 0)
+    + (branchChecks.hasDestination ? 4 : 0)
+    + routeEvidenceScore
+    + clickTargets.length
+    + assertionTargets.length;
+}
+
+export function buildScenarioSemanticSignature(scenario: McpScenario): string {
+  const steps = (scenario.steps ?? []).map((step) => step.replace(/^\d+[\.)]\s*/, "").trim());
+  const actionSequence = steps.map((step) => {
+    if (/^clic en\s+"/i.test(step)) return `click:${quotedTargets(step).join("/")}`;
+    if (/^(validar que|verificar que|comprobar que|visualizar que|esperar que)/i.test(step)) return "assert";
+    if (/^(ingresar|completar|llenar)/i.test(step)) return "fill";
+    if (/^seleccionar/i.test(step)) return "select";
+    return normalizeBranchText(step);
+  });
+  const nonAssertionActionSequence = actionSequence.filter((action) => action !== "assert");
+  const clickSequence = extractClickTargets(scenario).join(">");
+  const assertionSet = extractAssertionTargets(scenario).join("|");
+  const branchId = scenario.functionalBranch?.branchId ?? "none";
+  const accessIntent = scenario.functionalBranch?.accessIntent ?? inferScenarioAccessIntent(scenario);
+  const expectedDestination = normalizeBranchText(scenario.functionalBranch?.expectedDestination ?? "");
+  const expectedResult = normalizeBranchText(scenario.expectedResult ?? "").replace(/\b(validar|verificar|comprobar|visualizar|mostrar)\b/g, "").trim();
+  return [
+    `branch:${branchId}`,
+    `access:${accessIntent}`,
+    `actions:${nonAssertionActionSequence.join(">")}`,
+    `clicks:${clickSequence}`,
+    `assertions:${assertionSet}`,
+    `destination:${expectedDestination}`,
+    `expected:${expectedResult}`,
+  ].join("|");
+}
+
+export function dedupeScenariosBySemanticSignature<T extends McpScenario>(
+  scenarios: T[],
+): { scenarios: T[]; removed: number } {
+  const bySignature = new Map<string, T>();
+  let removed = 0;
+  for (const scenario of scenarios) {
+    const signature = buildScenarioSemanticSignature(scenario);
+    const existing = bySignature.get(signature);
+    if (!existing) {
+      bySignature.set(signature, scenario);
+      continue;
+    }
+    if (semanticScenarioStrength(scenario) > semanticScenarioStrength(existing)) {
+      bySignature.set(signature, scenario);
+    }
+    removed++;
+  }
+  return { scenarios: Array.from(bySignature.values()), removed };
+}
+
+export function evaluateGenerationSuccess(
+  responseVisibilityEqual: boolean,
+  branchCoverage: BranchCoverageCheck,
+  coverageRequirementsAvailable: boolean,
+  integrityChecks: {
+    omittedValid?: boolean;
+    categoriesDisjoint?: boolean;
+  } = {},
+): GenerationSuccessCheck {
+  const blockedReasons: GenerationSuccessCheck["blockedReasons"] = [];
+  if (!responseVisibilityEqual) blockedReasons.push("response_visibility_mismatch");
+  if (!branchCoverage.valid) blockedReasons.push("branch_coverage_invalid");
+  if (!coverageRequirementsAvailable) blockedReasons.push("coverage_requirements_unavailable");
+  if (integrityChecks.omittedValid === false) blockedReasons.push("omitted_invalid");
+  if (integrityChecks.categoriesDisjoint === false) blockedReasons.push("category_overlap_detected");
+  return {
+    generationSuccess: blockedReasons.length === 0,
+    blockedReasons,
+  };
+}
+
+export function markScenariosAsCoverageDiagnostics<T extends McpScenario>(
+  scenarios: T[],
+  branchCoverage: BranchCoverageCheck,
+): T[] {
+  const defaultReason = branchCoverage.reasonCode === "coverage_requirements_unavailable"
+    ? "coverage_requirements_unavailable"
+    : "branch_coverage_incomplete";
+  return scenarios.map((scenario) => ({
+    ...scenario,
+    mcpExecutable: false,
+    executionMode: "adaptive",
+    nonExecutableCriteria: scenario.nonExecutableCriteria || defaultReason,
+    automationStatus: "requires_route_discovery",
+  }));
+}
+
+function deriveCoverageRequirementsFromFunctionalBranches(
+  functionalBranches: FunctionalBranchRef[],
+): Array<{
+  id: string;
+  sourceText: string;
+  category: string;
+  automatable: boolean;
+  required: boolean;
+  coveredBy: Array<{ scenarioId: string; evidenceSteps: number[]; confidence: number }>;
+  status: string;
+  reasonCode?: string;
+}> {
+  const requirements: Array<{
+    id: string;
+    sourceText: string;
+    category: string;
+    automatable: boolean;
+    required: boolean;
+    coveredBy: Array<{ scenarioId: string; evidenceSteps: number[]; confidence: number }>;
+    status: string;
+    reasonCode?: string;
+  }> = [];
+  let index = 0;
+  for (const branch of functionalBranches) {
+    const sourceLabel = branch.sourceLabel?.trim();
+    const expectedDestination = branch.expectedDestination?.trim();
+    if (sourceLabel) {
+      requirements.push({
+        id: `FB-${++index}`,
+        sourceText: `Branch action: ${sourceLabel}`,
+        category: "branch_action",
+        automatable: true,
+        required: true,
+        coveredBy: [],
+        status: "uncovered",
+      });
+    }
+    if (expectedDestination) {
+      requirements.push({
+        id: `FB-${++index}`,
+        sourceText: `Branch destination: ${expectedDestination}`,
+        category: "branch_destination",
+        automatable: true,
+        required: true,
+        coveredBy: [],
+        status: "uncovered",
+      });
+    }
+  }
+  return requirements;
+}
+
+function ensureCoverageRequirementsAvailable(functionalBranches: FunctionalBranchRef[]): boolean {
+  const existingRequirements = (globalThis as any).__coverageReqs;
+  if (Array.isArray(existingRequirements)) return true;
+  const derivedRequirements = deriveCoverageRequirementsFromFunctionalBranches(functionalBranches);
+  if (derivedRequirements.length === 0) return false;
+  (globalThis as any).__coverageReqs = derivedRequirements;
+  console.log(
+    `[coverage] fallback_requirements source=functional_branches requirements=${derivedRequirements.length} branches=${functionalBranches.length}`,
+  );
+  return true;
+}
+
+export function preserveScenarioOnIntermediateRepairFailure(
+  scenario: McpScenario,
+  repairResult: IntermediateRepairResult,
+): McpScenario {
+  const errorDiag = repairResult.diagnostics.find((diag) => diag.level === "error");
+  return {
+    ...scenario,
+    steps: [...scenario.steps],
+    mcpExecutable: false,
+    nonExecutableCriteria: scenario.nonExecutableCriteria || "route_evidence_insufficient",
+    automationStatus: "requires_route_discovery",
+    _blockedReason: "route_evidence_insufficient",
+    _intermediateRepairFailure: {
+      reasonCode: repairResult.reasonCode,
+      target: errorDiag?.target ?? "unknown",
+      decision: errorDiag?.decision ?? "rejected_unresolvable",
+      message: errorDiag?.message ?? "Intermediate path could not be repaired",
+    },
+  } as McpScenario;
+}
+
+export type VisibleScenarioSetComparison = {
+  equal: boolean;
+  finalVisibleIds: string[];
+  responseVisibleIds: string[];
+  missingInResponse: string[];
+  unexpectedInResponse: string[];
+};
+
+export function compareVisibleScenarioSets(
+  finalVisibleScenarios: Array<Pick<McpScenario, "scenarioId" | "sourceIssueKey" | "title">>,
+  responseVisibleScenarios: Array<Pick<McpScenario, "scenarioId" | "sourceIssueKey" | "title">>,
+): VisibleScenarioSetComparison {
+  const finalVisibleIds = finalVisibleScenarios.map((scenario) => scenarioIdentity(scenario));
+  const responseVisibleIds = responseVisibleScenarios.map((scenario) => scenarioIdentity(scenario));
+  const finalVisibleSet = new Set(finalVisibleIds);
+  const responseVisibleSet = new Set(responseVisibleIds);
+  const missingInResponse = [...finalVisibleSet].filter((id) => !responseVisibleSet.has(id));
+  const unexpectedInResponse = [...responseVisibleSet].filter((id) => !finalVisibleSet.has(id));
+  return {
+    equal: missingInResponse.length === 0 && unexpectedInResponse.length === 0,
+    finalVisibleIds,
+    responseVisibleIds,
+    missingInResponse,
+    unexpectedInResponse,
+  };
+}
+
+export type ResponseAssemblyMetrics = {
+  candidateIds: string[];
+  visibleCandidateIds: string[];
+  rejectedCandidateIds: string[];
+  omitted: number;
+  omittedValid: boolean;
+  categoriesDisjoint: boolean;
+  overlapIds: string[];
+};
+
+function extractRejectedScenarioIds(rejected: McpRejectedScenario[]): Set<string> {
+  const rejectedIds = new Set<string>();
+  for (const rejectedItem of rejected) {
+    const explicitScenarioId = typeof (rejectedItem as any).scenarioId === "string"
+      ? String((rejectedItem as any).scenarioId).trim()
+      : "";
+    if (explicitScenarioId) {
+      rejectedIds.add(explicitScenarioId);
+      continue;
+    }
+    const reasonMatch = rejectedItem.reason?.match(/\bscenarioId\s*[:=]\s*([^\s,;]+)/i);
+    if (reasonMatch?.[1]) {
+      rejectedIds.add(reasonMatch[1].trim());
+    }
+  }
+  return rejectedIds;
+}
+
+export function computeResponseAssemblyMetrics(
+  candidateScenarios: Array<Pick<McpScenario, "scenarioId" | "sourceIssueKey" | "title">>,
+  executableScenarios: Array<Pick<McpScenario, "scenarioId" | "sourceIssueKey" | "title">>,
+  adaptiveScenarios: Array<Pick<McpScenario, "scenarioId" | "sourceIssueKey" | "title">>,
+  rejected: McpRejectedScenario[],
+): ResponseAssemblyMetrics {
+  const candidateIds = Array.from(new Set(candidateScenarios.map((scenario) => scenarioIdentity(scenario))));
+  const candidateSet = new Set(candidateIds);
+  const visibleIdsSet = new Set(
+    [...executableScenarios, ...adaptiveScenarios]
+      .map((scenario) => scenarioIdentity(scenario))
+      .filter((id) => candidateSet.has(id)),
+  );
+
+  const explicitRejectedIds = extractRejectedScenarioIds(rejected);
+  const rejectedCandidateIds = candidateIds.filter((id) => explicitRejectedIds.has(id));
+
+  const omittedSet = new Set(candidateIds);
+  for (const id of visibleIdsSet) omittedSet.delete(id);
+  for (const id of rejectedCandidateIds) omittedSet.delete(id);
+
+  const standardIds = Array.from(new Set(executableScenarios.map((scenario) => scenarioIdentity(scenario))));
+  const adaptiveIdsSet = new Set(adaptiveScenarios.map((scenario) => scenarioIdentity(scenario)));
+  const overlapIds = standardIds.filter((id) => adaptiveIdsSet.has(id));
+  const categoriesDisjoint = overlapIds.length === 0;
+
+  return {
+    candidateIds,
+    visibleCandidateIds: candidateIds.filter((id) => visibleIdsSet.has(id)),
+    rejectedCandidateIds,
+    omitted: omittedSet.size,
+    omittedValid: omittedSet.size >= 0,
+    categoriesDisjoint,
+    overlapIds,
+  };
+}
+
+type BranchRecoveryEvidenceCheck = {
+  recoverable: boolean;
+  reason:
+    | "ok"
+    | "missing_visible_action"
+    | "missing_visible_destination"
+    | "route_evidence_insufficient";
+  routeId?: string;
+};
+
+export function evaluateBranchRecoveryEvidence(
+  branch: FunctionalBranchRef | undefined,
+  routeCandidates: BranchRouteCandidate[],
+): BranchRecoveryEvidenceCheck {
+  if (!branch?.sourceLabel) {
+    return { recoverable: false, reason: "missing_visible_action" };
+  }
+  if (!branch.expectedDestination) {
+    return { recoverable: false, reason: "missing_visible_destination" };
+  }
+  const probeScenario: McpScenario = {
+    sourceIssueKey: "branch-recovery-probe",
+    title: `Validar rama ${branch.sourceLabel}`,
+    steps: [
+      `1. Clic en "${branch.sourceLabel}".`,
+      `2. Validar que se muestre "${branch.expectedDestination}".`,
+    ],
+    preconditions: [],
+    expectedResult: `Se alcanza ${branch.expectedDestination}.`,
+    type: "functional",
+    database: "",
+    isConverted: 0,
+    automationType: "ui_discovery",
+    setupStrategy: "no_login",
+    appSlug: "probe",
+    routeProfile: "",
+    dataRequirements: "",
+    nonExecutableCriteria: "",
+    mcpExecutable: false,
+    functionalBranch: branch,
+  };
+  for (const candidate of routeCandidates) {
+    const compatibility = evaluateBranchRouteCompatibility(branch, probeScenario, candidate);
+    if (compatibility.compatible) {
+      return { recoverable: true, reason: "ok", routeId: candidate.routeId };
+    }
+  }
+  return { recoverable: false, reason: "route_evidence_insufficient" };
+}
+
+export function applyBranchRoutePrefixRepair(
+  scenarios: McpScenario[],
+  routeCandidates: BranchRouteCandidate[],
+): { scenarios: McpScenario[]; repairedCount: number; incompatibleCount: number } {
+  let repairedCount = 0;
+  let incompatibleCount = 0;
+
+  const repairedScenarios = scenarios.map((scenario) => {
+    const branch = scenario.functionalBranch;
+    const actionEvidence = branch
+      ? evaluateScenarioActionMatch(scenario, branch)
+      : {
+          expectedActionIdentity: scenario.branchAssociation?.expectedActionIdentity ?? "",
+          actualActionIdentity: scenario.branchAssociation?.actualActionIdentity ?? "",
+          actionMatched: scenario.branchAssociation?.actionMatched === true,
+        };
+    let selectedCandidate: BranchRouteCandidate | null = null;
+    let selectedScore = Number.NEGATIVE_INFINITY;
+    let lastReason: BranchRouteCompatibility["reason"] = "branch_action_mismatch";
+
+    for (const candidate of routeCandidates) {
+      if (!branch && routeCandidates.length > 1) {
+        lastReason = "branch_action_mismatch";
+        continue;
+      }
+      const compatibility = evaluateBranchRouteCompatibility(branch, scenario, candidate);
+      if (!compatibility.compatible) {
+        incompatibleCount++;
+        lastReason = compatibility.reason;
+        continue;
+      }
+      if (compatibility.score > selectedScore) {
+        selectedScore = compatibility.score;
+        selectedCandidate = candidate;
+      }
+    }
+
+    if (!selectedCandidate) {
+      return {
+        ...scenario,
+        steps: [...(scenario.steps ?? [])],
+        _branchRouteCompatibility: {
+          compatible: false,
+          reason: lastReason,
+          routeId: null,
+        },
+        branchAssociation: {
+          ...(scenario.branchAssociation ?? {
+            branchId: branch?.branchId ?? "none",
+            sourceIssueKey: scenario.sourceIssueKey,
+            associationMethod: branch?.branchId ? "branch_id" : "none",
+            associationMatched: Boolean(branch?.branchId),
+            expectedActionIdentity: actionEvidence.expectedActionIdentity,
+            actualActionIdentity: actionEvidence.actualActionIdentity,
+            actionMatched: false,
+          }),
+          branchId: branch?.branchId ?? scenario.branchAssociation?.branchId ?? "none",
+          actionMatched: actionEvidence.actionMatched,
+          destinationMatched: false,
+          destinationEvidenceKind: "none",
+          destinationEvidenceSource: "route_candidates:destination_mismatch_or_incompatible",
+          reasonCode: lastReason,
+        },
+      } as McpScenario;
+    }
+
+    const existingSteps = stripStepNumbering(scenario.steps ?? []);
+    const requiredPrefix = uniqueClickPrefixFromCandidate(selectedCandidate);
+    const prefixTargets = new Set<string>();
+    for (const prefixStep of requiredPrefix) {
+      const clickMatch = prefixStep.match(/Clic en "(.+)"\./i);
+      if (clickMatch?.[1]) prefixTargets.add(normalizeBranchText(clickMatch[1]));
+    }
+
+    const filteredSteps = existingSteps.filter((step) => {
+      const clickMatch = step.match(/^Clic en "(.+)"\.?$/i);
+      if (!clickMatch?.[1]) return true;
+      return !prefixTargets.has(normalizeBranchText(clickMatch[1]));
+    });
+    const existingNorm = new Set(filteredSteps.map(normalizeBranchText));
+    const missingPrefix = requiredPrefix.filter((prefixStep) => {
+      const clickMatch = prefixStep.match(/Clic en "(.+)"\./i);
+      return clickMatch?.[1] ? !existingNorm.has(normalizeBranchText(clickMatch[1])) : false;
+    });
+    const merged = missingPrefix.length > 0 ? [...missingPrefix, ...filteredSteps] : filteredSteps;
+    if (missingPrefix.length > 0) repairedCount++;
+    return {
+      ...scenario,
+      steps: renumberScenarioSteps(merged),
+      _branchRouteCompatibility: {
+        compatible: true,
+        reason: "ok",
+        routeId: selectedCandidate.routeId,
+      },
+      branchAssociation: {
+        ...(scenario.branchAssociation ?? {
+          branchId: branch?.branchId ?? "none",
+          sourceIssueKey: scenario.sourceIssueKey,
+          associationMethod: branch?.branchId ? "branch_id" : "none",
+          associationMatched: Boolean(branch?.branchId),
+          expectedActionIdentity: actionEvidence.expectedActionIdentity,
+          actualActionIdentity: actionEvidence.actualActionIdentity,
+          actionMatched: false,
+        }),
+        branchId: branch?.branchId ?? scenario.branchAssociation?.branchId ?? "none",
+        actionMatched: actionEvidence.actionMatched,
+        destinationMatched: true,
+        destinationEvidenceKind: "route",
+        destinationEvidenceSource: `route:${selectedCandidate.routeId}`,
+        reasonCode: actionEvidence.actionMatched ? "ok" : "branch_action_mismatch",
+      },
+    } as McpScenario;
+  });
+
+  return { scenarios: repairedScenarios, repairedCount, incompatibleCount };
+}
+
+export function computeBranchCoverageCheck(
+  requiredBranches: FunctionalBranchRef[],
+  finalScenarios: McpScenario[],
+  options: BranchCoverageComputationOptions = {},
+): BranchCoverageCheck {
+  const automatableOptionFlowsCount = options.automatableOptionFlowsCount ?? 0;
+  const coverageRequirementsAvailable = options.coverageRequirementsAvailable ?? true;
+  const requiredBranchIds = Array.from(new Set(requiredBranches.map((branch) => branch.branchId)));
+  const requiredById = new Map(requiredBranches.map((branch) => [branch.branchId, branch]));
+  const coveredBranchIds = new Set<string>();
+
+  if (requiredBranchIds.length === 0) {
+    if (automatableOptionFlowsCount > 0) {
+      return {
+        required: 0,
+        covered: 0,
+        missing: [],
+        unexpected: [],
+        requiredBranchIds: [],
+        coveredBranchIds: [],
+        reasonCode: "branch_extraction_mismatch",
+        valid: false,
+      };
+    }
+    return {
+      required: 0,
+      covered: 0,
+      missing: [],
+      unexpected: [],
+      requiredBranchIds: [],
+      coveredBranchIds: [],
+      valid: true,
+    };
+  }
+
+  for (const scenario of finalScenarios) {
+    const branchId = scenario.functionalBranch?.branchId;
+    if (!branchId) continue;
+    const requiredBranch = requiredById.get(branchId);
+    if (!requiredBranch) {
+      coveredBranchIds.add(branchId);
+      continue;
+    }
+    const coverageSignals = evaluateScenarioBranchCoverageSignals(scenario, requiredBranch);
+    if (coverageSignals.complete) {
+      coveredBranchIds.add(branchId);
+    }
+  }
+
+  const coveredRequired = requiredBranchIds.filter((branchId) => coveredBranchIds.has(branchId));
+  const missing = requiredBranchIds.filter((branchId) => !coveredBranchIds.has(branchId));
+  const unexpected = Array.from(coveredBranchIds).filter((branchId) => !requiredById.has(branchId));
+  const validByCoverage = missing.length === 0;
+  const valid = validByCoverage && coverageRequirementsAvailable;
+
+  return {
+    required: requiredBranchIds.length,
+    covered: coveredRequired.length,
+    missing,
+    unexpected,
+    requiredBranchIds,
+    coveredBranchIds: coveredRequired,
+    reasonCode: coverageRequirementsAvailable ? undefined : "coverage_requirements_unavailable",
+    valid,
+  };
+}
+
+export type BranchCoverageReclassificationSummary = {
+  considered: number;
+  affected: number;
+  changed: number;
+  affectedScenarioIds: string[];
+};
+
+export function reclassifyScenariosByBranchCoverage(
+  executableScenarios: McpScenario[],
+  adaptiveScenarios: McpScenario[],
+  requiredBranches: FunctionalBranchRef[],
+  options: BranchCoverageComputationOptions = {},
+): {
+  executableScenarios: McpScenario[];
+  adaptiveScenarios: McpScenario[];
+  summary: BranchCoverageReclassificationSummary;
+} {
+  if (requiredBranches.length === 0 || executableScenarios.length === 0) {
+    return {
+      executableScenarios,
+      adaptiveScenarios,
+      summary: {
+        considered: 0,
+        affected: 0,
+        changed: 0,
+        affectedScenarioIds: [],
+      },
+    };
+  }
+
+  const preReclassificationCoverage = computeBranchCoverageCheck(
+    requiredBranches,
+    [...executableScenarios, ...adaptiveScenarios],
+    options,
+  );
+  const missingBranchIds = new Set(preReclassificationCoverage.missing);
+  const requiredById = new Map(requiredBranches.map((branch) => [branch.branchId, branch]));
+  const retainedExecutable: McpScenario[] = [];
+  const reclassifiedAsAdaptive: McpScenario[] = [];
+  const affectedBranchScenarioIds = new Set<string>();
+  let considered = 0;
+
+  for (const scenario of executableScenarios) {
+    const branchId = scenario.functionalBranch?.branchId;
+    if (!branchId) {
+      retainedExecutable.push(scenario);
+      continue;
+    }
+    const requiredBranch = requiredById.get(branchId);
+    if (!requiredBranch) {
+      retainedExecutable.push(scenario);
+      continue;
+    }
+    considered++;
+    const coverageSignals = evaluateScenarioBranchCoverageSignals(scenario, requiredBranch);
+    const reasonCode = coverageSignals.reasonCode;
+    scenario.branchAssociation = {
+      ...(scenario.branchAssociation ?? {
+        branchId,
+        sourceIssueKey: scenario.sourceIssueKey,
+        associationMethod: "none",
+        associationMatched: false,
+        expectedActionIdentity: coverageSignals.expectedActionIdentity,
+        actualActionIdentity: coverageSignals.actualActionIdentity,
+        actionMatched: false,
+      }),
+      branchId,
+      associationMatched: coverageSignals.associationMatched,
+      expectedActionIdentity: coverageSignals.expectedActionIdentity,
+      actualActionIdentity: coverageSignals.actualActionIdentity,
+      actionMatched: coverageSignals.hasAction,
+      destinationMatched: coverageSignals.hasDestination,
+      destinationEvidenceKind: coverageSignals.destinationEvidenceKind,
+      destinationEvidenceSource: coverageSignals.destinationEvidenceSource,
+      reasonCode,
+    };
+    if (coverageSignals.complete || !missingBranchIds.has(branchId)) {
+      retainedExecutable.push(scenario);
+      continue;
+    }
+
+    affectedBranchScenarioIds.add(scenarioIdentity(scenario));
+    const nonExecutableCriteria = coverageSignals.hasRouteEvidence
+      ? "branch_coverage_incomplete"
+      : "route_evidence_insufficient";
+    reclassifiedAsAdaptive.push({
+      ...scenario,
+      executionMode: "adaptive",
+      mcpExecutable: false,
+      nonExecutableCriteria,
+      automationStatus: "requires_route_discovery",
+      _blockedReason: nonExecutableCriteria,
+      _branchCoverageIncomplete: {
+        branchId,
+        hasAction: coverageSignals.hasAction,
+        hasDestination: coverageSignals.hasDestination,
+        accessCompatible: coverageSignals.accessCompatible,
+        hasRouteEvidence: coverageSignals.hasRouteEvidence,
+        reasonCode,
+      },
+    } as McpScenario);
+  }
+
+  return {
+    executableScenarios: retainedExecutable,
+    adaptiveScenarios: [...adaptiveScenarios, ...reclassifiedAsAdaptive],
+    summary: {
+      considered,
+      affected: affectedBranchScenarioIds.size,
+      changed: reclassifiedAsAdaptive.length,
+      affectedScenarioIds: Array.from(affectedBranchScenarioIds),
+    },
   };
 }
 
@@ -212,6 +1722,7 @@ export async function generateScenarioPreview(
   if (!req.activeSprint && !req.sprintId) {
     return { ok: false, error: "invalid_request", message: "activeSprint: true or sprintId is required" };
   }
+  (globalThis as any).__coverageReqs = undefined;
 
   // Discover which issue keys to process. If the caller already selected specific
   // issues, honor that selection; otherwise query Jira with the same filters that
@@ -536,15 +2047,33 @@ async function generateScenarioPreviewForIssue(
   let generationResult;
   let huModel: any = null;
   let scenarioPlan: any = null;
+  let huTextForAi = "";
+  let huExplicitRoutePathForAi: string[] = [];
+  let functionalBranchesForAi: FunctionalBranchRef[] = [];
+  let automatableOptionFlowsForCoverage: OptionFlow[] = [];
 
   // Pre-compute HU model and scenario plan for AI prompt context
   if (issues.length > 0) {
-    const huTextForAi = [issues[0].summary, issues[0].description, issues[0].acceptanceCriteria || ""].filter(Boolean).join(" ");
+    const optionFlowDetection = detectOptionFlows(issues[0]);
+    automatableOptionFlowsForCoverage = optionFlowDetection.flows.filter(
+      (flow) => flow.optionLabel?.trim() && flow.expectedResult?.trim(),
+    );
+    huTextForAi = [issues[0].summary, issues[0].description, issues[0].acceptanceCriteria || ""].filter(Boolean).join(" ");
     if (huTextForAi) {
       huModel = extractHuScenarioModel(huTextForAi);
       scenarioPlan = buildRoutePendingScenarioPlan(huModel);
+      huExplicitRoutePathForAi = extractExplicitRoutePath(huTextForAi);
+      functionalBranchesForAi = extractFunctionalBranchesFromHu(
+        huTextForAi,
+        huModel?.visibleOptions ?? [],
+        huExplicitRoutePathForAi,
+        automatableOptionFlowsForCoverage,
+      );
       console.log(`[scenario-preview] aiPrompt huModel=enabled huPlan=enabled`);
       console.log(`[scenario-preview] aiPrompt plan complexity=${scenarioPlan.complexity} target=${scenarioPlan.scenarioCountTarget} variants=${scenarioPlan.variants.length}`);
+      console.log(
+        `[scenarios:functional-branches] preAi extracted=${functionalBranchesForAi.length} ids=${functionalBranchesForAi.map((branch) => branch.branchId).join(",") || "none"}`,
+      );
     }
   }
 
@@ -565,6 +2094,7 @@ async function generateScenarioPreviewForIssue(
       undefined,
       huModel,
       scenarioPlan,
+      functionalBranchesForAi,
     );
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -678,11 +2208,31 @@ async function generateScenarioPreviewForIssue(
         ? newEntrySteps.filter((es) => es.action === "click").map((es) => es.target)
         : oldEntrySteps
     );
+    const branchRequiredClicks = collectBranchRequiredClicks(functionalBranchesForAi);
+    const generationEffectiveAllowedClicks = generationResult.generationDiagnostics?.effectiveAllowedClicks ?? [];
+    const mergedClickAuthority = mergeEffectiveAllowedClicks(
+      derivedContext.allowedExecutableClicks,
+      branchRequiredClicks,
+      generationEffectiveAllowedClicks,
+    );
+    const derivedContextForRepair = {
+      ...derivedContext,
+      allowedExecutableClicks: mergedClickAuthority.effectiveAllowedClicks,
+    };
+    const effectiveAllowedClicksBeforeRepair =
+      generationResult.generationDiagnostics?.effectiveAllowedClicksBeforeRepair
+      ?? generationEffectiveAllowedClicks.length
+      ?? mergedClickAuthority.effectiveAllowedClicks.length;
+    console.log(
+      `[scenarios:preview] intermediate-repair clickAuthority branchRequiredClicks=${branchRequiredClicks.length} ` +
+      `effectiveAllowedClicksBeforeRepair=${effectiveAllowedClicksBeforeRepair} ` +
+      `effectiveAllowedClicksAtIntermediateRepair=${derivedContextForRepair.allowedExecutableClicks.length}`,
+    );
 
     console.log(
       `[scenarios:preview] intermediate-repair starting appSlug=${appInference.appSlug} ` +
         `scenariosCount=${rawScenarios.length} ` +
-        `allowedClicks=${derivedContext.allowedExecutableClicks.length}`
+        `allowedClicks=${derivedContextForRepair.allowedExecutableClicks.length}`
     );
 
     rawScenarios = rawScenarios.map((sc) => {
@@ -690,7 +2240,7 @@ async function generateScenarioPreviewForIssue(
       const repairResult = repairMissingIntermediates(
         sc,
         resolvedRouteProfile,
-        derivedContext,
+        derivedContextForRepair,
         resolution,
         "medium" // Confidence threshold
       );
@@ -707,19 +2257,21 @@ async function generateScenarioPreviewForIssue(
           steps: repairResult.repairedSteps,
         };
       } else if (repairResult.reasonCode !== "no_repair_needed") {
-        // Repair failed - mark as rejected
         const errorDiag = repairResult.diagnostics.find((d) => d.level === "error");
         if (errorDiag) {
-          rejected.push({
-            sourceIssueKey: sc.sourceIssueKey,
-            reason: `${repairResult.reasonCode}: ${errorDiag.message}`,
-          });
-          return null; // Will be filtered out
+          const preservedScenario = preserveScenarioOnIntermediateRepairFailure(sc, repairResult);
+          warnings.push(
+            `Scenario "${sc.title}": route_evidence_insufficient - ${repairResult.reasonCode}: ${errorDiag.message}`,
+          );
+          console.log(
+            `[intermediate-repair] scenario="${sc.title}" decision=preserved_for_branch_recovery reasonCode=${repairResult.reasonCode}`,
+          );
+          return preservedScenario;
         }
       }
 
       return sc;
-    }).filter((sc): sc is McpScenario => sc !== null);
+    });
 
     console.log(
       `[scenarios:preview] intermediate-repair complete ` +
@@ -891,11 +2443,13 @@ async function generateScenarioPreviewForIssue(
   console.log(`[scenario-preview] routePendingBuilder architecture=hu_generates_scenarios_knowledge_completes_route`);
 
   // Load knowledge context for historical hints (not for discovery)
-  const huTextForContext = issues.length > 0 ? [issues[0].summary, issues[0].description, issues[0].acceptanceCriteria || ""].filter(Boolean).join(" ") : "";
+  const huTextForContext = huTextForAi || (issues.length > 0 ? [issues[0].summary, issues[0].description, issues[0].acceptanceCriteria || ""].filter(Boolean).join(" ") : "");
 
   // Diagnostic: extract rich HU model (used for intent refinement before resolver)
   huModel = huTextForContext ? extractHuScenarioModel(huTextForContext) : null;
-  const huExplicitRoutePath: string[] = huTextForContext ? extractExplicitRoutePath(huTextForContext) : [];
+  const huExplicitRoutePath: string[] = huExplicitRoutePathForAi.length > 0
+    ? huExplicitRoutePathForAi
+    : (huTextForContext ? extractExplicitRoutePath(huTextForContext) : []);
   if (huModel) {
     console.log(`[scenario-preview] huModel intent=${huModel.mainIntent} subIntent=${huModel.subIntent} uiObligations=${huModel.uiObligations.length} nonUiRequirements=${huModel.nonUiRequirements.length}`);
     console.log(`[scenario-preview] huModel screens=${huModel.requiredScreens.length} fields=${huModel.requiredFields.length} selectable=${huModel.selectableEntities.length} buttons=${huModel.visibleButtons.length} warnings=${huModel.visibleWarnings.length} delivery=${huModel.deliverySignals}`);
@@ -915,6 +2469,26 @@ async function generateScenarioPreviewForIssue(
     : primaryIssueIntent.intent;
   console.log(`[scenario-preview] resolverIntent=${resolverIntent} source=${huModel?.mainIntent !== "generic" && huModel?.mainIntent ? "huModel" : "primaryIssueIntent"} subIntent=${huModel?.subIntent ?? "none"} routePath="${huExplicitRoutePath.join(" > ")}"`);
   const knowledgeCtx = buildKnowledgeContextForScenarioGeneration(appInference.appSlug, huTextForContext, resolverIntent, huModel?.subIntent, huExplicitRoutePath);
+  const functionalBranches = functionalBranchesForAi.length > 0
+    ? functionalBranchesForAi
+    : extractFunctionalBranchesFromHu(
+      huTextForContext,
+      huModel?.visibleOptions ?? [],
+      huExplicitRoutePath,
+      automatableOptionFlowsForCoverage,
+    );
+  const hasBranchExtractionMismatch =
+    automatableOptionFlowsForCoverage.length > 0 && functionalBranches.length === 0;
+  if (hasBranchExtractionMismatch) {
+    console.log(
+      `[scenarios:functional-branches] reason=branch_extraction_mismatch optionFlows=${automatableOptionFlowsForCoverage.length} extracted=0`,
+    );
+    warnings.push("Functional branch extraction mismatch: option flows detected but no branches were generated.");
+  }
+  console.log(
+    `[scenarios:functional-branches] extracted=${functionalBranches.length} ids=${functionalBranches.map((branch) => branch.branchId).join(",") || "none"}`,
+  );
+  const coverageRequirementsAvailable = ensureCoverageRequirementsAvailable(functionalBranches);
 
   // -- Check if route profile mismatch generate routePending fallback scenarios --
   const hasRouteMismatch = blockedScenarios.some(b => b.reasonCode === "route_profile_intent_mismatch" || b.reason === "route_profile_intent_mismatch" || b.suggestedAction === "run_transactional_route_discovery");
@@ -988,8 +2562,41 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
   // Use first issue as HU context for classification
   const huContextForClassification = issues.length > 0 ? issues[0] : undefined;
 
-  const { automatable: automatableScenarios, excluded: excludedRequirements } =
+  let { automatable: automatableScenarios, excluded: excludedRequirements } =
     filterScenariosByAutomatability(encodingNormalizedScenarios, huContextForClassification);
+  automatableScenarios = assignFunctionalBranchesToScenarios(automatableScenarios, functionalBranches);
+  for (const scenario of automatableScenarios) {
+    const association = scenario.branchAssociation;
+    const branchId = association?.branchId ?? scenario.functionalBranch?.branchId ?? "none";
+    const sourceIssueKey = scenario.sourceIssueKey ?? "unknown";
+    const associationMethod = association?.associationMethod ?? "none";
+    const expectedActionIdentity = association?.expectedActionIdentity ?? "";
+    const actualActionIdentity = association?.actualActionIdentity ?? "";
+    const associationMatched = association?.associationMatched === true;
+    const actionMatched = association?.actionMatched === true;
+    const destinationMatched = association?.destinationMatched === true;
+    const destinationEvidenceKind = association?.destinationEvidenceKind ?? "none";
+    const destinationEvidenceSource = association?.destinationEvidenceSource ?? "none";
+    const reasonCode = association?.reasonCode ?? "none";
+    console.log(
+      `[scenarios:branch-association] scenarioId=${scenarioIdentity(scenario)} sourceIssueKey=${sourceIssueKey} branchId=${branchId} ` +
+      `associationMethod=${associationMethod} expectedActionIdentity="${expectedActionIdentity}" actualActionIdentity="${actualActionIdentity}" ` +
+      `associationMatched=${associationMatched} actionMatched=${actionMatched} destinationMatched=${destinationMatched} ` +
+      `destinationEvidenceKind=${destinationEvidenceKind} destinationEvidenceSource=${destinationEvidenceSource} reasonCode=${reasonCode}`,
+    );
+  }
+
+  const branchScenarioBackups = new Map<string, McpScenario>();
+  for (const scenario of automatableScenarios) {
+    const branchId = scenario.functionalBranch?.branchId;
+    if (!branchId || branchScenarioBackups.has(branchId)) continue;
+    branchScenarioBackups.set(branchId, {
+      ...scenario,
+      steps: [...(scenario.steps ?? [])],
+      preconditions: [...(scenario.preconditions ?? [])],
+      functionalBranch: scenario.functionalBranch ? { ...scenario.functionalBranch } : undefined,
+    });
+  }
 
   console.log(
     `[scenarios:automatability] total=${encodingNormalizedScenarios.length} ` +
@@ -1003,93 +2610,67 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
     catalogDiagnostics.uiAutomatableRequirementCount = automatableScenarios.length;
   }
 
-  // ── AI scenario prefix repair: inject knowledge prefix + HU explicit route ──
-  // For non-catalog intents, also filter catalog-contaminated labels
+  // ── AI route-prefix repair per functional branch ──
   const isPrivateOrBalanceIntent = effectiveIntent !== "catalog_listing_flow" &&
     effectiveIntent !== "product_detail_flow";
 
-  // Detect routeProfile catalog orientation via structural signals (not just label heuristics)
   const routeProfileFlavor = detectRouteProfileIsCatalog(resolvedRouteProfile, knowledgeCtx.available ? undefined : undefined);
   const routeProfileIsCatalog = routeProfileFlavor.isCatalog;
   console.log(`[scenario-preview] routeProfile compatibility=${routeProfileIsCatalog ? "compatible" : "incompatible"} effectiveIntent=${effectiveIntent} classifierIntent=${primaryIssueIntent.intent} reason=${routeProfileFlavor.reason} confidence=${routeProfileFlavor.confidence}`);
-
   if (isPrivateOrBalanceIntent && routeProfileIsCatalog) {
     console.log(`[scenario-preview] ignoredRequiredEntryStep reason=private_intent_catalog_profile compatibility=${routeProfileFlavor.confidence} signals="${routeProfileFlavor.reason}"`);
   }
 
-  // Build required prefix from app.knowledge + HU breadcrumb, deduplicated
-  const normLabel = (l: string) => l.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-  const requiredPrefix: string[] = [];
-  const includedLabels = new Set<string>();
+  const normLabel = (value: string) => normalizeBranchText(value);
+  const routeCandidates = buildBranchRouteCandidates(knowledgeCtx, huExplicitRoutePath);
+  console.log(`[scenarios:branch-route] candidates=${routeCandidates.length}`);
 
-  // 1. Knowledge prefix (validated navigation from app.knowledge)
-  if (candidatePrefixSteps && candidatePrefixSteps.length > 0) {
-    for (const t of candidatePrefixSteps) {
-      requiredPrefix.push(`Clic en "${t}".`);
-      includedLabels.add(normLabel(t));
-    }
-  }
-
-  // 2. HU explicit route (breadcrumb from HU text)
-  if (huExplicitRoutePath.length > 0) {
-    let added = 0;
-    for (const seg of huExplicitRoutePath) {
-      const ns = normLabel(seg);
-      if (!includedLabels.has(ns)) {
-        requiredPrefix.push(`Clic en "${seg}".`);
-        includedLabels.add(ns);
-        added++;
-      }
-    }
-    if (added > 0) {
-      console.log(`[scenario-preview] aiRoutePrefixRepair huRouteAdded=${added}`);
-    }
-  }
-
-  // 3. Apply prefix to ALL AI scenarios that don't already have it
-  if (requiredPrefix.length > 0 && automatableScenarios.length > 0) {
+  if (routeCandidates.length > 0 && automatableScenarios.length > 0) {
     let repairedCount = 0;
+    let incompatibleCount = 0;
+    let contaminationRemoved = 0;
     const catalogContaminationTerms = isPrivateOrBalanceIntent
       ? /nombre del producto|beneficios|requisitos|solicitar|descripci[oó]n general|informaci[oó]n de productos|volver al listado de productos|cuentas de efectivo|d[oó]lares|euros|pesos/i
       : null;
-    let contaminationRemoved = 0;
 
-    // Build set of labels protected from contamination removal
-    // Sources: HU explicit route, required prefix, huModel fields/buttons/screens
     const protectedLabels = new Set<string>();
     for (const seg of huExplicitRoutePath) protectedLabels.add(normLabel(seg));
-    for (const ps of requiredPrefix) {
-      const m = ps.match(/Clic en "(.+)"\./i);
-      if (m) protectedLabels.add(normLabel(m[1]));
-    }
     if (huModel) {
-      for (const f of (huModel.selectableEntities ?? [])) protectedLabels.add(normLabel(f));
-      for (const f of (huModel.visibleButtons ?? [])) protectedLabels.add(normLabel(f));
-      for (const f of (huModel.visibleWarnings ?? [])) protectedLabels.add(normLabel(f));
-      for (const f of (huModel.visibleOptions ?? [])) protectedLabels.add(normLabel(f));
-      for (const f of (huModel.requiredScreens ?? [])) protectedLabels.add(normLabel(f));
-      for (const f of (huModel.requiredFields ?? [])) protectedLabels.add(normLabel(f));
+      for (const value of (huModel.selectableEntities ?? [])) protectedLabels.add(normLabel(value));
+      for (const value of (huModel.visibleButtons ?? [])) protectedLabels.add(normLabel(value));
+      for (const value of (huModel.visibleWarnings ?? [])) protectedLabels.add(normLabel(value));
+      for (const value of (huModel.visibleOptions ?? [])) protectedLabels.add(normLabel(value));
+      for (const value of (huModel.requiredScreens ?? [])) protectedLabels.add(normLabel(value));
+      for (const value of (huModel.requiredFields ?? [])) protectedLabels.add(normLabel(value));
+    }
+    for (const branch of functionalBranches) {
+      if (branch.sourceLabel) protectedLabels.add(normLabel(branch.sourceLabel));
+      if (branch.expectedDestination) protectedLabels.add(normLabel(branch.expectedDestination));
     }
 
-    // Helper: extract quoted label from MCP step
     const extractLabel = (step: string): string | null => {
-      const m = step.match(/"(.+?)"/);
-      return m ? normLabel(m[1]) : null;
+      const match = step.match(/"(.+?)"/);
+      return match ? normLabel(match[1]) : null;
     };
 
-    for (const sc of automatableScenarios) {
-      let existingSteps = (sc.steps ?? []).map((s: string) => s.replace(/^\d+[\.)]\s*/, "").trim());
+    for (const scenario of automatableScenarios) {
+      const scenarioBranch = scenario.functionalBranch;
+      const actionEvidence = scenarioBranch
+        ? evaluateScenarioActionMatch(scenario, scenarioBranch)
+        : {
+            expectedActionIdentity: scenario.branchAssociation?.expectedActionIdentity ?? "",
+            actualActionIdentity: scenario.branchAssociation?.actualActionIdentity ?? "",
+            actionMatched: scenario.branchAssociation?.actionMatched === true,
+          };
+      let existingSteps = stripStepNumbering(scenario.steps ?? []);
       let modified = false;
 
-      // Remove catalog contamination for non-catalog intents
       if (catalogContaminationTerms && existingSteps.length > 0) {
         const before = existingSteps.length;
-        existingSteps = existingSteps.filter((s: string) => {
-          // Preserve loan/balance-specific labels
-          if (/prestamo|balance|tasa|monto|saldo|cuota|plazo|fecha|pago|desembolsado|cancelacion|amortizacion|correo|imprimir|volver/i.test(s)) return true;
-          if (catalogContaminationTerms.test(s)) {
-            // Check if label is protected by HU explicit route/prefix/model
-            const label = extractLabel(s);
+        existingSteps = existingSteps.filter((step) => {
+          if (/prestamo|balance|tasa|monto|saldo|cuota|plazo|fecha|pago|desembolsado|cancelacion|amortizacion|correo|imprimir|volver/i.test(step)) return true;
+          if (catalogContaminationTerms.test(step)) {
+            const label = extractLabel(step);
             if (label && protectedLabels.has(label)) {
               console.log(`[scenario-preview] contaminationPreserved reason=hu_protected_label target="${label}"`);
               return true;
@@ -1105,71 +2686,126 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
         }
       }
 
-      // Remove clicks from existingSteps already covered by requiredPrefix (avoids duplicates)
+      let selectedCandidate: BranchRouteCandidate | null = null;
+      let selectedScore = Number.NEGATIVE_INFINITY;
+      let lastReason: BranchRouteCompatibility["reason"] = "branch_action_mismatch";
+
+      for (const candidate of routeCandidates) {
+        if (!scenarioBranch && routeCandidates.length > 1) {
+          lastReason = "branch_action_mismatch";
+          continue;
+        }
+
+        const compatibility = evaluateBranchRouteCompatibility(scenarioBranch, scenario, candidate);
+        if (!compatibility.compatible) {
+          incompatibleCount++;
+          lastReason = compatibility.reason;
+          console.log(
+            `[scenarios:branch-route] scenarioId=${scenarioIdentity(scenario)} branchId=${scenarioBranch?.branchId ?? "none"} ` +
+            `candidateRoute=${candidate.routeId} branchAccess=${scenarioBranch?.accessIntent ?? "unknown"} routeAccess=${candidate.accessIntent} ` +
+            `compatible=false reason=${compatibility.reason}`,
+          );
+          continue;
+        }
+        if (compatibility.score > selectedScore) {
+          selectedScore = compatibility.score;
+          selectedCandidate = candidate;
+        }
+      }
+
+      if (!selectedCandidate) {
+        console.log(
+          `[scenarios:branch-route] scenarioId=${scenarioIdentity(scenario)} branchId=${scenarioBranch?.branchId ?? "none"} ` +
+          `candidateRoute=none branchAccess=${scenarioBranch?.accessIntent ?? "unknown"} routeAccess=unknown compatible=false reason=${lastReason}`,
+        );
+        warnings.push(
+          `Scenario "${scenario.title}": branch_route_incompatible - No se aplico prefijo por incompatibilidad o evidencia insuficiente.`,
+        );
+        (scenario as any)._branchRouteCompatibility = {
+          compatible: false,
+          reason: lastReason,
+          routeId: null,
+        };
+        scenario.branchAssociation = {
+          ...(scenario.branchAssociation ?? {
+            branchId: scenarioBranch?.branchId ?? "none",
+            sourceIssueKey: scenario.sourceIssueKey,
+            associationMethod: scenarioBranch?.branchId ? "branch_id" : "none",
+            associationMatched: Boolean(scenarioBranch?.branchId),
+            expectedActionIdentity: actionEvidence.expectedActionIdentity,
+            actualActionIdentity: actionEvidence.actualActionIdentity,
+            actionMatched: false,
+          }),
+          branchId: scenarioBranch?.branchId ?? scenario.branchAssociation?.branchId ?? "none",
+          destinationMatched: false,
+          destinationEvidenceKind: "none",
+          destinationEvidenceSource: "route_candidates:destination_mismatch_or_incompatible",
+          actionMatched: actionEvidence.actionMatched,
+          reasonCode: lastReason,
+        };
+      } else {
+        console.log(
+          `[scenarios:branch-route] scenarioId=${scenarioIdentity(scenario)} branchId=${scenarioBranch?.branchId ?? "none"} ` +
+          `candidateRoute=${selectedCandidate.routeId} branchAccess=${scenarioBranch?.accessIntent ?? "unknown"} routeAccess=${selectedCandidate.accessIntent} compatible=true reason=ok`,
+        );
+        (scenario as any)._branchRouteCompatibility = {
+          compatible: true,
+          reason: "ok",
+          routeId: selectedCandidate.routeId,
+        };
+        scenario.branchAssociation = {
+          ...(scenario.branchAssociation ?? {
+            branchId: scenarioBranch?.branchId ?? "none",
+            sourceIssueKey: scenario.sourceIssueKey,
+            associationMethod: scenarioBranch?.branchId ? "branch_id" : "none",
+            associationMatched: Boolean(scenarioBranch?.branchId),
+            expectedActionIdentity: actionEvidence.expectedActionIdentity,
+            actualActionIdentity: actionEvidence.actualActionIdentity,
+            actionMatched: false,
+          }),
+          branchId: scenarioBranch?.branchId ?? scenario.branchAssociation?.branchId ?? "none",
+          actionMatched: actionEvidence.actionMatched,
+          destinationMatched: true,
+          destinationEvidenceKind: "route",
+          destinationEvidenceSource: `route:${selectedCandidate.routeId}`,
+          reasonCode: actionEvidence.actionMatched ? "ok" : "branch_action_mismatch",
+        };
+      }
+
+      const requiredPrefix = selectedCandidate ? uniqueClickPrefixFromCandidate(selectedCandidate) : [];
       if (requiredPrefix.length > 0) {
         const prefixTargets = new Set<string>();
-        for (const ps of requiredPrefix) {
-          const m = ps.match(/Clic en "(.+)"\./i);
-          if (m) prefixTargets.add(normLabel(m[1]));
+        for (const prefixStep of requiredPrefix) {
+          const clickMatch = prefixStep.match(/Clic en "(.+)"\./i);
+          if (clickMatch?.[1]) prefixTargets.add(normLabel(clickMatch[1]));
         }
-        const beforeFilter = existingSteps.length;
-        existingSteps = existingSteps.filter((s: string) => {
-          const clickMatch = s.match(/^Clic en "(.+)"\.?$/i);
-          if (clickMatch && prefixTargets.has(normLabel(clickMatch[1]))) {
-            return false;
-          }
-          return true;
+        existingSteps = existingSteps.filter((step) => {
+          const clickMatch = step.match(/^Clic en "(.+)"\.?$/i);
+          if (!clickMatch?.[1]) return true;
+          return !prefixTargets.has(normLabel(clickMatch[1]));
         });
-        const duplicateClicksRemoved = beforeFilter - existingSteps.length;
-        if (duplicateClicksRemoved > 0) {
-          console.log(`[scenario-preview] aiRoutePrefixRepair duplicatePrefixClicksRemoved=${duplicateClicksRemoved} scenarioTitle="${sc.title?.substring(0, 60)}"`);
-        }
-      }
 
-      // Check which prefix steps are missing
-      const existingNorm = new Set(existingSteps.map(normLabel));
-      let missingPrefix: string[] = [];
-      for (const ps of requiredPrefix) {
-        const clickMatch = ps.match(/Clic en "(.+)"\./i);
-        if (clickMatch && !existingNorm.has(normLabel(clickMatch[1]))) {
-          missingPrefix.push(ps);
-        }
-      }
-      // Remove special-case for "Iniciar" — now handled generically by the filter above
-
-      if (missingPrefix.length > 0) {
-        // Prepend missing prefix steps to existing steps
-        const newSteps = [...missingPrefix, ...existingSteps];
-        // Re-number
-        sc.steps = newSteps.map((s, i) => {
-          const stripped = s.replace(/^\d+[\.)]\s*/, "");
-          return `${i + 1}. ${stripped}`;
+        const existingNorm = new Set(existingSteps.map(normLabel));
+        const missingPrefix = requiredPrefix.filter((prefixStep) => {
+          const clickMatch = prefixStep.match(/Clic en "(.+)"\./i);
+          return clickMatch?.[1] ? !existingNorm.has(normLabel(clickMatch[1])) : false;
         });
-        modified = true;
-      } else if (modified) {
-        // Just re-number after contamination removal
-        if (existingSteps.length > 0) {
-          sc.steps = existingSteps.map((s, i) => {
-            const stripped = s.replace(/^\d+[\.)]\s*/, "");
-            return `${i + 1}. ${stripped}`;
-          });
+        if (missingPrefix.length > 0) {
+          existingSteps = [...missingPrefix, ...existingSteps];
+          modified = true;
         }
       }
 
-      if (modified) repairedCount++;
-
-      // Trace: log first 6 steps after repair for auditability
-      if (modified && sc.steps && sc.steps.length > 0) {
-        const preview = sc.steps.slice(0, 6);
-        console.log(`[scenario-preview] afterAiRoutePrefixRepair scenarioTitle="${sc.title?.substring(0, 80)}" firstSteps=${JSON.stringify(preview)}`);
+      if (modified) {
+        scenario.steps = renumberScenarioSteps(existingSteps);
+        repairedCount++;
+        console.log(`[scenario-preview] afterAiRoutePrefixRepair scenarioTitle="${scenario.title?.substring(0, 80)}" firstSteps=${JSON.stringify(scenario.steps.slice(0, 6))}`);
       }
     }
 
-    if (repairedCount > 0) {
-      console.log(`[scenario-preview] aiRoutePrefixRepair requiredSteps=${requiredPrefix.length} scenarios=${repairedCount}`);
-      if (contaminationRemoved > 0) {
-        console.log(`[scenario-preview] aiRoutePrefixRepair contaminationRemoved=${contaminationRemoved} scenarios=${repairedCount}`);
-      }
+    console.log(`[scenario-preview] aiRoutePrefixRepair scenarios=${repairedCount} incompatible=${incompatibleCount}`);
+    if (contaminationRemoved > 0) {
+      console.log(`[scenario-preview] aiRoutePrefixRepair contaminationRemoved=${contaminationRemoved}`);
     }
   }
 
@@ -1255,6 +2891,49 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
     }
   }
 
+  if (functionalBranches.length > 0 && executableScenarios.length > 0) {
+    const reclassified = reclassifyScenariosByBranchCoverage(
+      executableScenarios,
+      adaptiveScenarios,
+      functionalBranches,
+      {
+        automatableOptionFlowsCount: automatableOptionFlowsForCoverage.length,
+        coverageRequirementsAvailable,
+      },
+    );
+    executableScenarios.length = 0;
+    executableScenarios.push(...reclassified.executableScenarios);
+    adaptiveScenarios.length = 0;
+    adaptiveScenarios.push(...reclassified.adaptiveScenarios);
+    console.log(
+      `[scenarios:classification] branchCoverageReclassified considered=${reclassified.summary.considered} affected=${reclassified.summary.affected} ` +
+      `changed=${reclassified.summary.changed} executableRemaining=${executableScenarios.length}`,
+    );
+    if (reclassified.summary.changed > 0) {
+      for (const scenario of adaptiveScenarios) {
+        if (!(scenario as any)._branchCoverageIncomplete) continue;
+        console.log(
+          `[scenarios:classification] scenarioId=${scenarioIdentity(scenario)} branchId=${scenario.functionalBranch?.branchId ?? "none"} ` +
+          `previousCategory=executable finalCategory=adaptive reasonCode=${(scenario as any)._branchCoverageIncomplete?.reasonCode ?? "branch_coverage_incomplete"}`,
+        );
+      }
+    }
+    for (const scenario of executableScenarios) {
+      if (!scenario.functionalBranch?.branchId) continue;
+      const association = scenario.branchAssociation;
+      if (!association) continue;
+      console.log(
+        `[scenarios:branch-association] scenarioId=${scenarioIdentity(scenario)} sourceIssueKey=${scenario.sourceIssueKey ?? "unknown"} branchId=${association.branchId} ` +
+        `associationMethod=${association.associationMethod} expectedActionIdentity="${association.expectedActionIdentity}" ` +
+        `actualActionIdentity="${association.actualActionIdentity}" associationMatched=${association.associationMatched === true} ` +
+        `actionMatched=${association.actionMatched} destinationMatched=${association.destinationMatched === true} ` +
+        `destinationEvidenceKind=${association.destinationEvidenceKind ?? "none"} ` +
+        `destinationEvidenceSource=${association.destinationEvidenceSource ?? "none"} ` +
+        `reasonCode=${association.reasonCode ?? "none"}`,
+      );
+    }
+  }
+
   // blockedScenarios contains only route-blocked (from routeResolutions) — NOT chain-blocked
   // adaptiveScenarios and blockedScenarios are mutually exclusive
 
@@ -1262,13 +2941,164 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
     `[scenarios:preview] response executable=${executableScenarios.length} adaptive=${adaptiveScenarios.length} blocked=${blockedScenarios.length} rejected=${rejected.length} ` +
     `generated=${validated.length} valid=${validCount} routePending=${routePendingCount}`,
   );
-  console.log(`[scenarios:preview] responseAssembly candidates=${validated.length} standard=${executableScenarios.length} adaptive=${adaptiveScenarios.length} omitted=${validated.length - executableScenarios.length - adaptiveScenarios.length - blockedScenarios.length - rejected.length}`);
+  const initialAssemblyMetrics = computeResponseAssemblyMetrics(
+    validated,
+    executableScenarios,
+    adaptiveScenarios,
+    rejected,
+  );
+  console.log(
+    `[scenarios:preview] responseAssembly candidates=${initialAssemblyMetrics.candidateIds.length} ` +
+    `standard=${executableScenarios.length} adaptive=${adaptiveScenarios.length} ` +
+    `omitted=${initialAssemblyMetrics.omitted} omittedValid=${initialAssemblyMetrics.omittedValid} ` +
+    `categoriesDisjoint=${initialAssemblyMetrics.categoriesDisjoint}`,
+  );
 
-  // Reconcile: all visible scenarios must be classified
-  const visibleTotal = executableScenarios.length + adaptiveScenarios.length;
-  const classifiedOk = (executableScenarios.length + adaptiveScenarios.length) === visibleTotal;
-  console.log(`[scenarios:preview] classificationCheck visible=${visibleTotal} classified=${visibleTotal} standard=${executableScenarios.length} adaptive=${adaptiveScenarios.length} valid=${classifiedOk}`);
+  // Reconcile with final visible candidates by identity, not just counts.
+  const expectedVisibleCandidates = validated.filter((scenario) => {
+    if ((scenario as any)._blockedReason && scenario.mcpExecutable === false) return true;
+    if (scenario.mcpExecutable === false) return scenario.validation?.valid === true && (scenario.steps ?? []).length > 0;
+    return scenario.validation?.valid === true;
+  });
+  const expectedVisibleIds = new Set(expectedVisibleCandidates.map((scenario) => scenarioIdentity(scenario)));
+  const assembledVisibleIds = new Set([...executableScenarios, ...adaptiveScenarios].map((scenario) => scenarioIdentity(scenario)));
+  const missingClassifiedIds = [...expectedVisibleIds].filter((id) => !assembledVisibleIds.has(id));
+  const unexpectedClassifiedIds = [...assembledVisibleIds].filter((id) => !expectedVisibleIds.has(id));
+  const classifiedOk = missingClassifiedIds.length === 0 && unexpectedClassifiedIds.length === 0;
+  const classificationValid = classifiedOk
+    && initialAssemblyMetrics.omittedValid
+    && initialAssemblyMetrics.categoriesDisjoint;
+  const visibleTotal = expectedVisibleIds.size;
+  const classifiedTotal = assembledVisibleIds.size;
+  console.log(
+    `[scenarios:preview] classificationCheck visible=${visibleTotal} classified=${classifiedTotal} standard=${executableScenarios.length} adaptive=${adaptiveScenarios.length} ` +
+    `valid=${classificationValid} idsValid=${classifiedOk} omitted=${initialAssemblyMetrics.omitted} omittedValid=${initialAssemblyMetrics.omittedValid} ` +
+    `categoriesDisjoint=${initialAssemblyMetrics.categoriesDisjoint} overlapIds=${initialAssemblyMetrics.overlapIds.length} ` +
+    `missingIds=${missingClassifiedIds.length} unexpectedIds=${unexpectedClassifiedIds.length}`,
+  );
 
+  const applySemanticDedupeToResponseBuckets = () => {
+    const combined = [...executableScenarios, ...adaptiveScenarios] as McpScenario[];
+    const dedupeResult = dedupeScenariosBySemanticSignature(combined);
+    if (dedupeResult.removed === 0) return;
+    const kept = new Set(dedupeResult.scenarios);
+    const dedupedExecutable = executableScenarios.filter((scenario) => kept.has(scenario as McpScenario));
+    const dedupedAdaptive = adaptiveScenarios.filter((scenario) => kept.has(scenario as McpScenario));
+    executableScenarios.length = 0;
+    executableScenarios.push(...dedupedExecutable);
+    adaptiveScenarios.length = 0;
+    adaptiveScenarios.push(...dedupedAdaptive);
+    console.log(
+      `[scenario-dedupe] removed=${dedupeResult.removed} retained=${dedupeResult.scenarios.length} standard=${executableScenarios.length} adaptive=${adaptiveScenarios.length}`,
+    );
+  };
+
+  applySemanticDedupeToResponseBuckets();
+
+  let finalVisibleScenarios: McpScenario[] = [...executableScenarios, ...adaptiveScenarios];
+  let branchCoverage = computeBranchCoverageCheck(functionalBranches, finalVisibleScenarios, {
+    automatableOptionFlowsCount: automatableOptionFlowsForCoverage.length,
+    coverageRequirementsAvailable,
+  });
+  const branchRecoveryInsufficient: string[] = [];
+  console.log(
+    `[scenarios:branch-coverage] required=${branchCoverage.required} covered=${branchCoverage.covered} missing=${branchCoverage.missing.length} valid=${branchCoverage.valid}`,
+  );
+
+  if (branchCoverage.missing.length > 0) {
+    for (const missingBranchId of branchCoverage.missing) {
+      if (finalVisibleScenarios.some((scenario) => scenario.functionalBranch?.branchId === missingBranchId)) continue;
+      const requiredBranch = functionalBranches.find((branch) => branch.branchId === missingBranchId);
+      const backup = branchScenarioBackups.get(missingBranchId);
+      const evidence = evaluateBranchRecoveryEvidence(requiredBranch, routeCandidates);
+      if (!backup && !evidence.recoverable) {
+        branchRecoveryInsufficient.push(missingBranchId);
+        console.log(
+          `[scenarios:branch-coverage] recovery branchId=${missingBranchId} source=deterministic_minimum status=failed reason=${evidence.reason}`,
+        );
+        warnings.push(`Branch ${missingBranchId}: route_evidence_insufficient`);
+        continue;
+      }
+      const fallbackScenario: McpScenario = backup
+        ? {
+            ...backup,
+            steps: [...(backup.steps ?? [])],
+            preconditions: [...(backup.preconditions ?? [])],
+            functionalBranch: backup.functionalBranch ? { ...backup.functionalBranch } : requiredBranch,
+            scenarioId: `${backup.scenarioId ?? `${backup.sourceIssueKey}:${backup.title}`}:branch-recovery`,
+          }
+        : {
+            sourceIssueKey: issues[0]?.key ?? "unknown",
+            title: requiredBranch?.sourceLabel
+              ? `Validar rama ${requiredBranch.sourceLabel}`
+              : `Validar rama ${missingBranchId}`,
+            steps: requiredBranch?.sourceLabel && requiredBranch.expectedDestination
+              ? [
+                  ...uniqueClickPrefixFromCandidate(
+                    routeCandidates.find((candidate) => candidate.routeId === evidence.routeId)
+                      ?? {
+                        routeId: "none",
+                        clickTargets: [],
+                        accessIntent: "unknown",
+                        source: "hu_route",
+                      },
+                  ).map((step, index) => `${index + 1}. ${step.replace(/^\d+[\.)]\s*/, "")}`),
+                  `Clic en "${requiredBranch.sourceLabel}".`,
+                  `Validar que se muestre "${requiredBranch.expectedDestination}".`,
+                ]
+              : [],
+            preconditions: ["La aplicación está disponible."],
+            expectedResult: requiredBranch?.expectedDestination
+              ? `Se alcanza "${requiredBranch.expectedDestination}".`
+              : "Se preserva la rama funcional requerida.",
+            type: "functional",
+            database: "",
+            isConverted: 0,
+            automationType: "ui_discovery",
+            setupStrategy: "no_login",
+            appSlug: appInference.appSlug,
+            targetAppSlug: appInference.appSlug,
+            routeProfile: resolvedRouteProfile?.name ?? "",
+            dataRequirements: "N/A",
+            nonExecutableCriteria: "requires_route_discovery",
+            mcpExecutable: false,
+            functionalBranch: requiredBranch,
+            scenarioId: `${issues[0]?.key ?? "unknown"}:${missingBranchId}:generated-branch-recovery`,
+          };
+      if (!backup) {
+        fallbackScenario.steps = renumberScenarioSteps(stripStepNumbering(fallbackScenario.steps));
+      }
+
+      const recoveryValidation = validateScenario(
+        fallbackScenario,
+        isPrivateOrBalanceIntent ? null : resolvedRouteProfile,
+        undefined, undefined, undefined,
+        isPrivateOrBalanceIntent ? true : undefined,
+        effectiveIntent,
+      );
+      const recoveredScenario = { ...fallbackScenario, validation: recoveryValidation };
+      adaptiveScenarios.push({
+        ...recoveredScenario,
+        executionMode: "adaptive",
+        mcpExecutable: false,
+        nonExecutableCriteria: recoveredScenario.nonExecutableCriteria || "requires_route_discovery",
+        automationStatus: "requires_route_discovery",
+      });
+      console.log(`[scenarios:branch-coverage] recovery branchId=${missingBranchId} source=${backup ? "last_valid_scenario" : "deterministic_minimum"} validation=${recoveryValidation.valid}`);
+    }
+
+    finalVisibleScenarios = [...executableScenarios, ...adaptiveScenarios];
+    branchCoverage = computeBranchCoverageCheck(functionalBranches, finalVisibleScenarios, {
+      automatableOptionFlowsCount: automatableOptionFlowsForCoverage.length,
+      coverageRequirementsAvailable,
+    });
+    if (branchRecoveryInsufficient.length > 0) {
+      branchCoverage.insufficientEvidenceBranchIds = [...branchRecoveryInsufficient];
+    }
+    console.log(
+      `[scenarios:branch-coverage] postRecovery required=${branchCoverage.required} covered=${branchCoverage.covered} missing=${branchCoverage.missing.length} valid=${branchCoverage.valid}`,
+    );
+  }
   // ── Post-validation fallback: under-generated or all-rejected ──
   const routePendingFallbackAlreadyGenerated = shouldFallback;
   const aiCalled = generationResult?.generationDiagnostics?.aiCalled === true;
@@ -1292,19 +3122,60 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
   if (needsPostValidationFallback) {
     const postFallbackReason = aiUnderGeneratedTarget
       ? "ai_under_generated_target" : "preview_validation_zero_after_ai";
-    const postFallbackScenarios = generateRoutePendingScenarios(
+    const postFallbackScenarios = assignFunctionalBranchesToScenarios(
+      generateRoutePendingScenarios(
       issues[0], resolverIntent, postFallbackReason,
       candidatePrefixSteps ? "knowledge_prefix_pending" : "missing_initial_route",
       appInference.appSlug, candidatePrefixSteps,
       huModel, scenarioPlan,
       huExplicitRoutePath,
+      ),
+      functionalBranches,
     );
     for (const fb of postFallbackScenarios) {
-      validated.push({ ...fb, validation: { valid: true, errors: [] } });
+      const validatedFallback = { ...fb, validation: { valid: true, errors: [] as string[], warnings: [] as string[] } };
+      validated.push(validatedFallback);
+      adaptiveScenarios.push({
+        ...validatedFallback,
+        executionMode: "adaptive",
+        mcpExecutable: false,
+        nonExecutableCriteria: "requires_route_discovery",
+        automationStatus: "requires_route_discovery",
+      });
       routePendingCount++;
     }
     console.log(`[scenario-preview] routePendingBuilder postValidationFallback reason=${postFallbackReason} added=${postFallbackScenarios.length} totalRoutePending=${routePendingCount}`);
   }
+
+  applySemanticDedupeToResponseBuckets();
+  finalVisibleScenarios = [...executableScenarios, ...adaptiveScenarios];
+  branchCoverage = computeBranchCoverageCheck(functionalBranches, finalVisibleScenarios, {
+    automatableOptionFlowsCount: automatableOptionFlowsForCoverage.length,
+    coverageRequirementsAvailable,
+  });
+  if (branchRecoveryInsufficient.length > 0) {
+    branchCoverage.insufficientEvidenceBranchIds = [...branchRecoveryInsufficient];
+  }
+  if (branchCoverage.reasonCode === "branch_extraction_mismatch") {
+    warnings.push("Branch coverage invalid: branch_extraction_mismatch.");
+  }
+  if (branchCoverage.reasonCode === "coverage_requirements_unavailable") {
+    warnings.push("Branch coverage invalid: coverage_requirements_unavailable.");
+  }
+  if (!branchCoverage.valid && branchCoverage.missing.length > 0) {
+    warnings.push(`Branch coverage incomplete: missing branchIds=${branchCoverage.missing.join(",")}`);
+  }
+
+  let responseVisibilityComparison = compareVisibleScenarioSets(
+    finalVisibleScenarios,
+    [...executableScenarios, ...adaptiveScenarios],
+  );
+  console.log(
+    `[scenarios:preview] responseVisibilityCheck equal=${responseVisibilityComparison.equal} finalVisible=${responseVisibilityComparison.finalVisibleIds.length} responseVisible=${responseVisibilityComparison.responseVisibleIds.length} missing=${responseVisibilityComparison.missingInResponse.length} unexpected=${responseVisibilityComparison.unexpectedInResponse.length}`,
+  );
+  console.log(
+    `[scenarios:branch-coverage] final required=${branchCoverage.required} covered=${branchCoverage.covered} missing=${branchCoverage.missing.length} valid=${branchCoverage.valid}`,
+  );
 
   // Log generation diagnostics if available
   if (generationResult.generationDiagnostics) {
@@ -1480,6 +3351,87 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
     );
   }
 
+  let responseScenarios = [
+    ...executableScenarios.map((scenario) => ({ ...scenario, executionMode: "standard" as const })),
+    ...adaptiveScenarios.map((scenario) => ({
+      ...scenario,
+      executionMode: "adaptive" as const,
+      mcpExecutable: false,
+      nonExecutableCriteria: scenario.nonExecutableCriteria || "requires_route_discovery",
+      automationStatus: scenario.automationStatus || "requires_route_discovery",
+    })),
+  ];
+  const definitiveBranchCoverage = branchCoverage;
+  let responseAssemblyMetrics = computeResponseAssemblyMetrics(
+    validated,
+    responseScenarios.filter((scenario: any) => scenario.executionMode === "standard"),
+    responseScenarios.filter((scenario: any) => scenario.executionMode === "adaptive"),
+    rejected,
+  );
+  if (!responseAssemblyMetrics.omittedValid) {
+    warnings.push(`Response assembly invalid: omitted=${responseAssemblyMetrics.omitted}`);
+  }
+  if (!responseAssemblyMetrics.categoriesDisjoint) {
+    warnings.push(`Response assembly invalid: overlapping categories=${responseAssemblyMetrics.overlapIds.length}`);
+  }
+  responseVisibilityComparison = compareVisibleScenarioSets(finalVisibleScenarios, responseScenarios);
+  if (!responseVisibilityComparison.equal) {
+    warnings.push(
+      `Response visibility mismatch: missing=${responseVisibilityComparison.missingInResponse.length} unexpected=${responseVisibilityComparison.unexpectedInResponse.length}`,
+    );
+  }
+  let generationSuccessCheck = evaluateGenerationSuccess(
+    responseVisibilityComparison.equal,
+    definitiveBranchCoverage,
+    coverageRequirementsAvailable,
+    {
+      omittedValid: responseAssemblyMetrics.omittedValid,
+      categoriesDisjoint: responseAssemblyMetrics.categoriesDisjoint,
+    },
+  );
+  if (!generationSuccessCheck.generationSuccess) {
+    warnings.push(
+      `Generation gated: success=false reasons=${generationSuccessCheck.blockedReasons.join(",")} missingBranchIds=${definitiveBranchCoverage.missing.join(",") || "none"}`,
+    );
+    responseScenarios = markScenariosAsCoverageDiagnostics(responseScenarios, definitiveBranchCoverage);
+    executableScenarios.length = 0;
+    adaptiveScenarios.length = 0;
+    adaptiveScenarios.push(...responseScenarios);
+    finalVisibleScenarios = [...responseScenarios];
+    responseAssemblyMetrics = computeResponseAssemblyMetrics(
+      validated,
+      responseScenarios.filter((scenario: any) => scenario.executionMode === "standard"),
+      responseScenarios.filter((scenario: any) => scenario.executionMode === "adaptive"),
+      rejected,
+    );
+    responseVisibilityComparison = compareVisibleScenarioSets(finalVisibleScenarios, responseScenarios);
+    generationSuccessCheck = evaluateGenerationSuccess(
+      responseVisibilityComparison.equal,
+      definitiveBranchCoverage,
+      coverageRequirementsAvailable,
+      {
+        omittedValid: responseAssemblyMetrics.omittedValid,
+        categoriesDisjoint: responseAssemblyMetrics.categoriesDisjoint,
+      },
+    );
+  }
+  branchCoverage = definitiveBranchCoverage;
+  console.log(
+    `[scenarios:branch-coverage] response required=${branchCoverage.required} covered=${branchCoverage.covered} missing=${branchCoverage.missing.length} valid=${branchCoverage.valid} reason=${branchCoverage.reasonCode ?? "none"}`,
+  );
+  console.log(
+    `[scenarios:preview] responseAssemblyFinal candidates=${responseAssemblyMetrics.candidateIds.length} ` +
+    `visible=${responseAssemblyMetrics.visibleCandidateIds.length} rejectedInCandidates=${responseAssemblyMetrics.rejectedCandidateIds.length} ` +
+    `omitted=${responseAssemblyMetrics.omitted} omittedValid=${responseAssemblyMetrics.omittedValid} ` +
+    `categoriesDisjoint=${responseAssemblyMetrics.categoriesDisjoint} overlapIds=${responseAssemblyMetrics.overlapIds.length}`,
+  );
+  console.log(
+    `[scenarios:preview] responseVisibilityFinal equal=${responseVisibilityComparison.equal} finalVisibleIds=${responseVisibilityComparison.finalVisibleIds.length} responseVisibleIds=${responseVisibilityComparison.responseVisibleIds.length}`,
+  );
+  console.log(
+    `[scenarios:preview] generationSuccess=${generationSuccessCheck.generationSuccess} reasons=${generationSuccessCheck.blockedReasons.join(",") || "none"}`,
+  );
+
   return {
     ok: true,
     source: {
@@ -1501,10 +3453,7 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
     appInference,
     appProfilePath: appProfileResult.appConfigPath,
     // All functional scenarios (standard + adaptive) in one array for the UI
-    scenarios: [
-      ...executableScenarios.map(s => ({ ...s, executionMode: "standard" })),
-      ...adaptiveScenarios.map(s => ({ ...s, executionMode: "adaptive", mcpExecutable: false, nonExecutableCriteria: "requires_route_discovery", automationStatus: "requires_route_discovery" })),
-    ],
+    scenarios: responseScenarios,
     summary: {
       generated: validated.length,
       visible: executableScenarios.length + adaptiveScenarios.length,
@@ -1515,6 +3464,7 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
       rejected: rejected.length,
       blocked: blockedScenarios.length,
       routePending: routePendingCount,
+      generationSuccess: generationSuccessCheck.generationSuccess,
     },
     routeProfile: resolvedRouteProfile,
     rejected,
@@ -1524,33 +3474,65 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
     // Backward-compatible: same adaptive scenarios for launch payload
     adaptiveScenarios,
     coverage: (() => {
-      try {
-        const rs: any[] = (globalThis as any).__coverageReqs;
-        if (!rs || !Array.isArray(rs)) throw new Error("coverageReqs not available");
-        const covFilter = (s: string) => rs.filter((r: any) => r.status === s).length;
-        const coveredCov = covFilter("covered");
-        const uncoveredCov = covFilter("uncovered");
-        const blockedCov = covFilter("blocked");
-        const nonAutomatable = covFilter("non_automatable");
-        const requiredFilter = (s: string) => rs.filter((r: any) => r.required && r.status === s).length;
-        const requiredCovered = requiredFilter("covered");
-        const requiredUncovered = requiredFilter("uncovered");
-        const requiredBlocked = requiredFilter("blocked");
-        const automatableRequired = rs.filter((r: any) => r.required && r.status !== "non_automatable").length;
-        const complete = automatableRequired > 0 && requiredUncovered === 0 && requiredBlocked === 0;
-        const status = automatableRequired === 0 ? "not_automatable" : complete ? "complete" : "partial";
-        const blockedRequirements = rs.filter((r: any) => r.status === "blocked" && r.required)
-          .map((r: any) => ({ id: r.id, sourceText: r.sourceText, category: r.category, required: r.required, reasonCode: r.reasonCode }));
-        return { status, complete, total: rs.length,
-          required: rs.filter((r: any) => r.required).length,
-          covered: coveredCov, uncovered: uncoveredCov, blocked: blockedCov, nonAutomatable,
-          requiredCovered, requiredUncovered, requiredBlocked, blockedRequirements };
-      } catch (e: any) {
-        console.log(`[coverage] analysis_failed error="${e.message}"`);
-        return { status: "partial", complete: false, total: 0, required: 0,
-          covered: 0, uncovered: 0, blocked: 0, nonAutomatable: 0,
-          requiredCovered: 0, requiredUncovered: 0, requiredBlocked: 0, blockedRequirements: [] };
+      const rs: any[] | undefined = (globalThis as any).__coverageReqs;
+      const requiresCoverageReqs = functionalBranches.length > 0 || automatableOptionFlowsForCoverage.length > 0;
+      if (!Array.isArray(rs)) {
+        console.log(
+          `[coverage] analysis_failed reason=coverage_requirements_unavailable requiresCoverage=${requiresCoverageReqs}`,
+        );
+        return {
+          status: requiresCoverageReqs ? "invalid" : "partial",
+          complete: false,
+          total: 0,
+          required: 0,
+          covered: 0,
+          uncovered: 0,
+          blocked: 0,
+          nonAutomatable: 0,
+          requiredCovered: 0,
+          requiredUncovered: 0,
+          requiredBlocked: 0,
+          blockedRequirements: [],
+          coverageRequirementsAvailable: false,
+          generationSuccess: generationSuccessCheck.generationSuccess,
+          generationBlockedReasons: generationSuccessCheck.blockedReasons,
+          branchCoverage,
+          responseVisibilityComparison,
+        };
       }
+      const covFilter = (s: string) => rs.filter((r: any) => r.status === s).length;
+      const coveredCov = covFilter("covered");
+      const uncoveredCov = covFilter("uncovered");
+      const blockedCov = covFilter("blocked");
+      const nonAutomatable = covFilter("non_automatable");
+      const requiredFilter = (s: string) => rs.filter((r: any) => r.required && r.status === s).length;
+      const requiredCovered = requiredFilter("covered");
+      const requiredUncovered = requiredFilter("uncovered");
+      const requiredBlocked = requiredFilter("blocked");
+      const automatableRequired = rs.filter((r: any) => r.required && r.status !== "non_automatable").length;
+      const complete = automatableRequired > 0 && requiredUncovered === 0 && requiredBlocked === 0;
+      const status = automatableRequired === 0 ? "not_automatable" : complete ? "complete" : "partial";
+      const blockedRequirements = rs.filter((r: any) => r.status === "blocked" && r.required)
+        .map((r: any) => ({ id: r.id, sourceText: r.sourceText, category: r.category, required: r.required, reasonCode: r.reasonCode }));
+      return {
+        status,
+        complete,
+        total: rs.length,
+        required: rs.filter((r: any) => r.required).length,
+        covered: coveredCov,
+        uncovered: uncoveredCov,
+        blocked: blockedCov,
+        nonAutomatable,
+        requiredCovered,
+        requiredUncovered,
+        requiredBlocked,
+        blockedRequirements,
+        coverageRequirementsAvailable: true,
+        generationSuccess: generationSuccessCheck.generationSuccess,
+        generationBlockedReasons: generationSuccessCheck.blockedReasons,
+        branchCoverage,
+        responseVisibilityComparison,
+      };
     })(),
   };
 

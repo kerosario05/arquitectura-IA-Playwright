@@ -623,6 +623,186 @@ runsRouter.delete("/:jobId", (req, res) => {
 // ── TestRail result sync backfill — sync results from a completed launch to the TestRun ──
 const LAUNCH_ARTIFACTS_DIR = path.resolve(__dirname, "..", "..", "..", ".artifacts", "scenario-launch-runs");
 const PREVIEW_ARTIFACTS_DIR = path.resolve(__dirname, "..", "..", "..", ".artifacts", "scenario-preview-runs");
+const EVIDENCE_ROOT_DIR = path.resolve(__dirname, "..", "..", "..", ".artifacts", "evidence");
+
+type EvidenceDocxStatus = "ready" | "preparing" | "failed" | "unavailable";
+type EvidenceDocxReasonCode =
+  | "ready"
+  | "job_not_found"
+  | "document_preparing"
+  | "document_generation_failed"
+  | "document_not_found_after_completion";
+
+type EvidenceDocxResolution = {
+  jobId: string;
+  status: EvidenceDocxStatus;
+  reasonCode: EvidenceDocxReasonCode;
+  documentReady: boolean;
+  documentPath?: string;
+  jobExists: boolean;
+  jobStatus?: string;
+  appSlug?: string;
+  sectionSlug?: string;
+};
+
+const TERMINAL_RUN_STATUSES = new Set([
+  "done",
+  "completed",
+  "completed_with_failures",
+  "completed_with_sync_errors",
+  "failed",
+  "error",
+  "cancelled",
+  "canceled",
+  "stopped",
+  "timeout",
+]);
+
+const ERROR_TERMINAL_RUN_STATUSES = new Set([
+  "failed",
+  "error",
+  "cancelled",
+  "canceled",
+  "stopped",
+  "timeout",
+  "completed_with_failures",
+  "completed_with_sync_errors",
+]);
+
+function toNonEmptyString(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function readPreviewJobMetadata(jobId: string): Record<string, unknown> | undefined {
+  const jobMetaPath = path.join(PREVIEW_ARTIFACTS_DIR, jobId, "job.json");
+  if (!fs.existsSync(jobMetaPath)) return undefined;
+  try {
+    const parsed = JSON.parse(fs.readFileSync(jobMetaPath, "utf-8"));
+    return parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function findEvidenceDocxByJobId(rootDir: string, jobId: string): string | undefined {
+  if (!fs.existsSync(rootDir)) return undefined;
+
+  const stack = [rootDir];
+  while (stack.length > 0) {
+    const dir = stack.pop();
+    if (!dir) continue;
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(fullPath);
+        continue;
+      }
+      if (
+        entry.name === "evidencia.docx"
+        && fullPath.includes(path.sep + "runs" + path.sep + jobId + path.sep)
+      ) {
+        return fullPath;
+      }
+    }
+  }
+  return undefined;
+}
+
+export function resolveEvidenceDocxForJob(jobId: string): EvidenceDocxResolution {
+  const job = jobStore.get(jobId);
+  const params = (job?.params ?? {}) as Record<string, unknown>;
+  const diskMeta = readPreviewJobMetadata(jobId);
+
+  const appSlug = toNonEmptyString(params.appSlug)
+    ?? toNonEmptyString(params.targetAppSlug)
+    ?? toNonEmptyString(diskMeta?.appSlug)
+    ?? toNonEmptyString(diskMeta?.targetAppSlug);
+  const sectionSlug = toNonEmptyString(params.sectionSlug) ?? toNonEmptyString(diskMeta?.sectionSlug);
+  const jobStatus = toNonEmptyString(job?.status) ?? toNonEmptyString(diskMeta?.status);
+  const previewJobDir = path.join(PREVIEW_ARTIFACTS_DIR, jobId);
+  const jobExists = Boolean(job || fs.existsSync(previewJobDir));
+
+  const candidatePaths: string[] = [];
+  if (appSlug && sectionSlug) {
+    candidatePaths.push(path.join(EVIDENCE_ROOT_DIR, appSlug, sectionSlug, "runs", jobId, "evidencia.docx"));
+  }
+  candidatePaths.push(path.join(PREVIEW_ARTIFACTS_DIR, jobId, "evidencia.docx"));
+
+  for (const candidate of candidatePaths) {
+    if (fs.existsSync(candidate)) {
+      return {
+        jobId,
+        status: "ready",
+        reasonCode: "ready",
+        documentReady: true,
+        documentPath: candidate,
+        jobExists: true,
+        jobStatus,
+        appSlug,
+        sectionSlug,
+      };
+    }
+  }
+
+  const foundInEvidenceTree = findEvidenceDocxByJobId(EVIDENCE_ROOT_DIR, jobId);
+  if (foundInEvidenceTree) {
+    return {
+      jobId,
+      status: "ready",
+      reasonCode: "ready",
+      documentReady: true,
+      documentPath: foundInEvidenceTree,
+      jobExists: true,
+      jobStatus,
+      appSlug,
+      sectionSlug,
+    };
+  }
+
+  if (!jobExists) {
+    return {
+      jobId,
+      status: "unavailable",
+      reasonCode: "job_not_found",
+      documentReady: false,
+      jobExists: false,
+      jobStatus,
+      appSlug,
+      sectionSlug,
+    };
+  }
+
+  const normalizedStatus = (jobStatus ?? "").trim().toLowerCase();
+  const terminal = TERMINAL_RUN_STATUSES.has(normalizedStatus);
+  if (!terminal) {
+    return {
+      jobId,
+      status: "preparing",
+      reasonCode: "document_preparing",
+      documentReady: false,
+      jobExists: true,
+      jobStatus,
+      appSlug,
+      sectionSlug,
+    };
+  }
+
+  return {
+    jobId,
+    status: ERROR_TERMINAL_RUN_STATUSES.has(normalizedStatus) ? "failed" : "unavailable",
+    reasonCode: ERROR_TERMINAL_RUN_STATUSES.has(normalizedStatus)
+      ? "document_generation_failed"
+      : "document_not_found_after_completion",
+    documentReady: false,
+    jobExists: true,
+    jobStatus,
+    appSlug,
+    sectionSlug,
+  };
+}
 
 runsRouter.post("/:jobId/sync-results", async (req, res) => {
   const jobId = req.params.jobId;
@@ -886,71 +1066,64 @@ runsRouter.post("/:jobId/link-jira-run-ref", async (req, res) => {
   }
 });
 
+// ── Evidence DOCX status ──
+runsRouter.get("/:jobId/evidence-docx/status", (req, res) => {
+  const jobId = req.params.jobId;
+  const resolution = resolveEvidenceDocxForJob(jobId);
+
+  if (!resolution.jobExists && resolution.reasonCode === "job_not_found") {
+    res.status(404).json({
+      jobId,
+      status: "not_found",
+      documentReady: false,
+      reasonCode: "job_not_found",
+    });
+    return;
+  }
+
+  const statusCode = resolution.status === "preparing" ? 202 : 200;
+  res.status(statusCode).json({
+    jobId,
+    status: resolution.status,
+    documentReady: resolution.documentReady,
+    reasonCode: resolution.reasonCode,
+    jobStatus: resolution.jobStatus,
+    appSlug: resolution.appSlug,
+    sectionSlug: resolution.sectionSlug,
+  });
+});
+
 // ── Download evidence DOCX ──
 runsRouter.get("/:jobId/evidence-docx", (req, res) => {
   const jobId = req.params.jobId;
-  const EVIDENCE_ROOT = path.resolve(__dirname, "..", "..", "..", ".artifacts", "evidence");
+  const resolution = resolveEvidenceDocxForJob(jobId);
+  const docxPath = resolution.documentPath;
 
-  // Try to get appSlug and sectionSlug from job params
-  const job = jobStore.get(jobId);
-  let docxPath: string | undefined;
-
-  if (job) {
-    const params = job.params as Record<string, unknown>;
-    const appSlug = params.appSlug || params.targetAppSlug;
-    const sectionSlug = params.sectionSlug;
-
-    if (appSlug && sectionSlug) {
-      // Try structured path: .artifacts/evidence/{appSlug}/{sectionSlug}/runs/{jobId}/evidencia.docx
-      const structuredPath = path.join(EVIDENCE_ROOT, String(appSlug), String(sectionSlug), "runs", jobId, "evidencia.docx");
-      if (fs.existsSync(structuredPath)) {
-        docxPath = structuredPath;
-        console.log(`[evidence-docx] found at structured path jobId=${jobId}`);
-      }
-    }
-  }
-
-  // Fallback: search for evidencia.docx in evidence directory
   if (!docxPath) {
-    console.log(`[evidence-docx] searching for evidencia.docx in evidence tree jobId=${jobId}`);
-    const searchPaths = [
-      path.join(EVIDENCE_ROOT, "**", "runs", jobId, "evidencia.docx"),
-      path.join(PREVIEW_ARTIFACTS_DIR, jobId, "evidencia.docx"),
-    ];
-
-    for (const pattern of searchPaths) {
-      const basePath = pattern.replace(/\*\*.*$/, "");
-      if (fs.existsSync(basePath)) {
-        const findPath = (dir: string, targetFile: string): string | null => {
-          const entries = fs.readdirSync(dir, { withFileTypes: true });
-          for (const entry of entries) {
-            const fullPath = path.join(dir, entry.name);
-            if (entry.isDirectory()) {
-              const found = findPath(fullPath, targetFile);
-              if (found) return found;
-            } else if (entry.name === targetFile && fullPath.includes(jobId)) {
-              return fullPath;
-            }
-          }
-          return null;
-        };
-
-        const found = findPath(EVIDENCE_ROOT, "evidencia.docx");
-        if (found) {
-          docxPath = found;
-          console.log(`[evidence-docx] found via search jobId=${jobId} path=${docxPath}`);
-          break;
-        }
-      }
+    if (!resolution.jobExists && resolution.reasonCode === "job_not_found") {
+      res.status(404).json({
+        error: "Job not found",
+        jobId,
+        reasonCode: "job_not_found",
+        message: "No existe un job con ese ID.",
+      });
+      return;
     }
-  }
-
-  if (!docxPath || !fs.existsSync(docxPath)) {
-    console.error(`[evidence-docx] file not found jobId=${jobId}`);
+    if (resolution.status === "preparing") {
+      res.status(409).json({
+        error: "Evidence DOCX is still being prepared",
+        jobId,
+        reasonCode: "document_preparing",
+        message: "La ejecución aún está consolidando el documento de evidencia.",
+      });
+      return;
+    }
+    console.error(`[evidence-docx] file not found jobId=${jobId} reason=${resolution.reasonCode}`);
     res.status(404).json({
       error: "Evidence DOCX not found",
       jobId,
-      message: "El documento de evidencia no está disponible. Verifique que la ejecución haya finalizado correctamente."
+      reasonCode: resolution.reasonCode,
+      message: "El documento de evidencia no está disponible para este job.",
     });
     return;
   }

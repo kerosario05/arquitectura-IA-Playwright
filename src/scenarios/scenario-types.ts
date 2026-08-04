@@ -33,6 +33,11 @@ export type ExcludedRequirement = {
   classification: AutomatabilityClassification; // Why it's not automatable
   suggestedHandling: string; // What to do instead (e.g., "manual_test", "backend_unit_test", "skip")
   detectedPatterns?: string[]; // Patterns that triggered exclusion
+  scenarioId?: string;
+  reasonCode?: string;
+  matchedRule?: string;
+  matchedText?: string;
+  matchedSource?: "steps" | "metadata" | "context" | "none";
 };
 
 export type CatalogDiagnostics = {
@@ -115,6 +120,25 @@ export type JiraIssueSource = {
 
 export type McpScenarioStep = string;
 
+export type BranchAccessIntent = "public" | "authenticated" | "unknown";
+
+export type FunctionalBranchEvidenceSource =
+  | "user_story"
+  | "acceptance_criteria"
+  | "route_profile"
+  | "knowledge"
+  | "discovery";
+
+export type FunctionalBranchRef = {
+  branchId: string;
+  sourceLabel?: string;
+  sourceRequirementId?: string;
+  actionIntent: string;
+  expectedDestination?: string;
+  accessIntent: BranchAccessIntent;
+  evidenceSource: FunctionalBranchEvidenceSource;
+};
+
 export type McpScenario = {
   sourceIssueKey: string;
   title: string;
@@ -134,8 +158,10 @@ export type McpScenario = {
   dataRequirements: string;
   nonExecutableCriteria: string;
   mcpExecutable: boolean;
+  scenarioId?: string;
   caseId?: number;
   generationSource?: "ai" | "deterministic_seed"; // Track source for seeds vs AI
+  functionalBranch?: FunctionalBranchRef;
   validation?: {
     valid: boolean;
     errors: string[];
@@ -145,6 +171,19 @@ export type McpScenario = {
   scenarioMode?: ScenarioMode;
   routeConfidence?: RouteConfidence;
   diagnostics?: ScenarioDiagnostic[];
+  branchAssociation?: {
+    branchId: string;
+    sourceIssueKey: string;
+    associationMethod: "branch_id" | "structured_metadata" | "normalized_action" | "textual_fallback" | "none";
+    associationMatched?: boolean;
+    expectedActionIdentity: string;
+    actualActionIdentity: string;
+    actionMatched: boolean;
+    destinationMatched?: boolean;
+    destinationEvidenceKind?: "route" | "heading" | "marker" | "auth_gate" | "structured_metadata" | "none";
+    destinationEvidenceSource?: string;
+    reasonCode?: string;
+  };
 };
 
 export type McpRouteProfile = {
@@ -326,6 +365,9 @@ export type ScenarioGenerationDiagnostics = {
   fallbackReason?: "ai_generation_error" | "ai_timeout" | "ai_parse_failed";
   fallbackScenarioCount?: number;
   skipAIReason?: string;
+  branchRequiredClicks?: string[];
+  effectiveAllowedClicks?: string[];
+  effectiveAllowedClicksBeforeRepair?: number;
 };
 
 export type DiagnosticCode =

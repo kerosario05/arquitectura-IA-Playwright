@@ -1,0 +1,52 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-001",
+    "caseId": 0,
+    "title": "Visualizacion de pantalla inicial del kiosco"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Clic en \"Iniciar\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Clic en \"transacciones y servicios\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "transacciones y servicios",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    }
+  ],
+  "notes": [
+    "Discovery partial: 2/4 navigations/assertions satisfied.",
+    "Review needed: 2 non-blocking assertion failure(s) were ignored for pass/fail reconciliation."
+  ],
+  "createdAt": "2026-08-04T13:27:29.461Z"
+}

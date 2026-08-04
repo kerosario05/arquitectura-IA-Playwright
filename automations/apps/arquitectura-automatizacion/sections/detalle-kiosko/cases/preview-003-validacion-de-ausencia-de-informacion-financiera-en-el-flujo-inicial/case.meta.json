@@ -1,0 +1,9 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "PREVIEW-003",
+  "testRailCaseId": 0,
+  "generatedAt": "2026-08-04T12:30:22.524Z",
+  "title": "Validación de ausencia de información financiera en el flujo inicial"
+}

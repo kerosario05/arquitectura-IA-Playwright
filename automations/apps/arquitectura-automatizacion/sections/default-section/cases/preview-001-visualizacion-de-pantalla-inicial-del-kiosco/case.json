@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-visualizacion-de-pantalla-inicial-del-kiosco",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Visualización de pantalla inicial del kiosco",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-04T13:18:36.376Z"
+}
