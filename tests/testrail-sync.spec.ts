@@ -65,6 +65,68 @@ function makeClient(): Pick<TestRailClientType, "getCasesByRefs" | "addCase" | "
   } as any;
 }
 
+const TESTRAIL_ENV_KEYS = [
+  "TESTRAIL_DEFAULT_CASE_ORACLE",
+  "TESTRAIL_REFS_FIELD",
+  "TESTRAIL_SEND_CUSTOM_REFS",
+] as const;
+
+type TestRailEnvKey = (typeof TESTRAIL_ENV_KEYS)[number];
+type TestRailEnvConfig = Record<TestRailEnvKey, string | undefined>;
+type TestRailEnvSnapshot = Record<TestRailEnvKey, string | undefined>;
+
+function snapshotTestRailEnv(): TestRailEnvSnapshot {
+  return {
+    TESTRAIL_DEFAULT_CASE_ORACLE: process.env.TESTRAIL_DEFAULT_CASE_ORACLE,
+    TESTRAIL_REFS_FIELD: process.env.TESTRAIL_REFS_FIELD,
+    TESTRAIL_SEND_CUSTOM_REFS: process.env.TESTRAIL_SEND_CUSTOM_REFS,
+  };
+}
+
+function restoreTestRailEnv(snapshot: TestRailEnvSnapshot): void {
+  for (const key of TESTRAIL_ENV_KEYS) {
+    const value = snapshot[key];
+    if (value === undefined) {
+      delete process.env[key];
+    } else {
+      process.env[key] = value;
+    }
+  }
+}
+
+function clearTestRailModuleCache(): void {
+  delete require.cache[require.resolve("../src/server/services/testrail-case-publisher")];
+  delete require.cache[require.resolve("../src/clients/testrail.client")];
+}
+
+function loadFreshTestRailModules() {
+  clearTestRailModuleCache();
+  const publisher = require("../src/server/services/testrail-case-publisher") as typeof import("../src/server/services/testrail-case-publisher");
+  const clientModule = require("../src/clients/testrail.client") as typeof import("../src/clients/testrail.client");
+  return { publisher, TestRailClientCtor: clientModule.TestRailClient };
+}
+
+async function withIsolatedTestRailEnv<T>(
+  env: TestRailEnvConfig,
+  run: (modules: ReturnType<typeof loadFreshTestRailModules>) => Promise<T> | T,
+): Promise<T> {
+  const snapshot = snapshotTestRailEnv();
+  try {
+    for (const key of TESTRAIL_ENV_KEYS) {
+      const value = env[key];
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
+    return await run(loadFreshTestRailModules());
+  } finally {
+    restoreTestRailEnv(snapshot);
+    clearTestRailModuleCache();
+  }
+}
+
 test.afterEach(() => {
   if (fs.existsSync(STORE_PATH)) {
     fs.rmSync(STORE_PATH, { force: true });
@@ -145,28 +207,36 @@ test("publishScenariosToTestRail incluye custom_expected y custom_case_oracle en
 });
 
 test("publishScenariosToTestRail usa fallback para custom_case_oracle cuando no existe en el escenario", async () => {
-  const client = makeClient() as any;
-  await testrailPublisher.publishScenariosToTestRail(client, {
-    projectId: 56,
-    suiteId: 1731,
-    sectionId: 4903,
-    appSlug: "kiosko",
-    storyKey: "AA-81",
-    cacheKey: "cache-oracle-fallback",
-    scenarios: [
-      makeScenario({
-        sourceIssueKey: "JIRA-201",
-        title: "Escenario sin oracle",
-        expectedResult: "",
-        steps: ["Validar que se muestre el resultado correcto", "Continuar"],
-      }),
-    ],
-  });
+  await withIsolatedTestRailEnv(
+    {
+      TESTRAIL_DEFAULT_CASE_ORACLE: "ORACLE-CONFIGURADO-POR-TEST",
+      TESTRAIL_REFS_FIELD: "both",
+      TESTRAIL_SEND_CUSTOM_REFS: "true",
+    },
+    async ({ publisher }) => {
+      const client = makeClient() as any;
+      await publisher.publishScenariosToTestRail(client, {
+        projectId: 56,
+        suiteId: 1731,
+        sectionId: 4903,
+        appSlug: "kiosko",
+        storyKey: "AA-81",
+        cacheKey: "cache-oracle-fallback",
+        scenarios: [
+          makeScenario({
+            sourceIssueKey: "JIRA-201",
+            title: "Escenario sin oracle",
+            expectedResult: "",
+            steps: ["Validar que se muestre el resultado correcto", "Continuar"],
+          }),
+        ],
+      });
 
-  const capturedInput = (client as any).__captured.addCaseInputs[0];
-  expect(String(capturedInput.customCaseOracle)).not.toBe("");
-  expect(String(capturedInput.customCaseOracle)).toContain("Resultado esperado");
-  expect(String(capturedInput.refs)).toBe("AA-81-PREVIEW-001");
+      const capturedInput = (client as any).__captured.addCaseInputs[0];
+      expect(String(capturedInput.customCaseOracle)).toBe("ORACLE-CONFIGURADO-POR-TEST");
+      expect(String(capturedInput.refs)).toBe("AA-81-PREVIEW-001");
+    },
+  );
 });
 
 test("publishScenariosToTestRail incluye custom fields configurados por env", async () => {
@@ -319,13 +389,22 @@ test("addCase: customFields.refs no sobrescribe body.refs", async () => {
   }) as typeof fetch;
 
   try {
-    const client = new TestRailClient({ url: "https://testrail.local", email: "user@example.com", apiKey: "secret" });
-    await client.addCase("4903", {
-      title: "Test case",
-      refs: "AA-81-PREVIEW-001",
-      // Simulate a customFields bag that tries to overwrite refs
-      customFields: { refs: "SHOULD-NOT-WIN", custom_refs: "SHOULD-NOT-WIN" },
-    } as any);
+    await withIsolatedTestRailEnv(
+      {
+        TESTRAIL_DEFAULT_CASE_ORACLE: "QA",
+        TESTRAIL_REFS_FIELD: "both",
+        TESTRAIL_SEND_CUSTOM_REFS: "true",
+      },
+      async ({ TestRailClientCtor }) => {
+        const client = new TestRailClientCtor({ url: "https://testrail.local", email: "user@example.com", apiKey: "secret" });
+        await client.addCase("4903", {
+          title: "Test case",
+          refs: "AA-81-PREVIEW-001",
+          // Simulate a customFields bag that tries to overwrite refs
+          customFields: { refs: "SHOULD-NOT-WIN", custom_refs: "SHOULD-NOT-WIN" },
+        } as any);
+      },
+    );
 
     // body.refs must keep the explicitly set value
     expect(capturedBody.refs).toBe("AA-81-PREVIEW-001");
@@ -349,13 +428,22 @@ test("updateCase: customFields.custom_refs no sobrescribe body.custom_refs", asy
   }) as typeof fetch;
 
   try {
-    const client = new TestRailClient({ url: "https://testrail.local", email: "user@example.com", apiKey: "secret" });
-    await client.updateCase(501, {
-      title: "Updated case",
-      refs: "AA-81-PREVIEW-001",
-      // Simulate a customFields bag that tries to overwrite custom_refs
-      customFields: { custom_refs: "OVERWRITE-ATTEMPT", refs: "OVERWRITE-ATTEMPT" },
-    } as any);
+    await withIsolatedTestRailEnv(
+      {
+        TESTRAIL_DEFAULT_CASE_ORACLE: "QA",
+        TESTRAIL_REFS_FIELD: "both",
+        TESTRAIL_SEND_CUSTOM_REFS: "true",
+      },
+      async ({ TestRailClientCtor }) => {
+        const client = new TestRailClientCtor({ url: "https://testrail.local", email: "user@example.com", apiKey: "secret" });
+        await client.updateCase(501, {
+          title: "Updated case",
+          refs: "AA-81-PREVIEW-001",
+          // Simulate a customFields bag that tries to overwrite custom_refs
+          customFields: { custom_refs: "OVERWRITE-ATTEMPT", refs: "OVERWRITE-ATTEMPT" },
+        } as any);
+      },
+    );
 
     expect(capturedBody.refs).toBe("AA-81-PREVIEW-001");
     expect(capturedBody.custom_refs).toBe("AA-81-PREVIEW-001");
@@ -378,12 +466,21 @@ test("addCase: final body contiene refs y custom_refs no vacíos", async () => {
   }) as typeof fetch;
 
   try {
-    const client = new TestRailClient({ url: "https://testrail.local", email: "user@example.com", apiKey: "secret" });
-    await client.addCase("4903", {
-      title: "Test case refs integrity",
-      refs: "AA-81-PREVIEW-007",
-      customFields: { custom_environment_tag: "QA" }, // Non-reserved field – must pass through
-    } as any);
+    await withIsolatedTestRailEnv(
+      {
+        TESTRAIL_DEFAULT_CASE_ORACLE: "QA",
+        TESTRAIL_REFS_FIELD: "both",
+        TESTRAIL_SEND_CUSTOM_REFS: "true",
+      },
+      async ({ TestRailClientCtor }) => {
+        const client = new TestRailClientCtor({ url: "https://testrail.local", email: "user@example.com", apiKey: "secret" });
+        await client.addCase("4903", {
+          title: "Test case refs integrity",
+          refs: "AA-81-PREVIEW-007",
+          customFields: { custom_environment_tag: "QA" }, // Non-reserved field – must pass through
+        } as any);
+      },
+    );
 
     // Core fields must be non-empty strings
     expect(typeof capturedBody.refs).toBe("string");
@@ -409,12 +506,21 @@ test("updateCase: final body contiene refs y custom_refs no vacíos", async () =
   }) as typeof fetch;
 
   try {
-    const client = new TestRailClient({ url: "https://testrail.local", email: "user@example.com", apiKey: "secret" });
-    await client.updateCase(500, {
-      title: "Updated case refs integrity",
-      refs: "AA-81-PREVIEW-007",
-      customFields: { custom_priority: 2 }, // Non-reserved field – must pass through
-    } as any);
+    await withIsolatedTestRailEnv(
+      {
+        TESTRAIL_DEFAULT_CASE_ORACLE: "QA",
+        TESTRAIL_REFS_FIELD: "both",
+        TESTRAIL_SEND_CUSTOM_REFS: "true",
+      },
+      async ({ TestRailClientCtor }) => {
+        const client = new TestRailClientCtor({ url: "https://testrail.local", email: "user@example.com", apiKey: "secret" });
+        await client.updateCase(500, {
+          title: "Updated case refs integrity",
+          refs: "AA-81-PREVIEW-007",
+          customFields: { custom_priority: 2 }, // Non-reserved field – must pass through
+        } as any);
+      },
+    );
 
     expect(typeof capturedBody.refs).toBe("string");
     expect((capturedBody.refs as string).trim().length).toBeGreaterThan(0);
@@ -422,6 +528,37 @@ test("updateCase: final body contiene refs y custom_refs no vacíos", async () =
     expect((capturedBody.custom_refs as string).trim().length).toBeGreaterThan(0);
     // Non-reserved customField must survive
     expect(capturedBody.custom_priority).toBe(2);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("addCase: con TESTRAIL_SEND_CUSTOM_REFS=false omite custom_refs y mantiene refs en modo both", async () => {
+  const originalFetch = globalThis.fetch;
+  let capturedBody: Record<string, unknown> = {};
+  globalThis.fetch = (async (_input: RequestInfo | URL, init?: RequestInit) => {
+    capturedBody = JSON.parse(init?.body as string ?? "{}") as Record<string, unknown>;
+    return new Response(JSON.stringify({ id: 997, title: "Test" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }) as typeof fetch;
+
+  try {
+    await withIsolatedTestRailEnv(
+      {
+        TESTRAIL_DEFAULT_CASE_ORACLE: "QA",
+        TESTRAIL_REFS_FIELD: "both",
+        TESTRAIL_SEND_CUSTOM_REFS: "false",
+      },
+      async ({ TestRailClientCtor }) => {
+        const client = new TestRailClientCtor({ url: "https://testrail.local", email: "user@example.com", apiKey: "secret" });
+        await client.addCase("4903", { title: "Refs mode off custom", refs: "AA-81-PREVIEW-099" } as any);
+      },
+    );
+
+    expect(capturedBody.refs).toBe("AA-81-PREVIEW-099");
+    expect(capturedBody.custom_refs).toBeUndefined();
   } finally {
     globalThis.fetch = originalFetch;
   }
