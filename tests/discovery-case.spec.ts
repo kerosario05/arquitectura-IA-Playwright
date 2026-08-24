@@ -2,7 +2,13 @@ import { test, expect } from "@playwright/test";
 import type { CaseDiscoveryResult, DiscoveryStepResult, DiscoveredObject } from "../src/types/discovery.types";
 import type { ExecutionPlan } from "../src/types/execution-plan.types";
 import type { TestScenario } from "../src/types/testrail.types";
-import { extractCleanTarget, parseScenarioStepsForDiscovery, evaluateEarlyCompletion } from "../src/discovery/case-discovery";
+import {
+  extractCleanTarget,
+  parseScenarioStepsForDiscovery,
+  evaluateEarlyCompletion,
+  buildDiscoveryAssertionContract,
+  resolveDiscoveryStatusFromAssertionContract
+} from "../src/discovery/case-discovery";
 import { expandSemanticTokens, tokenizeWithStopwords, computeSemanticScore, normalizeSemanticText, buildSnapshotCandidates } from "../src/discovery/target-resolver";
 import { resolveAssertionTargets, type AssertionTargetInput } from "../src/discovery/assertion-resolver";
 import { normalizeParsedTarget, type ActionTargetItem } from "../src/discovery/step-intent-parser";
@@ -1953,4 +1959,296 @@ test("BatchCaseRootCause categories are defined", () => {
   expect(rootCauses.length).toBe(15);
   expect(rootCauses).toContain("context_not_reached");
   expect(rootCauses).toContain("precondition_unresolved");
+});
+
+function makeContextualPendingAssertionStep(
+  targetText: string,
+  overrides?: Partial<DiscoveryStepResult>,
+): DiscoveryStepResult {
+  const step: DiscoveryStepResult = {
+    index: 2,
+    action: `Assert: ${targetText}`,
+    status: "needs_assertion_resolution",
+    targetText,
+    assertionClassification: "semantic_descriptor",
+    assertionImportance: "contextual",
+    error: "assertion_context_not_reached",
+    ...overrides
+  };
+  (step as any).pendingDiscovery = true;
+  return step;
+}
+
+test("contextual assertion pending with confirmed destination resolves as discovered_passed", () => {
+  const steps: DiscoveryStepResult[] = [
+    {
+      index: 1,
+      action: "Clic en 'Información de productos'",
+      status: "found",
+      targetText: "Información de productos",
+      recoveryMetadata: { transitionDetected: true }
+    },
+    makeContextualPendingAssertionStep("módulo de información")
+  ];
+
+  const contract = buildDiscoveryAssertionContract({ steps, earlyCompletionSatisfied: false });
+  const resolved = resolveDiscoveryStatusFromAssertionContract({
+    initialStatus: "discovered_partial",
+    unresolvedBlockingFailuresCount: 0,
+    pendingDiscoveryCount: 1,
+    someFound: true,
+    contract
+  });
+
+  expect(contract.pendingBlockingActions).toHaveLength(0);
+  expect(contract.pendingCriticalAssertions).toHaveLength(0);
+  expect(contract.destinationConfirmed).toBe(true);
+  expect(resolved.status).toBe("discovered_passed");
+  expect(resolved.shouldSkipFullDiscovery).toBe(true);
+});
+
+test("auth gate detected satisfies contextual authentication assertion by equivalent evidence", () => {
+  const steps: DiscoveryStepResult[] = [
+    {
+      index: 1,
+      action: "Clic en 'Transacciones y servicios'",
+      status: "found",
+      targetText: "Transacciones y servicios",
+      authGateDiagnostics: { detected: true, stage: "identification" }
+    },
+    makeContextualPendingAssertionStep("Autenticación", {
+      authGateDiagnostics: { detected: true, stage: "identification" }
+    })
+  ];
+
+  const contract = buildDiscoveryAssertionContract({ steps, earlyCompletionSatisfied: false });
+  const authEvidence = contract.satisfiedByEquivalentEvidence.find((item) => item.assertion === "Autenticación");
+
+  expect(contract.destinationConfirmed).toBe(true);
+  expect(authEvidence?.evidence).toBe("auth_gate_detected");
+  expect(contract.unresolvedContextualAssertions).toHaveLength(0);
+});
+
+test("contextual flow assertion with auth gate remains non-blocking and allows discovered_passed", () => {
+  const steps: DiscoveryStepResult[] = [
+    {
+      index: 1,
+      action: "Clic en 'Transacciones y servicios'",
+      status: "found",
+      targetText: "Transacciones y servicios",
+      authGateDiagnostics: { detected: true, stage: "identification" }
+    },
+    makeContextualPendingAssertionStep("flujo de autenticación", {
+      authGateDiagnostics: { detected: true, stage: "identification" }
+    })
+  ];
+
+  const contract = buildDiscoveryAssertionContract({ steps, earlyCompletionSatisfied: false });
+  const resolved = resolveDiscoveryStatusFromAssertionContract({
+    initialStatus: "discovered_partial",
+    unresolvedBlockingFailuresCount: 0,
+    pendingDiscoveryCount: 1,
+    someFound: true,
+    contract
+  });
+
+  expect(resolved.status).toBe("discovered_passed");
+  expect(resolved.shouldExecuteFunctionalGate).toBe(true);
+});
+
+test("contextual assertion without destination confirmation stays discovered_partial", () => {
+  const steps: DiscoveryStepResult[] = [
+    makeContextualPendingAssertionStep("módulo de información")
+  ];
+  const contract = buildDiscoveryAssertionContract({ steps, earlyCompletionSatisfied: false });
+  const resolved = resolveDiscoveryStatusFromAssertionContract({
+    initialStatus: "discovered_partial",
+    unresolvedBlockingFailuresCount: 0,
+    pendingDiscoveryCount: 1,
+    someFound: true,
+    contract
+  });
+
+  expect(contract.destinationConfirmed).toBe(false);
+  expect(resolved.status).toBe("discovered_partial");
+  expect(resolved.shouldSkipFullDiscovery).toBe(false);
+});
+
+test("someFound alone does not confirm destination for contextual pending assertions", () => {
+  const steps: DiscoveryStepResult[] = [
+    {
+      index: 1,
+      action: "Clic en 'Información de productos'",
+      status: "found",
+      targetText: "Información de productos",
+    },
+    makeContextualPendingAssertionStep("módulo de información")
+  ];
+  const contract = buildDiscoveryAssertionContract({ steps, earlyCompletionSatisfied: false });
+  const resolved = resolveDiscoveryStatusFromAssertionContract({
+    initialStatus: "discovered_partial",
+    unresolvedBlockingFailuresCount: 0,
+    pendingDiscoveryCount: 1,
+    someFound: true,
+    contract
+  });
+
+  expect(contract.destinationConfirmed).toBe(false);
+  expect(resolved.status).toBe("discovered_partial");
+});
+
+test("missing executable action remains blocking and keeps discovered_partial", () => {
+  const steps: DiscoveryStepResult[] = [
+    {
+      index: 1,
+      action: "Clic en 'Información de productos'",
+      status: "not_found",
+      targetText: "Información de productos",
+      error: "target_not_found"
+    }
+  ];
+  const contract = buildDiscoveryAssertionContract({ steps, earlyCompletionSatisfied: false });
+  const resolved = resolveDiscoveryStatusFromAssertionContract({
+    initialStatus: "discovered_partial",
+    unresolvedBlockingFailuresCount: 1,
+    pendingDiscoveryCount: 0,
+    someFound: false,
+    failedReason: "target_not_found",
+    contract
+  });
+
+  expect(contract.pendingBlockingActions).toContain("Información de productos");
+  expect(resolved.status).toBe("discovered_partial");
+});
+
+test("critical assertion pending remains blocking and keeps discovered_partial", () => {
+  const steps: DiscoveryStepResult[] = [
+    {
+      index: 2,
+      action: "Assert: total del carrito",
+      status: "needs_assertion_resolution",
+      targetText: "total del carrito",
+      assertionClassification: "literal_observable",
+      assertionImportance: "blocking",
+      error: "assertion_not_found"
+    }
+  ];
+  const contract = buildDiscoveryAssertionContract({ steps, earlyCompletionSatisfied: false });
+  const resolved = resolveDiscoveryStatusFromAssertionContract({
+    initialStatus: "discovered_partial",
+    unresolvedBlockingFailuresCount: 1,
+    pendingDiscoveryCount: 0,
+    someFound: true,
+    failedReason: "assertion_not_found_unrecovered",
+    contract
+  });
+
+  expect(contract.pendingCriticalAssertions).toContain("total del carrito");
+  expect(resolved.status).toBe("discovered_partial");
+});
+
+test("hard blocking reasons never promote to discovered_passed", () => {
+  const steps: DiscoveryStepResult[] = [
+    {
+      index: 1,
+      action: "Clic en 'Información de productos'",
+      status: "found",
+      targetText: "Información de productos",
+      recoveryMetadata: { transitionDetected: true }
+    },
+    makeContextualPendingAssertionStep("módulo de información")
+  ];
+  const contract = buildDiscoveryAssertionContract({ steps, earlyCompletionSatisfied: false });
+
+  for (const failedReason of ["target_not_found", "wrong_screen", "missing_intermediate_step_to_final_target"] as const) {
+    const resolved = resolveDiscoveryStatusFromAssertionContract({
+      initialStatus: "discovered_partial",
+      unresolvedBlockingFailuresCount: 0,
+      pendingDiscoveryCount: 1,
+      someFound: true,
+      failedReason,
+      contract
+    });
+    expect(resolved.status).toBe("discovered_partial");
+    expect(resolved.decisionReason).toBe("hard_blocking_reason");
+  }
+});
+
+test("missing intermediate step remains blocked even with contextual evidence", () => {
+  const steps: DiscoveryStepResult[] = [
+    {
+      index: 1,
+      action: "Clic en 'Transacciones y servicios'",
+      status: "found",
+      targetText: "Transacciones y servicios",
+      recoveryMetadata: { transitionDetected: true }
+    },
+    makeContextualPendingAssertionStep("flujo de autenticación")
+  ];
+  const contract = buildDiscoveryAssertionContract({ steps, earlyCompletionSatisfied: false });
+  const resolved = resolveDiscoveryStatusFromAssertionContract({
+    initialStatus: "discovered_partial",
+    unresolvedBlockingFailuresCount: 0,
+    pendingDiscoveryCount: 1,
+    someFound: true,
+    failedReason: "missing_intermediate_step_to_final_target",
+    contract
+  });
+
+  expect(resolved.status).toBe("discovered_partial");
+  expect(resolved.decisionReason).toBe("hard_blocking_reason");
+});
+
+test("auth gate detected does not satisfy assertions that require completed authentication", () => {
+  const steps: DiscoveryStepResult[] = [
+    {
+      index: 1,
+      action: "Clic en 'Transacciones y servicios'",
+      status: "found",
+      targetText: "Transacciones y servicios",
+      authGateDiagnostics: { detected: true, stage: "identification_input" }
+    },
+    makeContextualPendingAssertionStep("usuario autenticado correctamente", {
+      authGateDiagnostics: { detected: true, stage: "identification_input" }
+    })
+  ];
+  const contract = buildDiscoveryAssertionContract({ steps, earlyCompletionSatisfied: false });
+  const resolved = resolveDiscoveryStatusFromAssertionContract({
+    initialStatus: "discovered_partial",
+    unresolvedBlockingFailuresCount: 0,
+    pendingDiscoveryCount: 1,
+    someFound: true,
+    contract
+  });
+
+  expect(contract.satisfiedByEquivalentEvidence).toHaveLength(0);
+  expect(contract.pendingCriticalAssertions).toContain("usuario autenticado correctamente");
+  expect(resolved.status).toBe("discovered_partial");
+  expect(resolved.shouldSkipFullDiscovery).toBe(false);
+});
+
+test("contextual-only pending path skips full discovery and enables functional gate", () => {
+  const steps: DiscoveryStepResult[] = [
+    {
+      index: 1,
+      action: "Clic en 'Transacciones y servicios'",
+      status: "found",
+      targetText: "Transacciones y servicios",
+      recoveryMetadata: { transitionDetected: true }
+    },
+    makeContextualPendingAssertionStep("flujo de autenticación")
+  ];
+  const contract = buildDiscoveryAssertionContract({ steps, earlyCompletionSatisfied: false });
+  const resolved = resolveDiscoveryStatusFromAssertionContract({
+    initialStatus: "discovered_partial",
+    unresolvedBlockingFailuresCount: 0,
+    pendingDiscoveryCount: 1,
+    someFound: true,
+    contract
+  });
+
+  expect(resolved.status).toBe("discovered_passed");
+  expect(resolved.shouldSkipFullDiscovery).toBe(true);
+  expect(resolved.shouldExecuteFunctionalGate).toBe(true);
+  expect(resolved.decisionReason).toBe("only_contextual_assertions_pending");
 });

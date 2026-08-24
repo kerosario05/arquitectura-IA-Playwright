@@ -163,10 +163,11 @@ export type FutureIntegrationsConfig = {
   };
   android?: {
     sdkHome?: string;
-    avdName: string;
+    avdName?: string;
     apkPath?: string;
     appPackage?: string;
     appActivity?: string;
+    systemPort?: number;
     headless: boolean;
     bootTimeoutMs: number;
     appiumPort: number;

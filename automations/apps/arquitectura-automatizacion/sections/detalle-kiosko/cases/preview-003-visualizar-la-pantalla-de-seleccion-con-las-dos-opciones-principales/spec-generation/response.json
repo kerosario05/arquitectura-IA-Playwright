@@ -1,0 +1,25 @@
+{
+  "scenarioId": "PREVIEW-003",
+  "specContent": "import { test } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\n\nexport const PROMOTED_SPEC_STRATEGY = 'pom_runtime';\n\ntest('Visualizar la pantalla de seleccion con las dos opciones principales', async ({ page }) => {\n  test.setTimeout(Number(process.env.PROMOTED_SPEC_TIMEOUT_MS ?? 90000));\n  process.env.APP_SLUG = 'arquitectura-automatizacion';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-003';\n  process.env.SCENARIO_TITLE = 'Visualizar la pantalla de seleccion con las dos opciones principales';\n\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await page.goto('/');\n    await page.waitForLoadState('domcontentloaded');\n\n    throw new Error('Unresolved promotion requirement: executable step 2 (login) requires a permitted promoted runtime or auth flow implementation, but none was supplied in the available APIs/auth flow context.');\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    1
+  ],
+  "coveredAssertions": [],
+  "usedPageObjects": [],
+  "declaredIdentifiers": [
+    "promotedRuntime"
+  ],
+  "unresolvedRequirements": [
+    "Executable step 2 (login) is required and must use a permitted promoted runtime call, but the allowlist does not include any login method and no auth flow was supplied in AVAILABLE_AUTH_FLOW.",
+    "Executable step 3 (click on \"Iniciar\") cannot be validly implemented while preserving the required functional order because step 2 remains unresolved.",
+    "The expected outcome oracle \"La pantalla de seleccion presenta las opciones principales del kiosco.\" is marked backed=false with source evidence \"backing_evidence_missing\", so no observable assertion can be added without inventing evidence.",
+    "Scenario-level validations for \"logo institucional\", \"mensaje de bienvenida\", \"Â¿QuÃ© deseas realizar hoy?\", \"Explora nuestros productos\" and \"Transacciones y servicios\" lack backed observable evidence and cannot be asserted safely."
+  ],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

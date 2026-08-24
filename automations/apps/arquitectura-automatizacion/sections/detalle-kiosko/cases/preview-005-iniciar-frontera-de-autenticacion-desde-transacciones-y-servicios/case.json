@@ -1,0 +1,10 @@
+{
+  "id": "preview-005-iniciar-frontera-de-autenticacion-desde-transacciones-y-servicios",
+  "externalId": "PREVIEW-005",
+  "caseId": 0,
+  "title": "Iniciar frontera de autenticación desde Transacciones y servicios",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-12T21:05:47.509Z"
+}

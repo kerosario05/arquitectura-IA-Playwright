@@ -1,0 +1,35 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-003",
+    "caseId": 0,
+    "title": "Validar visualizacion de las opciones principales en la segunda pantalla del kiosco"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "description": "Clic en \"Iniciar\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    }
+  ],
+  "notes": [
+    "Discovery partial: 4/6 navigations/assertions satisfied."
+  ],
+  "createdAt": "2026-08-17T20:34:25.854Z"
+}

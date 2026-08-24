@@ -1,0 +1,127 @@
+{
+  "id": "preview-004-redirigir-al-modulo-de-informacion-al-seleccionar-explora-nuestros-productos",
+  "externalId": "PREVIEW-004",
+  "caseId": 0,
+  "title": "Redirigir al módulo de información al seleccionar Explora nuestros productos",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-004-redirigir-al-modulo-de-informacion-al-seleccionar-explora-nuestros-productos\\plan.json",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-004-redirigir-al-modulo-de-informacion-al-seleccionar-explora-nuestros-productos\\case.spec.ts",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "arquitectura-automatizacion",
+  "createdAt": "2026-08-17T21:34:26.246Z",
+  "updatedAt": "2026-08-17T21:34:26.246Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-08-17T21-32-34-374Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "passed",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-08-17T21-32-34-374Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "specGeneration": {
+      "mode": "ai_hybrid",
+      "provider": "codex",
+      "model": "gpt-5.4-mini",
+      "skill": {
+        "name": "playwright-spec-generation",
+        "version": "1.0.0",
+        "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+        "loaded": true
+      },
+      "invocations": 2,
+      "invocationsConsumed": 2,
+      "durationMs": 39416,
+      "usage": {
+        "inputTokens": 56253,
+        "cachedInputTokens": 43648,
+        "cacheWriteInputTokens": 0,
+        "nonCachedInputTokens": 12605,
+        "outputTokens": 1665,
+        "reasoningOutputTokens": 461,
+        "totalPhysicalTokens": 57918,
+        "durationMs": 36432,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "traceFidelity": "passed",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "passed",
+        "functionalExecution": "skipped"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specGenerationAttempts": 2,
+      "specRepairAttempts": 1,
+      "firstPassPromotion": false,
+      "failedGatesAttempt1": [
+        "traceFidelityValidation"
+      ],
+      "regressedGates": [],
+      "missingRequirements": [],
+      "oracleTypes": [
+        "literal_visible_text",
+        "navigation_transition"
+      ],
+      "errors": [],
+      "warnings": [
+        "ai_repair_attempt_applied:1:failedGates=traceFidelityValidation",
+        "ai_repair_previous_attempt_error:contract_target_changed:stepIndex=1:contractStepIndex=1:expected=\"¿Qué deseas realizar hoy?\"",
+        "ai_repair_previous_attempt_error:contract_target_changed:stepIndex=3:contractStepIndex=3:expected=\"información\""
+      ],
+      "finalSpec": {
+        "origin": "ai_candidate",
+        "generatedBy": "ai",
+        "strategy": "ai_candidate",
+        "fallback": null
+      },
+      "specWritten": true,
+      "previousSpec": {
+        "existed": true,
+        "hash": "ceb18924137dc6380bbbc2d2f6c23b3b03fc9574f21e7c4e183f9d82387f95af",
+        "lastModifiedAt": "2026-08-17T20:37:03.079Z"
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [],
+      "availablePageObjects": [
+        "ProductListPage",
+        "ProductDetailPage",
+        "FormPage",
+        "HomePage",
+        "LoginPage",
+        "CategoryPage",
+        "ProductInformationPage",
+        "OperationsMenuPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-004-redirigir-al-modulo-de-informacion-al-seleccionar-explora-nuestros-productos\\plan.json",
+    "previousStatus": "active"
+  }
+}

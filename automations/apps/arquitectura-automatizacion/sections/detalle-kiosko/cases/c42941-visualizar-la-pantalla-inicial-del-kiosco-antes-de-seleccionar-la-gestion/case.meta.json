@@ -1,0 +1,9 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "C42941",
+  "testRailCaseId": 42941,
+  "generatedAt": "2026-08-06T12:44:36.264Z",
+  "title": "Visualizar la pantalla inicial del kiosco antes de seleccionar la gestión"
+}

@@ -1,0 +1,9 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "PREVIEW-005",
+  "testRailCaseId": 0,
+  "generatedAt": "2026-08-17T20:37:27.574Z",
+  "title": "Validar que las pantallas iniciales no presenten informacion financiera"
+}

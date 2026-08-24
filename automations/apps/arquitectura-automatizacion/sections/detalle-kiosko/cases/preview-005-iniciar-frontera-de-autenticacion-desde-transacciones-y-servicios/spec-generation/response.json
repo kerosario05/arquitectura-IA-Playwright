@@ -1,0 +1,45 @@
+{
+  "scenarioId": "PREVIEW-005",
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\nimport { AuthFlow } from '../../../../flows/auth.flow';\nimport { HomePage } from '../../../../pages/home.page';\nimport { OperationsMenuPage } from '../../../../pages/operationsmenu.page';\n\nexport const PROMOTED_SPEC_STRATEGY = \"pom_runtime\";\n\ntest('Iniciar frontera de autenticación desde Transacciones y servicios', async ({ page }) => {\n  test.setTimeout(Number(process.env.PROMOTED_SPEC_TIMEOUT_MS ?? 90000));\n  process.env.APP_SLUG = 'arquitectura-automatizacion';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-005';\n  process.env.SCENARIO_TITLE = 'Iniciar frontera de autenticación desde Transacciones y servicios';\n\n  const homePage = new HomePage(page);\n  const operationsMenuPage = new OperationsMenuPage(page);\n  const authFlow = new AuthFlow(page);\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await page.goto(process.env.APP_BASE_URL!);\n    await page.waitForLoadState('domcontentloaded');\n\n    const replayStep_3 = async () => {\n      await homePage.start();\n    };\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 3,\n      target: 'Iniciar',\n      actionIntent: 'start_session',\n      expectedEffect: 'ui_change',\n      sensitive: false,\n      previousStepReplays: [],\n      lastSelectionStep: undefined,\n      expectedOwnerPage: 'HomePage',\n      action: async () => {\n        await homePage.start();\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 4,\n      target: 'transacciones y servicios',\n      actionIntent: 'open_module',\n      expectedEffect: 'ui_change',\n      sensitive: false,\n      previousStepReplays: [\n        {\n          stepIndex: 3,\n          actionIntent: 'start_session',\n          target: 'Iniciar',\n          sensitive: false,\n          replay: replayStep_3\n        }\n      ],\n      lastSelectionStep: undefined,\n      expectedOwnerPage: 'OperationsMenuPage',\n      action: async () => {\n        await operationsMenuPage.openModule('transacciones y servicios');\n      }\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 2,\n      target: 'auth_gate_stage',\n      description: 'Validar que se muestre \"flujo de autenticación\".',\n      assertion: async () => {\n        expect(await authFlow.detectCurrentStage()).toBeTruthy();\n      }\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    1,
+    3,
+    4,
+    2
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "Frontera de autenticación presentada antes de la gestión personalizada.",
+      "implementation": "expect(await authFlow.detectCurrentStage()).toBeTruthy();"
+    }
+  ],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "start"
+      ]
+    },
+    {
+      "className": "OperationsMenuPage",
+      "methods": [
+        "openModule"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "homePage",
+    "operationsMenuPage",
+    "authFlow",
+    "promotedRuntime",
+    "replayStep_3"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

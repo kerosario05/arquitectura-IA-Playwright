@@ -1,0 +1,10 @@
+{
+  "id": "c42942-validar-que-las-opciones-iniciales-se-muestren-sin-informacion-financiera",
+  "externalId": "C42942",
+  "caseId": 42942,
+  "title": "Validar que las opciones iniciales se muestren sin información financiera",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-06T12:44:05.922Z"
+}

@@ -1,0 +1,10 @@
+{
+  "error": "Your workspace is out of credits. Ask your workspace owner to refill in order to continue.",
+  "code": "ai_provider_execution_failed",
+  "_finalSpec": {
+    "origin": "deterministic_draft",
+    "generatedBy": "core",
+    "strategy": "deterministic_draft",
+    "fallback": null
+  }
+}

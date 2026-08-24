@@ -1,5 +1,12 @@
 import { test, expect } from "@playwright/test";
-import { buildPreviewFailureGroups, buildPreviewSummaryReport, classifyPreviewFailure, resolvePreviewAppProfile } from "../src/cli/discovery-preview";
+import {
+  buildPreviewFailureGroups,
+  buildPreviewSummaryReport,
+  classifyPreviewFailure,
+  resolvePreviewAppProfile,
+  resolvePreviewCompletion,
+  virtualCaseToTestScenario
+} from "../src/cli/discovery-preview";
 import { resolveCaseDiscoveryAppSlug } from "../src/discovery/case-discovery";
 import { inferAppFromTestRailSection } from "../src/automations/app-auto-resolver";
 import { normalizeEntrySteps, buildCanonicalEntrySteps, normalizeForComparison } from "../src/automations/scenario-normalizer";
@@ -56,6 +63,84 @@ test("runCaseDiscovery usa APP_SLUG del env si no recibe appSlug explicito", () 
   expect(resolveCaseDiscoveryAppSlug({
     env: { APP_SLUG: "app-b" },
   } as any)).toBe("app-b");
+});
+
+test("virtualCaseToTestScenario preserves explicit TestRail case identity when present", () => {
+  const scenario = virtualCaseToTestScenario({
+    id: "preview-001",
+    displayId: "PREVIEW-001",
+    testRailCaseId: 42811,
+    title: "Caso existente",
+    sourceIssueKey: "TR-C42811",
+    steps: ["Clic en \"Información de productos\"."],
+    expectedResult: "Se muestra el detalle",
+    preconditions: [],
+    appSlug: "app-a",
+    routeProfile: "kiosko-default",
+    dataRequirements: "",
+    mcpExecutable: true,
+    source: "scenario_preview",
+    type: "Functional",
+    automationType: "ui_with_auth_gate",
+    setupStrategy: "auth_gate",
+  });
+  expect(scenario.source).toBe("testrail");
+  expect(scenario.caseId).toBe(42811);
+  expect(scenario.externalId).toBe("C42811");
+});
+
+test("autoPromote no considera discovered_partial como exito final si no hay spec promovido", () => {
+  const completion = resolvePreviewCompletion({
+    caseResult: { status: "discovered_partial" },
+    promotionStatus: "not_applicable",
+  }, true);
+
+  expect(completion.eventStatus).toBe("failed");
+  expect(completion.automationReady).toBe(false);
+  expect(completion.specGenerationStatus).toBe("failed");
+});
+
+test("autoPromote no considera discovered_passed como exito final si spec generation falla", () => {
+  const completion = resolvePreviewCompletion({
+    caseResult: { status: "discovered_passed" },
+    promotionStatus: "spec_failed",
+    specPath: "C:\\tmp\\case.spec.ts",
+    specGeneration: {
+      provider: "copilot",
+      model: "gpt-5.4",
+      invocations: 1,
+      invocationsConsumed: 1,
+      promotionAllowed: false,
+      specWritten: false,
+      finalSpec: { origin: "ai_candidate", fallback: null },
+    },
+  }, true);
+
+  expect(completion.eventStatus).toBe("failed");
+  expect(completion.automationReady).toBe(false);
+  expect(completion.aiInvoked).toBe(true);
+});
+
+test("autoPromote requiere promotionAllowed y specWritten para automationReady", () => {
+  const completion = resolvePreviewCompletion({
+    caseResult: { status: "discovered_passed" },
+    promotionStatus: "promoted",
+    specPath: "C:\\tmp\\case.spec.ts",
+    specGeneration: {
+      provider: "copilot",
+      model: "gpt-5.4",
+      invocations: 1,
+      invocationsConsumed: 2,
+      promotionAllowed: true,
+      specWritten: true,
+      finalSpec: { origin: "ai_candidate", fallback: null },
+    },
+  }, true);
+
+  expect(completion.eventStatus).toBe("passed");
+  expect(completion.automationReady).toBe(true);
+  expect(completion.aiAttempts).toBe(2);
+  expect(completion.finalSpecOrigin).toBe("ai_candidate");
 });
 
 test("failureGroups agrupa fallos por causa sin perder promotion gate", () => {

@@ -1,0 +1,10 @@
+{
+  "id": "preview-003-validar-pantalla-de-bienvenida-institucional-y-acceso-controlado-por-iniciar",
+  "externalId": "PREVIEW-003",
+  "caseId": 0,
+  "title": "Validar pantalla de bienvenida institucional y acceso controlado por Iniciar",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-17T21:31:16.025Z"
+}

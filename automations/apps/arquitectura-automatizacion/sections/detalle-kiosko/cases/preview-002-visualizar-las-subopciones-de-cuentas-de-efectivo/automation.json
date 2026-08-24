@@ -7,17 +7,17 @@
   "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-002-visualizar-las-subopciones-de-cuentas-de-efectivo\\case.spec.ts",
   "appSlug": "arquitectura-automatizacion",
   "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
-  "status": "active",
+  "status": "spec_failed",
   "source": "discovery",
   "appProfile": "arquitectura-automatizacion",
-  "createdAt": "2026-06-10T01:37:46.480Z",
-  "updatedAt": "2026-06-10T01:37:46.480Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-06-10T01-37-36-259Z\\discovered-plans.pending.json",
-  "pomStatus": "promoted",
+  "createdAt": "2026-08-12T21:35:26.202Z",
+  "updatedAt": "2026-08-12T21:35:26.202Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-08-12T21-32-29-810Z\\discovered-plans.pending.json",
+  "pomStatus": "needs_manual_review",
   "inlineDebugMode": false,
-  "specVerificationStatus": "not_run",
+  "specVerificationStatus": "failed",
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-06-10T01-37-36-259Z",
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-08-12T21-32-29-810Z",
     "pomDiagnostics": {
       "status": "promoted",
       "inlineFallbackUsed": false,
@@ -29,12 +29,74 @@
       "missingMethods": [],
       "generatedCandidates": 0
     },
+    "specGeneration": {
+      "mode": "ai_hybrid",
+      "provider": "copilot",
+      "model": "gpt-5.4",
+      "skill": {
+        "name": "playwright-spec-generation",
+        "version": "1.0.0",
+        "hash": "13540c55cba2c9b355f720a0044ff710307a83aa02b8544377b52f88c4ebc359",
+        "loaded": true
+      },
+      "invocations": 1,
+      "invocationsConsumed": 1,
+      "durationMs": 153925,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "failed",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "failed",
+        "functionalExecution": "failed"
+      },
+      "promotionAllowed": false,
+      "specsRequested": 1,
+      "specsValidated": 0,
+      "specsRejected": 1,
+      "errors": [
+        "missing_expect_import_for_assertions",
+        "unresolved_requirement:No observed evidence was provided to assert that the Cuentas de Efectivo suboptions 'Pesos', 'Dólares' and 'Euros' are visible, so the required result cannot be validated without inventing assertions.",
+        "step_not_implemented_in_spec:2",
+        "assertions_not_covered",
+        "functional_execution_failed:exitCode=1",
+        "functional_execution_error:\u001b[31mTest timeout of 90000ms exceeded.\u001b[39m"
+      ],
+      "warnings": [
+        "functional_execution_screenshots=1"
+      ],
+      "finalSpec": {
+        "origin": "ai_candidate",
+        "generatedBy": "ai",
+        "strategy": "ai_candidate",
+        "fallback": null
+      },
+      "specWritten": false,
+      "previousSpec": {
+        "existed": true,
+        "hash": "c73def48d2a76ba831616c91d2864fefa425ad6b009fe5d4f7452aa425eca422",
+        "lastModifiedAt": "2026-06-10T01:37:46.458Z"
+      }
+    },
     "promotionStrategyDiagnostics": {
-      "requestedStrategy": "auto",
-      "autoPomEnabled": true,
+      "requestedStrategy": "pom",
+      "autoPomEnabled": false,
       "selectedStrategy": "pom",
-      "reason": "promoted",
-      "blockers": [],
+      "reason": "spec_generation_validation_failed",
+      "blockers": [
+        "spec_generation_validation_failed"
+      ],
       "availablePageObjects": [
         "ProductListPage",
         "ProductDetailPage",
@@ -51,6 +113,9 @@
       "autoPomCreatedMethods": [],
       "fallbackUsed": false,
       "requirePomRuntime": false
-    }
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-002-visualizar-las-subopciones-de-cuentas-de-efectivo\\plan.json",
+    "previousStatus": "active"
   }
 }

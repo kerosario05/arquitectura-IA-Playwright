@@ -1,6 +1,6 @@
 import { AiProviderError, type AiProviderConfig } from "./ai-provider.types";
 
-export type AiPurpose = "scenario_generation" | "repair" | "general";
+export type AiPurpose = "scenario_generation" | "repair" | "spec_generation" | "general";
 
 function parseBool(value: string | undefined, defaultValue = false): boolean {
   if (!value) return defaultValue;
@@ -26,7 +26,7 @@ function parseExtraArgs(argsString?: string): string[] {
  * Resolve AI configuration for a specific purpose (scenario_generation, repair, or general).
  *
  * Priority order:
- * 1. Purpose-specific env vars (AI_SCENARIO_*, AI_REPAIR_*)
+ * 1. Purpose-specific env vars (AI_SCENARIO_*, AI_REPAIR_*, AI_SPEC_*)
  * 2. General fallback env vars (AI_PROVIDER, AI_MODEL, etc.)
  *
  * @param purpose - The purpose for which AI is being used
@@ -55,6 +55,9 @@ export function resolveAiConfig(purpose: AiPurpose): AiProviderConfig {
   } else if (purpose === "repair") {
     provider = env.AI_REPAIR_PROVIDER?.trim();
     providerSource = "AI_REPAIR_PROVIDER";
+  } else if (purpose === "spec_generation") {
+    provider = env.AI_SPEC_PROVIDER?.trim();
+    providerSource = "AI_SPEC_PROVIDER";
   }
 
   if (!provider) {
@@ -88,6 +91,9 @@ export function resolveAiConfig(purpose: AiPurpose): AiProviderConfig {
   } else if (purpose === "repair") {
     model = env.AI_REPAIR_MODEL?.trim();
     modelSource = "AI_REPAIR_MODEL";
+  } else if (purpose === "spec_generation") {
+    model = env.AI_SPEC_MODEL?.trim();
+    modelSource = "AI_SPEC_MODEL";
   }
 
   if (!model) {
@@ -108,6 +114,8 @@ export function resolveAiConfig(purpose: AiPurpose): AiProviderConfig {
     timeoutMs = parsePositiveInt(env.AI_SCENARIO_TIMEOUT_MS, parsePositiveInt(env.AI_TIMEOUT_MS, 240000));
   } else if (purpose === "repair") {
     timeoutMs = parsePositiveInt(env.AI_REPAIR_TIMEOUT_MS, parsePositiveInt(env.AI_TIMEOUT_MS, 60000));
+  } else if (purpose === "spec_generation") {
+    timeoutMs = parsePositiveInt(env.AI_SPEC_TIMEOUT_MS, parsePositiveInt(env.AI_TIMEOUT_MS, 360000));
   } else {
     timeoutMs = parsePositiveInt(env.AI_TIMEOUT_MS, 30000);
   }
@@ -118,9 +126,18 @@ export function resolveAiConfig(purpose: AiPurpose): AiProviderConfig {
     maxAttempts = parsePositiveInt(env.AI_SCENARIO_MAX_ATTEMPTS, 1);
   } else if (purpose === "repair") {
     maxAttempts = parsePositiveInt(env.AI_REPAIR_MAX_ATTEMPTS, 1);
+  } else if (purpose === "spec_generation") {
+    maxAttempts = parsePositiveInt(env.AI_SPEC_MAX_ATTEMPTS, 1);
   } else {
     maxAttempts = 1;
   }
+
+  const requireJson = purpose === "spec_generation"
+    ? parseBool(env.AI_SPEC_REQUIRE_JSON, parseBool(env.AI_REQUIRE_JSON, true))
+    : parseBool(env.AI_REQUIRE_JSON, true);
+  const requireJsonSchema = purpose === "spec_generation"
+    ? parseBool(env.AI_SPEC_REQUIRE_JSON_SCHEMA, parseBool(env.AI_REQUIRE_JSON_SCHEMA, true))
+    : parseBool(env.AI_REQUIRE_JSON_SCHEMA, true);
 
   // Build config based on provider type
   const providerName = env.AI_PROVIDER_NAME?.trim() || providerLower;
@@ -141,8 +158,8 @@ export function resolveAiConfig(purpose: AiPurpose): AiProviderConfig {
       purpose,
       command,
       extraArgs,
-      requireJson: parseBool(env.AI_REQUIRE_JSON, true),
-      requireJsonSchema: parseBool(env.AI_REQUIRE_JSON_SCHEMA, true),
+      requireJson,
+      requireJsonSchema,
       allowStdoutJsonFallback: parseBool(env.AI_ALLOW_STDOUT_JSON_FALLBACK, false)
     };
   }
@@ -163,8 +180,8 @@ export function resolveAiConfig(purpose: AiPurpose): AiProviderConfig {
       purpose,
       command,
       extraArgs,
-      requireJson: parseBool(env.AI_REQUIRE_JSON, true),
-      requireJsonSchema: parseBool(env.AI_REQUIRE_JSON_SCHEMA, true)
+      requireJson,
+      requireJsonSchema
     };
   }
 
@@ -184,8 +201,8 @@ export function resolveAiConfig(purpose: AiPurpose): AiProviderConfig {
       purpose,
       command,
       extraArgs,
-      requireJson: parseBool(env.AI_REQUIRE_JSON, true),
-      requireJsonSchema: parseBool(env.AI_REQUIRE_JSON_SCHEMA, true),
+      requireJson,
+      requireJsonSchema,
       allowStdoutJsonFallback: parseBool(env.AI_ALLOW_STDOUT_JSON_FALLBACK, false)
     };
   }
@@ -218,8 +235,8 @@ export function resolveAiConfig(purpose: AiPurpose): AiProviderConfig {
       timeoutMs,
       maxAttempts,
       purpose,
-      requireJson: parseBool(env.AI_REQUIRE_JSON, true),
-      requireJsonSchema: parseBool(env.AI_REQUIRE_JSON_SCHEMA, true)
+      requireJson,
+      requireJsonSchema
     };
   }
 
@@ -241,6 +258,13 @@ export function resolveScenarioAiConfig(): AiProviderConfig {
  */
 export function resolveRepairAiConfig(): AiProviderConfig {
   return resolveAiConfig("repair");
+}
+
+/**
+ * Shorthand for resolving spec generation AI config.
+ */
+export function resolveSpecGenerationAiConfig(): AiProviderConfig {
+  return resolveAiConfig("spec_generation");
 }
 
 /**

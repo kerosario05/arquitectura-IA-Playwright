@@ -15,16 +15,19 @@ router.post("/api/user-stories/:issueKey/checklist-url", (req: Request, res: Res
   return res.json({ ok: true, issueKey: resp.issueKey, checklistUrl: resp.checklistUrl });
 });
 
-// GET /api/checklists/:issueKey — get checklist with defects (optional ?jobId= to filter by run)
+// GET /api/checklists/:issueKey — get checklist with defects. Filter strictly by ?runId= when
+// present (execution isolation; no fallback to issueKey), otherwise optionally by ?jobId=.
 router.get("/api/checklists/:issueKey", (req: Request, res: Response) => {
   const { issueKey } = req.params;
   const jobId = req.query.jobId as string | undefined;
+  const runId = req.query.runId as string | undefined;
   const list = defectChecklistStore.get(issueKey);
   if (!list) {
-    return res.json({ issueKey, defects: [], checklistUrl: `/checklist/${issueKey}`, createdAt: null, updatedAt: null });
+    return res.json({ issueKey, defects: [], total: 0, pendingReview: 0, highSeverity: 0, checklistUrl: `/checklist/${issueKey}`, createdAt: null, updatedAt: null });
   }
-  const resp = defectChecklistStore.toResponse(list, jobId);
-  console.log(`[checklist-query] issueKey=${issueKey} jobId=${jobId ?? 'none'} scope=${jobId ? 'job' : 'issue'} total=${resp.defects.length}`);
+  const filter = { ...(jobId ? { jobId } : {}), ...(runId ? { runId } : {}) };
+  const resp = defectChecklistStore.toResponse(list, Object.keys(filter).length > 0 ? filter : undefined);
+  console.log(`[checklist-query] issueKey=${issueKey} runId=${runId ?? 'none'} jobId=${jobId ?? 'none'} scope=${runId ? 'run' : (jobId ? 'job' : 'issue')} total=${resp.total} pending=${resp.pendingReview} highSeverity=${resp.highSeverity}`);
   return res.json(resp);
 });
 

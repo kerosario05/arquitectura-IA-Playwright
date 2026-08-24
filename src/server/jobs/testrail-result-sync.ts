@@ -11,7 +11,7 @@ export type ResultSyncInput = {
   runId: number;
   caseId: number;
   scenarioId: string;
-  discoveryStatus: "passed" | "failed" | "skipped" | "review_needed";
+  discoveryStatus: "passed" | "failed" | "skipped" | "review_needed" | "blocked_infrastructure";
   title?: string;
   artifactsDir?: string;
   errorMessage?: string;
@@ -23,7 +23,7 @@ export type ResultSyncInput = {
 
 export type ResultSyncOutput = {
   statusId: number;
-  syncStatus: "synced" | "skipped_no_case_id" | "failed";
+  syncStatus: "synced" | "skipped_no_case_id" | "skipped_non_functional_failure" | "failed";
   syncedAt?: string;
   error?: string;
 };
@@ -40,28 +40,36 @@ export type SyncResultEntry = {
 
 const DEFAULT_STATUS_IDS = {
   passed: Number(process.env.TESTRAIL_STATUS_PASSED_ID) || 1,
-  blocked: Number(process.env.TESTRAIL_STATUS_BLOCKED_ID) || 2,
-  untested: Number(process.env.TESTRAIL_STATUS_UNTESTED_ID) || 3,
-  retest: Number(process.env.TESTRAIL_STATUS_RETEST_ID) || 4,
   failed: Number(process.env.TESTRAIL_STATUS_FAILED_ID) || 5,
-  skipped: Number(process.env.TESTRAIL_STATUS_SKIPPED_ID) || undefined,
 };
 
-function mapDiscoveryStatusToTestRail(discoveryStatus: string): number {
+export function resolveInfrastructureBlockedStatusId(): number | undefined {
+  const raw = process.env.TESTRAIL_STATUS_BLOCKED_ID?.trim();
+  if (!raw) return undefined;
+  const parsed = Number(raw);
+  if (!Number.isInteger(parsed) || parsed <= 0) return undefined;
+  return parsed;
+}
+
+export function hasInfrastructureBlockedStatusMapping(): boolean {
+  return resolveInfrastructureBlockedStatusId() !== undefined;
+}
+
+export function mapDiscoveryStatusToTestRail(discoveryStatus: string): number {
   switch (discoveryStatus) {
     case "passed":
       return DEFAULT_STATUS_IDS.passed;
     case "failed":
     case "exploration_failed":
     case "error":
-      return DEFAULT_STATUS_IDS.failed;
     case "skipped":
-      return DEFAULT_STATUS_IDS.skipped ?? DEFAULT_STATUS_IDS.blocked;
     case "review_needed":
     case "needs_agent":
-      return DEFAULT_STATUS_IDS.blocked;
+      return DEFAULT_STATUS_IDS.failed;
+    case "blocked_infrastructure":
+      return resolveInfrastructureBlockedStatusId() ?? DEFAULT_STATUS_IDS.failed;
     default:
-      return DEFAULT_STATUS_IDS.untested;
+      return DEFAULT_STATUS_IDS.failed;
   }
 }
 
@@ -188,7 +196,7 @@ export function finalizeLaunchManifest(
       failed: results.filter((r: any) => r.discoveryStatus !== "passed").length,
       synced,
       syncFailed,
-      syncSkipped: results.filter((r: any) => r.syncStatus === "skipped_no_case_id").length,
+      syncSkipped: results.filter((r: any) => String(r.syncStatus).startsWith("skipped")).length,
     };
 
     fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), "utf-8");

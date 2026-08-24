@@ -1,0 +1,100 @@
+{
+  "mode": "ai_hybrid",
+  "provider": "codex",
+  "model": "gpt-5.4",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "invocations": 1,
+  "invocationsConsumed": 1,
+  "durationMs": 56328,
+  "usage": {
+    "inputTokens": 62412,
+    "cachedInputTokens": 41600,
+    "cacheWriteInputTokens": 0,
+    "nonCachedInputTokens": 20812,
+    "outputTokens": 1788,
+    "reasoningOutputTokens": 392,
+    "totalPhysicalTokens": 64200,
+    "durationMs": 53706,
+    "credits": null
+  },
+  "validation": {
+    "schema": "passed",
+    "structure": "passed",
+    "traceFidelity": "failed",
+    "typescript": "passed",
+    "playwrightDiscovery": "failed",
+    "semanticCoverage": "failed",
+    "functionalExecution": "skipped"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [],
+  "regressedGates": [],
+  "missingRequirements": [
+    {
+      "text": "Validar que se muestre \"logo institucional\".",
+      "type": "literal_visible_text",
+      "stepIndex": 1
+    },
+    {
+      "text": "Validar que se muestre \"mensaje de bienvenida\".",
+      "type": "literal_visible_text",
+      "stepIndex": 2
+    },
+    {
+      "text": "Validar que se muestre \"¿Qué deseas realizar hoy?\".",
+      "type": "literal_visible_text",
+      "stepIndex": 3
+    },
+    {
+      "text": "Validar que se muestre \"módulo de información\".",
+      "type": "literal_visible_text",
+      "stepIndex": 5
+    },
+    {
+      "text": "¿Qué deseas realizar hoy?",
+      "type": "literal_visible_text",
+      "stepIndex": 3
+    }
+  ],
+  "oracleTypes": [
+    "literal_visible_text",
+    "navigation_transition"
+  ],
+  "errors": [
+    "step_not_implemented_in_spec:1",
+    "unexpected_step_coverage:0",
+    "unexpected_step_coverage:4",
+    "unexpected_step_coverage:5",
+    "missing_assertion_coverage:Validar que se muestre \"logo institucional\".",
+    "missing_assertion_coverage:Validar que se muestre \"mensaje de bienvenida\".",
+    "missing_assertion_coverage:Validar que se muestre \"¿Qué deseas realizar hoy?\".",
+    "missing_assertion_coverage:Validar que se muestre \"módulo de información\".",
+    "missing_assertion_coverage:¿Qué deseas realizar hoy?",
+    "missing_assertion_oracle_context:requirement=¿Qué deseas realizar hoy?|oracleType=literal_visible_text|historicalRequirement=¿Qué deseas realizar hoy?|resolvedTarget=unknown|backed=true",
+    "contract_target_changed:stepIndex=0:contractStepIndex=0:expected=\"Iniciar\"",
+    "contract_target_changed:stepIndex=2:contractStepIndex=2:expected=\"Iniciar\"",
+    "contract_target_changed:stepIndex=3:contractStepIndex=3:expected=\"Explora nuestros productosConoce sobre los beneficios de los productos BSC\"",
+    "contract_target_changed:stepIndex=4:contractStepIndex=4:expected=\"Explora nuestros productos\"",
+    "contract_target_changed:stepIndex=5:contractStepIndex=5:expected=\"módulo de información\"",
+    "playwright_discovery_failed:exitCode=1:discovered=0",
+    "playwright_discovery_error:Listing tests:"
+  ],
+  "warnings": [],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "id": "c42990-validar-visibilidad-de-las-dos-opciones-principales-en-la-pantalla-de-seleccion",
+  "externalId": "C42990",
+  "caseId": 42990,
+  "title": "Validar visibilidad de las dos opciones principales en la pantalla de seleccion",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-06T18:32:43.027Z"
+}

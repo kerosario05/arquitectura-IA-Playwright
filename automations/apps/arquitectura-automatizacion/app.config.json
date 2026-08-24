@@ -5,8 +5,8 @@
     "name": "4",
     "baseUrl": "https://172.27.4.50",
     "baseUrlHash": "1423ba294517",
-    "createdAt": "2026-08-04T15:26:33.850Z",
-    "updatedAt": "2026-08-04T15:26:33.850Z"
+    "createdAt": "2026-08-18T12:27:39.360Z",
+    "updatedAt": "2026-08-18T12:27:39.360Z"
   },
   "baseUrl": "https://172.27.4.50",
   "loginMode": "password",
@@ -27,7 +27,15 @@
       }
     ],
     "aliases": {},
-    "intermediates": {},
+    "intermediates": {
+      "Iniciar": [
+        "Explora nuestros productos",
+        "transacciones y servicios"
+      ],
+      "¿Qué deseas realizar hoy?": [
+        "Explora nuestros productos"
+      ]
+    },
     "domainTerms": {},
     "visibleControls": [
       "Beneficios",
@@ -61,7 +69,7 @@
         "when": "before_first_functional_step"
       }
     ],
-    "updatedAt": "2026-08-04T15:25:55.706Z",
+    "updatedAt": "2026-08-18T02:32:04.819Z",
     "targetPaths": {
       "Tarjeta Crédito Visa Clásica": {
         "target": "Tarjeta Crédito Visa Clásica",
@@ -537,12 +545,23 @@
           "validationStatus": "validated_detail"
         }
       }
-    }
+    },
+    "routes": [
+      {
+        "from": "Iniciar",
+        "intermediates": [
+          "Explora nuestros productos",
+          "transacciones y servicios",
+          "explora nuestros productos"
+        ]
+      },
+      {
+        "from": "¿Qué deseas realizar hoy?",
+        "intermediates": [
+          "Explora nuestros productos"
+        ]
+      }
+    ]
   },
-  "updatedAt": "2026-08-04T19:23:05.492Z",
-  "lastUsedSource": {
-    "type": "request",
-    "sectionName": null,
-    "updatedAt": "2026-08-04T19:23:05.490Z"
-  }
+  "updatedAt": "2026-08-18T12:27:39.360Z"
 }

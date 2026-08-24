@@ -1,0 +1,10 @@
+{
+  "id": "preview-003-validar-la-visualizacion-de-las-opciones-principales-del-kiosco",
+  "externalId": "PREVIEW-003",
+  "caseId": 0,
+  "title": "Validar la visualizacion de las opciones principales del kiosco",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-15T02:11:53.348Z"
+}

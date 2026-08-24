@@ -1,0 +1,141 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "scenarioId": "PREVIEW-002",
+  "scenarioTitle": "Visualizar pantalla inicial del kiosco con acceso de entrada",
+  "stepCount": 4,
+  "sourceExpectedResultPresent": true,
+  "requiredAssertionCount": 4,
+  "unresolvedRequiredCount": 0,
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "PREVIEW-002",
+    "title": "Visualizar pantalla inicial del kiosco con acceso de entrada",
+    "appSlug": "arquitectura-automatizacion",
+    "sectionSlug": "detalle-kiosko",
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 0,
+        "originalText": "Clic en \"Iniciar\".",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Iniciar"
+        },
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "navigation_transition",
+          "backed": true,
+          "implementationKind": "heading_or_control",
+          "requirement": "La pantalla de seleccion de gestion queda disponible despues del ingreso inicial."
+        },
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 1,
+        "originalText": "Navigate to https://172.27.4.50",
+        "operation": "navigate",
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "page_object",
+          "owner": "HomePage",
+          "method": "open",
+          "argument": "APP_BASE_URL"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 2,
+        "originalText": "Clic en \"Iniciar\".",
+        "operation": "click",
+        "target": {
+          "strategy": "role:button",
+          "value": "Iniciar",
+          "exact": false
+        },
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "page_object",
+          "owner": "HomePage",
+          "method": "start",
+          "argument": "Iniciar"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 3,
+        "originalText": "Validar que se muestre \"Transacciones y servicios\".",
+        "operation": "assertVisible",
+        "target": {
+          "strategy": "text",
+          "value": "Transacciones y servicios"
+        },
+        "executionStatus": "unresolved",
+        "evidenceRefs": []
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 4,
+      "representedScenarioSteps": 3,
+      "missingScenarioSteps": [
+        {
+          "scenarioStepIndex": 3,
+          "reason": "required_scenario_step_missing"
+        }
+      ]
+    }
+  },
+  "executionContractChars": 1644,
+  "mode": "deterministic",
+  "functionalExecutionEnabled": true,
+  "provider": null,
+  "model": null,
+  "skill": {
+    "name": null,
+    "version": null,
+    "hash": null,
+    "loaded": false
+  },
+  "observableOracles": [
+    {
+      "id": "expected-01",
+      "requirement": "La pantalla de seleccion de gestion queda disponible despues del ingreso inicial.",
+      "type": "navigation_transition",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 0,
+      "target": "Iniciar",
+      "evidence": [
+        "transition_observed:true",
+        "click_target:Iniciar",
+        "action_type:Clic en \"Iniciar\"."
+      ],
+      "details": {
+        "transitionObserved": true,
+        "clickTarget": "Iniciar",
+        "resolvedTarget": null,
+        "postClickUiChange": null
+      }
+    }
+  ],
+  "oracleTypes": [
+    "navigation_transition"
+  ],
+  "specGenerationAttempts": 0,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [],
+  "finalSpec": {
+    "origin": "deterministic_draft",
+    "generatedBy": "core",
+    "strategy": "deterministic_draft",
+    "fallback": null
+  }
+}

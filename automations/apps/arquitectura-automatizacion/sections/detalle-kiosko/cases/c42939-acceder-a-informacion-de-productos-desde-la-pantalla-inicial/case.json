@@ -1,0 +1,10 @@
+{
+  "id": "c42939-acceder-a-informacion-de-productos-desde-la-pantalla-inicial",
+  "externalId": "C42939",
+  "caseId": 42939,
+  "title": "Acceder a Informacion de productos desde la pantalla inicial",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-05T21:36:45.440Z"
+}

@@ -67,6 +67,7 @@ export type TestScenario = {
   preconditions?: string;
   references?: string;
   steps: TestScenarioStep[];
+  authIntent?: "gate_observation" | "full_authentication";
   raw?: RawTestRailCase;
   sectionId?: number;
   sectionName?: string;

@@ -2,7 +2,7 @@ import { AiProviderError, type AiCompletionRequest, type AiCompletionResponse, t
 import { parseJsonObjectText } from "../ai-json-validator";
 import { runCodexCli } from "../../agent/codex-cli-runner";
 import type { CodexCliRunnerInput } from "../../types/codex-auto-repair.types";
-import { extractJsonFromSources, validateScenarioShape, type JsonExtractionSource } from "../json-output-extractor";
+import { extractJsonFromSources, validateScenarioShape, validateSpecOutputShape, type JsonExtractionSource } from "../json-output-extractor";
 import * as path from "node:path";
 import * as fs from "node:fs/promises";
 
@@ -31,6 +31,11 @@ const REPAIR_DECISION_SCHEMA = {
   },
   additionalProperties: false
 };
+
+let runCodexCliFn: typeof runCodexCli = runCodexCli;
+export function __setRunCodexCliForTesting(fn: typeof runCodexCli): void {
+  runCodexCliFn = fn;
+}
 
 export class CodexCliProvider {
   public readonly providerType = "codex_cli" as const;
@@ -91,17 +96,21 @@ export class CodexCliProvider {
         prompt: shortPrompt,
         cwd: tempDir,
         timeoutMs: this.timeoutMs,
+        taskType: (purpose === "scenario_generation" || purpose === "spec_generation")
+          ? "generation"
+          : (purpose.includes("repair") ? "repair" : "unknown"),
+        purpose,
         stdoutLogPath,
         stderrLogPath
       };
 
-      const result = await runCodexCli(runnerInput);
+      const result = await runCodexCliFn(runnerInput);
       processResult = result;
       const durationMs = Date.now() - startedAt;
 
-      // Log diagnostics for scenario_generation
-      if (purpose === "scenario_generation") {
-        console.log(`[codex-cli] purpose=scenario_generation exitCode=${result.exitCode} durationMs=${durationMs}`);
+      // Log diagnostics for generation purposes
+      if (purpose === "scenario_generation" || purpose === "spec_generation") {
+        console.log(`[codex-cli] purpose=${purpose} exitCode=${result.exitCode} durationMs=${durationMs}`);
         console.log(`[codex-cli] stdoutChars=${result.stdout?.length ?? 0} stderrChars=${result.stderr?.length ?? 0}`);
       }
 
@@ -127,6 +136,26 @@ export class CodexCliProvider {
 
       if (!extractionResult.success) {
         processExitedNonZero = result.exitCode !== 0 || processExitedNonZero;
+
+        // If the CLI exited non-zero and emitted a protocol error/turn.failed event,
+        // propagate the real technical error instead of treating stdout as a result.
+        const technicalFailure = result.exitCode !== 0
+          ? this.extractCodexFailureMessage(result.stdout)
+          : undefined;
+        if (technicalFailure) {
+          await this.saveDebugArtifacts(tempDir, result, purpose, extractionResult.attempts);
+          throw new AiProviderError(
+            "ai_provider_execution_failed",
+            technicalFailure,
+            {
+              provider: this.providerName,
+              tempDir,
+              exitCode: result.exitCode,
+              stdoutPreview: this.sanitizeSecrets(result.stdout).slice(0, 1000),
+              stderrPreview: this.sanitizeSecrets(result.stderr).slice(0, 1000)
+            }
+          );
+        }
 
         // Enhanced diagnostics for scenario generation failures
         const stderrLower = result.stderr.toLowerCase();
@@ -236,6 +265,37 @@ export class CodexCliProvider {
         }
       }
 
+      // Validate spec generation shape for spec_generation (fail closed)
+      if (purpose === "spec_generation") {
+        const specShapeValidation = validateSpecOutputShape(extractionResult.parsed);
+        if (!specShapeValidation.valid) {
+          processExitedNonZero = result.exitCode !== 0 || processExitedNonZero;
+
+          await this.saveDebugArtifacts(tempDir, result, purpose, extractionResult.attempts);
+
+          throw new AiProviderError(
+            "ai_provider_invalid_json",
+            `Spec generation JSON has invalid shape: ${specShapeValidation.reason}`,
+            {
+              provider: this.providerName,
+              tempDir,
+              exitCode: result.exitCode,
+              detectedKeys: specShapeValidation.detectedKeys,
+              extractionStrategy: extractionResult.strategy
+            }
+          );
+        }
+      }
+
+      // Report where the structured output was recovered from and whether
+      // fallback-to-stdout recovery required an extra AI invocation.
+      const recoveredFromResultFile = extractionResult.strategy === "output_file_json";
+      const outputSource = recoveredFromResultFile ? "result_file" : "stdout";
+      console.log(`[codex-output] source=${outputSource} schemaValid=true`);
+      if (!recoveredFromResultFile) {
+        console.log(`[codex-output] recovered=true extraAiInvocation=false`);
+      }
+
       if (result.exitCode !== 0) {
         processExitedNonZero = true;
         return {
@@ -244,6 +304,7 @@ export class CodexCliProvider {
           model: this.model,
           providerName: this.providerName,
           durationMs,
+          usage: result.usage,
           diagnostics: {
             warning: "ai_provider_exited_non_zero_but_output_valid",
             exitCode: result.exitCode,
@@ -258,7 +319,8 @@ export class CodexCliProvider {
         parsedJson: extractionResult.parsed,
         model: this.model,
         providerName: this.providerName,
-        durationMs
+        durationMs,
+        usage: result.usage
       };
     } catch (error) {
       if (processExitedNonZero && processResult) {
@@ -276,19 +338,22 @@ export class CodexCliProvider {
     if (purpose === "scenario_generation") {
       return "scenario-generation-result.json";
     }
+    if (purpose === "spec_generation") {
+      return "spec-generation-result.json";
+    }
     // Default to repair-decision.json for repair and general purposes
     return "repair-decision.json";
   }
 
   private getOutputMissingErrorMessage(purpose: string, fileName: string): string {
-    if (purpose === "scenario_generation") {
+    if (purpose === "scenario_generation" || purpose === "spec_generation") {
       return `AI provider did not write ${fileName}. Check artifacts at tempDir for stdout/stderr logs.`;
     }
     return `AI provider did not write ${fileName}`;
   }
 
   private getInvalidJsonErrorMessage(purpose: string, fileName: string): string {
-    if (purpose === "scenario_generation") {
+    if (purpose === "scenario_generation" || purpose === "spec_generation") {
       return `${fileName} contains invalid JSON. Check artifacts for raw output.`;
     }
     return `${fileName} contains invalid JSON`;
@@ -300,10 +365,11 @@ export class CodexCliProvider {
     purpose: string,
     extractionAttempts: string[]
   ): Promise<void> {
-    if (purpose !== "scenario_generation") return;
+    if (purpose !== "scenario_generation" && purpose !== "spec_generation") return;
 
     try {
-      const debugDir = path.join(process.cwd(), ".artifacts", "ai", "scenario_generation", `codex-${Date.now()}`);
+      const debugPurpose = purpose === "spec_generation" ? "spec_generation" : "scenario_generation";
+      const debugDir = path.join(process.cwd(), ".artifacts", "ai", debugPurpose, `codex-${Date.now()}`);
       await fs.mkdir(debugDir, { recursive: true });
 
       await fs.writeFile(path.join(debugDir, "stdout.log"), result.stdout, "utf-8");
@@ -349,7 +415,9 @@ export class CodexCliProvider {
 
   private async createTempDir(purpose: string): Promise<string> {
     const timestamp = Date.now();
-    const purposeDir = purpose === "scenario_generation" ? "scenario" : "repair";
+    const purposeDir = purpose === "scenario_generation"
+      ? "scenario"
+      : (purpose === "spec_generation" ? "spec" : "repair");
     const tempDir = path.join(process.cwd(), ".artifacts", "ai-provider", "codex", purposeDir, `${timestamp}`);
     await fs.mkdir(tempDir, { recursive: true });
     return tempDir;
@@ -363,13 +431,13 @@ export class CodexCliProvider {
     userMessage: string,
     purpose: string
   ): Promise<void> {
-    // Write schema for repair and general purposes, not for scenario_generation
-    if (purpose !== "scenario_generation") {
+    // Write repair schema only for repair/general purposes, not for generation flows.
+    if (purpose !== "scenario_generation" && purpose !== "spec_generation") {
       const schemaPath = path.join(tempDir, "repair-decision.schema.json");
       await fs.writeFile(schemaPath, JSON.stringify(REPAIR_DECISION_SCHEMA, null, 2), "utf-8");
     }
 
-    const fileOutputPrompt = purpose === "scenario_generation"
+    const fileOutputPrompt = (purpose === "scenario_generation" || purpose === "spec_generation")
       ? this.buildGenericFileOutputPrompt(outputPath, promptPath, systemMessage, userMessage)
       : this.buildRepairFileOutputPrompt(outputPath, promptPath, systemMessage, userMessage);
 
@@ -487,5 +555,25 @@ export class CodexCliProvider {
 
   private sanitizeArgs(args: string[]): string[] {
     return args.map(a => this.sanitizeSecrets(a));
+  }
+
+  private extractCodexFailureMessage(stdout: string): string | undefined {
+    if (!stdout) return undefined;
+    for (const line of stdout.split(/\r?\n/)) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      try {
+        const event = JSON.parse(trimmed);
+        if (!event || typeof event !== "object") continue;
+        if (event.type !== "turn.failed" && event.type !== "error") continue;
+        if (typeof event.message === "string" && event.message.trim()) return event.message.trim();
+        if (event.error && typeof event.error === "object" && typeof (event.error as { message?: unknown }).message === "string") {
+          return (event.error as { message: string }).message.trim();
+        }
+      } catch {
+        // Skip non-JSON protocol lines.
+      }
+    }
+    return undefined;
   }
 }

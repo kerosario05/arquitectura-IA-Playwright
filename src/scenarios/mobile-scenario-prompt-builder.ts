@@ -21,7 +21,10 @@ FORMATO DE SALIDA (JSON estricto, sin explicaciones, sin markdown, sin texto ant
         { "action": "assertDisabled", "description": "Verificar que el boton queda deshabilitado", "target": { "strategy": "accessibilityId", "value": "Continuar" } }
       ],
       "expectedResult": "Resultado esperado del escenario completo, en 1-2 frases",
-      "preconditions": ["Precondicion 1 (puede ser un array vacio si no aplica)"]
+      "preconditions": ["Precondicion 1 (puede ser un array vacio si no aplica)"],
+      "requiredDataProfile": "nombre-del-perfil-funcional (SOLO si el escenario depende de un estado de negocio backend y existe un perfil compatible; omitir si no aplica)",
+      "requiresManualData": false,
+      "coveredCriteria": ["CA01"]
     }
   ],
   "rejected": []
@@ -32,6 +35,10 @@ REGLAS:
 - Preferir SIEMPRE "accessibilityId" usando el texto visible mencionado o implicito en la historia — es la estrategia mas confiable sin conocer la jerarquia real de la app.
 - NO inventes resource-id (strategy "id") ni XPaths especificos — no tienes visibilidad de la app real, solo del texto de la historia.
 - "action" debe ser exactamente uno de: launchApp | click | fill | assertVisible | assertEnabled | assertDisabled | waitFor | screenshot.
+- OTP (codigo temporal de un solo uso): si la historia/evidencia/pantalla indican que el flujo requiere validar un codigo OTP (por ejemplo una pantalla de "codigo de verificacion" o "codigo recibido"), genera el paso que ingresa ese codigo con un "fill" accionable (por ejemplo description "Validar el codigo OTP recibido." o "Ingresar el codigo OTP vigente.") y anade en ESE paso la metadata estructurada: "otp": { "required": true, "identityField": "<campo opcional si la evidencia lo identifica>", "channel": "<canal opcional si la evidencia lo identifica>" }. 
+  * NUNCA escribas un codigo OTP concreto en "value" ni en ningun campo: el codigo es dinamico y se resuelve en runtime. Prohibido producir "otp": "123456", "codigo": "000000" o cualquier OTP estatico.
+  * "identityField" y "channel" solo deben provenir de configuracion/evidencia disponible (ej. pantallas reales o dataFields del perfil); si no puedes determinarlos de forma segura, OMITELOS para que runtime los resuelva desde mobile.config/app.config. No hardcodees numeros de identificacion, canales ni nombres de apps.
+  * Solo declara "otp" cuando el flujo REALMENTE requiere un codigo temporal (la pantalla/evidencia lo soporta); no lo inventes en flujos que no lo necesitan.
 - BOTONES CON GATE (deshabilitados hasta cumplir una condicion): si un elemento del contexto tiene "gated": true, esta DESHABILITADO hasta cumplir su "enabledWhen". Un paso "click" sobre un boton deshabilitado FALLA. Reglas:
   * Happy path: primero genera los pasos que cumplen el gate (segun "enabledWhen") y LUEGO el "click" sobre el boton.
   * Escenarios NEGATIVOS (datos invalidos/incompletos que caen en "disabledWhen"): NO generes "click" sobre ese boton; genera un paso {"action":"assertDisabled","target":{...}} para validar que queda deshabilitado (ese es el resultado esperado del escenario negativo).
@@ -39,9 +46,18 @@ REGLAS:
 - El primer paso de cada escenario debe ser siempre {"action":"launchApp"}.
 - "expectedResult" es OBLIGATORIO en cada escenario — describe el resultado final esperado, no un paso mas.
 - "preconditions" es un array de strings (puede ser vacio []) con lo que debe cumplirse antes de ejecutar el escenario.
-- Genera entre 1 y 4 escenarios por historia (happy path + variantes relevantes mencionadas en criterios de aceptacion).
+- Genera tantos escenarios como sean necesarios para cubrir TODOS los criterios funcionales automatizables de la historia. Un escenario puede cubrir varios criterios solo si su flujo y su resultado esperado (oracle) son coherentes; no generes escenarios redundantes solo para aumentar la cantidad. No generes escenarios para requisitos NO ejecutables: si un criterio requiere una precondicion que el motor no puede inducir (por ejemplo un error tecnico o una condicion externa que no se puede forzar desde la UI), omite ese criterio y deja su cobertura para los escenarios restantes. Mantén cada paso MCP accionable y basado únicamente en la evidencia disponible (pantallas, elementos, flujos y criterios proporcionados).
 - Si la historia NO tiene suficiente informacion (sin descripcion, sin criterios de aceptacion, texto vacio o irrelevante) para generar pasos con confianza razonable, NO inventes pasos genericos — agrega la historia al array "rejected" con una razon clara en "reason".
-- RUTEO POR INTENCION (FLUJOS): si el contexto incluye una seccion "FLUJOS DE NAVEGACION", primero identifica a que flujo pertenece la historia comparando su texto (titulo/descripcion/criterios) con los "triggerKeywords" y la descripcion de cada flujo. Cuando la historia corresponda a un flujo, DEBES anteponer los "entrySteps" de ese flujo (justo despues del paso launchApp) para llegar a la pantalla correcta, y luego continuar con los pasos especificos de la historia usando los elementos de la pantalla destino de ese flujo. Ejemplo: una historia de "validación del cliente / registro de nuevo usuario" NO empieza escribiendo usuario y contraseña en el login — empieza tocando el enlace de registro segun los entrySteps del flujo de registro.
+- RUTEO POR INTENCION (FLUJOS): si el contexto incluye una seccion "FLUJOS DE NAVEGACION", primero identifica a que flujo pertenece la historia comparando su texto (titulo/descripcion/criterios) con los "triggerKeywords" y la descripcion de cada flujo. Cuando la historia corresponda a un flujo, DEBES anteponer los "entrySteps" de ese flujo (justo despues del paso launchApp) para llegar a la pantalla correcta, y luego continuar con los pasos especificos de la historia usando los elementos de la pantalla destino de ese flujo. Los entrySteps son transiciones OBSERVADAS: incluyelos TODOS en orden y NUNCA saltes una pantalla intermedia que requiera una accion para avanzar (no colapses A -> B -> C en A -> C). Ejemplo: una historia de "validación del cliente / registro de nuevo usuario" NO empieza escribiendo usuario y contraseña en el login — empieza tocando el enlace de registro segun los entrySteps del flujo de registro.
+- SELECTORES/DROPDOWNS: cualquier validacion de opciones disponibles de un selector debe ocurrir ANTES de seleccionar una opcion que cierre el selector. Abre el selector, ejecuta todas las assertVisible necesarias sobre las opciones mientras sigue abierto, y SOLO entonces selecciona la opcion requerida. No valides opciones ni intentes re-seleccionar despues de haber seleccionado (el selector ya esta cerrado y las demas opciones ya no son visibles). No selecciones dos veces la misma opcion.
+- PERFILES DE DATOS FUNCIONALES (estado de negocio backend): si la historia o un criterio depende de un estado de negocio que NO se puede inducir desde la UI (cliente con un estado particular en el backend, cuenta con saldo, usuario ya registrado, entidad inexistente, etc.), genera el escenario normalmente. Reglas para "requiredDataProfile" y "requiresManualData":
+  * Si existe un perfil en "PERFILES FUNCIONALES DISPONIBLES" que cubra exactamente el estado requerido: declara "requiredDataProfile" con ese nombre exacto y "requiresManualData": false.
+  * Si el escenario depende de un estado funcional y NO existe un perfil compatible: omite "requiredDataProfile" y declara "requiresManualData": true. NUNCA inventes un nombre de perfil.
+  * Si el escenario es puramente UI/formato (opciones visibles, formato invalido, campos incompletos, boton deshabilitado) y NO depende de un estado funcional: omite "requiredDataProfile" y declara "requiresManualData": false.
+  * NUNCA rechazes un escenario por ausencia de perfil funcional. Los perfiles son una fuente opcional de datos precargados; su falta no impide la automatizacion.
+  * NO inventes documentos, identificaciones, saldos, numeros ni valores de negocio para satisfacer un estado funcional. Los valores reales se resuelven en tiempo de ejecucion desde testData usando el perfil; tu solo declaras el nombre del perfil. "exampleValue" es solo una referencia de formato, nunca una garantia de estado de negocio.
+  * Un escenario con "requiredDataProfile" no puede mezclar dos estados de negocio distintos; si la historia pide varios estados, genera un escenario por cada estado con su perfil correspondiente.
+- COBERTURA DE CRITERIOS DE ACEPTACION: en cada escenario declara "coveredCriteria" como un array con los identificadores de los criterios de aceptacion de la historia que ese escenario cubre, tal como aparecen en el texto (por ejemplo "CA01", "Criterio 2", "AC3"). Un escenario puede cubrir uno o varios criterios. Si el escenario no corresponde a ningun criterio identificable, usa []. Ningun criterio de aceptacion debe quedar sin cubrir en silencio: si un criterio no puede automatizarse (rejected/incapaz), declara su identificador en el array "coveredCriteria" de la entrada correspondiente en "rejected" (cada entrada de "rejected" acepta "sourceIssueKey", "reason" y "coveredCriteria").
 - No incluyas ninguna explicacion fuera del objeto JSON.`;
 
 function formatFlows(routeProfile: MobileRouteProfile): string {
@@ -50,6 +66,12 @@ function formatFlows(routeProfile: MobileRouteProfile): string {
   const lines = [
     "## FLUJOS DE NAVEGACION (rutas por intencion)",
     "Identifica a que flujo pertenece la historia y antepon sus 'entrySteps' (despues de launchApp) para llegar a la pantalla correcta antes de los pasos especificos.",
+    "",
+    "REGLAS OBLIGATORIAS DE TRANSICION:",
+    "- Los 'entrySteps' de un flujo son transiciones REALES OBSERVADAS (pantalla por pantalla). Cuando la historia corresponda a un flujo con entrySteps NO vacios, DEBES incluir TODOS los entrySteps en orden exacto, sin omitir ninguna pantalla intermedia.",
+    "- PROHIBIDO colapsar o saltar una pantalla intermedia: si la secuencia observada es A -> B -> C, NO generes A -> C saltando B, aunque puedas inferir una ruta mas corta. Si una pantalla intermedia requiere una accion para continuar (p. ej. un boton 'Continuar' o 'Siguiente'), debes incluir esa accion antes de pasar a la siguiente pantalla.",
+    "- Si el contexto de pantallas (PANTALLAS REALES CONOCIDAS o CONOCIMIENTO DE EJECUCIONES PREVIAS) muestra una pantalla intermedia entre la pantalla de entrada y la pantalla destino de la historia, y esa pantalla tiene acciones que permiten avanzar, trata esa transicion como obligatoria: nunca la omitas ni la fusiones con otra.",
+    "- Solo considera obligatoria una transicion cuando la evidencia la soporta como secuencia continua; no inventes pasos de navegacion que no esten en la evidencia.",
     ""
   ];
 
@@ -99,11 +121,11 @@ function formatRouteProfile(routeProfile: MobileRouteProfile): string {
       }
     }
     if (screen.dataFields && screen.dataFields.length > 0) {
-      lines.push(`  DATOS OBLIGATORIOS de esta pantalla (SIEMPRE genera pasos para cada uno, sin importar el fraseo de la historia):`);
+      lines.push(`  DATOS OBLIGATORIOS de esta pantalla (SIEMPRE genera pasos para cada uno, sin importar el fraseo de la historia). Para campos (texto): el exampleValue es SOLO una referencia estructural del formato, no un dato fijo. Si por razones de negocio el escenario requiere un valor alternativo (usuario inexistente, no cliente, cuenta inexistente, documento no registrado, etc.), puedes cambiar el CONTENIDO pero debes CONSERVAR la estructura observable del exampleValue: misma cantidad de caracteres significativos y mismas posiciones/separadores. EXCEPCION: si el escenario o criterio de aceptacion prueba precisamente formato invalido, longitud invalida, caracteres invalidos o dato mal formado, entonces si se permite violar esa estructura:`);
       for (const df of screen.dataFields) {
         if (df.kind === "select") {
           const opts = (df.options ?? []).join(" | ");
-          lines.push(`  - "${df.label}" (seleccion): genera un paso "click" sobre la opcion por defecto "${df.defaultValue ?? df.options?.[0] ?? ""}" usando target ${JSON.stringify(df.applyTargetTemplate?.value.replace("{{value}}", df.defaultValue ?? df.options?.[0] ?? ""))}. Opciones validas: ${opts}.`);
+          lines.push(`  - "${df.label}" (seleccion): usa la opcion por defecto "${df.defaultValue ?? df.options?.[0] ?? ""}" usando target ${JSON.stringify(df.applyTargetTemplate?.value.replace("{{value}}", df.defaultValue ?? df.options?.[0] ?? ""))}. Opciones validas: ${opts}. Este campo debe quedar resuelto dentro del escenario, pero NO agregues un click de seleccion redundante si el flujo ya contiene una seleccion equivalente de este mismo campo. Si la historia/criterio pide validar las opciones disponibles, haz TODAS las assertVisible sobre las opciones MIENTRAS el selector permanece ABIERTO y ANTES de seleccionar; luego selecciona exactamente UNA opcion y NO intentes validar opciones restantes despues de seleccionar (el selector se cierra). No selecciones dos veces consecutivas o semanticamente la misma opcion.`);
         } else {
           lines.push(`  - "${df.label}" (texto): genera un paso "fill" con target ${JSON.stringify(df.matchLocator.value)} strategy "${df.matchLocator.strategy}" y value de ejemplo ${JSON.stringify(df.exampleValue ?? "")}.`);
         }
@@ -119,11 +141,33 @@ function formatRouteProfile(routeProfile: MobileRouteProfile): string {
   return lines.join("\n");
 }
 
+/**
+ * Exposes the available functional data profile NAMES for the appSlug (never their
+ * resolved testData values — those are resolved deterministically at precheck time). The AI
+ * matches a backend/business-state scenario to one of these names when a compatible profile
+ * exists, or omits the field when no profile covers the required state. Absence of a profile
+ * never blocks scenario generation; the user supplies dataOverrides manually later.
+ */
+function formatFunctionalDataProfiles(routeProfile: MobileRouteProfile): string {
+  const profiles = routeProfile.functionalDataProfiles;
+  if (!profiles || Object.keys(profiles).length === 0) return "";
+  const lines = [
+    "## PERFILES FUNCIONALES DISPONIBLES (estados de negocio respaldados)",
+    "Estos son los estados de negocio backend disponibles para declarar como requiredDataProfile. Si un escenario depende de un estado distinto a estos, igualmente genera el escenario — simplemente omite requiredDataProfile y el usuario proveera dataOverrides manuales.",
+    ""
+  ];
+  for (const profileName of Object.keys(profiles)) {
+    lines.push(`- ${profileName}`);
+  }
+  lines.push("");
+  return lines.join("\n");
+}
+
 function formatIssue(issue: JiraIssueSource): string {
   const parts = [`## ${issue.key}: ${issue.summary}`];
   const description = issue.acceptanceCriteria || issue.description || "";
   if (description) {
-    parts.push(description.slice(0, 2000));
+    parts.push(description);
   } else {
     parts.push("(sin descripcion ni criterios de aceptacion)");
   }
@@ -168,20 +212,47 @@ export function buildMobileScenarioMessages(
     formatIssue(issue)
   ];
 
+  let flowsBlock = "";
+  let routeBlock = "";
+  let profilesBlock = "";
+  let knowledgeBlock = "";
+
   if (routeProfile) {
-    const flowsBlock = formatFlows(routeProfile);
+    flowsBlock = formatFlows(routeProfile);
     if (flowsBlock) userParts.push("", flowsBlock);
     if (Object.keys(routeProfile.screens).length > 0) {
-      userParts.push("", formatRouteProfile(routeProfile));
+      routeBlock = formatRouteProfile(routeProfile);
+      userParts.push("", routeBlock);
     }
+    profilesBlock = formatFunctionalDataProfiles(routeProfile);
+    if (profilesBlock) userParts.push("", profilesBlock);
   }
 
   if (learnedScreens && learnedScreens.length > 0) {
-    userParts.push("", formatLearnedKnowledge(learnedScreens));
+    knowledgeBlock = formatLearnedKnowledge(learnedScreens);
+    userParts.push("", knowledgeBlock);
   }
 
+  const systemContent = SYSTEM_PROMPT;
+  const userContent = userParts.join("\n");
+
+  const systemChars = systemContent.length;
+  const huChars = userParts[2]?.length ?? 0;
+  const instructionsChars = userParts[0].length + 2; // header + "\n\n"
+  const routeProfileChars = flowsBlock.length + routeBlock.length + profilesBlock.length;
+  const knowledgeChars = knowledgeBlock.length;
+  const totalChars = systemChars + userContent.length;
+  const estimatedTokens = Math.ceil(totalChars / 4);
+
+  console.log(
+    `[mobile:prompt-size] issue=${issue.key} ` +
+    `totalChars=${totalChars} estimatedTokens=${estimatedTokens} ` +
+    `systemChars=${systemChars} huChars=${huChars} instructionsChars=${instructionsChars} ` +
+    `routeProfileChars=${routeProfileChars} knowledgeChars=${knowledgeChars}`
+  );
+
   return [
-    { role: "system", content: SYSTEM_PROMPT },
-    { role: "user", content: userParts.join("\n") }
+    { role: "system", content: systemContent },
+    { role: "user", content: userContent }
   ];
 }

@@ -1,0 +1,56 @@
+{
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\nimport { HomePage } from '../../../../pages/home.page';\nimport { ProductListPage } from '../../../../pages/productlist.page';\n\nexport const PROMOTED_SPEC_STRATEGY = 'pom_runtime';\n\ntest('Seleccionar Explora nuestros productos y validar redireccion al modulo de informacion', async ({ page }) => {\n  test.setTimeout(Number(process.env.PROMOTED_SPEC_TIMEOUT_MS ?? 90000));\n  process.env.APP_SLUG = 'arquitectura-automatizacion';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-004';\n  process.env.SCENARIO_TITLE = 'Seleccionar Explora nuestros productos y validar redireccion al modulo de informacion';\n\n  const homePage = new HomePage(page);\n  const productListPage = new ProductListPage(page);\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await page.goto('/');\n    await page.waitForLoadState('domcontentloaded');\n\n    await promotedRuntime.waitForPromotedUiStable({\n      stepIndex: 2,\n      target: 'public_product_entry',\n      description: 'Preserve the observed functional order before selecting the first visible list item.'\n    });\n\n    const replayStep3 = async () => {\n      await homePage.start();\n    };\n    const replayStep4 = async () => {\n      await productListPage.selectProduct('Explora nuestros productosConoce sobre los beneficios de los productos BSC');\n    };\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 3,\n      target: 'Iniciar',\n      actionIntent: 'start_session',\n      expectedEffect: 'ui_change',\n      sensitive: false,\n      previousStepReplays: [],\n      lastSelectionStep: undefined,\n      expectedOwnerPage: 'HomePage',\n      action: async () => {\n        await homePage.start();\n      }\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 3,\n      target: 'Explora nuestros productosConoce sobre los beneficios de los productos BSC',\n      description: 'Validar la transicion observada despues de seleccionar la opcion publica.',\n      assertion: async () => {\n        await expect(page.getByText('Explora nuestros productosConoce sobre los beneficios de los productos BSC', { exact: false })).toBeVisible();\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 4,\n      target: 'Explora nuestros productosConoce sobre los beneficios de los productos BSC',\n      actionIntent: 'select_product',\n      expectedEffect: 'ui_change',\n      sensitive: false,\n      previousStepReplays: [\n        {\n          stepIndex: 3,\n          actionIntent: 'start_session',\n          target: 'Iniciar',\n          sensitive: false,\n          replay: replayStep3\n        }\n      ],\n      lastSelectionStep: undefined,\n      expectedOwnerPage: 'ProductListPage',\n      action: async () => {\n        await productListPage.selectProduct('Explora nuestros productosConoce sobre los beneficios de los productos BSC');\n      }\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 4,\n      target: 'DepÃ³sitos a plazo',\n      description: 'Validar el primer elemento visible del listado observado durante discovery.',\n      assertion: async () => {\n        await expect(page.getByText('DepÃ³sitos a plazo', { exact: false })).toBeVisible();\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 5,\n      target: 'el primer elemento visible del listado',\n      actionIntent: 'select_first_visible_card',\n      expectedEffect: 'ui_change',\n      sensitive: false,\n      previousStepReplays: [\n        {\n          stepIndex: 3,\n          actionIntent: 'start_session',\n          target: 'Iniciar',\n          sensitive: false,\n          replay: replayStep3\n        },\n        {\n          stepIndex: 4,\n          actionIntent: 'select_product',\n          target: 'Explora nuestros productosConoce sobre los beneficios de los productos BSC',\n          sensitive: false,\n          replay: replayStep4\n        }\n      ],\n      lastSelectionStep: undefined,\n      expectedOwnerPage: 'ProductListPage',\n      action: async () => {\n        await productListPage.selectFirstVisibleCard();\n      }\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 5,\n      target: 'mÃ³dulo de informaciÃ³n',\n      description: 'Validar que se muestre mÃ³dulo de informaciÃ³n tras la redirecciÃ³n observada.',\n      assertion: async () => {\n        await expect(page.getByText('mÃ³dulo de informaciÃ³n', { exact: false })).toBeVisible();\n      }\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "La opcion publica dirige al modulo de informacion.",
+      "implementation": "await expect(page.getByText('Explora nuestros productosConoce sobre los beneficios de los productos BSC', { exact: false })).toBeVisible();"
+    },
+    {
+      "requirement": "el primer elemento visible del listado",
+      "implementation": "await expect(page.getByText('DepÃ³sitos a plazo', { exact: false })).toBeVisible();"
+    },
+    {
+      "requirement": "mÃ³dulo de informaciÃ³n",
+      "implementation": "await expect(page.getByText('mÃ³dulo de informaciÃ³n', { exact: false })).toBeVisible();"
+    }
+  ],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "start"
+      ]
+    },
+    {
+      "className": "ProductListPage",
+      "methods": [
+        "selectProduct",
+        "selectFirstVisibleCard"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "homePage",
+    "productListPage",
+    "promotedRuntime",
+    "replayStep3",
+    "replayStep4"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [
+    "Discovery evidence for accented UI strings appears mojibake-encoded; the spec preserves the supplied evidence text verbatim."
+  ],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

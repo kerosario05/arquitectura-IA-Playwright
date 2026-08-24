@@ -1,4 +1,3 @@
-import dotenv from "dotenv";
 import type {
   BrowserName,
   FullConfig,
@@ -10,8 +9,9 @@ import type {
   TestDataValue
 } from "../types/env.types";
 import type { RequiredJiraRuntimeConfig } from "../types/jira.types";
+import { loadDotenvWithPowerShellSupport } from "./dotenv-loader";
 
-dotenv.config();
+loadDotenvWithPowerShellSupport();
 
 const allowedBrowsers: BrowserName[] = ["chromium", "firefox", "webkit"];
 const allowedLoginModes: LoginMode[] = ["password", "no_login", "manual"];
@@ -456,10 +456,14 @@ export const config: FullConfig = {
     },
     android: {
       sdkHome: process.env.ANDROID_HOME?.trim() || process.env.ANDROID_SDK_ROOT?.trim() || undefined,
-      avdName: process.env.ANDROID_AVD_NAME?.trim() || "Pixel_7_Pro",
+      avdName: process.env.ANDROID_AVD_NAME?.trim() || undefined,
       apkPath: process.env.ANDROID_APK_PATH?.trim() || undefined,
       appPackage: process.env.ANDROID_APP_PACKAGE?.trim() || undefined,
       appActivity: process.env.ANDROID_APP_ACTIVITY?.trim() || undefined,
+      systemPort: parseOptionalPositiveNumber(
+        process.env.APPIUM_ANDROID_SYSTEM_PORT,
+        "APPIUM_ANDROID_SYSTEM_PORT"
+      ),
       headless: (process.env.ANDROID_EMULATOR_HEADLESS ?? "true").toLowerCase() === "true",
       bootTimeoutMs: parseOptionalPositiveNumber(
         process.env.ANDROID_EMULATOR_BOOT_TIMEOUT_MS,

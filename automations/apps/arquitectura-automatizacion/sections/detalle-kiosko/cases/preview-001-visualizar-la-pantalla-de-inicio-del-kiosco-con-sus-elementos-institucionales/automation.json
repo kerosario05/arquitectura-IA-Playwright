@@ -1,0 +1,141 @@
+{
+  "id": "preview-001-visualizar-la-pantalla-de-inicio-del-kiosco-con-sus-elementos-institucionales",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Visualizar la pantalla de inicio del kiosco con sus elementos institucionales",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-001-visualizar-la-pantalla-de-inicio-del-kiosco-con-sus-elementos-institucionales\\plan.json",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-001-visualizar-la-pantalla-de-inicio-del-kiosco-con-sus-elementos-institucionales\\case.spec.ts",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "status": "spec_failed",
+  "source": "discovery",
+  "appProfile": "arquitectura-automatizacion",
+  "createdAt": "2026-08-13T19:00:18.702Z",
+  "updatedAt": "2026-08-13T19:00:18.702Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-08-13T18-57-54-341Z\\discovered-plans.pending.json",
+  "pomStatus": "needs_manual_review",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "failed",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-08-13T18-57-54-341Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "specGeneration": {
+      "mode": "ai_hybrid",
+      "provider": "codex",
+      "model": "gpt-5.4",
+      "skill": {
+        "name": "playwright-spec-generation",
+        "version": "1.0.0",
+        "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+        "loaded": true
+      },
+      "invocations": 2,
+      "invocationsConsumed": 2,
+      "durationMs": 57505,
+      "usage": {
+        "inputTokens": 61885,
+        "cachedInputTokens": 41088,
+        "cacheWriteInputTokens": 0,
+        "nonCachedInputTokens": 20797,
+        "outputTokens": 1551,
+        "reasoningOutputTokens": 516,
+        "totalPhysicalTokens": 63436,
+        "durationMs": 39904,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "failed",
+        "functionalExecution": "failed"
+      },
+      "promotionAllowed": false,
+      "specsRequested": 1,
+      "specsValidated": 0,
+      "specsRejected": 1,
+      "specGenerationAttempts": 2,
+      "specRepairAttempts": 1,
+      "firstPassPromotion": false,
+      "failedGatesAttempt1": [
+        "semanticCoverage"
+      ],
+      "regressedGates": [
+        "functionalExecution"
+      ],
+      "missingRequirements": [],
+      "oracleTypes": [
+        "unsupported_or_unresolved"
+      ],
+      "errors": [
+        "unresolved_requirement:Execution plan step 2 requires a promoted runtime login/authentication implementation, but no allowed runtime method or registered auth flow was provided to represent this step without inventing behavior.",
+        "unresolved_requirement:The expected outcome \"La bienvenida institucional del kiosco se presenta correctamente.\" is backed=false in observableOracles, so no compliant assertion can be generated for it.",
+        "unresolved_requirement:Scenario assertions for institutional logo and greeting message lack backed observable evidence or registered page-object/runtime APIs to verify them without inventing selectors or text.",
+        "step_not_implemented_in_spec:2",
+        "expected_result_not_propagated",
+        "functional_execution_failed:exitCode=1",
+        "functional_execution_error:Error: Promoted assertion failed at step 2 target=\"backing_evidence_missing\". diagnostics={\"currentUrl\":\"https://172.27.4.50/\",\"actionIntent\":\"assertVisible\",\"target\":\"backing_evidence_missing\",\"stepIndex\":2,\"timeoutMs\":15000,\"retryAttempted\":false,\"screenshotPath\":\"C:\\\\MisProyectos\\\\arquitectura-IA-Playwright-feature-auth-gate\\\\.artifacts\\\\promoted-runtime\\\\step-002.png\"} cause=Unresolved requirement: missing backed observable evidence for step 2 greeting message assertion.",
+        "repair_rejected:regressed_gates:functionalExecution"
+      ],
+      "warnings": [
+        "functional_execution_screenshots=1",
+        "repair_rejected_regressed_gates",
+        "ai_repair_attempt_applied:1:failedGates=semanticCoverage",
+        "ai_repair_previous_attempt_error:unresolved_requirement:Execution plan step 2 requires a promoted runtime login/authentication implementation, but no allowed runtime method or registered auth flow was provided to represent this step without inventing behavior.",
+        "ai_repair_previous_attempt_error:unresolved_requirement:The expected outcome \"La bienvenida institucional del kiosco se presenta correctamente.\" is backed=false in observableOracles, so no compliant assertion can be generated for it.",
+        "ai_repair_previous_attempt_error:unresolved_requirement:Scenario assertions for institutional logo and greeting message lack backed observable evidence or registered page-object/runtime APIs to verify them without inventing selectors or text.",
+        "ai_repair_previous_attempt_error:missing_step_coverage:2",
+        "ai_repair_previous_attempt_error:step_not_implemented_in_spec:2",
+        "ai_repair_previous_attempt_error:expected_result_not_propagated"
+      ],
+      "finalSpec": {
+        "origin": "ai_candidate",
+        "generatedBy": "ai",
+        "strategy": "ai_candidate",
+        "fallback": null
+      },
+      "specWritten": false,
+      "previousSpec": {
+        "existed": false,
+        "hash": null,
+        "lastModifiedAt": null
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "spec_generation_validation_failed",
+      "blockers": [
+        "spec_generation_validation_failed"
+      ],
+      "availablePageObjects": [
+        "ProductListPage",
+        "ProductDetailPage",
+        "FormPage",
+        "HomePage",
+        "LoginPage",
+        "CategoryPage",
+        "ProductInformationPage",
+        "OperationsMenuPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-observar-el-inicio-del-flujo-de-autenticacion-desde-transacciones-y-servicios",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Observar el inicio del flujo de autenticacion desde Transacciones y servicios",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-17T19:54:04.185Z"
+}

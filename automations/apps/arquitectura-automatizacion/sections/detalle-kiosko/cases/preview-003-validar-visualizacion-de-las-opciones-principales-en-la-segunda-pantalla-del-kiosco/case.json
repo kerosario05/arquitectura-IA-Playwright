@@ -1,0 +1,10 @@
+{
+  "id": "preview-003-validar-visualizacion-de-las-opciones-principales-en-la-segunda-pantalla-del-kiosco",
+  "externalId": "PREVIEW-003",
+  "caseId": 0,
+  "title": "Validar visualizacion de las opciones principales en la segunda pantalla del kiosco",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-17T20:34:25.925Z"
+}

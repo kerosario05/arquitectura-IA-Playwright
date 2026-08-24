@@ -1,0 +1,10 @@
+{
+  "id": "c42927-validacion-de-opciones-iniciales-sin-informacion-financiera-visible",
+  "externalId": "C42927",
+  "caseId": 42927,
+  "title": "Validacion de opciones iniciales sin informacion financiera visible",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-05T20:50:39.786Z"
+}

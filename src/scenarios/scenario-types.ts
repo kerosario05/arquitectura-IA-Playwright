@@ -1,3 +1,5 @@
+import type { AiUsageMetrics } from "../ai/ai-provider.types";
+
 export type CatalogOptions = {
   useDiscoveredCatalog?: boolean;
   catalogMode?: "existing" | "refresh";
@@ -97,6 +99,7 @@ export type ScenarioPreviewRequest = {
   createTestRun?: boolean;
   reportResults?: boolean;
   catalogOptions?: CatalogOptions;
+  launchId?: string;
 };
 
 export type AppInferenceMeta = {
@@ -161,6 +164,7 @@ export type McpScenario = {
   scenarioId?: string;
   caseId?: number;
   generationSource?: "ai" | "deterministic_seed"; // Track source for seeds vs AI
+  authIntent?: "gate_observation" | "full_authentication";
   functionalBranch?: FunctionalBranchRef;
   validation?: {
     valid: boolean;
@@ -295,6 +299,7 @@ export type ScenarioPreviewResponse = {
   blockedScenarios?: BlockedScenario[];
   warnings: string[];
   catalogDiagnostics?: CatalogDiagnostics;
+  generationDiagnostics?: ScenarioGenerationDiagnostics;
 };
 
 export type ScenarioPreviewError = {
@@ -368,6 +373,13 @@ export type ScenarioGenerationDiagnostics = {
   branchRequiredClicks?: string[];
   effectiveAllowedClicks?: string[];
   effectiveAllowedClicksBeforeRepair?: number;
+  aiPurpose?: string;
+  aiProvider?: string;
+  aiModel?: string;
+  aiUsage?: AiUsageMetrics;
+  launchId?: string;
+  sourceIssueKey?: string;
+  appSlug?: string;
 };
 
 export type DiagnosticCode =
@@ -555,4 +567,48 @@ export type DetectedProductCard = {
   clickableAncestorStrategy?: string; // Strategy to click ancestor (button, link, onclick, etc.)
   clickableAncestorTag?: string; // Tag of clickable ancestor
   labelElementTag?: string; // Tag of label element (h3, h2, etc.)
+};
+
+export type AppKnowledgeItem = {
+  id: string;
+  source: string;
+  issueKey?: string;
+  scenarioTitle?: string;
+  coverageRefs: string[];
+  steps: string[];
+  clickTargets: string[];
+  assertionTargets: string[];
+  negativeAssertions: string[];
+  optionLabels: string[];
+  authTerms: string[];
+  manual: boolean;
+  confidence: string;
+  createdAt: string;
+  updatedAt: string;
+  lastSeenAt: string;
+  runCount: number;
+  rejectedReason?: string;
+  routeSignature?: string;
+  coverageSignature?: string;
+  knowledgeKind?: string;
+  confidenceScore?: number;
+  sourceQuality?: string;
+  validationStatus?: string;
+  trustedForReuse?: boolean;
+  successCount?: number;
+  failureCount?: number;
+  lastValidatedAt?: string;
+  destination?: string;
+  destinationSignals?: string[];
+  destinationUrl?: string;
+  routeFrom?: string;
+  actionTarget?: string;
+};
+
+export type AppKnowledge = {
+  version: number;
+  appSlug: string;
+  createdAt: string;
+  updatedAt: string;
+  items: AppKnowledgeItem[];
 };

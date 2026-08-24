@@ -1,0 +1,13 @@
+{
+  "appSlug": "default",
+  "sectionSlug": "default-section",
+  "scenarioId": "PREVIEW-001",
+  "scenarioTitle": "Visualizacion de la pantalla inicial del kiosco",
+  "stepCount": 3,
+  "sourceExpectedResultPresent": false,
+  "requiredAssertionCount": 0,
+  "availablePageObjectCount": 0,
+  "mode": "deterministic",
+  "provider": null,
+  "model": null
+}

@@ -1,0 +1,10 @@
+{
+  "id": "c42993-validar-que-el-boton-iniciar-sea-visible-en-el-punto-de-entrada-del-kiosco",
+  "externalId": "C42993",
+  "caseId": 42993,
+  "title": "Validar que el boton Iniciar sea visible en el punto de entrada del kiosco",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-06T18:40:06.984Z"
+}

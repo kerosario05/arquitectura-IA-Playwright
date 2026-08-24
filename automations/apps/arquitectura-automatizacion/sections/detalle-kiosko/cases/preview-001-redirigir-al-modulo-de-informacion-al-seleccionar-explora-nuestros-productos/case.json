@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-redirigir-al-modulo-de-informacion-al-seleccionar-explora-nuestros-productos",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Redirigir al módulo de información al seleccionar Explora nuestros productos",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-18T12:26:54.685Z"
+}

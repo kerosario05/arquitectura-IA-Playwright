@@ -1,0 +1,127 @@
+{
+  "id": "preview-002-visualizar-pantalla-inicial-del-kiosco-con-acceso-de-entrada",
+  "externalId": "PREVIEW-002",
+  "caseId": 0,
+  "title": "Visualizar pantalla inicial del kiosco con acceso de entrada",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-002-visualizar-pantalla-inicial-del-kiosco-con-acceso-de-entrada\\plan.json",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-002-visualizar-pantalla-inicial-del-kiosco-con-acceso-de-entrada\\case.spec.ts",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "status": "spec_failed",
+  "source": "discovery",
+  "appProfile": "arquitectura-automatizacion",
+  "createdAt": "2026-08-14T17:48:45.342Z",
+  "updatedAt": "2026-08-14T17:48:45.342Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-08-14T17-48-38-434Z\\discovered-plans.pending.json",
+  "pomStatus": "needs_manual_review",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "failed",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-08-14T17-48-38-434Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "specGeneration": {
+      "mode": "deterministic",
+      "provider": null,
+      "model": null,
+      "skill": {
+        "name": null,
+        "version": null,
+        "hash": null,
+        "loaded": false
+      },
+      "invocations": 0,
+      "invocationsConsumed": 0,
+      "durationMs": 9,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "skipped",
+        "structure": "skipped",
+        "traceFidelity": "skipped",
+        "typescript": "skipped",
+        "playwrightDiscovery": "skipped",
+        "semanticCoverage": "skipped",
+        "functionalExecution": "skipped"
+      },
+      "promotionAllowed": false,
+      "specsRequested": 1,
+      "specsValidated": 0,
+      "specsRejected": 0,
+      "specGenerationAttempts": 0,
+      "specRepairAttempts": 0,
+      "firstPassPromotion": false,
+      "failedGatesAttempt1": [],
+      "regressedGates": [],
+      "missingRequirements": [],
+      "oracleTypes": [
+        "navigation_transition"
+      ],
+      "errors": [
+        "execution_contract_unresolved:step=3:operation=assertVisible",
+        "required_scenario_step_missing:scenarioStepIndex=3:reason=required_scenario_step_missing"
+      ],
+      "warnings": [
+        "promotion_oracle_gate:contract_invalid:unresolved_required_requirements=0"
+      ],
+      "finalSpec": {
+        "origin": "deterministic_draft",
+        "generatedBy": "core",
+        "strategy": "deterministic_draft",
+        "fallback": null
+      },
+      "specWritten": false,
+      "previousSpec": {
+        "existed": false,
+        "hash": null,
+        "lastModifiedAt": null
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "spec_generation_validation_failed",
+      "blockers": [
+        "spec_generation_validation_failed"
+      ],
+      "availablePageObjects": [
+        "ProductListPage",
+        "ProductDetailPage",
+        "FormPage",
+        "HomePage",
+        "LoginPage",
+        "CategoryPage",
+        "ProductInformationPage",
+        "OperationsMenuPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-002-visualizar-pantalla-inicial-del-kiosco-con-acceso-de-entrada\\plan.json",
+    "previousStatus": "spec_failed"
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-003",
+    "caseId": 0,
+    "title": "Direccionamiento autenticado desde Transacciones y servicios"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "description": "Clic en \"Iniciar\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Clic en \"Transacciones y servicios\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Transacciones y servicios",
+          "resolvedTargetName": "Transacciones y serviciosRealiza operaciones con tus cuentas",
+          "resolvedCandidateId": "el-5",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed",
+          "confidence": 0.975
+        }
+      },
+      "locatorStrategy": "role:button"
+    }
+  ],
+  "notes": [
+    "Discovery partial: 3/6 navigations/assertions satisfied.",
+    "Review needed: 3 non-blocking assertion failure(s) were ignored for pass/fail reconciliation.",
+    "Recovered 2 transient assertion failure(s) - see step recovery metadata for details."
+  ],
+  "createdAt": "2026-08-14T20:17:32.466Z",
+  "metadata": {
+    "authFlowRequired": false,
+    "authFlowAlias": "defaultClient",
+    "authFlowLanding": "transactions_menu",
+    "authGateDetectedDuringDiscovery": true,
+    "authGateStage": "identification_type_selection"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "mode": "deterministic",
+  "provider": null,
+  "model": null,
+  "skill": {
+    "name": null,
+    "version": null,
+    "hash": null,
+    "loaded": false
+  },
+  "invocations": 0,
+  "invocationsConsumed": 0,
+  "durationMs": 9,
+  "usage": {
+    "inputTokens": null,
+    "cachedInputTokens": null,
+    "cacheWriteInputTokens": null,
+    "nonCachedInputTokens": null,
+    "outputTokens": null,
+    "reasoningOutputTokens": null,
+    "totalPhysicalTokens": null,
+    "durationMs": null,
+    "credits": null
+  },
+  "validation": {
+    "schema": "skipped",
+    "structure": "skipped",
+    "traceFidelity": "skipped",
+    "typescript": "skipped",
+    "playwrightDiscovery": "skipped",
+    "semanticCoverage": "skipped",
+    "functionalExecution": "skipped"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 0,
+  "specGenerationAttempts": 0,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [],
+  "regressedGates": [],
+  "missingRequirements": [],
+  "oracleTypes": [
+    "navigation_transition"
+  ],
+  "errors": [
+    "execution_contract_unresolved:step=3:operation=assertVisible",
+    "required_scenario_step_missing:scenarioStepIndex=3:reason=required_scenario_step_missing"
+  ],
+  "warnings": [
+    "promotion_oracle_gate:contract_invalid:unresolved_required_requirements=0"
+  ],
+  "finalSpec": {
+    "origin": "deterministic_draft",
+    "generatedBy": "core",
+    "strategy": "deterministic_draft",
+    "fallback": null
+  }
+}

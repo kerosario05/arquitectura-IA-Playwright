@@ -1,0 +1,10 @@
+{
+  "id": "c42940-acceder-a-transacciones-y-servicios-para-iniciar-autenticacion",
+  "externalId": "C42940",
+  "caseId": 42940,
+  "title": "Acceder a Transacciones y servicios para iniciar autenticacion",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-12T20:53:34.794Z"
+}

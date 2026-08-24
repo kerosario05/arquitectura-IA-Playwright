@@ -1,0 +1,40 @@
+{
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\nimport { detectAuthGate } from '../../../../../../../src/discovery/auth-gate-detector';\nimport { scanCurrentPage } from '../../../../../../../src/explorer/page-scanner';\nimport { HomePage } from '../../../../pages/home.page';\n\ntest('PREVIEW-003 - Iniciar el flujo de autenticacion al seleccionar Transacciones y servicios', async ({ page }) => {\n  process.env.APP_SLUG = 'arquitectura-automatizacion';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-003';\n  process.env.SCENARIO_TITLE = 'Iniciar el flujo de autenticacion al seleccionar Transacciones y servicios';\n\n  const promotedRuntime = createPromotedSpecRuntime(page);\n  const homePage = new HomePage(page);\n\n  try {\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 0,\n      target: 'Iniciar',\n      actionIntent: 'Clic en \"Iniciar\".',\n      expectedEffect: 'Abrir la experiencia inicial observada durante el descubrimiento.',\n      action: async () => {\n        await homePage.start();\n      }\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 1,\n      target: 'Â¿QuÃ© deseas realizar hoy?',\n      assertion: async () => {\n        await expect(page.getByText('Â¿QuÃ© deseas realizar hoy?')).toBeVisible();\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 2,\n      target: 'transacciones y servicios',\n      actionIntent: 'Clic en \"transacciones y servicios\".',\n      expectedEffect: 'Disparar el inicio del flujo de autenticacion observado durante el descubrimiento.',\n      action: async () => {\n        await homePage.start();\n      }\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 3,\n      target: 'autenticaciÃ³n',\n      assertion: async () => {\n        await promotedRuntime.waitForPromotedUiStable(3, 'autenticaciÃ³n');\n        const authGate = detectAuthGate(await scanCurrentPage(page));\n        await expect(authGate?.detected).toBeTruthy();\n        await expect(authGate?.stage).toBe('identification_type_selection');\n      }\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});\n",
+  "coveredStepIndexes": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "Â¿QuÃ© deseas realizar hoy?",
+      "implementation": "await expect(page.getByText('Â¿QuÃ© deseas realizar hoy?')).toBeVisible();"
+    },
+    {
+      "requirement": "autenticaciÃ³n",
+      "implementation": "await expect(authGate?.stage).toBe('identification_type_selection');"
+    }
+  ],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "start"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "promotedRuntime",
+    "homePage",
+    "authGate"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

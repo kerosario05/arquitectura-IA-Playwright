@@ -1,0 +1,32 @@
+{
+  "specContent": "import { test } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\nimport { HomePage } from '../../../../pages/home.page';\n\nexport const PROMOTED_SPEC_STRATEGY = 'pom_runtime';\n\ntest('Validar ausencia de informaci\\u00f3n financiera en la pantalla de selecci\\u00f3n', async ({ page }) => {\n  test.setTimeout(Number(process.env.PROMOTED_SPEC_TIMEOUT_MS ?? 90000));\n  process.env.APP_SLUG = 'arquitectura-automatizacion';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-002';\n  process.env.SCENARIO_TITLE = 'Validar ausencia de informaci\\u00f3n financiera en la pantalla de selecci\\u00f3n';\n\n  const homePage = new HomePage(page);\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await page.goto('/');\n    await page.waitForLoadState('domcontentloaded');\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 3,\n      target: 'Iniciar',\n      actionIntent: 'start_session',\n      expectedEffect: 'ui_change',\n      sensitive: false,\n      previousStepReplays: [],\n      lastSelectionStep: undefined,\n      expectedOwnerPage: 'HomePage',\n      action: async () => {\n        await homePage.start();\n      }\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    3
+  ],
+  "coveredAssertions": [],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "start"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "homePage",
+    "promotedRuntime"
+  ],
+  "unresolvedRequirements": [
+    "Executable step 1 could not be implemented as an assertion because no backed observable oracle or observed assertion evidence was supplied for \\\"\\u00bfQu\\u00e9 deseas realizar hoy?\\\" and promotion rules forbid inventing visible-text assertions.",
+    "Executable step 2 (login) could not be implemented because the supplied runtime allowlist does not include any permitted login method, no auth flow was provided, and promotion rules forbid inventing runtime or page-object login behavior.",
+    "The expected result could not be asserted because the only observable oracle for \\\"La pantalla inicial solo muestra opciones de direccionamiento sin datos financieros.\\\" is backed=false and no authoritative observed evidence was supplied.",
+    "Executable step 3 could not include its paired post-click assertion because no backed observable oracle or observed assertion evidence was supplied for \\\"transacciones y servicios\\\"."
+  ],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

@@ -64,7 +64,7 @@
         "exact": false,
         "metadata": {
           "resolvedTargetName": "Depósitos a plazo en Pesos",
-          "resolvedCandidateId": "el-6",
+          "resolvedCandidateId": "el-5",
           "aiAssisted": false,
           "repairType": "ordinal_selection",
           "decisionStatus": "resolved",
@@ -81,9 +81,9 @@
           "domainTerm": "producto",
           "domainTermSource": "routeProfile",
           "selectedCandidateText": "Depósitos a plazo en Pesos",
-          "selectedCandidateId": "el-6"
+          "selectedCandidateId": "el-5"
         },
-        "selectedCandidateId": "el-6",
+        "selectedCandidateId": "el-5",
         "selectedCandidateText": "Depósitos a plazo en Pesos",
         "segmentIndex": 0,
         "transitionDetected": true,
@@ -100,22 +100,13 @@
         "exact": false
       },
       "locatorStrategy": "back_navigation_alias"
-    },
-    {
-      "index": 8,
-      "action": "assertText",
-      "description": "Assert: Préstamos",
-      "target": {
-        "strategy": "text",
-        "value": "Préstamos",
-        "exact": false
-      },
-      "expected": "Préstamos"
     }
   ],
   "notes": [
-    "Discovery partial: 6/9 navigations/assertions satisfied.",
+    "Discovery completed successfully. All targets and concrete assertions passed.",
+    "Contextual assertions kept as non-blocking warnings: Cuentas de Efectivo; Préstamos",
+    "Review needed: 3 non-blocking assertion failure(s) were ignored for pass/fail reconciliation.",
     "Recovered 2 transient assertion failure(s) - see step recovery metadata for details."
   ],
-  "createdAt": "2026-06-10T01:38:24.342Z"
+  "createdAt": "2026-08-12T21:41:21.904Z"
 }

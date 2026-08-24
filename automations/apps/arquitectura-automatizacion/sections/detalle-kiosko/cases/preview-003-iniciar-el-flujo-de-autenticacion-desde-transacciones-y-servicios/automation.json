@@ -1,0 +1,133 @@
+{
+  "id": "preview-003-iniciar-el-flujo-de-autenticacion-desde-transacciones-y-servicios",
+  "externalId": "PREVIEW-003",
+  "caseId": 0,
+  "title": "Iniciar el flujo de autenticación desde transacciones y servicios",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-003-iniciar-el-flujo-de-autenticacion-desde-transacciones-y-servicios\\plan.json",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-003-iniciar-el-flujo-de-autenticacion-desde-transacciones-y-servicios\\case.spec.ts",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "status": "spec_failed",
+  "source": "discovery",
+  "appProfile": "arquitectura-automatizacion",
+  "createdAt": "2026-08-17T14:16:44.770Z",
+  "updatedAt": "2026-08-17T14:16:44.770Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-08-17T14-13-42-073Z\\discovered-plans.pending.json",
+  "pomStatus": "needs_manual_review",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "failed",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-08-17T14-13-42-073Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "specGeneration": {
+      "mode": "ai_hybrid",
+      "provider": "codex",
+      "model": "gpt-5.4-mini",
+      "skill": {
+        "name": "playwright-spec-generation",
+        "version": "1.0.0",
+        "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+        "loaded": true
+      },
+      "invocations": 2,
+      "invocationsConsumed": 2,
+      "durationMs": 47068,
+      "usage": {
+        "inputTokens": 55779,
+        "cachedInputTokens": 43136,
+        "cacheWriteInputTokens": 0,
+        "nonCachedInputTokens": 12643,
+        "outputTokens": 2299,
+        "reasoningOutputTokens": 1209,
+        "totalPhysicalTokens": 58078,
+        "durationMs": 44100,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "failed",
+        "traceFidelity": "failed",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "passed",
+        "functionalExecution": "skipped"
+      },
+      "promotionAllowed": false,
+      "specsRequested": 1,
+      "specsValidated": 0,
+      "specsRejected": 1,
+      "specGenerationAttempts": 2,
+      "specRepairAttempts": 1,
+      "firstPassPromotion": false,
+      "failedGatesAttempt1": [
+        "structuralValidation",
+        "traceFidelityValidation"
+      ],
+      "regressedGates": [],
+      "missingRequirements": [],
+      "oracleTypes": [
+        "auth_gate"
+      ],
+      "errors": [
+        "missing_metadata_line:process.env.SCENARIO_TITLE = 'Iniciar el flujo de autenticación desde transacciones y servicios';",
+        "contract_target_changed:stepIndex=2:contractStepIndex=2:expected=\"autenticación\""
+      ],
+      "warnings": [
+        "ai_repair_attempt_applied:1:failedGates=structuralValidation,traceFidelityValidation",
+        "ai_repair_previous_attempt_error:missing_metadata_line:process.env.SCENARIO_TITLE = 'Iniciar el flujo de autenticación desde transacciones y servicios';",
+        "ai_repair_previous_attempt_error:missing_expect_import_for_assertions",
+        "ai_repair_previous_attempt_error:contract_target_changed:stepIndex=2:contractStepIndex=2:expected=\"autenticación\""
+      ],
+      "finalSpec": {
+        "origin": "ai_candidate",
+        "generatedBy": "ai",
+        "strategy": "ai_candidate",
+        "fallback": null
+      },
+      "specWritten": false,
+      "previousSpec": {
+        "existed": false,
+        "hash": null,
+        "lastModifiedAt": null
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "spec_generation_validation_failed",
+      "blockers": [
+        "spec_generation_validation_failed"
+      ],
+      "availablePageObjects": [
+        "ProductListPage",
+        "ProductDetailPage",
+        "FormPage",
+        "HomePage",
+        "LoginPage",
+        "CategoryPage",
+        "ProductInformationPage",
+        "OperationsMenuPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-003-iniciar-el-flujo-de-autenticacion-desde-transacciones-y-servicios\\plan.json",
+    "previousStatus": "spec_failed"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "scenarioId": "PREVIEW-002",
+  "specContent": "import { test } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\n\nimport { HomePage } from '../../../../pages/home.page';\nimport { ProductInformationPage } from '../../../../pages/productinformation.page';\nimport { CategoryPage } from '../../../../pages/category.page';\n\nexport const PROMOTED_SPEC_STRATEGY = 'pom_runtime';\n\ntest('Visualizar las subopciones de Cuentas de Efectivo', async ({ page }) => {\n  test.setTimeout(Number(process.env.PROMOTED_SPEC_TIMEOUT_MS ?? 90000));\n  process.env.APP_SLUG = 'arquitectura-automatizacion';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-002';\n  process.env.SCENARIO_TITLE = 'Visualizar las subopciones de Cuentas de Efectivo';\n\n  const homePage = new HomePage(page);\n  const productInformationPage = new ProductInformationPage(page);\n  const categoryPage = new CategoryPage(page);\n\n  const promotedRuntime = createPromotedSpecRuntime(page);\n  try {\n    await page.goto(process.env.APP_BASE_URL!);\n    await page.waitForLoadState('domcontentloaded');\n\n    const replayStep_3 = async () => {\n      await homePage.start();\n    };\n    const replayStep_4 = async () => {\n      await productInformationPage.openProductInformation();\n    };\n\n    await promotedRuntime.waitForPromotedUiStable({\n      stepIndex: 2,\n      target: 'APP_LOGIN_MODE=no_login',\n      actionIntent: 'confirm_no_login_mode',\n      expectedEffect: 'ui_stable',\n      sensitive: false,\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 3,\n      target: 'Iniciar',\n      actionIntent: 'start_session',\n      expectedEffect: 'ui_change',\n      sensitive: false,\n      previousStepReplays: [],\n      lastSelectionStep: undefined,\n      expectedOwnerPage: 'HomePage',\n      action: async () => {\n        await homePage.start();\n      },\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 4,\n      target: 'Información de productos',\n      actionIntent: 'open_product_information',\n      expectedEffect: 'ui_change',\n      sensitive: false,\n      previousStepReplays: [\n        {\n          stepIndex: 3,\n          actionIntent: 'start_session',\n          target: 'Iniciar',\n          sensitive: false,\n          replay: replayStep_3,\n        },\n      ],\n      lastSelectionStep: undefined,\n      expectedOwnerPage: 'ProductInformationPage',\n      action: async () => {\n        await productInformationPage.openProductInformation();\n      },\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 5,\n      target: 'Cuentas de Efectivo',\n      actionIntent: 'select_category',\n      expectedEffect: 'ui_change',\n      sensitive: false,\n      previousStepReplays: [\n        {\n          stepIndex: 3,\n          actionIntent: 'start_session',\n          target: 'Iniciar',\n          sensitive: false,\n          replay: replayStep_3,\n        },\n        {\n          stepIndex: 4,\n          actionIntent: 'open_product_information',\n          target: 'Información de productos',\n          sensitive: false,\n          replay: replayStep_4,\n        },\n      ],\n      lastSelectionStep: {\n        stepIndex: 4,\n        selectedTarget: 'Información de productos',\n      },\n      expectedOwnerPage: 'CategoryPage',\n      action: async () => {\n        await categoryPage.selectCategory('Cuentas de Efectivo');\n      },\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "coveredAssertions": [],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "start"
+      ]
+    },
+    {
+      "className": "ProductInformationPage",
+      "methods": [
+        "openProductInformation"
+      ]
+    },
+    {
+      "className": "CategoryPage",
+      "methods": [
+        "selectCategory"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "homePage",
+    "productInformationPage",
+    "categoryPage",
+    "promotedRuntime",
+    "replayStep_3",
+    "replayStep_4"
+  ],
+  "unresolvedRequirements": [
+    "No observed evidence was provided to assert that the Cuentas de Efectivo suboptions 'Pesos', 'Dólares' and 'Euros' are visible, so the required result cannot be validated without inventing assertions."
+  ],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\nimport { AuthFlow } from '../../../../flows/auth.flow';\nimport { HomePage } from '../../../../pages/home.page';\nimport { OperationsMenuPage } from '../../../../pages/operationsmenu.page';\n\nexport const PROMOTED_SPEC_STRATEGY = 'pom_runtime';\n\ntest('Seleccionar Transacciones y servicios e iniciar el flujo de autenticacion', async ({ page }) => {\n  test.setTimeout(Number(process.env.PROMOTED_SPEC_TIMEOUT_MS ?? 90000));\n\n  process.env.APP_SLUG = 'arquitectura-automatizacion';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-005';\n  process.env.SCENARIO_TITLE = 'Seleccionar Transacciones y servicios e iniciar el flujo de autenticacion';\n\n  const homePage = new HomePage(page);\n  const operationsMenuPage = new OperationsMenuPage(page);\n  const authFlow = new AuthFlow(page);\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await page.goto('/');\n    await page.waitForLoadState('domcontentloaded');\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 2,\n      target: 'Iniciar',\n      actionIntent: 'start_session',\n      expectedEffect: 'ui_change',\n      sensitive: false,\n      previousStepReplays: [],\n      lastSelectionStep: undefined,\n      expectedOwnerPage: 'HomePage',\n      action: async () => {\n        await homePage.start();\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 3,\n      target: 'Transacciones y serviciosRealiza operaciones con tus cuentas',\n      actionIntent: 'open_module',\n      expectedEffect: 'ui_change',\n      sensitive: false,\n      previousStepReplays: [],\n      lastSelectionStep: undefined,\n      expectedOwnerPage: 'OperationsMenuPage',\n      action: async () => {\n        await operationsMenuPage.openModule('Transacciones y serviciosRealiza operaciones con tus cuentas');\n      }\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 3,\n      target: 'flujo de autenticaciA3n',\n      description: 'Validar que se muestre \\\"flujo de autenticaciA3n\\\".',\n      assertion: async () => {\n        const currentStage = await authFlow.detectCurrentStage();\n        expect(currentStage).toBeTruthy();\n      }\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "Validar que se muestre \"flujo de autenticaciA3n\".",
+      "implementation": "expect(currentStage).toBeTruthy();"
+    },
+    {
+      "requirement": "La opcion autenticada inicia la barrera de autenticacion.",
+      "implementation": "expect(currentStage).toBeTruthy();"
+    },
+    {
+      "requirement": "flujo de autenticaciA3n",
+      "implementation": "expect(currentStage).toBeTruthy();"
+    }
+  ],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "start"
+      ]
+    },
+    {
+      "className": "OperationsMenuPage",
+      "methods": [
+        "openModule"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "homePage",
+    "operationsMenuPage",
+    "authFlow",
+    "promotedRuntime",
+    "currentStage"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

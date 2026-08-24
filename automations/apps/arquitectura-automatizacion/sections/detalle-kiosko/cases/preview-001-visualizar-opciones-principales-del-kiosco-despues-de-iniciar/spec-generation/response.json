@@ -1,0 +1,33 @@
+{
+  "specContent": "import { test } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\nimport { HomePage } from '../../../../pages/home.page';\n\nexport const PROMOTED_SPEC_STRATEGY = 'pom_runtime';\n\ntest('Visualizar opciones principales del kiosco despu\\u00e9s de iniciar', async ({ page }) => {\n  test.setTimeout(Number(process.env.PROMOTED_SPEC_TIMEOUT_MS ?? 90000));\n  process.env.APP_SLUG = 'arquitectura-automatizacion';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-001';\n  process.env.SCENARIO_TITLE = 'Visualizar opciones principales del kiosco despu\\u00e9s de iniciar';\n\n  const homePage = new HomePage(page);\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await page.goto('/');\n    await page.waitForLoadState('domcontentloaded');\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 2,\n      description: 'Validar que se muestre \"Informaci\\u00f3n de productos\".',\n      target: 'Informaci\\u00f3n de productos',\n      assertion: async () => {\n        throw new Error('Unresolved promoted assertion for step 2: no backed observable evidence, auth flow, or allowed runtime action was provided to implement the required login validation safely.');\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 3,\n      target: 'Iniciar',\n      actionIntent: 'start_session',\n      expectedEffect: 'ui_change',\n      sensitive: false,\n      previousStepReplays: [],\n      lastSelectionStep: undefined,\n      expectedOwnerPage: 'HomePage',\n      action: async () => {\n        await homePage.start();\n      }\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3
+  ],
+  "coveredAssertions": [],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "start"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "homePage",
+    "promotedRuntime"
+  ],
+  "unresolvedRequirements": [
+    "Executable step 2 (`login`) requires a promotedRuntime call, but no allowed runtime action, auth flow import, or backed observable assertion was provided to implement it without inventing unsupported behavior.",
+    "The expected outcome `La pantalla de selecci\\u00f3n presenta las dos opciones principales del kiosco.` is marked by observableOracles as `unsupported_or_unresolved` with `backed=false`, so no valid assertion can be added from the provided evidence.",
+    "Scenario assertions for `\\u00bfQu\\u00e9 deseas realizar hoy?`, `Informaci\\u00f3n de productos`, and `transacciones y servicios` are not backed by observed evidence phrases in a form safe for exact promoted assertions."
+  ],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

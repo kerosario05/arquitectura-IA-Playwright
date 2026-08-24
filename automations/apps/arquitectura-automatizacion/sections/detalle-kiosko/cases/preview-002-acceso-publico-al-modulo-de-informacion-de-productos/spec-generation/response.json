@@ -1,0 +1,47 @@
+{
+  "scenarioId": "PREVIEW-002",
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\n\nimport { HomePage } from '../../../../pages/home.page';\nimport { ProductInformationPage } from '../../../../pages/productinformation.page';\n\nexport const PROMOTED_SPEC_STRATEGY = 'pom_runtime';\n\ntest('Acceso público al módulo de Información de productos', async ({ page }) => {\n  test.setTimeout(Number(process.env.PROMOTED_SPEC_TIMEOUT_MS ?? 90000));\n  process.env.APP_SLUG = 'arquitectura-automatizacion';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-002';\n  process.env.SCENARIO_TITLE = 'Acceso público al módulo de Información de productos';\n\n  const homePage = new HomePage(page);\n  const productInformationPage = new ProductInformationPage(page);\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await page.goto(process.env.APP_BASE_URL ?? '/');\n    await page.waitForLoadState('domcontentloaded');\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 3,\n      target: 'Iniciar',\n      actionIntent: 'start_session',\n      expectedEffect: 'ui_change',\n      sensitive: false,\n      previousStepReplays: [],\n      lastSelectionStep: undefined,\n      expectedOwnerPage: 'HomePage',\n      action: async () => {\n        await homePage.start();\n      }\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 2,\n      description: 'Validar que se muestre \"¿Qué deseas realizar hoy?\".',\n      target: '¿Qué deseas realizar hoy?',\n      assertion: async () => {\n        await expect(page.getByText('¿Qué deseas realizar hoy?', { exact: true })).toBeVisible();\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 4,\n      target: 'Información de productos',\n      actionIntent: 'open_product_information',\n      expectedEffect: 'ui_change',\n      sensitive: false,\n      previousStepReplays: [],\n      lastSelectionStep: undefined,\n      expectedOwnerPage: 'ProductInformationPage',\n      action: async () => {\n        await productInformationPage.openProductInformation();\n      }\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "¿Qué deseas realizar hoy?",
+      "implementation": "await expect(page.getByText('¿Qué deseas realizar hoy?', { exact: true })).toBeVisible();"
+    }
+  ],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "start"
+      ]
+    },
+    {
+      "className": "ProductInformationPage",
+      "methods": [
+        "openProductInformation"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "homePage",
+    "productInformationPage",
+    "promotedRuntime"
+  ],
+  "unresolvedRequirements": [
+    "No hay evidencia observada suficiente para afirmar \"La ruta pública dirige al módulo de información.\" con una aserción verificable posterior al clic en \"Información de productos\"."
+  ],
+  "warnings": [
+    "El paso 2 del plan etiquetado como \"login\" se representó como una validación observable posterior a \"Iniciar\" para preservar el orden funcional descubierto."
+  ],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

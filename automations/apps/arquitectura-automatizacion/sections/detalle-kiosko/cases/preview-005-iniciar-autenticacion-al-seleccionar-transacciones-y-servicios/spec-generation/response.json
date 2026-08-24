@@ -1,0 +1,44 @@
+{
+  "specContent": "import { test } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../src/runtime/promoted-spec-runtime';\nimport { HomePage } from '../../../../pages/home.page';\nimport { CategoryPage } from '../../../../pages/category.page';\nimport { AuthFlow } from '../../../../flows/auth.flow';\n\ntest('PREVIEW-005 - Iniciar autenticacion al seleccionar Transacciones y servicios', async ({ page }) => {\n  process.env.APP_SLUG = 'arquitectura-automatizacion';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-005';\n  process.env.SCENARIO_TITLE = 'Iniciar autenticacion al seleccionar Transacciones y servicios';\n\n  const promotedRuntime = createPromotedSpecRuntime(page);\n  const homePage = new HomePage(page);\n  const categoryPage = new CategoryPage(page);\n  const authFlow = new AuthFlow(page);\n\n  try {\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 1,\n      description: 'Navigate to https://172.27.4.50',\n      target: 'APP_BASE_URL',\n      action: async () => {\n        await homePage.open();\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 2,\n      description: 'Clic en \"Iniciar\".',\n      target: 'Iniciar',\n      action: async () => {\n        await homePage.start();\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 3,\n      description: 'Clic en \"Transacciones y servicios\".',\n      target: 'Transacciones y serviciosRealiza operaciones con tus cuentas',\n      action: async () => {\n        await categoryPage.selectCategory('Transacciones y serviciosRealiza operaciones con tus cuentas');\n      }\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 3,\n      description: 'autenticaciÃ³n',\n      target: 'auth_gate_runtime_state',\n      assertion: async () => {\n        await authFlow.ensureStageReady();\n        const currentStage = await authFlow.detectCurrentStage();\n        if (currentStage !== 'identification_type_selection') {\n          throw new Error(`Expected auth gate stage identification_type_selection but received ${currentStage}`);\n        }\n      }\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});\n",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "autenticaciÃ³n",
+      "implementation": "await promotedRuntime.expectPromotedVisible({\n      stepIndex: 3,\n      description: 'autenticaciÃ³n',\n      target: 'auth_gate_runtime_state',\n      assertion: async () => {\n        await authFlow.ensureStageReady();\n        const currentStage = await authFlow.detectCurrentStage();\n        if (currentStage !== 'identification_type_selection') {\n          throw new Error(`Expected auth gate stage identification_type_selection but received ${currentStage}`);\n        }\n      }\n    });"
+    }
+  ],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "open",
+        "start"
+      ]
+    },
+    {
+      "className": "CategoryPage",
+      "methods": [
+        "selectCategory"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "promotedRuntime",
+    "homePage",
+    "categoryPage",
+    "authFlow",
+    "currentStage"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

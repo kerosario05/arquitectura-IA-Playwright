@@ -122,6 +122,15 @@ test.describe('test:promoted CLI Wrapper', () => {
     expect(content).toContain('cli.js');
     expect(content).toContain('spawnArgs');
   });
+
+  test('CLI wrapper propagates canonical evidence identity env vars to Playwright child', () => {
+    const cliPath = path.join(__dirname, '../src/cli/test-promoted.ts');
+    const content = fs.readFileSync(cliPath, 'utf-8');
+
+    expect(content).toContain('EVIDENCE_APP_SLUG');
+    expect(content).toContain('EVIDENCE_SECTION_SLUG');
+    expect(content).toContain('env: playwrightEnv');
+  });
 });
 
 test.describe('CLI Grep Pattern Handling', () => {

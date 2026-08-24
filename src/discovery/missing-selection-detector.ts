@@ -127,33 +127,48 @@ export function detectListingScreen(
 
 /**
  * Task 2: Detect detail assertions pending
- * Check if pending assertions look like detail/item fields
+ * Check if pending assertions look like detail/item fields.
+ *
+ * Detail is only inferred from strong entity-attribute semantics, not from
+ * generic assertion syntax (visible/mostrar/se muestre). Navigation
+ * destination signals and navigation-completion assertions act as contrary
+ * evidence and suppress ordinal selection.
  */
 export function detectDetailAssertionsPending(
   pendingAssertions: string[],
-  currentSnapshot: PageSnapshot
+  currentSnapshot: PageSnapshot,
+  navigationTarget?: string
 ): DetailAssertionDetection {
   const targets = pendingAssertions.slice(0, 5); // Focus on next few assertions
   const seemsLikeDetailAssertion: boolean[] = [];
 
-  // Generic patterns for detail-like assertions (no hardcoding)
-  const detailPatterns = [
-    /\bvisible\b/i, // Generic visibility
-    /\bmostrar\b|\bvisualizar\b|\baparecer\b/i, // Display patterns
-    /\b(?:campo|field|información|info|datos|value|precio|amount|tasa|estado|fecha)\b/i, // Generic field indicators
-    /\bse muestre\b|\bse vea\b|\bapareza\b/i, // Visibility in Spanish
-    /\ba la vista\b|\nen pantalla\b/i, // Screen presence
+  // STRONG detail signals: concrete entity attributes/sections (generic, no app vocabulary)
+  const strongDetailPatterns = [
+    /\b(?:precio|saldo|tasa|monto|valor|estado|fecha|número|numero|identificador|beneficios|requisitos|condiciones|características|caracteristicas|detalle|descripción|descripcion|amount|balance|rate)\b/i,
   ];
 
+  // NAVIGATION DESTINATION signals: module/list/category screens (contrary evidence)
+  const navigationDestinationPatterns = [
+    /\b(?:módulo|modulo|module|listado|lista|list|categoría|categoria|category|catálogo|catalogo|catalog)\b/i,
+  ];
+
+  const normalizedNavTarget = navigationTarget ? navigationTarget.toLowerCase() : "";
+
   for (const target of targets) {
-    const isDetailLike = detailPatterns.some(pattern => pattern.test(target));
+    const normalized = target.toLowerCase();
+    const hasStrongDetail = strongDetailPatterns.some(pattern => pattern.test(normalized));
+    const isNavigationDestination = navigationDestinationPatterns.some(pattern => pattern.test(normalized));
+    const isNavigationCompletion = normalizedNavTarget.length > 0 &&
+      (normalized.includes(normalizedNavTarget) || normalizedNavTarget.includes(normalized));
+
+    const isDetailLike = hasStrongDetail && !isNavigationDestination && !isNavigationCompletion;
     seemsLikeDetailAssertion.push(isDetailLike);
   }
 
   // Check if any of these assertions are visible now
   const visibleNow = targets.some(target => {
     const normalized = target.toLowerCase();
-    return snapshot.elements.some(
+    return currentSnapshot.elements.some(
       el =>
         (el.text ?? "").toLowerCase().includes(normalized.substring(0, 20)) ||
         (el.label ?? "").toLowerCase().includes(normalized.substring(0, 20))
@@ -164,7 +179,7 @@ export function detectDetailAssertionsPending(
   const likelyDetailCount = seemsLikeDetailAssertion.filter(v => v).length;
 
   console.log(
-    `[detail-assertions] pending count=${pendingCount} targets="${targets.join(", ")}" visibleNow=${visibleNow}`
+    `[detail-assertions] pending count=${pendingCount} targets="${targets.join(", ")}" visibleNow=${visibleNow} strongDetail=${likelyDetailCount} navTarget="${normalizedNavTarget}"`
   );
 
   return {
@@ -174,8 +189,8 @@ export function detectDetailAssertionsPending(
     seemsLikeDetailAssertion,
     reason:
       likelyDetailCount > 0
-        ? `${likelyDetailCount}/${targets.length} assertions seem like detail fields`
-        : "no detail-like assertions detected"
+        ? `${likelyDetailCount}/${targets.length} assertions have strong detail semantics`
+        : "no strong detail assertions detected"
   };
 }
 
@@ -205,7 +220,7 @@ export function inferMissingSelection(
   }
 
   // Detect detail assertions
-  const detailDetection = detectDetailAssertionsPending(pendingAssertions, currentSnapshot);
+  const detailDetection = detectDetailAssertionsPending(pendingAssertions, currentSnapshot, currentTarget);
   if (detailDetection.visibleNow || detailDetection.pendingCount === 0) {
     console.log(
       `[route-completion] blocked reason=assertions_already_visible detail_detected`

@@ -1,0 +1,10 @@
+{
+  "id": "c42986-visualizar-opciones-principales-despues-de-iniciar-el-kiosco",
+  "externalId": "C42986",
+  "caseId": 42986,
+  "title": "Visualizar opciones principales despues de iniciar el kiosco",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-06T18:30:01.380Z"
+}

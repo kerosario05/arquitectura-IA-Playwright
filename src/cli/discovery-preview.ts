@@ -17,6 +17,7 @@ export type PreviewCliArgs = {
   autoPom: boolean;
   rerunActive: boolean;
   overwrite: boolean;
+  deferEvidenceConsolidation: boolean;
   dryRun: boolean;
   help: boolean;
 };
@@ -52,6 +53,20 @@ type PreviewCaseResult = PreviewResult["cases"][number] & {
   discoveryStatus?: string;
   promotionStatus?: string;
   promotionReason?: string;
+  specGenerationStatus?: string;
+  automationReady?: boolean;
+  specWritten?: boolean;
+  promotionAllowed?: boolean;
+  finalSpecOrigin?: string | null;
+  fallbackUsed?: boolean;
+  aiInvoked?: boolean;
+  aiAttempts?: number;
+  specGenerationAttempts?: number;
+  specRepairAttempts?: number;
+  firstPassPromotion?: boolean;
+  oracleTypes?: string[];
+  provider?: string | null;
+  model?: string | null;
   failedTargets?: string[];
   failedAssertions?: string[];
   failureType?: string;
@@ -68,6 +83,101 @@ type PreviewCaseResult = PreviewResult["cases"][number] & {
   conditionalRisk?: string;
   reviewNeededReason?: string;
 };
+
+type PreviewCompletion = {
+  eventStatus: "passed" | "failed";
+  automationReady: boolean;
+  promotionAllowed: boolean;
+  specWritten: boolean;
+  specGenerationStatus: "passed" | "failed" | "not_applicable";
+  finalSpecOrigin: string | null;
+  fallbackUsed: boolean;
+  aiInvoked: boolean;
+  aiAttempts: number;
+  specGenerationAttempts: number;
+  specRepairAttempts: number;
+  firstPassPromotion: boolean;
+  oracleTypes: string[];
+  provider: string | null;
+  model: string | null;
+  reason: string;
+};
+
+export function resolvePreviewCompletion(
+  workflowResult: {
+    caseResult?: { status?: string } | undefined;
+    promotionStatus?: string;
+    specPath?: string;
+    specGeneration?: {
+      provider: string | null;
+      model: string | null;
+      invocations: number;
+      invocationsConsumed: number;
+      specGenerationAttempts?: number;
+      specRepairAttempts?: number;
+      firstPassPromotion?: boolean;
+      oracleTypes?: string[];
+      promotionAllowed: boolean;
+      specWritten?: boolean;
+      finalSpec: { origin: string; fallback: Record<string, unknown> | null };
+    } | undefined;
+  },
+  autoPromote: boolean,
+): PreviewCompletion {
+  const discoveryStatus = workflowResult.caseResult?.status ?? "";
+  const discoveryPassed =
+    discoveryStatus === "discovered_passed"
+    || discoveryStatus === "repaired_passed"
+    || discoveryStatus === "discovered_partial";
+  const specGeneration = workflowResult.specGeneration;
+  const promotionAllowed = specGeneration?.promotionAllowed === true;
+  const specWritten = specGeneration?.specWritten === true;
+  const finalSpecOrigin = specGeneration?.finalSpec?.origin ?? null;
+  const fallbackUsed = Boolean(specGeneration?.finalSpec?.fallback?.applied);
+  const aiAttempts = specGeneration?.invocationsConsumed ?? specGeneration?.invocations ?? 0;
+  const aiInvoked = aiAttempts > 0;
+  const specGenerationAttempts = specGeneration?.specGenerationAttempts ?? aiAttempts;
+  const specRepairAttempts = specGeneration?.specRepairAttempts ?? Math.max(0, specGenerationAttempts - 1);
+  const firstPassPromotion = specGeneration?.firstPassPromotion ?? (promotionAllowed && specRepairAttempts === 0);
+  const oracleTypes = specGeneration?.oracleTypes ?? [];
+  const provider = specGeneration?.provider ?? null;
+  const model = specGeneration?.model ?? null;
+  const automationReady = autoPromote
+    ? discoveryPassed
+      && workflowResult.promotionStatus === "promoted"
+      && promotionAllowed
+      && specWritten
+      && typeof workflowResult.specPath === "string"
+      && workflowResult.specPath.length > 0
+    : discoveryPassed;
+
+  return {
+    eventStatus: automationReady ? "passed" : "failed",
+    automationReady,
+    promotionAllowed,
+    specWritten,
+    specGenerationStatus: autoPromote
+      ? (automationReady ? "passed" : "failed")
+      : "not_applicable",
+    finalSpecOrigin,
+    fallbackUsed,
+    aiInvoked,
+    aiAttempts,
+    specGenerationAttempts,
+    specRepairAttempts,
+    firstPassPromotion,
+    oracleTypes,
+    provider,
+    model,
+    reason: autoPromote
+      ? (automationReady ? "automation_ready" : "automation_not_ready")
+      : discoveryStatus === "discovered_partial"
+        ? "observable_assertion_requires_discovery"
+        : discoveryPassed
+          ? "all_targets_validated"
+          : "blocking_failures",
+  };
+}
 
 export function classifyPreviewFailure(caseRes: PreviewCaseResult): {
   failureType: string;
@@ -321,6 +431,7 @@ function parsePreviewArgs(argv: string[]): PreviewCliArgs {
     autoPom: false,
     rerunActive: false,
     overwrite: false,
+    deferEvidenceConsolidation: false,
     dryRun: false,
     help: false,
   };
@@ -346,6 +457,8 @@ function parsePreviewArgs(argv: string[]): PreviewCliArgs {
       args.rerunActive = true;
     } else if (arg === "--overwrite") {
       args.overwrite = true;
+    } else if (arg === "--defer-evidence-consolidation") {
+      args.deferEvidenceConsolidation = true;
     } else if (arg === "--dry-run") {
       args.dryRun = true;
     } else if (arg === "--help" || arg === "-h") {
@@ -375,6 +488,7 @@ function printPreviewHelp(): void {
   console.log("  --auto-pom         Auto-generate page objects");
   console.log("  --rerun-active     Rerun active cases");
   console.log("  --overwrite        Overwrite existing outputs");
+  console.log("  --defer-evidence-consolidation  Skip run-level DOCX consolidation in this command");
   console.log("  --dry-run          Parse inputs without executing");
   console.log("  --help, -h         Show this help message");
 }
@@ -388,15 +502,19 @@ async function loadVirtualCases(inputPath: string): Promise<VirtualCase[]> {
   return data as VirtualCase[];
 }
 
-function virtualCaseToTestScenario(vc: VirtualCase): TestScenario {
+export function virtualCaseToTestScenario(vc: VirtualCase): TestScenario {
+  const embeddedCaseId = typeof vc.testRailCaseId === "number" && Number.isInteger(vc.testRailCaseId) && vc.testRailCaseId > 0
+    ? vc.testRailCaseId
+    : 0;
   const sectionName = vc.sectionName || undefined;
   const sectionSlug = vc.sectionSlug || undefined;
   return {
-    source: "jira",
-    externalId: vc.displayId,
-    caseId: 0,
+    source: embeddedCaseId > 0 ? "testrail" : "jira",
+    externalId: embeddedCaseId > 0 ? `C${embeddedCaseId}` : vc.displayId,
+    caseId: embeddedCaseId,
     title: vc.title,
     preconditions: vc.preconditions.join("\n"),
+    authIntent: vc.authIntent,
     steps: vc.steps.map((step, index) => ({
       index,
       action: step,
@@ -407,6 +525,12 @@ function virtualCaseToTestScenario(vc: VirtualCase): TestScenario {
     sectionSlug,
     sectionId: vc.sectionId,
     routeProfile: vc.routeProfile,
+    raw: {
+      custom_preconds: vc.preconditions.join("\n"),
+      custom_expected: vc.expectedResult,
+      custom_steps: vc.steps.join("\n"),
+      custom_steps_separated: vc.steps.map((step) => ({ content: step }))
+    },
   } as any;
 }
 
@@ -418,6 +542,7 @@ async function runPreviewCase(
   index: number,
   total: number,
   evidenceRunId?: string,
+  executionSource: "qalab" | "cli" = "cli",
 ): Promise<PreviewResult["cases"][number]> {
   const outputDir = path.resolve(`./.artifacts/preview/${vc.displayId}/${new Date().toISOString().replace(/[:.]/g, "-")}`);
 
@@ -444,6 +569,7 @@ async function runPreviewCase(
     workflowResult = await runCaseDiscoveryWorkflow({
       scenario,
       headed: args.headed,
+      executionSource,
       outputDir,
       autoPromote: args.autoPromote,
       promotionDryRun: args.dryRun,
@@ -457,10 +583,11 @@ async function runPreviewCase(
     });
 
     const discoveryStatus = workflowResult.caseResult.status;
-    const isPassed = discoveryStatus === "discovered_passed" || discoveryStatus === "repaired_passed" || discoveryStatus === "discovered_partial";
-    const eventStatus = isPassed ? "passed" : "failed";
+    const completion = resolvePreviewCompletion(workflowResult, args.autoPromote);
+    const isPassed = completion.eventStatus === "passed";
+    const eventStatus = completion.eventStatus;
 
-    console.log(`[preview-status-map] discoveryStatus=${discoveryStatus} eventStatus=${eventStatus} reason=${discoveryStatus === "discovered_partial" ? "observable_assertion_requires_discovery" : discoveryStatus === "discovered_passed" ? "all_targets_validated" : "blocking_failures"}`);
+    console.log(`[preview-status-map] discoveryStatus=${discoveryStatus} eventStatus=${eventStatus} automationReady=${completion.automationReady} reason=${completion.reason}`);
 
     // Build compact step results projection (no secrets, no form values)
     const cr = workflowResult.caseResult;
@@ -479,6 +606,20 @@ async function runPreviewCase(
       caseId: vc.displayId,
       status: eventStatus,
       discoveryStatus,
+      specGenerationStatus: completion.specGenerationStatus,
+      automationReady: completion.automationReady,
+      promotionAllowed: completion.promotionAllowed,
+      specWritten: completion.specWritten,
+      finalSpecOrigin: completion.finalSpecOrigin,
+      fallbackUsed: completion.fallbackUsed,
+      aiInvoked: completion.aiInvoked,
+      aiAttempts: completion.aiAttempts,
+      specGenerationAttempts: completion.specGenerationAttempts,
+      specRepairAttempts: completion.specRepairAttempts,
+      firstPassPromotion: completion.firstPassPromotion,
+      oracleTypes: completion.oracleTypes,
+      provider: completion.provider,
+      model: completion.model,
       failedAtStep: cr.failedAtStep,
       failedTarget: cr.failedTarget,
       failedReason: cr.failedReason,
@@ -524,6 +665,20 @@ async function runPreviewCase(
       discoveryStatus: workflowResult.caseResult.status,
       promotionStatus: workflowResult.promotionStatus,
       promotionReason: (workflowResult as any).promotionReason ?? "",
+      specGenerationStatus: completion.specGenerationStatus,
+      automationReady: completion.automationReady,
+      specWritten: completion.specWritten,
+      promotionAllowed: completion.promotionAllowed,
+      finalSpecOrigin: completion.finalSpecOrigin,
+      fallbackUsed: completion.fallbackUsed,
+      aiInvoked: completion.aiInvoked,
+      aiAttempts: completion.aiAttempts,
+      specGenerationAttempts: completion.specGenerationAttempts,
+      specRepairAttempts: completion.specRepairAttempts,
+      firstPassPromotion: completion.firstPassPromotion,
+      oracleTypes: completion.oracleTypes,
+      provider: completion.provider,
+      model: completion.model,
       failedTargets,
       failedAssertions,
       assertionRecovery: {
@@ -710,6 +865,7 @@ async function main(): Promise<void> {
     evidenceRunId = `preview-${timestamp}`;
     runIdMode = "standalone_generated";
   }
+  const executionSource: "qalab" | "cli" = runIdMode === "qalab" ? "qalab" : "cli";
 
   console.log(`[discovery:preview] evidenceRunId=${evidenceRunId} mode=${runIdMode}`);
   console.log(`[discovery:preview] app=${args.app}`);
@@ -720,6 +876,7 @@ async function main(): Promise<void> {
   console.log(`[discovery:preview] autoPromote=${args.autoPromote}`);
   console.log(`[discovery:preview] autoPom=${args.autoPom}`);
   console.log(`[discovery:preview] overwrite=${args.overwrite}`);
+  console.log(`[discovery:preview] deferEvidenceConsolidation=${args.deferEvidenceConsolidation}`);
 
   // Load virtual cases
   const cases = await loadVirtualCases(args.input);
@@ -763,21 +920,28 @@ async function main(): Promise<void> {
   const results: PreviewResult["cases"] = [];
   let passed = 0;
   let failed = 0;
+  let automationReady = 0;
+  let specsPromoted = 0;
 
   for (let i = 0; i < cases.length; i++) {
     const vc = cases[i];
-    const result = await runPreviewCase(vc, args, resolvedAppSlug, appProfileObj, i, cases.length, evidenceRunId);
+    const result = await runPreviewCase(vc, args, resolvedAppSlug, appProfileObj, i, cases.length, evidenceRunId, executionSource);
     results.push(result);
     if (result.status === "passed") passed++;
     else failed++;
+    if ((result as PreviewCaseResult).automationReady) automationReady += 1;
+    if ((result as PreviewCaseResult).specWritten) specsPromoted += 1;
   }
 
-  // Consolidate run evidence into single DOCX
-  // Extract sectionSlug from first case if available
-  const firstCase = cases[0];
-  const sectionSlug = firstCase?.sectionSlug;
-  const sectionName = firstCase?.sectionName;
-  await consolidateRunEvidence(evidenceRunId, resolvedAppSlug, sectionSlug, sectionName, results);
+  // Consolidate run evidence into single DOCX unless an upstream orchestrator requested deferral
+  if (args.deferEvidenceConsolidation) {
+    console.log(`[evidence:run] skipped runId=${evidenceRunId} reason=deferred_consolidation`);
+  } else {
+    const firstCase = cases[0];
+    const sectionSlug = firstCase?.sectionSlug;
+    const sectionName = firstCase?.sectionName;
+    await consolidateRunEvidence(evidenceRunId, resolvedAppSlug, sectionSlug, sectionName, results);
+  }
 
   // Aggregate failure groups (FASE 5)
   const failureGroups = buildPreviewFailureGroups(results);
@@ -794,6 +958,8 @@ async function main(): Promise<void> {
       completed: results.length,
       passed,
       failed,
+      automationReady,
+      specsPromoted,
       passRate: report.passRate,
       failureGroups,
       dominantFailure: report.dominantFailure,
@@ -812,6 +978,9 @@ async function main(): Promise<void> {
   await fs.writeFile(resultsPath, JSON.stringify(result, null, 2), "utf-8");
 
   console.log(`\n[discovery:preview] Results: ${passed} passed, ${failed} failed out of ${cases.length}`);
+  if (args.autoPromote) {
+    console.log(`[discovery:preview] automationReady=${automationReady} specsPromoted=${specsPromoted} total=${cases.length}`);
+  }
   console.log(`[discovery:preview] Results saved to ${resultsPath}`);
 
   if (failed > 0) {

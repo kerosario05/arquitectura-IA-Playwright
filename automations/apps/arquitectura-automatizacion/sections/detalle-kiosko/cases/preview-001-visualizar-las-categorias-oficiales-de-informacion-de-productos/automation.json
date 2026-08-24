@@ -7,17 +7,17 @@
   "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-001-visualizar-las-categorias-oficiales-de-informacion-de-productos\\case.spec.ts",
   "appSlug": "arquitectura-automatizacion",
   "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
-  "status": "active",
+  "status": "spec_failed",
   "source": "discovery",
   "appProfile": "arquitectura-automatizacion",
-  "createdAt": "2026-06-10T01:37:36.107Z",
-  "updatedAt": "2026-06-10T01:37:36.107Z",
-  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-06-10T01-37-22-385Z\\discovered-plans.pending.json",
-  "pomStatus": "promoted",
+  "createdAt": "2026-08-12T21:32:29.658Z",
+  "updatedAt": "2026-08-12T21:32:29.658Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-08-12T21-30-15-416Z\\discovered-plans.pending.json",
+  "pomStatus": "needs_manual_review",
   "inlineDebugMode": false,
-  "specVerificationStatus": "not_run",
+  "specVerificationStatus": "failed",
   "metadata": {
-    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-06-10T01-37-22-385Z",
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-08-12T21-30-15-416Z",
     "pomDiagnostics": {
       "status": "promoted",
       "inlineFallbackUsed": false,
@@ -29,12 +29,77 @@
       "missingMethods": [],
       "generatedCandidates": 0
     },
+    "specGeneration": {
+      "mode": "ai_hybrid",
+      "provider": "copilot",
+      "model": "gpt-5.4",
+      "skill": {
+        "name": "playwright-spec-generation",
+        "version": "1.0.0",
+        "hash": "13540c55cba2c9b355f720a0044ff710307a83aa02b8544377b52f88c4ebc359",
+        "loaded": true
+      },
+      "invocations": 1,
+      "invocationsConsumed": 1,
+      "durationMs": 115241,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "failed",
+        "functionalExecution": "failed"
+      },
+      "promotionAllowed": false,
+      "specsRequested": 1,
+      "specsValidated": 0,
+      "specsRejected": 1,
+      "errors": [
+        "unresolved_requirement:No observed evidence supports an assertion for \"Tarjetas de crédito\" after opening \"Información de productos\".",
+        "unresolved_requirement:No observed evidence supports an assertion for \"Depósitos a Plazo\" after opening \"Información de productos\".",
+        "unresolved_requirement:No observed evidence supports an assertion for \"Cuentas de Efectivo\" after opening \"Información de productos\".",
+        "unresolved_requirement:No observed evidence supports an assertion for \"Préstamos\" after opening \"Información de productos\".",
+        "unresolved_requirement:The expected result \"El cliente visualiza las categorías oficiales de productos.\" cannot be fully asserted because discovery evidence does not include the category texts or another verified post-navigation state for them.",
+        "step_not_implemented_in_spec:2",
+        "missing_assertion_coverage:El cliente visualiza las categorías oficiales de productos.",
+        "functional_execution_failed:exitCode=1",
+        "functional_execution_error:Error: Promoted click failed at step 4 target=\"Información de productos\". clickPath=failed nativeClickAttempted=true nativeClickSucceeded=false callbackAttempted=true callbackSucceeded=false retryAttempted=true diagnostics={\"currentUrl\":\"https://172.27.4.50/success\",\"actionIntent\":\"open_product_information\",\"target\":\"Información de productos\",\"stepIndex\":4,\"timeoutMs\":15000,\"stability\":{\"currentUrl\":\"https://172.27.4.50/success\",\"title\":\"Kiosco de Autogestión - Banco Santa Cruz\",\"visibleHeadings\":[\"¡Hola!\",\"¡Nos alegra que estés con nosotros!\",\"Transacciones\\ny servicios\",\"Explora nuestros\\nproductos\"],\"visibleButtons\":[\"Transacciones\\ny serviciosRealiza operaciones con tus cuentas\",\"Explora nuestros\\nproductosConoce sobre los beneficios de los productos BSC\",\"Salir\"],\"visibleTexts\":[\"¡Hola!\",\"¡Nos alegra que estés con nosotros!\",\"¿Qué deseas realizar hoy?\",\"Transacciones\\ny servicios\",\"Realiza operaciones con tus cuentas\",\"Explora nuestros\\nproductos\",\"Conoce sobre los beneficios de los productos BSC\",\"Salir\",\"© 2024 Banco Santa Cruz S.A. |\",\"Todos los derechos reservados\",\"Av. Lope de Vega No.21, Ensanche Naco, Santo Domingo, Rep. Dom.\"],\"loadingDetected\":false,\"skeletonDetected\":false,\"listReadiness\":{\"cardsVisible\":2,\"listItemsVisible\":0,\"loadingDetected\":false,\"zeroProductsDetected\":false,\"hasEntityContainers\":true,\"visibleHeadings\":[\"¡Hola!\",\"¡Nos alegra que estés con nosotros!\",\"Transacciones\\ny servicios\",\"Explora nuestros\\nproductos\"],\"visibleButtons\":[\"Transacciones\\ny serviciosRealiza operaciones con tus cuentas\",\"Explora nuestros\\nproductosConoce sobre los beneficios de los productos BSC\",\"Salir\"],\"ready\":true}},\"retryAttempted\":true,\"clickPath\":\"failed\",\"nativeClickAttempted\":true,\"nativeClickSucceeded\":false,\"callbackAttempted\":true,\"callbackSucceeded\":false,\"callbackError\":\"Retry failed: click retry timed out after 15000ms\",\"expectedEffect\":\"ui_change\",\"effectDetected\":false,\"fallbackUsed\":\"none\",\"matchedLocatorStrategy\":\"unknown\",\"screenshotPath\":\"C:\\\\MisProyectos\\\\arquitectura-IA-Playwright-feature-auth-gate\\\\.artifacts\\\\promoted-runtime\\\\step-004.png\"}"
+      ],
+      "warnings": [
+        "functional_execution_screenshots=3"
+      ],
+      "finalSpec": {
+        "origin": "ai_candidate",
+        "generatedBy": "ai",
+        "strategy": "ai_candidate",
+        "fallback": null
+      },
+      "specWritten": false,
+      "previousSpec": {
+        "existed": true,
+        "hash": "f622a2bdd5d7167348fd9639a007304b216d524122f48348769acae17adfcd05",
+        "lastModifiedAt": "2026-06-10T01:37:36.001Z"
+      }
+    },
     "promotionStrategyDiagnostics": {
-      "requestedStrategy": "auto",
-      "autoPomEnabled": true,
+      "requestedStrategy": "pom",
+      "autoPomEnabled": false,
       "selectedStrategy": "pom",
-      "reason": "promoted",
-      "blockers": [],
+      "reason": "spec_generation_validation_failed",
+      "blockers": [
+        "spec_generation_validation_failed"
+      ],
       "availablePageObjects": [
         "ProductListPage",
         "ProductDetailPage",
@@ -51,6 +116,9 @@
       "autoPomCreatedMethods": [],
       "fallbackUsed": false,
       "requirePomRuntime": false
-    }
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-001-visualizar-las-categorias-oficiales-de-informacion-de-productos\\plan.json",
+    "previousStatus": "active"
   }
 }

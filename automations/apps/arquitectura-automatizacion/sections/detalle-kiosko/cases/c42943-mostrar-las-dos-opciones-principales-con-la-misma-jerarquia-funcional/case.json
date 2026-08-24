@@ -1,0 +1,10 @@
+{
+  "id": "c42943-mostrar-las-dos-opciones-principales-con-la-misma-jerarquia-funcional",
+  "externalId": "C42943",
+  "caseId": 42943,
+  "title": "Mostrar las dos opciones principales con la misma jerarquía funcional",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-06T12:43:33.857Z"
+}

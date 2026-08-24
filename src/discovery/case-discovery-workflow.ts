@@ -9,6 +9,11 @@ import { getLoginStrategy } from "../auth/login-strategy.factory";
 import { runCaseDiscovery } from "./case-discovery";
 import { evaluatePromotionGate } from "../automations/promotion-gate";
 import { promoteExecutionPlan } from "../automations/promote-plan";
+import type {
+  SpecGenerationObservableOracle,
+  SpecGenerationObservableOracleType,
+  SpecGenerationSourceScenario
+} from "../automations/spec-generation-hybrid";
 import { DEFAULT_PROMOTION_POLICY } from "../types/automation-promotion.types";
 import type { PromotionPolicy } from "../types/automation-promotion.types";
 import { executeExecutionPlan } from "../runner/execution-plan-executor";
@@ -56,6 +61,7 @@ export type CaseDiscoveryWorkflowOptions = {
   requirePomRuntime?: boolean;
   runId?: string;
   executionMode?: string;
+  executionSource?: string;
   adaptiveContext?: {
     targetScreen?: string;
     knownSteps?: string[];
@@ -75,10 +81,678 @@ export type CaseDiscoveryWorkflowResult = {
   appSlug?: string;
   specPath?: string;
   specVerificationStatus?: string;
+  specGeneration?: {
+    provider: string | null;
+    model: string | null;
+    invocations: number;
+    invocationsConsumed: number;
+    specGenerationAttempts?: number;
+    specRepairAttempts?: number;
+    firstPassPromotion?: boolean;
+    failedGatesAttempt1?: string[];
+    oracleTypes?: string[];
+    promotionAllowed: boolean;
+    specWritten?: boolean;
+    validation: {
+      schema: string;
+      structure: string;
+      typescript: string;
+      playwrightDiscovery: string;
+      semanticCoverage: string;
+      functionalExecution: string;
+    };
+    finalSpec: {
+      origin: string;
+      generatedBy: string;
+      strategy: string;
+      fallback: Record<string, unknown> | null;
+    };
+    errors: string[];
+    warnings: string[];
+  };
   outputDir: string;
   evidenceDir: string;
   durationMs: number;
 };
+
+function splitMultilineValue(value: string | undefined): string[] {
+  if (!value || !value.trim()) return [];
+  return value
+    .split(/\r?\n+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function dedupeLower(values: string[]): string[] {
+  const seen = new Set<string>();
+  const deduped: string[] = [];
+  for (const value of values) {
+    const normalized = value.trim().toLowerCase();
+    if (!normalized || seen.has(normalized)) continue;
+    seen.add(normalized);
+    deduped.push(value.trim());
+  }
+  return deduped;
+}
+
+const MAX_MOJIBAKE_ITERATIONS = 3;
+
+const CP1252_HIGH_BYTE: Readonly<Record<number, number>> = {
+  0x20ac: 0x80,
+  0x201a: 0x82,
+  0x0192: 0x83,
+  0x201e: 0x84,
+  0x2026: 0x85,
+  0x2020: 0x86,
+  0x2021: 0x87,
+  0x02c6: 0x88,
+  0x2030: 0x89,
+  0x0160: 0x8a,
+  0x2039: 0x8b,
+  0x0152: 0x8c,
+  0x017d: 0x8e,
+  0x2018: 0x91,
+  0x2019: 0x92,
+  0x201c: 0x93,
+  0x201d: 0x94,
+  0x2022: 0x95,
+  0x2013: 0x96,
+  0x2014: 0x97,
+  0x02dc: 0x98,
+  0x2122: 0x99,
+  0x0161: 0x9a,
+  0x203a: 0x9b,
+  0x0153: 0x9c,
+  0x017e: 0x9e,
+  0x0178: 0x9f,
+};
+
+function decodeSingleMojibakeLevel(value: string): string | null {
+  const bytes: number[] = [];
+  for (const char of value) {
+    const code = char.codePointAt(0) ?? -1;
+    if (code >= 0 && code <= 0xff) {
+      bytes.push(code);
+    } else {
+      const cp1252Byte = CP1252_HIGH_BYTE[code];
+      if (cp1252Byte === undefined) return null;
+      bytes.push(cp1252Byte);
+    }
+  }
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(Uint8Array.from(bytes));
+  } catch {
+    return null;
+  }
+}
+
+function countNonAscii(value: string): number {
+  let count = 0;
+  for (const char of value) {
+    if ((char.codePointAt(0) ?? 0) > 0x7f) count += 1;
+  }
+  return count;
+}
+
+function normalizeMojibakeUtf8(value: string): string {
+  let current = value;
+  for (let i = 0; i < MAX_MOJIBAKE_ITERATIONS; i += 1) {
+    const decoded = decodeSingleMojibakeLevel(current);
+    if (decoded === null || decoded === current) break;
+    if (countNonAscii(decoded) >= countNonAscii(current)) break;
+    current = decoded;
+  }
+  return current;
+}
+
+function normalizeOracleText(value: string): string {
+  return normalizeMojibakeUtf8(value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim();
+}
+
+type SemanticObservedTargetCandidate = {
+  historicalTarget: string;
+  observedTarget: string;
+  normalizedObserved: string;
+  stepIndex?: number;
+  source: "runtime_snapshot" | "runtime_transition" | "runtime_auth_gate";
+  evidence: string[];
+  transitionBacked: boolean;
+};
+
+function toSemanticTokens(value: string): string[] {
+  return normalizeOracleText(value)
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((token) => token.length > 2 && !["para", "con", "sin", "por", "the", "and", "for", "que", "como"].includes(token));
+}
+
+function scoreSemanticEquivalence(expected: string, observed: string): number {
+  const normalizedExpected = normalizeOracleText(expected);
+  const normalizedObserved = normalizeOracleText(observed);
+  if (!normalizedExpected || !normalizedObserved) return 0;
+  if (normalizedExpected === normalizedObserved) return 1;
+  if (normalizedExpected.includes(normalizedObserved) || normalizedObserved.includes(normalizedExpected)) return 0.86;
+  const expectedTokens = toSemanticTokens(expected);
+  const observedTokens = toSemanticTokens(observed);
+  if (expectedTokens.length === 0 || observedTokens.length === 0) return 0;
+  let matched = 0;
+  for (const token of expectedTokens) {
+    if (observedTokens.some((candidate) => candidate.includes(token) || token.includes(candidate))) {
+      matched += 1;
+    }
+  }
+  const overlap = matched / expectedTokens.length;
+  const precision = matched / observedTokens.length;
+  return Math.max(0, Math.min(1, overlap * 0.7 + precision * 0.3));
+}
+
+function isClickAction(action: string | undefined): boolean {
+  if (!action) return false;
+  const normalized = action.trim().toLowerCase();
+  if (normalized === "click" || normalized === "select" || normalized === "tap") return true;
+  return /^(clic|click|seleccionar|select|tap|elegir|presionar|tocar)\b/.test(normalized)
+    || /clic en|click on|seleccionar\s+|tap on|presionar/.test(normalized);
+}
+
+function collectSemanticObservedTargets(
+  caseResult: CaseDiscoveryResult,
+): SemanticObservedTargetCandidate[] {
+  const fromRuntime = (caseResult.runtimeEvidenceTrace?.clickActions ?? [])
+    .filter((click) => click.success)
+    .map((click) => ({
+      historicalTarget: click.target,
+      observedTarget: click.resolvedTarget ?? click.target,
+      normalizedObserved: normalizeOracleText(click.resolvedTarget ?? click.target),
+      stepIndex: click.stepIndex,
+      source: click.transitionDetected || click.postClickUiChange ? "runtime_transition" as const : "runtime_snapshot" as const,
+      evidence: [
+        `click_target:${click.target}`,
+        ...(click.resolvedTarget ? [`resolved_target:${click.resolvedTarget}`] : []),
+        `transition_observed:${click.transitionDetected === true}`,
+        ...(click.postClickUiChange ? [`post_click_ui_change:${click.postClickUiChange}`] : []),
+      ],
+      transitionBacked: click.transitionDetected === true || Boolean(click.postClickUiChange),
+    }));
+  const fromSteps = caseResult.steps
+    .filter((step) => step.status === "found" && isClickAction(step.action))
+    .map((step) => {
+      const observedTarget = step.resolvedTargetName ?? step.candidateText ?? step.targetText ?? step.action;
+      return {
+        historicalTarget: step.targetText ?? step.action,
+        observedTarget,
+        normalizedObserved: normalizeOracleText(observedTarget),
+        stepIndex: step.index,
+        source: step.authGateDiagnostics?.detected ? "runtime_auth_gate" as const : "runtime_snapshot" as const,
+        evidence: [
+          `step_action:${step.action}`,
+          ...(step.targetText ? [`historical_target:${step.targetText}`] : []),
+          ...(step.resolvedTargetName ? [`resolved_target:${step.resolvedTargetName}`] : []),
+          ...(step.candidateText ? [`candidate_text:${step.candidateText}`] : []),
+        ],
+        transitionBacked: false,
+      };
+    });
+  const deduped = new Map<string, SemanticObservedTargetCandidate>();
+  for (const candidate of [...fromRuntime, ...fromSteps]) {
+    const key = `${candidate.stepIndex ?? "na"}:${candidate.normalizedObserved}`;
+    if (!deduped.has(key)) deduped.set(key, candidate);
+  }
+  return [...deduped.values()];
+}
+
+function extractQuotedAssertionTarget(text: string | undefined): string | undefined {
+  if (!text) return undefined;
+  const match = text.match(/["'“”‘’]([^"'“”‘’]+)["'“”‘’]/);
+  return match ? match[1].trim() : undefined;
+}
+
+function isAssertionAction(text: string | undefined): boolean {
+  return /^(validar|verificar|assert|comprobar|confirmar|mostrar|visualizar|se\s+muestr)/i.test((text ?? "").trim());
+}
+
+type TransitionClickLike = {
+  stepIndex: number;
+  target: string;
+  resolvedTarget?: string;
+  actionType?: string;
+  transitionDetected?: boolean;
+  postClickUiChange?: string;
+  afterUrl?: string;
+};
+
+function findCausalTransition(
+  transitionEvidence: TransitionClickLike[],
+  assertionStepIndex: number
+): TransitionClickLike | undefined {
+  const before = transitionEvidence.filter((t) => typeof t.stepIndex === "number" && t.stepIndex < assertionStepIndex);
+  if (before.length === 0) return transitionEvidence[0];
+  return before.reduce((best, current) => (current.stepIndex > best.stepIndex ? current : best), before[0]);
+}
+
+function findAssertionStepIndexAfter(
+  scenarioSteps: Array<{ index: number; action: string; expected?: string }> | undefined,
+  actionStepIndex: number
+): number | undefined {
+  const assertions = (scenarioSteps ?? [])
+    .filter((step) => isAssertionAction(step.action) && step.index > actionStepIndex)
+    .map((step) => step.index)
+    .sort((a, b) => a - b);
+  return assertions[0];
+}
+
+function buildExpectedObservableOracles(
+  expectedLines: string[],
+  observedAssertions: string[],
+  caseResult: CaseDiscoveryResult,
+  authGateEvidence: DiscoveryStepResult | undefined,
+  authMetadata: Record<string, unknown> | undefined,
+  semanticReconciliations: Array<{
+    expectedTarget: string;
+    observedTarget: string;
+    semanticEquivalent: boolean;
+    confidence: number;
+    source: "runtime_snapshot" | "runtime_transition" | "runtime_auth_gate";
+    evidence: string[];
+  }> | undefined,
+  scenarioSteps?: Array<{ index: number; action: string; expected?: string }>,
+): SpecGenerationObservableOracle[] {
+  const transitionEvidence = caseResult.runtimeEvidenceTrace?.clickActions
+    ?.filter((click) => click.success && (click.transitionDetected === true || Boolean(click.postClickUiChange)))
+    ?? [];
+  const discoveryPassed = caseResult.status === "discovered_passed" || caseResult.status === "repaired_passed";
+  const observedCorpus = observedAssertions.map((value) => normalizeOracleText(value));
+  const observedTargets = collectSemanticObservedTargets(caseResult);
+  const hasStructuralEvidence = (caseResult.runtimeEvidenceTrace?.structuralEvidence?.length ?? 0) > 0;
+  const hasFeedbackEvidence = (caseResult.runtimeEvidenceTrace?.feedbackEvidence?.length ?? 0) > 0;
+
+  // Scenario assertion steps are the authority for binding an auth_gate /
+  // navigation_transition oracle to its real scenario step (index + concrete target).
+  const assertionCandidates = (scenarioSteps ?? [])
+    .filter((step) => isAssertionAction(step.action))
+    .map((step) => ({
+      index: step.index,
+      requirement: extractQuotedAssertionTarget(step.action) ?? step.expected?.trim() ?? step.action.trim(),
+      combined: normalizeOracleText(`${step.action} ${step.expected ?? ""}`),
+    }));
+  const authAssertionCandidates = assertionCandidates.filter((candidate) =>
+    /(auth|autentic|identific|otp|flujo)/.test(candidate.combined)
+  );
+  const navigationAssertionCandidates = assertionCandidates.filter((candidate) =>
+    /(redirig|dirig|modul|naveg|ruta|acceso|transicion|ingres)/.test(candidate.combined)
+  );
+
+  if (discoveryPassed && observedAssertions.length > 0) {
+    const explicitAssertions = (scenarioSteps ?? []).filter((step) => isAssertionAction(step.action)).length;
+    console.log(`[promotion-oracle-gate] source=canonical_scenario_assertions explicitAssertions=${explicitAssertions} backedAssertions=${observedAssertions.length} narrativeRequirementAdded=false`);
+  }
+
+  return expectedLines.map((line, index) => {
+    const normalized = normalizeOracleText(line);
+    let requirement = line;
+    const authSignal = /(auth|autentic|identific|otp|flujo)/.test(normalized);
+    const navigationSignal = /(redirig|dirig|modul|naveg|ruta|acceso|transicion|ingres)/.test(normalized);
+    const literalSignal = observedCorpus.some((value) => value.includes(normalized) || normalized.includes(value));
+    const bestSemanticTarget = observedTargets
+      .map((candidate) => {
+        const directHistoricalMatch = normalizeOracleText(line) === normalizeOracleText(candidate.historicalTarget)
+          && normalizeOracleText(candidate.historicalTarget) !== normalizeOracleText(candidate.observedTarget);
+        const semanticScore = scoreSemanticEquivalence(line, candidate.observedTarget);
+        return {
+          candidate,
+          confidence: directHistoricalMatch ? Math.max(semanticScore, 0.92) : semanticScore,
+        };
+      })
+      .sort((a, b) => b.confidence - a.confidence)[0];
+    const semanticEquivalent = Boolean(
+      bestSemanticTarget
+      && bestSemanticTarget.confidence >= 0.72
+      && normalizeOracleText(bestSemanticTarget.candidate.observedTarget) !== normalized
+    );
+
+    let type: SpecGenerationObservableOracleType = "unsupported_or_unresolved";
+    let backed = false;
+    const evidence: string[] = [];
+    let details: Record<string, unknown> | undefined;
+    let stepIndex: number | undefined;
+    let target: string | undefined;
+
+    if (authSignal && (authGateEvidence?.authGateDiagnostics?.detected || authMetadata?.authGateDetectedDuringDiscovery === true)) {
+      type = "auth_gate";
+      backed = true;
+      const authAssertion = authAssertionCandidates[0];
+      if (authAssertion) {
+        stepIndex = authAssertion.index;
+        target = authAssertion.requirement;
+        requirement = authAssertion.requirement;
+      } else {
+        stepIndex = authGateEvidence?.index;
+        target = authGateEvidence?.targetText ?? authGateEvidence?.action;
+      }
+      evidence.push(`auth_gate_detected:true`, `auth_stage:${authGateEvidence?.authGateDiagnostics?.stage ?? "unknown"}`);
+      console.log(`[observable-oracle] type=auth_gate stage=${authGateEvidence?.authGateDiagnostics?.stage ?? "unknown"} backed=true scenarioStepIndex=${stepIndex ?? "na"} requirement="${requirement.slice(0, 120)}"`);
+      details = {
+        gateDetected: true,
+        stage: authGateEvidence?.authGateDiagnostics?.stage ?? null,
+        detectedBeforeStep: authGateEvidence?.authGateDiagnostics?.detectedBeforeStep ?? null,
+        authFlowLanding: typeof authMetadata?.authFlowLanding === "string" ? authMetadata.authFlowLanding : null,
+      };
+    } else if (navigationSignal && transitionEvidence.length > 0) {
+      type = "navigation_transition";
+      backed = true;
+      const navigationAssertion = navigationAssertionCandidates[0];
+      // Causal action: the closest executed action with transition evidence BEFORE the
+      // assertion step. Never default to the first action of the scenario.
+      const causalTransition = navigationAssertion
+        ? findCausalTransition(transitionEvidence, navigationAssertion.index) ?? transitionEvidence[transitionEvidence.length - 1]
+        : transitionEvidence[transitionEvidence.length - 1];
+      // Scenario step index of the assertion/outcome: prefer the text-based navigation
+      // assertion, otherwise the first scenario assertion immediately after the causal action.
+      const assertionIndex = navigationAssertion?.index
+        ?? findAssertionStepIndexAfter(scenarioSteps, causalTransition.stepIndex);
+      if (assertionIndex !== undefined) {
+        stepIndex = assertionIndex;
+      } else {
+        stepIndex = causalTransition.stepIndex;
+      }
+      if (navigationAssertion) {
+        requirement = navigationAssertion.requirement;
+      }
+      target = causalTransition.resolvedTarget ?? causalTransition.target;
+      evidence.push(
+        `transition_observed:${causalTransition.transitionDetected === true}`,
+        `click_target:${causalTransition.target}`,
+        ...(causalTransition.resolvedTarget ? [`resolved_target:${causalTransition.resolvedTarget}`] : []),
+        `action_type:${causalTransition.actionType}`,
+      );
+      if (causalTransition.postClickUiChange) {
+        evidence.push(`post_click_ui_change:${causalTransition.postClickUiChange}`);
+      }
+      const expectedUrl = typeof causalTransition.afterUrl === "string" && causalTransition.afterUrl.trim()
+        ? causalTransition.afterUrl.trim()
+        : undefined;
+      if (expectedUrl) {
+        evidence.push(`after_url:${expectedUrl}`);
+      }
+      console.log(`[observable-oracle] type=navigation_transition backed=true scenarioStepIndex=${stepIndex} sourceActionStepIndex=${causalTransition.stepIndex} target="${target}"${expectedUrl ? ` expectedUrl=${expectedUrl}` : ""}`);
+      details = {
+        transitionObserved: causalTransition.transitionDetected === true,
+        clickTarget: causalTransition.target,
+        resolvedTarget: causalTransition.resolvedTarget ?? null,
+        postClickUiChange: causalTransition.postClickUiChange ?? null,
+        sourceActionStepIndex: causalTransition.stepIndex,
+        ...(expectedUrl ? { expectedUrl } : {})
+      };
+    } else if (semanticEquivalent && bestSemanticTarget) {
+      type = "heading_or_control";
+      backed = true;
+      stepIndex = bestSemanticTarget.candidate.stepIndex;
+      target = bestSemanticTarget.candidate.observedTarget;
+      evidence.push(...bestSemanticTarget.candidate.evidence);
+      details = {
+        historicalRequirement: line,
+        historicalTarget: bestSemanticTarget.candidate.historicalTarget,
+        resolvedObservableTarget: bestSemanticTarget.candidate.observedTarget,
+        semanticEquivalent: true,
+        confidence: Number(bestSemanticTarget.confidence.toFixed(2)),
+      };
+      semanticReconciliations?.push({
+        expectedTarget: line,
+        observedTarget: bestSemanticTarget.candidate.observedTarget,
+        semanticEquivalent: true,
+        confidence: Number(bestSemanticTarget.confidence.toFixed(2)),
+        source: bestSemanticTarget.candidate.source,
+        evidence: [...bestSemanticTarget.candidate.evidence],
+      });
+      console.log(
+        `[semantic-reconciliation] expected="${line}" observed="${bestSemanticTarget.candidate.observedTarget}" equivalent=true confidence=${bestSemanticTarget.confidence.toFixed(2)} source=${bestSemanticTarget.candidate.source}`
+      );
+    } else if (literalSignal) {
+      type = "literal_visible_text";
+      backed = true;
+      evidence.push("observed_assertion_match:true");
+    } else if (discoveryPassed && hasStructuralEvidence) {
+      type = "page_object_state";
+      backed = true;
+      evidence.push("structural_evidence_present:true");
+      details = {
+        structuralEvidenceCount: caseResult.runtimeEvidenceTrace?.structuralEvidence?.length ?? 0,
+      };
+    } else if (discoveryPassed && hasFeedbackEvidence) {
+      type = "runtime_state";
+      backed = true;
+      evidence.push("feedback_evidence_present:true", `discovery_status:${caseResult.status}`);
+      details = {
+        discoveryStatus: caseResult.status,
+        feedbackEvidenceCount: caseResult.runtimeEvidenceTrace?.feedbackEvidence?.length ?? 0,
+      };
+    } else if (discoveryPassed && observedAssertions.length > 0) {
+      // Explicit scenario assertions already represent the observable outcome.
+      // Narrative expectedResult must not add a new blocking unresolved obligation.
+      type = "literal_visible_text";
+      backed = false;
+      evidence.push("narrative_covered_by_explicit_scenario_assertions");
+    } else {
+      evidence.push("backing_evidence_missing");
+    }
+
+    return {
+      id: `expected-${String(index + 1).padStart(2, "0")}`,
+      requirement,
+      type,
+      backed,
+      source: backed ? "discovery" : "inferred",
+      stepIndex,
+      target,
+      evidence,
+      details,
+    };
+  });
+}
+
+export function buildPromotionSourceScenario(
+  scenario: TestScenario,
+  caseResult: CaseDiscoveryResult
+): SpecGenerationSourceScenario {
+  const rawExpected = typeof scenario.raw?.custom_expected === "string" ? scenario.raw.custom_expected : "";
+  const stepExpected = scenario.steps
+    .map((step) => step.expected?.trim())
+    .filter((value): value is string => Boolean(value && value.length > 0));
+  const expectedFromConsumption = caseResult.partialDiagnostics?.expectedResultConsumption
+    ?.map((entry) => entry.originalText?.trim())
+    .filter((value): value is string => Boolean(value && value.length > 0)) ?? [];
+  const expectedResult = [rawExpected.trim(), ...stepExpected, ...expectedFromConsumption]
+    .filter((value) => value.length > 0)
+    .join("\n");
+  const observedAssertionsFromSteps = caseResult.steps
+    .filter((step) => isAssertionLikeStep(step))
+    .filter((step) => step.status === "found" || step.assertionStatus === "passed")
+    .flatMap((step) => [
+      (step.targetText ?? step.action ?? "").trim(),
+      (step.matchedText ?? "").trim(),
+    ])
+    .filter((value) => value.length > 0);
+  const observedAssertions = dedupeLower(observedAssertionsFromSteps);
+  const authGateEvidence = caseResult.steps.find((step) => step.authGateDiagnostics?.detected);
+  const authMetadata = caseResult.candidatePlan?.metadata;
+
+  // Steps whose runtime assertion ended as satisfied_by_previous_assertion do NOT
+  // carry literal evidence by themselves. They must be reconciled to the REAL
+  // evidence that satisfied them (backed auth gate, backed navigation transition),
+  // or fall back to unsupported_or_unresolved backed=false. Never synthesize
+  // literal_visible_text backed=true from status bookkeeping alone.
+  const satisfiedByPreviousAssertionSteps = caseResult.steps
+    .filter((step) => isAssertionLikeStep(step))
+    .filter((step) =>
+      step.status === "satisfied_by_previous_assertion"
+      || step.assertionStatus === "satisfied_by_previous_assertion"
+    );
+  const transitionEvidence = caseResult.runtimeEvidenceTrace?.clickActions
+    ?.filter((click) => click.success && (click.transitionDetected === true || Boolean(click.postClickUiChange)))
+    ?? [];
+  const satisfiedReconciledOracles: SpecGenerationObservableOracle[] = satisfiedByPreviousAssertionSteps
+    .map((step) => {
+      const requirement = (step.targetText ?? step.action ?? "").trim();
+      if (!requirement) return null;
+      const normalized = normalizeOracleText(requirement);
+      const authSignal = /(auth|autentic|identific|otp|flujo)/.test(normalized);
+      const navigationSignal = /(redirig|dirig|modul|naveg|ruta|acceso|transicion|ingres)/.test(normalized);
+      const gateDetected = authGateEvidence?.authGateDiagnostics?.detected === true
+        || authMetadata?.authGateDetectedDuringDiscovery === true;
+      if (authSignal && gateDetected) {
+        console.log(
+          `[observable-oracle-reconciled] type=auth_gate backed=true step=${step.index} text="${requirement.slice(0, 120)}"`
+        );
+        return {
+          id: `reconciled-auth-${step.index}`,
+          requirement,
+          type: "auth_gate" as const,
+          backed: true,
+          source: "discovery" as const,
+          stepIndex: step.index,
+          target: authGateEvidence?.targetText ?? authGateEvidence?.action,
+          evidence: [
+            "auth_gate_detected:true",
+            `auth_stage:${authGateEvidence?.authGateDiagnostics?.stage ?? "unknown"}`,
+            "satisfied_by:auth_gate",
+          ],
+          details: {
+            gateDetected: true,
+            stage: authGateEvidence?.authGateDiagnostics?.stage ?? null,
+            detectedBeforeStep: authGateEvidence?.authGateDiagnostics?.detectedBeforeStep ?? null,
+            satisfiedBy: "auth_gate",
+          },
+        };
+      }
+      if (navigationSignal && transitionEvidence.length > 0) {
+        const causalTransition = findCausalTransition(transitionEvidence, step.index) ?? transitionEvidence[0];
+        const expectedUrl = typeof causalTransition.afterUrl === "string" && causalTransition.afterUrl.trim()
+          ? causalTransition.afterUrl.trim()
+          : undefined;
+        console.log(
+          `[observable-oracle-reconciled] type=navigation_transition backed=true step=${step.index} sourceActionStepIndex=${causalTransition.stepIndex} target="${causalTransition.resolvedTarget ?? causalTransition.target}"${expectedUrl ? ` expectedUrl=${expectedUrl}` : ""}`
+        );
+        return {
+          id: `reconciled-navigation-${step.index}`,
+          requirement,
+          type: "navigation_transition" as const,
+          backed: true,
+          source: "discovery" as const,
+          stepIndex: step.index,
+          target: causalTransition.resolvedTarget ?? causalTransition.target,
+          evidence: [
+            `transition_observed:${causalTransition.transitionDetected === true}`,
+            `click_target:${causalTransition.target}`,
+            ...(causalTransition.resolvedTarget ? [`resolved_target:${causalTransition.resolvedTarget}`] : []),
+            ...(expectedUrl ? [`after_url:${expectedUrl}`] : []),
+            "satisfied_by:navigation_transition",
+          ],
+          details: {
+            transitionObserved: causalTransition.transitionDetected === true,
+            clickTarget: causalTransition.target,
+            resolvedTarget: causalTransition.resolvedTarget ?? null,
+            sourceActionStepIndex: causalTransition.stepIndex,
+            ...(expectedUrl ? { expectedUrl } : {}),
+            satisfiedBy: "navigation_transition",
+          },
+        };
+      }
+      console.log(
+        `[observable-oracle-reconciled] type=unsupported_or_unresolved backed=false step=${step.index} text="${requirement.slice(0, 120)}"`
+      );
+      return {
+        id: `reconciled-unresolved-${step.index}`,
+        requirement,
+        type: "unsupported_or_unresolved" as const,
+        backed: false,
+        source: "inferred" as const,
+        stepIndex: step.index,
+        evidence: ["satisfied_by_previous_assertion_without_runtime_evidence"],
+      };
+    })
+    .filter((oracle): oracle is SpecGenerationObservableOracle => oracle !== null);
+  const expectedLines = dedupeLower(splitMultilineValue(expectedResult));
+  const discoveryStepByIndex = new Map(caseResult.steps.map((step) => [step.index, step]));
+  const scenarioSteps = scenario.steps.map((step) => ({
+    index: step.index,
+    action: step.action,
+    expected: step.expected?.trim() || undefined,
+    assertionImportance: discoveryStepByIndex.get(step.index)?.assertionImportance
+  }));
+  const semanticReconciliations: Array<{
+    expectedTarget: string;
+    observedTarget: string;
+    semanticEquivalent: boolean;
+    confidence: number;
+    source: "runtime_snapshot" | "runtime_transition" | "runtime_auth_gate";
+    evidence: string[];
+  }> = [];
+  const observableOraclesRaw: SpecGenerationObservableOracle[] = [
+    ...observedAssertions.map((assertion, index) => ({
+      id: `observed-${String(index + 1).padStart(2, "0")}`,
+      requirement: assertion,
+      type: "literal_visible_text" as const,
+      backed: true,
+      source: "discovery" as const,
+      evidence: ["assertion_resolved_during_discovery"],
+    })),
+    ...buildExpectedObservableOracles(
+      expectedLines,
+      observedAssertions,
+      caseResult,
+      authGateEvidence,
+      authMetadata as Record<string, unknown> | undefined,
+      semanticReconciliations,
+      scenarioSteps,
+    ),
+    ...satisfiedReconciledOracles,
+  ];
+
+  // Finalization: a provisional unsupported_or_unresolved (backed=false) for a
+  // scenarioStepIndex that already has a backed, supported reconciled oracle must
+  // not remain as a blocking obligation.
+  const backedStepIndexes = new Set<number>(
+    observableOraclesRaw
+      .filter((oracle) => oracle.backed === true && oracle.type !== "unsupported_or_unresolved" && typeof oracle.stepIndex === "number")
+      .map((oracle) => oracle.stepIndex as number)
+  );
+  const observableOracles = observableOraclesRaw.filter((oracle) => {
+    const provisional = oracle.type === "unsupported_or_unresolved"
+      && oracle.backed === false
+      && typeof oracle.stepIndex === "number"
+      && backedStepIndexes.has(oracle.stepIndex as number);
+    if (provisional) {
+      console.log(`[observable-oracle-finalize] scenarioStepIndex=${oracle.stepIndex} supportedBackedOracle=true provisionalUnresolvedRemoved=true`);
+    }
+    return !provisional;
+  });
+  return {
+    title: scenario.title,
+    steps: scenario.steps.map((step) => ({
+      index: step.index,
+      action: step.action,
+      description: step.action,
+      expected: step.expected?.trim() || undefined,
+      assertionImportance: discoveryStepByIndex.get(step.index)?.assertionImportance
+    })),
+    expectedResult: expectedResult || undefined,
+    preconditions: dedupeLower([
+      ...splitMultilineValue(scenario.preconditions),
+      ...splitMultilineValue(typeof scenario.raw?.custom_preconds === "string" ? scenario.raw.custom_preconds : undefined)
+    ]),
+    observedAssertions,
+    observableOracles,
+    stepStatuses: caseResult.steps.map((step) => ({ index: step.index, status: step.status })),
+    auth: {
+      required: authMetadata?.authFlowRequired === true ? true : undefined,
+      gateDetected: authMetadata?.authGateDetectedDuringDiscovery === true || Boolean(authGateEvidence) ? true : undefined,
+      insertionAfterStepIndex: authMetadata?.authFlowInsertionAfterStepIndex,
+      detectedStage: authGateEvidence?.authGateDiagnostics?.stage,
+      detectedBeforeStep: authGateEvidence?.authGateDiagnostics?.detectedBeforeStep,
+      flowAlias: authMetadata?.authFlowAlias,
+      flowLanding: authMetadata?.authFlowLanding
+    }
+  };
+}
 
 function getDefaultOutputDir(id: number | string): string {
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
@@ -156,13 +830,14 @@ function normalizeForensics(value: string): string {
     .trim();
 }
 
-function buildRuntimeEvidenceTrace(caseResult: CaseDiscoveryResult): RuntimeEvidenceTrace {
+export function buildRuntimeEvidenceTrace(caseResult: CaseDiscoveryResult): RuntimeEvidenceTrace {
   const clickActions = caseResult.steps
-    .filter((s) => s.status === "found" && (s.action === "click" || s.action === "select"))
+    .filter((s) => s.status === "found" && isClickAction(s.action))
     .map((s) => ({
       stepIndex: s.index,
       target: s.targetText ?? s.action,
       normalizedTarget: normalizeForensics(s.targetText ?? s.action),
+      resolvedTarget: s.resolvedTargetName ?? s.candidateText,
       actionType: s.action,
       ownerContext: (s.assertionDiagnostics as any)?.assertionContextDiagnostics?.currentContext,
       locatorStrategy: s.locatorStrategy,
@@ -170,7 +845,8 @@ function buildRuntimeEvidenceTrace(caseResult: CaseDiscoveryResult): RuntimeEvid
       transitionDetected: s.status !== "click_no_transition",
       postClickUiChange: (s.assertionDiagnostics as any)?.postClickUiChangeReason,
       beforeContext: (s.assertionDiagnostics as any)?.assertionContextDiagnostics?.previousContext,
-      afterContext: (s.assertionDiagnostics as any)?.assertionContextDiagnostics?.currentContext
+      afterContext: (s.assertionDiagnostics as any)?.assertionContextDiagnostics?.currentContext,
+      afterUrl: typeof s.snapshotUrl === "string" ? s.snapshotUrl : undefined
     }));
   const fillActions = caseResult.steps
     .filter((s) => s.status === "found" && s.action === "fill")
@@ -185,7 +861,7 @@ function buildRuntimeEvidenceTrace(caseResult: CaseDiscoveryResult): RuntimeEvid
       activeContainerType: (s.assertionDiagnostics as any)?.activeContainer?.type
     }));
   const formEvidence = caseResult.steps
-    .filter((s) => s.action === "click" && /place order|submit|purchase|form|modal|dialog/i.test(s.targetText ?? ""))
+    .filter((s) => isClickAction(s.action) && /place order|submit|purchase|form|modal|dialog/i.test(s.targetText ?? ""))
     .map((s) => ({
       openedAtStep: s.index,
       fieldsDetected: caseResult.steps.filter((x) => x.action === "fill" && x.index >= s.index).map((x) => x.targetText ?? ""),
@@ -346,7 +1022,13 @@ function reconcileDiscoveryStatusAfterLocalClosure(
   const canTreatEarlyCompletionAsStale =
     localPending.shouldSkipAutoRepair
     && afterPendingAssertionCount === 0
-    && (caseResult.failedReason === "pending_local_assertions" || caseResult.failedReason === "needs_assertion_resolution" || !caseResult.failedReason);
+    && (
+      caseResult.failedReason === "pending_local_assertions"
+      || caseResult.failedReason === "needs_assertion_resolution"
+      || !caseResult.failedReason
+      || localPending.partialReason === "pending_context_deferred_assertions"
+      || localPending.partialReason === "pending_synthetic_expected"
+    );
   const pendingActionsCount = canTreatEarlyCompletionAsStale
     ? 0
     : (latestEarlyCompletion?.skippedRemainingActions ?? 0);
@@ -503,7 +1185,11 @@ async function loadLatestSnapshot(dir: string): Promise<{ snapshot?: PageSnapsho
   }
 }
 
-function collectLocalPendingAssertionDiagnostics(caseResult: CaseDiscoveryResult, runtimeEvidenceTrace?: RuntimeEvidenceTrace): {
+export function collectLocalPendingAssertionDiagnostics(
+  caseResult: CaseDiscoveryResult,
+  runtimeEvidenceTrace?: RuntimeEvidenceTrace,
+  narrativeRequirements?: string[]
+): {
   shouldSkipAutoRepair: boolean;
   partialReason?: "pending_local_assertions" | "pending_context_deferred_assertions" | "pending_synthetic_expected";
   pendingAssertions: string[];
@@ -565,6 +1251,23 @@ function collectLocalPendingAssertionDiagnostics(caseResult: CaseDiscoveryResult
   ]);
   const structuralEvidence = runtimeEvidenceTrace?.structuralEvidence ?? [];
   const feedbackEvidence = runtimeEvidenceTrace?.feedbackEvidence ?? [];
+  const semanticObservedTargets = collectSemanticObservedTargets(caseResult);
+  const hasTransitionBackedClick = (runtimeEvidenceTrace?.clickActions ?? []).some(
+    (click) => click.success && (click.transitionDetected === true || Boolean(click.postClickUiChange))
+  );
+  const transitionBackedTarget = (runtimeEvidenceTrace?.clickActions ?? [])
+    .find((click) => click.success && (click.transitionDetected === true || Boolean(click.postClickUiChange)))
+    ?.target ?? "";
+  const planMetadata = caseResult.candidatePlan?.metadata as Record<string, unknown> | undefined;
+  const hasDetectedAuthGate =
+    caseResult.steps.some((step) => step.authGateDiagnostics?.detected) ||
+    planMetadata?.authGateDetectedDuringDiscovery === true;
+  // Signal detectors are aligned with buildExpectedObservableOracles so the local
+  // closure resolves narrative assertions through the same observable oracle set.
+  const hasNavigationNarrativeSignal = (text: string): boolean =>
+    /(redirig|dirig|modul|naveg|ruta|acceso|transicion|ingres|transition)/.test(normalize(text));
+  const hasAuthNarrativeSignal = (text: string): boolean =>
+    /(auth|autentic|identific|otp|flujo|sesion|session)/.test(normalize(text));
 
   const hasStructuralEvidenceFor = (assertionText: string, inferredType: PendingAssertionForensics["inferredType"]): boolean => {
     const normalized = normalize(assertionText);
@@ -626,6 +1329,48 @@ function collectLocalPendingAssertionDiagnostics(caseResult: CaseDiscoveryResult
   const consumedByLocalEvidence = (assertionText: string): boolean => {
     const inferredType = inferAssertionTypeFromText(assertionText);
     const normalized = normalize(assertionText);
+    const bestSemanticMatch = semanticObservedTargets
+      .map((candidate) => ({
+        candidate,
+        confidence: scoreSemanticEquivalence(assertionText, candidate.observedTarget),
+      }))
+      .sort((a, b) => b.confidence - a.confidence)[0];
+    const navNarrativeLine = narrativeRequirements?.find((line) => hasNavigationNarrativeSignal(line));
+    const authNarrativeLine = narrativeRequirements?.find((line) => hasAuthNarrativeSignal(line));
+    if (
+      hasTransitionBackedClick
+      && (hasNavigationNarrativeSignal(assertionText) || Boolean(navNarrativeLine))
+      && (
+        (hasNavigationNarrativeSignal(assertionText) && (bestSemanticMatch?.confidence ?? 0) >= 0.35)
+        || (Boolean(navNarrativeLine) && scoreSemanticEquivalence(assertionText, navNarrativeLine as string) >= 0.5)
+      )
+    ) {
+      console.log(`[observable-oracle] type=navigation_transition requirement="${assertionText}" target="${transitionBackedTarget}" backed=true consumed=true`);
+      return true;
+    }
+    if (
+      hasDetectedAuthGate
+      && (hasAuthNarrativeSignal(assertionText) || Boolean(authNarrativeLine))
+      && (
+        hasAuthNarrativeSignal(assertionText)
+        || (Boolean(authNarrativeLine) && scoreSemanticEquivalence(assertionText, authNarrativeLine as string) >= 0.5)
+      )
+    ) {
+      const stage = caseResult.steps.find((step) => step.authGateDiagnostics?.detected)?.authGateDiagnostics?.stage
+        ?? (typeof planMetadata?.authGateStage === "string" ? planMetadata.authGateStage : "unknown");
+      console.log(`[observable-oracle] type=auth_gate stage=${stage} backed=true`);
+      return true;
+    }
+    if (
+      bestSemanticMatch
+      && bestSemanticMatch.confidence >= 0.72
+      && normalize(bestSemanticMatch.candidate.observedTarget) !== normalized
+    ) {
+      console.log(
+        `[semantic-reconciliation] expected="${assertionText}" observed="${bestSemanticMatch.candidate.observedTarget}" equivalent=true confidence=${bestSemanticMatch.confidence.toFixed(2)} source=${bestSemanticMatch.candidate.source}`
+      );
+      return true;
+    }
     if (wasActionExecutedForAssertion(assertionText)) return true;
     if (hasFeedbackEvidenceFor(assertionText)) return true;
     if (hasStructuralEvidenceFor(assertionText, inferredType)) return true;
@@ -1063,6 +1808,7 @@ export async function runCaseDiscoveryWorkflow(
 
   const browserType = { chromium, firefox, webkit }[activeConfig.execution.browser];
   const headless = !options.headed;
+  const browserLaunchSource = options.executionSource?.trim() || "cli";
 
   let browser;
   let caseResult: CaseDiscoveryResult | undefined;
@@ -1072,7 +1818,9 @@ export async function runCaseDiscoveryWorkflow(
   let specPath: string | undefined;
   let promotionStatus = "not_promoted";
   let promotionReason: string | undefined;
+  let specGeneration: CaseDiscoveryWorkflowResult["specGeneration"] | undefined;
   try {
+    console.log(`[browser-launch] source=${browserLaunchSource} headless=${headless}`);
     browser = await browserType.launch({ headless });
     const context = await browser.newContext();
     const page = await context.newPage();
@@ -1273,7 +2021,16 @@ export async function runCaseDiscoveryWorkflow(
     };
     try {
       runtimeEvidenceTrace = buildRuntimeEvidenceTrace(caseResult);
-      localPending = collectLocalPendingAssertionDiagnostics(caseResult, runtimeEvidenceTrace);
+      caseResult = { ...caseResult, runtimeEvidenceTrace };
+      const narrativeRequirements = [
+        scenario.title,
+        ...(typeof (scenario as any).expectedResult === "string" ? [(scenario as any).expectedResult] : []),
+        ...(typeof scenario.raw?.custom_expected === "string" && scenario.raw.custom_expected.trim()
+          ? [scenario.raw.custom_expected]
+          : []),
+        ...scenario.steps.map((step) => step.expected?.trim() ?? "").filter((value) => value.length > 0),
+      ].filter(Boolean);
+      localPending = collectLocalPendingAssertionDiagnostics(caseResult, runtimeEvidenceTrace, narrativeRequirements);
     } catch (error) {
       diagnosticsBuildError = error instanceof Error ? error.message : String(error);
       console.log(`[discovery:workflow] Warning: failed to build local diagnostics/forensics: ${diagnosticsBuildError}`);
@@ -1585,12 +2342,14 @@ export async function runCaseDiscoveryWorkflow(
     console.log(`[discovery:workflow] Overwrite enabled: ${options.overwrite === true}`);
 
     const promotionResultPath = path.join(outputDir, "promotion-result.json");
+    const sourceScenario = buildPromotionSourceScenario(scenario, caseResult);
     const gate = evaluatePromotionGate({
       discoveryResult: caseResult,
       candidatePlan: caseResult.candidatePlan,
       strict: options.promotionStrict,
       requireApproval: options.requirePromotionApproval,
-      promotionPolicy
+      promotionPolicy,
+      observableOracles: sourceScenario.observableOracles
     });
     promotionReason = gate.allowed ? "" : gate.reasons.join("; ");
 
@@ -1644,7 +2403,10 @@ export async function runCaseDiscoveryWorkflow(
           sectionSlug: sectionProfile?.sectionSlug,
           sectionId: sectionProfile?.sectionId,
           sectionName: sectionProfile?.sectionName,
-          requirePomRuntime: options.requirePomRuntime === true
+          requirePomRuntime: options.requirePomRuntime === true,
+          sourceScenario,
+          headed: options.headed,
+          executionSource: browserLaunchSource,
         },
         false,
         {
@@ -1666,6 +2428,47 @@ export async function runCaseDiscoveryWorkflow(
       automationId = promotedEntry.id;
       appSlug = promotedEntry.appSlug;
       specPath = promotedEntry.specPath;
+      specGeneration = (() => {
+        const raw = (promotedEntry.metadata as Record<string, unknown> | undefined)?.specGeneration as Record<string, unknown> | undefined;
+        const validation = raw?.validation as Record<string, unknown> | undefined;
+        const finalSpec = raw?.finalSpec as Record<string, unknown> | undefined;
+        if (!raw || !validation || !finalSpec) return undefined;
+        return {
+          provider: typeof raw.provider === "string" ? raw.provider : null,
+          model: typeof raw.model === "string" ? raw.model : null,
+          invocations: typeof raw.invocations === "number" ? raw.invocations : 0,
+          invocationsConsumed: typeof raw.invocationsConsumed === "number" ? raw.invocationsConsumed : 0,
+          specGenerationAttempts: typeof raw.specGenerationAttempts === "number" ? raw.specGenerationAttempts : undefined,
+          specRepairAttempts: typeof raw.specRepairAttempts === "number" ? raw.specRepairAttempts : undefined,
+          firstPassPromotion: typeof raw.firstPassPromotion === "boolean" ? raw.firstPassPromotion : undefined,
+          failedGatesAttempt1: Array.isArray(raw.failedGatesAttempt1)
+            ? raw.failedGatesAttempt1.filter((value): value is string => typeof value === "string")
+            : undefined,
+          oracleTypes: Array.isArray(raw.oracleTypes)
+            ? raw.oracleTypes.filter((value): value is string => typeof value === "string")
+            : undefined,
+          promotionAllowed: raw.promotionAllowed === true,
+          specWritten: typeof raw.specWritten === "boolean" ? raw.specWritten : undefined,
+          validation: {
+            schema: typeof validation.schema === "string" ? validation.schema : "skipped",
+            structure: typeof validation.structure === "string" ? validation.structure : "skipped",
+            typescript: typeof validation.typescript === "string" ? validation.typescript : "skipped",
+            playwrightDiscovery: typeof validation.playwrightDiscovery === "string" ? validation.playwrightDiscovery : "skipped",
+            semanticCoverage: typeof validation.semanticCoverage === "string" ? validation.semanticCoverage : "skipped",
+            functionalExecution: typeof validation.functionalExecution === "string" ? validation.functionalExecution : "skipped",
+          },
+          finalSpec: {
+            origin: typeof finalSpec.origin === "string" ? finalSpec.origin : "unknown",
+            generatedBy: typeof finalSpec.generatedBy === "string" ? finalSpec.generatedBy : "unknown",
+            strategy: typeof finalSpec.strategy === "string" ? finalSpec.strategy : "unknown",
+            fallback: finalSpec.fallback && typeof finalSpec.fallback === "object"
+              ? finalSpec.fallback as Record<string, unknown>
+              : null,
+          },
+          errors: Array.isArray(raw.errors) ? raw.errors.filter((value): value is string => typeof value === "string") : [],
+          warnings: Array.isArray(raw.warnings) ? raw.warnings.filter((value): value is string => typeof value === "string") : [],
+        };
+      })();
       promotionReport.promoted = true;
       promotionReport.automationId = promotedEntry.id;
       promotionReport.appSlug = promotedEntry.appSlug;
@@ -1693,6 +2496,7 @@ export async function runCaseDiscoveryWorkflow(
     automationId,
     appSlug,
     specPath,
+    specGeneration,
     outputDir,
     evidenceDir,
     durationMs: Date.now() - startTime

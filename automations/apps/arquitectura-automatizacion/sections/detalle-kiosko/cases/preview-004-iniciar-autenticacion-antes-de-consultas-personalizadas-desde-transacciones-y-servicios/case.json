@@ -1,0 +1,10 @@
+{
+  "id": "preview-004-iniciar-autenticacion-antes-de-consultas-personalizadas-desde-transacciones-y-servicios",
+  "externalId": "PREVIEW-004",
+  "caseId": 0,
+  "title": "Iniciar autenticacion antes de consultas personalizadas desde transacciones y servicios",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-07T15:29:02.844Z"
+}

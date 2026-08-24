@@ -18,6 +18,7 @@ export type LaunchScenario = {
   expectedResult: string;
   preconditions: string[];
   sourceIssueKey?: string;
+  testRailCaseId?: number;
   metadata?: Record<string, unknown>;
 };
 
@@ -33,6 +34,7 @@ export type LaunchExecutionInput = {
   jiraTitle?: string;
   sprintName?: string;
   selectedScenarios: LaunchScenario[];
+  existingTestRailCaseIds?: number[];
   adaptiveScenarios?: LaunchScenario[];
   publishStrategy?: "always_create" | "use_existing";
 };
@@ -41,6 +43,7 @@ export type PublishedCaseEntry = {
   scenarioId: string; // TestRail custom_scenario_id (same as testrailCustomScenarioId)
   caseId: number;
   title: string;
+  sourceType?: "jira_preview" | "testrail_case";
   sourceIssueKey?: string;
   launchScenarioId?: string; // Frontend-provided ID (e.g., LAUNCH-001) - NOT globally unique, visual only
   executionScenarioId?: string; // Discovery execution ID (e.g., PREVIEW-001) - what case_finished emits
@@ -90,6 +93,98 @@ function scenarioToMcpFormat(scenario: LaunchScenario, index: number, appSlug: s
   };
 }
 
+type PlannedLaunchScenario = LaunchScenario & {
+  originalIndex: number;
+  resolvedCaseId?: number;
+};
+
+type LaunchSelectionPlan = {
+  normalizedScenarios: PlannedLaunchScenario[];
+  scenariosToPublish: PlannedLaunchScenario[];
+  existingScenarios: PlannedLaunchScenario[];
+  existingTestRailCaseIds: number[];
+  invalidScenarioTitles: string[];
+};
+
+function toPositiveCaseId(value: unknown): number | undefined {
+  if (typeof value === "number" && Number.isInteger(value) && value > 0) return value;
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!/^\d+$/.test(trimmed)) return undefined;
+    const parsed = Number(trimmed);
+    if (Number.isInteger(parsed) && parsed > 0) return parsed;
+  }
+  return undefined;
+}
+
+export function extractLaunchScenarioCaseId(scenario: LaunchScenario): number | undefined {
+  const asAny = scenario as any;
+  const metadata = (asAny.metadata && typeof asAny.metadata === "object") ? asAny.metadata : undefined;
+  const candidates = [
+    scenario.testRailCaseId,
+    asAny.testRailCaseId,
+    asAny.caseId,
+    metadata?.testRailCaseId,
+    metadata?.caseId,
+  ];
+  for (const value of candidates) {
+    const parsed = toPositiveCaseId(value);
+    if (parsed) return parsed;
+  }
+  return undefined;
+}
+
+export function buildLaunchSelectionPlan(input: Pick<LaunchExecutionInput, "selectedScenarios" | "existingTestRailCaseIds">): LaunchSelectionPlan {
+  const normalizedScenarios: PlannedLaunchScenario[] = [];
+  const invalidScenarioTitles: string[] = [];
+  const selected = input.selectedScenarios ?? [];
+
+  for (let i = 0; i < selected.length; i++) {
+    const scenario = selected[i];
+    const resolvedCaseId = extractLaunchScenarioCaseId(scenario);
+    const scenarioId = typeof scenario.scenarioId === "string" ? scenario.scenarioId.trim() : "";
+    const resolvedScenarioId = scenarioId || (resolvedCaseId ? `TR-CASE-${resolvedCaseId}` : "");
+
+    if (!resolvedScenarioId) {
+      invalidScenarioTitles.push(scenario.title || `scenario_index_${i}`);
+      continue;
+    }
+
+    normalizedScenarios.push({
+      ...scenario,
+      scenarioId: resolvedScenarioId,
+      originalIndex: i,
+      resolvedCaseId,
+    });
+  }
+
+  const existingCaseIdSet = new Set<number>();
+  for (const caseId of input.existingTestRailCaseIds ?? []) {
+    const parsed = toPositiveCaseId(caseId);
+    if (parsed) existingCaseIdSet.add(parsed);
+  }
+
+  const existingScenarios: PlannedLaunchScenario[] = [];
+  const scenariosToPublish: PlannedLaunchScenario[] = [];
+
+  for (const scenario of normalizedScenarios) {
+    if (scenario.resolvedCaseId) {
+      existingCaseIdSet.add(scenario.resolvedCaseId);
+      existingScenarios.push(scenario);
+      continue;
+    }
+    scenariosToPublish.push(scenario);
+  }
+
+  return {
+    normalizedScenarios,
+    scenariosToPublish,
+    existingScenarios,
+    existingTestRailCaseIds: Array.from(existingCaseIdSet),
+    invalidScenarioTitles,
+  };
+}
+
 export async function launchExecution(input: LaunchExecutionInput): Promise<LaunchExecutionResult> {
   // ── 1. Validate payload ──
   console.log(`[launch-execution] validating payload`);
@@ -99,12 +194,34 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
   if (!input.testrailSectionId && !input.sectionId) {
     return { ok: false, error: "missing_section_id", message: "TestRail sectionId is required." };
   }
-  const standardCount = input.selectedScenarios?.length ?? 0;
-  const adaptiveCount = input.adaptiveScenarios?.length ?? 0;
-  if (standardCount === 0 && adaptiveCount === 0) {
-    return { ok: false, error: "missing_selected_scenarios", message: "At least one standard or adaptive scenario must be selected." };
+
+  const selectionPlan = buildLaunchSelectionPlan({
+    selectedScenarios: input.selectedScenarios ?? [],
+    existingTestRailCaseIds: input.existingTestRailCaseIds ?? [],
+  });
+
+  if (selectionPlan.invalidScenarioTitles.length > 0) {
+    return {
+      ok: false,
+      error: "missing_scenario_id",
+      message: `Scenario "${selectionPlan.invalidScenarioTitles[0]}" has no scenarioId.`,
+    };
   }
-  console.log(`[runs:launch] standard=${standardCount} adaptive=${adaptiveCount} mode=${adaptiveCount > 0 ? "automatic_mixed_execution" : "standard"}`);
+
+  const standardCount = selectionPlan.normalizedScenarios.length;
+  const existingCaseCount = selectionPlan.existingTestRailCaseIds.length;
+  const adaptiveCount = input.adaptiveScenarios?.length ?? 0;
+  const launchableSelectionCount = selectionPlan.scenariosToPublish.length + existingCaseCount;
+  if (launchableSelectionCount === 0 && adaptiveCount === 0) {
+    return {
+      ok: false,
+      error: "missing_selected_scenarios",
+      message: "At least one selected generated scenario, existing TestRail case, or adaptive scenario must be selected.",
+    };
+  }
+  console.log(
+    `[runs:launch] standard=${standardCount} publishable=${selectionPlan.scenariosToPublish.length} existingCases=${existingCaseCount} adaptive=${adaptiveCount} mode=${adaptiveCount > 0 ? "automatic_mixed_execution" : "standard"}`,
+  );
 
   // Validate adaptive scenarios have required metadata
   const validAdaptive: LaunchScenario[] = [];
@@ -128,10 +245,7 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
 
   // Validate unique scenarioIds
   const seenIds = new Set<string>();
-  for (const sc of input.selectedScenarios) {
-    if (!sc.scenarioId) {
-      return { ok: false, error: "missing_scenario_id", message: `Scenario "${sc.title}" has no scenarioId.` };
-    }
+  for (const sc of selectionPlan.normalizedScenarios) {
     if (seenIds.has(sc.scenarioId)) {
       return { ok: false, error: "duplicate_scenario_ids", message: `Duplicate scenarioId: "${sc.scenarioId}". Each scenario must have a unique execution ID.` };
     }
@@ -144,11 +258,11 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
 
   const effectiveSectionId = Number(input.testrailSectionId ?? input.sectionId);
 
-  const scenarioIds = input.selectedScenarios.map((_, i) => `PREVIEW-${String(i + 1).padStart(3, "0")}`).join(",");
-  console.log(`[launch-execution] starting launchId=${launchId} appSlug=${input.appSlug} scenarios=${input.selectedScenarios.length} ids=${scenarioIds}`);
+  const scenarioIds = selectionPlan.normalizedScenarios.map((_, i) => `PREVIEW-${String(i + 1).padStart(3, "0")}`).join(",");
+  console.log(`[launch-execution] starting launchId=${launchId} appSlug=${input.appSlug} scenarios=${selectionPlan.normalizedScenarios.length} ids=${scenarioIds}`);
 
   // ── 2. Publish scenarios to TestRail ──
-  let publishedCaseIds: number[] = [];
+  let caseIdsForRun: number[] = [...selectionPlan.existingTestRailCaseIds];
   type PublishMapping = {
     scenarioId: string; // TestRail custom_scenario_id
     testRailCaseId: number;
@@ -160,73 +274,72 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
   };
   let publishMappings: PublishMapping[] = [];
 
-  try {
-    const trConfig = requireTestRailConfig(config);
-    const trClient = new TestRailClient(trConfig);
+  if (selectionPlan.scenariosToPublish.length > 0) {
+    try {
+      const trConfig = requireTestRailConfig(config);
+      const trClient = new TestRailClient(trConfig);
 
-    const mcpScenarios = input.selectedScenarios.map((s, i) => scenarioToMcpFormat(s, i, input.appSlug));
-    const publishResult = await publishScenariosToTestRail(trClient, {
-      projectId: input.projectId,
-      suiteId: input.suiteId,
-      sectionId: effectiveSectionId,
-      scenarios: mcpScenarios,
-      appSlug: input.appSlug,
-      cacheKey: `launch-${launchId}`,
-      publishStrategy: input.publishStrategy ?? "always_create",
-      launchId, // Pass launchId for unique ID generation
-    } as any);
+      const mcpScenarios = selectionPlan.scenariosToPublish.map((s, i) => scenarioToMcpFormat(s, i, input.appSlug));
+      const publishResult = await publishScenariosToTestRail(trClient, {
+        projectId: input.projectId,
+        suiteId: input.suiteId,
+        sectionId: effectiveSectionId,
+        scenarios: mcpScenarios,
+        appSlug: input.appSlug,
+        cacheKey: `launch-${launchId}`,
+        publishStrategy: input.publishStrategy ?? "always_create",
+        launchId, // Pass launchId for unique ID generation
+      } as any);
 
-    publishedCaseIds = publishResult.caseIds;
-    publishMappings = publishResult.mappings.map((m: any, mi: number) => {
-      const inputSc = input.selectedScenarios[mi];
-      const mcpSc = mcpScenarios[mi];
+      caseIdsForRun.push(...publishResult.caseIds);
+      publishMappings = publishResult.mappings.map((m: any, mi: number) => {
+        const inputSc = selectionPlan.scenariosToPublish[mi];
 
-      // executionScenarioId: what discovery will emit (PREVIEW-001)
-      const executionScenarioId = buildScenarioPreviewScenarioId(mcpSc, mi);
+        // executionScenarioId: what discovery will emit (PREVIEW-001)
+        const executionScenarioId = buildScenarioPreviewScenarioId(
+          scenarioToMcpFormat(inputSc, inputSc.originalIndex, input.appSlug),
+          inputSc.originalIndex,
+        );
 
-      // testrailCustomScenarioId: globally unique ID stored in TestRail (L-abe094d6-001)
-      const testrailCustomScenarioId = m.scenarioId;
+        // testrailCustomScenarioId: globally unique ID stored in TestRail (L-abe094d6-001)
+        const testrailCustomScenarioId = m.scenarioId;
 
-      // launchScenarioId: frontend-provided ID (LAUNCH-001) - visual only, NOT globally unique
-      const launchScenarioId = inputSc?.scenarioId;
+        // launchScenarioId: frontend-provided ID (LAUNCH-001) - visual only, NOT globally unique
+        const launchScenarioId = inputSc.scenarioId;
 
-      const mapping: PublishMapping = {
-        scenarioId: testrailCustomScenarioId, // TestRail custom_scenario_id
-        testRailCaseId: m.testRailCaseId,
-        title: m.title ?? inputSc?.title,
-        sourceIssueKey: inputSc?.sourceIssueKey,
-        launchScenarioId,
-        executionScenarioId,
-        testrailCustomScenarioId,
-      };
+        const mapping: PublishMapping = {
+          scenarioId: testrailCustomScenarioId, // TestRail custom_scenario_id
+          testRailCaseId: m.testRailCaseId,
+          title: m.title ?? inputSc.title,
+          sourceIssueKey: inputSc.sourceIssueKey,
+          launchScenarioId,
+          executionScenarioId,
+          testrailCustomScenarioId,
+        };
 
-      console.log(`[launch-execution] id mapping source=${inputSc?.sourceIssueKey ?? "?"} launch=${launchScenarioId ?? "—"} testrailCustom=${testrailCustomScenarioId} execution=${executionScenarioId} caseId=${m.testRailCaseId}`);
-      return mapping;
-    });
+        console.log(`[launch-execution] id mapping source=${inputSc.sourceIssueKey ?? "?"} launch=${launchScenarioId ?? "—"} testrailCustom=${testrailCustomScenarioId} execution=${executionScenarioId} caseId=${m.testRailCaseId}`);
+        return mapping;
+      });
 
-    console.log(`[launch-execution] published cases count=${publishedCaseIds.length} created=${publishResult.created} updated=${publishResult.updated} reused=${publishResult.reused}`);
+      console.log(`[launch-execution] published cases count=${publishResult.caseIds.length} created=${publishResult.created} updated=${publishResult.updated} reused=${publishResult.reused}`);
 
-    // Validate count match
-    if (publishedCaseIds.length !== input.selectedScenarios.length) {
-      const msg = `Publish count mismatch: expected ${input.selectedScenarios.length} but got ${publishedCaseIds.length}. Aborting TestRun creation.`;
-      console.error(`[launch-execution] ${msg}`);
-      return { ok: false, error: "publish_count_mismatch", message: msg };
+      // Validate count match
+      if (publishResult.caseIds.length !== selectionPlan.scenariosToPublish.length) {
+        const msg = `Publish count mismatch: expected ${selectionPlan.scenariosToPublish.length} but got ${publishResult.caseIds.length}. Aborting TestRun creation.`;
+        console.error(`[launch-execution] ${msg}`);
+        return { ok: false, error: "publish_count_mismatch", message: msg };
+      }
+    } catch (err: any) {
+      const message = `Failed to publish scenarios to TestRail: ${err.message ?? String(err)}`;
+      console.error(`[launch-execution] ${message}`);
+      return { ok: false, error: "publish_failed", message };
     }
-
-    const uniqueIds = new Set(publishedCaseIds);
-    if (uniqueIds.size !== publishedCaseIds.length) {
-      const msg = `Duplicate case IDs detected: ${publishedCaseIds.length} entries but only ${uniqueIds.size} unique. Aborting.`;
-      console.error(`[launch-execution] ${msg}`);
-      return { ok: false, error: "duplicate_case_ids_for_run", message: msg };
-    }
-  } catch (err: any) {
-    const message = `Failed to publish scenarios to TestRail: ${err.message ?? String(err)}`;
-    console.error(`[launch-execution] ${message}`);
-    return { ok: false, error: "publish_failed", message };
   }
 
-  if (publishedCaseIds.length === 0) {
-    return { ok: false, error: "publish_failed", message: "No case IDs were returned after publishing. Cannot create TestRun." };
+  caseIdsForRun = Array.from(new Set(caseIdsForRun));
+
+  if (caseIdsForRun.length === 0) {
+    return { ok: false, error: "publish_failed", message: "No case IDs were selected or returned after publishing. Cannot create TestRun." };
   }
 
   // ── 3. Create TestRun ──
@@ -238,13 +351,13 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
     const trClient = new TestRailClient(trConfig);
 
     const runName = buildLaunchRunName(input.jiraKey, input.sprintName);
-    console.log(`[launch-execution] creating TestRail run include_all=false caseIds=${publishedCaseIds.length} ids=${JSON.stringify(publishedCaseIds)} refs=${runRefs || "(none)"}`);
+    console.log(`[launch-execution] creating TestRail run include_all=false caseIds=${caseIdsForRun.length} ids=${JSON.stringify(caseIdsForRun)} refs=${runRefs || "(none)"}`);
     const run = await trClient.addRun({
       projectId: String(input.projectId),
       suiteId: input.suiteId ? String(input.suiteId) : undefined,
       name: runName,
-      description: `QA Lab launch for ${input.appSlug} | section=${effectiveSectionId} | ${input.selectedScenarios.length} scenarios | launchId=${launchId}`,
-      caseIds: publishedCaseIds,
+      description: `QA Lab launch for ${input.appSlug} | section=${effectiveSectionId} | ${selectionPlan.normalizedScenarios.length} scenarios | launchId=${launchId}`,
+      caseIds: caseIdsForRun,
       refs: runRefs || undefined,
     });
 
@@ -257,15 +370,47 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
   }
 
   // ── 4. Save launch manifest ──
-  const publishedCases: PublishedCaseEntry[] = publishMappings.map((m, i) => ({
+  const publishedCases: PublishedCaseEntry[] = publishMappings.map((m) => ({
     scenarioId: m.scenarioId,
     caseId: m.testRailCaseId,
-    title: m.title ?? input.selectedScenarios[i]?.title ?? "unknown",
+    title: m.title ?? "unknown",
+    sourceType: "jira_preview",
     sourceIssueKey: m.sourceIssueKey,
     launchScenarioId: m.launchScenarioId,
     executionScenarioId: m.executionScenarioId,
     testrailCustomScenarioId: m.testrailCustomScenarioId,
   }));
+
+  const publishedCaseIdSet = new Set(publishedCases.map((pc) => pc.caseId));
+
+  for (const scenario of selectionPlan.existingScenarios) {
+    if (!scenario.resolvedCaseId || publishedCaseIdSet.has(scenario.resolvedCaseId)) continue;
+    const executionScenarioId = buildScenarioPreviewScenarioId(
+      scenarioToMcpFormat(scenario, scenario.originalIndex, input.appSlug),
+      scenario.originalIndex,
+    );
+    publishedCaseIdSet.add(scenario.resolvedCaseId);
+    publishedCases.push({
+      scenarioId: scenario.scenarioId,
+      caseId: scenario.resolvedCaseId,
+      title: scenario.title ?? `TestRail Case ${scenario.resolvedCaseId}`,
+      sourceType: "jira_preview",
+      sourceIssueKey: scenario.sourceIssueKey,
+      launchScenarioId: scenario.scenarioId,
+      executionScenarioId,
+    });
+  }
+
+  for (const caseId of selectionPlan.existingTestRailCaseIds) {
+    if (publishedCaseIdSet.has(caseId)) continue;
+    publishedCaseIdSet.add(caseId);
+    publishedCases.push({
+      scenarioId: `TR-CASE-${caseId}`,
+      caseId,
+      title: `TestRail Case ${caseId}`,
+      sourceType: "testrail_case",
+    });
+  }
 
   // Log mapping validation
   console.log(`[launch-execution] publishedCases count=${publishedCases.length}`);
@@ -293,13 +438,14 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
     jira: input.jiraKey ? { key: input.jiraKey, ...(input.jiraTitle ? { title: input.jiraTitle } : {}) } : undefined,
     sprintName: input.sprintName,
     publishStrategy: input.publishStrategy ?? "always_create",
-    selectedScenarioCount: input.selectedScenarios.length,
+    selectedScenarioCount: selectionPlan.normalizedScenarios.length,
+    selectedExistingTestRailCaseCount: selectionPlan.existingTestRailCaseIds.length,
     adaptiveScenarioCount: input.adaptiveScenarios?.length ?? 0,
     executionMode: (input.adaptiveScenarios?.length ?? 0) > 0 ? "automatic_mixed_execution" : "standard",
     publishedCases,
     status: "test_run_created",
     executionPlan: {
-      standardScenarios: input.selectedScenarios,
+      standardScenarios: selectionPlan.normalizedScenarios.map(({ originalIndex: _originalIndex, resolvedCaseId: _resolvedCaseId, ...scenario }) => scenario),
       adaptiveScenarios: input.adaptiveScenarios ?? [],
     },
   };
@@ -308,7 +454,7 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
   fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), "utf-8");
   console.log(`[launch-execution] manifest written path=${manifestPath}`);
 
-  const issueKey = input.jiraKey || (input.selectedScenarios[0] as any)?.sourceIssueKey || "";
+  const issueKey = input.jiraKey || (selectionPlan.normalizedScenarios[0] as any)?.sourceIssueKey || "";
 
   let checklistUrl: string | undefined;
   if (issueKey) {

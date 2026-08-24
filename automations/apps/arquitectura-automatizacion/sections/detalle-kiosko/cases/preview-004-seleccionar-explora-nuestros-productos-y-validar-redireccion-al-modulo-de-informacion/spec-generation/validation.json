@@ -1,0 +1,61 @@
+{
+  "mode": "ai_hybrid",
+  "provider": "codex",
+  "model": "gpt-5.4",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "invocations": 1,
+  "invocationsConsumed": 1,
+  "durationMs": 96202,
+  "usage": {
+    "inputTokens": 68538,
+    "cachedInputTokens": 43648,
+    "cacheWriteInputTokens": 0,
+    "nonCachedInputTokens": 24890,
+    "outputTokens": 3101,
+    "reasoningOutputTokens": 1301,
+    "totalPhysicalTokens": 71639,
+    "durationMs": 66580,
+    "credits": null
+  },
+  "validation": {
+    "schema": "passed",
+    "structure": "passed",
+    "typescript": "passed",
+    "playwrightDiscovery": "passed",
+    "semanticCoverage": "failed",
+    "functionalExecution": "failed"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [],
+  "regressedGates": [],
+  "missingRequirements": [],
+  "oracleTypes": [
+    "literal_visible_text",
+    "navigation_transition"
+  ],
+  "errors": [
+    "step_not_implemented_in_spec:2",
+    "functional_execution_failed:exitCode=1",
+    "functional_execution_error:Error: Promoted assertion failed at step 4 target=\"DepÃ³sitos a plazo\". diagnostics={\"currentUrl\":\"https://172.27.4.50/product-catalog\",\"actionIntent\":\"assertVisible\",\"target\":\"DepÃ³sitos a plazo\",\"stepIndex\":4,\"timeoutMs\":15000,\"retryAttempted\":false,\"screenshotPath\":\"[REDACTED]\"} cause=\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed"
+  ],
+  "warnings": [
+    "functional_execution_screenshots=4"
+  ],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

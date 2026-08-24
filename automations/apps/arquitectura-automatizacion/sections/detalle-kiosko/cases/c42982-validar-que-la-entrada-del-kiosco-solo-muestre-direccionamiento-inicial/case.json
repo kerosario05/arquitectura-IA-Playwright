@@ -1,0 +1,10 @@
+{
+  "id": "c42982-validar-que-la-entrada-del-kiosco-solo-muestre-direccionamiento-inicial",
+  "externalId": "C42982",
+  "caseId": 42982,
+  "title": "Validar que la entrada del kiosco solo muestre direccionamiento inicial",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-06T15:50:27.663Z"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-visualizar-las-opciones-principales-luego-de-iniciar",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Visualizar las opciones principales luego de iniciar",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-12T15:32:34.273Z"
+}

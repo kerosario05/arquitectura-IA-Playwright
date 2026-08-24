@@ -1,0 +1,9 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "C42990",
+  "testRailCaseId": 42990,
+  "generatedAt": "2026-08-06T18:32:43.031Z",
+  "title": "Validar visibilidad de las dos opciones principales en la pantalla de seleccion"
+}

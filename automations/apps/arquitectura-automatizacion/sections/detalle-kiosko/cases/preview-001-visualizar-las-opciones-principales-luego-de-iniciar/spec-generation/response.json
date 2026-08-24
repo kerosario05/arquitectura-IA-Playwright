@@ -1,0 +1,9 @@
+{
+  "spec": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\n\nimport { HomePage } from '../../../../pages/home.page';\n\nexport const PROMOTED_SPEC_STRATEGY = \"pom_runtime\";\n\ntest('Visualizar las opciones principales luego de iniciar', async ({ page }) => {\n  test.setTimeout(Number(process.env.PROMOTED_SPEC_TIMEOUT_MS ?? 90000));\n  process.env.APP_SLUG = 'arquitectura-automatizacion';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-001';\n  process.env.SCENARIO_TITLE = 'Visualizar las opciones principales luego de iniciar';\n\n  const homePage = new HomePage(page);\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await page.goto('/');\n    await page.waitForLoadState('domcontentloaded');\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 3,\n      target: 'Iniciar',\n      actionIntent: 'start_session',\n      expectedEffect: 'ui_change',\n      sensitive: false,\n      previousStepReplays: [],\n      lastSelectionStep: undefined,\n      expectedOwnerPage: 'HomePage',\n      action: async () => {\n        await homePage.start();\n      },\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "strategy": "pom_runtime",
+  "usedPageObjects": [
+    "HomePage"
+  ],
+  "missingPageObjects": [],
+  "missingMethods": []
+}

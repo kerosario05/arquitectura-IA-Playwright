@@ -1,0 +1,130 @@
+{
+  "id": "preview-001-redirigir-al-modulo-de-informacion-al-seleccionar-explora-nuestros-productos",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Redirigir al módulo de información al seleccionar Explora nuestros productos",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-001-redirigir-al-modulo-de-informacion-al-seleccionar-explora-nuestros-productos\\plan.json",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-001-redirigir-al-modulo-de-informacion-al-seleccionar-explora-nuestros-productos\\case.spec.ts",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "status": "spec_failed",
+  "source": "discovery",
+  "appProfile": "arquitectura-automatizacion",
+  "createdAt": "2026-08-18T12:27:39.393Z",
+  "updatedAt": "2026-08-18T12:27:39.393Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-08-18T12-26-31-295Z\\discovered-plans.pending.json",
+  "pomStatus": "needs_manual_review",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "failed",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-08-18T12-26-31-295Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "specGeneration": {
+      "mode": "ai_hybrid",
+      "provider": "codex",
+      "model": "gpt-5.4-mini",
+      "skill": {
+        "name": "playwright-spec-generation",
+        "version": "1.0.0",
+        "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+        "loaded": true
+      },
+      "invocations": 1,
+      "invocationsConsumed": 1,
+      "durationMs": 44594,
+      "usage": {
+        "inputTokens": 64481,
+        "cachedInputTokens": 28800,
+        "cacheWriteInputTokens": 0,
+        "nonCachedInputTokens": 35681,
+        "outputTokens": 1618,
+        "reasoningOutputTokens": 413,
+        "totalPhysicalTokens": 66099,
+        "durationMs": 39887,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "failed",
+        "traceFidelity": "failed",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "passed",
+        "functionalExecution": "skipped"
+      },
+      "promotionAllowed": false,
+      "specsRequested": 1,
+      "specsValidated": 0,
+      "specsRejected": 1,
+      "specGenerationAttempts": 1,
+      "specRepairAttempts": 0,
+      "firstPassPromotion": false,
+      "failedGatesAttempt1": [
+        "structuralValidation",
+        "traceFidelityValidation"
+      ],
+      "regressedGates": [],
+      "missingRequirements": [],
+      "oracleTypes": [
+        "literal_visible_text",
+        "navigation_transition"
+      ],
+      "errors": [
+        "missing_metadata_line:process.env.SCENARIO_TITLE = 'Redirigir al módulo de información al seleccionar Explora nuestros productos';",
+        "contract_target_changed:stepIndex=1:contractStepIndex=1:expected=\"¿Qué deseas realizar hoy?\"",
+        "contract_target_changed:stepIndex=3:contractStepIndex=3:expected=\"módulo de información\""
+      ],
+      "warnings": [],
+      "finalSpec": {
+        "origin": "ai_candidate",
+        "generatedBy": "ai",
+        "strategy": "ai_candidate",
+        "fallback": null
+      },
+      "specWritten": false,
+      "previousSpec": {
+        "existed": true,
+        "hash": "759dc1ce6e959ccb97cbacaebf4eb0b10f78d94799832742d0b01bec39681dfd",
+        "lastModifiedAt": "2026-08-18T02:33:15.914Z"
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "spec_generation_validation_failed",
+      "blockers": [
+        "spec_generation_validation_failed"
+      ],
+      "availablePageObjects": [
+        "ProductListPage",
+        "ProductDetailPage",
+        "FormPage",
+        "HomePage",
+        "LoginPage",
+        "CategoryPage",
+        "ProductInformationPage",
+        "OperationsMenuPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-001-redirigir-al-modulo-de-informacion-al-seleccionar-explora-nuestros-productos\\plan.json",
+    "previousStatus": "spec_failed"
+  }
+}

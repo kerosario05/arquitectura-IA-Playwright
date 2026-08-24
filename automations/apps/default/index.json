@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-06-02T01:35:39.292Z",
+  "updatedAt": "2026-08-12T15:50:59.874Z",
   "automations": [
     {
       "id": "c37757-consulta-depositos-a-plazo-en-dolares",
@@ -918,6 +918,89 @@
           "fallbackUsed": false,
           "requirePomRuntime": false
         }
+      }
+    },
+    {
+      "id": "preview-001-visualizacion-de-la-pantalla-inicial-del-kiosco",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "Visualizacion de la pantalla inicial del kiosco",
+      "planPath": "automations\\apps\\default\\sections\\default-section\\cases\\preview-001-visualizacion-de-la-pantalla-inicial-del-kiosco\\plan.json",
+      "specPath": "automations\\apps\\default\\sections\\default-section\\cases\\preview-001-visualizacion-de-la-pantalla-inicial-del-kiosco\\case.spec.ts",
+      "appSlug": "default",
+      "appConfigPath": "automations\\apps\\default\\app.config.json",
+      "status": "spec_failed",
+      "source": "discovery",
+      "appProfile": "default",
+      "baseUrlHash": "1423ba294517",
+      "createdAt": "2026-08-12T15:49:38.301Z",
+      "updatedAt": "2026-08-12T15:50:59.874Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-001-visualizacion-de-la-pantalla-inicial-del-kiosco\\plan.json",
+      "pomStatus": "needs_manual_review",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "failed",
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 1841,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "failed",
+            "typescript": "failed",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed"
+          },
+          "promotionAllowed": false,
+          "specsRequested": 1,
+          "specsValidated": 0,
+          "specsRejected": 1,
+          "errors": [
+            "missing_createPromotedSpecRuntime",
+            "missing_finally_block",
+            "missing_finishEvidence_call",
+            "unused_import:expect",
+            "typescript_validation_failed:exitCode=2"
+          ],
+          "warnings": [
+            "step_index_not_explicit_in_spec:1",
+            "step_index_not_explicit_in_spec:2",
+            "step_index_not_explicit_in_spec:3"
+          ]
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "inline",
+          "autoPomEnabled": false,
+          "selectedStrategy": "inline",
+          "reason": "spec_generation_validation_failed",
+          "blockers": [
+            "spec_generation_validation_failed"
+          ],
+          "availablePageObjects": [],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\default\\sections\\default-section\\cases\\preview-001-visualizacion-de-la-pantalla-inicial-del-kiosco\\plan.json",
+        "previousStatus": "spec_failed"
       }
     }
   ]

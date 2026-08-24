@@ -1,0 +1,125 @@
+{
+  "id": "preview-001-visualizar-la-pantalla-de-seleccion-inicial-del-kiosco",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Visualizar la pantalla de selección inicial del kiosco",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-001-visualizar-la-pantalla-de-seleccion-inicial-del-kiosco\\plan.json",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-001-visualizar-la-pantalla-de-seleccion-inicial-del-kiosco\\case.spec.ts",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "arquitectura-automatizacion",
+  "createdAt": "2026-08-17T14:12:03.854Z",
+  "updatedAt": "2026-08-17T14:12:03.854Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-08-17T14-10-32-130Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "passed",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-08-17T14-10-32-130Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "specGeneration": {
+      "mode": "ai_hybrid",
+      "provider": "codex",
+      "model": "gpt-5.4-mini",
+      "skill": {
+        "name": "playwright-spec-generation",
+        "version": "1.0.0",
+        "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+        "loaded": true
+      },
+      "invocations": 2,
+      "invocationsConsumed": 2,
+      "durationMs": 33336,
+      "usage": {
+        "inputTokens": 54780,
+        "cachedInputTokens": 28800,
+        "cacheWriteInputTokens": 0,
+        "nonCachedInputTokens": 25980,
+        "outputTokens": 1423,
+        "reasoningOutputTokens": 328,
+        "totalPhysicalTokens": 56203,
+        "durationMs": 30551,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "traceFidelity": "passed",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "passed",
+        "functionalExecution": "skipped"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specGenerationAttempts": 2,
+      "specRepairAttempts": 1,
+      "firstPassPromotion": false,
+      "failedGatesAttempt1": [
+        "traceFidelityValidation"
+      ],
+      "regressedGates": [],
+      "missingRequirements": [],
+      "oracleTypes": [
+        "literal_visible_text"
+      ],
+      "errors": [],
+      "warnings": [
+        "ai_repair_attempt_applied:1:failedGates=traceFidelityValidation",
+        "ai_repair_previous_attempt_error:contract_target_changed:stepIndex=1:contractStepIndex=1:expected=\"¿Qué deseas realizar hoy?\""
+      ],
+      "finalSpec": {
+        "origin": "ai_candidate",
+        "generatedBy": "ai",
+        "strategy": "ai_candidate",
+        "fallback": null
+      },
+      "specWritten": true,
+      "previousSpec": {
+        "existed": true,
+        "hash": "c237b3cb25c627b61a59eaa23b7e771962119feff7633ec9669e99e223e71ea6",
+        "lastModifiedAt": "2026-08-17T13:58:08.409Z"
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [],
+      "availablePageObjects": [
+        "ProductListPage",
+        "ProductDetailPage",
+        "FormPage",
+        "HomePage",
+        "LoginPage",
+        "CategoryPage",
+        "ProductInformationPage",
+        "OperationsMenuPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-001-visualizar-la-pantalla-de-seleccion-inicial-del-kiosco\\plan.json",
+    "previousStatus": "active"
+  }
+}

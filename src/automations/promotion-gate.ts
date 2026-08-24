@@ -43,6 +43,11 @@ export type PromotionGateInput = {
   missingPageObjects?: string[];
   missingMethods?: string[];
   specContent?: string;
+  observableOracles?: Array<{
+    requirement: string;
+    type: string;
+    backed: boolean;
+  }>;
 };
 
 export type PromotionGateResult = {
@@ -114,7 +119,24 @@ export function evaluatePromotionGate(input: PromotionGateInput): PromotionGateR
   const plan = input.candidatePlan ?? discovery.candidatePlan;
   const policy = input.promotionPolicy ?? DEFAULT_PROMOTION_POLICY;
 
-  if (discovery.status !== "discovered_passed" && discovery.status !== "repaired_passed") {
+  if (!plan) {
+    reasons.push("Candidate plan is missing.");
+    return { allowed: false, status: "blocked", reasons, warnings };
+  }
+
+  const validation = validateExecutionPlan(plan);
+  const blockingSteps = discovery.steps.filter((step) => !isOptionalOrInformational(step) && isBlockingStep(step));
+  const eligibleFromPartialDiscovery =
+    discovery.status === "discovered_partial"
+    && plan.status === "validated"
+    && validation.valid
+    && blockingSteps.length === 0;
+
+  if (
+    discovery.status !== "discovered_passed"
+    && discovery.status !== "repaired_passed"
+    && !eligibleFromPartialDiscovery
+  ) {
     return {
       allowed: false,
       status: "not_applicable",
@@ -123,16 +145,14 @@ export function evaluatePromotionGate(input: PromotionGateInput): PromotionGateR
     };
   }
 
-  if (!plan) {
-    reasons.push("Candidate plan is missing.");
-    return { allowed: false, status: "blocked", reasons, warnings };
+  if (eligibleFromPartialDiscovery) {
+    warnings.push("Promotion proceeding from discovered_partial because only non-blocking/contextual discovery gaps remain.");
   }
 
   if (plan.status !== "validated") {
     reasons.push(`Candidate plan status is '${plan.status}', expected 'validated'.`);
   }
 
-  const validation = validateExecutionPlan(plan);
   if (!validation.valid) {
     reasons.push("Candidate plan validation failed.");
   }
@@ -160,7 +180,6 @@ export function evaluatePromotionGate(input: PromotionGateInput): PromotionGateR
   // If the plan is validated, skip this check - the plan validation already ensures correctness
   // and any failed discovery steps were recovered/removed from the plan
   if (plan.status !== "validated" || !validation.valid) {
-    const blockingSteps = discovery.steps.filter((step) => !isOptionalOrInformational(step) && isBlockingStep(step));
     if (blockingSteps.length > 0) {
       reasons.push(`Blocking discovery steps found: ${blockingSteps.map((step) => `#${step.index}:${step.status}`).join(", ")}`);
     }
@@ -197,8 +216,29 @@ export function evaluatePromotionGate(input: PromotionGateInput): PromotionGateR
     warnings.push("Strict mode enabled and skipped steps were detected.");
   }
 
-  // --- POM Policy Checks ---
+  // --- Observable Oracle Gate ---
+  // A required expected outcome that could not be resolved to an observable
+  // oracle must block promotion: promoting a spec that cannot verify the
+  // scenario's expected result is forbidden.
   let pomStatus: POMPromotionStatus | undefined;
+  if (input.observableOracles && input.observableOracles.length > 0) {
+    const unresolvedRequired = input.observableOracles.filter(
+      (oracle) => oracle.type === "unsupported_or_unresolved" && oracle.backed === false
+    );
+    if (unresolvedRequired.length > 0) {
+      for (const oracle of unresolvedRequired) {
+        console.log(`[promotion-oracle-gate] requirement="${oracle.requirement.slice(0, 120)}" oracleType=${oracle.type} backed=false`);
+      }
+      reasons.push(
+        `Required observable oracle unresolved (${unresolvedRequired.length}): ` +
+        unresolvedRequired.map((oracle) => `"${oracle.requirement}"`).join(", ") +
+        `. Spec cannot verify the expected result; promotion blocked before spec generation.`
+      );
+      pomStatus = "needs_manual_review";
+    }
+  }
+
+  // --- POM Policy Checks ---
 
   if (policy.requirePageObjects) {
     const missingPO = input.missingPageObjects ?? [];

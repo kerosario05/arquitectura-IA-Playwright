@@ -1,9 +1,11 @@
 {
-  "requestedStrategy": "auto",
-  "autoPomEnabled": true,
+  "requestedStrategy": "pom",
+  "autoPomEnabled": false,
   "selectedStrategy": "pom",
-  "reason": "promoted",
-  "blockers": [],
+  "reason": "spec_generation_validation_failed",
+  "blockers": [
+    "spec_generation_validation_failed"
+  ],
   "availablePageObjects": [
     "ProductListPage",
     "ProductDetailPage",

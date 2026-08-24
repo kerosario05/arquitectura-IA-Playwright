@@ -1,0 +1,42 @@
+{
+  "scenarioId": "PREVIEW-001",
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\n\nimport { HomePage } from '../../../../pages/home.page';\n\nexport const PROMOTED_SPEC_STRATEGY = 'pom_runtime';\n\ntest('Visualizar opciones principales del kiosco tras iniciar', async ({ page }) => {\n  test.setTimeout(Number(process.env.PROMOTED_SPEC_TIMEOUT_MS ?? 90000));\n  process.env.APP_SLUG = 'arquitectura-automatizacion';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-001';\n  process.env.SCENARIO_TITLE = 'Visualizar opciones principales del kiosco tras iniciar';\n\n  const homePage = new HomePage(page);\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await page.goto('/');\n    await page.waitForLoadState('domcontentloaded');\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 2,\n      description: 'Validar que el boton Iniciar este visible antes de iniciar.',\n      target: 'Iniciar',\n      assertion: async () => {\n        await expect(page.getByRole('button', { name: /Iniciar/i })).toBeVisible();\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({ stepIndex: 3, target: 'Iniciar', actionIntent: 'start_session', expectedEffect: 'ui_change', sensitive: false, previousStepReplays: [], lastSelectionStep: undefined, expectedOwnerPage: 'HomePage', action: async () => { await homePage.start(); } });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "Validar que el boton Iniciar este visible antes de iniciar.",
+      "implementation": "await expect(page.getByRole('button', { name: /Iniciar/i })).toBeVisible();"
+    }
+  ],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "start"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "homePage",
+    "promotedRuntime"
+  ],
+  "unresolvedRequirements": [
+    "No observed evidence was supplied to assert the post-click text \"¿Qué deseas realizar hoy?\".",
+    "No observed evidence was supplied to assert the post-click text \"Información de productos\".",
+    "No observed evidence was supplied to assert the post-click text \"Transacciones y servicios\".",
+    "No observed evidence was supplied to verify the expected result \"Opciones iniciales visibles para direccionamiento.\" after clicking \"Iniciar\"."
+  ],
+  "warnings": [
+    "Execution plan step 2 is labeled as login, but no auth flow context or observed authentication evidence was provided; the spec preserves deterministic coverage for stepIndex 2 using the observed visible entry control \"Iniciar\"."
+  ],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

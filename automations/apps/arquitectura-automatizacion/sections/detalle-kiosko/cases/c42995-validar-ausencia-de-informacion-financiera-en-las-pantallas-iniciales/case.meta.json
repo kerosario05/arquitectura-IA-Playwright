@@ -1,0 +1,9 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "C42995",
+  "testRailCaseId": 42995,
+  "generatedAt": "2026-08-07T12:22:27.082Z",
+  "title": "Validar ausencia de información financiera en las pantallas iniciales"
+}

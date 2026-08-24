@@ -194,8 +194,9 @@
           "key": "numero_identificacion",
           "label": "Número de identificación",
           "kind": "text",
-          "exampleValue": "402-12345678-9",
+          "exampleValue": "402-1234567-8",
           "sensitive": true,
+          "dependsOn": "tipo_documento",
           "matchLocator": {
             "strategy": "androidUiAutomator",
             "value": "new UiSelector().className(\"android.widget.EditText\").instance(0)"
@@ -221,7 +222,7 @@
             "value": "new UiSelector().className(\"android.widget.EditText\").instance(0)"
           },
           "hasAccessibilityLabel": false,
-          "notes": "Único EditText de la pantalla. Placeholder de ejemplo: 402-12345678-9 (formato de cédula dominicana). No tiene content-desc/resource-id, se ubica por posición."
+          "notes": "Único EditText de la pantalla. Placeholder visual de la UI: 402-12345678-9 (formato de cédula dominicana). Estructura funcional observada por Appium: 3-7-1 caracteres significativos (402-1234567-8). El exampleValue usa la estructura funcional. No tiene content-desc/resource-id, se ubica por posición."
         },
         {
           "label": "Acepto los Términos y Condiciones",
@@ -288,5 +289,13 @@
         "Para validar que el gate se cumplió puedes usar action:assertEnabled sobre Continuar antes de clickearlo."
       ]
     }
+  },
+  "executionSignals": {
+    "technicalErrorSignals": [
+      "inconveniente tecnico",
+      "ocurrio un inconveniente tecnico",
+      "reintentar",
+      "la validacion no pudo realizarse"
+    ]
   }
 }

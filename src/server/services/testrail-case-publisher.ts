@@ -21,34 +21,58 @@ function ensureDir(filePath: string): void {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
 }
 
+const RECOVERY_TIMEOUT_MS = 30000;
+
 async function recoverCaseCreatedAfterHttp500(params: {
   client: TestRailClient;
   ctx: ScenarioPreviewPublishContext;
   scenarioTitle: string;
   marker: string | undefined;
+  scenarioId?: string;
 }): Promise<{ found: true; case: RawTestRailCase } | { found: false; matches: number }> {
-  const { client, ctx, scenarioTitle, marker } = params;
-  if (!marker || typeof client.getCases !== "function") {
-    return { found: false, matches: 0 };
-  }
+  const { client, ctx, scenarioTitle, marker, scenarioId } = params;
+  const scenarioLabel = scenarioId ?? "unknown";
 
-  const sectionCases = await client.getCases(
-    String(ctx.projectId),
-    ctx.suiteId ? String(ctx.suiteId) : undefined,
-    String(ctx.sectionId),
-  );
-  const normalizedScenarioTitle = normalizeTitle(scenarioTitle);
-  const matches = sectionCases.filter((testCase) => {
-    const sameSection = testCase.section_id === ctx.sectionId;
-    const sameTitle = normalizeTitle(testCase.title) === normalizedScenarioTitle;
-    const preconditions = String(testCase.custom_preconds ?? "");
-    return sameSection && sameTitle && preconditions.includes(marker);
+  const runRecovery = async (): Promise<{ found: true; case: RawTestRailCase } | { found: false; matches: number }> => {
+    if (!marker || typeof client.getCases !== "function") {
+      return { found: false, matches: 0 };
+    }
+
+    const sectionCases = await client.getCases(
+      String(ctx.projectId),
+      ctx.suiteId ? String(ctx.suiteId) : undefined,
+      String(ctx.sectionId),
+    );
+    const normalizedScenarioTitle = normalizeTitle(scenarioTitle);
+    const matches = sectionCases.filter((testCase) => {
+      const sameSection = testCase.section_id === ctx.sectionId;
+      const sameTitle = normalizeTitle(testCase.title) === normalizedScenarioTitle;
+      const preconditions = String(testCase.custom_preconds ?? "");
+      return sameSection && sameTitle && preconditions.includes(marker);
+    });
+
+    if (matches.length === 1) {
+      return { found: true, case: matches[0] };
+    }
+    return { found: false, matches: matches.length };
+  };
+
+  // Total deadline for the whole recovery (not per-page). If the caller's timeout fires first,
+  // we release the publisher without re-running add_case (the case may exist despite the 500).
+  let timer: NodeJS.Timeout | undefined;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      console.warn(`[testrail-publish-recovery] status=timeout scenario=${scenarioLabel} sectionId=${ctx.sectionId} timeoutMs=${RECOVERY_TIMEOUT_MS}`);
+      reject(new Error(`testrail_add_case_500_recovery_timeout: sectionId=${ctx.sectionId} scenarioId=${scenarioLabel} timeoutMs=${RECOVERY_TIMEOUT_MS}`));
+    }, RECOVERY_TIMEOUT_MS);
+    if (typeof timer.unref === "function") timer.unref();
   });
 
-  if (matches.length === 1) {
-    return { found: true, case: matches[0] };
+  try {
+    return await Promise.race([runRecovery(), timeoutPromise]);
+  } finally {
+    if (timer) clearTimeout(timer);
   }
-  return { found: false, matches: matches.length };
 }
 
 function readStore(): MappingStore {
@@ -671,6 +695,7 @@ export async function publishScenariosToTestRail(
               ctx,
               scenarioTitle: scenario.title,
               marker: uniqueMarker,
+              scenarioId,
             });
             if (recovered.found) {
               testRailCase = recovered.case;

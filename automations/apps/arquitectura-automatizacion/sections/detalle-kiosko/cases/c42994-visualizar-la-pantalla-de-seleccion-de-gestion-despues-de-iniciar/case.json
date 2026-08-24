@@ -1,0 +1,10 @@
+{
+  "id": "c42994-visualizar-la-pantalla-de-seleccion-de-gestion-despues-de-iniciar",
+  "externalId": "C42994",
+  "caseId": 42994,
+  "title": "Visualizar la pantalla de selección de gestión después de iniciar",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-07T12:21:45.204Z"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "c42929-inicio-del-flujo-de-autenticacion-desde-transacciones-y-servicios",
+  "externalId": "C42929",
+  "caseId": 42929,
+  "title": "Inicio del flujo de autenticacion desde Transacciones y servicios",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-05T20:52:30.716Z"
+}

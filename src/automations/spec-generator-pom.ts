@@ -704,7 +704,8 @@ export function generatePOMSpecFromPlan(
   pageObjectRegistry: PageObjectRegistry | undefined,
   policy: PromotionPolicy,
   inlineDebugMode: boolean,
-  authFlowOptions?: { alias?: string; landing?: string; testDataJson?: string; insertionAfterStepIndex?: number }
+  authFlowOptions?: { alias?: string; landing?: string; testDataJson?: string; insertionAfterStepIndex?: number },
+  metadata?: { sectionSlug?: string; scenarioId?: string }
 ): POMSpecResult {
   const escapedTitle = escapeSpecString(plan.scenario.title);
 
@@ -1252,7 +1253,7 @@ export function generatePOMSpecFromPlan(
   const lines: string[] = [];
   const promotedManifestPath = escapeSpecString(buildPortablePathFromCwd(path.join(appPaths.caseDir ?? path.dirname(appPaths.specPath ?? ""), "promoted-data.json")));
 
-  lines.push("import { test } from '@playwright/test';");
+  lines.push("import { test, expect } from '@playwright/test';");
   if (usesPromotedRuntime) {
     const runtimeImportPath = escapeSpecString(buildPortablePathFromSpec(appPaths.specPath ?? "", path.resolve(process.cwd(), "src/automations/runtime/promoted-spec-runtime.ts")));
     lines.push(`import { createPromotedSpecRuntime } from '${runtimeImportPath.replace(/\.ts$/, "")}';`);
@@ -1292,8 +1293,8 @@ export function generatePOMSpecFromPlan(
   lines.push(`  test.setTimeout(Number(process.env.PROMOTED_SPEC_TIMEOUT_MS ?? 90000));`);
   
   // Emit evidence metadata for this test scenario
-  const scenarioId = `C${plan.scenario.caseId ?? ""}`;
-  const sectionSlug = "default-section";
+  const scenarioId = metadata?.scenarioId ?? plan.scenario.externalId ?? `C${plan.scenario.caseId ?? ""}`;
+  const sectionSlug = metadata?.sectionSlug ?? "default-section";
   lines.push(`  // Evidence metadata`);
   lines.push(`  process.env.APP_SLUG = '${escapeSpecString(appProfile.appSlug)}';`);
   lines.push(`  process.env.SECTION_SLUG = '${escapeSpecString(sectionSlug)}';`);

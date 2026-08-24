@@ -1,0 +1,9 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "C42988",
+  "testRailCaseId": 42988,
+  "generatedAt": "2026-08-06T18:04:25.332Z",
+  "title": "Iniciar autenticacion desde Transacciones y servicios"
+}

@@ -69,7 +69,8 @@ import { detectAuthGate, type AuthGateDetection } from "./auth-gate-detector";
 import { resolveAuthInputs, validateRequiredInputs, logAuthResolution, type AuthInputResolverConfig } from "./auth-input-resolver";
 import { loadRouteProfile } from "../automations/app-profile";
 import { resolveMissingIntermediateStep, type MissingIntermediateStepResolution, type DiscoveryCandidate, type DiscoverySnapshot } from "./missing-intermediate-step-resolver";
-import { observeRouteTransition, observeRouteCompletionSuccess, saveRouteProfileSuggestions, type RouteProfileSuggestion, type RouteProfileLearningConfig } from "./route-profile-learning";
+import { observeRouteTransition, observeRouteCompletionSuccess, saveRouteProfileSuggestions, applyRouteProfileSuggestions, type RouteProfileSuggestion, type RouteProfileLearningConfig } from "./route-profile-learning";
+import { appendRouteSuggestionToKnowledge } from "../scenarios/app-knowledge-writer";
 import {
   createAuthGateState,
   shouldSkipStepAsAuthConsumed,
@@ -253,6 +254,265 @@ function countNonBlockingAssertionFailures(steps: DiscoveryStepResult[]): number
     const importance = s.assertionImportance ?? "blocking";
     return importance === "contextual" || importance === "optional" || (s.conditionalAssertion === true && s.conditionalRisk === "high");
   }).length;
+}
+
+export type DiscoveryAssertionContract = {
+  pendingBlockingActions: string[];
+  pendingCriticalAssertions: string[];
+  unresolvedContextualAssertions: string[];
+  satisfiedByEquivalentEvidence: Array<{ assertion: string; evidence: string }>;
+  destinationConfirmed: boolean;
+};
+
+export type DiscoveryStatusContractResolution = {
+  status: CaseDiscoveryResult["status"];
+  shouldSkipFullDiscovery: boolean;
+  shouldExecuteFunctionalGate: boolean;
+  decisionReason?:
+    | "only_contextual_assertions_pending"
+    | "observable_assertion_requires_discovery"
+    | "blocking_assertions_or_actions_pending"
+    | "hard_blocking_reason";
+};
+
+const DESTINATION_CONFIRMATION_STRUCTURAL_SIGNALS = new Set([
+  "satisfied_by_structural_evidence",
+  "satisfied_by_form_field_presence",
+  "satisfied_by_confirmation_closed",
+  "satisfied_by_action_executed",
+  "satisfied_by_post_confirmation_navigation",
+  "satisfied_by_cart_structure",
+  "structurally_satisfied"
+]);
+
+const HARD_BLOCKING_FAILURE_REASONS = new Set([
+  "target_not_found",
+  "wrong_screen",
+  "missing_intermediate_step",
+  "missing_intermediate_step_to_final_target",
+  "target_not_interactable",
+  "click_no_transition",
+  "precondition_unresolved",
+  "needs_setup_resolution",
+  "needs_approval",
+  "needs_associated_target_resolution",
+  "associated_entity_not_found",
+  "associated_action_not_found",
+  "locator_resolution_failed",
+  "fill_target_not_editable",
+  "fill_target_not_visible",
+  "fill_resolution_failed",
+  "fill_resolution_invalid"
+]);
+
+function isHardBlockingFailureReason(reason?: string): boolean {
+  if (!reason) return false;
+  return HARD_BLOCKING_FAILURE_REASONS.has(reason);
+}
+
+function normalizeAssertionLabel(step: DiscoveryStepResult): string {
+  return (step.targetText ?? step.action ?? "").trim();
+}
+
+function assertionRequiresAuthCompletion(assertionText: string): boolean {
+  const normalized = normalizeText(assertionText);
+  const completionSignals = [
+    /\bautenticad[oa]s?\b/,
+    /\bauthenticated\b/,
+    /\blog(?:ged)?\s*in\b/,
+    /\bsesion iniciada\b/,
+    /\bsigned in\b/,
+    /\bafter login\b/,
+    /\bpost[- ]login\b/,
+    /\bacceso concedido\b/,
+    /\bauth(?:entication)?\s*completed\b/,
+    /\bautenticacion completad[ao]\b/,
+  ];
+  return completionSignals.some((pattern) => pattern.test(normalized));
+}
+
+function isAuthGateCompleted(step: DiscoveryStepResult): boolean {
+  if (step.recoveredBy === "auth_flow") {
+    return true;
+  }
+  const diagnostics = step.authGateDiagnostics;
+  if (!diagnostics) {
+    return false;
+  }
+  if (Boolean(diagnostics.completedBy)) {
+    return true;
+  }
+  const stage = normalizeText(diagnostics.stage ?? "");
+  if (!stage) {
+    return false;
+  }
+  return stage.includes("authenticated") || stage.includes("private_menu") || stage.includes("operations");
+}
+
+function detectEquivalentAssertionEvidence(step: DiscoveryStepResult, assertionLabel: string): string | undefined {
+  if (step.recoveredBy === "auth_flow" || step.authGateDiagnostics?.detected) {
+    if (assertionRequiresAuthCompletion(assertionLabel)) {
+      return isAuthGateCompleted(step) ? "auth_gate_completed" : undefined;
+    }
+    return isAuthGateCompleted(step) ? "auth_gate_completed" : "auth_gate_detected";
+  }
+
+  if (step.recoveryMetadata?.transitionDetected === true) {
+    return "route_transition_detected";
+  }
+
+  const structuralSignals = step.structuralSignals ?? [];
+  if (structuralSignals.some((signal) => DESTINATION_CONFIRMATION_STRUCTURAL_SIGNALS.has(signal))) {
+    return "route_profile_success_signal";
+  }
+
+  if (step.assertionStatus === "satisfied_by_children" || step.assertionStatus === "satisfied_by_previous_assertion") {
+    return "assertion_relation_satisfied";
+  }
+
+  return undefined;
+}
+
+function isPendingDiscoveryFailureStep(step: DiscoveryStepResult): boolean {
+  if (step.recoveryStatus === "recovered" || step.recoveryStatus === "repaired") {
+    return false;
+  }
+  if (step.recoveryMetadata?.blocking === false) {
+    return false;
+  }
+  if (!(step.status === "not_found" || step.status === "needs_assertion_resolution")) {
+    return false;
+  }
+  return true;
+}
+
+export function buildDiscoveryAssertionContract(params: {
+  steps: DiscoveryStepResult[];
+  earlyCompletionSatisfied: boolean;
+}): DiscoveryAssertionContract {
+  const pendingBlockingActions = new Set<string>();
+  const pendingCriticalAssertions = new Set<string>();
+  const unresolvedContextualAssertions = new Set<string>();
+  const satisfiedByEquivalentEvidence = new Map<string, string>();
+
+  for (const step of params.steps) {
+    if (!isPendingDiscoveryFailureStep(step)) {
+      continue;
+    }
+
+    const assertionLabel = normalizeAssertionLabel(step);
+    const isAssertion = Boolean(step.assertionClassification);
+    if (!isAssertion) {
+      pendingBlockingActions.add(assertionLabel || `step_${step.index}`);
+      continue;
+    }
+
+    if ((step as any)?.pendingDiscovery !== true) {
+      const importance = step.assertionImportance ?? "blocking";
+      if (importance === "blocking") {
+        pendingCriticalAssertions.add(assertionLabel || `step_${step.index}`);
+      }
+      continue;
+    }
+
+    if (
+      assertionRequiresAuthCompletion(assertionLabel) &&
+      (step.recoveredBy === "auth_flow" || step.authGateDiagnostics?.detected) &&
+      !isAuthGateCompleted(step)
+    ) {
+      pendingCriticalAssertions.add(assertionLabel || `step_${step.index}`);
+      continue;
+    }
+
+    const evidence = detectEquivalentAssertionEvidence(step, assertionLabel);
+    if (evidence) {
+      const key = assertionLabel || `step_${step.index}`;
+      if (!satisfiedByEquivalentEvidence.has(key)) {
+        satisfiedByEquivalentEvidence.set(key, evidence);
+      }
+      continue;
+    }
+    unresolvedContextualAssertions.add(assertionLabel || `step_${step.index}`);
+  }
+
+  const destinationConfirmed =
+    params.earlyCompletionSatisfied ||
+    params.steps.some((step) => step.recoveryMetadata?.transitionDetected === true) ||
+    params.steps.some((step) => step.recoveredBy === "auth_flow" || step.authGateDiagnostics?.detected === true) ||
+    params.steps.some((step) => (step.structuralSignals ?? []).some((signal) => DESTINATION_CONFIRMATION_STRUCTURAL_SIGNALS.has(signal)));
+
+  return {
+    pendingBlockingActions: Array.from(pendingBlockingActions),
+    pendingCriticalAssertions: Array.from(pendingCriticalAssertions),
+    unresolvedContextualAssertions: Array.from(unresolvedContextualAssertions),
+    satisfiedByEquivalentEvidence: Array.from(satisfiedByEquivalentEvidence.entries()).map(([assertion, evidence]) => ({ assertion, evidence })),
+    destinationConfirmed
+  };
+}
+
+export function resolveDiscoveryStatusFromAssertionContract(params: {
+  initialStatus: CaseDiscoveryResult["status"];
+  unresolvedBlockingFailuresCount: number;
+  pendingDiscoveryCount: number;
+  someFound: boolean;
+  failedReason?: string;
+  contract: DiscoveryAssertionContract;
+}): DiscoveryStatusContractResolution {
+  const hasHardBlockingReason = isHardBlockingFailureReason(params.failedReason);
+  const hasBlockingActions = params.contract.pendingBlockingActions.length > 0;
+  const hasCriticalAssertions = params.contract.pendingCriticalAssertions.length > 0;
+  const hasContextualPending =
+    params.contract.unresolvedContextualAssertions.length > 0 ||
+    params.contract.satisfiedByEquivalentEvidence.length > 0;
+
+  if (hasHardBlockingReason) {
+    return {
+      status: params.initialStatus,
+      shouldSkipFullDiscovery: false,
+      shouldExecuteFunctionalGate: false,
+      decisionReason: "hard_blocking_reason"
+    };
+  }
+
+  if (
+    params.unresolvedBlockingFailuresCount === 0 &&
+    params.someFound &&
+    !hasBlockingActions &&
+    !hasCriticalAssertions &&
+    hasContextualPending &&
+    params.contract.destinationConfirmed
+  ) {
+    return {
+      status: "discovered_passed",
+      shouldSkipFullDiscovery: true,
+      shouldExecuteFunctionalGate: true,
+      decisionReason: "only_contextual_assertions_pending"
+    };
+  }
+
+  if ((hasBlockingActions || hasCriticalAssertions) && params.initialStatus === "discovered_passed") {
+    return {
+      status: "discovered_partial",
+      shouldSkipFullDiscovery: false,
+      shouldExecuteFunctionalGate: false,
+      decisionReason: "blocking_assertions_or_actions_pending"
+    };
+  }
+
+  if (params.pendingDiscoveryCount > 0 && params.initialStatus === "discovered_passed") {
+    return {
+      status: "discovered_partial",
+      shouldSkipFullDiscovery: false,
+      shouldExecuteFunctionalGate: false,
+      decisionReason: "observable_assertion_requires_discovery"
+    };
+  }
+
+  return {
+    status: params.initialStatus,
+    shouldSkipFullDiscovery: false,
+    shouldExecuteFunctionalGate: params.initialStatus === "discovered_passed" || params.initialStatus === "repaired_passed"
+  };
 }
 
 /**
@@ -831,6 +1091,11 @@ export function evaluateEarlyCompletion(
       }
     } else if (isMandatory) {
       pendingAssertions.push(res.assertionText);
+    } else {
+      // Evaluated but not satisfied and not blocking (e.g. passive_visibility that
+      // failed with assertion_not_found). Preserve as non-blocking so it is not
+      // dropped from early-completion accounting.
+      skippedAssertions.push(res.assertionText);
     }
   }
 
@@ -1304,6 +1569,20 @@ async function tryAuthGateRecovery(
   console.log(`[auth-gate] Required inputs: ${detection.requiredInputs.join(", ")}`);
   console.log(`[auth-gate] Virtual keyboard: ${detection.hasVirtualKeyboard}, Native input: ${detection.hasNativeInput}`);
 
+  if (options.scenario.authIntent === "gate_observation") {
+    console.log(`[auth-gate-observation] detected=true action=stop_before_auth`);
+    return {
+      recovered: true,
+      diagnostics: {
+        detected: true,
+        gateType: detection.gateType,
+        stage: detection.stage,
+        confidence: detection.confidence,
+        requiredInputs: detection.requiredInputs
+      }
+    };
+  }
+
   const resolverConfig: AuthInputResolverConfig = {
     env,
     missingInputBehavior,
@@ -1705,12 +1984,32 @@ async function tryAuthGateRecovery(
       }
 
       console.log(`[auth-gate] Auth flow failed: ${result.error}`);
-      return { recovered: false, error: result.error };
+      return {
+        recovered: false,
+        error: result.error,
+        diagnostics: {
+          detected: true,
+          gateType: detection.gateType,
+          stage: detection.stage,
+          confidence: detection.confidence,
+          requiredInputs: detection.requiredInputs
+        }
+      };
     }
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);
     console.log(`[auth-gate] Auth flow failed: ${errorMsg}`);
-    return { recovered: false, error: errorMsg };
+    return {
+      recovered: false,
+      error: errorMsg,
+      diagnostics: {
+        detected: true,
+        gateType: detection.gateType,
+        stage: detection.stage,
+        confidence: detection.confidence,
+        requiredInputs: detection.requiredInputs
+      }
+    };
   }
 }
 
@@ -1718,6 +2017,30 @@ function maskValue(value: string | undefined, visibleChars = 4): string {
   if (!value) return "";
   if (value.length <= visibleChars) return "****";
   return "*".repeat(value.length - visibleChars) + value.slice(-visibleChars);
+}
+
+/**
+ * Whether the scenario text itself explicitly requires an executable login action.
+ * This is the ONLY condition under which a plan login step may be emitted.
+ * Inference from section privacy, login mode, app profile, or configured
+ * credentials is forbidden: auth requirements must be traceable to the scenario.
+ */
+export function scenarioExplicitlyRequiresAuth(scenario: TestScenario): boolean {
+  const steps = scenario.steps ?? [];
+  for (const step of steps) {
+    const intents = parseStepIntent(step.action);
+    if (intents.some((intent) => intent.type === "setup_authentication")) {
+      return true;
+    }
+  }
+  const objectiveText = [
+    scenario.title ?? "",
+    scenario.preconditions ?? "",
+    typeof scenario.raw?.custom_preconds === "string" ? scenario.raw.custom_preconds : "",
+    typeof scenario.raw?.custom_expected === "string" ? scenario.raw.custom_expected : "",
+  ].filter(Boolean).join("\n");
+  const normalized = normalizeText(objectiveText);
+  return /(iniciar sesio|loguearse|autenticar|log in|sign in|login con)/.test(normalized);
 }
 
 export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<CaseDiscoveryResult> {
@@ -1785,6 +2108,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   let earlyCompletionSatisfied = false;
   let authGateState: AuthGateState | undefined;
   let authGateCompletedAfterStepIndex: number | undefined; // Track step index after which AuthFlow completed
+  let authGateDetectedDuringDiscovery = false; // Track gate detection regardless of completion
+  let authGateDetectedStage: string | undefined; // Stage at which the auth gate was detected
   let activeContainer: ActiveContainerContext | undefined;
   const resolvedDataKeys = new Set<string>();
   let postResumeTargetContext:
@@ -1846,7 +2171,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     target: "APP_BASE_URL"
   });
 
-  if (loginAction) {
+  const requiresExplicitAuth = scenarioExplicitlyRequiresAuth(scenario);
+  console.log(`[discovery:case] login-step-gate scenario="${scenario.title?.slice(0, 60)}" loginActionProvided=${Boolean(loginAction)} requiresExplicitAuth=${requiresExplicitAuth}`);
+  if (loginAction && requiresExplicitAuth) {
     planSteps.push({
       index: planSteps.length + 1,
       action: "login",
@@ -2899,9 +3226,54 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       }
     }
 
+    console.log(
+      `[early-completion-assertions] satisfied=${earlyCompletion.satisfiedAssertions.length}:[${earlyCompletion.satisfiedAssertions.join("|")}] ` +
+      `pending=${earlyCompletion.pendingAssertions.length}:[${earlyCompletion.pendingAssertions.join("|")}] ` +
+      `skipped=${earlyCompletion.skippedAssertions.length}:[${earlyCompletion.skippedAssertions.join("|")}] ` +
+      `deferred=${earlyCompletion.deferredAssertions.length}:[${earlyCompletion.deferredAssertions.join("|")}]`
+    );
+
     if (earlyCompletion.satisfied && earlyCompletionPolicy.allowed) {
       earlyCompletionSatisfied = true;
       console.log(`[discovery:case] Early completion allowed: ${earlyCompletionPolicy.reason}. Skipping remaining actions.`);
+
+      // Persist assertions that MCP actually observed/satisfied so they survive
+      // early completion as canonical backed assertion evidence in stepResults.
+      const satisfiedAssertionTexts = new Set(earlyCompletion.satisfiedAssertions);
+      for (const assertionTarget of parsed.assertionTargets) {
+        if (satisfiedAssertionTexts.has(assertionTarget.target)) {
+          steps.push({
+            index: assertionTarget.index,
+            action: assertionTarget.action,
+            status: "found",
+            targetText: assertionTarget.target,
+            assertionStatus: "passed",
+            assertionClassification: "passive_visibility",
+            matchedText: assertionTarget.target
+          } as any);
+        }
+      }
+
+      // Persist assertions that were evaluated, NOT satisfied, and allowed as
+      // contextual/non-blocking (skipped/deferred), so SpecExecutionContract does
+      // not reconstruct them later as required=true.
+      const nonBlockingNotSatisfiedTexts = new Set([
+        ...earlyCompletion.skippedAssertions,
+        ...earlyCompletion.deferredAssertions
+      ]);
+      for (const assertionTarget of parsed.assertionTargets) {
+        if (assertionTarget.source === "action" && nonBlockingNotSatisfiedTexts.has(assertionTarget.target)) {
+          steps.push({
+            index: assertionTarget.index,
+            action: assertionTarget.action,
+            status: "not_found",
+            targetText: assertionTarget.target,
+            assertionImportance: "contextual",
+            pendingDiscovery: true
+          } as any);
+        }
+      }
+
       for (const rem of remainingActionTargets) {
         steps.push({
           index: rem.index,
@@ -3177,6 +3549,59 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         options,
         orderedItem.type === "action" ? orderedItem.actionTarget?.target : undefined
       );
+
+      if (proactiveAuthCheck.diagnostics?.detected === true) {
+        authGateDetectedDuringDiscovery = true;
+        if (typeof proactiveAuthCheck.diagnostics?.stage === "string") {
+          authGateDetectedStage = proactiveAuthCheck.diagnostics.stage;
+        }
+      }
+
+      // Gate observation is terminal: scenario.authIntent === "gate_observation"
+      // means the scenario objective is to OBSERVE the auth gate, not to authenticate.
+      // When tryAuthGateRecovery detected the gate, Discovery is satisfied and must stop.
+      if (
+        options.scenario.authIntent === "gate_observation" &&
+        proactiveAuthCheck.recovered === true &&
+        proactiveAuthCheck.diagnostics?.detected === true &&
+        proactiveAuthCheck.diagnostics?.unresolved !== true
+      ) {
+        earlyCompletionSatisfied = true;
+        console.log(`[discovery:case] Auth gate observed (gate_observation). Completing discovery early.`);
+
+        const currentTarget = orderedItem.actionTarget?.target ?? orderedItem.navTarget?.target ?? (orderedItem.executableStep as any)?.target ?? "";
+        const currentAction = orderedItem.actionTarget?.action ?? orderedItem.navTarget?.action ?? (orderedItem.executableStep as any)?.action ?? "";
+
+        steps.push({
+          index: orderedItem.index,
+          action: currentAction,
+          status: "found",
+          targetText: currentTarget,
+          assertionStatus: "passed",
+          assertionClassification: "auth_gate_observed",
+          matchedText: currentTarget,
+          authGateDiagnostics: {
+            detected: true,
+            detectedBeforeStep: currentTarget,
+            stage: proactiveAuthCheck.diagnostics?.stage ?? "unknown",
+          },
+        } as any);
+
+        for (const rem of orderedItems) {
+          if (rem.index <= orderedItem.index) continue;
+          const remTarget = rem.actionTarget?.target ?? rem.navTarget?.target ?? (rem.executableStep as any)?.target ?? "";
+          const remAction = rem.actionTarget?.action ?? rem.navTarget?.action ?? (rem.executableStep as any)?.action ?? "";
+          steps.push({
+            index: rem.index,
+            action: remAction,
+            status: "skipped_after_completion",
+            targetText: remTarget,
+            error: "Skipped due to auth gate observation (gate_observation).",
+          } as any);
+        }
+
+        break;
+      }
 
       // Check for post-auth transient unresolved (failure case)
       const isPostAuthTransientUnresolved =
@@ -3893,6 +4318,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
         const authRecovery = await tryAuthGateRecovery(page, currentSnapshot, options, nav.target);
 
+        if (authRecovery.diagnostics?.detected === true) {
+          authGateDetectedDuringDiscovery = true;
+          if (typeof authRecovery.diagnostics?.stage === "string") {
+            authGateDetectedStage = authRecovery.diagnostics.stage;
+          }
+        }
+
         const unresolvedAuthRecovery =
           !authRecovery.recovered &&
           (authRecovery.diagnostics?.reason === "post_auth_transient_landing_unresolved" ||
@@ -4193,6 +4625,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         currentSnapshot = scan.snapshot;
 
         const authRecovery = await tryAuthGateRecovery(page, currentSnapshot, options, actionTarget.target);
+        if (authRecovery.diagnostics?.detected === true) {
+          authGateDetectedDuringDiscovery = true;
+          if (typeof authRecovery.diagnostics?.stage === "string") {
+            authGateDetectedStage = authRecovery.diagnostics.stage;
+          }
+        }
         if (
           !authRecovery.recovered &&
           (authRecovery.diagnostics?.reason === "post_auth_transient_landing_unresolved" ||
@@ -4529,11 +4967,27 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
       executedStepIndices.add(actionTarget.index);
 
+      const resolvedTargetName =
+        typeof resolution.candidateText === "string" && resolution.candidateText.trim().length > 0
+          ? resolution.candidateText.trim()
+          : undefined;
+      const hasSemanticTargetReconciliation = Boolean(
+        resolvedTargetName
+        && normalizeText(resolvedTargetName) !== normalizeText(actionTarget.target)
+        && resolution.confidence >= aiConfig.confidenceThreshold
+      );
+      if (hasSemanticTargetReconciliation) {
+        console.log(
+          `[semantic-reconciliation] expected="${actionTarget.target}" observed="${resolvedTargetName}" equivalent=true confidence=${resolution.confidence.toFixed(2)} source=runtime_snapshot`
+        );
+      }
+
       steps.push({
         index: actionTarget.index,
         action: actionTarget.action,
         status: "found",
         targetText: actionTarget.target,
+        resolvedTargetName: hasSemanticTargetReconciliation ? resolvedTargetName : undefined,
         snapshotUrl: scan.url,
         snapshotTitle: scan.title,
         elementsFound: scan.elementsCount,
@@ -4822,11 +5276,27 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
       executedStepIndices.add(actionTarget.index);
 
+      const runtimeResolvedTargetName =
+        typeof resolution.candidateText === "string" && resolution.candidateText.trim().length > 0
+          ? resolution.candidateText.trim()
+          : undefined;
+      const hasRuntimeTargetReconciliation = Boolean(
+        runtimeResolvedTargetName
+        && normalizeText(runtimeResolvedTargetName) !== normalizeText(actionTarget.target)
+        && resolution.confidence >= aiConfig.confidenceThreshold
+      );
+      if (hasRuntimeTargetReconciliation) {
+        console.log(
+          `[semantic-reconciliation] expected="${actionTarget.target}" observed="${runtimeResolvedTargetName}" equivalent=true confidence=${resolution.confidence.toFixed(2)} source=runtime_snapshot`
+        );
+      }
+
       steps.push({
         index: actionTarget.index,
         action: actionTarget.action,
         status: "found",
         targetText: actionTarget.target,
+        resolvedTargetName: hasRuntimeTargetReconciliation ? runtimeResolvedTargetName : undefined,
         snapshotUrl: scan.url,
         snapshotTitle: scan.title,
         elementsFound: scan.elementsCount,
@@ -5457,6 +5927,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         currentSnapshot = scan.snapshot;
 
         const authRecovery = await tryAuthGateRecovery(page, currentSnapshot, options, actionTarget.target);
+        if (authRecovery.diagnostics?.detected === true) {
+          authGateDetectedDuringDiscovery = true;
+          if (typeof authRecovery.diagnostics?.stage === "string") {
+            authGateDetectedStage = authRecovery.diagnostics.stage;
+          }
+        }
         if (
           !authRecovery.recovered &&
           (authRecovery.diagnostics?.reason === "post_auth_transient_landing_unresolved" ||
@@ -5560,7 +6036,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
           // Build enhanced AI Repair diagnostics for artifact persistence
           const aiRepairStartTime = Date.now();
-          console.log(`[ai-repair] enabled provider=${process.env.AI_PROVIDER ?? "unknown"} model=${process.env.AI_MODEL ?? "unknown"}`);
+          console.log(`[ai-repair] enabled provider=${process.env.AI_REPAIR_PROVIDER?.trim() || process.env.AI_PROVIDER?.trim() || "unknown"} model=${process.env.AI_REPAIR_MODEL?.trim() || process.env.AI_MODEL?.trim() || "unknown"}`);
           console.log(`[ai-repair] failure=target_not_found target="${actionTarget.target}"`);
           console.log(`[ai-repair] context candidates=${aiCandidates.length}`);
 
@@ -7925,6 +8401,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         }
 
         const authRecovery = await tryAuthGateRecovery(page, currentSnapshot, options, actionTarget.target);
+          if (authRecovery.diagnostics?.detected === true) {
+            authGateDetectedDuringDiscovery = true;
+          }
           if (
             !authRecovery.recovered &&
             (authRecovery.diagnostics?.reason === "post_auth_transient_landing_unresolved" ||
@@ -8141,9 +8620,24 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         .map((s) => s.targetText!)
         .filter(Boolean);
       const lastSuccessfulTarget = currentRouteHistory[currentRouteHistory.length - 1];
-      
+
+      // Only a previous executable action (not an assertion/validation/wait) can be the
+      // source of a learned transition; assertions must not change edge identity.
+      const isAssertionLikeStepLocal = (s: any): boolean =>
+        Boolean(s.assertionStatus || s.assertionClassification) ||
+        /\b(validar|verificar|comprobar|assert|should|esperar que se muestre)\b/i.test(s.action ?? "");
+      let lastSuccessfulActionTarget: string | undefined;
+      for (let i = steps.length - 1; i >= 0; i--) {
+        const s = steps[i] as any;
+        if ((s.index ?? i) >= actionTarget.index) continue;
+        if ((s.status === "passed" || s.status === "found") && s.targetText && !isAssertionLikeStepLocal(s)) {
+          lastSuccessfulActionTarget = s.targetText;
+          break;
+        }
+      }
+
       const learningResult = observeRouteTransition({
-        from: lastSuccessfulTarget || "entry",
+        from: lastSuccessfulActionTarget || "entry",
         to: actionTarget.target,
         beforeUrl: beforeState.url,
         afterUrl: afterState.url,
@@ -8237,21 +8731,32 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         : undefined) as any
     });
 
+      const planResolvedTargetName =
+        typeof resolution.candidateText === "string" && resolution.candidateText.trim().length > 0
+          ? resolution.candidateText.trim()
+          : undefined;
+      const planHasRuntimeReconciliation = Boolean(
+        planResolvedTargetName
+        && normalizeText(planResolvedTargetName) !== normalizeText(actionTarget.target)
+        && resolution.confidence >= aiConfig.confidenceThreshold
+      );
       planSteps.push({
         index: planSteps.length + 1,
         action: "click",
         description: actionTarget.action,
         target: { 
           strategy: (resolution.locatorStrategy || "text") as LocatorStrategy, 
-          value: actionTarget.target, 
+          value: planHasRuntimeReconciliation ? planResolvedTargetName! : actionTarget.target,
           exact: false,
-          metadata: resolution.locatorStrategy === "ordinal_selection" ? {
-            resolvedTargetName: resolution.candidateText,
+          metadata: (resolution.locatorStrategy === "ordinal_selection" || planHasRuntimeReconciliation) ? {
+            originalTarget: actionTarget.target,
+            resolvedTargetName: planHasRuntimeReconciliation ? planResolvedTargetName : resolution.candidateText,
             resolvedCandidateId: resolution.candidateId,
             aiAssisted: false,
-            repairType: "ordinal_selection",
+            repairType: resolution.locatorStrategy === "ordinal_selection" ? "ordinal_selection" : "target_resolution",
             decisionStatus: "resolved",
-            validationStatus: "passed"
+            validationStatus: "passed",
+            confidence: resolution.confidence
           } : undefined
         },
         locatorStrategy: resolution.locatorStrategy,
@@ -8320,12 +8825,14 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   let effectiveFailedAtStep = failedAtStep;
   let effectiveFailedTarget = failedTarget;
   
-  if (unresolvedBlockingFailures.length === 0 && failedReason) {
+  if (unresolvedBlockingFailures.length === 0 && failedReason && !isHardBlockingFailureReason(failedReason)) {
     // All failures were recovered - clear failedReason
     console.log(`[discovery:case] All failures recovered, clearing failedReason='${failedReason}'`);
     effectiveFailedReason = undefined;
     effectiveFailedAtStep = undefined;
     effectiveFailedTarget = undefined;
+  } else if (unresolvedBlockingFailures.length === 0 && failedReason && isHardBlockingFailureReason(failedReason)) {
+    console.log(`[discovery:case] preserving hard blocking failedReason='${failedReason}'`);
   } else if (unresolvedBlockingFailures.length > 0) {
     // Still have unresolved failures - use the first one
     const firstUnresolved = unresolvedBlockingFailures[0];
@@ -8364,12 +8871,50 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
                     ? "discovered_partial"
                     : "exploration_failed";
 
-  // Prevent discovered_passed when assertions require discovery
   const pendingDiscoveryCount = steps.filter(s => (s as any)?.pendingDiscovery === true).length;
-  if (pendingDiscoveryCount > 0 && status === "discovered_passed") {
+  const assertionContract = buildDiscoveryAssertionContract({
+    steps,
+    earlyCompletionSatisfied
+  });
+
+  for (const resolved of assertionContract.satisfiedByEquivalentEvidence) {
+    console.log(
+      `[assertion-resolution] assertion="${resolved.assertion}" classification=contextual evidence=${resolved.evidence} decision=satisfied_by_equivalent_evidence`
+    );
+  }
+  if (assertionContract.destinationConfirmed) {
+    for (const assertion of assertionContract.unresolvedContextualAssertions) {
+      console.log(
+        `[assertion-resolution] assertion="${assertion}" classification=contextual destinationConfirmed=true decision=non_blocking_warning`
+      );
+    }
+  }
+
+  const statusResolution = resolveDiscoveryStatusFromAssertionContract({
+    initialStatus: status,
+    unresolvedBlockingFailuresCount: unresolvedBlockingFailures.length,
+    pendingDiscoveryCount,
+    someFound,
+    failedReason: effectiveFailedReason ?? failedReason,
+    contract: assertionContract
+  });
+
+  if (statusResolution.status !== status) {
+    const reason = statusResolution.decisionReason ?? "observable_assertion_requires_discovery";
     console.log(`[status-reconcile] before=${status} pendingDiscovery=${pendingDiscoveryCount}`);
-    status = "discovered_partial";
-    console.log(`[status-reconcile] after=${status} reason=observable_assertion_requires_discovery`);
+    status = statusResolution.status;
+    console.log(`[status-reconcile] after=${status} reason=${reason}`);
+  }
+
+  if (statusResolution.shouldSkipFullDiscovery) {
+    console.log("[full-discovery] decision=skipped reason=only_contextual_assertions_pending");
+    console.log("[functional-gate] decision=execute reason=navigation_confirmed_no_blocking_pending");
+    console.log(
+      `[discovery-result] blockingActions=${assertionContract.pendingBlockingActions.length} criticalAssertions=${assertionContract.pendingCriticalAssertions.length} contextualWarnings=${assertionContract.unresolvedContextualAssertions.length} destinationConfirmed=${assertionContract.destinationConfirmed} status=discovered`
+    );
+    effectiveFailedReason = undefined;
+    effectiveFailedAtStep = undefined;
+    effectiveFailedTarget = undefined;
   }
    
   // Log status reconciliation
@@ -8391,10 +8936,11 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     source: resolvedDataKeys.has(key) ? "env" : undefined
   }));
 
+  const discoverySatisfied = status === "discovered_passed" || status === "repaired_passed";
   const candidatePlan: ExecutionPlan = {
     version: "1.0",
     source: "discovery_generated",
-    status: allFound ? "validated" : "needs_discovery",
+    status: discoverySatisfied ? "validated" : "needs_discovery",
     scenario: {
       source: "testrail",
       externalId: scenario.externalId,
@@ -8404,9 +8950,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     requiredData,
     steps: planSteps,
     notes: [
-      ...(allFound
+      ...(discoverySatisfied
         ? ["Discovery completed successfully. All targets and concrete assertions passed."]
         : [`Discovery partial: ${foundSteps}/${totalSteps} navigations/assertions satisfied.`]),
+      ...(statusResolution.shouldSkipFullDiscovery && assertionContract.unresolvedContextualAssertions.length > 0
+        ? [`Contextual assertions kept as non-blocking warnings: ${assertionContract.unresolvedContextualAssertions.join("; ")}`]
+        : []),
       ...(nonBlockingAssertionFailures > 0
         ? [`Review needed: ${nonBlockingAssertionFailures} non-blocking assertion failure(s) were ignored for pass/fail reconciliation.`]
         : []),
@@ -8416,13 +8965,14 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     ],
     createdAt: new Date().toISOString(),
     // AuthFlow metadata for spec generation
-    metadata: authGateCompletedAfterStepIndex !== undefined
+    metadata: authGateCompletedAfterStepIndex !== undefined || authGateDetectedDuringDiscovery
       ? {
-          authFlowRequired: true,
+          authFlowRequired: authGateCompletedAfterStepIndex !== undefined,
           authFlowInsertionAfterStepIndex: authGateCompletedAfterStepIndex,
           authFlowAlias: "defaultClient",
           authFlowLanding: "transactions_menu",
-          authGateDetectedDuringDiscovery: true
+          authGateDetectedDuringDiscovery: true,
+          authGateStage: authGateDetectedStage ?? "unknown"
         }
       : undefined
   };
@@ -8496,6 +9046,62 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         const pending = routeProfileSuggestions.filter((s) => s.status === "pending");
         
         console.log(`[route-learning] summary: ${approved.length} auto_approved, ${pending.length} pending`);
+      }
+
+      if (!routeProfileLearningConfig.autoApply) {
+        console.log(`[route-learning] autoApply skipped reason=disabled`);
+      } else {
+        const approvedSuggestions = routeProfileSuggestions.filter(
+          (suggestion) => suggestion.status === "auto_approved"
+        );
+        if (approvedSuggestions.length === 0) {
+          console.log(`[route-learning] autoApply skipped reason=no_auto_approved`);
+        } else if (!discoveryAppSlug || discoveryAppSlug === "default") {
+          console.log(`[route-learning] autoApply skipped reason=missing_app_slug`);
+        } else {
+          try {
+            const applyResult = await applyRouteProfileSuggestions(
+              discoveryAppSlug,
+              approvedSuggestions,
+              path.join(process.cwd(), "automations")
+            );
+            if (applyResult.error) {
+              console.log(`[route-learning] autoApply failed error=${applyResult.error}`);
+            } else {
+              console.log(`[route-learning] autoApply applied=${applyResult.applied} approved=${approvedSuggestions.length} changes=${applyResult.changes?.length ?? 0}`);
+            }
+          } catch (err) {
+            console.log(`[route-learning] autoApply failed error=${err instanceof Error ? err.message : String(err)}`);
+          }
+
+          let persisted = 0;
+          let duplicates = 0;
+          let failed = 0;
+          const automationsRoot = path.join(process.cwd(), "automations");
+          for (const suggestion of approvedSuggestions) {
+            try {
+              const knowledgeResult = await appendRouteSuggestionToKnowledge(
+                discoveryAppSlug,
+                suggestion,
+                automationsRoot
+              );
+              if (knowledgeResult.error) {
+                failed++;
+                console.log(`[route-learning] knowledge persist failed actionTarget="${suggestion.to}" error=${knowledgeResult.error}`);
+              } else if (knowledgeResult.persisted && knowledgeResult.duplicate) {
+                duplicates++;
+              } else if (knowledgeResult.persisted) {
+                persisted++;
+              } else {
+                failed++;
+              }
+            } catch (err) {
+              failed++;
+              console.log(`[route-learning] knowledge persist failed actionTarget="${suggestion.to}" error=${err instanceof Error ? err.message : String(err)}`);
+            }
+          }
+          console.log(`[route-learning] knowledge persisted=${persisted} duplicates=${duplicates} failed=${failed}`);
+        }
       }
     } catch (err) {
       console.log(`[route-learning] failed to save suggestions: ${err instanceof Error ? err.message : String(err)}`);

@@ -1,0 +1,10 @@
+{
+  "id": "c43003-visualizar-la-pantalla-de-seleccion-inicial-del-kiosco",
+  "externalId": "C43003",
+  "caseId": 43003,
+  "title": "Visualizar la pantalla de selección inicial del kiosco",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-07T13:04:24.165Z"
+}

@@ -1,0 +1,48 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "scenarioId": "PREVIEW-001",
+  "scenarioTitle": "Visualizar opciones principales despues de iniciar",
+  "stepCount": 4,
+  "sourceExpectedResultPresent": true,
+  "requiredAssertionCount": 1,
+  "observableOracles": [
+    {
+      "id": "expected-01",
+      "requirement": "Se visualizan las opciones principales de gestion del kiosco.",
+      "type": "runtime_state",
+      "backed": true,
+      "source": "discovery",
+      "evidence": [
+        "discovery_status:discovered_passed"
+      ],
+      "details": {
+        "discoveryStatus": "discovered_passed"
+      }
+    }
+  ],
+  "oracleTypes": [
+    "runtime_state"
+  ],
+  "availablePageObjectCount": 8,
+  "mode": "ai_hybrid",
+  "functionalExecutionEnabled": true,
+  "provider": "copilot",
+  "model": "gpt-5.4",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

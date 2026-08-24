@@ -1,0 +1,57 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-004",
+    "caseId": 0,
+    "title": "Redirigir al modulo de informacion desde Explora nuestros productos"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "description": "Clic en \"Iniciar\".",
+      "target": {
+        "strategy": "role:button",
+        "value": "Iniciar",
+        "exact": false
+      },
+      "locatorStrategy": "role:button"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Clic en \"explora nuestros productos\".",
+      "target": {
+        "strategy": "product_condition",
+        "value": "Explora nuestros productosConoce sobre los beneficios de los productos BSC",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "explora nuestros productos",
+          "resolvedTargetName": "Explora nuestros productosConoce sobre los beneficios de los productos BSC",
+          "resolvedCandidateId": "el-8",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed",
+          "confidence": 0.85
+        }
+      },
+      "locatorStrategy": "product_condition"
+    }
+  ],
+  "notes": [
+    "Discovery partial: 3/4 navigations/assertions satisfied.",
+    "Review needed: 1 non-blocking assertion failure(s) were ignored for pass/fail reconciliation."
+  ],
+  "createdAt": "2026-08-14T22:04:02.783Z"
+}

@@ -5,13 +5,13 @@ import { HomePage } from '../../../../pages/home.page';
 
 export const PROMOTED_SPEC_STRATEGY = "pom_runtime";
 
-test('Visualización de la pantalla inicial del kiosco', async ({ page }) => {
+test('Visualizacion de la pantalla inicial del kiosco', async ({ page }) => {
   test.setTimeout(Number(process.env.PROMOTED_SPEC_TIMEOUT_MS ?? 90000));
   // Evidence metadata
   process.env.APP_SLUG = 'arquitectura-automatizacion';
   process.env.SECTION_SLUG = 'default-section';
   process.env.SCENARIO_ID = 'C0';
-  process.env.SCENARIO_TITLE = 'Visualización de la pantalla inicial del kiosco';
+  process.env.SCENARIO_TITLE = 'Visualizacion de la pantalla inicial del kiosco';
 
 
   const homePage = new HomePage(page);

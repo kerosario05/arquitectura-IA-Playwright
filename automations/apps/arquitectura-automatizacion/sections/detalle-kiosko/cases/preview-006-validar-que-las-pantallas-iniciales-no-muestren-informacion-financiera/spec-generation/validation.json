@@ -1,0 +1,64 @@
+{
+  "mode": "ai_hybrid",
+  "provider": "codex",
+  "model": "gpt-5.4",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "invocations": 1,
+  "invocationsConsumed": 1,
+  "durationMs": 67235,
+  "usage": {
+    "inputTokens": 63715,
+    "cachedInputTokens": 42112,
+    "cacheWriteInputTokens": 0,
+    "nonCachedInputTokens": 21603,
+    "outputTokens": 1905,
+    "reasoningOutputTokens": 555,
+    "totalPhysicalTokens": 65620,
+    "durationMs": 47503,
+    "credits": null
+  },
+  "validation": {
+    "schema": "passed",
+    "structure": "passed",
+    "typescript": "passed",
+    "playwrightDiscovery": "passed",
+    "semanticCoverage": "failed",
+    "functionalExecution": "failed"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [],
+  "regressedGates": [],
+  "missingRequirements": [],
+  "oracleTypes": [
+    "unsupported_or_unresolved"
+  ],
+  "errors": [
+    "unresolved_requirement:No backed observable oracle was provided for the requirement \"Las pantallas iniciales funcionan solo como punto de entrada y direccionamiento.\", so no deterministic assertion can be generated.",
+    "unresolved_requirement:The scenario requests validation for \"Â¿QuÃ© deseas realizar hoy?\", but there is no observed assertion evidence or supported literal-visible-text oracle confirming that text.",
+    "unresolved_requirement:The scenario requests validation for \"Explora nuestros productos\", but there is no observed assertion evidence or supported literal-visible-text oracle confirming that text.",
+    "unresolved_requirement:The scenario requests validation for \"Transacciones y servicios\", but there is no observed assertion evidence or supported literal-visible-text oracle confirming that text.",
+    "expected_result_not_propagated",
+    "functional_execution_failed:exitCode=1",
+    "functional_execution_error:[runtime:session_reset] replay failed: no_safe_steps_to_replay"
+  ],
+  "warnings": [
+    "functional_execution_screenshots=0"
+  ],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

@@ -137,5 +137,6 @@ export type ExecutionPlan = {
     authFlowAlias?: string;
     authFlowLanding?: string;
     authGateDetectedDuringDiscovery?: boolean;
+    authGateStage?: string;
   };
 };

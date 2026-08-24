@@ -1,0 +1,10 @@
+{
+  "id": "preview-005-iniciar-autenticacion-al-seleccionar-transacciones-y-servicios",
+  "externalId": "PREVIEW-005",
+  "caseId": 0,
+  "title": "Iniciar autenticacion al seleccionar Transacciones y servicios",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-14T17:21:55.518Z"
+}

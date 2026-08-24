@@ -12,6 +12,16 @@ import fsp from "node:fs/promises";
 import path from "node:path";
 import type { AppRouteProfile } from "../types/env.types";
 
+function normalizeRouteLabel(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s]/g, "")
+    .replace(/\s+/g, " ");
+}
+
 export type RouteProfileLearningConfig = {
   enabled: boolean;
   autoApproveThreshold: number;
@@ -442,10 +452,14 @@ export async function applyRouteProfileSuggestions(
     }
     
     for (const suggestion of approvedRoutes) {
-      const existingRoute = routeProfile.routes.find((r) => r.from === suggestion.from);
+      const existingRoute = routeProfile.routes.find(
+        (r) => normalizeRouteLabel(r.from) === normalizeRouteLabel(suggestion.from)
+      );
       
       if (existingRoute) {
-        if (!existingRoute.intermediates.includes(suggestion.to)) {
+        if (!existingRoute.intermediates.some(
+          (s) => normalizeRouteLabel(s) === normalizeRouteLabel(suggestion.to)
+        )) {
           existingRoute.intermediates.push(suggestion.to);
           changes.push(`Added intermediate "${suggestion.to}" to route "${suggestion.from}"`);
         }
@@ -466,7 +480,9 @@ export async function applyRouteProfileSuggestions(
         intermediatesRecord[route.from] = [];
       }
       for (const step of route.intermediates) {
-        if (!intermediatesRecord[route.from].includes(step)) {
+        if (!intermediatesRecord[route.from].some(
+          (s) => normalizeRouteLabel(s) === normalizeRouteLabel(step)
+        )) {
           intermediatesRecord[route.from].push(step);
         }
       }

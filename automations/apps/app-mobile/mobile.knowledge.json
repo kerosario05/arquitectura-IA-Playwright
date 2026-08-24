@@ -1,0 +1,85 @@
+{
+  "items": [
+    {
+      "id": "mob_screen_e33462e67211",
+      "knowledgeKind": "screen_observed",
+      "matchKey": "aun_no_tienes_usuario_o_cuenta",
+      "screenKey": "aun_no_tienes_usuario_o_cuenta",
+      "title": "¿Aún no tienes usuario o cuenta?",
+      "clickTargets": [],
+      "assertionTargets": [
+        "¿Aún no tienes usuario o cuenta?"
+      ],
+      "issueKey": "AA-94",
+      "scenarioTitle": "Escenario navegación",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "failureCount": 0,
+      "successCount": 28,
+      "runCount": 28,
+      "createdAt": "2026-08-07T20:24:45.158Z",
+      "lastSeenAt": "2026-08-10T21:18:39.303Z",
+      "lastValidatedAt": "2026-08-10T21:18:39.303Z"
+    },
+    {
+      "id": "mob_screen_3e1ccc185ccd",
+      "knowledgeKind": "screen_observed",
+      "matchKey": "pantalla_alternativa",
+      "screenKey": "pantalla_alternativa",
+      "title": "Pantalla alternativa",
+      "clickTargets": [],
+      "assertionTargets": [
+        "Pantalla alternativa"
+      ],
+      "issueKey": "",
+      "scenarioTitle": "Escenario transición alterna",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "failureCount": 0,
+      "successCount": 7,
+      "runCount": 7,
+      "createdAt": "2026-08-10T20:34:45.717Z",
+      "lastSeenAt": "2026-08-10T21:18:39.446Z",
+      "lastValidatedAt": "2026-08-10T21:18:39.446Z"
+    },
+    {
+      "id": "mob_route_63e2bbaf1c92",
+      "knowledgeKind": "route_observed",
+      "matchKey": "63e2bbaf1c92",
+      "clickTargets": [
+        "Continuar"
+      ],
+      "assertionTargets": [],
+      "issueKey": "",
+      "scenarioTitle": "Escenario transición alterna",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "failureCount": 5,
+      "successCount": 0,
+      "runCount": 5,
+      "createdAt": "2026-08-10T20:34:45.722Z",
+      "lastSeenAt": "2026-08-10T21:18:39.462Z"
+    },
+    {
+      "id": "mob_screen_33120ece768e",
+      "knowledgeKind": "screen_observed",
+      "matchKey": "correo_electronico",
+      "screenKey": "correo_electronico",
+      "title": "Correo electrónico",
+      "clickTargets": [],
+      "assertionTargets": [
+        "Correo electrónico"
+      ],
+      "issueKey": "",
+      "scenarioTitle": "Escenario transición alterna",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "failureCount": 0,
+      "successCount": 3,
+      "runCount": 3,
+      "createdAt": "2026-08-10T21:04:02.922Z",
+      "lastSeenAt": "2026-08-10T21:18:39.453Z",
+      "lastValidatedAt": "2026-08-10T21:18:39.453Z"
+    }
+  ]
+}

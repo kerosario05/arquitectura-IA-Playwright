@@ -10,6 +10,9 @@ export type RuntimeEvidenceTrace = {
     stepIndex: number;
     target: string;
     normalizedTarget: string;
+    resolvedTarget?: string;
+    semanticReconciliationConfidence?: number;
+    semanticReconciliationSource?: "runtime_snapshot" | "runtime_transition" | "runtime_auth_gate";
     actionType: string;
     ownerContext?: string;
     locatorStrategy?: string;
@@ -407,6 +410,14 @@ export type CaseDiscoveryResult = {
       reason: string;
       coveredByAssertions?: string[];
       extractedQuotedTexts?: string[];
+    }>;
+    semanticReconciliations?: Array<{
+      expectedTarget: string;
+      observedTarget: string;
+      semanticEquivalent: boolean;
+      confidence: number;
+      source: "runtime_snapshot" | "runtime_transition" | "runtime_auth_gate";
+      evidence: string[];
     }>;
     nonExecutableCriteria?: string[];
     diagnosticsBuildError?: string;

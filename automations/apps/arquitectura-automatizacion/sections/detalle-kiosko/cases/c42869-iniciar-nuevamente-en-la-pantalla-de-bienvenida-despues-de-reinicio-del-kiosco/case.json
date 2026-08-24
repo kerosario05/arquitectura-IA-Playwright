@@ -1,0 +1,10 @@
+{
+  "id": "c42869-iniciar-nuevamente-en-la-pantalla-de-bienvenida-despues-de-reinicio-del-kiosco",
+  "externalId": "C42869",
+  "caseId": 42869,
+  "title": "Iniciar nuevamente en la pantalla de bienvenida despues de reinicio del kiosco",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-05T18:48:01.234Z"
+}

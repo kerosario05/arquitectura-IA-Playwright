@@ -1,0 +1,33 @@
+{
+  "specContent": "import { test } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\n\nimport { HomePage } from '../../../../pages/home.page';\n\ntest('Visualizar la pantalla inicial del kiosko antes de seleccionar una gestion', async ({ page }) => {\n  test.setTimeout(Number(process.env.PROMOTED_SPEC_TIMEOUT_MS ?? 90000));\n  process.env.APP_SLUG = 'arquitectura-automatizacion';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-001';\n  process.env.SCENARIO_TITLE = 'Visualizar la pantalla inicial del kiosko antes de seleccionar una gestion';\n\n  const homePage = new HomePage(page);\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await page.goto('/');\n    await page.waitForLoadState('domcontentloaded');\n\n    await promotedRuntime.waitForPromotedUiStable({\n      stepIndex: 2,\n      description: 'Validar que se muestre \"Explora nuestros productos\".'\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 3,\n      target: 'Iniciar',\n      actionIntent: 'start_session',\n      expectedEffect: 'ui_change',\n      sensitive: false,\n      previousStepReplays: [],\n      lastSelectionStep: undefined,\n      expectedOwnerPage: 'HomePage',\n      action: async () => {\n        await homePage.start();\n      }\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3
+  ],
+  "coveredAssertions": [],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "start"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "homePage",
+    "promotedRuntime"
+  ],
+  "unresolvedRequirements": [
+    "No backed observable oracle or observed assertion evidence was provided for validating the expected kiosk landing outcomes after clicking \"Iniciar\".",
+    "Scenario assertions referencing \"Â¿QuÃ© deseas realizar hoy?\", \"Explora nuestros productos\", and \"Transacciones y servicios\" cannot be implemented because those texts are not backed by observed evidence and the oracle is unresolved.",
+    "Step 2 requires a promoted runtime-backed login implementation with stepIndex 2, but no allowed runtime method or auth flow was provided to represent that login step safely."
+  ],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

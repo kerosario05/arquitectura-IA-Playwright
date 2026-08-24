@@ -1,0 +1,12 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "scenarioId": "PREVIEW-001",
+  "scenarioTitle": "Visualizar las opciones principales luego de iniciar",
+  "stepCount": 3,
+  "requiredAssertionCount": 0,
+  "availablePageObjectCount": 8,
+  "mode": "ai_hybrid",
+  "provider": "copilot",
+  "model": "gpt-5.4"
+}

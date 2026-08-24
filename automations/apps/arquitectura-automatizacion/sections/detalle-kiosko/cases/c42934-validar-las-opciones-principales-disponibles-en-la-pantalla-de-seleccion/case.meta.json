@@ -1,0 +1,10 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sectionId": 4903,
+  "sourceScenarioId": "C42934",
+  "testRailCaseId": 42934,
+  "generatedAt": "2026-08-05T20:52:58.349Z",
+  "title": "Validar las opciones principales disponibles en la pantalla de seleccion"
+}

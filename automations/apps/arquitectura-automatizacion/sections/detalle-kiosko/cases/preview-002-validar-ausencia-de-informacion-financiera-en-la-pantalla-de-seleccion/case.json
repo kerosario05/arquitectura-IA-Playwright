@@ -1,0 +1,10 @@
+{
+  "id": "preview-002-validar-ausencia-de-informacion-financiera-en-la-pantalla-de-seleccion",
+  "externalId": "PREVIEW-002",
+  "caseId": 0,
+  "title": "Validar ausencia de información financiera en la pantalla de selección",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-13T12:36:34.105Z"
+}

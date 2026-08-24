@@ -1,0 +1,64 @@
+{
+  "mode": "ai_hybrid",
+  "provider": "codex",
+  "model": "gpt-5.4",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "invocations": 1,
+  "invocationsConsumed": 1,
+  "durationMs": 57505,
+  "usage": {
+    "inputTokens": 61885,
+    "cachedInputTokens": 41088,
+    "cacheWriteInputTokens": 0,
+    "nonCachedInputTokens": 20797,
+    "outputTokens": 1551,
+    "reasoningOutputTokens": 516,
+    "totalPhysicalTokens": 63436,
+    "durationMs": 39904,
+    "credits": null
+  },
+  "validation": {
+    "schema": "passed",
+    "structure": "passed",
+    "typescript": "passed",
+    "playwrightDiscovery": "passed",
+    "semanticCoverage": "failed",
+    "functionalExecution": "failed"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [],
+  "regressedGates": [],
+  "missingRequirements": [],
+  "oracleTypes": [
+    "unsupported_or_unresolved"
+  ],
+  "errors": [
+    "unresolved_requirement:Execution plan step 2 requires a promoted runtime login/authentication implementation, but no allowed runtime method or registered auth flow was provided to represent this step without inventing behavior.",
+    "unresolved_requirement:The expected outcome \"La bienvenida institucional del kiosco se presenta correctamente.\" is backed=false in observableOracles, so no compliant assertion can be generated for it.",
+    "unresolved_requirement:Scenario assertions for institutional logo and greeting message lack backed observable evidence or registered page-object/runtime APIs to verify them without inventing selectors or text.",
+    "step_not_implemented_in_spec:2",
+    "expected_result_not_propagated",
+    "functional_execution_failed:exitCode=1",
+    "functional_execution_error:Error: Promoted assertion failed at step 2 target=\"backing_evidence_missing\". diagnostics={\"currentUrl\":\"https://172.27.4.50/\",\"actionIntent\":\"assertVisible\",\"target\":\"backing_evidence_missing\",\"stepIndex\":2,\"timeoutMs\":15000,\"retryAttempted\":false,\"screenshotPath\":\"[REDACTED]\"} cause=Unresolved requirement: missing backed observable evidence for step 2 greeting message assertion."
+  ],
+  "warnings": [
+    "functional_execution_screenshots=1"
+  ],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

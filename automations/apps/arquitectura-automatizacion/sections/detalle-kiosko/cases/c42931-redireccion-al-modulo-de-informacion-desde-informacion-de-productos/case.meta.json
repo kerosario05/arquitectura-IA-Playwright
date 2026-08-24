@@ -1,0 +1,10 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sectionId": 4903,
+  "sourceScenarioId": "C42931",
+  "testRailCaseId": 42931,
+  "generatedAt": "2026-08-05T20:30:25.367Z",
+  "title": "Redireccion al modulo de informacion desde Informacion de productos"
+}

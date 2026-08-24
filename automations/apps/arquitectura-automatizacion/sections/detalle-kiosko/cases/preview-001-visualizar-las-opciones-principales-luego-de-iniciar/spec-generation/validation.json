@@ -1,0 +1,41 @@
+{
+  "mode": "ai_hybrid",
+  "provider": "copilot",
+  "model": "gpt-5.4",
+  "invocations": 1,
+  "invocationsConsumed": 1,
+  "durationMs": 43787,
+  "usage": {
+    "inputTokens": null,
+    "cachedInputTokens": null,
+    "cacheWriteInputTokens": null,
+    "nonCachedInputTokens": null,
+    "outputTokens": null,
+    "reasoningOutputTokens": null,
+    "totalPhysicalTokens": null,
+    "durationMs": null,
+    "credits": null
+  },
+  "validation": {
+    "schema": "failed",
+    "structure": "skipped",
+    "typescript": "skipped",
+    "playwrightDiscovery": "skipped",
+    "semanticCoverage": "skipped"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "errors": [
+    "additionalProperties are not allowed: spec, strategy, missingPageObjects, missingMethods",
+    "specContent must be a non-empty string",
+    "coveredStepIndexes must be number[]",
+    "coveredAssertions must be array",
+    "declaredIdentifiers must be string[]",
+    "unresolvedRequirements must be string[]",
+    "warnings must be string[]",
+    "usedPageObjects entries must be objects"
+  ],
+  "warnings": []
+}

@@ -1,0 +1,10 @@
+{
+  "id": "preview-002-visualizar-pantalla-inicial-del-kiosco-con-acceso-de-entrada",
+  "externalId": "PREVIEW-002",
+  "caseId": 0,
+  "title": "Visualizar pantalla inicial del kiosco con acceso de entrada",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-14T17:48:45.268Z"
+}

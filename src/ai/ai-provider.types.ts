@@ -10,7 +10,24 @@ export type AiCompletionRequest = {
   temperature?: number;
   requireJson?: boolean;
   requireJsonSchema?: boolean;
-  purpose?: string; // Purpose of the AI request (scenario_generation, repair, general)
+  purpose?: string; // Purpose of the AI request (scenario_generation, spec_generation, repair, general)
+};
+
+export type AiUsageMetrics = {
+  timestamp?: string;
+  provider?: string;
+  model?: string;
+  taskType?: string;
+  inputTokens?: number;
+  cachedInputTokens?: number;
+  cacheWriteInputTokens?: number;
+  nonCachedInputTokens?: number;
+  outputTokens?: number;
+  reasoningOutputTokens?: number;
+  totalPhysicalTokens?: number;
+  durationMs?: number;
+  exitCode?: number;
+  success?: boolean;
 };
 
 export type AiCompletionResponse = {
@@ -19,6 +36,7 @@ export type AiCompletionResponse = {
   model: string;
   providerName: string;
   durationMs: number;
+  usage?: AiUsageMetrics;
   diagnostics?: {
     warning?: string;
     exitCode?: number;
@@ -70,7 +88,7 @@ export type AiProviderConfig = {
   requireJson: boolean;
   requireJsonSchema: boolean;
   maxAttempts?: number;   // Number of retry attempts (purpose-specific)
-  purpose?: string;       // Purpose of the AI request (scenario_generation, repair, general)
+  purpose?: string;       // Purpose of the AI request (scenario_generation, spec_generation, repair, general)
   // CLI provider specific (optional)
   command?: string;       // CLI command (CODEX_CLI_COMMAND, COPILOT_CLI_COMMAND)
   extraArgs?: string[];   // CLI extra args parsed

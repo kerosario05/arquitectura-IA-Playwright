@@ -1,0 +1,10 @@
+{
+  "id": "preview-002-direccionamiento-publico-a-informacion-desde-explora-nuestros-productos",
+  "externalId": "PREVIEW-002",
+  "caseId": 0,
+  "title": "Direccionamiento publico a informacion desde Explora nuestros productos",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-14T18:42:23.201Z"
+}

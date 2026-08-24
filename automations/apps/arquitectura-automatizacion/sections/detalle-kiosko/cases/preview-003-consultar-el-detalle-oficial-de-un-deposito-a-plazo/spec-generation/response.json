@@ -1,0 +1,69 @@
+{
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\n\nimport { HomePage } from '../../../../pages/home.page';\nimport { ProductInformationPage } from '../../../../pages/productinformation.page';\nimport { ProductListPage } from '../../../../pages/productlist.page';\n\nexport const PROMOTED_SPEC_STRATEGY = 'pom_runtime';\n\ntest('Consultar el detalle oficial de un Depósito a Plazo', async ({ page }) => {\n  test.setTimeout(Number(process.env.PROMOTED_SPEC_TIMEOUT_MS ?? 90000));\n\n  process.env.APP_SLUG = 'arquitectura-automatizacion';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-003';\n  process.env.SCENARIO_TITLE = 'Consultar el detalle oficial de un Depósito a Plazo';\n\n  const homePage = new HomePage(page);\n  const productInformationPage = new ProductInformationPage(page);\n  const productListPage = new ProductListPage(page);\n\n  const promotedRuntime = createPromotedSpecRuntime(page);\n  try {\n    await page.goto('/');\n    await page.waitForLoadState('domcontentloaded');\n\n    const replayStep_3 = async () => {\n      await homePage.start();\n    };\n    const replayStep_4 = async () => {\n      await productInformationPage.openProductInformation();\n    };\n    const replayStep_5 = async () => {\n      await productListPage.selectProduct('Depósitos a Plazo');\n    };\n\n    await promotedRuntime.expectPromotedVisible({ stepIndex: 2, description: 'Validar que el kiosco inicia en el menú inicial.', target: 'Iniciar', assertion: async () => { await expect(page.getByRole('button', { name: /Iniciar/i })).toBeVisible(); } });\n    await promotedRuntime.clickPromotedTarget({ stepIndex: 3, target: 'Iniciar', actionIntent: 'start_session', expectedEffect: 'ui_change', sensitive: false, previousStepReplays: [], lastSelectionStep: undefined, expectedOwnerPage: 'HomePage', action: async () => { await homePage.start(); } });\n    await promotedRuntime.clickPromotedTarget({ stepIndex: 4, target: 'Información de productos', actionIntent: 'open_product_information', expectedEffect: 'ui_change', sensitive: false, previousStepReplays: [{ stepIndex: 3, actionIntent: 'start_session', target: 'Iniciar', sensitive: false, replay: replayStep_3 }], lastSelectionStep: { stepIndex: 3, selectedTarget: 'Iniciar' }, expectedOwnerPage: 'ProductInformationPage', action: async () => { await productInformationPage.openProductInformation(); } });\n    await promotedRuntime.clickPromotedTarget({ stepIndex: 5, target: 'Depósitos a Plazo', actionIntent: 'select_product', expectedEffect: 'ui_change', sensitive: false, previousStepReplays: [{ stepIndex: 3, actionIntent: 'start_session', target: 'Iniciar', sensitive: false, replay: replayStep_3 }, { stepIndex: 4, actionIntent: 'open_product_information', target: 'Información de productos', sensitive: false, replay: replayStep_4 }], lastSelectionStep: { stepIndex: 4, selectedTarget: 'Información de productos' }, expectedOwnerPage: 'ProductListPage', action: async () => { await productListPage.selectProduct('Depósitos a Plazo'); } });\n    await promotedRuntime.clickPromotedTarget({ stepIndex: 6, target: 'el primer producto visible del listado', actionIntent: 'select_visible_item_by_ordinal', expectedEffect: 'ui_change', sensitive: false, previousStepReplays: [{ stepIndex: 3, actionIntent: 'start_session', target: 'Iniciar', sensitive: false, replay: replayStep_3 }, { stepIndex: 4, actionIntent: 'open_product_information', target: 'Información de productos', sensitive: false, replay: replayStep_4 }, { stepIndex: 5, actionIntent: 'select_product', target: 'Depósitos a Plazo', sensitive: false, replay: replayStep_5 }], lastSelectionStep: { stepIndex: 5, selectedTarget: 'Depósitos a Plazo' }, expectedOwnerPage: 'ProductListPage', action: async () => { await productListPage.selectVisibleItemByOrdinal('first', 'producto'); } });\n\n    await promotedRuntime.expectPromotedVisible({ stepIndex: 7, description: 'Validar que se muestre \"Nombre del producto\".', target: 'Nombre del producto', assertion: async () => { await expect(page.getByText('Nombre del producto', { exact: false })).toBeVisible(); } });\n    await promotedRuntime.expectPromotedVisible({ stepIndex: 10, description: 'Validar que se muestre \"Requisitos\".', target: 'Requisitos', assertion: async () => { await expect(page.getByText('Requisitos', { exact: false })).toBeVisible(); } });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "El cliente visualiza el detalle oficial del producto seleccionado.",
+      "implementation": "await expect(page.getByText('Nombre del producto', { exact: false })).toBeVisible();"
+    },
+    {
+      "requirement": "Nombre del producto",
+      "implementation": "await expect(page.getByText('Nombre del producto', { exact: false })).toBeVisible();"
+    },
+    {
+      "requirement": "Requisitos",
+      "implementation": "await expect(page.getByText('Requisitos', { exact: false })).toBeVisible();"
+    }
+  ],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "start"
+      ]
+    },
+    {
+      "className": "ProductInformationPage",
+      "methods": [
+        "openProductInformation"
+      ]
+    },
+    {
+      "className": "ProductListPage",
+      "methods": [
+        "selectProduct",
+        "selectVisibleItemByOrdinal"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "homePage",
+    "productInformationPage",
+    "productListPage",
+    "promotedRuntime",
+    "replayStep_3",
+    "replayStep_4",
+    "replayStep_5"
+  ],
+  "unresolvedRequirements": [
+    "No observed evidence was provided to assert \"Descripción general\" without inventing UI text or selectors.",
+    "No observed evidence was provided to assert \"Beneficios\" without inventing UI text or selectors.",
+    "No observed evidence was provided to assert \"Tasas\" without inventing UI text or selectors.",
+    "No observed evidence was provided to assert \"Condiciones relevantes\" without inventing UI text or selectors.",
+    "No observed evidence was provided to assert \"Información legal o notas aclaratorias\" without inventing UI text or selectors."
+  ],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

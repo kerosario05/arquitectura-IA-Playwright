@@ -1,0 +1,43 @@
+{
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { HomePage } from '../../../../pages/home.page';\nimport { createPromotedSpecRuntime } from '../../../../src/runtime/promoted-spec-runtime';\n\nprocess.env.APP_SLUG = 'arquitectura-automatizacion';\nprocess.env.SECTION_SLUG = 'detalle-kiosko';\nprocess.env.SCENARIO_ID = 'PREVIEW-001';\nprocess.env.SCENARIO_TITLE = 'Visualizar opciones principales despues de iniciar';\n\ntest('PREVIEW-001 - Visualizar opciones principales despues de iniciar', async ({ page }) => {\n  const promotedRuntime = createPromotedSpecRuntime(page);\n  const homePage = new HomePage(page);\n\n  try {\n    await homePage.open();\n\n    await homePage.start();\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 1,\n      description: 'Validar que se muestre \"¿Qué deseas realizar hoy?\".',\n      target: { strategy: 'text', value: '¿Qué deseas realizar hoy?' },\n      assertion: async () => {\n        await expect(page.getByText('¿Qué deseas realizar hoy?', { exact: true })).toBeVisible();\n      },\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 2,\n      description: 'Validar que se muestre \"Información de productos\".',\n      target: { strategy: 'text', value: 'Información de productos' },\n      assertion: async () => {\n        await expect(page.getByText('Información de productos', { exact: true })).toBeVisible();\n      },\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 3,\n      description: 'Validar que se muestre \"Transacciones y servicios\".',\n      target: { strategy: 'text', value: 'Transacciones y servicios' },\n      assertion: async () => {\n        await expect(page.getByText('Transacciones y servicios', { exact: true })).toBeVisible();\n      },\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});\n",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "Se visualizan las opciones principales de gestion del kiosco.",
+      "implementation": "await expect(page.getByText('Transacciones y servicios', { exact: true })).toBeVisible();"
+    },
+    {
+      "requirement": "Validar que se muestre \"¿Qué deseas realizar hoy?\".",
+      "implementation": "await expect(page.getByText('¿Qué deseas realizar hoy?', { exact: true })).toBeVisible();"
+    },
+    {
+      "requirement": "Validar que se muestre \"Información de productos\".",
+      "implementation": "await expect(page.getByText('Información de productos', { exact: true })).toBeVisible();"
+    }
+  ],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "open",
+        "start"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "promotedRuntime",
+    "homePage"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

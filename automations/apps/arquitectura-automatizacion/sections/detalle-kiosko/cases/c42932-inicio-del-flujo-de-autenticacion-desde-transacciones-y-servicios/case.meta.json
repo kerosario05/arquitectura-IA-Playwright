@@ -1,0 +1,10 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sectionId": 4903,
+  "sourceScenarioId": "C42932",
+  "testRailCaseId": 42932,
+  "generatedAt": "2026-08-05T20:45:21.364Z",
+  "title": "Inicio del flujo de autenticacion desde Transacciones y servicios"
+}

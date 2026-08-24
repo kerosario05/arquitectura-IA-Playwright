@@ -1,0 +1,40 @@
+{
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\nimport { detectAuthGate } from '../../../../../../../src/discovery/auth-gate-detector';\nimport { scanCurrentPage } from '../../../../../../../src/explorer/page-scanner';\nimport { HomePage } from '../../../../pages/home.page';\n\ntest('PREVIEW-001 - Iniciar flujo de autenticacion al seleccionar Transacciones y servicios', async ({ page }) => {\n  process.env.APP_SLUG = 'arquitectura-automatizacion';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-001';\n  process.env.SCENARIO_TITLE = 'Iniciar flujo de autenticacion al seleccionar Transacciones y servicios';\n\n  const promotedRuntime = createPromotedSpecRuntime(page);\n  const homePage = new HomePage(page);\n\n  try {\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 0,\n      target: 'Iniciar',\n      actionIntent: 'Iniciar el flujo desde la pantalla principal',\n      expectedEffect: 'Abrir el flujo de autenticacion',\n      action: async () => {\n        await homePage.start();\n      }\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 0,\n      target: 'autenticación',\n      assertion: async () => {\n        await promotedRuntime.waitForPromotedUiStable(0, 'autenticación');\n        const pageDiag = await scanCurrentPage(page);\n        const authGate = detectAuthGate(pageDiag);\n        expect(authGate?.stage).toBe('identification_type_selection');\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 1,\n      target: 'transacciones y servicios',\n      actionIntent: 'Seleccionar transacciones y servicios',\n      expectedEffect: 'Avanzar en el flujo visible del kiosko',\n      action: async () => {\n        await page.getByText('transacciones y servicios').click();\n      }\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 2,\n      target: 'autenticación',\n      assertion: async () => {\n        await promotedRuntime.waitForPromotedUiStable(2, 'autenticación');\n        const pageDiag = await scanCurrentPage(page);\n        const authGate = detectAuthGate(pageDiag);\n        expect(authGate?.stage).toBe('identification_type_selection');\n      }\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});\n",
+  "coveredStepIndexes": [
+    0,
+    1,
+    2
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "autenticación",
+      "implementation": "expect(authGate?.stage).toBe('identification_type_selection');"
+    },
+    {
+      "requirement": "autenticación",
+      "implementation": "expect(authGate?.stage).toBe('identification_type_selection');"
+    }
+  ],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "start"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "promotedRuntime",
+    "homePage",
+    "pageDiag",
+    "authGate"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

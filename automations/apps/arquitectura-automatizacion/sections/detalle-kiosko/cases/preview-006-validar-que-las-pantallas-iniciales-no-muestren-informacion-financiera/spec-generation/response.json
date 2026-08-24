@@ -1,0 +1,45 @@
+{
+  "scenarioId": "PREVIEW-006",
+  "specContent": "import { test } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\nimport { HomePage } from '../../../../pages/home.page';\nimport { LoginPage } from '../../../../pages/login.page';\n\nexport const PROMOTED_SPEC_STRATEGY = 'pom_runtime';\n\ntest('Validar que las pantallas iniciales no muestren informacion financiera', async ({ page }) => {\n  test.setTimeout(Number(process.env.PROMOTED_SPEC_TIMEOUT_MS ?? 90000));\n\n  process.env.APP_SLUG = 'arquitectura-automatizacion';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-006';\n  process.env.SCENARIO_TITLE = 'Validar que las pantallas iniciales no muestren informacion financiera';\n\n  const homePage = new HomePage(page);\n  const loginPage = new LoginPage(page);\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await page.goto('/');\n    await page.waitForLoadState('domcontentloaded');\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 2,\n      target: 'login',\n      actionIntent: 'authenticate',\n      expectedEffect: 'authenticated_session',\n      sensitive: true,\n      previousStepReplays: [\n        async () => {\n          await page.goto('/');\n          await page.waitForLoadState('domcontentloaded');\n        }\n      ],\n      lastSelectionStep: undefined,\n      expectedOwnerPage: 'LoginPage',\n      action: async () => {\n        await loginPage.expectLoginFormVisible();\n        await loginPage.fillUsername(process.env.APP_USERNAME ?? '');\n        await loginPage.fillPassword(process.env.APP_PASSWORD ?? '');\n        await loginPage.submitLogin();\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 3,\n      target: 'Iniciar',\n      actionIntent: 'start_session',\n      expectedEffect: 'ui_change',\n      sensitive: false,\n      previousStepReplays: [\n        async () => {\n          await page.goto('/');\n          await page.waitForLoadState('domcontentloaded');\n        },\n        async () => {\n          await loginPage.expectLoginFormVisible();\n          await loginPage.fillUsername(process.env.APP_USERNAME ?? '');\n          await loginPage.fillPassword(process.env.APP_PASSWORD ?? '');\n          await loginPage.submitLogin();\n        }\n      ],\n      lastSelectionStep: undefined,\n      expectedOwnerPage: 'HomePage',\n      action: async () => {\n        await homePage.start();\n      }\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3
+  ],
+  "coveredAssertions": [],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "start"
+      ]
+    },
+    {
+      "className": "LoginPage",
+      "methods": [
+        "expectLoginFormVisible",
+        "fillUsername",
+        "fillPassword",
+        "submitLogin"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "homePage",
+    "loginPage",
+    "promotedRuntime"
+  ],
+  "unresolvedRequirements": [
+    "No backed observable oracle was provided for the requirement \"Las pantallas iniciales funcionan solo como punto de entrada y direccionamiento.\", so no deterministic assertion can be generated.",
+    "The scenario requests validation for \"Â¿QuÃ© deseas realizar hoy?\", but there is no observed assertion evidence or supported literal-visible-text oracle confirming that text.",
+    "The scenario requests validation for \"Explora nuestros productos\", but there is no observed assertion evidence or supported literal-visible-text oracle confirming that text.",
+    "The scenario requests validation for \"Transacciones y servicios\", but there is no observed assertion evidence or supported literal-visible-text oracle confirming that text."
+  ],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

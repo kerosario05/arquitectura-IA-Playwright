@@ -5,6 +5,9 @@ export type MobileScreenSnapshot = {
   title: string;          // human-readable screen title (best-effort)
   clickTargets: string[]; // content-desc/text of clickable elements (real tappables)
   assertionTargets: string[]; // visible non-clickable text (headings, labels, messages)
+  /** Stable STRUCTURAL fingerprint (screen_<hash>) derived from the observed elements only —
+   *  never from title/labels/slugs. Order-independent; identical structure -> same fingerprint. */
+  fingerprint: string;
 };
 
 /** Decodes common XML entities and normalizes whitespace. */
@@ -77,5 +80,10 @@ export function extractMobileScreenSnapshot(pageSourceXml: string): MobileScreen
     ? title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 60) || "screen"
     : "screen_" + createHash("sha256").update(assertionTargets.slice(0, 8).join("|")).digest("hex").slice(0, 10);
 
-  return { screenKey, title, clickTargets, assertionTargets };
+  // Structural fingerprint: order-independent hash of ALL observed elements (tappables + text).
+  // This is the identity used for state transitions — it never encodes a title, slug, or fallback.
+  const structuralTokens = [...clickTargets, ...assertionTargets].sort().join("|");
+  const fingerprint = "screen_" + createHash("sha256").update(structuralTokens).digest("hex").slice(0, 10);
+
+  return { screenKey, title, clickTargets, assertionTargets, fingerprint };
 }

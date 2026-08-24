@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-iniciar-flujo-de-autenticacion-al-seleccionar-transacciones-y-servicios",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Iniciar flujo de autenticacion al seleccionar Transacciones y servicios",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-18T01:51:52.959Z"
+}

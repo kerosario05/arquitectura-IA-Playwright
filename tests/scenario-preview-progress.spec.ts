@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import {
   applyCaseFinishedSummaryPatch,
+  enforceExplicitScenarioClickAuthority,
   getScenarioPreviewOutcome,
   mergeScenarioPreviewSummary,
   parseScenarioPreviewResultsFile,
@@ -158,7 +159,9 @@ test("buildRunStreamPayload conserva completed_with_failures como estado termina
   const payload = buildRunStreamPayload({
     status: "completed_with_failures",
     exitCode: 1,
-    currentCase: "PREVIEW-007",
+    currentCase: "Visualización de opciones principales tras iniciar el kiosco",
+    currentCaseId: "PREVIEW-007",
+    currentCaseTitle: "Visualización de opciones principales tras iniciar el kiosco",
     errorMessage: "7 de 8 escenarios pasaron. 1 requiere revisión.",
     summary: {
       completed: 8,
@@ -171,7 +174,9 @@ test("buildRunStreamPayload conserva completed_with_failures como estado termina
   }, true);
 
   expect(payload.status).toBe("completed_with_failures");
-  expect(payload.currentCase).toBe("PREVIEW-007");
+  expect(payload.currentCase).toBe("Visualización de opciones principales tras iniciar el kiosco");
+  expect(payload.currentCaseId).toBe("PREVIEW-007");
+  expect(payload.currentCaseTitle).toBe("Visualización de opciones principales tras iniciar el kiosco");
   expect((payload.summary as any).passed).toBe(7);
   expect((payload.summary as any).failed).toBe(1);
   expect((payload.summary as any).failureGroups.assertion_not_found_unrecovered).toBe(1);
@@ -205,4 +210,153 @@ test("exitCode=1 sin cases ejecutados devuelve technical_failure", () => {
     sawCaseStarted: false,
     firstCaseStarted: false,
   })).toBe("technical_failure");
+});
+
+function countClicksOnTarget(steps: string[], target: string): number {
+  const targetRegex = new RegExp(`^\\d+[\\.)]?\\s*Clic en "${target}"\\.?$|^Clic en "${target}"\\.?$`, "i");
+  return steps.filter(step => targetRegex.test(step.trim())).length;
+}
+
+test("scenarioStepAuthority no duplica clic explícito ya presente", () => {
+  const result = enforceExplicitScenarioClickAuthority(
+    [
+      '1. Clic en "Iniciar".',
+      '2. Clic en "Información de productos".',
+      '3. Validar que se muestre "Información de productos".',
+    ],
+    [
+      '1. Clic en "Iniciar".',
+      '2. Clic en "Información de productos".',
+    ],
+  );
+
+  expect(countClicksOnTarget(result.steps, "Información de productos")).toBe(1);
+  expect(result.restoredCount).toBe(0);
+  expect(result.skippedCount).toBe(1);
+});
+
+test("scenarioStepAuthority restaura una vez cuando el clic explícito fue eliminado", () => {
+  const result = enforceExplicitScenarioClickAuthority(
+    [
+      '1. Clic en "Iniciar".',
+      '2. Validar que se muestre "Información de productos".',
+    ],
+    [
+      '1. Clic en "Iniciar".',
+      '2. Clic en "Información de productos".',
+    ],
+  );
+
+  expect(countClicksOnTarget(result.steps, "Información de productos")).toBe(1);
+  expect(result.restoredCount).toBe(1);
+  expect(result.skippedCount).toBe(0);
+});
+
+test("scenarioStepAuthority trata equivalentes operativos como el mismo clic", () => {
+  const result = enforceExplicitScenarioClickAuthority(
+    [
+      '1. Seleccionar la opción "Informacion de productos".',
+      '2. Validar que se muestre "Información de productos".',
+    ],
+    ['1. Hacer clic en "Información de productos".'],
+  );
+
+  expect(result.restoredCount).toBe(0);
+  expect(result.skippedCount).toBe(1);
+});
+
+test("scenarioStepAuthority conserva clics de targets diferentes", () => {
+  const result = enforceExplicitScenarioClickAuthority(
+    [
+      '1. Validar que se muestre "Información de productos".',
+      '2. Clic en "Transacciones y servicios".',
+    ],
+    [
+      '1. Clic en "Información de productos".',
+      '2. Clic en "Transacciones y servicios".',
+    ],
+  );
+
+  expect(countClicksOnTarget(result.steps, "Información de productos")).toBe(1);
+  expect(countClicksOnTarget(result.steps, "Transacciones y servicios")).toBe(1);
+  expect(result.restoredCount).toBe(1);
+});
+
+test("scenarioStepAuthority preserva repeticiones legítimas en contexto distinto", () => {
+  const result = enforceExplicitScenarioClickAuthority(
+    [
+      '1. Clic en "Información de productos".',
+      '2. Clic en "Volver".',
+      '3. Validar que se muestre "Información de productos".',
+    ],
+    [
+      '1. Clic en "Información de productos".',
+      '2. Clic en "Volver".',
+      '3. Clic en "Información de productos".',
+    ],
+  );
+
+  expect(countClicksOnTarget(result.steps, "Información de productos")).toBe(2);
+  expect(result.restoredCount).toBe(1);
+  expect(result.skippedCount).toBe(0);
+});
+
+test("scenarioStepAuthority no agrega copias extra con varios clics originales iguales", () => {
+  const result = enforceExplicitScenarioClickAuthority(
+    [
+      '1. Clic en "Información de productos".',
+      '2. Clic en "Volver".',
+      '3. Clic en "Información de productos".',
+      '4. Validar que se muestre "Información de productos".',
+      '5. Validar que se muestre "Información de productos".',
+    ],
+    [
+      '1. Clic en "Información de productos".',
+      '2. Clic en "Volver".',
+      '3. Clic en "Información de productos".',
+    ],
+  );
+
+  expect(countClicksOnTarget(result.steps, "Información de productos")).toBe(2);
+  expect(result.restoredCount).toBe(0);
+  expect(result.skippedCount).toBe(2);
+});
+
+test("PREVIEW-003 conserva un solo clic en Información de productos", () => {
+  const result = enforceExplicitScenarioClickAuthority(
+    [
+      '1. Clic en "Iniciar".',
+      '2. Validar que se muestre "¿Qué deseas realizar hoy?".',
+      '3. Clic en "Información de productos".',
+      '4. Validar que se muestre "Información de productos".',
+    ],
+    [
+      '1. Clic en "Iniciar".',
+      '2. Clic en "Información de productos".',
+    ],
+  );
+
+  expect(countClicksOnTarget(result.steps, "Información de productos")).toBe(1);
+  expect(result.restoredCount).toBe(0);
+  expect(result.skippedCount).toBe(1);
+});
+
+test("PREVIEW-004 reporta solo inserciones reales en restoredCount", () => {
+  const result = enforceExplicitScenarioClickAuthority(
+    [
+      '1. Clic en "Iniciar".',
+      '2. Validar que se muestre "¿Qué deseas realizar hoy?".',
+      '3. Clic en "Transacciones y servicios".',
+      '4. Validar que se muestre "Transacciones y servicios".',
+      '5. Validar que se muestre "TRANSACCIONES Y SERVICIOS".',
+    ],
+    [
+      '1. Clic en "Iniciar".',
+      '2. Clic en "Transacciones y servicios".',
+    ],
+  );
+
+  expect(countClicksOnTarget(result.steps, "Transacciones y servicios")).toBe(1);
+  expect(result.restoredCount).toBe(0);
+  expect(result.skippedCount).toBe(2);
 });

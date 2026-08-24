@@ -1,0 +1,52 @@
+{
+  "mode": "ai_hybrid",
+  "provider": "copilot",
+  "model": "gpt-5.4",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "13540c55cba2c9b355f720a0044ff710307a83aa02b8544377b52f88c4ebc359",
+    "loaded": true
+  },
+  "invocations": 1,
+  "invocationsConsumed": 1,
+  "durationMs": 91035,
+  "usage": {
+    "inputTokens": null,
+    "cachedInputTokens": null,
+    "cacheWriteInputTokens": null,
+    "nonCachedInputTokens": null,
+    "outputTokens": null,
+    "reasoningOutputTokens": null,
+    "totalPhysicalTokens": null,
+    "durationMs": null,
+    "credits": null
+  },
+  "validation": {
+    "schema": "passed",
+    "structure": "passed",
+    "typescript": "passed",
+    "playwrightDiscovery": "passed",
+    "semanticCoverage": "failed",
+    "functionalExecution": "passed"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "errors": [
+    "unresolved_requirement:No observed evidence was supplied to assert the post-click text \"¿Qué deseas realizar hoy?\".",
+    "unresolved_requirement:No observed evidence was supplied to assert the post-click text \"Información de productos\".",
+    "unresolved_requirement:No observed evidence was supplied to assert the post-click text \"Transacciones y servicios\".",
+    "unresolved_requirement:No observed evidence was supplied to verify the expected result \"Opciones iniciales visibles para direccionamiento.\" after clicking \"Iniciar\".",
+    "step_not_implemented_in_spec:2",
+    "missing_assertion_coverage:Opciones iniciales visibles para direccionamiento."
+  ],
+  "warnings": [],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

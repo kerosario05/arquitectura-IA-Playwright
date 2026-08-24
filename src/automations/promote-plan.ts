@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { createHash } from "node:crypto";
 import { config as envConfig } from "../config/env";
 import { validateExecutionPlan } from "../plans/execution-plan-validator";
 import type { ExecutionPlan, ExecutionPlanStep, PlanTarget } from "../types/execution-plan.types";
@@ -53,6 +54,7 @@ import {
 import { buildDataContext } from "../data/data-context";
 import { buildPromotedDataManifest, savePromotedDataManifestSync } from "../data/promoted-data";
 import { validatePromotedSpecRuntimeContract } from "./runtime/promoted-runtime-contract";
+import { runHybridSpecGeneration, type SpecGenerationDiagnostics, type SpecGenerationSourceScenario } from "./spec-generation-hybrid";
 
 interface PromoteInput {
   plan: ExecutionPlan;
@@ -74,6 +76,9 @@ interface PromoteInput {
   sectionSlug?: string;
   sectionId?: string | number;
   sectionName?: string;
+  sourceScenario?: SpecGenerationSourceScenario;
+  headed?: boolean;
+  executionSource?: string;
 }
 
 const PROMOTION_IO_RETRIES = 3;
@@ -115,6 +120,28 @@ async function writeFileAtomicWithRetry(filePath: string, content: string): Prom
       }
       throw error;
     }
+  }
+
+}
+
+async function readExistingSpecInfo(specPath: string): Promise<{ existed: boolean; hash: string | null; lastModifiedAt: string | null }> {
+  try {
+    const [content, stat] = await Promise.all([
+      fs.readFile(specPath, "utf-8"),
+      fs.stat(specPath)
+    ]);
+    const hash = createHash("sha256").update(content, "utf-8").digest("hex");
+    return {
+      existed: true,
+      hash,
+      lastModifiedAt: stat.mtime.toISOString()
+    };
+  } catch {
+    return {
+      existed: false,
+      hash: null,
+      lastModifiedAt: null
+    };
   }
 }
 
@@ -863,9 +890,13 @@ export async function promoteExecutionPlan(
     generatedCandidates: number;
     autoPom?: AutoPomDiagnostics;
   } | undefined;
+  let generatedSpecContent = "";
+  let registryForSpecValidation: PageObjectRegistry | undefined;
+  let specGenerationDiagnostics: SpecGenerationDiagnostics | undefined;
 
   if (promotionPolicy && promotionPolicy.specMode === "page-object") {
     const registry = await loadPageObjectRegistry(appProfile, input.outputRoot).catch(() => undefined);
+    registryForSpecValidation = registry;
 
     // Detect if plan requires AuthFlow from metadata (preferred) or auth-consumed steps (legacy)
     const authFlowMetadata = plan.metadata?.authFlowRequired
@@ -892,12 +923,14 @@ export async function promoteExecutionPlan(
       automationId,
       appProfile,
       appPaths,
+      sectionSlug,
+      scenarioId: plan.scenario.externalId,
       promotionPolicy,
       inlineDebugMode,
       pageObjectRegistry: registry,
       authFlowOptions
     });
-    await writeFileAtomicWithRetry(appPaths.specPath, specResult.specContent);
+    generatedSpecContent = specResult.specContent;
     pomStatus = specResult.pomStatus;
 
     const requirePomRuntime = input.requirePomRuntime === true || process.env.PROMOTION_REQUIRE_POM_RUNTIME === "true";
@@ -983,6 +1016,8 @@ export async function promoteExecutionPlan(
         automationId,
         appProfile,
         appPaths,
+        sectionSlug,
+        scenarioId: plan.scenario.externalId,
         outputRoot: input.outputRoot,
         promotionPolicy,
         inlineDebugMode: input.inlineDebugMode ?? false,
@@ -993,10 +1028,10 @@ export async function promoteExecutionPlan(
       pomStatus = autoPomResult.pomStatus;
 
       if (autoPomResult.diagnostics.finalPomStatus === "promoted") {
-        await writeFileAtomicWithRetry(appPaths.specPath, autoPomResult.specContent);
+        generatedSpecContent = autoPomResult.specContent;
         console.log(`[promote-plan] Auto-POM succeeded, spec regenerated and promoted.`);
       } else {
-        await writeFileAtomicWithRetry(appPaths.specPath, autoPomResult.specContent);
+        generatedSpecContent = autoPomResult.specContent;
         console.log(`[promote-plan] Auto-POM completed but promotion still blocked: ${autoPomResult.diagnostics.finalPomStatus}`);
       }
 
@@ -1019,8 +1054,11 @@ export async function promoteExecutionPlan(
       }
     }
   } else {
-    const specContent = generateSpecFromPlan(plan, automationId, appProfile, appPaths);
-    await writeFileAtomicWithRetry(appPaths.specPath, specContent);
+    const specContent = generateSpecFromPlan(plan, automationId, appProfile, appPaths, {
+      sectionSlug,
+      scenarioId: plan.scenario.externalId
+    });
+    generatedSpecContent = specContent;
     pomStatus = inlineDebugMode ? "inline_debug_only" : undefined;
     strategyDiagnostics = {
       requestedStrategy: "inline",
@@ -1038,12 +1076,46 @@ export async function promoteExecutionPlan(
     };
   }
 
+  const specGenerationResult = await runHybridSpecGeneration({
+    plan,
+    deterministicDraft: generatedSpecContent,
+    appProfile,
+    appPaths,
+    sectionSlug,
+    scenarioId: plan.scenario.externalId,
+    promotionPolicy,
+    pageObjectRegistry: registryForSpecValidation,
+    sourceScenario: input.sourceScenario,
+    headed: input.headed,
+    executionSource: input.executionSource,
+  });
+  specGenerationDiagnostics = specGenerationResult.diagnostics;
+  generatedSpecContent = specGenerationResult.specContent;
+
+  const previousSpec = await readExistingSpecInfo(appPaths.specPath);
+  let specWritten = false;
+  let specPromotionAllowed = specGenerationResult.promotionAllowed;
+  if (specPromotionAllowed) {
+    await writeFileAtomicWithRetry(appPaths.specPath, generatedSpecContent);
+    specWritten = true;
+  } else {
+    pomStatus = "needs_manual_review";
+    if (strategyDiagnostics) {
+      strategyDiagnostics.blockers.push("spec_generation_validation_failed");
+      strategyDiagnostics.reason = "spec_generation_validation_failed";
+    }
+  }
+  if (specGenerationDiagnostics) {
+    specGenerationDiagnostics.specWritten = specWritten;
+    specGenerationDiagnostics.previousSpec = previousSpec;
+  }
+
   if (appPaths.caseDir && strategyDiagnostics) {
     await writeFileAtomicWithRetry(path.join(appPaths.caseDir, "promotion-diagnostics.json"), JSON.stringify(strategyDiagnostics, null, 2));
   }
 
   const requirePomRuntimeContract = input.requirePomRuntime === true || process.env.PROMOTION_REQUIRE_POM_RUNTIME === "true";
-  if (requirePomRuntimeContract && appPaths.specPath) {
+  if (requirePomRuntimeContract && appPaths.specPath && specPromotionAllowed) {
     const diagnosticsPath = appPaths.caseDir ? path.join(appPaths.caseDir, "promotion-diagnostics.json") : undefined;
     const contractResult = await validatePromotedSpecRuntimeContract(appPaths.specPath, diagnosticsPath);
     if (!contractResult.valid) {
@@ -1073,7 +1145,9 @@ export async function promoteExecutionPlan(
   const rawAutomationStatus = determineAutomationStatus(plan.status, source);
 
   // Override status if POM requires a non-active status
-  const automationStatus = pomStatus === "inline_debug_only"
+  const automationStatus = !specPromotionAllowed
+    ? "spec_failed"
+    : pomStatus === "inline_debug_only"
     ? "inline_debug_only"
     : pomStatus === "needs_page_object" || pomStatus === "needs_page_method"
       ? "blocked_missing_pom"
@@ -1102,10 +1176,11 @@ export async function promoteExecutionPlan(
     lastExecutionResultPath: input.lastExecutionResultPath,
     pomStatus,
     inlineDebugMode,
-    specVerificationStatus: "not_run",
-    metadata: pomDiagnostics || wasOverwritten ? {
+    specVerificationStatus: specPromotionAllowed ? "passed" : "failed",
+    metadata: pomDiagnostics || wasOverwritten || specGenerationDiagnostics ? {
       ...metadata,
       ...(pomDiagnostics ? { pomDiagnostics } : {}),
+      ...(specGenerationDiagnostics ? { specGeneration: specGenerationDiagnostics } : {}),
       ...(strategyDiagnostics ? { promotionStrategyDiagnostics: strategyDiagnostics } : {}),
       ...(wasOverwritten ? {
         overwritten: true,

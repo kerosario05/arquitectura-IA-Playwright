@@ -5,8 +5,8 @@
     "name": "4",
     "baseUrl": "https://172.27.4.50",
     "baseUrlHash": "1423ba294517",
-    "createdAt": "2026-06-02T01:35:39.280Z",
-    "updatedAt": "2026-06-02T01:35:39.280Z"
+    "createdAt": "2026-08-12T15:50:59.864Z",
+    "updatedAt": "2026-08-12T15:50:59.864Z"
   },
   "baseUrl": "https://172.27.4.50",
   "loginMode": "password",
@@ -18,10 +18,5 @@
   "usernameRef": "APP_USERNAME",
   "passwordRef": "APP_PASSWORD",
   "missingInputBehavior": "auto_generate",
-  "updatedAt": "2026-06-11T01:37:15.340Z",
-  "lastUsedSource": {
-    "type": "fallback",
-    "sectionName": null,
-    "updatedAt": "2026-06-11T01:37:15.338Z"
-  }
+  "updatedAt": "2026-08-12T15:50:59.864Z"
 }

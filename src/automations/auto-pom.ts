@@ -16,6 +16,8 @@ export type AutoPomInput = {
   automationId: string;
   appProfile: AppProfile;
   appPaths: AppAutomationPaths;
+  sectionSlug?: string;
+  scenarioId?: string;
   outputRoot: string | undefined;
   promotionPolicy: PromotionPolicy;
   inlineDebugMode: boolean;
@@ -326,6 +328,8 @@ export async function runAutoPomPipeline(input: AutoPomInput): Promise<AutoPomRe
     automationId: input.automationId,
     appProfile: input.appProfile,
     appPaths: input.appPaths,
+    sectionSlug: input.sectionSlug,
+    scenarioId: input.scenarioId,
     promotionPolicy: policy,
     inlineDebugMode: input.inlineDebugMode,
     pageObjectRegistry: registry,

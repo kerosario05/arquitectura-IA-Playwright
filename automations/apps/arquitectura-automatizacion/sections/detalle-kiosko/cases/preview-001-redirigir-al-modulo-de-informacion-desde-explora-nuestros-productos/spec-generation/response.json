@@ -1,0 +1,47 @@
+{
+  "scenarioId": "PREVIEW-001",
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\nimport { HomePage } from '../../../../pages/home.page';\nimport { ProductListPage } from '../../../../pages/productlist.page';\n\nprocess.env.APP_SLUG = 'arquitectura-automatizacion';\nprocess.env.SECTION_SLUG = 'detalle-kiosko';\nprocess.env.SCENARIO_ID = 'PREVIEW-001';\nprocess.env.SCENARIO_TITLE = 'Redirigir al modulo de informacion desde Explora nuestros productos';\n\ntest('PREVIEW-001 Redirigir al modulo de informacion desde Explora nuestros productos', async ({ page }) => {\n  const promotedRuntime = createPromotedSpecRuntime(page);\n  const homePage = new HomePage(page);\n  const productListPage = new ProductListPage(page);\n\n  try {\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 0,\n      target: 'Iniciar',\n      actionIntent: 'Abrir el flujo principal desde la pagina inicial',\n      expectedEffect: 'La vista inicial queda activa para continuar con la exploracion de productos',\n      action: async () => {\n        await homePage.start();\n      },\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 1,\n      target: 'Explora nuestros productos',\n      actionIntent: 'Abrir el modulo de exploracion de productos',\n      expectedEffect: 'Se muestra el listado de productos disponibles',\n      action: async () => {\n        await page.getByText('Explora nuestros productos', { exact: true }).click();\n      },\n    });\n\n    await promotedRuntime.selectPromotedItem({\n      stepIndex: 2,\n      target: 'el primer elemento visible del listado',\n      action: async () => {\n        await productListPage.selectProduct('Depósitos a plazo');\n      },\n    });\n\n    await promotedRuntime.waitForPromotedUiStable(3, 'módulo de información');\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 3,\n      target: 'módulo de información',\n      assertion: async () => {\n        await expect(page).toHaveURL(/product-subcategory\\?category=certificates/);\n      },\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "el primer elemento visible del listado",
+      "implementation": "await productListPage.selectProduct('Depósitos a plazo');"
+    },
+    {
+      "requirement": "módulo de información",
+      "implementation": "await expect(page).toHaveURL(/product-subcategory\\?category=certificates/);"
+    }
+  ],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "start"
+      ]
+    },
+    {
+      "className": "ProductListPage",
+      "methods": [
+        "selectProduct"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "promotedRuntime",
+    "homePage",
+    "productListPage"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "mode": "ai_hybrid",
+  "provider": "codex",
+  "model": "gpt-5.4",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "invocations": 1,
+  "invocationsConsumed": 1,
+  "durationMs": 59968,
+  "usage": {
+    "inputTokens": 62211,
+    "cachedInputTokens": 47744,
+    "cacheWriteInputTokens": 0,
+    "nonCachedInputTokens": 14467,
+    "outputTokens": 1244,
+    "reasoningOutputTokens": 382,
+    "totalPhysicalTokens": 63455,
+    "durationMs": 40238,
+    "credits": null
+  },
+  "validation": {
+    "schema": "passed",
+    "structure": "passed",
+    "typescript": "passed",
+    "playwrightDiscovery": "passed",
+    "semanticCoverage": "failed",
+    "functionalExecution": "failed"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [],
+  "regressedGates": [],
+  "missingRequirements": [],
+  "oracleTypes": [
+    "unsupported_or_unresolved"
+  ],
+  "errors": [
+    "unresolved_requirement:Executable step 2 (login) is required and must use a permitted promoted runtime call, but the allowlist does not include any login method and no auth flow was supplied in AVAILABLE_AUTH_FLOW.",
+    "unresolved_requirement:Executable step 3 (click on \"Iniciar\") cannot be validly implemented while preserving the required functional order because step 2 remains unresolved.",
+    "unresolved_requirement:The expected outcome oracle \"La pantalla de seleccion presenta las opciones principales del kiosco.\" is marked backed=false with source evidence \"backing_evidence_missing\", so no observable assertion can be added without inventing evidence.",
+    "unresolved_requirement:Scenario-level validations for \"logo institucional\", \"mensaje de bienvenida\", \"Â¿QuÃ© deseas realizar hoy?\", \"Explora nuestros productos\" and \"Transacciones y servicios\" lack backed observable evidence and cannot be asserted safely.",
+    "missing_step_coverage:2",
+    "step_not_implemented_in_spec:2",
+    "missing_step_coverage:3",
+    "step_not_implemented_in_spec:3",
+    "expected_result_not_propagated",
+    "functional_execution_failed:exitCode=1",
+    "functional_execution_error:Error: Unresolved promotion requirement: executable step 2 (login) requires a permitted promoted runtime or auth flow implementation, but none was supplied in the available APIs/auth flow context."
+  ],
+  "warnings": [
+    "functional_execution_screenshots=0"
+  ],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

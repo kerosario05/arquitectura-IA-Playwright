@@ -1,0 +1,38 @@
+{
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\nimport { detectAuthGate } from '../../../../../../../src/discovery/auth-gate-detector';\nimport { scanCurrentPage } from '../../../../../../../src/explorer/page-scanner';\nimport { HomePage } from '../../../../pages/home.page';\n\ntest('Observar el inicio del flujo de autenticacion desde Transacciones y servicios', async ({ page }) => {\n  process.env.APP_SLUG = 'arquitectura-automatizacion';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-001';\n  process.env.SCENARIO_TITLE = 'Observar el inicio del flujo de autenticacion desde Transacciones y servicios';\n\n  const promotedRuntime = createPromotedSpecRuntime(page);\n  const homePage = new HomePage(page);\n\n  try {\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 0,\n      target: 'Iniciar',\n      actionIntent: 'Activar el inicio del flujo de autenticacion',\n      expectedEffect: 'Desencadenar el limite de autenticacion en el acceso privado',\n      action: async () => {\n        await homePage.start();\n      },\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 1,\n      target: 'Transacciones y servicios',\n      actionIntent: 'Abrir la opcion Transacciones y servicios',\n      expectedEffect: 'Mostrar la opcion seleccionada en la interfaz',\n      action: async () => {\n        await page.getByText('Transacciones y servicios', { exact: true }).click();\n      },\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 2,\n      target: 'Transacciones y servicios',\n      assertion: async () => {\n        await promotedRuntime.waitForPromotedUiStable(2, 'Transacciones y servicios');\n        const pageDiag = await scanCurrentPage(page);\n        const authGate = await detectAuthGate(pageDiag);\n        expect(authGate.stage).toBe('identification_type_selection');\n      },\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    0,
+    1,
+    2
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "Transacciones y servicios",
+      "implementation": "expect(authGate.stage).toBe('identification_type_selection');"
+    },
+    {
+      "requirement": "La opcion privada activa el limite de autenticacion.",
+      "implementation": "expect(authGate.stage).toBe('identification_type_selection');"
+    }
+  ],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "start"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "promotedRuntime",
+    "homePage"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

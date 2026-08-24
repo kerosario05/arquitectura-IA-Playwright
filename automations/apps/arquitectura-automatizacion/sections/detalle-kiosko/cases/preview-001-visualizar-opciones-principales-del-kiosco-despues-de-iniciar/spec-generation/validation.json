@@ -1,0 +1,63 @@
+{
+  "mode": "ai_hybrid",
+  "provider": "codex",
+  "model": "gpt-5.4",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "invocations": 1,
+  "invocationsConsumed": 1,
+  "durationMs": 79879,
+  "usage": {
+    "inputTokens": 62211,
+    "cachedInputTokens": 36992,
+    "cacheWriteInputTokens": 0,
+    "nonCachedInputTokens": 25219,
+    "outputTokens": 1669,
+    "reasoningOutputTokens": 516,
+    "totalPhysicalTokens": 63880,
+    "durationMs": 59667,
+    "credits": null
+  },
+  "validation": {
+    "schema": "passed",
+    "structure": "failed",
+    "typescript": "passed",
+    "playwrightDiscovery": "passed",
+    "semanticCoverage": "failed",
+    "functionalExecution": "failed"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [],
+  "oracleTypes": [
+    "unsupported_or_unresolved"
+  ],
+  "errors": [
+    "missing_metadata_line:process.env.SCENARIO_TITLE = 'Visualizar opciones principales del kiosco después de iniciar';",
+    "unresolved_requirement:Executable step 2 (`login`) requires a promotedRuntime call, but no allowed runtime action, auth flow import, or backed observable assertion was provided to implement it without inventing unsupported behavior.",
+    "unresolved_requirement:The expected outcome `La pantalla de selecci\\u00f3n presenta las dos opciones principales del kiosco.` is marked by observableOracles as `unsupported_or_unresolved` with `backed=false`, so no valid assertion can be added from the provided evidence.",
+    "unresolved_requirement:Scenario assertions for `\\u00bfQu\\u00e9 deseas realizar hoy?`, `Informaci\\u00f3n de productos`, and `transacciones y servicios` are not backed by observed evidence phrases in a form safe for exact promoted assertions.",
+    "step_not_implemented_in_spec:2",
+    "expected_result_not_propagated",
+    "functional_execution_failed:exitCode=1",
+    "functional_execution_error:Error: Promoted assertion failed at step 2 target=\"Información de productos\". diagnostics={\"currentUrl\":\"https://172.27.4.50/\",\"actionIntent\":\"assertVisible\",\"target\":\"Información de productos\",\"stepIndex\":2,\"timeoutMs\":15000,\"retryAttempted\":false,\"screenshotPath\":\"[REDACTED]\"} cause=Unresolved promoted assertion for step 2: no backed observable evidence, auth flow, or allowed runtime action was provided to implement the required login validation safely."
+  ],
+  "warnings": [
+    "functional_execution_screenshots=1"
+  ],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

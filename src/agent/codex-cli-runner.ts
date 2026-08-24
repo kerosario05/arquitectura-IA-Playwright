@@ -1,8 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
+import { appendFile, mkdir } from "node:fs/promises";
 import { spawn as nodeSpawn } from "node:child_process";
 import type { SpawnOptionsWithoutStdio } from "node:child_process";
-import type { CodexCliRunnerInput, CodexCliRunnerResult } from "../types/codex-auto-repair.types";
+import type { CodexCliRunnerInput, CodexCliRunnerResult, CodexCliUsage } from "../types/codex-auto-repair.types";
 
 const SAFE_ENV_KEYS = [
   "PATH",
@@ -96,17 +97,29 @@ export function escapeDoubleQuotes(s: string): string {
 }
 
 export function buildCommandArgs(input: CodexCliRunnerInput): { command: string; args: string[] } {
+  const hasJsonFlag = input.extraArgs.some(arg => arg === "--json");
+  const extraArgs = hasJsonFlag ? [...input.extraArgs] : [...input.extraArgs, "--json"];
+  const contextIsolationArgs = input.purpose === "spec_generation"
+    ? ["-c", "project_doc_max_bytes=0"]
+    : [];
   // codex.cmd / codex -> "exec" "<prompt>"
   return {
     command: input.command,
-    args: ["exec", ...input.extraArgs, input.prompt]
+    args: ["exec", ...contextIsolationArgs, ...extraArgs, input.prompt]
   };
 }
 
 // Back-compat helper used by tests and error formatting.
 export function buildCommand(input: CodexCliRunnerInput): string {
   const commandPart = input.command.includes(" ") ? `"${escapeDoubleQuotes(input.command)}"` : input.command;
-  const parts = [commandPart, "exec", ...input.extraArgs, `"${escapeDoubleQuotes(input.prompt)}"`];
+  const { args } = buildCommandArgs(input);
+  const commandArgs = args.map((arg, index) => {
+    if (index === args.length - 1) {
+      return `"${escapeDoubleQuotes(arg)}"`;
+    }
+    return arg.includes(" ") ? `"${escapeDoubleQuotes(arg)}"` : arg;
+  });
+  const parts = [commandPart, ...commandArgs];
   return parts.join(" ");
 }
 
@@ -151,9 +164,183 @@ function ensureLogPath(p?: string, fallbackDir?: string, name?: string): string 
   return undefined;
 }
 
+type CodexJsonlEvent = {
+  type?: string;
+  model?: string;
+  usage?: Record<string, unknown>;
+  item?: Record<string, unknown>;
+};
+
+type ParsedJsonlState = {
+  lastAgentMessage?: string;
+  lastTurnCompleted?: CodexJsonlEvent;
+  invalidJsonLines: number;
+  parsedJsonLines: number;
+};
+
+function asObject(value: unknown): Record<string, unknown> | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  return value as Record<string, unknown>;
+}
+
+function readNumberField(obj: Record<string, unknown>, camelName: string, snakeName: string): number {
+  const value = obj[camelName] ?? obj[snakeName];
+  if (typeof value !== "number" || !Number.isFinite(value)) return 0;
+  return Math.max(0, Math.floor(value));
+}
+
+function readStringField(obj: Record<string, unknown>, key: string): string | undefined {
+  const value = obj[key];
+  return typeof value === "string" && value.trim().length > 0 ? value : undefined;
+}
+
+function extractAgentMessageText(item: Record<string, unknown>): string | undefined {
+  const direct = readStringField(item, "text")
+    ?? readStringField(item, "output_text")
+    ?? readStringField(item, "message");
+  if (direct) return direct;
+
+  const itemMessage = asObject(item.message);
+  const messageContent = Array.isArray(itemMessage?.content) ? itemMessage.content : undefined;
+  const itemContent = Array.isArray(item.content) ? item.content : undefined;
+  const blocks = messageContent ?? itemContent;
+  if (!blocks) return undefined;
+
+  const parts: string[] = [];
+  for (const block of blocks) {
+    if (typeof block === "string") {
+      if (block.trim().length > 0) parts.push(block);
+      continue;
+    }
+    const blockObj = asObject(block);
+    if (!blockObj) continue;
+
+    const text = readStringField(blockObj, "text") ?? readStringField(blockObj, "content");
+    if (text) {
+      parts.push(text);
+      continue;
+    }
+
+    if (Array.isArray(blockObj.content)) {
+      for (const nested of blockObj.content) {
+        const nestedObj = asObject(nested);
+        const nestedText = nestedObj ? (readStringField(nestedObj, "text") ?? readStringField(nestedObj, "content")) : undefined;
+        if (nestedText) {
+          parts.push(nestedText);
+        }
+      }
+    }
+  }
+
+  if (parts.length === 0) return undefined;
+  return parts.join("\n").trim() || undefined;
+}
+
+function parseCodexJsonl(stdout: string): ParsedJsonlState {
+  const state: ParsedJsonlState = {
+    invalidJsonLines: 0,
+    parsedJsonLines: 0
+  };
+
+  const lines = stdout.split(/\r?\n/);
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) continue;
+    try {
+      const parsed = JSON.parse(line) as CodexJsonlEvent;
+      state.parsedJsonLines += 1;
+      if (parsed.type === "item.completed") {
+        const item = asObject(parsed.item);
+        if (item && readStringField(item, "type") === "agent_message") {
+          const text = extractAgentMessageText(item);
+          if (text) {
+            state.lastAgentMessage = text;
+          }
+        }
+      } else if (parsed.type === "turn.completed") {
+        state.lastTurnCompleted = parsed;
+      }
+    } catch {
+      state.invalidJsonLines += 1;
+    }
+  }
+
+  return state;
+}
+
+function resolveModelFromArgs(extraArgs: string[]): string {
+  for (let i = 0; i < extraArgs.length; i += 1) {
+    if ((extraArgs[i] === "--model" || extraArgs[i] === "-m") && typeof extraArgs[i + 1] === "string" && extraArgs[i + 1].trim()) {
+      return extraArgs[i + 1].trim();
+    }
+  }
+  return "unknown";
+}
+
+function buildUsageSnapshot(
+  input: CodexCliRunnerInput,
+  parsedJsonl: ParsedJsonlState,
+  exitCode: number,
+  timedOut: boolean,
+  durationMs: number
+): CodexCliUsage {
+  const turnObj = parsedJsonl.lastTurnCompleted ? asObject(parsedJsonl.lastTurnCompleted) : undefined;
+  const usageObj = turnObj?.usage ? asObject(turnObj.usage) : undefined;
+  const success = !timedOut && exitCode === 0;
+  const modelFromTurn = turnObj ? readStringField(turnObj, "model") : undefined;
+  const model = modelFromTurn ?? resolveModelFromArgs(input.extraArgs);
+  const taskType = input.taskType ?? "unknown";
+
+  const inputTokens = usageObj ? readNumberField(usageObj, "inputTokens", "input_tokens") : 0;
+  const cachedInputTokens = usageObj ? readNumberField(usageObj, "cachedInputTokens", "cached_input_tokens") : 0;
+  const cacheWriteInputTokens = usageObj ? readNumberField(usageObj, "cacheWriteInputTokens", "cache_write_input_tokens") : 0;
+  const outputTokens = usageObj ? readNumberField(usageObj, "outputTokens", "output_tokens") : 0;
+  const reasoningOutputTokens = usageObj ? readNumberField(usageObj, "reasoningOutputTokens", "reasoning_output_tokens") : 0;
+  const nonCachedInputTokens = Math.max(0, inputTokens - cachedInputTokens);
+  const totalPhysicalTokens = inputTokens + outputTokens;
+
+  return {
+    timestamp: new Date().toISOString(),
+    provider: "codex_cli",
+    model,
+    taskType,
+    inputTokens,
+    cachedInputTokens,
+    cacheWriteInputTokens,
+    nonCachedInputTokens,
+    outputTokens,
+    reasoningOutputTokens,
+    totalPhysicalTokens,
+    durationMs,
+    exitCode,
+    success
+  };
+}
+
+const CODEX_USAGE_METRICS_PATH = path.join(".artifacts", "metrics", "codex-usage.jsonl");
+
+async function persistUsage(usage: CodexCliUsage): Promise<void> {
+  const metricsPath = path.join(process.cwd(), CODEX_USAGE_METRICS_PATH);
+  await mkdir(path.dirname(metricsPath), { recursive: true });
+  await appendFile(metricsPath, `${JSON.stringify(usage)}\n`, "utf-8");
+}
+
+function logUsageLine(usage: CodexCliUsage, usageUnavailable: boolean): void {
+  console.log(
+    `[codex-cli:usage] model=${usage.model} taskType=${usage.taskType} ` +
+    `input=${usage.inputTokens} cached=${usage.cachedInputTokens} cacheWrite=${usage.cacheWriteInputTokens} ` +
+    `nonCached=${usage.nonCachedInputTokens} output=${usage.outputTokens} reasoning=${usage.reasoningOutputTokens} ` +
+    `total=${usage.totalPhysicalTokens} durationMs=${usage.durationMs} exitCode=${usage.exitCode} success=${usage.success}` +
+    (usageUnavailable ? " usageUnavailable=true" : "")
+  );
+}
+
 export async function runCodexCli(input: CodexCliRunnerInput): Promise<CodexCliRunnerResult> {
   lastRunnerInput = { ...input };
   const resolved = resolveSpawnCommand(input);
+  if (input.purpose === "spec_generation") {
+    console.log("[codex-context-policy] purpose=spec_generation projectDocMaxBytes=0");
+  }
   const cwd = input.cwd;
   const timeoutMs = input.timeoutMs;
   const startedAt = Date.now();
@@ -166,6 +353,7 @@ export async function runCodexCli(input: CodexCliRunnerInput): Promise<CodexCliR
   const stderrLogPath = ensureLogPath(input.stderrLogPath, handoffDir, "codex.stderr.log");
 
   if (input.showAgentLog) {
+    console.log(`[codex-runner] taskType=${input.taskType ?? "unknown"} purpose=${input.purpose ?? "unknown"}`);
     console.log(`[codex-cli] displayCommand: ${resolved.displayCommand}`);
     console.log(`[codex-cli] spawnCommand: ${resolved.spawnCommand} ${resolved.spawnArgs.join(" ")}`);
     console.log(`[codex-cli] cwd: ${cwd}`);
@@ -207,12 +395,13 @@ export async function runCodexCli(input: CodexCliRunnerInput): Promise<CodexCliR
         settled = true;
         child.kill("SIGTERM");
         cleanup();
+        const durationMs = Date.now() - startedAt;
         resolve({
           exitCode: -1,
           stdout: stdoutBuf,
           stderr: stderrBuf,
           timedOut: true,
-          durationMs: Date.now() - startedAt,
+          durationMs,
           stdoutLogPath,
           stderrLogPath
         });
@@ -244,13 +433,14 @@ export async function runCodexCli(input: CodexCliRunnerInput): Promise<CodexCliR
       if (settled) return;
       settled = true;
       cleanup();
+      const durationMs = Date.now() - startedAt;
       resolve({
         exitCode: code ?? 1,
         stdout: stdoutBuf,
         stderr: stderrBuf,
         timedOut: false,
         signal: signal ?? undefined,
-        durationMs: Date.now() - startedAt,
+        durationMs,
         stdoutLogPath,
         stderrLogPath
       });
@@ -260,16 +450,45 @@ export async function runCodexCli(input: CodexCliRunnerInput): Promise<CodexCliR
       if (settled) return;
       settled = true;
       cleanup();
+      const durationMs = Date.now() - startedAt;
       resolve({
         exitCode: 1,
         stdout: stdoutBuf,
         stderr: `${stderrBuf}\n${err.message}`,
         timedOut: false,
-        durationMs: Date.now() - startedAt,
+        durationMs,
         stdoutLogPath,
         stderrLogPath
       });
     });
+  }).then(async (rawResult) => {
+    const parsedJsonl = parseCodexJsonl(rawResult.stdout);
+    if (parsedJsonl.invalidJsonLines > 0 && parsedJsonl.parsedJsonLines > 0) {
+      console.log(`[codex-cli] jsonl_parse_warning invalidLines=${parsedJsonl.invalidJsonLines}`);
+    }
+
+    const usage = buildUsageSnapshot(
+      input,
+      parsedJsonl,
+      rawResult.exitCode,
+      rawResult.timedOut,
+      rawResult.durationMs
+    );
+
+    const usageUnavailable = !parsedJsonl.lastTurnCompleted?.usage;
+    logUsageLine(usage, usageUnavailable);
+    try {
+      await persistUsage(usage);
+    } catch {
+      console.log("[codex-cli] usage_metrics_persist_failed");
+    }
+
+    const stdout = parsedJsonl.lastAgentMessage ?? rawResult.stdout;
+    return {
+      ...rawResult,
+      stdout,
+      usage: usageUnavailable ? undefined : usage
+    };
   });
 }
 

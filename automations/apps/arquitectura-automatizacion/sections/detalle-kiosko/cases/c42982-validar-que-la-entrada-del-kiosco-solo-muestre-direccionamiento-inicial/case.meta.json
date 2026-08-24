@@ -1,0 +1,9 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "C42982",
+  "testRailCaseId": 42982,
+  "generatedAt": "2026-08-06T15:50:27.668Z",
+  "title": "Validar que la entrada del kiosco solo muestre direccionamiento inicial"
+}

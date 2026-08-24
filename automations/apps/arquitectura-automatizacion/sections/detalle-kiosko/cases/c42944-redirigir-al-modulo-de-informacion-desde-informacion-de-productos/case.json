@@ -1,0 +1,10 @@
+{
+  "id": "c42944-redirigir-al-modulo-de-informacion-desde-informacion-de-productos",
+  "externalId": "C42944",
+  "caseId": 42944,
+  "title": "Redirigir al módulo de información desde información de productos",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-06T15:48:43.058Z"
+}

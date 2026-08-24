@@ -1,0 +1,10 @@
+{
+  "id": "preview-002-validar-que-la-pantalla-inicial-de-seleccion-no-muestre-informacion-financiera",
+  "externalId": "PREVIEW-002",
+  "caseId": 0,
+  "title": "Validar que la pantalla inicial de seleccion no muestre informacion financiera",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-07T15:27:12.742Z"
+}

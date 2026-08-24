@@ -842,8 +842,15 @@ export async function generateScenariosWithAi(
   huScenarioModel?: any,
   routePendingScenarioPlan?: any,
   functionalBranches?: FunctionalBranchRef[],
+  telemetryContext?: { launchId?: string },
 ): Promise<McpGenerationResponse> {
   const primaryIssue = issues[0];
+  const normalizedLaunchId = typeof telemetryContext?.launchId === "string" && telemetryContext.launchId.trim().length > 0
+    ? telemetryContext.launchId.trim()
+    : undefined;
+  const normalizedSourceIssueKey = typeof primaryIssue?.key === "string" && primaryIssue.key.trim().length > 0
+    ? primaryIssue.key.trim()
+    : undefined;
   const primaryHuEvidence = primaryIssue ? huEvidenceMap?.get(primaryIssue.key) : null;
   const primaryPathSelection = primaryIssue ? pathSelectionMap?.get(primaryIssue.key) : null;
   const privateSyntheticSelectedPath = !!primaryHuEvidence &&
@@ -1077,7 +1084,11 @@ export async function generateScenariosWithAi(
         generationMode: "route_pending",
         deterministicSeedsGenerated: pendingSeedCount,
         aiCalled: false, aiGenerated: 0, finalValid: 0, finalRejected: 0,
-        finalBlocked: blockedIssues.length, fallbackUsed: false
+        finalBlocked: blockedIssues.length, fallbackUsed: false,
+        aiPurpose: "scenario_generation",
+        launchId: normalizedLaunchId,
+        sourceIssueKey: normalizedSourceIssueKey,
+        appSlug,
       };
 
       try {
@@ -1092,14 +1103,20 @@ export async function generateScenariosWithAi(
         console.log(`[scenarios:prompt] messages built system=${messages[0]?.content.length ?? 0} user=${messages[1]?.content.length ?? 0}`);
 
         const provider = _testProvider ?? await createScenarioAiProvider();
-        console.log(`[scenarios:ai] purpose=route_pending_generation provider=${provider.providerType} model=${provider.model}`);
+        console.log(`[scenarios:ai] purpose=scenario_generation generationMode=route_pending provider=${provider.providerType} model=${provider.model}`);
 
         genDiag.aiCalled = true;
         const response = await provider.completeJson({
           messages,
           temperature: 0.4,
-          requireJson: true
+          requireJson: true,
+          purpose: "scenario_generation",
         });
+        genDiag.aiProvider = response.providerName;
+        genDiag.aiModel = response.model;
+        if (response.usage) {
+          genDiag.aiUsage = response.usage;
+        }
 
         if (!response.parsedJson) {
           console.log(`[scenario-preview] aiGeneration routePending empty fallback=plan_based`);
@@ -1117,13 +1134,15 @@ export async function generateScenariosWithAi(
         const parsed = parseAiResponseWithMode(response.parsedJson, "route_pending");
         const routePendingScenarios = parsed.scenarios.map((sc: any) => ({
           ...sc,
-          mcpExecutable: false,
           nonExecutableCriteria: "requires_route_discovery",
         }));
 
         genDiag.aiGenerated = routePendingScenarios.length;
         genDiag.finalValid = routePendingScenarios.length;
         console.log(`[scenario-preview] aiGeneration routePending generated=${routePendingScenarios.length}`);
+        for (const sc of routePendingScenarios) {
+          console.log(`[scenario-auth-intent] scenarioId=${sc.scenarioId ?? sc.sourceIssueKey} authIntent=${sc.authIntent ?? "undefined"}`);
+        }
 
         return {
           appSlug, targetAppSlug, targetAppName, confidence: "low",
@@ -1190,6 +1209,10 @@ export async function generateScenariosWithAi(
     branchRequiredClicks,
     effectiveAllowedClicks: [...derivedContext.allowedExecutableClicks],
     effectiveAllowedClicksBeforeRepair: derivedContext.allowedExecutableClicks.length,
+    aiPurpose: "scenario_generation",
+    launchId: normalizedLaunchId,
+    sourceIssueKey: normalizedSourceIssueKey,
+    appSlug,
   };
 
   // Check if we should skip AI (only in deterministic_only mode)
@@ -1292,6 +1315,11 @@ export async function generateScenariosWithAi(
       requireJsonSchema: false,
       purpose: "scenario_generation",
     });
+    generationDiagnostics.aiProvider = response.providerName;
+    generationDiagnostics.aiModel = response.model;
+    if (response.usage) {
+      generationDiagnostics.aiUsage = response.usage;
+    }
 
     console.log(`[scenarios:ai] completed durationMs=${response.durationMs} model=${response.model} provider=${response.providerName}`);
 
@@ -1515,6 +1543,9 @@ export async function generateScenariosWithAi(
         generationDiagnostics.finalValid = fallbackScenarios.length;
         console.log(`[scenario-preview] selectedPathFallback generated issue=${primaryIssue.key} count=${fallbackScenarios.length} source=hu_evidence_selected_path`);
         console.log(`[scenario-preview] selectedPathFallback routeProfilePublicIgnored reason=private_selected_path`);
+        for (const sc of fallbackScenarios) {
+          console.log(`[scenario-auth-intent] scenarioId=${sc.scenarioId ?? sc.sourceIssueKey} authIntent=${sc.authIntent ?? "undefined"}`);
+        }
 
         return {
           ...parsed,
@@ -1543,6 +1574,9 @@ export async function generateScenariosWithAi(
         generationDiagnostics.fallbackScenarioCount = fallbackToAdd.length;
         generationDiagnostics.finalValid = complianceValidation.validScenarios.length + fallbackToAdd.length;
         console.log(`[scenarios:coverage] insufficientFunctionalCoverage issue=${primaryIssue.key} valid=${complianceValidation.validScenarios.length} minimum=3 fallback=true`);
+        for (const sc of [...complianceValidation.validScenarios, ...fallbackToAdd]) {
+          console.log(`[scenario-auth-intent] scenarioId=${sc.scenarioId ?? sc.sourceIssueKey} authIntent=${sc.authIntent ?? "undefined"}`);
+        }
         return {
           ...parsed,
           scenarios: [...complianceValidation.validScenarios, ...fallbackToAdd],
@@ -1559,6 +1593,9 @@ export async function generateScenariosWithAi(
       `finalValid=${generationDiagnostics.finalValid} ` +
       `finalRejected=${generationDiagnostics.finalRejected}`
     );
+    for (const sc of complianceValidation.validScenarios) {
+      console.log(`[scenario-auth-intent] scenarioId=${sc.scenarioId ?? sc.sourceIssueKey} authIntent=${sc.authIntent ?? "undefined"}`);
+    }
 
     return {
       ...parsed,

@@ -1,0 +1,8 @@
+{
+  "otpProfile": {
+    "strategy": "oracle_local_token",
+    "defaultChannel": "ONBOARDINGWEB",
+    "allowedChannels": ["ONBOARDINGWEB"],
+    "enabledEnvironments": ["local", "qa"]
+  }
+}

@@ -9,6 +9,9 @@ export type KnowledgeNavigationHint = {
   confidenceScore: number;
   score: number;
   reason: string;
+  destination?: string;
+  destinationSignals?: string[];
+  destinationUrl?: string;
 };
 
 export type KnowledgeFunctionalHint = {
@@ -339,6 +342,9 @@ export function buildKnowledgeContextForScenarioGeneration(
         confidenceScore: item.confidenceScore ?? 0,
         score: s.score,
         reason: s.reason,
+        destination: item.destination,
+        destinationSignals: item.destinationSignals,
+        destinationUrl: item.destinationUrl,
       };
     });
 

@@ -30,6 +30,7 @@ export interface EvidenceScenarioContext {
 
 export interface EvidenceStepRecord {
   index: number;
+  stepIndex?: number;
   stepText: string;
   target?: string;
   status: EvidenceStepStatus;

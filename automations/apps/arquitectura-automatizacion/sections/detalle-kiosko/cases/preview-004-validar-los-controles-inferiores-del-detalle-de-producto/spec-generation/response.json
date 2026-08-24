@@ -1,0 +1,57 @@
+{
+  "specContent": "import { test } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\n\nimport { HomePage } from '../../../../pages/home.page';\nimport { ProductInformationPage } from '../../../../pages/productinformation.page';\nimport { ProductListPage } from '../../../../pages/productlist.page';\n\nexport const PROMOTED_SPEC_STRATEGY = 'pom_runtime';\n\ntest('Validar los controles inferiores del detalle de producto', async ({ page }) => {\n  test.setTimeout(Number(process.env.PROMOTED_SPEC_TIMEOUT_MS ?? 90000));\n\n  process.env.APP_SLUG = 'arquitectura-automatizacion';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-004';\n  process.env.SCENARIO_TITLE = 'Validar los controles inferiores del detalle de producto';\n\n  const appBaseUrl = process.env.APP_BASE_URL;\n  if (!appBaseUrl) {\n    throw new Error('APP_BASE_URL must be configured for promoted specs.');\n  }\n\n  const homePage = new HomePage(page);\n  const productInformationPage = new ProductInformationPage(page);\n  const productListPage = new ProductListPage(page);\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await page.goto(appBaseUrl);\n    await page.waitForLoadState('domcontentloaded');\n\n    await promotedRuntime.waitForPromotedUiStable({\n      stepIndex: 2,\n      target: 'APP_LOGIN_MODE=no_login',\n      description: 'Execute login'\n    });\n\n    const replayStep_3 = async () => {\n      await homePage.start();\n    };\n    const replayStep_4 = async () => {\n      await productInformationPage.openProductInformation();\n    };\n    const replayStep_5 = async () => {\n      await productListPage.selectProduct('Depósitos a Plazo');\n    };\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 3,\n      target: 'Iniciar',\n      actionIntent: 'start_session',\n      expectedEffect: 'ui_change',\n      sensitive: false,\n      previousStepReplays: [],\n      lastSelectionStep: undefined,\n      expectedOwnerPage: 'HomePage',\n      action: async () => {\n        await homePage.start();\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 4,\n      target: 'Información de productos',\n      actionIntent: 'open_product_information',\n      expectedEffect: 'ui_change',\n      sensitive: false,\n      previousStepReplays: [\n        {\n          stepIndex: 3,\n          actionIntent: 'start_session',\n          target: 'Iniciar',\n          sensitive: false,\n          replay: replayStep_3\n        }\n      ],\n      lastSelectionStep: undefined,\n      expectedOwnerPage: 'ProductInformationPage',\n      action: async () => {\n        await productInformationPage.openProductInformation();\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 5,\n      target: 'Depósitos a Plazo',\n      actionIntent: 'select_product',\n      expectedEffect: 'ui_change',\n      sensitive: false,\n      previousStepReplays: [\n        {\n          stepIndex: 3,\n          actionIntent: 'start_session',\n          target: 'Iniciar',\n          sensitive: false,\n          replay: replayStep_3\n        },\n        {\n          stepIndex: 4,\n          actionIntent: 'open_product_information',\n          target: 'Información de productos',\n          sensitive: false,\n          replay: replayStep_4\n        }\n      ],\n      lastSelectionStep: {\n        stepIndex: 4,\n        selectedTarget: 'Información de productos'\n      },\n      expectedOwnerPage: 'ProductListPage',\n      action: async () => {\n        await productListPage.selectProduct('Depósitos a Plazo');\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 6,\n      target: 'el primer producto visible del listado',\n      actionIntent: 'select_visible_item_by_ordinal',\n      expectedEffect: 'ui_change',\n      sensitive: false,\n      previousStepReplays: [\n        {\n          stepIndex: 3,\n          actionIntent: 'start_session',\n          target: 'Iniciar',\n          sensitive: false,\n          replay: replayStep_3\n        },\n        {\n          stepIndex: 4,\n          actionIntent: 'open_product_information',\n          target: 'Información de productos',\n          sensitive: false,\n          replay: replayStep_4\n        },\n        {\n          stepIndex: 5,\n          actionIntent: 'select_product',\n          target: 'Depósitos a Plazo',\n          sensitive: false,\n          replay: replayStep_5\n        }\n      ],\n      lastSelectionStep: {\n        stepIndex: 5,\n        selectedTarget: 'Depósitos a Plazo'\n      },\n      expectedOwnerPage: 'ProductListPage',\n      action: async () => {\n        await productListPage.selectVisibleItemByOrdinal('first', 'producto');\n      }\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "coveredAssertions": [],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "start"
+      ]
+    },
+    {
+      "className": "ProductInformationPage",
+      "methods": [
+        "openProductInformation"
+      ]
+    },
+    {
+      "className": "ProductListPage",
+      "methods": [
+        "selectProduct",
+        "selectVisibleItemByOrdinal"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "PROMOTED_SPEC_STRATEGY",
+    "appBaseUrl",
+    "homePage",
+    "productInformationPage",
+    "productListPage",
+    "promotedRuntime",
+    "replayStep_3",
+    "replayStep_4",
+    "replayStep_5"
+  ],
+  "unresolvedRequirements": [
+    "No observed evidence confirms visibility of the \"Volver al listado de productos\" control on the product detail view.",
+    "No observed evidence confirms visibility of the \"Solicitar\" control on the product detail view.",
+    "No observed evidence confirms visibility of the \"Finalizar sesión\" control on the product detail view.",
+    "The expected result \"El cliente visualiza los controles inferiores del detalle.\" cannot be asserted from the provided observed evidence without inventing UI text or selectors."
+  ],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

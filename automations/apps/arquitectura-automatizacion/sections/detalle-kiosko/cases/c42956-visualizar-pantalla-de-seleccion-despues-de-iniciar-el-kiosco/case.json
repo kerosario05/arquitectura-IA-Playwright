@@ -1,0 +1,10 @@
+{
+  "id": "c42956-visualizar-pantalla-de-seleccion-despues-de-iniciar-el-kiosco",
+  "externalId": "C42956",
+  "caseId": 42956,
+  "title": "Visualizar pantalla de seleccion despues de iniciar el kiosco",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-06T12:45:22.481Z"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "preview-002-acceso-publico-al-modulo-de-informacion-de-productos",
+  "externalId": "PREVIEW-002",
+  "caseId": 0,
+  "title": "Acceso público al módulo de Información de productos",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-12T23:44:10.058Z"
+}

@@ -1,0 +1,48 @@
+{
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\nimport { AuthFlow } from '../../../../flows/auth.flow';\nimport { HomePage } from '../../../../pages/home.page';\nimport { OperationsMenuPage } from '../../../../pages/operationsmenu.page';\n\nexport const PROMOTED_SPEC_STRATEGY = 'pom_runtime';\n\ntest('Inicio del flujo autenticado desde transacciones y servicios', async ({ page }) => {\n  test.setTimeout(Number(process.env.PROMOTED_SPEC_TIMEOUT_MS ?? 90000));\n\n  process.env.APP_SLUG = 'arquitectura-automatizacion';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-003';\n  process.env.SCENARIO_TITLE = 'Inicio del flujo autenticado desde transacciones y servicios';\n\n  const appBaseUrl = process.env.APP_BASE_URL;\n  if (!appBaseUrl) {\n    throw new Error('APP_BASE_URL is required');\n  }\n\n  const homePage = new HomePage(page);\n  const operationsMenuPage = new OperationsMenuPage(page);\n  const authFlow = new AuthFlow(page);\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await page.goto(appBaseUrl);\n    await page.waitForLoadState('domcontentloaded');\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 3,\n      target: 'Iniciar',\n      actionIntent: 'start_session',\n      expectedEffect: 'ui_change',\n      sensitive: false,\n      previousStepReplays: [],\n      lastSelectionStep: undefined,\n      expectedOwnerPage: 'HomePage',\n      action: async () => {\n        await homePage.start();\n      }\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 3,\n      description: 'Validar que se muestre \"¿Qué deseas realizar hoy?\".',\n      target: '¿Qué deseas realizar hoy?',\n      assertion: async () => {\n        await expect(page.getByText('¿Qué deseas realizar hoy?', { exact: true })).toBeVisible();\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 4,\n      target: 'transacciones y servicios',\n      actionIntent: 'open_module',\n      expectedEffect: 'auth_gate_start',\n      sensitive: false,\n      previousStepReplays: [],\n      lastSelectionStep: undefined,\n      expectedOwnerPage: 'OperationsMenuPage',\n      action: async () => {\n        await operationsMenuPage.openModule('transacciones y servicios');\n      }\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 2,\n      description: 'Validar que la opción protegida deriva al límite de autenticación.',\n      target: 'auth_gate',\n      assertion: async () => {\n        const detectedStage = await authFlow.detectCurrentStage();\n        expect(detectedStage).toBeTruthy();\n        expect(await authFlow.isStageControlReady()).toBeTruthy();\n      }\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "¿Qué deseas realizar hoy?",
+      "implementation": "await expect(page.getByText('¿Qué deseas realizar hoy?', { exact: true })).toBeVisible();"
+    },
+    {
+      "requirement": "La opción protegida deriva al límite de autenticación.",
+      "implementation": "expect(await authFlow.isStageControlReady()).toBeTruthy();"
+    }
+  ],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "start"
+      ]
+    },
+    {
+      "className": "OperationsMenuPage",
+      "methods": [
+        "openModule"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "appBaseUrl",
+    "homePage",
+    "operationsMenuPage",
+    "authFlow",
+    "promotedRuntime"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

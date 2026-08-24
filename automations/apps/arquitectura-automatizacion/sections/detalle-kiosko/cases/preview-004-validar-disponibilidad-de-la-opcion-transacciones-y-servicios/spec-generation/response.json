@@ -1,0 +1,38 @@
+{
+  "scenarioId": "PREVIEW-004",
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\n\nimport { AuthFlow } from '../../../../flows/auth.flow';\nimport { HomePage } from '../../../../pages/home.page';\n\nexport const PROMOTED_SPEC_STRATEGY = \"pom_runtime\";\n\ntest('Validar disponibilidad de la opción Transacciones y servicios', async ({ page }) => {\n  test.setTimeout(Number(process.env.PROMOTED_SPEC_TIMEOUT_MS ?? 90000));\n  process.env.APP_SLUG = \"arquitectura-automatizacion\";\n  process.env.SECTION_SLUG = \"detalle-kiosko\";\n  process.env.SCENARIO_ID = \"PREVIEW-004\";\n  process.env.SCENARIO_TITLE = \"Validar disponibilidad de la opción Transacciones y servicios\";\n\n  const homePage = new HomePage(page);\n  const authFlow = new AuthFlow(page);\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await page.goto('/');\n    await page.waitForLoadState('domcontentloaded');\n\n    await promotedRuntime.safeReplayContext({\n      stepIndex: 2,\n      description: 'Execute login',\n      sensitive: true,\n      action: async () => {\n        await authFlow.ensureAuthenticated();\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 3,\n      target: 'Iniciar',\n      actionIntent: 'start_session',\n      expectedEffect: 'ui_change',\n      sensitive: false,\n      previousStepReplays: [],\n      lastSelectionStep: undefined,\n      expectedOwnerPage: 'HomePage',\n      action: async () => {\n        await homePage.start();\n      }\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 3,\n      description: 'Opción autenticada disponible desde el selector inicial.',\n      target: 'Transacciones y servicios',\n      assertion: async () => {\n        expect(await authFlow.isTransactionsEntryVisible()).toBe(true);\n      }\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "Opción autenticada disponible desde el selector inicial.",
+      "implementation": "expect(await authFlow.isTransactionsEntryVisible()).toBe(true);"
+    }
+  ],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "start"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "homePage",
+    "authFlow",
+    "promotedRuntime"
+  ],
+  "unresolvedRequirements": [
+    "No observed evidence or registered API was provided to assert the enabled state of \"Transacciones y servicios\" independently from its authenticated availability."
+  ],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

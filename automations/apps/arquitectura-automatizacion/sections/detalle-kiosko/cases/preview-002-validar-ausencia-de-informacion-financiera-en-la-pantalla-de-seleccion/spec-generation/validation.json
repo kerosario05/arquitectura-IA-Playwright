@@ -1,0 +1,62 @@
+{
+  "mode": "ai_hybrid",
+  "provider": "codex",
+  "model": "gpt-5.4",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "invocations": 1,
+  "invocationsConsumed": 1,
+  "durationMs": 51055,
+  "usage": {
+    "inputTokens": 61529,
+    "cachedInputTokens": 46208,
+    "cacheWriteInputTokens": 0,
+    "nonCachedInputTokens": 15321,
+    "outputTokens": 1405,
+    "reasoningOutputTokens": 372,
+    "totalPhysicalTokens": 62934,
+    "durationMs": 39374,
+    "credits": null
+  },
+  "validation": {
+    "schema": "passed",
+    "structure": "failed",
+    "typescript": "passed",
+    "playwrightDiscovery": "passed",
+    "semanticCoverage": "failed",
+    "functionalExecution": "passed"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [],
+  "oracleTypes": [
+    "unsupported_or_unresolved"
+  ],
+  "errors": [
+    "missing_metadata_line:process.env.SCENARIO_TITLE = 'Validar ausencia de información financiera en la pantalla de selección';",
+    "unresolved_requirement:Executable step 1 could not be implemented as an assertion because no backed observable oracle or observed assertion evidence was supplied for \\\"\\u00bfQu\\u00e9 deseas realizar hoy?\\\" and promotion rules forbid inventing visible-text assertions.",
+    "unresolved_requirement:Executable step 2 (login) could not be implemented because the supplied runtime allowlist does not include any permitted login method, no auth flow was provided, and promotion rules forbid inventing runtime or page-object login behavior.",
+    "unresolved_requirement:The expected result could not be asserted because the only observable oracle for \\\"La pantalla inicial solo muestra opciones de direccionamiento sin datos financieros.\\\" is backed=false and no authoritative observed evidence was supplied.",
+    "unresolved_requirement:Executable step 3 could not include its paired post-click assertion because no backed observable oracle or observed assertion evidence was supplied for \\\"transacciones y servicios\\\".",
+    "missing_step_coverage:1",
+    "missing_step_coverage:2",
+    "step_not_implemented_in_spec:2",
+    "expected_result_not_propagated"
+  ],
+  "warnings": [],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

@@ -8,9 +8,15 @@ export type JobSummary = {
   sprintLabel?: string;
   totalStories: number;
   synced: number;
+  syncFailed?: number;
   passed: number;
   failed: number;
+  skipped?: number;
   completed?: number;
+  requested?: number;
+  executed?: number;
+  progressPercent?: number;
+  passRate?: number | null;
   errorMessage?: string;
   testRailRunId?: number;
   testRailRunUrl?: string;
@@ -20,6 +26,24 @@ export type JobSummary = {
   scenarioCount?: number;
   currentCaseIndex?: number;
   totalCases?: number;
+  requestedCases?: number;
+  executedCases?: number;
+  notExecutableCases?: number;
+  caseResults?: Array<{
+    caseId: number;
+    status: "passed" | "failed" | "skipped";
+    completedAt: string;
+    durationMs: number;
+  }>;
+  evidenceInitializationFailures?: number;
+  reasonCode?: string;
+  documentAttempted?: boolean;
+  documentGenerated?: boolean;
+  documentPathPresent?: boolean;
+  documentPath?: string;
+  scenarioEvidenceCount?: number;
+  evidenceResults?: number;
+  documentError?: string;
 };
 
 export type Job = {
@@ -38,6 +62,8 @@ export type Job = {
   logs: string[];
   summary?: JobSummary;
   currentCase?: string | null;
+  currentCaseId?: string | null;
+  currentCaseTitle?: string | null;
   errorMessage?: string;
 };
 
@@ -80,7 +106,7 @@ class JobStore {
       .map((j) => this.serialize(j));
   }
 
-  update(id: string, patch: Partial<Pick<JobInternal, "status" | "startedAt" | "completedAt" | "durationMs" | "exitCode" | "summary" | "process" | "currentCase" | "errorMessage" | "issueKey" | "checklistUrl" | "defectCount">>): void {
+  update(id: string, patch: Partial<Pick<JobInternal, "status" | "startedAt" | "completedAt" | "durationMs" | "exitCode" | "summary" | "process" | "currentCase" | "currentCaseId" | "currentCaseTitle" | "errorMessage" | "issueKey" | "checklistUrl" | "defectCount">>): void {
     const job = this.jobs.get(id);
     if (!job) return;
     Object.assign(job, patch);

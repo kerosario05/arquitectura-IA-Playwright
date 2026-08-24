@@ -1,7 +1,14 @@
 import fs from "fs";
 import path from "path";
 import type { McpScenario } from "../../scenarios/scenario-types";
+import { deriveScenarioRequiredData } from "../../scenarios/mobile-scenario-generator";
 import type { VirtualCase } from "../../types/scenario-preview.types";
+import type { MobileLaunchExecutionParams } from "./mobile-launch-execution-runner";
+import { loadMobileRouteProfile } from "../../mobile/mobile-route-profile";
+import {
+  readMobileExecutionManifest,
+  readMobileExecutionResults,
+} from "./mobile-rerun-artifacts";
 
 const ROOT = path.resolve(__dirname, "..", "..", "..");
 const ARTIFACTS_DIR = path.join(ROOT, ".artifacts", "scenario-preview-runs");
@@ -10,6 +17,7 @@ export type CaseOutcome = { id: string; status: string; failureReason?: string }
 
 export type RerunPrepareResult = {
   ok: true;
+  jobType: "scenario-preview";
   scenarios: McpScenario[];
   selectedCount: number;
   totalCount: number;
@@ -27,6 +35,15 @@ export type RerunPrepareResult = {
     rerunActive?: boolean;
     headed?: boolean;
   };
+} | {
+  ok: true;
+  jobType: "mobile-launch-execution";
+  mobileParams: MobileLaunchExecutionParams;
+  selectedCount: number;
+  totalCount: number;
+  sourceJobId: string;
+  rerunMode: "failed_only" | "all";
+  appSlug: string;
 } | {
   ok: false;
   error: string;
@@ -87,15 +104,112 @@ function loadJobMetadata(sourceDir: string): JobMetadata {
   return {};
 }
 
+function enrichMobileScenariosForRerun(params: MobileLaunchExecutionParams): MobileLaunchExecutionParams {
+  const routeProfile = params.appSlug ? loadMobileRouteProfile(params.appSlug) : null;
+  const scenarios = params.scenarios.map((scenario) => {
+    const derived = deriveScenarioRequiredData(scenario.steps, routeProfile);
+    const mergedByKey = new Map<string, (typeof derived)[number]>();
+    for (const field of scenario.requiredData ?? []) {
+      mergedByKey.set(`${field.kind}:${field.stepIndex}:${field.key}`, field);
+    }
+    for (const field of derived) {
+      const key = `${field.kind}:${field.stepIndex}:${field.key}`;
+      if (!mergedByKey.has(key)) {
+        mergedByKey.set(key, field);
+      }
+    }
+    return {
+      ...scenario,
+      requiredData: Array.from(mergedByKey.values()),
+    };
+  });
+  return {
+    ...params,
+    scenarios,
+  };
+}
+
 export function prepareRerun(
   sourceJobId: string,
   mode: "failed_only" | "all",
+  sourceJobTypeHint?: string,
 ): RerunPrepareResult {
   const sourceDir = path.join(ARTIFACTS_DIR, sourceJobId);
   const previewPath = path.join(sourceDir, "preview-scenarios.json");
 
   if (!fs.existsSync(previewPath)) {
-    return { ok: false, error: "missing_preview_scenarios", message: `Source job ${sourceJobId} has no preview-scenarios.json at ${previewPath}` };
+    const mobileManifest = readMobileExecutionManifest(sourceJobId);
+    if (!mobileManifest) {
+      if (sourceJobTypeHint === "mobile-launch-execution") {
+        return {
+          ok: false,
+          error: "missing_mobile_rerun_manifest",
+          message: `Source mobile job ${sourceJobId} has no mobile execution manifest for rerun.`,
+        };
+      }
+      return {
+        ok: false,
+        error: "missing_preview_scenarios",
+        message: `Source job ${sourceJobId} has no preview-scenarios.json at ${previewPath}`,
+      };
+    }
+
+    const enrichedMobileParams = enrichMobileScenariosForRerun(mobileManifest.params);
+    const allScenarios = enrichedMobileParams.scenarios;
+    if (!Array.isArray(allScenarios) || allScenarios.length === 0) {
+      return {
+        ok: false,
+        error: "empty_mobile_scenarios",
+        message: `Mobile rerun manifest for source job ${sourceJobId} contains no scenarios.`,
+      };
+    }
+
+    let selectedScenarios = allScenarios;
+    if (mode === "failed_only") {
+      const scenarioResults = readMobileExecutionResults(sourceJobId);
+      if (!scenarioResults) {
+        return {
+          ok: false,
+          error: "missing_mobile_results",
+          message: `Source mobile job ${sourceJobId} has no mobile execution results. Cannot determine failed scenarios. Use mode=all instead.`,
+        };
+      }
+      const failedScenarioIds = new Set(
+        scenarioResults
+          .filter((entry) => entry.status === "failed")
+          .map((entry) => entry.scenarioId),
+      );
+      selectedScenarios = allScenarios.filter((scenario) => failedScenarioIds.has(scenario.scenarioId));
+      if (selectedScenarios.length === 0) {
+        return {
+          ok: false,
+          error: "no_failures",
+          message: `No failed mobile scenarios found in source job ${sourceJobId}. All ${allScenarios.length} scenarios passed.`,
+        };
+      }
+    }
+
+    const dataOverrides = enrichedMobileParams.dataOverrides
+      ? Object.fromEntries(
+        Object.entries(enrichedMobileParams.dataOverrides)
+          .filter(([scenarioId]) => selectedScenarios.some((scenario) => scenario.scenarioId === scenarioId)),
+      )
+      : undefined;
+
+    return {
+      ok: true,
+      jobType: "mobile-launch-execution",
+      mobileParams: {
+        ...enrichedMobileParams,
+        scenarios: selectedScenarios,
+        dataOverrides,
+      },
+      selectedCount: selectedScenarios.length,
+      totalCount: allScenarios.length,
+      sourceJobId,
+      rerunMode: mode,
+      appSlug: enrichedMobileParams.appSlug,
+    };
   }
 
   let allScenarios: VirtualCase[];
@@ -160,6 +274,7 @@ export function prepareRerun(
 
   return {
     ok: true,
+    jobType: "scenario-preview",
     scenarios,
     selectedCount: scenarios.length,
     totalCount: allScenarios.length,

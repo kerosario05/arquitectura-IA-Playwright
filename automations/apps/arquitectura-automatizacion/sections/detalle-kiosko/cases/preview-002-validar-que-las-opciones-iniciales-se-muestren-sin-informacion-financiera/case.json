@@ -1,0 +1,10 @@
+{
+  "id": "preview-002-validar-que-las-opciones-iniciales-se-muestren-sin-informacion-financiera",
+  "externalId": "PREVIEW-002",
+  "caseId": 0,
+  "title": "Validar que las opciones iniciales se muestren sin información financiera",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-05T21:44:28.099Z"
+}

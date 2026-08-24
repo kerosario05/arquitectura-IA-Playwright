@@ -22,6 +22,17 @@ import {
 import { loadOrCreateKnowledgeContext, buildKnowledgeContextForScenarioGeneration, type KnowledgeContext } from "./knowledge-context-resolver";
 import { detectHuIntent, isCatalogListingIntent, isTransactionalDocumentIntent, type HuIntentDetection } from "./hu-intent-classifier";
 import { detectOptionFlows, type OptionFlow } from "./hu-scope-guard";
+import {
+  classifySemanticObject,
+  resolveFunctionalObject,
+  validateSemanticScenarioTitle,
+  repairSemanticScenarioTitle,
+  resolveBackedObjectForTitle,
+  inferFunctionalAction,
+  mapBusinessEntityLabel,
+  normalizeObjText,
+  type ObjectResolutionContext,
+} from "./functional-object-resolver";
 import type {
   ScenarioPreviewRequest,
   ScenarioPreviewResponse,
@@ -116,15 +127,20 @@ export type BranchRouteCandidate = {
   clickTargets: string[];
   accessIntent: BranchAccessIntent;
   source: "knowledge" | "hu_route";
+  destination?: string;
+  destinationSignals?: string[];
+  destinationUrl?: string;
 };
 
 export type BranchCoverageCheck = {
   required: number;
   covered: number;
   missing: string[];
+  pending: string[];
   unexpected: string[];
   requiredBranchIds: string[];
   coveredBranchIds: string[];
+  pendingBranchIds: string[];
   insufficientEvidenceBranchIds?: string[];
   reasonCode?: "branch_extraction_mismatch" | "coverage_requirements_unavailable";
   valid: boolean;
@@ -682,6 +698,9 @@ function buildBranchRouteCandidates(
         clickTargets: hint.clickTargets,
         accessIntent,
         source: "knowledge",
+        destination: (hint as { destination?: string }).destination,
+        destinationSignals: (hint as { destinationSignals?: string[] }).destinationSignals,
+        destinationUrl: (hint as { destinationUrl?: string }).destinationUrl,
       });
     }
   }
@@ -712,6 +731,8 @@ function evaluateBranchRouteCompatibility(
 
   const routeText = candidate.clickTargets.join(" ");
   const routeTokenSet = new Set(nonGenericTokens(routeText));
+  const destinationEvidenceText = [candidate.destination, ...(candidate.destinationSignals ?? [])].filter(Boolean).join(" ");
+  const destinationTokenSet = new Set(nonGenericTokens(destinationEvidenceText));
   const branchActionTokens = new Set(nonGenericTokens([branch.sourceLabel ?? "", branch.actionIntent].join(" ")));
   const branchDestinationTokens = new Set(nonGenericTokens(branch.expectedDestination ?? ""));
   const scenarioActionIdentities = collectScenarioActionIdentities(scenario);
@@ -731,7 +752,7 @@ function evaluateBranchRouteCompatibility(
 
   let destinationOverlap = 0;
   for (const token of branchDestinationTokens) {
-    if (routeTokenSet.has(token)) destinationOverlap++;
+    if (destinationTokenSet.has(token)) destinationOverlap++;
   }
   const matchesExpectedDestination = branchDestinationTokens.size === 0 ? true : destinationOverlap > 0;
 
@@ -773,6 +794,68 @@ function uniqueClickPrefixFromCandidate(candidate: BranchRouteCandidate): string
     prefix.push(`Clic en "${target}".`);
   }
   return prefix;
+}
+
+function extractClickTargetLabel(step: string): string | undefined {
+  const match = step.match(/^Clic en "(.+)"\.?$/i);
+  return match?.[1]?.trim();
+}
+
+function applicableEntryTargets(entrySteps: Array<{ action?: string; target?: string; when?: string }>): string[] {
+  const targets: string[] = [];
+  for (const entryStep of entrySteps) {
+    if (entryStep.action !== "click") continue;
+    if (!entryStep.target || !entryStep.target.trim()) continue;
+    const when = (entryStep.when ?? "").trim().toLowerCase();
+    if (when && when !== "before_first_functional_step") continue;
+    targets.push(entryStep.target.trim());
+  }
+  return targets;
+}
+
+export function applyCanonicalRoutePrefix(
+  steps: string[],
+  routeClickTargets: string[],
+  entrySteps: Array<{ action?: string; target?: string; when?: string }>,
+): { steps: string[]; changed: boolean } {
+  const normalize = (value: string) => normalizeBranchText(value);
+  const existingClickByTarget = new Map<string, string>();
+  for (const step of steps) {
+    const target = extractClickTargetLabel(step);
+    if (!target) continue;
+    const normalizedTarget = normalize(target);
+    if (!normalizedTarget || existingClickByTarget.has(normalizedTarget)) continue;
+    existingClickByTarget.set(normalizedTarget, step);
+  }
+
+  const canonicalTargets: string[] = [];
+  const seenTargets = new Set<string>();
+  for (const target of [...applicableEntryTargets(entrySteps), ...routeClickTargets]) {
+    const normalizedTarget = normalize(target);
+    if (!normalizedTarget || seenTargets.has(normalizedTarget)) continue;
+    seenTargets.add(normalizedTarget);
+    canonicalTargets.push(target);
+  }
+
+  if (canonicalTargets.length === 0) {
+    return { steps, changed: false };
+  }
+
+  const canonicalPrefix = canonicalTargets.map((target) => {
+    const normalizedTarget = normalize(target);
+    const existing = existingClickByTarget.get(normalizedTarget);
+    return existing ?? `Clic en "${target}".`;
+  });
+
+  const remainingSteps = steps.filter((step) => {
+    const target = extractClickTargetLabel(step);
+    if (!target) return true;
+    return !seenTargets.has(normalize(target));
+  });
+
+  const rebuilt = [...canonicalPrefix, ...remainingSteps];
+  const changed = rebuilt.length !== steps.length || rebuilt.some((step, index) => step !== steps[index]);
+  return { steps: changed ? rebuilt : steps, changed };
 }
 
 function scenarioIdentity(scenario: Pick<McpScenario, "scenarioId" | "sourceIssueKey" | "title">): string {
@@ -862,7 +945,7 @@ function hasBranchActionAndDestination(
 
 type DestinationEvidenceAssessment = {
   destinationMatched: boolean;
-  destinationEvidenceKind: "route" | "heading" | "marker" | "auth_gate" | "structured_metadata" | "none";
+  destinationEvidenceKind: "route" | "heading" | "marker" | "auth_gate" | "auth_gate_pending_discovery" | "structured_metadata" | "none";
   destinationEvidenceSource: string;
 };
 
@@ -881,6 +964,23 @@ function evaluateScenarioDestinationEvidence(
   const isAuthBoundary = isAuthStartBranchDestination(requiredBranch);
   const hasAuthBoundary = isAuthBoundary && hasObservableAuthBoundary(assertionTargets, scenario);
   const routeId = routeCompatibility?.routeId ?? "none";
+
+  // Auth intent gate_observation: destination is an auth gate pending Discovery validation.
+  // Do not depend on textual heuristic; authority is scenario.authIntent.
+  if (scenario.authIntent === "gate_observation") {
+    if (hasAuthBoundary) {
+      return {
+        destinationMatched: true,
+        destinationEvidenceKind: "auth_gate",
+        destinationEvidenceSource: "observable_auth_boundary",
+      };
+    }
+    return {
+      destinationMatched: false,
+      destinationEvidenceKind: "auth_gate_pending_discovery",
+      destinationEvidenceSource: "auth_intent_gate_observation_pending_discovery",
+    };
+  }
 
   // If route compatibility explicitly failed by destination, keep it as definitive negative.
   if (routeCompatibility?.compatible === false && routeCompatibility.reason === "destination_mismatch") {
@@ -941,9 +1041,9 @@ function evaluateScenarioBranchCoverageSignals(
   hasDestination: boolean;
   hasRouteEvidence: boolean;
   complete: boolean;
-  destinationEvidenceKind: "route" | "heading" | "marker" | "auth_gate" | "structured_metadata" | "none";
+  destinationEvidenceKind: "route" | "heading" | "marker" | "auth_gate" | "auth_gate_pending_discovery" | "structured_metadata" | "none";
   destinationEvidenceSource: string;
-  reasonCode: "ok" | "branch_action_mismatch" | "destination_mismatch" | "access_mismatch" | "route_evidence_insufficient";
+  reasonCode: "ok" | "branch_action_mismatch" | "destination_mismatch" | "destination_pending_discovery" | "access_mismatch" | "route_evidence_insufficient";
 } {
   const associationMatched = scenario.functionalBranch?.branchId === requiredBranch.branchId;
   const accessCompatible =
@@ -959,12 +1059,15 @@ function evaluateScenarioBranchCoverageSignals(
   const hasRouteEvidence = !hasIntermediateFailure
     && scenario.nonExecutableCriteria !== "route_evidence_insufficient"
     && (scenario.mcpExecutable !== false || routeCompatible);
+  const destinationPendingDiscovery = destinationEvidence.destinationEvidenceKind === "auth_gate_pending_discovery";
   const reasonCode = !accessCompatible
     ? "access_mismatch"
     : !hasAction
       ? "branch_action_mismatch"
       : !hasDestination
-        ? "destination_mismatch"
+        ? destinationPendingDiscovery
+          ? "destination_pending_discovery"
+          : "destination_mismatch"
         : !hasRouteEvidence
           ? "route_evidence_insufficient"
           : "ok";
@@ -1440,6 +1543,7 @@ export function computeBranchCoverageCheck(
   const requiredBranchIds = Array.from(new Set(requiredBranches.map((branch) => branch.branchId)));
   const requiredById = new Map(requiredBranches.map((branch) => [branch.branchId, branch]));
   const coveredBranchIds = new Set<string>();
+  const pendingBranchIds = new Set<string>();
 
   if (requiredBranchIds.length === 0) {
     if (automatableOptionFlowsCount > 0) {
@@ -1447,9 +1551,11 @@ export function computeBranchCoverageCheck(
         required: 0,
         covered: 0,
         missing: [],
+        pending: [],
         unexpected: [],
         requiredBranchIds: [],
         coveredBranchIds: [],
+        pendingBranchIds: [],
         reasonCode: "branch_extraction_mismatch",
         valid: false,
       };
@@ -1458,9 +1564,11 @@ export function computeBranchCoverageCheck(
       required: 0,
       covered: 0,
       missing: [],
+      pending: [],
       unexpected: [],
       requiredBranchIds: [],
       coveredBranchIds: [],
+      pendingBranchIds: [],
       valid: true,
     };
   }
@@ -1476,11 +1584,14 @@ export function computeBranchCoverageCheck(
     const coverageSignals = evaluateScenarioBranchCoverageSignals(scenario, requiredBranch);
     if (coverageSignals.complete) {
       coveredBranchIds.add(branchId);
+    } else if (coverageSignals.reasonCode === "destination_pending_discovery") {
+      pendingBranchIds.add(branchId);
     }
   }
 
   const coveredRequired = requiredBranchIds.filter((branchId) => coveredBranchIds.has(branchId));
-  const missing = requiredBranchIds.filter((branchId) => !coveredBranchIds.has(branchId));
+  const pending = requiredBranchIds.filter((branchId) => pendingBranchIds.has(branchId) && !coveredBranchIds.has(branchId));
+  const missing = requiredBranchIds.filter((branchId) => !coveredBranchIds.has(branchId) && !pendingBranchIds.has(branchId));
   const unexpected = Array.from(coveredBranchIds).filter((branchId) => !requiredById.has(branchId));
   const validByCoverage = missing.length === 0;
   const valid = validByCoverage && coverageRequirementsAvailable;
@@ -1489,9 +1600,11 @@ export function computeBranchCoverageCheck(
     required: requiredBranchIds.length,
     covered: coveredRequired.length,
     missing,
+    pending,
     unexpected,
     requiredBranchIds,
     coveredBranchIds: coveredRequired,
+    pendingBranchIds: Array.from(pendingBranchIds),
     reasonCode: coverageRequirementsAvailable ? undefined : "coverage_requirements_unavailable",
     valid,
   };
@@ -1573,7 +1686,7 @@ export function reclassifyScenariosByBranchCoverage(
       destinationEvidenceSource: coverageSignals.destinationEvidenceSource,
       reasonCode,
     };
-    if (coverageSignals.complete || !missingBranchIds.has(branchId)) {
+    if (coverageSignals.complete || !missingBranchIds.has(branchId) || reasonCode === "destination_pending_discovery") {
       retainedExecutable.push(scenario);
       continue;
     }
@@ -2095,6 +2208,7 @@ async function generateScenarioPreviewForIssue(
       huModel,
       scenarioPlan,
       functionalBranchesForAi,
+      { launchId: req.launchId },
     );
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -2772,26 +2886,11 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
         };
       }
 
-      const requiredPrefix = selectedCandidate ? uniqueClickPrefixFromCandidate(selectedCandidate) : [];
-      if (requiredPrefix.length > 0) {
-        const prefixTargets = new Set<string>();
-        for (const prefixStep of requiredPrefix) {
-          const clickMatch = prefixStep.match(/Clic en "(.+)"\./i);
-          if (clickMatch?.[1]) prefixTargets.add(normLabel(clickMatch[1]));
-        }
-        existingSteps = existingSteps.filter((step) => {
-          const clickMatch = step.match(/^Clic en "(.+)"\.?$/i);
-          if (!clickMatch?.[1]) return true;
-          return !prefixTargets.has(normLabel(clickMatch[1]));
-        });
-
-        const existingNorm = new Set(existingSteps.map(normLabel));
-        const missingPrefix = requiredPrefix.filter((prefixStep) => {
-          const clickMatch = prefixStep.match(/Clic en "(.+)"\./i);
-          return clickMatch?.[1] ? !existingNorm.has(normLabel(clickMatch[1])) : false;
-        });
-        if (missingPrefix.length > 0) {
-          existingSteps = [...missingPrefix, ...existingSteps];
+      const routePrefixTargets = selectedCandidate ? selectedCandidate.clickTargets : [];
+      if (routePrefixTargets.length > 0 || newEntrySteps.length > 0) {
+        const canonicalPrefixResult = applyCanonicalRoutePrefix(existingSteps, routePrefixTargets, newEntrySteps);
+        if (canonicalPrefixResult.changed) {
+          existingSteps = canonicalPrefixResult.steps;
           modified = true;
         }
       }
@@ -3471,6 +3570,7 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
     blockedScenarios,
     warnings,
     catalogDiagnostics,
+    generationDiagnostics: generationResult.generationDiagnostics,
     // Backward-compatible: same adaptive scenarios for launch payload
     adaptiveScenarios,
     coverage: (() => {
@@ -3955,18 +4055,24 @@ function generateRoutePendingScenarios(
   const cleanScenarios: typeof scenarios = [];
   const be = huModel?.businessEntity ?? {};
   const fallbackTerm = (be.singularLabel || be.normalizedKey || "elemento");
+  const titleContext: ObjectResolutionContext = {
+    huModel,
+    entityTerm: (be.singularLabel || be.normalizedKey || "elemento"),
+    featureName: huModel?.featureName,
+  };
 
   for (const sc of scenarios) {
-    const result = validateAndRepairScenarioTitle(sc.title ?? "", fallbackTerm);
+    const result = validateAndRepairScenarioTitle(sc.title ?? "", fallbackTerm, titleContext);
     if (result.rejected) {
       console.log(`[scenario-title-contract] rejected reason=unrepairable_title title="${sc.title?.slice(0,80)}"`);
       titlesRejected++;
       continue;
     }
     if (result.repaired) {
-      console.log(`[scenario-title-contract] repaired reason=title_contract_violation old="${sc.title?.slice(0,60)}" new="${result.title.slice(0,60)}"`);
+      console.log(`[scenario-title-contract] repaired reason=title_contract_violation old="${sc.title?.slice(0,60)}" new="${result.title.slice(0,60)}" object="${result.object ?? ""}" objectSource=${result.objectSource ?? "none"}`);
       titlesFixed++;
     } else {
+      console.log(`[scenario-title-contract] valid title="${result.title.slice(0,60)}" object="${result.object ?? ""}" objectSource=${result.objectSource ?? "none"}`);
       titlesPassed++;
     }
     cleanScenarios.push({ ...sc, title: result.title });
@@ -4486,8 +4592,12 @@ function singularizeWord(w: string): string {
 }
 
 /** Unified title contract — validates and repairs any scenario title. */
-function validateAndRepairScenarioTitle(title: string, fallbackTerm: string): { title: string; repaired: boolean; rejected: boolean } {
-  if (!title) return { title, repaired: false, rejected: false };
+function validateAndRepairScenarioTitle(
+  title: string,
+  fallbackTerm: string,
+  context?: ObjectResolutionContext,
+): { title: string; repaired: boolean; rejected: boolean; valid: boolean; reason?: string; object?: string | null; objectSource?: string | null } {
+  if (!title) return { title, repaired: false, rejected: false, valid: false, reason: "empty_title", object: null, objectSource: null };
   let t = title;
   let repaired = false;
 
@@ -4523,15 +4633,29 @@ function validateAndRepairScenarioTitle(title: string, fallbackTerm: string): { 
     repaired = true;
   }
 
+  // ── Semantic contract layer: action + valid backed functional object + no dangling filler ──
+  const semantic = validateSemanticScenarioTitle(t, context);
+  if (!semantic.valid) {
+    const repair = repairSemanticScenarioTitle(t, context);
+    if (repair.repaired) {
+      console.log(`[scenario-title-repair] source=deterministic reason=invalid_object oldTitle="${title}" newTitle="${repair.title}" objectSource=${repair.objectSource ?? "none"}`);
+      t = repair.title;
+      repaired = true;
+    } else {
+      console.log(`[scenario-title-contract] invalid reason=${semantic.reason ?? "unknown"} title="${title}" object="${semantic.object ?? ""}" objectSource=${semantic.objectSource ?? "none"}`);
+      return { title: t, repaired, rejected: true, valid: false, reason: semantic.reason, object: semantic.object, objectSource: semantic.objectSource };
+    }
+  }
+
   // Apply title case only to the FIRST letter (preserves entity casing within)
   t = toScenarioTitleCase(t);
   if (t !== title) repaired = true;
 
   // Final check: if STILL failing, reject
   const FINAL_CHECK = /[–—]|\s-\s|_[a-z]+_[a-z]+|\s(flow|field|message|token|data_entry_fields)$/i;
-  if (FINAL_CHECK.test(t) || t.length > 100) return { title: t, repaired, rejected: true };
+  if (FINAL_CHECK.test(t) || t.length > 100) return { title: t, repaired, rejected: true, valid: false, reason: "syntactic_violation", object: semantic.object, objectSource: semantic.objectSource };
 
-  return { title: t, repaired, rejected: false };
+  return { title: t, repaired, rejected: false, valid: true, reason: undefined, object: semantic.object, objectSource: semantic.objectSource };
 }
 
 /** Lowercase entity label for natural casing in titles — avoids hardcoded entity lists. */
@@ -4882,14 +5006,46 @@ function buildPlanBasedScenarios(
     }
 
 
+    // Resolve the best validated business object for scenario titles.
+    // Priority: featureName → entity → real field → selectable → warning. Skips buttons
+    // (action labels like "Continuar" are structural, not flow objects).
+    const resolvePlanTitleObject = (
+      mh: any, featureNameCandidate: string, entityCandidate: string,
+    ): { object: string; source: string; backed: boolean } | null => {
+      const candidates: Array<{ value: string; source: string }> = [];
+      if (featureNameCandidate && classifySemanticObject(featureNameCandidate).valid) candidates.push({ value: featureNameCandidate, source: "featureName" });
+      if (entityCandidate && classifySemanticObject(entityCandidate).valid && !/operacion|elemento|producto/.test(normalizeObjText(entityCandidate))) candidates.push({ value: entityCandidate, source: "entity" });
+      for (const f of (mh?.requiredFields ?? [])) {
+        if (typeof f === "string" && classifySemanticObject(f).valid && !INTERNAL_IDS.has(f.toLowerCase())) candidates.push({ value: f, source: "field" });
+      }
+      for (const e of (mh?.selectableEntities ?? [])) {
+        const label = mapBusinessEntityLabel(String(e));
+        if (classifySemanticObject(label).valid) candidates.push({ value: label, source: "selectable" });
+      }
+      for (const w of (mh?.visibleWarnings ?? [])) {
+        if (typeof w === "string" && classifySemanticObject(w).valid) candidates.push({ value: w, source: "warning" });
+      }
+      const picked = candidates.find((c) => c.source !== "selectable") ?? candidates[0];
+      if (!picked) return null;
+      return { object: picked.value, source: picked.source, backed: true };
+    };
+
     // ── Title builder: produces business-readable Spanish, no variant IDs ──
-    const feat = featureName;
     const entity = resolveSelectableEntityLabel();
+    const titleObject = resolvePlanTitleObject(m, featureName, entity);
+    const feat = titleObject?.object ?? "la operacion";
+    console.log(`[functional-object] requirement=feature object="${feat}" source=${titleObject?.source ?? "none"} backed=${titleObject?.backed ?? false}`);
+    const requiredFieldsObj = (m?.requiredFields ?? []).find(
+      (f: any) => typeof f === "string" && classifySemanticObject(f).valid && !INTERNAL_IDS.has(f.toLowerCase()),
+    );
+    const requiredFieldsTitle = requiredFieldsObj
+      ? `Completar datos requeridos de ${toTitleEntityLabel(requiredFieldsObj)}`
+      : `Completar datos requeridos de ${feat}`;
     const scopes: Record<string, string> = {
       happy_path: `Ejecutar flujo completo de ${feat}`,
       selection_flow: `Seleccionar ${entity} para generar ${feat}`,
       multi_selection_flow: `Seleccionar multiples ${entity}s para ${feat}`,
-      required_fields_flow: `Completar datos requeridos para generar ${feat}`,
+      required_fields_flow: requiredFieldsTitle,
       search_flow: `Buscar ${entity} para ${feat}`,
       dropdown_selection_flow: `Seleccionar opcion de ${feat}`,
       preview_review_flow: `Revisar vista previa de ${feat}`,
@@ -5042,10 +5198,10 @@ function buildPlanBasedScenarios(
       switch (v) {
         case "happy_path":
           if (m?.visibleButtons?.length) steps.push(`Clic en "${m.visibleButtons[0]}".`);
-          else if (m?.primaryAction) steps.push(`${m.primaryAction} ${m?.featureName ?? ""}.`);
+          else if (m?.primaryAction) steps.push(`${m.primaryAction} ${feat}.`);
           if (m?.visibleWarnings?.length) steps.push(`Validar que se muestre "${m.visibleWarnings[0]}".`);
           if (m?.confirmationSignals || m?.visibleButtons?.includes("Confirmar")) steps.push('Clic en "Confirmar".');
-          steps.push(`Validar que ${m?.featureName ?? "la operacion"} se complete correctamente.`);
+          steps.push(`Validar que ${feat} se complete correctamente.`);
           expected = `El flujo de ${feat} se completa exitosamente.`;
           break;
 
@@ -5324,6 +5480,8 @@ function buildPlanBasedScenarios(
     id: string; sourceText: string; category: string; automatable: boolean; required: boolean;
     coveredBy: Array<{ scenarioId: string; evidenceSteps: number[]; confidence: number }>;
     status: string; reasonCode?: string; optionalityEvidence?: string;
+    originalText?: string; normalizedText?: string; action?: string; source?: string; uiEvidence?: string;
+    functionalObject?: string | null; functionalObjectSource?: string | null; functionalObjectBacked?: boolean;
   }> = [];
   // Optionality: only mark required=false with explicit evidence
   const isExplicitlyOptional = (t: string): { isOptional: boolean; evidence: string } => {
@@ -5332,28 +5490,40 @@ function buildPlanBasedScenarios(
     return { isOptional: false, evidence: "" };
   };
   let reqIdx = 0;
+  const mkReq = (sourceText: string, category: string, source: string, uiEvidence: string, required = true, automatable = true) => {
+    const originalText = sourceText;
+    const normalizedText = originalText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return {
+      id: `R${++reqIdx}`, sourceText, category, automatable, required,
+      coveredBy: [], status: "uncovered",
+      originalText, normalizedText,
+      action: inferFunctionalAction(originalText),
+      source, uiEvidence,
+      optionalityEvidence: undefined as string | undefined,
+    };
+  };
 
   // From huModel fields with source text
   for (const f of (huModel?.requiredFields ?? [])) {
     const ft = String(f);
     if (!["data_entry_fields","data_entry","required_fields","fields","generic_field","recipient","rnc","date","amount","currency","period","reason","motivo"].includes(ft)) {
-      coverageReqs.push({ id: `R${++reqIdx}`, sourceText: ft, category: "input_field", automatable: true, required: true, coveredBy: [], status: "uncovered" });
+      coverageReqs.push(mkReq(ft, "input_field", "requiredFields", "requiredFields"));
     }
   }
   for (const e of (huModel?.selectableEntities ?? [])) {
-    coverageReqs.push({ id: `R${++reqIdx}`, sourceText: String(e), category: "selection", automatable: true, required: true, coveredBy: [], status: "uncovered" });
+    coverageReqs.push(mkReq(String(e), "selection", "selectableEntities", "selectableEntities"));
   }
   for (const b of (huModel?.visibleButtons ?? [])) {
-    coverageReqs.push({ id: `R${++reqIdx}`, sourceText: String(b), category: "button", automatable: true, required: true, coveredBy: [], status: "uncovered" });
+    coverageReqs.push(mkReq(String(b), "button", "visibleButtons", "visibleButtons"));
   }
   for (const w of (huModel?.visibleWarnings ?? [])) {
-    coverageReqs.push({ id: `R${++reqIdx}`, sourceText: String(w).slice(0, 60), category: "warning", automatable: true, required: true, coveredBy: [], status: "uncovered" });
+    coverageReqs.push(mkReq(String(w).slice(0, 60), "warning", "visibleWarnings", "visibleWarnings"));
   }
   for (const obl of (huModel?.uiObligations ?? [])) {
     // Filter internal tags — only create requirements for concrete UI obligations, not structural hints
     const internalTags = /_screen$|_field$|_selection$|_button$|_flow$|_message$|_data$|_warning$/i;
     if (!internalTags.test(String(obl))) {
-      coverageReqs.push({ id: `R${++reqIdx}`, sourceText: String(obl), category: "obligation", automatable: true, required: true, coveredBy: [], status: "uncovered" });
+      coverageReqs.push(mkReq(String(obl), "obligation", "uiObligations", "uiObligations"));
     }
   }
 
@@ -5366,7 +5536,9 @@ function buildPlanBasedScenarios(
       if (cleaned.length > 10 && !/^(?:criterio|requisito|escenario|dado|cuando|entonces)/i.test(cleaned)) {
         const cat = /validar|mostrar|visualizar|seleccionar|ingresar/i.test(cleaned) ? "ui_validation" : "acceptance_criteria";
         const opt = isExplicitlyOptional(cleaned);
-        coverageReqs.push({ id: `R${++reqIdx}`, sourceText: cleaned.slice(0, 100), category: cat, automatable: /validar|mostrar|seleccionar|click|ingresar/i.test(cleaned), required: !opt.isOptional, coveredBy: [], status: "uncovered", optionalityEvidence: opt.evidence || undefined });
+        const req = mkReq(cleaned.slice(0, 100), cat, "acceptanceCriteria", "acceptanceCriteria", !opt.isOptional, /validar|mostrar|seleccionar|click|ingresar/i.test(cleaned));
+        req.optionalityEvidence = opt.evidence || undefined;
+        coverageReqs.push(req);
       }
     }
   }
@@ -5449,27 +5621,28 @@ function buildPlanBasedScenarios(
     // Semantic grouping: isolate requirements without object, classify action precisely
     const gapGroups: Map<string, { reqs: typeof uncoveredReqs; action: string; object: string }> = new Map();
     for (const r of uncoveredReqs) {
-      const t = r.sourceText.toLowerCase();
       // Precise action taxonomy — no "validar" fallback
-      const action = /navegar|ir\s+a|acceder\s+a/i.test(t) ? "navigate" :
-                     /seleccionar|elegir|escoger/i.test(t) ? "select" :
-                     /ingresar|completar|llenar|digitar/i.test(t) ? "fill" :
-                     /buscar|consultar|filtrar/i.test(t) ? "search" :
-                     /enviar|procesar|ejecutar/i.test(t) ? "submit" :
-                     /confirmar|aceptar/i.test(t) ? "confirm" :
-                     /cancelar|rechazar/i.test(t) ? "cancel" :
-                     /volver|regresar|retornar/i.test(t) ? "return" :
-                     /descargar/i.test(t) ? "download" :
-                     /exportar/i.test(t) ? "export" :
-                     /generar/i.test(t) ? "generate" :
-                     /validar|verificar|mostrar|visualizar/i.test(t) ? "validate" : "unknown";
-      // Extract concrete object — if empty, isolate the requirement
-      const objMatch = t.match(/(?:de\s+la\s+|del\s+|de\s+las?\s+|de\s+los?\s+)?([a-záéíóúñ]{4,}(?:\s+[a-záéíóúñ]{3,})?)\s*$/);
-      const object = objMatch?.[1]?.trim() || "";
+      const action = inferFunctionalAction(r.sourceText);
+      // Resolve the functional object BEFORE deciding there is none: original requirement,
+      // huModel fields/buttons/selectables/warnings and requirement noun phrase are all backed sources.
+      const resolved = resolveFunctionalObject(
+        { id: r.id, sourceText: r.sourceText, originalText: (r as any).originalText ?? r.sourceText, action, category: r.category },
+        { huModel, entityTerm, featureName },
+      );
+      const object = resolved.object ?? "";
+      const objectSource = resolved.source;
+      const backed = resolved.backed;
+      (r as any).functionalObject = object || null;
+      (r as any).functionalObjectSource = objectSource;
+      (r as any).functionalObjectBacked = backed;
+      if (object) {
+        console.log(`[functional-object] requirement=${r.id} object="${object}" source=${objectSource} backed=${backed}`);
+      } else {
+        console.log(`[coverage-gap] isolated requirement=${r.id} reason=missing_object action=${action}`);
+      }
       const key = object ? `${r.category}:${action}:${object}` : `${r.category}:${action}:isolated:${r.id}`;
       if (!gapGroups.has(key)) gapGroups.set(key, { reqs: [], action, object });
       gapGroups.get(key)!.reqs.push(r);
-      if (!object) console.log(`[coverage-gap] isolated requirement=${r.id} reason=missing_object action=${action}`);
     }
 
     console.log(`[coverage-repair] iteration=${iter} gaps=${uncoveredReqs.length} groups=${gapGroups.size}`);
@@ -5492,7 +5665,7 @@ function buildPlanBasedScenarios(
       for (const r of reqs) {
         if (r.category === "input_field" || r.category === "acceptance_criteria") {
           for (const f of ((huModel?.requiredFields ?? []) as string[])) {
-            if (!["data_entry_fields","data_entry","recipient","rnc"].includes(f)) {
+            if (!["data_entry_fields","data_entry","recipient","rnc"].includes(f) && classifySemanticObject(f).valid) {
               targets.push({ value: f, source: "requiredFields", compatible: action === "fill" || action === "validate" });
             }
           }
@@ -5513,7 +5686,7 @@ function buildPlanBasedScenarios(
           // Resolve targets by action, not just visibleWarnings
           if (action === "validate") {
             for (const w of (huModel?.visibleWarnings ?? [])) {
-              if (typeof w === "string" && w.length > 3 && w.length < 80)
+              if (typeof w === "string" && w.length > 3 && w.length < 80 && classifySemanticObject(w).valid)
                 targets.push({ value: w, source: "visibleWarnings", compatible: true });
             }
             for (const b of (huModel?.visibleButtons ?? [])) {
@@ -5552,12 +5725,22 @@ function buildPlanBasedScenarios(
         continue;
       }
 
-      // Build title: only from action + object + HU-detected entity, no foreign concepts
-      const firstTarget = compatibleTargets[0]?.value || object;
+      // Build title: only from action + a validated business object, no foreign concepts
+      const objectCandidates = [object, compatibleTargets[0]?.value].filter(
+        (x): x is string => !!x && classifySemanticObject(x).valid,
+      );
+      const titleTarget = objectCandidates[0] ?? "";
+      if (!titleTarget) {
+        for (const r of reqs) {
+          r.status = "blocked";
+          (r as any).reasonCode = "invalid_functional_object";
+        }
+        console.log(`[coverage-gap] blocked group=${key} reason=invalid_functional_object object="${object || compatibleTargets[0]?.value || ""}"`);
+        continue;
+      }
       const huTokens = new Set([...(huModel?.selectableEntities ?? []).map((e: any) => toSelectionEntity(String(e))),
         ...((huModel?.visibleButtons ?? []) as string[]).slice(0, 5),
         entityTerm, object].map((s: string) => s.toLowerCase()));
-      const titleTarget = huTokens.has(firstTarget.toLowerCase()) ? firstTarget : (object || firstTarget);
       const title = action === "validate" ? `Validar ${titleTarget}` :
                     action === "select" ? `Seleccionar ${titleTarget}` :
                     action === "fill" ? `Completar ${titleTarget}` :
@@ -5766,18 +5949,24 @@ function buildPlanBasedScenarios(
   let titleFailed = 0;
   const titleClean: typeof scenarios = [];
   const titleFallback = (huModel?.businessEntity as any)?.singularLabel || resolveSelectableEntityLabel();
+  const titleContext: ObjectResolutionContext = {
+    huModel,
+    entityTerm: titleFallback,
+    featureName: huModel?.featureName,
+  };
 
   for (const sc of scenarios) {
-    const result = validateAndRepairScenarioTitle(sc.title ?? "", titleFallback);
+    const result = validateAndRepairScenarioTitle(sc.title ?? "", titleFallback, titleContext);
     if (result.rejected) {
       console.log(`[scenario-title-contract] rejected reason=unrepairable_title title="${sc.title?.slice(0,80)}"`);
       titleFailed++;
       continue;
     }
     if (result.repaired) {
-      console.log(`[scenario-title-contract] repaired reason=title_contract_violation old="${sc.title?.slice(0,60)}" new="${result.title.slice(0,60)}"`);
+      console.log(`[scenario-title-contract] repaired reason=title_contract_violation old="${sc.title?.slice(0,60)}" new="${result.title.slice(0,60)}" object="${result.object ?? ""}" objectSource=${result.objectSource ?? "none"}`);
       titleFixed++;
     } else {
+      console.log(`[scenario-title-contract] valid title="${result.title.slice(0,60)}" object="${result.object ?? ""}" objectSource=${result.objectSource ?? "none"}`);
       titlePassed++;
     }
     titleClean.push({ ...sc, title: result.title });

@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-validar-visualizacion-de-pantalla-de-bienvenida-institucional",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Validar visualización de pantalla de bienvenida institucional",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-12T14:47:58.055Z"
+}

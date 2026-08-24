@@ -24,6 +24,8 @@ export type GenerateSpecOptions = {
   automationId: string;
   appProfile: AppProfile;
   appPaths: AppAutomationPaths;
+  sectionSlug?: string;
+  scenarioId?: string;
   promotionPolicy?: PromotionPolicy;
   inlineDebugMode?: boolean;
   pageObjectRegistry?: PageObjectRegistry;
@@ -50,9 +52,10 @@ export function generateSpecFromPlan(
   plan: ExecutionPlan,
   automationId: string,
   appProfile: AppProfile,
-  appPaths: AppAutomationPaths
+  appPaths: AppAutomationPaths,
+  metadata?: { sectionSlug?: string; scenarioId?: string }
 ): string {
-  return _generateInlineSpec(plan, automationId, appProfile, appPaths);
+  return _generateInlineSpec(plan, automationId, appProfile, appPaths, metadata);
 }
 
 export async function generateSpecFromPlanWithPolicy(
@@ -67,7 +70,8 @@ export async function generateSpecFromPlanWithPolicy(
       options.plan,
       options.automationId,
       options.appProfile,
-      options.appPaths
+      options.appPaths,
+      { sectionSlug: options.sectionSlug, scenarioId: options.scenarioId }
     );
     return {
       specContent: content,
@@ -108,7 +112,8 @@ export async function generateSpecFromPlanWithPolicy(
     registry,
     policy,
     inlineDebug,
-    options.authFlowOptions
+    options.authFlowOptions,
+    { sectionSlug: options.sectionSlug, scenarioId: options.scenarioId }
   );
 
   // If POM spec is sufficient, return it
@@ -153,7 +158,8 @@ export async function generateSpecFromPlanWithPolicy(
       options.plan,
       options.automationId,
       options.appProfile,
-      options.appPaths
+      options.appPaths,
+      { sectionSlug: options.sectionSlug, scenarioId: options.scenarioId }
     );
     return {
       specContent: content,
@@ -190,7 +196,8 @@ function _generateInlineSpec(
   plan: ExecutionPlan,
   automationId: string,
   appProfile: AppProfile,
-  appPaths: AppAutomationPaths
+  appPaths: AppAutomationPaths,
+  metadata?: { sectionSlug?: string; scenarioId?: string }
 ): string {
   const escapedTitle = escapeSpecString(plan.scenario.title);
   const escapedProfile = escapeSpecString(appProfile.appSlug);
@@ -203,9 +210,11 @@ function _generateInlineSpec(
   const appProfileImportPath = escapeSpecString(buildPortablePathFromSpec(specPath, path.resolve(process.cwd(), "src/automations/app-profile.ts")));
   const execPlanTypeImportPath = escapeSpecString(buildPortablePathFromSpec(specPath, path.resolve(process.cwd(), "src/types/execution-plan.types.ts")));
   const escapedEvidenceDir = escapeSpecString(buildPortablePathFromCwd(appPaths.caseRunsDir ?? appPaths.runsDir));
+  const sectionSlug = metadata?.sectionSlug ?? "default-section";
+  const scenarioId = metadata?.scenarioId ?? plan.scenario.externalId ?? `C${plan.scenario.caseId ?? ""}`;
 
   return [
-    "import { test } from '@playwright/test';",
+    "import { test, expect } from '@playwright/test';",
     "import { readFileSync } from 'node:fs';",
     "import { resolve } from 'node:path';",
     `import { config } from '${envImportPath.replace(/\.ts$/, "")}';`,
@@ -230,6 +239,11 @@ function _generateInlineSpec(
     "const plan = JSON.parse(readFileSync(planPath, 'utf8')) as ExecutionPlan;",
     "",
     `test('${escapedTitle}', async ({ page }) => {`,
+    `  process.env.APP_SLUG = '${escapeSpecString(appProfile.appSlug)}';`,
+    `  process.env.SECTION_SLUG = '${escapeSpecString(sectionSlug)}';`,
+    `  process.env.SCENARIO_ID = '${escapeSpecString(scenarioId)}';`,
+    `  process.env.SCENARIO_TITLE = '${escapedTitle}';`,
+    "",
     "  const dataContext = buildDataContext(__runtimeConfig);",
     "  await executeExecutionPlan({",
     "    page,",

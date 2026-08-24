@@ -1,0 +1,9 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "C42957",
+  "testRailCaseId": 42957,
+  "generatedAt": "2026-08-06T12:45:55.728Z",
+  "title": "Validar jerarquia visible de las dos opciones principales"
+}

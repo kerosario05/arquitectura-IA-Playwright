@@ -5,11 +5,13 @@ export type VirtualCaseSource = "scenario_preview";
 export type VirtualCase = {
   id: string;
   displayId: string;
+  testRailCaseId?: number;
   title: string;
   sourceIssueKey: string;
   steps: string[];
   expectedResult: string;
   caseOracle?: string;
+  authIntent?: "gate_observation" | "full_authentication";
   preconditions: string[];
   appSlug: string;
   routeProfile: string;
@@ -18,6 +20,8 @@ export type VirtualCase = {
   source: VirtualCaseSource;
   targetAppSlug?: string;
   targetAppName?: string;
+  navigationPrefix?: string;
+  routeEvidence?: string;
   type: string;
   automationType: string;
   setupStrategy: string;
@@ -131,6 +135,7 @@ export function toVirtualCase(scenario: McpScenario, index: number, sectionSlug?
     sourceIssueKey: scenario.sourceIssueKey,
     steps: scenario.steps.map(normalizeStep),
     expectedResult: scenario.expectedResult,
+    authIntent: scenario.authIntent,
     preconditions: scenario.preconditions,
     appSlug: scenario.targetAppSlug ?? scenario.appSlug,
     routeProfile: scenario.routeProfile,

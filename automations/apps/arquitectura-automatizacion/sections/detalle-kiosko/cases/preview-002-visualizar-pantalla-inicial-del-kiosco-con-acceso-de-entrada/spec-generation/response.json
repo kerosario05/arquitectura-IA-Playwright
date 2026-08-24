@@ -1,0 +1,28 @@
+{
+  "specContent": "import { test } from '@playwright/test';\nimport { HomePage } from '../../../../pages/home.page';\n\nprocess.env.APP_SLUG = 'arquitectura-automatizacion';\nprocess.env.SECTION_SLUG = 'detalle-kiosko';\nprocess.env.SCENARIO_ID = 'PREVIEW-002';\nprocess.env.SCENARIO_TITLE = 'Visualizar pantalla inicial del kiosco con acceso de entrada';\n\ntest('PREVIEW-002 - Visualizar pantalla inicial del kiosco con acceso de entrada', async ({ page }) => {\n  const homePage = new HomePage(page);\n\n  throw new Error('Unresolved promoted spec generation requirements: exact import path for createPromotedSpecRuntime(page) was not provided, so the required promoted runtime pattern cannot be implemented deterministically.');\n});\n",
+  "coveredStepIndexes": [],
+  "coveredAssertions": [],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "open",
+        "start"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "homePage"
+  ],
+  "unresolvedRequirements": [
+    "Missing exact import path for createPromotedSpecRuntime(page); the required promoted runtime pattern cannot be implemented deterministically.",
+    "No backed observable oracles were supplied for assertions, so no evidence-backed assertion can be added without inventing behavior."
+  ],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

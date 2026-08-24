@@ -1,0 +1,10 @@
+{
+  "id": "preview-003-visualizar-la-pantalla-de-seleccion-con-las-dos-opciones-principales",
+  "externalId": "PREVIEW-003",
+  "caseId": 0,
+  "title": "Visualizar la pantalla de seleccion con las dos opciones principales",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-13T19:02:22.734Z"
+}

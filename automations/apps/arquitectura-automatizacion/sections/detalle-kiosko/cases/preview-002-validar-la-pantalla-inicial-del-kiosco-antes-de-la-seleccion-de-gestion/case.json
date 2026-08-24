@@ -1,0 +1,10 @@
+{
+  "id": "preview-002-validar-la-pantalla-inicial-del-kiosco-antes-de-la-seleccion-de-gestion",
+  "externalId": "PREVIEW-002",
+  "caseId": 0,
+  "title": "Validar la pantalla inicial del kiosco antes de la seleccion de gestion",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-14T22:03:26.233Z"
+}

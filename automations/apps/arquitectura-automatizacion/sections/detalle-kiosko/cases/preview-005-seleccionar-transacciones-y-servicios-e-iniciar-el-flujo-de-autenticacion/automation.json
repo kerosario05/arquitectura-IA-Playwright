@@ -1,0 +1,141 @@
+{
+  "id": "preview-005-seleccionar-transacciones-y-servicios-e-iniciar-el-flujo-de-autenticacion",
+  "externalId": "PREVIEW-005",
+  "caseId": 0,
+  "title": "Seleccionar Transacciones y servicios e iniciar el flujo de autenticacion",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-005-seleccionar-transacciones-y-servicios-e-iniciar-el-flujo-de-autenticacion\\plan.json",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-005-seleccionar-transacciones-y-servicios-e-iniciar-el-flujo-de-autenticacion\\case.spec.ts",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "arquitectura-automatizacion",
+  "createdAt": "2026-08-14T15:14:35.551Z",
+  "updatedAt": "2026-08-14T15:14:35.551Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-08-14T15-09-48-396Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "passed",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-08-14T15-09-48-396Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "specGeneration": {
+      "mode": "ai_hybrid",
+      "provider": "codex",
+      "model": "gpt-5.4",
+      "skill": {
+        "name": "playwright-spec-generation",
+        "version": "1.0.0",
+        "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+        "loaded": true
+      },
+      "invocations": 2,
+      "invocationsConsumed": 2,
+      "durationMs": 77666,
+      "usage": {
+        "inputTokens": 66681,
+        "cachedInputTokens": 28288,
+        "cacheWriteInputTokens": 0,
+        "nonCachedInputTokens": 38393,
+        "outputTokens": 1636,
+        "reasoningOutputTokens": 425,
+        "totalPhysicalTokens": 68317,
+        "durationMs": 52336,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "passed",
+        "functionalExecution": "passed"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specGenerationAttempts": 2,
+      "specRepairAttempts": 1,
+      "firstPassPromotion": false,
+      "failedGatesAttempt1": [
+        "semanticCoverage"
+      ],
+      "regressedGates": [],
+      "missingRequirements": [
+        {
+          "text": "Validar que se muestre \"flujo de autenticaciA3n\".",
+          "type": "auth_gate",
+          "stepIndex": 2
+        },
+        {
+          "text": "La opcion autenticada inicia la barrera de autenticacion.",
+          "type": "auth_gate"
+        },
+        {
+          "text": "flujo de autenticaciA3n",
+          "type": "auth_gate",
+          "stepIndex": 2
+        }
+      ],
+      "oracleTypes": [
+        "auth_gate"
+      ],
+      "errors": [],
+      "warnings": [
+        "ai_repair_attempt_applied:1:failedGates=semanticCoverage",
+        "ai_repair_previous_attempt_error:missing_assertion_coverage:Validar que se muestre \"flujo de autenticaciA3n\".",
+        "ai_repair_previous_attempt_error:assertion_implementation_not_found:La opcion autenticada inicia la barrera de autenticacion.",
+        "ai_repair_previous_attempt_error:assertion_implementation_not_found:flujo de autenticaciA3n"
+      ],
+      "finalSpec": {
+        "origin": "ai_candidate",
+        "generatedBy": "ai",
+        "strategy": "ai_candidate",
+        "fallback": null
+      },
+      "specWritten": true,
+      "previousSpec": {
+        "existed": false,
+        "hash": null,
+        "lastModifiedAt": null
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [],
+      "availablePageObjects": [
+        "ProductListPage",
+        "ProductDetailPage",
+        "FormPage",
+        "HomePage",
+        "LoginPage",
+        "CategoryPage",
+        "ProductInformationPage",
+        "OperationsMenuPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-005-seleccionar-transacciones-y-servicios-e-iniciar-el-flujo-de-autenticacion\\plan.json",
+    "previousStatus": "spec_failed"
+  }
+}

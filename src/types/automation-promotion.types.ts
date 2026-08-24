@@ -116,6 +116,45 @@ export type PromotedAutomationIndexEntry = {
       fallbackUsed: boolean;
       requirePomRuntime: boolean;
     };
+    specGeneration?: {
+      mode: "deterministic" | "ai_hybrid";
+      provider: string | null;
+      model: string | null;
+      invocations: number;
+      invocationsConsumed: number;
+      durationMs: number;
+      usage: {
+        inputTokens: number | null;
+        cachedInputTokens: number | null;
+        cacheWriteInputTokens: number | null;
+        nonCachedInputTokens: number | null;
+        outputTokens: number | null;
+        reasoningOutputTokens: number | null;
+        totalPhysicalTokens: number | null;
+        durationMs: number | null;
+        credits: number | null;
+      };
+      validation: {
+        schema: SpecVerificationStatus | "skipped";
+        structure: SpecVerificationStatus | "skipped";
+        typescript: SpecVerificationStatus | "skipped";
+        playwrightDiscovery: SpecVerificationStatus | "skipped";
+        semanticCoverage: SpecVerificationStatus | "skipped";
+        functionalExecution: SpecVerificationStatus | "skipped";
+      };
+      promotionAllowed: boolean;
+      specsRequested: number;
+      specsValidated: number;
+      specsRejected: number;
+      specWritten?: boolean;
+      previousSpec?: {
+        existed: boolean;
+        hash: string | null;
+        lastModifiedAt: string | null;
+      };
+      errors: string[];
+      warnings: string[];
+    };
     overwritten?: boolean;
     previousAutomationPath?: string;
     previousStatus?: string;

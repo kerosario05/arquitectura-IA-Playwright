@@ -3,10 +3,15 @@ import fs from "fs";
 import path from "path";
 import { jobStore } from "../jobs/job-store";
 import { startSprintRun } from "../jobs/run-runner";
-import { startDiscoveryBatchRun } from "../jobs/discovery-batch-runner";
+import {
+  buildDiscoveryBatchChecklistIdentity,
+  resolveDiscoveryBatchIssueKeyMetadata,
+  startDiscoveryBatchRun,
+} from "../jobs/discovery-batch-runner";
 import { startScenarioPreviewRun } from "../jobs/scenario-preview-runner";
+import { startMobileLaunchExecutionJob } from "../jobs/mobile-launch-execution-runner";
 import { prepareRerun } from "../jobs/rerun-runner";
-import { launchExecution } from "../jobs/launch-orchestrator";
+import { launchExecution, type LaunchScenario } from "../jobs/launch-orchestrator";
 import { defectChecklistStore } from "../services/defect-checklist-store";
 import type { McpScenario } from "../../scenarios/scenario-types";
 
@@ -74,6 +79,138 @@ function inferTargetAppSlug(body: {
   return { scenarioTargetAppSlugs, titlesSample };
 }
 
+function toPositiveInt(value: unknown): number | undefined {
+  if (typeof value === "number" && Number.isInteger(value) && value > 0) return value;
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!/^\d+$/.test(trimmed)) return undefined;
+    const parsed = Number(trimmed);
+    if (Number.isInteger(parsed) && parsed > 0) return parsed;
+  }
+  return undefined;
+}
+
+function extractCaseIdFromValue(value: unknown): number | undefined {
+  if (value == null) return undefined;
+  if (typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    const direct = [
+      record.caseId,
+      record.testRailCaseId,
+      record.testrailCaseId,
+      record.id,
+      (record.metadata as Record<string, unknown> | undefined)?.caseId,
+      (record.metadata as Record<string, unknown> | undefined)?.testRailCaseId,
+    ];
+    for (const candidate of direct) {
+      const parsed = toPositiveInt(candidate);
+      if (parsed) return parsed;
+    }
+    return undefined;
+  }
+  return toPositiveInt(value);
+}
+
+function normalizeStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is string => typeof item === "string")
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
+}
+
+function normalizeLaunchScenario(value: unknown, _fallbackPrefix: string, index: number): LaunchScenario | null {
+  if (!value || typeof value !== "object") return null;
+  const record = value as Record<string, unknown>;
+  const testRailCaseId = extractCaseIdFromValue(record);
+
+  const rawScenarioId = typeof record.scenarioId === "string"
+    ? record.scenarioId.trim()
+    : typeof record.id === "string"
+      ? record.id.trim()
+      : "";
+  const scenarioId = rawScenarioId || (testRailCaseId ? `TR-CASE-${testRailCaseId}` : "");
+
+  const rawTitle = typeof record.title === "string" ? record.title.trim() : "";
+  const title = rawTitle || (testRailCaseId ? `TestRail Case ${testRailCaseId}` : `Scenario ${index + 1}`);
+
+  const scenario: LaunchScenario = {
+    scenarioId,
+    title,
+    steps: normalizeStringArray(record.steps),
+    expectedResult: typeof record.expectedResult === "string" ? record.expectedResult : "",
+    preconditions: normalizeStringArray(record.preconditions),
+    sourceIssueKey: typeof record.sourceIssueKey === "string" ? record.sourceIssueKey : undefined,
+    testRailCaseId,
+    metadata: (record.metadata && typeof record.metadata === "object") ? (record.metadata as Record<string, unknown>) : undefined,
+  };
+
+  return scenario;
+}
+
+function collectCaseIdsFromArray(value: unknown): number[] {
+  if (!Array.isArray(value)) return [];
+  const ids: number[] = [];
+  for (const item of value) {
+    const parsed = extractCaseIdFromValue(item);
+    if (parsed) ids.push(parsed);
+  }
+  return ids;
+}
+
+export function extractLaunchScenariosFromPayload(body: Record<string, unknown>): LaunchScenario[] {
+  const dedup = new Map<string, LaunchScenario>();
+
+  const append = (items: unknown, fallbackPrefix: string): void => {
+    if (!Array.isArray(items)) return;
+    for (let i = 0; i < items.length; i++) {
+      const normalized = normalizeLaunchScenario(items[i], fallbackPrefix, i);
+      if (!normalized) continue;
+      const key = normalized.testRailCaseId
+        ? `case:${normalized.testRailCaseId}`
+        : normalized.scenarioId
+          ? `scenario:${normalized.scenarioId.toLowerCase()}`
+          : `missing-id:${fallbackPrefix}:${i}`;
+      if (!dedup.has(key)) {
+        dedup.set(key, normalized);
+      }
+    }
+  };
+
+  append(body.selectedScenarios, "SELECTED");
+  append(body.selectedGeneratedScenarios, "GENERATED");
+  append(body.selectedJiraScenarios, "JIRA");
+  append(body.generatedScenarios, "GENERATED");
+  append(body.selectedTestRailCases, "TR-CASE");
+
+  return Array.from(dedup.values());
+}
+
+export function extractExistingTestRailCaseIdsFromPayload(body: Record<string, unknown>, selectedScenarios: LaunchScenario[]): number[] {
+  const ids = new Set<number>();
+  const sources: unknown[] = [
+    body.existingTestRailCaseIds,
+    body.selectedCaseIds,
+    body.testRailCaseIds,
+    body.caseIds,
+    body.selectedTestRailCases,
+    body.selectedScenarios,
+  ];
+
+  for (const source of sources) {
+    for (const id of collectCaseIdsFromArray(source)) {
+      ids.add(id);
+    }
+  }
+
+  for (const scenario of selectedScenarios) {
+    const caseId = extractCaseIdFromValue(scenario);
+    if (caseId) ids.add(caseId);
+  }
+
+  return Array.from(ids);
+}
+
 export function buildRunStreamPayload(
   job: {
     status: string;
@@ -81,6 +218,8 @@ export function buildRunStreamPayload(
     summary?: Record<string, unknown>;
     errorMessage?: string;
     currentCase?: string | null;
+    currentCaseId?: string | null;
+    currentCaseTitle?: string | null;
     startedAt?: string;
     completedAt?: string;
     durationMs?: number;
@@ -94,6 +233,8 @@ export function buildRunStreamPayload(
     status: job.status,
     summary: job.summary,
     currentCase: job.currentCase,
+    currentCaseId: job.currentCaseId,
+    currentCaseTitle: job.currentCaseTitle,
     startedAt: job.startedAt,
     issueKey: job.issueKey,
     checklistUrl: job.checklistUrl,
@@ -256,11 +397,26 @@ runsRouter.post("/discovery-batch", (req, res) => {
     caseIds?: number[];
     appSlug?: string;
     sectionName?: string;
+    sectionSlug?: string;
+    forceRediscovery?: boolean;
     overwrite?: boolean;
     autoPromote?: boolean;
     autoPom?: boolean;
     rerunActive?: boolean;
     headed?: boolean;
+    executePromotedSpecs?: boolean;
+    launchId?: string;
+    testRunId?: number;
+    jiraKey?: string;
+    publishedCases?: Array<{
+      scenarioId: string;
+      caseId: number;
+      title?: string;
+      sourceType?: "jira_preview" | "testrail_case";
+      sourceIssueKey?: string;
+      launchScenarioId?: string;
+      executionScenarioId?: string;
+    }>;
   };
 
   if (!body.caseIds || body.caseIds.length === 0) {
@@ -275,9 +431,31 @@ runsRouter.post("/discovery-batch", (req, res) => {
   }
 
   const job = jobStore.create("discovery-batch", body as Record<string, unknown>);
+  const checklistIdentity = buildDiscoveryBatchChecklistIdentity({
+    jobId: job.id,
+    launchId: body.launchId,
+  });
+  const checklist = defectChecklistStore.getOrCreate(checklistIdentity);
+  const checklistUrl = `/checklist/${checklist.urlSlug}`;
+  const defectCount = checklist.defects.filter((defect) => defect.jobId === job.id).length;
+  const issueKey = resolveDiscoveryBatchIssueKeyMetadata({
+    jiraKey: body.jiraKey,
+    publishedCases: body.publishedCases,
+  });
+  jobStore.update(job.id, {
+    checklistUrl,
+    defectCount,
+    ...(issueKey ? { issueKey } : {}),
+  });
   setImmediate(() => startDiscoveryBatchRun(job.id));
 
-  res.status(202).json({ jobId: job.id, status: job.status });
+  res.status(202).json({
+    jobId: job.id,
+    status: job.status,
+    checklistUrl,
+    defectCount,
+    ...(issueKey ? { issueKey } : {}),
+  });
 });
 
 runsRouter.post("/sprint", (req, res) => {
@@ -367,6 +545,8 @@ runsRouter.get("/:jobId/logs", (req, res) => {
       summary: current.summary,
       errorMessage: current.errorMessage,
       currentCase: (current as any).currentCase,
+      currentCaseId: (current as any).currentCaseId,
+      currentCaseTitle: (current as any).currentCaseTitle,
       startedAt: current.startedAt,
       completedAt: current.completedAt,
       durationMs: current.durationMs,
@@ -385,6 +565,8 @@ runsRouter.get("/:jobId/logs", (req, res) => {
       summary: current.summary,
       errorMessage: current.errorMessage,
       currentCase: (current as any).currentCase,
+      currentCaseId: (current as any).currentCaseId,
+      currentCaseTitle: (current as any).currentCaseTitle,
       startedAt: current.startedAt,
       completedAt: current.completedAt,
       durationMs: current.durationMs,
@@ -406,6 +588,8 @@ runsRouter.get("/:jobId/logs", (req, res) => {
           summary: job.summary,
           errorMessage: job.errorMessage,
           currentCase: (job as any).currentCase,
+          currentCaseId: (job as any).currentCaseId,
+          currentCaseTitle: (job as any).currentCaseTitle,
           startedAt: (job as any).startedAt,
           completedAt: (job as any).completedAt,
           durationMs: (job as any).durationMs,
@@ -420,6 +604,8 @@ runsRouter.get("/:jobId/logs", (req, res) => {
           status: job.status,
           summary: job.summary,
           currentCase: (job as any).currentCase,
+          currentCaseId: (job as any).currentCaseId,
+          currentCaseTitle: (job as any).currentCaseTitle,
           startedAt: (job as any).startedAt,
           issueKey: (job as any).issueKey,
           checklistUrl: (job as any).checklistUrl,
@@ -435,19 +621,9 @@ runsRouter.get("/:jobId/logs", (req, res) => {
 runsRouter.post("/:jobId/rerun", async (req, res) => {
   const jobId = req.params.jobId;
   const mode = (req.body?.mode as string) === "failed_only" ? "failed_only" : "all";
-  const ARTIFACTS_DIR = path.resolve(__dirname, "..", "..", "..", ".artifacts", "scenario-preview-runs");
 
   // 1. Check memory first
   const previous = jobStore.get(jobId);
-
-  // 2. If not in memory, check disk artifacts
-  const artifactDir = path.join(ARTIFACTS_DIR, jobId);
-  const hasArtifacts = fs.existsSync(path.join(artifactDir, "preview-scenarios.json"));
-
-  if (!previous && !hasArtifacts) {
-    res.status(404).json({ ok: false, error: "job_not_found", message: `Job ${jobId} not found in memory or disk artifacts.` });
-    return;
-  }
 
   if (previous) {
     if (previous.status === "running" || previous.status === "queued") {
@@ -456,16 +632,31 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
     }
   }
 
-  // 3. Prepare rerun from artifacts (works with or without memory job)
-  const prepared = prepareRerun(jobId, mode);
+  const memoryJobMiss = !previous;
+
+  // 2. Prepare rerun from canonical artifacts by job type.
+  const prepared = prepareRerun(jobId, mode, previous?.type);
   if (!prepared.ok) {
+    // No in-memory job and no persisted source artifacts → explicit source-not-found error.
+    if (memoryJobMiss && (prepared.error === "missing_preview_scenarios" || prepared.error === "missing_mobile_rerun_manifest")) {
+      res.status(404).json({
+        ok: false,
+        error: "rerun_source_not_found",
+        sourceJobId: jobId,
+        message: prepared.message,
+      });
+      return;
+    }
+    if (prepared.error === "missing_preview_scenarios" || prepared.error === "missing_mobile_rerun_manifest") {
+      res.status(404).json(prepared);
+      return;
+    }
     res.status(400).json(prepared);
     return;
   }
 
-  const memoryJobMiss = !previous;
-  console.log(`[runs:rerun] sourceJobId=${jobId} memoryJob=${!memoryJobMiss} artifactFallback=${memoryJobMiss}`);
-  console.log(`[runs:rerun] artifactDir=${artifactDir}`);
+  console.log(`[runs:rerun] sourceResolution=${previous ? "memory" : "artifact"}`);
+  console.log(`[runs:rerun] sourceJobId=${jobId} memoryJob=${!memoryJobMiss} artifactFallback=${memoryJobMiss} sourceJobType=${prepared.jobType}`);
 
   // Resolve issueKey: body > sourceJob > sourceJob.params > artifact > scenarios
   let issueKey = String(req.body?.issueKey || req.body?.jiraKey || "");
@@ -474,7 +665,9 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
   }
   if (!issueKey) {
     // Try to infer from the first scenario in prepared.scenarios
-    const firstSc = Array.isArray(prepared.scenarios) ? (prepared.scenarios[0] as any) : null;
+    const firstSc = prepared.jobType === "scenario-preview"
+      ? (Array.isArray(prepared.scenarios) ? (prepared.scenarios[0] as any) : null)
+      : (Array.isArray(prepared.mobileParams.scenarios) ? (prepared.mobileParams.scenarios[0] as any) : null);
     if (firstSc) {
       issueKey = String(firstSc.sourceIssueKey || firstSc.issueKey || firstSc.jiraKey || firstSc.refs || "");
     }
@@ -495,7 +688,14 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
   // 4. Build new job payload
   let newPayload: Record<string, unknown>;
 
-  if (previous) {
+  if (prepared.jobType === "mobile-launch-execution") {
+    newPayload = {
+      ...prepared.mobileParams,
+      sourceJobId: jobId,
+      rerunMode: mode,
+      rerun: true,
+    };
+  } else if (previous) {
     // Memory path: inherit all previous params
     const prevParams = previous.params as Record<string, unknown>;
     newPayload = {
@@ -513,7 +713,9 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
       reportResults: prevParams.reportResults ?? false,
     };
   } else {
-    // Disk-only path: build payload from artifact metadata
+    // Disk-only path: build payload from artifact metadata. Recover launch context
+    // (launchId/testRunId/publishedCases) from the persisted launch manifest when present.
+    const launchMeta = resolveLaunchContextForRerun(jobId, prepared);
     newPayload = {
       scenarios: prepared.scenarios,
       appSlug: prepared.appSlug,
@@ -524,6 +726,9 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
       rerun: true,
       issueKey,
       checklistUrl,
+      launchId: launchMeta?.launchId,
+      testRunId: launchMeta?.testRunId,
+      publishedCases: launchMeta?.publishedCases,
       sectionName: prepared.sectionName,
       sectionSlug: prepared.sectionSlug,
       publishToTestRail: false,
@@ -539,16 +744,20 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
     };
   }
 
-  const newJob = jobStore.create("scenario-preview", newPayload);
+  const newJob = jobStore.create(prepared.jobType, newPayload);
   if (issueKey && issueKey !== "undefined" && issueKey !== "") {
     jobStore.update(newJob.id, { issueKey, checklistUrl } as any);
   }
   jobStore.appendLog(newJob.id, `[runs:rerun] sourceJobId=${jobId} mode=${mode} selected=${prepared.selectedCount} total=${prepared.totalCount}`);
   jobStore.appendLog(newJob.id, `[runs:rerun] newJobId=${newJob.id} issueKey=${issueKey || "?"} checklistUrl=${checklistUrl || "?"}`);
   jobStore.appendLog(newJob.id, `[runs:rerun] appSlug=${prepared.appSlug}`);
-  jobStore.appendLog(newJob.id, `[runs:rerun] artifactDir=${artifactDir}`);
+  jobStore.appendLog(newJob.id, `[runs:rerun] sourceJobType=${prepared.jobType}`);
 
-  setImmediate(() => startScenarioPreviewRun(newJob.id));
+  if (prepared.jobType === "mobile-launch-execution") {
+    setImmediate(() => startMobileLaunchExecutionJob(newJob.id));
+  } else {
+    setImmediate(() => startScenarioPreviewRun(newJob.id));
+  }
 
   res.json({
     ok: true,
@@ -569,8 +778,11 @@ runsRouter.post("/launch-execution", async (req, res, next) => {
   try {
     const body = req.body as Record<string, unknown>;
     const appSlug = String(body.appSlug ?? "");
-    const scenariosCount = Array.isArray(body.selectedScenarios) ? body.selectedScenarios.length : 0;
-    console.log(`[launch-execution] received payload appSlug=${appSlug} scenarios=${scenariosCount} projectId=${body.projectId} sectionId=${body.sectionId}`);
+    const selectedScenarios = extractLaunchScenariosFromPayload(body);
+    const existingTestRailCaseIds = extractExistingTestRailCaseIdsFromPayload(body, selectedScenarios);
+    console.log(
+      `[launch-execution] received payload appSlug=${appSlug} scenarios=${selectedScenarios.length} existingCaseIds=${existingTestRailCaseIds.length} projectId=${body.projectId} sectionId=${body.sectionId}`,
+    );
     const result = await launchExecution({
       appSlug: String(body.appSlug ?? ""),
       sectionSlug: body.sectionSlug as string | undefined,
@@ -582,7 +794,8 @@ runsRouter.post("/launch-execution", async (req, res, next) => {
       jiraKey: body.jiraKey as string | undefined,
       jiraTitle: (body.jiraTitle ?? body.storyTitle ?? body.huTitle) as string | undefined,
       sprintName: body.sprintName as string | undefined,
-      selectedScenarios: Array.isArray(body.selectedScenarios) ? body.selectedScenarios : [],
+      selectedScenarios,
+      existingTestRailCaseIds,
       adaptiveScenarios: Array.isArray(body.adaptiveScenarios) ? body.adaptiveScenarios : undefined,
       publishStrategy: (body.publishStrategy as string) === "use_existing" ? "use_existing" : "always_create",
     });
@@ -625,11 +838,74 @@ const LAUNCH_ARTIFACTS_DIR = path.resolve(__dirname, "..", "..", "..", ".artifac
 const PREVIEW_ARTIFACTS_DIR = path.resolve(__dirname, "..", "..", "..", ".artifacts", "scenario-preview-runs");
 const EVIDENCE_ROOT_DIR = path.resolve(__dirname, "..", "..", "..", ".artifacts", "evidence");
 
+type LaunchContextForRerun = {
+  launchId?: string;
+  testRunId?: number;
+  publishedCases?: Array<{ scenarioId: string; caseId: number; title?: string }>;
+};
+
+// Rebuilds the minimal launch context for a rerun from persisted artifacts when the
+// in-memory job is gone after a server restart. Scans the launch manifests for one that
+// references the same source job or scenarios; returns undefined when nothing persisted.
+function resolveLaunchContextForRerun(sourceJobId: string, prepared: { scenarios?: unknown[]; appSlug?: string }): LaunchContextForRerun | undefined {
+  const sourceDir = path.join(PREVIEW_ARTIFACTS_DIR, sourceJobId);
+  const sourceJobMetaPath = path.join(sourceDir, "job.json");
+  let sourceJobMeta: Record<string, unknown> | null = null;
+  try {
+    if (fs.existsSync(sourceJobMetaPath)) {
+      sourceJobMeta = JSON.parse(fs.readFileSync(sourceJobMetaPath, "utf-8"));
+    }
+  } catch {
+    sourceJobMeta = null;
+  }
+  const sourceLaunchId = typeof sourceJobMeta?.launchId === "string" ? sourceJobMeta.launchId : undefined;
+  if (sourceLaunchId) {
+    const manifestPath = path.join(LAUNCH_ARTIFACTS_DIR, sourceLaunchId, "launch-manifest.json");
+    try {
+      if (fs.existsSync(manifestPath)) {
+        const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+        return {
+          launchId: sourceLaunchId,
+          testRunId: typeof manifest.testRunId === "number" ? manifest.testRunId : typeof manifest.testRunId === "string" ? Number(manifest.testRunId) : undefined,
+          publishedCases: Array.isArray(manifest.publishedCases) ? manifest.publishedCases : undefined,
+        };
+      }
+    } catch {
+      // fall through to scan below
+    }
+  }
+  // Fallback scan: find a launch manifest whose jobId/sourceJobId matches this source job.
+  if (!fs.existsSync(LAUNCH_ARTIFACTS_DIR)) return undefined;
+  const launchIds = fs.readdirSync(LAUNCH_ARTIFACTS_DIR, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name);
+  for (const launchId of launchIds) {
+    const manifestPath = path.join(LAUNCH_ARTIFACTS_DIR, launchId, "launch-manifest.json");
+    if (!fs.existsSync(manifestPath)) continue;
+    try {
+      const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+      const manifestJobIds = [manifest.jobId, manifest.sourceJobId, manifest.originJobId].filter((v): v is string => typeof v === "string");
+      if (manifestJobIds.includes(sourceJobId)) {
+        return {
+          launchId,
+          testRunId: typeof manifest.testRunId === "number" ? manifest.testRunId : typeof manifest.testRunId === "string" ? Number(manifest.testRunId) : undefined,
+          publishedCases: Array.isArray(manifest.publishedCases) ? manifest.publishedCases : undefined,
+        };
+      }
+    } catch {
+      // ignore unreadable manifests
+    }
+  }
+  return undefined;
+}
+
 type EvidenceDocxStatus = "ready" | "preparing" | "failed" | "unavailable";
 type EvidenceDocxReasonCode =
   | "ready"
   | "job_not_found"
   | "document_preparing"
+  | "cases_not_executable"
+  | "evidence_initialization_failed"
   | "document_generation_failed"
   | "document_not_found_after_completion";
 
@@ -675,6 +951,11 @@ function toNonEmptyString(value: unknown): string | undefined {
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
+function toBoolean(value: unknown): boolean | undefined {
+  if (typeof value === "boolean") return value;
+  return undefined;
+}
+
 function readPreviewJobMetadata(jobId: string): Record<string, unknown> | undefined {
   const jobMetaPath = path.join(PREVIEW_ARTIFACTS_DIR, jobId, "job.json");
   if (!fs.existsSync(jobMetaPath)) return undefined;
@@ -714,6 +995,7 @@ function findEvidenceDocxByJobId(rootDir: string, jobId: string): string | undef
 export function resolveEvidenceDocxForJob(jobId: string): EvidenceDocxResolution {
   const job = jobStore.get(jobId);
   const params = (job?.params ?? {}) as Record<string, unknown>;
+  const summary = (job?.summary ?? {}) as Record<string, unknown>;
   const diskMeta = readPreviewJobMetadata(jobId);
 
   const appSlug = toNonEmptyString(params.appSlug)
@@ -775,6 +1057,46 @@ export function resolveEvidenceDocxForJob(jobId: string): EvidenceDocxResolution
     };
   }
 
+  const summaryReasonCode = toNonEmptyString(summary.reasonCode) as EvidenceDocxReasonCode | undefined;
+  if (summaryReasonCode === "cases_not_executable") {
+    return {
+      jobId,
+      status: "unavailable",
+      reasonCode: "cases_not_executable",
+      documentReady: false,
+      jobExists: true,
+      jobStatus,
+      appSlug,
+      sectionSlug,
+    };
+  }
+
+  if (summaryReasonCode === "document_generation_failed") {
+    return {
+      jobId,
+      status: "unavailable",
+      reasonCode: "document_generation_failed",
+      documentReady: false,
+      jobExists: true,
+      jobStatus,
+      appSlug,
+      sectionSlug,
+    };
+  }
+
+  if (summaryReasonCode === "evidence_initialization_failed") {
+    return {
+      jobId,
+      status: "unavailable",
+      reasonCode: "evidence_initialization_failed",
+      documentReady: false,
+      jobExists: true,
+      jobStatus,
+      appSlug,
+      sectionSlug,
+    };
+  }
+
   const normalizedStatus = (jobStatus ?? "").trim().toLowerCase();
   const terminal = TERMINAL_RUN_STATUSES.has(normalizedStatus);
   if (!terminal) {
@@ -782,6 +1104,35 @@ export function resolveEvidenceDocxForJob(jobId: string): EvidenceDocxResolution
       jobId,
       status: "preparing",
       reasonCode: "document_preparing",
+      documentReady: false,
+      jobExists: true,
+      jobStatus,
+      appSlug,
+      sectionSlug,
+    };
+  }
+
+  const documentAttempted = toBoolean(summary.documentAttempted) === true;
+  const documentGenerated = toBoolean(summary.documentGenerated) === true;
+  const documentPathPresent = toBoolean(summary.documentPathPresent) === true;
+  if (documentAttempted && !documentGenerated) {
+    return {
+      jobId,
+      status: "unavailable",
+      reasonCode: "document_generation_failed",
+      documentReady: false,
+      jobExists: true,
+      jobStatus,
+      appSlug,
+      sectionSlug,
+    };
+  }
+
+  if (documentGenerated && !documentPathPresent) {
+    return {
+      jobId,
+      status: "unavailable",
+      reasonCode: "document_not_found_after_completion",
       documentReady: false,
       jobExists: true,
       jobStatus,

@@ -4,12 +4,31 @@ export type CodexCliRunnerInput = {
   prompt: string;
   cwd: string;
   timeoutMs: number;
+  taskType?: "generation" | "repair" | "unknown";
+  purpose?: string;
   showAgentLog?: boolean;
   heartbeatMs?: number;
   handoffDir?: string;
   attempt?: number;
   stdoutLogPath?: string;
   stderrLogPath?: string;
+};
+
+export type CodexCliUsage = {
+  timestamp: string;
+  provider: "codex_cli";
+  model: string;
+  taskType: "generation" | "repair" | "unknown";
+  inputTokens: number;
+  cachedInputTokens: number;
+  cacheWriteInputTokens: number;
+  nonCachedInputTokens: number;
+  outputTokens: number;
+  reasoningOutputTokens: number;
+  totalPhysicalTokens: number;
+  durationMs: number;
+  exitCode: number;
+  success: boolean;
 };
 
 export type CodexCliRunnerResult = {
@@ -21,6 +40,7 @@ export type CodexCliRunnerResult = {
   durationMs: number;
   stdoutLogPath?: string;
   stderrLogPath?: string;
+  usage?: CodexCliUsage;
 };
 
 import type { SkillId } from "./agent-skill.types";

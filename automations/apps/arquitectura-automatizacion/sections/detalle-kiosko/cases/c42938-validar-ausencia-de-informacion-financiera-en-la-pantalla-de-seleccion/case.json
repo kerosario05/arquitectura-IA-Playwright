@@ -1,0 +1,10 @@
+{
+  "id": "c42938-validar-ausencia-de-informacion-financiera-en-la-pantalla-de-seleccion",
+  "externalId": "C42938",
+  "caseId": 42938,
+  "title": "Validar ausencia de informacion financiera en la pantalla de seleccion",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-05T21:36:08.717Z"
+}

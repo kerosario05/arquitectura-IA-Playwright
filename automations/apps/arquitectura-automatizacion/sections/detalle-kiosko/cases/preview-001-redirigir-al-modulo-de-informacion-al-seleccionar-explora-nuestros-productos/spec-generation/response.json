@@ -1,0 +1,39 @@
+{
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\nimport { HomePage } from '../../../../pages/home.page';\n\ntest('PREVIEW-001 - Redirigir al m\\u00f3dulo de informaci\\u00f3n al seleccionar Explora nuestros productos', async ({ page }) => {\n  process.env.APP_SLUG = 'arquitectura-automatizacion';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-001';\n  process.env.SCENARIO_TITLE = 'Redirigir al m\\u00f3dulo de informaci\\u00f3n al seleccionar Explora nuestros productos';\n\n  const promotedRuntime = createPromotedSpecRuntime(page);\n  const homePage = new HomePage(page);\n\n  try {\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 0,\n      target: 'Iniciar',\n      actionIntent: 'Click en Iniciar',\n      expectedEffect: 'Abrir el flujo inicial de exploraci\\u00f3n',\n      action: async () => {\n        await homePage.start();\n      },\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 1,\n      target: '\\u00bfQu\\u00e9 deseas realizar hoy?',\n      assertion: async () => {\n        await expect(page.getByText('\\u00bfQu\\u00e9 deseas realizar hoy?')).toBeVisible();\n      },\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 2,\n      target: 'Explora nuestros productos',\n      actionIntent: 'Clic en Explora nuestros productos',\n      expectedEffect: 'Navegar al m\\u00f3dulo de informaci\\u00f3n',\n      action: async () => {\n        await homePage.start();\n      },\n    });\n\n    await promotedRuntime.waitForPromotedUiStable(3, 'm\\u00f3dulo de informaci\\u00f3n');\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 3,\n      target: 'm\\u00f3dulo de informaci\\u00f3n',\n      assertion: async () => {\n        await expect(page).toHaveURL(/https:\\/\\/172\\.27\\.4\\.50\\/product-catalog/);\n      },\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "Â¿QuÃ© deseas realizar hoy?",
+      "implementation": "await expect(page.getByText('\\u00bfQu\\u00e9 deseas realizar hoy?')).toBeVisible();"
+    },
+    {
+      "requirement": "mÃ³dulo de informaciÃ³n",
+      "implementation": "await expect(page).toHaveURL(/https:\\/\\/172\\.27\\.4\\.50\\/product-catalog/);"
+    }
+  ],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "start"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "promotedRuntime",
+    "homePage"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

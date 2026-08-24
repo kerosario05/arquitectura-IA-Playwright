@@ -1,0 +1,10 @@
+{
+  "id": "c42995-validar-ausencia-de-informacion-financiera-en-las-pantallas-iniciales",
+  "externalId": "C42995",
+  "caseId": 42995,
+  "title": "Validar ausencia de información financiera en las pantallas iniciales",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-07T12:22:27.076Z"
+}

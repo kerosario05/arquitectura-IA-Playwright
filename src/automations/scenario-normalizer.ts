@@ -682,6 +682,19 @@ const DETAIL_KEYWORDS = [
   "status", "summary", "data", "attributes",
 ];
 
+// Navigation destination concepts: an assertion that only names a module/list/category
+// screen is NOT evidence that a product detail must be opened (accent-stripped stems).
+const NAVIGATION_DESTINATION_TERMS = [
+  "modulo", "catalogo", "listado", "categoria", "pantalla", "seccion",
+];
+
+// Strong detail signals override generic keywords and navigation context.
+const STRONG_DETAIL_SIGNALS = [
+  "precio", "saldo", "tasa", "monto", "valor", "estado", "fecha",
+  "numero", "identificador", "beneficios", "requisitos", "condiciones",
+  "caracteristicas", "detalle", "descripcion", "resumen", "atributos",
+];
+
 const SELECTION_PATTERNS = [
   /seleccionar\s+(el|la|un|una)?\s*primer/i,
   /select\s+(the\s+)?first/i,
@@ -796,14 +809,26 @@ function findRecoverableParentCategory(
 function hasDetailAssertions(steps: string[], expectedResult: string): boolean {
   // Only check assertion-type steps (Validar, Verificar, check) and expectedResult
   // Exclude click/navigation steps to avoid false positives from product names like "información de productos"
-  const assertionText = [
+  const assertionTexts = [
     ...steps
       .map(stripStepNumbering)
       .filter((s) => /^(validar|verificar|comprobar|esperar|should|verify|check|assert)\b/i.test(s)),
     expectedResult,
-  ].join(" ").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  ]
+    .map((s) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+    .filter(Boolean);
 
-  return DETAIL_KEYWORDS.some((kw) => assertionText.includes(kw));
+  return assertionTexts.some((text) => {
+    // An assertion that names a navigation destination (module/list/category screen)
+    // without a strong detail signal is NOT a detail assertion.
+    const isNavigationDestination = NAVIGATION_DESTINATION_TERMS.some((term) => text.includes(term));
+    const hasStrongDetail = STRONG_DETAIL_SIGNALS.some((sig) => text.includes(sig));
+    if (isNavigationDestination && !hasStrongDetail) {
+      console.log(`[scenario-detail-guard] detailAssertionSkipped reason=navigation_destination assertion="${text}"`);
+      return false;
+    }
+    return DETAIL_KEYWORDS.some((kw) => text.includes(kw)) || hasStrongDetail;
+  });
 }
 
 function hasItemSelection(steps: string[]): boolean {

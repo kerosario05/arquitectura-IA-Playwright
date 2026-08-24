@@ -10,7 +10,9 @@ import { mobileRouter } from "./routes/mobile";
 import { debugRouter } from "./routes/debug";
 import { checklistRouter } from "./routes/checklist";
 import { executionsRouter } from "./routes/executions";
+import { internalOtpRouter } from "./routes/internal-otp";
 import { resolveServerPort } from "./config";
+import { captureRawJsonBody, mobileUtf8JsonReconciler } from "./middleware/mobile-utf8-json";
 
 const PORT = resolveServerPort(process.env as Record<string, string | undefined>);
 const HOST = process.env.API_HOST || "0.0.0.0";
@@ -20,7 +22,13 @@ const API_KEY = process.env.API_KEY || "";
 const app = express();
 
 app.use(cors({ origin: CORS_ORIGIN }));
-app.use(express.json({ limit: "50mb" }));
+app.use(express.json({
+  limit: "50mb",
+  verify: (req, res, buf) => {
+    captureRawJsonBody(req, res, buf);
+  },
+}));
+app.use(mobileUtf8JsonReconciler());
 
 // Ensure UTF-8 encoding for all JSON responses
 app.use((req, res, next) => {
@@ -45,6 +53,7 @@ app.use("/api/testrail", testrailRouter);
 app.use("/api/runs", runsRouter);
 app.use("/api/scenarios", scenariosRouter);
 app.use("/api/mobile", mobileRouter);
+app.use("/api/internal/otp", internalOtpRouter);
 app.use(checklistRouter);
 app.use(executionsRouter);
 
@@ -83,7 +92,7 @@ const server = app.listen(PORT, HOST, () => {
   console.log(`  GET  /api/runs/:jobId/logs  (SSE)`);
   console.log(`  DEL  /api/runs/:jobId`);
   console.log(`  POST /api/runs/:jobId/rerun  { mode: "failed_only" | "all" }`);
-  console.log(`  POST /api/runs/launch-execution  { appSlug, projectId, sectionId, selectedScenarios }`);
+  console.log(`  POST /api/runs/launch-execution  { appSlug, projectId, sectionId, selectedScenarios, existingTestRailCaseIds? }`);
   console.log(`  GET  /api/scenarios/preview?projectKey=AA&sprintId=42&status=...`);
   console.log(`  POST /api/scenarios/preview  { projectKey, sprintId|activeSprint, status }`);
   console.log(`  POST /api/mobile/emulator/start  { avdName?, headless? }`);
@@ -92,8 +101,12 @@ const server = app.listen(PORT, HOST, () => {
   console.log(`  GET  /api/mobile/appium/status`);
   console.log(`  POST /api/mobile/tests/run  { apkPath|appPackage, appActivity?, steps, dataOverrides? }`);
   console.log(`  POST /api/mobile/scenarios/preview  { projectKey, sprintId|activeSprint, status }`);
+  console.log(`  POST /api/mobile/scenarios/generation  { projectKey, sprintId|activeSprint, status, appSlug, selectedIssueKeys? }`);
+  console.log(`  GET  /api/mobile/scenarios/generation/:generationJobId`);
   console.log(`  POST /api/mobile/runs/launch-execution  { appSlug, projectId, sectionId, scenarios }`);
   console.log(`  POST /api/mobile/runs/execute  { launchId, testRunId, publishedCases, scenarios, dataOverrides? }`);
+  console.log(`  POST /api/internal/otp/local-token/generate  { identity, channel, appSlug }`);
+  console.log(`  POST /api/internal/otp/local-token/latest  { identity, channel, appSlug, generatedAfter, requestId? }`);
   if (isDebugEnabled) {
     console.log(`\n[server] Debug endpoints (dev-only):`);
     console.log(`  GET  /api/debug/testrail/status`);

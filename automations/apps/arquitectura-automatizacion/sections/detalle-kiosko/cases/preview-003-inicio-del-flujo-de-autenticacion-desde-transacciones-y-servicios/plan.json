@@ -1,0 +1,49 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-003",
+    "caseId": 0,
+    "title": "Inicio del flujo de autenticación desde transacciones y servicios"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Ingresar al kiosco",
+      "target": {
+        "strategy": "text",
+        "value": "kiosco",
+        "exact": false
+      }
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Seleccionar Transacciones y servicios",
+      "target": {
+        "strategy": "text",
+        "value": "Transacciones y servicios",
+        "exact": false
+      }
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-08-13T01:58:21.034Z"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-visualizar-opciones-principales-luego-de-iniciar-el-kiosco",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Visualizar opciones principales luego de iniciar el kiosco",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-04T19:56:53.654Z"
+}

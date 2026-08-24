@@ -1,0 +1,9 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "C42943",
+  "testRailCaseId": 42943,
+  "generatedAt": "2026-08-06T12:43:33.860Z",
+  "title": "Mostrar las dos opciones principales con la misma jerarquía funcional"
+}

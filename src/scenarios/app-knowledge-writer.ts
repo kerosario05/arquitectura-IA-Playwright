@@ -3,6 +3,7 @@ import * as path from "path";
 import type { AppKnowledge, AppKnowledgeItem } from "./scenario-types";
 import type { CoverageContract, CoverageContractItem } from "./scenario-types";
 import type { OptionFlow } from "./hu-scope-guard";
+import type { RouteProfileSuggestion } from "../discovery/route-profile-learning";
 
 function normalizeForHash(s: string): string {
   return s
@@ -1216,6 +1217,9 @@ export function writeAppKnowledge(
       updatedAt: now,
       lastSeenAt: now,
       runCount: 1,
+      destinationSignals: Array.isArray((routeProfile as any)?._terminalSignals)
+        ? (routeProfile as any)._terminalSignals
+        : undefined,
     };
 
     learnedRouteItems.push(learnedRouteItem);
@@ -2084,4 +2088,120 @@ export function writeAppKnowledge(
   console.log(`[knowledge-summary] reuse selectedRoutes=${trustedRoutes.length} selectedScenarios=${trustedScenarios.length} skippedUntrusted=${untrusted.length}`);
 
   return { added, updated, unchanged, total: result.items.length, skipped };
+}
+
+export async function appendRouteSuggestionToKnowledge(
+  appSlug: string,
+  suggestion: RouteProfileSuggestion,
+  automationsRoot: string,
+): Promise<{ persisted: boolean; duplicate: boolean; error?: string }> {
+  if (suggestion.status !== "auto_approved") {
+    return { persisted: false, duplicate: false };
+  }
+
+  const knowledgePath = path.join(automationsRoot, "apps", appSlug, "app.knowledge.json");
+  const dir = path.dirname(knowledgePath);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+
+  let knowledge: AppKnowledge;
+  if (fs.existsSync(knowledgePath)) {
+    try {
+      knowledge = JSON.parse(fs.readFileSync(knowledgePath, "utf-8")) as AppKnowledge;
+    } catch {
+      knowledge = { version: 1, appSlug, createdAt: nowIso(), updatedAt: nowIso(), items: [] };
+    }
+  } else {
+    knowledge = { version: 1, appSlug, createdAt: nowIso(), updatedAt: nowIso(), items: [] };
+  }
+
+  // Canonicalize identity inputs (casing/accents/whitespace-insensitive) without altering stored display values
+  const canonSlug = normalizeCompare(appSlug);
+  const canonFrom = normalizeCompare(suggestion.from || "");
+  const canonTo = normalizeCompare(suggestion.to);
+  const canonUrl = normalizeCompare(suggestion.evidence?.afterUrl || "");
+
+  const raw = `${canonSlug}::${canonFrom}::${canonTo}::${canonUrl}`;
+  let hash = 0;
+  for (let i = 0; i < raw.length; i++) {
+    const chr = raw.charCodeAt(i);
+    hash = ((hash << 5) - hash) + chr;
+    hash |= 0;
+  }
+  const edgeId = `route_edge_${canonSlug}_${Math.abs(hash).toString(36)}`;
+
+  // Direct id match, then fallback to semantic match for cosmetic variants with a different historical id
+  let existing = knowledge.items.find(i => i.id === edgeId);
+  if (!existing) {
+    existing = knowledge.items.find(i =>
+      i.routeFrom != null &&
+      i.actionTarget != null &&
+      normalizeCompare(i.routeFrom) === canonFrom &&
+      normalizeCompare(i.actionTarget) === canonTo &&
+      (!i.destinationUrl || normalizeCompare(i.destinationUrl) === canonUrl)
+    );
+  }
+  if (existing) {
+    existing.updatedAt = nowIso();
+    existing.lastSeenAt = nowIso();
+    existing.runCount = (existing.runCount || 0) + 1;
+    if (!existing.destinationUrl && suggestion.evidence?.afterUrl) {
+      existing.destinationUrl = suggestion.evidence.afterUrl;
+    }
+    if (suggestion.confidence > (existing.confidenceScore ?? 0)) {
+      existing.confidenceScore = suggestion.confidence;
+    }
+    if (existing.source === "route_learning" && !existing.knowledgeKind) {
+      existing.knowledgeKind = "route_functional_observed";
+    }
+    try {
+      knowledge.updatedAt = nowIso();
+      fs.writeFileSync(knowledgePath, JSON.stringify(knowledge, null, 2), "utf-8");
+      return { persisted: true, duplicate: true };
+    } catch (err) {
+      return { persisted: false, duplicate: true, error: String(err) };
+    }
+  }
+
+  const now = nowIso();
+  const item: AppKnowledgeItem = {
+    id: edgeId,
+    source: "scenario_derived",
+    issueKey: undefined,
+    scenarioTitle: undefined,
+    coverageRefs: [
+      "learned_navigation_path",
+      `relation:${suggestion.relation}`,
+    ],
+    steps: [`Clic en "${suggestion.to}".`],
+    clickTargets: [suggestion.to],
+    assertionTargets: [],
+    negativeAssertions: [],
+    optionLabels: [],
+    authTerms: [],
+    manual: false,
+    confidence: "scenario_derived",
+    createdAt: now,
+    updatedAt: now,
+    lastSeenAt: now,
+    runCount: 1,
+    validationStatus: "validated",
+    trustedForReuse: true,
+    successCount: 1,
+    confidenceScore: suggestion.confidence,
+    knowledgeKind: "route_functional_observed",
+    destinationUrl: suggestion.evidence?.afterUrl,
+    routeFrom: suggestion.from,
+    actionTarget: suggestion.to,
+  };
+
+  knowledge.items.push(item);
+  try {
+    knowledge.updatedAt = now;
+    fs.writeFileSync(knowledgePath, JSON.stringify(knowledge, null, 2), "utf-8");
+    return { persisted: true, duplicate: false };
+  } catch (err) {
+    return { persisted: false, duplicate: false, error: String(err) };
+  }
 }

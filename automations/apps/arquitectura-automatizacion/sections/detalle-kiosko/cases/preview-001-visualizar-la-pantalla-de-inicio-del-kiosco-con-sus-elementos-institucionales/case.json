@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-visualizar-la-pantalla-de-inicio-del-kiosco-con-sus-elementos-institucionales",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Visualizar la pantalla de inicio del kiosco con sus elementos institucionales",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-13T18:58:14.963Z"
+}

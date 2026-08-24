@@ -47,10 +47,16 @@ export class EvidenceRecorder {
     page: Page,
     stepIndex: number,
     stepText: string,
-    options?: { target?: string; status?: "passed" | "failed" | "skipped"; errorMessage?: string },
+    options?: {
+      target?: string;
+      status?: "passed" | "failed" | "skipped";
+      errorMessage?: string;
+      sourceStepIndex?: number;
+    },
   ): Promise<EvidenceStepRecord> {
     const record: EvidenceStepRecord = {
       index: stepIndex,
+      stepIndex: options?.sourceStepIndex,
       stepText,
       target: options?.target,
       status: options?.status ?? "passed",
@@ -101,6 +107,7 @@ export class EvidenceRecorder {
       errorMessage?: string;
       screenshotPath?: string;
       snapshotPath?: string;
+      sourceStepIndex?: number;
     },
   ): void {
     // Validate screenshotPath - must be image file or undefined
@@ -120,6 +127,7 @@ export class EvidenceRecorder {
 
     const record: EvidenceStepRecord = {
       index: stepIndex,
+      stepIndex: options?.sourceStepIndex,
       stepText,
       target: options?.target,
       status: options?.status ?? "passed",

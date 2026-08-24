@@ -1,4 +1,4 @@
-import { createAiProviderFromEnv, type AiProvider } from "../ai-provider-factory";
+import { createRepairAiProvider, type AiProvider } from "../ai-provider-factory";
 import { AiProviderError } from "../ai-provider.types";
 import { buildRepairContextPack, type RepairContextPack, type RepairEvidence } from "./repair-context-pack";
 import { validateRepairDecision, type RepairCandidateForValidation, type RepairEvidenceForValidation } from "./repair-decision-validator";
@@ -66,10 +66,27 @@ export async function runAiRepairOrchestrator(input: AiRepairOrchestratorInput):
     return { status: "provider_disabled", diagnostics: { reason: "AI_REPAIR_ENABLED=false" } };
   }
 
-  // Usar provider inyectado si viene (para tests), sino crear desde env
-  const provider = input.provider ?? await createAiProviderFromEnv();
-  if (!provider) {
-    return { status: "provider_disabled", diagnostics: { reason: "AI provider is disabled or missing." } };
+  // Resolve effective provider/model for logging (AI_REPAIR_* takes priority over general vars)
+  const effectiveProvider = process.env.AI_REPAIR_PROVIDER?.trim() || process.env.AI_PROVIDER?.trim() || "unknown";
+  const effectiveModel = process.env.AI_REPAIR_MODEL?.trim() || process.env.AI_MODEL?.trim() || "unknown";
+  console.log(`[ai-repair] enabled provider=${effectiveProvider} model=${effectiveModel}`);
+
+  // Use injected provider if present (for tests), otherwise create from repair-specific config
+  let provider: AiProvider;
+  if (input.provider) {
+    provider = input.provider;
+  } else {
+    try {
+      provider = await createRepairAiProvider();
+    } catch (err) {
+      const code = err instanceof AiProviderError ? err.code : "ai_provider_config_missing";
+      const message = err instanceof Error ? err.message : String(err);
+      console.log(`[ai-repair] provider_error code=${code} message=${message}`);
+      return {
+        status: "provider_error",
+        diagnostics: { code, message, invocationsConsumed: 0 }
+      };
+    }
   }
 
   const maxChars = Number(process.env.AI_REPAIR_MAX_CONTEXT_CHARS ?? "30000");
@@ -88,15 +105,23 @@ export async function runAiRepairOrchestrator(input: AiRepairOrchestratorInput):
   const systemPrompt = buildRepairSystemPrompt();
 
   try {
+    console.log(`[ai-repair] invocation started purpose=repair provider=${provider.providerName} model=${provider.model}`);
+    const invocationStart = Date.now();
     const completion = await provider.completeJson({
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: prompt }
       ],
+      purpose: "repair",
       temperature: 0,
       requireJson: true,
       requireJsonSchema: bool("AI_REQUIRE_JSON_SCHEMA", true)
     });
+
+    const invocationDurationMs = Date.now() - invocationStart;
+    const exitCode = completion.diagnostics?.exitCode ?? "unknown";
+    const reportedTokens = completion.usage?.totalPhysicalTokens ?? "unknown";
+    console.log(`[ai-repair] completed purpose=repair provider=${provider.providerName} model=${provider.model} durationMs=${invocationDurationMs} exitCode=${exitCode} tokens=${reportedTokens}`);
 
     const validation = validateRepairDecision(completion.parsedJson ?? completion.rawText, {
       candidates: input.candidates,
@@ -171,20 +196,25 @@ export async function runAiRepairOrchestrator(input: AiRepairOrchestratorInput):
     };
   } catch (error) {
     if (error instanceof AiProviderError) {
+      console.log(`[ai-repair] provider_error code=${error.code} message=${error.message}`);
       return {
         status: "provider_error",
         diagnostics: {
           code: error.code,
           message: error.message,
-          details: error.diagnostics
+          details: error.diagnostics,
+          invocationsConsumed: 1
         }
       };
     }
+    const message = error instanceof Error ? error.message : String(error);
+    console.log(`[ai-repair] provider_error code=ai_provider_http_error message=${message}`);
     return {
       status: "provider_error",
       diagnostics: {
         code: "ai_provider_http_error",
-        message: error instanceof Error ? error.message : String(error)
+        message,
+        invocationsConsumed: 1
       }
     };
   }

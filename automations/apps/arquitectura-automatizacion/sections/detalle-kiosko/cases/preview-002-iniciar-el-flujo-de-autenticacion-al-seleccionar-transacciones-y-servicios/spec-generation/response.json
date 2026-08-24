@@ -1,0 +1,35 @@
+{
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\nimport { detectAuthGate } from '../../../../../../../src/discovery/auth-gate-detector';\nimport { scanCurrentPage } from '../../../../../../../src/explorer/page-scanner';\nimport { HomePage } from '../../../../pages/home.page';\n\ntest('PREVIEW-002 Iniciar el flujo de autenticacion al seleccionar Transacciones y servicios', async ({ page }) => {\n  process.env.APP_SLUG = 'arquitectura-automatizacion';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-002';\n  process.env.SCENARIO_TITLE = 'Iniciar el flujo de autenticacion al seleccionar Transacciones y servicios';\n\n  const promotedRuntime = createPromotedSpecRuntime(page);\n  const homePage = new HomePage(page);\n\n  try {\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 0,\n      target: 'Iniciar',\n      actionIntent: 'Clic en \"Iniciar\".',\n      expectedEffect: 'Iniciar el flujo de autenticacion',\n      action: async () => {\n        await homePage.start();\n      },\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 1,\n      target: 'Transacciones y servicios',\n      actionIntent: 'Clic en \"Transacciones y servicios\".',\n      expectedEffect: 'Seleccionar Transacciones y servicios',\n      action: async () => {\n        await page.getByText('Transacciones y servicios', { exact: true }).click();\n      },\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 2,\n      target: 'flujo de autenticacion',\n      assertion: async () => {\n        await promotedRuntime.waitForPromotedUiStable(2, 'flujo de autenticacion');\n        const authGate = await detectAuthGate(await scanCurrentPage(page));\n        expect(authGate).toBeTruthy();\n        expect(authGate?.stage).toBe('identification_type_selection');\n      },\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    0,
+    1,
+    2
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "flujo de autenticaciÃ³n",
+      "implementation": "expect(authGate?.stage).toBe('identification_type_selection');"
+    }
+  ],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "start"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "promotedRuntime",
+    "homePage",
+    "authGate"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

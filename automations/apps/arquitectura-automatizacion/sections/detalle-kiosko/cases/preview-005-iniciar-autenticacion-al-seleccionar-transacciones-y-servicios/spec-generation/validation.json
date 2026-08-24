@@ -1,0 +1,93 @@
+{
+  "mode": "ai_hybrid",
+  "provider": "codex",
+  "model": "gpt-5.4",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "invocations": 1,
+  "invocationsConsumed": 1,
+  "durationMs": 42738,
+  "usage": {
+    "inputTokens": 61319,
+    "cachedInputTokens": 41088,
+    "cacheWriteInputTokens": 0,
+    "nonCachedInputTokens": 20231,
+    "outputTokens": 1612,
+    "reasoningOutputTokens": 343,
+    "totalPhysicalTokens": 62931,
+    "durationMs": 40151,
+    "credits": null
+  },
+  "validation": {
+    "schema": "passed",
+    "structure": "failed",
+    "traceFidelity": "passed",
+    "typescript": "passed",
+    "playwrightDiscovery": "failed",
+    "semanticCoverage": "failed",
+    "functionalExecution": "skipped"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [],
+  "regressedGates": [],
+  "missingRequirements": [
+    {
+      "text": "Validar que se muestre \"¿Qué deseas realizar hoy?\".",
+      "type": "literal_visible_text",
+      "stepIndex": 1
+    },
+    {
+      "text": "Validar que se muestre \"autenticación\".",
+      "type": "auth_gate",
+      "stepIndex": 3
+    },
+    {
+      "text": "¿Qué deseas realizar hoy?",
+      "type": "literal_visible_text",
+      "stepIndex": 1
+    },
+    {
+      "text": "La opcion autenticada activa la barrera de autenticacion antes de consultas personalizadas.",
+      "type": "auth_gate"
+    },
+    {
+      "text": "autenticación",
+      "type": "auth_gate",
+      "stepIndex": 3
+    }
+  ],
+  "oracleTypes": [
+    "literal_visible_text",
+    "auth_gate"
+  ],
+  "errors": [
+    "missing_expect_import_for_assertions",
+    "auth_flow_method_signature_mismatch:ensureStageReady:expected=2-2:actual=0",
+    "step_not_implemented_in_spec:1",
+    "missing_assertion_coverage:Validar que se muestre \"¿Qué deseas realizar hoy?\".",
+    "missing_assertion_coverage:Validar que se muestre \"autenticación\".",
+    "missing_assertion_coverage:¿Qué deseas realizar hoy?",
+    "missing_assertion_oracle_context:requirement=¿Qué deseas realizar hoy?|oracleType=literal_visible_text|historicalRequirement=¿Qué deseas realizar hoy?|resolvedTarget=unknown|backed=true",
+    "missing_assertion_coverage:La opcion autenticada activa la barrera de autenticacion antes de consultas personalizadas.",
+    "missing_assertion_oracle_context:requirement=La opcion autenticada activa la barrera de autenticacion antes de consultas personalizadas.|oracleType=auth_gate|historicalRequirement=La opcion autenticada activa la barrera de autenticacion antes de consultas personalizadas.|resolvedTarget=unknown|backed=true",
+    "playwright_discovery_failed:exitCode=1:discovered=0",
+    "playwright_discovery_error:Listing tests:"
+  ],
+  "warnings": [],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

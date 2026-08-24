@@ -1,0 +1,38 @@
+{
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\nimport { detectAuthGate } from '../../../../../../../src/discovery/auth-gate-detector';\nimport { scanCurrentPage } from '../../../../../../../src/explorer/page-scanner';\nimport { HomePage } from '../../../../pages/home.page';\n\nprocess.env.APP_SLUG = 'arquitectura-automatizacion';\nprocess.env.SECTION_SLUG = 'detalle-kiosko';\nprocess.env.SCENARIO_ID = 'PREVIEW-003';\nprocess.env.SCENARIO_TITLE = 'Iniciar el flujo de autenticaci\\u00f3n desde transacciones y servicios';\n\ntest('PREVIEW-003 - Iniciar el flujo de autenticaci\\u00f3n desde transacciones y servicios', async ({ page }) => {\n  const promotedRuntime = createPromotedSpecRuntime(page);\n  const homePage = new HomePage(page);\n\n  try {\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 0,\n      target: 'Iniciar',\n      actionIntent: 'Clic en \"Iniciar\".',\n      expectedEffect: 'Iniciar el flujo de autenticaci\\u00f3n desde transacciones y servicios.',\n      action: async () => {\n        await homePage.start();\n      },\n    });\n\n    await promotedRuntime.waitForPromotedUiStable(0, 'autenticaci\\u00f3n');\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 0,\n      target: 'autenticaci\\u00f3n',\n      assertion: async () => {\n        const authGate = detectAuthGate(await scanCurrentPage(page));\n        expect(authGate.stage).toBe('identification_type_selection');\n      },\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 1,\n      target: 'transacciones y servicios',\n      actionIntent: 'Clic en \"transacciones y servicios\".',\n      expectedEffect: 'Mantener el flujo de autenticaci\\u00f3n en la ruta observada.',\n      action: async () => {\n        await page.getByText('transacciones y servicios', { exact: false }).click();\n      },\n    });\n\n    await promotedRuntime.waitForPromotedUiStable(2, 'autenticaci\\u00f3n');\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 2,\n      target: 'autenticaci\\u00f3n',\n      assertion: async () => {\n        const authGate = detectAuthGate(await scanCurrentPage(page));\n        expect(authGate.stage).toBe('identification_type_selection');\n      },\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    0,
+    1,
+    2
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "autenticaciÃ³n",
+      "implementation": "expect(authGate.stage).toBe('identification_type_selection');"
+    },
+    {
+      "requirement": "autenticaciÃ³n",
+      "implementation": "expect(authGate.stage).toBe('identification_type_selection');"
+    }
+  ],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "start"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "promotedRuntime",
+    "homePage"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

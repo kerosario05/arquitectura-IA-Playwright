@@ -2,9 +2,9 @@
   "id": "preview-001-visualizacion-de-la-pantalla-inicial-del-kiosco",
   "externalId": "PREVIEW-001",
   "caseId": 0,
-  "title": "Visualización de la pantalla inicial del kiosco",
+  "title": "Visualizacion de la pantalla inicial del kiosco",
   "source": "discovery",
   "appSlug": "arquitectura-automatizacion",
   "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
-  "createdAt": "2026-08-04T15:26:22.497Z"
+  "createdAt": "2026-08-05T17:59:32.789Z"
 }

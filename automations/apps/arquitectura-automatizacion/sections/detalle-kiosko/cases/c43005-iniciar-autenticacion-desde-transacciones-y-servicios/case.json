@@ -1,0 +1,10 @@
+{
+  "id": "c43005-iniciar-autenticacion-desde-transacciones-y-servicios",
+  "externalId": "C43005",
+  "caseId": 43005,
+  "title": "Iniciar autenticación desde transacciones y servicios",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-07T13:07:39.240Z"
+}

@@ -1,0 +1,10 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sectionId": 4903,
+  "sourceScenarioId": "C42869",
+  "testRailCaseId": 42869,
+  "generatedAt": "2026-08-05T18:48:01.237Z",
+  "title": "Iniciar nuevamente en la pantalla de bienvenida despues de reinicio del kiosco"
+}

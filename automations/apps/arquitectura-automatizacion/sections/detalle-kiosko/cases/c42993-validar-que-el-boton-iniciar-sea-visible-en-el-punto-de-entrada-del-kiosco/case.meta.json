@@ -1,0 +1,9 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "C42993",
+  "testRailCaseId": 42993,
+  "generatedAt": "2026-08-06T18:40:06.987Z",
+  "title": "Validar que el boton Iniciar sea visible en el punto de entrada del kiosco"
+}

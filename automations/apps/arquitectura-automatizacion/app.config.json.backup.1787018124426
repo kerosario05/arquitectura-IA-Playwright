@@ -1,0 +1,557 @@
+{
+  "appProfile": {
+    "appSlug": "arquitectura-automatizacion",
+    "source": "default",
+    "name": "4",
+    "baseUrl": "https://172.27.4.50",
+    "baseUrlHash": "1423ba294517",
+    "createdAt": "2026-08-18T01:52:38.122Z",
+    "updatedAt": "2026-08-18T01:52:38.123Z"
+  },
+  "baseUrl": "https://172.27.4.50",
+  "loginMode": "password",
+  "testData": {},
+  "testDataAliases": {},
+  "testDataRefs": {},
+  "username": "adminr",
+  "password": "admin123",
+  "usernameRef": "APP_USERNAME",
+  "passwordRef": "APP_PASSWORD",
+  "missingInputBehavior": "auto_generate",
+  "routeProfile": {
+    "name": "inferred_from_scenarios",
+    "entry": [
+      {
+        "businessLabel": "información_de_productos",
+        "visibleLabel": "Información de productos"
+      }
+    ],
+    "aliases": {},
+    "intermediates": {
+      "Iniciar": [
+        "Explora nuestros productos",
+        "transacciones y servicios"
+      ]
+    },
+    "domainTerms": {},
+    "visibleControls": [
+      "Beneficios",
+      "Condiciones relevantes",
+      "Cuentas de Efectivo",
+      "Depósitos a Plazo",
+      "Descripción general",
+      "Dólares",
+      "Euros",
+      "Finalizar sesión",
+      "Información de productos",
+      "Información legal o notas aclaratorias",
+      "Nombre del producto",
+      "Pesos",
+      "Préstamos",
+      "Requisitos",
+      "Solicitar",
+      "Tarjetas",
+      "Tarjetas de crédito",
+      "Tasas",
+      "Volver al listado de productos"
+    ],
+    "representativeFixture": {},
+    "notes": [
+      "Auto-inferred from 7 scenario(s) during run. Persist routeProfile in app.config.json for reuse."
+    ],
+    "entrySteps": [
+      {
+        "action": "click",
+        "target": "Iniciar",
+        "when": "before_first_functional_step"
+      }
+    ],
+    "updatedAt": "2026-08-18T01:50:12.229Z",
+    "targetPaths": {
+      "Tarjeta Crédito Visa Clásica": {
+        "target": "Tarjeta Crédito Visa Clásica",
+        "requiredIntermediates": [
+          "Información de productos",
+          "Tarjetas"
+        ],
+        "confidence": "high",
+        "source": "runtime_discovery",
+        "productMetadata": {
+          "category": "General",
+          "subcategory": "Información de productos",
+          "productLabel": "Tarjeta Crédito Visa Clásica",
+          "normalizedLabel": "tarjeta credito visa clasica",
+          "isRepresentative": true,
+          "groupKey": "tarjeta_credito_visa_clasica",
+          "discoveredAt": "2026-06-11T21:04:16.169Z",
+          "detailSections": [
+            "Beneficios",
+            "Detalles",
+            "Información del Producto"
+          ],
+          "actionButtons": [
+            "Finalizar sesión",
+            "Volver",
+            "Solicitar"
+          ],
+          "presentationType": "detail_page",
+          "validationStatus": "validated_detail",
+          "expectedCardSignals": {
+            "cardTextPreview": "Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Pagos en línea con disponibilidad inmediata. Tecnología contactless y Click to Pay.",
+            "bulletCount": 0,
+            "hasImageOrIcon": true,
+            "visibleSignals": [],
+            "cardIndex": 1
+          },
+          "clickableToDetail": true
+        }
+      },
+      "Tarjeta Crédito Visa Gold": {
+        "target": "Tarjeta Crédito Visa Gold",
+        "requiredIntermediates": [
+          "Información de productos",
+          "Tarjetas"
+        ],
+        "confidence": "high",
+        "source": "runtime_discovery",
+        "productMetadata": {
+          "category": "General",
+          "subcategory": "Información de productos",
+          "productLabel": "Tarjeta Crédito Visa Gold",
+          "normalizedLabel": "tarjeta credito visa gold",
+          "isRepresentative": true,
+          "groupKey": "tarjeta_credito_visa_gold",
+          "discoveredAt": "2026-06-11T21:04:16.170Z",
+          "detailSections": [
+            "Beneficios",
+            "Detalles",
+            "Información del Producto"
+          ],
+          "actionButtons": [
+            "Finalizar sesión",
+            "Volver",
+            "Solicitar"
+          ],
+          "presentationType": "detail_page",
+          "validationStatus": "validated_detail",
+          "expectedCardSignals": {
+            "cardTextPreview": "Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Mayor plazo para pagar: 26 días después de la fecha de corte. Pagos en línea, que permiten la disponibilidad de fo",
+            "bulletCount": 0,
+            "hasImageOrIcon": true,
+            "visibleSignals": [],
+            "cardIndex": 2
+          },
+          "clickableToDetail": true
+        }
+      },
+      "Tarjeta de Crédito Visa Platinum": {
+        "target": "Tarjeta de Crédito Visa Platinum",
+        "requiredIntermediates": [
+          "Información de productos",
+          "Tarjetas"
+        ],
+        "confidence": "high",
+        "source": "runtime_discovery",
+        "productMetadata": {
+          "category": "Tarjeta",
+          "subcategory": "Información de productos",
+          "productLabel": "Tarjeta de Crédito Visa Platinum",
+          "normalizedLabel": "tarjeta de credito visa platinum",
+          "isRepresentative": true,
+          "groupKey": "tarjeta_de_credito_visa_platinum",
+          "discoveredAt": "2026-06-11T21:04:16.170Z",
+          "detailSections": [
+            "Beneficios",
+            "Detalles",
+            "Información del Producto"
+          ],
+          "actionButtons": [
+            "Finalizar sesión",
+            "Volver",
+            "Solicitar"
+          ],
+          "presentationType": "detail_page",
+          "validationStatus": "validated_detail",
+          "expectedCardSignals": {
+            "cardTextPreview": "2 pases anuales a los VIP Lounges afiliados a Visa Airport Companion. Doble de Puntos Santa Cruz en Restaurantes y Plataforas de Streaming digitales (HBO Max, Disney Plus, Netflix, Spotify, iTunes, Go",
+            "bulletCount": 0,
+            "hasImageOrIcon": true,
+            "visibleSignals": [],
+            "cardIndex": 3
+          },
+          "clickableToDetail": true
+        }
+      },
+      "Tarjeta de Crédito Visa Infinite": {
+        "target": "Tarjeta de Crédito Visa Infinite",
+        "requiredIntermediates": [
+          "Información de productos",
+          "Tarjetas"
+        ],
+        "confidence": "high",
+        "source": "runtime_discovery",
+        "productMetadata": {
+          "category": "Tarjeta",
+          "subcategory": "Información de productos",
+          "productLabel": "Tarjeta de Crédito Visa Infinite",
+          "normalizedLabel": "tarjeta de credito visa infinite",
+          "isRepresentative": true,
+          "groupKey": "tarjeta_de_credito_visa_infinite",
+          "discoveredAt": "2026-06-11T21:04:16.170Z",
+          "detailSections": [
+            "Beneficios",
+            "Detalles",
+            "Información del Producto"
+          ],
+          "actionButtons": [
+            "Finalizar sesión",
+            "Volver",
+            "Solicitar"
+          ],
+          "presentationType": "detail_page",
+          "validationStatus": "validated_detail",
+          "expectedCardSignals": {
+            "cardTextPreview": "Before boarding: 6 pases anuales. Pases ilimitados (Lounge Key) membresía del programa para el tarjetahabiente principal. Triple de Puntos Santa Cruz en restaurantes locales e internacionales.",
+            "bulletCount": 0,
+            "hasImageOrIcon": true,
+            "visibleSignals": [],
+            "cardIndex": 4
+          },
+          "clickableToDetail": true
+        }
+      },
+      "Tarjeta de Crédito Bravo Santa Cruz": {
+        "target": "Tarjeta de Crédito Bravo Santa Cruz",
+        "requiredIntermediates": [
+          "Información de productos",
+          "Tarjetas"
+        ],
+        "confidence": "high",
+        "source": "runtime_discovery",
+        "productMetadata": {
+          "category": "Tarjeta",
+          "subcategory": "Información de productos",
+          "productLabel": "Tarjeta de Crédito Bravo Santa Cruz",
+          "normalizedLabel": "tarjeta de credito bravo santa cruz",
+          "isRepresentative": true,
+          "groupKey": "tarjeta_de_credito_bravo_santa_cruz",
+          "discoveredAt": "2026-06-11T21:04:16.170Z",
+          "detailSections": [
+            "Beneficios",
+            "Detalles",
+            "Información del Producto"
+          ],
+          "actionButtons": [
+            "Finalizar sesión",
+            "Volver",
+            "Solicitar"
+          ],
+          "presentationType": "detail_page",
+          "validationStatus": "validated_detail",
+          "expectedCardSignals": {
+            "cardTextPreview": "Cashback: 7% en todas las compras realizadas dentro del ecosistema Bravo con un tope mensual de RD$10,500. Cashback: 5% en servicios de streaming y taxi: Uber, Netflix, Google Play, App Store, Spotify",
+            "bulletCount": 0,
+            "hasImageOrIcon": true,
+            "visibleSignals": [],
+            "cardIndex": 7
+          },
+          "clickableToDetail": true
+        }
+      },
+      "Cuenta de Ahorros Personal en Dólares": {
+        "target": "Cuenta de Ahorros Personal en Dólares",
+        "requiredIntermediates": [
+          "Información de productos",
+          "Cuentas"
+        ],
+        "confidence": "high",
+        "source": "runtime_discovery",
+        "productMetadata": {
+          "category": "Cuenta de Ahorros Personal",
+          "subcategory": "Información de productos",
+          "variant": "Dólares",
+          "productLabel": "Cuenta de Ahorros Personal en Dólares",
+          "normalizedLabel": "cuenta de ahorros personal en dolares",
+          "isRepresentative": true,
+          "groupKey": "cuenta_de_ahorros_personal_en_dolares",
+          "discoveredAt": "2026-06-11T21:04:16.170Z",
+          "detailSections": [
+            "Detalles",
+            "Información del Producto"
+          ],
+          "actionButtons": [
+            "Finalizar sesión",
+            "Volver",
+            "Solicitar"
+          ],
+          "presentationType": "detail_page",
+          "validationStatus": "validated_detail",
+          "expectedCardSignals": {
+            "cardTextPreview": "Liquidez total: retiros y transferencias en cualquier momento. TIN anual: 0.05%, acreditado mensualmente sobre el balance promedio. Alertas de movimientos y transacciones seguras por BSC en línea y Ap",
+            "bulletCount": 0,
+            "hasImageOrIcon": true,
+            "visibleSignals": [],
+            "cardIndex": 2
+          },
+          "clickableToDetail": true
+        }
+      },
+      "Préstamo Personal": {
+        "target": "Préstamo Personal",
+        "requiredIntermediates": [
+          "Información de productos",
+          "Préstamos"
+        ],
+        "confidence": "high",
+        "source": "runtime_discovery",
+        "productMetadata": {
+          "category": "General",
+          "subcategory": "Información de productos",
+          "productLabel": "Préstamo Personal",
+          "normalizedLabel": "prestamo personal",
+          "isRepresentative": true,
+          "groupKey": "prestamo_personal",
+          "discoveredAt": "2026-06-24T14:26:45.214Z",
+          "detailSections": [
+            "Beneficios",
+            "Información del Producto"
+          ],
+          "actionButtons": [
+            "Finalizar sesión",
+            "Volver",
+            "Solicitar"
+          ],
+          "presentationType": "detail_page",
+          "validationStatus": "validated_detail"
+        }
+      },
+      "Tarjeta Multicrédito": {
+        "target": "Tarjeta Multicrédito",
+        "requiredIntermediates": [
+          "Información de productos",
+          "Tarjetas",
+          "Tarjeta de Crédito"
+        ],
+        "confidence": "high",
+        "source": "runtime_discovery",
+        "productMetadata": {
+          "category": "General",
+          "subcategory": "Información de productos",
+          "productLabel": "Tarjeta Multicrédito",
+          "normalizedLabel": "tarjeta multicredito",
+          "isRepresentative": true,
+          "groupKey": "tarjeta_multicredito",
+          "discoveredAt": "2026-06-24T14:26:45.215Z",
+          "detailSections": [],
+          "actionButtons": [],
+          "presentationType": "product_card",
+          "validationStatus": "validated_card",
+          "expectedCardSignals": {
+            "cardTextPreview": "Tecnología para pago sin contacto (contactless). Un saldo (Límite en pesos dominicanos RD$). Permite realizar pagos desde tus cuentas, a través de BSC en línea y App BSC.",
+            "bulletCount": 0,
+            "hasImageOrIcon": true,
+            "visibleSignals": [],
+            "cardIndex": 6
+          },
+          "clickableToDetail": false
+        }
+      },
+      "Tarjeta de Crédito Visa Joven": {
+        "target": "Tarjeta de Crédito Visa Joven",
+        "requiredIntermediates": [
+          "Información de productos",
+          "Tarjetas",
+          "Tarjeta de Crédito"
+        ],
+        "confidence": "high",
+        "source": "runtime_discovery",
+        "productMetadata": {
+          "category": "Tarjeta",
+          "subcategory": "Información de productos",
+          "productLabel": "Tarjeta de Crédito Visa Joven",
+          "normalizedLabel": "tarjeta de credito visa joven",
+          "isRepresentative": true,
+          "groupKey": "tarjeta_de_credito_visa_joven",
+          "discoveredAt": "2026-06-24T14:26:45.216Z",
+          "detailSections": [],
+          "actionButtons": [],
+          "presentationType": "product_card",
+          "validationStatus": "validated_card",
+          "expectedCardSignals": {
+            "cardTextPreview": "2% de devolución del pago en universidades, papelerías, centros de fotocopiados, librerías. 2% de devolución del pago en fast foods, restaurantes. 2% de devolución del pago en couriers, tiendas de tec",
+            "bulletCount": 0,
+            "hasImageOrIcon": true,
+            "visibleSignals": [],
+            "cardIndex": 5
+          },
+          "clickableToDetail": false
+        }
+      },
+      "Tarjeta de Crédito PriceSmart": {
+        "target": "Tarjeta de Crédito PriceSmart",
+        "requiredIntermediates": [
+          "Información de productos",
+          "Tarjetas",
+          "Tarjeta de Crédito"
+        ],
+        "confidence": "high",
+        "source": "runtime_discovery",
+        "productMetadata": {
+          "category": "Tarjeta",
+          "subcategory": "Información de productos",
+          "productLabel": "Tarjeta de Crédito PriceSmart",
+          "normalizedLabel": "tarjeta de credito pricesmart",
+          "isRepresentative": true,
+          "groupKey": "tarjeta_de_credito_pricesmart",
+          "discoveredAt": "2026-06-24T14:26:45.217Z",
+          "detailSections": [],
+          "actionButtons": [],
+          "presentationType": "product_card",
+          "validationStatus": "validated_card",
+          "expectedCardSignals": {
+            "cardTextPreview": "Acumulas 6% de SmartCash en todos los clubes y página web de PriceSmart de Rep. Dom. Tope mensual RD$6,000.00. o Cada SmartCash equivale a un peso dominicano (RD$1) para redimir en los clubes de Price",
+            "bulletCount": 0,
+            "hasImageOrIcon": false,
+            "visibleSignals": [],
+            "cardIndex": 8
+          },
+          "clickableToDetail": false
+        }
+      },
+      "Cuenta de Ahorros Personal en Pesos": {
+        "target": "Cuenta de Ahorros Personal en Pesos",
+        "requiredIntermediates": [
+          "Información de productos",
+          "Cuentas",
+          "Cuenta de Ahorro"
+        ],
+        "confidence": "high",
+        "source": "runtime_discovery",
+        "productMetadata": {
+          "category": "Cuenta de Ahorros Personal",
+          "subcategory": "Información de productos",
+          "variant": "Pesos",
+          "productLabel": "Cuenta de Ahorros Personal en Pesos",
+          "normalizedLabel": "cuenta de ahorros personal en pesos",
+          "isRepresentative": true,
+          "groupKey": "cuenta_de_ahorros_personal_en_pesos",
+          "discoveredAt": "2026-06-24T14:26:45.219Z",
+          "detailSections": [],
+          "actionButtons": [],
+          "presentationType": "product_card",
+          "validationStatus": "validated_card",
+          "expectedCardSignals": {
+            "cardTextPreview": "Liquidez total, retiros y transferencias en cualquier momento. TIN 0.25% anual, acreditados mensualmente sobre el balance promedio. Alertas de movimientos y transacciones seguras por BSC en línea y Ap",
+            "bulletCount": 0,
+            "hasImageOrIcon": true,
+            "visibleSignals": [],
+            "cardIndex": 1
+          },
+          "clickableToDetail": false
+        }
+      },
+      "Cuenta de Ahorros Personal en Euros": {
+        "target": "Cuenta de Ahorros Personal en Euros",
+        "requiredIntermediates": [
+          "Información de productos",
+          "Cuentas",
+          "Cuenta de Ahorro"
+        ],
+        "confidence": "high",
+        "source": "runtime_discovery",
+        "productMetadata": {
+          "category": "Cuenta de Ahorros Personal",
+          "subcategory": "Información de productos",
+          "variant": "Euros",
+          "productLabel": "Cuenta de Ahorros Personal en Euros",
+          "normalizedLabel": "cuenta de ahorros personal en euros",
+          "isRepresentative": true,
+          "groupKey": "cuenta_de_ahorros_personal_en_euros",
+          "discoveredAt": "2026-06-24T14:26:45.220Z",
+          "detailSections": [],
+          "actionButtons": [],
+          "presentationType": "product_card",
+          "validationStatus": "validated_card",
+          "expectedCardSignals": {
+            "cardTextPreview": "Liquidez total: retiros y transferencias en cualquier momento. Interés nominal anual (TIN): 0.01%, acreditado mensualmente sobre el balance promedio. Alertas de movimientos y transacciones seguras por",
+            "bulletCount": 0,
+            "hasImageOrIcon": false,
+            "visibleSignals": [],
+            "cardIndex": 3
+          },
+          "clickableToDetail": false
+        }
+      },
+      "Depósitos a plazo en Pesos": {
+        "target": "Depósitos a plazo en Pesos",
+        "requiredIntermediates": [
+          "Información de productos",
+          "Depósitos a plazo"
+        ],
+        "confidence": "high",
+        "source": "runtime_discovery",
+        "productMetadata": {
+          "category": "Depósitos a plazo",
+          "subcategory": "Información de productos",
+          "variant": "Pesos",
+          "productLabel": "Depósitos a plazo en Pesos",
+          "normalizedLabel": "depositos a plazo en pesos",
+          "isRepresentative": true,
+          "groupKey": "depositos_a_plazo_en_pesos",
+          "discoveredAt": "2026-06-24T14:26:45.221Z",
+          "detailSections": [
+            "Detalles",
+            "Información del Producto"
+          ],
+          "actionButtons": [
+            "Finalizar sesión",
+            "Volver",
+            "Solicitar"
+          ],
+          "presentationType": "detail_page",
+          "validationStatus": "validated_detail"
+        }
+      },
+      "Depósitos a plazo en Dólares": {
+        "target": "Depósitos a plazo en Dólares",
+        "requiredIntermediates": [
+          "Información de productos",
+          "Depósitos a plazo"
+        ],
+        "confidence": "high",
+        "source": "runtime_discovery",
+        "productMetadata": {
+          "category": "Depósitos a plazo",
+          "subcategory": "Información de productos",
+          "variant": "Dólares",
+          "productLabel": "Depósitos a plazo en Dólares",
+          "normalizedLabel": "depositos a plazo en dolares",
+          "isRepresentative": true,
+          "groupKey": "depositos_a_plazo_en_dolares",
+          "discoveredAt": "2026-06-24T14:26:45.222Z",
+          "detailSections": [
+            "Detalles",
+            "Información del Producto"
+          ],
+          "actionButtons": [
+            "Finalizar sesión",
+            "Volver",
+            "Solicitar"
+          ],
+          "presentationType": "detail_page",
+          "validationStatus": "validated_detail"
+        }
+      }
+    },
+    "routes": [
+      {
+        "from": "Iniciar",
+        "intermediates": [
+          "Explora nuestros productos",
+          "transacciones y servicios"
+        ]
+      }
+    ]
+  },
+  "updatedAt": "2026-08-18T01:52:38.123Z"
+}

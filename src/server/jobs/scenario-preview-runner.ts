@@ -4,7 +4,7 @@ import fs from "fs";
 import { randomUUID } from "crypto";
 import { jobStore, type JobSummary, type JobStatus } from "./job-store";
 import type { PublishedCaseEntry } from "./launch-orchestrator";
-import { toVirtualCase, type ScenarioPreviewRequest, type VirtualCase } from "../../types/scenario-preview.types";
+import { type ScenarioPreviewRequest, type VirtualCase } from "../../types/scenario-preview.types";
 import { config, requireTestRailConfig } from "../../config/env";
 import { TestRailClient } from "../../clients/testrail.client";
 import { defectChecklistStore } from "../services/defect-checklist-store";
@@ -37,6 +37,7 @@ import { buildStructuredDefectDescription, buildDefectTitle, inferDefectSeverity
 import { learnEntryStepsFromSnapshot } from "../services/entry-steps-learner";
 import { RunEvidenceRecorder } from "../../evidence/run-evidence-recorder";
 import { loadEvidenceConfig } from "../../evidence/evidence-types";
+import { buildVirtualCaseFromContract } from "../../automations/case-contract-evaluator";
 
 const TECHNICAL_SLUGS = new Set([
   "tests",
@@ -961,7 +962,18 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   console.log(`[section-profile] source=${sectionProfile.source} sectionName="${sectionProfile.sectionName}" sectionSlug=${sectionProfile.sectionSlug}`);
 
   // Convert to virtual cases with section metadata
-  const virtualCases = normalizedScenarios.map((s, i) => toVirtualCase(s, i, sectionProfile.sectionSlug, sectionProfile.sectionName, sectionProfile.sectionId));
+  for (const scenario of normalizedScenarios) {
+    console.log(`[scenario-auth-intent-runner] scenarioId=${scenario.scenarioId ?? scenario.sourceIssueKey} authIntent=${scenario.authIntent ?? "undefined"}`);
+  }
+  const virtualCases = normalizedScenarios.map((scenario, index) =>
+    buildVirtualCaseFromContract({
+      scenario,
+      index,
+      sectionSlug: sectionProfile.sectionSlug,
+      sectionName: sectionProfile.sectionName,
+      sectionId: sectionProfile.sectionId,
+    }),
+  );
 
   // Normalize virtual cases (second pass for safety)
   const normalizedCases: VirtualCase[] = [];
@@ -1015,12 +1027,17 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
       );
     }
 
-    // Restore required navigation clicks that were converted to validations
+    // Restore required navigation clicks that were converted to validations.
+    // Only restore when the step was actually a converted click (action), never a
+    // genuine assertion whose target merely matches a required navigation target.
+    const convertedClickTargets = new Set(
+      result.convertedTargets.map((target) => target.toLowerCase())
+    );
     const restoredSteps = result.steps.map((step: string) => {
       const validationMatch = step.match(/^Validar que se muestre "([^"]+)"\.?$/i);
       if (validationMatch) {
         const target = validationMatch[1];
-        if (entryStepsTargets.has(target.toLowerCase())) {
+        if (entryStepsTargets.has(target.toLowerCase()) && convertedClickTargets.has(target.toLowerCase())) {
           const restoredStep = `Clic en "${target}".`;
           jobStore.appendLog(
             jobId,
@@ -1053,45 +1070,32 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   }
 
   // POST-GUARDS: Enforce scenario steps as authoritative (FINAL AUTHORITY PASS)
-  // Any click that exists in original scenario MUST be preserved as click, not converted
+  // Restore only explicit clicks that were actually removed during normalization.
   for (const vc of normalizedCases) {
     const originalSteps = originalScenarioSteps.get(vc.displayId) || [];
-    const originalClicks = new Map<string, string>();
+    const authorityResult = enforceExplicitScenarioClickAuthority(vc.steps, originalSteps);
 
-    // Extract all explicit clicks from original scenario
-    for (const step of originalSteps) {
-      const clickMatch = step.match(/^Clic en "([^"]+)"/i);
-      if (clickMatch) {
-        originalClicks.set(clickMatch[1].toLowerCase(), step);
-      }
-    }
-
-    // Restore any original click that was converted to validation by ANY guard
-    let restoredCount = 0;
-    const enforcedSteps = vc.steps.map((step: string) => {
-      const validationMatch = step.match(/^Validar que se muestre "([^"]+)"\.?$/i);
-      if (validationMatch) {
-        const target = validationMatch[1];
-        const originalClick = originalClicks.get(target.toLowerCase());
-        if (originalClick) {
-          restoredCount++;
-          jobStore.appendLog(
-            jobId,
-            `[scenario-guard] explicitScenarioClickPreserved target="${target}" reason=scenario_steps_authority`,
-          );
-          return originalClick;
-        }
-      }
-      return step;
-    });
-
-    if (restoredCount > 0) {
+    for (const target of authorityResult.restoredTargets) {
       jobStore.appendLog(
         jobId,
-        `[mcp-execution] scenarioStepAuthority scenario=${vc.displayId} action=restored_explicit_clicks count=${restoredCount}`,
+        `[scenario-guard] explicitScenarioClickPreserved target="${target}" reason=scenario_steps_authority`,
       );
-      vc.steps = enforcedSteps;
     }
+
+    if (authorityResult.skippedCount > 0) {
+      jobStore.appendLog(
+        jobId,
+        `[mcp-execution] scenarioStepAuthority scenario=${vc.displayId} action=explicit_click_already_present skipped=${authorityResult.skippedCount}`,
+      );
+    }
+
+    if (authorityResult.restoredCount > 0) {
+      jobStore.appendLog(
+        jobId,
+        `[mcp-execution] scenarioStepAuthority scenario=${vc.displayId} action=restored_explicit_clicks count=${authorityResult.restoredCount}`,
+      );
+    }
+    vc.steps = authorityResult.steps;
 
     jobStore.appendLog(
       jobId,
@@ -1100,25 +1104,31 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   }
 
   // Guard: convert unsupported short/generic click targets that appear right before ordinal selection
+  const preOrdinalConvertedTargets = new Map<string, Set<string>>();
   for (const vc of normalizedCases) {
     const result = convertUnsupportedPreOrdinalClicks(vc.steps, routeProfile, entrySteps);
+    const converted = new Set<string>();
     for (const diag of result.diagnostics) {
+      converted.add(diag.target.toLowerCase());
       jobStore.appendLog(
         jobId,
         `[scenario-guard] unsupportedPreOrdinalClick target="${diag.target}" handling=contextual_assertion reason=${diag.reason}`,
       );
     }
+    preOrdinalConvertedTargets.set(vc.displayId, converted);
     vc.steps = result.steps;
   }
 
   // Post-guards: Restore any required navigation that was converted to assertions by guards
-  // This runs AFTER all guards to catch re-conversions
+  // This runs AFTER all guards to catch re-conversions. Only restore when the step was
+  // actually a converted click (action), never a genuine assertion.
   for (const vc of normalizedCases) {
+    const convertedClickTargets = preOrdinalConvertedTargets.get(vc.displayId) ?? new Set<string>();
     vc.steps = vc.steps.map((step: string) => {
       const validationMatch = step.match(/^Validar que se muestre "([^"]+)"\.?$/i);
       if (validationMatch) {
         const target = validationMatch[1];
-        if (entryStepsTargets.has(target.toLowerCase())) {
+        if (entryStepsTargets.has(target.toLowerCase()) && convertedClickTargets.has(target.toLowerCase())) {
           const restoredStep = `Clic en "${target}".`;
           jobStore.appendLog(
             jobId,
@@ -1242,29 +1252,47 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   for (const vc of normalizedCases) {
     jobStore.appendLog(jobId, `[scenario-preview-runner] beforeWrite scenario=${vc.displayId} steps=${JSON.stringify(vc.steps)}`);
 
-    // Verify that required navigation is preserved as clicks, not converted to assertions
-    // Step 1: Repair ANY assertions that correspond to navigation entry points
-    let repairedCount = 0;
-    const repairedSteps = vc.steps.map((step: string) => {
-      const validationMatch = step.match(/^Validar que se muestre "([^"]+)"\.?$/i);
-      if (validationMatch) {
-        const target = validationMatch[1];
-        // Repair if target is ANY entry step (not just clicks, any action)
-        if (expectedNavigationTargets.has(target.toLowerCase())) {
-          const repairedStep = `Clic en "${target}".`;
-          repairedCount++;
-          jobStore.appendLog(
-            jobId,
-            `[scenario-preview-runner] requiredNavigationRepairApplied scenario=${vc.displayId} target="${target}" from=assertion to=click`,
-          );
-          return repairedStep;
-        }
-      }
-      return step;
-    });
+    // Verify that required navigation is preserved as clicks, not converted to assertions.
+    // Step 1: Count current executable navigation clicks BEFORE any repair. If the required
+    // navigation is already satisfied, short-circuit and never convert an assertion.
+    const countRequiredNavigationClicks = (steps: string[]): number =>
+      steps.filter((s: string) => {
+        const clickMatch = s.match(/^Clic en "([^"]+)"\.?$/i);
+        return clickMatch !== null && expectedNavigationTargets.has(clickMatch[1].toLowerCase());
+      }).length;
 
-    if (repairedCount > 0) {
-      vc.steps = repairedSteps;
+    const currentRequiredClicks = countRequiredNavigationClicks(vc.steps);
+
+    if (currentRequiredClicks >= expectedRequiredNavigationCount) {
+      jobStore.appendLog(
+        jobId,
+        `[scenario-preview-runner] requiredNavigationRepairSkipped scenario=${vc.displayId} reason=already_satisfied clicks=${currentRequiredClicks} expected=${expectedRequiredNavigationCount} targets="${Array.from(expectedNavigationTargets).join("|")}"`,
+      );
+    } else {
+      // A required navigation click is genuinely missing. Only restore an assertion when it
+      // has traceability of being a previously-converted click (never by target coincidence).
+      const convertedClickTargets = preOrdinalConvertedTargets.get(vc.displayId) ?? new Set<string>();
+      let repairedCount = 0;
+      const repairedSteps = vc.steps.map((step: string) => {
+        const validationMatch = step.match(/^Validar que se muestre "([^"]+)"\.?$/i);
+        if (validationMatch) {
+          const target = validationMatch[1];
+          if (expectedNavigationTargets.has(target.toLowerCase()) && convertedClickTargets.has(target.toLowerCase())) {
+            const repairedStep = `Clic en "${target}".`;
+            repairedCount++;
+            jobStore.appendLog(
+              jobId,
+              `[scenario-preview-runner] requiredNavigationRepairApplied scenario=${vc.displayId} target="${target}" from=assertion to=click`,
+            );
+            return repairedStep;
+          }
+        }
+        return step;
+      });
+
+      if (repairedCount > 0) {
+        vc.steps = repairedSteps;
+      }
     }
 
     // Step 2: Validate that we have the correct number of navigation clicks
@@ -1670,6 +1698,10 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
     env: {
       ...process.env,
       EVIDENCE_RUN_ID: jobId,
+      AUTOMATION_SOURCE: "qalab",
+      AUTOMATION_HEADLESS: opts.headed ? "false" : "true",
+      HEADLESS: opts.headed ? "false" : "true",
+      AI_SPEC_REPAIR_MAX_ATTEMPTS: process.env.AI_SPEC_REPAIR_MAX_ATTEMPTS ?? "1",
     } as NodeJS.ProcessEnv,
     stdio: ["ignore", "pipe", "pipe"],
   });
@@ -1682,6 +1714,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   let stdoutBuffer = "";
   let stderrBuffer = "";
   const finishedCaseIds = new Set<string>();
+  const caseTitleById = new Map<string, string>();
   let sawResultsLine = false;
 
   // FASE 5: First case timeout
@@ -1826,8 +1859,15 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
             clearTimeout(firstCaseTimeoutTimer);
             firstCaseTimeoutTimer = null;
           }
+          const currentCaseId = typeof json.caseId === "string" ? json.caseId : null;
+          const currentCaseTitle = typeof json.title === "string" && json.title.trim().length > 0 ? json.title.trim() : null;
+          if (currentCaseId && currentCaseTitle) {
+            caseTitleById.set(currentCaseId, currentCaseTitle);
+          }
           jobStore.update(jobId, {
-            currentCase: json.caseId,
+            currentCase: currentCaseTitle ?? currentCaseId,
+            currentCaseId,
+            currentCaseTitle,
             summary: mergeScenarioPreviewSummary(jobStore.get(jobId)?.summary, {
               currentCaseIndex: json.index,
               totalCases: json.total,
@@ -1860,8 +1900,14 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
             }
           }
           const currentSummary = jobStore.get(jobId)?.summary;
+          const currentCaseId = typeof json.caseId === "string" ? json.caseId : null;
+          const currentCaseTitle = typeof json.title === "string" && json.title.trim().length > 0
+            ? json.title.trim()
+            : (currentCaseId ? caseTitleById.get(currentCaseId) ?? null : null);
           jobStore.update(jobId, {
-            currentCase: json.caseId,
+            currentCase: currentCaseTitle ?? currentCaseId,
+            currentCaseId,
+            currentCaseTitle,
             summary: mergeScenarioPreviewSummary(jobStore.get(jobId)?.summary, applyCaseFinishedSummaryPatch(currentSummary, json.status)),
           });
           jobStore.appendLog(jobId, `[scenario-preview] case_finished: ${json.caseId} status=${json.status}`);
@@ -1911,7 +1957,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
       }
       const match = line.match(/(PREVIEW-\d+)/);
       if (match) {
-        jobStore.update(jobId, { currentCase: match[1] });
+        jobStore.update(jobId, { currentCase: match[1], currentCaseId: match[1], currentCaseTitle: null });
       }
       jobStore.appendLog(jobId, `[scenario-preview] case_started: ${line.trim()}`);
     } else if (line.includes("[discovery:preview] completed")) {
@@ -1928,8 +1974,12 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
       }
       const currentSummary = jobStore.get(jobId)?.summary;
       const isPassed = line.includes("status=passed");
+      const currentCaseId = match?.[1] ?? jobStore.get(jobId)?.currentCaseId ?? null;
+      const currentCaseTitle = currentCaseId ? caseTitleById.get(currentCaseId) ?? null : null;
       jobStore.update(jobId, {
-        currentCase: match?.[1] ?? jobStore.get(jobId)?.currentCase ?? null,
+        currentCase: currentCaseTitle ?? currentCaseId ?? jobStore.get(jobId)?.currentCase ?? null,
+        currentCaseId,
+        currentCaseTitle,
         summary: currentSummary ? mergeScenarioPreviewSummary(currentSummary, applyCaseFinishedSummaryPatch(currentSummary, isPassed ? "passed" : "failed")) : undefined,
       });
       jobStore.appendLog(jobId, `[scenario-preview] case_finished: ${line.trim()}`);
@@ -2743,6 +2793,112 @@ function normalizeStepForDedup(step: string): string {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/["""''«»]/g, "")
     .trim();
+}
+
+type ExplicitScenarioClickAuthorityResult = {
+  steps: string[];
+  restoredCount: number;
+  skippedCount: number;
+  restoredTargets: string[];
+};
+
+const EXPLICIT_CLICK_PREFIXES = [
+  /^(?:clic en|hacer clic en|seleccionar la opci[oó]n)\s*:?\s+(.+)$/i,
+];
+
+function normalizeScenarioStepSemanticToken(text: string): string {
+  return normalizeForComparison(stripStepNumbering(text))
+    .replace(/["“”'‘’«»`´]/g, " ")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function extractExplicitClickSemanticTarget(step: string): string | null {
+  const plainStep = stripStepNumbering(step).trim();
+  if (!plainStep) return null;
+
+  const firstSentence = plainStep.split(/[.!?]/)[0]?.trim();
+  if (!firstSentence) return null;
+
+  for (const pattern of EXPLICIT_CLICK_PREFIXES) {
+    const match = firstSentence.match(pattern);
+    if (!match) continue;
+    const rawTarget = match[1]
+      .trim()
+      .replace(/^["“”'‘’«»`´]\s*/, "")
+      .replace(/\s*["“”'‘’«»`´]$/, "");
+    const semanticTarget = normalizeScenarioStepSemanticToken(rawTarget);
+    return semanticTarget || null;
+  }
+
+  return null;
+}
+
+function extractValidationDisplayTarget(step: string): string | null {
+  const validationMatch = stripStepNumbering(step).match(/^Validar que se muestre "([^"]+)"\.?$/i);
+  return validationMatch?.[1]?.trim() || null;
+}
+
+function countSemanticClicks(steps: string[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const step of steps) {
+    const target = extractExplicitClickSemanticTarget(step);
+    if (!target) continue;
+    counts.set(target, (counts.get(target) || 0) + 1);
+  }
+  return counts;
+}
+
+export function enforceExplicitScenarioClickAuthority(
+  currentSteps: string[],
+  originalScenarioSteps: string[],
+): ExplicitScenarioClickAuthorityResult {
+  const originalClickCounts = new Map<string, number>();
+  const originalClickTemplates = new Map<string, string>();
+
+  for (const step of originalScenarioSteps) {
+    const target = extractExplicitClickSemanticTarget(step);
+    if (!target) continue;
+    originalClickCounts.set(target, (originalClickCounts.get(target) || 0) + 1);
+    if (!originalClickTemplates.has(target)) {
+      originalClickTemplates.set(target, step);
+    }
+  }
+
+  const projectedClickCounts = countSemanticClicks(currentSteps);
+  const restoredTargets: string[] = [];
+  let restoredCount = 0;
+  let skippedCount = 0;
+
+  const steps = currentSteps.map((step) => {
+    const validationTarget = extractValidationDisplayTarget(step);
+    if (!validationTarget) return step;
+
+    const semanticTarget = normalizeScenarioStepSemanticToken(validationTarget);
+    if (!semanticTarget) return step;
+
+    const originalTargetCount = originalClickCounts.get(semanticTarget) || 0;
+    if (originalTargetCount === 0) return step;
+
+    const currentTargetCount = projectedClickCounts.get(semanticTarget) || 0;
+    if (currentTargetCount >= originalTargetCount) {
+      skippedCount++;
+      return step;
+    }
+
+    projectedClickCounts.set(semanticTarget, currentTargetCount + 1);
+    restoredCount++;
+    restoredTargets.push(validationTarget);
+    return originalClickTemplates.get(semanticTarget) || `Clic en "${validationTarget}".`;
+  });
+
+  return {
+    steps,
+    restoredCount,
+    skippedCount,
+    restoredTargets,
+  };
 }
 
 function applyEntryStepsToScenarios(

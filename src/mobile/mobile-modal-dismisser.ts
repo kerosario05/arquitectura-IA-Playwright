@@ -149,7 +149,13 @@ export function detectBlockingModal(pageSourceXml: string): ModalDetection {
     if (MODAL_CLASS_HINTS.some((h) => tag.includes(h) || rid.includes(h))) {
       hasModalContainer = true;
     }
-    if (TERMS_MODAL_HINTS.includes(normalize((attrs["content-desc"] || "").trim()))) {
+    // Consider both semantic attributes independently: some Android trees expose the modal
+    // title via `text` rather than `content-desc`. Evaluating each separately (not via `||`)
+    // ensures a non-matching content-desc never blocks a valid matching `text`.
+    if (
+      TERMS_MODAL_HINTS.includes(normalize((attrs["content-desc"] || "").trim())) ||
+      TERMS_MODAL_HINTS.includes(normalize((attrs["text"] || "").trim()))
+    ) {
       hasTermsPanel = true;
     }
     if (!closeSelector) {
@@ -252,3 +258,95 @@ export async function dismissBlockingModal(
 
   return false;
 }
+
+/**
+ * Detects and dismisses an Android system compatibility-warning dialog.
+ *
+ * This dialog is shown by the Android OS (not the app) when an app was compiled
+ * against an older page-size setting. It is identified by:
+ *   - package "android" (system-level, not the app under test)
+ *   - resource-id "android:id/message" containing compatibility warning text
+ *   - an "OK" button with resource-id "android:id/button1" or text "OK"
+ *
+ * Pressing "OK" dismisses the dialog without "Don't show again" semantics.
+ * This function never hardcodes the app name or package and does not affect
+ * any functional modal owned by the app under test.
+ *
+ * Returns true if the dialog was detected and the OK button was tapped.
+ */
+export async function dismissAndroidCompatibilityDialog(
+  browser: WebdriverIO.Browser,
+  log: (line: string) => void = () => {},
+): Promise<boolean> {
+  let xml: string;
+  try {
+    xml = await browser.getPageSource();
+  } catch {
+    return false;
+  }
+
+  const detected = detectAndroidCompatibilityDialog(xml);
+  if (!detected) return false;
+
+  // Prefer the button by resource-id, fall back to text "OK".
+  const selectors = [
+    `android=new UiSelector().resourceId("android:id/button1")`,
+    `android=new UiSelector().text("OK")`,
+  ];
+  for (const sel of selectors) {
+    try {
+      const el = await browser.$(sel);
+      if (await el.isExisting()) {
+        await el.click();
+        log(`[mobile:compat-dialog] dismissed Android compatibility dialog via selector="${sel}"`);
+        return true;
+      }
+    } catch {
+      // Try next selector.
+    }
+  }
+  log(`[mobile:compat-dialog] compatibility dialog detected but OK button not found; attempting back()`);
+  try {
+    await browser.back();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Pure detection — no I/O. Returns true when the page source contains an Android
+ * system compatibility dialog. Checks for system package ownership and the presence
+ * of compatibility-warning wording in the message element.
+ */
+export function detectAndroidCompatibilityDialog(pageSourceXml: string): boolean {
+  if (!pageSourceXml) return false;
+
+  // The system dialog has package="android" at the hierarchy or window level.
+  const hasSystemPackage =
+    /package="android"/.test(pageSourceXml) ||
+    /com\.android\.settings|android:id\/alertTitle|android:id\/message/.test(pageSourceXml);
+  if (!hasSystemPackage) return false;
+
+  // The message element contains compatibility-warning wording (language-agnostic keywords).
+  const normalizedXml = pageSourceXml.toLowerCase();
+  const compatibilityKeywords = [
+    "compiled with an older version",
+    "page size",
+    "16 kb",
+    "16kb",
+    "compatibility",
+    "compilada con una version",
+    "tama\u00f1o de p\u00e1gina",
+  ];
+  const hasCompatMessage = compatibilityKeywords.some((kw) => normalizedXml.includes(kw));
+  if (!hasCompatMessage) return false;
+
+  // Must have an "OK" button (resource-id android:id/button1 or text OK).
+  const hasOkButton =
+    /android:id\/button1/.test(pageSourceXml) ||
+    /text="OK"/.test(pageSourceXml);
+
+  return hasOkButton;
+}
+

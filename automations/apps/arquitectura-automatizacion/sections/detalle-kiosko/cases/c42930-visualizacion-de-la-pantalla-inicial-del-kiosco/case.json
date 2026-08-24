@@ -1,0 +1,10 @@
+{
+  "id": "c42930-visualizacion-de-la-pantalla-inicial-del-kiosco",
+  "externalId": "C42930",
+  "caseId": 42930,
+  "title": "Visualizacion de la pantalla inicial del kiosco",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-05T20:30:12.261Z"
+}

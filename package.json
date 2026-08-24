@@ -54,6 +54,7 @@
     "cors": "^2.8.6",
     "dotenv": "^16.6.1",
     "express": "^5.2.1",
+    "oracledb": "^7.0.1",
     "webdriverio": "^9.30.0"
   },
   "devDependencies": {
@@ -61,6 +62,8 @@
     "@types/express": "^5.0.6",
     "@types/jszip": "^3.4.0",
     "@types/node": "^24.3.0",
+    "appium": "^3.5.0",
+    "appium-uiautomator2-driver": "^8.4.0",
     "jszip": "^3.10.1",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2"

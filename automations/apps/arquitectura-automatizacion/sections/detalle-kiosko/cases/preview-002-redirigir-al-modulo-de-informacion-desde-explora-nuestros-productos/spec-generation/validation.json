@@ -1,0 +1,62 @@
+{
+  "mode": "ai_hybrid",
+  "provider": "codex",
+  "model": "gpt-5.4-mini",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "invocations": 1,
+  "invocationsConsumed": 1,
+  "durationMs": 50587,
+  "usage": {
+    "inputTokens": 54932,
+    "cachedInputTokens": 37504,
+    "cacheWriteInputTokens": 0,
+    "nonCachedInputTokens": 17428,
+    "outputTokens": 2161,
+    "reasoningOutputTokens": 926,
+    "totalPhysicalTokens": 57093,
+    "durationMs": 47952,
+    "credits": null
+  },
+  "validation": {
+    "schema": "passed",
+    "structure": "failed",
+    "traceFidelity": "failed",
+    "typescript": "passed",
+    "playwrightDiscovery": "passed",
+    "semanticCoverage": "passed",
+    "functionalExecution": "skipped"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [
+    "structuralValidation",
+    "traceFidelityValidation"
+  ],
+  "regressedGates": [],
+  "missingRequirements": [],
+  "oracleTypes": [
+    "literal_visible_text",
+    "navigation_transition"
+  ],
+  "errors": [
+    "missing_metadata_line:process.env.SCENARIO_TITLE = 'Redirigir al módulo de información desde explora nuestros productos';",
+    "contract_target_changed:stepIndex=3:contractStepIndex=3:expected=\"módulo de información\""
+  ],
+  "warnings": [],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

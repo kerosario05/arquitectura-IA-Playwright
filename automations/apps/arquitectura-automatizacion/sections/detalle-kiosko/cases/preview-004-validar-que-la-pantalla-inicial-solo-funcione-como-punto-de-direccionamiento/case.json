@@ -1,0 +1,10 @@
+{
+  "id": "preview-004-validar-que-la-pantalla-inicial-solo-funcione-como-punto-de-direccionamiento",
+  "externalId": "PREVIEW-004",
+  "caseId": 0,
+  "title": "Validar que la pantalla inicial solo funcione como punto de direccionamiento",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-17T14:17:03.874Z"
+}

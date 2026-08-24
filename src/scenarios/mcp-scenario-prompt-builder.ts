@@ -578,9 +578,11 @@ ${skillRules}
 9. If Functional Branch Coverage Contract is present, generate independent coverage for each listed branchId and return branchId in functionalBranch.
 
 ## Entry Steps Rules
-- If entrySteps are provided in the App Configuration section, EVERY scenario MUST start with them.
-- Do NOT omit, reorder, or modify entry steps.
-- entrySteps are mandatory navigation steps (e.g., clicking "Iniciar") needed before the first functional step.
+- entrySteps represent the navigation needed to reach a functional context that comes AFTER the entry screen. They are mandatory only when the scenario's target context is downstream of that navigation.
+- If the scenario's primary objective is to validate the screen/context that exists BEFORE the entrySteps, do NOT prepend entrySteps that would leave that screen. Perform the assertions while that screen/context remains active.
+- If the scenario validates a screen or behavior that occurs AFTER the entry navigation, include the required entrySteps in order before the scenario-specific steps.
+- Temporal coherence: an assertion must run while the screen/context it belongs to is still active. Never place an assertion after a navigation step that leaves that context.
+- If entrySteps are needed for the target context, do NOT omit, reorder, or modify them.
 - If entrySteps are NOT provided, do NOT invent them. Generate steps based ONLY on the Jira story.
 - MCP will insert missing entrySteps automatically at runtime if the routeProfile defines them.
 - Do NOT duplicate entry steps. Each entry step must appear exactly once per scenario.
@@ -777,6 +779,7 @@ Return a JSON object with this exact structure:
       "isConverted": 0,
       "automationType": "ui_with_auth_gate",
       "setupStrategy": "auth_gate",
+      "authIntent": "gate_observation",
       "appSlug": "${targetAppSlug ?? appSlug}",
       "targetAppSlug": "${targetAppSlug ?? appSlug}",
       "targetAppName": "${targetAppName ?? appSlug}",
@@ -802,7 +805,15 @@ Return a JSON object with this exact structure:
       "reason": "backend_only_or_not_ui_automatable"
     }
   ]
-}`;
+}
+
+## AUTH INTENT
+- Use "authIntent": "gate_observation" SOLO cuando el objetivo funcional del escenario termina al comprobar que aparece o se activa un mecanismo de autenticación.
+- Use "authIntent": "full_authentication" cuando el escenario necesita atravesar autenticación para ejecutar o validar pasos funcionales posteriores.
+- Omite authIntent cuando el escenario no requiere autenticación o la evidencia de la HU no permite determinarlo.
+- NO uses "gate_observation" únicamente porque la funcionalidad sea privada, accessIntent sea "authenticated", exista un auth gate en la ruta, o la navegación llegue a una pantalla de login.
+- NO infieras authIntent desde appSlug, URL, stage, nombre de módulo, producto o implementación específica.
+`;
 }
 
 export async function buildMcpScenarioMessages(

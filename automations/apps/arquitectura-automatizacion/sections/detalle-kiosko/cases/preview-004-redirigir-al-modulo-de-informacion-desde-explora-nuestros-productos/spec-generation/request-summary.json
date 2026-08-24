@@ -1,0 +1,68 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "scenarioId": "PREVIEW-004",
+  "scenarioTitle": "Redirigir al modulo de informacion desde Explora nuestros productos",
+  "stepCount": 4,
+  "sourceExpectedResultPresent": true,
+  "requiredAssertionCount": 4,
+  "mode": "ai_hybrid",
+  "functionalExecutionEnabled": true,
+  "provider": "codex",
+  "model": "gpt-5.4",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "observableOracles": [
+    {
+      "id": "observed-01",
+      "requirement": "¿Qué deseas realizar hoy?",
+      "type": "literal_visible_text",
+      "backed": true,
+      "source": "discovery",
+      "evidence": [
+        "assertion_resolved_during_discovery"
+      ]
+    },
+    {
+      "id": "expected-01",
+      "requirement": "módulo de información",
+      "type": "navigation_transition",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 3,
+      "target": "explora nuestros productos",
+      "evidence": [
+        "transition_observed:true",
+        "click_target:explora nuestros productos",
+        "action_type:Clic en \"explora nuestros productos\".",
+        "after_url:https://172.27.4.50/product-catalog"
+      ],
+      "details": {
+        "transitionObserved": true,
+        "clickTarget": "explora nuestros productos",
+        "resolvedTarget": null,
+        "postClickUiChange": null,
+        "sourceActionStepIndex": 2,
+        "expectedUrl": "https://172.27.4.50/product-catalog"
+      }
+    }
+  ],
+  "oracleTypes": [
+    "literal_visible_text",
+    "navigation_transition"
+  ],
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [],
+  "finalSpec": {
+    "origin": "deterministic_draft",
+    "generatedBy": "core",
+    "strategy": "deterministic_draft",
+    "fallback": null
+  }
+}

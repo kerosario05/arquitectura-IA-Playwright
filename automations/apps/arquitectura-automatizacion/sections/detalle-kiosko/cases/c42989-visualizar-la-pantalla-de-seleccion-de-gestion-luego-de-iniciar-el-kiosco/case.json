@@ -1,0 +1,10 @@
+{
+  "id": "c42989-visualizar-la-pantalla-de-seleccion-de-gestion-luego-de-iniciar-el-kiosco",
+  "externalId": "C42989",
+  "caseId": 42989,
+  "title": "Visualizar la pantalla de seleccion de gestion luego de iniciar el kiosco",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-06T18:32:05.469Z"
+}

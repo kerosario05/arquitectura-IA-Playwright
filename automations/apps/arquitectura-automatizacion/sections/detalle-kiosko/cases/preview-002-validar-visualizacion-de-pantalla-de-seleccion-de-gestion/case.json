@@ -1,0 +1,10 @@
+{
+  "id": "preview-002-validar-visualizacion-de-pantalla-de-seleccion-de-gestion",
+  "externalId": "PREVIEW-002",
+  "caseId": 0,
+  "title": "Validar visualización de pantalla de selección de gestión",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-12T14:48:05.662Z"
+}

@@ -1,0 +1,54 @@
+{
+  "mode": "ai_hybrid",
+  "provider": "codex",
+  "model": "gpt-5.4",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "invocations": 1,
+  "invocationsConsumed": 1,
+  "durationMs": 77666,
+  "usage": {
+    "inputTokens": 66681,
+    "cachedInputTokens": 28288,
+    "cacheWriteInputTokens": 0,
+    "nonCachedInputTokens": 38393,
+    "outputTokens": 1636,
+    "reasoningOutputTokens": 425,
+    "totalPhysicalTokens": 68317,
+    "durationMs": 52336,
+    "credits": null
+  },
+  "validation": {
+    "schema": "passed",
+    "structure": "passed",
+    "typescript": "passed",
+    "playwrightDiscovery": "passed",
+    "semanticCoverage": "passed",
+    "functionalExecution": "passed"
+  },
+  "promotionAllowed": true,
+  "specsRequested": 1,
+  "specsValidated": 1,
+  "specsRejected": 0,
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": true,
+  "failedGatesAttempt1": [],
+  "regressedGates": [],
+  "missingRequirements": [],
+  "oracleTypes": [
+    "auth_gate"
+  ],
+  "errors": [],
+  "warnings": [],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

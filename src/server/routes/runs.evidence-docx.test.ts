@@ -140,6 +140,89 @@ async function main(): Promise<void> {
     });
   });
 
+  const nonExecutableJob = jobStore.create("discovery-batch", {
+    appSlug: `none-app-${Date.now()}`,
+    sectionSlug: "none-section",
+  });
+  jobStore.update(nonExecutableJob.id, {
+    status: "done",
+    summary: {
+      totalStories: 3,
+      synced: 0,
+      passed: 0,
+      failed: 0,
+      reasonCode: "cases_not_executable",
+    },
+  });
+
+  await test("done job with cases_not_executable reports explicit unavailable reason", async () => {
+    await withServer(async (baseUrl) => {
+      const res = await fetch(`${baseUrl}/api/runs/${nonExecutableJob.id}/evidence-docx/status`);
+      assert.strictEqual(res.status, 200);
+      const body = await res.json() as any;
+      assert.strictEqual(body.status, "unavailable");
+      assert.strictEqual(body.documentReady, false);
+      assert.strictEqual(body.reasonCode, "cases_not_executable");
+    });
+  });
+
+  const docFailedJob = jobStore.create("discovery-batch", {
+    appSlug: `docfail-app-${Date.now()}`,
+    sectionSlug: "docfail-section",
+  });
+  jobStore.update(docFailedJob.id, {
+    status: "done",
+    summary: {
+      totalStories: 2,
+      synced: 2,
+      passed: 1,
+      failed: 1,
+      documentAttempted: true,
+      documentGenerated: false,
+      documentPathPresent: false,
+    },
+  });
+
+  await test("done job with failed document generation reports document_generation_failed", async () => {
+    await withServer(async (baseUrl) => {
+      const res = await fetch(`${baseUrl}/api/runs/${docFailedJob.id}/evidence-docx/status`);
+      assert.strictEqual(res.status, 200);
+      const body = await res.json() as any;
+      assert.strictEqual(body.status, "unavailable");
+      assert.strictEqual(body.documentReady, false);
+      assert.strictEqual(body.reasonCode, "document_generation_failed");
+    });
+  });
+
+  const evidenceInitFailedJob = jobStore.create("discovery-batch", {
+    appSlug: `evfail-app-${Date.now()}`,
+    sectionSlug: "evfail-section",
+  });
+  jobStore.update(evidenceInitFailedJob.id, {
+    status: "done",
+    summary: {
+      totalStories: 2,
+      synced: 0,
+      passed: 0,
+      failed: 0,
+      reasonCode: "evidence_initialization_failed",
+      documentAttempted: true,
+      documentGenerated: false,
+      documentPathPresent: false,
+    },
+  });
+
+  await test("done job with recorder init failure reports evidence_initialization_failed", async () => {
+    await withServer(async (baseUrl) => {
+      const res = await fetch(`${baseUrl}/api/runs/${evidenceInitFailedJob.id}/evidence-docx/status`);
+      assert.strictEqual(res.status, 200);
+      const body = await res.json() as any;
+      assert.strictEqual(body.status, "unavailable");
+      assert.strictEqual(body.documentReady, false);
+      assert.strictEqual(body.reasonCode, "evidence_initialization_failed");
+    });
+  });
+
   const failedJob = jobStore.create("scenario-preview", {
     appSlug: `failed-app-${Date.now()}`,
     sectionSlug: "failed-section",

@@ -1,0 +1,10 @@
+{
+  "id": "preview-004-validar-disponibilidad-de-la-opcion-transacciones-y-servicios",
+  "externalId": "PREVIEW-004",
+  "caseId": 0,
+  "title": "Validar disponibilidad de la opción Transacciones y servicios",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-12T21:03:02.205Z"
+}

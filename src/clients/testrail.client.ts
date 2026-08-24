@@ -128,7 +128,7 @@ export class TestRailClient {
       cases.push(...pageCases);
 
       if (payload._links?.next && payload._links.next.trim()) {
-        endpoint = payload._links.next.replace(/^\//, "");
+        endpoint = payload._links.next.replace(/^\//, "").replace(/^api\/v2\//, "");
       } else {
         endpoint = "";
       }

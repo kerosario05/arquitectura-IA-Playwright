@@ -1,0 +1,10 @@
+{
+  "id": "preview-005-validar-que-las-pantallas-iniciales-no-presenten-informacion-financiera",
+  "externalId": "PREVIEW-005",
+  "caseId": 0,
+  "title": "Validar que las pantallas iniciales no presenten informacion financiera",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-17T20:37:27.570Z"
+}

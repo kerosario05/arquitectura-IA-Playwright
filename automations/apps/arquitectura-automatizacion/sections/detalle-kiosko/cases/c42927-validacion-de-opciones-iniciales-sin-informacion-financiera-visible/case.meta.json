@@ -1,0 +1,10 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sectionId": 4903,
+  "sourceScenarioId": "C42927",
+  "testRailCaseId": 42927,
+  "generatedAt": "2026-08-05T20:50:39.789Z",
+  "title": "Validacion de opciones iniciales sin informacion financiera visible"
+}

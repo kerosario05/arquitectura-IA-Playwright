@@ -1,0 +1,138 @@
+{
+  "id": "preview-003-inicio-del-flujo-de-autenticacion-desde-transacciones-y-servicios",
+  "externalId": "PREVIEW-003",
+  "caseId": 0,
+  "title": "Inicio del flujo de autenticación desde transacciones y servicios",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-003-inicio-del-flujo-de-autenticacion-desde-transacciones-y-servicios\\plan.json",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-003-inicio-del-flujo-de-autenticacion-desde-transacciones-y-servicios\\case.spec.ts",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "status": "spec_failed",
+  "source": "discovery",
+  "appProfile": "arquitectura-automatizacion",
+  "createdAt": "2026-08-13T02:01:32.377Z",
+  "updatedAt": "2026-08-13T02:01:32.377Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-08-13T01-57-41-091Z\\discovered-plans.pending.json",
+  "pomStatus": "needs_manual_review",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "failed",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-08-13T01-57-41-091Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "specGeneration": {
+      "mode": "ai_hybrid",
+      "provider": "copilot",
+      "model": "gpt-5.4",
+      "skill": {
+        "name": "playwright-spec-generation",
+        "version": "1.0.0",
+        "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+        "loaded": true
+      },
+      "invocations": 2,
+      "invocationsConsumed": 2,
+      "durationMs": 102911,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "failed",
+        "functionalExecution": "failed"
+      },
+      "promotionAllowed": false,
+      "specsRequested": 1,
+      "specsValidated": 0,
+      "specsRejected": 1,
+      "specGenerationAttempts": 2,
+      "specRepairAttempts": 1,
+      "firstPassPromotion": false,
+      "failedGatesAttempt1": [
+        "semanticCoverage",
+        "functionalExecution"
+      ],
+      "oracleTypes": [
+        "unsupported_or_unresolved"
+      ],
+      "errors": [
+        "expected_result_not_propagated",
+        "functional_execution_failed:exitCode=1",
+        "functional_execution_error:Error: wrong_screen_before_contextual_action: Cannot execute 'select_product' on target \"kiosco\" because current screen does not match required context. currentUrl=\"https://172.27.4.50/\" visibleButtons=[Iniciar] visibleHeadings=[¡Hola!] stepIndex=3 actionIntent=\"select_product\" screenSignals={isOnHomeScreen:false, isOnLoginScreen:true, isOnMenuScreen:false, isOnAuthGate:false} suggestedFix=\"Ensure navigation/module/auth steps precede this action in the spec\""
+      ],
+      "warnings": [
+        "unresolved_requirement_accepted_by_auth_flow:The observable oracle for \"Se inicia el flujo de autenticación antes de permitir consultas personalizadas.\" is backed=false, so the expected result cannot be asserted without inventing evidence.",
+        "unresolved_requirement_accepted_by_auth_flow:No backed auth-gate signal was provided for step 2 beyond detecting a non-unknown authentication stage after opening \"Transacciones y servicios\".",
+        "functional_execution_screenshots=0",
+        "ai_repair_attempt_applied:1:failedGates=semanticCoverage,functionalExecution",
+        "ai_repair_previous_attempt_error:unresolved_requirement:No backed observable auth-gate evidence was provided to implement executable step 2 as the required post-click authentication-start runtime assertion for scenario PREVIEW-003.",
+        "ai_repair_previous_attempt_error:unresolved_requirement:The expected result \"Se inicia el flujo de autenticación antes de permitir consultas personalizadas.\" is marked as unsupported_or_unresolved with backed=false, so it cannot be asserted without inventing evidence.",
+        "ai_repair_previous_attempt_error:missing_step_coverage:2",
+        "ai_repair_previous_attempt_error:step_not_implemented_in_spec:2",
+        "ai_repair_previous_attempt_error:expected_result_not_propagated",
+        "ai_repair_previous_attempt_error:functional_execution_failed:exitCode=1",
+        "ai_repair_previous_attempt_error:functional_execution_error:Error: session_reset_unrecoverable_missing_replay_callback: Home reset detected but cannot recover context. reason=\"home_url_with_iniciar\" currentUrl=\"https://172.27.4.50/\" previousStepsCount=0 stepIndex=3 target=\"kiosco\" actionIntent=\"select_product\" suggestedFix=\"Regenerate spec with previousStepReplays callbacks or increase session timeout\""
+      ],
+      "finalSpec": {
+        "origin": "ai_candidate",
+        "generatedBy": "ai",
+        "strategy": "ai_candidate",
+        "fallback": null
+      },
+      "specWritten": false,
+      "previousSpec": {
+        "existed": true,
+        "hash": "7426c267c9053d32da1b4fb4b87266ae42749f902fea7fe95f7331e6a3dff029",
+        "lastModifiedAt": "2026-08-05T18:02:36.194Z"
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "pom",
+      "autoPomEnabled": false,
+      "selectedStrategy": "pom",
+      "reason": "spec_generation_validation_failed",
+      "blockers": [
+        "spec_generation_validation_failed"
+      ],
+      "availablePageObjects": [
+        "ProductListPage",
+        "ProductDetailPage",
+        "FormPage",
+        "HomePage",
+        "LoginPage",
+        "CategoryPage",
+        "ProductInformationPage",
+        "OperationsMenuPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-003-inicio-del-flujo-de-autenticacion-desde-transacciones-y-servicios\\plan.json",
+    "previousStatus": "active"
+  }
+}

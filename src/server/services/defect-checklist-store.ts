@@ -11,6 +11,9 @@ export type Defect = {
   /** Personalized defect headline (cause + step + scenario). Falls back to scenarioTitle when absent. */
   title?: string;
   jobId?: string;
+  /** Execution run this defect belongs to (mobile: TestRail runId / launchId). Used to isolate
+   *  the checklist view per execution — never falls back to issueKey when a runId is present. */
+  runId?: string;
   description: string;
   severity: Severity;
   severityReason?: string;
@@ -21,6 +24,7 @@ export type Defect = {
   jiraIssueKey?: string;
   jiraIssueUrl?: string;
   technicalContext?: {
+    dedupeKey?: string;
     reasonCode?: string;
     discoveryStatus?: string;
     failedAtStep?: number;
@@ -29,6 +33,19 @@ export type Defect = {
     rawError?: string;
     evidenceDir?: string;
     evidencePath?: string;
+    evidenceJsonPath?: string;
+    currentUrl?: string;
+    matchedLocatorStrategy?: string;
+    caseId?: number | string;
+    scenarioId?: string;
+    sourceType?: "jira_preview" | "testrail_case";
+    appSlug?: string;
+    sectionSlug?: string;
+    launchId?: string;
+    status?: string;
+    failureReason?: string;
+    errorMessage?: string;
+    screenshotPath?: string;
     lastSuccessfulStep?: {
       stepIndex: number;
       action?: string;
@@ -55,6 +72,13 @@ const VALID_DEFECT_STATUSES: DefectStatus[] = ["pending_review", "accepted", "re
 
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+/** The runId a defect belongs to is the explicitly persisted mobile execution runId only.
+ *  It is NEVER derived from testRailRunId, launchId or jobId — those remain independent
+ *  metadata in technicalContext. */
+function resolveDefectRunId(defect: Defect): string | undefined {
+  return defect.runId;
 }
 
 class DefectChecklistStore {
@@ -111,7 +135,7 @@ class DefectChecklistStore {
 
   addDefect(
     issueKey: string,
-    params: { description: string; severity: Severity; severityReason?: string; jobId?: string; scenarioId?: string; scenarioTitle?: string; title?: string; evidenceUrl?: string; technicalContext?: Defect["technicalContext"] }
+    params: { description: string; severity: Severity; severityReason?: string; jobId?: string; runId?: string; scenarioId?: string; scenarioTitle?: string; title?: string; evidenceUrl?: string; technicalContext?: Defect["technicalContext"] }
   ): Defect | null {
     if (!VALID_SEVERITIES.includes(params.severity)) return null;
     const list = this.getOrCreate(issueKey);
@@ -122,6 +146,7 @@ class DefectChecklistStore {
       severity: params.severity,
       severityReason: params.severityReason,
       jobId: params.jobId,
+      runId: params.runId,
       status: "pending_review",
       scenarioId: params.scenarioId,
       scenarioTitle: params.scenarioTitle,
@@ -163,13 +188,38 @@ class DefectChecklistStore {
     this.save();
   }
 
-  toResponse(list: Checklist, jobId?: string): { issueKey: string; title?: string; checklistUrl: string; defects: Defect[]; createdAt: string; updatedAt: string } {
-    const defects = jobId ? list.defects.filter(d => d.jobId === jobId) : list.defects;
+  toResponse(
+    list: Checklist,
+    filter?: { jobId?: string; runId?: string },
+  ): {
+    issueKey: string;
+    title?: string;
+    checklistUrl: string;
+    defects: Defect[];
+    total: number;
+    pendingReview: number;
+    highSeverity: number;
+    createdAt: string;
+    updatedAt: string;
+  } {
+    let defects = list.defects;
+    if (filter?.runId) {
+      // Strict run isolation: when a runId is provided, show ONLY defects of that run. No
+      // fallback to issueKey/story even if the runId matches nothing.
+      const runId = String(filter.runId);
+      defects = defects.filter((d) => resolveDefectRunId(d) === runId);
+    } else if (filter?.jobId) {
+      defects = defects.filter((d) => d.jobId === filter.jobId);
+    }
+    const withRunId = defects.map((d) => ({ ...d, runId: resolveDefectRunId(d) }));
     return {
       issueKey: list.issueKey,
       title: list.title,
       checklistUrl: `/checklist/${list.urlSlug}`,
-      defects,
+      defects: withRunId,
+      total: withRunId.length,
+      pendingReview: withRunId.filter((d) => d.status === "pending_review").length,
+      highSeverity: withRunId.filter((d) => d.severity === "high" || d.severity === "critical").length,
       createdAt: list.createdAt,
       updatedAt: list.updatedAt,
     };

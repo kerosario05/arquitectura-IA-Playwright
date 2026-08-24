@@ -6,6 +6,22 @@ import type { MobileScreenSnapshot } from "./mobile-knowledge-extractor";
 export type MobileKnowledgeItem = Record<string, unknown>;
 export type MobileKnowledgeStatus = "passed" | "failed" | "partial";
 
+/**
+ * A structured per-step navigation transition: the screen observed before an executed
+ * action, the effective action target, and the screen observed after. screenBefore/
+ * screenAfter are structured fingerprints (screenKey) — never visible text/titles.
+ */
+export type MobileObservedTransition = {
+  stepIndex?: number;
+  action: string;
+  actionTarget: {
+    strategy: string;
+    value: string;
+  };
+  screenBefore: string;
+  screenAfter: string;
+};
+
 function knowledgePath(appSlug: string): string {
   return path.join(process.cwd(), "automations", "apps", appSlug, "mobile.knowledge.json");
 }
@@ -52,6 +68,7 @@ function persistItem(appSlug: string, newItem: MobileKnowledgeItem, matchKey: st
     // Refresh the observed content with the latest snapshot.
     existing.clickTargets = newItem.clickTargets;
     existing.assertionTargets = newItem.assertionTargets;
+    if (newItem.transitions) existing.transitions = newItem.transitions;
     if (newItem.title) existing.title = newItem.title;
     if (isSuccess) {
       existing.successCount = ((existing.successCount as number) ?? 0) + 1;
@@ -107,7 +124,8 @@ export function persistMobileScreen(
 export function persistMobileRoute(
   appSlug: string,
   clickTargets: string[],
-  meta: { issueKey?: string; scenarioTitle?: string; status: MobileKnowledgeStatus }
+  meta: { issueKey?: string; scenarioTitle?: string; status: MobileKnowledgeStatus },
+  transitions?: MobileObservedTransition[]
 ): void {
   if (clickTargets.length < 1) return;
   const now = new Date().toISOString();
@@ -130,5 +148,8 @@ export function persistMobileRoute(
     lastSeenAt: now,
     lastValidatedAt: isSuccess ? now : undefined
   };
+  if (transitions && transitions.length > 0) {
+    item.transitions = transitions;
+  }
   persistItem(appSlug, item, matchKey);
 }

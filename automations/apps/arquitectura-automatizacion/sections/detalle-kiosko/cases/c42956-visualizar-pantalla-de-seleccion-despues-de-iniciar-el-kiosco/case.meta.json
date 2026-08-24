@@ -1,0 +1,9 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "C42956",
+  "testRailCaseId": 42956,
+  "generatedAt": "2026-08-06T12:45:22.484Z",
+  "title": "Visualizar pantalla de seleccion despues de iniciar el kiosco"
+}

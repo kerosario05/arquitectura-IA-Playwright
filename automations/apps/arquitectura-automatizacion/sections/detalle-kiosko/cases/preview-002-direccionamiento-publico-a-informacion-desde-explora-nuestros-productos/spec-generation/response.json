@@ -1,0 +1,45 @@
+{
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../src/runtime/promoted-spec-runtime';\nimport { HomePage } from '../../../../pages/home.page';\nimport { ProductDetailPage } from '../../../../pages/productdetail.page';\n\ntest('PREVIEW-002 - Direccionamiento publico a informacion desde Explora nuestros productos', async ({ page }) => {\n  process.env.APP_SLUG = 'arquitectura-automatizacion';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-002';\n  process.env.SCENARIO_TITLE = 'Direccionamiento publico a informacion desde Explora nuestros productos';\n\n  const promotedRuntime = createPromotedSpecRuntime(page);\n  const homePage = new HomePage(page);\n  const productDetailPage = new ProductDetailPage(page);\n\n  try {\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 0,\n      description: 'Clic en \"Iniciar\".',\n      target: { strategy: 'text', value: 'Iniciar' },\n      action: async () => {\n        await page.getByText('Iniciar', { exact: true }).click();\n      }\n    });\n\n    await promotedRuntime.safeReplayContext({\n      stepIndex: 1,\n      description: 'Navigate to https://172.27.4.50',\n      target: { strategy: 'page_object', value: 'HomePage.open' },\n      action: async () => {\n        await homePage.open();\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 2,\n      description: 'Clic en \"Iniciar\".',\n      target: { strategy: 'role:button', value: 'Iniciar', exact: false },\n      action: async () => {\n        await homePage.start();\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 3,\n      description: 'Clic en \"Explora nuestros productos\".',\n      target: {\n        strategy: 'product_condition',\n        value: 'Explora nuestros productosConoce sobre los beneficios de los productos BSC',\n        exact: false\n      },\n      action: async () => {\n        await productDetailPage.clickPrimaryAction('Explora nuestros productosConoce sobre los beneficios de los productos BSC');\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 4,\n      description: 'Clic en \"Explora nuestros productos\".',\n      target: { strategy: 'text', value: 'Explora nuestros productos' },\n      action: async () => {\n        await page.getByText('Explora nuestros productos', { exact: true }).click();\n      }\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 5,\n      description: 'Validar que se muestre \"mÃ³dulo de informaciÃ³n\".',\n      target: { strategy: 'text', value: 'mÃ³dulo de informaciÃ³n' },\n      assertion: async () => {\n        await expect(page.getByText('mÃ³dulo de informaciÃ³n', { exact: true })).toBeVisible();\n      }\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});\n",
+  "coveredStepIndexes": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "La opcion publica dirige al modulo de informacion.",
+      "implementation": "await expect(page.getByText('mÃ³dulo de informaciÃ³n', { exact: true })).toBeVisible();"
+    }
+  ],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "open",
+        "start"
+      ]
+    },
+    {
+      "className": "ProductDetailPage",
+      "methods": [
+        "clickPrimaryAction"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "promotedRuntime",
+    "homePage",
+    "productDetailPage"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

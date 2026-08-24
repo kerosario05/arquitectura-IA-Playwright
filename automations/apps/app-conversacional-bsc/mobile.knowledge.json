@@ -32,11 +32,11 @@
       "validationStatus": "validated",
       "trustedForReuse": true,
       "failureCount": 0,
-      "successCount": 45,
-      "runCount": 45,
+      "successCount": 221,
+      "runCount": 221,
       "createdAt": "2026-07-23T17:10:04.605Z",
-      "lastSeenAt": "2026-07-25T13:58:07.774Z",
-      "lastValidatedAt": "2026-07-25T13:58:07.774Z"
+      "lastSeenAt": "2026-08-24T12:48:53.108Z",
+      "lastValidatedAt": "2026-08-24T12:48:53.108Z"
     },
     {
       "id": "mob_screen_01f11df122d9",
@@ -46,7 +46,6 @@
       "title": "Bienvenido",
       "clickTargets": [
         "",
-        "Iniciar sesión",
         "Acceso Biométrico",
         "¿Aún no tienes usuario o cuenta?"
       ],
@@ -58,19 +57,18 @@
         "",
         "Iniciar sesión",
         "Acceso Biométrico",
-        "¿Aún no tienes usuario o cuenta?",
-        "v1.0.0"
+        "¿Aún no tienes usuario o cuenta?"
       ],
       "issueKey": "AA-84",
       "scenarioTitle": "Registro exitoso - documento válido de cliente existente y habilitado",
       "validationStatus": "validated",
       "trustedForReuse": true,
       "failureCount": 0,
-      "successCount": 40,
-      "runCount": 40,
+      "successCount": 72,
+      "runCount": 72,
       "createdAt": "2026-07-23T17:16:30.189Z",
-      "lastSeenAt": "2026-07-25T14:03:50.338Z",
-      "lastValidatedAt": "2026-07-25T14:03:50.338Z"
+      "lastSeenAt": "2026-08-21T20:19:55.049Z",
+      "lastValidatedAt": "2026-08-21T20:19:55.049Z"
     },
     {
       "id": "mob_screen_901c4cbb1c98",
@@ -91,11 +89,11 @@
       "validationStatus": "validated",
       "trustedForReuse": true,
       "failureCount": 0,
-      "successCount": 37,
-      "runCount": 37,
+      "successCount": 187,
+      "runCount": 187,
       "createdAt": "2026-07-23T17:16:30.193Z",
-      "lastSeenAt": "2026-07-25T13:58:07.774Z",
-      "lastValidatedAt": "2026-07-25T13:58:07.774Z"
+      "lastSeenAt": "2026-08-24T12:48:53.117Z",
+      "lastValidatedAt": "2026-08-24T12:48:53.117Z"
     },
     {
       "id": "mob_route_79beaf1cebe9",
@@ -113,13 +111,14 @@
       "assertionTargets": [],
       "issueKey": "AA-84",
       "scenarioTitle": "Registro exitoso - documento válido de cliente existente y habilitado",
-      "validationStatus": "pending",
-      "trustedForReuse": false,
+      "validationStatus": "validated",
+      "trustedForReuse": true,
       "failureCount": 1,
-      "successCount": 0,
-      "runCount": 1,
+      "successCount": 2,
+      "runCount": 3,
       "createdAt": "2026-07-23T17:16:30.193Z",
-      "lastSeenAt": "2026-07-23T17:16:30.193Z"
+      "lastSeenAt": "2026-08-18T19:15:07.414Z",
+      "lastValidatedAt": "2026-08-18T19:15:07.414Z"
     },
     {
       "id": "mob_route_d3a2547ff599",
@@ -137,12 +136,12 @@
       "scenarioTitle": "Validación exitosa de documento de cliente existente y habilitado",
       "validationStatus": "validated",
       "trustedForReuse": true,
-      "failureCount": 17,
-      "successCount": 5,
-      "runCount": 22,
+      "failureCount": 29,
+      "successCount": 12,
+      "runCount": 41,
       "createdAt": "2026-07-23T18:08:26.933Z",
-      "lastSeenAt": "2026-07-25T13:57:01.578Z",
-      "lastValidatedAt": "2026-07-25T13:57:01.578Z"
+      "lastSeenAt": "2026-08-18T21:55:43.817Z",
+      "lastValidatedAt": "2026-08-18T21:55:43.817Z"
     },
     {
       "id": "mob_route_60143815282f",
@@ -160,13 +159,13 @@
       "issueKey": "AA-84",
       "scenarioTitle": "Validacion exitosa de cliente existente y habilitado para continuar el registro",
       "validationStatus": "validated",
-      "trustedForReuse": false,
-      "failureCount": 9,
-      "successCount": 3,
-      "runCount": 12,
+      "trustedForReuse": true,
+      "failureCount": 27,
+      "successCount": 10,
+      "runCount": 37,
       "createdAt": "2026-07-23T18:25:46.195Z",
-      "lastSeenAt": "2026-07-25T13:58:07.774Z",
-      "lastValidatedAt": "2026-07-24T16:01:14.440Z"
+      "lastSeenAt": "2026-08-18T21:56:48.553Z",
+      "lastValidatedAt": "2026-08-18T21:56:48.553Z"
     },
     {
       "id": "mob_route_bb3b5a141b6f",
@@ -226,11 +225,11 @@
       "scenarioTitle": "Registro exitoso - cliente existente y habilitado con documento válido",
       "validationStatus": "pending",
       "trustedForReuse": false,
-      "failureCount": 1,
+      "failureCount": 3,
       "successCount": 0,
-      "runCount": 1,
+      "runCount": 3,
       "createdAt": "2026-07-24T15:03:35.954Z",
-      "lastSeenAt": "2026-07-24T15:03:35.954Z"
+      "lastSeenAt": "2026-08-18T19:17:07.067Z"
     },
     {
       "id": "mob_route_893eae6c9ee9",
@@ -245,13 +244,14 @@
       "assertionTargets": [],
       "issueKey": "AA-93",
       "scenarioTitle": "Validación exitosa de cliente existente y habilitado",
-      "validationStatus": "pending",
+      "validationStatus": "validated",
       "trustedForReuse": false,
-      "failureCount": 2,
-      "successCount": 0,
-      "runCount": 2,
+      "failureCount": 6,
+      "successCount": 8,
+      "runCount": 14,
       "createdAt": "2026-07-24T16:23:29.480Z",
-      "lastSeenAt": "2026-07-24T16:34:38.108Z"
+      "lastSeenAt": "2026-08-19T21:33:25.815Z",
+      "lastValidatedAt": "2026-08-19T21:31:31.905Z"
     },
     {
       "id": "mob_route_b28fc7cebb64",
@@ -265,13 +265,850 @@
       "assertionTargets": [],
       "issueKey": "AA-93",
       "scenarioTitle": "Rechazo por formato de documento inválido",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "failureCount": 2,
+      "successCount": 4,
+      "runCount": 6,
+      "createdAt": "2026-07-24T16:24:22.122Z",
+      "lastSeenAt": "2026-08-19T21:28:43.268Z",
+      "lastValidatedAt": "2026-08-19T21:28:43.268Z"
+    },
+    {
+      "id": "mob_screen_d4c78d5bc112",
+      "knowledgeKind": "screen_observed",
+      "matchKey": "at_a_glance",
+      "screenKey": "at_a_glance",
+      "title": "At a glance",
+      "clickTargets": [
+        "Fri, Aug 7",
+        "Play Store",
+        "Gmail",
+        "Photos",
+        "YouTube",
+        "Phone",
+        "Messages",
+        "Chrome",
+        "Predicted app: Play Store",
+        "Google search",
+        "Google app",
+        "Voice search",
+        "Camera search"
+      ],
+      "assertionTargets": [
+        "At a glance",
+        "Home",
+        "Google"
+      ],
+      "issueKey": "AA-94",
+      "scenarioTitle": "Mostrar error tecnico al fallar la consulta de datos",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "failureCount": 0,
+      "successCount": 4,
+      "runCount": 4,
+      "createdAt": "2026-08-07T20:16:01.881Z",
+      "lastSeenAt": "2026-08-07T20:40:15.941Z",
+      "lastValidatedAt": "2026-08-07T20:40:15.941Z"
+    },
+    {
+      "id": "mob_screen_40a7b11ff64d",
+      "knowledgeKind": "screen_observed",
+      "matchKey": "no_te_pudimos_validar_como_cliente",
+      "screenKey": "no_te_pudimos_validar_como_cliente",
+      "title": "No te pudimos validar como cliente",
+      "clickTargets": [
+        "No te pudimos validar como cliente, Para usar el App Conversacional debes ser cliente de Banco Santa Cruz. Puedes solicitar tus productos desde nuestro Portal de Ventas.",
+        "Ir al Portal de Ventas",
+        "Ir al inicio"
+      ],
+      "assertionTargets": [
+        "No te pudimos validar como cliente",
+        "Para usar el App Conversacional debes ser cliente de Banco Santa Cruz. Puedes solicitar tus productos desde nuestro Portal de Ventas.",
+        "Ir al Portal de Ventas",
+        "Ir al inicio"
+      ],
+      "issueKey": "AA-94",
+      "scenarioTitle": "Indicar que los datos de contacto no son correctos",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "failureCount": 0,
+      "successCount": 34,
+      "runCount": 34,
+      "createdAt": "2026-08-10T19:13:30.427Z",
+      "lastSeenAt": "2026-08-21T20:19:55.063Z",
+      "lastValidatedAt": "2026-08-21T20:19:55.063Z"
+    },
+    {
+      "id": "mob_screen_4ea140588150",
+      "knowledgeKind": "screen_observed",
+      "matchKey": "home",
+      "screenKey": "home",
+      "title": "Home",
+      "clickTargets": [
+        "Thu, Aug 20",
+        "Play Store",
+        "Gmail",
+        "Photos",
+        "YouTube",
+        "Phone",
+        "Messages",
+        "Chrome",
+        "Predicted app: Banco Santa Cruz",
+        "Search",
+        "Google app"
+      ],
+      "assertionTargets": [
+        "Home"
+      ],
+      "issueKey": "AA-94",
+      "scenarioTitle": "Mostrar error tecnico al fallar la consulta de datos de contacto",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "failureCount": 0,
+      "successCount": 4,
+      "runCount": 4,
+      "createdAt": "2026-08-10T20:05:59.365Z",
+      "lastSeenAt": "2026-08-20T21:46:36.335Z",
+      "lastValidatedAt": "2026-08-20T21:46:36.335Z"
+    },
+    {
+      "id": "mob_route_34c39dbf975e",
+      "knowledgeKind": "route_observed",
+      "matchKey": "34c39dbf975e",
+      "clickTargets": [
+        "¿Aún no tienes usuario o cuenta?",
+        "Continuar",
+        "new UiSelector().text(\"Cédula de identidad\")"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-94",
+      "scenarioTitle": "Confirmar datos de contacto y continuar con OTP",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "failureCount": 8,
+      "successCount": 0,
+      "runCount": 8,
+      "createdAt": "2026-08-10T20:48:22.353Z",
+      "lastSeenAt": "2026-08-21T02:55:45.561Z",
+      "transitions": [
+        {
+          "stepIndex": 2,
+          "action": "click",
+          "actionTarget": {
+            "strategy": "accessibilityId",
+            "value": "Continuar"
+          },
+          "screenBefore": "screen_6b33d7ee85",
+          "screenAfter": "screen_491aa84560"
+        },
+        {
+          "stepIndex": 3,
+          "action": "click",
+          "actionTarget": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().text(\"Cédula de identidad\")"
+          },
+          "screenBefore": "screen_491aa84560",
+          "screenAfter": "screen_72df5efdfc"
+        }
+      ]
+    },
+    {
+      "id": "mob_route_619debfbcb91",
+      "knowledgeKind": "route_observed",
+      "matchKey": "619debfbcb91",
+      "clickTargets": [
+        "¿Aún no tienes usuario o cuenta?",
+        "Continuar"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-94",
+      "scenarioTitle": "Confirmar datos de contacto y continuar con OTP",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "failureCount": 4,
+      "successCount": 4,
+      "runCount": 8,
+      "createdAt": "2026-08-11T12:48:51.305Z",
+      "lastSeenAt": "2026-08-19T21:32:16.742Z",
+      "lastValidatedAt": "2026-08-19T21:32:16.742Z"
+    },
+    {
+      "id": "mob_route_03ba63599cbd",
+      "knowledgeKind": "route_observed",
+      "matchKey": "03ba63599cbd",
+      "clickTargets": [
+        "¿Aún no tienes usuario o cuenta?",
+        "Continuar",
+        "new UiSelector().text(\"Cédula de identidad\")",
+        "new UiSelector().text(\"Cédula de identidad\")"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-93",
+      "scenarioTitle": "Validar cliente existente con cedula y continuar el registro",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "failureCount": 18,
+      "successCount": 0,
+      "runCount": 18,
+      "createdAt": "2026-08-11T12:50:51.446Z",
+      "lastSeenAt": "2026-08-19T19:06:26.286Z"
+    },
+    {
+      "id": "mob_route_2e1993ea5f1a",
+      "knowledgeKind": "route_observed",
+      "matchKey": "2e1993ea5f1a",
+      "clickTargets": [
+        "¿Aún no tienes usuario o cuenta?",
+        "Continuar",
+        "new UiSelector().descriptionContains(\"Cédula de identidad\")",
+        "new UiSelector().text(\"Cédula de identidad\")"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-93",
+      "scenarioTitle": "Mostrar opciones de tipo de documento en registro",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "failureCount": 5,
+      "successCount": 4,
+      "runCount": 9,
+      "createdAt": "2026-08-17T20:57:41.398Z",
+      "lastSeenAt": "2026-08-21T19:44:06.050Z",
+      "lastValidatedAt": "2026-08-21T19:44:06.050Z",
+      "transitions": [
+        {
+          "stepIndex": 1,
+          "action": "click",
+          "actionTarget": {
+            "strategy": "accessibilityId",
+            "value": "¿Aún no tienes usuario o cuenta?"
+          },
+          "screenBefore": "screen_69bb3dbf9e",
+          "screenAfter": "screen_6b33d7ee85"
+        },
+        {
+          "stepIndex": 2,
+          "action": "click",
+          "actionTarget": {
+            "strategy": "accessibilityId",
+            "value": "Continuar"
+          },
+          "screenBefore": "screen_6b33d7ee85",
+          "screenAfter": "screen_491aa84560"
+        },
+        {
+          "stepIndex": 3,
+          "action": "click",
+          "actionTarget": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"Cédula de identidad\")"
+          },
+          "screenBefore": "screen_491aa84560",
+          "screenAfter": "screen_72df5efdfc"
+        },
+        {
+          "stepIndex": 4,
+          "action": "click",
+          "actionTarget": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().text(\"Cédula de identidad\")"
+          },
+          "screenBefore": "screen_72df5efdfc",
+          "screenAfter": "screen_491aa84560"
+        }
+      ]
+    },
+    {
+      "id": "mob_route_2e88c949aa7a",
+      "knowledgeKind": "route_observed",
+      "matchKey": "2e88c949aa7a",
+      "clickTargets": [
+        "¿Aún no tienes usuario o cuenta?",
+        "Continuar",
+        "new UiSelector().text(\"Cédula de identidad\")",
+        "new UiSelector().text(\"Pasaporte\")",
+        "new UiSelector().descriptionContains(\"Acepto los Términos y Condiciones\")"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-93",
+      "scenarioTitle": "Permitir continuar cuando el cliente existente es elegible",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "failureCount": 1,
+      "successCount": 0,
+      "runCount": 1,
+      "createdAt": "2026-08-17T20:59:46.683Z",
+      "lastSeenAt": "2026-08-17T20:59:46.683Z"
+    },
+    {
+      "id": "mob_screen_8693cbc5d148",
+      "knowledgeKind": "screen_observed",
+      "matchKey": "process_system_isn_t_responding",
+      "screenKey": "process_system_isn_t_responding",
+      "title": "Process system isn't responding",
+      "clickTargets": [
+        "Close app",
+        "Wait"
+      ],
+      "assertionTargets": [
+        "Process system isn't responding"
+      ],
+      "issueKey": "AA-93",
+      "scenarioTitle": "Validar cliente existente habilitado con cedula",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "failureCount": 0,
+      "successCount": 1,
+      "runCount": 1,
+      "createdAt": "2026-08-18T13:24:42.170Z",
+      "lastSeenAt": "2026-08-18T13:24:42.170Z",
+      "lastValidatedAt": "2026-08-18T13:24:42.170Z"
+    },
+    {
+      "id": "mob_route_67fb8cc83c7f",
+      "knowledgeKind": "route_observed",
+      "matchKey": "67fb8cc83c7f",
+      "clickTargets": [
+        "¿Aún no tienes usuario o cuenta?"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-93",
+      "scenarioTitle": "Bloquear continuar cuando el formato del documento es invalido",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "failureCount": 4,
+      "successCount": 0,
+      "runCount": 4,
+      "createdAt": "2026-08-18T14:41:21.387Z",
+      "lastSeenAt": "2026-08-20T13:42:59.200Z"
+    },
+    {
+      "id": "mob_screen_239ce0c91eac",
+      "knowledgeKind": "screen_observed",
+      "matchKey": "system_ui_isn_t_responding",
+      "screenKey": "system_ui_isn_t_responding",
+      "title": "System UI isn't responding",
+      "clickTargets": [
+        "Close app",
+        "Wait"
+      ],
+      "assertionTargets": [
+        "System UI isn't responding"
+      ],
+      "issueKey": "AA-93",
+      "scenarioTitle": "Mostrar bloqueo cuando el documento no corresponde a un cliente del banco",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "failureCount": 0,
+      "successCount": 7,
+      "runCount": 7,
+      "createdAt": "2026-08-18T15:07:15.725Z",
+      "lastSeenAt": "2026-08-21T20:36:09.146Z",
+      "lastValidatedAt": "2026-08-21T20:36:09.146Z"
+    },
+    {
+      "id": "mob_route_565aa17b490a",
+      "knowledgeKind": "route_observed",
+      "matchKey": "565aa17b490a",
+      "clickTargets": [
+        "¿Aún no tienes usuario o cuenta?",
+        "Continuar",
+        "new UiSelector().descriptionContains(\"Cédula de identidad\")",
+        "new UiSelector().text(\"Cédula de identidad\")",
+        "new UiSelector().text(\"Cédula de identidad\")",
+        "new UiSelector().text(\"Cédula de identidad\")"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-93",
+      "scenarioTitle": "Validar cliente existente con cedula y TyC aceptados",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "failureCount": 1,
+      "successCount": 0,
+      "runCount": 1,
+      "createdAt": "2026-08-18T18:25:38.012Z",
+      "lastSeenAt": "2026-08-18T18:25:38.012Z"
+    },
+    {
+      "id": "mob_screen_bdf7082358d6",
+      "knowledgeKind": "screen_observed",
+      "matchKey": "screen_1bbbf5ee3e",
+      "screenKey": "screen_1bbbf5ee3e",
+      "title": "Estamos experimentando dificultades técnicas momentáneas",
+      "clickTargets": [
+        "Estamos experimentando dificultades técnicas momentáneas, Te invitamos a visitar nuestro Centro de Negocios más cercano en donde un asesor podrá aclararte cualquier duda y ayudarte a continuar con el proceso. Lamentamos los inconvenientes.",
+        "Ir al inicio"
+      ],
+      "assertionTargets": [
+        "Estamos experimentando dificultades técnicas momentáneas",
+        "Te invitamos a visitar nuestro Centro de Negocios más cercano en donde un asesor podrá aclararte cualquier duda y ayudarte a continuar con el proceso. Lamentamos los inconvenientes.",
+        "Ir al inicio"
+      ],
+      "issueKey": "AA-93",
+      "scenarioTitle": "Impedir registro cuando el documento no pertenece a un cliente del banco",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "failureCount": 0,
+      "successCount": 3,
+      "runCount": 3,
+      "createdAt": "2026-08-18T20:09:07.968Z",
+      "lastSeenAt": "2026-08-24T12:48:53.125Z",
+      "lastValidatedAt": "2026-08-24T12:48:53.125Z"
+    },
+    {
+      "id": "mob_route_068367689c4a",
+      "knowledgeKind": "route_observed",
+      "matchKey": "068367689c4a",
+      "clickTargets": [
+        "¿Aún no tienes usuario o cuenta?",
+        "Continuar",
+        "new UiSelector().descriptionContains(\"Cédula de identidad\")",
+        "new UiSelector().text(\"Cédula de identidad\")",
+        "new UiSelector().text(\"Cédula de identidad\")"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-93",
+      "scenarioTitle": "Mostrar opciones de tipo de documento en registro",
+      "validationStatus": "validated",
+      "trustedForReuse": false,
+      "failureCount": 7,
+      "successCount": 4,
+      "runCount": 11,
+      "createdAt": "2026-08-19T18:30:47.885Z",
+      "lastSeenAt": "2026-08-20T18:54:42.887Z",
+      "lastValidatedAt": "2026-08-20T17:28:55.418Z"
+    },
+    {
+      "id": "mob_route_0d42ec48fa64",
+      "knowledgeKind": "route_observed",
+      "matchKey": "0d42ec48fa64",
+      "clickTargets": [
+        "¿Aún no tienes usuario o cuenta?",
+        "Continuar",
+        "new UiSelector().descriptionContains(\"Cédula de identidad\")",
+        "Pasaporte",
+        "new UiSelector().descriptionContains(\"Acepto los Términos y Condiciones\")",
+        "Continuar"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-93",
+      "scenarioTitle": "Redirigir al login cuando el cliente ya esta registrado en la app",
       "validationStatus": "pending",
       "trustedForReuse": false,
       "failureCount": 2,
       "successCount": 0,
       "runCount": 2,
-      "createdAt": "2026-07-24T16:24:22.122Z",
-      "lastSeenAt": "2026-07-24T16:35:27.259Z"
+      "createdAt": "2026-08-19T19:32:10.684Z",
+      "lastSeenAt": "2026-08-19T19:58:34.340Z"
+    },
+    {
+      "id": "mob_route_98ae48b7c019",
+      "knowledgeKind": "route_observed",
+      "matchKey": "98ae48b7c019",
+      "clickTargets": [
+        "¿Aún no tienes usuario o cuenta?",
+        "Continuar",
+        "new UiSelector().descriptionContains(\"Cédula de identidad\")",
+        "Cédula de identidad",
+        "new UiSelector().descriptionContains(\"Acepto los Términos y Condiciones\")",
+        "Continuar"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-93",
+      "scenarioTitle": "Validar opciones de tipo de documento y continuar con cliente existente habilitado",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "failureCount": 0,
+      "successCount": 1,
+      "runCount": 1,
+      "createdAt": "2026-08-19T20:39:59.926Z",
+      "lastSeenAt": "2026-08-19T20:39:59.926Z",
+      "lastValidatedAt": "2026-08-19T20:39:59.926Z"
+    },
+    {
+      "id": "mob_route_b5065270f974",
+      "knowledgeKind": "route_observed",
+      "matchKey": "b5065270f974",
+      "clickTargets": [
+        "¿Aún no tienes usuario o cuenta?",
+        "Continuar",
+        "new UiSelector().descriptionContains(\"Cédula de identidad\")",
+        "Cédula de identidad"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-93",
+      "scenarioTitle": "Seleccion de tipo de documento y validacion de opciones disponibles",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "failureCount": 0,
+      "successCount": 1,
+      "runCount": 1,
+      "createdAt": "2026-08-19T21:27:50.809Z",
+      "lastSeenAt": "2026-08-19T21:27:50.809Z",
+      "lastValidatedAt": "2026-08-19T21:27:50.809Z"
+    },
+    {
+      "id": "mob_route_02b67dbf09b4",
+      "knowledgeKind": "route_observed",
+      "matchKey": "02b67dbf09b4",
+      "clickTargets": [
+        "¿Aún no tienes usuario o cuenta?",
+        "Continuar",
+        "new UiSelector().descriptionContains(\"Cédula de identidad\")",
+        "Cédula de identidad",
+        "new UiSelector().text(\"Cédula de identidad\")"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-93",
+      "scenarioTitle": "Mostrar opciones de tipo de documento al iniciar el registro",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "failureCount": 4,
+      "successCount": 3,
+      "runCount": 7,
+      "createdAt": "2026-08-20T02:06:19.216Z",
+      "lastSeenAt": "2026-08-21T19:40:45.542Z",
+      "lastValidatedAt": "2026-08-21T19:40:45.542Z",
+      "transitions": [
+        {
+          "stepIndex": 1,
+          "action": "click",
+          "actionTarget": {
+            "strategy": "accessibilityId",
+            "value": "¿Aún no tienes usuario o cuenta?"
+          },
+          "screenBefore": "screen_44b05bc2f8",
+          "screenAfter": "screen_6b33d7ee85"
+        },
+        {
+          "stepIndex": 2,
+          "action": "click",
+          "actionTarget": {
+            "strategy": "accessibilityId",
+            "value": "Continuar"
+          },
+          "screenBefore": "screen_6b33d7ee85",
+          "screenAfter": "screen_491aa84560"
+        },
+        {
+          "stepIndex": 3,
+          "action": "click",
+          "actionTarget": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"Cédula de identidad\")"
+          },
+          "screenBefore": "screen_491aa84560",
+          "screenAfter": "screen_72df5efdfc"
+        },
+        {
+          "stepIndex": 6,
+          "action": "click",
+          "actionTarget": {
+            "strategy": "accessibilityId",
+            "value": "Cédula de identidad"
+          },
+          "screenBefore": "screen_72df5efdfc",
+          "screenAfter": "screen_491aa84560"
+        },
+        {
+          "stepIndex": 7,
+          "action": "click",
+          "actionTarget": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().text(\"Cédula de identidad\")"
+          },
+          "screenBefore": "screen_491aa84560",
+          "screenAfter": "screen_72df5efdfc"
+        }
+      ]
+    },
+    {
+      "id": "mob_route_70b492c3713e",
+      "knowledgeKind": "route_observed",
+      "matchKey": "70b492c3713e",
+      "clickTargets": [
+        "¿Aún no tienes usuario o cuenta?",
+        "Continuar",
+        "new UiSelector().descriptionContains(\"Cédula de identidad\")",
+        "new UiSelector().text(\"Cédula de identidad\")",
+        "new UiSelector().descriptionContains(\"Acepto los Términos y Condiciones\")"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-93",
+      "scenarioTitle": "Bloquear continuidad con documento en formato invalido",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "failureCount": 4,
+      "successCount": 3,
+      "runCount": 7,
+      "createdAt": "2026-08-20T02:07:07.225Z",
+      "lastSeenAt": "2026-08-21T19:41:28.437Z",
+      "lastValidatedAt": "2026-08-21T19:41:28.437Z",
+      "transitions": [
+        {
+          "stepIndex": 2,
+          "action": "click",
+          "actionTarget": {
+            "strategy": "accessibilityId",
+            "value": "Continuar"
+          },
+          "screenBefore": "screen_6b33d7ee85",
+          "screenAfter": "screen_491aa84560"
+        },
+        {
+          "stepIndex": 3,
+          "action": "click",
+          "actionTarget": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"Cédula de identidad\")"
+          },
+          "screenBefore": "screen_491aa84560",
+          "screenAfter": "screen_72df5efdfc"
+        },
+        {
+          "stepIndex": 4,
+          "action": "click",
+          "actionTarget": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().text(\"Cédula de identidad\")"
+          },
+          "screenBefore": "screen_72df5efdfc",
+          "screenAfter": "screen_491aa84560"
+        },
+        {
+          "stepIndex": 6,
+          "action": "click",
+          "actionTarget": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"Acepto los Términos y Condiciones\")"
+          },
+          "screenBefore": "screen_e0b632d8cf",
+          "screenAfter": "screen_ceb5a07e7e"
+        }
+      ]
+    },
+    {
+      "id": "mob_route_31d28cfc5f19",
+      "knowledgeKind": "route_observed",
+      "matchKey": "31d28cfc5f19",
+      "clickTargets": [
+        "¿Aún no tienes usuario o cuenta?",
+        "Continuar",
+        "new UiSelector().descriptionContains(\"Cédula de identidad\")",
+        "new UiSelector().text(\"Cédula de identidad\")",
+        "new UiSelector().descriptionContains(\"Acepto los Términos y Condiciones\")",
+        "Continuar"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-93",
+      "scenarioTitle": "Permitir continuar a cliente existente habilitado",
+      "validationStatus": "validated",
+      "trustedForReuse": false,
+      "failureCount": 26,
+      "successCount": 7,
+      "runCount": 33,
+      "createdAt": "2026-08-20T02:08:51.076Z",
+      "lastSeenAt": "2026-08-24T12:48:53.132Z",
+      "lastValidatedAt": "2026-08-21T19:43:28.394Z",
+      "transitions": [
+        {
+          "stepIndex": 2,
+          "action": "click",
+          "actionTarget": {
+            "strategy": "accessibilityId",
+            "value": "Continuar"
+          },
+          "screenBefore": "screen_6b33d7ee85",
+          "screenAfter": "screen_491aa84560"
+        },
+        {
+          "stepIndex": 3,
+          "action": "click",
+          "actionTarget": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"Cédula de identidad\")"
+          },
+          "screenBefore": "screen_491aa84560",
+          "screenAfter": "screen_72df5efdfc"
+        },
+        {
+          "stepIndex": 4,
+          "action": "click",
+          "actionTarget": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().text(\"Cédula de identidad\")"
+          },
+          "screenBefore": "screen_72df5efdfc",
+          "screenAfter": "screen_491aa84560"
+        },
+        {
+          "stepIndex": 6,
+          "action": "click",
+          "actionTarget": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"Acepto los Términos y Condiciones\")"
+          },
+          "screenBefore": "screen_008313829f",
+          "screenAfter": "screen_05684c4640"
+        }
+      ]
+    },
+    {
+      "id": "mob_route_6576aabe1162",
+      "knowledgeKind": "route_observed",
+      "matchKey": "6576aabe1162",
+      "clickTargets": [
+        "¿Aún no tienes usuario o cuenta?",
+        "Continuar",
+        "new UiSelector().descriptionContains(\"Cédula de identidad\")",
+        "new UiSelector().text(\"Pasaporte\")",
+        "new UiSelector().descriptionContains(\"Acepto los Términos y Condiciones\")",
+        "Continuar"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-93",
+      "scenarioTitle": "Permitir continuar a un cliente existente habilitado",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "failureCount": 0,
+      "successCount": 1,
+      "runCount": 1,
+      "createdAt": "2026-08-20T14:09:00.368Z",
+      "lastSeenAt": "2026-08-20T14:09:00.368Z",
+      "lastValidatedAt": "2026-08-20T14:09:00.368Z"
+    },
+    {
+      "id": "mob_route_b83deb08483d",
+      "knowledgeKind": "route_observed",
+      "matchKey": "b83deb08483d",
+      "clickTargets": [
+        "¿Aún no tienes usuario o cuenta?",
+        "Continuar",
+        "new UiSelector().descriptionContains(\"Cédula de identidad\")",
+        "Pasaporte"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-93",
+      "scenarioTitle": "Redirigir al login cuando el cliente ya esta registrado en la app",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "failureCount": 1,
+      "successCount": 0,
+      "runCount": 1,
+      "createdAt": "2026-08-20T14:12:53.392Z",
+      "lastSeenAt": "2026-08-20T14:12:53.392Z"
+    },
+    {
+      "id": "mob_route_4ff60749cc95",
+      "knowledgeKind": "route_observed",
+      "matchKey": "4ff60749cc95",
+      "clickTargets": [
+        "¿Aún no tienes usuario o cuenta?",
+        "Continuar",
+        "new UiSelector().descriptionContains(\"Cédula de identidad\")"
+      ],
+      "assertionTargets": [],
+      "issueKey": "AA-94",
+      "scenarioTitle": "Confirmar datos de contacto con OTP",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "failureCount": 1,
+      "successCount": 0,
+      "runCount": 1,
+      "createdAt": "2026-08-20T21:46:36.352Z",
+      "lastSeenAt": "2026-08-20T21:46:36.352Z",
+      "transitions": [
+        {
+          "stepIndex": 2,
+          "action": "click",
+          "actionTarget": {
+            "strategy": "accessibilityId",
+            "value": "Continuar"
+          },
+          "screenBefore": "screen_6b33d7ee85",
+          "screenAfter": "screen_491aa84560"
+        },
+        {
+          "stepIndex": 3,
+          "action": "click",
+          "actionTarget": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"Cédula de identidad\")"
+          },
+          "screenBefore": "screen_491aa84560",
+          "screenAfter": "screen_72df5efdfc"
+        }
+      ]
+    },
+    {
+      "id": "mob_screen_3b0fe0d342e9",
+      "knowledgeKind": "screen_observed",
+      "matchKey": "internet",
+      "screenKey": "internet",
+      "title": "Internet",
+      "clickTargets": [
+        "Internet,AndroidWifi",
+        "Bluetooth.",
+        "Do Not Disturb.,",
+        "Collapse",
+        "Manage",
+        "Clear all notifications.",
+        "4:11 PM"
+      ],
+      "assertionTargets": [
+        "Internet",
+        "Bluetooth",
+        "Flashlight, Camera in use",
+        "Flashlight",
+        "Do Not Disturb",
+        "Security & privacy",
+        "•",
+        "21 minutes ago",
+        "Set a screen lock",
+        "For added security, set a PIN, pattern, or password for this device.",
+        "Fri, Aug 21",
+        "Wifi signal full.",
+        "Phone signal full.",
+        "Battery 100 percent.",
+        "100%"
+      ],
+      "issueKey": "AA-94",
+      "scenarioTitle": "Confirmar datos de contacto correctos con OTP y continuar el registro",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "failureCount": 0,
+      "successCount": 2,
+      "runCount": 2,
+      "createdAt": "2026-08-21T20:10:02.850Z",
+      "lastSeenAt": "2026-08-21T20:12:07.596Z",
+      "lastValidatedAt": "2026-08-21T20:12:07.596Z"
+    },
+    {
+      "id": "mob_screen_36a7a00fe95f",
+      "knowledgeKind": "screen_observed",
+      "matchKey": "screen_cdca129ce8",
+      "screenKey": "screen_cdca129ce8",
+      "title": "No pudimos realizar esta validación exitosamente.",
+      "clickTargets": [
+        "No pudimos realizar esta validación exitosamente., Llama a nuestro Centro de Contacto al 809-726-1000 o visita tu centro de Negocios más cercano, consultando en nuestro sitio web, para que te asistan con el proceso.",
+        "Ir al inicio"
+      ],
+      "assertionTargets": [
+        "No pudimos realizar esta validación exitosamente.",
+        "Llama a nuestro Centro de Contacto al 809-726-1000 o visita tu centro de Negocios más cercano, consultando en nuestro sitio web, para que te asistan con el proceso.",
+        "Ir al inicio"
+      ],
+      "issueKey": "AA-94",
+      "scenarioTitle": "Confirmar datos de contacto correctos con OTP y continuar el registro",
+      "validationStatus": "validated",
+      "trustedForReuse": true,
+      "failureCount": 0,
+      "successCount": 1,
+      "runCount": 1,
+      "createdAt": "2026-08-24T12:38:38.608Z",
+      "lastSeenAt": "2026-08-24T12:38:38.608Z",
+      "lastValidatedAt": "2026-08-24T12:38:38.608Z"
     }
   ]
 }

@@ -1,0 +1,60 @@
+{
+  "mode": "ai_hybrid",
+  "provider": "copilot",
+  "model": "gpt-5.4",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "invocations": 1,
+  "invocationsConsumed": 1,
+  "durationMs": 102911,
+  "usage": {
+    "inputTokens": null,
+    "cachedInputTokens": null,
+    "cacheWriteInputTokens": null,
+    "nonCachedInputTokens": null,
+    "outputTokens": null,
+    "reasoningOutputTokens": null,
+    "totalPhysicalTokens": null,
+    "durationMs": null,
+    "credits": null
+  },
+  "validation": {
+    "schema": "passed",
+    "structure": "passed",
+    "typescript": "passed",
+    "playwrightDiscovery": "passed",
+    "semanticCoverage": "failed",
+    "functionalExecution": "failed"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [],
+  "oracleTypes": [
+    "unsupported_or_unresolved"
+  ],
+  "errors": [
+    "expected_result_not_propagated",
+    "functional_execution_failed:exitCode=1",
+    "functional_execution_error:Error: wrong_screen_before_contextual_action: Cannot execute 'select_product' on target \"kiosco\" because current screen does not match required context. currentUrl=\"https://172.27.4.50/\" visibleButtons=[Iniciar] visibleHeadings=[¡Hola!] stepIndex=3 actionIntent=\"select_product\" screenSignals={isOnHomeScreen:false, isOnLoginScreen:true, isOnMenuScreen:false, isOnAuthGate:false} suggestedFix=\"Ensure navigation/module/auth steps precede this action in the spec\""
+  ],
+  "warnings": [
+    "unresolved_requirement_accepted_by_auth_flow:The observable oracle for \"Se inicia el flujo de autenticación antes de permitir consultas personalizadas.\" is backed=false, so the expected result cannot be asserted without inventing evidence.",
+    "unresolved_requirement_accepted_by_auth_flow:No backed auth-gate signal was provided for step 2 beyond detecting a non-unknown authentication stage after opening \"Transacciones y servicios\".",
+    "functional_execution_screenshots=0"
+  ],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

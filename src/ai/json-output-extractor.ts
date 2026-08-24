@@ -51,7 +51,7 @@ export async function extractJsonFromSources(
   if (stdoutTrimmed) {
     try {
       const parsed = JSON.parse(stdoutTrimmed);
-      if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
+      if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed) && !isCodexProtocolEvent(parsed as Record<string, unknown>)) {
         if (purpose === "scenario_generation") {
           console.log(`[${logPrefix}] parseStrategy=stdout_json success=true`);
         }
@@ -117,54 +117,86 @@ export async function extractJsonFromSources(
 function extractBalancedJson(text: string): { raw: string; parsed: Record<string, unknown> } | null {
   if (!text) return null;
 
-  // Find first opening brace
-  const startIndex = text.indexOf("{");
-  if (startIndex === -1) return null;
+  let searchFrom = 0;
+  while (searchFrom < text.length) {
+    // Find first opening brace
+    const startIndex = text.indexOf("{", searchFrom);
+    if (startIndex === -1) return null;
 
-  // Find matching closing brace
-  let depth = 0;
-  let inString = false;
-  let escapeNext = false;
+    // Find matching closing brace
+    let depth = 0;
+    let inString = false;
+    let escapeNext = false;
+    let endIndex = -1;
 
-  for (let i = startIndex; i < text.length; i++) {
-    const char = text[i];
+    for (let i = startIndex; i < text.length; i++) {
+      const char = text[i];
 
-    if (escapeNext) {
-      escapeNext = false;
-      continue;
-    }
+      if (escapeNext) {
+        escapeNext = false;
+        continue;
+      }
 
-    if (char === "\\") {
-      escapeNext = true;
-      continue;
-    }
+      if (char === "\\") {
+        escapeNext = true;
+        continue;
+      }
 
-    if (char === '"' && !escapeNext) {
-      inString = !inString;
-      continue;
-    }
+      if (char === '"' && !escapeNext) {
+        inString = !inString;
+        continue;
+      }
 
-    if (inString) continue;
+      if (inString) continue;
 
-    if (char === "{") depth++;
-    if (char === "}") {
-      depth--;
-      if (depth === 0) {
-        // Found balanced JSON
-        const jsonStr = text.substring(startIndex, i + 1);
-        try {
-          const parsed = JSON.parse(jsonStr);
-          if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
-            return { raw: jsonStr, parsed: parsed as Record<string, unknown> };
-          }
-        } catch {
-          // Invalid JSON, keep looking
+      if (char === "{") depth++;
+      if (char === "}") {
+        depth--;
+        if (depth === 0) {
+          endIndex = i;
+          break;
         }
       }
+    }
+
+    if (endIndex === -1) return null;
+
+    // Found balanced JSON
+    const jsonStr = text.substring(startIndex, endIndex + 1);
+    searchFrom = endIndex + 1;
+    try {
+      const parsed = JSON.parse(jsonStr);
+      if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
+        if (isCodexProtocolEvent(parsed as Record<string, unknown>)) continue;
+        return { raw: jsonStr, parsed: parsed as Record<string, unknown> };
+      }
+    } catch {
+      // Invalid JSON, keep looking
     }
   }
 
   return null;
+}
+
+/**
+ * Codex CLI emits JSONL protocol events to stdout (thread.started, turn.started,
+ * error, turn.failed, ...). These are transport/status events, never the requested
+ * structured result, and must not be selected as the output.
+ */
+function isCodexProtocolEvent(parsed: Record<string, unknown>): boolean {
+  const type = parsed.type;
+  if (typeof type !== "string") return false;
+  return (
+    type === "thread.started"
+    || type === "thread.completed"
+    || type === "turn.started"
+    || type === "turn.completed"
+    || type === "turn.failed"
+    || type === "error"
+    || type === "event"
+    || type === "user_message"
+    || type === "assistant_message"
+  );
 }
 
 /**
@@ -195,6 +227,31 @@ export function validateScenarioShape(json: Record<string, unknown>): {
   return {
     valid: false,
     reason: `Missing expected keys. Found: ${keys.join(", ")}. Expected: scenarios, rejected`,
+    detectedKeys: keys
+  };
+}
+
+/**
+ * Validates that parsed JSON has the expected spec generation shape
+ * (single-spec response or batch response).
+ */
+export function validateSpecOutputShape(json: Record<string, unknown>): {
+  valid: boolean;
+  reason: string;
+  detectedKeys: string[];
+} {
+  const keys = Object.keys(json);
+
+  const hasSpecContent = typeof json.specContent === "string" && json.specContent.trim().length > 0;
+  const hasSpecsBatch = Array.isArray(json.specs) && json.specs.length > 0;
+
+  if (hasSpecContent || hasSpecsBatch) {
+    return { valid: true, reason: "", detectedKeys: keys };
+  }
+
+  return {
+    valid: false,
+    reason: `Missing expected keys. Found: ${keys.join(", ")}. Expected: specContent or specs`,
     detectedKeys: keys
   };
 }

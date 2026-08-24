@@ -5,7 +5,7 @@ import { CodexCliProvider } from "./providers/codex-cli-provider";
 import { CopilotCliProvider } from "./providers/copilot-cli-provider";
 import { ClaudeCliProvider } from "./providers/claude-cli-provider";
 import { resolveCodexCliPath } from "../agent/codex-cli-resolver";
-import { resolveScenarioAiConfig, resolveRepairAiConfig, resolveGeneralAiConfig } from "./ai-config-resolver";
+import { resolveScenarioAiConfig, resolveRepairAiConfig, resolveSpecGenerationAiConfig, resolveGeneralAiConfig } from "./ai-config-resolver";
 
 function parseBool(value: string | undefined, defaultValue = false): boolean {
   if (!value) return defaultValue;
@@ -157,6 +157,14 @@ export async function createScenarioAiProvider(): Promise<AiProvider> {
  */
 export async function createRepairAiProvider(): Promise<AiProvider> {
   const config = resolveRepairAiConfig();
+  return createAiProviderFromConfig(config);
+}
+
+/**
+ * Shorthand for creating an AI provider for spec generation.
+ */
+export async function createSpecGenerationAiProvider(): Promise<AiProvider> {
+  const config = resolveSpecGenerationAiConfig();
   return createAiProviderFromConfig(config);
 }
 

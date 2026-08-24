@@ -4,6 +4,8 @@ import type { Page } from "@playwright/test";
 import type { AppRouteProfile } from "../../types/env.types";
 import { capturePageDiagnostics, waitForListReadiness, waitForPromotedSpecStepReady } from "../../browser/promoted-spec-helpers";
 import { waitForStablePageState } from "../../discovery/page-stability-detector";
+import { EvidenceRecorder } from "../../evidence/evidence-recorder";
+import { loadEvidenceConfig } from "../../evidence/evidence-types";
 import { findSemanticTargetMatch, type SemanticMatchOptions } from "./semantic-target-matcher";
 
 export type SafeReplayStep = {
@@ -95,6 +97,7 @@ export type PromotedFillOptions = {
 export type PromotedAssertOptions = {
   stepIndex: number;
   target: string;
+  description?: string;
   assertion: () => Promise<void>;
   evidenceDir?: string;
 };
@@ -110,6 +113,16 @@ function numberFromEnv(name: string, fallback: number): number {
   if (!raw) return fallback;
   const parsed = Number(raw);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function stringFromEnv(...names: string[]): string | undefined {
+  for (const name of names) {
+    const raw = process.env[name];
+    if (typeof raw !== "string") continue;
+    const trimmed = raw.trim();
+    if (trimmed.length > 0) return trimmed;
+  }
+  return undefined;
 }
 
 function maskIfSensitive(value: string, sensitive?: boolean): string {
@@ -1324,6 +1337,9 @@ export class PromotedSpecRuntime {
   private lastSelectionStep?: { selectedTarget: string; stepIndex: number; timestamp: number };
   private evidenceRecorder?: any;
   private evidenceStepIndex = 0;
+  private evidenceInitState: "pending" | "initialized" | "disabled" | "failed" = "pending";
+  private evidenceInitReason?: string;
+  private evidenceInitPromise?: Promise<void>;
 
   constructor(private readonly page: Page, config?: Partial<PromotedRuntimeConfig>) {
     this.config = { ...loadPromotedRuntimeConfigFromEnv(), ...config };
@@ -1340,49 +1356,70 @@ export class PromotedSpecRuntime {
     });
 
     // Initialize evidence recorder if EVIDENCE_ENABLED
-    this.initEvidence().catch(err => console.log(`[evidence] init error: ${err.message}`));
+    this.evidenceInitPromise = this.initEvidence().catch((err: any) => {
+      this.evidenceInitState = "failed";
+      this.evidenceInitReason = err?.message ?? "unknown_error";
+      console.log(`[evidence] init error: ${this.evidenceInitReason}`);
+    });
   }
 
   /** Initialize evidence recorder from env config */
   private async initEvidence(): Promise<void> {
     try {
-      const { EvidenceRecorder } = await import("../../evidence/evidence-recorder");
-      const { loadEvidenceConfig } = await import("../../evidence/evidence-types");
       const cfg = loadEvidenceConfig();
-      if (!cfg.enabled) return;
+      if (!cfg.enabled) {
+        this.evidenceInitState = "disabled";
+        this.evidenceInitReason = "config_disabled";
+        console.log("[evidence] disabled reason=config_disabled");
+        return;
+      }
       this.evidenceRecorder = new EvidenceRecorder(
         {
-          appSlug: process.env.APP_SLUG || "unknown",
-          sectionSlug: process.env.SECTION_SLUG || "unknown",
+          appSlug: stringFromEnv("EVIDENCE_APP_SLUG", "APP_SLUG") ?? "default",
+          sectionSlug: stringFromEnv("EVIDENCE_SECTION_SLUG", "SECTION_SLUG") ?? "default-section",
           sectionName: process.env.SECTION_NAME,
-          scenarioId: process.env.SCENARIO_ID || "unknown",
-          scenarioTitle: process.env.SCENARIO_TITLE || "unknown",
+          scenarioId: stringFromEnv("SCENARIO_ID") ?? "unknown",
+          scenarioTitle: stringFromEnv("SCENARIO_TITLE") ?? "unknown",
+          runId: process.env.EVIDENCE_RUN_ID,
+          outputRoot: cfg.outputRoot,
           analystName: cfg.analystName || process.env.EVIDENCE_ANALYST_NAME,
         },
         cfg,
       );
       await this.evidenceRecorder.start();
-      console.log(`[evidence] recorder initialized scenario=${process.env.SCENARIO_ID || "unknown"}`);
+      this.evidenceInitState = "initialized";
+      this.evidenceInitReason = undefined;
+      console.log(`[evidence] initialized scenario=${process.env.SCENARIO_ID || "unknown"}`);
     } catch (err: any) {
-      console.log(`[evidence] init failed: ${err.message}`);
+      this.evidenceInitState = "failed";
+      this.evidenceInitReason = err?.message ?? "unknown_error";
+      console.log(`[evidence] init failed: ${this.evidenceInitReason}`);
     }
   }
 
-  /** Capture evidence for a single step */
-  private async captureEvidenceStep(stepText: string, status: "passed" | "failed" | "skipped", errorMessage?: string): Promise<void> {
-    if (!this.evidenceRecorder) return;
+  private async ensureEvidenceInitialized(): Promise<void> {
+    if (!this.evidenceInitPromise) return;
+    await this.evidenceInitPromise;
+  }
 
-    // Exclude validation steps from evidence capture
-    if (/^\s*validar\b/i.test(stepText)) {
-      console.log(`[evidence] skipping validation step: "${stepText}"`);
-      return;
-    }
+  /** Capture evidence for a single step */
+  private async captureEvidenceStep(
+    stepText: string,
+    status: "passed" | "failed" | "skipped",
+    errorMessage?: string,
+    options?: { sourceStepIndex?: number; target?: string }
+  ): Promise<void> {
+    await this.ensureEvidenceInitialized();
+    if (!this.evidenceRecorder) return;
 
     this.evidenceStepIndex++;
     try {
-      const target = stepText.match(/"([^"]+)"/)?.[1];
+      const target = options?.target ?? stepText.match(/"([^"]+)"/)?.[1];
       await this.evidenceRecorder.captureStep(this.page, this.evidenceStepIndex, stepText, {
-        target, status, errorMessage,
+        target,
+        status,
+        errorMessage,
+        sourceStepIndex: options?.sourceStepIndex,
       });
     } catch (err: any) {
       console.log(`[evidence] step capture failed: ${err.message}`);
@@ -1393,18 +1430,29 @@ export class PromotedSpecRuntime {
   private async captureClickStep(target: string, status: "passed" | "failed" | "skipped", errorMessage?: string): Promise<void> {
     if (!this.evidenceRecorder) return;
     const stepText = `Clic en "${target}".`;
-    await this.captureEvidenceStep(stepText, status, errorMessage);
+    await this.captureEvidenceStep(stepText, status, errorMessage, { target });
   }
 
   /** Call at the end of a spec to finalize evidence (saves evidence.json and generates evidencia.docx) */
   async finishEvidence(): Promise<void> {
+    await this.ensureEvidenceInitialized();
     if (!this.evidenceRecorder) {
-      console.log(`[evidence] disabled`);
+      if (this.evidenceInitState === "failed") {
+        console.log(`[evidence] unavailable reason=initialization_failed detail=${this.evidenceInitReason ?? "unknown"}`);
+      } else if (this.evidenceInitState === "disabled") {
+        console.log(`[evidence] disabled`);
+      }
       return;
     }
     try {
       const record = await this.evidenceRecorder.finish();
-      console.log(`[evidence] scenario=${record.scenarioId} status=${record.status} docx=${record.docxPath || "(template not available)"} screenshots=${record.steps.filter((s: any) => s.screenshotPath).length}`);
+      const perScenarioDocxGenerated = Boolean(
+        record.docxPath
+        && fs.existsSync(record.docxPath),
+      );
+      console.log(
+        `[evidence] scenario=${record.scenarioId} status=${record.status} perScenarioDocxGenerated=${perScenarioDocxGenerated} steps=${record.steps.length} screenshots=${record.steps.filter((s: any) => s.screenshotPath).length}`,
+      );
     } catch (err: any) {
       console.log(`[evidence] finish failed: ${err.message}`);
     }
@@ -2190,11 +2238,18 @@ export class PromotedSpecRuntime {
   }
 
   async expectPromotedVisible(options: PromotedAssertOptions): Promise<void> {
+    const stepText = options.description?.trim() || `Validar que se muestre "${options.target}".`;
     try {
       await withTimeout(options.assertion(), this.config.actionTimeoutMs, "assert visible");
-      await this.captureEvidenceStep(`Validar que se muestre "${options.target}".`, "passed");
+      await this.captureEvidenceStep(stepText, "passed", undefined, {
+        sourceStepIndex: options.stepIndex,
+        target: options.target
+      });
     } catch (error) {
-      await this.captureEvidenceStep(`Validar que se muestre "${options.target}".`, "failed", error instanceof Error ? error.message : String(error));
+      await this.captureEvidenceStep(stepText, "failed", error instanceof Error ? error.message : String(error), {
+        sourceStepIndex: options.stepIndex,
+        target: options.target
+      });
       const diagnostics = await captureDiagnosticsIfNeeded(
         this.page,
         {
@@ -2330,6 +2385,23 @@ export class PromotedSpecRuntime {
   }
 }
 
-export function createPromotedSpecRuntime(page: Page, config?: Partial<PromotedRuntimeConfig>): PromotedSpecRuntime {
+export const PROMOTED_SPEC_RUNTIME_PUBLIC_METHODS = [
+  "clickPromotedTarget",
+  "fillPromotedField",
+  "selectPromotedItem",
+  "expectPromotedVisible",
+  "waitForPromotedUiStable",
+  "handlePromotedDialogOrAlert",
+  "safeReplayContext",
+  "checkIfAlreadyOnListPage",
+  "getDebugState",
+  "finishEvidence"
+] as const;
+
+export type PromotedSpecRuntimePublicMethod = typeof PROMOTED_SPEC_RUNTIME_PUBLIC_METHODS[number];
+
+export type PromotedSpecRuntimeApi = Pick<PromotedSpecRuntime, PromotedSpecRuntimePublicMethod>;
+
+export function createPromotedSpecRuntime(page: Page, config?: Partial<PromotedRuntimeConfig>): PromotedSpecRuntimeApi {
   return new PromotedSpecRuntime(page, config);
 }

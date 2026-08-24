@@ -1,0 +1,44 @@
+{
+  "scenarioId": "PREVIEW-003",
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\nimport { HomePage } from '../../../../pages/home.page';\n\ntest('Validar visualizacion de las opciones principales en la segunda pantalla del kiosco', async ({ page }) => {\n  process.env.APP_SLUG = 'arquitectura-automatizacion';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-003';\n  process.env.SCENARIO_TITLE = 'Validar visualizacion de las opciones principales en la segunda pantalla del kiosco';\n\n  const promotedRuntime = createPromotedSpecRuntime(page);\n  const homePage = new HomePage(page);\n\n  try {\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 0,\n      target: 'Iniciar',\n      actionIntent: 'click',\n      expectedEffect: 'Open the second kiosk screen',\n      action: async () => {\n        await homePage.start();\n      },\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 3,\n      target: 'Â¿QuÃ© deseas realizar hoy?',\n      assertion: async () => {\n        await expect(page.getByText('Â¿QuÃ© deseas realizar hoy?')).toBeVisible();\n      },\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 4,\n      target: 'Explora nuestros productos',\n      assertion: async () => {\n        await expect(page.getByText('Explora nuestros productos')).toBeVisible();\n      },\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 5,\n      target: 'Transacciones y servicios',\n      assertion: async () => {\n        await expect(page.getByText('Transacciones y servicios')).toBeVisible();\n      },\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    0,
+    3,
+    4,
+    5
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "Â¿QuÃ© deseas realizar hoy?",
+      "implementation": "await expect(page.getByText('Â¿QuÃ© deseas realizar hoy?')).toBeVisible();"
+    },
+    {
+      "requirement": "Explora nuestros productos",
+      "implementation": "await expect(page.getByText('Explora nuestros productos')).toBeVisible();"
+    },
+    {
+      "requirement": "Transacciones y servicios",
+      "implementation": "await expect(page.getByText('Transacciones y servicios')).toBeVisible();"
+    }
+  ],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "start"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "promotedRuntime",
+    "homePage"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

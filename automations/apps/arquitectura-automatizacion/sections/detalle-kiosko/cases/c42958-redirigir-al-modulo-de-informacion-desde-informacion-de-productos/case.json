@@ -1,0 +1,10 @@
+{
+  "id": "c42958-redirigir-al-modulo-de-informacion-desde-informacion-de-productos",
+  "externalId": "C42958",
+  "caseId": 42958,
+  "title": "Redirigir al modulo de informacion desde Informacion de productos",
+  "source": "discovery",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "createdAt": "2026-08-06T12:46:31.062Z"
+}

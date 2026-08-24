@@ -1,0 +1,117 @@
+{
+  "id": "c42940-acceder-a-transacciones-y-servicios-para-iniciar-autenticacion",
+  "externalId": "C42940",
+  "caseId": 42940,
+  "title": "Acceder a Transacciones y servicios para iniciar autenticacion",
+  "planPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\c42940-acceder-a-transacciones-y-servicios-para-iniciar-autenticacion\\plan.json",
+  "specPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\c42940-acceder-a-transacciones-y-servicios-para-iniciar-autenticacion\\case.spec.ts",
+  "appSlug": "arquitectura-automatizacion",
+  "appConfigPath": "automations\\apps\\arquitectura-automatizacion\\app.config.json",
+  "status": "spec_failed",
+  "source": "discovery",
+  "appProfile": "arquitectura-automatizacion",
+  "createdAt": "2026-08-12T20:54:57.194Z",
+  "updatedAt": "2026-08-12T20:54:57.194Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\c42940-acceder-a-transacciones-y-servicios-para-iniciar-autenticacion\\plan.json",
+  "pomStatus": "needs_manual_review",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "failed",
+  "metadata": {
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "specGeneration": {
+      "mode": "ai_hybrid",
+      "provider": "copilot",
+      "model": "gpt-5.4",
+      "skill": {
+        "name": "playwright-spec-generation",
+        "version": "1.0.0",
+        "hash": "13540c55cba2c9b355f720a0044ff710307a83aa02b8544377b52f88c4ebc359",
+        "loaded": true
+      },
+      "invocations": 1,
+      "invocationsConsumed": 1,
+      "durationMs": 82350,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "failed",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "passed",
+        "functionalExecution": "failed"
+      },
+      "promotionAllowed": false,
+      "specsRequested": 1,
+      "specsValidated": 0,
+      "specsRejected": 1,
+      "errors": [
+        "unused_import:expect",
+        "functional_execution_failed:exitCode=1",
+        "functional_execution_error:Error: Promoted assertion failed at step 2 target=\"authentication gate\". diagnostics={\"currentUrl\":\"https://172.27.4.50/client-identification\",\"actionIntent\":\"assertVisible\",\"target\":\"authentication gate\",\"stepIndex\":2,\"timeoutMs\":15000,\"retryAttempted\":false,\"screenshotPath\":\"C:\\\\MisProyectos\\\\arquitectura-IA-Playwright-feature-auth-gate\\\\.artifacts\\\\promoted-runtime\\\\step-002.png\"} cause=Timeout 5000ms exceeded while waiting on the predicate"
+      ],
+      "warnings": [
+        "functional_execution_screenshots=3"
+      ],
+      "finalSpec": {
+        "origin": "ai_candidate",
+        "generatedBy": "ai",
+        "strategy": "ai_candidate",
+        "fallback": null
+      },
+      "specWritten": false,
+      "previousSpec": {
+        "existed": true,
+        "hash": "51548d4e8df5b43c455ee145681138a9f10f6c87534f27c70e1e8245f3c4b350",
+        "lastModifiedAt": "2026-08-12T20:32:26.103Z"
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "pom",
+      "autoPomEnabled": false,
+      "selectedStrategy": "pom",
+      "reason": "spec_generation_validation_failed",
+      "blockers": [
+        "spec_generation_validation_failed"
+      ],
+      "availablePageObjects": [
+        "ProductListPage",
+        "ProductDetailPage",
+        "FormPage",
+        "HomePage",
+        "LoginPage",
+        "CategoryPage",
+        "ProductInformationPage",
+        "OperationsMenuPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\c42940-acceder-a-transacciones-y-servicios-para-iniciar-autenticacion\\plan.json",
+    "previousStatus": "spec_failed"
+  }
+}

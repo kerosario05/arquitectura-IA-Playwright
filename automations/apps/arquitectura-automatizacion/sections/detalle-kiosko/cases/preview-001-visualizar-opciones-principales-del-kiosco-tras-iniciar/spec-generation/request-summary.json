@@ -1,0 +1,26 @@
+{
+  "appSlug": "arquitectura-automatizacion",
+  "sectionSlug": "detalle-kiosko",
+  "scenarioId": "PREVIEW-001",
+  "scenarioTitle": "Visualizar opciones principales del kiosco tras iniciar",
+  "stepCount": 4,
+  "sourceExpectedResultPresent": true,
+  "requiredAssertionCount": 1,
+  "availablePageObjectCount": 8,
+  "mode": "ai_hybrid",
+  "functionalExecutionEnabled": true,
+  "provider": "copilot",
+  "model": "gpt-5.4",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "13540c55cba2c9b355f720a0044ff710307a83aa02b8544377b52f88c4ebc359",
+    "loaded": true
+  },
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

@@ -42,6 +42,10 @@ export type MobileScreenDataField = {
   matchLocator: { strategy: MobileLocatorStrategy; value: string };
   /** For select: locator template with `{{value}}` to click the chosen option. */
   applyTargetTemplate?: { strategy: MobileLocatorStrategy; value: string };
+  /** Optional key of another dataField this field depends on (e.g. a select that must be
+   * picked before this input can be filled). Only honored when the dependent field is
+   * actually used by a scenario's steps; it is NOT implied by sharing a screen. */
+  dependsOn?: string;
 };
 
 export type MobileScreen = {
@@ -91,4 +95,22 @@ export type MobileRouteProfile = {
   screens: Record<string, MobileScreen>;
   /** Optional intent-driven navigation flows (login, registration, etc.). */
   flows?: Record<string, MobileFlow>;
+  /** Optional execution classification hints for transition/failure interpretation. */
+  executionSignals?: {
+    successSignals?: string[];
+    rejectionSignals?: string[];
+    validationSignals?: string[];
+    technicalErrorSignals?: string[];
+    inductionActions?: string[];
+  };
+  /**
+   * Functional data profiles: each profile binds semantic field keys to keys that already
+   * exist in testData (APP_TEST_DATA_JSON). A scenario whose outcome depends on a
+   * backend/business state declares `requiredDataProfile` and is only executable when that
+   * profile exists AND every dataRef resolves in testData. Profile names are app-defined;
+   * core never hardcodes them.
+   */
+  functionalDataProfiles?: Record<string, {
+    dataRefs: Record<string, string>;
+  }>;
 };

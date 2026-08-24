@@ -1,0 +1,58 @@
+{
+  "mode": "ai_hybrid",
+  "provider": "codex",
+  "model": "gpt-5.4",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "invocations": 1,
+  "invocationsConsumed": 1,
+  "durationMs": 61378,
+  "usage": {
+    "inputTokens": 61253,
+    "cachedInputTokens": 31872,
+    "cacheWriteInputTokens": 0,
+    "nonCachedInputTokens": 29381,
+    "outputTokens": 1449,
+    "reasoningOutputTokens": 529,
+    "totalPhysicalTokens": 62702,
+    "durationMs": 37091,
+    "credits": null
+  },
+  "validation": {
+    "schema": "passed",
+    "structure": "passed",
+    "typescript": "passed",
+    "playwrightDiscovery": "passed",
+    "semanticCoverage": "failed",
+    "functionalExecution": "passed"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [],
+  "oracleTypes": [
+    "unsupported_or_unresolved"
+  ],
+  "errors": [
+    "unresolved_requirement:No backed observable oracle or observed assertion evidence was provided for validating the expected kiosk landing outcomes after clicking \"Iniciar\".",
+    "unresolved_requirement:Scenario assertions referencing \"Â¿QuÃ© deseas realizar hoy?\", \"Explora nuestros productos\", and \"Transacciones y servicios\" cannot be implemented because those texts are not backed by observed evidence and the oracle is unresolved.",
+    "unresolved_requirement:Step 2 requires a promoted runtime-backed login implementation with stepIndex 2, but no allowed runtime method or auth flow was provided to represent that login step safely.",
+    "step_not_implemented_in_spec:2",
+    "expected_result_not_propagated"
+  ],
+  "warnings": [],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

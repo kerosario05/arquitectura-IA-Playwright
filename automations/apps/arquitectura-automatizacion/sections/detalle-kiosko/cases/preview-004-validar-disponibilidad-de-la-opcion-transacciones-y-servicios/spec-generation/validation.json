@@ -1,0 +1,56 @@
+{
+  "mode": "ai_hybrid",
+  "provider": "copilot",
+  "model": "gpt-5.4",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "13540c55cba2c9b355f720a0044ff710307a83aa02b8544377b52f88c4ebc359",
+    "loaded": true
+  },
+  "invocations": 1,
+  "invocationsConsumed": 1,
+  "durationMs": 78184,
+  "usage": {
+    "inputTokens": null,
+    "cachedInputTokens": null,
+    "cacheWriteInputTokens": null,
+    "nonCachedInputTokens": null,
+    "outputTokens": null,
+    "reasoningOutputTokens": null,
+    "totalPhysicalTokens": null,
+    "durationMs": null,
+    "credits": null
+  },
+  "validation": {
+    "schema": "passed",
+    "structure": "failed",
+    "typescript": "passed",
+    "playwrightDiscovery": "passed",
+    "semanticCoverage": "failed",
+    "functionalExecution": "failed"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "errors": [
+    "missing_metadata_line:process.env.APP_SLUG = 'arquitectura-automatizacion';",
+    "missing_metadata_line:process.env.SECTION_SLUG = 'detalle-kiosko';",
+    "missing_metadata_line:process.env.SCENARIO_ID = 'PREVIEW-004';",
+    "missing_metadata_line:process.env.SCENARIO_TITLE = 'Validar disponibilidad de la opción Transacciones y servicios';",
+    "auth_flow_order_invalid:before_start",
+    "functional_execution_failed:exitCode=1",
+    "functional_execution_error:test-results\\apps\\arquitectura-automatizacio-e2655-n-Transacciones-y-servicios\\test-failed-1.png"
+  ],
+  "warnings": [
+    "unresolved_requirement_accepted_by_auth_flow:No observed evidence or registered API was provided to assert the enabled state of \"Transacciones y servicios\" independently from its authenticated availability.",
+    "functional_execution_screenshots=0"
+  ],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}
