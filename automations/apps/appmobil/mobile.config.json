@@ -1,0 +1,8 @@
+{
+  "appSlug": "appmobil",
+  "packageName": "com.appconversacionalbsc",
+  "appName": "appmobil",
+  "platform": "android",
+  "mainActivity": "com.appconversacionalbsc.MainActivity",
+  "updatedAt": "2026-09-01T13:35:34.508Z"
+}

@@ -33,6 +33,14 @@ export type MobileLaunchScenario = {
   steps: MobileStep[];
   /** Carried from the preview so select overrides can be re-targeted at execution. */
   requiredData?: MobileDataField[];
+  /** Name of a functional data profile this scenario depends on (business/backend state). */
+  requiredDataProfile?: string;
+  /** True when the scenario's technical locators lack validated runtime evidence — it must
+   *  NEVER reach Appium execution. Gate lives here (execution boundary) so a caller cannot
+   *  bypass POST /api/mobile/runs/launch-execution by calling runs/execute directly. */
+  requiresRouteLearning?: boolean;
+  /** Step-level requirement references to propagate into runtime transitions. */
+  stepRequirementRefs?: Array<{ stepIndex: number; requirementIds: string[] }>;
 };
 
 export type MobileLaunchExecutionParams = {
@@ -330,6 +338,45 @@ export async function startMobileLaunchExecutionJobWithDeps(
       attemptedScenarioIds.add(scenario.scenarioId);
       onLog(`[mobile:launch] scenario ${scenario.scenarioId} "${scenario.title}" — starting`);
 
+      // Route-learning scenarios must never reach Appium execution, regardless of whether they
+      // were filtered at launch-execution or sent directly via runs/execute (defense in depth).
+      if (scenario.requiresRouteLearning === true) {
+        onLog(`[mobile:launch] scenario ${scenario.scenarioId} — requires_route_learning, skipped (no Appium execution)`);
+        totalBlocked++;
+        const syncResult = {
+          statusId: 0,
+          syncStatus: "skipped_non_functional_failure" as const,
+          error: "non_functional_failure:requires_route_learning",
+        };
+        const resolvedCaseId = resolveCaseId(params.publishedCases, scenario.scenarioId);
+        if (resolvedCaseId) {
+          updateLaunchManifestWithResult(
+            params.launchId,
+            {
+              scenarioId: scenario.scenarioId,
+              caseId: resolvedCaseId,
+              discoveryStatus: "skipped",
+              testRailStatusId: syncResult.statusId,
+              syncStatus: syncResult.syncStatus,
+              error: syncResult.error,
+            },
+            params.scenarios.length,
+          );
+        }
+        onLog(
+          `[mobile:summary] scenarioId=${scenario.scenarioId} status=blocked passed=0 failed=0 skipped=0 blocked=1 firstFailureStep=-1 causalStep=-1 causalStepIndex=-1 reasonCode=requires_route_learning failureCategory=non_executable_precondition jiraAction=skipped testRailAction=${syncResult.syncStatus}`,
+        );
+        scenarioOutcomes.push({
+          scenarioId: scenario.scenarioId,
+          status: "blocked",
+          failureCategory: "non_executable_precondition",
+          firstFailureStep: -1,
+          firstFailureStepIndex: -1,
+          firstFailureReasonCode: "requires_route_learning",
+        });
+        continue;
+      }
+
       const caseId = resolveCaseId(params.publishedCases, scenario.scenarioId);
       if (!caseId) {
         onLog(`[mobile:launch] scenario ${scenario.scenarioId} — no matching TestRail caseId found in publishedCases, skipping execution`);
@@ -350,7 +397,7 @@ export async function startMobileLaunchExecutionJobWithDeps(
         onLog(`[mobile:launch] scenario ${scenario.scenarioId} — applied ${Object.keys(params.dataOverrides[scenario.scenarioId]).length} data override(s)`);
       }
 
-      const precheck = evaluateScenarioPrecheck(stepsToRun, params.appSlug);
+      const precheck = evaluateScenarioPrecheck(stepsToRun, params.appSlug, undefined, scenario.requiredDataProfile);
       if (precheck.blocked) {
         totalBlocked++;
         const blockedReason = precheck.reasonCode;
@@ -411,7 +458,8 @@ export async function startMobileLaunchExecutionJobWithDeps(
             runId,
             sectionSlug,
             appSlug: params.appSlug,
-            sourceIssueKey: scenario.scenarioId.startsWith("MOBILE-") ? scenario.scenarioId.split("-").slice(1, -1).join("-") : undefined
+            sourceIssueKey: scenario.scenarioId.startsWith("MOBILE-") ? scenario.scenarioId.split("-").slice(1, -1).join("-") : undefined,
+            stepRequirementRefs: scenario.stepRequirementRefs,
           },
           onLog
         );

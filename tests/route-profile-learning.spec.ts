@@ -28,6 +28,7 @@ import {
   type RouteProfileLearningConfig,
   type RouteObservation
 } from "../src/discovery/route-profile-learning";
+import { deriveRouteProfileFromKnowledge } from "../src/knowledge/route-profile-deriver";
 
 const DEFAULT_CONFIG: RouteProfileLearningConfig = {
   enabled: true,
@@ -69,6 +70,69 @@ test("learns child_route from successful transition", () => {
     expect(result.suggestion.appSlug).toBe("test-app");
     expect(result.suggestion.confidence).toBeGreaterThan(0.5);
   }
+});
+
+test("carries runtime transition evidence without fallback", () => {
+  const base: RouteObservation = {
+    from: "source",
+    to: "destination",
+    beforeUrl: "https://example.com/source",
+    afterUrl: "https://example.com/destination",
+    clickable: true,
+    visible: true,
+    transitionDetected: true
+  };
+  const result = observeRouteTransition({
+    ...base,
+    transitionValidated: true,
+    beforeTechnicalScreenKey: "tech-A",
+    afterTechnicalScreenKey: "tech-B"
+  }, "test-app", DEFAULT_CONFIG);
+  expect(result.suggestion?.evidence).toMatchObject({
+    transitionValidated: true,
+    beforeTechnicalScreenKey: "tech-A",
+    afterTechnicalScreenKey: "tech-B"
+  });
+
+  const falseResult = observeRouteTransition({ ...base, transitionValidated: false }, "test-app", DEFAULT_CONFIG);
+  expect(falseResult.suggestion?.evidence?.transitionValidated).toBe(false);
+  const absentResult = observeRouteTransition(base, "test-app", DEFAULT_CONFIG);
+  expect(absentResult.suggestion?.evidence?.beforeTechnicalScreenKey).toBeUndefined();
+  expect(absentResult.suggestion?.evidence?.afterTechnicalScreenKey).toBeUndefined();
+});
+
+test("derives functional routes only from validated trusted semantic transitions", () => {
+  const snapshot = {
+    knowledgeKind: "route_menu_snapshot",
+    screenKey: "screen-entry",
+    clickTargets: ["destination"],
+    businessLabels: ["destination"],
+  };
+  const destinationSnapshot = {
+    knowledgeKind: "route_menu_snapshot",
+    screenKey: "screen-destination",
+    clickTargets: ["leaf"],
+    businessLabels: ["leaf"],
+  };
+  const transition = {
+    knowledgeKind: "route_transition",
+    sourceScreenKey: "screen-entry",
+    destinationScreenKey: "screen-destination",
+    actionBusinessLabel: "destination",
+    validationStatus: "validated",
+    trustedForReuse: true,
+  };
+  const profile = deriveRouteProfileFromKnowledge([snapshot, destinationSnapshot, transition]);
+  expect(profile?.targetPaths.destination).toBeDefined();
+  expect(deriveRouteProfileFromKnowledge([snapshot, destinationSnapshot, { ...transition, validationStatus: "pending" }])?.targetPaths.leaf).toBeUndefined();
+  expect(deriveRouteProfileFromKnowledge([snapshot, destinationSnapshot, { ...transition, trustedForReuse: false }])?.targetPaths.leaf).toBeUndefined();
+  expect(deriveRouteProfileFromKnowledge([snapshot, destinationSnapshot, {
+    knowledgeKind: "route_transition",
+    validationStatus: "validated",
+    trustedForReuse: true,
+    sourceTechnicalScreenKey: "tech-A",
+    destinationTechnicalScreenKey: "tech-B",
+  }])?.targetPaths.leaf).toBeUndefined();
 });
 
 test("learns intermediate_step from Route Completion with retrySucceeded", () => {

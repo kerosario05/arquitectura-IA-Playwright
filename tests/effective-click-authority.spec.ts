@@ -5,7 +5,7 @@ import {
 } from "../src/scenarios/effective-click-authority";
 import type { FunctionalBranchRef } from "../src/scenarios/scenario-types";
 
-test("branchRequiredClicks are preserved in effectiveAllowedClicks", () => {
+test("branchRequiredClicks remain generation metadata, not execution authority", () => {
   const branches: FunctionalBranchRef[] = [
     {
       branchId: "branch-public",
@@ -28,15 +28,14 @@ test("branchRequiredClicks are preserved in effectiveAllowedClicks", () => {
   const branchRequiredClicks = collectBranchRequiredClicks(branches);
   const merged = mergeEffectiveAllowedClicks(["Iniciar"], branchRequiredClicks);
   expect(branchRequiredClicks).toEqual(["Información de productos", "Transacciones y servicios"]);
-  expect(merged.effectiveAllowedClicks).toEqual(
-    expect.arrayContaining(["Iniciar", "Información de productos", "Transacciones y servicios"]),
-  );
+  expect(merged.effectiveAllowedClicks).toEqual(["Iniciar"]);
+  expect(merged.addedFromBranchRequired).toBe(0);
 });
 
-test("effectiveAllowedClicks total does not decrease before intermediate repair", () => {
+test("protected execution clicks remain allowed without branch hint promotion", () => {
   const routeProfileAllowedClicks = ["Iniciar", "Información de productos"];
   const branchRequiredClicks = ["Transacciones y servicios"];
-  const protectedClicks = ["Iniciar", "Transacciones y servicios", "Detalle de productos"];
+  const protectedClicks = ["Iniciar", "Detalle de productos"];
 
   const merged = mergeEffectiveAllowedClicks(
     routeProfileAllowedClicks,
@@ -46,17 +45,13 @@ test("effectiveAllowedClicks total does not decrease before intermediate repair"
 
   expect(merged.effectiveAllowedClicks.length).toBeGreaterThanOrEqual(routeProfileAllowedClicks.length);
   expect(merged.effectiveAllowedClicks).toEqual(
-    expect.arrayContaining(["Transacciones y servicios", "Detalle de productos"]),
+    expect.arrayContaining(["Iniciar", "Información de productos", "Detalle de productos"]),
   );
+  expect(merged.effectiveAllowedClicks).not.toContain("Transacciones y servicios");
 });
 
-test("branch click from functional branch is not lost when routeProfile authority is smaller", () => {
-  const beforeRepairSnapshot = [
-    "Iniciar",
-    "Información de productos",
-    "Transacciones y servicios",
-    "Detalle",
-  ];
+test("branch click is not promoted when routeProfile authority is smaller", () => {
+  const beforeRepairSnapshot = ["Iniciar", "Información de productos", "Detalle"];
   const intermediateRouteProfileClicks = ["Iniciar", "Información de productos", "Detalle"];
   const branchRequiredClicks = ["Transacciones y servicios"];
   const merged = mergeEffectiveAllowedClicks(
@@ -65,7 +60,7 @@ test("branch click from functional branch is not lost when routeProfile authorit
     beforeRepairSnapshot,
   );
 
-  expect(beforeRepairSnapshot.length).toBe(4);
-  expect(merged.effectiveAllowedClicks.length).toBe(4);
-  expect(merged.effectiveAllowedClicks).toContain("Transacciones y servicios");
+  expect(beforeRepairSnapshot.length).toBe(3);
+  expect(merged.effectiveAllowedClicks.length).toBe(3);
+  expect(merged.effectiveAllowedClicks).not.toContain("Transacciones y servicios");
 });

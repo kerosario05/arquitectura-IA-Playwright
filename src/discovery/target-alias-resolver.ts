@@ -46,10 +46,14 @@ export function resolveTargetWithAliases(
   }
 
   const normalizedTarget = normalizeText(target);
-  const aliases = routeProfile.aliases as Record<string, string>;
+  const aliases = Object.entries(routeProfile.aliases as Record<string, unknown>).flatMap(([key, value]) =>
+    (Array.isArray(value) ? value : [value])
+      .filter((alias): alias is string => typeof alias === "string")
+      .map((alias) => ({ key, value: alias }))
+  );
 
   // Strategy 1: target exactly matches an alias value → already in short form
-  for (const [key, value] of Object.entries(aliases)) {
+  for (const { key, value } of aliases) {
     const normalizedValue = normalizeText(value);
     if (normalizedTarget === normalizedValue) {
       return {
@@ -65,7 +69,7 @@ export function resolveTargetWithAliases(
   }
 
   // Strategy 2: target text contains a long-form alias key → use the short value
-  for (const [key, value] of Object.entries(aliases)) {
+  for (const { key, value } of aliases) {
     const normalizedKey = normalizeText(key);
     if (normalizedTarget.includes(normalizedKey)) {
       return {
@@ -82,7 +86,7 @@ export function resolveTargetWithAliases(
 
   // Strategy 3: significant token overlap between target and an alias key
   const targetTokens = extractTokens(normalizedTarget);
-  for (const [key, value] of Object.entries(aliases)) {
+  for (const { key, value } of aliases) {
     const normalizedKey = normalizeText(key);
     const keyTokens = extractTokens(normalizedKey);
     const overlap = targetTokens.filter((t) => keyTokens.some((kt) => kt.includes(t) || t.includes(kt)));

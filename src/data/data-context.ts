@@ -84,8 +84,27 @@ function addEntry(
   });
 }
 
-export function buildDataContext(config: FullConfig): DataContext {
+export function buildDataContext(config: FullConfig, overrides?: { dataOverrides?: Record<string,string>; suggestedData?: Record<string,string> }): DataContext {
   const entriesMap = new Map<string, DataContextEntry>();
+
+  // Priority 0: runtime overrides and suggested values per scenario (generic, no hardcode)
+  if (overrides?.dataOverrides) {
+    for (const [k,v] of Object.entries(overrides.dataOverrides)) {
+      addEntry(entriesMap, k, v, "test_data" as any);
+      // mark as not sensitive to preserve masking logic via isSensitive
+      const e = entriesMap.get(normalize(k));
+      if (e) (e as any).source = "dataOverrides";
+    }
+  }
+  if (overrides?.suggestedData) {
+    for (const [k,v] of Object.entries(overrides.suggestedData)) {
+      const norm = normalize(k);
+      if (entriesMap.has(norm)) continue;
+      addEntry(entriesMap, k, v, "test_data" as any);
+      const e = entriesMap.get(norm);
+      if (e) (e as any).source = "suggestedValue";
+    }
+  }
 
   for (const [envKey, envValue] of Object.entries(process.env)) {
     if (!envValue) {

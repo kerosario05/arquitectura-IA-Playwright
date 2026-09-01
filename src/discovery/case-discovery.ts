@@ -3,6 +3,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import type { Page } from "@playwright/test";
 import { createAIExplorer, type AIExplorer } from "../ai/ai-explorer";
 import { scanCurrentPage } from "../explorer/page-scanner";
+import { buildTechnicalScreenKey } from "../explorer/page-scanner";
 import { buildProposedObjects } from "./proposed-object-builder";
 import { waitForPageReady } from "../browser/page-readiness";
 import {
@@ -71,6 +72,7 @@ import { loadRouteProfile } from "../automations/app-profile";
 import { resolveMissingIntermediateStep, type MissingIntermediateStepResolution, type DiscoveryCandidate, type DiscoverySnapshot } from "./missing-intermediate-step-resolver";
 import { observeRouteTransition, observeRouteCompletionSuccess, saveRouteProfileSuggestions, applyRouteProfileSuggestions, type RouteProfileSuggestion, type RouteProfileLearningConfig } from "./route-profile-learning";
 import { appendRouteSuggestionToKnowledge } from "../scenarios/app-knowledge-writer";
+import { persistRuntimeTransition } from "../knowledge/runtime-knowledge-persister";
 import {
   createAuthGateState,
   shouldSkipStepAsAuthConsumed,
@@ -117,11 +119,10 @@ function inferProductType(candidateText: string): string {
  * Check if a failed assertion was recovered by later success
  * Returns the step index where recovery happened, or undefined if not recovered
  * 
- * Recovery scenarios:
- * 1. Same target succeeds later (exact match recovery)
- * 2. Any action succeeds later, indicating page navigation completed (navigation recovery)
+ * Recovery is target-specific. A different successful action only proves that a
+ * transition happened; it cannot satisfy this assertion.
  */
-function findAssertionRecoveryByLaterSuccess(
+export function findAssertionRecoveryByLaterSuccess(
   failedAssertionTarget: string,
   steps: DiscoveryStepResult[],
   currentIndex: number
@@ -164,24 +165,6 @@ function findAssertionRecoveryByLaterSuccess(
     }
   }
   
-  // NAVIGATION RECOVERY: If any action succeeds after the failed assertion,
-  // it indicates the page was functional and navigation completed.
-  // The assertion failure was likely due to page transitioning before assertion completed.
-  for (let i = currentIndex; i < steps.length; i++) {
-    const step = steps[i];
-    const isSuccessStatus = [
-      "found",
-      "satisfied_by_children",
-      "satisfied_by_previous_assertion",
-      "skipped_after_completion"
-    ].includes(step.status);
-    
-    if (isSuccessStatus) {
-      console.log(`[assertion-recovery] found navigation recovery step=${i} target="${step.targetText}" status=${step.status} (different target indicates successful navigation)`);
-      return i;
-    }
-  }
-  
   console.log(`[assertion-recovery] no later success found for target="${failedAssertionTarget}"`);
   return undefined;
 }
@@ -201,10 +184,17 @@ function getUnresolvedBlockingFailures(steps: DiscoveryStepResult[]): DiscoveryS
     if (s.recoveryStatus === "recovered" || s.recoveryStatus === "repaired") {
       return false;
     }
+
+    // Canonical required assertions remain blocking until their own evidence
+    // satisfies them, even when they have no runtime backing yet.
+    if (s.functionalRequired === true && (s.status === "not_found" || s.status === "needs_assertion_resolution")) {
+      blocking++;
+      return true;
+    }
     
     // Skip if marked as non-blocking by recovery metadata
     const recoveryMeta = (s as any).recoveryMetadata;
-    if (recoveryMeta?.blocking === false) {
+    if (recoveryMeta?.blocking === false && s.functionalRequired !== true) {
       return false;
     }
     
@@ -229,7 +219,7 @@ function getUnresolvedBlockingFailures(steps: DiscoveryStepResult[]): DiscoveryS
     }
 
     const importance = s.assertionImportance ?? "blocking";
-    if (importance === "contextual" || importance === "optional") {
+    if (s.functionalRequired !== true && (importance === "contextual" || importance === "optional")) {
       contextualCount++;
       return false;
     }
@@ -373,6 +363,30 @@ function detectEquivalentAssertionEvidence(step: DiscoveryStepResult, assertionL
   return undefined;
 }
 
+function getCanonicalAssertionMetadata(scenario: TestScenario, stepIndex: number): {
+  required: boolean;
+  refs: Array<{ requirementId: string; facet?: string; claimId?: string }>;
+} {
+  const scenarioRecord = scenario as TestScenario & {
+    stepRequirementRefs?: Array<{ stepIndex: number; requirementId: string; facet?: string }>;
+    stepClaims?: Array<{ stepIndex: number; claimId: string; requirementId?: string; facet?: string; required?: boolean; coverable?: boolean }>;
+  };
+  const refs = (scenarioRecord.stepRequirementRefs ?? []).filter((ref) => ref.stepIndex === stepIndex || ref.stepIndex === stepIndex - 1);
+  const claims = scenarioRecord.stepClaims ?? [];
+  const canonicalRefs = refs.map((ref) => {
+    const claim = claims.find((candidate) =>
+      (candidate.stepIndex === ref.stepIndex || candidate.stepIndex === stepIndex || candidate.stepIndex === stepIndex - 1)
+      && (!candidate.requirementId || candidate.requirementId === ref.requirementId)
+      && (!candidate.facet || !ref.facet || candidate.facet === ref.facet)
+    );
+    return { requirementId: ref.requirementId, facet: ref.facet, claimId: claim?.claimId };
+  });
+  const required = canonicalRefs.length > 0 && claims
+    .filter((claim) => canonicalRefs.some((ref) => ref.requirementId === claim.requirementId))
+    .every((claim) => claim.required !== false && claim.coverable !== false);
+  return { required: canonicalRefs.length > 0 && required, refs: canonicalRefs };
+}
+
 function isPendingDiscoveryFailureStep(step: DiscoveryStepResult): boolean {
   if (step.recoveryStatus === "recovered" || step.recoveryStatus === "repaired") {
     return false;
@@ -412,6 +426,11 @@ export function buildDiscoveryAssertionContract(params: {
       if (importance === "blocking") {
         pendingCriticalAssertions.add(assertionLabel || `step_${step.index}`);
       }
+      continue;
+    }
+
+    if (step.functionalRequired === true) {
+      pendingCriticalAssertions.add(assertionLabel || `step_${step.index}`);
       continue;
     }
 
@@ -694,6 +713,7 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
 
   for (const step of scenario.steps) {
     const intents = parseStepIntent(step.action);
+    const requiredContext = (step as any).requiredContext ?? (step as any).requirement?.requiredContext;
 
     for (const intent of intents) {
       if (intent.type === "precondition_context" || intent.type === "navigation_path" || intent.type === "setup_route") {
@@ -712,14 +732,16 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
           index: step.index,
           action: step.action,
           target: intent.actionTarget,
-          source: "action"
+          source: "action",
+          ...(requiredContext ? { requiredContext } : {})
         });
       } else if (intent.type === "unknown") {
         assertionTargets.push({
           index: step.index,
           action: step.action,
           target: intent.originalText,
-          source: "action"
+          source: "action",
+          ...(requiredContext ? { requiredContext } : {})
         });
       } else if (intent.actionTarget) {
         let targetText = intent.actionTarget;
@@ -801,7 +823,8 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
           if (findExistingAssertionByTarget(target)) {
             continue;
           }
-          assertionTargets.push({ index: lastStep.index, action: target, target, source: "expected" });
+          const requiredContext = (lastStep as any).requiredContext ?? (lastStep as any).requirement?.requiredContext;
+          assertionTargets.push({ index: lastStep.index, action: target, target, source: "expected", ...(requiredContext ? { requiredContext } : {}) });
           orderedSteps.push({
             stepIndex: lastStep.index,
             originalText: target,
@@ -824,7 +847,8 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
           if (findExistingAssertionByTarget(target)) {
             continue;
           }
-          assertionTargets.push({ index: lastStep.index, action: target, target, source: "expected" });
+          const requiredContext = (lastStep as any).requiredContext ?? (lastStep as any).requirement?.requiredContext;
+          assertionTargets.push({ index: lastStep.index, action: target, target, source: "expected", ...(requiredContext ? { requiredContext } : {}) });
           orderedSteps.push({
             stepIndex: lastStep.index,
             originalText: target,
@@ -1099,10 +1123,12 @@ export function evaluateEarlyCompletion(
     }
   }
 
-  const SENSITIVE_VERBS = ["pagar", "comprar", "submit", "enviar", "confirmar", "delete", "eliminar", "borrar", "guardar", "save", "finalizar", "completar"];
-  const hasSensitiveActionsRemaining = remainingActionTargets.some(a => 
-    SENSITIVE_VERBS.some(v => a.action.toLowerCase().includes(v))
-  );
+  const hasSensitiveActionsRemaining = remainingActionTargets.some((a: any) => {
+    const metadata = a.metadata ?? a;
+    const intent = String(metadata.actionIntent ?? "").toLowerCase();
+    const status = String(metadata.status ?? "pending").toLowerCase();
+    return Boolean(intent) && !["passed", "satisfied", "completed"].includes(status);
+  });
 
   let satisfied = pendingAssertions.length === 0 && satisfiedAssertions.length > 0;
   
@@ -1231,6 +1257,10 @@ export type CaseDiscoveryOptions = {
   missingInputBehavior?: MissingInputBehavior;
   /** Optional evidence recorder for per-step screenshots */
   evidenceRecorder?: import("../evidence/evidence-recorder").EvidenceRecorder;
+  /** Per-scenario runtime overrides from QA Lab (dataOverrides) - generic per key */
+  scenarioDataOverrides?: Record<string, string>;
+  /** Per-scenario suggested values from dataRequirements - generic per key */
+  scenarioSuggestedData?: Record<string, string>;
 };
 
 export function resolveCaseDiscoveryAppSlug(options: Pick<CaseDiscoveryOptions, "appSlug" | "env">): string {
@@ -1311,40 +1341,13 @@ function buildFailureResult(
 function isTransientLoadingScreen(snapshot: PageSnapshot): boolean {
   if (!snapshot || !snapshot.elements) return false;
 
-  // Signals that indicate a transient/loading screen
-  const loadingSignals = [
-    "cargando", "loading", "por favor espere", "please wait",
-    "redirigiendo", "redirecting", "preparing", "preparando",
-    "procesando", "processing", "iniciando", "initializing"
-  ];
-
-  const hasLoadingText = snapshot.elements.some((el: any) => {
-    const text = (el.text || el.label || el.title || "").toLowerCase();
-    return loadingSignals.some(signal => text.includes(signal));
-  });
-
-  // Detect spinner/loader by role or class
-  const hasSpinner = snapshot.elements.some((el: any) => {
+  // Only structured runtime state can establish a transient screen.
+  return snapshot.elements.some((el: any) => {
     const role = String(el.role || "").toLowerCase();
-    const className = String(el.className || "").toLowerCase();
-    return role.includes("progressbar") || role.includes("status") ||
-           className.includes("spinner") || className.includes("loader") ||
-           className.includes("loading");
+    const busy = el.ariaBusy === true || String(el.ariaBusy || "").toLowerCase() === "true" ||
+      el["aria-busy"] === true || String(el["aria-busy"] || "").toLowerCase() === "true";
+    return busy || role === "progressbar" || role === "status";
   });
-
-  // Detect screen with minimal content (likely transitioning)
-  const controlCount = snapshot.elements.filter((el: any) =>
-    /button|link|menuitem|input/i.test(String(el.role || ""))
-  ).length;
-
-  const textCount = snapshot.elements.filter((el: any) =>
-    String(el.text || "").trim().length > 0
-  ).length;
-
-  // Transient if: has loading text OR has spinner OR (very few controls and has loading text)
-  const isMinimalScreen = controlCount === 0 && textCount <= 3;
-
-  return hasLoadingText || hasSpinner || (isMinimalScreen && hasLoadingText);
 }
 
 async function waitForPrivateMenuReadyBeforeTargetResolution(
@@ -1356,7 +1359,7 @@ async function waitForPrivateMenuReadyBeforeTargetResolution(
   const loadingTexts = ["cargando", "loading", "por favor espere", "please wait"];
   const maxAttempts = 12;
 
-  console.log(`[post-otp-gate] start target="${targetName}" url="${snapshot.url}"`);
+  console.log(`[post-otp-gate] start target="${targetName}" ${safeUrlForLog(snapshot.url)}`);
 
   let attempt = 0;
   let currentSnapshot = snapshot;
@@ -1388,36 +1391,35 @@ async function waitForPrivateMenuReadyBeforeTargetResolution(
       const hasCards = textCount > 2;
 
       console.log(
-        `[post-otp-gate] wait attempt=${attempt} loading=${stillLoading} targetVisible=${targetVisible} controls=${controlCount} url="${currentSnapshot.url}"`
+        `[post-otp-gate] wait attempt=${attempt} loading=${stillLoading} targetVisible=${targetVisible} controls=${controlCount} ${safeUrlForLog(currentSnapshot.url)}`
       );
 
       // Ready if target is visible AND screen is stable (no loading indicators)
       if (targetVisible && !stillLoading) {
-        console.log(`[post-otp-gate] ready=true reason="target_visible_and_screen_stable" url="${currentSnapshot.url}"`);
+        console.log(`[post-otp-gate] ready=true reason="target_visible_and_screen_stable" ${safeUrlForLog(currentSnapshot.url)}`);
         return { status: "ready", reason: "target_visible_and_screen_stable", url: currentSnapshot.url };
       }
 
       // Target visible but still loading — log and continue waiting
       if (targetVisible && stillLoading) {
-        console.log(`[post-otp-gate] ready=false reason="target_visible_but_screen_not_stable" loading=${stillLoading} url="${currentSnapshot.url}"`);
+        console.log(`[post-otp-gate] ready=false reason="target_visible_but_screen_not_stable" loading=${stillLoading} ${safeUrlForLog(currentSnapshot.url)}`);
       }
 
       if (!stillLoading && hasControls) {
-        console.log(`[post-otp-gate] ready=true reason="controls_loaded" url="${currentSnapshot.url}"`);
+        console.log(`[post-otp-gate] ready=true reason="controls_loaded" ${safeUrlForLog(currentSnapshot.url)}`);
         return { status: "ready", reason: "controls_loaded", url: currentSnapshot.url };
       }
 
       if (!stillLoading && hasCards && textCount > 2) {
-        console.log(`[post-otp-gate] ready=true reason="loading_finished" url="${currentSnapshot.url}"`);
+        console.log(`[post-otp-gate] ready=true reason="loading_finished" ${safeUrlForLog(currentSnapshot.url)}`);
         return { status: "ready", reason: "loading_finished", url: currentSnapshot.url };
       }
 
-      // Check if app redirected to "/" (lost private landing)
-      const urlAtRoot = currentSnapshot.url.endsWith("/") || currentSnapshot.url.includes("login");
-      if (urlAtRoot && !isTransientLoadingScreen(currentSnapshot) && !hasControls) {
+      // Without configured/runtime landing evidence, remain unresolved.
+      if (!isTransientLoadingScreen(currentSnapshot) && !hasControls && authProfile?.privateLanding) {
         if (attempt >= maxAttempts - 2) {
           console.log(
-            `[post-otp-gate] blocked reason="private_landing_lost_during_product_loading" url="${currentSnapshot.url}"`
+            `[post-otp-gate] blocked reason="private_landing_lost_during_product_loading" ${safeUrlForLog(currentSnapshot.url)}`
           );
           return { status: "blocked", reason: "private_landing_lost_during_product_loading", url: currentSnapshot.url };
         }
@@ -1436,7 +1438,7 @@ async function waitForPrivateMenuReadyBeforeTargetResolution(
             currentSnapshot = await scanCurrentPage(page);
           } catch (err2) {
             // If all scans fail, exit gate as timeout
-            console.log(`[post-otp-gate] blocked reason="private_menu_loading_timeout" url="${currentSnapshot.url}" error="scan_failed"`);
+            console.log(`[post-otp-gate] blocked reason="private_menu_loading_timeout" ${safeUrlForLog(currentSnapshot.url)} error="scan_failed"`);
             return { status: "timeout", reason: "private_menu_loading_timeout", url: currentSnapshot.url };
           }
         }
@@ -1451,13 +1453,23 @@ async function waitForPrivateMenuReadyBeforeTargetResolution(
 
     // Exhausted attempts while still loading
     console.log(
-      `[post-otp-gate] blocked reason="private_menu_loading_timeout" url="${currentSnapshot.url}" attempts=${maxAttempts}`
+      `[post-otp-gate] blocked reason="private_menu_loading_timeout" ${safeUrlForLog(currentSnapshot.url)} attempts=${maxAttempts}`
     );
     return { status: "timeout", reason: "private_menu_loading_timeout", url: currentSnapshot.url };
   } catch (err) {
     // Gate function error - return as blocked to prevent further execution
-    console.log(`[post-otp-gate] blocked reason="gate_error" error="${err instanceof Error ? err.message : String(err)}" url="${currentSnapshot.url}"`);
+    console.log(`[post-otp-gate] blocked reason="gate_error" error="${err instanceof Error ? err.message : String(err)}" ${safeUrlForLog(currentSnapshot.url)}`);
     return { status: "blocked", reason: "gate_error", url: currentSnapshot.url };
+  }
+}
+
+function safeUrlForLog(value: unknown): string {
+  if (typeof value !== "string" || !value) return "urlPresent=false";
+  try {
+    const parsed = new URL(value);
+    return `origin="${parsed.origin}" pathname="${parsed.pathname}"`;
+  } catch {
+    return "urlPresent=true parseable=false";
   }
 }
 
@@ -1468,30 +1480,20 @@ async function captureSessionCheckpoint(page: Page, checkpointName: string, url:
     const contextStable = contextIdPrev === contextIdCurrent;
 
     const cookies = await page.context().cookies();
-    const storageState = await page.context().storageState();
-
     const localStorage = await page.evaluate(() => {
-      const keys = Object.keys(window.localStorage || {});
-      return { keys, sample: keys.slice(0, 3) };
-    }).catch(() => ({ keys: [], sample: [] }));
+      return { entryCount: Object.keys(window.localStorage || {}).length };
+    }).catch(() => ({ entryCount: 0 }));
 
     const sessionStorage = await page.evaluate(() => {
-      const keys = Object.keys(window.sessionStorage || {});
-      return { keys, sample: keys.slice(0, 3) };
-    }).catch(() => ({ keys: [], sample: [] }));
+      return { entryCount: Object.keys(window.sessionStorage || {}).length };
+    }).catch(() => ({ entryCount: 0 }));
 
     const urlObj = new URL(url);
     const origin = urlObj.origin;
-    const storageOrigins = Array.from(new Set((storageState?.origins || []).map((o: any) => o.origin)));
-
-    const tokenInLS = localStorage.keys.some((k: string) => /token|auth|session|jwt/i.test(k));
-    const tokenInSS = sessionStorage.keys.some((k: string) => /token|auth|session|jwt/i.test(k));
-
+    const pathname = urlObj.pathname;
     console.log(
-      `[auth-session] checkpoint="${checkpointName}" cookies=${cookies.length} ls=${localStorage.keys.length} ss=${sessionStorage.keys.length} ` +
-      `url="${url}" origin="${origin}" storageOrigins=${JSON.stringify(storageOrigins)} ` +
-      `tokenInLS=${tokenInLS} tokenInSS=${tokenInSS} contextStable=${contextStable} ` +
-      `lsSample=${JSON.stringify(localStorage.sample)} ssSample=${JSON.stringify(sessionStorage.sample)}`
+      `[auth-session] checkpoint="${checkpointName}" cookies=${cookies.length} ls=${localStorage.entryCount} ss=${sessionStorage.entryCount} ` +
+      `origin="${origin}" pathname="${pathname}" contextStable=${contextStable}`
     );
 
     return { origin, contextStable };
@@ -1504,34 +1506,20 @@ async function captureSessionCheckpoint(page: Page, checkpointName: string, url:
 async function captureSessionDiagnostics(page: Page, phase: string): Promise<{ origin?: string }> {
   try {
     const cookies = await page.context().cookies();
-    const storageState = await page.context().storageState();
-
     const localStorage = await page.evaluate(() => {
-      const keys = Object.keys(window.localStorage || {});
-      return { keys, sample: keys.slice(0, 3) };
-    }).catch(() => ({ keys: [], sample: [] }));
+      return { entryCount: Object.keys(window.localStorage || {}).length };
+    }).catch(() => ({ entryCount: 0 }));
 
     const sessionStorage = await page.evaluate(() => {
-      const keys = Object.keys(window.sessionStorage || {});
-      return { keys, sample: keys.slice(0, 3) };
-    }).catch(() => ({ keys: [], sample: [] }));
+      return { entryCount: Object.keys(window.sessionStorage || {}).length };
+    }).catch(() => ({ entryCount: 0 }));
 
     const urlObj = new URL(page.url());
     const origin = urlObj.origin;
-    const storageOrigins = Array.from(new Set((storageState?.origins || []).map((o: any) => o.origin)));
-
-    const hasToken = localStorage.keys.some((k: string) =>
-      /token|auth|session|jwt/i.test(k)
-    );
-
-    const hasCookieWithSession = cookies.some((c: any) =>
-      /token|auth|session|jwt/i.test(c.name)
-    );
-
+    const pathname = urlObj.pathname;
     console.log(
-      `[auth-session] phase="${phase}" cookies=${cookies.length} ls=${localStorage.keys.length} ss=${sessionStorage.keys.length} ` +
-      `hasTokenInStorage=${hasToken} hasCookieWithAuth=${hasCookieWithSession} ` +
-      `storageOrigins=${JSON.stringify(storageOrigins)} lsSample=${JSON.stringify(localStorage.sample)} ssSample=${JSON.stringify(sessionStorage.sample)}`
+      `[auth-session] phase="${phase}" cookies=${cookies.length} ls=${localStorage.entryCount} ss=${sessionStorage.entryCount} ` +
+      `origin="${origin}" pathname="${pathname}"`
     );
 
     return { origin };
@@ -1640,8 +1628,7 @@ async function tryAuthGateRecovery(
     let AuthFlow: any;
     let AUTH_FLOW_IMPLEMENTATION_ID: string | undefined;
     const requestedSpecifier = `../../automations/apps/${discoveryAppSlug}/flows/auth.flow`;
-    let selectedSource: "primary" | "fallback" | "none" = "none";
-    let fallbackAllowed = false;
+    let selectedSource: "primary" | "none" = "none";
 
     console.log(`[auth-loader] appSlug=${discoveryAppSlug} requestedSpecifier=${requestedSpecifier} cwd=${process.cwd()}`);
     try {
@@ -1654,25 +1641,14 @@ async function tryAuthGateRecovery(
       console.log(`[auth-loader] primaryImportFailed appSlug=${discoveryAppSlug} error=${loaderErr.message}`);
     }
 
-    // Fallback to default only for apps without a specific flow
-    if (!AuthFlow && (discoveryAppSlug === "default" || !AUTH_FLOW_IMPLEMENTATION_ID)) {
-      try {
-        const mod = await import("../../automations/apps/default/flows/auth.flow");
-        AuthFlow = mod.AuthFlow || mod.default?.AuthFlow || mod.default;
-        AUTH_FLOW_IMPLEMENTATION_ID = mod.AUTH_FLOW_IMPLEMENTATION_ID || mod.default?.AUTH_FLOW_IMPLEMENTATION_ID;
-        selectedSource = "fallback";
-        fallbackAllowed = discoveryAppSlug === "default";
-      } catch { /* non-fatal */ }
-    }
-
     // Validate implementation
     const verified = Boolean(AuthFlow && AUTH_FLOW_IMPLEMENTATION_ID);
-    console.log(`[auth-loader] appSlug=${discoveryAppSlug} selected=${selectedSource} requestedSpecifier=${requestedSpecifier} implementationId=${AUTH_FLOW_IMPLEMENTATION_ID || 'missing'} verified=${verified} fallbackAllowed=${fallbackAllowed}`);
+    console.log(`[auth-loader] appSlug=${discoveryAppSlug} selected=${selectedSource} requestedSpecifier=${requestedSpecifier} implementationId=${AUTH_FLOW_IMPLEMENTATION_ID || 'missing'} verified=${verified}`);
 
     if (!verified) {
       throw new Error(`auth_flow_implementation_unverified: Could not load verified AuthFlow for appSlug=${discoveryAppSlug}. ` +
         `Primary import: ${selectedSource === 'primary' ? 'resolved without implementationId' : 'failed'}. ` +
-        `Fallback: ${fallbackAllowed ? 'not allowed for this appSlug' : 'not loaded'}.`);
+        `No project-specific auth flow is configured.`);
     }
 
     const globalThisWithTestData = globalThis as typeof globalThis & {
@@ -1721,31 +1697,28 @@ async function tryAuthGateRecovery(
         return scan.elements.some((el: any) => String(el.text || el.label || "").toLowerCase().includes(normalizedValue));
       });
     const detectTransientLoading = (scan: PageSnapshot, url: string) => {
-        const generic = scan.elements.some((el: any) => /cargando|loading|procesando|espere|success|authenticated/i.test(String(el.text || el.label || "")));
         const configured = transientSignals.length > 0 && hasSignal(scan, transientSignals);
-        const urlBased = /success|authenticated/i.test(url);
-        return { detected: generic || configured || urlBased, reason: configured ? "configured" : (generic ? "loading_text" : (urlBased ? "structural" : "none")) };
+        return { detected: configured, reason: configured ? "configured" : "none" };
       };
     const evaluateLanding = (scan: PageSnapshot, url: string) => {
         const targetVisible = nextPendingTarget
           ? scan.elements.some((el: any) => String(el.text || el.label || "").toLowerCase().includes(String(nextPendingTarget).toLowerCase()))
           : false;
         const privateSignalVisible = successSignals.length > 0 && hasSignal(scan, successSignals);
-        const privatePathVisible = (() => {
-          try {
-            const pathname = new URL(url).pathname.toLowerCase();
-            return pathname !== "/" && !/authentication-success|authenticated|otp|identification|login|auth/.test(pathname);
-          } catch {
-            return false;
-          }
-        })();
         const privateLandingVisible = privateLandingSignals.length > 0 &&
-          (privateLandingSignals.some((signal) => url.toLowerCase().includes(String(signal).toLowerCase())) || hasSignal(scan, privateLandingSignals));
-        const structuralPrivateMenu = !/authentication-success|authenticated|\/$/.test(url) &&
+          (privateLandingSignals.some((signal) => {
+            try {
+              const configured = new URL(String(signal), url);
+              const current = new URL(url);
+              return configured.origin === current.origin && configured.pathname === current.pathname;
+            } catch {
+              return false;
+            }
+          }) || hasSignal(scan, privateLandingSignals));
+        const structuralPrivateMenu = new URL(url).pathname !== "/" &&
           (scan.elements.filter((el: any) => /button|link/i.test(String(el.role || ""))).length >= 3);
         if (targetVisible) return { valid: true, reason: "target_visible" };
         if (privateSignalVisible) return { valid: true, reason: "private_signal" };
-        if (privatePathVisible) return { valid: true, reason: "private_landing" };
         if (privateLandingVisible) return { valid: true, reason: "private_landing" };
         if (structuralPrivateMenu) return { valid: true, reason: "private_signal" };
         return { valid: false, reason: "unresolved" };
@@ -1809,7 +1782,7 @@ async function tryAuthGateRecovery(
           console.log(`[auth-flow] postAuthContinue step=${idx + 1} action="${step.action ?? "unknown"}" result="${resultLabel}"`);
           const continueSnapshot = await scanCurrentPage(page);
           const landingCheck = evaluateLanding(continueSnapshot, page.url());
-          console.log(`[auth-resume] landingCheck valid=${landingCheck.valid} reason="${landingCheck.reason}" url="${page.url()}"`);
+          console.log(`[auth-resume] landingCheck valid=${landingCheck.valid} reason="${landingCheck.reason}" ${safeUrlForLog(page.url())}`);
           if (landingCheck.valid) {
             return;
           }
@@ -1838,7 +1811,7 @@ async function tryAuthGateRecovery(
       const initialLandingCheck = evaluateLanding(currentSnapshot, currentUrl);
       const isTransientSuccessPage = transientState.detected;
       console.log(`[auth-resume] transientLoading detected=${transientState.detected} reason="${transientState.reason}"`);
-      console.log(`[auth-resume] landingCheck valid=${initialLandingCheck.valid} reason="${initialLandingCheck.reason}" url="${currentUrl}"`);
+      console.log(`[auth-resume] landingCheck valid=${initialLandingCheck.valid} reason="${initialLandingCheck.reason}" ${safeUrlForLog(currentUrl)}`);
 
       if (isTransientSuccessPage && !initialLandingCheck.valid) {
         const transientSnapshot = buildTransientSnapshot(currentSnapshot);
@@ -1846,13 +1819,13 @@ async function tryAuthGateRecovery(
         const transientRetryAttempts = redirectingHint ? 8 : 3;
         const transientRetryDelayMs = redirectingHint ? 1500 : 800;
         console.log(
-          `[auth-resume] transientSnapshot url="${transientSnapshot.url}" ` +
+          `[auth-resume] transientSnapshot ${safeUrlForLog(transientSnapshot.url)} ` +
           `texts=${JSON.stringify(transientSnapshot.texts)} controls=${JSON.stringify(transientSnapshot.controls)} ` +
           `loaders=${JSON.stringify(transientSnapshot.loaders)}`
         );
         console.log(
           `[auth-flow] postAuthTransient detected=true reason=success_page_without_private_signals ` +
-          `url="${currentUrl}"`
+          `${safeUrlForLog(currentUrl)}`
         );
 
         await executePostAuthContinueSteps();
@@ -1861,7 +1834,7 @@ async function tryAuthGateRecovery(
         let postAuthUrl = page.url();
 
         console.log(
-          `[auth-flow] postAuthContinue completed url="${postAuthUrl}" ` +
+          `[auth-flow] postAuthContinue completed ${safeUrlForLog(postAuthUrl)} ` +
           `urlChanged=${postAuthUrl !== currentUrl}`
         );
 
@@ -1872,8 +1845,8 @@ async function tryAuthGateRecovery(
           postAuthSnapshot = await scanCurrentPage(page);
           postAuthUrl = page.url();
           landingCheckAfter = evaluateLanding(postAuthSnapshot, postAuthUrl);
-          console.log(`[auth-resume] retry attempt=${attempt} ready=${landingCheckAfter.valid} reason="${landingCheckAfter.reason}" url="${postAuthUrl}"`);
-          console.log(`[auth-resume] landingCheck valid=${landingCheckAfter.valid} reason="${landingCheckAfter.reason}" url="${postAuthUrl}"`);
+          console.log(`[auth-resume] retry attempt=${attempt} ready=${landingCheckAfter.valid} reason="${landingCheckAfter.reason}" ${safeUrlForLog(postAuthUrl)}`);
+          console.log(`[auth-resume] landingCheck valid=${landingCheckAfter.valid} reason="${landingCheckAfter.reason}" ${safeUrlForLog(postAuthUrl)}`);
         }
         const authResumeMs = Date.now() - authResumeStart;
         if (landingCheckAfter.valid) {
@@ -1884,14 +1857,14 @@ async function tryAuthGateRecovery(
         if (!landingCheckAfter.valid) {
           const unresolvedSnapshot = buildTransientSnapshot(postAuthSnapshot);
           console.log(
-            `[auth-resume] transientSnapshot url="${unresolvedSnapshot.url}" ` +
+            `[auth-resume] transientSnapshot ${safeUrlForLog(unresolvedSnapshot.url)} ` +
             `texts=${JSON.stringify(unresolvedSnapshot.texts)} controls=${JSON.stringify(unresolvedSnapshot.controls)} ` +
             `loaders=${JSON.stringify(unresolvedSnapshot.loaders)}`
           );
           logConfigSuggestion(unresolvedSnapshot);
           console.log(
             `[auth-resume] blocked reason=post_auth_transient_landing_unresolved ` +
-            `target="${nextPendingTarget ?? "unknown"}" url="${postAuthUrl}"`
+            `target="${nextPendingTarget ?? "unknown"}" ${safeUrlForLog(postAuthUrl)}`
           );
           // Return failure explicitly - DO NOT proceed to normal auth completion
           return {
@@ -1969,7 +1942,7 @@ async function tryAuthGateRecovery(
         ["identification_input", "phone_confirmation", "otp"].includes(finalStage);
 
       if (isBlockingFailure) {
-        console.log(`[auth-gate] Blocking scenario: auth not completed. finalStage=${finalStage} reason=${stuckReason} url=${currentUrl}`);
+        console.log(`[auth-gate] Blocking scenario: auth not completed. finalStage=${finalStage} reason=${stuckReason} ${safeUrlForLog(currentUrl)}`);
         return {
           recovered: false,
           error: `auth_not_completed stage=${finalStage}`,
@@ -2033,14 +2006,68 @@ export function scenarioExplicitlyRequiresAuth(scenario: TestScenario): boolean 
       return true;
     }
   }
-  const objectiveText = [
-    scenario.title ?? "",
-    scenario.preconditions ?? "",
-    typeof scenario.raw?.custom_preconds === "string" ? scenario.raw.custom_preconds : "",
-    typeof scenario.raw?.custom_expected === "string" ? scenario.raw.custom_expected : "",
-  ].filter(Boolean).join("\n");
-  const normalized = normalizeText(objectiveText);
-  return /(iniciar sesio|loguearse|autenticar|log in|sign in|login con)/.test(normalized);
+  return scenario.authIntent === "full_authentication";
+}
+
+export function getAuthoritativeSubjectSignals(scenario: TestScenario): string[] {
+  const s: any = scenario;
+  const candidates: string[] = [];
+  const push = (v: any) => { if (typeof v === "string" && v.trim()) candidates.push(v.trim().toLowerCase()); };
+  push(s.type); push(s.automationType); push(s.setupStrategy); push(s.database);
+  push(s.functionalBranch?.actionIntent); push(s.functionalBranch?.branchId); push(s.functionalBranch?.accessIntent);
+  push(s.functionalBranch?.evidenceSource); push(s.branchAssociation?.expectedActionIdentity); push(s.branchAssociation?.actualActionIdentity);
+  push(s.scenarioMode); push(s.routeProfile); push((s.raw as any)?.custom_expected); push((s.raw as any)?.custom_preconds);
+  // generic scan for subject/intent/requirement fields if present
+  push((s as any).subject); push((s as any).intent); push((s as any).subIntent); push((s as any).requirement); push((s as any).requirementId);
+  // also include stringified functionalBranch for auth test detection without hardcoding titles
+  return candidates.filter(Boolean);
+}
+
+export function isAuthenticationTestScenario(scenario: TestScenario, _parsed?: { actionTargets: ActionTargetItem[]; assertionTargets: any[] }): boolean {
+  if (scenario.authIntent !== "full_authentication") return false;
+  const s: any = scenario;
+  const fields = [s.type, s.automationType, s.subject, s.intent, s.subIntent,
+    s.requirement?.category, s.requirement?.scope, s.functionalBranch?.category,
+    s.functionalBranch?.scope, s.functionalBranch?.actionIntent];
+  return fields.some(v => typeof v === "string" && ["authentication_test", "auth_test", "authentication-test"].includes(v.trim().toLowerCase()));
+}
+
+export function shouldPerformBusinessFlowAuthSetup(scenario: TestScenario, parsed?: { actionTargets: ActionTargetItem[]; assertionTargets: any[] }): boolean {
+  if (scenario.authIntent === "gate_observation") return false;
+  if (scenario.authIntent !== "full_authentication") return false;
+  if (isAuthenticationTestScenario(scenario, parsed)) return false;
+  return true;
+}
+
+export function getLoginStepsToConsume(parsed: { actionTargets: ActionTargetItem[] }): Set<number> {
+  const s = new Set<number>();
+  for (const at of parsed.actionTargets) {
+    const metadata: any = (at as any).metadata ?? at;
+    const intent = String(metadata.actionIntent ?? "").toLowerCase();
+    const role = String(metadata.targetRole ?? metadata.routeRole ?? "").toLowerCase();
+    if (intent === "authentication" || intent === "authenticate" || role === "authentication") s.add(at.index);
+  }
+  return s;
+}
+
+export function loadProjectAuthProfile(appSlug: string): { profile: any | null; source: string; variantSupport: boolean } {
+  try {
+    const fsSync = require("node:fs");
+    const path = require("node:path");
+    const cfgPath = path.join(process.cwd(), "automations", "apps", appSlug, "app.config.json");
+    const raw = fsSync.readFileSync(cfgPath, "utf-8");
+    const cfg = JSON.parse(raw);
+    const authProfiles = cfg?.authProfiles ?? {};
+    const authProfileRef = cfg?.authProfile ?? cfg?.routeProfiles?.private_operations?.authProfile;
+    const profile = typeof authProfileRef === "string" ? authProfiles?.[authProfileRef] : authProfileRef;
+    if (profile) {
+      const hasVariant = Boolean(profile.variant || profile.accountType || profile.loginVariant || profile.loginMode);
+      return { profile, source: "app_config", variantSupport: hasVariant || true };
+    }
+    return { profile: null, source: "app_config", variantSupport: false };
+  } catch {
+    return { profile: null, source: "none", variantSupport: false };
+  }
 }
 
 export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<CaseDiscoveryResult> {
@@ -2142,23 +2169,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     return { texts, controls };
   };
 
-  const isPrivateLandingPath = (url: string): boolean => {
-    try {
-      const pathname = new URL(url).pathname.toLowerCase();
-      return pathname !== "/" && !/auth|otp|login|identification|authentication-success/.test(pathname);
-    } catch {
-      return false;
-    }
-  };
-
-  const isPublicOrAuthPath = (url: string): boolean => {
-    try {
-      const pathname = new URL(url).pathname.toLowerCase();
-      return pathname === "/" || /auth|otp|login|identification/.test(pathname);
-    } catch {
-      return false;
-    }
-  };
+  const isPrivateLandingPath = (_url: string): boolean => false;
+  const isPublicOrAuthPath = (_url: string): boolean => false;
 
   if (evidenceDir && evidenceDir.trim()) {
     await mkdir(evidenceDir, { recursive: true });
@@ -2171,15 +2183,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     target: "APP_BASE_URL"
   });
 
-  const requiresExplicitAuth = scenarioExplicitlyRequiresAuth(scenario);
-  console.log(`[discovery:case] login-step-gate scenario="${scenario.title?.slice(0, 60)}" loginActionProvided=${Boolean(loginAction)} requiresExplicitAuth=${requiresExplicitAuth}`);
-  if (loginAction && requiresExplicitAuth) {
-    planSteps.push({
-      index: planSteps.length + 1,
-      action: "login",
-      description: "Execute login"
-    });
-  }
+  // Audit current contract before gated decision
+  const initialRequiresExplicitAuth = scenarioExplicitlyRequiresAuth(scenario);
+  const initialAuthProfileInfo = loadProjectAuthProfile(discoveryAppSlug);
+  console.log(`[discovery:case] login-step-gate scenario="${scenario.title?.slice(0, 60)}" loginActionProvided=${Boolean(loginAction)} requiresExplicitAuth=${initialRequiresExplicitAuth} authIntent=${scenario.authIntent ?? "undefined"}`);
+  console.log(`[auth-contract-audit] authIntent=${scenario.authIntent ?? "undefined"} loginGate=${initialRequiresExplicitAuth} credentialSource=${options.env ? "env/test_data" : "none"} variantSupport=${initialAuthProfileInfo.variantSupport} profileSource=${initialAuthProfileInfo.source}`);
+  // Defer actual login plan step until after parsing to handle full_authentication business vs auth-test distinction; no push here yet
 
   await page.goto(appBaseUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
   await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
@@ -2246,6 +2255,60 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     parsed.actionTargets.push(...sanitizedActionTargets);
   }
 
+  // ── AUTH CONTRACT: business flow with full_authentication as SETUP (project-scoped, no hardcode) ──
+  const isAuthTest = isAuthenticationTestScenario(scenario, parsed);
+  const shouldSetup = shouldPerformBusinessFlowAuthSetup(scenario, parsed);
+  const authProfileInfoForSetup = loadProjectAuthProfile(discoveryAppSlug);
+  console.log(`[auth-contract] authIntent=${scenario.authIntent ?? "undefined"} isAuthTest=${isAuthTest} businessSetup=${shouldSetup} projectAuthSource=${authProfileInfoForSetup.source} variantSupport=${authProfileInfoForSetup.variantSupport}`);
+  console.log(`[auth-decision] authenticationTestDetection=${isAuthTest} businessFlowAuthSetup=${shouldSetup} gateObservationPreserved=${scenario.authIntent === "gate_observation"}`);
+  let businessSetupExecuted = false;
+  let businessSetupSuccess = false;
+  let loginStepsToConsume: Set<number> | null = null;
+  if (shouldSetup) {
+    console.log(`[project-auth] appSlug=${discoveryAppSlug} source=${authProfileInfoForSetup.source} variantSupport=${authProfileInfoForSetup.variantSupport} projectIsolationPreserved=true`);
+    loginStepsToConsume = getLoginStepsToConsume(parsed);
+    if (loginStepsToConsume.size > 0) {
+      console.log(`[login-consumption] loginStepsConsumed=${[...loginStepsToConsume].join(",")} doubleLoginPrevented=true reason=business_flow_setup`);
+    }
+    const firstBusinessTarget = parsed.actionTargets.find((at: any) => {
+      const metadata = at.metadata ?? at;
+      const scope = String(metadata.scope ?? metadata.targetScope ?? "").toLowerCase();
+      const role = String(metadata.targetRole ?? metadata.routeRole ?? metadata.destinationRole ?? "").toLowerCase();
+      const intent = String(metadata.actionIntent ?? "").toLowerCase();
+      return (scope === "business" || role === "business" || intent === "business") &&
+        metadata.executionBacked !== false;
+    })?.target;
+    const gateRecovery = await tryAuthGateRecovery(page, initialScan.snapshot, options, firstBusinessTarget);
+    if (gateRecovery.recovered) {
+      businessSetupSuccess = true;
+      authGateState = gateRecovery.authGateState;
+      authGateDetectedDuringDiscovery = Boolean(gateRecovery.diagnostics?.detected);
+      console.log(`[auth-setup] businessFlowAuthSetup executed recovered=${gateRecovery.recovered} gateDetected=${gateRecovery.diagnostics?.detected ?? false}`);
+    } else {
+      const stillGate = detectAuthGate(initialScan.snapshot);
+      if (!stillGate.detected) {
+        businessSetupSuccess = true;
+        console.log(`[auth-setup] businessFlowAuthSetup no gate detected, treating as already authenticated`);
+      } else if (gateRecovery.error?.includes("token")) {
+        console.log(`[auth-token-gap] gap=token_challenge_no_config fallback=existing_mechanism`);
+      } else {
+        console.log(`[auth-setup] businessFlowAuthSetup attempted recovered=false error=${gateRecovery.error ?? "none"}`);
+      }
+    }
+    businessSetupExecuted = true;
+  } else if (scenario.authIntent === "gate_observation") {
+    console.log(`[gate-observation] preserved=true authIntent=gate_observation will stop before auth per contract`);
+  }
+
+  // Defer login plan step emission until now, respecting business setup (prevent double login)
+  const finalRequiresExplicitAuth = isAuthTest ? initialRequiresExplicitAuth : (shouldSetup ? false : initialRequiresExplicitAuth);
+  if (loginAction && finalRequiresExplicitAuth && !shouldSetup) {
+    planSteps.push({ index: planSteps.length + 1, action: "login", description: "Execute login" });
+    console.log(`[login-plan] emitted login step for auth test`);
+  } else if (shouldSetup) {
+    console.log(`[login-plan] login step suppressed for business flow (setup handles auth)`);
+  }
+
   // Task 1: Deduplicat action targets equivalents - normalize generic text
   function normalizeTarget(target: string): string {
     return target
@@ -2294,55 +2357,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   console.log(`[detail-runtime] candidates actionTargets=[${parsed.actionTargets.map(t => `"${t.target}"`).join(", ")}]`);
   console.log(`[detail-runtime] candidates assertionTargets=[${parsed.assertionTargets.map(t => `"${t.target}"`).join(", ")}]`);
 
-  // Entry and intermediate terms that should NOT be considered as detail targets
-  const entryTerms = new Set(["iniciar", "inicio", "home", "menú", "menu", "información de productos", "productos", "información"]);
-  const intermediateCategoryTerms = new Set([
-    "tarjetas", "tarjetas de crédito", "tarjeta de crédito",
-    "cuentas", "cuentas de efectivo", "cuenta de efectivo",
-    "préstamos", "prestamos",
-    "depósitos", "depositos", "depósitos a plazo", "depositos a plazo",
-    "seguros", "inversiones"
-  ]);
-
-  // Section terms that should NOT be considered as detail targets
-  const detailSectionTerms = new Set([
-    "detalles", "beneficios", "requisitos", "condiciones",
-    "condiciones relevantes",
-    "información del producto", "informacion del producto",
-    "términos y condiciones", "terminos y condiciones",
-    "tasas", "información legal", "informacion legal",
-    "notas aclaratorias",
-  ]);
-
-  // Generic field labels that are NOT concrete product names
-  const genericFieldLabels = new Set([
-    "nombre del producto", "descripción general", "descripcion general",
-    "información de productos", "informacion de productos",
-    "controles", "opciones disponibles", "detalles del producto",
-    "acciones disponibles", "botón de retorno", "botón de solicitud",
-    "boton de retorno", "boton de solicitud",
-  ]);
-
-  // Attribute/field terms that are NOT clickable product targets but valid assertions
-  // Used when ordinal selection is detected to exclude field-level assertions as detail targets
-  const attributeFieldTerms = new Set([
-    "tasa", "tasa de interes", "tasa de interés", "tasa de interés anual",
-    "plazo", "plazo del producto", "plazo disponible",
-    "monto", "monto mínimo", "monto máximo",
-    "fecha", "fecha de vencimiento", "fecha de inicio", "fecha de cierre",
-    "moneda", "divisa",
-    "rentabilidad", "rendimiento",
-    "comisión", "comisiones",
-    "saldo", "saldo disponible",
-    "límite", "límite de crédito"
-  ]);
-
-  // Button terms that should NOT be considered as detail targets
-  const actionButtonTerms = new Set([
-    "volver", "solicitar", "contratar", "finalizar sesión", "finalizar sesion",
-    "cerrar", "cancelar", "aceptar", "continuar"
-  ]);
-
+  // Entry classification must come from structured route metadata, never labels.
+  const isStructuredEntryTarget = (target: any): boolean => {
+    const metadata = target?.metadata ?? target?.routeMetadata ?? target;
+    const role = String(metadata?.routeRole ?? metadata?.destinationRole ?? metadata?.role ?? "").toLowerCase();
+    const intent = String(metadata?.actionIntent ?? metadata?.destinationIntent ?? "").toLowerCase();
+    return role === "entry" || role === "navigation" || intent === "entry";
+  };
   const routeProfileWithPaths = routeProfile as any;
 
   // FALLBACK A: Try exact targetPath match
@@ -2389,7 +2410,6 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
     for (let i = parsed.actionTargets.length - 1; i >= 0; i--) {
       const actionTarget = parsed.actionTargets[i];
-      const targetLower = actionTarget.target.toLowerCase().trim();
 
       // Skip ordinal selection patterns
       if (/seleccionar|primer|primera|elemento.*visible|listado/i.test(actionTarget.target)) {
@@ -2397,17 +2417,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         continue;
       }
 
-      // Skip entry terms
-      if (entryTerms.has(targetLower)) {
-        console.log(`[detail-runtime] fallback=B skipped actionIndex=${i} target="${actionTarget.target}" reason=entry_term`);
+      // Skip targets explicitly classified as entry/navigation.
+      if (isStructuredEntryTarget(actionTarget)) {
+        console.log(`[detail-runtime] fallback=B skipped actionIndex=${i} reason=structured_entry_role`);
         continue;
       }
 
       // Skip intermediate category terms
-      if (intermediateCategoryTerms.has(targetLower)) {
-        console.log(`[detail-runtime] fallback=B skipped actionIndex=${i} target="${actionTarget.target}" reason=intermediate_term`);
-        continue;
-      }
 
       // Task 1: Check if this action target has nextTarget pending (is intermediate navigation)
       const nextActionTarget = parsed.actionTargets.find(at => at.index > actionTarget.index);
@@ -2439,53 +2455,24 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       const assertionLower = assertionTarget.target.toLowerCase().trim();
 
       // Skip section terms
-      if (detailSectionTerms.has(assertionLower)) {
+      if ((assertionTarget as any).metadata?.destinationRole === "section") {
         console.log(`[detail-runtime] fallback=C skipped assertion="${assertionTarget.target}" reason=detail_section`);
         continue;
       }
 
       // Skip button terms
-      if (actionButtonTerms.has(assertionLower)) {
+      if ((assertionTarget as any).metadata?.targetRole === "action") {
         console.log(`[detail-runtime] fallback=C skipped assertion="${assertionTarget.target}" reason=action_button`);
         continue;
       }
 
       // Skip entry/intermediate terms
-      if (entryTerms.has(assertionLower) || intermediateCategoryTerms.has(assertionLower)) {
+      if (isStructuredEntryTarget(assertionTarget)) {
         console.log(`[detail-runtime] fallback=C skipped assertion="${assertionTarget.target}" reason=entry_or_intermediate`);
         continue;
       }
 
       // Skip generic field labels (not concrete product names)
-      if (genericFieldLabels.has(assertionLower)) {
-        console.log(`[detail-runtime] fallback=C skipped assertion="${assertionTarget.target}" reason=generic_field_label`);
-        continue;
-      }
-
-      // Skip attribute/field terms (not clickable product targets)
-      if (attributeFieldTerms.has(assertionLower)) {
-        console.log(`[detail-runtime] fallback=C skipped assertion="${assertionTarget.target}" reason=attribute_field_term`);
-        continue;
-      }
-
-      // Skip field-prefixed assertions (e.g. "Número de certificado", "Código de producto")
-      if (/^(número|número de|código|código de|identificador|identificador de|id|no\.|nro\.?|tipo de|tipo del|nombre del|nombre de)\b/i.test(assertionLower)) {
-        console.log(`[detail-runtime] fallback=C skipped assertion="${assertionTarget.target}" reason=field_prefixed`);
-        continue;
-      }
-
-      // Skip navigation/control only texts
-      if (/^(volver|regresar|atrás|salir|finalizar|solicitar|imprimir|enviar)\b/i.test(assertionLower)) {
-        console.log(`[detail-runtime] fallback=C skipped assertion="${assertionTarget.target}" reason=navigation_control`);
-        continue;
-      }
-
-      // Skip single currency/variant words
-      if (/^(pesos|dólares|dolares|euros)$/i.test(assertionLower)) {
-        console.log(`[detail-runtime] fallback=C skipped assertion="${assertionTarget.target}" reason=currency_variant_only`);
-        continue;
-      }
-
       // Skip assertions that appear functional but have no concrete entity target.
       // Only assertions backed by ordinal selection or entity metadata can become detailTarget.
       // This prevents screen descriptions ("Listado de X") from being treated as product details.
@@ -2495,9 +2482,15 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       const precedingAction = [...parsed.actionTargets].reverse().find(at => at.index < assertionIdx);
 
       // Use preceding action as detail target if it exists and is a selection (ordinal/entity)
-      if (precedingAction &&
-          (/seleccionar|primer|primera|elemento.*visible/i.test(precedingAction.target) ||
-           /consultar|abrir|detalle/i.test(precedingAction.target))) {
+      const actionMetadata: any = (precedingAction as any)?.metadata ?? precedingAction;
+      const actionIsBacked = actionMetadata?.executionBacked === true ||
+        actionMetadata?.locatorAuthority === "runtime" ||
+        actionMetadata?.runtimeObserved === true ||
+        actionMetadata?.transitionValidated === true ||
+        actionMetadata?.trustedKnowledge === true;
+      const actionIntent = String(actionMetadata?.actionIntent ?? "").toLowerCase();
+      const actionRole = String(actionMetadata?.targetRole ?? actionMetadata?.routeRole ?? actionMetadata?.destinationRole ?? "").toLowerCase();
+      if (precedingAction && actionIsBacked && (actionIntent === "select" || actionIntent === "navigate" || actionRole === "detail" || actionRole === "entity")) {
         detailTarget = precedingAction.target;
         detailTargetSource = "precedingActionViaAssertion";
         finalProductClickStepIndex = precedingAction.index;
@@ -2522,11 +2515,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         const assertionLower = assertionTarget.target.toLowerCase().trim();
 
         // Exclude field/attribute terms when ordinal is detected
-        if (!detailSectionTerms.has(assertionLower) &&
-            !actionButtonTerms.has(assertionLower) &&
-            !entryTerms.has(assertionLower) &&
-            !intermediateCategoryTerms.has(assertionLower) &&
-            !attributeFieldTerms.has(assertionLower)) {
+        if (!isStructuredEntryTarget(assertionTarget) &&
+            (assertionTarget as any).metadata?.destinationRole === "detail") {
 
           detailTarget = assertionTarget.target;
           detailTargetSource = "ordinalAssertionFallback";
@@ -2542,7 +2532,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             `ordinalStepIndex=${finalProductClickStepIndex}`
           );
           break;
-        } else if (attributeFieldTerms.has(assertionLower)) {
+        } else if ((assertionTarget as any).metadata?.targetRole === "field") {
           console.log(
             `[detail-runtime] skipped assertion="${assertionTarget.target}" reason=attribute_or_field`
           );
@@ -2600,9 +2590,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
   // Detect if this is a detail scenario even if detailTarget wasn't resolved
   const hasDetailAssertions = parsed.assertionTargets.some(at => {
-    const lower = at.target.toLowerCase().trim();
-    return detailSectionTerms.has(lower) ||
-           (lower.length > 5 && !entryTerms.has(lower) && !intermediateCategoryTerms.has(lower));
+    const metadata: any = (at as any).metadata ?? at;
+    const role = String(metadata.routeRole ?? metadata.destinationRole ?? metadata.targetRole ?? "").toLowerCase();
+    const intent = String(metadata.actionIntent ?? metadata.destinationIntent ?? "").toLowerCase();
+    return role === "detail" || intent === "detail";
   });
 
   if (hasDetailAssertions && !detailTarget) {
@@ -2857,39 +2848,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             productNameVisible = pollNameMatch.matches;
           }
 
-          // Check for strong detail heading signals
-          const exclusiveDetailHeadings = [
-            "más detalles", "mas detalles",
-            "detalle del producto", "detalle de producto",
-            "información del producto", "informacion del producto",
-            "detalles de", "detalle de"
-          ];
-          const detailHeadingVisible = exclusiveDetailHeadings.some(heading =>
-            lastSnapshot.elements.some((el: any) => {
-              const text = (el.text || el.label || el.name || "").toLowerCase();
-              return text.includes(heading) && (el.role === "heading" || el.tagName === "h1" || el.tagName === "h2" || el.tagName === "h3");
-            })
-          );
-
-          // Check for strong detail section signals
-          const exclusiveDetailSections = [
-            "beneficios", "detalles", "requisitos", "condiciones",
-            "información del producto", "informacion del producto",
-            "características", "caracteristicas"
-          ];
-          const detailSectionsVisible = exclusiveDetailSections.some(section =>
-            lastSnapshot.elements.some((el: any) =>
-              (el.text || el.label || el.name || "").toLowerCase().includes(section)
-            )
-          );
-
-          // Check for action buttons (weaker signal, not sufficient alone)
-          const exclusiveActionButtons = ["volver", "solicitar", "contratar", "finalizar sesión", "finalizar sesion"];
-          const actionButtonsVisible = exclusiveActionButtons.some(button =>
-            lastSnapshot.elements.some((el: any) =>
-              (el.text || el.label || el.name || "").toLowerCase().includes(button)
-            )
-          );
+          const detailHeadingVisible = lastSnapshot.elements.some((el: any) => {
+            const role = String(el.role ?? el.tagName ?? "").toLowerCase();
+            const text = String(el.text ?? el.label ?? el.name ?? "");
+            return /heading|h1|h2|h3/.test(role) && normalizeText(text) === normalizeText(detailTarget);
+          });
+          const detailSectionsVisible = false;
+          const actionButtonsVisible = false;
 
           // Strong signal = heading OR sections (NOT just buttons)
           strongSignalFound = detailHeadingVisible || detailSectionsVisible;
@@ -2951,39 +2916,14 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           }
         }
 
-        // Check for exclusive detail heading/title signals
-        const exclusiveDetailHeadings = [
-          "más detalles", "mas detalles",
-          "detalle del producto", "detalle de producto",
-          "información del producto", "informacion del producto",
-          "detalles de", "detalle de"
-        ];
-        const detailHeadingVisible = exclusiveDetailHeadings.some(heading =>
-          detailSnapshot.elements.some((el: any) => {
-            const text = (el.text || el.label || el.name || "").toLowerCase();
-            return text.includes(heading) && (el.role === "heading" || el.tagName === "h1" || el.tagName === "h2" || el.tagName === "h3");
-          })
-        );
-
-        // Check for exclusive detail section signals
-        const exclusiveDetailSections = [
-          "beneficios", "detalles", "requisitos", "condiciones",
-          "información del producto", "informacion del producto",
-          "características", "caracteristicas"
-        ];
-        const detailSectionsVisible = exclusiveDetailSections.some(section =>
-          detailSnapshot.elements.some((el: any) =>
-            (el.text || el.label || el.name || "").toLowerCase().includes(section)
-          )
-        );
-
-        // Check for action buttons (diagnostic only, NOT sufficient alone)
-        const exclusiveActionButtons = ["volver", "solicitar", "contratar", "finalizar sesión", "finalizar sesion"];
-        const actionButtonsVisible = exclusiveActionButtons.some(button =>
-          detailSnapshot.elements.some((el: any) =>
-            (el.text || el.label || el.name || "").toLowerCase().includes(button)
-          )
-        );
+        // Detail evidence comes from the explicit target and runtime transition.
+        const detailHeadingVisible = detailSnapshot.elements.some((el: any) => {
+          const role = String(el.role ?? el.tagName ?? "").toLowerCase();
+          const text = String(el.text ?? el.label ?? el.name ?? "");
+          return /heading|h1|h2|h3/.test(role) && normalizeText(text) === normalizeText(detailTarget);
+        });
+        const detailSectionsVisible = false;
+        const actionButtonsVisible = false;
 
         // Check for navigation transition (URL/DOM change) - additional evidence, not gate
         const urlChanged = afterUrl !== currentSnapshot.url;
@@ -3696,7 +3636,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             "generar cartas"
           ]
         });
-        console.log(`[discovery:case] Page stability: waited=${stabilityResult.waited}, reason=${stabilityResult.reason}, duration=${stabilityResult.durationMs}ms, url=${stabilityResult.finalUrl}`);
+        console.log(`[discovery:case] Page stability: waited=${stabilityResult.waited}, reason=${stabilityResult.reason}, duration=${stabilityResult.durationMs}ms, ${safeUrlForLog(stabilityResult.finalUrl)}`);
         }
         const scan = await scanAndCollectObjects(page, orderedItem.index, evidenceDir);
         currentSnapshot = scan.snapshot;
@@ -3709,7 +3649,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           };
           const postResumeSummary = summarizeSnapshot(currentSnapshot);
           console.log(`[auth-resume] skipLongPostResumeWait reason=private_landing_resolved target="${resumedTarget}"`);
-          console.log(`[auth-resume] postResumeFastScan target="${resumedTarget}" url="${currentSnapshot.url}"`);
+        console.log(`[auth-resume] postResumeFastScan target="${resumedTarget}" ${safeUrlForLog(currentSnapshot.url)}`);
           console.log(
             `[auth-resume] postResumeSnapshot target="${resumedTarget}" url="${currentSnapshot.url}" ` +
             `texts=${JSON.stringify(postResumeSummary.texts)} controls=${JSON.stringify(postResumeSummary.controls)}`
@@ -3723,15 +3663,16 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     // Check if this step should be skipped because AuthFlow already handled it
     // Skip if we're on operations menu and the step is the landing target
     if (authGateState && orderedItem.type === "action" && orderedItem.actionTarget) {
-      const targetText = orderedItem.actionTarget.target.toLowerCase();
-      const landingHints = ["transacciones y servicios", "transacciones y services", "operaciones", "operations menu"];
-      const isLandingTarget = landingHints.some(hint => targetText.includes(hint));
-      const isOnOperationsMenu = /operations-menu|operaciones|transacciones.*servicios/i.test(currentSnapshot.url);
+      const targetText = orderedItem.actionTarget.target;
+      const targetMetadata: any = orderedItem.actionTarget.metadata ?? orderedItem.actionTarget;
+      const targetRole = String(targetMetadata.routeRole ?? targetMetadata.destinationRole ?? targetMetadata.targetRole ?? "").toLowerCase();
+      const isLandingTarget = targetRole === "entry" || targetRole === "landing";
+      const isOnOperationsMenu = authGateState.completed === true;
       
-      console.log(`[discovery:case] Skip check: type=${orderedItem.type}, target=${targetText}, isLanding=${isLandingTarget}, isOnMenu=${isOnOperationsMenu}, url=${currentSnapshot.url}`);
+      console.log(`[discovery:case] Skip check: type=${orderedItem.type}, target=${targetText}, isLanding=${isLandingTarget}, isOnMenu=${isOnOperationsMenu}, ${safeUrlForLog(currentSnapshot.url)}`);
       
       if (isLandingTarget && isOnOperationsMenu) {
-        console.log(`[discovery:case] Skipping step ${orderedItem.actionTarget.index} (${targetText}) - already on landing page after AuthFlow (url=${currentSnapshot.url})`);
+        console.log(`[discovery:case] Skipping step ${orderedItem.actionTarget.index} (${targetText}) - already on landing page after AuthFlow (${safeUrlForLog(currentSnapshot.url)})`);
         steps.push({
           index: orderedItem.actionTarget.index,
           action: orderedItem.actionTarget.action,
@@ -4039,8 +3980,11 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             expectedResult: (scenario as any).expectedResult ?? "",
           });
 
-          // Classify assertion importance (let — may be downgraded to contextual)
-          let assertionImportance = classifyAssertionImportance(assertionResult.assertionText, {
+           const canonicalMetadata = getCanonicalAssertionMetadata(scenario, es.stepIndex);
+
+           // Structured canonical requirements own requiredness. Runtime backing
+           // is tracked separately and must never downgrade a required claim.
+           let assertionImportance = classifyAssertionImportance(assertionResult.assertionText, {
             scenarioTitle: scenario.title,
             expectedResult: (scenario as any).expectedResult ?? "",
             routeProfile,
@@ -4052,7 +3996,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             routeProfile,
           });
 
-          if (recoveryResult.recovered) {
+           const recoveryMatchesSameAssertion = recoveryResult.recovered
+             && normalizeText(recoveryResult.matchedText ?? "") === normalizeText(assertionResult.assertionText);
+
+           if (recoveryMatchesSameAssertion && (!canonicalMetadata.required || recoveryMatchesSameAssertion)) {
             console.log(`[assertion-recovery] recovered "${assertionResult.assertionText}" -> "${recoveryResult.matchedText}" decision=${recoveryResult.decision} confidence=${recoveryResult.confidence}`);
             // Update step status to recovered
             steps[steps.length - 1].status = "found";
@@ -4062,7 +4009,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             (steps[steps.length - 1] as any).recoveryAttempts = recoveryResult.recoveryAttempts;
             (steps[steps.length - 1] as any).recoveryConfidence = recoveryResult.confidence;
             (steps[steps.length - 1] as any).matchedText = recoveryResult.matchedText;
-            (steps[steps.length - 1] as any).assertionImportance = assertionImportance;
+             (steps[steps.length - 1] as any).assertionImportance = assertionImportance;
+             (steps[steps.length - 1] as any).functionalRequired = canonicalMetadata.required;
+             (steps[steps.length - 1] as any).runtimeBacked = true;
+             (steps[steps.length - 1] as any).canonicalRequirementRefs = canonicalMetadata.refs;
             (steps[steps.length - 1] as any).conditionalAssertion = conditionalRisk.isConditional;
             (steps[steps.length - 1] as any).conditionalRisk = conditionalRisk.risk;
             // Clear failure markers
@@ -4082,7 +4032,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             // isBlockingRequirement: contract marked this assertion as functionally important
             // hasObservableBacking: real observable evidence exists — NOT derived from assertionImportance
             // runtimeFound: resolver found matching text/tokens during execution
-            const isBlockingRequirement = assertionImportance === "blocking";
+             const isBlockingRequirement = assertionImportance === "blocking";
 
             const hasObservableBacking =
               (assertionResult.structuralSignals?.length ?? 0) > 0 ||
@@ -4098,24 +4048,31 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
                 return false;
               })();
 
-            const runtimeFound =
+             const runtimeFound =
               assertionResult.matchedText != null ||
               (assertionResult.matchedTokens?.length ?? 0) > 0;
 
-            console.log(`[assertion-contract] target="${assertionResult.assertionText}" blocking=${isBlockingRequirement}`);
-            console.log(`[assertion-backing] target="${assertionResult.assertionText}" backed=${hasObservableBacking} source=${hasObservableBacking ? "structural" : "none"}`);
+             const functionalRequired = canonicalMetadata.required || isBlockingRequirement;
+             (steps[steps.length - 1] as any).functionalRequired = functionalRequired;
+             (steps[steps.length - 1] as any).runtimeBacked = hasObservableBacking;
+             (steps[steps.length - 1] as any).canonicalRequirementRefs = canonicalMetadata.refs;
+
+             console.log(`[assertion-contract] target="${assertionResult.assertionText}" blocking=${isBlockingRequirement}`);
+             console.log(`[assertion-backing] target="${assertionResult.assertionText}" backed=${hasObservableBacking} source=${hasObservableBacking ? "structural" : "none"}`);
+             console.log(`[assertion-requiredness] target="${assertionResult.assertionText}" functionalRequired=${functionalRequired} runtimeBacked=${hasObservableBacking} canonical=${canonicalMetadata.refs.length > 0}`);
             console.log(`[assertion-runtime] target="${assertionResult.assertionText}" found=${runtimeFound}`);
 
             if (runtimeFound) {
               console.log(`[assertion-decision] target="${assertionResult.assertionText}" result=passed runtimeFound=true`);
             } else if (isBlockingRequirement && hasObservableBacking) {
               console.log(`[assertion-decision] target="${assertionResult.assertionText}" result=failed blocking=true backed=true runtimeFound=false`);
-            } else if (isBlockingRequirement && !hasObservableBacking) {
-              console.log(`[assertion-decision] target="${assertionResult.assertionText}" result=discovery_required blocking=true backed=false runtimeFound=false`);
-              assertionImportance = "contextual";
-              (steps[steps.length - 1] as any).assertionImportance = "contextual";
-              (steps[steps.length - 1] as any).pendingDiscovery = true;
-              console.log(`[assertion-failure-record] target="${assertionResult.assertionText}" blocking=false importance=contextual pendingDiscovery=true reason=observable_assertion_requires_discovery`);
+             } else if (functionalRequired && !hasObservableBacking) {
+               console.log(`[assertion-decision] target="${assertionResult.assertionText}" result=discovery_required blocking=true backed=false runtimeFound=false`);
+               assertionImportance = "blocking";
+               (steps[steps.length - 1] as any).assertionImportance = "blocking";
+               (steps[steps.length - 1] as any).pendingDiscovery = true;
+               (steps[steps.length - 1] as any).recoveryMetadata = { ...(steps[steps.length - 1] as any).recoveryMetadata, blocking: true };
+               console.log(`[assertion-failure-record] target="${assertionResult.assertionText}" blocking=true importance=blocking pendingDiscovery=true reason=observable_assertion_requires_discovery`);
             } else {
               console.log(`[assertion-decision] target="${assertionResult.assertionText}" result=contextual blocking=false runtimeFound=false`);
               assertionImportance = "contextual";
@@ -4332,7 +4289,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         if (unresolvedAuthRecovery) {
           console.log(`[auth-resume] skipLegacyStableWait reason=post_auth_transient_landing_unresolved`);
           console.log(`[status-reconcile] evidenceStatus=Fallido caseFinished=failed reason=post_auth_transient_landing_unresolved`);
-          throw new Error(`[auth-resume] blocked reason=post_auth_transient_landing_unresolved target="${nav.target}" url="${authRecovery.diagnostics?.url}"`);
+          throw new Error(`[auth-resume] blocked reason=post_auth_transient_landing_unresolved target="${nav.target}" ${safeUrlForLog(authRecovery.diagnostics?.url)}`);
         }
 
         // Check for blocking auth failures
@@ -4372,7 +4329,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           const authCompletedUrl = page.url();
           const isPrivateMenu = /operations-menu|operaciones|transacciones.*servicios/i.test(authCompletedUrl);
           if (isPrivateMenu) {
-            console.log(`[auth-flow] authenticated=true source=private_menu_detected url=${authCompletedUrl}`);
+            console.log(`[auth-flow] authenticated=true source=private_menu_detected ${safeUrlForLog(authCompletedUrl)}`);
           }
 
           // Task 4: Determine stage and whether to continue
@@ -4530,6 +4487,19 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         }
       }
       
+      // Build per-scenario overrides and suggested data (generic, no hardcode)
+      const overrides = (options as any).scenarioDataOverrides as Record<string, string> | undefined;
+      let suggestedData = (options as any).scenarioSuggestedData as Record<string, string> | undefined;
+      if (!suggestedData) {
+        const scAny: any = scenario as any;
+        if (Array.isArray(scAny.dataRequirements)) {
+          const map: Record<string,string> = {};
+          for (const r of scAny.dataRequirements) {
+            if (r && r.key && r.suggestedValue) map[r.key] = String(r.suggestedValue);
+          }
+          if (Object.keys(map).length>0) suggestedData = map;
+        }
+      }
       const dataResolution = resolveDataKey(normalizedActionTarget.valueKey, {
         testData: testDataMap,
         testDataAliases,
@@ -4537,7 +4507,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         missingInputBehavior,
         autoGenerateConfig,
         field: normalizedActionTarget.target,
-        context: scenario.title
+        context: scenario.title,
+        overrides,
+        suggestedData,
       });
       
       console.log(formatDataKeyForLog(dataResolution));
@@ -4638,7 +4610,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         ) {
           console.log(`[auth-resume] skipLegacyStableWait reason=post_auth_transient_landing_unresolved`);
           console.log(`[status-reconcile] evidenceStatus=Fallido caseFinished=failed reason=post_auth_transient_landing_unresolved`);
-          throw new Error(`[auth-resume] blocked reason=post_auth_transient_landing_unresolved target="${actionTarget.target}" url="${authRecovery.diagnostics?.url}"`);
+          throw new Error(`[auth-resume] blocked reason=post_auth_transient_landing_unresolved target="${actionTarget.target}" ${safeUrlForLog(authRecovery.diagnostics?.url)}`);
         }
         if (authRecovery.recovered) {
           console.log(`[discovery:case] Auth gate recovery successful, retrying fill target...`);
@@ -5429,11 +5401,11 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       if (previousResumeUrl !== currentUrl && isPrivateLandingPath(previousResumeUrl) && isPublicOrAuthPath(currentUrl)) {
         console.log(
           `[auth-resume] lostPrivateLanding beforeTarget="${actionTarget.target}" ` +
-          `from="${previousResumeUrl}" to="${currentUrl}"`
+          `${safeUrlForLog(previousResumeUrl)} ${safeUrlForLog(currentUrl)}`
         );
         console.log(
           `[auth-resume] blocked reason=private_landing_lost_before_target ` +
-          `target="${actionTarget.target}" url="${currentUrl}"`
+          `target="${actionTarget.target}" ${safeUrlForLog(currentUrl)}`
         );
         console.log(`[status-reconcile] evidenceStatus=Fallido caseFinished=failed reason=private_landing_lost_before_target`);
         await captureEvStep(actionTarget.action, "failed", `Private landing lost before resolving "${actionTarget.target}".`);
@@ -5940,7 +5912,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         ) {
           console.log(`[auth-resume] skipLegacyStableWait reason=post_auth_transient_landing_unresolved`);
           console.log(`[status-reconcile] evidenceStatus=Fallido caseFinished=failed reason=post_auth_transient_landing_unresolved`);
-          throw new Error(`[auth-resume] blocked reason=post_auth_transient_landing_unresolved target="${actionTarget.target}" url="${authRecovery.diagnostics?.url}"`);
+          throw new Error(`[auth-resume] blocked reason=post_auth_transient_landing_unresolved target="${actionTarget.target}" ${safeUrlForLog(authRecovery.diagnostics?.url)}`);
         }
         if (authRecovery.recovered) {
           console.log(`[discovery:case] Auth gate recovery successful, retrying click target...`);
@@ -6839,9 +6811,11 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         // Log candidates summary
         const clickableCandidates = aiCandidates.filter((c) => c.visible && c.clickable);
         const visibleClickableLabels = clickableCandidates.slice(0, 10).map((c) => c.name ?? c.text ?? "unknown");
-        const submitLikeCount = clickableCandidates.filter((c) => {
-          const text = (c.name ?? c.text ?? "").toLowerCase();
-          return /(continuar|confirmar|enviar|solicitar|finalizar)/i.test(text);
+        const submitLikeCount = clickableCandidates.filter((c: any) => {
+          const metadata = c.metadata ?? c;
+          const intent = String(metadata.actionIntent ?? "").toLowerCase();
+          const role = String(metadata.targetRole ?? metadata.role ?? "").toLowerCase();
+          return intent === "submit" || intent === "confirm" || role === "submit";
         }).length;
         const sensitiveCount = aiCandidates.filter((c) => c.sensitive).length;
         
@@ -7109,6 +7083,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       continue;
     }
 
+    // AUTH SETUP: consume login functional click if business flow already authenticated (prevent double login)
+    if (typeof businessSetupSuccess !== "undefined" && businessSetupSuccess && loginStepsToConsume?.has(actionTarget.index)) {
+      console.log(`[double-login-guard] skipping login target index=${actionTarget.index} target="${actionTarget.target}" doubleLoginPrevented=true`);
+      continue;
+    }
+
     console.log(`[discovery:case] Clicking target: ${actionTarget.target} (strategy: ${resolution.locatorStrategy}, confidence: ${resolution.confidence.toFixed(2)})`);
 
     const beforeState = await capturePageState(page);
@@ -7370,31 +7350,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
               }
             }
 
-            // Check for strong detail heading signals
-            const exclusiveDetailHeadings = [
-              "más detalles", "mas detalles",
-              "detalle del producto", "detalle de producto",
-              "información del producto", "informacion del producto",
-              "detalles de", "detalle de"
-            ];
-            const detailHeadingVisible = exclusiveDetailHeadings.some(heading =>
-              checkSnapshot.elements.some((el: any) => {
-                const text = (el.text || el.label || el.name || "").toLowerCase();
-                return text.includes(heading) && (el.role === "heading" || el.tagName === "h1" || el.tagName === "h2" || el.tagName === "h3");
-              })
-            );
-
-            // Check for strong detail section signals
-            const exclusiveDetailSections = [
-              "beneficios", "detalles", "requisitos", "condiciones",
-              "información del producto", "informacion del producto",
-              "características", "caracteristicas"
-            ];
-            const detailSectionsVisible = exclusiveDetailSections.some(section =>
-              checkSnapshot.elements.some((el: any) =>
-                (el.text || el.label || el.name || "").toLowerCase().includes(section)
-              )
-            );
+            // Detail authority comes from the explicit target observed at runtime.
+            const detailHeadingVisible = productNameVisible;
+            const detailSectionsVisible = false;
 
             // Strong signal = heading OR sections (NOT just buttons)
             const strongDetailSignal = detailHeadingVisible || detailSectionsVisible;
@@ -8174,6 +8132,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
     const afterState = await capturePageState(page);
     const transitionDetected = hasPageTransition(beforeState, afterState, actionTarget.target);
+    const afterTransitionSnapshot = await scanCurrentPage(page);
+    const beforeStructuralFingerprint = currentSnapshot.structuralFingerprint;
+    const afterStructuralFingerprint = afterTransitionSnapshot.structuralFingerprint;
+    const transitionValidated = Boolean(
+      transitionDetected && beforeStructuralFingerprint && afterStructuralFingerprint
+    );
 
     console.log(`[discovery:case] Transition detected: ${transitionDetected ? "yes" : "no"}`);
 
@@ -8411,7 +8375,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           ) {
             console.log(`[auth-resume] skipLegacyStableWait reason=post_auth_transient_landing_unresolved`);
             console.log(`[status-reconcile] evidenceStatus=Fallido caseFinished=failed reason=post_auth_transient_landing_unresolved`);
-            throw new Error(`[auth-resume] blocked reason=post_auth_transient_landing_unresolved target="${actionTarget.target}" url="${authRecovery.diagnostics?.url}"`);
+          throw new Error(`[auth-resume] blocked reason=post_auth_transient_landing_unresolved target="${actionTarget.target}" ${safeUrlForLog(authRecovery.diagnostics?.url)}`);
           }
           if (authRecovery.recovered) {
             console.log(`[discovery:case] Auth gate recovery after click_no_transition successful, retrying...`);
@@ -8623,9 +8587,14 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
       // Only a previous executable action (not an assertion/validation/wait) can be the
       // source of a learned transition; assertions must not change edge identity.
-      const isAssertionLikeStepLocal = (s: any): boolean =>
-        Boolean(s.assertionStatus || s.assertionClassification) ||
-        /\b(validar|verificar|comprobar|assert|should|esperar que se muestre)\b/i.test(s.action ?? "");
+      const isAssertionLikeStepLocal = (s: any): boolean => {
+        const metadata = s.metadata ?? s;
+        const action = String(metadata.actionIntent ?? metadata.action ?? "").toLowerCase();
+        const type = String(metadata.type ?? metadata.stepType ?? "").toLowerCase();
+        const scope = String(metadata.scope ?? metadata.category ?? "").toLowerCase();
+        return Boolean(s.assertionStatus || s.assertionClassification) ||
+          type === "assertion" || action === "assert" || scope === "assertion";
+      };
       let lastSuccessfulActionTarget: string | undefined;
       for (let i = steps.length - 1; i >= 0; i--) {
         const s = steps[i] as any;
@@ -8651,8 +8620,27 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         sensitive: false,
         submitLike: false,
         riskyAction: false,
-        transitionDetected: true
+        transitionDetected,
+        ...(beforeStructuralFingerprint ? { beforeStructuralFingerprint } : {}),
+        ...(afterStructuralFingerprint ? { afterStructuralFingerprint } : {}),
+        ...(beforeStructuralFingerprint ? { beforeTechnicalScreenKey: buildTechnicalScreenKey(beforeState.url, beforeStructuralFingerprint) } : {}),
+        ...(afterStructuralFingerprint ? { afterTechnicalScreenKey: buildTechnicalScreenKey(afterState.url, afterStructuralFingerprint) } : {}),
+        transitionValidated
       }, options.appSlug ?? "default", routeProfileLearningConfig);
+
+      if (transitionValidated && beforeStructuralFingerprint && afterStructuralFingerprint) {
+        const beforeTechnicalScreenKey = buildTechnicalScreenKey(beforeState.url, beforeStructuralFingerprint);
+        const afterTechnicalScreenKey = buildTechnicalScreenKey(afterState.url, afterStructuralFingerprint);
+        if (beforeTechnicalScreenKey && afterTechnicalScreenKey) {
+          persistRuntimeTransition(options.appSlug ?? "default", {
+            sourceTechnicalScreenKey: beforeTechnicalScreenKey,
+            destinationTechnicalScreenKey: afterTechnicalScreenKey,
+            transitionValidated: true,
+            actionLocatorIdentity: resolution.candidateId ?? resolution.locatorStrategy,
+            actionDescription: actionTarget.action,
+          });
+        }
+      }
       
       if (learningResult.suggestion) {
         routeProfileSuggestions.push(learningResult.suggestion);

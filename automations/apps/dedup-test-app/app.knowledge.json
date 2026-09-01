@@ -1,0 +1,34 @@
+{
+  "items": [
+    {
+      "id": "hd_action_3f8bf03b6e44",
+      "source": "hu_declared",
+      "knowledgeKind": "hu_declared",
+      "category": "action",
+      "sourceText": "Clic en \"Cuentas\"",
+      "sourceIssueKey": "TEST-1",
+      "associatedBranchId": "",
+      "expectedBehavior": "",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "runCount": 1,
+      "createdAt": "2026-08-27T18:12:23.754Z",
+      "lastSeenAt": "2026-08-27T18:12:23.754Z"
+    },
+    {
+      "id": "hd_prerequisite_dc4c2b5ee380",
+      "source": "hu_declared",
+      "knowledgeKind": "hu_declared",
+      "category": "prerequisite",
+      "sourceText": "Estar autenticado",
+      "sourceIssueKey": "TEST-1",
+      "associatedBranchId": "",
+      "expectedBehavior": "",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "runCount": 1,
+      "createdAt": "2026-08-27T18:12:23.754Z",
+      "lastSeenAt": "2026-08-27T18:12:23.754Z"
+    }
+  ]
+}

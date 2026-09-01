@@ -59,6 +59,17 @@ export type MobileStepResult = {
   acceptanceSource?: string;
   screenshotPath?: string;
   durationMs: number;
+  /** Technical identity of the exact control that was resolved and executed by the Appium
+   *  executor. Values come from the real DOM element attributes (resource-id, content-desc,
+   *  package, class), NOT from step.target or post-hoc matching. Undefined when the driver
+   *  couldn't capture the attributes. */
+  executedControl?: {
+    locatorIdentity?: string;
+    resourceId?: string;
+    contentDesc?: string;
+    package?: string;
+    className?: string;
+  };
 };
 
 /**

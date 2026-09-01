@@ -2,8 +2,10 @@ import { config, requireJiraConfig } from "../config/env";
 import type { LoginMode } from "../types/env.types";
 import { JiraClient } from "../clients/jira.client";
 import { loadJiraIssues } from "./jira-scenario-source";
-import { generateScenariosWithAi } from "./codex-scenario-generator";
+import { generateScenariosWithAi, evaluateProviderClaimCompliance } from "./codex-scenario-generator";
 import { validateScenario } from "./scenario-validator";
+import { buildCanonicalClaims, buildRequirementAccounting, evaluateFunctionalCoverageInvariant } from "./scenario-functional-quality";
+import { classifyScenarioPublicationEligibility } from "./scenario-publication-eligibility";
 import {
   resolveAppForPreview,
   ensureFunctionalAppProfile,
@@ -21,6 +23,9 @@ import {
 } from "./effective-click-authority";
 import { loadOrCreateKnowledgeContext, buildKnowledgeContextForScenarioGeneration, type KnowledgeContext } from "./knowledge-context-resolver";
 import { detectHuIntent, isCatalogListingIntent, isTransactionalDocumentIntent, type HuIntentDetection } from "./hu-intent-classifier";
+import { resolveCanonicalHuIntent, type CanonicalHuIntentResolution } from "./canonical-hu-intent";
+import { evaluateDestinationEvidence } from "./destination-evidence";
+import { evaluateStepAuthority, remapStepClaimsByOrigins, resolveRequirementFacet, resolveStepClaimType } from "./step-authority";
 import { detectOptionFlows, type OptionFlow } from "./hu-scope-guard";
 import {
   classifySemanticObject,
@@ -46,6 +51,40 @@ import type {
   FunctionalBranchEvidenceSource,
   IntermediateRepairResult,
 } from "./scenario-types";
+
+export function evaluateRequirementDependencyGate(
+  scenario: Pick<McpScenario, "requirementDependencies" | "stepRequirementRefs">,
+  canonicalDependencies: ReadonlyMap<string, readonly string[]> | undefined,
+): { dependencySatisfied: boolean; reason?: string } {
+  const dependencies = scenario.requirementDependencies ?? [];
+  if (dependencies.length === 0) return { dependencySatisfied: true };
+  if (!canonicalDependencies || canonicalDependencies.size === 0) {
+    return { dependencySatisfied: false, reason: "dependency_canonical_authority_unavailable" };
+  }
+  const refsByRequirement = new Map<string, number[]>();
+  for (const ref of scenario.stepRequirementRefs ?? []) {
+    const indexes = refsByRequirement.get(ref.requirementId) ?? [];
+    indexes.push(ref.stepIndex);
+    refsByRequirement.set(ref.requirementId, indexes);
+  }
+  for (const dependency of dependencies) {
+    const prerequisites = canonicalDependencies.get(dependency.requirementId);
+    if (!prerequisites) {
+      return { dependencySatisfied: false, reason: "dependency_requirement_not_canonical" };
+    }
+    const dependentIndexes = refsByRequirement.get(dependency.requirementId) ?? [];
+    if (dependentIndexes.length === 0) return { dependencySatisfied: false, reason: "dependency_dependent_ref_missing" };
+    for (const prerequisiteId of prerequisites) {
+      if (!canonicalDependencies.has(prerequisiteId)) return { dependencySatisfied: false, reason: "dependency_prerequisite_not_canonical" };
+      const prerequisiteIndexes = refsByRequirement.get(prerequisiteId) ?? [];
+      if (prerequisiteIndexes.length === 0) return { dependencySatisfied: false, reason: "dependency_prerequisite_ref_missing" };
+      if (!prerequisiteIndexes.some((pre) => dependentIndexes.some((dependent) => pre < dependent))) {
+        return { dependencySatisfied: false, reason: "dependency_order_invalid" };
+      }
+    }
+  }
+  return { dependencySatisfied: true };
+}
 
 function resolveAppSlug(requestAppSlug?: string): string {
   if (requestAppSlug?.trim()) return requestAppSlug.trim();
@@ -83,6 +122,27 @@ function isEntryClickStep(step: string, entryLabels: string[]): boolean {
   return entryLabels.some((label) => stepIsClickOnLabel(step, label));
 }
 
+/** Route data resolves implementation, but cannot create functional authority. */
+export function isEntryStepInsertionAuthorized(
+  scenario: Pick<McpScenario, "stepRequirementRefs" | "requirementDependencies">,
+  functionalBranches: FunctionalBranchRef[] = [],
+): boolean {
+  const canonicalPrerequisiteIds = new Set(
+    functionalBranches.flatMap((branch) => branch.prerequisiteRequirementIds ?? []),
+  );
+  const canonicalActionIds = new Set(
+    (scenario.requirementDependencies ?? []).map((dependency) => dependency.requirementId),
+  );
+  return (scenario.stepRequirementRefs ?? []).some((ref) =>
+    (ref.facet === "action" || ref.facet === "activation")
+    && (
+      canonicalPrerequisiteIds.has(ref.requirementId)
+      || canonicalActionIds.has(ref.requirementId)
+      || ref.requirementId.startsWith("prerequisite:")
+    ),
+  );
+}
+
 export function insertEntrySteps(
   scenario: McpScenario,
   entrySteps: string[],
@@ -102,23 +162,55 @@ export function insertEntrySteps(
 
   if (!labels.length || !scenario.steps || scenario.steps.length === 0) return scenario;
 
-  const formattedEntry = labels.map((label, i) => formatEntryStep(label, i));
   const existingSteps = scenario.steps.map((s) => s.trim());
+  const referencedIndexes = new Set(
+    (scenario.stepRequirementRefs ?? []).map((ref) => ref.stepIndex),
+  );
+  const protectedEntryLabels = new Set(
+    labels.filter((label) => existingSteps.some((step, index) =>
+      referencedIndexes.has(index) && isEntryClickStep(step, [label]),
+    )),
+  );
+  const formattedEntry = labels
+    .filter((label) => !protectedEntryLabels.has(label))
+    .map((label, i) => ({ text: formatEntryStep(label, i), originalIndex: undefined as number | undefined }));
 
   // Remove ALL existing entry click steps (damaged or canonical) from anywhere in the list
-  const nonEntrySteps = existingSteps.filter((step) => !isEntryClickStep(step, labels));
+  const nonEntrySteps = existingSteps
+    .map((text, originalIndex) => ({ text, originalIndex }))
+    .filter(({ text, originalIndex }) => referencedIndexes.has(originalIndex) || !isEntryClickStep(text, labels));
 
   // Prepend canonical entry steps
-  const newSteps = [...formattedEntry, ...nonEntrySteps];
+  const protectedPrefixCount = nonEntrySteps.findIndex(({ originalIndex, text }) =>
+    !referencedIndexes.has(originalIndex) || !isEntryClickStep(text, labels),
+  );
+  const insertionIndex = protectedPrefixCount < 0 ? nonEntrySteps.length : protectedPrefixCount;
+  const newSteps = [
+    ...nonEntrySteps.slice(0, insertionIndex),
+    ...formattedEntry,
+    ...nonEntrySteps.slice(insertionIndex),
+  ];
+  const oldToNewIndex = new Map<number, number>();
+  newSteps.forEach((step, index) => {
+    if (step.originalIndex !== undefined) oldToNewIndex.set(step.originalIndex, index);
+  });
+  const stepRequirementRefs = scenario.stepRequirementRefs
+    ?.map((ref) => {
+      const stepIndex = oldToNewIndex.get(ref.stepIndex);
+      return stepIndex === undefined ? undefined : { ...ref, stepIndex };
+    })
+    .filter((ref): ref is NonNullable<typeof ref> => ref !== undefined);
 
   // Re-number all steps
   const renumbered = newSteps.map((step, idx) => {
-    return step.replace(/^\d+[\.)]\s*/, `${idx + 1}. `);
+    return step.text.replace(/^\d+[\.)]\s*/, `${idx + 1}. `);
   });
 
   return {
     ...scenario,
     steps: renumbered,
+    ...(stepRequirementRefs ? { stepRequirementRefs } : {}),
+    ...(scenario.stepClaims ? { stepClaims: remapStepClaimsByOrigins(scenario.stepClaims, newSteps.map((step) => step.originalIndex)) } : {}),
   };
 }
 
@@ -154,6 +246,7 @@ export type GenerationSuccessCheck = {
     | "coverage_requirements_unavailable"
     | "omitted_invalid"
     | "category_overlap_detected"
+    | "provider_claim_compliance_invalid"
   >;
 };
 
@@ -282,6 +375,8 @@ function mapOptionFlowToFunctionalBranch(
     expectedDestination,
     accessIntent,
     evidenceSource: "user_story",
+    activation: { actionType: "select", targetIdentity: sourceLabel },
+    destination: { semanticDeclaration: expectedDestination },
   };
 }
 
@@ -340,6 +435,8 @@ export function extractFunctionalBranchesFromHu(
       expectedDestination,
       accessIntent,
       evidenceSource,
+      activation: { actionType: "select", targetIdentity: label },
+      ...(expectedDestination ? { destination: { semanticDeclaration: expectedDestination } } : {}),
     });
   }
 
@@ -359,6 +456,8 @@ export function extractFunctionalBranchesFromHu(
       expectedDestination: target,
       accessIntent: inferAccessIntentFromText(routeText),
       evidenceSource: "user_story",
+      activation: { actionType: "navigate", targetIdentity: explicitRoutePath[0] },
+      destination: { semanticDeclaration: target },
     });
   }
 
@@ -642,7 +741,17 @@ export function assignFunctionalBranchesToScenarios(
   const branchById = new Map(branches.map((branch) => [branch.branchId, branch]));
   return scenarios.map((scenario) => {
     const decision = decideScenarioBranchAssociation(scenario, branches, branchById);
-    if (decision.branch) {
+    const hasStructuredLineage = Boolean(
+      decision.branch
+      && decision.branch.sourceRequirementId
+      && (scenario.stepRequirementRefs ?? []).some((ref) => ref.requirementId === decision.branch!.sourceRequirementId),
+    );
+    const branchAuthority = Boolean(
+      decision.branch
+      && (decision.associationMethod === "branch_id"
+        || hasStructuredLineage),
+    );
+    if (decision.branch && branchAuthority) {
       return {
         ...scenario,
         functionalBranch: decision.branch,
@@ -665,7 +774,7 @@ export function assignFunctionalBranchesToScenarios(
       branchAssociation: {
         branchId: "none",
         sourceIssueKey: scenario.sourceIssueKey,
-        associationMethod: "none",
+        associationMethod: decision.associationMethod === "textual_fallback" ? "textual_fallback" : "none",
         associationMatched: false,
         expectedActionIdentity: decision.expectedActionIdentity,
         actualActionIdentity: decision.actualActionIdentity,
@@ -797,7 +906,7 @@ function uniqueClickPrefixFromCandidate(candidate: BranchRouteCandidate): string
 }
 
 function extractClickTargetLabel(step: string): string | undefined {
-  const match = step.match(/^Clic en "(.+)"\.?$/i);
+  const match = step.replace(/^\d+[\.)]\s*/, "").trim().match(/^Clic en "(.+)"\.?$/i);
   return match?.[1]?.trim();
 }
 
@@ -817,17 +926,9 @@ export function applyCanonicalRoutePrefix(
   steps: string[],
   routeClickTargets: string[],
   entrySteps: Array<{ action?: string; target?: string; when?: string }>,
-): { steps: string[]; changed: boolean } {
+  stepRequirementRefs: Array<{ stepIndex: number }> = [],
+): { steps: string[]; stepOrigins: Array<number | undefined>; changed: boolean } {
   const normalize = (value: string) => normalizeBranchText(value);
-  const existingClickByTarget = new Map<string, string>();
-  for (const step of steps) {
-    const target = extractClickTargetLabel(step);
-    if (!target) continue;
-    const normalizedTarget = normalize(target);
-    if (!normalizedTarget || existingClickByTarget.has(normalizedTarget)) continue;
-    existingClickByTarget.set(normalizedTarget, step);
-  }
-
   const canonicalTargets: string[] = [];
   const seenTargets = new Set<string>();
   for (const target of [...applicableEntryTargets(entrySteps), ...routeClickTargets]) {
@@ -838,24 +939,28 @@ export function applyCanonicalRoutePrefix(
   }
 
   if (canonicalTargets.length === 0) {
-    return { steps, changed: false };
+    return { steps, stepOrigins: steps.map((_, index) => index), changed: false };
   }
 
-  const canonicalPrefix = canonicalTargets.map((target) => {
-    const normalizedTarget = normalize(target);
-    const existing = existingClickByTarget.get(normalizedTarget);
-    return existing ?? `Clic en "${target}".`;
-  });
-
-  const remainingSteps = steps.filter((step) => {
+  const referencedIndexes = new Set(stepRequirementRefs.map((ref) => ref.stepIndex));
+  const existingCanonicalTargets = new Set<string>();
+  const remainingSteps: Array<{ step: string; originalIndex: number }> = [];
+  for (const [originalIndex, step] of steps.entries()) {
     const target = extractClickTargetLabel(step);
-    if (!target) return true;
-    return !seenTargets.has(normalize(target));
-  });
-
-  const rebuilt = [...canonicalPrefix, ...remainingSteps];
+    const normalizedTarget = target ? normalize(target) : "";
+    if (normalizedTarget && seenTargets.has(normalizedTarget)) {
+      if (existingCanonicalTargets.has(normalizedTarget) && !referencedIndexes.has(originalIndex)) continue;
+      existingCanonicalTargets.add(normalizedTarget);
+    }
+    remainingSteps.push({ step, originalIndex });
+  }
+  const missingPrefix = canonicalTargets
+    .filter((target) => !existingCanonicalTargets.has(normalize(target)))
+    .map((target, index) => ({ step: formatEntryStep(target, index), originalIndex: undefined as number | undefined }));
+  const rebuilt = [...missingPrefix.map(({ step }) => step), ...remainingSteps.map(({ step }) => step)];
+  const stepOrigins = [...missingPrefix.map(({ originalIndex }) => originalIndex), ...remainingSteps.map(({ originalIndex }) => originalIndex)];
   const changed = rebuilt.length !== steps.length || rebuilt.some((step, index) => step !== steps[index]);
-  return { steps: changed ? rebuilt : steps, changed };
+  return { steps: changed ? rebuilt : steps, stepOrigins: changed ? stepOrigins : steps.map((_, index) => index), changed };
 }
 
 function scenarioIdentity(scenario: Pick<McpScenario, "scenarioId" | "sourceIssueKey" | "title">): string {
@@ -949,10 +1054,21 @@ type DestinationEvidenceAssessment = {
   destinationEvidenceSource: string;
 };
 
-function evaluateScenarioDestinationEvidence(
+export function evaluateScenarioDestinationEvidence(
   scenario: McpScenario,
   requiredBranch: FunctionalBranchRef,
 ): DestinationEvidenceAssessment {
+  const sharedEvidence = evaluateDestinationEvidence({
+    transitionDetected: Boolean((scenario as any).transitionDetected),
+    transitionValidated: Boolean((scenario as any).transitionValidated),
+    routeCompatibility: (scenario as any)._branchRouteCompatibility?.compatible,
+    expectedRouteIdentity: (scenario as any).expectedRouteIdentity,
+  });
+  if (sharedEvidence.destinationValidation === "validated") return {
+    destinationMatched: true,
+    destinationEvidenceKind: "route",
+    destinationEvidenceSource: sharedEvidence.destinationEvidenceSource,
+  };
   const expectedDestination = normalizeBranchText(requiredBranch.expectedDestination ?? "");
   const assertionTargets = extractAssertionTargets(scenario);
   const routeCompatibility = (scenario as any)._branchRouteCompatibility as
@@ -968,13 +1084,6 @@ function evaluateScenarioDestinationEvidence(
   // Auth intent gate_observation: destination is an auth gate pending Discovery validation.
   // Do not depend on textual heuristic; authority is scenario.authIntent.
   if (scenario.authIntent === "gate_observation") {
-    if (hasAuthBoundary) {
-      return {
-        destinationMatched: true,
-        destinationEvidenceKind: "auth_gate",
-        destinationEvidenceSource: "observable_auth_boundary",
-      };
-    }
     return {
       destinationMatched: false,
       destinationEvidenceKind: "auth_gate_pending_discovery",
@@ -992,17 +1101,12 @@ function evaluateScenarioDestinationEvidence(
   }
 
   if (isAuthBoundary) {
-    if (hasAuthBoundary) {
-      return {
-        destinationMatched: true,
-        destinationEvidenceKind: "auth_gate",
-        destinationEvidenceSource: "observable_auth_boundary",
-      };
-    }
     return {
       destinationMatched: false,
-      destinationEvidenceKind: "none",
-      destinationEvidenceSource: "observable_auth_boundary_missing",
+      destinationEvidenceKind: "auth_gate_pending_discovery",
+      destinationEvidenceSource: hasAuthBoundary
+        ? "assertion_without_runtime_auth_boundary"
+        : "observable_auth_boundary_missing",
     };
   }
 
@@ -1014,14 +1118,6 @@ function evaluateScenarioDestinationEvidence(
     };
   }
 
-  if (!routeCompatibility && hasAssertionDestination) {
-    return {
-      destinationMatched: true,
-      destinationEvidenceKind: "heading",
-      destinationEvidenceSource: "assertion_observable",
-    };
-  }
-
   return {
     destinationMatched: false,
     destinationEvidenceKind: "none",
@@ -1029,7 +1125,7 @@ function evaluateScenarioDestinationEvidence(
   };
 }
 
-function evaluateScenarioBranchCoverageSignals(
+export function evaluateScenarioBranchCoverageSignals(
   scenario: McpScenario,
   requiredBranch: FunctionalBranchRef,
 ): {
@@ -1040,7 +1136,8 @@ function evaluateScenarioBranchCoverageSignals(
   actualActionIdentity: string;
   hasDestination: boolean;
   hasRouteEvidence: boolean;
-  complete: boolean;
+  functionalBranchCovered: boolean;
+  destinationValidationStatus: "validated" | "pending_discovery" | "mismatch";
   destinationEvidenceKind: "route" | "heading" | "marker" | "auth_gate" | "auth_gate_pending_discovery" | "structured_metadata" | "none";
   destinationEvidenceSource: string;
   reasonCode: "ok" | "branch_action_mismatch" | "destination_mismatch" | "destination_pending_discovery" | "access_mismatch" | "route_evidence_insufficient";
@@ -1060,12 +1157,27 @@ function evaluateScenarioBranchCoverageSignals(
     && scenario.nonExecutableCriteria !== "route_evidence_insufficient"
     && (scenario.mcpExecutable !== false || routeCompatible);
   const destinationPendingDiscovery = destinationEvidence.destinationEvidenceKind === "auth_gate_pending_discovery";
+  const functionalRefsPresent = (scenario.stepRequirementRefs ?? []).some((ref) =>
+    ref.requirementId === requiredBranch.sourceRequirementId && Number.isInteger(ref.stepIndex) && ref.stepIndex >= 0 && ref.stepIndex < (scenario.steps ?? []).length,
+  );
+  const dependencySatisfied = (scenario as any).dependencySatisfied !== false;
+  const functionalBranchCovered = associationMatched && accessCompatible && hasAction && functionalRefsPresent && dependencySatisfied;
+  const destinationValidationStatus = destinationEvidence.destinationMatched
+    ? "validated"
+    : destinationPendingDiscovery
+      ? "pending_discovery"
+      : destinationEvidence.destinationEvidenceSource === "destination_not_observed"
+        || destinationEvidence.destinationEvidenceSource === "assertion_without_route_support"
+        ? "pending_discovery"
+        : "mismatch";
   const reasonCode = !accessCompatible
     ? "access_mismatch"
     : !hasAction
       ? "branch_action_mismatch"
-      : !hasDestination
-        ? destinationPendingDiscovery
+       : !functionalBranchCovered
+       ? "branch_action_mismatch"
+       : !hasDestination
+         ? destinationPendingDiscovery
           ? "destination_pending_discovery"
           : "destination_mismatch"
         : !hasRouteEvidence
@@ -1079,7 +1191,8 @@ function evaluateScenarioBranchCoverageSignals(
     actualActionIdentity: actionEvidence.actualActionIdentity,
     hasDestination,
     hasRouteEvidence,
-    complete: reasonCode === "ok",
+     functionalBranchCovered,
+     destinationValidationStatus,
     destinationEvidenceKind: destinationEvidence.destinationEvidenceKind,
     destinationEvidenceSource: destinationEvidence.destinationEvidenceSource,
     reasonCode,
@@ -1159,6 +1272,8 @@ export function evaluateGenerationSuccess(
   integrityChecks: {
     omittedValid?: boolean;
     categoriesDisjoint?: boolean;
+    functionalCoverageValid?: boolean;
+    providerClaimComplianceValid?: boolean;
   } = {},
 ): GenerationSuccessCheck {
   const blockedReasons: GenerationSuccessCheck["blockedReasons"] = [];
@@ -1167,6 +1282,8 @@ export function evaluateGenerationSuccess(
   if (!coverageRequirementsAvailable) blockedReasons.push("coverage_requirements_unavailable");
   if (integrityChecks.omittedValid === false) blockedReasons.push("omitted_invalid");
   if (integrityChecks.categoriesDisjoint === false) blockedReasons.push("category_overlap_detected");
+  if (integrityChecks.functionalCoverageValid === false) blockedReasons.push("requirement_coverage_incomplete");
+  if (integrityChecks.providerClaimComplianceValid === false) blockedReasons.push("provider_claim_compliance_invalid");
   return {
     generationSuccess: blockedReasons.length === 0,
     blockedReasons,
@@ -1490,21 +1607,29 @@ export function applyBranchRoutePrefixRepair(
       if (clickMatch?.[1]) prefixTargets.add(normalizeBranchText(clickMatch[1]));
     }
 
-    const filteredSteps = existingSteps.filter((step) => {
+    const filteredSteps = existingSteps.map((step, originalIndex) => ({ step, originalIndex })).filter(({ step }) => {
       const clickMatch = step.match(/^Clic en "(.+)"\.?$/i);
       if (!clickMatch?.[1]) return true;
       return !prefixTargets.has(normalizeBranchText(clickMatch[1]));
     });
-    const existingNorm = new Set(filteredSteps.map(normalizeBranchText));
+    const existingNorm = new Set(filteredSteps.map(({ step }) => normalizeBranchText(step)));
     const missingPrefix = requiredPrefix.filter((prefixStep) => {
       const clickMatch = prefixStep.match(/Clic en "(.+)"\./i);
       return clickMatch?.[1] ? !existingNorm.has(normalizeBranchText(clickMatch[1])) : false;
     });
-    const merged = missingPrefix.length > 0 ? [...missingPrefix, ...filteredSteps] : filteredSteps;
+    const merged = missingPrefix.length > 0
+      ? [...missingPrefix.map((step) => ({ step, originalIndex: undefined as number | undefined })), ...filteredSteps]
+      : filteredSteps;
     if (missingPrefix.length > 0) repairedCount++;
     return {
       ...scenario,
-      steps: renumberScenarioSteps(merged),
+      steps: renumberScenarioSteps(merged.map(({ step }) => step)),
+      ...(scenario.stepClaims ? {
+        stepClaims: remapStepClaimsByOrigins(
+          scenario.stepClaims,
+          merged.map(({ originalIndex }) => originalIndex),
+        ),
+      } : {}),
       _branchRouteCompatibility: {
         compatible: true,
         reason: "ok",
@@ -1582,15 +1707,22 @@ export function computeBranchCoverageCheck(
       continue;
     }
     const coverageSignals = evaluateScenarioBranchCoverageSignals(scenario, requiredBranch);
-    if (coverageSignals.complete) {
+    if (coverageSignals.functionalBranchCovered) {
       coveredBranchIds.add(branchId);
-    } else if (coverageSignals.reasonCode === "destination_pending_discovery") {
+    }
+    if (coverageSignals.destinationValidationStatus === "pending_discovery") {
       pendingBranchIds.add(branchId);
     }
   }
 
   const coveredRequired = requiredBranchIds.filter((branchId) => coveredBranchIds.has(branchId));
-  const pending = requiredBranchIds.filter((branchId) => pendingBranchIds.has(branchId) && !coveredBranchIds.has(branchId));
+  const pending = requiredBranchIds.filter((branchId) => pendingBranchIds.has(branchId) && !coveredBranchIds.has(branchId)
+    && finalScenarios.some((scenario) => {
+      const requiredBranch = requiredById.get(branchId);
+      return requiredBranch
+        && scenario.functionalBranch?.branchId === branchId
+        && evaluateScenarioBranchCoverageSignals(scenario, requiredBranch).functionalBranchCovered;
+    }));
   const missing = requiredBranchIds.filter((branchId) => !coveredBranchIds.has(branchId) && !pendingBranchIds.has(branchId));
   const unexpected = Array.from(coveredBranchIds).filter((branchId) => !requiredById.has(branchId));
   const validByCoverage = missing.length === 0;
@@ -1686,7 +1818,7 @@ export function reclassifyScenariosByBranchCoverage(
       destinationEvidenceSource: coverageSignals.destinationEvidenceSource,
       reasonCode,
     };
-    if (coverageSignals.complete || !missingBranchIds.has(branchId) || reasonCode === "destination_pending_discovery") {
+    if (coverageSignals.functionalBranchCovered || !missingBranchIds.has(branchId) || reasonCode === "destination_pending_discovery") {
       retainedExecutable.push(scenario);
       continue;
     }
@@ -1781,7 +1913,20 @@ function buildRouteProfileForPrompt(
       const es = Array.isArray(configRp.entrySteps) ? configRp.entrySteps as EntryStepConfig[] : [];
       console.log(`[route-profile] source=app_config returning routeProfile name=${configRp.name}`);
       return {
-        routeProfile: configRp as unknown as McpRouteProfile,
+        routeProfile: {
+          ...configRp,
+          fieldProvenance: {
+            entry: "explicit_trusted_config",
+            aliases: "explicit_trusted_config",
+            intermediates: "explicit_trusted_config",
+            domainTerms: "explicit_trusted_config",
+            visibleControls: "explicit_trusted_config",
+            entrySteps: "explicit_trusted_config",
+            targetPaths: Object.values((configRp.targetPaths ?? {}) as Record<string, { source?: string }>).every((path) => !path.source || ["config", "manual", "user_confirmed"].includes(path.source))
+              ? "explicit_trusted_config"
+              : "declared_hint",
+          },
+        } as unknown as McpRouteProfile,
         source: "app_config",
         entrySteps: es,
         loginMode: appConfig?.loginMode as string | undefined,
@@ -1803,7 +1948,18 @@ function buildRouteProfileForPrompt(
       scenarioTitles,
     })
   ) {
-    const seed = seedKioskoInfoProductosRouteProfile() as unknown as McpRouteProfile;
+    const seed = {
+      ...(seedKioskoInfoProductosRouteProfile() as unknown as McpRouteProfile),
+      fieldProvenance: {
+        entry: "declared_hint",
+        aliases: "declared_hint",
+        intermediates: "declared_hint",
+        domainTerms: "declared_hint",
+        visibleControls: "declared_hint",
+        entrySteps: "declared_hint",
+        targetPaths: "declared_hint",
+      },
+    } as McpRouteProfile;
     console.log(`[route-profile] source=seed_kiosko_info_productos name=${seed.name}`);
     return {
       routeProfile: seed,
@@ -2049,11 +2205,13 @@ async function generateScenarioPreviewForIssue(
   // Derive effective intent from HU text analysis — this overrides the
   // classifier for catalog/private decisions. Multiproject-safe.
   let effectiveIntent = primaryIssueIntent.intent;
+  let canonicalIntentResolution: CanonicalHuIntentResolution = resolveCanonicalHuIntent(primaryIssueIntent, "generic");
   if (issues.length > 0) {
     const huTextEarly = [issues[0].summary, issues[0].description, issues[0].acceptanceCriteria || ""].filter(Boolean).join(" ");
     const earlyModel = extractHuScenarioModel(huTextEarly);
     if (earlyModel?.mainIntent && earlyModel.mainIntent !== "generic") {
       effectiveIntent = earlyModel.mainIntent;
+      canonicalIntentResolution = resolveCanonicalHuIntent(primaryIssueIntent, effectiveIntent);
     }
   }
   console.log(`[scenario-preview] effectiveIntent=${effectiveIntent} primaryIssueIntent=${primaryIssueIntent.intent}`);
@@ -2083,7 +2241,7 @@ async function generateScenarioPreviewForIssue(
   console.log(`[scenarios:preview] routeProfileEntry=${JSON.stringify(initialRouteProfile?.entry ?? [])}`);
 
   // Ensure catalog context for scenario generation (enrichment phase)
-  const shouldSkipCatalogContext = effectiveIntent !== "catalog_listing_flow" && effectiveIntent !== "product_detail_flow";
+  const shouldSkipCatalogContext = !canonicalIntentResolution.catalogRelevant && !canonicalIntentResolution.productDetailRelevant;
   let enrichedRouteProfile, catalogDiagnostics;
   let catalogOptions;
 
@@ -2095,10 +2253,16 @@ async function generateScenarioPreviewForIssue(
       coverageMode: process.env.AI_CATALOG_COVERAGE_MODE as "representative" | "exhaustive" || "representative",
       maxProductsPerCategory: parseInt(process.env.AI_CATALOG_MAX_PER_CATEGORY || "2", 10),
     };
+    // Preview generation may consume static route hints and persisted Knowledge,
+    // but live catalog discovery belongs to the explicit discovery workflow.
+    const previewCatalogOptions = {
+      ...catalogOptions,
+      useDiscoveredCatalog: false,
+    };
     const result = await ensureScenarioGenerationContext(
       appInference.appSlug,
       initialRouteProfile,
-      catalogOptions,
+      previewCatalogOptions,
       (loginMode || "no_login") as LoginMode,
       config
     );
@@ -2256,7 +2420,18 @@ async function generateScenarioPreviewForIssue(
   let resolvedRouteProfile = initialRouteProfile;
   if (postCodexDetection && (!initialRouteProfile || !initialRouteProfile.name)) {
     console.log(`[scenarios:preview] post-codex detection: KIOSKO/InfoProductos detected from scenario titles`);
-    resolvedRouteProfile = seedKioskoInfoProductosRouteProfile() as unknown as McpRouteProfile;
+    resolvedRouteProfile = {
+      ...(seedKioskoInfoProductosRouteProfile() as unknown as McpRouteProfile),
+      fieldProvenance: {
+        entry: "declared_hint",
+        aliases: "declared_hint",
+        intermediates: "declared_hint",
+        domainTerms: "declared_hint",
+        visibleControls: "declared_hint",
+        entrySteps: "declared_hint",
+        targetPaths: "declared_hint",
+      },
+    };
   }
 
   // Log entry steps — prefer new format, fallback to old
@@ -2264,6 +2439,10 @@ async function generateScenarioPreviewForIssue(
   const configRp = resolvedRouteProfile ? (resolvedRouteProfile as Record<string, unknown>).entrySteps : undefined;
   const newEntrySteps = Array.isArray(configRp) && configRp.length > 0 ? configRp as EntryStepConfig[] : [];
   console.log(`[scenarios:preview] oldEntrySteps=${JSON.stringify(oldEntrySteps)} newEntrySteps=${JSON.stringify(newEntrySteps)}`);
+
+  // Route-profile seeds are discovery hints, not authority for exact UI steps.
+  // Do not delete unsupported claims here. Final provenance validation must be
+  // able to reject the whole scenario without leaving a mutilated flow.
 
   // Log before normalize
   for (const sc of rawScenarios) {
@@ -2277,9 +2456,18 @@ async function generateScenarioPreviewForIssue(
   // Skip catalog entry insertion for non-catalog intents to avoid contaminating
   // balance_inquiry / document_generation / payment_transfer / private scenarios
   // with steps like "Información de productos" from a catalog routeProfile.
-  const isNonCatalogForInsertion = effectiveIntent !== "catalog_listing_flow" && effectiveIntent !== "product_detail_flow";
+  const isNonCatalogForInsertion = !canonicalIntentResolution.catalogRelevant && !canonicalIntentResolution.productDetailRelevant;
   if ((newEntrySteps.length > 0 || oldEntrySteps.length > 0) && !isNonCatalogForInsertion) {
+    const entryFieldAuthority = resolvedRouteProfile?.fieldProvenance?.entry;
+    const routeEntryAuthority = ["explicit_trusted_config", "validated_knowledge", "trusted_route"].includes(entryFieldAuthority ?? "unknown");
     rawScenarios = rawScenarios.map((sc) => {
+      const branchAccess = sc.functionalBranch?.accessIntent;
+      if (branchAccess === "authenticated") return sc;
+      if (!routeEntryAuthority) return sc;
+      if (!isEntryStepInsertionAuthorized(sc, functionalBranches)) {
+        console.log(`[entry-steps] resolved=${newEntrySteps.length || oldEntrySteps.length} authorized=0 inserted=0 reason=canonical_authority_missing scenarioId=${scenarioIdentity(sc)}`);
+        return sc;
+      }
       const repaired = insertEntrySteps(sc, oldEntrySteps, newEntrySteps);
       if (repaired !== sc) {
         if (!generationResult.warnings) generationResult.warnings = [];
@@ -2366,10 +2554,17 @@ async function generateScenarioPreviewForIssue(
         generationResult.warnings.push(
           `Scenario "${sc.title}": intermediate_steps_inserted - Added ${repairResult.insertedCount} intermediate step(s)`
         );
-        return {
-          ...sc,
-          steps: repairResult.repairedSteps,
-        };
+          return {
+            ...sc,
+            steps: repairResult.repairedSteps,
+            ...(repairResult.stepOrigins ? {
+              stepRequirementRefs: sc.stepRequirementRefs?.flatMap((ref) => {
+                const stepIndex = repairResult.stepOrigins!.findIndex((origin) => origin === ref.stepIndex);
+                return stepIndex >= 0 ? [{ ...ref, stepIndex }] : [];
+              }),
+              stepClaims: remapStepClaimsByOrigins(sc.stepClaims, repairResult.stepOrigins),
+            } : {}),
+          };
       } else if (repairResult.reasonCode !== "no_repair_needed") {
         const errorDiag = repairResult.diagnostics.find((d) => d.level === "error");
         if (errorDiag) {
@@ -2395,7 +2590,7 @@ async function generateScenarioPreviewForIssue(
   }
 
   // -- Quick catalog intent check --
-  const isCatalogIntent = effectiveIntent === "catalog_listing_flow" || effectiveIntent === "product_detail_flow";
+  const isCatalogIntent = canonicalIntentResolution.catalogRelevant || canonicalIntentResolution.productDetailRelevant;
 
   // Generate deterministic seeds for coverage guarantee
   if (catalogOptions.useDiscoveredCatalog && routeProfileForGeneration && isCatalogIntent) {
@@ -2591,6 +2786,17 @@ async function generateScenarioPreviewForIssue(
       huExplicitRoutePath,
       automatableOptionFlowsForCoverage,
     );
+  canonicalIntentResolution = resolveCanonicalHuIntent(
+    primaryIssueIntent,
+    effectiveIntent,
+    functionalBranches,
+  );
+  console.log(
+    `[scenario-preview] canonicalIntent primary=${canonicalIntentResolution.primaryClassifierIntent} derived=${canonicalIntentResolution.derivedModelIntent} ` +
+    `catalog=${canonicalIntentResolution.catalogRelevant} private=${canonicalIntentResolution.privateNavigationRelevant} ` +
+    `detail=${canonicalIntentResolution.productDetailRelevant} transactional=${canonicalIntentResolution.transactionalRelevant} ` +
+    `branches=${Object.keys(canonicalIntentResolution.branchIntents).length}`,
+  );
   const hasBranchExtractionMismatch =
     automatableOptionFlowsForCoverage.length > 0 && functionalBranches.length === 0;
   if (hasBranchExtractionMismatch) {
@@ -2725,8 +2931,8 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
   }
 
   // ── AI route-prefix repair per functional branch ──
-  const isPrivateOrBalanceIntent = effectiveIntent !== "catalog_listing_flow" &&
-    effectiveIntent !== "product_detail_flow";
+  const isPrivateOrBalanceIntent = !canonicalIntentResolution.catalogRelevant &&
+    !canonicalIntentResolution.productDetailRelevant;
 
   const routeProfileFlavor = detectRouteProfileIsCatalog(resolvedRouteProfile, knowledgeCtx.available ? undefined : undefined);
   const routeProfileIsCatalog = routeProfileFlavor.isCatalog;
@@ -2781,7 +2987,11 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
 
       if (catalogContaminationTerms && existingSteps.length > 0) {
         const before = existingSteps.length;
-        existingSteps = existingSteps.filter((step) => {
+        const referencedIndexes = new Set((scenario.stepRequirementRefs ?? []).map((ref) => ref.stepIndex));
+        const filteredWithOrigins = existingSteps
+          .map((step, originalIndex) => ({ step, originalIndex }))
+          .filter(({ step, originalIndex }) => {
+            if (referencedIndexes.has(originalIndex)) return true;
           if (/prestamo|balance|tasa|monto|saldo|cuota|plazo|fecha|pago|desembolsado|cancelacion|amortizacion|correo|imprimir|volver/i.test(step)) return true;
           if (catalogContaminationTerms.test(step)) {
             const label = extractLabel(step);
@@ -2792,7 +3002,20 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
             return false;
           }
           return true;
-        });
+          });
+        existingSteps = filteredWithOrigins.map(({ step }) => step);
+        if (scenario.stepRequirementRefs) {
+          scenario.stepRequirementRefs = scenario.stepRequirementRefs.flatMap((ref) => {
+            const newIndex = filteredWithOrigins.findIndex(({ originalIndex }) => originalIndex === ref.stepIndex);
+            return newIndex >= 0 ? [{ ...ref, stepIndex: newIndex }] : [];
+          });
+        }
+        if (scenario.stepClaims) {
+          scenario.stepClaims = remapStepClaimsByOrigins(
+            scenario.stepClaims,
+            filteredWithOrigins.map(({ originalIndex }) => originalIndex),
+          );
+        }
         const removed = before - existingSteps.length;
         if (removed > 0) {
           contaminationRemoved += removed;
@@ -2886,12 +3109,30 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
         };
       }
 
-      const routePrefixTargets = selectedCandidate ? selectedCandidate.clickTargets : [];
-      if (routePrefixTargets.length > 0 || newEntrySteps.length > 0) {
-        const canonicalPrefixResult = applyCanonicalRoutePrefix(existingSteps, routePrefixTargets, newEntrySteps);
-        if (canonicalPrefixResult.changed) {
+      const entryStepAuthorized = isEntryStepInsertionAuthorized(scenario, functionalBranches);
+      const routePrefixTargets = entryStepAuthorized && selectedCandidate?.source === "knowledge" && knowledgeCtx.available
+        ? selectedCandidate.clickTargets
+        : [];
+      const authorizedEntrySteps = entryStepAuthorized ? newEntrySteps : [];
+      if (routePrefixTargets.length > 0 || authorizedEntrySteps.length > 0) {
+      const canonicalPrefixResult = applyCanonicalRoutePrefix(
+          existingSteps,
+          routePrefixTargets,
+          authorizedEntrySteps,
+          scenario.stepRequirementRefs,
+        );
+      if (canonicalPrefixResult.changed) {
           existingSteps = canonicalPrefixResult.steps;
-          modified = true;
+            if (scenario.stepRequirementRefs) {
+            scenario.stepRequirementRefs = scenario.stepRequirementRefs.flatMap((ref) => {
+              const finalIndex = canonicalPrefixResult.stepOrigins.findIndex((origin) => origin === ref.stepIndex);
+              return finalIndex >= 0 ? [{ ...ref, stepIndex: finalIndex }] : [];
+              });
+            }
+            if (scenario.stepClaims) {
+              scenario.stepClaims = remapStepClaimsByOrigins(scenario.stepClaims, canonicalPrefixResult.stepOrigins);
+            }
+            modified = true;
         }
       }
 
@@ -2940,6 +3181,19 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
     return returnRemaining ? steps.slice(idx) : steps.slice(0, idx);
   }
 
+  const canonicalDependencies = new Map(
+    buildRequirementAccounting([], functionalBranches, huTextForContext, issues[0]?.key).requirements
+      .map((requirement) => [requirement.requirementId ?? requirement.id, requirement.prerequisiteRequirementIds ?? []] as const)
+      .filter(([id]) => Boolean(id)),
+  );
+  for (const scenario of validated) {
+    const gate = evaluateRequirementDependencyGate(scenario, canonicalDependencies);
+    if (!gate.dependencySatisfied) {
+      scenario.mcpExecutable = false;
+      scenario.nonExecutableCriteria = gate.reason ?? "dependency_unresolved";
+      (scenario as any).dependencySatisfied = false;
+    }
+  }
   const executableScenarios = validated.filter(s => s.validation?.valid && s.mcpExecutable !== false);
   const adaptiveScenarios: any[] = [];
 
@@ -3031,6 +3285,44 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
         `reasonCode=${association.reasonCode ?? "none"}`,
       );
     }
+  }
+
+  // Functional branch coverage does not grant execution authority. Provider
+  // metadata is only a candidate until a trusted route/evidence is available.
+  const readinessDegraded: McpScenario[] = [];
+  const readinessExecutable: McpScenario[] = [];
+  for (const scenario of executableScenarios) {
+    const branchId = scenario.functionalBranch?.branchId;
+    const branch = branchId ? functionalBranches.find((candidate) => candidate.branchId === branchId) : undefined;
+    if (!branch) {
+      readinessExecutable.push(scenario);
+      continue;
+    }
+    const signals = evaluateScenarioBranchCoverageSignals(scenario, branch);
+    const trustedExecutionAuthority = (scenario as any)._branchRouteCompatibility?.compatible === true
+      || signals.destinationValidationStatus === "validated" && signals.hasRouteEvidence;
+    const beforeExecutable = scenario.mcpExecutable === true;
+    const beforeReadiness = (scenario as any).executionReadiness ?? "standard";
+    if (!trustedExecutionAuthority && signals.destinationValidationStatus !== "validated") {
+      scenario.mcpExecutable = false;
+      (scenario as any).executionReadiness = "requires_route_discovery";
+      readinessDegraded.push({
+        ...scenario,
+        executionMode: "adaptive",
+        mcpExecutable: false,
+        executionReadiness: "requires_route_discovery",
+        automationStatus: "requires_route_discovery",
+        nonExecutableCriteria: "requires_route_discovery",
+      } as McpScenario);
+      console.log(`[execution-readiness-gate] scenarioId=${scenarioIdentity(scenario)} functionalBranchCovered=${signals.functionalBranchCovered} destinationValidationStatus=${signals.destinationValidationStatus} trustedExecutionAuthority=${trustedExecutionAuthority} executionAuthoritySource=${trustedExecutionAuthority ? "route_or_validated_evidence" : "none"} mcpExecutableBeforeGate=${beforeExecutable} mcpExecutableAfterGate=false readinessBeforeGate=${beforeReadiness} readinessAfterGate=requires_route_discovery reasonCode=destination_authority_pending`);
+    } else {
+      readinessExecutable.push(scenario);
+    }
+  }
+  if (readinessDegraded.length > 0) {
+    executableScenarios.length = 0;
+    executableScenarios.push(...readinessExecutable);
+    adaptiveScenarios.push(...readinessDegraded);
   }
 
   // blockedScenarios contains only route-blocked (from routeResolutions) — NOT chain-blocked
@@ -3527,6 +3819,201 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
   console.log(
     `[scenarios:preview] responseVisibilityFinal equal=${responseVisibilityComparison.equal} finalVisibleIds=${responseVisibilityComparison.finalVisibleIds.length} responseVisibleIds=${responseVisibilityComparison.responseVisibleIds.length}`,
   );
+  let finalRequirementAccounting = buildRequirementAccounting(
+    responseScenarios as McpScenario[],
+    functionalBranches,
+    huTextForContext,
+    issues[0]?.key,
+  );
+  const requirementById = new Map(finalRequirementAccounting.requirements.map((requirement) => [requirement.requirementId ?? requirement.id, requirement]));
+  const canonicalClaims = buildCanonicalClaims(finalRequirementAccounting.requirements);
+  const canonicalClaimById = new Map(canonicalClaims.map((claim) => [claim.claimId, claim]));
+  const configControls = resolvedRouteProfile && rpSource === "app_config"
+    ? [
+        ...(resolvedRouteProfile.visibleControls ?? []),
+        ...(resolvedRouteProfile.entry ?? []).flatMap((entry) => [entry.businessLabel, entry.visibleLabel]),
+        ...(resolvedRouteProfile.entrySteps ?? []).map((entry) => entry.target),
+        ...Object.entries(resolvedRouteProfile.targetPaths ?? {})
+          .filter(([, targetPath]) => !targetPath.source || ["config", "manual", "user_confirmed"].includes(targetPath.source))
+          .flatMap(([target, targetPath]) => [target, targetPath.target, ...targetPath.requiredIntermediates]),
+      ].filter((value): value is string => typeof value === "string" && value.length > 0)
+    : [];
+  const validatedRouteControls = resolvedRouteProfile && rpSource !== "app_config"
+    ? Object.entries(resolvedRouteProfile.targetPaths ?? {})
+        .filter(([, targetPath]) => targetPath.source === "runtime_discovery" && targetPath.confidence === "high")
+        .flatMap(([target, targetPath]) => [target, targetPath.target, ...targetPath.requiredIntermediates])
+        .filter((value): value is string => typeof value === "string" && value.length > 0)
+    : [];
+  const validatedKnowledgeControls = knowledgeCtx.available
+    ? (knowledgeCtx.navigationHints ?? []).flatMap((hint) => [...hint.clickTargets, ...hint.steps])
+    : [];
+  responseScenarios = responseScenarios.map((scenario: any) => {
+    const providerClaims = Array.isArray(scenario.stepClaims) ? scenario.stepClaims : [];
+    const claimRefs = providerClaims.flatMap((claim: any) => {
+      const descriptor = canonicalClaimById.get(claim.claimId);
+      return descriptor && Number.isInteger(claim.stepIndex)
+        ? [{ stepIndex: claim.stepIndex, requirementId: descriptor.requirementId, facet: descriptor.facet }]
+        : [];
+    });
+    const existingRefs = scenario.stepRequirementRefs ?? [];
+    scenario.stepRequirementRefs = [...existingRefs, ...claimRefs].filter((ref: any, index: number, refs: any[]) =>
+      refs.findIndex((candidate) => candidate.stepIndex === ref.stepIndex && candidate.requirementId === ref.requirementId && candidate.facet === ref.facet) === index,
+    ).map((ref: any) => {
+      const requirement = requirementById.get(ref.requirementId);
+      const claimType = scenario.stepClaimTypes?.[ref.stepIndex];
+      const facet = resolveRequirementFacet(requirement?.category, claimType, ref.facet);
+      return facet ? { ...ref, facet } : ref;
+    });
+    const nonAutomatableRefs = (scenario.stepRequirementRefs ?? [])
+      .map((ref: any) => requirementById.get(ref.requirementId))
+      .filter((requirement: any) => requirement?.status === "nonAutomatable")
+      .map((requirement: any) => requirement.requirementId ?? requirement.id);
+    const branchId = scenario.functionalBranch?.branchId;
+    const stepAuthority = (scenario.steps ?? []).map((step: string, stepIndex: number) => {
+      const refs = (scenario.stepRequirementRefs ?? []).filter((ref: any) => ref.stepIndex === stepIndex);
+      const referencedRequirements = refs.map((ref: any) => requirementById.get(ref.requirementId)).filter(Boolean);
+      const requirement = referencedRequirements[0];
+      const canonicalClaimsForStep = providerClaims
+        .filter((claim: any) => claim.stepIndex === stepIndex)
+        .map((claim: any) => canonicalClaimById.get(claim.claimId))
+        .filter(Boolean);
+      const canonicalClaimType = canonicalClaimsForStep[0]?.claimType;
+      const claimType = resolveStepClaimType(
+        canonicalClaimType ?? scenario.stepClaimTypes?.[stepIndex],
+        referencedRequirements.map((candidate: any) => candidate.category),
+      );
+      const requirementFacet = resolveRequirementFacet(
+        requirement?.category,
+        claimType,
+        refs[0]?.facet,
+      );
+      const expectedClaim = requirement && requirementFacet
+        ? canonicalClaims.find((claim) => claim.requirementId === (requirement.requirementId ?? requirement.id) && claim.facet === requirementFacet)
+        : undefined;
+      const evaluation = evaluateStepAuthority({
+        step,
+        requirement,
+        requirementFacet,
+        branchId,
+        claimType,
+        configuredControls: configControls,
+        configTrusted: rpSource === "app_config",
+        validatedRouteControls,
+        validatedKnowledgeControls,
+      });
+      const claimBindingValid = Boolean(expectedClaim && canonicalClaimsForStep.some((claim) => claim?.claimId === expectedClaim.claimId));
+      return {
+        stepIndex,
+        requirementFacet,
+        ...evaluation,
+        authorityValid: evaluation.authorityValid && claimBindingValid,
+        authorityReason: !claimBindingValid
+          ? "provider step claim is missing or incompatible with canonical claim"
+          : evaluation.authorityReason,
+      };
+    });
+    const unsupportedFunctionalSteps = stepAuthority
+      .filter((authority: any) => !authority.authorityValid && !["unknown", "technical_route"].includes(authority.claimType))
+      .map((authority: any) => ({
+        stepIndex: authority.stepIndex,
+        producer: authority.sourceType === "provider" ? "provider" : authority.sourceType,
+        provenance: authority.sourceType,
+        reason: authority.sourceType === "provider"
+          ? "functional claim has no structured authority"
+          : "functional claim is outside its authority scope",
+      }));
+    scenario.stepClaimTypes = stepAuthority.map((authority: any) => authority.claimType);
+    const provenanceIssues = unsupportedFunctionalSteps.map((step: any) =>
+      `unsupported functional claim at step ${step.stepIndex}: ${step.reason}`,
+    );
+    const semanticIssues = [
+      ...(nonAutomatableRefs.length > 0
+        ? nonAutomatableRefs.map((id: string) => `nonAutomatable requirement is not demonstrated by scenario evidence: ${id}`)
+        : []),
+      ...provenanceIssues,
+    ];
+    return {
+      ...scenario,
+      stepAuthority,
+      unsupportedFunctionalSteps,
+      semanticValidity: semanticIssues.length > 0 ? "incomplete" : "valid",
+      semanticIssues,
+    };
+  });
+  const finalProviderClaimCompliance = evaluateProviderClaimCompliance(responseScenarios, canonicalClaims);
+  generationResult.generationDiagnostics = {
+    ...(generationResult.generationDiagnostics ?? {}),
+    providerClaimCompliance: finalProviderClaimCompliance,
+  };
+  // Requirement coverage is measured over the final response scenario set.
+  // Semantic validity remains independently reported by StepAuthority.
+  finalRequirementAccounting = buildRequirementAccounting(
+    responseScenarios as McpScenario[],
+    functionalBranches,
+    huTextForContext,
+    issues[0]?.key,
+  );
+  for (const scenario of responseScenarios) {
+    const eligibility = classifyScenarioPublicationEligibility(scenario, finalRequirementAccounting.requirements);
+    Object.assign(scenario, eligibility);
+    if (eligibility.launchClassification === "nonAutomatable") {
+      scenario.mcpExecutable = false;
+      scenario.executionMode = "nonAutomatable" as any;
+    }
+  }
+  const nonAutomatableScenarioIds = new Set(
+    responseScenarios
+      .filter((scenario) => scenario.launchClassification === "nonAutomatable")
+      .map((scenario) => scenarioIdentity(scenario)),
+  );
+  executableScenarios.splice(
+    0,
+    executableScenarios.length,
+    ...executableScenarios.filter((scenario) => !nonAutomatableScenarioIds.has(scenarioIdentity(scenario))),
+  );
+  adaptiveScenarios.splice(
+    0,
+    adaptiveScenarios.length,
+    ...adaptiveScenarios.filter((scenario) => !nonAutomatableScenarioIds.has(scenarioIdentity(scenario))),
+  );
+  const finalFunctionalCoverage = finalRequirementAccounting.functionalCoverage;
+  const finalCoverageInvariant = evaluateFunctionalCoverageInvariant(finalRequirementAccounting.requirements);
+  console.log(
+    `[requirement-accounting-final] total=${finalRequirementAccounting.requirements.length} ` +
+    `covered=${finalFunctionalCoverage.covered} ` +
+    `nonAutomatable=${finalCoverageInvariant.nonAutomatable} ` +
+    `incomplete=${finalCoverageInvariant.incomplete} ` +
+    `missing=${finalFunctionalCoverage.missing.length} ` +
+    `coverableRequired=${finalCoverageInvariant.coverableRequired} ` +
+    `coverableSatisfied=${finalCoverageInvariant.coverableSatisfied} ` +
+    `valid=${finalCoverageInvariant.valid}`,
+  );
+  console.log(`[requirement-accounting-trace] final scenarios=${responseScenarios.length} ids=${JSON.stringify(responseScenarios.map((scenario) => scenario.scenarioId ?? scenario.sourceIssueKey ?? "unknown"))}`);
+  generationSuccessCheck = evaluateGenerationSuccess(
+    responseVisibilityComparison.equal,
+    definitiveBranchCoverage,
+    coverageRequirementsAvailable,
+    {
+      omittedValid: responseAssemblyMetrics.omittedValid,
+      categoriesDisjoint: responseAssemblyMetrics.categoriesDisjoint,
+      functionalCoverageValid: finalCoverageInvariant.valid,
+      providerClaimComplianceValid: generationResult.generationDiagnostics?.providerClaimCompliance
+        ? generationResult.generationDiagnostics.providerClaimCompliance.missingClaims.length === 0
+          && generationResult.generationDiagnostics.providerClaimCompliance.invalidClaims.length === 0
+        : undefined,
+    },
+  );
+  if (!generationSuccessCheck.generationSuccess) {
+    warnings.push(`Generation gated: success=false reasons=${generationSuccessCheck.blockedReasons.join(",")}`);
+  }
+  console.log(
+    `[generation-success] requirementAccountingStage=final ` +
+    `requirementCoverageValid=${finalCoverageInvariant.valid} ` +
+    `providerClaimComplianceValid=${generationResult.generationDiagnostics?.providerClaimCompliance
+      ? generationResult.generationDiagnostics.providerClaimCompliance.missingClaims.length === 0
+        && generationResult.generationDiagnostics.providerClaimCompliance.invalidClaims.length === 0
+      : "unknown"}`,
+  );
   console.log(
     `[scenarios:preview] generationSuccess=${generationSuccessCheck.generationSuccess} reasons=${generationSuccessCheck.blockedReasons.join(",") || "none"}`,
   );
@@ -3551,15 +4038,15 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
     targetAppName: appInference.appName,
     appInference,
     appProfilePath: appProfileResult.appConfigPath,
-    // All functional scenarios (standard + adaptive) in one array for the UI
+    // All functional representations, including documentation-only scenarios, remain visible.
     scenarios: responseScenarios,
     summary: {
       generated: validated.length,
-      visible: executableScenarios.length + adaptiveScenarios.length,
-      standard: executableScenarios.length,
-      adaptive: adaptiveScenarios.length,
-      valid: validCount,
-      invalid: invalidCount,
+      visible: responseScenarios.length,
+      standard: responseScenarios.filter((scenario: any) => scenario.launchClassification === "standard").length,
+      adaptive: responseScenarios.filter((scenario: any) => scenario.launchClassification === "adaptive").length,
+       valid: responseScenarios.filter((scenario: any) => scenario.semanticValidity === "valid").length,
+       invalid: responseScenarios.filter((scenario: any) => scenario.semanticValidity !== "valid").length,
       rejected: rejected.length,
       blocked: blockedScenarios.length,
       routePending: routePendingCount,
@@ -3571,69 +4058,43 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
     warnings,
     catalogDiagnostics,
     generationDiagnostics: generationResult.generationDiagnostics,
+    canonicalClaims,
+    providerClaimCompliance: finalProviderClaimCompliance,
+    requirements: finalRequirementAccounting.requirements,
+    functionalCoverage: finalRequirementAccounting.functionalCoverage,
     // Backward-compatible: same adaptive scenarios for launch payload
     adaptiveScenarios,
-    coverage: (() => {
-      const rs: any[] | undefined = (globalThis as any).__coverageReqs;
-      const requiresCoverageReqs = functionalBranches.length > 0 || automatableOptionFlowsForCoverage.length > 0;
-      if (!Array.isArray(rs)) {
-        console.log(
-          `[coverage] analysis_failed reason=coverage_requirements_unavailable requiresCoverage=${requiresCoverageReqs}`,
-        );
-        return {
-          status: requiresCoverageReqs ? "invalid" : "partial",
-          complete: false,
-          total: 0,
-          required: 0,
-          covered: 0,
-          uncovered: 0,
-          blocked: 0,
-          nonAutomatable: 0,
-          requiredCovered: 0,
-          requiredUncovered: 0,
-          requiredBlocked: 0,
-          blockedRequirements: [],
-          coverageRequirementsAvailable: false,
-          generationSuccess: generationSuccessCheck.generationSuccess,
-          generationBlockedReasons: generationSuccessCheck.blockedReasons,
-          branchCoverage,
-          responseVisibilityComparison,
-        };
-      }
-      const covFilter = (s: string) => rs.filter((r: any) => r.status === s).length;
-      const coveredCov = covFilter("covered");
-      const uncoveredCov = covFilter("uncovered");
-      const blockedCov = covFilter("blocked");
-      const nonAutomatable = covFilter("non_automatable");
-      const requiredFilter = (s: string) => rs.filter((r: any) => r.required && r.status === s).length;
-      const requiredCovered = requiredFilter("covered");
-      const requiredUncovered = requiredFilter("uncovered");
-      const requiredBlocked = requiredFilter("blocked");
-      const automatableRequired = rs.filter((r: any) => r.required && r.status !== "non_automatable").length;
-      const complete = automatableRequired > 0 && requiredUncovered === 0 && requiredBlocked === 0;
-      const status = automatableRequired === 0 ? "not_automatable" : complete ? "complete" : "partial";
-      const blockedRequirements = rs.filter((r: any) => r.status === "blocked" && r.required)
-        .map((r: any) => ({ id: r.id, sourceText: r.sourceText, category: r.category, required: r.required, reasonCode: r.reasonCode }));
-      return {
-        status,
-        complete,
-        total: rs.length,
-        required: rs.filter((r: any) => r.required).length,
-        covered: coveredCov,
-        uncovered: uncoveredCov,
-        blocked: blockedCov,
-        nonAutomatable,
-        requiredCovered,
-        requiredUncovered,
-        requiredBlocked,
-        blockedRequirements,
-        coverageRequirementsAvailable: true,
-        generationSuccess: generationSuccessCheck.generationSuccess,
-        generationBlockedReasons: generationSuccessCheck.blockedReasons,
-        branchCoverage,
-        responseVisibilityComparison,
-      };
-    })(),
+     coverage: (() => {
+       const accounts = finalRequirementAccounting.requirements;
+       const status = (value: string | undefined) => value ?? "incompleteRequirement";
+       const covered = accounts.filter((r) => status(r.status) === "covered").length;
+       const incomplete = finalCoverageInvariant.incomplete;
+       const nonAutomatable = finalCoverageInvariant.nonAutomatable;
+       const missing = finalRequirementAccounting.functionalCoverage.missing.length;
+       return {
+         status: finalRequirementAccounting.functionalCoverage.valid ? "complete" : "partial",
+         complete: finalRequirementAccounting.functionalCoverage.valid,
+         total: accounts.length,
+         required: accounts.filter((r) => r.required).length,
+         covered,
+         uncovered: missing,
+         missing,
+         incompleteRequirement: incomplete,
+         blocked: 0,
+         nonAutomatable,
+         requiredCovered: accounts.filter((r) => r.required && status(r.status) === "covered").length,
+         requiredUncovered: accounts.filter((r) => r.required && status(r.status) === "missing").length,
+         requiredBlocked: 0,
+         blockedRequirements: [],
+         coverageRequirementsAvailable: true,
+         generationSuccess: generationSuccessCheck.generationSuccess,
+         generationBlockedReasons: generationSuccessCheck.blockedReasons,
+         branchCoverage,
+         responseVisibilityComparison,
+         coverableRequired: finalCoverageInvariant.coverableRequired,
+         coverableSatisfied: finalCoverageInvariant.coverableSatisfied,
+       };
+     })(),
   };
 
 /**

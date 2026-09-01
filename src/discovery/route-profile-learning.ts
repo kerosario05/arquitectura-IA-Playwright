@@ -42,6 +42,9 @@ export type RouteProfileSuggestion = {
     afterUrl?: string;
     beforeSnapshotPath?: string;
     afterSnapshotPath?: string;
+    transitionValidated?: boolean;
+    beforeTechnicalScreenKey?: string;
+    afterTechnicalScreenKey?: string;
     candidateId?: string;
     candidateText?: string;
     locatorSummary?: string;
@@ -55,6 +58,12 @@ export type RouteProfileSuggestion = {
   };
   status: "pending" | "auto_approved" | "rejected";
   createdAt?: string;
+  observedContext?: {
+    destinationIdentity?: string;
+    routeRole?: string;
+    destinationRole?: string;
+    source: "validated_knowledge" | "configured_route";
+  };
 };
 
 export type RouteObservation = {
@@ -73,6 +82,8 @@ export type RouteObservation = {
   submitLike?: boolean;
   riskyAction?: boolean;
   transitionDetected?: boolean;
+  transitionValidated?: boolean;
+  observedContext?: RouteProfileSuggestion["observedContext"];
 };
 
 export type LearningResult = {
@@ -232,6 +243,9 @@ export function observeRouteTransition(
       afterUrl: observation.afterUrl,
       beforeSnapshotPath: observation.beforeSnapshotPath,
       afterSnapshotPath: observation.afterSnapshotPath,
+      ...(observation.transitionValidated !== undefined ? { transitionValidated: observation.transitionValidated } : {}),
+      ...(observation.beforeTechnicalScreenKey !== undefined ? { beforeTechnicalScreenKey: observation.beforeTechnicalScreenKey } : {}),
+      ...(observation.afterTechnicalScreenKey !== undefined ? { afterTechnicalScreenKey: observation.afterTechnicalScreenKey } : {}),
       candidateId: observation.candidateId,
       candidateText: observation.candidateText,
       locatorSummary: observation.locatorSummary
@@ -244,7 +258,11 @@ export function observeRouteTransition(
       riskyAction: observation.riskyAction ?? false
     },
     status: confidence >= config.autoApproveThreshold ? "auto_approved" : "pending",
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    ...(observation.transitionValidated && observation.observedContext?.source &&
+      (observation.observedContext.source === "validated_knowledge" || observation.observedContext.source === "configured_route")
+      ? { observedContext: observation.observedContext }
+      : {})
   };
   
   return { suggestion, status: "learned" };

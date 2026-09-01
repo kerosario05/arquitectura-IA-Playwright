@@ -43,10 +43,42 @@ export function resolveDataKey(
     autoGenerateConfig?: AutoGenerateConfig;
     field?: string;
     context?: string;
+    overrides?: Record<string, string>;
+    suggestedData?: Record<string, string>;
   }
 ): DataKeyResolution {
-  const { testData, testDataAliases, env = {}, missingInputBehavior = "fail", autoGenerateConfig, field, context } = options;
+  const { testData, testDataAliases, env = {}, missingInputBehavior = "fail", autoGenerateConfig, field, context, overrides, suggestedData } = options as any;
   const normalizedKey = normalizeKey(key);
+
+  // Priority 0: Runtime dataOverrides (QA Lab) > suggestedValue/default — generic per key, no hardcode
+  if (overrides && typeof overrides === "object") {
+    const normOverrides = new Map<string,string>();
+    for (const [k,v] of Object.entries(overrides as Record<string,string>)) {
+      if (v === undefined || v === null) continue;
+      const vs = String(v).trim();
+      if (!vs) continue;
+      normOverrides.set(normalizeKey(k), vs);
+      // also keep original case key for direct match
+      normOverrides.set(k, vs);
+    }
+    const hit = normOverrides.get(normalizedKey) ?? (overrides as any)[key] ?? (overrides as any)[normalizedKey];
+    if (hit !== undefined && String(hit).trim() !== "") {
+      return { status: "resolved", key, value: String(hit).trim(), source: "dataOverrides", masked: isSensitiveKey(key) };
+    }
+  }
+  if (suggestedData && typeof suggestedData === "object") {
+    const normSug = new Map<string,string>();
+    for (const [k,v] of Object.entries(suggestedData as Record<string,string>)) {
+      if (v === undefined || v === null) continue;
+      const vs = String(v).trim();
+      if (!vs) continue;
+      normSug.set(normalizeKey(k), vs);
+    }
+    const hit = normSug.get(normalizedKey);
+    if (hit !== undefined && hit !== "") {
+      return { status: "resolved", key, value: String(hit), source: "suggestedValue", masked: isSensitiveKey(key) };
+    }
+  }
   
   // Priority 1: Direct lookup in APP_TEST_DATA_JSON
   if (testData && key in testData) {

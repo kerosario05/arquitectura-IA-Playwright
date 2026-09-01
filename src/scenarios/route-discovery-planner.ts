@@ -34,6 +34,10 @@ export function planRouteDiscovery(
   if (!reasonCode?.trim()) {
     return { ok: false, error: "missing_field", message: "reasonCode is required" };
   }
+  if (request.discoveryTarget?.scope === "branch" &&
+      (!request.discoveryTarget.branchId?.trim() || !request.discoveryTarget.sourceRequirementId?.trim())) {
+    return { ok: false, error: "invalid_branch_target", message: "branch discovery requires branchId and sourceRequirementId" };
+  }
 
   console.log(
     `[route-discovery-plan] requested appSlug=${appSlug} issue=${issueKey} huIntent=${huIntent} reason=${reasonCode}`
@@ -58,6 +62,7 @@ export function planRouteDiscovery(
     ],
     nextAction: "run_guided_route_discovery",
     planVersion: "1.0"
+    ,discoveryTarget: request.discoveryTarget
   };
 
   console.log(

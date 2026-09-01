@@ -122,6 +122,9 @@ function normalizeStringArray(value: unknown): string[] {
 function normalizeLaunchScenario(value: unknown, _fallbackPrefix: string, index: number): LaunchScenario | null {
   if (!value || typeof value !== "object") return null;
   const record = value as Record<string, unknown>;
+  const metadata = (record.metadata && typeof record.metadata === "object")
+    ? record.metadata as Record<string, unknown>
+    : undefined;
   const testRailCaseId = extractCaseIdFromValue(record);
 
   const rawScenarioId = typeof record.scenarioId === "string"
@@ -143,6 +146,23 @@ function normalizeLaunchScenario(value: unknown, _fallbackPrefix: string, index:
     sourceIssueKey: typeof record.sourceIssueKey === "string" ? record.sourceIssueKey : undefined,
     testRailCaseId,
     metadata: (record.metadata && typeof record.metadata === "object") ? (record.metadata as Record<string, unknown>) : undefined,
+    mcpExecutable: typeof record.mcpExecutable === "boolean" ? record.mcpExecutable : typeof metadata?.mcpExecutable === "boolean" ? metadata.mcpExecutable : undefined,
+    executionReadiness: typeof record.executionReadiness === "string" ? record.executionReadiness : typeof metadata?.executionReadiness === "string" ? metadata.executionReadiness : undefined,
+    semanticValidity: typeof record.semanticValidity === "string" ? record.semanticValidity : typeof metadata?.semanticValidity === "string" ? metadata.semanticValidity : undefined,
+    automationType: typeof record.automationType === "string" ? record.automationType : typeof metadata?.automationType === "string" ? metadata.automationType : undefined,
+    launchClassification: record.launchClassification === "standard" || record.launchClassification === "adaptive" || record.launchClassification === "nonAutomatable"
+      ? record.launchClassification
+      : undefined,
+    publicationClassification: typeof record.publicationClassification === "string" ? record.publicationClassification : undefined,
+    nonAutomatable: typeof record.nonAutomatable === "boolean" ? record.nonAutomatable : undefined,
+    targetScreen: typeof record.targetScreen === "string" ? record.targetScreen : typeof metadata?.targetScreen === "string" ? metadata.targetScreen : undefined,
+    actualChain: record.actualChain ?? metadata?.actualChain,
+    requiredChain: record.requiredChain ?? metadata?.requiredChain,
+    branchId: typeof record.branchId === "string" ? record.branchId : typeof metadata?.branchId === "string" ? metadata.branchId : undefined,
+    functionalBranch: (record.functionalBranch ?? metadata?.functionalBranch) as LaunchScenario["functionalBranch"],
+    branchAssociation: (record.branchAssociation ?? metadata?.branchAssociation) as LaunchScenario["branchAssociation"],
+    requirementDependencies: Array.isArray(record.requirementDependencies) ? record.requirementDependencies : Array.isArray(metadata?.requirementDependencies) ? metadata.requirementDependencies : undefined,
+    stepRequirementRefs: Array.isArray(record.stepRequirementRefs) ? record.stepRequirementRefs : Array.isArray(metadata?.stepRequirementRefs) ? metadata.stepRequirementRefs : undefined,
   };
 
   return scenario;
@@ -774,7 +794,7 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
   });
 });
 
-runsRouter.post("/launch-execution", async (req, res, next) => {
+  runsRouter.post("/launch-execution", async (req, res, next) => {
   try {
     const body = req.body as Record<string, unknown>;
     const appSlug = String(body.appSlug ?? "");

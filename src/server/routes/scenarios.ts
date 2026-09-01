@@ -7,6 +7,8 @@ import { generateScenarioPreview } from "../../scenarios/scenario-preview.servic
 import type { ScenarioPreviewRequest } from "../../scenarios/scenario-types";
 import { planRouteDiscovery } from "../../scenarios/route-discovery-planner";
 import { runGuidedRouteDiscovery } from "../../scenarios/guided-route-discovery";
+import { executeApprovedDiscoveryCandidate } from "../../scenarios/approved-candidate-execution";
+import type { ApprovedDiscoveryCandidateExecutionRequest } from "../../scenarios/scenario-types";
 import type { RouteDiscoveryPlanRequest, GuidedRouteDiscoveryRequest } from "../../scenarios/scenario-types";
 
 export const scenariosRouter = Router();
@@ -145,6 +147,13 @@ scenariosRouter.post("/route-discovery/run", async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+});
+
+scenariosRouter.post("/route-discovery/execute-candidate", async (req, res, next) => {
+  try {
+    const result = await executeApprovedDiscoveryCandidate(req.body as ApprovedDiscoveryCandidateExecutionRequest);
+    res.status(result.ok ? 200 : 400).json(result);
+  } catch (err) { next(err); }
 });
 
 // GET /api/scenarios/preview?projectKey=AA&sprintId=42&status=Desestimado

@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import { config, requireTestRailConfig } from "../config/env";
 import { TestRailClient } from "../clients/testrail.client";
 import { runCaseDiscoveryWorkflow } from "../discovery/case-discovery-workflow";
-import { resolveAppProfile, ensureAppStructure } from "../automations/app-profile";
+import { resolveAppProfile, ensureAppStructure, loadPromotedAppConfigSync } from "../automations/app-profile";
 import type { VirtualCase } from "../types/scenario-preview.types";
 import type { TestScenario } from "../types/testrail.types";
 import { RunEvidenceRecorder } from "../evidence/run-evidence-recorder";
@@ -534,6 +534,21 @@ export function virtualCaseToTestScenario(vc: VirtualCase): TestScenario {
   } as any;
 }
 
+export function resolveWebBaseUrl(appSlug: string): { appSlug: string; source: string; configured?: string; effective: string; fallbackUsed: boolean } {
+  const normalized = appSlug.trim();
+  const cfg: any = loadPromotedAppConfigSync({ appSlug: normalized });
+  const configured = typeof cfg?.baseUrl === "string" ? cfg.baseUrl.trim() : undefined;
+  const hasConfigured = Boolean(configured);
+  if (hasConfigured) {
+    const safe = new URL(configured);
+    console.log(`[web:base-url] appSlug=${normalized} source=app_config origin=${safe.origin} pathname=${safe.pathname} fallbackUsed=false`);
+    return { appSlug: normalized, source: "app_config", configured, effective: configured!, fallbackUsed: false };
+  }
+  const envFallback = config.app.baseUrl;
+  console.log(`[web:base-url] appSlug=${normalized} source=fallback configuredPresent=${Boolean(configured)} effectivePresent=${Boolean(envFallback)} fallbackUsed=true`);
+  throw new Error(`[web:base-url] missing baseUrl for appSlug=${normalized} source=app_config — FAIL CLOSED: create automations/apps/${normalized}/app.config.json with baseUrl. Env fallback present=${Boolean(envFallback)} not used.`);
+}
+
 async function runPreviewCase(
   vc: VirtualCase,
   args: PreviewCliArgs,
@@ -543,6 +558,7 @@ async function runPreviewCase(
   total: number,
   evidenceRunId?: string,
   executionSource: "qalab" | "cli" = "cli",
+  effectiveBaseUrl?: string,
 ): Promise<PreviewResult["cases"][number]> {
   const outputDir = path.resolve(`./.artifacts/preview/${vc.displayId}/${new Date().toISOString().replace(/[:.]/g, "-")}`);
 
@@ -566,6 +582,26 @@ async function runPreviewCase(
     const testRailConfig = requireTestRailConfig(config);
     const trClient = new TestRailClient(testRailConfig);
 
+    // Build per-app config that preserves project baseUrl (fail-closed, no fallback to env default)
+    const discoveryConfig: typeof config = effectiveBaseUrl
+      ? { ...config, app: { ...config.app, baseUrl: effectiveBaseUrl, appProfile: appSlug } }
+      : config;
+    if (effectiveBaseUrl) {
+      const safe = new URL(effectiveBaseUrl);
+      console.log(`[web:base-url] appSlug=${appSlug} source=app_config origin=${safe.origin} pathname=${safe.pathname} fallbackUsed=false`);
+    }
+    // Per-scenario dataOverrides and suggestedData (generic, per-scenario isolated)
+    const scenarioOverrides = (vc as any).dataOverrides as Record<string, string> | undefined;
+    let scenarioSuggested: Record<string, string> | undefined;
+    const vcDataReq = (vc as any).dataRequirements as any;
+    if (Array.isArray(vcDataReq)) {
+      const map: Record<string,string> = {};
+      for (const r of vcDataReq) {
+        if (r && r.key && r.suggestedValue !== undefined && String(r.suggestedValue).trim() !== "") map[r.key] = String(r.suggestedValue);
+      }
+      if (Object.keys(map).length>0) scenarioSuggested = map;
+    }
+    if (scenarioOverrides) console.log(`[web:dataOverrides] scenario=${vc.displayId} overrides=${Object.keys(scenarioOverrides).join(",")}`);
     workflowResult = await runCaseDiscoveryWorkflow({
       scenario,
       headed: args.headed,
@@ -579,8 +615,11 @@ async function runPreviewCase(
       autoPom: args.autoPom,
       testRailClient: trClient,
       appProfile: appProfileObj,
+      config: discoveryConfig,
       runId: evidenceRunId,
-    });
+      scenarioDataOverrides: scenarioOverrides,
+      scenarioSuggestedData: scenarioSuggested,
+    } as any);
 
     const discoveryStatus = workflowResult.caseResult.status;
     const completion = resolvePreviewCompletion(workflowResult, args.autoPromote);
@@ -916,6 +955,18 @@ async function main(): Promise<void> {
   // Resolve app profile
   const { resolvedAppSlug, appProfileObj } = await resolvePreviewAppProfile(args.app);
 
+  // ── [web:base-url] Fail-closed resolution — appSlug → app_config → baseUrl must be preserved ──
+  let webBase: { effective: string; source: string; fallbackUsed: boolean };
+  try {
+    webBase = resolveWebBaseUrl(resolvedAppSlug);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(message);
+    const resultsPath = path.join(path.dirname(args.input), "results.json");
+    await fs.writeFile(resultsPath, JSON.stringify({ ok: false, error: "missing_base_url", message }, null, 2), "utf-8");
+    process.exit(1);
+  }
+
   // Execute each case in series
   const results: PreviewResult["cases"] = [];
   let passed = 0;
@@ -925,7 +976,7 @@ async function main(): Promise<void> {
 
   for (let i = 0; i < cases.length; i++) {
     const vc = cases[i];
-    const result = await runPreviewCase(vc, args, resolvedAppSlug, appProfileObj, i, cases.length, evidenceRunId, executionSource);
+    const result = await runPreviewCase(vc, args, resolvedAppSlug, appProfileObj, i, cases.length, evidenceRunId, executionSource, webBase.effective);
     results.push(result);
     if (result.status === "passed") passed++;
     else failed++;

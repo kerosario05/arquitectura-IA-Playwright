@@ -1,0 +1,40 @@
+{
+  "name": "QA3",
+  "baseUrl": "https://172.27.4.50",
+  "loginMode": "no_login",
+  "testData": {},
+  "testDataAliases": {},
+  "missingInputBehavior": "auto_generate",
+  "routeProfile": {
+    "name": "inferred_from_scenarios",
+    "entry": [
+      {
+        "businessLabel": "iniciar",
+        "visibleLabel": "Iniciar"
+      }
+    ],
+    "aliases": {},
+    "intermediates": {},
+    "domainTerms": {},
+    "visibleControls": [
+      "Cuentas de Efectivo",
+      "Depositos a Plazo",
+      "Explora nuestros productos",
+      "Iniciar",
+      "Prestamos",
+      "Tarjetas de credito"
+    ],
+    "representativeFixture": {},
+    "notes": [
+      "Auto-inferred from 1 scenario(s) during run. Persist routeProfile in app.config.json for reuse."
+    ],
+    "entrySteps": [
+      {
+        "action": "click",
+        "target": "Iniciar",
+        "when": "before_first_functional_step"
+      }
+    ],
+    "updatedAt": "2026-08-28T02:38:55.629Z"
+  }
+}

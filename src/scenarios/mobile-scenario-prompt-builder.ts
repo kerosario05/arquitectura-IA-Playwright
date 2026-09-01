@@ -2,6 +2,7 @@ import type { JiraIssueSource } from "./scenario-types";
 import type { AiMessage } from "../ai/ai-provider.types";
 import type { MobileRouteProfile } from "../mobile/mobile-route-profile.types";
 import type { MobileLearnedScreen } from "../mobile/mobile-knowledge-resolver";
+import type { DestinationClaimDefinition } from "../mobile/mobile-destination-claim";
 
 const SYSTEM_PROMPT = `Eres un generador de pasos de prueba automatizados para apps Android nativas usando Appium/UiAutomator2.
 
@@ -24,7 +25,13 @@ FORMATO DE SALIDA (JSON estricto, sin explicaciones, sin markdown, sin texto ant
       "preconditions": ["Precondicion 1 (puede ser un array vacio si no aplica)"],
       "requiredDataProfile": "nombre-del-perfil-funcional (SOLO si el escenario depende de un estado de negocio backend y existe un perfil compatible; omitir si no aplica)",
       "requiresManualData": false,
-      "coveredCriteria": ["CA01"]
+      "coveredCriteria": ["CA01"],
+      "stepRequirementRefs": [
+        { "stepIndex": 1, "requirementIds": ["CA01"] }
+      ],
+      "stepDestinationExpectations": [
+        { "stepIndex": 1, "destinationClaimId": "abc123def456" }
+      ]
     }
   ],
   "rejected": []
@@ -58,6 +65,8 @@ REGLAS:
   * NO inventes documentos, identificaciones, saldos, numeros ni valores de negocio para satisfacer un estado funcional. Los valores reales se resuelven en tiempo de ejecucion desde testData usando el perfil; tu solo declaras el nombre del perfil. "exampleValue" es solo una referencia de formato, nunca una garantia de estado de negocio.
   * Un escenario con "requiredDataProfile" no puede mezclar dos estados de negocio distintos; si la historia pide varios estados, genera un escenario por cada estado con su perfil correspondiente.
 - COBERTURA DE CRITERIOS DE ACEPTACION: en cada escenario declara "coveredCriteria" como un array con los identificadores de los criterios de aceptacion de la historia que ese escenario cubre, tal como aparecen en el texto (por ejemplo "CA01", "Criterio 2", "AC3"). Un escenario puede cubrir uno o varios criterios. Si el escenario no corresponde a ningun criterio identificable, usa []. Ningun criterio de aceptacion debe quedar sin cubrir en silencio: si un criterio no puede automatizarse (rejected/incapaz), declara su identificador en el array "coveredCriteria" de la entrada correspondiente en "rejected" (cada entrada de "rejected" acepta "sourceIssueKey", "reason" y "coveredCriteria").
+- STEP REQUIREMENT REFS: en cada escenario declara "stepRequirementRefs" como array de objetos { "stepIndex": 0, "requirementIds": ["CA01"] } que mapea el paso funcional (0-based, contando desde launchApp) al criterion o criterios que materializa directamente. Solo declara un ref cuando el paso ejecuta inequívocamente el criterion (click que realiza la accion requerida, fill que ingresa el dato principal). NO propages coveredCriteria automaticamente a cada paso. Si no puedes asignar un criterion inequivocamente a un paso, omite el ref para ese paso. Los IDs deben pertenecer al conjunto de coveredCriteria del escenario. Si la IA no puede determinar la asignacion con certeza, deja el array vacio.
+- STEP DESTINATION EXPECTATIONS: si hay destination claims disponibles (seccion "DESTINATION CLAIMS DISPONIBLES"), en cada escenario declara "stepDestinationExpectations" como array de objetos { "stepIndex": 1, "destinationClaimId": "<id_del_claim>" } que asocia un paso a un claim preexistente. Solo asocia un claim cuando el paso produce inequivocamente un cambio de pantalla hacia ese destino. NO crees claims nuevos — solo referencia claims existentes. Si no hay claims disponibles, omite el array. El campo "requirementIds", "semanticIdentity", "kind", "source" y "trustLevel" se resuelven automaticamente desde el manifest — NO los incluyas en tu output.
 - No incluyas ninguna explicacion fuera del objeto JSON.`;
 
 function formatFlows(routeProfile: MobileRouteProfile): string {
@@ -201,10 +210,29 @@ function formatLearnedKnowledge(learnedScreens: MobileLearnedScreen[]): string {
   return lines.join("\n").trim();
 }
 
+function formatDestinationClaimManifest(manifest: DestinationClaimDefinition[]): string {
+  if (manifest.length === 0) return "";
+  const lines = [
+    "## DESTINATION CLAIMS DISPONIBLES",
+    "Estos son los claims de destino validos que puedes referenciar en stepDestinationExpectations.",
+    "NO crees claims nuevos. SOLO referencia estos claims por su destinationClaimId.",
+    "",
+  ];
+  for (const claim of manifest) {
+    lines.push(`- destinationClaimId: "${claim.destinationClaimId}"`);
+    lines.push(`  requirementIds: [${claim.requirementIds.map((id) => `"${id}"`).join(", ")}]`);
+    lines.push(`  semanticIdentity: "${claim.semanticIdentity}"`);
+    lines.push(`  kind: "${claim.kind}"`);
+    lines.push("");
+  }
+  return lines.join("\n").trim();
+}
+
 export function buildMobileScenarioMessages(
   issue: JiraIssueSource,
   routeProfile?: MobileRouteProfile | null,
-  learnedScreens?: MobileLearnedScreen[]
+  learnedScreens?: MobileLearnedScreen[],
+  destinationClaimManifest?: DestinationClaimDefinition[],
 ): AiMessage[] {
   const userParts = [
     "Genera pasos de prueba mobile para la siguiente historia de usuario:",
@@ -216,11 +244,12 @@ export function buildMobileScenarioMessages(
   let routeBlock = "";
   let profilesBlock = "";
   let knowledgeBlock = "";
+  let manifestBlock = "";
 
   if (routeProfile) {
     flowsBlock = formatFlows(routeProfile);
     if (flowsBlock) userParts.push("", flowsBlock);
-    if (Object.keys(routeProfile.screens).length > 0) {
+    if (routeProfile.screens && Object.keys(routeProfile.screens).length > 0) {
       routeBlock = formatRouteProfile(routeProfile);
       userParts.push("", routeBlock);
     }
@@ -233,6 +262,11 @@ export function buildMobileScenarioMessages(
     userParts.push("", knowledgeBlock);
   }
 
+  if (destinationClaimManifest && destinationClaimManifest.length > 0) {
+    manifestBlock = formatDestinationClaimManifest(destinationClaimManifest);
+    userParts.push("", manifestBlock);
+  }
+
   const systemContent = SYSTEM_PROMPT;
   const userContent = userParts.join("\n");
 
@@ -241,6 +275,7 @@ export function buildMobileScenarioMessages(
   const instructionsChars = userParts[0].length + 2; // header + "\n\n"
   const routeProfileChars = flowsBlock.length + routeBlock.length + profilesBlock.length;
   const knowledgeChars = knowledgeBlock.length;
+  const manifestChars = manifestBlock.length;
   const totalChars = systemChars + userContent.length;
   const estimatedTokens = Math.ceil(totalChars / 4);
 
@@ -248,7 +283,7 @@ export function buildMobileScenarioMessages(
     `[mobile:prompt-size] issue=${issue.key} ` +
     `totalChars=${totalChars} estimatedTokens=${estimatedTokens} ` +
     `systemChars=${systemChars} huChars=${huChars} instructionsChars=${instructionsChars} ` +
-    `routeProfileChars=${routeProfileChars} knowledgeChars=${knowledgeChars}`
+    `routeProfileChars=${routeProfileChars} knowledgeChars=${knowledgeChars} manifestChars=${manifestChars}`
   );
 
   return [

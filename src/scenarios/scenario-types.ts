@@ -140,6 +140,87 @@ export type FunctionalBranchRef = {
   expectedDestination?: string;
   accessIntent: BranchAccessIntent;
   evidenceSource: FunctionalBranchEvidenceSource;
+  activation?: {
+    actionType: "click" | "select" | "navigate" | "unknown";
+    targetIdentity?: string;
+  };
+  destination?: {
+    semanticDeclaration: string;
+  };
+};
+
+export type RequirementFacet = "activation" | "destination" | "visibility" | "action" | "technical";
+
+export type CanonicalClaim = {
+  claimId: string;
+  requirementId: string;
+  facet: RequirementFacet;
+  claimType: "action" | "visibility_assertion" | "semantic_destination_assertion" | "technical_route_step";
+  targetKind: "exact_ui_target" | "declared_ui_target" | "semantic_destination" | "structured_route" | "auth_boundary" | "none";
+  required: boolean;
+  coverable: boolean;
+  scope?: "global" | "branch" | "scenario";
+  scopeId?: string;
+};
+
+export type DiscoveryTarget = {
+  scope?: "issue" | "branch";
+  scenarioId?: string;
+  branchId?: string;
+  sourceRequirementId?: string;
+  expectedDestination?: string;
+};
+
+export type RouteDiscoveryPlanRequest = {
+  appSlug: string;
+  issueKey: string;
+  huIntent: string;
+  reasonCode: string;
+  discoveryTarget?: DiscoveryTarget;
+  currentRouteProfileName?: string;
+};
+
+export type RouteDiscoveryPlanResponse = Record<string, unknown> & {
+  ok: true;
+  discoveryTarget?: DiscoveryTarget;
+};
+
+export type RouteDiscoveryPlanError = Record<string, unknown> & { ok: false; error: string };
+
+export type GuidedRouteDiscoveryRequest = {
+  appSlug: string;
+  issueKey: string;
+  huIntent: string;
+  reasonCode: string;
+  dryRun?: boolean;
+  mode?: "candidate_only" | "standard";
+  headless?: boolean;
+  jiraSummary?: string;
+  jiraDescription?: string;
+  acceptanceCriteria?: string;
+  discoveryTarget?: DiscoveryTarget;
+};
+
+export type GuidedRouteDiscoveryResponse = Record<string, any> & {
+  ok: boolean;
+  status: string;
+  discoveryTarget?: DiscoveryTarget;
+};
+
+export type ApprovedDiscoveryCandidateExecutionRequest = {
+  appSlug: string;
+  issueKey: string;
+  approved: boolean;
+  discoveryTarget: DiscoveryTarget & { scope: "branch"; branchId: string; sourceRequirementId: string };
+  candidate: {
+    candidateId: string;
+    source: "runtime_observation";
+    target: string;
+    role?: string;
+    score?: number;
+    safety?: string;
+  };
+  executionId: string;
 };
 
 export type McpScenario = {
@@ -161,11 +242,57 @@ export type McpScenario = {
   dataRequirements: string;
   nonExecutableCriteria: string;
   mcpExecutable: boolean;
+  executionReadiness?: string;
+  semanticValidity?: string;
+  functionalRepresentationAllowed?: boolean;
+  publishableToTestManagement?: boolean;
+  standardExecutable?: boolean;
+  publicationClassification?: "executable" | "documentation" | "blocked";
+  launchClassification?: "standard" | "adaptive" | "nonAutomatable";
   scenarioId?: string;
   caseId?: number;
   generationSource?: "ai" | "deterministic_seed"; // Track source for seeds vs AI
   authIntent?: "gate_observation" | "full_authentication";
   functionalBranch?: FunctionalBranchRef;
+  requirementDependencies?: Array<{
+    requirementId: string;
+    prerequisiteRequirementIds?: string[];
+  }>;
+  stepRequirementRefs?: Array<{
+    stepIndex: number;
+    requirementId: string;
+    facet?: RequirementFacet;
+    prerequisiteRequirementIds?: string[];
+  }>;
+  stepAuthority?: Array<{
+    stepIndex: number;
+    claimType: string;
+    requirementFacet?: RequirementFacet;
+    sourceType: string;
+    sourceId?: string;
+    trustLevel: string;
+    scope?: string;
+    authorityValid: boolean;
+    authorityReason: string;
+  }>;
+  stepClaimTypes?: Array<"action" | "visibility_assertion" | "semantic_destination_assertion" | "technical_route" | "unknown">;
+  stepClaims?: Array<{
+    stepIndex: number;
+    claimId: string;
+    requirementId?: string;
+    facet?: RequirementFacet;
+    claimType?: CanonicalClaim["claimType"];
+    targetKind?: CanonicalClaim["targetKind"];
+    scope?: "global" | "branch" | "scenario";
+    scopeId?: string;
+  }>;
+  unsupportedFunctionalSteps?: Array<{
+    stepIndex: number;
+    producer: string;
+    provenance: string;
+    reason: string;
+  }>;
+  missingPrerequisiteRequirementIds?: string[];
   validation?: {
     valid: boolean;
     errors: string[];
@@ -190,6 +317,40 @@ export type McpScenario = {
   };
 };
 
+export type RequirementCategory =
+  | "action" | "assertion" | "visibility" | "branch" | "destination"
+  | "negative" | "prerequisite" | "entry_precondition" | "content_restriction"
+  | "inactivity" | "restart" | "environment";
+
+export type RequirementStatus = "covered" | "adaptive" | "nonAutomatable" | "incompleteRequirement";
+
+export type FunctionalRequirementAccount = {
+  id?: string;
+  sourceRequirementId?: string;
+  requirementId?: string;
+  prerequisiteRequirementIds?: string[];
+  sourceIssueKey: string;
+  category: RequirementCategory;
+  sourceText: string;
+  expectedBehavior: string;
+  associatedBranchId?: string;
+  facets?: RequirementFacet[];
+  status?: RequirementStatus;
+  coveredBy?: string;
+  reasonCode?: string;
+};
+
+export type FunctionalCoverageResult = {
+  required: number;
+  covered: number;
+  missing: string[];
+  valid: boolean;
+  nonAutomatable?: number;
+  incomplete?: number;
+  coverableRequired?: number;
+  coverableSatisfied?: number;
+};
+
 export type McpRouteProfile = {
   name: string;
   entry: Array<{ businessLabel: string; visibleLabel: string }>;
@@ -203,6 +364,7 @@ export type McpRouteProfile = {
   entrySteps?: Array<{ action: string; target: string; when: string }>;
   // Optional: per-target path requirements
   targetPaths?: Record<string, TargetPathDefinition>;
+  fieldProvenance?: Partial<Record<"entry" | "aliases" | "intermediates" | "domainTerms" | "visibleControls" | "entrySteps" | "targetPaths", "explicit_trusted_config" | "validated_knowledge" | "trusted_route" | "declared_hint" | "unknown">>;
 };
 
 export type TargetPathDefinition = {
@@ -254,6 +416,15 @@ export type McpGenerationResponse = {
   rejected: McpRejectedScenario[];
   routeResolutions?: Map<string, ScenarioRouteResolution>;
   generationDiagnostics?: ScenarioGenerationDiagnostics;
+  requirements?: FunctionalRequirementAccount[];
+  functionalCoverage?: FunctionalCoverageResult;
+  canonicalClaims?: CanonicalClaim[];
+  providerClaimCompliance?: {
+    expectedClaims: string[];
+    referencedClaims: string[];
+    missingClaims: string[];
+    invalidClaims: Array<{ stepIndex: number; claimId?: string; reason: string }>;
+  };
 };
 
 export type ScenarioValidationResult = {
@@ -455,6 +626,7 @@ export type IntermediateRepairResult = {
   repaired: boolean;
   originalSteps: string[];
   repairedSteps: string[];
+  stepOrigins?: Array<number | undefined>;
   insertedSteps: string[];
   insertedCount: number;
   reasonCode: string;

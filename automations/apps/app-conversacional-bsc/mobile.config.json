@@ -297,5 +297,19 @@
       "reintentar",
       "la validacion no pudo realizarse"
     ]
+  },
+  "functionalDataProfiles": {
+    "cliente_con_cedula": {
+      "dataRefs": {
+        "identity.type": "identities.cedula.type",
+        "identity.value": "identities.cedula.value"
+      }
+    },
+    "cliente_con_pasaporte": {
+      "dataRefs": {
+        "identity.type": "identities.pasaporte.type",
+        "identity.value": "identities.pasaporte.value"
+      }
+    }
   }
 }

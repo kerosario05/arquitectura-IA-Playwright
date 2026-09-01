@@ -7,6 +7,7 @@ import { runCaseDiscoveryWorkflow } from "../discovery/case-discovery-workflow";
 import type { TestScenario } from "../types/testrail.types";
 import { sanitizeTestRailRef } from "../server/services/testrail-case-publisher";
 import type { AddResultForCaseInput } from "../types/testrail.types";
+import { formatDuration } from "../testrail/testrail-reporter";
 
 type CliArgs = {
   projectKey: string;
@@ -346,7 +347,7 @@ async function main(): Promise<void> {
     caseId: r.testRailCaseId,
     statusId: r.testRailStatusId,
     comment: r.comment,
-    elapsed: `${Math.round(r.durationMs / 1000)}s`
+    elapsed: formatDuration(r.durationMs)
   }));
 
   const reportResult = await testRailClient.addResultsForCases(testRailRun.id, testRailResults);

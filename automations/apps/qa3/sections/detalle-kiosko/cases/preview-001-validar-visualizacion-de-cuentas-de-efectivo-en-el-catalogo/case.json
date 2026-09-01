@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-validar-visualizacion-de-cuentas-de-efectivo-en-el-catalogo",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Validar visualizacion de Cuentas de Efectivo en el catalogo",
+  "source": "discovery",
+  "appSlug": "qa3",
+  "appConfigPath": "automations\\apps\\qa3\\app.config.json",
+  "createdAt": "2026-08-28T12:22:18.278Z"
+}

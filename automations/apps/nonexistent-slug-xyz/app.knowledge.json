@@ -1,0 +1,19 @@
+{
+  "items": [
+    {
+      "id": "hd_prerequisite_40ab2b0298ba",
+      "source": "hu_declared",
+      "knowledgeKind": "hu_declared",
+      "category": "prerequisite",
+      "sourceText": "Debe estar autenticado",
+      "sourceIssueKey": "TEST-1",
+      "associatedBranchId": "",
+      "expectedBehavior": "",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "runCount": 1,
+      "createdAt": "2026-08-27T18:12:23.384Z",
+      "lastSeenAt": "2026-08-27T18:12:23.384Z"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-preview-001-visualizar-categorias",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "PREVIEW-001 Visualizar categorias",
+  "source": "discovery",
+  "appSlug": "qa3",
+  "appConfigPath": "automations\\apps\\qa3\\app.config.json",
+  "createdAt": "2026-08-27T21:14:34.239Z"
+}

@@ -1,7 +1,12 @@
-import * as fs from "node:fs";
-import * as path from "node:path";
 import { createHash } from "node:crypto";
 import type { MobileScreenSnapshot } from "./mobile-knowledge-extractor";
+import {
+  persistRuntimeSnapshot,
+  persistRuntimeRoute,
+  persistRuntimeTransition,
+} from "../knowledge/runtime-knowledge-persister";
+import { extractObservedDestination, type MobileObservedDestination } from "./mobile-observed-destination";
+import type { MobileDestinationBindingCandidate } from "./mobile-destination-binding";
 
 export type MobileKnowledgeItem = Record<string, unknown>;
 export type MobileKnowledgeStatus = "passed" | "failed" | "partial";
@@ -20,136 +25,99 @@ export type MobileObservedTransition = {
   };
   screenBefore: string;
   screenAfter: string;
+  controlPackage?: string;
+  controlResourceId?: string;
+  controlContentDesc?: string;
+  actionLocatorIdentity?: string;
+  /** Mechanical action description (e.g. "click"), preserved as descriptive evidence. */
+  actionDescription?: string;
+  /** Canonical criterion IDs that this step materializes, from the scenario's stepRequirementRefs. */
+  requirementIds?: string[];
+  /** Action semantic authority: "validated" when all promotion conditions are met. */
+  actionSemanticAuthority?: string;
+  /** True when the technical transition was validated (screen changed, different fingerprints). */
+  transitionValidated?: boolean;
+  /** True when the action was actually executed by Appium (real runtime evidence). */
+  executionBacked?: boolean;
+  /** Observed destination evidence from the Appium snapshot after this step. */
+  observedDestinationEvidence?: MobileObservedDestination;
+  /** Binding candidate created from this transition. Observation-only, pending validation. */
+  bindingCandidate?: MobileDestinationBindingCandidate;
 };
 
-function knowledgePath(appSlug: string): string {
-  return path.join(process.cwd(), "automations", "apps", appSlug, "mobile.knowledge.json");
+function toRuntimeSnapshot(snapshot: MobileScreenSnapshot) {
+  return {
+    screenKey: snapshot.screenKey,
+    url: `mobile://${snapshot.screenKey}`,
+    clickTargets: snapshot.clickTargets,
+    businessLabels: snapshot.clickTargets,
+    observedControls: (snapshot.observedControls ?? []).map((c) => ({
+      ...c,
+      sourceScreenKey: snapshot.screenKey,
+    })),
+    assertionTargets: snapshot.assertionTargets,
+    headings: [] as string[],
+    inputLabels: [] as string[],
+    selectLabels: [] as string[],
+    capturedAt: new Date().toISOString(),
+  };
 }
 
-function readKnowledge(appSlug: string): { items: MobileKnowledgeItem[] } {
-  const kp = knowledgePath(appSlug);
-  try {
-    if (fs.existsSync(kp)) return JSON.parse(fs.readFileSync(kp, "utf-8"));
-  } catch {
-    /* corrupt file → start fresh */
-  }
-  return { items: [] };
-}
-
-function writeKnowledge(appSlug: string, data: { items: MobileKnowledgeItem[] }): void {
-  const kp = knowledgePath(appSlug);
-  try {
-    const dir = path.dirname(kp);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    const tmp = kp + ".tmp";
-    fs.writeFileSync(tmp, JSON.stringify(data, null, 2), "utf-8");
-    fs.renameSync(tmp, kp);
-  } catch {
-    fs.writeFileSync(kp, JSON.stringify(data, null, 2), "utf-8");
-  }
-}
-
-/**
- * Upserts a knowledge item, matching by (knowledgeKind + matchKey). On re-observation it
- * increments runCount/successCount and, on repeated failure (>2), demotes trustedForReuse.
- * Same trust/decay logic as the web runtime-knowledge-persister.
- */
-function persistItem(appSlug: string, newItem: MobileKnowledgeItem, matchKey: string): void {
-  const data = readKnowledge(appSlug);
-  const idx = data.items.findIndex(
-    (i) => (i.knowledgeKind as string) === (newItem.knowledgeKind as string) && (i.matchKey as string) === matchKey
-  );
-
-  if (idx >= 0) {
-    const existing = data.items[idx];
-    const isSuccess = newItem.validationStatus === "validated";
-    existing.lastSeenAt = new Date().toISOString();
-    existing.runCount = ((existing.runCount as number) ?? 0) + 1;
-    // Refresh the observed content with the latest snapshot.
-    existing.clickTargets = newItem.clickTargets;
-    existing.assertionTargets = newItem.assertionTargets;
-    if (newItem.transitions) existing.transitions = newItem.transitions;
-    if (newItem.title) existing.title = newItem.title;
-    if (isSuccess) {
-      existing.successCount = ((existing.successCount as number) ?? 0) + 1;
-      existing.validationStatus = "validated";
-      existing.trustedForReuse = true;
-      existing.lastValidatedAt = new Date().toISOString();
-    } else {
-      existing.failureCount = ((existing.failureCount as number) ?? 0) + 1;
-      if ((existing.failureCount as number) > 2) existing.trustedForReuse = false;
-    }
-    data.items[idx] = existing;
-    console.log(`[mobile:knowledge] updated ${existing.id} runCount=${existing.runCount} trusted=${existing.trustedForReuse}`);
-  } else {
-    data.items.push(newItem);
-    console.log(`[mobile:knowledge] persisted kind=${newItem.knowledgeKind} matchKey=${matchKey} trusted=${newItem.trustedForReuse}`);
-  }
-
-  writeKnowledge(appSlug, data);
-}
-
-/** Persists a screen observation (the real elements seen on a visited screen). */
-export function persistMobileScreen(
+/** Persists a screen observation via shared SQL-first persister (ProjectKnowledge → app.knowledge.json). */
+export async function persistMobileScreen(
   appSlug: string,
   snapshot: MobileScreenSnapshot,
   meta: { issueKey?: string; scenarioTitle?: string; status: MobileKnowledgeStatus }
-): void {
+): Promise<void> {
   if (snapshot.clickTargets.length === 0 && snapshot.assertionTargets.length === 0) return;
-  const now = new Date().toISOString();
+  const before = Date.now();
+  await persistRuntimeSnapshot(appSlug, toRuntimeSnapshot(snapshot), {
+    issueKey: meta.issueKey,
+    scenarioTitle: meta.scenarioTitle,
+    status: meta.status,
+  });
   const isSuccess = meta.status === "passed" || meta.status === "partial";
-  const item: MobileKnowledgeItem = {
-    id: `mob_screen_${createHash("sha256").update(snapshot.screenKey).digest("hex").slice(0, 12)}`,
-    knowledgeKind: "screen_observed",
-    matchKey: snapshot.screenKey,
-    screenKey: snapshot.screenKey,
-    title: snapshot.title,
-    clickTargets: snapshot.clickTargets,
-    assertionTargets: snapshot.assertionTargets,
-    issueKey: meta.issueKey ?? "",
-    scenarioTitle: meta.scenarioTitle ?? "",
-    validationStatus: isSuccess ? "validated" : "pending",
-    trustedForReuse: isSuccess,
-    failureCount: isSuccess ? 0 : 1,
-    successCount: isSuccess ? 1 : 0,
-    runCount: 1,
-    createdAt: now,
-    lastSeenAt: now,
-    lastValidatedAt: isSuccess ? now : undefined
-  };
-  persistItem(appSlug, item, snapshot.screenKey);
+  console.log(
+    `[mobile:runtime-knowledge] appSlug=${appSlug} kind=screen_observed screenKey=${snapshot.screenKey} status=${meta.status} validationStatus=${isSuccess ? "validated" : "pending"} trustedForReuse=${isSuccess} ms=${Date.now() - before}`
+  );
 }
 
-/** Persists a functional route (the sequence of tap targets that a scenario executed). */
-export function persistMobileRoute(
+/** Persists a functional route via shared SQL-first persister; each transition becomes a route_transition. */
+export async function persistMobileRoute(
   appSlug: string,
   clickTargets: string[],
-  meta: { issueKey?: string; scenarioTitle?: string; status: MobileKnowledgeStatus },
+  meta: { issueKey?: string; scenarioTitle?: string; status: MobileKnowledgeStatus; expectedAppPackage?: string },
   transitions?: MobileObservedTransition[]
-): void {
+): Promise<void> {
   if (clickTargets.length < 1) return;
-  const now = new Date().toISOString();
-  const isSuccess = meta.status === "passed";
-  const matchKey = createHash("sha256").update(clickTargets.join("|")).digest("hex").slice(0, 12);
-  const item: MobileKnowledgeItem = {
-    id: `mob_route_${matchKey}`,
-    knowledgeKind: "route_observed",
-    matchKey,
-    clickTargets,
-    assertionTargets: [],
-    issueKey: meta.issueKey ?? "",
-    scenarioTitle: meta.scenarioTitle ?? "",
-    validationStatus: isSuccess ? "validated" : "pending",
-    trustedForReuse: isSuccess,
-    failureCount: isSuccess ? 0 : 1,
-    successCount: isSuccess ? 1 : 0,
-    runCount: 1,
-    createdAt: now,
-    lastSeenAt: now,
-    lastValidatedAt: isSuccess ? now : undefined
-  };
-  if (transitions && transitions.length > 0) {
-    item.transitions = transitions;
+  await persistRuntimeRoute(appSlug, clickTargets, clickTargets, {
+    issueKey: meta.issueKey,
+    scenarioTitle: meta.scenarioTitle,
+    status: meta.status as "passed" | "failed" | "partial",
+  });
+  if (transitions && meta.expectedAppPackage) {
+    for (const t of transitions) {
+      if (!t.screenBefore || !t.screenAfter || !t.action) continue;
+      await persistRuntimeTransition(appSlug, {
+        sourceScreenKey: t.screenBefore,
+        destinationScreenKey: t.screenAfter,
+        actionBusinessLabel: undefined,
+        actionDescription: t.action,
+        actionLocatorIdentity: t.actionLocatorIdentity ?? (t.actionTarget ? `${t.actionTarget.strategy}:${t.actionTarget.value}` : undefined),
+        controlPackage: t.controlPackage,
+        controlResourceId: t.controlResourceId,
+        controlContentDesc: t.controlContentDesc,
+        requirementIds: t.requirementIds,
+        actionSemanticAuthority: t.actionSemanticAuthority,
+        transitionValidated: t.transitionValidated,
+        executionBacked: t.executionBacked,
+        observedDestinationEvidence: t.observedDestinationEvidence,
+        bindingCandidate: t.bindingCandidate,
+      }, meta.expectedAppPackage);
+    }
   }
-  persistItem(appSlug, item, matchKey);
+  const isSuccess = meta.status === "passed";
+  console.log(
+    `[mobile:runtime-knowledge] appSlug=${appSlug} kind=route_observed clickTargets=${clickTargets.length} transitions=${transitions?.length ?? 0} status=${meta.status} validationStatus=${isSuccess ? "validated" : "pending"} trustedForReuse=${isSuccess}`
+  );
 }

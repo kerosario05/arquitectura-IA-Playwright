@@ -3,6 +3,7 @@ import type { PageObjectRegistry } from "../types/page-object.types";
 import { deriveSemanticMethodIntent } from "./pom-classification";
 import { findMethodBySemanticIntent } from "./page-object-registry";
 import { getPreferredOwnerForIntent, METHOD_INTENT_NAME_MAP } from "../types/pom-ownership";
+import { decodeJsStringLiteralBody, normalizeSemanticText, semanticallyEqualText } from "./semantic-text-normalization";
 
 // Local copies of the minimal source-scenario/oracle shapes to avoid a circular
 // dependency with the spec-generation-hybrid module that consumes this contract.
@@ -37,6 +38,8 @@ export type ContractSourceScenario = {
   auth?: ContractSourceScenarioAuth;
   observableOracles?: ContractObservableOracle[];
   stepStatuses?: Array<{ index: number; status: string }>;
+  stepRequirementRefs?: Array<{ stepIndex: number; requirementId: string; facet?: string }>;
+  stepClaims?: Array<{ stepIndex: number; claimId: string; requirementId?: string; facet?: string; required?: boolean; coverable?: boolean }>;
 };
 
 export type SpecStepOperation =
@@ -65,6 +68,8 @@ export type SpecPageObjectImplementation = {
   owner: string;
   method: string;
   argument?: string;
+  expectedArgs?: number;
+  semanticActionIdentity?: string;
 };
 
 export type SpecRuntimeImplementation = {
@@ -357,12 +362,21 @@ function resolveImplementationDescriptor(
   const semanticIntent = deriveSemanticMethodIntent(step, "unknown", []);
   const resolved = findMethodBySemanticIntent(registry, semanticIntent, step);
   if (resolved) {
+    // Registry lookup has legacy name-based fallbacks. A contract binding must
+    // be capability-based, never just a similar method name.
+    if (resolved.method.intent !== semanticIntent) return undefined;
+    const expectedArgs = resolved.method.parameters?.length ?? 0;
+    // The contract currently carries one optional argument. Do not emit a
+    // partial call for methods requiring multiple parameters.
+    if (expectedArgs > 1) return undefined;
     const arg = getStepTargetValue(step);
     return {
       kind: "page_object",
       owner: resolved.pageObject.className,
       method: resolved.method.name,
-      argument: arg || undefined
+      expectedArgs,
+      semanticActionIdentity: semanticIntent,
+      ...(expectedArgs === 1 && arg ? { argument: arg } : {})
     };
   }
 
@@ -372,11 +386,18 @@ function resolveImplementationDescriptor(
     const ownerPO = registry.pageObjects.find((po) => po.className === owner && po.status === "active");
     const method = ownerPO?.methods.find((m) => m.name === methodName && m.available);
     if (method) {
+      if (method.intent !== semanticIntent) return undefined;
+      const expectedArgs = method.parameters?.length ?? 0;
+      if (expectedArgs > 1) return undefined;
       return {
         kind: "page_object",
         owner: ownerPO!.className,
         method: method.name,
-        argument: getStepTargetValue(step) || undefined
+        expectedArgs,
+        semanticActionIdentity: semanticIntent,
+        ...(expectedArgs === 1 && getStepTargetValue(step)
+          ? { argument: getStepTargetValue(step) }
+          : {})
       };
     }
   }
@@ -450,7 +471,7 @@ function getScenarioStepOriginalText(scenarioStep: ScenarioStepLike): string {
 }
 
 function normalizeOracleMatch(value: string): string {
-  return value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim();
+  return normalizeSemanticText(value).replace(/\s+/g, " ").trim();
 }
 
 function oracleToStepOracle(
@@ -554,6 +575,28 @@ function resolveResolvedExecutionTarget(
   return undefined;
 }
 
+function hasCanonicalRequiredness(sourceScenario: ContractSourceScenario | undefined, scenarioStepIndex: number): boolean {
+  const refs = (sourceScenario?.stepRequirementRefs ?? []).filter((ref) =>
+    ref.stepIndex === scenarioStepIndex || ref.stepIndex === scenarioStepIndex - 1
+  );
+  if (refs.length === 0) return false;
+  const claims = sourceScenario?.stepClaims ?? [];
+  return refs.every((ref) => {
+    const claim = claims.find((candidate) =>
+      (candidate.stepIndex === ref.stepIndex || candidate.stepIndex === scenarioStepIndex || candidate.stepIndex === scenarioStepIndex - 1)
+      && (!candidate.requirementId || candidate.requirementId === ref.requirementId)
+      && (!candidate.facet || !ref.facet || candidate.facet === ref.facet)
+    );
+    return claim?.required !== false && claim?.coverable !== false;
+  });
+}
+
+function canonicalRequirementIds(sourceScenario: ContractSourceScenario | undefined, scenarioStepIndex: number): string[] {
+  return (sourceScenario?.stepRequirementRefs ?? [])
+    .filter((ref) => ref.stepIndex === scenarioStepIndex || ref.stepIndex === scenarioStepIndex - 1)
+    .map((ref) => ref.requirementId);
+}
+
 export function buildSpecExecutionContract(
   plan: ExecutionPlan,
   sourceScenario: ContractSourceScenario | undefined,
@@ -589,11 +632,15 @@ export function buildSpecExecutionContract(
       ? undefined
       : findCompatiblePlanStep(scenarioStep, operation, plan.steps);
 
-    const oracleResult = isAssertion
+    let oracleResult = isAssertion
       ? resolveScenarioStepOracle(scenarioStep, observableOracles, plan.steps)
       : planStep
         ? resolveStepOracle(planStep, observableOracles, plan.steps)
         : resolveScenarioStepOracle(scenarioStep, observableOracles, plan.steps);
+    const canonicalIds = canonicalRequirementIds(sourceScenario, scenarioStep.index);
+    if (isAssertion && canonicalIds.length > 0 && oracleResult.oracle && !canonicalIds.includes(oracleResult.oracle.requirement ?? "")) {
+      oracleResult = { evidenceRefs: [] };
+    }
     const oracle = oracleResult.oracle;
 
     const implementation = planStep
@@ -613,13 +660,14 @@ export function buildSpecExecutionContract(
     // 3. no backing AND not explicitly non-blocking -> required=true, unresolved.
     const assertionImportance = scenarioStep.assertionImportance ?? "blocking";
     const hasBackedOracle = Boolean(oracle && oracle.backed);
+    const canonicalRequired = isAssertion && hasCanonicalRequiredness(sourceScenario, scenarioStep.index);
 
     let required = true;
     let executionStatus: SpecExecutionContractStep["executionStatus"] = "executed";
     if (planStep?.optional) {
       executionStatus = "skipped";
     } else if (isAssertion && !hasBackedOracle) {
-      if (assertionImportance !== "blocking") {
+      if (!canonicalRequired && assertionImportance !== "blocking") {
         required = false;
         executionStatus = "contextual_unresolved";
       } else {
@@ -630,7 +678,7 @@ export function buildSpecExecutionContract(
     const discoveredStatus = sourceScenario?.stepStatuses?.find(
       (item) => item.index === scenarioStep.index
     )?.status;
-    if (discoveredStatus === "skipped_after_completion") {
+    if (discoveredStatus === "skipped_after_completion" && !canonicalRequired) {
       required = false;
       executionStatus = "skipped";
     }
@@ -728,6 +776,18 @@ export function validateSpecExecutionContract(
       errors.push(`required_oracle_mechanism_unresolved:scenarioStepIndex=${step.scenarioStepIndex}:oracleType=${step.oracle.type}`);
       console.log(`[execution-contract] valid=false reason=required_oracle_mechanism_unresolved scenarioStepIndex=${step.scenarioStepIndex} oracleType=${step.oracle.type}`);
     }
+    if (step.implementation?.kind === "page_object") {
+      const expectedArgs = step.implementation.expectedArgs;
+      if (expectedArgs !== undefined) {
+        const actualArgs = step.implementation.argument === undefined ? 0 : 1;
+        if (actualArgs !== expectedArgs) {
+          errors.push(`page_object_method_signature_mismatch:${step.implementation.owner}.${step.implementation.method}:expectedArgs=${expectedArgs}:actualArgs=${actualArgs}`);
+        }
+      }
+      if (!step.implementation.semanticActionIdentity) {
+        errors.push(`page_object_method_semantic_mismatch:step=${step.scenarioStepIndex}:missing_action_identity`);
+      }
+    }
   }
 
   for (const unresolved of contract.unresolvedRequiredOracles) {
@@ -781,10 +841,10 @@ function isTechnicalEvidenceMetadata(value: string): boolean {
 }
 
 function extractRuntimeTargetValue(body: string): string | undefined {
-  const stringForm = /\btarget\s*:\s*['"]([^'"]*)['"]/.exec(body);
-  if (stringForm) return stringForm[1];
-  const objectForm = /\btarget\s*:\s*\{[^{}]*?\bvalue\s*:\s*['"]([^'"]*)['"]/.exec(body);
-  if (objectForm) return objectForm[1];
+  const stringForm = /\btarget\s*:\s*(['"])((?:\\.|(?!\1)[^])*)\1/.exec(body);
+  if (stringForm) return decodeJsStringLiteralBody(stringForm[2]);
+  const objectForm = /\btarget\s*:\s*\{[^{}]*?\bvalue\s*:\s*(['"])((?:\\.|(?!\1)[^])*)\1/.exec(body);
+  if (objectForm) return decodeJsStringLiteralBody(objectForm[2]);
   return undefined;
 }
 
@@ -864,12 +924,17 @@ function extractStringLiterals(body: string): string[] {
       let j = i + 1;
       let value = "";
       while (j < body.length && body[j] !== quote) {
-        if (body[j] === "\\") { j += 2; continue; }
+        if (body[j] === "\\") {
+          value += body[j];
+          if (j + 1 < body.length) value += body[j + 1];
+          j += 2;
+          continue;
+        }
         value += body[j];
         j += 1;
       }
       if (j < body.length && inCall && depth - callDepth >= 0) {
-        if (value.trim().length > 0) literals.push(value);
+        if (value.trim().length > 0) literals.push(decodeJsStringLiteralBody(value));
       }
       i = j < body.length ? j + 1 : body.length;
       continue;
@@ -1005,7 +1070,7 @@ export function computeTraceFidelity(
         callbackFound = true;
         const literals = extractStringLiterals(callbackBody);
         candidateLiterals = literals;
-        if (literals.some((lit) => normalizeOracleMatch(lit) === expectedResolved)) {
+        if (literals.some((lit) => semanticallyEqualText(lit, step.resolvedExecutionTarget!))) {
           resolvedTargetPreserved = true;
           break;
         }

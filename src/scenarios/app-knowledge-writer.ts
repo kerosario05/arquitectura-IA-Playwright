@@ -2152,6 +2152,10 @@ export async function appendRouteSuggestionToKnowledge(
     if (suggestion.confidence > (existing.confidenceScore ?? 0)) {
       existing.confidenceScore = suggestion.confidence;
     }
+    if (existing.knowledgeKind === "route_functional_observed" || existing.source === "route_learning") {
+      existing.validationStatus = "pending";
+      existing.trustedForReuse = false;
+    }
     if (existing.source === "route_learning" && !existing.knowledgeKind) {
       existing.knowledgeKind = "route_functional_observed";
     }
@@ -2186,14 +2190,17 @@ export async function appendRouteSuggestionToKnowledge(
     updatedAt: now,
     lastSeenAt: now,
     runCount: 1,
-    validationStatus: "validated",
-    trustedForReuse: true,
+    validationStatus: "pending",
+    trustedForReuse: false,
     successCount: 1,
     confidenceScore: suggestion.confidence,
     knowledgeKind: "route_functional_observed",
     destinationUrl: suggestion.evidence?.afterUrl,
     routeFrom: suggestion.from,
     actionTarget: suggestion.to,
+    transitionValidated: suggestion.evidence?.transitionValidated,
+    sourceTechnicalScreenKey: suggestion.evidence?.beforeTechnicalScreenKey,
+    destinationTechnicalScreenKey: suggestion.evidence?.afterTechnicalScreenKey,
   };
 
   knowledge.items.push(item);

@@ -7,6 +7,7 @@ import type {
   DeterministicSeedScenario,
   FunctionalBranchRef,
 } from "./scenario-types";
+import type { CanonicalClaim, FunctionalRequirementAccount } from "./scenario-types";
 import {
   buildAppProfilePromptContext,
   formatAppProfileContext,
@@ -575,7 +576,9 @@ ${skillRules}
 6. expectedResult must be a short contextual phrase, not new validation targets.
 7. If an issue is not UI-automatable, add it to "rejected" array with reason.
 8. Forbidden step phrases: "El sistema permite", "El cliente accede", "Validar correctamente", "Verificar que funcione", "Se procesa exitosamente", "Validar backend", "Validar Core Banking", "Validar base de datos", "Validar cálculo exacto", "Validar auditoría".
-9. If Functional Branch Coverage Contract is present, generate independent coverage for each listed branchId and return branchId in functionalBranch.
+ 9. If Functional Branch Coverage Contract is present, generate independent coverage for each listed branchId and return branchId in functionalBranch.
+  10. Return one stepClaimTypes value per step for step semantics only. Do not use it to redefine canonical claim metadata.
+  11. Return stepClaims for every referenced canonical claim using only { stepIndex, claimId }. Use only claimIds present in the supplied manifest, do not invent IDs, and do not repeat requirementId, facet, claimType, targetKind, or scope. The core resolves those values from CanonicalClaim. A claim may be grouped with compatible claims in one scenario, but every required coverable claim must be referenced.
 
 ## Entry Steps Rules
 - entrySteps represent the navigation needed to reach a functional context that comes AFTER the entry screen. They are mandatory only when the scenario's target context is downstream of that navigation.
@@ -768,10 +771,12 @@ Return a JSON object with this exact structure:
   },
   "scenarios": [
     {
-      "sourceIssueKey": "AA-123",
-      "scenarioId": "AA-123:branch-example:01",
+       "sourceIssueKey": "<source-issue-key>",
+       "scenarioId": "<source-issue-key>:<scenario-slug>:01",
       "title": "Scenario title",
       "steps": ["1. Clic en \"X\".", "2. Validar que se muestre \"Y\"."],
+      "stepClaimTypes": ["action", "visibility_assertion"],
+      "stepClaims": [{ "stepIndex": 0, "claimId": "canonical-claim-id" }],
       "preconditions": ["1. BASE_URL configurado.", "2. App available.", "3. APP_LOGIN_MODE=password.", "4. AuthGate/AuthFlow enabled.", "5. Test client meets dataRequirements.", "6. App Slug: ${appSlug}."],
       "expectedResult": "Short contextual phrase.",
       "type": "Functional",
@@ -788,9 +793,9 @@ Return a JSON object with this exact structure:
       "nonExecutableCriteria": "",
       "mcpExecutable": true,
       "functionalBranch": {
-        "branchId": "branch-example",
+         "branchId": "<branch-id-from-structured-metadata>",
         "sourceLabel": "Visible option label from HU",
-        "sourceRequirementId": "option:1",
+         "sourceRequirementId": "<canonical-requirement-id>",
         "actionIntent": "select_option",
         "expectedDestination": "Expected visible destination",
         "accessIntent": "public|authenticated|unknown",
@@ -800,8 +805,8 @@ Return a JSON object with this exact structure:
   ],
   "warnings": [],
   "rejected": [
-    {
-      "sourceIssueKey": "AA-999",
+     {
+       "sourceIssueKey": "<source-issue-key>",
       "reason": "backend_only_or_not_ui_automatable"
     }
   ]
@@ -834,15 +839,19 @@ export async function buildMcpScenarioMessages(
   _huScenarioModel?: any,
   _routePendingScenarioPlan?: any,
   functionalBranches?: FunctionalBranchRef[],
+  requirementAccounting?: FunctionalRequirementAccount[],
+  canonicalClaims?: CanonicalClaim[],
 ): Promise<Array<{ role: "system" | "user"; content: string }>> {
   const skillMd = await loadSkillMarkdown();
 
   // Detect intent from explicit effectiveIntent first, fallback to annotated issues
   const classifierIntent = ((issues[0] as any)?._huIntent as string) ?? "unknown_flow";
-  const primaryHuIntent = effectiveIntent || classifierIntent;
-  console.log(`[scenarios:prompt] intentResolution primaryHuIntent=${primaryHuIntent} source=${effectiveIntent ? "effectiveIntent" : "classifier"} classifier=${classifierIntent}`);
+  const canonicalIntent = effectiveIntent || classifierIntent;
+  const primaryHuIntent = canonicalIntent;
+  console.log(`[scenarios:prompt] intentResolution canonicalIntent=${canonicalIntent} source=${effectiveIntent ? "derivedModelIntent" : "classifier"} primaryClassifierIntent=${classifierIntent}`);
   const isNonCatalogIntent = primaryHuIntent !== "catalog_listing_flow" &&
-    primaryHuIntent !== "product_detail_flow";
+    primaryHuIntent !== "product_detail_flow" &&
+    canonicalIntent !== "catalog_listing" && canonicalIntent !== "product_detail";
 
   // Detect routeProfile catalog orientation via structural signals
   let routeProfileIsCatalog = false;
@@ -963,6 +972,28 @@ export async function buildMcpScenarioMessages(
     functionalBranches,
   );
   console.log(`[scenarios:prompt] functionalBranches=${functionalBranches?.length ?? 0}`);
+  if (requirementAccounting?.length) {
+    const manifest = requirementAccounting.map((r) => ({
+      requirementId: r.requirementId ?? r.id,
+      category: r.category,
+      ...(r.associatedBranchId ? { associatedBranchId: r.associatedBranchId } : {}),
+      ...(r.prerequisiteRequirementIds?.length ? { prerequisiteRequirementIds: r.prerequisiteRequirementIds } : {}),
+      ...(r.expectedBehavior ? { expectedBehavior: r.expectedBehavior } : {}),
+    }));
+    systemContent += `\n## Requirement ID manifest\n${JSON.stringify(manifest)}\n` +
+      "All coverable requirements in this manifest must be represented by at least one valid stepRequirementRef across the candidate scenarios. " +
+      "Use only IDs from this manifest, use 0-based stepIndex, and never invent requirement IDs. " +
+      "A step may have multiple refs and a requirement may appear in multiple scenarios. " +
+      "Non-automatable requirements do not require executable refs.\n";
+  }
+  if (canonicalClaims?.length) {
+    const requiredClaims = canonicalClaims.filter((claim) => claim.required && claim.coverable);
+    systemContent += `\n## Canonical claim manifest\n${JSON.stringify(requiredClaims)}\n` +
+      "Every required coverable claim must be referenced exactly by claimId in scenario stepClaims. " +
+      "Use only supplied claimIds; never invent or replace a claim with description text. " +
+      "Keep claimId, requirementId, facet, claimType, targetKind, and scope structurally compatible. " +
+      "A semantic_destination claim must remain semantic and cannot become an exact UI assertion without an explicit exact UI target.\n";
+  }
 
   // Add route resolution context if available
   if (!suppressRouteProfile) {

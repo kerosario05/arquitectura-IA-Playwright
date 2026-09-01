@@ -108,6 +108,11 @@ export type AssertionTargetInput = {
   action: string;
   target: string;
   source: "action" | "expected";
+  requiredContext?: {
+    destinationIdentity?: string;
+    routeRole?: string;
+    destinationRole?: string;
+  };
 };
 
 export type AssertionResolutionResult = {

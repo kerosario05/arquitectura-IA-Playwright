@@ -1,0 +1,23 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [
+    "missing_method:step=1 target=\"Iniciar\" derivedIntent=\"start_session\" expectedOwner=\"HomePage\" availableMethods=[]"
+  ],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [
+    "step=1 target=\"Iniciar\" derivedIntent=\"start_session\" expectedOwner=\"HomePage\" availableMethods=[]"
+  ],
+  "autoPomAttempted": true,
+  "autoPomCreatedMethods": [
+    "HomePage.start()"
+  ],
+  "fallbackUsed": false,
+  "requirePomRuntime": false
+}

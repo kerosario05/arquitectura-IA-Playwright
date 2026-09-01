@@ -400,6 +400,36 @@ mobileRouter.post("/runs/launch-execution", async (req, res, next) => {
       return;
     }
 
+    // Separate scenarios that need route learning: they are functionally valid but their
+    // technical locators lack validated runtime evidence, so they must NOT be published or
+    // launched as standard executable scenarios. They remain visible so the user knows the
+    // story exists and only needs route learning to become executable.
+    const standardScenarios = (body.scenarios ?? []).filter((s) => s.requiresRouteLearning !== true);
+    const routeLearningScenarios = (body.scenarios ?? []).filter((s) => s.requiresRouteLearning === true);
+    if (routeLearningScenarios.length > 0) {
+      console.log(
+        `[runs:launch] routeLearningExcluded=${routeLearningScenarios.length} standard=${standardScenarios.length} reason=requires_route_learning scenarioIds=${routeLearningScenarios.map((s) => s.scenarioId).join(",")}`,
+      );
+    }
+    if (standardScenarios.length === 0) {
+      res.status(202).json({
+        ok: true,
+        launchId: null,
+        status: "requires_route_learning",
+        publishedCases: [],
+        testRunId: undefined,
+        routeLearningScenarios: routeLearningScenarios.map((s) => ({
+          scenarioId: s.scenarioId,
+          sourceIssueKey: s.sourceIssueKey,
+          title: s.title,
+          requiresRouteLearning: true,
+          locatorExecutionBacked: s.locatorExecutionBacked ?? false,
+        })),
+        message: "Todos los escenarios requieren aprendizaje de ruta: no se publicaron ni ejecutaron como estándar.",
+      });
+      return;
+    }
+
     const result = await launchExecution({
       appSlug: body.appSlug || "mobile",
       projectId: body.projectId,
@@ -410,7 +440,7 @@ mobileRouter.post("/runs/launch-execution", async (req, res, next) => {
       jiraTitle: (body as { jiraTitle?: string; storyTitle?: string }).jiraTitle ?? (body as { storyTitle?: string }).storyTitle,
       sprintName: body.sprintName,
       publishStrategy: body.publishStrategy,
-      selectedScenarios: body.scenarios.map(mobileScenarioToLaunchScenario)
+      selectedScenarios: standardScenarios.map(mobileScenarioToLaunchScenario)
     });
 
     if (!result.ok) {
@@ -418,7 +448,20 @@ mobileRouter.post("/runs/launch-execution", async (req, res, next) => {
       return;
     }
 
-    res.json(result);
+    res.json({
+      ...result,
+      ...(routeLearningScenarios.length > 0
+        ? {
+            routeLearningScenarios: routeLearningScenarios.map((s) => ({
+              scenarioId: s.scenarioId,
+              sourceIssueKey: s.sourceIssueKey,
+              title: s.title,
+              requiresRouteLearning: true,
+              locatorExecutionBacked: s.locatorExecutionBacked ?? false,
+            })),
+          }
+        : {}),
+    });
   } catch (err) {
     next(err);
   }

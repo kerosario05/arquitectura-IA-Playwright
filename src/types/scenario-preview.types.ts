@@ -25,6 +25,11 @@ export type VirtualCase = {
   type: string;
   automationType: string;
   setupStrategy: string;
+  executionReadiness?: string;
+  semanticValidity?: string;
+  publicationClassification?: "executable" | "documentation" | "blocked";
+  launchClassification?: "standard" | "adaptive" | "nonAutomatable";
+  nonAutomatable?: boolean;
   sectionSlug?: string;
   sectionName?: string;
   sectionId?: string | number;
@@ -147,6 +152,11 @@ export function toVirtualCase(scenario: McpScenario, index: number, sectionSlug?
     type: scenario.type,
     automationType: scenario.automationType,
     setupStrategy: scenario.setupStrategy,
+    executionReadiness: scenario.executionReadiness,
+    semanticValidity: scenario.semanticValidity,
+    publicationClassification: scenario.publicationClassification,
+    launchClassification: scenario.launchClassification,
+    nonAutomatable: scenario.publicationClassification === "blocked",
     sectionSlug,
     sectionName,
     sectionId,

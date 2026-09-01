@@ -7,6 +7,8 @@ import { publishScenariosToTestRail } from "../services/testrail-case-publisher"
 import { buildScenarioPreviewScenarioId } from "../services/testrail-sync-types";
 import type { McpScenario } from "../../scenarios/scenario-types";
 import { defectChecklistStore } from "../services/defect-checklist-store";
+import { jobStore } from "./job-store";
+import { startDiscoveryBatchRun } from "./discovery-batch-runner";
 
 const ROOT = path.resolve(__dirname, "..", "..", "..");
 const LAUNCH_ARTIFACTS_DIR = path.join(ROOT, ".artifacts", "scenario-launch-runs");
@@ -20,6 +22,22 @@ export type LaunchScenario = {
   sourceIssueKey?: string;
   testRailCaseId?: number;
   metadata?: Record<string, unknown>;
+  mcpExecutable?: boolean;
+  executionReadiness?: string;
+  semanticValidity?: string;
+  automationType?: string;
+  launchClassification?: "standard" | "adaptive" | "nonAutomatable";
+  publicationClassification?: string;
+  nonAutomatable?: boolean;
+  targetScreen?: string;
+  actualChain?: unknown;
+  requiredChain?: unknown;
+  validation?: { valid?: boolean };
+  functionalBranch?: { branchId?: string };
+  branchAssociation?: { branchId?: string };
+  branchId?: string;
+  requirementDependencies?: unknown[];
+  stepRequirementRefs?: unknown[];
 };
 
 export type LaunchExecutionInput = {
@@ -55,6 +73,9 @@ export type LaunchExecutionResult = {
   launchId: string;
   status: string;
   publishedCases: PublishedCaseEntry[];
+  routeDiscoveryScenarios?: LaunchScenario[];
+  routeDiscoveryPublishedCases?: PublishedCaseEntry[];
+  discoveryJobId?: string;
   testRunId?: number;
   manifestPath: string;
 } | {
@@ -62,6 +83,53 @@ export type LaunchExecutionResult = {
   error: string;
   message: string;
 };
+
+export function classifyLaunchScenarioAuthority(scenario: Pick<LaunchScenario, "mcpExecutable" | "executionReadiness" | "launchClassification">): "standard" | "adaptive" | "nonAutomatable" {
+  if (scenario.launchClassification === "nonAutomatable") return "nonAutomatable";
+  return scenario.mcpExecutable !== true || scenario.executionReadiness === "requires_route_discovery"
+    ? "adaptive"
+    : "standard";
+}
+
+export function classifyRouteDiscoveryEligibility(scenario: Pick<LaunchScenario, "executionReadiness" | "semanticValidity" | "launchClassification" | "nonAutomatable" | "validation" | "functionalBranch" | "branchAssociation" | "requirementDependencies" | "stepRequirementRefs">): { allowed: boolean; reasonCode: string } {
+  if (scenario.launchClassification === "nonAutomatable" || scenario.nonAutomatable === true) {
+    return { allowed: false, reasonCode: "non_automatable" };
+  }
+  if (scenario.executionReadiness !== "requires_route_discovery") {
+    return { allowed: false, reasonCode: "readiness_not_requires_route_discovery" };
+  }
+  if (scenario.validation?.valid === false || !["valid", "validated"].includes(scenario.semanticValidity ?? "")) {
+    return { allowed: false, reasonCode: "semantic_scenario_invalid" };
+  }
+  const hasStructuredLineage = Boolean(
+    (scenario as LaunchScenario).branchId
+      || scenario.functionalBranch?.branchId
+      || scenario.branchAssociation?.branchId
+      || (scenario.requirementDependencies?.length ?? 0) > 0
+      || (scenario.stepRequirementRefs?.length ?? 0) > 0,
+  );
+  if (!hasStructuredLineage) return { allowed: false, reasonCode: "missing_structured_lineage" };
+  return { allowed: true, reasonCode: "requires_route_discovery" };
+}
+
+export function partitionLaunchScenarios(scenarios: LaunchScenario[]): {
+  standard: LaunchScenario[];
+  adaptiveFunctional: LaunchScenario[];
+  routeDiscovery: LaunchScenario[];
+  nonAutomatable: LaunchScenario[];
+} {
+  const routeDiscovery: LaunchScenario[] = [];
+  const standard: LaunchScenario[] = [];
+  const adaptiveFunctional: LaunchScenario[] = [];
+  const nonAutomatable: LaunchScenario[] = [];
+  for (const scenario of scenarios) {
+    if (classifyRouteDiscoveryEligibility(scenario).allowed) routeDiscovery.push(scenario);
+    else if (classifyLaunchScenarioAuthority(scenario) === "nonAutomatable") nonAutomatable.push(scenario);
+    else if (classifyLaunchScenarioAuthority(scenario) === "standard") standard.push(scenario);
+    else adaptiveFunctional.push(scenario);
+  }
+  return { standard, adaptiveFunctional, routeDiscovery, nonAutomatable };
+}
 
 function buildLaunchRunName(jiraKey?: string, sprintName?: string): string {
   const parts: string[] = [];
@@ -82,13 +150,21 @@ function scenarioToMcpFormat(scenario: LaunchScenario, index: number, appSlug: s
     type: "Functional",
     database: "QA",
     isConverted: 0,
-    automationType: "ui_with_auth_gate",
+    automationType: scenario.automationType ?? "ui_with_auth_gate",
     setupStrategy: "auth_gate",
     appSlug,
     routeProfile: "",
     dataRequirements: "",
     nonExecutableCriteria: "",
-    mcpExecutable: true,
+    mcpExecutable: scenario.mcpExecutable ?? false,
+    executionReadiness: scenario.executionReadiness,
+    semanticValidity: scenario.semanticValidity,
+    launchClassification: scenario.launchClassification,
+    publicationClassification: scenario.publicationClassification === "executable"
+      || scenario.publicationClassification === "documentation"
+      || scenario.publicationClassification === "blocked"
+      ? scenario.publicationClassification
+      : undefined,
     launchScenarioId: scenario.scenarioId, // Pass through for unique TestRail ID generation
   };
 }
@@ -195,8 +271,24 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
     return { ok: false, error: "missing_section_id", message: "TestRail sectionId is required." };
   }
 
+  const selectedScenarios = input.selectedScenarios ?? [];
+  const scenarioGroups = partitionLaunchScenarios(selectedScenarios);
+  const routeDiscoveryScenarios = scenarioGroups.routeDiscovery;
+  const routeDiscoverySet = new Set(routeDiscoveryScenarios);
+  const adaptiveFromSelected = scenarioGroups.adaptiveFunctional;
+  const nonAutomatableFromSelected = scenarioGroups.nonAutomatable;
+  const adaptiveFromInput = (input.adaptiveScenarios ?? []).filter(
+    (scenario) => classifyLaunchScenarioAuthority(scenario) !== "nonAutomatable",
+  );
+  const adaptiveScenarios = Array.from(new Map(
+    [...adaptiveFromInput, ...adaptiveFromSelected]
+      .map((scenario, index) => [scenario.scenarioId || `adaptive-${index}`, scenario] as const),
+  ).values());
+  const executableSelectedScenarios = selectedScenarios.filter((scenario) =>
+    !routeDiscoverySet.has(scenario) && !adaptiveFromSelected.includes(scenario) && !nonAutomatableFromSelected.includes(scenario),
+  );
   const selectionPlan = buildLaunchSelectionPlan({
-    selectedScenarios: input.selectedScenarios ?? [],
+    selectedScenarios: executableSelectedScenarios,
     existingTestRailCaseIds: input.existingTestRailCaseIds ?? [],
   });
 
@@ -210,9 +302,10 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
 
   const standardCount = selectionPlan.normalizedScenarios.length;
   const existingCaseCount = selectionPlan.existingTestRailCaseIds.length;
-  const adaptiveCount = input.adaptiveScenarios?.length ?? 0;
+  const adaptiveCount = adaptiveScenarios.length;
+  const routeDiscoveryCount = routeDiscoveryScenarios.length;
   const launchableSelectionCount = selectionPlan.scenariosToPublish.length + existingCaseCount;
-  if (launchableSelectionCount === 0 && adaptiveCount === 0) {
+  if (launchableSelectionCount === 0 && adaptiveCount === 0 && routeDiscoveryScenarios.length === 0) {
     return {
       ok: false,
       error: "missing_selected_scenarios",
@@ -220,13 +313,13 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
     };
   }
   console.log(
-    `[runs:launch] standard=${standardCount} publishable=${selectionPlan.scenariosToPublish.length} existingCases=${existingCaseCount} adaptive=${adaptiveCount} mode=${adaptiveCount > 0 ? "automatic_mixed_execution" : "standard"}`,
+    `[runs:launch] standard=${standardCount} publishable=${selectionPlan.scenariosToPublish.length} existingCases=${existingCaseCount} adaptive=${adaptiveCount} routeDiscovery=${routeDiscoveryScenarios.length} mode=${adaptiveCount > 0 || routeDiscoveryScenarios.length > 0 ? "automatic_mixed_execution" : "standard"}`,
   );
 
   // Validate adaptive scenarios have required metadata
   const validAdaptive: LaunchScenario[] = [];
   const blockedAdaptive: Array<{ sourceIssueKey?: string; title?: string; reasonCode: string; reason: string }> = [];
-  for (const sc of input.adaptiveScenarios ?? []) {
+  for (const sc of adaptiveScenarios) {
     const asAny = sc as any;
     if (!asAny.targetScreen || !asAny.actualChain || !asAny.requiredChain) {
       blockedAdaptive.push({
@@ -241,6 +334,13 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
   }
   if (blockedAdaptive.length > 0) {
     console.log(`[runs:launch] blockedAdaptive count=${blockedAdaptive.length} reason=adaptive_metadata_incomplete`);
+  }
+  if (selectionPlan.normalizedScenarios.length === 0 && validAdaptive.length === 0 && routeDiscoveryScenarios.length === 0) {
+    return {
+      ok: false,
+      error: "no_launchable_scenarios",
+      message: "No scenarios remain launchable after authority and adaptive metadata validation.",
+    };
   }
 
   // Validate unique scenarioIds
@@ -273,6 +373,7 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
     testrailCustomScenarioId?: string; // Globally unique TestRail ID (L-xxx-001)
   };
   let publishMappings: PublishMapping[] = [];
+  let routeDiscoveryPublishedCases: PublishedCaseEntry[] = [];
 
   if (selectionPlan.scenariosToPublish.length > 0) {
     try {
@@ -333,6 +434,33 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
       const message = `Failed to publish scenarios to TestRail: ${err.message ?? String(err)}`;
       console.error(`[launch-execution] ${message}`);
       return { ok: false, error: "publish_failed", message };
+    }
+  }
+
+  if (routeDiscoveryScenarios.length > 0) {
+    try {
+      const trConfig = requireTestRailConfig(config);
+      const trClient = new TestRailClient(trConfig);
+      const discoveryPublishResult = await publishScenariosToTestRail(trClient, {
+        projectId: input.projectId,
+        suiteId: input.suiteId,
+        sectionId: effectiveSectionId,
+        scenarios: routeDiscoveryScenarios.map((scenario, index) => scenarioToMcpFormat(scenario, index, input.appSlug)),
+        appSlug: input.appSlug,
+        cacheKey: `launch-${launchId}-route-discovery`,
+        publishStrategy: input.publishStrategy ?? "always_create",
+        launchId,
+      } as any);
+      routeDiscoveryPublishedCases = discoveryPublishResult.mappings.map((mapping, index) => ({
+        scenarioId: mapping.scenarioId,
+        caseId: mapping.testRailCaseId,
+        title: mapping.scenarioTitle ?? routeDiscoveryScenarios[index]?.title ?? "unknown",
+        sourceType: "jira_preview",
+        sourceIssueKey: routeDiscoveryScenarios[index]?.sourceIssueKey,
+      }));
+      console.log(`[route-discovery] publishedForDiscovery=${routeDiscoveryPublishedCases.length} created=${discoveryPublishResult.created} updated=${discoveryPublishResult.updated} reused=${discoveryPublishResult.reused}`);
+    } catch (err: any) {
+      console.error(`[route-discovery] publication failed reason=${err?.message ?? String(err)}`);
     }
   }
 
@@ -440,19 +568,40 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
     publishStrategy: input.publishStrategy ?? "always_create",
     selectedScenarioCount: selectionPlan.normalizedScenarios.length,
     selectedExistingTestRailCaseCount: selectionPlan.existingTestRailCaseIds.length,
-    adaptiveScenarioCount: input.adaptiveScenarios?.length ?? 0,
-    executionMode: (input.adaptiveScenarios?.length ?? 0) > 0 ? "automatic_mixed_execution" : "standard",
+    adaptiveScenarioCount: adaptiveScenarios.length,
+    executionMode: adaptiveScenarios.length > 0 || routeDiscoveryCount > 0 ? "automatic_mixed_execution" : "standard",
     publishedCases,
     status: "test_run_created",
     executionPlan: {
       standardScenarios: selectionPlan.normalizedScenarios.map(({ originalIndex: _originalIndex, resolvedCaseId: _resolvedCaseId, ...scenario }) => scenario),
-      adaptiveScenarios: input.adaptiveScenarios ?? [],
-    },
+       adaptiveScenarios,
+       routeDiscoveryScenarios,
+       routeDiscoveryPublishedCases,
+     },
   };
 
   const manifestPath = path.join(artifactDir, "launch-manifest.json");
   fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), "utf-8");
   console.log(`[launch-execution] manifest written path=${manifestPath}`);
+
+  const routeDiscoveryCaseIds = routeDiscoveryPublishedCases
+    .map((publishedCase) => publishedCase.caseId)
+    .filter((caseId): caseId is number => Boolean(caseId));
+  let discoveryJobId: string | undefined;
+  if (routeDiscoveryCaseIds.length > 0) {
+    const discoveryJob = jobStore.create("discovery-batch", {
+      caseIds: Array.from(new Set(routeDiscoveryCaseIds)),
+      appSlug: input.appSlug,
+      executePromotedSpecs: false,
+      overwrite: false,
+      rerunActive: false,
+    });
+    discoveryJobId = discoveryJob.id;
+    jobStore.appendLog(discoveryJobId, `[route-discovery] source=launch routeDiscoveryScenarios=${routeDiscoveryScenarios.length}`);
+    startDiscoveryBatchRun(discoveryJobId);
+  } else if (routeDiscoveryCount > 0) {
+    console.log(`[route-discovery] pending scenarios=${routeDiscoveryCount} reason=publication_failed_or_no_case_id`);
+  }
 
   const issueKey = input.jiraKey || (selectionPlan.normalizedScenarios[0] as any)?.sourceIssueKey || "";
 
@@ -473,6 +622,9 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
     issueKey: issueKey || undefined,
     checklistUrl,
     publishedCases,
+    routeDiscoveryScenarios,
+    routeDiscoveryPublishedCases,
+    discoveryJobId,
     testRunId,
     manifestPath,
   };

@@ -79,3 +79,7 @@ Thumbs.db
 # JetBrains IDEs
 # ============================================
 .idea/
+# APK binaries (mobile projects)
+*.apk
+
+

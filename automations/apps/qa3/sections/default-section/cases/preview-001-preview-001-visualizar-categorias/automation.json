@@ -1,0 +1,139 @@
+{
+  "id": "preview-001-preview-001-visualizar-categorias",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "PREVIEW-001 Visualizar categorias",
+  "planPath": "automations\\apps\\qa3\\sections\\default-section\\cases\\preview-001-preview-001-visualizar-categorias\\plan.json",
+  "specPath": "automations\\apps\\qa3\\sections\\default-section\\cases\\preview-001-preview-001-visualizar-categorias\\case.spec.ts",
+  "appSlug": "qa3",
+  "appConfigPath": "automations\\apps\\qa3\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "qa3",
+  "createdAt": "2026-08-27T21:15:25.967Z",
+  "updatedAt": "2026-08-27T21:15:25.967Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-08-27T21-14-18-479Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "passed",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-08-27T21-14-18-479Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [
+        "HomePage"
+      ],
+      "generatedMethods": [
+        "HomePage.start()"
+      ],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0,
+      "autoPom": {
+        "enabled": true,
+        "initialPomStatus": "needs_page_method",
+        "generatedCandidateFiles": [
+          "automations\\apps\\qa3\\pages\\home.page.candidate.ts"
+        ],
+        "autoApprovedPageObjects": [
+          "HomePage"
+        ],
+        "autoApprovedMethods": [
+          "HomePage.start()"
+        ],
+        "blockedAutoApprovals": [],
+        "approvalThreshold": 0.5,
+        "regeneratedSpec": true,
+        "validationStatus": "passed",
+        "finalPomStatus": "promoted"
+      }
+    },
+    "specGeneration": {
+      "mode": "ai_hybrid",
+      "provider": "codex",
+      "model": "gpt-5.4-mini",
+      "skill": {
+        "name": "playwright-spec-generation",
+        "version": "1.0.0",
+        "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+        "loaded": true
+      },
+      "invocations": 1,
+      "invocationsConsumed": 1,
+      "durationMs": 51596,
+      "usage": {
+        "inputTokens": 61548,
+        "cachedInputTokens": 41216,
+        "cacheWriteInputTokens": 0,
+        "nonCachedInputTokens": 20332,
+        "outputTokens": 1260,
+        "reasoningOutputTokens": 423,
+        "totalPhysicalTokens": 62808,
+        "durationMs": 43897,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "traceFidelity": "passed",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "passed",
+        "functionalExecution": "skipped"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specGenerationAttempts": 1,
+      "specRepairAttempts": 0,
+      "firstPassPromotion": true,
+      "failedGatesAttempt1": [],
+      "regressedGates": [],
+      "missingRequirements": [],
+      "oracleTypes": [
+        "literal_visible_text"
+      ],
+      "errors": [],
+      "warnings": [],
+      "finalSpec": {
+        "origin": "ai_candidate",
+        "generatedBy": "ai",
+        "strategy": "ai_candidate",
+        "fallback": null
+      },
+      "specWritten": true,
+      "previousSpec": {
+        "existed": false,
+        "hash": null,
+        "lastModifiedAt": null
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [
+        "missing_method:step=1 target=\"Iniciar\" derivedIntent=\"start_session\" expectedOwner=\"HomePage\" availableMethods=[]"
+      ],
+      "availablePageObjects": [
+        "ProductListPage",
+        "OperationsMenuPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [
+        "step=1 target=\"Iniciar\" derivedIntent=\"start_session\" expectedOwner=\"HomePage\" availableMethods=[]"
+      ],
+      "autoPomAttempted": true,
+      "autoPomCreatedMethods": [
+        "HomePage.start()"
+      ],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    }
+  }
+}

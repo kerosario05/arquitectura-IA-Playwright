@@ -1,0 +1,82 @@
+{
+  "version": "1.0",
+  "appSlug": "df",
+  "pageObjects": [
+    {
+      "id": "po_framework_productlistpage",
+      "className": "ProductListPage",
+      "filePath": "automations/apps/df/pages/productlist.page.ts",
+      "screenSignature": "screen:df-product_list",
+      "methods": [
+        {
+          "name": "selectProduct",
+          "intent": "select_product",
+          "parameters": [
+            "productName"
+          ],
+          "available": true,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        },
+        {
+          "name": "selectFirstVisibleCard",
+          "intent": "select_first_visible_card",
+          "parameters": [],
+          "available": true,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        }
+      ],
+      "confidence": 1,
+      "status": "active",
+      "sourcePlanIds": [],
+      "caseIds": [],
+      "createdAt": "2026-08-31T14:18:33.513Z",
+      "updatedAt": "2026-08-31T14:18:33.513Z"
+    },
+    {
+      "id": "po_framework_operationsmenupage",
+      "className": "OperationsMenuPage",
+      "filePath": "automations/apps/df/pages/operationsmenu.page.ts",
+      "screenSignature": "screen:df-operations_menu",
+      "methods": [
+        {
+          "name": "openModule",
+          "intent": "open_module",
+          "parameters": [
+            "moduleName"
+          ],
+          "available": true,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        },
+        {
+          "name": "expectModuleVisible",
+          "intent": "expect_loaded",
+          "parameters": [
+            "moduleName"
+          ],
+          "available": true,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        }
+      ],
+      "confidence": 1,
+      "status": "active",
+      "sourcePlanIds": [],
+      "caseIds": [],
+      "createdAt": "2026-08-31T14:18:33.513Z",
+      "updatedAt": "2026-08-31T14:18:33.513Z"
+    }
+  ],
+  "componentCandidates": [],
+  "updatedAt": "2026-08-31T14:18:33.513Z"
+}

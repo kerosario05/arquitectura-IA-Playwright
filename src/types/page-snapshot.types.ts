@@ -55,6 +55,8 @@ export type PageSnapshot = {
   url: string;
   title: string;
   capturedAt: string;
+  structuralFingerprint?: string;
+  technicalScreenKey?: string;
   elements: SnapshotElement[];
   summary: {
     totalElements: number;

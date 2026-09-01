@@ -531,8 +531,8 @@ function normalizeRouteTerms(routeProfile?: AppRouteProfile): string[] {
   return [
     ...(routeProfile?.domainTerms || []),
     ...(routeProfile?.entryPoints || []),
-    ...Object.values(routeProfile?.aliases || {})
-  ].map((term) => normalizeText(term)).filter(Boolean);
+    ...Object.values(routeProfile?.aliases || {}).flatMap((term) => Array.isArray(term) ? term : [term])
+  ].filter((term): term is string => typeof term === "string").map((term) => normalizeText(term)).filter(Boolean);
 }
 
 function shouldTryContextualOptionResolution(target: string, opts: ResolveActionTargetOptions): boolean {

@@ -721,22 +721,50 @@ export async function executeMobileStep(
         }
         // Re-query in case the tree re-rendered while waiting for the enabled state. Skipped when the
         // consent strategy already resolved the acceptance (the helper handled the control directly).
+        let clickedElement: WdioElement | null = null;
+        let preClickAttrs: { resourceId?: string; contentDesc?: string; package?: string; className?: string } | undefined;
         if (!consentResolved) {
           const disambiguation = await resolveClickableElement(browser, effectiveStep.target, clickSelector);
           if (disambiguation) {
             console.log(
               `[mobile:click] duplicateTextMatches=${disambiguation.duplicateTextMatches} originalClass=${disambiguation.originalClass} selectedClass=${disambiguation.selectedClass} disambiguationReason=exact_clickable_ancestor_label disambiguated=true`,
             );
+            // Capture attributes BEFORE click — element may become stale after navigation.
+            try {
+              preClickAttrs = {
+                resourceId: String(await disambiguation.element.getAttribute("resource-id") ?? "").trim() || undefined,
+                contentDesc: String(await disambiguation.element.getAttribute("content-desc") ?? "").trim() || undefined,
+                package: String(await disambiguation.element.getAttribute("package") ?? "").trim() || undefined,
+                className: String(await disambiguation.element.getAttribute("class") ?? "").trim() || undefined,
+              };
+            } catch { /* attribute read is best-effort */ }
             await disambiguation.element.click();
+            clickedElement = disambiguation.element;
           } else {
-            await (await browser.$(clickSelector)).click();
+            const el = await browser.$(clickSelector);
+            try {
+              preClickAttrs = {
+                resourceId: String(await el.getAttribute("resource-id") ?? "").trim() || undefined,
+                contentDesc: String(await el.getAttribute("content-desc") ?? "").trim() || undefined,
+                package: String(await el.getAttribute("package") ?? "").trim() || undefined,
+                className: String(await el.getAttribute("class") ?? "").trim() || undefined,
+              };
+            } catch { /* attribute read is best-effort */ }
+            await el.click();
+            clickedElement = el;
           }
         }
+        // Build executedControl from pre-click captured attributes.
+        const executedControl = preClickAttrs ? {
+          locatorIdentity: preClickAttrs.contentDesc || preClickAttrs.resourceId || undefined,
+          ...preClickAttrs,
+        } : undefined;
         const clickEnabledObservation = await observeEnabledState(browser, clickSelector, effectiveStep.target);
         resultExtras = {
           targetResolved: clickEnabledObservation.targetResolved,
           enabledObserved: clickEnabledObservation.enabledObserved,
           enabledSource: clickEnabledObservation.enabledSource,
+          ...(executedControl ? { executedControl } : {}),
         };
         break;
       }

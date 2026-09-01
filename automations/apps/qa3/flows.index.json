@@ -1,0 +1,39 @@
+{
+  "version": "1.0",
+  "appSlug": "qa3",
+  "flows": [
+    {
+      "id": "flow_1787865274285_bjulop",
+      "name": "PREVIEW-001 Visualizar categorias",
+      "filePath": "flows\\preview-001-visualizar-categorias.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar",
+          "pageObjectId": "HomePage",
+          "methodName": "start"
+        },
+        {
+          "action": "click",
+          "target": "Explora nuestros productos Conoce sobre los beneficios de los productos BSC",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-08-27T21:14:34.284Z",
+      "updatedAt": "2026-08-27T21:14:34.284Z"
+    }
+  ],
+  "updatedAt": "2026-08-27T21:14:34.289Z"
+}

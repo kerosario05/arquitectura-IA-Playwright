@@ -19,6 +19,7 @@ import {
   computeExecutionContractMetrics,
   type SpecExecutionContract
 } from "./spec-execution-contract";
+import { decodeJsStringLiteralBody, normalizeSemanticText, semanticallyEqualText } from "./semantic-text-normalization";
 
 type ValidationStatus = "passed" | "failed" | "skipped";
 
@@ -109,7 +110,14 @@ type SpecGenerationResponse = {
 type AvailablePageObject = {
   className: string;
   importPath: string;
-  methods: Array<{ name: string; parameters: string[] }>;
+  methods: Array<{
+    name: string;
+    parameters: string[];
+    expectedArgs: number;
+    semanticActionIdentity: string;
+    sourceActionIds?: string[];
+    targetBinding?: string;
+  }>;
 };
 
 type CommandResult = {
@@ -850,6 +858,17 @@ function normalizeText(value: string): string {
   return normalizeMojibakeUtf8(value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim();
 }
 
+function readAssignedStringLiteral(content: string, variable: string): string | undefined {
+  const assignment = new RegExp(
+    `process\\.env\\.${variable}\\s*=\\s*(['"])((?:\\\\.|(?!\\1)[^])*)\\1\\s*;`,
+  ).exec(content);
+  return assignment ? decodeJsStringLiteralBody(assignment[2]) : undefined;
+}
+
+function normalizeLiteralMatch(value: string): string {
+  return normalizeSemanticText(value).replace(/\s+/g, " ").trim();
+}
+
 function toNullableNumber(value: unknown): number | null {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   return null;
@@ -1474,7 +1493,14 @@ function buildAvailablePageObjects(
       importPath: path.relative(path.dirname(appPaths.specPath ?? appPaths.caseDir ?? process.cwd()), po.filePath).replace(/\\/g, "/").replace(/\.(ts|tsx|js)$/i, ""),
       methods: po.methods
         .filter((m) => m.available)
-        .map((m) => ({ name: m.name, parameters: m.parameters ?? [] }))
+        .map((m) => ({
+          name: m.name,
+          parameters: m.parameters ?? [],
+          expectedArgs: (m.parameters ?? []).length,
+          semanticActionIdentity: m.intent,
+          sourceActionIds: m.sourceActionIds,
+          targetBinding: m.targetBinding
+        }))
     }));
 }
 
@@ -2590,9 +2616,8 @@ async function validateImportContracts(input: {
           errors.push(`auth_flow_import_path_mismatch:${imp.importPath}:expected:${input.authFlowContext.importPath}`);
         }
       }
+      }
     }
-  }
-
   if (input.authFlowContext) {
     const allowedAuthMethods = new Map(input.authFlowContext.methodSignatures.map((item) => [item.name, item]));
     const authInstances = classInstanceNames.get(input.authFlowContext.className) ?? [];
@@ -2617,7 +2642,7 @@ async function validateImportContracts(input: {
   return errors;
 }
 
-function structuralValidation(input: {
+export function structuralValidation(input: {
   specContent: string;
   expectedAppSlug: string;
   expectedSectionSlug: string;
@@ -2631,6 +2656,7 @@ function structuralValidation(input: {
   executableStepIndexes: number[];
   planStepActions: Map<number, string>;
   response: SpecGenerationResponse;
+  executionContract?: SpecExecutionContract;
   availablePageObjects: AvailablePageObject[];
   observedEvidencePhrases: string[];
   authFlowContext?: AuthFlowRuntimeContext;
@@ -2646,6 +2672,22 @@ function structuralValidation(input: {
   const runtimeStepCalls = extractRuntimeStepCalls(content);
   const runtimeMethodCalls = extractPromotedRuntimeMethodCalls(content);
   const runtimeAllowlist = new Set(input.promotedRuntimeMethodsAllowlist);
+  if (input.executionContract) {
+    for (const contractStep of input.executionContract.steps) {
+      const implementation = contractStep.implementation;
+      if (implementation?.kind !== "page_object") continue;
+      const instanceNames = extractConstructedInstanceNames(input.specContent, implementation.owner);
+      const invoked = instanceNames.some((instanceName) =>
+        extractMethodCallArgumentCounts(input.specContent, instanceName, implementation.method).length > 0
+      );
+      if (!invoked) {
+        semanticErrors.push(
+          `page_object_method_semantic_mismatch:step=${contractStep.scenarioStepIndex}`
+          + `:expected=${implementation.owner}.${implementation.method}`
+        );
+      }
+    }
+  }
 
   if (content.includes("\uFFFD")) {
     errors.push("utf8_damaged_text_detected");
@@ -2673,14 +2715,17 @@ function structuralValidation(input: {
     }
   }
 
-  const expectedMeta = [
-    `process.env.APP_SLUG = '${input.expectedAppSlug}';`,
-    `process.env.SECTION_SLUG = '${input.expectedSectionSlug}';`,
-    `process.env.SCENARIO_ID = '${input.expectedScenarioId}';`,
-    `process.env.SCENARIO_TITLE = '${input.expectedScenarioTitle.replace(/'/g, "''")}';`
+  const expectedMetadata: Array<[string, string]> = [
+    ["APP_SLUG", input.expectedAppSlug],
+    ["SECTION_SLUG", input.expectedSectionSlug],
+    ["SCENARIO_ID", input.expectedScenarioId],
+    ["SCENARIO_TITLE", input.expectedScenarioTitle],
   ];
-  for (const metaLine of expectedMeta) {
-    if (!content.includes(metaLine)) errors.push(`missing_metadata_line:${metaLine}`);
+  for (const [variable, expectedValue] of expectedMetadata) {
+    const actualValue = readAssignedStringLiteral(content, variable);
+    const semanticEqual = actualValue !== undefined && semanticallyEqualText(actualValue, expectedValue);
+    if (!semanticEqual) errors.push(`missing_metadata_line:${variable}`);
+    console.log(`[semantic-literal-compare] field=metadata:${variable} semanticEqual=${semanticEqual} representationDifferent=${actualValue !== undefined && actualValue !== expectedValue}`);
   }
 
   const authAssertionCoveredByFlow = (requirement: string): boolean =>
@@ -2851,16 +2896,16 @@ function structuralValidation(input: {
         semanticErrors.push("assertions_not_covered");
       }
     } else {
-      const normalizedCovered = input.response.coveredAssertions.map((c) => `${normalizeText(c.requirement)} ${normalizeText(c.implementation)}`);
+      const normalizedCovered = input.response.coveredAssertions.map((c) => `${normalizeLiteralMatch(c.requirement)} ${normalizeLiteralMatch(c.implementation)}`);
       const oracleByRequirement = new Map(
-        input.observableOracles.map((oracle) => [normalizeText(oracle.requirement), oracle] as const)
+        input.observableOracles.map((oracle) => [normalizeLiteralMatch(oracle.requirement), oracle] as const)
       );
       for (const required of input.requiredAssertions) {
-        const norm = normalizeText(required);
+        const norm = normalizeLiteralMatch(required);
         const linkedOracle = oracleByRequirement.get(norm);
         const coveredByAssertion = normalizedCovered.some((c) => c.includes(norm));
         const coveredByOracleId = linkedOracle
-          ? normalizedCovered.some((c) => c.includes(normalizeText(linkedOracle.id)))
+           ? normalizedCovered.some((c) => c.includes(normalizeLiteralMatch(linkedOracle.id)))
           : false;
         const coveredByAuthFlow = authAssertionCoveredByFlow(required);
         const covered = coveredByAssertion || coveredByOracleId || coveredByAuthFlow;
@@ -2878,9 +2923,9 @@ function structuralValidation(input: {
       }
 
       if (input.mode === "ai_hybrid") {
-        const normalizedSpec = normalizeText(content);
+        const normalizedSpec = normalizeLiteralMatch(content);
         for (const assertion of input.response.coveredAssertions) {
-          const implementation = normalizeText(assertion.implementation);
+          const implementation = normalizeLiteralMatch(assertion.implementation);
           if (implementation && !normalizedSpec.includes(implementation)) {
             semanticErrors.push(`assertion_implementation_not_found:${assertion.requirement}`);
           }
@@ -2888,22 +2933,22 @@ function structuralValidation(input: {
 
         for (const oracle of input.observableOracles) {
           if (oracle.backed) continue;
-          const normalizedRequirement = normalizeText(oracle.requirement);
+          const normalizedRequirement = normalizeLiteralMatch(oracle.requirement);
           if (!normalizedRequirement) continue;
-          const inventedCoverage = input.response.coveredAssertions.some((item) => normalizeText(item.requirement).includes(normalizedRequirement));
-          const unresolvedReported = input.response.unresolvedRequirements.some((item) => normalizeText(item).includes(normalizedRequirement));
+          const inventedCoverage = input.response.coveredAssertions.some((item) => normalizeLiteralMatch(item.requirement).includes(normalizedRequirement));
+          const unresolvedReported = input.response.unresolvedRequirements.some((item) => normalizeLiteralMatch(item).includes(normalizedRequirement));
           if (inventedCoverage && !unresolvedReported) {
             semanticErrors.push(`unresolved_oracle_must_not_be_invented:${oracle.requirement}`);
           }
         }
 
-        const authorizedRequirements = new Set(input.requiredAssertions.map((requirement) => normalizeText(requirement)));
+        const authorizedRequirements = new Set(input.requiredAssertions.map((requirement) => normalizeLiteralMatch(requirement)));
         for (const assertion of input.response.coveredAssertions) {
-          const normalizedRequirement = normalizeText(assertion.requirement);
+          const normalizedRequirement = normalizeLiteralMatch(assertion.requirement);
           if (!normalizedRequirement) continue;
           const coveredByAuthFlow = authAssertionCoveredByFlow(assertion.requirement);
           const isAuthorized = authorizedRequirements.has(normalizedRequirement)
-            || authorizedRequirements.has(normalizeText(assertion.implementation));
+            || authorizedRequirements.has(normalizeLiteralMatch(assertion.implementation));
           if (!isAuthorized && !coveredByAuthFlow) {
             semanticErrors.push(`extraneous_requirement:${assertion.requirement}`);
           }
@@ -2913,9 +2958,9 @@ function structuralValidation(input: {
   }
 
   if (input.mode === "ai_hybrid") {
-    const observedEvidence = new Set(input.observedEvidencePhrases.map((value) => normalizeText(value)));
+    const observedEvidence = new Set(input.observedEvidencePhrases.map((value) => normalizeLiteralMatch(value)));
     for (const literal of extractAssertionTextLiterals(content)) {
-      const normalizedLiteral = normalizeText(literal);
+      const normalizedLiteral = normalizeLiteralMatch(literal);
       if (!normalizedLiteral) continue;
       if (!observedEvidence.has(normalizedLiteral)) {
         semanticErrors.push(`assertion_without_observed_evidence:${literal}`);
@@ -3708,6 +3753,7 @@ async function runHybridSpecGenerationInternal(
       executableStepIndexes,
       planStepActions: new Map(input.plan.steps.map((step) => [step.index, step.action])),
       response,
+      executionContract,
       availablePageObjects,
       observedEvidencePhrases,
       authFlowContext,

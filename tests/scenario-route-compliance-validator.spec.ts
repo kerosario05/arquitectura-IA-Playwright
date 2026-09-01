@@ -4,9 +4,45 @@ import {
   validateScenariosCompliance,
 } from "../src/scenarios/scenario-route-compliance-validator";
 import type { McpScenario } from "../src/scenarios/scenario-types";
+import type { CanonicalClaim } from "../src/scenarios/scenario-types";
 import type { DerivedExecutionContext } from "../src/scenarios/route-profile-derived-context";
 
 test.describe("Scenario Route Compliance Validator - Multi-App", () => {
+  test("canonical functional action remains valid without execution allowlist backing", () => {
+    const context: DerivedExecutionContext = {
+      appSlug: "app",
+      allowedExecutableClicks: [],
+      assertionOnlyTerms: [],
+      visibleButNotExecutableTerms: [],
+      sensitiveActions: [],
+      entryActionTargets: [],
+      routeTargets: [],
+      aliasesByTarget: new Map(),
+      domainTerms: [],
+      profileConfidence: "none",
+      diagnostics: [],
+    };
+    const claim: CanonicalClaim = {
+      claimId: "requirement::action",
+      requirementId: "requirement",
+      facet: "action",
+      claimType: "action",
+      targetKind: "declared_ui_target",
+      required: true,
+      coverable: true,
+    };
+    const scenario = {
+      steps: ['1. Clic en "Declarada".'],
+      stepClaims: [{ stepIndex: 0, claimId: claim.claimId }],
+    } as McpScenario;
+
+    const result = validateScenarioCompliance(scenario, context, undefined, [claim]);
+
+    expect(result.valid).toBe(true);
+    expect(result.reasonCode).toBe("valid");
+    expect(result.diagnostics.some((diagnostic) => diagnostic.level === "warning")).toBe(true);
+  });
+
   test("unbacked click is rejected", () => {
     const context: DerivedExecutionContext = {
       appSlug: "retail-app",
@@ -594,4 +630,3 @@ test.describe("Scenario Route Compliance Validator - Multi-App", () => {
     )).toBe(true);
   });
 });
-

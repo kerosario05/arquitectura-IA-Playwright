@@ -1,0 +1,19 @@
+{
+  "items": [
+    {
+      "id": "hd_action_a601b44b745c",
+      "source": "hu_declared",
+      "knowledgeKind": "hu_declared",
+      "category": "action",
+      "sourceText": "Clic en \"Productos\"",
+      "sourceIssueKey": "TEST-1",
+      "associatedBranchId": "",
+      "expectedBehavior": "",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "runCount": 1,
+      "createdAt": "2026-08-27T18:12:23.088Z",
+      "lastSeenAt": "2026-08-27T18:12:23.088Z"
+    }
+  ]
+}

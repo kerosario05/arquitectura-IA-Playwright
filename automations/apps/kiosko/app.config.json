@@ -1,23 +1,11 @@
 {
-  "appProfile": {
-    "appSlug": "kiosko",
-    "source": "default",
-    "name": "4",
-    "baseUrl": "https://172.27.4.50",
-    "baseUrlHash": "1423ba294517",
-    "createdAt": "2026-06-03T14:37:41.325Z",
-    "updatedAt": "2026-06-03T14:37:41.326Z"
-  },
+  "appSlug": "kiosko",
+  "name": "kiosko",
   "baseUrl": "https://172.27.4.50",
-  "loginMode": "password",
-  "testData": {},
-  "testDataAliases": {},
-  "testDataRefs": {},
-  "username": "adminr",
-  "password": "admin123",
-  "usernameRef": "APP_USERNAME",
-  "passwordRef": "APP_PASSWORD",
-  "missingInputBehavior": "auto_generate",
+  "source": {
+    "type": "request",
+    "sectionName": null
+  },
   "routeProfile": {
     "name": "informacion_productos",
     "entry": [
@@ -43,7 +31,9 @@
         "Cuentas de Efectivo",
         "Cuentas"
       ],
-      "prestamos": "Préstamos",
+      "prestamos": [
+        "Préstamos"
+      ],
       "volver": "Volver",
       "solicitar": "Solicitar",
       "finalizar_sesion": "Finalizar sesión"
@@ -72,10 +62,25 @@
       "Solicitar",
       "Finalizar sesión"
     ],
+    "intermediate": {
+      "informacion_productos": [
+        "Iniciar",
+        "Información de productos"
+      ]
+    },
     "representativeFixture": {},
     "notes": [
-      "RouteProfile para KIOSKO / Información de productos."
+      "RouteProfile inicial inferido para KIOSKO / Información de productos."
     ],
+    "fieldProvenance": {
+      "entry": "declared_hint",
+      "aliases": "declared_hint",
+      "intermediates": "declared_hint",
+      "domainTerms": "declared_hint",
+      "visibleControls": "declared_hint",
+      "entrySteps": "declared_hint",
+      "targetPaths": "declared_hint"
+    },
     "entrySteps": [
       {
         "action": "click",
@@ -88,12 +93,13 @@
         "when": "before_first_functional_step"
       }
     ],
-    "updatedAt": "2026-06-11T19:11:25.497Z"
+    "updatedAt": "2026-08-31T14:45:25.173Z"
   },
-  "updatedAt": "2026-08-05T21:21:49.655Z",
+  "createdAt": "2026-08-31T12:24:58.353Z",
+  "updatedAt": "2026-08-31T14:09:49.339Z",
   "lastUsedSource": {
-    "type": "explicit",
+    "type": "request",
     "sectionName": null,
-    "updatedAt": "2026-08-05T21:21:49.654Z"
+    "updatedAt": "2026-08-31T14:09:49.339Z"
   }
 }

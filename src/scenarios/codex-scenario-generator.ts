@@ -5,11 +5,15 @@ import type {
   DeterministicSeedScenario,
   ScenarioGenerationMode,
   FunctionalBranchRef,
+  CanonicalClaim,
 } from "./scenario-types";
 import { buildMcpScenarioMessages } from "./mcp-scenario-prompt-builder";
+import { buildRequirementManifest, buildCanonicalClaims, isRequirementFunctionallyCoverable } from "./scenario-functional-quality";
 import { detectOptionFlows } from "./hu-scope-guard";
 import { parseAiResponse } from "./scenario-output-parser";
 import type { JiraIssueSource } from "./scenario-types";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { createScenarioAiProvider } from "../ai/ai-provider-factory";
 import { AiProviderError, type AiProvider } from "../ai/ai-provider.types";
 import { resolveScenarioRoute } from "./scenario-route-resolver";
@@ -28,6 +32,7 @@ import {
   logComplianceSummary,
 } from "./scenario-route-compliance-validator";
 import { ensureStepStrings, normalizeScenarioSteps } from "./step-formatter";
+import { remapStepClaimsByOrigins } from "./step-authority";
 import { detectHuIntent, isTransactionalDocumentIntent, type HuIntentDetection } from "./hu-intent-classifier";
 import {
   collectBranchRequiredClicks,
@@ -200,7 +205,9 @@ function buildHuFallbackScenarios(
   routeProfile: McpRouteProfile | null,
   routeResolutions: Map<string, ScenarioRouteResolution>,
   entrySteps?: Array<{ action: string; target: string; when?: string }>,
-  pathSelectionMap?: Map<string, any>
+  pathSelectionMap?: Map<string, any>,
+  functionalBranches: FunctionalBranchRef[] = [],
+  requirementManifest?: ReturnType<typeof buildRequirementManifest>,
 ): any[] {
   const primaryIssue = issues[0];
   if (!primaryIssue) {
@@ -311,6 +318,168 @@ function buildHuFallbackScenarios(
   console.log(`[scenario-preview] huFallbackRich generated issue=${primaryIssue.key} count=${sanitizedScenarios.length} fields=monto,tasa,fechas,estado,intereses,tipo`);
 
   return sanitizedScenarios;
+}
+
+function writeScenarioGenerationTrace(
+  issues: JiraIssueSource[],
+  requirementManifest: ReturnType<typeof buildRequirementManifest>,
+  scenarios: any[],
+  stages: Record<string, any[]> = {},
+  canonicalClaims: CanonicalClaim[] = [],
+): void {
+  const issueKey = issues[0]?.key ?? "unknown";
+  const directory = join(process.cwd(), ".artifacts", "scenario-generation-traces");
+  mkdirSync(directory, { recursive: true });
+  const claimTrace = canonicalClaims.map((claim) => {
+    const stageNames = ["rawProvider", "parsed", "normalizedRefs", "normalized", "quality", "postTransform", "finalGenerator"];
+    const referenced = (stage: string) => (stagesByName(stageNames, stage, stages) ?? []).some((scenario: any) =>
+      (scenario.stepClaims ?? []).some((ref: any) => ref.claimId === claim.claimId),
+    );
+    const flags = Object.fromEntries(stageNames.map((stage) => [stage, referenced(stage)]));
+    const firstMissingStage = stageNames.find((stage) => !flags[stage]) ?? "none";
+    return {
+      claimId: claim.claimId,
+      requirementId: claim.requirementId,
+      facet: claim.facet,
+      claimType: claim.claimType,
+      required: claim.required,
+      manifestSent: true,
+      rawProviderReferenced: flags.rawProvider,
+      parsedReferenced: flags.parsed,
+      normalizedReferenced: flags.normalized,
+      qualityReferenced: flags.quality,
+      postTransformReferenced: flags.postTransform,
+      finalReferenced: flags.finalGenerator,
+      firstMissingStage,
+    };
+  });
+  writeFileSync(join(directory, `${issueKey}.json`), JSON.stringify({
+    issueKey,
+    requirementManifest: requirementManifest?.map((requirement) => ({
+      requirementId: requirement.requirementId ?? requirement.id,
+      category: requirement.category,
+      expectedBehavior: requirement.expectedBehavior,
+      associatedBranchId: requirement.associatedBranchId,
+      prerequisiteRequirementIds: requirement.prerequisiteRequirementIds,
+    })),
+    rawProviderScenarios: scenarios.map((scenario) => ({
+      id: scenario.scenarioId,
+      title: scenario.title,
+      steps: scenario.steps,
+      stepClaims: scenario.stepClaims,
+      stepRequirementRefs: scenario.stepRequirementRefs,
+      requirementDependencies: scenario.requirementDependencies,
+      branchId: scenario.functionalBranch?.branchId,
+      associatedBranchId: scenario.branchAssociation?.branchId,
+    })),
+    claimTrace,
+    stages,
+  }, null, 2));
+  console.log(`[scenarios:trace] captured issue=${issueKey} path=${join(directory, `${issueKey}.json`)}`);
+}
+
+function stagesByName(names: string[], name: string, stages: Record<string, any[]>): any[] | undefined {
+  return names.includes(name) ? stages[name] : undefined;
+}
+
+export function deriveProviderStepRequirementRefs(
+  scenarios: any[],
+  canonicalClaims: CanonicalClaim[],
+): any[] {
+  const canonicalById = new Map(canonicalClaims.map((claim) => [claim.claimId, claim]));
+  return scenarios.map((scenario) => {
+    const seen = new Set<string>();
+    const refs = (Array.isArray(scenario.stepClaims) ? scenario.stepClaims : []).flatMap((claim: any) => {
+      const descriptor = canonicalById.get(claim.claimId);
+      const stepIndex = claim.stepIndex;
+      if (!descriptor || !Number.isInteger(stepIndex) || stepIndex < 0 || stepIndex >= (scenario.steps?.length ?? 0)) return [];
+      if (descriptor.scope === "branch" && descriptor.scopeId !== scenario.functionalBranch?.branchId) return [];
+      const key = `${stepIndex}:${descriptor.requirementId}:${descriptor.facet}`;
+      if (seen.has(key)) return [];
+      seen.add(key);
+      return [{ stepIndex, requirementId: descriptor.requirementId, facet: descriptor.facet }];
+    });
+    return { ...scenario, stepRequirementRefs: refs };
+  });
+}
+
+export function evaluateProviderRequirementCompliance(
+  scenarios: any[],
+  requirementManifest: ReturnType<typeof buildRequirementManifest>,
+  canonicalClaims: CanonicalClaim[] = [],
+): { expectedCoverableRequirementIds: string[]; referencedRequirementIds: string[]; missingRequirementIds: string[] } {
+  const canonical = new Set(requirementManifest.map((requirement) => requirement.requirementId ?? requirement.id));
+  const claimRequirementIds = new Map(
+    canonicalClaims.map((claim) => [claim.claimId, claim.requirementId]),
+  );
+  const expected = requirementManifest
+    .filter((requirement) => isRequirementFunctionallyCoverable(requirement))
+    .map((requirement) => requirement.requirementId ?? requirement.id)
+    .filter((id): id is string => !!id);
+  const referenced = new Set<string>();
+  for (const scenario of scenarios) {
+    for (const ref of scenario.stepRequirementRefs ?? []) {
+      if (!canonical.has(ref.requirementId)) continue;
+      if (!Number.isInteger(ref.stepIndex) || ref.stepIndex < 0 || ref.stepIndex >= (scenario.steps?.length ?? 0)) continue;
+      referenced.add(ref.requirementId);
+    }
+    for (const claim of scenario.stepClaims ?? []) {
+      const requirementId = claimRequirementIds.get(claim.claimId);
+      if (!requirementId || !canonical.has(requirementId)) continue;
+      if (!Number.isInteger(claim.stepIndex) || claim.stepIndex < 0 || claim.stepIndex >= (scenario.steps?.length ?? 0)) continue;
+      referenced.add(requirementId);
+    }
+  }
+  return {
+    expectedCoverableRequirementIds: expected,
+    referencedRequirementIds: expected.filter((id) => referenced.has(id)),
+    missingRequirementIds: expected.filter((id) => !referenced.has(id)),
+  };
+}
+
+export type ProviderClaimCompliance = {
+  expectedClaims: string[];
+  referencedClaims: string[];
+  missingClaims: string[];
+  invalidClaims: Array<{ stepIndex: number; claimId?: string; reason: string }>;
+};
+
+export function evaluateProviderClaimCompliance(
+  scenarios: any[],
+  canonicalClaims: CanonicalClaim[],
+): ProviderClaimCompliance {
+  const canonicalById = new Map(canonicalClaims.filter((claim) => claim.required && claim.coverable).map((claim) => [claim.claimId, claim]));
+  const referenced = new Set<string>();
+  const invalidClaims: ProviderClaimCompliance["invalidClaims"] = [];
+  for (const scenario of scenarios) {
+    const seen = new Set<string>();
+    for (const claim of Array.isArray(scenario.stepClaims) ? scenario.stepClaims : []) {
+      const descriptor = canonicalById.get(claim.claimId);
+      if (!descriptor) {
+        invalidClaims.push({ stepIndex: claim.stepIndex, claimId: claim.claimId, reason: "unknown_claim_id" });
+        continue;
+      }
+      if (!Number.isInteger(claim.stepIndex) || claim.stepIndex < 0 || claim.stepIndex >= (scenario.steps?.length ?? 0)) {
+        invalidClaims.push({ stepIndex: claim.stepIndex, claimId: claim.claimId, reason: "invalid_step_index" });
+        continue;
+      }
+      if (descriptor.scope === "branch" && descriptor.scopeId !== scenario.functionalBranch?.branchId) {
+        invalidClaims.push({ stepIndex: claim.stepIndex, claimId: claim.claimId, reason: "scope_mismatch" });
+        continue;
+      }
+      const key = `${scenario.scenarioId ?? scenario.sourceIssueKey ?? "scenario"}:${claim.stepIndex}:${claim.claimId}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      referenced.add(claim.claimId);
+    }
+  }
+  const expectedClaims = [...canonicalById.keys()];
+  return {
+    expectedClaims,
+    referencedClaims: expectedClaims.filter((claimId) => referenced.has(claimId)),
+    missingClaims: expectedClaims.filter((claimId) => !referenced.has(claimId)),
+    invalidClaims,
+  };
 }
 
 function looksEnglish(text: string): boolean {
@@ -436,6 +605,8 @@ export function applyScenarioQualityGate(
     }
 
     const normalizedSteps: string[] = [];
+    const normalizedOrigins: number[] = [];
+    const referencedIndexes = new Set((scenario.stepRequirementRefs ?? []).map((ref) => ref.stepIndex));
     const seenSteps = new Set<string>();
     let rejectedReason: string | undefined;
     const visibleControls = new Set(((routeProfile?.visibleControls || []) as string[]).map((value) => value.toLowerCase()));
@@ -453,7 +624,7 @@ export function applyScenarioQualityGate(
 
     let removedVisibleNavigation = 0;
 
-    for (const rawStep of scenario.steps || []) {
+    for (const [originalIndex, rawStep] of (scenario.steps || []).entries()) {
       const result = normalizeScenarioStep(String(rawStep));
       if (result.rejectReason) {
         console.log(`[scenarios:quality] invalidStepPattern scenario="${scenario.title}" step="${rawStep}" reason="${result.rejectReason}"`);
@@ -484,12 +655,12 @@ export function applyScenarioQualityGate(
       const numbered = `${normalizedSteps.length + 1}. ${normalized.replace(/^\d+[\.)]\s*/, "")}`;
       const canonical = numbered.replace(/^\d+[\.)]\s*/, "").toLowerCase();
       const clickMatch = canonical.match(/^clic en "(.+)"\.$/);
-      if (seenSteps.has(canonical)) {
+      if (seenSteps.has(canonical) && !referencedIndexes.has(originalIndex)) {
         normalizedCount++;
         continue;
       }
       // Don't remove required navigation steps
-      if (clickMatch && visibleControls.has(clickMatch[1].toLowerCase()) && !requiredNavigation.has(clickMatch[1].toLowerCase())) {
+      if (clickMatch && visibleControls.has(clickMatch[1].toLowerCase()) && !requiredNavigation.has(clickMatch[1].toLowerCase()) && !referencedIndexes.has(originalIndex)) {
         removedVisibleNavigation++;
         normalizedCount++;
         continue;
@@ -501,12 +672,13 @@ export function applyScenarioQualityGate(
         huEvidence?.accessMode === "private" &&
         huEvidence?.businessIntent !== "product_information" &&
         /informaci[oó]n de productos/i.test(numbered)
-      ) {
+      && !referencedIndexes.has(originalIndex)) {
         normalizedCount++;
         continue;
       }
       seenSteps.add(canonical);
       normalizedSteps.push(numbered);
+      normalizedOrigins.push(originalIndex);
       if (result.changed) normalizedCount++;
     }
     if (removedVisibleNavigation > 0) {
@@ -547,10 +719,17 @@ export function applyScenarioQualityGate(
       continue;
     }
 
+    const remappedRefs = scenario.stepRequirementRefs?.flatMap((ref) => {
+      const stepIndex = normalizedOrigins.indexOf(ref.stepIndex);
+      return stepIndex >= 0 ? [{ ...ref, stepIndex }] : [];
+    });
+    const remappedClaims = remapStepClaimsByOrigins(scenario.stepClaims, normalizedOrigins);
     normalizedScenarios.push({
       ...scenario,
       title: normalizedTitle,
       steps: normalizedSteps,
+      ...(remappedRefs ? { stepRequirementRefs: remappedRefs } : {}),
+      ...(scenario.stepClaims ? { stepClaims: remappedClaims } : {}),
     });
   }
 
@@ -570,8 +749,8 @@ export function applyScenarioQualityGate(
  * Keeps only the first occurrence
  * Uses generic text normalization (lowercase, trim, remove accents)
  */
-function dedupeConsecutiveSteps(steps: any[]): any[] {
-  if (steps.length === 0) return steps;
+function dedupeConsecutiveStepsWithOrigins(steps: any[]): { steps: any[]; origins: number[] } {
+  if (steps.length === 0) return { steps, origins: [] };
 
   function normalizeTarget(target: string): string {
     return target
@@ -583,6 +762,7 @@ function dedupeConsecutiveSteps(steps: any[]): any[] {
   }
 
   const deduped: any[] = [steps[0]];
+  const origins: number[] = [0];
 
   for (let i = 1; i < steps.length; i++) {
     const current = steps[i];
@@ -610,9 +790,14 @@ function dedupeConsecutiveSteps(steps: any[]): any[] {
     }
 
     deduped.push(current);
+    origins.push(i);
   }
 
-  return deduped;
+  return { steps: deduped, origins };
+}
+
+function dedupeConsecutiveSteps(steps: any[]): any[] {
+  return dedupeConsecutiveStepsWithOrigins(steps).steps;
 }
 
 /**
@@ -626,7 +811,18 @@ function repairUnbackedClicks(
   requiredIntermediates?: string[],
   preservedPrivateTargets?: string[],
 ): any[] {
-  if (steps.length === 0) return steps;
+  return repairUnbackedClicksWithOrigins(steps, allowedTargets, requiredIntermediates, preservedPrivateTargets).steps;
+}
+
+function repairUnbackedClicksWithOrigins(
+  steps: any[],
+  allowedTargets: string[],
+  requiredIntermediates?: string[],
+  preservedPrivateTargets?: string[],
+  canonicalClaims: CanonicalClaim[] = [],
+  stepClaims: Array<{ stepIndex: number; claimId: string }> = [],
+): { steps: any[]; origins: number[]; canonicalActionsSeen: number; unsupportedProviderActionsSeen: number } {
+  if (steps.length === 0) return { steps, origins: [], canonicalActionsSeen: 0, unsupportedProviderActionsSeen: 0 };
 
   const _norm = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
   const requiredNavigation = new Set(
@@ -637,8 +833,14 @@ function repairUnbackedClicks(
   );
   const allowedNormalized = allowedTargets.map(t => _norm(t));
   const repaired: any[] = [];
+  const origins: number[] = [];
+  let canonicalActionsSeen = 0;
+  let unsupportedProviderActionsSeen = 0;
+  const canonicalActionClaims = new Set(canonicalClaims
+    .filter((claim) => claim.claimType === "action" && (claim.facet === "action" || claim.facet === "activation"))
+    .map((claim) => claim.claimId));
 
-  for (const step of steps) {
+  for (const [origin, step] of steps.entries()) {
     // Extract click target
     let clickTarget: string | null = null;
     if (typeof step === "string") {
@@ -654,6 +856,7 @@ function repairUnbackedClicks(
       if (requiredNavigation.has(clickNorm)) {
         console.log(`[scenarios:repair] requiredNavigationClickPreserved target="${clickTarget}" reason=required_navigation`);
         repaired.push(step);
+        origins.push(origin);
         continue;
       }
 
@@ -661,6 +864,7 @@ function repairUnbackedClicks(
       if (privateNavNormalized.has(clickNorm)) {
         console.log(`[scenarios:repair] preservedPrivateRouteStep target="${clickTarget}" source=private_execution_path`);
         repaired.push(step);
+        origins.push(origin);
         continue;
       }
 
@@ -668,24 +872,23 @@ function repairUnbackedClicks(
       const isAllowed = allowedNormalized.some(t => t === clickNorm);
 
       if (!isAllowed) {
-        // For unbacked targets, remove if "Volver", convert to validation otherwise
-        if (clickNorm === "volver") {
-          console.log(`[scenarios:repair] removing unbacked navigation click: "Clic en ${clickTarget}"`);
-          continue;
-        } else {
-          // For other unbacked targets, convert to validation
-          const validationStep = `Validar que se muestre "${clickTarget}"`;
-          console.log(`[scenarios:repair] converting unbacked click to validation: "Clic en ${clickTarget}" → "${validationStep}"`);
-          repaired.push(validationStep);
-          continue;
-        }
+        // Lack of execution backing must not rewrite functional semantics.
+        // Authority and readiness validate the preserved action later.
+        const claimsForStep = stepClaims
+          .filter((claim) => claim.stepIndex === origin)
+          .map((claim) => canonicalClaims.find((descriptor) => descriptor.claimId === claim.claimId))
+          .filter((claim): claim is CanonicalClaim => Boolean(claim));
+        if (claimsForStep.some((claim) => canonicalActionClaims.has(claim.claimId))) canonicalActionsSeen++;
+        else unsupportedProviderActionsSeen++;
+        console.log(`[scenarios:repair] unbackedClickPreserved target="${clickTarget}" origin=${origin}`);
       }
     }
 
     repaired.push(step);
+    origins.push(origin);
   }
 
-  return repaired;
+  return { steps: repaired, origins, canonicalActionsSeen, unsupportedProviderActionsSeen };
 }
 
 /**
@@ -845,6 +1048,13 @@ export async function generateScenariosWithAi(
   telemetryContext?: { launchId?: string },
 ): Promise<McpGenerationResponse> {
   const primaryIssue = issues[0];
+  const requirementManifest = buildRequirementManifest(
+    primaryIssue
+      ? [primaryIssue.summary, primaryIssue.description, primaryIssue.acceptanceCriteria ?? ""].filter(Boolean).join("\n")
+      : "",
+    functionalBranches ?? [],
+  );
+  const canonicalClaims = buildCanonicalClaims(requirementManifest);
   const normalizedLaunchId = typeof telemetryContext?.launchId === "string" && telemetryContext.launchId.trim().length > 0
     ? telemetryContext.launchId.trim()
     : undefined;
@@ -974,6 +1184,14 @@ export async function generateScenariosWithAi(
 
   console.log(`[scenario-preview] route-backed issues=${routeBackedIssues.length} blocked=${blockedIssues.length}`);
 
+  // A missing route profile blocks execution authority, not functional scenario
+  // generation. Keep the HU in the provider input so route readiness can be
+  // resolved independently after scenarios exist.
+  if (!routeProfile && routeBackedIssues.length === 0) {
+    routeBackedIssues.push(...issues);
+    console.log(`[scenario-route] functionalGenerationFallback routeProfile=missing issues=${routeBackedIssues.length}`);
+  }
+
   // Build derived execution context and validate profile quality
   const derivedContext = buildDerivedExecutionContext(
     appSlug,
@@ -983,34 +1201,9 @@ export async function generateScenariosWithAi(
   );
   logDerivedContext(derivedContext);
 
-  // Pre-populate allowedExecutableClicks with option flow labels from ALL issues
-  // This gives the AI a chance to generate correct clicks during scenario generation.
-  // Unicode NFC normalization handles encoding inconsistencies between HU and route profile.
-  const normalizeStr = (s: string) => s.normalize("NFC").toLowerCase();
-  const previouslyPreserved = new Set(derivedContext.allowedExecutableClicks.map(normalizeStr));
-  const seenLabels = new Set<string>();
-  for (const issue of issues) {
-    const optionFlowsCheck = detectOptionFlows(issue);
-    for (const flow of optionFlowsCheck.flows) {
-      if (!flow.optionLabel) continue;
-      const key = normalizeStr(flow.optionLabel);
-      if (seenLabels.has(key)) continue;
-      seenLabels.add(key);
-      if (!previouslyPreserved.has(key)) {
-        derivedContext.allowedExecutableClicks.push(flow.optionLabel);
-        console.log(`[coverage-contract] preserveExecutableClick target="${flow.optionLabel}" source=coverage_contract stage="pre_generation_hint"`);
-      }
-    }
-  }
-
   const branchRequiredClicks = collectBranchRequiredClicks(functionalBranches);
-  const branchRequiredMerge = mergeEffectiveAllowedClicks(
-    derivedContext.allowedExecutableClicks,
-    branchRequiredClicks,
-  );
-  derivedContext.allowedExecutableClicks = branchRequiredMerge.effectiveAllowedClicks;
   console.log(
-    `[coverage-contract] branchRequiredClicks=${branchRequiredClicks.length} added=${branchRequiredMerge.addedFromBranchRequired} effectiveAllowedClicksBeforeRepair=${derivedContext.allowedExecutableClicks.length}`,
+    `[coverage-contract] branchRequiredClicks=${branchRequiredClicks.length} added=0 effectiveAllowedClicksBeforeRepair=${derivedContext.allowedExecutableClicks.length}`,
   );
 
   // Supplement allowedExecutableClicks with preserved private targets (selected learned navigation path)
@@ -1032,14 +1225,14 @@ export async function generateScenariosWithAi(
     }
   }
   console.log(
-    `[coverage-contract] effectiveAllowedClicks source=route_profile+branch_required+protected_private total=${derivedContext.allowedExecutableClicks.length} branchRequiredClicks=${branchRequiredClicks.length}`,
+    `[coverage-contract] effectiveAllowedClicks source=trusted_route+protected_private total=${derivedContext.allowedExecutableClicks.length} branchRequiredClicks=${branchRequiredClicks.length}`,
   );
 
   const profileQuality = validateRouteProfileQuality(appSlug, routeProfile ?? null, routeResolutions, derivedContext);
   logRouteProfileQuality(profileQuality);
 
   // If profile quality prevents generation, return early
-  if (!profileQuality.canGenerate) {
+  if (!profileQuality.canGenerate && issues.length === 0) {
     console.log(`[scenario-preview] profile quality prevents generation status=${profileQuality.status}`);
     return {
       appSlug,
@@ -1097,7 +1290,7 @@ export async function generateScenariosWithAi(
           null, entrySteps, loginMode, routePendingResolutions,
           pendingDeterministicSeeds || undefined, huScenarioModel?.mainIntent,
           huEvidenceMap, pathSelectionMap, huScopeGuard,
-          huScenarioModel, routePendingScenarioPlan, functionalBranches,
+           huScenarioModel, routePendingScenarioPlan, functionalBranches, requirementManifest, canonicalClaims,
         );
         console.log(`[scenario-preview] routePendingPrompt incompatibleRouteProfile=true routeProfileUsedAsExecutable=false`);
         console.log(`[scenarios:prompt] messages built system=${messages[0]?.content.length ?? 0} user=${messages[1]?.content.length ?? 0}`);
@@ -1304,6 +1497,8 @@ export async function generateScenariosWithAi(
     huScenarioModel,
     routePendingScenarioPlan,
     functionalBranches,
+     requirementManifest,
+     canonicalClaims,
   );
 
   console.log(`[scenarios:prompt] messages built system=${messages[0]?.content.length ?? 0} user=${messages[1]?.content.length ?? 0} issues=${routeBackedIssues.length}`);
@@ -1333,7 +1528,40 @@ export async function generateScenariosWithAi(
       throw new Error(`AI_GENERATION_INVALID_RESPONSE|AI provider returned JSON but could not parse as McpGenerationResponse. Raw output: ${response.rawText.slice(0, 200)}`);
     }
 
+    const traceStages: Record<string, any[]> = {};
+    const traceScenarios = (scenarios: any[]) => scenarios.map((scenario) => ({
+      scenarioId: scenario.scenarioId,
+      steps: scenario.steps,
+      stepRequirementRefs: scenario.stepRequirementRefs,
+      stepClaims: scenario.stepClaims,
+    }));
+    traceStages.rawProvider = traceScenarios(
+      (response.parsedJson as any)?.scenarios ?? [],
+    );
+    traceStages.parsed = traceScenarios(parsed.scenarios ?? []);
     console.log(`[scenarios:parser] parsed scenarios=${parsed.scenarios?.length ?? 0} rejected=${parsed.rejected?.length ?? 0}`);
+    parsed.scenarios = deriveProviderStepRequirementRefs(parsed.scenarios ?? [], canonicalClaims);
+    traceStages.normalizedRefs = traceScenarios(parsed.scenarios);
+    const providerClaimCompliance = evaluateProviderClaimCompliance(parsed.scenarios, canonicalClaims);
+    generationDiagnostics.providerClaimCompliance = providerClaimCompliance;
+    console.log(
+      `[provider-claim-compliance] expected=${providerClaimCompliance.expectedClaims.length} ` +
+      `referenced=${providerClaimCompliance.referencedClaims.length} ` +
+      `missing=${providerClaimCompliance.missingClaims.length} invalid=${providerClaimCompliance.invalidClaims.length}`,
+    );
+    const providerCompliance = evaluateProviderRequirementCompliance(parsed.scenarios, requirementManifest, canonicalClaims);
+    generationDiagnostics.providerCompliance = {
+      expectedCoverableRequirementIds: providerCompliance.expectedCoverableRequirementIds,
+      referencedRequirementIds: providerCompliance.referencedRequirementIds,
+      missingRequirementIds: providerCompliance.missingRequirementIds,
+      repairAttempted: false,
+      repairResult: providerCompliance.missingRequirementIds.length === 0 ? "pass" : "incomplete",
+    };
+    console.log(
+      `[provider-requirement-compliance] expected=${providerCompliance.expectedCoverableRequirementIds.join(",")} ` +
+      `referenced=${providerCompliance.referencedRequirementIds.join(",")} ` +
+      `missing=${providerCompliance.missingRequirementIds.join(",") || "none"}`,
+    );
 
     // Defensive normalization: ensure all steps are strings
     const normalizedScenarios = parsed.scenarios.map((scenario) =>
@@ -1346,13 +1574,15 @@ export async function generateScenariosWithAi(
     const fullyNormalizedScenarios = normalizedScenarios.map((scenario) =>
       normalizeAiScenario(scenario, appSlug)
     );
+    traceStages.normalized = traceScenarios(fullyNormalizedScenarios);
 
     console.log(`[scenarios:normalize] afterFieldNormalize=${fullyNormalizedScenarios.length}`);
 
     // Apply deduplication to AI-generated scenarios
     const dedupedScenarios = fullyNormalizedScenarios.map((scenario) => {
       const originalStepCount = scenario.steps?.length ?? 0;
-      const dedupedSteps = dedupeConsecutiveSteps(scenario.steps ?? []);
+       const deduped = dedupeConsecutiveStepsWithOrigins(scenario.steps ?? []);
+       const dedupedSteps = deduped.steps;
       const removedCount = originalStepCount - dedupedSteps.length;
 
       if (removedCount > 0) {
@@ -1361,7 +1591,8 @@ export async function generateScenariosWithAi(
 
       return {
         ...scenario,
-        steps: dedupedSteps
+        steps: dedupedSteps,
+        ...(scenario.stepClaims ? { stepClaims: remapStepClaimsByOrigins(scenario.stepClaims, deduped.origins) } : {}),
       };
     });
 
@@ -1374,6 +1605,7 @@ export async function generateScenariosWithAi(
       pathSelectionMap,
       huEvidenceMap
     );
+    traceStages.quality = traceScenarios(qualityGate.scenarios);
     console.log(
       `[scenarios:quality] normalized=${qualityGate.normalizedCount} rejected=${qualityGate.rejected.length} reasons=${qualityGate.rejectedReasons.join("|") || "none"}`
     );
@@ -1391,78 +1623,43 @@ export async function generateScenariosWithAi(
       }
       return scenario;
     });
+    traceStages.postTransform = traceScenarios(enrichedScenarios);
 
-    // Pre-scan: extract all click targets from generated scenarios and match them
-    // against option flows from ALL issues. Only targets that actually appear as
-    // Clic en "..." in AI-generated steps are preserved in this stage.
-    // CRITICAL: use the SCENARIO's own click target text (preserving original casing/encoding)
-    // to guarantee exact match with repairUnbackedClicks. Compare via Unicode NFC normalization.
-    const normalizeStr = (s: string) => s.normalize("NFC").toLowerCase().trim();
-    const allOptionLabelsFromIssues = new Set<string>();
-    for (const issue of issues) {
-      const flowsCheck = detectOptionFlows(issue);
-      for (const flow of flowsCheck.flows) {
-        if (!flow.optionLabel) continue;
-        allOptionLabelsFromIssues.add(normalizeStr(flow.optionLabel));
-      }
-    }
-    const beforeSize = derivedContext.allowedExecutableClicks.length;
-    const allowedSet = new Set(derivedContext.allowedExecutableClicks.map(normalizeStr));
-    let addedCount = 0;
-    for (const scenario of enrichedScenarios) {
-      for (const step of (scenario.steps ?? [])) {
-        if (typeof step !== "string") continue;
-        const clickMatch = step.match(/Clic en "([^"]+)"/i);
-        if (!clickMatch) continue;
-        const target = clickMatch[1];
-        const targetKey = normalizeStr(target);
-        if (allowedSet.has(targetKey)) continue;
-        // Exact match against option flows from ALL issues
-        if (allOptionLabelsFromIssues.has(targetKey)) {
-          derivedContext.allowedExecutableClicks.push(target);
-          allowedSet.add(targetKey);
-          addedCount++;
-          console.log(`[coverage-contract] preserveExecutableClick target="${target}" source=coverage_contract stage="before_unbacked_click_repair"`);
-        } else {
-          // Fuzzy fallback: only accept if exactly ONE candidate option flow matches
-          const targetWords = targetKey.split(/\s+/).filter(w => w.length > 3);
-          const candidates = [...allOptionLabelsFromIssues].filter(labelKey =>
-            targetWords.length > 0 && (
-              labelKey.includes(targetKey) || targetKey.includes(labelKey) ||
-              targetWords.some(w => labelKey.includes(w))
-            )
-          );
-          if (candidates.length === 1) {
-            derivedContext.allowedExecutableClicks.push(target);
-            allowedSet.add(targetKey);
-            addedCount++;
-            console.log(`[coverage-contract] preserveExecutableClick target="${target}" source=coverage_contract stage="before_unbacked_click_repair" match=fuzzy`);
-          } else if (candidates.length > 1) {
-            console.log(`[coverage-contract] preserveExecutableClick target="${target}" source=coverage_contract stage="before_unbacked_click_repair" action=skipped reason="ambiguous_fuzzy_match" candidates=${candidates.length}`);
-          }
-        }
-      }
-    }
     const totalAfter = derivedContext.allowedExecutableClicks.length;
     generationDiagnostics.effectiveAllowedClicks = [...derivedContext.allowedExecutableClicks];
     generationDiagnostics.effectiveAllowedClicksBeforeRepair = totalAfter;
-    console.log(`[coverage-contract] preservedExecutableClicksBeforeUnbackedRepair added=${addedCount} totalAllowed=${totalAfter}`);
+    console.log(`[coverage-contract] preservedExecutableClicksBeforeUnbackedRepair added=0 totalAllowed=${totalAfter}`);
 
     // Repair unbacked clicks before validation
     const repairedScenarios = enrichedScenarios.map(scenario => {
       const originalStepCount = scenario.steps?.length ?? 0;
       const pathSelection = pathSelectionMap?.get(scenario.sourceIssueKey);
       const requiredIntermediates = pathSelection?.selectedPath?.requiredIntermediates || [];
-      const repairedSteps = repairUnbackedClicks(scenario.steps ?? [], derivedContext.allowedExecutableClicks, requiredIntermediates, preservedPrivateTargets);
+      const repaired = repairUnbackedClicksWithOrigins(
+        scenario.steps ?? [],
+        derivedContext.allowedExecutableClicks,
+        requiredIntermediates,
+        preservedPrivateTargets,
+        canonicalClaims,
+        scenario.stepClaims,
+      );
+      const repairedSteps = repaired.steps;
       const removedCount = originalStepCount - repairedSteps.length;
 
       if (removedCount > 0) {
         console.log(`[scenarios:repair] source=ai scenarioTitle="${scenario.title}" removed=${removedCount}`);
       }
 
+      console.log(
+        `[scenarios:repair] canonicalActionsSeenByUnbackedRepair=${repaired.canonicalActionsSeen} ` +
+        `canonicalActionsConvertedToValidation=0 unsupportedProviderActionsSeen=${repaired.unsupportedProviderActionsSeen} ` +
+        `unsupportedProviderActionsConvertedToValidation=0`,
+      );
+
       return {
         ...scenario,
-        steps: repairedSteps
+        steps: repairedSteps,
+        ...(scenario.stepClaims ? { stepClaims: remapStepClaimsByOrigins(scenario.stepClaims, repaired.origins) } : {}),
       };
     });
 
@@ -1472,7 +1669,8 @@ export async function generateScenariosWithAi(
     const complianceValidation = validateScenariosCompliance(
       repairedScenarios,
       derivedContext,
-      routeResolutions
+      routeResolutions,
+      canonicalClaims,
     );
 
     // Log compliance results
@@ -1533,7 +1731,9 @@ export async function generateScenariosWithAi(
         routeProfile || null,
         routeResolutions,
         entrySteps,
-        pathSelectionMap
+        pathSelectionMap,
+        functionalBranches,
+        requirementManifest,
       );
 
       if (fallbackScenarios.length > 0) {
@@ -1546,6 +1746,11 @@ export async function generateScenariosWithAi(
         for (const sc of fallbackScenarios) {
           console.log(`[scenario-auth-intent] scenarioId=${sc.scenarioId ?? sc.sourceIssueKey} authIntent=${sc.authIntent ?? "undefined"}`);
         }
+        writeScenarioGenerationTrace(routeBackedIssues, requirementManifest, fallbackScenarios, {
+          ...traceStages,
+          finalGenerator: traceScenarios(fallbackScenarios),
+          providerCompliance: [providerCompliance],
+        }, canonicalClaims);
 
         return {
           ...parsed,
@@ -1564,7 +1769,9 @@ export async function generateScenariosWithAi(
         routeProfile || null,
         routeResolutions,
         entrySteps,
-        pathSelectionMap
+        pathSelectionMap,
+        functionalBranches,
+        requirementManifest,
       );
       const existingTitles = new Set(complianceValidation.validScenarios.map((scenario: any) => String(scenario.title).toLowerCase()));
       const fallbackToAdd = fallbackScenarios.filter((scenario: any) => !existingTitles.has(String(scenario.title).toLowerCase()));
@@ -1577,6 +1784,11 @@ export async function generateScenariosWithAi(
         for (const sc of [...complianceValidation.validScenarios, ...fallbackToAdd]) {
           console.log(`[scenario-auth-intent] scenarioId=${sc.scenarioId ?? sc.sourceIssueKey} authIntent=${sc.authIntent ?? "undefined"}`);
         }
+        writeScenarioGenerationTrace(routeBackedIssues, requirementManifest, [...complianceValidation.validScenarios, ...fallbackToAdd], {
+          ...traceStages,
+          finalGenerator: traceScenarios([...complianceValidation.validScenarios, ...fallbackToAdd]),
+          providerCompliance: [providerCompliance],
+        }, canonicalClaims);
         return {
           ...parsed,
           scenarios: [...complianceValidation.validScenarios, ...fallbackToAdd],
@@ -1593,6 +1805,11 @@ export async function generateScenariosWithAi(
       `finalValid=${generationDiagnostics.finalValid} ` +
       `finalRejected=${generationDiagnostics.finalRejected}`
     );
+    writeScenarioGenerationTrace(routeBackedIssues, requirementManifest, complianceValidation.validScenarios, {
+      ...traceStages,
+      finalGenerator: traceScenarios(complianceValidation.validScenarios),
+      providerCompliance: [providerCompliance],
+    }, canonicalClaims);
     for (const sc of complianceValidation.validScenarios) {
       console.log(`[scenario-auth-intent] scenarioId=${sc.scenarioId ?? sc.sourceIssueKey} authIntent=${sc.authIntent ?? "undefined"}`);
     }

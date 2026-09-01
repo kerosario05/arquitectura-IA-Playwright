@@ -35,8 +35,11 @@ import { loadEvidenceConfig } from "../../evidence/evidence-types";
 import { applyDataOverrides, type MobileStep, type MobileStepResult, type MobileDataField } from "../../mobile/mobile-step-types";
 import { extractMobileScreenSnapshot, type MobileScreenSnapshot } from "../../mobile/mobile-knowledge-extractor";
 import { persistMobileScreen, persistMobileRoute } from "../../mobile/mobile-knowledge-persister";
+import { extractObservedDestination } from "../../mobile/mobile-observed-destination";
+import { buildBindingCandidate, canCreateBindingCandidate } from "../../mobile/mobile-destination-binding";
 import { loadMobileRouteProfile } from "../../mobile/mobile-route-profile";
 import { evaluateScenarioPrecheck, resolveMobileExecutionSignals } from "../../mobile/mobile-execution-precheck";
+import { getProjectConfigurationBySlug } from "../../db/project-reader";
 export { evaluateScenarioPrecheck, type ScenarioPrecheckResult } from "../../mobile/mobile-execution-precheck";
 import { dismissAndroidCompatibilityDialog } from "../../mobile/mobile-modal-dismisser";
 import { buildTextVariants } from "../../mobile/mobile-text-normalization";
@@ -83,6 +86,8 @@ export type MobileTestRunParams = {
   requiredData?: MobileDataField[];
   /** Route-profile app slug; if set, enables knowledge learning for this run. */
   appSlug?: string;
+  /** Step-level requirement refs from the scenario, to propagate into runtime transitions. */
+  stepRequirementRefs?: Array<{ stepIndex: number; requirementIds: string[] }>;
 };
 
 export type ResolvedMobileTarget = {
@@ -257,6 +262,8 @@ export function resolveMobileTarget(params: {
   appPackage?: string;
   appActivity?: string;
   systemPort?: number;
+  /** Resolved from SQL MobileProjectConfiguration.packageName by the async caller. */
+  sqlPackageName?: string;
 }): ResolvedMobileTarget {
   const appProfileDefaults = resolveAppProfileDefaults(params.appSlug);
   const avdName = params.avdName?.trim() || config.integrations.android?.avdName;
@@ -278,7 +285,7 @@ export function resolveMobileTarget(params: {
       ?? 8200,
     apkPath: requestApkPath || envApkPath,
     apkPathSource: requestApkPath ? "payload" : (envApkPath ? "env.ANDROID_APK_PATH" : undefined),
-    appPackage: params.appPackage?.trim() || config.integrations.android?.appPackage || appProfileDefaults.appPackage,
+    appPackage: params.appPackage?.trim() || config.integrations.android?.appPackage || appProfileDefaults.appPackage || params.sqlPackageName?.trim() || undefined,
     appActivity: params.appActivity?.trim() || config.integrations.android?.appActivity || appProfileDefaults.appActivity
   };
 }
@@ -711,6 +718,8 @@ export type RunOneScenarioOptions = {
   /** Runtime data for OTP identity resolution: maps identityField -> stepIndex and supplies override values. */
   requiredData?: MobileDataField[];
   dataOverrides?: Record<number, string>;
+  /** Step-level requirement refs from the scenario, to propagate into runtime transitions. */
+  stepRequirementRefs?: Array<{ stepIndex: number; requirementIds: string[] }>;
 };
 
 export type RunOneScenarioResult = {
@@ -852,6 +861,10 @@ export async function runOneScenario(
     actionTarget: { strategy: string; value: string };
     screenBefore: string;
     screenAfter: string;
+    controlPackage?: string;
+    controlResourceId?: string;
+    controlContentDesc?: string;
+    actionLocatorIdentity?: string;
   }> = [];
   let skippedByDependencyCount = 0;
   const executionSignals = resolveMobileExecutionSignals(opts.appSlug);
@@ -877,21 +890,39 @@ export async function runOneScenario(
 
       const filename = buildScreenshotFilename(i, step.description || step.action);
       const screenshotPath = path.join(screenshotsDir, filename);
-      const preStepPageSource = step.action === "click"
+      let preStepPageSource = step.action === "click"
         ? await browser.getPageSource().catch(() => "")
         : undefined;
       // Structural screen fingerprint BEFORE the click (only when we have a usable page source).
       // A transition is only valid when the before/after screens have real observed content.
       let screenBeforeFingerprint: string | undefined;
       let screenBeforeHasContent = false;
-      if (step.action === "click" && preStepPageSource && preStepPageSource.trim().length > 0) {
-        try {
-          const beforeSnap = extractMobileScreenSnapshot(preStepPageSource);
-          screenBeforeFingerprint = beforeSnap.fingerprint;
-          screenBeforeHasContent = beforeSnap.clickTargets.length > 0 || beforeSnap.assertionTargets.length > 0;
-        } catch {
-          screenBeforeFingerprint = undefined;
-          screenBeforeHasContent = false;
+      if (step.action === "click") {
+        const expectedPkg = opts.appPackage?.trim();
+        const deadline = Date.now() + Math.min(step.timeoutMs ?? 10000, 10000);
+        let polls = 0;
+        while (Date.now() < deadline) {
+          try {
+            if (!preStepPageSource || preStepPageSource.trim().length === 0) { polls++; await new Promise((r) => setTimeout(r, 500)); preStepPageSource = await browser.getPageSource().catch(() => ""); continue; }
+            const snap = extractMobileScreenSnapshot(preStepPageSource);
+            // Snapshot is usable ONLY when there are explicit app-owned controls:
+            // at least one observedControl with package === expectedAppPackage.
+            // dominantPackage alone is NOT enough (undefined/ambiguous/tie → not owned).
+            const hasAppOwnedControl = expectedPkg
+              ? snap.observedControls.some((c) => c.package === expectedPkg)
+              : false;
+            if (hasAppOwnedControl) {
+              screenBeforeFingerprint = snap.fingerprint;
+              screenBeforeHasContent = true;
+              break;
+            }
+          } catch { /* snapshot failed, continue polling */ }
+          polls++;
+          await new Promise((r) => setTimeout(r, 500));
+          preStepPageSource = await browser.getPageSource().catch(() => "");
+        }
+        if (!screenBeforeHasContent && polls > 0) {
+          onLog(`[mobile:before-snapshot] polls=${polls} usable=false reason=no_usable_content`);
         }
       }
 
@@ -1040,13 +1071,43 @@ export async function runOneScenario(
             } catch { /* diagnostics write is best-effort */ }
           }
 
-          if (transitionPersistCandidate) {
+          if (transitionPersistCandidate && screenBeforeFingerprint) {
+            // Use the exact executed control identity from the executor — NOT a post-hoc
+            // re-resolution against beforeSnapshot.observedControls. The executor captured
+            // technical attributes from the real DOM element that Appium resolved.
+            const ec = result.executedControl;
+            const stepRequirementIds = opts.stepRequirementRefs
+              ?.filter((ref) => ref.stepIndex === i)
+              .flatMap((ref) => ref.requirementIds) ?? [];
+            // Action semantic authority: validated only when ALL conditions are met.
+            const controlOwnedByApp = ec?.package === opts.appPackage?.trim();
+            const hasCanonicalRefs = stepRequirementIds.length > 0;
+            const actionSemanticValid = controlOwnedByApp && hasCanonicalRefs;
+            const destEvidence = snapshot ? extractObservedDestination(snapshot) : undefined;
+            // Build binding candidate when all conditions are met.
+            // Candidate is observation-only — never auto-promotes to authoritative.
+            const candidateTransitionId = screenBeforeFingerprint && afterFingerprint
+              ? `${screenBeforeFingerprint}:${afterFingerprint}`
+              : undefined;
+            const bindingCandidate = (candidateTransitionId && destEvidence && actionSemanticValid && stepRequirementIds.length > 0)
+              ? buildBindingCandidate(candidateTransitionId, stepRequirementIds, destEvidence)
+              : undefined;
             observedTransitions.push({
               stepIndex: i,
               action: step.action,
               actionTarget: { strategy: step.target.strategy, value: step.target.value },
               screenBefore: screenBeforeFingerprint,
               screenAfter: afterFingerprint,
+              controlPackage: ec?.package,
+              controlResourceId: ec?.resourceId,
+              controlContentDesc: ec?.contentDesc,
+              actionLocatorIdentity: ec?.locatorIdentity,
+              requirementIds: stepRequirementIds.length > 0 ? stepRequirementIds : undefined,
+              actionSemanticAuthority: actionSemanticValid ? "validated" : undefined,
+              transitionValidated: true,
+              executionBacked: true,
+              observedDestinationEvidence: destEvidence,
+              bindingCandidate,
             });
           }
         } catch {
@@ -1073,14 +1134,40 @@ export async function runOneScenario(
     );
   }
 
-  // Persist observed screens + route so the context grows with each run.
+  // Persist observed screens + route via shared SQL-first persister (ProjectKnowledge -> app.knowledge.json)
   if (learningEnabled && opts.appSlug) {
     const status: "passed" | "failed" = failedCount === 0 ? "passed" : "failed";
+    const expectedPackage = opts.appPackage?.trim();
     for (const snapshot of screensByKey.values()) {
-      persistMobileScreen(opts.appSlug, snapshot, { issueKey: opts.sourceIssueKey, scenarioTitle: opts.evidenceScenarioTitle, status: failedCount === 0 ? "passed" : "partial" });
+      // Filter to app-owned controls only: preserve only controls whose package
+      // matches the expected appPackage. External controls (System UI, launcher,
+      // dialogs) are excluded to prevent them from being treated as functional
+      // project knowledge.
+      const appOwnedControls = expectedPackage
+        ? snapshot.observedControls.filter((c) => c.package === expectedPackage)
+        : snapshot.observedControls;
+      const appOwnedLabels = new Set(appOwnedControls.map((c) => c.label));
+      const filteredClickTargets = snapshot.clickTargets.filter((l) => appOwnedLabels.has(l));
+      const filteredAssertionTargets = snapshot.assertionTargets.filter((l) => appOwnedLabels.has(l));
+
+      // Skip entirely if no app-owned controls survive filtering.
+      if (appOwnedControls.length === 0 && filteredClickTargets.length === 0 && filteredAssertionTargets.length === 0) {
+        onLog(`[mobile:knowledge] skipped screen=${snapshot.screenKey} reason=external_package dominant=${snapshot.dominantPackage ?? "unknown"} expected=${expectedPackage ?? "none"}`);
+        continue;
+      }
+
+      // Project a filtered snapshot so only app-owned data is persisted.
+      const filteredSnapshot: typeof snapshot = {
+        ...snapshot,
+        observedControls: appOwnedControls,
+        clickTargets: filteredClickTargets,
+        assertionTargets: filteredAssertionTargets,
+      };
+
+      await persistMobileScreen(opts.appSlug, filteredSnapshot, { issueKey: opts.sourceIssueKey, scenarioTitle: opts.evidenceScenarioTitle, status: failedCount === 0 ? "passed" : "partial" });
     }
     if (executedClickTargets.length > 0) {
-      persistMobileRoute(opts.appSlug, executedClickTargets, { issueKey: opts.sourceIssueKey, scenarioTitle: opts.evidenceScenarioTitle, status }, observedTransitions);
+      await persistMobileRoute(opts.appSlug, executedClickTargets, { issueKey: opts.sourceIssueKey, scenarioTitle: opts.evidenceScenarioTitle, status, expectedAppPackage: opts.appPackage?.trim() }, observedTransitions);
     }
     onLog(`[mobile:knowledge] learned screens=${screensByKey.size} routeTargets=${executedClickTargets.length}`);
   }
@@ -1191,7 +1278,15 @@ export async function startMobileTestRunJob(jobId: string): Promise<void> {
   try {
     let target: ResolvedMobileTarget;
     try {
-      target = validateResolvedMobileTarget(resolveMobileTarget(params));
+      // Resolve SQL packageName as last-resort fallback when other sources don't provide it.
+      let sqlPackageName: string | undefined;
+      if (params.appSlug?.trim()) {
+        try {
+          const cfg = await getProjectConfigurationBySlug(params.appSlug.trim());
+          sqlPackageName = cfg?.mobile?.packageName?.trim() || undefined;
+        } catch { /* db read is best-effort */ }
+      }
+      target = validateResolvedMobileTarget(resolveMobileTarget({ ...params, sqlPackageName }));
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       const reasonCode = err instanceof MobileTargetValidationError ? err.reasonCode : "mobile_apk_not_accessible";
@@ -1258,6 +1353,7 @@ export async function startMobileTestRunJob(jobId: string): Promise<void> {
         appSlug: params.appSlug,
         requiredData: params.requiredData,
         dataOverrides: params.dataOverrides,
+        stepRequirementRefs: params.stepRequirementRefs,
       },
       onLog
     );

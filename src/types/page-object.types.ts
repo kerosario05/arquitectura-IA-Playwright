@@ -51,6 +51,9 @@ export type PageObjectMethod = {
   sensitive: boolean;
   confidence: number;
   status: PageMethodCandidateStatus;
+  /** Optional structured provenance for contract-level capability binding. */
+  sourceActionIds?: string[];
+  targetBinding?: string;
 };
 
 export type PageObjectEntry = {

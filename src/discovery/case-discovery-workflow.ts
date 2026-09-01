@@ -1738,7 +1738,7 @@ export async function runCaseDiscoveryWorkflow(
   options: CaseDiscoveryWorkflowOptions
 ): Promise<CaseDiscoveryWorkflowResult> {
   const startTime = Date.now();
-  const activeConfig = options.config ?? envConfig;
+  let activeConfig = options.config ?? envConfig;
   const outputId = options.scenario?.externalId ?? options.caseId ?? "unknown";
   const outputDir = options.outputDir ? path.resolve(options.outputDir) : getDefaultOutputDir(outputId);
   const evidenceDir = path.join(outputDir, "evidence");
@@ -1748,6 +1748,30 @@ export async function runCaseDiscoveryWorkflow(
     console.log(`[discovery:case] Using app profile: appSlug=${options.appProfile.appSlug} source=${options.appProfile.source}`);
   }
   const workflowAppSlug = options.appProfile?.appSlug ?? activeConfig.app.appProfile;
+  // ── [web:base-url] Fail-closed: appSlug → app_config → baseUrl must be preserved until navigation ──
+  try {
+    const { loadPromotedAppConfigSync: loadCfg } = await import("../automations/app-profile");
+    const cfg: any = loadCfg({ appSlug: workflowAppSlug });
+    const configured: string | undefined = typeof cfg?.baseUrl === "string" ? cfg.baseUrl.trim() : undefined;
+    const requested: string | undefined = activeConfig.app.baseUrl?.trim();
+    if (configured) {
+      if (requested !== configured) {
+        console.log(`[web:base-url] appSlug=${workflowAppSlug} source=app_config configured=${configured} effective=${configured} fallbackUsed=false (corrected from ${requested ?? "undefined"})`);
+        activeConfig = { ...activeConfig, app: { ...activeConfig.app, baseUrl: configured, appProfile: workflowAppSlug } };
+      } else {
+        console.log(`[web:base-url] appSlug=${workflowAppSlug} source=app_config configured=${configured} effective=${configured} fallbackUsed=false`);
+      }
+    } else {
+      // No baseUrl in app_config → fail closed (never fallback to default/other app)
+      const fallbackEff = requested ?? "undefined";
+      console.log(`[web:base-url] appSlug=${workflowAppSlug} source=fallback configured=undefined effective=${fallbackEff} fallbackUsed=true`);
+      throw new Error(`[web:base-url] missing baseUrl for appSlug=${workflowAppSlug} — FAIL CLOSED: create automations/apps/${workflowAppSlug}/app.config.json with baseUrl. Fallback ${fallbackEff} not used.`);
+    }
+  } catch (e) {
+    if (e instanceof Error && e.message.includes("FAIL CLOSED")) throw e;
+    // If import or other non-fail error, log but continue with activeConfig (preserve previous behavior for infra errors)
+    console.log(`[web:base-url] appSlug=${workflowAppSlug} source=error configured=undefined effective=${activeConfig.app.baseUrl} fallbackUsed=true error=${e instanceof Error ? e.message : String(e)}`);
+  }
 
   let scenario: TestScenario;
   let client: TestRailClient;

@@ -1,0 +1,35 @@
+{
+  "scenarioId": "PREVIEW-001",
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\nimport { HomePage } from '../../../../pages/home.page';\n\nprocess.env.APP_SLUG = 'qa3';\nprocess.env.SECTION_SLUG = 'detalle-kiosko';\nprocess.env.SCENARIO_ID = 'PREVIEW-001';\nprocess.env.SCENARIO_TITLE = 'Validar visualizacion de Cuentas de Efectivo en el catalogo';\n\ntest('PREVIEW-001 - Validar visualizacion de Cuentas de Efectivo en el catalogo', async ({ page }) => {\n  const promotedRuntime = createPromotedSpecRuntime(page);\n  const homePage = new HomePage(page);\n\n  try {\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 0,\n      target: 'Iniciar',\n      actionIntent: 'click',\n      expectedEffect: 'abrir el inicio del flujo',\n      action: async () => {\n        await homePage.start();\n      },\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 1,\n      target: 'Explora nuestros productos',\n      actionIntent: 'click',\n      expectedEffect: 'abrir el catalogo de productos',\n      action: async () => {\n        await page.getByText('Explora nuestros productos', { exact: true }).click();\n      },\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 2,\n      target: 'Cuentas de Efectivo',\n      assertion: async () => {\n        await expect(page.getByText('Cuentas de Efectivo')).toBeVisible();\n      },\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});\n",
+  "coveredStepIndexes": [
+    0,
+    1,
+    2
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "Cuentas de Efectivo",
+      "implementation": "await expect(page.getByText('Cuentas de Efectivo')).toBeVisible();"
+    }
+  ],
+  "usedPageObjects": [
+    {
+      "className": "HomePage",
+      "methods": [
+        "start"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "homePage",
+    "promotedRuntime"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

@@ -60,6 +60,7 @@ export function repairMissingIntermediates(
   const diagnostics: IntermediateRepairResult["diagnostics"] = [];
   const originalSteps = [...scenario.steps];
   const repairedSteps: string[] = [];
+  const stepOrigins: Array<number | undefined> = [];
   const insertedSteps: string[] = [];
   let insertedCount = 0;
 
@@ -68,6 +69,7 @@ export function repairMissingIntermediates(
       repaired: false,
       originalSteps,
       repairedSteps: originalSteps,
+      stepOrigins: originalSteps.map((_, index) => index),
       insertedSteps: [],
       insertedCount: 0,
       reasonCode: "no_route_profile",
@@ -112,6 +114,7 @@ export function repairMissingIntermediates(
             const stepNumber = repairedSteps.length + 1;
             const stepText = `${stepNumber}. Clic en "${insertedStep.target}".`;
             repairedSteps.push(stepText);
+            stepOrigins.push(undefined);
             insertedSteps.push(stepText);
             insertedCount++;
             navigationContext.push(insertedStep.target);
@@ -141,6 +144,7 @@ export function repairMissingIntermediates(
             repaired: false,
             originalSteps,
             repairedSteps: originalSteps,
+            stepOrigins: originalSteps.map((_, index) => index),
             insertedSteps: [],
             insertedCount: 0,
             reasonCode: "low_confidence_path",
@@ -166,6 +170,7 @@ export function repairMissingIntermediates(
             repaired: false,
             originalSteps,
             repairedSteps: originalSteps,
+            stepOrigins: originalSteps.map((_, index) => index),
             insertedSteps: [],
             insertedCount: 0,
             reasonCode: "unresolvable_path",
@@ -178,6 +183,7 @@ export function repairMissingIntermediates(
       const stepNumber = repairedSteps.length + 1;
       const stepText = `${stepNumber}. Clic en "${clickTarget}".`;
       repairedSteps.push(stepText);
+      stepOrigins.push(i);
       navigationContext.push(clickTarget);
     } else {
       // Non-click step (validation, etc.) - add as-is with updated numbering
@@ -185,6 +191,7 @@ export function repairMissingIntermediates(
       // Preserve original step text but update numbering
       const stepText = step.replace(/^\d+\./, `${stepNumber}.`);
       repairedSteps.push(stepText);
+      stepOrigins.push(i);
     }
   }
 
@@ -203,6 +210,7 @@ export function repairMissingIntermediates(
     repaired: insertedCount > 0,
     originalSteps,
     repairedSteps,
+    stepOrigins,
     insertedSteps,
     insertedCount,
     reasonCode,

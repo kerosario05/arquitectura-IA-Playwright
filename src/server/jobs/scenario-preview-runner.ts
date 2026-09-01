@@ -8,6 +8,16 @@ import { type ScenarioPreviewRequest, type VirtualCase } from "../../types/scena
 import { config, requireTestRailConfig } from "../../config/env";
 import { TestRailClient } from "../../clients/testrail.client";
 import { defectChecklistStore } from "../services/defect-checklist-store";
+
+function safeUrlForLog(value: unknown): string {
+  if (typeof value !== "string" || !value) return "urlPresent=false";
+  try {
+    const parsed = new URL(value);
+    return `origin="${parsed.origin}" pathname="${parsed.pathname}"`;
+  } catch {
+    return "urlPresent=true parseable=false";
+  }
+}
 import {
   normalizeScenario,
   normalizeVirtualCase,
@@ -38,6 +48,7 @@ import { learnEntryStepsFromSnapshot } from "../services/entry-steps-learner";
 import { RunEvidenceRecorder } from "../../evidence/run-evidence-recorder";
 import { loadEvidenceConfig } from "../../evidence/evidence-types";
 import { buildVirtualCaseFromContract } from "../../automations/case-contract-evaluator";
+import { isEntryStepInsertionAuthorized } from "../../scenarios/scenario-preview.service";
 
 const TECHNICAL_SLUGS = new Set([
   "tests",
@@ -933,7 +944,12 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
 
   if (entrySteps.length > 0) {
     jobStore.appendLog(jobId, `[run:scenario-preview] applying ${entrySteps.length} entrySteps`);
-    applyEntryStepsToScenarios(validScenarios, entrySteps);
+    applyEntryStepsToScenarios(validScenarios, entrySteps, (scenario) =>
+      isEntryStepInsertionAuthorized(scenario, validScenarios
+        .map((candidate) => candidate.functionalBranch)
+        .filter((branch): branch is NonNullable<typeof branch> => Boolean(branch))),
+      (diagnostic) => jobStore.appendLog(jobId, diagnostic),
+    );
   } else {
     jobStore.appendLog(jobId, `[run:scenario-preview] no entrySteps resolved`);
   }
@@ -945,7 +961,17 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
 
   // Normalize scenarios before converting to virtual cases
   const normalizedScenarios = validScenarios.map((s) => {
-    const { scenario, stats } = normalizeScenario(s, routeProfile, appConfig, entrySteps);
+    const entryAuthority = isEntryStepInsertionAuthorized(s, validScenarios
+      .map((candidate) => candidate.functionalBranch)
+      .filter((branch): branch is NonNullable<typeof branch> => Boolean(branch)));
+    const hasMissingEntryStep = entrySteps.some((entryStep) =>
+      !s.steps?.some((step) => normalizeStepForDedup(step) === normalizeStepForDedup(entryStepToText(entryStep))),
+    );
+    const normalizationEntrySteps = entryAuthority && hasMissingEntryStep ? entrySteps : [];
+    // An empty entry list must not fall back to routeProfile.entry: inferred
+    // route data is an implementation resolver, never scenario authority.
+    const normalizationRouteProfile = normalizationEntrySteps.length > 0 ? routeProfile : null;
+    const { scenario, stats } = normalizeScenario(s, normalizationRouteProfile, appConfig, normalizationEntrySteps);
     jobStore.appendLog(
       jobId,
       `[run:scenario-preview] normalized scenario=${s.sourceIssueKey} beforeSteps=${stats.beforeSteps} afterSteps=${stats.afterSteps} entryDeduped=${stats.entryDeduped} canonicalizedLabels=${stats.canonicalizedLabels}`,
@@ -977,8 +1003,17 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
 
   // Normalize virtual cases (second pass for safety)
   const normalizedCases: VirtualCase[] = [];
-  for (const vc of virtualCases) {
-    const { vc: normalized, stats } = normalizeVirtualCase(vc, routeProfile, appConfig, entrySteps);
+  for (const [caseIndex, vc] of virtualCases.entries()) {
+    const sourceScenario = normalizedScenarios[caseIndex];
+    const entryAuthority = isEntryStepInsertionAuthorized(sourceScenario, normalizedScenarios
+      .map((candidate) => candidate.functionalBranch)
+      .filter((branch): branch is NonNullable<typeof branch> => Boolean(branch)));
+    const hasMissingEntryStep = entrySteps.some((entryStep) =>
+      !sourceScenario.steps?.some((step) => normalizeStepForDedup(step) === normalizeStepForDedup(entryStepToText(entryStep))),
+    );
+    const normalizationEntrySteps = entryAuthority && hasMissingEntryStep ? entrySteps : [];
+    const normalizationRouteProfile = normalizationEntrySteps.length > 0 ? routeProfile : null;
+    const { vc: normalized, stats } = normalizeVirtualCase(vc, normalizationRouteProfile, appConfig, normalizationEntrySteps);
     jobStore.appendLog(
       jobId,
       `[run:scenario-preview] normalized ${vc.displayId} beforeSteps=${stats.beforeSteps} afterSteps=${stats.afterSteps} entryDeduped=${stats.entryDeduped} canonicalizedLabels=${stats.canonicalizedLabels}`,
@@ -986,10 +1021,30 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
     normalizedCases.push(normalized);
   }
 
+  const scenarioBranches = normalizedScenarios
+    .map((scenario) => scenario.functionalBranch)
+    .filter((branch): branch is NonNullable<typeof branch> => Boolean(branch));
+  const entryAuthorityByIndex = (index: number): boolean =>
+    isEntryStepInsertionAuthorized(normalizedScenarios[index], scenarioBranches);
+
+  // Propagate per-scenario dataOverrides from QA Lab (generic, per-scenario isolated, no global map)
+  const dataOverridesMap = (pRecord as any).dataOverrides as Record<string, Record<string, string>> | undefined;
+  if (dataOverridesMap && typeof dataOverridesMap === "object" && !Array.isArray(dataOverridesMap)) {
+    for (const vc of normalizedCases) {
+      const key = (vc as any).displayId ?? (vc as any).id;
+      const overrides = (dataOverridesMap as any)[key] ?? (dataOverridesMap as any)[(vc as any).id] ?? undefined;
+      if (overrides && typeof overrides === "object" && Object.keys(overrides).length > 0) {
+        (vc as any).dataOverrides = overrides;
+        jobStore.appendLog(jobId, `[web:dataOverrides] scenario=${vc.displayId} overrides=${Object.keys(overrides).join(",")}`);
+      }
+    }
+  }
+
   // Final ordering pass: ensure entrySteps are first in the correct order
   if (entrySteps.length > 0) {
-    for (const vc of normalizedCases) {
-      const result = normalizeScenarioEntryStepsOrder(vc.steps, entrySteps);
+    for (const [caseIndex, vc] of normalizedCases.entries()) {
+      const authorizedEntrySteps = entryAuthorityByIndex(caseIndex) ? entrySteps : [];
+      const result = normalizeScenarioEntryStepsOrder(vc.steps, authorizedEntrySteps);
       vc.steps = result.steps;
       jobStore.appendLog(
         jobId,
@@ -1006,14 +1061,12 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
 
   // Guard: filter unsupported click targets not backed by routeProfile/snapshot
   // but PRESERVE clicks that are part of required entry steps navigation
-  const entryStepsTargets = new Set(
-    entrySteps
-      .filter(es => es.action === "click")
-      .map(es => es.target.toLowerCase())
-  );
-
-  for (const vc of normalizedCases) {
-    const result = filterUnsupportedClickTargets(vc.steps, routeProfile, entrySteps);
+  for (const [caseIndex, vc] of normalizedCases.entries()) {
+    const authorizedEntrySteps = entryAuthorityByIndex(caseIndex) ? entrySteps : [];
+    const entryStepsTargets = new Set(
+      authorizedEntrySteps.filter((es) => es.action === "click").map((es) => es.target.toLowerCase()),
+    );
+    const result = filterUnsupportedClickTargets(vc.steps, routeProfile, authorizedEntrySteps);
 
     // Filter out converted targets that are actually required navigation
     const actuallyConverted = result.convertedTargets.filter(
@@ -1105,8 +1158,9 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
 
   // Guard: convert unsupported short/generic click targets that appear right before ordinal selection
   const preOrdinalConvertedTargets = new Map<string, Set<string>>();
-  for (const vc of normalizedCases) {
-    const result = convertUnsupportedPreOrdinalClicks(vc.steps, routeProfile, entrySteps);
+  for (const [caseIndex, vc] of normalizedCases.entries()) {
+    const authorizedEntrySteps = entryAuthorityByIndex(caseIndex) ? entrySteps : [];
+    const result = convertUnsupportedPreOrdinalClicks(vc.steps, routeProfile, authorizedEntrySteps);
     const converted = new Set<string>();
     for (const diag of result.diagnostics) {
       converted.add(diag.target.toLowerCase());
@@ -1122,7 +1176,12 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   // Post-guards: Restore any required navigation that was converted to assertions by guards
   // This runs AFTER all guards to catch re-conversions. Only restore when the step was
   // actually a converted click (action), never a genuine assertion.
-  for (const vc of normalizedCases) {
+  for (const [caseIndex, vc] of normalizedCases.entries()) {
+    const entryStepsTargets = new Set(
+      (entryAuthorityByIndex(caseIndex) ? entrySteps : [])
+        .filter((es) => es.action === "click")
+        .map((es) => es.target.toLowerCase()),
+    );
     const convertedClickTargets = preOrdinalConvertedTargets.get(vc.displayId) ?? new Set<string>();
     vc.steps = vc.steps.map((step: string) => {
       const validationMatch = step.match(/^Validar que se muestre "([^"]+)"\.?$/i);
@@ -1142,7 +1201,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   }
 
   // Guard: ensure detail scenarios have an item selection step before detail assertions
-  for (const vc of normalizedCases) {
+  for (const [caseIndex, vc] of normalizedCases.entries()) {
     // Skip list-only scenarios — they should not get ordinal selection
     const isListOnly =
       /^visualiz(?:aci[oó]n|ar)\s+(?:\w+\s+)*listado/i.test(vc.title) ||
@@ -1155,7 +1214,8 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
       jobStore.appendLog(jobId, `[scenario-detail-guard] skipped scenario=${vc.displayId} reason=list_only`);
       continue;
     }
-    const result = ensureDetailScenarioHasItemSelection(vc.steps, vc.expectedResult, routeProfile, entrySteps);
+    const authorizedEntrySteps = entryAuthorityByIndex(caseIndex) ? entrySteps : [];
+    const result = ensureDetailScenarioHasItemSelection(vc.steps, vc.expectedResult, routeProfile, authorizedEntrySteps);
     if (result.inserted) {
       jobStore.appendLog(
         jobId,
@@ -1242,14 +1302,19 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
 
   // Validate artifacts before execution (FASE 3)
   // Expected navigation clicks = all entry steps that are clicks (minimum navigation for any route)
-  const expectedNavigationTargets = new Set(
-    entrySteps.map((es) => es.target.toLowerCase())
-  );
-  const expectedRequiredNavigationCount = entrySteps.filter((es) => es.action === "click").length;
-
   let hasNavigationBlockage = false;
 
-  for (const vc of normalizedCases) {
+  for (const [caseIndex, vc] of normalizedCases.entries()) {
+    const sourceScenario = normalizedScenarios[caseIndex];
+    const navigationAuthorized = isEntryStepInsertionAuthorized(sourceScenario, normalizedScenarios
+      .map((candidate) => candidate.functionalBranch)
+      .filter((branch): branch is NonNullable<typeof branch> => Boolean(branch)));
+    const expectedNavigationTargets = new Set(
+      navigationAuthorized ? entrySteps.map((es) => es.target.toLowerCase()) : [],
+    );
+    const expectedRequiredNavigationCount = navigationAuthorized
+      ? entrySteps.filter((es) => es.action === "click").length
+      : 0;
     jobStore.appendLog(jobId, `[scenario-preview-runner] beforeWrite scenario=${vc.displayId} steps=${JSON.stringify(vc.steps)}`);
 
     // Verify that required navigation is preserved as clicks, not converted to assertions.
@@ -1542,7 +1607,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
         });
         testRailRunId = run.id;
         testRailRunUrl = run.url;
-        jobStore.appendLog(jobId, `[run:scenario-preview] createdTestRun id=${run.id} url=${run.url ?? "n/a"}`);
+        jobStore.appendLog(jobId, `[run:scenario-preview] createdTestRun id=${run.id} ${safeUrlForLog(run.url)}`);
         jobStore.update(jobId, {
           summary: mergeScenarioPreviewSummary(jobStore.get(jobId)?.summary, {
             testRailRunId: run.id,
@@ -2902,8 +2967,10 @@ export function enforceExplicitScenarioClickAuthority(
 }
 
 function applyEntryStepsToScenarios(
-  scenarios: Array<{ steps?: string[] }>,
+  scenarios: Array<{ steps?: string[]; stepRequirementRefs?: Array<{ stepIndex: number; requirementId: string; facet?: string }>; requirementDependencies?: Array<{ requirementId: string }>; scenarioId?: string; sourceIssueKey?: string }>,
   entrySteps: EntryStepConfig[],
+  isAuthorized: (scenario: { steps?: string[]; stepRequirementRefs?: Array<{ stepIndex: number; requirementId: string; facet?: string }>; requirementDependencies?: Array<{ requirementId: string }> }) => boolean,
+  log?: (message: string) => void,
 ): void {
   if (!entrySteps.length) return;
   const entryTexts = entrySteps.map(entryStepToText);
@@ -2911,12 +2978,18 @@ function applyEntryStepsToScenarios(
 
   for (const sc of scenarios) {
     if (!sc.steps) continue;
+    const resolvedCount = entrySteps.length;
+    if (!isAuthorized(sc)) {
+      log?.(`[entry-steps] resolved=${resolvedCount} authorized=0 inserted=0 reason=canonical_authority_missing scenarioId=${sc.scenarioId ?? sc.sourceIssueKey ?? "unknown"}`);
+      continue;
+    }
     const existingSteps = sc.steps;
-    const nonEntrySteps = existingSteps.filter((step) => {
-      const normalized = normalizeStepForDedup(step);
-      return !normalizedEntryTexts.some((net) => normalized.startsWith(net));
-    });
-    sc.steps = [...entryTexts, ...nonEntrySteps];
+    const existingEntryTexts = new Set(existingSteps.map(normalizeStepForDedup));
+    const missingEntryTexts = entryTexts.filter((entryText, index) =>
+      !existingEntryTexts.has(normalizedEntryTexts[index]),
+    );
+    sc.steps = [...missingEntryTexts, ...existingSteps];
+    log?.(`[entry-steps] resolved=${resolvedCount} authorized=${entryTexts.length} inserted=${missingEntryTexts.length} scenarioId=${sc.scenarioId ?? sc.sourceIssueKey ?? "unknown"}`);
   }
 }
 

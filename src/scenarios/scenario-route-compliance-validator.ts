@@ -9,7 +9,7 @@
  * DO NOT hardcode project-specific logic.
  */
 
-import type { McpScenario, ScenarioRouteResolution, McpRouteProfile } from "./scenario-types";
+import type { CanonicalClaim, McpScenario, ScenarioRouteResolution, McpRouteProfile } from "./scenario-types";
 import type { DerivedExecutionContext } from "./route-profile-derived-context";
 import {
   normalizeTarget,
@@ -171,7 +171,8 @@ function isValidationStep(step: string): boolean {
 export function validateScenarioCompliance(
   scenario: McpScenario,
   derivedContext: DerivedExecutionContext,
-  resolution?: ScenarioRouteResolution
+  resolution?: ScenarioRouteResolution,
+  canonicalClaims: readonly CanonicalClaim[] = [],
 ): ScenarioComplianceResult {
   const diagnostics: ScenarioComplianceResult["diagnostics"] = [];
   let valid = true;
@@ -186,10 +187,18 @@ export function validateScenarioCompliance(
   }
 
   // Validate each step
-  for (const step of scenario.steps) {
+  for (const [stepIndex, step] of scenario.steps.entries()) {
     const clickTarget = extractClickTarget(step);
 
     if (clickTarget) {
+      const stepClaimIds = new Set(
+        (scenario.stepClaims ?? [])
+          .filter((claim) => claim.stepIndex === stepIndex)
+          .map((claim) => claim.claimId),
+      );
+      const canonicalFunctionalAction = canonicalClaims.some((claim) =>
+        claim.claimType === "action" && stepClaimIds.has(claim.claimId),
+      );
       // 1. Check if click target is backed
       const backingResult = isTargetBacked(
         clickTarget,
@@ -198,12 +207,20 @@ export function validateScenarioCompliance(
       );
 
       if (!backingResult.backed) {
-        // Check if it's a visible but not executable term (content term)
-        const isVisibleButNotExecutable = derivedContext.visibleButNotExecutableTerms.some(
-          term => targetsMatch(clickTarget, term)
-        );
+        if (canonicalFunctionalAction) {
+          diagnostics.push({
+            level: "warning",
+            step,
+            target: clickTarget,
+            message: "Functional action has canonical authority but no execution backing.",
+          });
+        } else {
+          // Check if it's a visible but not executable term (content term)
+          const isVisibleButNotExecutable = derivedContext.visibleButNotExecutableTerms.some(
+            term => targetsMatch(clickTarget, term)
+          );
 
-        if (isVisibleButNotExecutable) {
+          if (isVisibleButNotExecutable) {
           diagnostics.push({
             level: "error",
             step,
@@ -214,13 +231,13 @@ export function validateScenarioCompliance(
           if (reasonCode === "valid") {
             reasonCode = "content_term_used_as_click";
           }
-        } else {
+          } else {
           // Check if it's an assertion-only term
           const isAssertionOnly = derivedContext.assertionOnlyTerms.some(
             term => targetsMatch(clickTarget, term)
           );
 
-          if (isAssertionOnly) {
+            if (isAssertionOnly) {
             diagnostics.push({
               level: "error",
               step,
@@ -231,7 +248,7 @@ export function validateScenarioCompliance(
             if (reasonCode === "valid") {
               reasonCode = "assertion_term_used_as_click";
             }
-          } else {
+            } else {
             // Provide more helpful error message
             const normalizedTarget = normalizeTarget(clickTarget);
             const mojibake = detectMojibake(clickTarget);
@@ -252,6 +269,7 @@ export function validateScenarioCompliance(
             valid = false;
             if (reasonCode === "valid") {
               reasonCode = "unbacked_click_target";
+            }
             }
           }
         }
@@ -373,7 +391,8 @@ export function validateScenarioCompliance(
 export function validateScenariosCompliance(
   scenarios: McpScenario[],
   derivedContext: DerivedExecutionContext,
-  routeResolutions: Map<string, ScenarioRouteResolution>
+  routeResolutions: Map<string, ScenarioRouteResolution>,
+  canonicalClaims: readonly CanonicalClaim[] = [],
 ): {
   validScenarios: McpScenario[];
   invalidScenarios: Array<{ scenario: McpScenario; result: ScenarioComplianceResult }>;
@@ -383,7 +402,7 @@ export function validateScenariosCompliance(
 
   for (const scenario of scenarios) {
     const resolution = routeResolutions.get(scenario.sourceIssueKey);
-    const result = validateScenarioCompliance(scenario, derivedContext, resolution);
+    const result = validateScenarioCompliance(scenario, derivedContext, resolution, canonicalClaims);
 
     if (result.valid) {
       validScenarios.push(scenario);

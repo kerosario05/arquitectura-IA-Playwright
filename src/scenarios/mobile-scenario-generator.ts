@@ -5,11 +5,15 @@ import { buildMobileScenarioMessages } from "./mobile-scenario-prompt-builder";
 import { loadMobileRouteProfile } from "../mobile/mobile-route-profile";
 import { evaluateScenarioPrecheck } from "../mobile/mobile-execution-precheck";
 import { loadMobileKnowledge, selectRelevantMobileKnowledge } from "../mobile/mobile-knowledge-resolver";
+import type { MobileKnowledgeItem } from "../mobile/mobile-knowledge-persister";
 import { repairUtf8Mojibake } from "../mobile/mobile-text-normalization";
+import { buildRequirementAccounting } from "./scenario-functional-quality";
+import { persistHuDeclaredKnowledge } from "../knowledge/hu-declared-persister";
 import type { RequiredJiraRuntimeConfig } from "../types/jira.types";
 import { isSensitiveDataLabel, slugifyDataKey, type MobileStep, type MobileDataField, type MobileStepTarget } from "../mobile/mobile-step-types";
-import type { MobileRouteProfile, MobileScreenDataField } from "../mobile/mobile-route-profile.types";
+import type { MobileRouteProfile, MobileScreenDataField, MobileFlow, MobileStepHint } from "../mobile/mobile-route-profile.types";
 import type { LaunchScenario } from "../server/jobs/launch-orchestrator";
+import { parseStepDestinationExpectations, validateStepDestinationExpectations, buildMobileDestinationClaimManifest, type StepDestinationExpectation, type DestinationClaimDefinition } from "../mobile/mobile-destination-claim";
 
 export type MobileGeneratedScenario = {
   scenarioId: string;
@@ -27,11 +31,30 @@ export type MobileGeneratedScenario = {
   requiresManualData?: boolean;
   /** Acceptance-criterion identifiers from the HU that this scenario covers (e.g. ["CA01"]). */
   coveredCriteria?: string[];
+  /** Step-level requirement references: which canonical criterion IDs does each step materialize.
+   *  stepIndex is 0-based (0 = launchApp). Only steps that inequivocally execute a criterion. */
+  stepRequirementRefs?: Array<{ stepIndex: number; requirementIds: string[] }>;
+  /** Step-level destination expectations: structured declarations of where each step is expected to land.
+   *  Each expectation maps a step to a semantic destination claim derived from canonical requirements.
+   *  This is a DECLARATION, not runtime validation — destinationSemanticAuthority remains pending until
+   *  runtime evidence confirms the destination. */
+  stepDestinationExpectations?: StepDestinationExpectation[];
+  /** Materialized navigation steps that reach the required initial state, derived from a
+   *  known flow/route when a functional precondition implies a later app screen. */
+  prerequisiteSteps?: MobileStep[];
+  /** True when a functional precondition needs a route that Knowledge cannot resolve yet —
+   *  the scenario must NOT pretend to start at a later screen without a real path. */
+  requiresRouteLearning?: boolean;
+  /** True only when every AI-generated locator is backed by validated runtime evidence
+   *  (source=mcp_runtime_observation, validationStatus=validated, trustedForReuse=true).
+   *  False means at least one target is an unverified AI guess and must not be treated as
+   *  execution authority on its own. */
+  locatorExecutionBacked?: boolean;
 };
 
 /** Flattens all declared dataFields across every screen of the route profile. */
 function collectDeclaredDataFields(routeProfile?: MobileRouteProfile | null): MobileScreenDataField[] {
-  if (!routeProfile) return [];
+  if (!routeProfile?.screens) return [];
   return Object.values(routeProfile.screens).flatMap((s) => s.dataFields ?? []);
 }
 
@@ -212,6 +235,284 @@ function deriveRequiredData(
 
 export function deriveScenarioRequiredData(steps: MobileStep[], routeProfile?: MobileRouteProfile | null): MobileDataField[] {
   return deriveRequiredData(steps, routeProfile).fields;
+}
+
+/** Phrases that indicate a FUNCTIONAL prerequisite (the user must already be at / have passed
+ *  a later app state) as opposed to a merely descriptive precondition. Neutral, app-agnostic —
+ *  no hardcoded labels, document types or business values. */
+const PREREQUISITE_STATE_RE = /\b(?:ya (?:supero|completo|completo|realizo|realizo|cargo|cargo|registro|registro|valido|valido|acepto|acepto)|previamente (?:supero|completo|valido|registro|realizo|cargo)|supero (?:las|la|el|los) (?:validaciones|verificaciones|identidad)|paso por|esta (?:pre)?(?:validado|verificado|autenticado|registrado)|cliente (?:ya )?(?:supero|completo|valido|registro|esta (?:pre)?validado|prevalidado)|usuario (?:ya )?(?:supero|completo|valido|registro|esta (?:pre)?validado|prevalidado)|ya se encuentra en|ya esta en|alcanzo el estado|se encuentra en la pantalla)\b/i;
+
+/** Signals a scenario is pretending to start at a later screen: after launchApp the very next
+ *  step is a pure assertion/check on a non-entry screen, with no navigation/fill to reach it. */
+function startsAtLaterScreenWithoutPath(steps: MobileStep[]): boolean {
+  if (steps.length < 2 || steps[0]?.action !== "launchApp") return false;
+  const second = steps[1];
+  if (!second) return false;
+  const isAssert = second.action === "assertVisible" || second.action === "assertEnabled" || second.action === "assertDisabled";
+  if (!isAssert) return false;
+  // A fill/click path would begin the setup; a pure assert right after launch implies magic state.
+  return !steps.slice(1).some((s) => s.action === "fill" || s.action === "click");
+}
+
+/** Finds a route profile flow whose trigger keywords match the functional precondition text
+ *  (or the scenario title/step descriptions, which often restate the required state). Matching
+ *  tolerates morphological variants (plural/gender) by checking keyword tokens as substrings. */
+function matchFlowForPrerequisite(
+  routeProfile: MobileRouteProfile | null | undefined,
+  preconditionText: string,
+  contextText = "",
+): { flow: MobileFlow; flowId: string } | null {
+  if (!routeProfile?.flows) return null;
+  const corpus = repairUtf8Mojibake(`${preconditionText} ${contextText}`).toLowerCase();
+  const tokens = corpus.split(/[^a-z0-9]+/).filter((t) => t.length >= 4);
+  for (const [flowId, flow] of Object.entries(routeProfile.flows)) {
+    const keywords = (flow.triggerKeywords ?? []).map((kw) => repairUtf8Mojibake(kw).toLowerCase());
+    for (const kw of keywords) {
+      if (corpus.includes(kw)) return { flow, flowId };
+      // Morphological tolerance: count how many significant keyword tokens appear inside the
+      // corpus as substrings (covers plural/gender inflections like validacion(s), cliente(s)).
+      const kwTokens = kw.split(/[^a-z0-9]+/).filter((t) => t.length >= 5);
+      const hits = kwTokens.filter((tk) => tokens.some((c) => c.includes(tk))).length;
+      if (kwTokens.length > 0 && hits >= Math.max(1, Math.ceil(kwTokens.length / 2))) return { flow, flowId };
+    }
+  }
+  return null;
+}
+
+/** Collects the data fields of every screen a flow touches (entry screen + screens referenced
+ *  by its entry steps via description/screen mentions) so a prerequisite can surface them. */
+function collectFlowDataFields(routeProfile: MobileRouteProfile | null | undefined, flow: MobileFlow): MobileScreenDataField[] {
+  if (!routeProfile?.screens) return [];
+  const ids = new Set<string>();
+  if (flow.entryFromScreen) ids.add(flow.entryFromScreen);
+  // Best-effort: any screen whose title/description text appears in an entry step description.
+  for (const st of flow.entrySteps) {
+    const desc = repairUtf8Mojibake(st.description ?? "").toLowerCase();
+    for (const [id, screen] of Object.entries(routeProfile.screens)) {
+      if (desc.includes(repairUtf8Mojibake(screen.title).toLowerCase())) ids.add(id);
+    }
+  }
+  const fields: MobileScreenDataField[] = [];
+  for (const id of ids) {
+    const screen = routeProfile.screens[id];
+    if (screen?.dataFields) fields.push(...screen.dataFields);
+  }
+  return fields;
+}
+
+/**
+ * Materializes a functional prerequisite into real navigation steps + data requirements when
+ * the route profile has a matching flow. If no route is known, marks requiresRouteLearning so
+ * the scenario is NOT silently left as a launchApp → assert on a later screen (magic state).
+ */
+export function materializeFunctionalPrerequisite(
+  scenario: MobileGeneratedScenario,
+  routeProfile?: MobileRouteProfile | null,
+): MobileGeneratedScenario {
+  if (scenario.requiresRouteLearning) return scenario;
+  const preconditions = scenario.preconditions ?? [];
+  const functionalPrecondition = preconditions.find((p) => PREREQUISITE_STATE_RE.test(p));
+  if (!functionalPrecondition) return scenario;
+  // Scenario already contains an explicit setup path — nothing to materialize.
+  if (scenario.steps.some((s) => s.action === "fill") || scenario.steps.some((s) => s.action === "click" && s.target?.value)) {
+    return scenario;
+  }
+
+  const matched = matchFlowForPrerequisite(routeProfile, functionalPrecondition, `${scenario.title} ${scenario.steps.map((s) => `${s.description ?? ""} ${s.target?.value ?? ""}`).join(" ")}`);
+  if (!matched) {
+    console.log(
+      `[mobile:prerequisite] appSlug=${routeProfile?.appSlug ?? "-"} scenario=${scenario.scenarioId} status=requires_route_learning precondition="${functionalPrecondition.slice(0, 120)}" flow=none`,
+    );
+    return { ...scenario, requiresRouteLearning: true };
+  }
+
+  const { flow } = matched;
+  const prerequisiteSteps: MobileStep[] = flow.entrySteps
+    .filter((st) => st.action !== "launchApp" && st.action !== "screenshot")
+    .map((st) => ({
+      action: st.action,
+      description: st.description ?? `${st.action} ${st.target?.value ?? ""}`.trim(),
+      target: st.target,
+      value: st.value,
+    }));
+
+  const flowFields = collectFlowDataFields(routeProfile, flow);
+  const extraData: MobileDataField[] = flowFields.map((df) => {
+    const stepIdx = prerequisiteSteps.findIndex((st) => st.target?.value === df.matchLocator.value);
+    return {
+      key: df.key,
+      label: df.label,
+      kind: df.kind,
+      stepIndex: stepIdx >= 0 ? stepIdx : 0,
+      exampleValue: df.exampleValue ?? df.defaultValue ?? "",
+      sensitive: df.sensitive,
+      options: df.kind === "select" ? df.options : undefined,
+      defaultValue: df.kind === "select" ? df.defaultValue : undefined,
+      applyTargetTemplate: df.kind === "select" ? df.applyTargetTemplate : undefined,
+      openerLocator: df.kind === "select" ? df.matchLocator : undefined,
+    };
+  });
+
+  // Merge with existing requiredData (dedupe by key), preserving explicit fields.
+  const existingKeys = new Set((scenario.requiredData ?? []).map((f) => f.key));
+  const mergedData = [...(scenario.requiredData ?? [])];
+  for (const f of extraData) {
+    if (!existingKeys.has(f.key)) {
+      mergedData.push(f);
+      existingKeys.add(f.key);
+    }
+  }
+
+  console.log(
+    `[mobile:prerequisite] appSlug=${routeProfile?.appSlug ?? "-"} scenario=${scenario.scenarioId} status=materialized flow=${matched.flowId} steps=${prerequisiteSteps.length} dataFields=${extraData.length}`,
+  );
+  return { ...scenario, prerequisiteSteps, requiredData: mergedData, requiresRouteLearning: false };
+}
+
+/** Normalizes a token for evidence matching: repairs mojibake, strips accents, lowercases. */
+function normalizeLocatorToken(value: string): string {
+  return repairUtf8Mojibake(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+type LocatorStrategy = "accessibilityId" | "id" | "xpath" | "className" | "androidUiAutomator";
+
+/** Field keys that carry TECHNICAL locator identity per strategy. Only these can back a
+ *  generated technical locator. Semantic label/text fields NEVER appear here. */
+const TECHNICAL_FIELD_KEYS: Record<LocatorStrategy, string[]> = {
+  accessibilityId: ["accessibilityId", "contentDesc", "content-desc", "accessibility-id"],
+  id: ["resourceId", "resource-id", "id"],
+  xpath: ["xpath", "locatorIdentity"],
+  className: ["className", "class", "locatorIdentity"],
+  androidUiAutomator: ["androidUiAutomator", "locatorIdentity", "uiAutomator"],
+};
+
+function isLocatorStrategy(value: string | undefined): value is LocatorStrategy {
+  return value === "accessibilityId" || value === "id" || value === "xpath" || value === "className" || value === "androidUiAutomator";
+}
+
+function collectStringArray(value: unknown): string[] {
+  if (Array.isArray(value)) return value.filter((v): v is string => typeof v === "string");
+  if (typeof value === "string") return [value];
+  return [];
+}
+
+function collectTechnicalFromControl(value: unknown, strategy: LocatorStrategy): string[] {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return [];
+  const rec = value as Record<string, unknown>;
+  const out: string[] = [];
+  // Explicit strategy/value pair (e.g. { strategy: "accessibilityId", value: "x" }).
+  if (typeof rec.strategy === "string" && isLocatorStrategy(rec.strategy) && rec.strategy === strategy && typeof rec.value === "string") {
+    out.push(rec.value);
+  }
+  for (const key of TECHNICAL_FIELD_KEYS[strategy]) {
+    out.push(...collectStringArray(rec[key]));
+  }
+  return out;
+}
+
+/**
+ * Builds per-strategy sets of TECHNICAL locator identity observed at runtime, plus a set of
+ * SEMANTIC control identities. Only the technical set can grant locatorExecutionBacked.
+ */
+function buildEvidenceSets(knowledge: { items: MobileKnowledgeItem[] }): {
+  technicalByStrategy: Map<LocatorStrategy, Set<string>>;
+  semantic: Set<string>;
+} {
+  const technicalByStrategy = new Map<LocatorStrategy, Set<string>>();
+  const semantic = new Set<string>();
+  for (const item of knowledge.items ?? []) {
+    if (item.source !== "mcp_runtime_observation") continue;
+    if (item.validationStatus !== "validated" || item.trustedForReuse !== true) continue;
+
+    // SEMANTIC evidence: labels, visible text, business labels, click targets.
+    for (const t of [
+      ...((item.clickTargets as unknown[]) ?? []),
+      ...((item.businessLabels as unknown[]) ?? []),
+      ...((item.assertionTargets as unknown[]) ?? []),
+    ]) {
+      if (typeof t === "string" && t.trim()) semantic.add(normalizeLocatorToken(t));
+    }
+
+    // observedControls may be strings (semantic) or structured controls (may carry technical
+    // attributes). Keep semantic labels always; collect technical per strategy when present.
+    for (const c of (item.observedControls as unknown[]) ?? []) {
+      if (typeof c === "string") {
+        if (c.trim()) semantic.add(normalizeLocatorToken(c));
+        continue;
+      }
+      if (c && typeof c === "object") {
+        const rec = c as Record<string, unknown>;
+        for (const t of collectStringArray(rec.label)) if (t.trim()) semantic.add(normalizeLocatorToken(t));
+        for (const t of collectStringArray(rec.businessLabel)) if (t.trim()) semantic.add(normalizeLocatorToken(t));
+        for (const strategy of Object.keys(TECHNICAL_FIELD_KEYS) as LocatorStrategy[]) {
+          for (const t of collectTechnicalFromControl(c, strategy)) {
+            if (t.trim()) {
+              if (!technicalByStrategy.has(strategy)) technicalByStrategy.set(strategy, new Set());
+              technicalByStrategy.get(strategy)!.add(normalizeLocatorToken(t));
+            }
+          }
+        }
+      }
+    }
+
+    // Item-level technical attributes (direct fields), per strategy.
+    for (const strategy of Object.keys(TECHNICAL_FIELD_KEYS) as LocatorStrategy[]) {
+      for (const key of TECHNICAL_FIELD_KEYS[strategy]) {
+        for (const t of collectStringArray(item[key])) {
+          if (t.trim()) {
+            if (!technicalByStrategy.has(strategy)) technicalByStrategy.set(strategy, new Set());
+            technicalByStrategy.get(strategy)!.add(normalizeLocatorToken(t));
+          }
+        }
+      }
+    }
+  }
+  return { technicalByStrategy, semantic };
+}
+
+/**
+ * Classifies each AI-generated technical locator: it is execution-backed ONLY when runtime
+ * evidence contains a matching TECHNICAL attribute for the same strategy (accessibilityId,
+ * resource-id, xpath/locatorIdentity, className identity, androidUiAutomator identity).
+ * Semantic matches (labels/text) never grant technical authority — if the required technical
+ * attribute is absent, the locator stays unbacked (requiresRouteLearning).
+ */
+export function classifyLocatorExecutionBacking(
+  scenario: MobileGeneratedScenario,
+  knowledge: { items: MobileKnowledgeItem[] },
+): MobileGeneratedScenario {
+  const { technicalByStrategy, semantic } = buildEvidenceSets(knowledge);
+  let anyTargetStep = false;
+  let allBacked = true;
+  let anySemanticOnly = false;
+  const unbacked: string[] = [];
+  for (const step of scenario.steps ?? []) {
+    const raw = step.target?.value ?? "";
+    if (!raw.trim()) continue;
+    const strategy = step.target?.strategy;
+    if (!isLocatorStrategy(strategy)) continue;
+    anyTargetStep = true;
+    const normalized = normalizeLocatorToken(raw);
+    const technicalBacked = (technicalByStrategy.get(strategy)?.has(normalized) ?? false);
+    const semanticMatch = semantic.has(normalized);
+    if (!technicalBacked) {
+      allBacked = false;
+      if (semanticMatch) anySemanticOnly = true;
+      unbacked.push(`${strategy}:${raw.slice(0, 60)}`);
+    }
+  }
+  const requiresRouteLearning = anyTargetStep ? !allBacked : (scenario.requiresRouteLearning ?? false);
+  const locatorExecutionBacked = anyTargetStep ? allBacked : (scenario.locatorExecutionBacked ?? false);
+  if (unbacked.length > 0) {
+    console.log(
+      `[mobile:locator-authority] appSlug=${scenario.sourceIssueKey ? "-" : "-"} scenario=${scenario.scenarioId} status=${anySemanticOnly ? "semantic_only_unbacked" : "unbacked"} targets=${unbacked.length} locatorExecutionBacked=false requiresRouteLearning=true`,
+    );
+  }
+  return { ...scenario, requiresRouteLearning, locatorExecutionBacked };
 }
 
 export type MobileRejectedIssue = {
@@ -482,6 +783,40 @@ function parseCriterionIds(value: unknown): string[] | undefined {
   return ids.length > 0 ? ids : undefined;
 }
 
+function parseStepRequirementRefs(
+  value: unknown,
+  stepCount: number,
+): Array<{ stepIndex: number; requirementIds: string[] }> | undefined {
+  if (!Array.isArray(value) || value.length === 0) return undefined;
+  const refs: Array<{ stepIndex: number; requirementIds: string[] }> = [];
+  for (const raw of value) {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) continue;
+    const r = raw as Record<string, unknown>;
+    const idx = typeof r.stepIndex === "number" && Number.isInteger(r.stepIndex) && r.stepIndex >= 0 && r.stepIndex < stepCount
+      ? r.stepIndex
+      : undefined;
+    if (idx === undefined) continue;
+    const ids = Array.isArray(r.requirementIds)
+      ? Array.from(new Set(r.requirementIds.filter((v: unknown): v is string => typeof v === "string").map((v) => v.trim()).filter(Boolean).map(normalizeCriterionId)))
+      : [];
+    if (ids.length > 0) refs.push({ stepIndex: idx, requirementIds: ids });
+  }
+  return refs.length > 0 ? refs : undefined;
+}
+
+function validateStepRequirementRefs(
+  refs: Array<{ stepIndex: number; requirementIds: string[] }>,
+  canonicalIds: string[],
+): Array<{ stepIndex: number; requirementIds: string[] }> {
+  const canonicalSet = new Set(canonicalIds);
+  return refs
+    .map((ref) => {
+      const validIds = ref.requirementIds.filter((id) => canonicalSet.has(id));
+      return validIds.length > 0 ? { stepIndex: ref.stepIndex, requirementIds: validIds } : null;
+    })
+    .filter((ref): ref is { stepIndex: number; requirementIds: string[] } => ref !== null);
+}
+
 /**
  * Extracts acceptance-criterion identifiers from the HU text delivered to the generator.
  * Supports explicit labels (CA/AC/CRIT/CRITERIO/CRITÉRIO + number) and falls back to a
@@ -564,7 +899,9 @@ function buildCriterionCoverage(
 function parseAiScenarios(
   parsed: Record<string, unknown> | undefined,
   fallbackIssueKey: string,
-  routeProfile?: MobileRouteProfile | null
+  routeProfile?: MobileRouteProfile | null,
+  knowledge?: { items: MobileKnowledgeItem[] },
+  destinationClaimManifest?: DestinationClaimDefinition[],
 ): {
   scenarios: MobileGeneratedScenario[];
   rejected: MobileRejectedIssue[];
@@ -619,7 +956,7 @@ function parseAiScenarios(
     const steps = normalizedSteps;
     // deriveRequiredData may materialize a dependent select click, so it can change `steps`.
     const derivedData = deriveRequiredData(steps, routeProfile);
-    scenarios.push({
+    let scenario: MobileGeneratedScenario = {
       // Assigned server-side (not by the AI) so it's stable across re-runs and
       // guaranteed unique — launchExecution() rejects duplicate scenarioIds.
       scenarioId: `MOBILE-${sourceIssueKey}-${String(localIndex).padStart(3, "0")}`,
@@ -637,8 +974,18 @@ function parseAiScenarios(
         ? rawScenario.requiredDataProfile.trim()
         : undefined,
       requiresManualData: parseRequiresManualData(rawScenario.requiresManualData),
-      coveredCriteria: parseCriterionIds(rawScenario.coveredCriteria)
-    });
+      coveredCriteria: parseCriterionIds(rawScenario.coveredCriteria),
+      stepRequirementRefs: parseStepRequirementRefs(rawScenario.stepRequirementRefs, steps.length),
+      stepDestinationExpectations: parseStepDestinationExpectations(
+        rawScenario.stepDestinationExpectations,
+        steps.length,
+        parseCriterionIds(rawScenario.coveredCriteria) ?? [],
+        destinationClaimManifest,
+      ),
+    };
+    scenario = materializeFunctionalPrerequisite(scenario, routeProfile);
+    scenario = classifyLocatorExecutionBacking(scenario, knowledge ?? { items: [] });
+    scenarios.push(scenario);
   }
 
   const rawRejected = container.rawRejected;
@@ -721,7 +1068,24 @@ export async function generateMobileScenarios(
   const routeProfile = appSlug ? loadMobileRouteProfile(appSlug) : null;
   const knowledge = appSlug ? loadMobileKnowledge(appSlug) : { items: [] };
   if (appSlug) {
-    logger.log(`[mobile:scenarios] routeProfile appSlug=${appSlug} found=${routeProfile !== null} screens=${routeProfile ? Object.keys(routeProfile.screens).length : 0} knowledgeItems=${knowledge.items.length}`);
+    logger.log(`[mobile:scenarios] routeProfile appSlug=${appSlug} found=${routeProfile !== null} screens=${routeProfile?.screens ? Object.keys(routeProfile.screens).length : 0} knowledgeItems=${knowledge.items.length}`);
+  }
+
+  // Build destination claim manifest BEFORE provider call from authoritative sources.
+  // This manifest establishes which destination claims are valid. The provider can only
+  // REFERENCE claims in this manifest, not create new ones.
+  const allCanonicalIds = issues.flatMap((issue) =>
+    extractCriterionIds(issue.acceptanceCriteria || issue.description || "")
+  );
+  const routeProfileScreenIds = routeProfile?.screens ? Object.keys(routeProfile.screens) : undefined;
+  const destinationClaimManifest: DestinationClaimDefinition[] = buildMobileDestinationClaimManifest(
+    allCanonicalIds,
+    routeProfileScreenIds,
+  );
+  if (destinationClaimManifest.length > 0) {
+    logger.log(`[mobile:scenarios] destinationClaimManifest claims=${destinationClaimManifest.length}`);
+  } else {
+    logger.log(`[mobile:scenarios] destinationClaimManifest claims=0 (no authoritative requirement→destination binding)`);
   }
 
   const scenarios: MobileGeneratedScenario[] = [];
@@ -746,7 +1110,7 @@ export async function generateMobileScenarios(
       if (learnedScreens.length > 0) {
         logger.log(`[mobile:scenarios] issue=${issue.key} injecting ${learnedScreens.length} learned screen(s) from previous runs`);
       }
-      const messages = buildMobileScenarioMessages(issue, routeProfile, learnedScreens);
+      const messages = buildMobileScenarioMessages(issue, routeProfile, learnedScreens, destinationClaimManifest);
       const response = await provider.completeJson({
         messages,
         purpose: "scenario_generation",
@@ -756,12 +1120,15 @@ export async function generateMobileScenarios(
       const parsed = parseAiScenarios(
         response.parsedJson,
         issue.key,
-        routeProfile
+        routeProfile,
+        knowledge,
+        destinationClaimManifest,
       );
       const issueScenarios = parsed.scenarios;
       const issueRejected = parsed.rejected;
       let classifiedReason: string | undefined;
       const issueAccepted: MobileGeneratedScenario[] = [];
+      const canonicalIds = extractCriterionIds(issue.acceptanceCriteria || issue.description || "");
       const blockedForCoverage: Array<{ coveredCriteria?: string[]; reasonCode?: string }> = [];
 
       if (issueScenarios.length === 0 && issueRejected.length === 0) {
@@ -795,6 +1162,19 @@ export async function generateMobileScenarios(
             } else if (functionalData?.status === "resolved") {
               scenario.requiresManualData = false;
               console.log(`[mobile-scenarios:precheck] functionalDataResolved=${scenario.scenarioId}`);
+            }
+            if (scenario.stepRequirementRefs && canonicalIds.length > 0) {
+              scenario.stepRequirementRefs = validateStepRequirementRefs(scenario.stepRequirementRefs, canonicalIds);
+            }
+            // Validate destination expectations against stepRequirementRefs (fail-closed).
+            if (scenario.stepDestinationExpectations && scenario.stepDestinationExpectations.length > 0) {
+              scenario.stepDestinationExpectations = validateStepDestinationExpectations(
+                scenario.stepDestinationExpectations,
+                scenario.stepRequirementRefs,
+              );
+              if (scenario.stepDestinationExpectations.length === 0) {
+                scenario.stepDestinationExpectations = undefined;
+              }
             }
             scenarios.push(scenario);
             issueAccepted.push(scenario);
@@ -835,6 +1215,23 @@ export async function generateMobileScenarios(
         `[mobile:scenarios:diag] issue=${issue.key} providerExitCode=${response.diagnostics?.exitCode ?? "n/a"} rawOutputLength=${response.rawText?.length ?? 0} parsed=${parsed.diagnostics.parsed} contractValid=${parsed.diagnostics.contractValid} rawScenarioCount=${parsed.diagnostics.rawScenarioCount} rawRejectedCount=${parsed.diagnostics.rawRejectedCount} normalizationDroppedCount=${parsed.diagnostics.normalizationDroppedCount} dropReasons=${parsed.diagnostics.dropReasons.join(",") || "-"} finalScenarioCount=${issueScenarios.length} finalRejectedCount=${finalRejectedCount} classifiedReason=${classifiedReason ?? "-"}`,
       );
       logger.log(`[mobile:scenarios] issue=${issue.key} scenarios=${issueScenarios.length} rejected=${finalRejectedCount}`);
+
+      // ── hu_declared knowledge persistence (shared with Web) ────────────
+      if (appSlug) {
+        try {
+          const huText = [issue.summary, issue.description, issue.acceptanceCriteria].filter(Boolean).join(" ");
+          const requirementAccounting = buildRequirementAccounting([], [], huText, issue.key);
+          const result = await persistHuDeclaredKnowledge(appSlug, requirementAccounting, [], issue.key);
+          logger.log(
+            `[mobile:hu-declared] appSlug=${appSlug} issueKey=${issue.key} derived=${result.derived} inserted=${result.inserted} updated=${result.updated} deduped=${result.deduped}`,
+          );
+        } catch (err) {
+          console.warn(
+            `[mobile:hu-declared] appSlug=${appSlug} issueKey=${issue.key} reason=persist_failed err=${(err as Error).message}`,
+          );
+        }
+      }
+
       const issueFinishedAtMs = Date.now();
       const issueFinishedAt = new Date(issueFinishedAtMs).toISOString();
       deps.onIssueCompleted?.({
@@ -915,12 +1312,20 @@ export async function generateMobileScenarios(
  * execution, it is not needed by TestRail.
  */
 export function mobileScenarioToLaunchScenario(s: MobileGeneratedScenario): LaunchScenario {
+  const setupSteps = (s.prerequisiteSteps ?? [])
+    .map((st) => st.description?.trim() || `${st.action} ${st.target?.value ?? st.value ?? ""}`.trim());
+  const scenarioSteps = s.steps.map((st) => st.description?.trim() || `${st.action} ${st.target?.value ?? st.value ?? ""}`.trim());
+  const metadata: Record<string, unknown> = {};
+  if (s.requiresRouteLearning) metadata.requiresRouteLearning = true;
+  if (s.prerequisiteSteps?.length) metadata.prerequisiteSteps = s.prerequisiteSteps.length;
+  if (s.requiredDataProfile) metadata.requiredDataProfile = s.requiredDataProfile;
   return {
     scenarioId: s.scenarioId,
     title: s.title,
-    steps: s.steps.map((st) => st.description?.trim() || `${st.action} ${st.target?.value ?? st.value ?? ""}`.trim()),
+    steps: [...setupSteps, ...scenarioSteps],
     expectedResult: s.expectedResult,
     preconditions: s.preconditions,
-    sourceIssueKey: s.sourceIssueKey
+    sourceIssueKey: s.sourceIssueKey,
+    ...(Object.keys(metadata).length > 0 ? { metadata } : {}),
   };
 }

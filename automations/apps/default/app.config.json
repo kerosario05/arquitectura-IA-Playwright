@@ -18,5 +18,10 @@
   "usernameRef": "APP_USERNAME",
   "passwordRef": "APP_PASSWORD",
   "missingInputBehavior": "auto_generate",
-  "updatedAt": "2026-08-12T15:50:59.864Z"
+  "updatedAt": "2026-08-29T23:08:47.493Z",
+  "lastUsedSource": {
+    "type": "request",
+    "sectionName": null,
+    "updatedAt": "2026-08-29T23:08:47.493Z"
+  }
 }

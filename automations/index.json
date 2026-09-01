@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-08-18T12:27:39.434Z",
+  "updatedAt": "2026-08-31T18:54:09.092Z",
   "automations": [
     {
       "id": "c10002-test-automation-plan",
@@ -30533,6 +30533,1023 @@
         "overwritten": true,
         "previousAutomationPath": "automations\\apps\\arquitectura-automatizacion\\sections\\detalle-kiosko\\cases\\preview-001-redirigir-al-modulo-de-informacion-al-seleccionar-explora-nuestros-productos\\plan.json",
         "previousStatus": "spec_failed"
+      }
+    },
+    {
+      "id": "preview-001-visualizar-la-pantalla-de-bienvenida-institucional-del-kiosco",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "Visualizar la pantalla de bienvenida institucional del kiosco",
+      "planPath": "automations\\apps\\df\\sections\\detalle-kiosko\\cases\\preview-001-visualizar-la-pantalla-de-bienvenida-institucional-del-kiosco\\plan.json",
+      "specPath": "automations\\apps\\df\\sections\\detalle-kiosko\\cases\\preview-001-visualizar-la-pantalla-de-bienvenida-institucional-del-kiosco\\case.spec.ts",
+      "appSlug": "df",
+      "appConfigPath": "automations\\apps\\df\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "df",
+      "createdAt": "2026-08-31T14:19:49.205Z",
+      "updatedAt": "2026-08-31T14:19:49.258Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-08-31T14-18-33-522Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-08-31T14-18-33-522Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [
+            "HomePage"
+          ],
+          "generatedMethods": [
+            "HomePage.start()"
+          ],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0,
+          "autoPom": {
+            "enabled": true,
+            "initialPomStatus": "needs_page_method",
+            "generatedCandidateFiles": [
+              "automations\\apps\\df\\pages\\home.page.candidate.ts"
+            ],
+            "autoApprovedPageObjects": [
+              "HomePage"
+            ],
+            "autoApprovedMethods": [
+              "HomePage.start()"
+            ],
+            "blockedAutoApprovals": [],
+            "approvalThreshold": 0.5,
+            "regeneratedSpec": true,
+            "validationStatus": "passed",
+            "finalPomStatus": "promoted"
+          }
+        },
+        "specGeneration": {
+          "mode": "ai_hybrid",
+          "provider": "codex",
+          "model": "gpt-5.4-mini",
+          "skill": {
+            "name": "playwright-spec-generation",
+            "version": "1.0.0",
+            "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+            "loaded": true
+          },
+          "invocations": 1,
+          "invocationsConsumed": 1,
+          "durationMs": 50270,
+          "usage": {
+            "inputTokens": 61713,
+            "cachedInputTokens": 24832,
+            "cacheWriteInputTokens": 0,
+            "nonCachedInputTokens": 36881,
+            "outputTokens": 1231,
+            "reasoningOutputTokens": 421,
+            "totalPhysicalTokens": 62944,
+            "durationMs": 43564,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "traceFidelity": "passed",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "skipped"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 1,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "heading_or_control"
+          ],
+          "errors": [],
+          "warnings": [],
+          "finalSpec": {
+            "origin": "ai_candidate",
+            "generatedBy": "ai",
+            "strategy": "ai_candidate",
+            "fallback": null
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [
+            "missing_method:step=1 target=\"Iniciar\" derivedIntent=\"start_session\" expectedOwner=\"HomePage\" availableMethods=[]"
+          ],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [
+            "step=1 target=\"Iniciar\" derivedIntent=\"start_session\" expectedOwner=\"HomePage\" availableMethods=[]"
+          ],
+          "autoPomAttempted": true,
+          "autoPomCreatedMethods": [
+            "HomePage.start()"
+          ],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-002-redirigir-al-modulo-de-informacion-al-seleccionar-explora-nuestros-productos",
+      "externalId": "PREVIEW-002",
+      "caseId": 0,
+      "title": "Redirigir al módulo de información al seleccionar Explora nuestros productos",
+      "planPath": "automations\\apps\\df\\sections\\detalle-kiosko\\cases\\preview-002-redirigir-al-modulo-de-informacion-al-seleccionar-explora-nuestros-productos\\plan.json",
+      "specPath": "automations\\apps\\df\\sections\\detalle-kiosko\\cases\\preview-002-redirigir-al-modulo-de-informacion-al-seleccionar-explora-nuestros-productos\\case.spec.ts",
+      "appSlug": "df",
+      "appConfigPath": "automations\\apps\\df\\app.config.json",
+      "status": "spec_failed",
+      "source": "discovery",
+      "appProfile": "df",
+      "createdAt": "2026-08-31T14:22:06.921Z",
+      "updatedAt": "2026-08-31T14:22:06.970Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-08-31T14-19-49-408Z\\discovered-plans.pending.json",
+      "pomStatus": "needs_manual_review",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "failed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-08-31T14-19-49-408Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "ai_hybrid",
+          "provider": "codex",
+          "model": "gpt-5.4-mini",
+          "skill": {
+            "name": "playwright-spec-generation",
+            "version": "1.0.0",
+            "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+            "loaded": true
+          },
+          "invocations": 2,
+          "invocationsConsumed": 2,
+          "durationMs": 48165,
+          "usage": {
+            "inputTokens": 65359,
+            "cachedInputTokens": 29952,
+            "cacheWriteInputTokens": 0,
+            "nonCachedInputTokens": 35407,
+            "outputTokens": 1791,
+            "reasoningOutputTokens": 539,
+            "totalPhysicalTokens": 67150,
+            "durationMs": 44329,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "failed",
+            "traceFidelity": "failed",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "skipped"
+          },
+          "promotionAllowed": false,
+          "specsRequested": 1,
+          "specsValidated": 0,
+          "specsRejected": 1,
+          "specGenerationAttempts": 2,
+          "specRepairAttempts": 1,
+          "firstPassPromotion": false,
+          "failedGatesAttempt1": [
+            "structuralValidation",
+            "traceFidelityValidation"
+          ],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "literal_visible_text",
+            "navigation_transition"
+          ],
+          "errors": [
+            "missing_metadata_line:process.env.SCENARIO_TITLE = 'Redirigir al módulo de información al seleccionar Explora nuestros productos';",
+            "contract_target_changed:stepIndex=1:contractStepIndex=1:expected=\"¿Qué deseas realizar hoy?\"",
+            "contract_target_changed:stepIndex=3:contractStepIndex=3:expected=\"módulo de información\""
+          ],
+          "warnings": [
+            "ai_repair_attempt_applied:1:failedGates=structuralValidation,traceFidelityValidation",
+            "ai_repair_previous_attempt_error:missing_metadata_line:process.env.SCENARIO_TITLE = 'Redirigir al módulo de información al seleccionar Explora nuestros productos';",
+            "ai_repair_previous_attempt_error:contract_target_changed:stepIndex=1:contractStepIndex=1:expected=\"¿Qué deseas realizar hoy?\"",
+            "ai_repair_previous_attempt_error:contract_target_changed:stepIndex=3:contractStepIndex=3:expected=\"módulo de información\""
+          ],
+          "finalSpec": {
+            "origin": "deterministic_draft",
+            "generatedBy": "core",
+            "strategy": "deterministic_draft",
+            "fallback": null
+          },
+          "specWritten": false,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "spec_generation_validation_failed",
+          "blockers": [
+            "spec_generation_validation_failed"
+          ],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage",
+            "HomePage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-004-avanzar-desde-la-bienvenida-usando-iniciar",
+      "externalId": "PREVIEW-004",
+      "caseId": 0,
+      "title": "Avanzar desde la bienvenida usando Iniciar",
+      "planPath": "automations\\apps\\df\\sections\\detalle-kiosko\\cases\\preview-004-avanzar-desde-la-bienvenida-usando-iniciar\\plan.json",
+      "specPath": "automations\\apps\\df\\sections\\detalle-kiosko\\cases\\preview-004-avanzar-desde-la-bienvenida-usando-iniciar\\case.spec.ts",
+      "appSlug": "df",
+      "appConfigPath": "automations\\apps\\df\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "df",
+      "createdAt": "2026-08-31T14:23:24.318Z",
+      "updatedAt": "2026-08-31T14:23:24.342Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-08-31T14-22-32-137Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-08-31T14-22-32-137Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "ai_hybrid",
+          "provider": "codex",
+          "model": "gpt-5.4-mini",
+          "skill": {
+            "name": "playwright-spec-generation",
+            "version": "1.0.0",
+            "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+            "loaded": true
+          },
+          "invocations": 1,
+          "invocationsConsumed": 1,
+          "durationMs": 42086,
+          "usage": {
+            "inputTokens": 53085,
+            "cachedInputTokens": 36608,
+            "cacheWriteInputTokens": 0,
+            "nonCachedInputTokens": 16477,
+            "outputTokens": 1651,
+            "reasoningOutputTokens": 559,
+            "totalPhysicalTokens": 54736,
+            "durationMs": 39555,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "traceFidelity": "passed",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "skipped"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 1,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "literal_visible_text",
+            "heading_or_control"
+          ],
+          "errors": [],
+          "warnings": [],
+          "finalSpec": {
+            "origin": "ai_candidate",
+            "generatedBy": "ai",
+            "strategy": "ai_candidate",
+            "fallback": null
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage",
+            "HomePage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-005-iniciar-el-flujo-de-autenticacion-al-seleccionar-transacciones-y-servicios",
+      "externalId": "PREVIEW-005",
+      "caseId": 0,
+      "title": "Iniciar el flujo de autenticación al seleccionar Transacciones y servicios",
+      "planPath": "automations\\apps\\df\\sections\\detalle-kiosko\\cases\\preview-005-iniciar-el-flujo-de-autenticacion-al-seleccionar-transacciones-y-servicios\\plan.json",
+      "specPath": "automations\\apps\\df\\sections\\detalle-kiosko\\cases\\preview-005-iniciar-el-flujo-de-autenticacion-al-seleccionar-transacciones-y-servicios\\case.spec.ts",
+      "appSlug": "df",
+      "appConfigPath": "automations\\apps\\df\\app.config.json",
+      "status": "spec_failed",
+      "source": "discovery",
+      "appProfile": "df",
+      "createdAt": "2026-08-31T14:25:17.730Z",
+      "updatedAt": "2026-08-31T14:25:17.751Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-08-31T14-23-24-418Z\\discovered-plans.pending.json",
+      "pomStatus": "needs_manual_review",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "failed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-08-31T14-23-24-418Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "ai_hybrid",
+          "provider": "codex",
+          "model": "gpt-5.4-mini",
+          "skill": {
+            "name": "playwright-spec-generation",
+            "version": "1.0.0",
+            "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+            "loaded": true
+          },
+          "invocations": 2,
+          "invocationsConsumed": 2,
+          "durationMs": 42613,
+          "usage": {
+            "inputTokens": 55236,
+            "cachedInputTokens": 27904,
+            "cacheWriteInputTokens": 0,
+            "nonCachedInputTokens": 27332,
+            "outputTokens": 1644,
+            "reasoningOutputTokens": 570,
+            "totalPhysicalTokens": 56880,
+            "durationMs": 40222,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "failed",
+            "traceFidelity": "failed",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "skipped"
+          },
+          "promotionAllowed": false,
+          "specsRequested": 1,
+          "specsValidated": 0,
+          "specsRejected": 1,
+          "specGenerationAttempts": 2,
+          "specRepairAttempts": 1,
+          "firstPassPromotion": false,
+          "failedGatesAttempt1": [
+            "structuralValidation",
+            "traceFidelityValidation"
+          ],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "literal_visible_text",
+            "auth_gate"
+          ],
+          "errors": [
+            "missing_metadata_line:process.env.SCENARIO_TITLE = 'Iniciar el flujo de autenticación al seleccionar Transacciones y servicios';",
+            "contract_target_changed:stepIndex=1:contractStepIndex=1:expected=\"¿Qué deseas realizar hoy?\"",
+            "contract_target_changed:stepIndex=3:contractStepIndex=3:expected=\"flujo de autenticación\""
+          ],
+          "warnings": [
+            "ai_repair_attempt_applied:1:failedGates=structuralValidation,traceFidelityValidation",
+            "ai_repair_previous_attempt_error:missing_metadata_line:process.env.SCENARIO_TITLE = 'Iniciar el flujo de autenticación al seleccionar Transacciones y servicios';",
+            "ai_repair_previous_attempt_error:contract_target_changed:stepIndex=1:contractStepIndex=1:expected=\"¿Qué deseas realizar hoy?\"",
+            "ai_repair_previous_attempt_error:contract_target_changed:stepIndex=3:contractStepIndex=3:expected=\"flujo de autenticación\""
+          ],
+          "finalSpec": {
+            "origin": "deterministic_draft",
+            "generatedBy": "core",
+            "strategy": "deterministic_draft",
+            "fallback": null
+          },
+          "specWritten": false,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "spec_generation_validation_failed",
+          "blockers": [
+            "spec_generation_validation_failed"
+          ],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage",
+            "HomePage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-001-visualizar-la-pantalla-de-bienvenida-institucional-y-avanzar-con-iniciar",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "Visualizar la pantalla de bienvenida institucional y avanzar con Iniciar",
+      "planPath": "automations\\apps\\de\\sections\\detalle-kiosko\\cases\\preview-001-visualizar-la-pantalla-de-bienvenida-institucional-y-avanzar-con-iniciar\\plan.json",
+      "specPath": "automations\\apps\\de\\sections\\detalle-kiosko\\cases\\preview-001-visualizar-la-pantalla-de-bienvenida-institucional-y-avanzar-con-iniciar\\case.spec.ts",
+      "appSlug": "de",
+      "appConfigPath": "automations\\apps\\de\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "de",
+      "createdAt": "2026-08-31T18:48:59.864Z",
+      "updatedAt": "2026-08-31T18:48:59.891Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-08-31T18-47-50-066Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-08-31T18-47-50-066Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [
+            "HomePage"
+          ],
+          "generatedMethods": [
+            "HomePage.start()"
+          ],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0,
+          "autoPom": {
+            "enabled": true,
+            "initialPomStatus": "needs_page_method",
+            "generatedCandidateFiles": [
+              "automations\\apps\\de\\pages\\home.page.candidate.ts"
+            ],
+            "autoApprovedPageObjects": [
+              "HomePage"
+            ],
+            "autoApprovedMethods": [
+              "HomePage.start()"
+            ],
+            "blockedAutoApprovals": [],
+            "approvalThreshold": 0.5,
+            "regeneratedSpec": true,
+            "validationStatus": "passed",
+            "finalPomStatus": "promoted"
+          }
+        },
+        "specGeneration": {
+          "mode": "ai_hybrid",
+          "provider": "codex",
+          "model": "gpt-5.4-mini",
+          "skill": {
+            "name": "playwright-spec-generation",
+            "version": "1.0.0",
+            "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+            "loaded": true
+          },
+          "invocations": 1,
+          "invocationsConsumed": 1,
+          "durationMs": 53371,
+          "usage": {
+            "inputTokens": 62807,
+            "cachedInputTokens": 40704,
+            "cacheWriteInputTokens": 0,
+            "nonCachedInputTokens": 22103,
+            "outputTokens": 1476,
+            "reasoningOutputTokens": 450,
+            "totalPhysicalTokens": 64283,
+            "durationMs": 40635,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "traceFidelity": "passed",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "skipped"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 1,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "literal_visible_text"
+          ],
+          "errors": [],
+          "warnings": [],
+          "finalSpec": {
+            "origin": "ai_candidate",
+            "generatedBy": "ai",
+            "strategy": "ai_candidate",
+            "fallback": null
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [
+            "missing_method:step=1 target=\"Iniciar\" derivedIntent=\"start_session\" expectedOwner=\"HomePage\" availableMethods=[]"
+          ],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [
+            "step=1 target=\"Iniciar\" derivedIntent=\"start_session\" expectedOwner=\"HomePage\" availableMethods=[]"
+          ],
+          "autoPomAttempted": true,
+          "autoPomCreatedMethods": [
+            "HomePage.start()"
+          ],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-002-reiniciar-el-kiosco-y-validar-el-retorno-a-la-pantalla-inicial",
+      "externalId": "PREVIEW-002",
+      "caseId": 0,
+      "title": "ReIniciar el kiosco y validar el retorno a la pantalla inicial",
+      "planPath": "automations\\apps\\de\\sections\\detalle-kiosko\\cases\\preview-002-reiniciar-el-kiosco-y-validar-el-retorno-a-la-pantalla-inicial\\plan.json",
+      "specPath": "automations\\apps\\de\\sections\\detalle-kiosko\\cases\\preview-002-reiniciar-el-kiosco-y-validar-el-retorno-a-la-pantalla-inicial\\case.spec.ts",
+      "appSlug": "de",
+      "appConfigPath": "automations\\apps\\de\\app.config.json",
+      "status": "blocked_missing_pom",
+      "source": "discovery",
+      "appProfile": "de",
+      "createdAt": "2026-08-31T18:50:09.964Z",
+      "updatedAt": "2026-08-31T18:50:09.996Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-08-31T18-49-00-084Z\\discovered-plans.pending.json",
+      "pomStatus": "needs_page_object",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-08-31T18-49-00-084Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0,
+          "autoPom": {
+            "enabled": true,
+            "initialPomStatus": "needs_page_object",
+            "generatedCandidateFiles": [],
+            "autoApprovedPageObjects": [],
+            "autoApprovedMethods": [],
+            "blockedAutoApprovals": [],
+            "approvalThreshold": 0.5,
+            "regeneratedSpec": true,
+            "validationStatus": "passed",
+            "finalPomStatus": "promoted"
+          }
+        },
+        "specGeneration": {
+          "mode": "ai_hybrid",
+          "provider": "codex",
+          "model": "gpt-5.4-mini",
+          "skill": {
+            "name": "playwright-spec-generation",
+            "version": "1.0.0",
+            "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+            "loaded": true
+          },
+          "invocations": 1,
+          "invocationsConsumed": 1,
+          "durationMs": 48973,
+          "usage": {
+            "inputTokens": 62035,
+            "cachedInputTokens": 22784,
+            "cacheWriteInputTokens": 0,
+            "nonCachedInputTokens": 39251,
+            "outputTokens": 1384,
+            "reasoningOutputTokens": 546,
+            "totalPhysicalTokens": 63419,
+            "durationMs": 45461,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "traceFidelity": "passed",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "skipped"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 1,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "literal_visible_text"
+          ],
+          "errors": [],
+          "warnings": [],
+          "finalSpec": {
+            "origin": "ai_candidate",
+            "generatedBy": "ai",
+            "strategy": "ai_candidate",
+            "fallback": null
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage",
+            "HomePage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": true,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-003-seleccionar-explora-nuestros-productos-y-validar-redireccion-al-modulo-de-informacion",
+      "externalId": "PREVIEW-003",
+      "caseId": 0,
+      "title": "Seleccionar Explora nuestros productos y validar redirección al módulo de información",
+      "planPath": "automations\\apps\\de\\sections\\detalle-kiosko\\cases\\preview-003-seleccionar-explora-nuestros-productos-y-validar-redireccion-al-modulo-de-informacion\\plan.json",
+      "specPath": "automations\\apps\\de\\sections\\detalle-kiosko\\cases\\preview-003-seleccionar-explora-nuestros-productos-y-validar-redireccion-al-modulo-de-informacion\\case.spec.ts",
+      "appSlug": "de",
+      "appConfigPath": "automations\\apps\\de\\app.config.json",
+      "status": "spec_failed",
+      "source": "discovery",
+      "appProfile": "de",
+      "createdAt": "2026-08-31T18:52:03.550Z",
+      "updatedAt": "2026-08-31T18:52:03.691Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-08-31T18-50-10-324Z\\discovered-plans.pending.json",
+      "pomStatus": "needs_manual_review",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "failed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-08-31T18-50-10-324Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "ai_hybrid",
+          "provider": "codex",
+          "model": "gpt-5.4-mini",
+          "skill": {
+            "name": "playwright-spec-generation",
+            "version": "1.0.0",
+            "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+            "loaded": true
+          },
+          "invocations": 2,
+          "invocationsConsumed": 2,
+          "durationMs": 41117,
+          "usage": {
+            "inputTokens": 64122,
+            "cachedInputTokens": 31488,
+            "cacheWriteInputTokens": 0,
+            "nonCachedInputTokens": 32634,
+            "outputTokens": 1432,
+            "reasoningOutputTokens": 334,
+            "totalPhysicalTokens": 65554,
+            "durationMs": 37216,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "failed",
+            "traceFidelity": "passed",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "skipped"
+          },
+          "promotionAllowed": false,
+          "specsRequested": 1,
+          "specsValidated": 0,
+          "specsRejected": 1,
+          "specGenerationAttempts": 2,
+          "specRepairAttempts": 1,
+          "firstPassPromotion": false,
+          "failedGatesAttempt1": [
+            "structuralValidation"
+          ],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "literal_visible_text",
+            "navigation_transition"
+          ],
+          "errors": [
+            "page_object_method_signature_mismatch:HomePage.start:expectedArgs=0:actualArgs=1",
+            "page_object_method_signature_mismatch:HomePage.start:expectedArgs=0:actualArgs=1"
+          ],
+          "warnings": [
+            "ai_repair_attempt_applied:1:failedGates=structuralValidation",
+            "ai_repair_previous_attempt_error:page_object_method_signature_mismatch:HomePage.start:expectedArgs=0:actualArgs=1",
+            "ai_repair_previous_attempt_error:page_object_method_signature_mismatch:HomePage.start:expectedArgs=0:actualArgs=1"
+          ],
+          "finalSpec": {
+            "origin": "ai_candidate",
+            "generatedBy": "ai",
+            "strategy": "ai_candidate",
+            "fallback": null
+          },
+          "specWritten": false,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "spec_generation_validation_failed",
+          "blockers": [
+            "spec_generation_validation_failed"
+          ],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage",
+            "HomePage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-004-seleccionar-transacciones-y-servicios-y-validar-el-inicio-del-flujo-de-autenticacion",
+      "externalId": "PREVIEW-004",
+      "caseId": 0,
+      "title": "Seleccionar Transacciones y servicios y validar el inicio del flujo de autenticación",
+      "planPath": "automations\\apps\\de\\sections\\detalle-kiosko\\cases\\preview-004-seleccionar-transacciones-y-servicios-y-validar-el-inicio-del-flujo-de-autenticacion\\plan.json",
+      "specPath": "automations\\apps\\de\\sections\\detalle-kiosko\\cases\\preview-004-seleccionar-transacciones-y-servicios-y-validar-el-inicio-del-flujo-de-autenticacion\\case.spec.ts",
+      "appSlug": "de",
+      "appConfigPath": "automations\\apps\\de\\app.config.json",
+      "status": "spec_failed",
+      "source": "discovery",
+      "appProfile": "de",
+      "createdAt": "2026-08-31T18:54:09.064Z",
+      "updatedAt": "2026-08-31T18:54:09.092Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-08-31T18-52-04-018Z\\discovered-plans.pending.json",
+      "pomStatus": "needs_manual_review",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "failed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-08-31T18-52-04-018Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "ai_hybrid",
+          "provider": "codex",
+          "model": "gpt-5.4-mini",
+          "skill": {
+            "name": "playwright-spec-generation",
+            "version": "1.0.0",
+            "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+            "loaded": true
+          },
+          "invocations": 2,
+          "invocationsConsumed": 2,
+          "durationMs": 45652,
+          "usage": {
+            "inputTokens": 54763,
+            "cachedInputTokens": 8960,
+            "cacheWriteInputTokens": 0,
+            "nonCachedInputTokens": 45803,
+            "outputTokens": 1443,
+            "reasoningOutputTokens": 292,
+            "totalPhysicalTokens": 56206,
+            "durationMs": 42793,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "failed",
+            "traceFidelity": "passed",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "skipped"
+          },
+          "promotionAllowed": false,
+          "specsRequested": 1,
+          "specsValidated": 0,
+          "specsRejected": 1,
+          "specGenerationAttempts": 2,
+          "specRepairAttempts": 1,
+          "firstPassPromotion": false,
+          "failedGatesAttempt1": [
+            "structuralValidation"
+          ],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "literal_visible_text",
+            "auth_gate"
+          ],
+          "errors": [
+            "page_object_method_signature_mismatch:HomePage.start:expectedArgs=0:actualArgs=1",
+            "page_object_method_signature_mismatch:HomePage.start:expectedArgs=0:actualArgs=1"
+          ],
+          "warnings": [
+            "ai_repair_attempt_applied:1:failedGates=structuralValidation",
+            "ai_repair_previous_attempt_error:page_object_method_signature_mismatch:HomePage.start:expectedArgs=0:actualArgs=1",
+            "ai_repair_previous_attempt_error:page_object_method_signature_mismatch:HomePage.start:expectedArgs=0:actualArgs=1"
+          ],
+          "finalSpec": {
+            "origin": "ai_candidate",
+            "generatedBy": "ai",
+            "strategy": "ai_candidate",
+            "fallback": null
+          },
+          "specWritten": false,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "spec_generation_validation_failed",
+          "blockers": [
+            "spec_generation_validation_failed"
+          ],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage",
+            "HomePage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
       }
     }
   ]

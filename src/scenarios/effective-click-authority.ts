@@ -21,7 +21,7 @@ export function collectBranchRequiredClicks(functionalBranches?: FunctionalBranc
 
 export function mergeEffectiveAllowedClicks(
   baseAllowedClicks: string[],
-  branchRequiredClicks: string[],
+  _branchRequiredClicks: string[],
   protectedClicks: string[] = [],
 ): {
   effectiveAllowedClicks: string[];
@@ -30,16 +30,7 @@ export function mergeEffectiveAllowedClicks(
 } {
   const effectiveAllowedClicks = [...baseAllowedClicks];
   const seen = new Set(effectiveAllowedClicks.map((target) => normalizeClickTarget(target)));
-  let addedFromBranchRequired = 0;
   let addedFromProtected = 0;
-
-  for (const target of branchRequiredClicks) {
-    const normalized = normalizeClickTarget(target);
-    if (seen.has(normalized)) continue;
-    seen.add(normalized);
-    effectiveAllowedClicks.push(target);
-    addedFromBranchRequired++;
-  }
 
   for (const target of protectedClicks) {
     const normalized = normalizeClickTarget(target);
@@ -51,7 +42,7 @@ export function mergeEffectiveAllowedClicks(
 
   return {
     effectiveAllowedClicks,
-    addedFromBranchRequired,
+    addedFromBranchRequired: 0,
     addedFromProtected,
   };
 }

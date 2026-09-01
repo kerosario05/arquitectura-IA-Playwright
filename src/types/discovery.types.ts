@@ -18,6 +18,11 @@ export type RuntimeEvidenceTrace = {
     locatorStrategy?: string;
     success: boolean;
     transitionDetected?: boolean;
+    beforeStructuralFingerprint?: string;
+    afterStructuralFingerprint?: string;
+    transitionValidated?: boolean;
+    beforeTechnicalScreenKey?: string;
+    afterTechnicalScreenKey?: string;
     postClickUiChange?: string;
     beforeContext?: string;
     afterContext?: string;
@@ -221,6 +226,9 @@ export type DiscoveryStepResult = {
   childAssertionsUsed?: string[];
   assertionDiagnostics?: Record<string, unknown>;
   assertionImportance?: "blocking" | "contextual" | "optional";
+  functionalRequired?: boolean;
+  runtimeBacked?: boolean;
+  canonicalRequirementRefs?: Array<{ requirementId: string; facet?: string; claimId?: string }>;
   conditionalAssertion?: boolean;
   conditionalRisk?: "low" | "medium" | "high";
   conditionalReason?: string;
@@ -254,6 +262,9 @@ export type DiscoveryStepResult = {
     score?: number;
     segmentIndex?: number;
     transitionDetected?: boolean;
+    beforeStructuralFingerprint?: string;
+    afterStructuralFingerprint?: string;
+    transitionValidated?: boolean;
     executedAction?: string;
     rationale?: string;
     alreadySatisfiedEvidence?: {

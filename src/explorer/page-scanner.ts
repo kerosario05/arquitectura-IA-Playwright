@@ -3,6 +3,7 @@ import { buildCandidateLocators } from "./locator-candidate-builder";
 import { extractDataHintsFromElementText } from "./data-hint-extractor";
 import { sanitizeSnapshotText } from "./snapshot-sanitizer";
 import type { PageSnapshot, SnapshotElement, SnapshotElementType } from "../types/page-snapshot.types";
+import { createHash } from "node:crypto";
 
 type RawDomElement = {
   id: string;
@@ -28,6 +29,31 @@ type RawDomElement = {
 };
 
 const MAX_ELEMENTS = 300;
+
+export function buildStructuralFingerprint(elements: SnapshotElement[]): string {
+  const canonical = elements.map((element) => [
+    element.type,
+    element.role ?? "",
+    element.tagName ?? "",
+    element.inputType ?? "",
+    element.required === true,
+    element.disabled === true,
+  ].join("|")).sort().join(";");
+  return createHash("sha256").update(canonical).digest("hex");
+}
+
+export function buildTechnicalScreenKey(url: string, structuralFingerprint?: string): string | undefined {
+  if (!structuralFingerprint) return undefined;
+  try {
+    const parsed = new URL(url);
+    return createHash("sha256")
+      .update(`${parsed.origin}\n${parsed.pathname}\n${structuralFingerprint}`)
+      .digest("hex")
+      .slice(0, 16);
+  } catch {
+    return undefined;
+  }
+}
 
 function getSummary(elements: SnapshotElement[]): PageSnapshot["summary"] {
   return {
@@ -225,11 +251,14 @@ export async function scanCurrentPage(page: Page): Promise<PageSnapshot> {
     };
   });
 
+  const structuralFingerprint = buildStructuralFingerprint(elements);
   return {
     version: "1.0",
     url: page.url(),
     title: await page.title(),
     capturedAt: new Date().toISOString(),
+    structuralFingerprint,
+    technicalScreenKey: buildTechnicalScreenKey(page.url(), structuralFingerprint),
     elements,
     summary: getSummary(elements)
   };

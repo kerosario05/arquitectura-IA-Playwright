@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { insertEntrySteps } from "../src/scenarios/scenario-preview.service";
+import { insertEntrySteps, isEntryStepInsertionAuthorized, applyCanonicalRoutePrefix } from "../src/scenarios/scenario-preview.service";
 import type { McpScenario } from "../src/scenarios/scenario-types";
 
 function makeScenario(steps: string[]): McpScenario {
@@ -21,6 +21,42 @@ function makeScenario(steps: string[]): McpScenario {
     mcpExecutable: true,
   };
 }
+
+const entryBranch = {
+  branchId: "branch-a",
+  sourceLabel: "A",
+  actionIntent: "select_option" as const,
+  expectedDestination: "B",
+  accessIntent: "public" as const,
+  evidenceSource: "user_story" as const,
+  prerequisiteRequirementIds: ["prerequisite:1"],
+};
+
+test("entry authority: assertion-only scenario rejects routeProfile entry", () => {
+  const scenario = makeScenario(['1. Validar que se muestre "X".']);
+  expect(isEntryStepInsertionAuthorized(scenario, [entryBranch])).toBe(false);
+});
+
+test("entry authority: snapshot/inferred entry does not authorize without refs", () => {
+  const scenario = makeScenario(['1. Validar que se muestre "X".']);
+  expect(isEntryStepInsertionAuthorized(scenario, [])).toBe(false);
+});
+
+test("entry authority: canonical prerequisite action authorizes trusted implementation", () => {
+  const scenario = makeScenario(['1. Validar que se muestre "X".']);
+  scenario.stepRequirementRefs = [{ stepIndex: 0, requirementId: "prerequisite:1", facet: "action" }];
+  expect(isEntryStepInsertionAuthorized(scenario, [entryBranch])).toBe(true);
+});
+
+test("entry canonicalization preserves assertions-before-existing-action order", () => {
+  const result = applyCanonicalRoutePrefix(
+    ['1. Validar que se muestre "X".', '2. Clic en "A".'],
+    [],
+    [{ action: "click", target: "A", when: "before_first_functional_step" }],
+  );
+  expect(result.steps).toEqual(['1. Validar que se muestre "X".', '2. Clic en "A".']);
+  expect(result.changed).toBe(false);
+});
 
 // ── Entry step insertion ──────────────────────────────────────────
 

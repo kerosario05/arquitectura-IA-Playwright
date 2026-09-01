@@ -11,6 +11,7 @@ import { debugRouter } from "./routes/debug";
 import { checklistRouter } from "./routes/checklist";
 import { executionsRouter } from "./routes/executions";
 import { internalOtpRouter } from "./routes/internal-otp";
+import { projectsRouter } from "./routes/projects";
 import { resolveServerPort } from "./config";
 import { captureRawJsonBody, mobileUtf8JsonReconciler } from "./middleware/mobile-utf8-json";
 
@@ -54,6 +55,7 @@ app.use("/api/runs", runsRouter);
 app.use("/api/scenarios", scenariosRouter);
 app.use("/api/mobile", mobileRouter);
 app.use("/api/internal/otp", internalOtpRouter);
+app.use("/api/projects", projectsRouter);
 app.use(checklistRouter);
 app.use(executionsRouter);
 

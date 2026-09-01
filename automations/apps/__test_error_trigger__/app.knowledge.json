@@ -1,0 +1,19 @@
+{
+  "items": [
+    {
+      "id": "hd_action_d3a55ec043a0",
+      "source": "hu_declared",
+      "knowledgeKind": "hu_declared",
+      "category": "action",
+      "sourceText": "Clic en \"Exportar\"",
+      "sourceIssueKey": "TEST-1",
+      "associatedBranchId": "",
+      "expectedBehavior": "",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "runCount": 1,
+      "createdAt": "2026-08-27T18:12:23.483Z",
+      "lastSeenAt": "2026-08-27T18:12:23.483Z"
+    }
+  ]
+}

@@ -161,7 +161,7 @@ function buildKnowledgeCandidate(
   };
 }
 
-export async function runGuidedRouteDiscovery(
+async function runGuidedRouteDiscoveryInternal(
   request: GuidedRouteDiscoveryRequest,
 ): Promise<GuidedRouteDiscoveryResponse> {
   const { appSlug, issueKey, huIntent, reasonCode } = request;
@@ -216,17 +216,12 @@ export async function runGuidedRouteDiscovery(
     const knowledgeItems = loadKnowledgeItems(appSlug);
     const eligible = filterEligibleKnowledge(knowledgeItems);
     console.log(`[guided-route-discovery] knowledge candidates scanned=${knowledgeItems.length} eligible=${eligible.length}`);
-
-    if (eligible.length === 0) {
-      console.log(`[guided-route-discovery] candidate_only aborted reason=no_eligible_knowledge`);
-      return { ok: false, status: "no_candidate_found", discoveryType: "intent_route_discovery", recommendedMode: "guided_route_discovery", appSlug, issueKey, huIntent, reasonCode, nextAction: "configure_knowledge_prefix", candidateRoute: null, observations: [{ step: "load_knowledge", status: "failed", detail: "No eligible knowledge items" }], warnings: ["No eligible knowledge prefix found for guided navigation."], message: `Cannot run guided discovery: no trusted knowledge prefix for ${appSlug}.`, dryRun: false };
-    }
-
+    const coldStart = eligible.length === 0;
     const scored = scoreKnowledgeItems(eligible);
     const best = scored[0];
-    const prefixTargets = best.item.clickTargets;
+    const prefixTargets = best?.item.clickTargets ?? [];
 
-    console.log(`[guided-route-discovery] knowledge prefix selected id=${best.item.id} source=knowledge_base targets=${prefixTargets.length}`);
+    console.log(`[guided-route-discovery] prefix source=${coldStart ? "configured_base_url" : "knowledge_base"} targets=${prefixTargets.length} coldStart=${coldStart}`);
     console.log(`[guided-route-discovery] prefix navigation started appSlug=${appSlug} targets=${prefixTargets.length}`);
 
     // Attempt Playwright navigation
@@ -241,11 +236,14 @@ export async function runGuidedRouteDiscovery(
     if (!playwrightAvailable) {
       console.log(`[guided-route-discovery] candidate_only skipped reason=playwright_unavailable`);
       // Fall back to knowledge candidate without browser
+      if (!best) {
+        return { ok: false, status: "no_candidate_found", discoveryType: "intent_route_discovery", recommendedMode: "guided_route_discovery", appSlug, issueKey, huIntent, reasonCode, nextAction: "review_human", candidateRoute: null, observations: [{ step: "load_knowledge", status: "completed", detail: "cold-start: no trusted prefix; baseUrl anchor available" }, { step: "playwright_browser", status: "failed", detail: "Playwright not available in this runtime" }], warnings: ["Playwright unavailable during cold-start discovery."], message: "Cold-start browser discovery unavailable.", dryRun: false, coldStart, prefixSource: "configured_base_url", prefixTargets: [] };
+      }
       const candidate = buildKnowledgeCandidate(best, huIntent);
       return { ok: true, status: "candidate_found", discoveryType: "intent_route_discovery", recommendedMode: "guided_route_discovery", appSlug, issueKey, huIntent, reasonCode, nextAction: "validate_candidate_route", candidateRoute: candidate, observations: [
         { step: "load_knowledge", status: "completed", detail: `prefix=${best.item.id} targets=${prefixTargets.length}` },
         { step: "playwright_browser", status: "failed", detail: "Playwright not available in this runtime" },
-      ], warnings: ["Playwright unavailable: candidate from knowledge only (not navigated)."], message: `Candidate route prefix found from knowledge (no browser navigation).`, dryRun: false };
+        ], warnings: ["Playwright unavailable: candidate from knowledge only (not navigated)."], message: `Candidate route prefix found from knowledge (no browser navigation).`, dryRun: false, coldStart, prefixSource: coldStart ? "configured_base_url" : "knowledge_base", prefixTargets };
     }
 
     // Playwright is available - execute real navigation
@@ -464,6 +462,11 @@ const browser = await chromium.launch({ headless: headlessMode });
             ? `Guided discovery completed for issue=${issueKey}. Prefix navigated (${prefixTargets.length} steps), ${scoredCandidates.length} continuation candidates found. Top candidate: ${topCandidates[0].target}.`
             : `Guided discovery completed for issue=${issueKey}. Prefix navigated but no continuation candidates found matching HU intent.`,
           dryRun: false,
+          coldStart,
+          prefixSource: coldStart ? "configured_base_url" : "knowledge_base",
+          prefixTargets,
+          browserStarted: true,
+          initialPageObserved: true,
           persisted: false,
           mode: "candidate_only",
           sideEffects: {
@@ -522,4 +525,20 @@ const browser = await chromium.launch({ headless: headlessMode });
     { step: "load_app_config", status: "completed", detail: `Config loaded for ${appSlug}` },
     { step: "assess_candidate", status: configStatus === "candidate_found" ? "completed" : "failed", detail: `confidence=${candidate.confidence}` },
   ], warnings: configStatus === "candidate_found" ? ["Candidate route found from config."] : ["No entry steps found."], message: configStatus === "candidate_found" ? `Candidate route found for issue=${issueKey}.` : `No candidate route for issue=${issueKey}.`, dryRun: false };
+}
+
+export async function runGuidedRouteDiscovery(
+  request: GuidedRouteDiscoveryRequest,
+): Promise<GuidedRouteDiscoveryResponse> {
+  const target = request.discoveryTarget;
+  if (target?.scope === "branch" && (!target.branchId?.trim() || !target.sourceRequirementId?.trim())) {
+    return {
+      ok: false,
+      status: "invalid_branch_target",
+      message: "branch discovery requires branchId and sourceRequirementId",
+      discoveryTarget: target,
+    };
+  }
+  const result = await runGuidedRouteDiscoveryInternal(request);
+  return { ...result, discoveryTarget: target };
 }

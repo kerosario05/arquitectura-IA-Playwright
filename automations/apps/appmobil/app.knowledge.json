@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "appSlug": "appmobil",
+  "createdAt": "2026-09-01 13:30:37.274",
+  "updatedAt": "2026-09-01 13:35:34.445",
+  "items": [
+    {
+      "id": "hd_inactivity_ac4360374b1e",
+      "source": "hu_declared",
+      "knowledgeKind": "hu_declared",
+      "category": "inactivity",
+      "sourceText": "- Timeout del servicio.",
+      "sourceIssueKey": "AA-93",
+      "associatedBranchId": "",
+      "expectedBehavior": "La sesión termina tras inactividad",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "runCount": 1,
+      "createdAt": "2026-09-01T13:35:34.407Z",
+      "lastSeenAt": "2026-09-01T13:35:34.407Z"
+    }
+  ]
+}

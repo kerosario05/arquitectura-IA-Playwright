@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { buildLaunchSelectionPlan } from "../src/server/jobs/launch-orchestrator";
+import { buildLaunchSelectionPlan, classifyLaunchScenarioAuthority } from "../src/server/jobs/launch-orchestrator";
 import { extractExistingTestRailCaseIdsFromPayload, extractLaunchScenariosFromPayload } from "../src/server/routes/runs";
 
 function makeGeneratedScenario(id: string, title = "Generated scenario") {
@@ -113,4 +113,36 @@ test("escenario sin scenarioId ni caseId queda inválido para evitar ejecución 
   const plan = buildLaunchSelectionPlan({ selectedScenarios, existingTestRailCaseIds });
 
   expect(plan.invalidScenarioTitles).toEqual(["Sin identificador"]);
+});
+
+test("launch authority preserves adaptive readiness and does not upgrade it", () => {
+  expect(classifyLaunchScenarioAuthority({ mcpExecutable: true })).toBe("standard");
+  expect(classifyLaunchScenarioAuthority({ mcpExecutable: false })).toBe("adaptive");
+  expect(classifyLaunchScenarioAuthority({ mcpExecutable: true, executionReadiness: "requires_route_discovery" })).toBe("adaptive");
+  expect(classifyLaunchScenarioAuthority({ executionReadiness: "requires_route_discovery" })).toBe("adaptive");
+});
+
+test("payload extraction preserves launch authority fields", () => {
+  const [scenario] = extractLaunchScenariosFromPayload({
+    selectedScenarios: [{
+      ...makeGeneratedScenario("ADAPTIVE-001"),
+      mcpExecutable: false,
+      executionReadiness: "requires_route_discovery",
+      semanticValidity: "valid",
+      automationType: "ui_discovery",
+    }],
+  });
+  expect(scenario).toMatchObject({
+    mcpExecutable: false,
+    executionReadiness: "requires_route_discovery",
+    semanticValidity: "valid",
+    automationType: "ui_discovery",
+  });
+});
+
+test("pure nonAutomatable classification is not placed in standard launch", () => {
+  expect(classifyLaunchScenarioAuthority({
+    mcpExecutable: true,
+    launchClassification: "nonAutomatable",
+  })).toBe("nonAutomatable");
 });

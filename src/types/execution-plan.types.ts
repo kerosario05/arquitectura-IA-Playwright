@@ -101,6 +101,9 @@ export type ExecutionPlanStep = {
     selectedCandidateText?: string;
     segmentIndex?: number;
     transitionDetected?: boolean;
+    beforeStructuralFingerprint?: string;
+    afterStructuralFingerprint?: string;
+    transitionValidated?: boolean;
     executedAction?: string;
   };
   // Context tracking for context-dependent actions

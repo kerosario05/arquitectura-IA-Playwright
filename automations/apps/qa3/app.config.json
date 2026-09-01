@@ -1,0 +1,14 @@
+{
+  "name": "QA3",
+  "baseUrl": "https://172.27.4.50",
+  "loginMode": "no_login",
+  "testData": {},
+  "testDataAliases": {},
+  "missingInputBehavior": "auto_generate",
+  "lastUsedSource": {
+    "type": "request",
+    "sectionName": null,
+    "updatedAt": "2026-08-31T22:02:17.667Z"
+  },
+  "updatedAt": "2026-08-31T22:02:17.667Z"
+}
