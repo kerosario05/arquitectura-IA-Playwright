@@ -4,6 +4,7 @@ import { config, requireTestRailConfig } from "../config/env";
 import { TestRailClient } from "../clients/testrail.client";
 import { runCaseDiscoveryWorkflow } from "../discovery/case-discovery-workflow";
 import { resolveAppProfile, ensureAppStructure, loadPromotedAppConfigSync } from "../automations/app-profile";
+import type { McpRouteProfile } from "../scenarios/scenario-types";
 import type { VirtualCase } from "../types/scenario-preview.types";
 import type { TestScenario } from "../types/testrail.types";
 import { RunEvidenceRecorder } from "../evidence/run-evidence-recorder";
@@ -12,6 +13,7 @@ import { loadEvidenceConfig } from "../evidence/evidence-types";
 export type PreviewCliArgs = {
   input: string;
   app: string;
+  routeProfile?: McpRouteProfile;
   headed: boolean;
   autoPromote: boolean;
   autoPom: boolean;
@@ -105,7 +107,13 @@ type PreviewCompletion = {
 
 export function resolvePreviewCompletion(
   workflowResult: {
-    caseResult?: { status?: string } | undefined;
+    caseResult?: {
+      status?: string;
+      steps?: Array<{ status?: string; error?: string }>;
+      failedAtStep?: number;
+      failedTarget?: string;
+      failedReason?: string;
+    } | undefined;
     promotionStatus?: string;
     specPath?: string;
     specGeneration?: {
@@ -119,6 +127,8 @@ export function resolvePreviewCompletion(
       oracleTypes?: string[];
       promotionAllowed: boolean;
       specWritten?: boolean;
+      validation?: Record<string, string>;
+      errors?: string[];
       finalSpec: { origin: string; fallback: Record<string, unknown> | null };
     } | undefined;
   },
@@ -142,6 +152,8 @@ export function resolvePreviewCompletion(
   const oracleTypes = specGeneration?.oracleTypes ?? [];
   const provider = specGeneration?.provider ?? null;
   const model = specGeneration?.model ?? null;
+  const failedSpecGate = Object.entries(specGeneration?.validation ?? {})
+    .find(([, status]) => status === "failed")?.[0];
   const automationReady = autoPromote
     ? discoveryPassed
       && workflowResult.promotionStatus === "promoted"
@@ -150,9 +162,17 @@ export function resolvePreviewCompletion(
       && typeof workflowResult.specPath === "string"
       && workflowResult.specPath.length > 0
     : discoveryPassed;
+  const partialSteps = workflowResult.caseResult?.steps ?? [];
+  const partialDiscoveryHasValidEvidence = discoveryStatus === "discovered_partial"
+    && partialSteps.length > 0
+    && workflowResult.caseResult?.failedAtStep == null
+    && !workflowResult.caseResult?.failedTarget
+    && !workflowResult.caseResult?.failedReason
+    && partialSteps.every((step) => !step.error && !/failed|not_found|error/i.test(step.status ?? ""));
+  const eventPassed = automationReady || partialDiscoveryHasValidEvidence;
 
   return {
-    eventStatus: automationReady ? "passed" : "failed",
+    eventStatus: eventPassed ? "passed" : "failed",
     automationReady,
     promotionAllowed,
     specWritten,
@@ -170,7 +190,19 @@ export function resolvePreviewCompletion(
     provider,
     model,
     reason: autoPromote
-      ? (automationReady ? "automation_ready" : "automation_not_ready")
+      ? automationReady
+        ? "automation_ready"
+        : !discoveryPassed
+          ? "blocking_failures"
+          : failedSpecGate
+            ? `spec_gate_failed:${failedSpecGate}`
+            : workflowResult.promotionStatus !== "promoted"
+              ? `promotion_status:${workflowResult.promotionStatus ?? "unknown"}`
+              : !promotionAllowed
+                ? "spec_generation_not_allowed"
+                : !specWritten
+                  ? "spec_not_written"
+                  : "promoted_spec_path_missing"
       : discoveryStatus === "discovered_partial"
         ? "observable_assertion_requires_discovery"
         : discoveryPassed
@@ -250,11 +282,29 @@ export function classifyPreviewFailure(caseRes: PreviewCaseResult): {
     return { failureType: "assertion_not_found_unrecovered", phase: "assertion_validation" };
   }
 
+  if (caseRes.failedTargets && caseRes.failedTargets.length > 0) {
+    return { failureType: "target_not_found", phase: "target_resolution" };
+  }
+
   if (caseRes.promotionStatus === "not_applicable") {
     return { failureType: "promotion_not_applicable", phase: "promotion_gate" };
   }
 
-  return { failureType: "target_not_found", phase: "target_resolution" };
+  if (
+    caseRes.specGenerationStatus === "failed"
+    || joined.includes("spec_gate_failed")
+    || joined.includes("spec_generation")
+    || joined.includes("spec_not_written")
+    || joined.includes("promoted_spec_path_missing")
+  ) {
+    return { failureType: "spec_generation_failed", phase: "spec_generation" };
+  }
+
+  if (caseRes.promotionStatus && caseRes.promotionStatus !== "promoted") {
+    return { failureType: "promotion_failed", phase: "promotion_gate" };
+  }
+
+  return { failureType: "automation_not_ready", phase: "promotion_gate" };
 }
 
 export async function resolvePreviewAppProfile(cliAppSlug: string): Promise<{ resolvedAppSlug: string; appProfileObj: any }> {
@@ -300,6 +350,9 @@ export function buildPreviewFailureGroups(results: PreviewResult["cases"]) {
     ai_repair_schema_invalid: 0,
     assertion_not_found: 0,
     target_not_found: 0,
+    spec_generation_failed: 0,
+    promotion_failed: 0,
+    automation_not_ready: 0,
     route_profile_missing: 0,
     promotion_not_applicable: 0
   };
@@ -310,11 +363,11 @@ export function buildPreviewFailureGroups(results: PreviewResult["cases"]) {
     }
 
     const classifiedFailure = classifyPreviewFailure(caseRes as PreviewCaseResult);
-    if (classifiedFailure.failureType in failureGroups) {
+    const hasClassifiedFailureGroup = classifiedFailure.failureType in failureGroups;
+    if (hasClassifiedFailureGroup) {
       (failureGroups as any)[classifiedFailure.failureType] += 1;
     }
 
-    let classified = false;
     const errorMsg = String(caseRes.error ?? "").toLowerCase() + " " + String(caseRes.promotionReason ?? "").toLowerCase();
     const hasRouteProfileIssue = errorMsg.includes("routeprofile loaded=false") ||
       errorMsg.includes("routeprofile missing") ||
@@ -326,7 +379,6 @@ export function buildPreviewFailureGroups(results: PreviewResult["cases"]) {
 
     if (hasRouteProfileIssue) {
       failureGroups.route_profile_missing++;
-      classified = true;
     }
 
     const isPromoNotApplicable = caseRes.promotionStatus === "not_applicable" ||
@@ -338,7 +390,6 @@ export function buildPreviewFailureGroups(results: PreviewResult["cases"]) {
 
     if (isPromoNotApplicable) {
       failureGroups.promotion_not_applicable++;
-      classified = true;
     }
 
     const hasAssertionFailure = (caseRes.failedAssertions && caseRes.failedAssertions.length > 0) ||
@@ -349,25 +400,16 @@ export function buildPreviewFailureGroups(results: PreviewResult["cases"]) {
 
     if (hasAssertionFailure) {
       failureGroups.assertion_not_found++;
-      classified = true;
     }
 
     const hasTargetFailure = (caseRes.failedTargets && caseRes.failedTargets.length > 0) ||
       errorMsg.includes("target not found") ||
-      errorMsg.includes("target_not_found") ||
-      errorMsg.includes("not found") ||
-      errorMsg.includes("no encontrado") ||
-      errorMsg.includes("el primer producto") ||
-      errorMsg.includes("pesos");
+      errorMsg.includes("target_not_found");
 
     if (hasTargetFailure) {
       failureGroups.target_not_found++;
-      classified = true;
     }
 
-    if (!classified) {
-      failureGroups.target_not_found++;
-    }
   }
 
   return failureGroups;
@@ -426,6 +468,7 @@ function parsePreviewArgs(argv: string[]): PreviewCliArgs {
   const args: PreviewCliArgs = {
     input: "",
     app: "",
+    routeProfile: undefined,
     headed: false,
     autoPromote: false,
     autoPom: false,
@@ -447,6 +490,14 @@ function parsePreviewArgs(argv: string[]): PreviewCliArgs {
       const nextValue = argv[++i];
       if (!nextValue) throw new Error("Missing value for --app");
       args.app = nextValue;
+    } else if (arg === "--route-profile-json") {
+      const nextValue = argv[++i];
+      if (!nextValue) throw new Error("Missing value for --route-profile-json");
+      const parsed = JSON.parse(nextValue) as unknown;
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        throw new Error("--route-profile-json must contain a routeProfile object");
+      }
+      args.routeProfile = parsed as McpRouteProfile;
     } else if (arg === "--headed") {
       args.headed = true;
     } else if (arg === "--auto-promote") {
@@ -483,6 +534,7 @@ function printPreviewHelp(): void {
   console.log("Options:");
   console.log("  --input, -i        Path to preview-scenarios.json");
   console.log("  --app, -a          App slug to target");
+  console.log("  --route-profile-json  Structured routeProfile from the launch payload");
   console.log("  --headed           Run browser headed");
   console.log("  --auto-promote     Promote passing cases");
   console.log("  --auto-pom         Auto-generate page objects");
@@ -502,7 +554,7 @@ async function loadVirtualCases(inputPath: string): Promise<VirtualCase[]> {
   return data as VirtualCase[];
 }
 
-export function virtualCaseToTestScenario(vc: VirtualCase): TestScenario {
+export function virtualCaseToTestScenario(vc: VirtualCase, routeProfile?: McpRouteProfile): TestScenario {
   const embeddedCaseId = typeof vc.testRailCaseId === "number" && Number.isInteger(vc.testRailCaseId) && vc.testRailCaseId > 0
     ? vc.testRailCaseId
     : 0;
@@ -524,7 +576,7 @@ export function virtualCaseToTestScenario(vc: VirtualCase): TestScenario {
     sectionName,
     sectionSlug,
     sectionId: vc.sectionId,
-    routeProfile: vc.routeProfile,
+    routeProfile: routeProfile ?? vc.routeProfile,
     raw: {
       custom_preconds: vc.preconditions.join("\n"),
       custom_expected: vc.expectedResult,
@@ -577,7 +629,7 @@ async function runPreviewCase(
   let workflowResult: any;
 
   try {
-    const scenario = virtualCaseToTestScenario(vc);
+    const scenario = virtualCaseToTestScenario(vc, args.routeProfile);
 
     const testRailConfig = requireTestRailConfig(config);
     const trClient = new TestRailClient(testRailConfig);
@@ -703,7 +755,7 @@ async function runPreviewCase(
       status: eventStatus,
       discoveryStatus: workflowResult.caseResult.status,
       promotionStatus: workflowResult.promotionStatus,
-      promotionReason: (workflowResult as any).promotionReason ?? "",
+      promotionReason: (workflowResult as any).promotionReason || (isPassed ? "" : completion.reason),
       specGenerationStatus: completion.specGenerationStatus,
       automationReady: completion.automationReady,
       specWritten: completion.specWritten,

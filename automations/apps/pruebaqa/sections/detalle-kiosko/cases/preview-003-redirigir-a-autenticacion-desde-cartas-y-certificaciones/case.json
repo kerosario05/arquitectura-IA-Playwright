@@ -1,0 +1,10 @@
+{
+  "id": "preview-003-redirigir-a-autenticacion-desde-cartas-y-certificaciones",
+  "externalId": "PREVIEW-003",
+  "caseId": 0,
+  "title": "Redirigir a autenticacion desde Cartas y certificaciones",
+  "source": "discovery",
+  "appSlug": "pruebaqa",
+  "appConfigPath": "automations\\apps\\pruebaqa\\app.config.json",
+  "createdAt": "2026-09-02T18:09:07.673Z"
+}

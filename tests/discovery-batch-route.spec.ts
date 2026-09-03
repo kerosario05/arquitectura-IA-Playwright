@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { jobStore } from "../src/server/jobs/job-store";
-import { startDiscoveryBatchRun } from "../src/server/jobs/discovery-batch-runner";
+import { buildDiscoveryPreviewArgs, startDiscoveryBatchRun } from "../src/server/jobs/discovery-batch-runner";
 
 // Helper to simulate the route handler validation logic
 function validateDiscoveryBatchRequest(body: Record<string, unknown>): { ok: true } | { ok: false; status: number; error: string; invalidIds?: unknown[] } {
@@ -187,6 +187,27 @@ test("runner: includes --app when appSlug is provided", () => {
   });
   expect(args).toContain("--app");
   expect(args).toContain("kiosko");
+});
+
+test("runner: serializes structured routeProfile for discovery preview", () => {
+  const routeProfile = {
+    name: "kiosko",
+    entry: [{ businessLabel: "home", visibleLabel: "Home" }],
+    aliases: {},
+    intermediates: {},
+    domainTerms: { home: ["Home"] },
+    visibleControls: ["Home"],
+    representativeFixture: {},
+    notes: [],
+  };
+  const args = buildDiscoveryPreviewArgs({
+    previewPath: "preview.json",
+    appSlug: "kiosko",
+    routeProfile,
+  });
+  const profileIndex = args.indexOf("--route-profile-json");
+  expect(profileIndex).toBeGreaterThanOrEqual(0);
+  expect(JSON.parse(args[profileIndex + 1])).toEqual(routeProfile);
 });
 
 test("runner: does not include --app when appSlug is not provided", () => {

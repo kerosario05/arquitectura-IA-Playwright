@@ -1,0 +1,10 @@
+{
+  "id": "preview-005-seleccionar-explora-nuestros-productos-desde-la-pantalla-principal",
+  "externalId": "PREVIEW-005",
+  "caseId": 0,
+  "title": "Seleccionar Explora nuestros productos desde la pantalla principal",
+  "source": "discovery",
+  "appSlug": "pruebaqa",
+  "appConfigPath": "automations\\apps\\pruebaqa\\app.config.json",
+  "createdAt": "2026-09-02T18:13:55.832Z"
+}

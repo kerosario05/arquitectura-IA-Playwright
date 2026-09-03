@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "appSlug": "bsc",
+  "createdAt": "2026-09-03 03:03:19.660",
+  "updatedAt": "2026-09-03T13:49:42.431Z",
+  "items": [
+    {
+      "id": "90636e208670",
+      "knowledgeKind": "route_transition",
+      "source": "mcp_runtime_observation",
+      "actionDescription": "Clic en \"Estados de cuenta\".",
+      "actionLocatorIdentity": "el-9",
+      "sourceTechnicalScreenKey": "4b8ecc79fa2c33ff",
+      "destinationTechnicalScreenKey": "11d106cccb26b9cd",
+      "transitionValidated": true,
+      "validationStatus": "validated_technical",
+      "trustedForReuse": false,
+      "runCount": 10,
+      "createdAt": "2026-09-03T03:08:19.423Z",
+      "lastSeenAt": "2026-09-03T13:41:09.519Z",
+      "lastValidatedAt": "2026-09-03T13:41:09.519Z"
+    },
+    {
+      "id": "0a8e0150ec20",
+      "knowledgeKind": "route_transition",
+      "source": "mcp_runtime_observation",
+      "actionDescription": "Clic en \"Explora nuestros productos\".",
+      "actionLocatorIdentity": "el-21",
+      "sourceTechnicalScreenKey": "38d02fb0ed5494e8",
+      "destinationTechnicalScreenKey": "fbb49d696e7128b2",
+      "transitionValidated": true,
+      "validationStatus": "validated_technical",
+      "trustedForReuse": false,
+      "runCount": 4,
+      "createdAt": "2026-09-03T11:43:28.586Z",
+      "lastSeenAt": "2026-09-03T13:49:35.599Z",
+      "lastValidatedAt": "2026-09-03T13:49:35.599Z"
+    },
+    {
+      "id": "d2a6984db019",
+      "knowledgeKind": "route_transition",
+      "source": "mcp_runtime_observation",
+      "actionDescription": "Seleccionar el primer elemento visible del listado.",
+      "actionLocatorIdentity": "el-11",
+      "sourceTechnicalScreenKey": "230b87b859d3a12f",
+      "destinationTechnicalScreenKey": "9bdbd2452e8c9d2f",
+      "transitionValidated": true,
+      "validationStatus": "validated_technical",
+      "trustedForReuse": false,
+      "runCount": 1,
+      "createdAt": "2026-09-03T13:49:39.964Z",
+      "lastSeenAt": "2026-09-03T13:49:39.964Z",
+      "lastValidatedAt": "2026-09-03T13:49:39.964Z"
+    },
+    {
+      "id": "route_edge_bsc_u6rqko",
+      "source": "scenario_derived",
+      "coverageRefs": [
+        "learned_navigation_path",
+        "relation:child_route"
+      ],
+      "steps": [
+        "Clic en \"Explora nuestros productos\"."
+      ],
+      "clickTargets": [
+        "Explora nuestros productos"
+      ],
+      "assertionTargets": [],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-09-03T13:49:42.431Z",
+      "updatedAt": "2026-09-03T13:49:42.431Z",
+      "lastSeenAt": "2026-09-03T13:49:42.431Z",
+      "runCount": 1,
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "successCount": 1,
+      "confidenceScore": 0.9999999999999999,
+      "knowledgeKind": "route_functional_observed",
+      "destinationUrl": "https://172.27.4.50/product-catalog",
+      "routeFrom": "entry",
+      "actionTarget": "Explora nuestros productos",
+      "transitionValidated": true,
+      "sourceTechnicalScreenKey": "38d02fb0ed5494e8",
+      "destinationTechnicalScreenKey": "fbb49d696e7128b2"
+    }
+  ]
+}

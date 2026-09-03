@@ -1,0 +1,113 @@
+{
+  "id": "c44722-redirigir-a-autenticacion-al-seleccionar-estados-de-cuenta",
+  "externalId": "C44722",
+  "caseId": 44722,
+  "title": "Redirigir a autenticacion al seleccionar Estados de cuenta",
+  "planPath": "automations\\apps\\bsc\\sections\\detalle-kiosko\\cases\\c44722-redirigir-a-autenticacion-al-seleccionar-estados-de-cuenta\\plan.json",
+  "specPath": "automations\\apps\\bsc\\sections\\detalle-kiosko\\cases\\c44722-redirigir-a-autenticacion-al-seleccionar-estados-de-cuenta\\case.spec.ts",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "bsc",
+  "baseUrlHash": "1423ba294517",
+  "createdAt": "2026-09-03T11:59:04.665Z",
+  "updatedAt": "2026-09-03T11:59:04.665Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-09-03T11-57-32-264Z\\cases\\case-44722\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "passed",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-09-03T11-57-32-264Z\\cases\\case-44722",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "specGeneration": {
+      "mode": "ai_hybrid",
+      "provider": "codex",
+      "model": "gpt-5.4-mini",
+      "skill": {
+        "name": "playwright-spec-generation",
+        "version": "1.0.0",
+        "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+        "loaded": true
+      },
+      "invocations": 1,
+      "invocationsConsumed": 1,
+      "durationMs": 60827,
+      "usage": {
+        "inputTokens": 62938,
+        "cachedInputTokens": 27392,
+        "cacheWriteInputTokens": 0,
+        "nonCachedInputTokens": 35546,
+        "outputTokens": 1641,
+        "reasoningOutputTokens": 671,
+        "totalPhysicalTokens": 64579,
+        "durationMs": 51971,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "traceFidelity": "passed",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "passed",
+        "functionalExecution": "skipped"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specGenerationAttempts": 1,
+      "specRepairAttempts": 0,
+      "firstPassPromotion": true,
+      "failedGatesAttempt1": [],
+      "regressedGates": [],
+      "missingRequirements": [],
+      "oracleTypes": [
+        "literal_visible_text",
+        "auth_gate"
+      ],
+      "errors": [],
+      "warnings": [],
+      "finalSpec": {
+        "origin": "ai_candidate",
+        "generatedBy": "ai",
+        "strategy": "ai_candidate",
+        "fallback": null
+      },
+      "specWritten": true,
+      "previousSpec": {
+        "existed": false,
+        "hash": null,
+        "lastModifiedAt": null
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [],
+      "availablePageObjects": [
+        "ProductListPage",
+        "OperationsMenuPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    }
+  }
+}

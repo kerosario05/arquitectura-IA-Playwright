@@ -13,7 +13,7 @@ import { startMobileLaunchExecutionJob } from "../jobs/mobile-launch-execution-r
 import { prepareRerun } from "../jobs/rerun-runner";
 import { launchExecution, type LaunchScenario } from "../jobs/launch-orchestrator";
 import { defectChecklistStore } from "../services/defect-checklist-store";
-import type { McpScenario } from "../../scenarios/scenario-types";
+import type { McpRouteProfile, McpScenario } from "../../scenarios/scenario-types";
 
 export const runsRouter = Router();
 
@@ -143,6 +143,7 @@ function normalizeLaunchScenario(value: unknown, _fallbackPrefix: string, index:
     steps: normalizeStringArray(record.steps),
     expectedResult: typeof record.expectedResult === "string" ? record.expectedResult : "",
     preconditions: normalizeStringArray(record.preconditions),
+    routeProfile: record.routeProfile as McpRouteProfile | undefined,
     sourceIssueKey: typeof record.sourceIssueKey === "string" ? record.sourceIssueKey : undefined,
     testRailCaseId,
     metadata: (record.metadata && typeof record.metadata === "object") ? (record.metadata as Record<string, unknown>) : undefined,
@@ -396,6 +397,7 @@ runsRouter.post("/scenario-preview", (req, res) => {
   }
 
   const job = jobStore.create("scenario-preview", jobPayload as Record<string, unknown>);
+  checklistUrl = checklistUrl ? `${checklistUrl}${checklistUrl.includes("?") ? "&" : "?"}jobId=${encodeURIComponent(job.id)}` : checklistUrl;
   if (issueKey) {
     jobStore.update(job.id, { issueKey, checklistUrl } as any);
   }
@@ -456,7 +458,7 @@ runsRouter.post("/discovery-batch", (req, res) => {
     launchId: body.launchId,
   });
   const checklist = defectChecklistStore.getOrCreate(checklistIdentity);
-  const checklistUrl = `/checklist/${checklist.urlSlug}`;
+  const checklistUrl = `/checklist/${checklist.urlSlug}?jobId=${encodeURIComponent(job.id)}`;
   const defectCount = checklist.defects.filter((defect) => defect.jobId === job.id).length;
   const issueKey = resolveDiscoveryBatchIssueKeyMetadata({
     jiraKey: body.jiraKey,
@@ -765,11 +767,14 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
   }
 
   const newJob = jobStore.create(prepared.jobType, newPayload);
+  const scopedChecklistUrl = checklistUrl
+    ? `${checklistUrl}${checklistUrl.includes("?") ? "&" : "?"}jobId=${encodeURIComponent(newJob.id)}`
+    : checklistUrl;
   if (issueKey && issueKey !== "undefined" && issueKey !== "") {
-    jobStore.update(newJob.id, { issueKey, checklistUrl } as any);
+    jobStore.update(newJob.id, { issueKey, checklistUrl: scopedChecklistUrl } as any);
   }
   jobStore.appendLog(newJob.id, `[runs:rerun] sourceJobId=${jobId} mode=${mode} selected=${prepared.selectedCount} total=${prepared.totalCount}`);
-  jobStore.appendLog(newJob.id, `[runs:rerun] newJobId=${newJob.id} issueKey=${issueKey || "?"} checklistUrl=${checklistUrl || "?"}`);
+   jobStore.appendLog(newJob.id, `[runs:rerun] newJobId=${newJob.id} issueKey=${issueKey || "?"} checklistUrl=${scopedChecklistUrl || "?"}`);
   jobStore.appendLog(newJob.id, `[runs:rerun] appSlug=${prepared.appSlug}`);
   jobStore.appendLog(newJob.id, `[runs:rerun] sourceJobType=${prepared.jobType}`);
 
@@ -784,7 +789,7 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
     jobId: newJob.id,
     status: newJob.status,
     issueKey,
-    checklistUrl,
+    checklistUrl: scopedChecklistUrl,
     mode: "rerun",
     rerunMode: mode,
     scenarioCount: prepared.selectedCount,

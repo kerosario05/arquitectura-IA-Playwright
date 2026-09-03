@@ -1,0 +1,22 @@
+{
+  "specContent": "import { test } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../../src/automations/runtime/promoted-spec-runtime';\n\nprocess.env.APP_SLUG = 'bsc';\nprocess.env.SECTION_SLUG = 'detalle-kiosko';\nprocess.env.SCENARIO_ID = 'C44720';\nprocess.env.SCENARIO_TITLE = 'Seleccionar Explora nuestros productos segÃºn la rama funcional obligatoria';\n\ntest('C44720 - Seleccionar Explora nuestros productos segÃºn la rama funcional obligatoria', async ({ page }) => {\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 1,\n      target: 'Explora nuestros productos',\n      actionIntent: 'Clic en \"Explora nuestros productos\".',\n      expectedEffect: 'Iniciar la rama funcional obligatoria del contrato.',\n      action: async () => {\n        await page.getByText('Explora nuestros productos').click();\n      },\n    });\n\n    await promotedRuntime.waitForPromotedUiStable(2, 'La opciÃ³n sigue la rama funcional exigida por el contrato de cobertura.');\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    1,
+    2
+  ],
+  "coveredAssertions": [],
+  "usedPageObjects": [],
+  "declaredIdentifiers": [
+    "promotedRuntime"
+  ],
+  "unresolvedRequirements": [
+    "No observable oracle was provided for step 2, so the wait step is implemented as UI-stability evidence only."
+  ],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

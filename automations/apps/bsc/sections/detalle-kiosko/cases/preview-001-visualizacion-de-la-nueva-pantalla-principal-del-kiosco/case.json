@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-visualizacion-de-la-nueva-pantalla-principal-del-kiosco",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Visualizacion de la nueva pantalla principal del kiosco",
+  "source": "discovery",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "createdAt": "2026-09-03T13:29:53.090Z"
+}

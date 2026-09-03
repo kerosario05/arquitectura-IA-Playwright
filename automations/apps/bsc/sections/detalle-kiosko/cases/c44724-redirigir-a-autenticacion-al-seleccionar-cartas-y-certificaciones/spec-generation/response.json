@@ -1,0 +1,31 @@
+{
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../../src/automations/runtime/promoted-spec-runtime';\nimport { detectAuthGate } from '../../../../../../../../src/discovery/auth-gate-detector';\nimport { scanCurrentPage } from '../../../../../../../../src/explorer/page-scanner';\n\nprocess.env.APP_SLUG = 'bsc';\nprocess.env.SECTION_SLUG = 'detalle-kiosko';\nprocess.env.SCENARIO_ID = 'C44724';\nprocess.env.SCENARIO_TITLE = 'Redirigir a autenticacion al seleccionar Cartas y certificaciones';\n\ntest('Redirigir a autenticacion al seleccionar Cartas y certificaciones', async ({ page }) => {\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 1,\n      target: 'Cartas y certificaciones',\n      assertion: async () => {\n        await expect(page.getByText('Cartas y certificaciones')).toBeVisible();\n      },\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 2,\n      target: 'Cartas y certificaciones',\n      actionIntent: 'Seleccionar Cartas y certificaciones',\n      expectedEffect: 'Abrir la ruta que redirige al flujo de autenticacion del kiosco',\n      action: async () => {\n        await page.getByText('Cartas y certificaciones').click();\n      },\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 3,\n      target: 'La opcion Cartas y certificaciones redirige a la autenticacion del kiosco.',\n      assertion: async () => {\n        await promotedRuntime.waitForPromotedUiStable(3, 'La opcion Cartas y certificaciones redirige a la autenticacion del kiosco.');\n        const gate = detectAuthGate(await scanCurrentPage(page));\n        expect(gate?.stage).toBe('identification_type_selection');\n      },\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});\n",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "Cartas y certificaciones",
+      "implementation": "await expect(page.getByText('Cartas y certificaciones')).toBeVisible();"
+    },
+    {
+      "requirement": "Autenticación del kiosco",
+      "implementation": "expect(gate?.stage).toBe('identification_type_selection');"
+    }
+  ],
+  "usedPageObjects": [],
+  "declaredIdentifiers": [
+    "promotedRuntime",
+    "gate"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

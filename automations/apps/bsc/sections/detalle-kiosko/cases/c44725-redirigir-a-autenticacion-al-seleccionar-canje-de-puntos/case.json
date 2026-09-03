@@ -1,0 +1,10 @@
+{
+  "id": "c44725-redirigir-a-autenticacion-al-seleccionar-canje-de-puntos",
+  "externalId": "C44725",
+  "caseId": 44725,
+  "title": "Redirigir a autenticacion al seleccionar Canje de Puntos",
+  "source": "discovery",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "createdAt": "2026-09-03T12:09:34.156Z"
+}

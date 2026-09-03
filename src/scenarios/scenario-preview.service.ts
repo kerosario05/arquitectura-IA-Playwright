@@ -12,8 +12,6 @@ import {
   loadAppConfig,
   getRouteProfileFromConfig,
   buildEntrySteps,
-  detectKioskoInfoProductos,
-  seedKioskoInfoProductosRouteProfile,
 } from "../automations/app-auto-resolver";
 import { buildDerivedExecutionContext } from "./route-profile-derived-context";
 import { repairMissingIntermediates, logIntermediateRepair } from "./scenario-intermediate-repair";
@@ -27,6 +25,7 @@ import { resolveCanonicalHuIntent, type CanonicalHuIntentResolution } from "./ca
 import { evaluateDestinationEvidence } from "./destination-evidence";
 import { evaluateStepAuthority, remapStepClaimsByOrigins, resolveRequirementFacet, resolveStepClaimType } from "./step-authority";
 import { detectOptionFlows, type OptionFlow } from "./hu-scope-guard";
+import { buildCanonicalHuContext } from "./canonical-hu-context";
 import {
   classifySemanticObject,
   resolveFunctionalObject,
@@ -50,6 +49,7 @@ import type {
   BranchAccessIntent,
   FunctionalBranchEvidenceSource,
   IntermediateRepairResult,
+  CanonicalClaim,
 } from "./scenario-types";
 
 export function evaluateRequirementDependencyGate(
@@ -86,11 +86,164 @@ export function evaluateRequirementDependencyGate(
   return { dependencySatisfied: true };
 }
 
-function resolveAppSlug(requestAppSlug?: string): string {
+export function applyWebRuntimeReadiness<T extends {
+  semanticValidity?: string;
+  mcpExecutable?: boolean;
+  executionReadiness?: string;
+  launchClassification?: string;
+  functionalBranch?: { branchId?: string };
+  branchAssociation?: { branchId?: string };
+  requirementDependencies?: unknown[];
+  stepRequirementRefs?: unknown[];
+  stepAuthority?: Array<{ authorityValid?: boolean; sourceType?: string }>;
+}>(scenario: T): T {
+  const structuredLineage = Boolean(
+    scenario.functionalBranch?.branchId
+    || scenario.branchAssociation?.branchId
+    || (scenario.requirementDependencies?.length ?? 0) > 0
+    || (scenario.stepRequirementRefs?.length ?? 0) > 0,
+  );
+  const hasTrustedRuntimeAuthority = (scenario.stepAuthority ?? []).some((authority) =>
+    authority.authorityValid === true
+    && ["explicit_trusted_config", "validated_knowledge", "trusted_route"].includes(authority.sourceType ?? ""),
+  );
+  if (scenario.semanticValidity === "valid" && structuredLineage && !hasTrustedRuntimeAuthority) {
+    scenario.mcpExecutable = false;
+    scenario.executionReadiness = "requires_route_discovery";
+    scenario.launchClassification = "adaptive";
+  }
+  return scenario;
+}
+
+export function resolveEffectiveIntent(primaryIntent: string, structuredIntent?: string): string {
+  return structuredIntent && structuredIntent !== "generic" ? structuredIntent : primaryIntent;
+}
+
+export function extractStructuredOptionFlows(huText: string): OptionFlow[] {
+  const lines = huText.split(/[\r\n]+/).map((line) => line.trim()).filter(Boolean);
+  const hasSelectionIntro = lines.some((line) => {
+    const normalized = line.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return /(?:al\s+seleccionar|seleccion\w*|eleg\w*|elig\w*|escog\w*)/i.test(normalized);
+  });
+  if (!hasSelectionIntro) return [];
+
+  const flows: OptionFlow[] = [];
+  const addFlow = (optionLabel: string, expectedResult: string) => {
+    const cleanLabel = optionLabel
+      .trim()
+      .replace(/^["“”']|["“”']$/g, "")
+      .replace(/\s+/g, " ");
+    const cleanResult = expectedResult.trim().replace(/\s+/g, " ");
+    if (!cleanLabel || cleanLabel.length < 2 || !cleanResult || cleanResult.length < 3) return;
+    if (/^(?:una|cualquier|alguna)\s+(?:de\s+las\s+)?(?:opciones?|alternativas?)$/i.test(cleanLabel)) return;
+    if (flows.some((flow) => flow.optionLabel === cleanLabel)) return;
+    flows.push({ optionLabel: cleanLabel, expectedResult: cleanResult, source: "hu" });
+  };
+
+  // Parse prose selection clauses before list heuristics. The selector list
+  // ends at the system/outcome clause, so commas inside the list cannot leak
+  // into expectedResult.
+  for (const line of lines) {
+    const grouped = line.match(/seleccion(?:e|a)\s+(?:cualquiera\s+de\s+las\s+opciones\s+)?(.+?),\s*(?:el\s+)?sistema\s+(debe|deber[aá])\s+(.+?)(?:[.。]|$)/i);
+    if (grouped) {
+      const labels = grouped[1]
+        .split(/\s*,\s*|\s+\bo\b\s+/i)
+        .map((label) => label.trim().replace(/^['"“”]|['"“”]$/g, ""))
+        .filter((label) => label.length > 1);
+      for (const label of labels) addFlow(label, `el sistema ${grouped[2]} ${grouped[3]}`);
+      continue;
+    }
+    const single = line.match(/seleccion(?:e|a)\s+['"“”]([^'"“”]+)['"“”]\s*,\s*(?:el\s+)?sistema\s+(debe|deber[aá])\s+(.+?)(?:[.。]|$)/i);
+    if (single) addFlow(single[1], `el sistema ${single[2]} ${single[3]}`);
+  }
+
+  for (const line of lines) {
+    const item = line
+      .replace(/^\s*(?:[-*•]|\d+[.)])\s*/, "")
+      .match(/^(.+?)\s*(?::|：|→)\s*(.+)$/);
+    if (!item) continue;
+    const labels = item[1].split(/\s*,\s*|\s+\by\b\s+/i)
+      .map((label) => label.trim().replace(/^"|"$/g, ""))
+      .filter((label) => label.length > 1);
+    const expectedResult = item[2].trim();
+    if (!expectedResult) continue;
+    for (const optionLabel of labels) addFlow(optionLabel, expectedResult);
+  }
+
+  const isListLine = (line: string) => /^\s*(?:[-*•]|\d+[.)])\s+/.test(line);
+  const stripListMarker = (line: string) => line.replace(/^\s*(?:[-*•]|\d+[.)])\s*/, "").trim();
+  const listMarkerFamily = (line: string) => /^\s*(?:[-*•])\s+/.test(line) ? "bullet" : /^\s*\d+[.)]\s+/.test(line) ? "numbered" : "";
+  const selectionOutcome = /(?:cuando|si|al)\s+(?:(?:el|la)\s+)?(?:(?:usuario|cliente|persona)\s+)?(?:se\s+)?(?:selecci(?:on|ón)\w*|elig\w*|escog\w*|eleg\w*)\s+(.+?)\s*,\s*(?:entonces\s+)?(.+?)(?:\.|$)/i;
+  const selectableListLabels = new Set<string>();
+
+  // Some Jira descriptions put a selectable list under a selection heading and
+  // describe the common result in later numbered acceptance criteria. Treat the
+  // list as alternatives only when that later selection/result evidence exists.
+  for (let index = 0; index < lines.length; index++) {
+    const normalizedHeading = lines[index].normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (!/(?:seleccion\w*|eleg\w*|elig\w*|escog\w*|opcion\w*|alternativ\w*)/i.test(normalizedHeading) || !/[:：]/.test(lines[index])) continue;
+    const list: string[] = [];
+    let cursor = index + 1;
+    const family = listMarkerFamily(lines[cursor] ?? "");
+    while (cursor < lines.length && isListLine(lines[cursor]) && listMarkerFamily(lines[cursor]) === family) {
+      const value = stripListMarker(lines[cursor]);
+      if (value && !/[:：]\s*.+$/.test(value) && !/→/.test(value)) {
+        list.push(value);
+        selectableListLabels.add(value.replace(/^["“”']|["“”']$/g, "").replace(/\s+/g, " "));
+      }
+      cursor++;
+    }
+    if (list.length < 2) continue;
+
+    let sharedResult = "";
+    for (let evidenceIndex = cursor; evidenceIndex < lines.length; evidenceIndex++) {
+      const evidence = lines[evidenceIndex].normalize("NFD").replace(/[\u0300-\u036f]/g, "").match(selectionOutcome);
+      if (!evidence) continue;
+      const selectedLabel = evidence[1].trim();
+      if (list.length >= 2) {
+        sharedResult = evidence[2];
+        break;
+      }
+      if (/^(?:una|cualquier|alguna)\s+(?:de\s+las\s+)?(?:opciones?|alternativas?)$/i.test(selectedLabel)) {
+        sharedResult = evidence[2];
+        break;
+      }
+      addFlow(selectedLabel, evidence[2]);
+    }
+    if (sharedResult) {
+      for (const optionLabel of list) addFlow(optionLabel, sharedResult);
+    }
+  }
+  if (selectableListLabels.size > 1) {
+    const labels = new Set([...selectableListLabels].map((label) => label.toLowerCase()));
+    flows.splice(0, flows.length, ...flows.filter((flow) => labels.has(flow.optionLabel.toLowerCase())));
+  }
+
+  // Some Jira prose repeats the complete selector expression in the clause
+  // captured as the result (for example: "A, B o C, el sistema ..."). Keep
+  // only the outcome after the last known selector label. This is structural:
+  // it uses the labels extracted from the same HU, never domain vocabulary.
+  const labels = flows.map((flow) => flow.optionLabel).filter(Boolean);
+  return flows.map((flow) => {
+    const matchingLabels = labels
+      .filter((label) => label !== flow.optionLabel)
+      .map((label) => ({ label, index: flow.expectedResult.toLocaleLowerCase().lastIndexOf(label.toLocaleLowerCase()) }))
+      .filter((entry) => entry.index >= 0)
+      .sort((a, b) => b.index - a.index);
+    if (matchingLabels.length < 2) return flow;
+    const last = matchingLabels[0];
+    const outcome = flow.expectedResult.slice(last.index + last.label.length)
+      .replace(/^\s*(?:,|;|:|\b(?:y|o)\b)\s*/i, "")
+      .trim();
+    return outcome.length >= 3 ? { ...flow, expectedResult: outcome } : flow;
+  });
+}
+
+function resolveAppSlug(requestAppSlug?: string): string | undefined {
   if (requestAppSlug?.trim()) return requestAppSlug.trim();
   const envSlug = process.env.APP_SLUG?.trim();
   if (envSlug) return envSlug;
-  return "arquitectura-automatizacion";
+  return undefined;
 }
 
 function normalizeScenariosToTargetApp(scenarios: McpScenario[], targetAppSlug: string): McpScenario[] {
@@ -247,6 +400,7 @@ export type GenerationSuccessCheck = {
     | "omitted_invalid"
     | "category_overlap_detected"
     | "provider_claim_compliance_invalid"
+    | "requirement_coverage_incomplete"
   >;
 };
 
@@ -304,10 +458,13 @@ function extractExecutedClickTarget(step: string): string | undefined {
 
 function inferAccessIntentFromText(value: string): BranchAccessIntent {
   const normalized = normalizeBranchText(value);
-  const authSignals = /\b(auth|autentic(?:ad[oa]|acion)?|login|sesion|otp|password|clave|token|identificacion|privad[oa]?)\b/i.test(normalized);
+  const hasAuthMention = /\b(auth|autentic(?:ad[oa]|acion)?|login|sesion|otp|password|clave|token|identificacion|privad[oa]?)\b/i.test(normalized);
+  const negatedAuth = /\bsin\s+(?:la\s+)?(?:autentic(?:ad[oa]|acion)|login|sesion|identificacion|acceso\s+seguro)\b/i.test(normalized);
+  const authSignals = hasAuthMention && !negatedAuth;
   const publicSignals = /\b(public[oa]?|catalog|informativ[oa]?|consulta|ayuda|contacto|about)\b/i.test(normalized);
   if (authSignals && !publicSignals) return "authenticated";
   if (publicSignals && !authSignals) return "public";
+  if (negatedAuth) return "public";
   return "unknown";
 }
 
@@ -361,19 +518,14 @@ function mapOptionFlowToFunctionalBranch(
   const sourceLabel = flow.optionLabel?.trim();
   const expectedDestination = flow.expectedResult?.trim();
   if (!sourceLabel || !expectedDestination) return null;
-  const accessIntent: BranchAccessIntent = flow.requiresAuth === true
-    ? "authenticated"
-    : flow.requiresAuth === false
-      ? "public"
-      : inferAccessIntentFromText(`${sourceLabel} ${expectedDestination}`);
-  const branchId = branchIdFromParts(`${sourceLabel}|${expectedDestination}|${accessIntent}`, seenIds);
+  const branchId = branchIdFromParts(`${sourceLabel}|${expectedDestination}|unknown`, seenIds);
   return {
     branchId,
     sourceLabel,
     sourceRequirementId: `option-flow:${index + 1}`,
     actionIntent: "select_option",
     expectedDestination,
-    accessIntent,
+    accessIntent: "unknown",
     evidenceSource: "user_story",
     activation: { actionType: "select", targetIdentity: sourceLabel },
     destination: { semanticDeclaration: expectedDestination },
@@ -406,7 +558,9 @@ function isLikelyBranchOption(label: string, huText: string, optionCount: number
   if (optionCount > 1) return true;
   const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const ctx = huText.match(new RegExp(`[^\\n.]{0,80}"${escaped}"[^\\n.]{0,80}`, "i"))?.[0] ?? "";
-  return /\b(opcion|elige|selecciona|escoge|menu|conduce|dirige|lleva|ruta|destino)\b/i.test(ctx);
+  if (/\b(opcion|elige|selecciona|escoge|menu|conduce|dirige|lleva|ruta|destino)\b/i.test(ctx)) return true;
+  if (/\b"?\w[^"]*"?\s*:\s*\S/.test(ctx)) return true;
+  return false;
 }
 
 export function extractFunctionalBranchesFromHu(
@@ -419,12 +573,31 @@ export function extractFunctionalBranchesFromHu(
   const branches: FunctionalBranchRef[] = [];
   const seenIds = new Map<string, number>();
 
-  for (const label of dedupedOptions) {
-    if (!isLikelyBranchOption(label, huText, dedupedOptions.length)) continue;
-    const expectedDestination = extractExpectedDestination(label, huText);
+  // Preserve alternatives expressed as an explicit list even when the model's
+  // quoted-label extractor did not populate visibleOptions.
+  const enumeratedOptions = /(?:opciones|alternativas|men[uú]|seleccionar)[^\n:]*:/i.test(huText)
+    ? huText.split(/[\r\n]+/)
+      .map((line) => line.trim().replace(/^[-*•]\s*/, ""))
+      .map((line) => line.match(/^"?([^":→]{2,80})"?\s*(?::|→)\s*(.+)$/))
+      .filter((match): match is RegExpMatchArray => Boolean(match?.[1] && match[2]))
+      .map((match) => ({ label: match[1].trim(), destination: match[2].trim() }))
+    : [];
+  const optionFlowLabels = new Set(optionFlows.map((flow) => normalizeBranchText(flow.optionLabel)));
+  const optionInputs = [
+    ...(dedupedOptions.length > 1
+      ? dedupedOptions
+        .filter((label) => !optionFlowLabels.has(normalizeBranchText(label)))
+        .map((label) => ({ label, destination: extractExpectedDestination(label, huText) }))
+      : enumeratedOptions),
+    ...optionFlows.map((flow) => ({ label: flow.optionLabel, destination: flow.expectedResult })),
+  ];
+
+  for (const option of optionInputs) {
+    const label = option.label;
+    if (!isLikelyBranchOption(label, huText, optionInputs.length)) continue;
+    const expectedDestination = option.destination ?? extractExpectedDestination(label, huText);
     const evidenceLine = huText.split(/[\n\r]+/).find((line) => line.includes(label)) ?? "";
-    const contextText = [label, expectedDestination ?? "", evidenceLine || huText].join(" ");
-    const accessIntent = inferAccessIntentFromText(contextText);
+    const accessIntent: BranchAccessIntent = "unknown";
     const evidenceSource = inferEvidenceSource(evidenceLine);
     const branchId = branchIdFromParts(`${label}|${expectedDestination ?? "none"}|${accessIntent}`, seenIds);
     branches.push({
@@ -454,7 +627,7 @@ export function extractFunctionalBranchesFromHu(
       sourceRequirementId: "route:1",
       actionIntent: "navigate",
       expectedDestination: target,
-      accessIntent: inferAccessIntentFromText(routeText),
+      accessIntent: "unknown",
       evidenceSource: "user_story",
       activation: { actionType: "navigate", targetIdentity: explicitRoutePath[0] },
       destination: { semanticDeclaration: target },
@@ -621,26 +794,48 @@ function decideScenarioBranchAssociation(
     const selected = branchById.get(aiBranchId)!;
     if (branchMatchesScenarioIssueKey(selected, scenario)) {
       const actionEvidence = evaluateScenarioActionMatch(scenario, selected);
-      return {
-        branch: selected,
-        associationMethod: "branch_id",
-        expectedActionIdentity: actionEvidence.expectedActionIdentity,
-        actualActionIdentity: actionEvidence.actualActionIdentity,
-        actionMatched: actionEvidence.actionMatched,
-      };
+      const metadataSource = normalizeBranchText(scenario.functionalBranch?.sourceLabel ?? "");
+      const metadataDestination = normalizeBranchText(scenario.functionalBranch?.expectedDestination ?? "");
+      const sourceMatches = !metadataSource || metadataSource === normalizeBranchText(selected.sourceLabel ?? "");
+      const destinationMatches = !metadataDestination || metadataDestination === normalizeBranchText(selected.expectedDestination ?? "");
+      if (metadataDestination && !destinationMatches) {
+        return {
+          branch: null,
+          associationMethod: "none",
+          expectedActionIdentity: actionEvidence.expectedActionIdentity,
+          actualActionIdentity: actionEvidence.actualActionIdentity,
+          actionMatched: false,
+          reasonCode: "branch_destination_mismatch",
+        };
+      }
+      // A provider-supplied branchId is only trusted when its own action and
+      // outcome metadata agree with the canonical branch. Otherwise continue
+      // through structural matching instead of importing another branch's
+      // destination.
+      if (actionEvidence.actionMatched && sourceMatches && destinationMatches) {
+        return {
+          branch: selected,
+          associationMethod: "branch_id",
+          expectedActionIdentity: actionEvidence.expectedActionIdentity,
+          actualActionIdentity: actionEvidence.actualActionIdentity,
+          actionMatched: actionEvidence.actionMatched,
+        };
+      }
     }
   }
 
   const structuredMatch = structuredBranchMetadataMatch(scenario, issueScopedBranches);
   if (structuredMatch) {
     const actionEvidence = evaluateScenarioActionMatch(scenario, structuredMatch);
-    return {
-      branch: structuredMatch,
-      associationMethod: "structured_metadata",
-      expectedActionIdentity: actionEvidence.expectedActionIdentity,
-      actualActionIdentity: actionEvidence.actualActionIdentity,
-      actionMatched: actionEvidence.actionMatched,
-    };
+    if (actionEvidence.actionMatched) {
+      return {
+        branch: structuredMatch,
+        associationMethod: "structured_metadata",
+        expectedActionIdentity: actionEvidence.expectedActionIdentity,
+        actualActionIdentity: actionEvidence.actualActionIdentity,
+        actionMatched: actionEvidence.actionMatched,
+      };
+    }
   }
 
   const normalizedCandidates = issueScopedBranches
@@ -754,6 +949,7 @@ export function assignFunctionalBranchesToScenarios(
     if (decision.branch && branchAuthority) {
       return {
         ...scenario,
+        authIntent: resolveBranchAuthIntent(decision.branch),
         functionalBranch: decision.branch,
         branchAssociation: {
           branchId: decision.branch.branchId,
@@ -771,6 +967,8 @@ export function assignFunctionalBranchesToScenarios(
     }
     return {
       ...scenario,
+      authIntent: undefined,
+      functionalBranch: undefined,
       branchAssociation: {
         branchId: "none",
         sourceIssueKey: scenario.sourceIssueKey,
@@ -794,13 +992,7 @@ function buildBranchRouteCandidates(
   const candidates: BranchRouteCandidate[] = [];
   for (let i = 0; i < (knowledgeCtx.navigationHints ?? []).length; i++) {
     const hint = knowledgeCtx.navigationHints[i];
-    const accessFromText = inferAccessIntentFromText([
-      ...(hint.clickTargets ?? []),
-      ...(hint.authTerms ?? []),
-    ].join(" "));
-    const accessIntent: BranchAccessIntent = hint.authTerms.length > 0
-      ? "authenticated"
-      : accessFromText;
+    const accessIntent: BranchAccessIntent = "unknown";
     if (Array.isArray(hint.clickTargets) && hint.clickTargets.length > 0) {
       candidates.push({
         routeId: `knowledge-${i + 1}`,
@@ -818,7 +1010,7 @@ function buildBranchRouteCandidates(
     candidates.push({
       routeId: "hu-route",
       clickTargets: explicitRoutePath,
-      accessIntent: inferAccessIntentFromText(explicitRoutePath.join(" ")),
+      accessIntent: "unknown",
       source: "hu_route",
     });
   }
@@ -1004,8 +1196,16 @@ function isAuthStartBranchDestination(requiredBranch: FunctionalBranchRef): bool
   if (requiredBranch.accessIntent !== "authenticated") return false;
   const expectedDestination = normalizeBranchText(requiredBranch.expectedDestination ?? "");
   const actionIntent = normalizeBranchText(requiredBranch.actionIntent ?? "");
-  return /\b(auth|autentic\w*|login|sesion|identific\w*|acceso|ingreso)\b/i.test(expectedDestination)
-    || /\b(auth|autentic\w*|login|sesion|identific\w*|acceso|ingreso)\b/i.test(actionIntent);
+  const semanticDestination = normalizeBranchText(requiredBranch.destination?.semanticDeclaration ?? "");
+  return /\b(auth\w*|autentic\w*|login|sesion|session|identific\w*|acceso|ingreso)\b/i.test(expectedDestination)
+    || /\b(auth\w*|autentic\w*|login|sesion|session|identific\w*|acceso|ingreso)\b/i.test(actionIntent)
+    || /\b(auth\w*|autentic\w*|login|sesion|session|identific\w*|acceso|ingreso)\b/i.test(semanticDestination);
+}
+
+function resolveBranchAuthIntent(branch: FunctionalBranchRef): McpScenario["authIntent"] {
+  if (isAuthStartBranchDestination(branch)) return "gate_observation";
+  if (branch.accessIntent === "authenticated") return "full_authentication";
+  return undefined;
 }
 
 function hasObservableAuthBoundary(assertionTargets: string[], scenario: McpScenario): boolean {
@@ -1248,21 +1448,81 @@ export function buildScenarioSemanticSignature(scenario: McpScenario): string {
 export function dedupeScenariosBySemanticSignature<T extends McpScenario>(
   scenarios: T[],
 ): { scenarios: T[]; removed: number } {
-  const bySignature = new Map<string, T>();
+  const bySignature = new Map<string, T[]>();
   let removed = 0;
   for (const scenario of scenarios) {
     const signature = buildScenarioSemanticSignature(scenario);
-    const existing = bySignature.get(signature);
-    if (!existing) {
-      bySignature.set(signature, scenario);
+    bySignature.set(signature, [...(bySignature.get(signature) ?? []), scenario]);
+  }
+
+  const retained: T[] = [];
+  for (const [signature, candidates] of bySignature) {
+    if (candidates.length === 1) {
+      retained.push(candidates[0]);
       continue;
     }
-    if (semanticScenarioStrength(scenario) > semanticScenarioStrength(existing)) {
-      bySignature.set(signature, scenario);
+
+    const hasStructuralConflict = candidates.some((candidate, index) =>
+      candidates.slice(index + 1).some((other) => {
+        const candidateAssociation = (candidate as any).branchAssociation;
+        const otherAssociation = (other as any).branchAssociation;
+        if (candidateAssociation?.branchId && otherAssociation?.branchId
+          && candidateAssociation.branchId !== otherAssociation.branchId) {
+          return true;
+        }
+
+        const candidateBranch = candidate.functionalBranch;
+        const otherBranch = other.functionalBranch;
+        if (candidateBranch && otherBranch
+          && (candidateBranch.branchId !== otherBranch.branchId
+            || candidateBranch.sourceRequirementId !== otherBranch.sourceRequirementId)) {
+          return true;
+        }
+
+        const candidateRefs = candidate.stepRequirementRefs;
+        const otherRefs = other.stepRequirementRefs;
+        if (candidateRefs?.length && otherRefs?.length
+          && JSON.stringify(candidateRefs) !== JSON.stringify(otherRefs)) {
+          return true;
+        }
+
+        const candidateClaims = (candidate as any).stepClaims;
+        const otherClaims = (other as any).stepClaims;
+        return Array.isArray(candidateClaims) && candidateClaims.length > 0
+          && Array.isArray(otherClaims) && otherClaims.length > 0
+          && JSON.stringify(candidateClaims) !== JSON.stringify(otherClaims);
+      }),
+    );
+
+    if (hasStructuralConflict) {
+      retained.push(...candidates);
+      console.log(
+        `[scenario-dedupe] dedupeSkippedStructuralConflict=true retained=${candidates.map((scenario) => scenario.scenarioId ?? scenario.title).join("|")} reason=structured_metadata_conflict`,
+      );
+      continue;
     }
-    removed++;
+
+    const structuredMetadataScore = (scenario: T): number => {
+      const refs = scenario.stepRequirementRefs?.length ? 4 : 0;
+      const claims = Array.isArray((scenario as any).stepClaims) && (scenario as any).stepClaims.length > 0 ? 3 : 0;
+      const association = (scenario as any).branchAssociation ? 2 : 0;
+      const branch = scenario.functionalBranch ? 1 : 0;
+      return refs + claims + association + branch;
+    };
+    const winner = candidates.reduce((best, candidate) => {
+      const bestMetadataScore = structuredMetadataScore(best);
+      const candidateMetadataScore = structuredMetadataScore(candidate);
+      if (candidateMetadataScore !== bestMetadataScore) return candidateMetadataScore > bestMetadataScore ? candidate : best;
+      return semanticScenarioStrength(candidate) > semanticScenarioStrength(best) ? candidate : best;
+    });
+    retained.push(winner);
+    removed += candidates.length - 1;
+    console.log(
+      `[scenario-dedupe] retained=${winner.scenarioId ?? winner.title} reason=${structuredMetadataScore(winner) > 0 ? "structured_metadata_priority" : "semantic_strength"}`,
+    );
   }
-  return { scenarios: Array.from(bySignature.values()), removed };
+
+  return { scenarios: retained, removed };
 }
 
 export function evaluateGenerationSuccess(
@@ -1749,6 +2009,16 @@ export type BranchCoverageReclassificationSummary = {
   affectedScenarioIds: string[];
 };
 
+export function reclassifyScenariosByBranchCoverage<T extends McpScenario>(
+  executableScenarios: T[],
+  adaptiveScenarios: T[],
+  requiredBranches: FunctionalBranchRef[],
+  options?: BranchCoverageComputationOptions,
+): {
+  executableScenarios: T[];
+  adaptiveScenarios: T[];
+  summary: BranchCoverageReclassificationSummary;
+};
 export function reclassifyScenariosByBranchCoverage(
   executableScenarios: McpScenario[],
   adaptiveScenarios: McpScenario[],
@@ -1878,6 +2148,22 @@ type EntryStepConfig = {
   reason?: string;
 };
 
+export function isConfiguredRouteProfileUsable(routeProfile: Record<string, unknown> | null): boolean {
+  if (!routeProfile) return false;
+  const entry = routeProfile.entry as unknown[] | undefined;
+  const aliases = routeProfile.aliases as Record<string, unknown> | undefined;
+  const routes = routeProfile.routes as unknown[] | undefined;
+  const intermediates = routeProfile.intermediates as Record<string, unknown> | undefined;
+  const targetPaths = routeProfile.targetPaths as Record<string, unknown> | undefined;
+  return Boolean(
+    (entry && entry.length > 0)
+    || (aliases && Object.keys(aliases).length > 0)
+    || (routes && routes.length > 0)
+    || (intermediates && Object.keys(intermediates).length > 0)
+    || (targetPaths && Object.keys(targetPaths).length > 0),
+  );
+}
+
 function buildRouteProfileForPrompt(
   targetAppSlug: string,
   requestRouteProfile?: McpRouteProfile,
@@ -1909,7 +2195,7 @@ function buildRouteProfileForPrompt(
 
     console.log(`[route-profile] configRp found name=${configRp.name} entry=${entry?.length ?? 0} aliases=${Object.keys(aliases ?? {}).length} domainTerms=${Object.keys(domainTerms ?? {}).length} visibleControls=${visibleControls?.length ?? 0} entrySteps=${entrySteps?.length ?? 0}`);
 
-    if ((entry && entry.length > 0) || (aliases && Object.keys(aliases).length > 0)) {
+    if (isConfiguredRouteProfileUsable(configRp)) {
       const es = Array.isArray(configRp.entrySteps) ? configRp.entrySteps as EntryStepConfig[] : [];
       console.log(`[route-profile] source=app_config returning routeProfile name=${configRp.name}`);
       return {
@@ -1938,38 +2224,7 @@ function buildRouteProfileForPrompt(
     console.log(`[route-profile] configRp=null after getRouteProfileFromConfig`);
   }
 
-  // 3. Seed for KIOSKO / Información de productos
-  if (
-    detectKioskoInfoProductos({
-      targetAppSlug,
-      jiraSummary,
-      jiraDescription,
-      testrailSectionName,
-      scenarioTitles,
-    })
-  ) {
-    const seed = {
-      ...(seedKioskoInfoProductosRouteProfile() as unknown as McpRouteProfile),
-      fieldProvenance: {
-        entry: "declared_hint",
-        aliases: "declared_hint",
-        intermediates: "declared_hint",
-        domainTerms: "declared_hint",
-        visibleControls: "declared_hint",
-        entrySteps: "declared_hint",
-        targetPaths: "declared_hint",
-      },
-    } as McpRouteProfile;
-    console.log(`[route-profile] source=seed_kiosko_info_productos name=${seed.name}`);
-    return {
-      routeProfile: seed,
-      source: "seed_kiosko_info_productos",
-      entrySteps: [],
-      loginMode: appConfig?.loginMode as string | undefined,
-    };
-  }
-
-  // 4. Default empty
+  // 3. No trusted route profile is available.
   console.log(`[route-profile] source=default returning null routeProfile`);
   return { routeProfile: null, source: "default", entrySteps: [], loginMode: appConfig?.loginMode as string | undefined };
 }
@@ -2097,19 +2352,23 @@ async function generateScenarioPreviewForIssue(
     return { ok: false, error: "invalid_request", message: "activeSprint: true or sprintId is required" };
   }
 
-  // Resolve effective appSlug using fallback chain (request → APP_SLUG env → hardcoded default)
-  const effectiveAppSlug = resolveAppSlug(req.appSlug);
-
-  // Ensure app.knowledge.json exists (create empty if not)
-  loadOrCreateKnowledgeContext(effectiveAppSlug);
+  // Resolve the app only from request or environment authority.
+  const requestedAppSlug = resolveAppSlug(req.appSlug);
 
   // Pass the resolved appSlug to the app resolver for priority resolution
   const appInference = resolveAppForPreview({
     targetAppSlug: req.targetAppSlug,
     targetAppName: req.targetAppName,
     testrailSectionName: req.testrailSectionName,
-    requestAppSlug: effectiveAppSlug,
+    requestAppSlug: requestedAppSlug,
   });
+  if (appInference.source === "fallback" || !appInference.appSlug) {
+    return { ok: false, error: "app_identity_unresolved", message: "No app identity authority was provided." };
+  }
+  const effectiveAppSlug = appInference.appSlug;
+
+  // Ensure app.knowledge.json exists (create empty if not)
+  loadOrCreateKnowledgeContext(effectiveAppSlug);
 
   console.log(
     `[app-resolution] requestAppSlug=${effectiveAppSlug} requestTargetAppSlug=${req.targetAppSlug ?? "none"} inferenceSource=${appInference.source} inferredAppSlug=${appInference.appSlug} effectiveTargetAppSlug=${appInference.appSlug}`,
@@ -2192,10 +2451,21 @@ async function generateScenarioPreviewForIssue(
   }
 
   console.log(`[jira] selected issues count=${issues.length} keys=${JSON.stringify(issues.map((i) => i.key))}`);
+  const canonicalIssues = issues.map((issue) => {
+    const context = buildCanonicalHuContext(issue);
+    return {
+      ...issue,
+      summary: context.summary,
+      description: context.description,
+      acceptanceCriteria: context.acceptanceCriteria,
+      canonicalExtractionIncomplete: context.canonicalExtractionIncomplete,
+    };
+  });
+  const canonicalIssue = canonicalIssues[0]!;
   // Detect primary HU intent for guard logic
   const primaryIssueIntent: HuIntentDetection = issues.length > 0
     ? detectHuIntent(
-        { summary: issues[0].summary, description: issues[0].description, acceptanceCriteria: issues[0].acceptanceCriteria },
+        { summary: issues[0].summary, description: issues[0].description, acceptanceCriteria: issues[0].acceptanceCriteria ?? undefined },
         issues[0].key
       )
     : { intent: "unknown_flow", confidence: "low", reason: "no_issue", matchedSignals: [] };
@@ -2204,13 +2474,13 @@ async function generateScenarioPreviewForIssue(
   }
   // Derive effective intent from HU text analysis — this overrides the
   // classifier for catalog/private decisions. Multiproject-safe.
-  let effectiveIntent = primaryIssueIntent.intent;
+  let effectiveIntent: string = primaryIssueIntent.intent;
   let canonicalIntentResolution: CanonicalHuIntentResolution = resolveCanonicalHuIntent(primaryIssueIntent, "generic");
   if (issues.length > 0) {
-    const huTextEarly = [issues[0].summary, issues[0].description, issues[0].acceptanceCriteria || ""].filter(Boolean).join(" ");
+     const huTextEarly = [canonicalIssue.summary, canonicalIssue.description, canonicalIssue.acceptanceCriteria || ""].filter(Boolean).join("\n");
     const earlyModel = extractHuScenarioModel(huTextEarly);
-    if (earlyModel?.mainIntent && earlyModel.mainIntent !== "generic") {
-      effectiveIntent = earlyModel.mainIntent;
+    if (earlyModel?.mainIntent) {
+      effectiveIntent = resolveEffectiveIntent(effectiveIntent, earlyModel.mainIntent);
       canonicalIntentResolution = resolveCanonicalHuIntent(primaryIssueIntent, effectiveIntent);
     }
   }
@@ -2331,20 +2601,22 @@ async function generateScenarioPreviewForIssue(
 
   // Pre-compute HU model and scenario plan for AI prompt context
   if (issues.length > 0) {
-    const optionFlowDetection = detectOptionFlows(issues[0]);
+     const optionFlowDetection = detectOptionFlows(canonicalIssue);
     automatableOptionFlowsForCoverage = optionFlowDetection.flows.filter(
       (flow) => flow.optionLabel?.trim() && flow.expectedResult?.trim(),
     );
-    huTextForAi = [issues[0].summary, issues[0].description, issues[0].acceptanceCriteria || ""].filter(Boolean).join(" ");
+     huTextForAi = [canonicalIssue.summary, canonicalIssue.description, canonicalIssue.acceptanceCriteria || ""].filter(Boolean).join("\n");
     if (huTextForAi) {
       huModel = extractHuScenarioModel(huTextForAi);
+      effectiveIntent = resolveEffectiveIntent(effectiveIntent, huModel.mainIntent);
+      canonicalIntentResolution = resolveCanonicalHuIntent(primaryIssueIntent, effectiveIntent);
       scenarioPlan = buildRoutePendingScenarioPlan(huModel);
       huExplicitRoutePathForAi = extractExplicitRoutePath(huTextForAi);
       functionalBranchesForAi = extractFunctionalBranchesFromHu(
         huTextForAi,
         huModel?.visibleOptions ?? [],
         huExplicitRoutePathForAi,
-        automatableOptionFlowsForCoverage,
+        [...automatableOptionFlowsForCoverage, ...(huModel?.optionFlows ?? [])],
       );
       console.log(`[scenario-preview] aiPrompt huModel=enabled huPlan=enabled`);
       console.log(`[scenario-preview] aiPrompt plan complexity=${scenarioPlan.complexity} target=${scenarioPlan.scenarioCountTarget} variants=${scenarioPlan.variants.length}`);
@@ -2356,7 +2628,7 @@ async function generateScenarioPreviewForIssue(
 
   try {
     generationResult = await generateScenariosWithAi(
-      issues,
+      canonicalIssues,
       effectiveAppSlug,
       testrailMeta,
       appInference.appSlug,
@@ -2406,33 +2678,7 @@ async function generateScenarioPreviewForIssue(
     rawScenarios = normalizeScenariosToTargetApp(rawScenarios, appInference.appSlug);
   }
 
-  // Post-Codex: re-detect routeProfile from generated scenario titles
-  // This catches cases where Jira summary didn't contain the module name but scenarios do
-  const scenarioTitles = rawScenarios.map((s) => s.title);
-  const postCodexDetection = detectKioskoInfoProductos({
-    targetAppSlug: appInference.appSlug,
-    jiraSummary,
-    jiraDescription,
-    testrailSectionName: req.testrailSectionName,
-    scenarioTitles,
-  });
-
   let resolvedRouteProfile = initialRouteProfile;
-  if (postCodexDetection && (!initialRouteProfile || !initialRouteProfile.name)) {
-    console.log(`[scenarios:preview] post-codex detection: KIOSKO/InfoProductos detected from scenario titles`);
-    resolvedRouteProfile = {
-      ...(seedKioskoInfoProductosRouteProfile() as unknown as McpRouteProfile),
-      fieldProvenance: {
-        entry: "declared_hint",
-        aliases: "declared_hint",
-        intermediates: "declared_hint",
-        domainTerms: "declared_hint",
-        visibleControls: "declared_hint",
-        entrySteps: "declared_hint",
-        targetPaths: "declared_hint",
-      },
-    };
-  }
 
   // Log entry steps — prefer new format, fallback to old
   const oldEntrySteps = buildEntrySteps(resolvedRouteProfile as unknown as Record<string, unknown>);
@@ -2752,10 +2998,10 @@ async function generateScenarioPreviewForIssue(
   console.log(`[scenario-preview] routePendingBuilder architecture=hu_generates_scenarios_knowledge_completes_route`);
 
   // Load knowledge context for historical hints (not for discovery)
-  const huTextForContext = huTextForAi || (issues.length > 0 ? [issues[0].summary, issues[0].description, issues[0].acceptanceCriteria || ""].filter(Boolean).join(" ") : "");
+  const huTextForContext = huTextForAi || (canonicalIssue ? [canonicalIssue.summary, canonicalIssue.description, canonicalIssue.acceptanceCriteria || ""].filter(Boolean).join("\n") : "");
 
-  // Diagnostic: extract rich HU model (used for intent refinement before resolver)
-  huModel = huTextForContext ? extractHuScenarioModel(huTextForContext) : null;
+  // Reuse the structured model already built for the same HU text.
+  huModel = huModel ?? (huTextForContext ? extractHuScenarioModel(huTextForContext) : null);
   const huExplicitRoutePath: string[] = huExplicitRoutePathForAi.length > 0
     ? huExplicitRoutePathForAi
     : (huTextForContext ? extractExplicitRoutePath(huTextForContext) : []);
@@ -2784,7 +3030,7 @@ async function generateScenarioPreviewForIssue(
       huTextForContext,
       huModel?.visibleOptions ?? [],
       huExplicitRoutePath,
-      automatableOptionFlowsForCoverage,
+      [...automatableOptionFlowsForCoverage, ...(huModel?.optionFlows ?? [])],
     );
   canonicalIntentResolution = resolveCanonicalHuIntent(
     primaryIssueIntent,
@@ -2808,7 +3054,8 @@ async function generateScenarioPreviewForIssue(
   console.log(
     `[scenarios:functional-branches] extracted=${functionalBranches.length} ids=${functionalBranches.map((branch) => branch.branchId).join(",") || "none"}`,
   );
-  const coverageRequirementsAvailable = ensureCoverageRequirementsAvailable(functionalBranches);
+  const coverageRequirementsAvailable = !canonicalIssue?.canonicalExtractionIncomplete
+    && ensureCoverageRequirementsAvailable(functionalBranches);
 
   // -- Check if route profile mismatch generate routePending fallback scenarios --
   const hasRouteMismatch = blockedScenarios.some(b => b.reasonCode === "route_profile_intent_mismatch" || b.reason === "route_profile_intent_mismatch" || b.suggestedAction === "run_transactional_route_discovery");
@@ -3181,10 +3428,14 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
     return returnRemaining ? steps.slice(idx) : steps.slice(0, idx);
   }
 
-  const canonicalDependencies = new Map(
+  const canonicalDependencies = new Map<string, string[]>(
     buildRequirementAccounting([], functionalBranches, huTextForContext, issues[0]?.key).requirements
-      .map((requirement) => [requirement.requirementId ?? requirement.id, requirement.prerequisiteRequirementIds ?? []] as const)
-      .filter(([id]) => Boolean(id)),
+      .flatMap((requirement) => {
+        const requirementId = requirement.requirementId ?? requirement.id;
+        return requirementId
+          ? [[requirementId, requirement.prerequisiteRequirementIds ?? []] as const]
+          : [];
+      }),
   );
   for (const scenario of validated) {
     const gate = evaluateRequirementDependencyGate(scenario, canonicalDependencies);
@@ -3289,8 +3540,8 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
 
   // Functional branch coverage does not grant execution authority. Provider
   // metadata is only a candidate until a trusted route/evidence is available.
-  const readinessDegraded: McpScenario[] = [];
-  const readinessExecutable: McpScenario[] = [];
+  const readinessDegraded: ValidatedScenario[] = [];
+  const readinessExecutable: ValidatedScenario[] = [];
   for (const scenario of executableScenarios) {
     const branchId = scenario.functionalBranch?.branchId;
     const branch = branchId ? functionalBranches.find((candidate) => candidate.branchId === branchId) : undefined;
@@ -3313,7 +3564,7 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
         executionReadiness: "requires_route_discovery",
         automationStatus: "requires_route_discovery",
         nonExecutableCriteria: "requires_route_discovery",
-      } as McpScenario);
+      });
       console.log(`[execution-readiness-gate] scenarioId=${scenarioIdentity(scenario)} functionalBranchCovered=${signals.functionalBranchCovered} destinationValidationStatus=${signals.destinationValidationStatus} trustedExecutionAuthority=${trustedExecutionAuthority} executionAuthoritySource=${trustedExecutionAuthority ? "route_or_validated_evidence" : "none"} mcpExecutableBeforeGate=${beforeExecutable} mcpExecutableAfterGate=false readinessBeforeGate=${beforeReadiness} readinessAfterGate=requires_route_discovery reasonCode=destination_authority_pending`);
     } else {
       readinessExecutable.push(scenario);
@@ -3901,7 +4152,7 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
         validatedRouteControls,
         validatedKnowledgeControls,
       });
-      const claimBindingValid = Boolean(expectedClaim && canonicalClaimsForStep.some((claim) => claim?.claimId === expectedClaim.claimId));
+      const claimBindingValid = Boolean(expectedClaim && canonicalClaimsForStep.some((claim: CanonicalClaim | undefined) => claim?.claimId === expectedClaim.claimId));
       return {
         stepIndex,
         requirementFacet,
@@ -3940,11 +4191,13 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
       semanticIssues,
     };
   });
+  for (const scenario of responseScenarios as any[]) {
+    applyWebRuntimeReadiness(scenario);
+  }
   const finalProviderClaimCompliance = evaluateProviderClaimCompliance(responseScenarios, canonicalClaims);
-  generationResult.generationDiagnostics = {
-    ...(generationResult.generationDiagnostics ?? {}),
-    providerClaimCompliance: finalProviderClaimCompliance,
-  };
+  if (generationResult.generationDiagnostics) {
+    generationResult.generationDiagnostics.providerClaimCompliance = finalProviderClaimCompliance;
+  }
   // Requirement coverage is measured over the final response scenario set.
   // Semantic validity remains independently reported by StepAuthority.
   finalRequirementAccounting = buildRequirementAccounting(
@@ -3989,6 +4242,29 @@ console.log(`[scenarios:preview] beforeValidation rawScenarios=${rawScenarios.le
     `valid=${finalCoverageInvariant.valid}`,
   );
   console.log(`[requirement-accounting-trace] final scenarios=${responseScenarios.length} ids=${JSON.stringify(responseScenarios.map((scenario) => scenario.scenarioId ?? scenario.sourceIssueKey ?? "unknown"))}`);
+  console.log(`[SCENARIO_TRACE] ${JSON.stringify(responseScenarios.map((scenario: any) => ({
+    scenarioId: scenario.scenarioId,
+    title: scenario.title,
+    mcpExecutable: scenario.mcpExecutable,
+    semanticValidity: scenario.semanticValidity,
+    semanticIssues: scenario.semanticIssues,
+    executionReadiness: scenario.executionReadiness,
+    launchClassification: scenario.launchClassification,
+    publicationClassification: scenario.publicationClassification,
+    functionalBranch: scenario.functionalBranch,
+    branchAssociation: scenario.branchAssociation,
+    requirementDependencies: scenario.requirementDependencies,
+    stepRequirementRefs: scenario.stepRequirementRefs,
+    stepAuthority: scenario.stepAuthority,
+  })))}`);
+  console.log(`[REQUIREMENTS] ${JSON.stringify((finalRequirementAccounting.requirements ?? []).map((requirement: any) => ({
+    requirementId: requirement.requirementId ?? requirement.id,
+    type: requirement.type,
+    facet: requirement.facet,
+    associatedBranchId: requirement.associatedBranchId,
+    prerequisiteRequirementIds: requirement.prerequisiteRequirementIds,
+    status: requirement.status,
+  })))}`);
   generationSuccessCheck = evaluateGenerationSuccess(
     responseVisibilityComparison.equal,
     definitiveBranchCoverage,
@@ -4570,6 +4846,13 @@ type HuScenarioModel = {
   dropdownSignals: boolean;
   dataRequirements: string[];
   rawSignals: string[];
+  optionFlows: OptionFlow[];
+  businessEntity?: ReturnType<typeof extractBusinessEntity>;
+  selectionMetadata?: {
+    parentEntity?: string;
+    alternativeGroup?: string;
+    selectionCardinality?: string;
+  };
 };
 
 /**
@@ -4706,6 +4989,10 @@ function extractHuScenarioModel(huText: string): HuScenarioModel {
   const visibleOptions: string[] = [];
   const visibleButtons: string[] = [];
   const visibleWarnings: string[] = [];
+  const optionFlows = extractStructuredOptionFlows(huText);
+  for (const flow of optionFlows) {
+    if (!visibleOptions.includes(flow.optionLabel)) visibleOptions.push(flow.optionLabel);
+  }
 
   // Detect UI obligations from HU text patterns
   const uiObligations: string[] = [];
@@ -4746,8 +5033,16 @@ function extractHuScenarioModel(huText: string): HuScenarioModel {
   // Visible buttons / labels / warnings
   if (/\"(.+?)\"/g.test(t)) {
     const quoted = [...t.matchAll(/\"(.+?)\"/g)].map(m => m[1]).slice(0, 5);
-    visibleOptions.push(...quoted);
+    for (const option of quoted) {
+      if (!visibleOptions.includes(option)) visibleOptions.push(option);
+    }
     if (quoted.length > 0) uiObligations.push("quoted_labels_found");
+  }
+  const hasMultipleAlternatives = optionFlows.length > 1 || (visibleOptions.length > 1 &&
+    /(?:opcion(?:es)?|alternativ(?:a|as)|men[uú]|seleccionar|seleccione|elegir)/i.test(t));
+  if (hasMultipleAlternatives) {
+    mainIntent = "multi_branch_navigation";
+    uiObligations.push("multi_branch_navigation");
   }
   if (/confirmar/.test(t)) { visibleButtons.push("Confirmar"); uiObligations.push("confirm_button"); }
   if (/continuar/.test(t)) { visibleButtons.push("Continuar"); uiObligations.push("continue_button"); }
@@ -4829,6 +5124,7 @@ function extractHuScenarioModel(huText: string): HuScenarioModel {
     visibleWarnings, previewSignals, confirmationSignals, returnOrCancelSignals,
     deliverySignals, searchSignals, dropdownSignals,
     dataRequirements, rawSignals, businessEntity, selectionMetadata,
+    optionFlows,
   };
 }
 
@@ -5596,7 +5892,7 @@ function buildPlanBasedScenarios(
           && !f.startsWith("required_");
       });
       if (entryFields.length) {
-        const entrySteps: string[] = entryFields.map(f => buildFieldStep(f));
+        const entrySteps: string[] = entryFields.map((f: string) => buildFieldStep(f));
         phases.push({ type: "data_entry", steps: entrySteps });
       }
 

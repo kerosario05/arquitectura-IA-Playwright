@@ -2,7 +2,7 @@
   "version": 1,
   "appSlug": "appmobil",
   "createdAt": "2026-09-01 13:30:37.274",
-  "updatedAt": "2026-09-01 13:35:34.445",
+  "updatedAt": "2026-09-01 14:25:12.502",
   "items": [
     {
       "id": "hd_inactivity_ac4360374b1e",
@@ -18,6 +18,21 @@
       "runCount": 1,
       "createdAt": "2026-09-01T13:35:34.407Z",
       "lastSeenAt": "2026-09-01T13:35:34.407Z"
+    },
+    {
+      "id": "hd_action_5dcf55a18029",
+      "source": "hu_declared",
+      "knowledgeKind": "hu_declared",
+      "category": "action",
+      "sourceText": "seleccione la opción correspondiente\nEntonces\n- el sist",
+      "sourceIssueKey": "AA-94",
+      "associatedBranchId": "",
+      "expectedBehavior": "Seleccionar opción correspondiente",
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "runCount": 1,
+      "createdAt": "2026-09-01T14:25:12.366Z",
+      "lastSeenAt": "2026-09-01T14:25:12.366Z"
     }
   ]
 }

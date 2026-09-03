@@ -1,0 +1,10 @@
+{
+  "id": "c44720-seleccionar-explora-nuestros-productos-segun-la-rama-funcional-obligatoria",
+  "externalId": "C44720",
+  "caseId": 44720,
+  "title": "Seleccionar Explora nuestros productos según la rama funcional obligatoria",
+  "source": "discovery",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "createdAt": "2026-09-03T11:44:28.883Z"
+}

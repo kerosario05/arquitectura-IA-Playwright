@@ -1,0 +1,119 @@
+{
+  "id": "c44719-seleccionar-canje-de-puntos-y-observar-redireccion-a-autenticacion",
+  "externalId": "C44719",
+  "caseId": 44719,
+  "title": "Seleccionar Canje de Puntos y observar redirección a autenticación",
+  "planPath": "automations\\apps\\bsc\\sections\\detalle-kiosko\\cases\\c44719-seleccionar-canje-de-puntos-y-observar-redireccion-a-autenticacion\\plan.json",
+  "specPath": "automations\\apps\\bsc\\sections\\detalle-kiosko\\cases\\c44719-seleccionar-canje-de-puntos-y-observar-redireccion-a-autenticacion\\case.spec.ts",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "status": "spec_failed",
+  "source": "discovery",
+  "appProfile": "bsc",
+  "baseUrlHash": "1423ba294517",
+  "createdAt": "2026-09-03T11:43:45.446Z",
+  "updatedAt": "2026-09-03T11:43:45.446Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-09-03T11-41-28-230Z\\cases\\case-44719\\discovered-plans.pending.json",
+  "pomStatus": "needs_manual_review",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "failed",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-09-03T11-41-28-230Z\\cases\\case-44719",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "specGeneration": {
+      "mode": "ai_hybrid",
+      "provider": "codex",
+      "model": "gpt-5.4-mini",
+      "skill": {
+        "name": "playwright-spec-generation",
+        "version": "1.0.0",
+        "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+        "loaded": true
+      },
+      "invocations": 1,
+      "invocationsConsumed": 1,
+      "durationMs": 60469,
+      "usage": {
+        "inputTokens": 62217,
+        "cachedInputTokens": 45312,
+        "cacheWriteInputTokens": 0,
+        "nonCachedInputTokens": 16905,
+        "outputTokens": 1625,
+        "reasoningOutputTokens": 699,
+        "totalPhysicalTokens": 63842,
+        "durationMs": 49616,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "traceFidelity": "failed",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "passed",
+        "functionalExecution": "skipped"
+      },
+      "promotionAllowed": false,
+      "specsRequested": 1,
+      "specsValidated": 0,
+      "specsRejected": 1,
+      "specGenerationAttempts": 1,
+      "specRepairAttempts": 0,
+      "firstPassPromotion": false,
+      "failedGatesAttempt1": [
+        "traceFidelityValidation"
+      ],
+      "regressedGates": [],
+      "missingRequirements": [],
+      "oracleTypes": [
+        "literal_visible_text",
+        "navigation_transition"
+      ],
+      "errors": [
+        "contract_target_changed:stepIndex=2:contractStepIndex=1:expected=\"La opci&oacute;n dirige al l&iacute;mite observable de autenticaci&oacute;n del kiosco.\""
+      ],
+      "warnings": [],
+      "finalSpec": {
+        "origin": "ai_candidate",
+        "generatedBy": "ai",
+        "strategy": "ai_candidate",
+        "fallback": null
+      },
+      "specWritten": false,
+      "previousSpec": {
+        "existed": false,
+        "hash": null,
+        "lastModifiedAt": null
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "spec_generation_validation_failed",
+      "blockers": [
+        "spec_generation_validation_failed"
+      ],
+      "availablePageObjects": [
+        "ProductListPage",
+        "OperationsMenuPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    }
+  }
+}

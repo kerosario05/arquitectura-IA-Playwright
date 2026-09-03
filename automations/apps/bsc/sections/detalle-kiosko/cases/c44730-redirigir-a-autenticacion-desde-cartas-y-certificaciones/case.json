@@ -1,0 +1,10 @@
+{
+  "id": "c44730-redirigir-a-autenticacion-desde-cartas-y-certificaciones",
+  "externalId": "C44730",
+  "caseId": 44730,
+  "title": "Redirigir a autenticacion desde Cartas y certificaciones",
+  "source": "discovery",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "createdAt": "2026-09-03T13:00:04.209Z"
+}

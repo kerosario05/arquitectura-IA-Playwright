@@ -1,0 +1,51 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-002",
+    "caseId": 0,
+    "title": "Redirigir a autenticacion desde Consulta de balance"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "description": "Clic en \"Consulta de balance\".",
+      "target": {
+        "strategy": "text",
+        "value": "Consulta de balance",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Consulta de balance",
+          "resolvedTargetName": "Consulta de balance",
+          "resolvedCandidateId": "el-12",
+          "aiAssisted": true,
+          "aiReason": "ai_selection_resolution",
+          "repairType": "selection_resolution",
+          "decisionStatus": "repaired_plan",
+          "validationStatus": "valid"
+        }
+      }
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-09-02T18:06:07.049Z",
+  "metadata": {
+    "authFlowRequired": false,
+    "authFlowAlias": "defaultClient",
+    "authFlowLanding": "transactions_menu",
+    "authGateDetectedDuringDiscovery": true,
+    "authGateStage": "identification_type_selection"
+  }
+}

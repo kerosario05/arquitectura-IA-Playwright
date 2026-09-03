@@ -1,0 +1,10 @@
+{
+  "id": "c44739-visualizacion-de-la-nueva-pantalla-principal-del-kiosco",
+  "externalId": "C44739",
+  "caseId": 44739,
+  "title": "Visualizacion de la nueva pantalla principal del kiosco",
+  "source": "discovery",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "createdAt": "2026-09-03T13:29:14.979Z"
+}

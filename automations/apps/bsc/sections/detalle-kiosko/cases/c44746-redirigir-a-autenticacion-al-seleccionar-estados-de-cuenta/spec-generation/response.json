@@ -1,0 +1,26 @@
+{
+  "scenarioId": "C44746",
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../../src/automations/runtime/promoted-spec-runtime';\n\ntest('C44746 - Redirigir a autenticaci\\u00f3n al seleccionar Estados de cuenta', async ({ page }) => {\n  process.env.APP_SLUG = 'bsc';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'C44746';\n  process.env.SCENARIO_TITLE = 'Redirigir a autenticaci\\u00f3n al seleccionar Estados de cuenta';\n\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 1,\n      target: 'Estados de cuenta',\n      actionIntent: 'select the account statements option',\n      expectedEffect: 'open the kiosk authentication flow',\n      action: async () => {\n        await page.getByText('Estados de cuenta', { exact: true }).click();\n      },\n    });\n\n    await promotedRuntime.waitForPromotedUiStable(2, 'La opci\\u00f3n Estados de cuenta conduce al mecanismo de autenticaci\\u00f3n del kiosco.');\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 2,\n      target: 'La opci\\u00f3n Estados de cuenta conduce al mecanismo de autenticaci\\u00f3n del kiosco.',\n      assertion: async () => {\n        await expect(page.getByText('La opci\\u00f3n Estados de cuenta conduce al mecanismo de autenticaci\\u00f3n del kiosco.', { exact: true })).toBeVisible();\n      },\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    1,
+    2
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "La opci&oacute;n Estados de cuenta conduce al mecanismo de autenticaci&oacute;n del kiosco.",
+      "implementation": "await expect(page.getByText('La opci\\u00f3n Estados de cuenta conduce al mecanismo de autenticaci\\u00f3n del kiosco.', { exact: true })).toBeVisible();"
+    }
+  ],
+  "usedPageObjects": [],
+  "declaredIdentifiers": [
+    "promotedRuntime"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C44659",
+    "caseId": 44659,
+    "title": "Redirigir a autenticacion desde Canje de Puntos"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "description": "Clic en \"Canje de Puntos\".",
+      "target": {
+        "strategy": "text",
+        "value": "Canje de Puntos",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Canje de Puntos",
+          "resolvedTargetName": "Canje de Puntos",
+          "resolvedCandidateId": "el-18",
+          "aiAssisted": true,
+          "aiReason": "ai_selection_resolution",
+          "repairType": "selection_resolution",
+          "decisionStatus": "repaired_plan",
+          "validationStatus": "valid"
+        }
+      }
+    }
+  ],
+  "notes": [
+    "Discovery partial: 2/3 navigations/assertions satisfied.",
+    "Review needed: 1 non-blocking assertion failure(s) were ignored for pass/fail reconciliation."
+  ],
+  "createdAt": "2026-09-02T18:15:11.716Z",
+  "metadata": {
+    "authFlowRequired": false,
+    "authFlowAlias": "defaultClient",
+    "authFlowLanding": "transactions_menu",
+    "authGateDetectedDuringDiscovery": true,
+    "authGateStage": "identification_type_selection"
+  }
+}

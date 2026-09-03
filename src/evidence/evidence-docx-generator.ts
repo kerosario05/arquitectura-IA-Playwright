@@ -230,6 +230,8 @@ async function tryWordComGeneration(
         images = fallbackImage ? [fallbackImage] : [];
       }
 
+      images = prependInitialScreenImage(sc, images);
+
       // Dedup final-phase images: keep only the dominant final screenshot per scenario.
       // The final phase = last N images around the dominant stepIndex.
       // Mode "detail_or_ordinal" removes adjacent steps (click → ordinal → detail).
@@ -534,6 +536,8 @@ function prepareScenarioDocxInput(scenario: EvidenceScenarioRecord): PreparedSce
     images = fallbackImage ? [fallbackImage] : [];
   }
 
+  images = prependInitialScreenImage(scenario, images);
+
   if (scenario.detailEvidence?.screenshotPath) {
     const detailPath = path.resolve(scenario.detailEvidence.screenshotPath);
     console.log(
@@ -629,6 +633,22 @@ function finalizeScenarioImagesForDocx(
     : false;
 
   return { images, finalImagePath, finalIncluded, finalIsLast };
+}
+
+function prependInitialScreenImage(
+  scenario: EvidenceScenarioRecord,
+  images: Array<{ path: string; stepText: string }>,
+): Array<{ path: string; stepText: string }> {
+  const initial = scenario.initialScreenEvidence;
+  if (!initial?.path || !isImageFile(initial.path) || !fs.existsSync(initial.path)) return images;
+  const initialPath = path.resolve(initial.path);
+  if (images.some((image) => path.resolve(image.path) === initialPath)) return images;
+  return [{
+    path: initialPath,
+    stepText: initial.status === "load_failed"
+      ? `ESTADO INICIAL - FALLO DE CARGA: ${initial.reason ?? "initial_load_failure"}`
+      : "ESTADO INICIAL",
+  }, ...images];
 }
 
 function validateFinalImageInsertionLogs(

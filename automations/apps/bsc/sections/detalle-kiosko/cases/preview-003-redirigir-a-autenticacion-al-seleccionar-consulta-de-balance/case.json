@@ -1,0 +1,10 @@
+{
+  "id": "preview-003-redirigir-a-autenticacion-al-seleccionar-consulta-de-balance",
+  "externalId": "PREVIEW-003",
+  "caseId": 0,
+  "title": "Redirigir a autenticación al seleccionar Consulta de balance",
+  "source": "discovery",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "createdAt": "2026-09-03T13:44:01.666Z"
+}

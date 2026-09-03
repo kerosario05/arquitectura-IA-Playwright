@@ -1,5 +1,6 @@
 import assert from "node:assert";
-import { applyCanonicalRoutePrefix } from "./scenario-preview.service";
+import { applyCanonicalRoutePrefix, dedupeScenariosBySemanticSignature } from "./scenario-preview.service";
+import type { McpScenario } from "./scenario-types";
 
 function test(label: string, fn: () => void): void {
   try {
@@ -130,5 +131,59 @@ describe("applyCanonicalRoutePrefix", () => {
     ]);
     assert.strictEqual(result.steps.some((step) => step.includes("Entrada posterior")), false);
     assert.strictEqual(result.changed, false);
+  });
+});
+
+function dedupeScenario(overrides: Partial<McpScenario> = {}): McpScenario {
+  return {
+    sourceIssueKey: "TEST-1",
+    title: "Scenario",
+    steps: ["Clic en \"Entrada\".", "Validar que se muestre \"Resultado\"."],
+    preconditions: [],
+    expectedResult: "Resultado",
+    type: "functional",
+    database: "",
+    isConverted: 0,
+    automationType: "ui_discovery",
+    setupStrategy: "no_login",
+    appSlug: "default",
+    routeProfile: "",
+    dataRequirements: "N/A",
+    nonExecutableCriteria: "",
+    mcpExecutable: true,
+    ...overrides,
+  };
+}
+
+describe("dedupeScenariosBySemanticSignature", () => {
+  test("keeps both scenarios when requirement refs conflict", () => {
+    const result = dedupeScenariosBySemanticSignature([
+      dedupeScenario({ scenarioId: "with-ref-a", stepRequirementRefs: [{ stepIndex: 1, requirementId: "REQ-A" }] }),
+      dedupeScenario({ scenarioId: "with-ref-b", stepRequirementRefs: [{ stepIndex: 1, requirementId: "REQ-B" }] }),
+    ]);
+
+    assert.strictEqual(result.removed, 0);
+    assert.strictEqual(result.scenarios.length, 2);
+  });
+
+  test("prefers structured metadata over semantic strength", () => {
+    const result = dedupeScenariosBySemanticSignature([
+      dedupeScenario({ scenarioId: "without-ref", _branchRouteCompatibility: { compatible: true, routeId: "route" } } as any),
+      dedupeScenario({ scenarioId: "with-ref", stepRequirementRefs: [{ stepIndex: 1, requirementId: "REQ-A" }] }),
+    ]);
+
+    assert.strictEqual(result.removed, 1);
+    assert.strictEqual(result.scenarios[0].scenarioId, "with-ref");
+  });
+
+  test("allows dedupe when structured metadata is equivalent", () => {
+    const refs = [{ stepIndex: 1, requirementId: "REQ-A" }];
+    const result = dedupeScenariosBySemanticSignature([
+      dedupeScenario({ scenarioId: "first", stepRequirementRefs: refs }),
+      dedupeScenario({ scenarioId: "second", stepRequirementRefs: [...refs] }),
+    ]);
+
+    assert.strictEqual(result.removed, 1);
+    assert.strictEqual(result.scenarios.length, 1);
   });
 });

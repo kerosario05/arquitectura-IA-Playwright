@@ -1,0 +1,10 @@
+{
+  "id": "c44717-seleccionar-consulta-de-balance-y-observar-redireccion-a-autenticacion",
+  "externalId": "C44717",
+  "caseId": 44717,
+  "title": "Seleccionar Consulta de balance y observar redirección a autenticación",
+  "source": "discovery",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "createdAt": "2026-09-03T11:38:25.807Z"
+}

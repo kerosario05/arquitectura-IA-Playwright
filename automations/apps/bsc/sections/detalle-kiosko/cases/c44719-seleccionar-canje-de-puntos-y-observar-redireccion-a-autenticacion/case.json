@@ -1,0 +1,10 @@
+{
+  "id": "c44719-seleccionar-canje-de-puntos-y-observar-redireccion-a-autenticacion",
+  "externalId": "C44719",
+  "caseId": 44719,
+  "title": "Seleccionar Canje de Puntos y observar redirección a autenticación",
+  "source": "discovery",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "createdAt": "2026-09-03T11:42:44.712Z"
+}

@@ -1,0 +1,60 @@
+{
+  "mode": "ai_hybrid",
+  "provider": "codex",
+  "model": "gpt-5.4-mini",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "invocations": 1,
+  "invocationsConsumed": 1,
+  "durationMs": 95690,
+  "usage": {
+    "inputTokens": 62471,
+    "cachedInputTokens": 23808,
+    "cacheWriteInputTokens": 0,
+    "nonCachedInputTokens": 38663,
+    "outputTokens": 1442,
+    "reasoningOutputTokens": 428,
+    "totalPhysicalTokens": 63913,
+    "durationMs": 83788,
+    "credits": null
+  },
+  "validation": {
+    "schema": "passed",
+    "structure": "passed",
+    "traceFidelity": "failed",
+    "typescript": "passed",
+    "playwrightDiscovery": "passed",
+    "semanticCoverage": "passed",
+    "functionalExecution": "skipped"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [
+    "traceFidelityValidation"
+  ],
+  "regressedGates": [],
+  "missingRequirements": [],
+  "oracleTypes": [
+    "literal_visible_text",
+    "heading_or_control"
+  ],
+  "errors": [
+    "contract_target_changed:stepIndex=2:contractStepIndex=1:expected=\"La opci&oacute;n Estados de cuenta conduce al mecanismo de autenticaci&oacute;n del kiosco.\""
+  ],
+  "warnings": [],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

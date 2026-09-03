@@ -1,0 +1,31 @@
+{
+  "scenarioId": "C44659",
+  "specContent": "import { test, expect, type Page } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../../src/automations/runtime/promoted-spec-runtime';\n\ntest('Redirigir a autenticacion desde Canje de Puntos', async ({ page }: { page: Page }) => {\n  process.env.APP_SLUG = 'pruebaqa';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'C44659';\n  process.env.SCENARIO_TITLE = 'Redirigir a autenticacion desde Canje de Puntos';\n\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 1,\n      target: 'Canje de Puntos',\n      assertion: async () => {\n        await expect(page.getByText('Canje de Puntos', { exact: true })).toBeVisible();\n      },\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 2,\n      target: 'Canje de Puntos',\n      actionIntent: 'Abrir la opcion Canje de Puntos',\n      expectedEffect: 'Navegar al acceso autenticado del kiosco',\n      action: async () => {\n        await page.getByText('Canje de Puntos', { exact: true }).click();\n      },\n    });\n\n    await promotedRuntime.waitForPromotedUiStable(3, 'La opcion Canje de Puntos redirige al acceso autenticado del kiosco.');\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 3,\n      target: 'La opcion Canje de Puntos redirige al acceso autenticado del kiosco.',\n      assertion: async () => {\n        await expect(page.getByText('Canje de Puntos', { exact: true })).toBeVisible();\n      },\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});\n",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "Canje de Puntos",
+      "implementation": "await expect(page.getByText('Canje de Puntos', { exact: true })).toBeVisible();"
+    },
+    {
+      "requirement": "Canje de Puntos",
+      "implementation": "await expect(page.getByText('Canje de Puntos', { exact: true })).toBeVisible();"
+    }
+  ],
+  "usedPageObjects": [],
+  "declaredIdentifiers": [
+    "promotedRuntime"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

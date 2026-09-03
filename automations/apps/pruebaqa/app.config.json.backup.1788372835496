@@ -1,0 +1,8 @@
+{
+  "name": "PruebaQA",
+  "baseUrl": "https://172.27.4.50/",
+  "loginMode": "no_login",
+  "testData": {},
+  "testDataAliases": {},
+  "missingInputBehavior": "auto_generate"
+}

@@ -1,0 +1,26 @@
+{
+  "scenarioId": "PREVIEW-005",
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../../src/automations/runtime/promoted-spec-runtime';\n\ntest('Seleccionar Canje de Puntos y observar redirección a autenticación', async ({ page }) => {\n  process.env.APP_SLUG = 'bsc';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-005';\n  process.env.SCENARIO_TITLE = 'Seleccionar Canje de Puntos y observar redirección a autenticación';\n\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 0,\n      target: 'Canje de Puntos',\n      actionIntent: 'click',\n      expectedEffect: 'open authentication flow',\n      action: async () => {\n        await page.getByText('Canje de Puntos', { exact: true }).click();\n      },\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 1,\n      target: 'pantalla de autenticación del kiosco',\n      assertion: async () => {\n        await expect(page.getByText('pantalla de autenticación del kiosco', { exact: true })).toBeVisible();\n      },\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    0,
+    1
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "pantalla de autenticación del kiosco",
+      "implementation": "await expect(page.getByText('pantalla de autenticación del kiosco', { exact: true })).toBeVisible();"
+    }
+  ],
+  "usedPageObjects": [],
+  "declaredIdentifiers": [
+    "promotedRuntime"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

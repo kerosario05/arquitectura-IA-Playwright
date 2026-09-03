@@ -1,0 +1,10 @@
+{
+  "appSlug": "bsc",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sectionId": 4903,
+  "sourceScenarioId": "C44717",
+  "testRailCaseId": 44717,
+  "generatedAt": "2026-09-03T11:38:25.822Z",
+  "title": "Seleccionar Consulta de balance y observar redirección a autenticación"
+}

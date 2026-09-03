@@ -1402,6 +1402,14 @@ export class PromotedSpecRuntime {
     await this.evidenceInitPromise;
   }
 
+  private async ensureInitialEvidence(): Promise<void> {
+    await this.ensureEvidenceInitialized();
+    if (!this.evidenceRecorder) return;
+    if (!(await this.evidenceRecorder.captureInitialScreen(this.page, "promoted_reuse"))) {
+      throw new Error("initial_readiness_failure");
+    }
+  }
+
   /** Capture evidence for a single step */
   private async captureEvidenceStep(
     stepText: string,
@@ -1427,10 +1435,10 @@ export class PromotedSpecRuntime {
   }
 
   /** Capture evidence for a click target step */
-  private async captureClickStep(target: string, status: "passed" | "failed" | "skipped", errorMessage?: string): Promise<void> {
+  private async captureClickStep(target: string, status: "passed" | "failed" | "skipped", errorMessage?: string, sourceStepIndex?: number): Promise<void> {
     if (!this.evidenceRecorder) return;
     const stepText = `Clic en "${target}".`;
-    await this.captureEvidenceStep(stepText, status, errorMessage, { target });
+    await this.captureEvidenceStep(stepText, status, errorMessage, { target, sourceStepIndex });
   }
 
   /** Call at the end of a spec to finalize evidence (saves evidence.json and generates evidencia.docx) */
@@ -1445,6 +1453,9 @@ export class PromotedSpecRuntime {
       return;
     }
     try {
+      if (!this.evidenceRecorder.hasInitialScreenEvidence) {
+        await this.evidenceRecorder.captureInitialScreen(this.page, "promoted_reuse");
+      }
       const record = await this.evidenceRecorder.finish();
       const perScenarioDocxGenerated = Boolean(
         record.docxPath
@@ -1627,6 +1638,7 @@ export class PromotedSpecRuntime {
   }
 
   async clickPromotedTarget(options: PromotedClickOptions): Promise<void> {
+    await this.ensureInitialEvidence();
     const previousUrl = this.page.url();
     const expectedEffect = options.expectedEffect ?? "ui_change";
     let retryAttempted = false;
@@ -2038,7 +2050,7 @@ export class PromotedSpecRuntime {
         );
       }
       
-      await this.captureClickStep(options.target, "failed", `clickPath=${clickPath} native=${nativeClickError || "?"} callback=${callbackError || "?"}`);
+      await this.captureClickStep(options.target, "failed", `clickPath=${clickPath} native=${nativeClickError || "?"} callback=${callbackError || "?"}`, options.stepIndex);
       throw new Error(
         `Promoted click failed at step ${options.stepIndex} target="${options.target}". ` +
         `clickPath=${clickPath} nativeClickAttempted=${nativeClickAttempted} nativeClickSucceeded=${nativeClickSucceeded} ` +
@@ -2048,10 +2060,11 @@ export class PromotedSpecRuntime {
     }
 
     // Capture evidence after successful click
-    await this.captureClickStep(options.target, "passed");
+    await this.captureClickStep(options.target, "passed", undefined, options.stepIndex);
   }
 
   async fillPromotedField(options: PromotedFillOptions): Promise<void> {
+    await this.ensureInitialEvidence();
     const masked = maskIfSensitive(options.value, options.sensitive);
     const previousActiveContainer = this.activeContainer?.descriptor;
     const refresh = await this.refreshActiveContainerForField(options.field);
@@ -2238,6 +2251,7 @@ export class PromotedSpecRuntime {
   }
 
   async expectPromotedVisible(options: PromotedAssertOptions): Promise<void> {
+    await this.ensureInitialEvidence();
     const stepText = options.description?.trim() || `Validar que se muestre "${options.target}".`;
     try {
       await withTimeout(options.assertion(), this.config.actionTimeoutMs, "assert visible");

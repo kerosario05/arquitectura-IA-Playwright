@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import type { Page } from "@playwright/test";
-import { loadEvidenceConfig, type EvidenceConfig, type EvidenceScenarioContext, type EvidenceStepRecord, type EvidenceScenarioRecord, type DetailEvidenceMetadata, deriveScenarioStatus } from "./evidence-types";
+import { loadEvidenceConfig, type EvidenceConfig, type EvidenceScenarioContext, type EvidenceStepRecord, type EvidenceScenarioRecord, type DetailEvidenceMetadata, type InitialScreenEvidence, deriveScenarioStatus } from "./evidence-types";
 import { buildEvidencePaths, buildScreenshotFilename } from "./evidence-paths";
 import { generateEvidenceDocx } from "./evidence-docx-generator";
 
@@ -18,6 +18,7 @@ export class EvidenceRecorder {
   private evidenceKind?: string;
   private isDetailEvidence?: boolean;
   private lastActionTarget?: string;
+  private initialScreenEvidence?: InitialScreenEvidence;
 
   constructor(context: EvidenceScenarioContext, config?: Partial<EvidenceConfig>) {
     this.config = { ...loadEvidenceConfig(), ...config };
@@ -41,6 +42,46 @@ export class EvidenceRecorder {
 
     const runIdLog = this.context.runId ? ` runId=${this.context.runId}` : "";
     console.log(`[evidence:scenario] started scenarioId=${this.context.scenarioId}${runIdLog} dir=${this.paths.scenarioDir}`);
+  }
+
+  async captureInitialScreen(page: Page, executionSource: "full_discovery" | "promoted_reuse", timeoutMs = 10000): Promise<boolean> {
+    if (this.initialScreenEvidence) return this.initialScreenEvidence.status === "ready";
+    await this.start();
+    const capturedAt = new Date().toISOString();
+    let ready = false;
+    let reason: string | undefined;
+    try {
+      if (page.isClosed()) throw new Error("initial_load_failure");
+      await page.waitForLoadState("domcontentloaded", { timeout: timeoutMs });
+      const deadline = Date.now() + timeoutMs;
+      while (Date.now() < deadline) {
+        const usable = await page.evaluate(() => document.readyState !== "loading" && Boolean(document.body) && document.body.childNodes.length > 0).catch(() => false);
+        if (usable) { ready = true; break; }
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      if (!ready) reason = "initial_readiness_timeout";
+    } catch (error) {
+      reason = error instanceof Error && error.message.includes("timeout") ? "initial_readiness_timeout" : "navigation_failed";
+    }
+
+    let screenshotPath: string | null = null;
+    try {
+      const filename = ready ? "initial-screen.png" : "initial-load-failure.png";
+      screenshotPath = path.join(this.paths.screenshotsDir, filename);
+      await page.screenshot({ path: screenshotPath, fullPage: this.config.fullPage });
+    } catch {
+      screenshotPath = null;
+    }
+    this.initialScreenEvidence = {
+      status: ready ? "ready" : "load_failed",
+      captured: Boolean(screenshotPath),
+      path: screenshotPath,
+      capturedAt,
+      ...(ready ? {} : { reason }),
+    };
+    console.log(`[evidence:initial] scenarioId=${this.context.scenarioId} executionSource=${executionSource} status=${this.initialScreenEvidence.status} captured=${this.initialScreenEvidence.captured} beforeStepIndex=1 reason=${ready ? "none" : reason}`);
+    if (!ready) console.log(`[initial-readiness] scenarioId=${this.context.scenarioId} executionSource=${executionSource} ready=false reason=${reason} stepsStarted=false`);
+    return ready;
   }
 
   async captureStep(
@@ -144,6 +185,10 @@ export class EvidenceRecorder {
    */
   get stepCount(): number {
     return this.steps.length;
+  }
+
+  get hasInitialScreenEvidence(): boolean {
+    return Boolean(this.initialScreenEvidence);
   }
 
   /**
@@ -292,11 +337,11 @@ export class EvidenceRecorder {
   async finish(page?: Page): Promise<EvidenceScenarioRecord> {
     if (!this.config.enabled) {
       this.finished = true;
-      return buildRecord(this.context, this.steps, undefined, undefined, undefined, this.detailEvidence);
+      return buildRecord(this.context, this.steps, undefined, undefined, undefined, this.detailEvidence, undefined, undefined, undefined, undefined, this.initialScreenEvidence);
     }
 
     if (this.finished) {
-      return buildRecord(this.context, this.steps, this.paths.docxPath, this.paths.evidenceJsonPath, undefined, this.detailEvidence);
+      return buildRecord(this.context, this.steps, this.paths.docxPath, this.paths.evidenceJsonPath, undefined, this.detailEvidence, undefined, undefined, undefined, undefined, this.initialScreenEvidence);
     }
     this.finished = true;
 
@@ -328,7 +373,7 @@ export class EvidenceRecorder {
       }
     }
 
-    let status = deriveScenarioStatus(this.steps);
+    let status = this.initialScreenEvidence?.status === "load_failed" ? "Fallido" : deriveScenarioStatus(this.steps);
 
     // EVIDENCE GATE: Validate detail screenshot requirement
     // Task 2: Skip detail screenshot requirement for listing/navigation scenarios (no detailTarget AND no finalProductClickStepIndex)
@@ -339,7 +384,7 @@ export class EvidenceRecorder {
         `detailTarget=${this.detailTarget ?? "none"} finalProductClickStepIndex=${this.finalProductClickStepIndex ?? "none"}`
       );
       console.log(
-        `[evidence:scenario] finalScreenEvidence captured=true source=last_successful_action ` +
+        `[evidence:scenario] finalScreenEvidence captured=${this.steps.some((step) => Boolean(step.screenshotPath))} source=last_successful_action ` +
         `scenario=${this.context.scenarioId} finalStepsCount=${this.steps.length}`
       );
       // Clear detailEvidence so downstream (DOCX) doesn't use it
@@ -425,7 +470,12 @@ export class EvidenceRecorder {
       day: "numeric",
     });
 
-    const record = buildRecord(this.context, this.steps, this.paths.docxPath, this.paths.evidenceJsonPath, status, this.detailEvidence, date, this.evidenceKind, this.isDetailEvidence, this.lastActionTarget);
+    const finalScreenshot = [...this.steps].reverse().find((step) => Boolean(step.screenshotPath))?.screenshotPath ?? null;
+    const record = buildRecord(this.context, this.steps, this.paths.docxPath, this.paths.evidenceJsonPath, status, this.detailEvidence, date, this.evidenceKind, this.isDetailEvidence, this.lastActionTarget, this.initialScreenEvidence, {
+      captured: Boolean(finalScreenshot),
+      path: finalScreenshot,
+      capturedAt: new Date().toISOString(),
+    });
 
     console.log(`[evidence:scenario] persisted evidenceKind=${this.evidenceKind ?? "unknown"} isDetail=${this.isDetailEvidence ?? false} detailRequired=${this.detailEvidence?.required ?? false}`);
     console.log(`[evidence:scenario] finalClassification evidenceKind=${this.evidenceKind ?? "unknown"} isDetail=${this.isDetailEvidence ?? false} detailRequired=${this.detailEvidence?.required ?? false} lastTarget="${this.lastActionTarget ?? ""}"`);
@@ -486,6 +536,8 @@ function buildRecord(
   evidenceKind?: string,
   isDetailEvidence?: boolean,
   lastActionTarget?: string,
+  initialScreenEvidence?: InitialScreenEvidence,
+  finalScreenEvidence?: EvidenceScenarioRecord["finalScreenEvidence"],
 ): EvidenceScenarioRecord {
   return {
     scenarioId: context.scenarioId,
@@ -501,7 +553,9 @@ function buildRecord(
     appSlug: context.appSlug,
     sectionSlug: context.sectionSlug,
     sectionName: context.sectionName,
+    initialScreenEvidence,
     steps,
+    finalScreenEvidence,
     docxPath,
     evidenceJsonPath,
     detailEvidence,

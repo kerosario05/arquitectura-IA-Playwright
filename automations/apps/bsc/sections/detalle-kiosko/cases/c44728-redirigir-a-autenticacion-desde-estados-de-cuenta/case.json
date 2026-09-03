@@ -1,0 +1,10 @@
+{
+  "id": "c44728-redirigir-a-autenticacion-desde-estados-de-cuenta",
+  "externalId": "C44728",
+  "caseId": 44728,
+  "title": "Redirigir a autenticacion desde Estados de cuenta",
+  "source": "discovery",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "createdAt": "2026-09-03T12:54:37.264Z"
+}

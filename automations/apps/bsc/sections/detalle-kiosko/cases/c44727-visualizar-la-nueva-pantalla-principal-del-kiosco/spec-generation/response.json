@@ -1,0 +1,39 @@
+{
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../../src/automations/runtime/promoted-spec-runtime';\n\nprocess.env.APP_SLUG = 'bsc';\nprocess.env.SECTION_SLUG = 'detalle-kiosko';\nprocess.env.SCENARIO_ID = 'C44727';\nprocess.env.SCENARIO_TITLE = 'Visualizar la nueva pantalla principal del kiosco';\n\ntest('C44727 - Visualizar la nueva pantalla principal del kiosco', async ({ page }) => {\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 1,\n      target: 'Estados de cuenta',\n      assertion: async () => {\n        await expect(page.getByText('Estados de cuenta')).toBeVisible();\n      },\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 2,\n      target: 'Consulta de balance',\n      assertion: async () => {\n        await expect(page.getByText('Consulta de balance')).toBeVisible();\n      },\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 3,\n      target: 'Cartas y certificaciones',\n      assertion: async () => {\n        await expect(page.getByText('Cartas y certificaciones')).toBeVisible();\n      },\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 4,\n      target: 'Canje de Puntos',\n      assertion: async () => {\n        await expect(page.getByText('Canje de Puntos')).toBeVisible();\n      },\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});\n",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "Estados de cuenta",
+      "implementation": "await expect(page.getByText('Estados de cuenta')).toBeVisible();"
+    },
+    {
+      "requirement": "Consulta de balance",
+      "implementation": "await expect(page.getByText('Consulta de balance')).toBeVisible();"
+    },
+    {
+      "requirement": "Cartas y certificaciones",
+      "implementation": "await expect(page.getByText('Cartas y certificaciones')).toBeVisible();"
+    },
+    {
+      "requirement": "Canje de Puntos",
+      "implementation": "await expect(page.getByText('Canje de Puntos')).toBeVisible();"
+    }
+  ],
+  "usedPageObjects": [],
+  "declaredIdentifiers": [
+    "promotedRuntime"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

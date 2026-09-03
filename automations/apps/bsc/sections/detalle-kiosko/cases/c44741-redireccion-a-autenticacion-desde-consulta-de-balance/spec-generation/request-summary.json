@@ -1,0 +1,162 @@
+{
+  "appSlug": "bsc",
+  "sectionSlug": "detalle-kiosko",
+  "scenarioId": "C44741",
+  "scenarioTitle": "Redireccion a autenticacion desde Consulta de balance",
+  "stepCount": 3,
+  "sourceExpectedResultPresent": true,
+  "requiredAssertionCount": 4,
+  "observableOracles": [
+    {
+      "id": "observed-01",
+      "requirement": "Consulta de balance",
+      "type": "literal_visible_text",
+      "backed": true,
+      "source": "discovery",
+      "evidence": [
+        "assertion_resolved_during_discovery"
+      ]
+    },
+    {
+      "id": "expected-01",
+      "requirement": "pantalla de autenticaci&oacute;n del kiosco para iniciar sesi&oacute;n",
+      "type": "auth_gate",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 3,
+      "target": "pantalla de autenticaci&oacute;n del kiosco para iniciar sesi&oacute;n",
+      "evidence": [
+        "auth_gate_detected:true",
+        "auth_stage:unknown"
+      ],
+      "details": {
+        "gateDetected": true,
+        "stage": null,
+        "detectedBeforeStep": null,
+        "authFlowLanding": "transactions_menu"
+      }
+    }
+  ],
+  "oracleTypes": [
+    "literal_visible_text",
+    "auth_gate"
+  ],
+  "availablePageObjectCount": 2,
+  "mode": "ai_hybrid",
+  "functionalExecutionEnabled": false,
+  "provider": "codex",
+  "model": "gpt-5.4-mini",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "C44741",
+    "title": "Redireccion a autenticacion desde Consulta de balance",
+    "appSlug": "bsc",
+    "sectionSlug": "detalle-kiosko",
+    "auth": {
+      "gateDetected": true,
+      "required": false,
+      "stage": "identification_type_selection",
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    },
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Validar que se muestre \"Consulta de balance\".",
+        "operation": "assertVisible",
+        "target": {
+          "strategy": "text",
+          "value": "Consulta de balance"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "literal_visible_text",
+          "backed": true,
+          "implementationKind": "heading_or_control",
+          "requirement": "Consulta de balance"
+        },
+        "evidenceRefs": [
+          "oracle:observed-01"
+        ]
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Clic en \"Consulta de balance\".",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Consulta de balance"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Validar que se muestre \"pantalla de autenticaci&oacute;n del kiosco para iniciar sesi&oacute;n\".",
+        "operation": "assertVisible",
+        "target": {
+          "strategy": "text",
+          "value": "Consulta de balance redirige a la autenticacion del kiosco."
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "auth_gate",
+          "backed": true,
+          "implementationKind": "heading_or_control",
+          "mechanism": {
+            "source": "auth_gate_detector",
+            "method": "detectAuthGate",
+            "scanner": {
+              "source": "page_scanner",
+              "method": "scanCurrentPage"
+            },
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "auth_gate"
+            }
+          },
+          "requirement": "pantalla de autenticaci&oacute;n del kiosco para iniciar sesi&oacute;n"
+        },
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 3,
+      "representedScenarioSteps": 3,
+      "missingScenarioSteps": []
+    }
+  },
+  "executionContractChars": 1885,
+  "promptChars": 25271,
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "promotionAllowed": false,
+  "failedGatesAttempt1": [
+    "playwrightDiscovery"
+  ],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

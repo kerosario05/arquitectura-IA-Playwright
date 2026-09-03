@@ -143,51 +143,13 @@ export function resolveAppForPreview(req: {
     };
   }
 
-  // 4. TestRail section name
-  if (req.testrailSectionName?.trim()) {
-    const inferred = inferAppFromTestRailSection(req.testrailSectionName);
-    if (inferred) {
-      return {
-        ...inferred,
-        source: "testrail_section",
-        confidence: "high",
-        reason: `Detected app from TestRail section name: ${req.testrailSectionName}`,
-      };
-    }
-  }
-
-  // 5. TestRail project name
-  if (req.testrailProjectName?.trim()) {
-    const inferred = inferAppFromTestRailSection(req.testrailProjectName);
-    if (inferred) {
-      return {
-        ...inferred,
-        source: "testrail_project",
-        confidence: "medium",
-        reason: `Detected app from TestRail project name: ${req.testrailProjectName}`,
-      };
-    }
-  }
-
-  // 6. Jira project key
-  if (req.jiraProjectKey?.trim()) {
-    const slug = normalizeAppSlug(req.jiraProjectKey.trim());
-    return {
-      appName: req.jiraProjectKey.trim(),
-      appSlug: slug,
-      source: "jira",
-      confidence: "low",
-      reason: `Fallback to Jira project key: ${req.jiraProjectKey}`,
-    };
-  }
-
-  // 7. Last fallback
+  // TestRail and Jira metadata describe work items, not app identity.
   return {
-    appName: "default",
-    appSlug: "default",
+    appName: "",
+    appSlug: "",
     source: "fallback",
     confidence: "low",
-    reason: "No app inference source available, using default",
+    reason: "No app inference source available",
   };
 }
 

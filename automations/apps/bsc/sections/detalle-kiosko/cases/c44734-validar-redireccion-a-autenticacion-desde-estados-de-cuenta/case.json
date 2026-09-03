@@ -1,0 +1,10 @@
+{
+  "id": "c44734-validar-redireccion-a-autenticacion-desde-estados-de-cuenta",
+  "externalId": "C44734",
+  "caseId": 44734,
+  "title": "Validar redireccion a autenticacion desde Estados de cuenta",
+  "source": "discovery",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "createdAt": "2026-09-03T13:15:43.290Z"
+}

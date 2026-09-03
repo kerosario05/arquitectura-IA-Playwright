@@ -115,6 +115,20 @@ export type CaseDiscoveryWorkflowResult = {
   durationMs: number;
 };
 
+export function resolvePromotionOutcome(input: {
+  promotionAllowed: boolean;
+  promotionStatus: string;
+}): { promoted: boolean; promotionStatus: string; promotionReason?: string } {
+  if (input.promotionAllowed && input.promotionStatus === "promoted") {
+    return { promoted: true, promotionStatus: "promoted" };
+  }
+  return {
+    promoted: false,
+    promotionStatus: input.promotionStatus === "promoted" ? "promotion_failed" : input.promotionStatus,
+    ...(input.promotionAllowed ? {} : { promotionReason: "spec_generation_promotion_not_allowed" }),
+  };
+}
+
 function splitMultilineValue(value: string | undefined): string[] {
   if (!value || !value.trim()) return [];
   return value
@@ -2437,7 +2451,6 @@ export async function runCaseDiscoveryWorkflow(
           discoveryDir: outputDir
         }
       );
-      promoted = true;
       if (promotedEntry.pomStatus === "needs_page_object" || promotedEntry.pomStatus === "needs_page_method" || promotedEntry.pomStatus === "blocked_missing_pom") {
         promotionStatus = promotedEntry.pomStatus;
       } else if (promotedEntry.pomStatus === "inline_debug_only") {
@@ -2493,7 +2506,17 @@ export async function runCaseDiscoveryWorkflow(
           warnings: Array.isArray(raw.warnings) ? raw.warnings.filter((value): value is string => typeof value === "string") : [],
         };
       })();
-      promotionReport.promoted = true;
+      const promotionOutcome = resolvePromotionOutcome({
+        promotionAllowed: specGeneration?.promotionAllowed !== false,
+        promotionStatus,
+      });
+      const generationAllowed = specGeneration?.promotionAllowed !== false;
+      const promotionPersisted = promotionOutcome.promoted;
+      promoted = promotionOutcome.promoted;
+      promotionStatus = promotionOutcome.promotionStatus;
+      promotionReason = promotionOutcome.promotionReason ?? promotionReason;
+      console.log(`[discovery:workflow] promotionAllowed=${generationAllowed} promotionPersisted=${promotionPersisted} finalCaseStatus=${caseResult.status} failedGate=${promotionPersisted ? "none" : promotionStatus}`);
+      promotionReport.promoted = promotionPersisted;
       promotionReport.automationId = promotedEntry.id;
       promotionReport.appSlug = promotedEntry.appSlug;
       promotionReport.specPath = promotedEntry.specPath;

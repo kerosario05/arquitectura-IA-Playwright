@@ -1,0 +1,44 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C44718",
+    "caseId": 44718,
+    "title": "Seleccionar Cartas y certificaciones y observar redirección a autenticación"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "description": "Clic en \"Cartas y certificaciones\".",
+      "target": {
+        "strategy": "text",
+        "value": "Cartas y certificaciones",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Cartas y certificaciones",
+          "resolvedTargetName": "Cartas y certificaciones",
+          "resolvedCandidateId": "el-15",
+          "aiAssisted": true,
+          "aiReason": "ai_selection_resolution",
+          "repairType": "selection_resolution",
+          "decisionStatus": "repaired_plan",
+          "validationStatus": "valid"
+        }
+      }
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-09-03T11:40:33.627Z"
+}

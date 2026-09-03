@@ -1,0 +1,10 @@
+{
+  "appSlug": "bsc",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sectionId": 4903,
+  "sourceScenarioId": "C44727",
+  "testRailCaseId": 44727,
+  "generatedAt": "2026-09-03T12:52:32.064Z",
+  "title": "Visualizar la nueva pantalla principal del kiosco"
+}

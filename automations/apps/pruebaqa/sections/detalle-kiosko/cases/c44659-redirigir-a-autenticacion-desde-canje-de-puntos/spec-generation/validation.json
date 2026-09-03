@@ -1,0 +1,63 @@
+{
+  "mode": "ai_hybrid",
+  "provider": "codex",
+  "model": "gpt-5.4-mini",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "invocations": 1,
+  "invocationsConsumed": 1,
+  "durationMs": 50154,
+  "usage": {
+    "inputTokens": 62792,
+    "cachedInputTokens": 33024,
+    "cacheWriteInputTokens": 0,
+    "nonCachedInputTokens": 29768,
+    "outputTokens": 1683,
+    "reasoningOutputTokens": 651,
+    "totalPhysicalTokens": 64475,
+    "durationMs": 46733,
+    "credits": null
+  },
+  "validation": {
+    "schema": "passed",
+    "structure": "failed",
+    "traceFidelity": "passed",
+    "typescript": "failed",
+    "playwrightDiscovery": "skipped",
+    "semanticCoverage": "passed",
+    "functionalExecution": "skipped"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [
+    "structuralValidation",
+    "typescriptValidation"
+  ],
+  "regressedGates": [],
+  "missingRequirements": [],
+  "oracleTypes": [
+    "literal_visible_text",
+    "auth_gate"
+  ],
+  "errors": [
+    "unused_import:type Page",
+    "typescript_validation_failed:exitCode=2",
+    "typescript_validation_error:automations/apps/pruebaqa/sections/detalle-kiosko/cases/c44659-redirigir-a-autenticacion-desde-canje-de-puntos/spec-generation/.spec-validation-40008-1788372959800.ts(19,82): Cannot find name 'Page'."
+  ],
+  "warnings": [],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

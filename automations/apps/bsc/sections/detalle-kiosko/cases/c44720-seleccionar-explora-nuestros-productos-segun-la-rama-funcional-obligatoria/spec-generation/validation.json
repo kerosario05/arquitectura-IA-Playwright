@@ -1,0 +1,63 @@
+{
+  "mode": "ai_hybrid",
+  "provider": "codex",
+  "model": "gpt-5.4-mini",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "invocations": 1,
+  "invocationsConsumed": 1,
+  "durationMs": 56455,
+  "usage": {
+    "inputTokens": 62012,
+    "cachedInputTokens": 28416,
+    "cacheWriteInputTokens": 0,
+    "nonCachedInputTokens": 33596,
+    "outputTokens": 1369,
+    "reasoningOutputTokens": 499,
+    "totalPhysicalTokens": 63381,
+    "durationMs": 45833,
+    "credits": null
+  },
+  "validation": {
+    "schema": "passed",
+    "structure": "failed",
+    "traceFidelity": "failed",
+    "typescript": "passed",
+    "playwrightDiscovery": "passed",
+    "semanticCoverage": "failed",
+    "functionalExecution": "skipped"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [
+    "structuralValidation",
+    "traceFidelityValidation",
+    "semanticCoverage"
+  ],
+  "regressedGates": [],
+  "missingRequirements": [],
+  "oracleTypes": [
+    "literal_visible_text"
+  ],
+  "errors": [
+    "missing_expect_import_for_assertions",
+    "missing_contract_semantic_coverage:scenarioStepIndex=2:operation=wait",
+    "missing_contract_step:stepIndex=2:contractStepIndex=1:operation=wait"
+  ],
+  "warnings": [],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

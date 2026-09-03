@@ -160,6 +160,8 @@ function validateRouteBacking(
     return { hasBacking: false, missingSteps: ["routeProfile"] };
   }
 
+  const visibleControls = routeProfile.visibleControls ?? [];
+
   // Check entry steps exist
   if (!routeProfile.entry || routeProfile.entry.length === 0) {
     missingSteps.push("entry");
@@ -168,7 +170,7 @@ function validateRouteBacking(
   switch (mode) {
     case "listing_validation":
       // Need entry + list target
-      if (routeProfile.visibleControls.length === 0) {
+      if (visibleControls.length === 0) {
         missingSteps.push("list_target");
       }
       break;
@@ -182,7 +184,7 @@ function validateRouteBacking(
 
     case "detail_navigation":
       // Need entry + list + detail (domainTerm for selection)
-      if (routeProfile.visibleControls.length === 0) {
+      if (visibleControls.length === 0) {
         missingSteps.push("list_target");
       }
       if (Object.keys(routeProfile.domainTerms || {}).length === 0) {
@@ -192,13 +194,13 @@ function validateRouteBacking(
 
     case "return_navigation":
       // Need entry + list + detail + return control
-      if (routeProfile.visibleControls.length === 0) {
+      if (visibleControls.length === 0) {
         missingSteps.push("list_target");
       }
       if (Object.keys(routeProfile.domainTerms || {}).length === 0) {
         missingSteps.push("domainTerm_for_selection");
       }
-      const hasReturnControl = routeProfile.visibleControls.some(
+      const hasReturnControl = visibleControls.some(
         control => normalizeText(control).includes("volver")
       );
       if (!hasReturnControl) {
@@ -208,7 +210,7 @@ function validateRouteBacking(
 
     case "action_button_validation":
       // Need entry + sensitive button in visibleControls
-      const hasSensitiveButton = routeProfile.visibleControls.some(control => {
+      const hasSensitiveButton = visibleControls.some(control => {
         const normalized = normalizeText(control);
         return SENSITIVE_ACTIONS.some(action => normalized.includes(action));
       });

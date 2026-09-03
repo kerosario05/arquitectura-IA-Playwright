@@ -11,6 +11,7 @@ import { resolveCaseDiscoveryAppSlug } from "../src/discovery/case-discovery";
 import { inferAppFromTestRailSection } from "../src/automations/app-auto-resolver";
 import { normalizeEntrySteps, buildCanonicalEntrySteps, normalizeForComparison } from "../src/automations/scenario-normalizer";
 import type { McpRouteProfile } from "../src/scenarios/scenario-types";
+import { resolveEffectiveAutoPomStatus } from "../src/automations/auto-pom";
 
 const TECHNICAL_SLUGS = new Set(["tests", "test", "default", "unknown", "undefined", "null"]);
 
@@ -89,6 +90,28 @@ test("virtualCaseToTestScenario preserves explicit TestRail case identity when p
   expect(scenario.externalId).toBe("C42811");
 });
 
+test("virtualCaseToTestScenario uses payload routeProfile before the virtual case value", () => {
+  const routeProfile = makeRouteProfile({ name: "payload-profile" });
+  const scenario = virtualCaseToTestScenario({
+    id: "preview-002",
+    displayId: "PREVIEW-002",
+    title: "Caso con perfil explícito",
+    sourceIssueKey: "TR-C42812",
+    steps: ["Clic en \"Iniciar\"."],
+    expectedResult: "Se inicia",
+    preconditions: [],
+    appSlug: "app-a",
+    routeProfile: "app-config-profile",
+    dataRequirements: "",
+    mcpExecutable: true,
+    source: "scenario_preview",
+    type: "Functional",
+    automationType: "ui_with_auth_gate",
+    setupStrategy: "auth_gate",
+  }, routeProfile);
+  expect((scenario as any).routeProfile).toBe(routeProfile);
+});
+
 test("autoPromote no considera discovered_partial como exito final si no hay spec promovido", () => {
   const completion = resolvePreviewCompletion({
     caseResult: { status: "discovered_partial" },
@@ -141,6 +164,107 @@ test("autoPromote requiere promotionAllowed y specWritten para automationReady",
   expect(completion.automationReady).toBe(true);
   expect(completion.aiAttempts).toBe(2);
   expect(completion.finalSpecOrigin).toBe("ai_candidate");
+});
+
+test("T1 auto-POM promoted replaces the initial blocked status", () => {
+  const promotionStatus = resolveEffectiveAutoPomStatus("promoted");
+  const completion = resolvePreviewCompletion({
+    caseResult: { status: "discovered_passed" },
+    promotionStatus,
+    specPath: "automations/apps/project/cases/case/case.spec.ts",
+    specGeneration: {
+      provider: null,
+      model: null,
+      invocations: 0,
+      invocationsConsumed: 0,
+      promotionAllowed: true,
+      specWritten: true,
+      validation: { structure: "passed", semanticCoverage: "passed" },
+      finalSpec: { origin: "deterministic", fallback: null },
+    },
+  }, true);
+
+  expect(promotionStatus).toBe("promoted");
+  expect(completion.specGenerationStatus).toBe("passed");
+  expect(completion.automationReady).toBe(true);
+});
+
+test("T2 failed auto-POM remains fail-closed", () => {
+  const promotionStatus = resolveEffectiveAutoPomStatus("needs_page_method");
+  const completion = resolvePreviewCompletion({
+    caseResult: { status: "discovered_passed" },
+    promotionStatus,
+    specPath: "automations/apps/project/cases/case/case.spec.ts",
+    specGeneration: {
+      provider: null,
+      model: null,
+      invocations: 0,
+      invocationsConsumed: 0,
+      promotionAllowed: true,
+      specWritten: true,
+      finalSpec: { origin: "deterministic", fallback: null },
+    },
+  }, true);
+
+  expect(promotionStatus).not.toBe("promoted");
+  expect(completion.automationReady).toBe(false);
+});
+
+test("T3 a later spec gate failure overrides promoted readiness with the real reason", () => {
+  const completion = resolvePreviewCompletion({
+    caseResult: { status: "discovered_passed" },
+    promotionStatus: "promoted",
+    specPath: "automations/apps/project/cases/case/case.spec.ts",
+    specGeneration: {
+      provider: null,
+      model: null,
+      invocations: 0,
+      invocationsConsumed: 0,
+      promotionAllowed: false,
+      specWritten: true,
+      validation: { structure: "failed" },
+      finalSpec: { origin: "deterministic", fallback: null },
+    },
+  }, true);
+
+  expect(completion.automationReady).toBe(false);
+  expect(completion.reason).toBe("spec_gate_failed:structure");
+});
+
+test("T4 promotion failure without failed targets is not classified as target_not_found", () => {
+  const failure = classifyPreviewFailure({
+    id: "case",
+    displayId: "CASE",
+    title: "Promotion failure",
+    status: "failed",
+    promotionStatus: "spec_failed",
+    specGenerationStatus: "failed",
+    promotionReason: "spec_gate_failed:structure",
+    failedTargets: [],
+    failedAssertions: [],
+  });
+
+  expect(failure).toEqual({ failureType: "spec_generation_failed", phase: "spec_generation" });
+});
+
+test("T5 an already promoted result remains automation ready", () => {
+  const completion = resolvePreviewCompletion({
+    caseResult: { status: "discovered_passed" },
+    promotionStatus: "promoted",
+    specPath: "automations/apps/project/cases/case/case.spec.ts",
+    specGeneration: {
+      provider: null,
+      model: null,
+      invocations: 0,
+      invocationsConsumed: 0,
+      promotionAllowed: true,
+      specWritten: true,
+      finalSpec: { origin: "existing_spec", fallback: null },
+    },
+  }, true);
+
+  expect(completion.eventStatus).toBe("passed");
+  expect(completion.automationReady).toBe(true);
 });
 
 test("failureGroups agrupa fallos por causa sin perder promotion gate", () => {

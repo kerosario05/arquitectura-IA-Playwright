@@ -1,0 +1,10 @@
+{
+  "id": "preview-005-redirigir-a-autenticacion-al-seleccionar-canje-de-puntos",
+  "externalId": "PREVIEW-005",
+  "caseId": 0,
+  "title": "Redirigir a autenticación al seleccionar Canje de Puntos",
+  "source": "discovery",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "createdAt": "2026-09-03T13:47:53.230Z"
+}

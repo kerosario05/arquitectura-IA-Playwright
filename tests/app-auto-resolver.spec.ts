@@ -117,14 +117,13 @@ test("resolveAppForPreview: explicit targetAppSlug wins", () => {
   expect(result.confidence).toBe("high");
 });
 
-test("resolveAppForPreview: testrail_section when no explicit", () => {
+test("resolveAppForPreview: TestRail section does not establish app identity", () => {
   const result = resolveAppForPreview({
     testrailSectionName: "Detalle_KIOSKO",
-    requestAppSlug: "arquitectura-automatizacion",
   });
-  expect(result.appSlug).toBe("kiosko");
-  expect(result.source).toBe("testrail_section");
-  expect(result.confidence).toBe("high");
+  expect(result.appSlug).toBe("");
+  expect(result.source).toBe("fallback");
+  expect(result.confidence).toBe("low");
 });
 
 test("resolveAppForPreview: fallback to request appSlug", () => {
@@ -132,12 +131,12 @@ test("resolveAppForPreview: fallback to request appSlug", () => {
     requestAppSlug: "arquitectura-automatizacion",
   });
   expect(result.appSlug).toBe("arquitectura-automatizacion");
-  expect(result.source).toBe("fallback");
+  expect(result.source).toBe("request");
 });
 
-test("resolveAppForPreview: last fallback is default", () => {
+test("resolveAppForPreview: unresolved when no authority exists", () => {
   const result = resolveAppForPreview({});
-  expect(result.appSlug).toBe("default");
+  expect(result.appSlug).toBe("");
   expect(result.source).toBe("fallback");
 });
 

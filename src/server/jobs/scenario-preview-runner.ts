@@ -5,6 +5,10 @@ import { randomUUID } from "crypto";
 import { jobStore, type JobSummary, type JobStatus } from "./job-store";
 import type { PublishedCaseEntry } from "./launch-orchestrator";
 import { type ScenarioPreviewRequest, type VirtualCase } from "../../types/scenario-preview.types";
+import {
+  createQaLabDiagnosticManifest,
+  recordQaLabDiagnosticPhase,
+} from "./qa-lab-diagnostic-manifest";
 import { config, requireTestRailConfig } from "../../config/env";
 import { TestRailClient } from "../../clients/testrail.client";
 import { defectChecklistStore } from "../services/defect-checklist-store";
@@ -142,20 +146,30 @@ async function consolidateRunEvidence(
 
           // Check if this scenario was previously marked as failed by evidence gate
           const currentEvidenceStatus = recordedScenario?.status;
-          const isEvidenceGateFailed = currentEvidenceStatus === "Fallido" &&
-            (recordedScenario?.failureReasons?.some((r: string) =>
-              r.includes("evidence_gate") || r.includes("missing_detail_screenshot") || r.includes("promotion_gate")
-            ) ?? false);
+           const isEvidenceGateFailed = currentEvidenceStatus === "Fallido" &&
+             (recordedScenario?.failureReasons?.some((r: string) =>
+               r.includes("evidence_gate") || r.includes("missing_detail_screenshot") || r.includes("promotion_gate")
+             ) ?? false);
+           const isValidPartialOutcome = outcome.status === "failed"
+             && outcome.discoveryStatus === "discovered_partial"
+             && (outcome.stepResults?.length ?? 0) > 0
+             && (outcome.stepResults ?? []).every((step: any) => !step?.reason && !/failed|not_found|error/i.test(step?.status ?? ""));
 
           // Don't allow case_finished to improve Fallido (from evidence gate) to Exitoso
-          if (isEvidenceGateFailed && outcome.status === "passed") {
+           if (isEvidenceGateFailed && outcome.status === "passed") {
             console.log(
               `[evidence:run] statusOverrideSkipped scenarioId=${scenarioId} from="Fallido" attempted="Exitoso" reason=evidence_gate_failed`,
             );
-            continue;
-          }
+             continue;
+           }
+           if (isValidPartialOutcome && (currentEvidenceStatus === "Exitoso" || currentEvidenceStatus === "Parcial / Con observaciones")) {
+             console.log(
+               `[evidence:run] statusOverrideSkipped scenarioId=${scenarioId} from="${currentEvidenceStatus}" attempted="Fallido" reason=valid_discovered_partial`,
+             );
+             continue;
+           }
 
-          runRecorder.overrideScenarioStatus(scenarioId, outcome.status, "case_finished");
+           runRecorder.overrideScenarioStatus(scenarioId, outcome.status, "case_finished");
         }
       }
     } else {
@@ -668,9 +682,43 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   if (!job) return;
 
   const p = job.params as ScenarioPreviewParams;
+  const artifactDir = ensureArtifactDir(jobId);
+  const diagnosticManifestPath = createQaLabDiagnosticManifest(artifactDir, jobId, {
+    appSlug: p.appSlug,
+    targetAppSlug: p.targetAppSlug,
+    sectionName: p.sectionName,
+    sectionSlug: p.sectionSlug,
+    source: p.source,
+    scenarioCount: p.scenarios?.length ?? 0,
+    publishToTestRail: p.publishToTestRail,
+    createTestRun: p.createTestRun,
+    reportResults: p.reportResults,
+  });
+  recordQaLabDiagnosticPhase(diagnosticManifestPath, "generation", "received", {
+    scenarioCount: p.scenarios?.length ?? 0,
+    scenarios: (p.scenarios ?? []).map((scenario: any) => ({
+      id: scenario.scenarioId,
+      title: scenario.title,
+      sourceIssueKey: scenario.sourceIssueKey,
+      steps: scenario.steps,
+      expectedResult: scenario.expectedResult,
+      preconditions: scenario.preconditions,
+      authIntent: scenario.authIntent,
+      semanticValidity: scenario.semanticValidity,
+      publicationClassification: scenario.publicationClassification,
+      launchClassification: scenario.launchClassification,
+      mcpExecutable: scenario.mcpExecutable,
+      coverageRefs: scenario.coverageRefs,
+      stepClaims: scenario.stepClaims,
+      stepRequirementRefs: scenario.stepRequirementRefs,
+      requirementDependencies: scenario.requirementDependencies,
+      functionalBranch: scenario.functionalBranch,
+      branchAssociation: scenario.branchAssociation,
+    })),
+  });
 
   if (!p.scenarios || p.scenarios.length === 0) {
-    const artifactDir = ensureArtifactDir(jobId);
+    recordQaLabDiagnosticPhase(diagnosticManifestPath, "completed", "failed", { reason: "no_scenarios" });
     saveLogFile(artifactDir, "stdout.log", "");
     saveLogFile(artifactDir, "stderr.log", "");
     const resultsPath = path.join(artifactDir, "results.json");
@@ -700,7 +748,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   );
 
   if (validScenarios.length === 0) {
-    const artifactDir = ensureArtifactDir(jobId);
+    recordQaLabDiagnosticPhase(diagnosticManifestPath, "completed", "failed", { reason: "no_valid_scenarios" });
     saveLogFile(artifactDir, "stdout.log", "");
     saveLogFile(artifactDir, "stderr.log", "");
     const resultsPath = path.join(artifactDir, "results.json");
@@ -725,14 +773,19 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
     return;
   }
 
-  const artifactDir = ensureArtifactDir(jobId);
-
   // ── Extract launch metadata for TestRail result sync (Fase 2) ──
   const pRecord = p as Record<string, unknown>;
   const launchId = (pRecord.launchId as string) || undefined;
   const testRunId = pRecord.testRunId ? Number(pRecord.testRunId) : undefined;
   const jiraKey = (pRecord.jiraKey as string) || undefined;
   const publishedCases: PublishedCaseEntry[] = Array.isArray(pRecord.publishedCases) ? pRecord.publishedCases : [];
+
+  recordQaLabDiagnosticPhase(diagnosticManifestPath, "launch", launchId || testRunId ? "metadata_received" : "not_configured", {
+    launchId,
+    testRunId,
+    jiraKey,
+    publishedCases,
+  });
 
   // Persist this job's id onto the launch manifest (when this run belongs to a launch) so the
   // Executions summary can tie the run to its defects (keyed by jobId) and evidence docx.
@@ -1261,6 +1314,24 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
     jobStore.appendLog(jobId, `[scenario-preview] finalSteps scenario=${vc.displayId} firstSteps=${JSON.stringify(firstSteps)}`);
   }
 
+  recordQaLabDiagnosticPhase(diagnosticManifestPath, "coverage", "computed", {
+    scenarioCount: normalizedCases.length,
+    scenarios: normalizedCases.map((scenario: any) => ({
+      id: scenario.displayId ?? scenario.scenarioId,
+      title: scenario.title,
+      sourceIssueKey: scenario.sourceIssueKey,
+      coverageRefs: scenario.coverageRefs,
+      stepClaims: scenario.stepClaims,
+      stepRequirementRefs: scenario.stepRequirementRefs,
+      requirementDependencies: scenario.requirementDependencies,
+      functionalBranch: scenario.functionalBranch,
+      branchAssociation: scenario.branchAssociation,
+      semanticValidity: scenario.semanticValidity,
+      publicationClassification: scenario.publicationClassification,
+      launchClassification: scenario.launchClassification,
+    })),
+  });
+
   // Validate before writing artifacts
   const { valid, issues } = validateVirtualCases(normalizedCases, routeProfile, appConfig);
   if (!valid) {
@@ -1431,6 +1502,11 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
     return casePath;
   });
   jobStore.appendLog(jobId, `[run:scenario-preview] Saved ${normalizedCases.length} scenarios to ${previewPath}`);
+  recordQaLabDiagnosticPhase(diagnosticManifestPath, "generation", "artifacts_written", {
+    previewPath,
+    generatedCasePaths,
+    scenarioCount: normalizedCases.length,
+  });
 
   const previewCases = JSON.parse(fs.readFileSync(previewPath, "utf-8")) as VirtualCase[];
   for (const vc of previewCases) {
@@ -1756,6 +1832,12 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   jobStore.appendLog(jobId, `[run:scenario-preview] command=${cmd} ${args.join(" ")}`);
   jobStore.appendLog(jobId, `[run:scenario-preview] jobId=${jobId}`);
   jobStore.appendLog(jobId, `[run:scenario-preview] started`);
+  recordQaLabDiagnosticPhase(diagnosticManifestPath, "execution", "started", {
+    command: cmd,
+    args,
+    scenarioCount: normalizedCases.length,
+    artifactsDir: artifactDir,
+  });
 
   const child = spawn(cmd, args, {
     shell: true,
@@ -2088,6 +2170,13 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
     saveLogFile(artifactDir, "stdout.log", stdoutBuffer);
     saveLogFile(artifactDir, "stderr.log", stderrBuffer);
 
+    recordQaLabDiagnosticPhase(diagnosticManifestPath, "execution", code === 0 ? "completed" : "failed", {
+      exitCode: code,
+      completedCases: finishedCaseIds.size,
+      stdoutPath: stdoutLogPath,
+      stderrPath: stderrLogPath,
+    });
+
     const currentSummary = jobStore.get(jobId)?.summary;
   const completedCount = currentSummary?.completed ?? 0;
     const lastStdout = stdoutBuffer.split("\n").filter((l) => l.trim()).slice(-10).join("\n");
@@ -2306,6 +2395,17 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
       }
     }
 
+    recordQaLabDiagnosticPhase(diagnosticManifestPath, "result_sync", shouldReportResults ? "completed" : "not_requested", {
+      testRunId: testRailRunId,
+      reported: shouldReportResults,
+      syncFailedCount,
+      outcomes: Array.from(caseOutcomeMap.entries()).map(([scenarioId, outcome]) => ({
+        scenarioId,
+        status: outcome.status,
+        failureReason: outcome.failureReason,
+      })),
+    });
+
     // Write per-case outcomes to results.json for rerun support
     const finalResultsPath = path.join(artifactDir, "results.json");
     try {
@@ -2389,7 +2489,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
             jobStore.appendLog(jobId, `[defect-checklist] skipped reason=no_failed_cases_found jobId=${jobId}`);
           } else {
             const list = defectChecklistStore.getOrCreate(issueKey);
-            const checklistUrl = `/checklist/${list.urlSlug}`;
+            const checklistUrl = `/checklist/${list.urlSlug}?jobId=${encodeURIComponent(jobId)}`;
 
             for (const fc of failedCases) {
               jobStore.appendLog(jobId, `[defect-source-shape] scenarioId=${fc.id} isFailed=${fc.status === "failed"} hasFailureReason=${Boolean(fc.failureReason)}`);
@@ -2511,6 +2611,11 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
 
     // Consolidate run evidence into single DOCX
     await consolidateRunEvidence(jobId, appSlug, sectionSlug, p.sectionName, caseOutcomeMap);
+    recordQaLabDiagnosticPhase(diagnosticManifestPath, "completed", finalStatus, {
+      resultPath: finalResultsPath,
+      evidenceDir: artifactDir,
+      scenarioCount: normalizedCases.length,
+    });
 
     jobStore.update(jobId, {
       status: finalStatus,
@@ -2535,6 +2640,8 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
     saveLogFile(artifactDir, "stderr.log", stderrBuffer);
 
     const errorMessage = `Child process error: ${err.message}`;
+    recordQaLabDiagnosticPhase(diagnosticManifestPath, "execution", "failed_to_start", { error: errorMessage });
+    recordQaLabDiagnosticPhase(diagnosticManifestPath, "completed", "failed", { error: errorMessage });
 
     // Write results.json
     const resultsPath = path.join(artifactDir, "results.json");

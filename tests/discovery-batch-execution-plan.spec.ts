@@ -19,7 +19,10 @@ import {
   supportsTargetedDiscoveryPreview,
   validatePromotedEntryForExecution,
   resolveRouteFromValidation,
+  isPersistedDiscoveryPromotionSuccessful,
+  resolvePostDiscoveryExecutionAdmission,
 } from "../src/server/jobs/discovery-batch-runner";
+import { resolvePromotionOutcome } from "../src/discovery/case-discovery-workflow";
 
 test("execution plan: all requested cases are executable", () => {
   const plan = buildDiscoveryBatchExecutionPlan(
@@ -190,6 +193,25 @@ test("discovery args include overwrite/rerun-active only when explicitly request
   expect(args).toContain("--rerun-active");
 });
 
+test("resolved rediscovery intent is propagated to the child discovery command", () => {
+  const intent = resolveRediscoveryIntent({
+    forceRediscovery: false,
+    overwrite: true,
+    rerunActive: true,
+    executePromotedSpecs: false,
+  });
+  const args = buildDiscoveryBatchArgs({
+    caseIds: [],
+    appSlug: "app-a",
+    overwrite: intent.overwrite,
+    rerunActive: intent.rerunActive,
+  }, [42868]);
+
+  expect(intent.explicit).toBe(false);
+  expect(args).toContain("--overwrite");
+  expect(args).toContain("--rerun-active");
+});
+
 test("mixed execution planner prioritizes jira preview while preserving relative order per group", () => {
   const plan = buildMixedExecutionPlan({
     caseIds: [1001, 2001, 1002, 2002],
@@ -296,6 +318,137 @@ test("route decision prefers promoted reuse when validation is reusable", () => 
   });
   expect(route.route).toBe("promoted_reuse");
   expect(route.reason).toBe("promoted_spec_valid");
+});
+
+test("persisted promotion requires both a reusable entry and promoted child state", () => {
+  expect(isPersistedDiscoveryPromotionSuccessful({ discoveredState: "discovered_passed", reusable: true })).toBe(false);
+  expect(isPersistedDiscoveryPromotionSuccessful({ discoveredState: "promoted", reusable: true })).toBe(true);
+  expect(isPersistedDiscoveryPromotionSuccessful({ discoveredState: "promoted", reusable: false })).toBe(false);
+});
+
+function postDiscoveryEntry(overrides: Record<string, unknown> = {}): any {
+  return {
+    id: "automation-post-discovery",
+    caseId: 5010,
+    title: "post discovery case",
+    appSlug: "app-a",
+    appProfile: "app-a",
+    specPath: "automations/apps/app-a/sections/section-a/cases/c5010/case.spec.ts",
+    planPath: "automations/apps/app-a/sections/section-a/cases/c5010/plan.json",
+    appConfigPath: "automations/apps/app-a/app.config.json",
+    status: "active",
+    pomStatus: "promoted",
+    specVerificationStatus: "passed",
+    ...overrides,
+  };
+}
+
+test("T1: promoted child with persisted valid entry admits functional execution", () => {
+  const result = resolvePostDiscoveryExecutionAdmission({
+    caseId: 5010,
+    appSlug: "app-a",
+    sectionSlug: "section-a",
+    childStatus: "promoted",
+    promotionPersisted: true,
+    entries: [postDiscoveryEntry()],
+    fileExists: () => true,
+  });
+  expect(result.admitted).toBe(true);
+  expect(result.specPath).toMatch(/case\.spec\.ts$/);
+});
+
+test("T2: promoted child with invalid persisted entry fails closed", () => {
+  const result = resolvePostDiscoveryExecutionAdmission({
+    caseId: 5010,
+    appSlug: "app-a",
+    childStatus: "promoted",
+    promotionPersisted: true,
+    entries: [postDiscoveryEntry({ specVerificationStatus: "failed" })],
+    fileExists: () => true,
+  });
+  expect(result.admitted).toBe(false);
+  expect(result.specPath).toBeUndefined();
+});
+
+test("T3: discovered_passed without persisted promotion is not admitted", () => {
+  const result = resolvePostDiscoveryExecutionAdmission({
+    caseId: 5010,
+    appSlug: "app-a",
+    childStatus: "discovered_passed",
+    promotionPersisted: false,
+    entries: [postDiscoveryEntry()],
+    fileExists: () => true,
+  });
+  expect(result).toMatchObject({ admitted: false, reason: "child_status_discovered_passed" });
+});
+
+test("T4: discovered_partial is not admitted", () => {
+  const result = resolvePostDiscoveryExecutionAdmission({
+    caseId: 5010,
+    appSlug: "app-a",
+    childStatus: "discovered_partial",
+    promotionPersisted: true,
+    entries: [postDiscoveryEntry()],
+    fileExists: () => true,
+  });
+  expect(result.admitted).toBe(false);
+});
+
+test("T5: promoted is preparation success, not a failed full-discovery result", () => {
+  const result = resolvePostDiscoveryExecutionAdmission({
+    caseId: 5010,
+    appSlug: "app-a",
+    childStatus: "promoted",
+    promotionPersisted: true,
+    entries: [postDiscoveryEntry()],
+    fileExists: () => true,
+  });
+  expect(result.reason).not.toBe("full_discovery_promoted");
+});
+
+test("T6: admitted promoted result carries the exact spec for functional execution", () => {
+  const result = resolvePostDiscoveryExecutionAdmission({
+    caseId: 5010,
+    appSlug: "app-a",
+    sectionSlug: "section-a",
+    childStatus: "promoted",
+    promotionPersisted: true,
+    entries: [postDiscoveryEntry()],
+    fileExists: () => true,
+  });
+  expect(result.admitted).toBe(true);
+  expect(result.specPath?.replace(/\\/g, "/")).toContain("/c5010/");
+});
+
+test("T7: post-discovery admission uses the promoted spec resolver", () => {
+  const result = resolvePostDiscoveryExecutionAdmission({
+    caseId: 5010,
+    appSlug: "app-a",
+    sectionSlug: "wrong-section",
+    childStatus: "promoted",
+    promotionPersisted: true,
+    entries: [postDiscoveryEntry()],
+    fileExists: () => true,
+  });
+  expect(result.admitted).toBe(false);
+});
+
+test("T8: direct promoted reuse semantics remain unchanged", () => {
+  expect(isPersistedDiscoveryPromotionSuccessful({ discoveredState: "promoted", reusable: true })).toBe(true);
+  expect(isPersistedDiscoveryPromotionSuccessful({ discoveredState: "discovered_passed", reusable: true })).toBe(false);
+});
+
+test("workflow does not label a failed spec-generation gate as promoted", () => {
+  expect(resolvePromotionOutcome({ promotionAllowed: false, promotionStatus: "promoted" })).toEqual({
+    promoted: false,
+    promotionStatus: "promotion_failed",
+    promotionReason: "spec_generation_promotion_not_allowed",
+  });
+  expect(resolvePromotionOutcome({ promotionAllowed: true, promotionStatus: "promoted" })).toEqual({
+    promoted: true,
+    promotionStatus: "promoted",
+  });
+  expect(resolvePromotionOutcome({ promotionAllowed: true, promotionStatus: "promotion_failed" }).promoted).toBe(false);
 });
 
 test("route decision forces discovery when explicit rediscovery is requested", () => {

@@ -1,0 +1,23 @@
+{
+  "name": "PruebaQA",
+  "baseUrl": "https://172.27.4.50/",
+  "loginMode": "no_login",
+  "testData": {},
+  "testDataAliases": {},
+  "missingInputBehavior": "auto_generate",
+  "routeProfile": {
+    "routes": [
+      {
+        "from": "entry",
+        "intermediates": [
+          "Explora nuestros productos"
+        ]
+      }
+    ],
+    "intermediates": {
+      "entry": [
+        "Explora nuestros productos"
+      ]
+    }
+  }
+}

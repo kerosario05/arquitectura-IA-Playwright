@@ -1,0 +1,167 @@
+{
+  "appSlug": "bsc",
+  "sectionSlug": "detalle-kiosko",
+  "scenarioId": "C44732",
+  "scenarioTitle": "Acceder sin autenticacion a Explora nuestros productos",
+  "stepCount": 3,
+  "sourceExpectedResultPresent": true,
+  "requiredAssertionCount": 4,
+  "observableOracles": [
+    {
+      "id": "observed-01",
+      "requirement": "Explora nuestros productos",
+      "type": "literal_visible_text",
+      "backed": true,
+      "source": "discovery",
+      "evidence": [
+        "assertion_resolved_during_discovery"
+      ]
+    },
+    {
+      "id": "expected-01",
+      "requirement": "<p>La opcion Explora nuestros productos abre la informacion de productos sin autenticacion.</p>",
+      "type": "heading_or_control",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 2,
+      "target": "Explora nuestros productos",
+      "evidence": [
+        "click_target:Explora nuestros productos",
+        "transition_observed:true"
+      ],
+      "details": {
+        "historicalRequirement": "<p>La opcion Explora nuestros productos abre la informacion de productos sin autenticacion.</p>",
+        "historicalTarget": "Explora nuestros productos",
+        "resolvedObservableTarget": "Explora nuestros productos",
+        "semanticEquivalent": true,
+        "confidence": 0.86
+      }
+    },
+    {
+      "id": "expected-02",
+      "requirement": "La opcion Explora nuestros productos abre la informacion de productos sin autenticacion.",
+      "type": "heading_or_control",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 2,
+      "target": "Explora nuestros productos",
+      "evidence": [
+        "click_target:Explora nuestros productos",
+        "transition_observed:true"
+      ],
+      "details": {
+        "historicalRequirement": "La opcion Explora nuestros productos abre la informacion de productos sin autenticacion.",
+        "historicalTarget": "Explora nuestros productos",
+        "resolvedObservableTarget": "Explora nuestros productos",
+        "semanticEquivalent": true,
+        "confidence": 0.86
+      }
+    }
+  ],
+  "oracleTypes": [
+    "literal_visible_text",
+    "heading_or_control"
+  ],
+  "availablePageObjectCount": 2,
+  "mode": "ai_hybrid",
+  "functionalExecutionEnabled": false,
+  "provider": "codex",
+  "model": "gpt-5.4-mini",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "C44732",
+    "title": "Acceder sin autenticacion a Explora nuestros productos",
+    "appSlug": "bsc",
+    "sectionSlug": "detalle-kiosko",
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Validar que se muestre \"Explora nuestros productos\".",
+        "operation": "assertVisible",
+        "target": {
+          "strategy": "text",
+          "value": "Explora nuestros productos"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "literal_visible_text",
+          "backed": true,
+          "implementationKind": "heading_or_control",
+          "requirement": "Explora nuestros productos"
+        },
+        "evidenceRefs": [
+          "oracle:observed-01"
+        ]
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Clic en \"Explora nuestros productos\".",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Explora nuestros productos"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "heading_or_control",
+          "backed": true,
+          "implementationKind": "heading_or_control",
+          "requirement": "<p>La opcion Explora nuestros productos abre la informacion de productos sin autenticacion.</p>"
+        },
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Validar que se muestre \"Informacion de productos\".",
+        "operation": "assertVisible",
+        "target": {
+          "strategy": "text",
+          "value": "La opcion Explora nuestros productos abre la informacion de productos sin autenticacion."
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "literal_visible_text",
+          "backed": true,
+          "implementationKind": "heading_or_control",
+          "requirement": "Explora nuestros productos"
+        },
+        "evidenceRefs": [
+          "oracle:observed-01"
+        ]
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 3,
+      "representedScenarioSteps": 3,
+      "missingScenarioSteps": []
+    }
+  },
+  "executionContractChars": 1698,
+  "promptChars": 24412,
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": true,
+  "promotionAllowed": true,
+  "failedGatesAttempt1": [],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

@@ -54,7 +54,7 @@ import {
 import { buildDataContext } from "../data/data-context";
 import { buildPromotedDataManifest, savePromotedDataManifestSync } from "../data/promoted-data";
 import { validatePromotedSpecRuntimeContract } from "./runtime/promoted-runtime-contract";
-import { runHybridSpecGeneration, type SpecGenerationDiagnostics, type SpecGenerationSourceScenario } from "./spec-generation-hybrid";
+import { rewritePromotedRuntimeImport, runHybridSpecGeneration, validatePromotedSpecInternalImports, type SpecGenerationDiagnostics, type SpecGenerationSourceScenario } from "./spec-generation-hybrid";
 
 interface PromoteInput {
   plan: ExecutionPlan;
@@ -156,6 +156,20 @@ function assertPromotable(status: string, allowDraft: boolean): void {
       `Plan status is 'draft'. Use --allow-draft to promote draft plans or resolve required data first.`
     );
   }
+}
+
+function ensurePromotedSpecNavigation(specContent: string, plan: ExecutionPlan): string {
+  const hasNavigationStep = plan.steps.some((step) => step.action === "navigate");
+  if (!hasNavigationStep || /\.goto\s*\(/.test(specContent)) return specContent;
+
+  const navigation = [
+    "    const baseUrl = process.env.APP_BASE_URL;",
+    "    if (!baseUrl) throw new Error('APP_BASE_URL is required');",
+    "    await page.goto(baseUrl);",
+    "    await page.waitForLoadState('domcontentloaded');",
+    ""
+  ].join("\n");
+  return specContent.replace(/(\n\s*try\s*\{\n)/, `$1${navigation}`);
 }
 
 async function ensureDirectories(paths: {
@@ -1091,10 +1105,17 @@ export async function promoteExecutionPlan(
   });
   specGenerationDiagnostics = specGenerationResult.diagnostics;
   generatedSpecContent = specGenerationResult.specContent;
+  generatedSpecContent = rewritePromotedRuntimeImport(generatedSpecContent, appPaths.specPath);
+  generatedSpecContent = ensurePromotedSpecNavigation(generatedSpecContent, plan);
+  const promotedImportValidation = await validatePromotedSpecInternalImports(generatedSpecContent, appPaths.specPath);
+  console.log(`[promoted-spec-imports] specPath=${appPaths.specPath} internalImports=${promotedImportValidation.internalImports} resolved=${promotedImportValidation.resolved} unresolved=${promotedImportValidation.unresolved.length}`);
 
   const previousSpec = await readExistingSpecInfo(appPaths.specPath);
   let specWritten = false;
-  let specPromotionAllowed = specGenerationResult.promotionAllowed;
+  let specPromotionAllowed = specGenerationResult.promotionAllowed && promotedImportValidation.unresolved.length === 0;
+  if (promotedImportValidation.unresolved.length > 0) {
+    specGenerationDiagnostics.errors.push(`promoted_spec_internal_imports_unresolved:${promotedImportValidation.unresolved.join(",")}`);
+  }
   if (specPromotionAllowed) {
     await writeFileAtomicWithRetry(appPaths.specPath, generatedSpecContent);
     specWritten = true;

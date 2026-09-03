@@ -40,6 +40,14 @@ export interface EvidenceStepRecord {
   errorMessage?: string;
 }
 
+export interface InitialScreenEvidence {
+  status: "ready" | "load_failed";
+  captured: boolean;
+  path: string | null;
+  capturedAt: string;
+  reason?: string;
+}
+
 export interface DetailEvidenceMetadata {
   required: boolean;
   captured: boolean;
@@ -65,7 +73,13 @@ export interface EvidenceScenarioRecord {
   appSlug: string;
   sectionSlug: string;
   sectionName?: string;
+  initialScreenEvidence?: InitialScreenEvidence;
   steps: EvidenceStepRecord[];
+  finalScreenEvidence?: {
+    captured: boolean;
+    path: string | null;
+    capturedAt: string;
+  };
   docxPath?: string;
   evidenceJsonPath?: string;
   detailEvidence?: DetailEvidenceMetadata;

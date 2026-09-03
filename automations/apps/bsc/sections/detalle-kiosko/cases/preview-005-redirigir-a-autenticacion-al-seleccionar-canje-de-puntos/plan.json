@@ -1,0 +1,44 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-005",
+    "caseId": 0,
+    "title": "Redirigir a autenticación al seleccionar Canje de Puntos"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "description": "Clic en \"Canje de Puntos\".",
+      "target": {
+        "strategy": "text",
+        "value": "Canje de Puntos",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Canje de Puntos",
+          "resolvedTargetName": "Canje de Puntos",
+          "resolvedCandidateId": "el-18",
+          "aiAssisted": true,
+          "aiReason": "ai_selection_resolution",
+          "repairType": "selection_resolution",
+          "decisionStatus": "repaired_plan",
+          "validationStatus": "valid"
+        }
+      }
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-09-03T13:47:53.086Z"
+}

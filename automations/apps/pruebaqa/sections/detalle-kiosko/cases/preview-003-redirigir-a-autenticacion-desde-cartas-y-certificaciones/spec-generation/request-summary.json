@@ -1,0 +1,195 @@
+{
+  "appSlug": "pruebaqa",
+  "sectionSlug": "detalle-kiosko",
+  "scenarioId": "PREVIEW-003",
+  "scenarioTitle": "Redirigir a autenticacion desde Cartas y certificaciones",
+  "stepCount": 3,
+  "sourceExpectedResultPresent": true,
+  "requiredAssertionCount": 4,
+  "observableOracles": [
+    {
+      "id": "observed-01",
+      "requirement": "Cartas y certificaciones",
+      "type": "literal_visible_text",
+      "backed": true,
+      "source": "discovery",
+      "evidence": [
+        "assertion_resolved_during_discovery"
+      ]
+    },
+    {
+      "id": "observed-02",
+      "requirement": "Iniciar sesión",
+      "type": "literal_visible_text",
+      "backed": true,
+      "source": "discovery",
+      "evidence": [
+        "assertion_resolved_during_discovery"
+      ]
+    },
+    {
+      "id": "expected-01",
+      "requirement": "La opcion Cartas y certificaciones deriva al acceso autenticado del kiosco.",
+      "type": "auth_gate",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 2,
+      "target": "Iniciar sesión",
+      "evidence": [
+        "auth_gate_detected:true",
+        "auth_stage:identification_type_selection"
+      ],
+      "details": {
+        "gateDetected": true,
+        "stage": "identification_type_selection",
+        "detectedBeforeStep": "Iniciar sesión",
+        "authFlowLanding": "transactions_menu"
+      }
+    }
+  ],
+  "oracleTypes": [
+    "literal_visible_text",
+    "auth_gate"
+  ],
+  "availablePageObjectCount": 2,
+  "mode": "ai_hybrid",
+  "functionalExecutionEnabled": false,
+  "provider": "codex",
+  "model": "gpt-5.4-mini",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "PREVIEW-003",
+    "title": "Redirigir a autenticacion desde Cartas y certificaciones",
+    "appSlug": "pruebaqa",
+    "sectionSlug": "detalle-kiosko",
+    "auth": {
+      "gateDetected": true,
+      "required": false,
+      "stage": "identification_type_selection",
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    },
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 0,
+        "originalText": "Validar que se muestre \"Cartas y certificaciones\".",
+        "operation": "assertVisible",
+        "target": {
+          "strategy": "text",
+          "value": "Cartas y certificaciones"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "literal_visible_text",
+          "backed": true,
+          "implementationKind": "heading_or_control",
+          "requirement": "Cartas y certificaciones"
+        },
+        "evidenceRefs": [
+          "oracle:observed-01"
+        ]
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 1,
+        "originalText": "Clic en \"Cartas y certificaciones\".",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Cartas y certificaciones"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "auth_gate",
+          "backed": true,
+          "implementationKind": "runtime_auth_state",
+          "mechanism": {
+            "source": "auth_gate_detector",
+            "method": "detectAuthGate",
+            "scanner": {
+              "source": "page_scanner",
+              "method": "scanCurrentPage"
+            },
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "auth_gate",
+              "stage": "identification_type_selection"
+            }
+          },
+          "requirement": "La opcion Cartas y certificaciones deriva al acceso autenticado del kiosco."
+        },
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 2,
+        "originalText": "Esperar que se muestre \"Iniciar sesión\".",
+        "operation": "wait",
+        "target": {
+          "strategy": "text",
+          "value": "Iniciar sesión"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "auth_gate",
+          "backed": true,
+          "implementationKind": "runtime_auth_state",
+          "mechanism": {
+            "source": "auth_gate_detector",
+            "method": "detectAuthGate",
+            "scanner": {
+              "source": "page_scanner",
+              "method": "scanCurrentPage"
+            },
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "auth_gate",
+              "stage": "identification_type_selection"
+            }
+          },
+          "requirement": "La opcion Cartas y certificaciones deriva al acceso autenticado del kiosco."
+        },
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 3,
+      "representedScenarioSteps": 3,
+      "missingScenarioSteps": []
+    }
+  },
+  "executionContractChars": 2348,
+  "promptChars": 26055,
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": true,
+  "promotionAllowed": true,
+  "failedGatesAttempt1": [],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

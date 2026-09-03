@@ -1,0 +1,25 @@
+{
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../../src/automations/runtime/promoted-spec-runtime';\n\ntest('PREVIEW-004 - Redirigir a autenticación al seleccionar Cartas y certificaciones', async ({ page }) => {\n  process.env.APP_SLUG = 'bsc';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-004';\n  process.env.SCENARIO_TITLE = 'Redirigir a autenticaciÃ³n al seleccionar Cartas y certificaciones';\n\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 0,\n      target: 'Cartas y certificaciones',\n      actionIntent: 'Seleccionar la opción Cartas y certificaciones',\n      expectedEffect: 'Iniciar la redirección al flujo de autenticación del kiosco',\n      action: async () => {\n        await page.getByText('Cartas y certificaciones', { exact: true }).click();\n      }\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 1,\n      target: 'pantalla de autenticaciÃ³n del kiosco',\n      assertion: async () => {\n        await expect(page.getByText('pantalla de autenticaciÃ³n del kiosco', { exact: true })).toBeVisible();\n      }\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});\n",
+  "coveredStepIndexes": [
+    0,
+    1
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "pantalla de autenticaciÃ³n del kiosco",
+      "implementation": "await expect(page.getByText('pantalla de autenticaciÃ³n del kiosco', { exact: true })).toBeVisible();"
+    }
+  ],
+  "usedPageObjects": [],
+  "declaredIdentifiers": [
+    "promotedRuntime"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

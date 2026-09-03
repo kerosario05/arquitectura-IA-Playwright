@@ -1,0 +1,9 @@
+{
+  "appSlug": "bsc",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "PREVIEW-004",
+  "testRailCaseId": 0,
+  "generatedAt": "2026-09-03T11:40:15.105Z",
+  "title": "Seleccionar Cartas y certificaciones y observar redirección a autenticación"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "c44656-visualizar-la-nueva-pantalla-principal-y-redirigir-a-autenticacion-desde-estados-de-cuenta",
+  "externalId": "C44656",
+  "caseId": 44656,
+  "title": "Visualizar la nueva pantalla principal y redirigir a autenticacion desde Estados de cuenta",
+  "source": "discovery",
+  "appSlug": "pruebaqa",
+  "appConfigPath": "automations\\apps\\pruebaqa\\app.config.json",
+  "createdAt": "2026-09-02T18:03:47.423Z"
+}

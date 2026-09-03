@@ -136,6 +136,7 @@ export type FunctionalBranchRef = {
   branchId: string;
   sourceLabel?: string;
   sourceRequirementId?: string;
+  prerequisiteRequirementIds?: string[];
   actionIntent: string;
   expectedDestination?: string;
   accessIntent: BranchAccessIntent;
@@ -242,6 +243,8 @@ export type McpScenario = {
   dataRequirements: string;
   nonExecutableCriteria: string;
   mcpExecutable: boolean;
+  executionMode?: "standard" | "adaptive" | "nonAutomatable";
+  automationStatus?: "requires_route_discovery" | "requires_controlled_data" | "blocked";
   executionReadiness?: string;
   semanticValidity?: string;
   functionalRepresentationAllowed?: boolean;
@@ -311,7 +314,7 @@ export type McpScenario = {
     actualActionIdentity: string;
     actionMatched: boolean;
     destinationMatched?: boolean;
-    destinationEvidenceKind?: "route" | "heading" | "marker" | "auth_gate" | "structured_metadata" | "none";
+    destinationEvidenceKind?: "route" | "heading" | "marker" | "auth_gate" | "auth_gate_pending_discovery" | "structured_metadata" | "none";
     destinationEvidenceSource?: string;
     reasonCode?: string;
   };
@@ -333,6 +336,7 @@ export type FunctionalRequirementAccount = {
   category: RequirementCategory;
   sourceText: string;
   expectedBehavior: string;
+  required?: boolean;
   associatedBranchId?: string;
   facets?: RequirementFacet[];
   status?: RequirementStatus;
@@ -419,6 +423,7 @@ export type McpGenerationResponse = {
   requirements?: FunctionalRequirementAccount[];
   functionalCoverage?: FunctionalCoverageResult;
   canonicalClaims?: CanonicalClaim[];
+  missingRequirementIds?: string[];
   providerClaimCompliance?: {
     expectedClaims: string[];
     referencedClaims: string[];
@@ -463,6 +468,12 @@ export type ScenarioPreviewResponse = {
     invalid: number;
     rejected: number;
     blocked?: number;
+    visible?: number;
+    standard?: number;
+    adaptive?: number;
+    routePending?: number;
+    automationReady?: number;
+    generationSuccess?: boolean;
   };
   routeProfile: McpRouteProfile | null;
   scenarios: ValidatedScenario[];
@@ -471,6 +482,12 @@ export type ScenarioPreviewResponse = {
   warnings: string[];
   catalogDiagnostics?: CatalogDiagnostics;
   generationDiagnostics?: ScenarioGenerationDiagnostics;
+  canonicalClaims?: CanonicalClaim[];
+  providerClaimCompliance?: ScenarioGenerationDiagnostics["providerClaimCompliance"];
+  requirements?: FunctionalRequirementAccount[];
+  functionalCoverage?: FunctionalCoverageResult;
+  adaptiveScenarios?: McpScenario[];
+  coverage?: Record<string, unknown>;
 };
 
 export type ScenarioPreviewError = {
@@ -551,12 +568,42 @@ export type ScenarioGenerationDiagnostics = {
   launchId?: string;
   sourceIssueKey?: string;
   appSlug?: string;
+  generationSuccess?: boolean;
+  generationFailureReason?: string;
+  coverageCompletion?: {
+    completionCalls: number;
+    requiredRequirementIds?: string[];
+    coveredRequirementIds?: string[];
+    missingRequirementIds?: string[];
+    generationSuccess?: boolean;
+    scenarios?: McpScenario[];
+    compliance?: {
+      expectedCoverableRequirementIds: string[];
+      referencedRequirementIds: string[];
+      missingRequirementIds: string[];
+    };
+  };
+  providerClaimCompliance?: {
+    expectedClaims: string[];
+    referencedClaims: string[];
+    missingClaims: string[];
+    invalidClaims: Array<{
+      scenarioId?: string;
+      stepIndex: number;
+      claimId?: string;
+      requirementId?: string;
+      facet?: string;
+      branchId?: string;
+      reason: string;
+    }>;
+  };
 };
 
 export type DiagnosticCode =
   // ERROR level (blocks generation)
   | "needs_route_profile"
   | "missing_parent_route"
+  | "route_profile_intent_mismatch"
   // WARNING level (allows with low confidence)
   | "missing_intermediate_step"
   | "missing_detail_selection_step"

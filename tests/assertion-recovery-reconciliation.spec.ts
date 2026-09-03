@@ -1,7 +1,115 @@
 import { test, expect } from '@playwright/test';
 import type { DiscoveryStepResult } from '../src/types/discovery.types';
+import { calculateUnresolvedBlockingFailures, reconcileAuthGateAssertionFailures } from '../src/discovery/case-discovery';
 
 test.describe('Assertion Recovery Reconciliation', () => {
+  test('T1: discovery-batch runtime evidence reconciles a missing authentication assertion', () => {
+    const steps = [
+      {
+        index: 1,
+        action: 'click',
+        status: 'found',
+        targetText: 'selection',
+        canonicalRequirementRefs: [{ requirementId: 'branch:one' }],
+      },
+      {
+        index: 2,
+        action: 'assert',
+        status: 'not_found',
+        targetText: 'authentication screen',
+        functionalRequired: true,
+        canonicalRequirementRefs: [{ requirementId: 'branch:one' }],
+        error: 'assertion_not_found',
+      },
+    ] as DiscoveryStepResult[];
+
+    expect(calculateUnresolvedBlockingFailures(steps, {
+      detected: true,
+      completedAfterStepIndex: 1,
+      stage: 'otp',
+    })).toHaveLength(0);
+    expect(steps[1]).toMatchObject({ status: 'satisfied_by_previous_assertion', runtimeBacked: true, recoveryStatus: 'recovered' });
+  });
+
+  test('T2: missing assertion remains blocking without auth gate evidence', () => {
+    const steps = [{
+      index: 2,
+      action: 'assert',
+      status: 'not_found',
+      targetText: 'authentication screen',
+      functionalRequired: true,
+      canonicalRequirementRefs: [{ requirementId: 'branch:one' }],
+    }] as DiscoveryStepResult[];
+    expect(reconcileAuthGateAssertionFailures(steps)).toBe(0);
+    expect(steps[0].status).toBe('not_found');
+  });
+
+  test('T3: auth gate from another step or requirement does not reconcile', () => {
+    const steps = [
+      { index: 1, action: 'click', status: 'found', authGateDiagnostics: { detected: true }, canonicalRequirementRefs: [{ requirementId: 'branch:other' }] },
+      { index: 2, action: 'click', status: 'found', canonicalRequirementRefs: [{ requirementId: 'branch:one' }] },
+      { index: 3, action: 'assert', status: 'not_found', functionalRequired: true, canonicalRequirementRefs: [{ requirementId: 'branch:one' }] },
+    ] as DiscoveryStepResult[];
+    expect(reconcileAuthGateAssertionFailures(steps)).toBe(0);
+    expect(steps[2].status).toBe('not_found');
+  });
+
+  test('T4: an independent failure remains unresolved', () => {
+    const steps = [
+      { index: 1, action: 'click', status: 'found', authGateDiagnostics: { detected: true }, canonicalRequirementRefs: [{ requirementId: 'branch:one' }] },
+      { index: 2, action: 'assert', status: 'not_found', functionalRequired: true, canonicalRequirementRefs: [{ requirementId: 'branch:one' }] },
+      { index: 3, action: 'assert', status: 'not_found', functionalRequired: true, canonicalRequirementRefs: [{ requirementId: 'branch:other' }] },
+    ] as DiscoveryStepResult[];
+    reconcileAuthGateAssertionFailures(steps);
+    expect(steps[1].status).toBe('satisfied_by_previous_assertion');
+    expect(steps[2].status).toBe('not_found');
+  });
+
+  test('T5: generic destination assertion is not reconciled without structured gate evidence', () => {
+    const steps = [
+      { index: 1, action: 'click', status: 'found', canonicalRequirementRefs: [{ requirementId: 'branch:one' }] },
+      { index: 2, action: 'assert', status: 'not_found', functionalRequired: true, canonicalRequirementRefs: [{ requirementId: 'branch:one' }] },
+    ] as DiscoveryStepResult[];
+    expect(reconcileAuthGateAssertionFailures(steps)).toBe(0);
+  });
+
+  test('T6: reconciliation resolves the record before unresolved blocking failures are evaluated', () => {
+    const steps = [
+      { index: 1, action: 'click', status: 'found', authGateDiagnostics: { detected: true }, canonicalRequirementRefs: [{ requirementId: 'branch:one' }] },
+      { index: 2, action: 'assert', status: 'not_found', functionalRequired: true, canonicalRequirementRefs: [{ requirementId: 'branch:one' }] },
+    ] as DiscoveryStepResult[];
+    reconcileAuthGateAssertionFailures(steps);
+    expect(steps.filter((step) => step.status === 'not_found')).toHaveLength(0);
+  });
+
+  test('T7: gate observation can back the obligation without auth-flow implementation', () => {
+    const steps = [
+      { index: 2, action: 'assert', status: 'not_found', functionalRequired: true, canonicalRequirementRefs: [{ requirementId: 'gate' }] },
+    ] as DiscoveryStepResult[];
+    expect(calculateUnresolvedBlockingFailures(steps, { detected: true, detectedAtStepIndex: 2 })).toHaveLength(0);
+  });
+
+  test('T9: causal adjacency reconciles when runtime has no canonical refs', () => {
+    const steps = [
+      { index: 1, action: 'click', status: 'found' },
+      { index: 2, action: 'assert', status: 'not_found', functionalRequired: true },
+    ] as DiscoveryStepResult[];
+    expect(calculateUnresolvedBlockingFailures(steps, {
+      detected: true,
+      completedAfterStepIndex: 1,
+    })).toHaveLength(0);
+  });
+
+  test('T8: full authentication requirements still require completed auth flow', () => {
+    const steps = [
+      { index: 2, action: 'assert', status: 'not_found', functionalRequired: true, canonicalRequirementRefs: [{ requirementId: 'auth' }] },
+    ] as DiscoveryStepResult[];
+    expect(calculateUnresolvedBlockingFailures(steps, {
+      detected: true,
+      detectedAtStepIndex: 2,
+      requiresAuthFlowCompletion: true,
+    })).toHaveLength(1);
+  });
   test('getUnresolvedBlockingFailures ignores recovered steps', () => {
     // Simulate the helper function behavior
     const steps: Partial<DiscoveryStepResult>[] = [

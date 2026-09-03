@@ -1,0 +1,34 @@
+{
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../../src/automations/runtime/promoted-spec-runtime';\nimport { detectAuthGate } from '../../../../../../../../src/discovery/auth-gate-detector';\nimport { scanCurrentPage } from '../../../../../../../../src/explorer/page-scanner';\n\ntest('PREVIEW-002 Redirigir a autenticacion desde Consulta de balance', async ({ page }) => {\n  process.env.APP_SLUG = 'pruebaqa';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-002';\n  process.env.SCENARIO_TITLE = 'Redirigir a autenticacion desde Consulta de balance';\n\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 0,\n      target: 'Consulta de balance',\n      assertion: async () => {\n        const pageDiag = await scanCurrentPage(page);\n        const authGate = await detectAuthGate(pageDiag);\n        expect(authGate?.stage).toBe('identification_type_selection');\n      },\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 1,\n      target: 'Consulta de balance',\n      actionIntent: 'Clic en \"Consulta de balance\".',\n      expectedEffect: 'Dirigir al mecanismo de autenticacion del kiosco.',\n      action: async () => {\n        await page.getByText('Consulta de balance').click();\n      },\n    });\n\n    await promotedRuntime.waitForPromotedUiStable(2, 'Iniciar sesiÃ³n');\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 2,\n      target: 'Iniciar sesiÃ³n',\n      assertion: async () => {\n        const pageDiag = await scanCurrentPage(page);\n        const authGate = await detectAuthGate(pageDiag);\n        expect(authGate?.stage).toBe('identification_type_selection');\n      },\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    0,
+    1,
+    2
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "Consulta de balance",
+      "implementation": "expect(authGate?.stage).toBe('identification_type_selection');"
+    },
+    {
+      "requirement": "La opcion Consulta de balance dirige al mecanismo de autenticacion del kiosco.",
+      "implementation": "await page.getByText('Consulta de balance').click();"
+    },
+    {
+      "requirement": "La opcion Consulta de balance dirige al mecanismo de autenticacion del kiosco.",
+      "implementation": "expect(authGate?.stage).toBe('identification_type_selection');"
+    }
+  ],
+  "usedPageObjects": [],
+  "declaredIdentifiers": [
+    "promotedRuntime"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

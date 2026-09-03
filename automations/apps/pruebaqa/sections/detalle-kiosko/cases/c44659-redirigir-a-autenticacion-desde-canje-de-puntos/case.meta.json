@@ -1,0 +1,10 @@
+{
+  "appSlug": "pruebaqa",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sectionId": 4903,
+  "sourceScenarioId": "C44659",
+  "testRailCaseId": 44659,
+  "generatedAt": "2026-09-02T18:15:12.022Z",
+  "title": "Redirigir a autenticacion desde Canje de Puntos"
+}

@@ -50,6 +50,9 @@ scenariosRouter.post("/preview", async (req, res, next) => {
     );
     const result = await generateScenarioPreview(body);
 
+    const _dbg = (result as any).scenarios ?? [];
+    for (const _sc of _dbg) { console.log('[scenario-id-trace] BACKEND_HTTP_OUT=' + JSON.stringify({ bucket: 'scenario', title: _sc?.title ?? '', scenarioId: _sc?.scenarioId ?? '', id: _sc?.id ?? '', sourceIssueKey: _sc?.sourceIssueKey ?? '' })); }
+
     if (!result.ok) {
       const errorResult = result as Extract<typeof result, { ok: false }>;
       const status = errorResult.error === "no_active_sprint" ? 404 : errorResult.error === "invalid_request" ? 400 : 502;

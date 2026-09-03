@@ -1,0 +1,10 @@
+{
+  "id": "preview-006-seleccionar-explora-nuestros-productos-segun-la-rama-funcional-obligatoria",
+  "externalId": "PREVIEW-006",
+  "caseId": 0,
+  "title": "Seleccionar Explora nuestros productos según la rama funcional obligatoria",
+  "source": "discovery",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "createdAt": "2026-09-03T11:43:29.843Z"
+}

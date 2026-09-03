@@ -1,0 +1,10 @@
+{
+  "id": "c44716-seleccionar-estados-de-cuenta-y-observar-redireccion-a-autenticacion",
+  "externalId": "C44716",
+  "caseId": 44716,
+  "title": "Seleccionar Estados de cuenta y observar redirección a autenticación",
+  "source": "discovery",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "createdAt": "2026-09-03T11:35:46.217Z"
+}

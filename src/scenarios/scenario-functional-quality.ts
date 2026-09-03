@@ -6,6 +6,7 @@ import type {
   McpRejectedScenario,
   McpScenario,
   RequirementCategory,
+  RequirementFacet,
   RequirementStatus,
 } from "./scenario-types";
 
@@ -299,7 +300,7 @@ function ensureRequirementStepAlignment(
         isConverted: 0,
         automationType: "ui_validation",
         setupStrategy: "no_login",
-        appSlug: kept[0]?.appSlug ?? "default",
+        appSlug: kept[0]?.appSlug ?? "",
         routeProfile: "",
         dataRequirements: "N/A",
         nonExecutableCriteria: "",
@@ -331,7 +332,7 @@ function ensureRequirementStepAlignment(
         isConverted: 0,
         automationType: "ui_validation",
         setupStrategy: "no_login",
-        appSlug: kept[0]?.appSlug ?? "default",
+        appSlug: kept[0]?.appSlug ?? "",
         routeProfile: "",
         dataRequirements: "N/A",
         nonExecutableCriteria: "",
@@ -374,7 +375,7 @@ function generateNonUiRequirementScenarios(
   const generated: McpScenario[] = [];
   const base = {
     sourceIssueKey: scenarios[0]?.sourceIssueKey ?? "functional",
-    appSlug: scenarios[0]?.appSlug ?? "default",
+    appSlug: scenarios[0]?.appSlug ?? "",
     preconditions: ["La aplicación está disponible."],
     type: "functional",
     database: "",
@@ -720,10 +721,12 @@ export function extractRequirements(
   const seenClickTerms = new Set<string>();
   // Assertion-oriented categories share a term space: a term must not become
   // both a content restriction and a visibility requirement from one phrase.
-  const seenAssertionTerms = new Set<string>();
+  const seenContentRestrictionTerms = new Set<string>();
+  const seenDestinationTerms = new Set<string>();
+  const seenVisibilityTerms = new Set<string>();
   const branchTermKeys = new Set<string>();
   const add = (candidate: RequirementCandidate): void => {
-    const key = `${candidate.category}:${norm(candidate.keyTerm)}`;
+    const key = `${candidate.category}:${norm(candidate.keyTerm)}:${candidate.associatedBranchId ?? ""}`;
     if (seenKeys.has(key)) return;
     if (candidate.category === "action" || candidate.category === "prerequisite") {
       const term = norm(candidate.keyTerm);
@@ -751,6 +754,29 @@ export function extractRequirements(
       associatedBranchId: branch.branchId,
       associatedDestination: branch.expectedDestination,
       facets: ["activation", ...(branch.expectedDestination ? ["destination" as const] : [])],
+    });
+  }
+
+  // An explicitly listed set of alternatives is visible before activation. Its
+  // visibility is therefore shared screen evidence; activation and destination
+  // remain branch-scoped on the branch requirement above.
+  const sharedScreenVisibility = functionalBranches.length > 1
+    && /(?:opciones?|alternativas?|men[uú]|seleccionar|seleccione|elegir)[^\n:]*[:：]/i.test(huText);
+  for (const branch of functionalBranches) {
+    if (!branch.sourceLabel) continue;
+    const visibilityId = sharedScreenVisibility
+      ? `visibility:global:${norm(branch.sourceLabel)}`
+      : `visibility:branch:${branch.branchId}`;
+    add({
+      id: visibilityId,
+      sourceRequirementId: visibilityId,
+      category: "visibility",
+      sourceText: branch.sourceLabel,
+      keyTerm: branch.sourceLabel,
+      truncated: isTruncatedSource(branch.sourceLabel),
+      expectedBehavior: `Se muestra ${branch.sourceLabel}`,
+      ...(sharedScreenVisibility ? {} : { associatedBranchId: branch.branchId }),
+      facets: ["visibility"],
     });
   }
 
@@ -822,8 +848,8 @@ export function extractRequirements(
     const term = cleanRequirementTarget(atomicRequirementTarget(String(match[1] ?? "")));
     if (!term) continue;
     const tKey = norm(term);
-    if (seenAssertionTerms.has(tKey)) continue;
-    seenAssertionTerms.add(tKey);
+    if (seenContentRestrictionTerms.has(tKey)) continue;
+    seenContentRestrictionTerms.add(tKey);
     contentRestrictionCount++;
     add({
       id: `content_restriction:${contentRestrictionCount}`,
@@ -842,8 +868,8 @@ export function extractRequirements(
     const term = cleanRequirementTarget(atomicRequirementTarget(String(match[1] ?? "")));
     if (!term) continue;
     const tKey = norm(term);
-    if (seenAssertionTerms.has(tKey)) continue;
-    seenAssertionTerms.add(tKey);
+    if (seenDestinationTerms.has(tKey)) continue;
+    seenDestinationTerms.add(tKey);
     destinationCount++;
     add({
       id: `destination:${destinationCount}`,
@@ -852,6 +878,7 @@ export function extractRequirements(
       keyTerm: term,
       truncated: isTruncatedMatch(huText, match, term),
       expectedBehavior: `Resultado: ${term}`,
+      facets: ["destination"],
     });
   }
 
@@ -865,8 +892,8 @@ export function extractRequirements(
     if (!term) continue;
     if (startsWithNarrativeVerb(term)) continue; // compound clause: "mostrar seleccionar ..." → skip
     const tKey = norm(term);
-    if (seenAssertionTerms.has(tKey)) continue;
-    seenAssertionTerms.add(tKey);
+    if (seenVisibilityTerms.has(tKey)) continue;
+    seenVisibilityTerms.add(tKey);
     visibilityCount++;
     add({
       id: `visibility:${visibilityCount}`,
@@ -984,6 +1011,7 @@ export function buildCanonicalClaims(requirements: FunctionalRequirementAccount[
       : requirement.category === "visibility" ? ["visibility" as const]
         : requirement.category === "action" || requirement.category === "prerequisite" ? ["action" as const]
           : requirement.category === "branch" ? ["activation" as const, "destination" as const]
+            : requirement.category === "destination" ? ["destination" as const]
             : ["technical" as const];
     const coverable = isRequirementFunctionallyCoverable(requirement);
     return facets.map((facet) => ({

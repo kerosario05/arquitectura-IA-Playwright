@@ -1,0 +1,52 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C44730",
+    "caseId": 44730,
+    "title": "Redirigir a autenticacion desde Cartas y certificaciones"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "description": "Clic en \"Cartas y certificaciones\".",
+      "target": {
+        "strategy": "text",
+        "value": "Cartas y certificaciones",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Cartas y certificaciones",
+          "resolvedTargetName": "Cartas y certificaciones",
+          "resolvedCandidateId": "el-15",
+          "aiAssisted": true,
+          "aiReason": "ai_selection_resolution",
+          "repairType": "selection_resolution",
+          "decisionStatus": "repaired_plan",
+          "validationStatus": "valid"
+        }
+      }
+    }
+  ],
+  "notes": [
+    "Discovery partial: 2/3 navigations/assertions satisfied.",
+    "Review needed: 1 non-blocking assertion failure(s) were ignored for pass/fail reconciliation."
+  ],
+  "createdAt": "2026-09-03T13:00:04.123Z",
+  "metadata": {
+    "authFlowRequired": false,
+    "authFlowAlias": "defaultClient",
+    "authFlowLanding": "transactions_menu",
+    "authGateDetectedDuringDiscovery": true,
+    "authGateStage": "identification_type_selection"
+  }
+}

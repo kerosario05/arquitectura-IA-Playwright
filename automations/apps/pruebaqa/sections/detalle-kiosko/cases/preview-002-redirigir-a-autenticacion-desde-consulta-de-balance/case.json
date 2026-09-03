@@ -1,0 +1,10 @@
+{
+  "id": "preview-002-redirigir-a-autenticacion-desde-consulta-de-balance",
+  "externalId": "PREVIEW-002",
+  "caseId": 0,
+  "title": "Redirigir a autenticacion desde Consulta de balance",
+  "source": "discovery",
+  "appSlug": "pruebaqa",
+  "appConfigPath": "automations\\apps\\pruebaqa\\app.config.json",
+  "createdAt": "2026-09-02T18:06:07.251Z"
+}

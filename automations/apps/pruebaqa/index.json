@@ -1,0 +1,1044 @@
+{
+  "version": "1.0",
+  "updatedAt": "2026-09-02T18:16:02.286Z",
+  "automations": [
+    {
+      "id": "c44656-visualizar-la-nueva-pantalla-principal-y-redirigir-a-autenticacion-desde-estados-de-cuenta",
+      "externalId": "C44656",
+      "caseId": 44656,
+      "title": "Visualizar la nueva pantalla principal y redirigir a autenticacion desde Estados de cuenta",
+      "planPath": "automations\\apps\\pruebaqa\\sections\\detalle-kiosko\\cases\\c44656-visualizar-la-nueva-pantalla-principal-y-redirigir-a-autenticacion-desde-estados-de-cuenta\\plan.json",
+      "specPath": "automations\\apps\\pruebaqa\\sections\\detalle-kiosko\\cases\\c44656-visualizar-la-nueva-pantalla-principal-y-redirigir-a-autenticacion-desde-estados-de-cuenta\\case.spec.ts",
+      "appSlug": "pruebaqa",
+      "appConfigPath": "automations\\apps\\pruebaqa\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "pruebaqa",
+      "baseUrlHash": "1423ba294517",
+      "createdAt": "2026-09-02T18:04:50.852Z",
+      "updatedAt": "2026-09-02T18:04:50.852Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-09-02T18-03-27-947Z\\cases\\case-44656\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-09-02T18-03-27-947Z\\cases\\case-44656",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "ai_hybrid",
+          "provider": "codex",
+          "model": "gpt-5.4-mini",
+          "skill": {
+            "name": "playwright-spec-generation",
+            "version": "1.0.0",
+            "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+            "loaded": true
+          },
+          "invocations": 1,
+          "invocationsConsumed": 1,
+          "durationMs": 63279,
+          "usage": {
+            "inputTokens": 65404,
+            "cachedInputTokens": 33024,
+            "cacheWriteInputTokens": 0,
+            "nonCachedInputTokens": 32380,
+            "outputTokens": 2397,
+            "reasoningOutputTokens": 925,
+            "totalPhysicalTokens": 67801,
+            "durationMs": 56783,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "traceFidelity": "passed",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "skipped"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 1,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "literal_visible_text",
+            "auth_gate"
+          ],
+          "errors": [],
+          "warnings": [],
+          "finalSpec": {
+            "origin": "ai_candidate",
+            "generatedBy": "ai",
+            "strategy": "ai_candidate",
+            "fallback": null
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-001-visualizar-la-nueva-pantalla-principal-y-redirigir-a-autenticacion-desde-estados-de-cuenta",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "Visualizar la nueva pantalla principal y redirigir a autenticacion desde Estados de cuenta",
+      "planPath": "automations\\apps\\pruebaqa\\sections\\detalle-kiosko\\cases\\preview-001-visualizar-la-nueva-pantalla-principal-y-redirigir-a-autenticacion-desde-estados-de-cuenta\\plan.json",
+      "specPath": "automations\\apps\\pruebaqa\\sections\\detalle-kiosko\\cases\\preview-001-visualizar-la-nueva-pantalla-principal-y-redirigir-a-autenticacion-desde-estados-de-cuenta\\case.spec.ts",
+      "appSlug": "pruebaqa",
+      "appConfigPath": "automations\\apps\\pruebaqa\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "pruebaqa",
+      "createdAt": "2026-09-02T18:05:03.003Z",
+      "updatedAt": "2026-09-02T18:05:03.003Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-02T18-03-46-721Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-02T18-03-46-721Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "ai_hybrid",
+          "provider": "codex",
+          "model": "gpt-5.4-mini",
+          "skill": {
+            "name": "playwright-spec-generation",
+            "version": "1.0.0",
+            "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+            "loaded": true
+          },
+          "invocations": 1,
+          "invocationsConsumed": 1,
+          "durationMs": 56512,
+          "usage": {
+            "inputTokens": 55223,
+            "cachedInputTokens": 33024,
+            "cacheWriteInputTokens": 0,
+            "nonCachedInputTokens": 22199,
+            "outputTokens": 2004,
+            "reasoningOutputTokens": 516,
+            "totalPhysicalTokens": 57227,
+            "durationMs": 50376,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "traceFidelity": "passed",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "skipped"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 1,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "literal_visible_text",
+            "auth_gate"
+          ],
+          "errors": [],
+          "warnings": [],
+          "finalSpec": {
+            "origin": "ai_candidate",
+            "generatedBy": "ai",
+            "strategy": "ai_candidate",
+            "fallback": null
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-002-redirigir-a-autenticacion-desde-consulta-de-balance",
+      "externalId": "PREVIEW-002",
+      "caseId": 0,
+      "title": "Redirigir a autenticacion desde Consulta de balance",
+      "planPath": "automations\\apps\\pruebaqa\\sections\\detalle-kiosko\\cases\\preview-002-redirigir-a-autenticacion-desde-consulta-de-balance\\plan.json",
+      "specPath": "automations\\apps\\pruebaqa\\sections\\detalle-kiosko\\cases\\preview-002-redirigir-a-autenticacion-desde-consulta-de-balance\\case.spec.ts",
+      "appSlug": "pruebaqa",
+      "appConfigPath": "automations\\apps\\pruebaqa\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "pruebaqa",
+      "createdAt": "2026-09-02T18:08:04.024Z",
+      "updatedAt": "2026-09-02T18:08:04.025Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-09-02T18-05-03-759Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-09-02T18-05-03-759Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "ai_hybrid",
+          "provider": "codex",
+          "model": "gpt-5.4-mini",
+          "skill": {
+            "name": "playwright-spec-generation",
+            "version": "1.0.0",
+            "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+            "loaded": true
+          },
+          "invocations": 2,
+          "invocationsConsumed": 2,
+          "durationMs": 55337,
+          "usage": {
+            "inputTokens": 64406,
+            "cachedInputTokens": 33536,
+            "cacheWriteInputTokens": 0,
+            "nonCachedInputTokens": 30870,
+            "outputTokens": 1434,
+            "reasoningOutputTokens": 395,
+            "totalPhysicalTokens": 65840,
+            "durationMs": 49629,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "traceFidelity": "passed",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "skipped"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 2,
+          "specRepairAttempts": 1,
+          "firstPassPromotion": false,
+          "failedGatesAttempt1": [
+            "structuralValidation"
+          ],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "literal_visible_text",
+            "auth_gate"
+          ],
+          "errors": [],
+          "warnings": [
+            "ai_repair_attempt_applied:1:failedGates=structuralValidation",
+            "ai_repair_previous_attempt_error:missing_expect_import_for_assertions"
+          ],
+          "finalSpec": {
+            "origin": "ai_candidate",
+            "generatedBy": "ai",
+            "strategy": "ai_candidate",
+            "fallback": null
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "c44657-redirigir-a-autenticacion-desde-consulta-de-balance",
+      "externalId": "C44657",
+      "caseId": 44657,
+      "title": "Redirigir a autenticacion desde Consulta de balance",
+      "planPath": "automations\\apps\\pruebaqa\\sections\\detalle-kiosko\\cases\\c44657-redirigir-a-autenticacion-desde-consulta-de-balance\\plan.json",
+      "specPath": "automations\\apps\\pruebaqa\\sections\\detalle-kiosko\\cases\\c44657-redirigir-a-autenticacion-desde-consulta-de-balance\\case.spec.ts",
+      "appSlug": "pruebaqa",
+      "appConfigPath": "automations\\apps\\pruebaqa\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "pruebaqa",
+      "baseUrlHash": "1423ba294517",
+      "createdAt": "2026-09-02T18:08:39.183Z",
+      "updatedAt": "2026-09-02T18:08:39.183Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-09-02T18-06-24-271Z\\cases\\case-44657\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-09-02T18-06-24-271Z\\cases\\case-44657",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "ai_hybrid",
+          "provider": "codex",
+          "model": "gpt-5.4-mini",
+          "skill": {
+            "name": "playwright-spec-generation",
+            "version": "1.0.0",
+            "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+            "loaded": true
+          },
+          "invocations": 1,
+          "invocationsConsumed": 1,
+          "durationMs": 68459,
+          "usage": {
+            "inputTokens": 63281,
+            "cachedInputTokens": 39168,
+            "cacheWriteInputTokens": 0,
+            "nonCachedInputTokens": 24113,
+            "outputTokens": 1774,
+            "reasoningOutputTokens": 788,
+            "totalPhysicalTokens": 65055,
+            "durationMs": 55070,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "traceFidelity": "passed",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "skipped"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 1,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "literal_visible_text",
+            "auth_gate"
+          ],
+          "errors": [],
+          "warnings": [],
+          "finalSpec": {
+            "origin": "ai_candidate",
+            "generatedBy": "ai",
+            "strategy": "ai_candidate",
+            "fallback": null
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-003-redirigir-a-autenticacion-desde-cartas-y-certificaciones",
+      "externalId": "PREVIEW-003",
+      "caseId": 0,
+      "title": "Redirigir a autenticacion desde Cartas y certificaciones",
+      "planPath": "automations\\apps\\pruebaqa\\sections\\detalle-kiosko\\cases\\preview-003-redirigir-a-autenticacion-desde-cartas-y-certificaciones\\plan.json",
+      "specPath": "automations\\apps\\pruebaqa\\sections\\detalle-kiosko\\cases\\preview-003-redirigir-a-autenticacion-desde-cartas-y-certificaciones\\case.spec.ts",
+      "appSlug": "pruebaqa",
+      "appConfigPath": "automations\\apps\\pruebaqa\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "pruebaqa",
+      "createdAt": "2026-09-02T18:10:07.254Z",
+      "updatedAt": "2026-09-02T18:10:07.254Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-09-02T18-08-04-295Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-09-02T18-08-04-295Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "ai_hybrid",
+          "provider": "codex",
+          "model": "gpt-5.4-mini",
+          "skill": {
+            "name": "playwright-spec-generation",
+            "version": "1.0.0",
+            "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+            "loaded": true
+          },
+          "invocations": 1,
+          "invocationsConsumed": 1,
+          "durationMs": 59510,
+          "usage": {
+            "inputTokens": 63783,
+            "cachedInputTokens": 22784,
+            "cacheWriteInputTokens": 0,
+            "nonCachedInputTokens": 40999,
+            "outputTokens": 2169,
+            "reasoningOutputTokens": 1115,
+            "totalPhysicalTokens": 65952,
+            "durationMs": 55195,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "traceFidelity": "passed",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "skipped"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 1,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "literal_visible_text",
+            "auth_gate"
+          ],
+          "errors": [],
+          "warnings": [],
+          "finalSpec": {
+            "origin": "ai_candidate",
+            "generatedBy": "ai",
+            "strategy": "ai_candidate",
+            "fallback": null
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "c44658-redirigir-a-autenticacion-desde-cartas-y-certificaciones",
+      "externalId": "C44658",
+      "caseId": 44658,
+      "title": "Redirigir a autenticacion desde Cartas y certificaciones",
+      "planPath": "automations\\apps\\pruebaqa\\sections\\detalle-kiosko\\cases\\c44658-redirigir-a-autenticacion-desde-cartas-y-certificaciones\\plan.json",
+      "specPath": "automations\\apps\\pruebaqa\\sections\\detalle-kiosko\\cases\\c44658-redirigir-a-autenticacion-desde-cartas-y-certificaciones\\case.spec.ts",
+      "appSlug": "pruebaqa",
+      "appConfigPath": "automations\\apps\\pruebaqa\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "pruebaqa",
+      "baseUrlHash": "1423ba294517",
+      "createdAt": "2026-09-02T18:12:52.708Z",
+      "updatedAt": "2026-09-02T18:12:52.708Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-09-02T18-09-56-686Z\\cases\\case-44658\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-09-02T18-09-56-686Z\\cases\\case-44658",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "ai_hybrid",
+          "provider": "codex",
+          "model": "gpt-5.4-mini",
+          "skill": {
+            "name": "playwright-spec-generation",
+            "version": "1.0.0",
+            "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+            "loaded": true
+          },
+          "invocations": 1,
+          "invocationsConsumed": 1,
+          "durationMs": 74611,
+          "usage": {
+            "inputTokens": 63736,
+            "cachedInputTokens": 24832,
+            "cacheWriteInputTokens": 0,
+            "nonCachedInputTokens": 38904,
+            "outputTokens": 2326,
+            "reasoningOutputTokens": 1271,
+            "totalPhysicalTokens": 66062,
+            "durationMs": 62575,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "traceFidelity": "passed",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "skipped"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 1,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "literal_visible_text",
+            "auth_gate"
+          ],
+          "errors": [],
+          "warnings": [],
+          "finalSpec": {
+            "origin": "ai_candidate",
+            "generatedBy": "ai",
+            "strategy": "ai_candidate",
+            "fallback": null
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-004-redirigir-a-autenticacion-desde-canje-de-puntos",
+      "externalId": "PREVIEW-004",
+      "caseId": 0,
+      "title": "Redirigir a autenticacion desde Canje de Puntos",
+      "planPath": "automations\\apps\\pruebaqa\\sections\\detalle-kiosko\\cases\\preview-004-redirigir-a-autenticacion-desde-canje-de-puntos\\plan.json",
+      "specPath": "automations\\apps\\pruebaqa\\sections\\detalle-kiosko\\cases\\preview-004-redirigir-a-autenticacion-desde-canje-de-puntos\\case.spec.ts",
+      "appSlug": "pruebaqa",
+      "appConfigPath": "automations\\apps\\pruebaqa\\app.config.json",
+      "status": "spec_failed",
+      "source": "discovery",
+      "appProfile": "pruebaqa",
+      "createdAt": "2026-09-02T18:13:23.432Z",
+      "updatedAt": "2026-09-02T18:13:23.433Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-09-02T18-10-07-479Z\\discovered-plans.pending.json",
+      "pomStatus": "needs_manual_review",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "failed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-004\\2026-09-02T18-10-07-479Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "ai_hybrid",
+          "provider": "codex",
+          "model": "gpt-5.4-mini",
+          "skill": {
+            "name": "playwright-spec-generation",
+            "version": "1.0.0",
+            "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+            "loaded": true
+          },
+          "invocations": 2,
+          "invocationsConsumed": 2,
+          "durationMs": 50393,
+          "usage": {
+            "inputTokens": 64280,
+            "cachedInputTokens": 24832,
+            "cacheWriteInputTokens": 0,
+            "nonCachedInputTokens": 39448,
+            "outputTokens": 1415,
+            "reasoningOutputTokens": 404,
+            "totalPhysicalTokens": 65695,
+            "durationMs": 45156,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "traceFidelity": "failed",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "failed",
+            "functionalExecution": "skipped"
+          },
+          "promotionAllowed": false,
+          "specsRequested": 1,
+          "specsValidated": 0,
+          "specsRejected": 1,
+          "specGenerationAttempts": 2,
+          "specRepairAttempts": 1,
+          "firstPassPromotion": false,
+          "failedGatesAttempt1": [
+            "traceFidelityValidation",
+            "semanticCoverage"
+          ],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "literal_visible_text",
+            "auth_gate"
+          ],
+          "errors": [
+            "missing_contract_semantic_coverage:scenarioStepIndex=2:operation=wait",
+            "missing_contract_step:stepIndex=2:contractStepIndex=2:operation=wait"
+          ],
+          "warnings": [
+            "ai_repair_attempt_applied:1:failedGates=traceFidelityValidation,semanticCoverage",
+            "ai_repair_previous_attempt_error:missing_contract_semantic_coverage:scenarioStepIndex=2:operation=wait",
+            "ai_repair_previous_attempt_error:missing_contract_step:stepIndex=2:contractStepIndex=2:operation=wait"
+          ],
+          "finalSpec": {
+            "origin": "ai_candidate",
+            "generatedBy": "ai",
+            "strategy": "ai_candidate",
+            "fallback": null
+          },
+          "specWritten": false,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "spec_generation_validation_failed",
+          "blockers": [
+            "spec_generation_validation_failed"
+          ],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "preview-005-seleccionar-explora-nuestros-productos-desde-la-pantalla-principal",
+      "externalId": "PREVIEW-005",
+      "caseId": 0,
+      "title": "Seleccionar Explora nuestros productos desde la pantalla principal",
+      "planPath": "automations\\apps\\pruebaqa\\sections\\detalle-kiosko\\cases\\preview-005-seleccionar-explora-nuestros-productos-desde-la-pantalla-principal\\plan.json",
+      "specPath": "automations\\apps\\pruebaqa\\sections\\detalle-kiosko\\cases\\preview-005-seleccionar-explora-nuestros-productos-desde-la-pantalla-principal\\case.spec.ts",
+      "appSlug": "pruebaqa",
+      "appConfigPath": "automations\\apps\\pruebaqa\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "pruebaqa",
+      "createdAt": "2026-09-02T18:15:08.148Z",
+      "updatedAt": "2026-09-02T18:15:08.149Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-09-02T18-13-24-475Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-005\\2026-09-02T18-13-24-475Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "ai_hybrid",
+          "provider": "codex",
+          "model": "gpt-5.4-mini",
+          "skill": {
+            "name": "playwright-spec-generation",
+            "version": "1.0.0",
+            "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+            "loaded": true
+          },
+          "invocations": 1,
+          "invocationsConsumed": 1,
+          "durationMs": 72227,
+          "usage": {
+            "inputTokens": 62713,
+            "cachedInputTokens": 32512,
+            "cacheWriteInputTokens": 0,
+            "nonCachedInputTokens": 30201,
+            "outputTokens": 1564,
+            "reasoningOutputTokens": 551,
+            "totalPhysicalTokens": 64277,
+            "durationMs": 68592,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "traceFidelity": "passed",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "skipped"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 1,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "literal_visible_text",
+            "heading_or_control"
+          ],
+          "errors": [],
+          "warnings": [],
+          "finalSpec": {
+            "origin": "ai_candidate",
+            "generatedBy": "ai",
+            "strategy": "ai_candidate",
+            "fallback": null
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    },
+    {
+      "id": "c44659-redirigir-a-autenticacion-desde-canje-de-puntos",
+      "externalId": "C44659",
+      "caseId": 44659,
+      "title": "Redirigir a autenticacion desde Canje de Puntos",
+      "planPath": "automations\\apps\\pruebaqa\\sections\\detalle-kiosko\\cases\\c44659-redirigir-a-autenticacion-desde-canje-de-puntos\\plan.json",
+      "specPath": "automations\\apps\\pruebaqa\\sections\\detalle-kiosko\\cases\\c44659-redirigir-a-autenticacion-desde-canje-de-puntos\\case.spec.ts",
+      "appSlug": "pruebaqa",
+      "appConfigPath": "automations\\apps\\pruebaqa\\app.config.json",
+      "status": "spec_failed",
+      "source": "discovery",
+      "appProfile": "pruebaqa",
+      "baseUrlHash": "1423ba294517",
+      "createdAt": "2026-09-02T18:16:02.285Z",
+      "updatedAt": "2026-09-02T18:16:02.286Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-09-02T18-14-12-260Z\\cases\\case-44659\\discovered-plans.pending.json",
+      "pomStatus": "needs_manual_review",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "failed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-09-02T18-14-12-260Z\\cases\\case-44659",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "ai_hybrid",
+          "provider": "codex",
+          "model": "gpt-5.4-mini",
+          "skill": {
+            "name": "playwright-spec-generation",
+            "version": "1.0.0",
+            "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+            "loaded": true
+          },
+          "invocations": 1,
+          "invocationsConsumed": 1,
+          "durationMs": 50154,
+          "usage": {
+            "inputTokens": 62792,
+            "cachedInputTokens": 33024,
+            "cacheWriteInputTokens": 0,
+            "nonCachedInputTokens": 29768,
+            "outputTokens": 1683,
+            "reasoningOutputTokens": 651,
+            "totalPhysicalTokens": 64475,
+            "durationMs": 46733,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "failed",
+            "traceFidelity": "passed",
+            "typescript": "failed",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "skipped"
+          },
+          "promotionAllowed": false,
+          "specsRequested": 1,
+          "specsValidated": 0,
+          "specsRejected": 1,
+          "specGenerationAttempts": 1,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": false,
+          "failedGatesAttempt1": [
+            "structuralValidation",
+            "typescriptValidation"
+          ],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "literal_visible_text",
+            "auth_gate"
+          ],
+          "errors": [
+            "unused_import:type Page",
+            "typescript_validation_failed:exitCode=2",
+            "typescript_validation_error:automations/apps/pruebaqa/sections/detalle-kiosko/cases/c44659-redirigir-a-autenticacion-desde-canje-de-puntos/spec-generation/.spec-validation-40008-1788372959800.ts(19,82): Cannot find name 'Page'."
+          ],
+          "warnings": [],
+          "finalSpec": {
+            "origin": "ai_candidate",
+            "generatedBy": "ai",
+            "strategy": "ai_candidate",
+            "fallback": null
+          },
+          "specWritten": false,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "spec_generation_validation_failed",
+          "blockers": [
+            "spec_generation_validation_failed"
+          ],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false
+        }
+      }
+    }
+  ]
+}

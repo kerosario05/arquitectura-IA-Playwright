@@ -1,0 +1,116 @@
+{
+  "id": "preview-006-seleccionar-explora-nuestros-productos-segun-la-rama-funcional-obligatoria",
+  "externalId": "PREVIEW-006",
+  "caseId": 0,
+  "title": "Seleccionar Explora nuestros productos según la rama funcional obligatoria",
+  "planPath": "automations\\apps\\bsc\\sections\\detalle-kiosko\\cases\\preview-006-seleccionar-explora-nuestros-productos-segun-la-rama-funcional-obligatoria\\plan.json",
+  "specPath": "automations\\apps\\bsc\\sections\\detalle-kiosko\\cases\\preview-006-seleccionar-explora-nuestros-productos-segun-la-rama-funcional-obligatoria\\case.spec.ts",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "bsc",
+  "createdAt": "2026-09-03T11:45:22.306Z",
+  "updatedAt": "2026-09-03T11:45:22.306Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-006\\2026-09-03T11-43-00-823Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "passed",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-006\\2026-09-03T11-43-00-823Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "specGeneration": {
+      "mode": "ai_hybrid",
+      "provider": "codex",
+      "model": "gpt-5.4-mini",
+      "skill": {
+        "name": "playwright-spec-generation",
+        "version": "1.0.0",
+        "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+        "loaded": true
+      },
+      "invocations": 2,
+      "invocationsConsumed": 2,
+      "durationMs": 56182,
+      "usage": {
+        "inputTokens": 63080,
+        "cachedInputTokens": 42752,
+        "cacheWriteInputTokens": 0,
+        "nonCachedInputTokens": 20328,
+        "outputTokens": 1284,
+        "reasoningOutputTokens": 384,
+        "totalPhysicalTokens": 64364,
+        "durationMs": 45360,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "traceFidelity": "passed",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "passed",
+        "functionalExecution": "skipped"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specGenerationAttempts": 2,
+      "specRepairAttempts": 1,
+      "firstPassPromotion": false,
+      "failedGatesAttempt1": [
+        "structuralValidation"
+      ],
+      "regressedGates": [],
+      "missingRequirements": [],
+      "oracleTypes": [
+        "literal_visible_text"
+      ],
+      "errors": [],
+      "warnings": [
+        "ai_repair_attempt_applied:1:failedGates=structuralValidation",
+        "ai_repair_previous_attempt_error:missing_expect_import_for_assertions"
+      ],
+      "finalSpec": {
+        "origin": "ai_candidate",
+        "generatedBy": "ai",
+        "strategy": "ai_candidate",
+        "fallback": null
+      },
+      "specWritten": true,
+      "previousSpec": {
+        "existed": false,
+        "hash": null,
+        "lastModifiedAt": null
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [],
+      "availablePageObjects": [
+        "ProductListPage",
+        "OperationsMenuPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    }
+  }
+}

@@ -30,6 +30,9 @@ function createMockPage() {
   return {
     on: () => undefined,
     url: () => "https://example.test/",
+    isClosed: () => false,
+    waitForLoadState: async () => undefined,
+    evaluate: async () => true,
     screenshot: async (options?: { path?: string }) => {
       if (!options?.path) return;
       await fs.mkdir(path.dirname(options.path), { recursive: true });
@@ -61,6 +64,7 @@ test("promoted assertion success is recorded in evidence with screenshot and wit
       },
       async () => {
         const runtime = new PromotedSpecRuntime(createMockPage() as any, { captureDiagnostics: false });
+        await (runtime as any).ensureInitialEvidence();
         await (runtime as any).captureClickStep("Iniciar", "passed");
         await (runtime as any).captureClickStep("transacciones y servicios", "passed");
         await runtime.expectPromotedVisible({
@@ -73,6 +77,9 @@ test("promoted assertion success is recorded in evidence with screenshot and wit
 
         const evidence = await readEvidenceJson(evidenceRoot, scenarioId);
         assert.strictEqual(evidence.status, "Exitoso");
+        assert.strictEqual(evidence.initialScreenEvidence.status, "ready");
+        assert.strictEqual(evidence.initialScreenEvidence.captured, true);
+        assert.strictEqual(evidence.steps[0].stepIndex, undefined);
         assert.strictEqual(evidence.steps.length, 3);
         assert.strictEqual(evidence.steps[2].stepText, "Validar que se muestre \"auth_gate\".");
         assert.strictEqual(evidence.steps[2].target, "auth_gate");
@@ -112,6 +119,7 @@ test("promoted assertion failure is recorded as failed before error propagation"
       },
       async () => {
         const runtime = new PromotedSpecRuntime(createMockPage() as any, { captureDiagnostics: false });
+        await (runtime as any).ensureInitialEvidence();
         await (runtime as any).captureClickStep("Iniciar", "passed");
         await (runtime as any).captureClickStep("transacciones y servicios", "passed");
 
@@ -129,6 +137,8 @@ test("promoted assertion failure is recorded as failed before error propagation"
 
         await runtime.finishEvidence();
         const evidence = await readEvidenceJson(evidenceRoot, scenarioId);
+        assert.strictEqual(evidence.initialScreenEvidence.status, "ready");
+        assert.strictEqual(evidence.initialScreenEvidence.captured, true);
         assert.strictEqual(evidence.steps.length, 3);
         const validationStep = evidence.steps[2];
         assert.strictEqual(validationStep.stepText, "Validar que se muestre \"auth_gate\".");

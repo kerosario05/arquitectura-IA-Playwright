@@ -1,0 +1,9 @@
+{
+  "appSlug": "pruebaqa",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "PREVIEW-002",
+  "testRailCaseId": 0,
+  "generatedAt": "2026-09-02T18:06:07.267Z",
+  "title": "Redirigir a autenticacion desde Consulta de balance"
+}

@@ -17,6 +17,7 @@ import { TestRailClient } from "../../clients/testrail.client";
 import { normalizeTestRailCase } from "../../testrail/testrail-normalizer";
 import type { PromotedAutomationIndexEntry, PromotedAutomationStatus } from "../../types/automation-promotion.types";
 import type { RawTestRailCase } from "../../types/testrail.types";
+import type { McpRouteProfile } from "../../scenarios/scenario-types";
 import type { PublishedCaseEntry } from "./launch-orchestrator";
 import { jobStore } from "./job-store";
 import {
@@ -60,6 +61,7 @@ type DiscoveryBatchParams = {
   testRunId?: number;
   jiraKey?: string;
   publishedCases?: PublishedCaseEntry[];
+  routeProfile?: McpRouteProfile;
 };
 
 export type RediscoveryIntentSource = "user_request" | "job_default" | "legacy_default" | "none";
@@ -285,7 +287,6 @@ const BLOCKED_PROMOTED_STATUSES = new Set<PromotedAutomationStatus>([
   "needs_page_method",
   "needs_component_object",
   "needs_flow",
-  "blocked_missing_pom",
 ]);
 
 function normalizeAppSlug(value: string | undefined): string {
@@ -314,7 +315,7 @@ function extractSectionSlugFromSpecPath(specPath: string): string | undefined {
   return match?.[1];
 }
 
-async function loadPromotedEntriesForRouting(appSlug?: string): Promise<PromotedAutomationIndexEntry[]> {
+export async function loadPromotedEntriesForRouting(appSlug?: string): Promise<PromotedAutomationIndexEntry[]> {
   const entries: PromotedAutomationIndexEntry[] = [];
   const globalIndex = await loadAutomationIndex();
   entries.push(...globalIndex.automations);
@@ -326,7 +327,7 @@ async function loadPromotedEntriesForRouting(appSlug?: string): Promise<Promoted
   return entries;
 }
 
-function selectCandidateEntryForCase(
+export function selectCandidateEntryForCase(
   caseId: number,
   entries: PromotedAutomationIndexEntry[],
   appSlug?: string,
@@ -335,8 +336,14 @@ function selectCandidateEntryForCase(
   const candidates = entries.filter((entry) => entry.caseId === caseId);
   if (candidates.length === 0) return undefined;
   if (!normalizedApp) return candidates[0];
-  return candidates.find((entry) => normalizeAppSlug(entry.appSlug ?? entry.appProfile) === normalizedApp)
-    ?? candidates[0];
+  const ownedCandidates = candidates.filter((entry) => normalizeAppSlug(entry.appSlug ?? entry.appProfile) === normalizedApp);
+  if (ownedCandidates.length === 0) return undefined;
+  const uniqueCandidates = new Map<string, PromotedAutomationIndexEntry>();
+  for (const entry of ownedCandidates) {
+    const identity = `${entry.id.trim()}\u0000${normalizeAppSlug(entry.appSlug ?? entry.appProfile)}`;
+    if (!uniqueCandidates.has(identity)) uniqueCandidates.set(identity, entry);
+  }
+  return uniqueCandidates.size === 1 ? Array.from(uniqueCandidates.values())[0] : undefined;
 }
 
 export function validatePromotedEntryForExecution(input: {
@@ -344,6 +351,7 @@ export function validatePromotedEntryForExecution(input: {
   appSlug?: string;
   sectionSlug?: string;
   entry?: PromotedAutomationIndexEntry;
+  fileExists?: (filePath: string) => boolean;
 }): {
   reusable: boolean;
   blocked: boolean;
@@ -376,10 +384,11 @@ export function validatePromotedEntryForExecution(input: {
 
   const specPath = toAbsoluteFromRoot(entry.specPath);
   const planPath = toAbsoluteFromRoot(entry.planPath);
-  if (!specPath || !fs.existsSync(specPath)) {
+  const fileExists = input.fileExists ?? fs.existsSync;
+  if (!specPath || !fileExists(specPath)) {
     return { reusable: false, blocked: false, reason: "missing_spec_file" };
   }
-  if (!planPath || !fs.existsSync(planPath)) {
+  if (!planPath || !fileExists(planPath)) {
     return { reusable: false, blocked: false, reason: "missing_plan_file" };
   }
 
@@ -396,16 +405,116 @@ export function validatePromotedEntryForExecution(input: {
     }
   }
 
-  if (!/(\\|\/)c\d+/.test(specPath.toLowerCase())) {
+  const normalizedSpecPath = normalizePathForMatch(specPath);
+  const caseMatch = normalizedSpecPath.match(/\/cases\/c(\d+)(?:[-/])[^/]*\/case\.spec\.ts$/)
+    ?? normalizedSpecPath.match(/\/cases\/c(\d+)\/case\.spec\.ts$/);
+  if (!caseMatch || Number(caseMatch[1]) !== input.caseId) {
     return { reusable: false, blocked: false, reason: "spec_not_in_case_tree" };
   }
 
   const appConfigPath = toAbsoluteFromRoot(entry.appConfigPath);
-  if (appConfigPath && !fs.existsSync(appConfigPath)) {
+  if (appConfigPath && !fileExists(appConfigPath)) {
     return { reusable: false, blocked: false, reason: "missing_app_config" };
   }
 
+  const bootstrap = validatePromotedBootstrapContract({ caseId: input.caseId, specPath, planPath });
+  console.log(`[promoted-bootstrap] caseId=${input.caseId} initialNavigationDeclared=${bootstrap.initialNavigationDeclared} currentUrl=not_started bootstrapContractValid=${bootstrap.valid}`);
+  if (!bootstrap.valid) {
+    return { reusable: false, blocked: false, reason: "stale_promoted_spec_bootstrap" };
+  }
+
   return { reusable: true, blocked: false, reason: "promoted_spec_valid", specPath };
+}
+
+export function validatePromotedBootstrapContract(input: {
+  caseId: number;
+  specPath: string;
+  planPath: string;
+}): { valid: boolean; initialNavigationDeclared: boolean } {
+  try {
+    const plan = JSON.parse(fs.readFileSync(input.planPath, "utf-8")) as { steps?: Array<{ action?: string }> };
+    const initialNavigationDeclared = (plan.steps ?? []).some((step) => step.action === "navigate");
+    if (!initialNavigationDeclared) return { valid: true, initialNavigationDeclared: false };
+    const spec = fs.readFileSync(input.specPath, "utf-8");
+    const valid = /createPromotedSpecRuntime\s*\(/.test(spec)
+      && /process\.env\.APP_BASE_URL/.test(spec)
+      && /page\.goto\s*\(/.test(spec)
+      && /createPromotedSpecRuntime[\s\S]*?try\s*\{/.test(spec);
+    return { valid, initialNavigationDeclared: true };
+  } catch {
+    return { valid: false, initialNavigationDeclared: true };
+  }
+}
+
+export function resolvePromotedSpecTargetFromEntries(input: {
+  entries: PromotedAutomationIndexEntry[];
+  caseId: number;
+  appSlug?: string;
+  sectionSlug?: string;
+  fileExists?: (filePath: string) => boolean;
+}): ReturnType<typeof validatePromotedEntryForExecution> {
+  const entry = selectCandidateEntryForCase(input.caseId, input.entries, input.appSlug);
+  const validation = validatePromotedEntryForExecution({ ...input, entry });
+  if (validation.reusable && (
+    entry?.status !== "active" ||
+    entry.pomStatus !== "promoted" ||
+    entry.specVerificationStatus !== "passed"
+  )) {
+    validation.reusable = false;
+    validation.specPath = undefined;
+    validation.reason = entry?.status !== "active"
+      ? `status_${entry?.status}`
+      : entry.pomStatus !== "promoted"
+        ? "pom_not_promoted"
+        : "spec_not_verified";
+  }
+  return validation;
+}
+
+export async function resolvePromotedSpecForExecution(input: {
+  caseId: number;
+  appSlug?: string;
+  sectionSlug?: string;
+}): Promise<ReturnType<typeof validatePromotedEntryForExecution>> {
+  const entries = await loadPromotedEntriesForRouting(input.appSlug);
+  const candidate = selectCandidateEntryForCase(input.caseId, entries, input.appSlug);
+  const validation = resolvePromotedSpecTargetFromEntries({ ...input, entries });
+  console.log(
+    `[promoted-spec-resolution] caseId=${input.caseId} appSlug=${input.appSlug ?? ""} sectionSlug=${input.sectionSlug ?? ""} ` +
+    `entryFound=${candidate ? "true" : "false"} specPath=${validation.specPath ?? "none"} valid=${validation.reusable ? "true" : "false"} reason=${validation.reason}`,
+  );
+  return validation;
+}
+
+export function isPersistedDiscoveryPromotionSuccessful(input: {
+  discoveredState?: string;
+  reusable: boolean;
+}): boolean {
+  return input.discoveredState === "promoted" && input.reusable;
+}
+
+export function resolvePostDiscoveryExecutionAdmission(input: {
+  caseId: number;
+  appSlug: string;
+  sectionSlug?: string;
+  childStatus?: string;
+  promotionPersisted: boolean;
+  entries: PromotedAutomationIndexEntry[];
+  fileExists?: (filePath: string) => boolean;
+}): { admitted: boolean; reason: string; specPath?: string } {
+  const validation = resolvePromotedSpecTargetFromEntries(input);
+  const admitted = input.childStatus === "promoted"
+    && input.promotionPersisted
+    && validation.reusable
+    && Boolean(validation.specPath);
+  const reason = admitted
+    ? "promoted_spec_valid_after_full_discovery"
+    : input.childStatus !== "promoted"
+      ? `child_status_${input.childStatus ?? "unknown"}`
+      : !input.promotionPersisted
+        ? "promotion_not_persisted"
+        : validation.reason;
+  return { admitted, reason, specPath: admitted ? validation.specPath : undefined };
 }
 
 export function resolveRouteFromValidation(input: {
@@ -523,6 +632,7 @@ export function resolveRediscoveryIntent(input: {
 export function buildDiscoveryPreviewArgs(input: {
   previewPath: string;
   appSlug: string;
+  routeProfile?: McpRouteProfile;
   autoPromote?: boolean;
   autoPom?: boolean;
   headed?: boolean;
@@ -537,6 +647,7 @@ export function buildDiscoveryPreviewArgs(input: {
     "--app",
     input.appSlug,
   ];
+  if (input.routeProfile) args.push("--route-profile-json", JSON.stringify(input.routeProfile));
   if (input.autoPromote !== false) args.push("--auto-promote");
   if (input.autoPom !== false) args.push("--auto-pom");
   if (input.headed === true) args.push("--headed");
@@ -1226,8 +1337,8 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
   const routeDecisions = new Map<number, RouteDecision>();
   const fullDiscoveryCommandParams: DiscoveryBatchParams = {
     ...params,
-    overwrite: forceRediscovery ? params.overwrite : false,
-    rerunActive: forceRediscovery ? params.rerunActive : false,
+    overwrite: rediscoveryIntent.overwrite,
+    rerunActive: rediscoveryIntent.rerunActive,
   };
   const promotedEntriesBefore = await loadPromotedEntriesForRouting(effectiveAppSlug);
   const appConfig = await loadAppConfig(effectiveAppSlug);
@@ -1275,7 +1386,7 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
   });
   const checklistIssueKeyMetadata = resolveDiscoveryBatchIssueKeyMetadata(params);
   const checklistList = defectChecklistStore.getOrCreate(checklistIdentity);
-  const checklistUrl = `/checklist/${checklistList.urlSlug}`;
+  const checklistUrl = `/checklist/${checklistList.urlSlug}?jobId=${encodeURIComponent(jobId)}`;
   const initialDefectCount = countDefectsForJob(checklistList, jobId);
 
   jobStore.update(jobId, {
@@ -1501,6 +1612,7 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
   for (const scheduledCase of scheduledCases) {
     const caseId = scheduledCase.caseId;
     const sourceGroup = scheduledCase.sourceGroup;
+    const scenarioRef = publishedEntryByCaseId(caseId, params.publishedCases);
     if (activeGroup !== sourceGroup) {
       if (activeGroup) {
         markGroupEnd(activeGroup, "completed", "group_cases_processed");
@@ -1525,12 +1637,15 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
 
     const resolveStartedAt = Date.now();
     const candidate = selectCandidateEntryForCase(caseId, promotedEntriesBefore, effectiveAppSlug);
-    const validation = validatePromotedEntryForExecution({
+    const persistedValidation = validatePromotedEntryForExecution({
       caseId,
       appSlug: effectiveAppSlug,
       sectionSlug: params.sectionSlug,
       entry: candidate,
     });
+    const validation = scenarioRef?.executionSource === "mcp_required"
+      ? { reusable: false, blocked: false, reason: scenarioRef.reasonCode ?? "mcp_required", specPath: persistedValidation.specPath }
+      : persistedValidation;
     let contractEvaluation: CaseContractSufficiencyResult | undefined;
     let contractScenario: ReturnType<typeof buildMcpScenarioContractFromTestRailCase> | undefined;
     let contractMetadata: ReturnType<typeof extractCaseContractMetadata> | undefined;
@@ -1640,6 +1755,7 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
     const runFullDiscoveryForCase = async (currentRoute: RouteDecision): Promise<RouteDecision> => {
       const fullDiscoveryArgs = buildDiscoveryBatchArgs(fullDiscoveryCommandParams, [caseId]);
       let discoveredState: string | undefined;
+      let promotionPersisted = false;
       let discoveryDurationMs = 0;
       log(jobId, `[run:discovery-batch] caseIds=${caseId} appSlug=${params.appSlug ?? "N/A"}`);
       log(jobId, `[run:discovery-batch] command=${cmd} ${fullDiscoveryArgs.join(" ")}`);
@@ -1649,6 +1765,8 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
         fullDiscoveryArgs,
         process.env as NodeJS.ProcessEnv,
         (line) => {
+          const persistedMatch = /\[discovery:workflow\].*promotionPersisted=(true|false)/i.exec(line);
+          if (persistedMatch) promotionPersisted = persistedMatch[1].toLowerCase() === "true";
           const match = DISCOVERY_CASE_FINISHED_RE.exec(line);
           if (!match) return;
           const parsedCaseId = Number(match[1]);
@@ -1681,20 +1799,25 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
       }
 
       const promotedEntriesAfter = await loadPromotedEntriesForRouting(effectiveAppSlug);
-      const promotedCandidate = selectCandidateEntryForCase(caseId, promotedEntriesAfter, effectiveAppSlug);
-      const promotedValidation = validatePromotedEntryForExecution({
+      const admission = resolvePostDiscoveryExecutionAdmission({
         caseId,
         appSlug: effectiveAppSlug,
         sectionSlug: params.sectionSlug,
-        entry: promotedCandidate,
+        childStatus: discoveredState,
+        promotionPersisted,
+        entries: promotedEntriesAfter,
       });
-      if (promotedValidation.reusable) {
+      log(
+        jobId,
+        `[post-discovery-execution-admission] caseId=${caseId} childStatus=${discoveredState ?? "unknown"} promotionPersisted=${promotionPersisted ? "true" : "false"} promotedSpecResolved=${admission.specPath ? "true" : "false"} admitted=${admission.admitted ? "true" : "false"} reason=${admission.reason}`,
+      );
+      if (admission.admitted) {
         const discoveredRoute: RouteDecision = {
           caseId,
           appSlug: effectiveAppSlug,
           route: "full_discovery",
           reason: discoveredState === "promoted" ? "full_discovery_promoted" : "promoted_spec_valid_after_full_discovery",
-          specPath: promotedValidation.specPath,
+          specPath: admission.specPath,
         };
         prepareResult = "completed";
         prepareReason = discoveredRoute.reason;
@@ -1715,11 +1838,7 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
         return discoveredRoute;
       }
 
-      const blockedReason = discoveredState
-        ? `full_discovery_${discoveredState}`
-        : promotedValidation.blocked
-          ? promotedValidation.reason
-          : `full_discovery_${promotedValidation.reason}`;
+      const blockedReason = `full_discovery_${admission.reason}`;
       prepareResult = "failed";
       prepareReason = blockedReason;
       promotionResult = "failed";
@@ -1741,7 +1860,7 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
         appSlug: effectiveAppSlug,
         route: "blocked",
         reason: blockedReason,
-        specPath: promotedValidation.specPath,
+        specPath: admission.specPath,
       };
     };
 
@@ -1775,6 +1894,7 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
         const previewArgs = buildDiscoveryPreviewArgs({
           previewPath,
           appSlug: effectiveAppSlug,
+          routeProfile: params.routeProfile,
           autoPromote: params.autoPromote,
           autoPom: params.autoPom,
           headed: params.headed,
@@ -1883,7 +2003,6 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
       `[case-lifecycle] jobId=${jobId} caseId=${caseId} sourceGroup=${sourceGroup} phase=promotion result=${promotionResult} durationMs=${promotionDurationMs} reason=${promotionReason}`,
     );
 
-    const scenarioRef = publishedEntryByCaseId(caseId, params.publishedCases);
     const scenarioId = scenarioRef?.executionScenarioId ?? scenarioRef?.scenarioId ?? `TR-CASE-${caseId}`;
     const scenarioTitle = nonEmptyString(scenarioRef?.title) ?? `C${caseId}`;
 

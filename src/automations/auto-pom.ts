@@ -45,6 +45,12 @@ export type AutoPomResult = {
   diagnostics: AutoPomDiagnostics;
 };
 
+export function resolveEffectiveAutoPomStatus(
+  finalPomStatus: AutoPomDiagnostics["finalPomStatus"],
+): POMPromotionStatus {
+  return finalPomStatus;
+}
+
 function buildAutoPomMethodStub(methodName: string, intent: string): string | undefined {
   if (intent === "select_first_visible_card" || methodName === "selectFirstVisibleCard") {
     return [
@@ -349,7 +355,7 @@ export async function runAutoPomPipeline(input: AutoPomInput): Promise<AutoPomRe
       diagnostics.finalPomStatus = "needs_manual_review";
       return {
         success: false,
-        pomStatus: "needs_page_method",
+        pomStatus: resolveEffectiveAutoPomStatus(diagnostics.finalPomStatus),
         specContent: specResult.specContent,
         diagnostics
       };
@@ -377,7 +383,7 @@ export async function runAutoPomPipeline(input: AutoPomInput): Promise<AutoPomRe
 
   return {
     success: diagnostics.finalPomStatus === "promoted",
-    pomStatus: specResult.pomStatus,
+    pomStatus: resolveEffectiveAutoPomStatus(diagnostics.finalPomStatus),
     specContent: specResult.specContent,
     diagnostics
   };

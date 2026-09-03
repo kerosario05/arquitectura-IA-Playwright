@@ -1,0 +1,10 @@
+{
+  "id": "c44658-redirigir-a-autenticacion-desde-cartas-y-certificaciones",
+  "externalId": "C44658",
+  "caseId": 44658,
+  "title": "Redirigir a autenticacion desde Cartas y certificaciones",
+  "source": "discovery",
+  "appSlug": "pruebaqa",
+  "appConfigPath": "automations\\apps\\pruebaqa\\app.config.json",
+  "createdAt": "2026-09-02T18:11:37.990Z"
+}

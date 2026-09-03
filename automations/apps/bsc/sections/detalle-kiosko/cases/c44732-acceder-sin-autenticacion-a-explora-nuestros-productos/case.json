@@ -1,0 +1,10 @@
+{
+  "id": "c44732-acceder-sin-autenticacion-a-explora-nuestros-productos",
+  "externalId": "C44732",
+  "caseId": 44732,
+  "title": "Acceder sin autenticacion a Explora nuestros productos",
+  "source": "discovery",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "createdAt": "2026-09-03T13:06:01.983Z"
+}

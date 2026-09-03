@@ -104,6 +104,9 @@ function buildListingValidationSteps(
 ): string[] {
   const steps = buildEntrySteps(routeProfile);
   let stepNum = steps.length + 1;
+  const visibleControls = Array.isArray(routeProfile.visibleControls)
+    ? routeProfile.visibleControls
+    : [];
 
   // Navigate to list target if identifiable (only backed targets)
   const listTarget = extractListTarget(huIntent, routeProfile, allowedNavigationTargets);
@@ -113,7 +116,7 @@ function buildListingValidationSteps(
   }
 
   // Add validations for visible controls that are NOT navigation targets
-  routeProfile.visibleControls.forEach(control => {
+  visibleControls.forEach(control => {
     // Skip entry labels
     const isEntry = routeProfile.entry.some(e => e.visibleLabel === control);
     // Skip navigation targets (these can be clicked)
@@ -184,6 +187,9 @@ function extractDetailFields(
 ): string[] {
   const fields: string[] = [];
   const normalized = normalizeText(huIntent);
+  const visibleControls = Array.isArray(routeProfile.visibleControls)
+    ? routeProfile.visibleControls
+    : [];
 
   // Common detail field keywords (content terms, not navigation)
   const fieldKeywords = [
@@ -214,7 +220,7 @@ function extractDetailFields(
   }
 
   // Extract from visibleControls that are NOT navigation targets
-  for (const control of routeProfile.visibleControls) {
+  for (const control of visibleControls) {
     // Skip if it's a backed navigation target
     if (allowedNavigationTargets.includes(control)) {
       continue;

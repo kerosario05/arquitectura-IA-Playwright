@@ -1,6 +1,11 @@
 import { spawn } from "node:child_process";
 import path from "node:path";
 import {
+  resolvePromotedSpecForExecution,
+  resolvePromotedSpecTargetFromEntries,
+} from "../server/jobs/discovery-batch-runner";
+import type { PromotedAutomationIndexEntry } from "../types/automation-promotion.types";
+import {
   applyPromotedBrowserMode,
   resolvePromotedBrowserMode,
 } from "./test-promoted-browser-mode";
@@ -136,14 +141,7 @@ function nonEmpty(value: string | undefined): string | undefined {
 }
 
 function buildTestPath(options: { app?: string; section?: string; caseId?: string }): string | null {
-  if (options.caseId) {
-    if (options.app && options.section) {
-      // Specific path without glob
-      return `automations/apps/${options.app}/sections/${options.section}/cases/c${options.caseId}`;
-    }
-    // For case-id only, use grep to filter by case ID in test name
-    return null;
-  }
+  if (options.caseId) return null;
 
   if (options.app && options.section) {
     return `automations/apps/${options.app}/sections/${options.section}/cases`;
@@ -157,7 +155,33 @@ function buildTestPath(options: { app?: string; section?: string; caseId?: strin
   return 'automations/apps';
 }
 
-function main(): void {
+async function resolvePromotedSpecPath(options: { app?: string; section?: string; caseId: string }): Promise<string | null> {
+  const validation = await resolvePromotedSpecForExecution({
+    caseId: Number(options.caseId),
+    appSlug: options.app,
+    sectionSlug: options.section,
+  });
+  return validation.reusable ? validation.specPath ?? null : null;
+}
+
+export function resolvePromotedSpecTarget(
+  entries: PromotedAutomationIndexEntry[],
+  options: { app?: string; section?: string; caseId: string },
+  fileExists: (filePath: string) => boolean,
+): string | null {
+  const caseId = Number(options.caseId);
+  if (!Number.isInteger(caseId) || caseId <= 0) return null;
+  const validation = resolvePromotedSpecTargetFromEntries({
+    entries,
+    caseId,
+    appSlug: options.app,
+    sectionSlug: options.section,
+    fileExists,
+  });
+  return validation.reusable ? validation.specPath ?? null : null;
+}
+
+async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const options = parseArgs(args);
 
@@ -166,7 +190,18 @@ function main(): void {
     process.exit(0);
   }
 
-  const testPath = buildTestPath(options);
+  let testPath = buildTestPath(options);
+  if (options.caseId) {
+    const specPath = await resolvePromotedSpecPath({ ...options, caseId: options.caseId });
+    if (!specPath) {
+      console.error(`[test:promoted] caseId=${options.caseId} specPath=none`);
+      console.error(`[test:promoted] Refusing execution: exact promoted case.spec.ts could not be resolved safely.`);
+      process.exitCode = 1;
+      return;
+    }
+    testPath = path.relative(process.cwd(), specPath).replace(/\\/g, "/") || ".";
+    console.log(`[test:promoted] caseId=${options.caseId} specPath=${specPath}`);
+  }
   const timeout = process.env.PROMOTED_SPEC_TIMEOUT_MS 
     ? parseInt(process.env.PROMOTED_SPEC_TIMEOUT_MS, 10) 
     : options.timeout;
@@ -179,12 +214,6 @@ function main(): void {
     playwrightArgs.push(testPath);
   } else {
     playwrightArgs.push("automations/apps");
-  }
-
-  // Add grep filter for case-id search across all apps/sections
-  if (options.caseId && !options.app && !options.section) {
-    playwrightArgs.push(`--grep=C${options.caseId}`);
-    console.log(`[test:promoted] Filtering by case ID: ${options.caseId}`);
   }
 
   // Add workers configuration
@@ -264,4 +293,9 @@ function main(): void {
   });
 }
 
-main();
+if (process.argv[1]?.replace(/\\/g, "/").endsWith("test-promoted.ts")) {
+  main().catch((error) => {
+    console.error(`[test:promoted] Failed to resolve execution target: ${error instanceof Error ? error.message : String(error)}`);
+    process.exitCode = 1;
+  });
+}

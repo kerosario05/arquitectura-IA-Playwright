@@ -1,0 +1,107 @@
+{
+  "appSlug": "bsc",
+  "sectionSlug": "detalle-kiosko",
+  "scenarioId": "PREVIEW-006",
+  "scenarioTitle": "Seleccionar Explora nuestros productos según la rama funcional obligatoria",
+  "stepCount": 2,
+  "sourceExpectedResultPresent": true,
+  "requiredAssertionCount": 1,
+  "observableOracles": [
+    {
+      "id": "observed-01",
+      "requirement": "pantalla de autenticación del kiosco",
+      "type": "literal_visible_text",
+      "backed": true,
+      "source": "discovery",
+      "evidence": [
+        "assertion_resolved_during_discovery"
+      ]
+    },
+    {
+      "id": "expected-01",
+      "requirement": "La opción sigue la rama funcional exigida por el contrato de cobertura.",
+      "type": "literal_visible_text",
+      "backed": false,
+      "source": "inferred",
+      "evidence": [
+        "narrative_covered_by_explicit_scenario_assertions"
+      ]
+    }
+  ],
+  "oracleTypes": [
+    "literal_visible_text"
+  ],
+  "availablePageObjectCount": 2,
+  "mode": "ai_hybrid",
+  "functionalExecutionEnabled": false,
+  "provider": "codex",
+  "model": "gpt-5.4-mini",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "PREVIEW-006",
+    "title": "Seleccionar Explora nuestros productos según la rama funcional obligatoria",
+    "appSlug": "bsc",
+    "sectionSlug": "detalle-kiosko",
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 0,
+        "originalText": "Clic en \"Explora nuestros productos\".",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Explora nuestros productos"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 1,
+        "originalText": "Esperar que se muestre \"pantalla de autenticación del kiosco\".",
+        "operation": "wait",
+        "target": {
+          "strategy": "text",
+          "value": "pantalla de autenticación del kiosco"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "literal_visible_text",
+          "backed": true,
+          "implementationKind": "heading_or_control",
+          "requirement": "pantalla de autenticación del kiosco"
+        },
+        "evidenceRefs": [
+          "oracle:observed-01"
+        ]
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 2,
+      "representedScenarioSteps": 2,
+      "missingScenarioSteps": []
+    }
+  },
+  "executionContractChars": 1022,
+  "promptChars": 25175,
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": true,
+  "promotionAllowed": true,
+  "failedGatesAttempt1": [],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C44720",
+    "caseId": 44720,
+    "title": "Seleccionar Explora nuestros productos según la rama funcional obligatoria"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "description": "Clic en \"Explora nuestros productos\".",
+      "target": {
+        "strategy": "product_condition",
+        "value": "Explora nuestros productosConoce los beneficios de los productos BSC",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Explora nuestros productos",
+          "resolvedTargetName": "Explora nuestros productosConoce los beneficios de los productos BSC",
+          "resolvedCandidateId": "el-21",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed",
+          "confidence": 0.85
+        }
+      },
+      "locatorStrategy": "product_condition"
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-09-03T11:44:28.289Z"
+}

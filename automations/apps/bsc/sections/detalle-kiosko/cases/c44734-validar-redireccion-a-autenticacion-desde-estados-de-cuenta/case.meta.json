@@ -1,0 +1,10 @@
+{
+  "appSlug": "bsc",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sectionId": 4903,
+  "sourceScenarioId": "C44734",
+  "testRailCaseId": 44734,
+  "generatedAt": "2026-09-03T13:15:43.293Z",
+  "title": "Validar redireccion a autenticacion desde Estados de cuenta"
+}

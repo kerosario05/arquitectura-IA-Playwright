@@ -1,0 +1,10 @@
+{
+  "id": "c44736-validar-redireccion-a-autenticacion-desde-cartas-y-certificaciones",
+  "externalId": "C44736",
+  "caseId": 44736,
+  "title": "Validar redireccion a autenticacion desde Cartas y certificaciones",
+  "source": "discovery",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "createdAt": "2026-09-03T13:21:10.568Z"
+}

@@ -1,0 +1,116 @@
+{
+  "id": "preview-003-redirigir-a-autenticacion-al-seleccionar-consulta-de-balance",
+  "externalId": "PREVIEW-003",
+  "caseId": 0,
+  "title": "Redirigir a autenticación al seleccionar Consulta de balance",
+  "planPath": "automations\\apps\\bsc\\sections\\detalle-kiosko\\cases\\preview-003-redirigir-a-autenticacion-al-seleccionar-consulta-de-balance\\plan.json",
+  "specPath": "automations\\apps\\bsc\\sections\\detalle-kiosko\\cases\\preview-003-redirigir-a-autenticacion-al-seleccionar-consulta-de-balance\\case.spec.ts",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "status": "spec_failed",
+  "source": "discovery",
+  "appProfile": "bsc",
+  "createdAt": "2026-09-03T13:44:58.474Z",
+  "updatedAt": "2026-09-03T13:44:58.474Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-09-03T13-43-00-939Z\\discovered-plans.pending.json",
+  "pomStatus": "needs_manual_review",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "failed",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-09-03T13-43-00-939Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "specGeneration": {
+      "mode": "ai_hybrid",
+      "provider": "codex",
+      "model": "gpt-5.4-mini",
+      "skill": {
+        "name": "playwright-spec-generation",
+        "version": "1.0.0",
+        "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+        "loaded": true
+      },
+      "invocations": 1,
+      "invocationsConsumed": 1,
+      "durationMs": 56753,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "failed",
+        "structure": "skipped",
+        "traceFidelity": "skipped",
+        "typescript": "skipped",
+        "playwrightDiscovery": "skipped",
+        "semanticCoverage": "skipped",
+        "functionalExecution": "skipped"
+      },
+      "promotionAllowed": false,
+      "specsRequested": 1,
+      "specsValidated": 0,
+      "specsRejected": 1,
+      "specGenerationAttempts": 1,
+      "specRepairAttempts": 0,
+      "firstPassPromotion": false,
+      "failedGatesAttempt1": [],
+      "regressedGates": [],
+      "missingRequirements": [],
+      "oracleTypes": [
+        "literal_visible_text",
+        "heading_or_control"
+      ],
+      "errors": [
+        "provider_error:ai_provider_output_missing:AI provider did not write spec-generation-result.json. Check artifacts at tempDir for stdout/stderr logs.\n  1. Check stderr/stdout in debug artifacts for details\n  2. Ensure Codex CLI is properly installed and configured"
+      ],
+      "warnings": [],
+      "finalSpec": {
+        "origin": "deterministic_draft",
+        "generatedBy": "core",
+        "strategy": "deterministic_draft",
+        "fallback": null
+      },
+      "specWritten": false,
+      "previousSpec": {
+        "existed": false,
+        "hash": null,
+        "lastModifiedAt": null
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "spec_generation_validation_failed",
+      "blockers": [
+        "spec_generation_validation_failed"
+      ],
+      "availablePageObjects": [
+        "ProductListPage",
+        "OperationsMenuPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false
+    }
+  }
+}

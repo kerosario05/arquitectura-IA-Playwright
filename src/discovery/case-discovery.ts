@@ -172,6 +172,69 @@ export function findAssertionRecoveryByLaterSuccess(
 /**
  * Get unresolved blocking failures - ignores steps that were recovered or marked as non-blocking
  */
+export function reconcileAuthGateAssertionFailures(
+  steps: DiscoveryStepResult[],
+  authGateEvidence?: {
+    detected: boolean;
+    detectedAtStepIndex?: number;
+    completedAfterStepIndex?: number;
+    requirementRefs?: Array<{ requirementId: string; facet?: string; claimId?: string }>;
+    requiresAuthFlowCompletion?: boolean;
+    stage?: string;
+  },
+): number {
+  let reconciled = 0;
+  for (const assertion of steps) {
+    if (!(
+      (assertion.status === "not_found" || assertion.status === "needs_assertion_resolution")
+      && assertion.functionalRequired === true
+    )) continue;
+
+    const gate = steps.find((candidate) =>
+      candidate.index === assertion.index - 1
+      && candidate.authGateDiagnostics?.detected === true
+      && (candidate.canonicalRequirementRefs?.length ?? 0) > 0,
+    );
+    const runtimeGateIsCausal = authGateEvidence?.detected === true
+      && authGateEvidence.requiresAuthFlowCompletion !== true
+      && (
+        authGateEvidence.completedAfterStepIndex === assertion.index - 1
+        || authGateEvidence.detectedAtStepIndex === assertion.index
+      );
+    const completedAuthGateIsCausal = authGateEvidence?.detected === true
+      && authGateEvidence.completedAfterStepIndex === assertion.index - 1;
+    if (!gate && !runtimeGateIsCausal) continue;
+
+    const sharedLineage = gate?.canonicalRequirementRefs?.some((gateRef) =>
+      assertion.canonicalRequirementRefs!.some((assertionRef) => assertionRef.requirementId === gateRef.requirementId),
+    ) ?? false;
+    const causalDestinationLineage = gate?.canonicalRequirementRefs?.some((gateRef) =>
+      ["activation", "action"].includes(gateRef.facet ?? "")
+      && assertion.canonicalRequirementRefs!.some((assertionRef) => assertionRef.facet === "destination"),
+    ) ?? false;
+    const runtimeRequirementLineage = authGateEvidence?.requirementRefs?.some((gateRef) =>
+      assertion.canonicalRequirementRefs!.some((assertionRef) => assertionRef.requirementId === gateRef.requirementId),
+    ) ?? false;
+    if (!runtimeGateIsCausal && !completedAuthGateIsCausal && !sharedLineage && !causalDestinationLineage) continue;
+    if (authGateEvidence?.requirementRefs?.length && !runtimeRequirementLineage) continue;
+
+    assertion.runtimeBacked = true;
+    assertion.recoveryStatus = "recovered";
+    assertion.recoveredBy = "auth_flow";
+    assertion.recoveryMetadata = {
+      ...(assertion.recoveryMetadata ?? {}),
+      originalFailureReason: assertion.error ?? "assertion_not_found",
+      recoveredAfterStep: authGateEvidence?.completedAfterStepIndex ?? gate?.index ?? assertion.index - 1,
+      recoveredBecause: "auth_gate_completed",
+      blocking: false,
+    };
+    assertion.status = "satisfied_by_previous_assertion";
+    assertion.assertionStatus = "passed";
+    reconciled++;
+  }
+  return reconciled;
+}
+
 function getUnresolvedBlockingFailures(steps: DiscoveryStepResult[]): DiscoveryStepResult[] {
   let total = 0;
   let blocking = 0;
@@ -235,6 +298,49 @@ function getUnresolvedBlockingFailures(steps: DiscoveryStepResult[]): DiscoveryS
   console.log(`[blocking-failure-filter] total=${total} blocking=${blocking} pendingDiscovery=${pendingDiscoveryCount} contextual=${contextualCount}`);
 
   return result;
+}
+
+export function reconcileFailureMarkers(
+  steps: DiscoveryStepResult[],
+  markers: { failedAtStep?: number; failedTarget?: string; failedReason?: string },
+): { failedAtStep?: number; failedTarget?: string; failedReason?: string } {
+  const unresolved = getUnresolvedBlockingFailures(steps);
+  const failedStep = markers.failedAtStep === undefined
+    ? undefined
+    : steps.find((step) => step.index === markers.failedAtStep);
+  const reconciled = Boolean(
+    failedStep
+    && (failedStep.recoveryStatus === "recovered"
+      || failedStep.recoveryStatus === "repaired"
+      || failedStep.status === "satisfied_by_previous_assertion"
+      || failedStep.status === "satisfied_by_children"
+      || failedStep.assertionStatus === "satisfied_by_previous_assertion")
+    && !unresolved.some((step) => step.index === markers.failedAtStep),
+  );
+  return reconciled
+    ? { failedAtStep: undefined, failedTarget: undefined, failedReason: undefined }
+    : markers;
+}
+
+export function calculateUnresolvedBlockingFailures(
+  steps: DiscoveryStepResult[],
+  authGateEvidence?: {
+    detected: boolean;
+    detectedAtStepIndex?: number;
+    completedAfterStepIndex?: number;
+    requirementRefs?: Array<{ requirementId: string; facet?: string; claimId?: string }>;
+    requiresAuthFlowCompletion?: boolean;
+    stage?: string;
+  },
+): DiscoveryStepResult[] {
+  const candidateFailures = steps.filter((step) =>
+    step.functionalRequired === true
+    && (step.status === "not_found" || step.status === "needs_assertion_resolution"),
+  ).length;
+  reconcileAuthGateAssertionFailures(steps, authGateEvidence);
+  const remaining = getUnresolvedBlockingFailures(steps);
+  console.log(`[auth-gate-reconciliation] candidateFailures=${candidateFailures} reconciled=${steps.filter((step) => step.recoveredBy === "auth_flow" && step.recoveryMetadata?.recoveredBecause === "auth_gate_completed").length} remainingBlocking=${remaining.length}`);
+  return remaining;
 }
 
 function countNonBlockingAssertionFailures(steps: DiscoveryStepResult[]): number {
@@ -385,6 +491,18 @@ function getCanonicalAssertionMetadata(scenario: TestScenario, stepIndex: number
     .filter((claim) => canonicalRefs.some((ref) => ref.requirementId === claim.requirementId))
     .every((claim) => claim.required !== false && claim.coverable !== false);
   return { required: canonicalRefs.length > 0 && required, refs: canonicalRefs };
+}
+
+const OBSERVABLE_REQUIREMENT_FACETS = new Set(["visibility", "text", "label", "content", "heading", "control"]);
+
+export function hasObservableAssertionAuthority(step: Pick<DiscoveryStepResult, "canonicalRequirementRefs" | "assertionDiagnostics">): boolean {
+  if (step.assertionDiagnostics?.observableAuthority === true) return true;
+  if (step.assertionDiagnostics?.explicitStructuredAssertion === true) return true;
+  return (step.canonicalRequirementRefs ?? []).some((ref) => {
+    const facet = normalizeText(ref.facet ?? "");
+    return OBSERVABLE_REQUIREMENT_FACETS.has(facet)
+      || Boolean(ref.claimId && normalizeText(facet).includes("visible"));
+  });
 }
 
 function isPendingDiscoveryFailureStep(step: DiscoveryStepResult): boolean {
@@ -2136,6 +2254,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   let authGateState: AuthGateState | undefined;
   let authGateCompletedAfterStepIndex: number | undefined; // Track step index after which AuthFlow completed
   let authGateDetectedDuringDiscovery = false; // Track gate detection regardless of completion
+  let authGateDetectedAtStepIndex: number | undefined;
   let authGateDetectedStage: string | undefined; // Stage at which the auth gate was detected
   let activeContainer: ActiveContainerContext | undefined;
   const resolvedDataKeys = new Set<string>();
@@ -2190,8 +2309,39 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   console.log(`[auth-contract-audit] authIntent=${scenario.authIntent ?? "undefined"} loginGate=${initialRequiresExplicitAuth} credentialSource=${options.env ? "env/test_data" : "none"} variantSupport=${initialAuthProfileInfo.variantSupport} profileSource=${initialAuthProfileInfo.source}`);
   // Defer actual login plan step until after parsing to handle full_authentication business vs auth-test distinction; no push here yet
 
-  await page.goto(appBaseUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
-  await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+  try {
+    await page.goto(appBaseUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
+    await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+  } catch {
+    if (evidenceRec && !(await evidenceRec.captureInitialScreen(page, "full_discovery"))) {
+      return {
+        version: "1.0",
+        caseId: Number(scenario.caseId ?? 0),
+        caseTitle: scenario.title,
+        discoveredAt: new Date().toISOString(),
+        status: "exploration_failed",
+        steps: [],
+        discoveredObjects: [],
+        evidenceDir,
+        failedReason: "navigation_failed",
+      };
+    }
+    throw new Error("navigation_failed");
+  }
+
+  if (evidenceRec && !(await evidenceRec.captureInitialScreen(page, "full_discovery"))) {
+    return {
+      version: "1.0",
+      caseId: Number(scenario.caseId ?? 0),
+      caseTitle: scenario.title,
+      discoveredAt: new Date().toISOString(),
+      status: "exploration_failed",
+      steps: [],
+      discoveredObjects: [],
+      evidenceDir,
+      failedReason: "initial_readiness_failure",
+    };
+  }
 
   const initialScan = await scanAndCollectObjects(page, 0, evidenceDir);
   allDiscoveredObjects.push(...initialScan.objects);
@@ -3492,6 +3642,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
       if (proactiveAuthCheck.diagnostics?.detected === true) {
         authGateDetectedDuringDiscovery = true;
+        authGateDetectedAtStepIndex = orderedItem.index;
         if (typeof proactiveAuthCheck.diagnostics?.stage === "string") {
           authGateDetectedStage = proactiveAuthCheck.diagnostics.stage;
         }
@@ -3980,7 +4131,11 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             expectedResult: (scenario as any).expectedResult ?? "",
           });
 
-           const canonicalMetadata = getCanonicalAssertionMetadata(scenario, es.stepIndex);
+            const canonicalMetadata = getCanonicalAssertionMetadata(scenario, es.stepIndex);
+            const observableAuthority = hasObservableAssertionAuthority({
+              canonicalRequirementRefs: canonicalMetadata.refs,
+              assertionDiagnostics: assertionResult.assertionDiagnostics,
+            });
 
            // Structured canonical requirements own requiredness. Runtime backing
            // is tracked separately and must never downgrade a required claim.
@@ -4032,7 +4187,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             // isBlockingRequirement: contract marked this assertion as functionally important
             // hasObservableBacking: real observable evidence exists — NOT derived from assertionImportance
             // runtimeFound: resolver found matching text/tokens during execution
-             const isBlockingRequirement = assertionImportance === "blocking";
+             const authGateAuthority = authGateDetectedDuringDiscovery
+               && /\b(auth|autentic|identific|otp|flujo)\b/i.test(normalizeText(assertionResult.assertionText));
+             const isBlockingRequirement = assertionImportance === "blocking"
+               && (observableAuthority || authGateAuthority);
 
             const hasObservableBacking =
               (assertionResult.structuralSignals?.length ?? 0) > 0 ||
@@ -4052,14 +4210,16 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
               assertionResult.matchedText != null ||
               (assertionResult.matchedTokens?.length ?? 0) > 0;
 
-             const functionalRequired = canonicalMetadata.required || isBlockingRequirement;
+             const functionalRequired =
+               (observableAuthority || authGateAuthority) && (canonicalMetadata.required || isBlockingRequirement)
+               || assertionRequiresAuthCompletion(assertionResult.assertionText);
              (steps[steps.length - 1] as any).functionalRequired = functionalRequired;
              (steps[steps.length - 1] as any).runtimeBacked = hasObservableBacking;
              (steps[steps.length - 1] as any).canonicalRequirementRefs = canonicalMetadata.refs;
 
              console.log(`[assertion-contract] target="${assertionResult.assertionText}" blocking=${isBlockingRequirement}`);
              console.log(`[assertion-backing] target="${assertionResult.assertionText}" backed=${hasObservableBacking} source=${hasObservableBacking ? "structural" : "none"}`);
-             console.log(`[assertion-requiredness] target="${assertionResult.assertionText}" functionalRequired=${functionalRequired} runtimeBacked=${hasObservableBacking} canonical=${canonicalMetadata.refs.length > 0}`);
+             console.log(`[assertion-requiredness] target="${assertionResult.assertionText}" functionalRequired=${functionalRequired} observableAuthority=${observableAuthority} runtimeBacked=${hasObservableBacking} canonical=${canonicalMetadata.refs.length > 0}`);
             console.log(`[assertion-runtime] target="${assertionResult.assertionText}" found=${runtimeFound}`);
 
             if (runtimeFound) {
@@ -4277,6 +4437,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
         if (authRecovery.diagnostics?.detected === true) {
           authGateDetectedDuringDiscovery = true;
+          authGateDetectedAtStepIndex = orderedItem.index;
           if (typeof authRecovery.diagnostics?.stage === "string") {
             authGateDetectedStage = authRecovery.diagnostics.stage;
           }
@@ -4599,6 +4760,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         const authRecovery = await tryAuthGateRecovery(page, currentSnapshot, options, actionTarget.target);
         if (authRecovery.diagnostics?.detected === true) {
           authGateDetectedDuringDiscovery = true;
+          authGateDetectedAtStepIndex = actionTarget.index;
           if (typeof authRecovery.diagnostics?.stage === "string") {
             authGateDetectedStage = authRecovery.diagnostics.stage;
           }
@@ -5901,6 +6063,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         const authRecovery = await tryAuthGateRecovery(page, currentSnapshot, options, actionTarget.target);
         if (authRecovery.diagnostics?.detected === true) {
           authGateDetectedDuringDiscovery = true;
+          authGateDetectedAtStepIndex = actionTarget.index;
           if (typeof authRecovery.diagnostics?.stage === "string") {
             authGateDetectedStage = authRecovery.diagnostics.stage;
           }
@@ -8367,6 +8530,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         const authRecovery = await tryAuthGateRecovery(page, currentSnapshot, options, actionTarget.target);
           if (authRecovery.diagnostics?.detected === true) {
             authGateDetectedDuringDiscovery = true;
+            authGateDetectedAtStepIndex = actionTarget.index;
           }
           if (
             !authRecovery.recovered &&
@@ -8777,6 +8941,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   }
 
   // Recover transient assertion failures BEFORE calculating final status
+  let unresolvedBlockingFailures = calculateUnresolvedBlockingFailures(steps, {
+    detected: authGateDetectedDuringDiscovery,
+    detectedAtStepIndex: authGateDetectedAtStepIndex,
+    completedAfterStepIndex: authGateCompletedAfterStepIndex,
+    requiresAuthFlowCompletion: finalRequiresExplicitAuth,
+    stage: authGateDetectedStage,
+  });
   // Find when AuthGate was completed (if at all)
   const authGateCompletedAtStep = steps.findIndex(
     (s) => s.recoveredBy === "auth_flow" && s.index > 0
@@ -8789,6 +8960,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       authGateCompletedAtStep >= 0 ? authGateCompletedAtStep : undefined,
       undefined // pageStabilizedAtStep - could be added if needed
     );
+    unresolvedBlockingFailures = calculateUnresolvedBlockingFailures(steps, {
+      detected: authGateDetectedDuringDiscovery,
+      detectedAtStepIndex: authGateDetectedAtStepIndex,
+      completedAfterStepIndex: authGateCompletedAfterStepIndex,
+      requiresAuthFlowCompletion: finalRequiresExplicitAuth,
+      stage: authGateDetectedStage,
+    });
   }
   
   // Log recovery results
@@ -8801,7 +8979,6 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   }
 
   // Calculate status based on UNRESOLVED blocking failures (not historical failures)
-  const unresolvedBlockingFailures = getUnresolvedBlockingFailures(steps);
   const nonBlockingAssertionFailures = countNonBlockingAssertionFailures(steps);
   const foundSteps = steps.filter((s) => s.status === "found" || s.status === "satisfied_by_children" || (s.status === "skipped_after_completion" && earlyCompletionSatisfied)).length;
   const totalSteps = steps.filter((s) => s.status !== "skipped").length;
@@ -8813,7 +8990,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   let effectiveFailedAtStep = failedAtStep;
   let effectiveFailedTarget = failedTarget;
   
-  if (unresolvedBlockingFailures.length === 0 && failedReason && !isHardBlockingFailureReason(failedReason)) {
+  const reconciledFailureMarkers = reconcileFailureMarkers(steps, { failedAtStep, failedTarget, failedReason });
+  const failedMarkerReconciled = failedAtStep !== undefined && reconciledFailureMarkers.failedAtStep === undefined;
+
+  if (unresolvedBlockingFailures.length === 0 && failedReason && (!isHardBlockingFailureReason(failedReason) || failedMarkerReconciled)) {
     // All failures were recovered - clear failedReason
     console.log(`[discovery:case] All failures recovered, clearing failedReason='${failedReason}'`);
     effectiveFailedReason = undefined;

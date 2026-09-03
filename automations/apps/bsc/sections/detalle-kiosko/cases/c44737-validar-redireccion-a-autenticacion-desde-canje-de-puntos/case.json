@@ -1,0 +1,10 @@
+{
+  "id": "c44737-validar-redireccion-a-autenticacion-desde-canje-de-puntos",
+  "externalId": "C44737",
+  "caseId": 44737,
+  "title": "Validar redireccion a autenticacion desde Canje de Puntos",
+  "source": "discovery",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "createdAt": "2026-09-03T13:23:13.819Z"
+}

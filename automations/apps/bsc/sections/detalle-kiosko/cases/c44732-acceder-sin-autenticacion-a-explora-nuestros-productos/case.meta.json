@@ -1,0 +1,10 @@
+{
+  "appSlug": "bsc",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sectionId": 4903,
+  "sourceScenarioId": "C44732",
+  "testRailCaseId": 44732,
+  "generatedAt": "2026-09-03T13:06:01.989Z",
+  "title": "Acceder sin autenticacion a Explora nuestros productos"
+}

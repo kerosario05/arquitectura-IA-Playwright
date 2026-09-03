@@ -1,0 +1,30 @@
+{
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../../src/automations/runtime/promoted-spec-runtime';\n\nprocess.env.APP_SLUG = 'pruebaqa';\nprocess.env.SECTION_SLUG = 'detalle-kiosko';\nprocess.env.SCENARIO_ID = 'C44658';\nprocess.env.SCENARIO_TITLE = 'Redirigir a autenticacion desde Cartas y certificaciones';\n\ntest('Redirigir a autenticacion desde Cartas y certificaciones', async ({ page }) => {\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 1,\n      target: 'Cartas y certificaciones',\n      assertion: async () => {\n        await expect(page.getByText('Cartas y certificaciones', { exact: true })).toBeVisible();\n      },\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 2,\n      target: 'Cartas y certificaciones',\n      actionIntent: 'open card and certificate access',\n      expectedEffect: 'navigate toward the authenticated kiosk access flow',\n      action: async () => {\n        await page.getByText('Cartas y certificaciones', { exact: true }).click();\n      },\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 3,\n      target: 'La opcion Cartas y certificaciones deriva al acceso autenticado del kiosco.',\n      assertion: async () => {\n        await expect(page.getByText('Cartas y certificaciones', { exact: true })).toBeVisible();\n      },\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "Cartas y certificaciones",
+      "implementation": "await expect(page.getByText('Cartas y certificaciones', { exact: true })).toBeVisible();"
+    },
+    {
+      "requirement": "Cartas y certificaciones",
+      "implementation": "await expect(page.getByText('Cartas y certificaciones', { exact: true })).toBeVisible();"
+    }
+  ],
+  "usedPageObjects": [],
+  "declaredIdentifiers": [
+    "promotedRuntime"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "specContent": "import { expect, test } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../../src/automations/runtime/promoted-spec-runtime';\nimport { detectAuthGate } from '../../../../../../../../src/discovery/auth-gate-detector';\nimport { scanCurrentPage } from '../../../../../../../../src/explorer/page-scanner';\n\ntest('PREVIEW-003 Redirigir a autenticacion desde Cartas y certificaciones', async ({ page }) => {\n  process.env.APP_SLUG = 'pruebaqa';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-003';\n  process.env.SCENARIO_TITLE = 'Redirigir a autenticacion desde Cartas y certificaciones';\n\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 0,\n      target: 'Cartas y certificaciones',\n      assertion: async () => {\n        await expect(page.getByText('Cartas y certificaciones')).toBeVisible();\n      },\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 1,\n      target: 'Cartas y certificaciones',\n      actionIntent: 'Clic en Cartas y certificaciones',\n      expectedEffect: 'Derivar al acceso autenticado del kiosco',\n      action: async () => {\n        await page.getByText('Cartas y certificaciones').click();\n      },\n    });\n\n    await promotedRuntime.waitForPromotedUiStable(2, 'Iniciar sesiÃ³n');\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 2,\n      target: 'Iniciar sesiÃ³n',\n      assertion: async () => {\n        const pageScan = await scanCurrentPage(page);\n        const authGate = detectAuthGate(pageScan);\n        expect(authGate?.stage).toBe('identification_type_selection');\n      },\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    0,
+    1,
+    2
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "Cartas y certificaciones",
+      "implementation": "await expect(page.getByText('Cartas y certificaciones')).toBeVisible();"
+    },
+    {
+      "requirement": "La opcion Cartas y certificaciones deriva al acceso autenticado del kiosco.",
+      "implementation": "expect(authGate?.stage).toBe('identification_type_selection');"
+    }
+  ],
+  "usedPageObjects": [],
+  "declaredIdentifiers": [
+    "promotedRuntime",
+    "pageScan",
+    "authGate"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

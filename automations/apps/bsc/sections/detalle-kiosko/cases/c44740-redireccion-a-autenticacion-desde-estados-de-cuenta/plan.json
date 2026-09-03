@@ -1,0 +1,53 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C44740",
+    "caseId": 44740,
+    "title": "Redireccion a autenticacion desde Estados de cuenta"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "description": "Clic en \"Estados de cuenta\".",
+      "target": {
+        "strategy": "product_condition",
+        "value": "Estados de cuentaGenera y recibe tus estados por correo",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Estados de cuenta",
+          "resolvedTargetName": "Estados de cuentaGenera y recibe tus estados por correo",
+          "resolvedCandidateId": "el-9",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed",
+          "confidence": 0.85
+        }
+      },
+      "locatorStrategy": "product_condition"
+    }
+  ],
+  "notes": [
+    "Discovery partial: 2/3 navigations/assertions satisfied.",
+    "Review needed: 1 non-blocking assertion failure(s) were ignored for pass/fail reconciliation."
+  ],
+  "createdAt": "2026-09-03T13:30:40.481Z",
+  "metadata": {
+    "authFlowRequired": false,
+    "authFlowAlias": "defaultClient",
+    "authFlowLanding": "transactions_menu",
+    "authGateDetectedDuringDiscovery": true,
+    "authGateStage": "identification_type_selection"
+  }
+}

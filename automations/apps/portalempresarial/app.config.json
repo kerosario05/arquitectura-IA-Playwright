@@ -1,0 +1,9 @@
+{
+  "name": "PortalEmpresarial",
+  "baseUrl": "https://172.27.4.31/login",
+  "loginMode": "password",
+  "testData": {},
+  "testDataAliases": {},
+  "missingInputBehavior": "auto_generate",
+  "username": "dcastroh"
+}

@@ -21,6 +21,52 @@ import {
 } from "./spec-execution-contract";
 import { decodeJsStringLiteralBody, normalizeSemanticText, semanticallyEqualText } from "./semantic-text-normalization";
 
+export function rewritePromotedRuntimeImport(specContent: string, specFilePath: string): string {
+  const sourceRoot = path.resolve(process.cwd(), "src");
+  const runtimeModulePath = path.resolve(sourceRoot, "automations/runtime/promoted-spec-runtime");
+  const runtimeImportPath = path.relative(path.dirname(specFilePath), runtimeModulePath).replace(/\\/g, "/");
+  const rewrittenRuntime = specContent.replace(
+    /import\s+\{\s*createPromotedSpecRuntime\s*\}\s+from\s+['"][^'"]+['"];?/,
+    `import { createPromotedSpecRuntime } from '${runtimeImportPath}';`,
+  );
+  return rewrittenRuntime.replace(
+    /(from\s+['"])([^'"]+)(['"])/g,
+    (fullImport, prefix: string, importPath: string, suffix: string) => {
+      const normalizedImportPath = importPath.replace(/\\/g, "/");
+      const srcMarker = normalizedImportPath.lastIndexOf("/src/");
+      if (srcMarker < 0) return fullImport;
+
+      const targetPath = path.join(sourceRoot, normalizedImportPath.slice(srcMarker + "/src/".length));
+      const relativeImportPath = path.relative(path.dirname(specFilePath), targetPath)
+        .replace(/\\/g, "/")
+        .replace(/\.(ts|tsx|js)$/i, "");
+      return `${prefix}${relativeImportPath}${suffix}`;
+    },
+  );
+}
+
+export async function validatePromotedSpecInternalImports(specContent: string, specFilePath: string): Promise<{
+  internalImports: number;
+  resolved: number;
+  unresolved: string[];
+}> {
+  const imports = Array.from(specContent.matchAll(/from\s+['"]([^'"]+)['"]/g))
+    .map((match) => match[1])
+    .filter((importPath): importPath is string => Boolean(importPath))
+    .filter((importPath) => /(^|[\\/])src[\\/]/.test(importPath.replace(/\\/g, "/")));
+  const unresolved: string[] = [];
+  for (const importPath of imports) {
+    const basePath = path.resolve(path.dirname(specFilePath), importPath);
+    const candidates = [basePath, `${basePath}.ts`, `${basePath}.tsx`, `${basePath}.js`, path.join(basePath, "index.ts")];
+    const exists = await Promise.any(candidates.map(async (candidate) => {
+      await fs.access(candidate);
+      return true;
+    })).catch(() => false);
+    if (!exists) unresolved.push(importPath);
+  }
+  return { internalImports: imports.length, resolved: imports.length - unresolved.length, unresolved };
+}
+
 type ValidationStatus = "passed" | "failed" | "skipped";
 
 type SpecGenerationAiUsage = {
@@ -3104,6 +3150,46 @@ function stripImportStatements(specContent: string): string {
   return specContent.replace(/import\s+[\s\S]*?\s+from\s+['"][^'"]+['"]\s*;?\s*/g, "");
 }
 
+export function repairMissingExpectImport(specContent: string): string {
+  const contentWithoutImports = stripImportStatements(specContent);
+  if (!/\bexpect\s*\(/.test(contentWithoutImports)) return specContent;
+  if (
+    /\b(?:const|let|var|function|class)\s+expect\b/.test(contentWithoutImports)
+    || /\bexpect\s*[:=]\s*/.test(contentWithoutImports)
+    || /(?:\(|,)\s*expect\s*(?:[,):=])/.test(contentWithoutImports)
+    || /import\s+(?:expect\b|\{[^}]*\bexpect\b[^}]*\})\s+from\s+['"](?!@playwright\/test['"])/.test(specContent)
+  ) {
+    return specContent;
+  }
+
+  const compatibleImport = /import\s*\{([^}]*)\}\s*from\s*(['"])@playwright\/test\2\s*;?/m.exec(specContent);
+  if (!compatibleImport) return specContent;
+  const namedBindings = compatibleImport[1]
+    .split(",")
+    .map((binding) => binding.trim())
+    .filter(Boolean);
+  if (namedBindings.some((binding) => /^expect(?:\s+as\s+\w+)?$/.test(binding))) return specContent;
+  const replacement = compatibleImport[0].replace(
+    compatibleImport[1],
+    `${compatibleImport[1].replace(/\s*$/, "")}, expect `,
+  );
+  return specContent.slice(0, compatibleImport.index)
+    + replacement
+    + specContent.slice(compatibleImport.index + compatibleImport[0].length);
+}
+
+export function summarizePlaywrightDiscoveryError(stdout: string, stderr: string): string | undefined {
+  const lines = `${stdout}\n${stderr}`
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+  const useful = lines.find((line) =>
+    line !== "Listing tests:"
+    && /\b(error|failed|cannot|exception|timed out|unexpected|module|syntax)\b/i.test(line)
+  );
+  return useful ?? lines.find((line) => line !== "Listing tests:") ?? lines[0];
+}
+
 function buildTypeValidationSource(specContent: string): string {
   const imports = parseImportClauses(specContent);
   const declarations = new Set<string>([
@@ -3306,6 +3392,7 @@ async function runHybridSpecGenerationInternal(
   const artifactsDir = input.appPaths.caseDir
     ? path.join(input.appPaths.caseDir, "spec-generation")
     : path.join(process.cwd(), ".artifacts", "spec-generation", `${input.appProfile.appSlug}-${scenarioId}`);
+  const candidateSpecPath = path.join(artifactsDir, "candidate.spec.ts");
   await fs.mkdir(artifactsDir, { recursive: true });
 
   const diagnostics: SpecGenerationDiagnostics = {
@@ -3422,7 +3509,7 @@ async function runHybridSpecGenerationInternal(
       failedGatesAttempt1: [],
       finalSpec: diagnostics.finalSpec,
     }), null, 2), "utf-8");
-    await fs.writeFile(path.join(artifactsDir, "candidate.spec.ts"), sanitizeText(input.deterministicDraft), "utf-8");
+    await fs.writeFile(candidateSpecPath, sanitizeText(rewritePromotedRuntimeImport(input.deterministicDraft, candidateSpecPath)), "utf-8");
     await fs.writeFile(path.join(artifactsDir, "validation.json"), JSON.stringify(sanitizeForArtifact(diagnostics), null, 2), "utf-8");
     console.log(`[spec-generation] promotionAllowed=false reason=execution_contract_invalid attempts=0`);
     return { promotionAllowed: false, specContent: input.deterministicDraft, diagnostics, artifactsDir };
@@ -3508,7 +3595,7 @@ async function runHybridSpecGenerationInternal(
       let promotedRuntimeImport: { importPath?: string; exportName: string; exists: boolean };
       try {
         await fs.access(promotedRuntimeModulePath);
-        const promotedRuntimeImportPath = toRelativeImportPath(input.appPaths.specPath, promotedRuntimeModulePath.replace(/\.ts$/i, ""));
+        const promotedRuntimeImportPath = toRelativeImportPath(candidateSpecPath, promotedRuntimeModulePath.replace(/\.ts$/i, ""));
         promotedRuntimeImport = { importPath: promotedRuntimeImportPath, exportName: "createPromotedSpecRuntime", exists: true };
         console.log(`[spec-import-contract] symbol=createPromotedSpecRuntime source=${promotedRuntimeModulePath} importPath="${promotedRuntimeImportPath}" exists=true`);
       } catch {
@@ -3525,8 +3612,8 @@ async function runHybridSpecGenerationInternal(
         await fs.access(authGateDetectorModulePath);
         await fs.access(pageScannerModulePath);
         authGateDetectionImports = {
-          detectAuthGate: { importPath: toRelativeImportPath(input.appPaths.specPath, authGateDetectorModulePath.replace(/\.ts$/i, "")), exportName: "detectAuthGate", exists: true },
-          scanCurrentPage: { importPath: toRelativeImportPath(input.appPaths.specPath, pageScannerModulePath.replace(/\.ts$/i, "")), exportName: "scanCurrentPage", exists: true }
+          detectAuthGate: { importPath: toRelativeImportPath(candidateSpecPath, authGateDetectorModulePath.replace(/\.ts$/i, "")), exportName: "detectAuthGate", exists: true },
+          scanCurrentPage: { importPath: toRelativeImportPath(candidateSpecPath, pageScannerModulePath.replace(/\.ts$/i, "")), exportName: "scanCurrentPage", exists: true }
         };
       } catch {
         authGateDetectionImports = {
@@ -3658,7 +3745,8 @@ async function runHybridSpecGenerationInternal(
             finalSpec: diagnostics.finalSpec,
           }), null, 2), "utf-8");
           await fs.writeFile(path.join(artifactsDir, "response.json"), JSON.stringify(sanitizeForArtifact(buildResponseArtifact(providerResponse, diagnostics)), null, 2), "utf-8");
-          await fs.writeFile(path.join(artifactsDir, "candidate.spec.ts"), sanitizeText(candidate.specContent), "utf-8");
+          const candidatePath = path.join(artifactsDir, "candidate.spec.ts");
+          await fs.writeFile(candidatePath, sanitizeText(rewritePromotedRuntimeImport(candidate.specContent, candidatePath)), "utf-8");
           await fs.writeFile(path.join(artifactsDir, "validation.json"), JSON.stringify(sanitizeForArtifact(diagnostics), null, 2), "utf-8");
           return { promotionAllowed: false, specContent: candidate.specContent, diagnostics, artifactsDir };
         }
@@ -3702,7 +3790,8 @@ async function runHybridSpecGenerationInternal(
           finalSpec: diagnostics.finalSpec,
         }), null, 2), "utf-8");
         await fs.writeFile(path.join(artifactsDir, "response.json"), JSON.stringify(sanitizeForArtifact(buildResponseArtifact({ error: message, code }, diagnostics)), null, 2), "utf-8");
-        await fs.writeFile(path.join(artifactsDir, "candidate.spec.ts"), sanitizeText(candidate.specContent), "utf-8");
+        const candidatePath = path.join(artifactsDir, "candidate.spec.ts");
+        await fs.writeFile(candidatePath, sanitizeText(rewritePromotedRuntimeImport(candidate.specContent, candidatePath)), "utf-8");
         await fs.writeFile(path.join(artifactsDir, "validation.json"), JSON.stringify(sanitizeForArtifact(diagnostics), null, 2), "utf-8");
         return { promotionAllowed: false, specContent: candidate.specContent, diagnostics, artifactsDir };
       }
@@ -3713,7 +3802,14 @@ async function runHybridSpecGenerationInternal(
   const rawCandidate = candidate.specContent;
   const effectiveCandidate = normalizeMojibakeUtf8(rawCandidate);
   console.log(`[spec-candidate] rawChanged=${rawCandidate !== effectiveCandidate} effectiveChars=${effectiveCandidate.length}`);
-  let executableSpecContent = effectiveCandidate;
+  let expectRepairApplied = false;
+  let executableSpecContent = repairMissingExpectImport(effectiveCandidate);
+  if (executableSpecContent !== effectiveCandidate) {
+    expectRepairApplied = true;
+    console.log("[spec-repair] deterministic=missing_expect_import applied=true");
+  }
+  executableSpecContent = sanitizeText(rewritePromotedRuntimeImport(executableSpecContent, candidateSpecPath));
+  await fs.writeFile(candidateSpecPath, executableSpecContent, "utf-8");
 
   let lastSemanticCoverageDiag: ReturnType<typeof buildSemanticCoverageDiagnostics> | undefined;
 
@@ -3827,17 +3923,18 @@ async function runHybridSpecGenerationInternal(
       return { validation, errors, warnings, passed: false };
     }
 
-    const candidatePath = path.join(artifactsDir, `candidate.validation-${process.pid}-${Date.now()}.spec.ts`);
-    await fs.writeFile(candidatePath, sanitizeText(specContent), "utf-8");
-    const validationPath = input.appPaths.specPath
-      ? path.join(path.dirname(input.appPaths.specPath), `case.validation-${process.pid}-${Date.now()}.spec.ts`)
-      : candidatePath;
-    if (validationPath !== candidatePath) {
-      await fs.writeFile(validationPath, specContent, "utf-8");
-    }
+    const validationPath = candidateSpecPath;
+    const persistedCandidate = sanitizeText(rewritePromotedRuntimeImport(specContent, validationPath));
+    await fs.writeFile(validationPath, persistedCandidate, "utf-8");
+    const diskCandidate = await fs.readFile(validationPath, "utf-8").catch(() => "");
+    const runtimeModuleAbsolutePath = resolvePromotedRuntimeModulePath();
+    const runtimeImport = toRelativeImportPath(validationPath, runtimeModuleAbsolutePath.replace(/\.ts$/i, ""));
+    const resolvedImportAbsolutePath = path.resolve(path.dirname(validationPath), `${runtimeImport}.ts`);
+    const runtimeImportResolves = path.resolve(resolvedImportAbsolutePath) === path.resolve(runtimeModuleAbsolutePath)
+      && await fs.access(resolvedImportAbsolutePath).then(() => true).catch(() => false);
+    const diskMatchesValidatedCandidate = diskCandidate === persistedCandidate;
 
-    try {
-      const tsRunner = deps?.runTypeScriptValidation ?? defaultRunTypeScriptValidation;
+    const tsRunner = deps?.runTypeScriptValidation ?? defaultRunTypeScriptValidation;
       const tsResult = await tsRunner(validationPath);
       validation.typescript = tsResult.ok ? "passed" : "failed";
       if (!tsResult.ok) {
@@ -3850,24 +3947,26 @@ async function runHybridSpecGenerationInternal(
       }
 
       if (tsResult.ok) {
-        const listRunner = deps?.runPlaywrightDiscovery ?? defaultRunPlaywrightDiscovery;
-        const listResult = await listRunner(validationPath, playwrightLaunchContext);
-        const discovered = countDiscoveredTests(`${listResult.stdout}\n${listResult.stderr}`);
-        const discoveryOk = listResult.ok && discovered === 1;
-        validation.playwrightDiscovery = discoveryOk ? "passed" : "failed";
-        if (!discoveryOk) {
+        console.log(`[spec-candidate-runtime] candidatePath=${validationPath} runtimeImport=${runtimeImport} runtimeImportResolves=${runtimeImportResolves ? "true" : "false"} expectRepairApplied=${expectRepairApplied ? "true" : "false"} diskMatchesValidatedCandidate=${diskMatchesValidatedCandidate ? "true" : "false"}`);
+        if (!runtimeImportResolves || !diskMatchesValidatedCandidate) {
+          validation.playwrightDiscovery = "failed";
+          errors.push(`playwright_discovery_preflight_failed:runtimeImportResolves=${runtimeImportResolves}:diskMatchesValidatedCandidate=${diskMatchesValidatedCandidate}`);
+        } else {
+          const listRunner = deps?.runPlaywrightDiscovery ?? defaultRunPlaywrightDiscovery;
+          const listResult = await listRunner(validationPath, playwrightLaunchContext);
+          const discovered = countDiscoveredTests(`${listResult.stdout}\n${listResult.stderr}`);
+          const discoveryOk = listResult.ok && discovered === 1;
+          validation.playwrightDiscovery = discoveryOk ? "passed" : "failed";
+          if (!discoveryOk) {
           errors.push(`playwright_discovery_failed:exitCode=${listResult.exitCode}:discovered=${discovered ?? "unknown"}`);
-          const discoveryErrorLine = `${listResult.stdout}\n${listResult.stderr}`
-            .split(/\r?\n/)
-            .map((line) => line.trim())
-            .find((line) => /\b(error|failed|cannot|exception|timed out|unexpected)\b/i.test(line) || line.length > 0);
+          const discoveryErrorLine = summarizePlaywrightDiscoveryError(listResult.stdout, listResult.stderr);
           if (discoveryErrorLine) {
             errors.push(`playwright_discovery_error:${discoveryErrorLine}`);
           }
           console.log(`[playwright-discovery] status=failed error="${discoveryErrorLine ?? `discovered=${discovered ?? "unknown"}`}"`);
-        }
+          }
 
-        if (functionalExecutionEnabled && discoveryOk) {
+          if (functionalExecutionEnabled && discoveryOk) {
           const functionalRunner = deps?.runFunctionalExecution ?? defaultRunFunctionalExecution;
           const functionalResult = await functionalRunner(validationPath, playwrightLaunchContext);
           const hasEvidenceSteps = typeof functionalResult.evidenceSteps === "number" && functionalResult.evidenceSteps > 0;
@@ -3897,19 +3996,14 @@ async function runHybridSpecGenerationInternal(
           if (!functionalOk) {
             warnings.push(`functional_execution_screenshots=${functionalResult.screenshots ?? "null"}`);
           }
-        } else {
-          validation.functionalExecution = "skipped";
+          } else {
+            validation.functionalExecution = "skipped";
+          }
         }
       } else {
         validation.playwrightDiscovery = "skipped";
         validation.functionalExecution = "skipped";
       }
-    } finally {
-      if (validationPath !== candidatePath) {
-        await fs.rm(validationPath, { force: true }).catch(() => undefined);
-      }
-      await fs.rm(candidatePath, { force: true }).catch(() => undefined);
-    }
 
     const passed = validation.structure === "passed"
       && validation.traceFidelity !== "failed"
@@ -4080,7 +4174,7 @@ async function runHybridSpecGenerationInternal(
     }
   }
 
-  await fs.writeFile(path.join(artifactsDir, "candidate.spec.ts"), sanitizeText(executableSpecContent), "utf-8");
+  await fs.writeFile(candidateSpecPath, sanitizeText(rewritePromotedRuntimeImport(executableSpecContent, candidateSpecPath)), "utf-8");
 
   diagnostics.specsValidated = passed ? 1 : 0;
   diagnostics.specsRejected = passed ? 0 : 1;

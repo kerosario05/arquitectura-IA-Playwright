@@ -19,16 +19,22 @@ router.post("/api/user-stories/:issueKey/checklist-url", (req: Request, res: Res
 // present (execution isolation; no fallback to issueKey), otherwise optionally by ?jobId=.
 router.get("/api/checklists/:issueKey", (req: Request, res: Response) => {
   const { issueKey } = req.params;
-  const jobId = req.query.jobId as string | undefined;
-  const runId = req.query.runId as string | undefined;
+  const jobId = typeof req.query.jobId === "string" ? req.query.jobId : undefined;
+  const runId = typeof req.query.runId === "string" ? req.query.runId : undefined;
   const list = defectChecklistStore.get(issueKey);
   if (!list) {
-    return res.json({ issueKey, defects: [], total: 0, pendingReview: 0, highSeverity: 0, checklistUrl: `/checklist/${issueKey}`, createdAt: null, updatedAt: null });
+    const checklistUrl = jobId
+      ? `/checklist/${issueKey}?jobId=${encodeURIComponent(jobId)}`
+      : `/checklist/${issueKey}`;
+    return res.json({ issueKey, defects: [], total: 0, pendingReview: 0, highSeverity: 0, checklistUrl, createdAt: null, updatedAt: null });
   }
   const filter = { ...(jobId ? { jobId } : {}), ...(runId ? { runId } : {}) };
   const resp = defectChecklistStore.toResponse(list, Object.keys(filter).length > 0 ? filter : undefined);
   console.log(`[checklist-query] issueKey=${issueKey} runId=${runId ?? 'none'} jobId=${jobId ?? 'none'} scope=${runId ? 'run' : (jobId ? 'job' : 'issue')} total=${resp.total} pending=${resp.pendingReview} highSeverity=${resp.highSeverity}`);
-  return res.json(resp);
+   const checklistUrl = jobId
+     ? `/checklist/${resp.issueKey}?jobId=${encodeURIComponent(jobId)}`
+     : resp.checklistUrl;
+   return res.json({ ...resp, checklistUrl });
 });
 
 // POST /api/checklists/:issueKey/defects — add a defect

@@ -1,0 +1,10 @@
+{
+  "id": "c44735-validar-redireccion-a-autenticacion-desde-consulta-de-balance",
+  "externalId": "C44735",
+  "caseId": 44735,
+  "title": "Validar redireccion a autenticacion desde Consulta de balance",
+  "source": "discovery",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "createdAt": "2026-09-03T13:18:24.581Z"
+}

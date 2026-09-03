@@ -1,0 +1,10 @@
+{
+  "appSlug": "pruebaqa",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sectionId": 4903,
+  "sourceScenarioId": "C44658",
+  "testRailCaseId": 44658,
+  "generatedAt": "2026-09-02T18:11:37.995Z",
+  "title": "Redirigir a autenticacion desde Cartas y certificaciones"
+}

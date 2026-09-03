@@ -143,7 +143,7 @@ function buildMissingRouteReason(diagnostics: ScenarioDiagnostic[]): string | un
 export function resolveScenarioRoute(
   issue: JiraIssueSource,
   routeProfile: McpRouteProfile | null,
-  appSlug: string = "default"
+  appSlug?: string,
 ): ScenarioRouteResolution {
   // Combine description and acceptance criteria for intent analysis
   const huText = [issue.description, issue.acceptanceCriteria || ""]
@@ -162,7 +162,7 @@ export function resolveScenarioRoute(
   // Build derived execution context to get backed navigation targets
   // This ensures only backed targets become navigation steps
   const derivedContext = routeProfile
-    ? buildDerivedExecutionContext(appSlug, routeProfile, new Map(), [])
+    ? buildDerivedExecutionContext(appSlug ?? "", routeProfile, new Map(), [])
     : null;
 
   // Build executable steps if generation allowed

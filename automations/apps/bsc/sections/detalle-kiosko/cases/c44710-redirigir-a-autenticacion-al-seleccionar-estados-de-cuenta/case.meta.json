@@ -1,0 +1,10 @@
+{
+  "appSlug": "bsc",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sectionId": 4903,
+  "sourceScenarioId": "C44710",
+  "testRailCaseId": 44710,
+  "generatedAt": "2026-09-03T03:08:22.364Z",
+  "title": "Redirigir a autenticacion al seleccionar Estados de cuenta"
+}

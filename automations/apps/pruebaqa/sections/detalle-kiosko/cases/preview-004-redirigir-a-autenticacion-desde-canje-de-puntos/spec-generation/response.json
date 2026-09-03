@@ -1,0 +1,36 @@
+{
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../../src/automations/runtime/promoted-spec-runtime';\nimport { detectAuthGate } from '../../../../../../../../src/discovery/auth-gate-detector';\nimport { scanCurrentPage } from '../../../../../../../../src/explorer/page-scanner';\n\ntest('Redirigir a autenticacion desde Canje de Puntos', async ({ page }) => {\n  process.env.APP_SLUG = 'pruebaqa';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-004';\n  process.env.SCENARIO_TITLE = 'Redirigir a autenticacion desde Canje de Puntos';\n\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 0,\n      target: 'Canje de Puntos',\n      assertion: async () => {\n        await expect(page.getByText('Canje de Puntos')).toBeVisible();\n      },\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 1,\n      target: 'Canje de Puntos',\n      actionIntent: 'Redirigir a autenticacion desde Canje de Puntos',\n      expectedEffect: 'Abrir el acceso autenticado del kiosco',\n      action: async () => {\n        await page.getByText('Canje de Puntos').click();\n      },\n    });\n\n    await promotedRuntime.waitForPromotedUiStable(2, 'Iniciar sesiÃ³n');\n    const authGateSnapshot = await scanCurrentPage(page);\n    const authGate = detectAuthGate(authGateSnapshot);\n    expect(authGate.stage).toBe('identification_type_selection');\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    0,
+    1,
+    2
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "Canje de Puntos",
+      "implementation": "await expect(page.getByText('Canje de Puntos')).toBeVisible();"
+    },
+    {
+      "requirement": "La opcion Canje de Puntos redirige al acceso autenticado del kiosco.",
+      "implementation": "expect(authGate.stage).toBe('identification_type_selection');"
+    },
+    {
+      "requirement": "La opcion Canje de Puntos redirige al acceso autenticado del kiosco.",
+      "implementation": "await promotedRuntime.waitForPromotedUiStable(2, 'Iniciar sesiÃ³n');"
+    }
+  ],
+  "usedPageObjects": [],
+  "declaredIdentifiers": [
+    "promotedRuntime",
+    "authGateSnapshot",
+    "authGate"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

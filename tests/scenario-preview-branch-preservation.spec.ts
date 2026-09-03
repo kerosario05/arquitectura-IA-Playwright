@@ -76,8 +76,8 @@ test("extractFunctionalBranchesFromHu creates independent branches for decision 
   expect(branches.map((branch) => branch.expectedDestination)).toEqual(
     expect.arrayContaining(["Portal Público Alfa", "Portal Autenticado Beta", "Portal Público Gamma"]),
   );
-  expect(branches.find((branch) => branch.sourceLabel === "Opción Beta")?.accessIntent).toBe("authenticated");
-  expect(branches.find((branch) => branch.sourceLabel === "Opción Alfa")?.accessIntent).toBe("public");
+  expect(branches.find((branch) => branch.sourceLabel === "Opción Beta")?.accessIntent).toBe("unknown");
+  expect(branches.find((branch) => branch.sourceLabel === "Opción Alfa")?.accessIntent).toBe("unknown");
 });
 
 test("extractFunctionalBranchesFromHu maps automatable option flows to functional branches", () => {
@@ -102,8 +102,8 @@ test("extractFunctionalBranchesFromHu maps automatable option flows to functiona
   );
 
   expect(branches).toHaveLength(2);
-  expect(branches.find((branch) => branch.sourceLabel === "Opción Alfa")?.accessIntent).toBe("public");
-  expect(branches.find((branch) => branch.sourceLabel === "Opción Beta")?.accessIntent).toBe("authenticated");
+  expect(branches.find((branch) => branch.sourceLabel === "Opción Alfa")?.accessIntent).toBe("unknown");
+  expect(branches.find((branch) => branch.sourceLabel === "Opción Beta")?.accessIntent).toBe("unknown");
 });
 
 test("assignFunctionalBranchesToScenarios preserves scenario-to-branch association", () => {

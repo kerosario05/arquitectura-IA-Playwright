@@ -1,0 +1,32 @@
+{
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../../src/automations/runtime/promoted-spec-runtime';\nimport { detectAuthGate } from '../../../../../../../../src/discovery/auth-gate-detector';\nimport { scanCurrentPage } from '../../../../../../../../src/explorer/page-scanner';\n\ntest.describe('C44728 - Redirigir a autenticacion desde Estados de cuenta', () => {\n  test('Redirigir a autenticacion desde Estados de cuenta', async ({ page }) => {\n    process.env.APP_SLUG = 'bsc';\n    process.env.SECTION_SLUG = 'detalle-kiosko';\n    process.env.SCENARIO_ID = 'C44728';\n    process.env.SCENARIO_TITLE = 'Redirigir a autenticacion desde Estados de cuenta';\n\n    const promotedRuntime = createPromotedSpecRuntime(page);\n\n    try {\n      await promotedRuntime.expectPromotedVisible({\n        stepIndex: 1,\n        target: 'Estados de cuenta',\n        assertion: async () => {\n          await expect(page.getByText('Estados de cuenta')).toBeVisible();\n        },\n      });\n\n      await promotedRuntime.clickPromotedTarget({\n        stepIndex: 2,\n        target: 'Estados de cuenta',\n        actionIntent: 'open Estados de cuenta',\n        expectedEffect: 'navigate to kiosk authentication',\n        action: async () => {\n          await page.getByText('Estados de cuenta').click();\n        },\n      });\n\n      await promotedRuntime.waitForPromotedUiStable(3, 'La opcion Estados de cuenta redirige a la pantalla de autenticacion.');\n\n      await promotedRuntime.expectPromotedVisible({\n        stepIndex: 3,\n        target: 'La opcion Estados de cuenta redirige a la pantalla de autenticacion.',\n        assertion: async () => {\n          const pageDiag = await scanCurrentPage(page);\n          const authGate = await detectAuthGate(pageDiag);\n          expect(authGate?.stage).toBe('identification_type_selection');\n        },\n      });\n    } finally {\n      await promotedRuntime.finishEvidence();\n    }\n  });\n});",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "Estados de cuenta",
+      "implementation": "await expect(page.getByText('Estados de cuenta')).toBeVisible();"
+    },
+    {
+      "requirement": "autenticacion del kiosco",
+      "implementation": "expect(authGate?.stage).toBe('identification_type_selection');"
+    }
+  ],
+  "usedPageObjects": [],
+  "declaredIdentifiers": [
+    "promotedRuntime",
+    "pageDiag",
+    "authGate"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

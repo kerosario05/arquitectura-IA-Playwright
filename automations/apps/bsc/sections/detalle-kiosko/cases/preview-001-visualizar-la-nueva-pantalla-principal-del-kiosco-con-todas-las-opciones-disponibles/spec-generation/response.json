@@ -1,0 +1,44 @@
+{
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../../src/automations/runtime/promoted-spec-runtime';\n\ntest('Visualizar la nueva pantalla principal del kiosco con todas las opciones disponibles', async ({ page }) => {\n  process.env.APP_SLUG = 'bsc';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'PREVIEW-001';\n  process.env.SCENARIO_TITLE = 'Visualizar la nueva pantalla principal del kiosco con todas las opciones disponibles';\n\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 0,\n      target: 'Estados de cuenta',\n      assertion: async () => {\n        await expect(page.getByText('Estados de cuenta', { exact: true })).toBeVisible();\n      }\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 1,\n      target: 'Consulta de balance',\n      assertion: async () => {\n        await expect(page.getByText('Consulta de balance', { exact: true })).toBeVisible();\n      }\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 2,\n      target: 'Cartas y certificaciones',\n      assertion: async () => {\n        await expect(page.getByText('Cartas y certificaciones', { exact: true })).toBeVisible();\n      }\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 3,\n      target: 'Canje de Puntos',\n      assertion: async () => {\n        await expect(page.getByText('Canje de Puntos', { exact: true })).toBeVisible();\n      }\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 4,\n      target: 'Explora nuestros productos',\n      assertion: async () => {\n        await expect(page.getByText('Explora nuestros productos', { exact: true })).toBeVisible();\n      }\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "Estados de cuenta",
+      "implementation": "await expect(page.getByText('Estados de cuenta', { exact: true })).toBeVisible();"
+    },
+    {
+      "requirement": "Consulta de balance",
+      "implementation": "await expect(page.getByText('Consulta de balance', { exact: true })).toBeVisible();"
+    },
+    {
+      "requirement": "Cartas y certificaciones",
+      "implementation": "await expect(page.getByText('Cartas y certificaciones', { exact: true })).toBeVisible();"
+    },
+    {
+      "requirement": "Canje de Puntos",
+      "implementation": "await expect(page.getByText('Canje de Puntos', { exact: true })).toBeVisible();"
+    },
+    {
+      "requirement": "Explora nuestros productos",
+      "implementation": "await expect(page.getByText('Explora nuestros productos', { exact: true })).toBeVisible();"
+    }
+  ],
+  "usedPageObjects": [],
+  "declaredIdentifiers": [
+    "promotedRuntime"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

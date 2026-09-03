@@ -64,7 +64,7 @@ test.describe("App Slug Resolution Priority", () => {
     expect(result.confidence).toBe("high");
   });
 
-  test("E. No requestAppSlug but TestRail projectName exists → uses TestRail (inferred)", () => {
+  test("E. TestRail projectName does not establish app identity", () => {
     const result = resolveAppForPreview({
       requestAppSlug: undefined,
       targetAppSlug: undefined,
@@ -74,12 +74,12 @@ test.describe("App Slug Resolution Priority", () => {
       jiraProjectKey: undefined,
     });
 
-    expect(result.appSlug).toBe("app-a-automation");
-    expect(result.source).toBe("testrail_project");
-    expect(result.confidence).toBe("medium");
+    expect(result.appSlug).toBe("");
+    expect(result.source).toBe("fallback");
+    expect(result.confidence).toBe("low");
   });
 
-  test("F. No requestAppSlug, no TestRail, no Jira → uses default fallback", () => {
+  test("F. No explicit app identity → unresolved", () => {
     const result = resolveAppForPreview({
       requestAppSlug: undefined,
       targetAppSlug: undefined,
@@ -89,12 +89,12 @@ test.describe("App Slug Resolution Priority", () => {
       jiraProjectKey: undefined,
     });
 
-    expect(result.appSlug).toBe("default");
+    expect(result.appSlug).toBe("");
     expect(result.source).toBe("fallback");
     expect(result.confidence).toBe("low");
   });
 
-  test("Priority order: explicit targetAppSlug > requestAppSlug > TestRail > Jira > default", () => {
+  test("Priority order: explicit targetAppSlug > requestAppSlug; metadata is ignored", () => {
     // 1. Explicit targetAppSlug wins over everything
     const withExplicit = resolveAppForPreview({
       targetAppSlug: "explicit-app",
@@ -115,7 +115,7 @@ test.describe("App Slug Resolution Priority", () => {
     expect(withRequest.appSlug).toBe("request-app");
     expect(withRequest.source).toBe("request");
 
-    // 3. TestRail section wins over project and Jira
+    // 3. TestRail metadata cannot establish app identity
     const withTestrailSection = resolveAppForPreview({
       targetAppSlug: undefined,
       requestAppSlug: undefined,
@@ -123,10 +123,10 @@ test.describe("App Slug Resolution Priority", () => {
       testrailProjectName: "testrail-project",
       jiraProjectKey: "JIRA",
     });
-    expect(withTestrailSection.appSlug).toBe("app-b-feature-x");
-    expect(withTestrailSection.source).toBe("testrail_section");
+    expect(withTestrailSection.appSlug).toBe("");
+    expect(withTestrailSection.source).toBe("fallback");
 
-    // 4. TestRail project wins over Jira
+    // 4. TestRail project metadata cannot establish app identity
     const withTestrailProject = resolveAppForPreview({
       targetAppSlug: undefined,
       requestAppSlug: undefined,
@@ -134,10 +134,10 @@ test.describe("App Slug Resolution Priority", () => {
       testrailProjectName: "app-c - Module Y",
       jiraProjectKey: "JIRA",
     });
-    expect(withTestrailProject.appSlug).toBe("app-c-module-y");
-    expect(withTestrailProject.source).toBe("testrail_project");
+    expect(withTestrailProject.appSlug).toBe("");
+    expect(withTestrailProject.source).toBe("fallback");
 
-    // 5. Jira is last resort before default
+    // 5. Jira metadata cannot establish app identity
     const withJira = resolveAppForPreview({
       targetAppSlug: undefined,
       requestAppSlug: undefined,
@@ -145,8 +145,8 @@ test.describe("App Slug Resolution Priority", () => {
       testrailProjectName: undefined,
       jiraProjectKey: "JIRA",
     });
-    expect(withJira.appSlug).toBe("jira");
-    expect(withJira.source).toBe("jira");
+    expect(withJira.appSlug).toBe("");
+    expect(withJira.source).toBe("fallback");
   });
 
   test("Normalization: spaces and special chars are normalized to slugs", () => {
@@ -173,9 +173,8 @@ test.describe("App Slug Resolution Priority", () => {
       jiraProjectKey: "FALLBACK",
     });
 
-    // Should fall through to Jira since empty strings are treated as undefined
-    expect(result.appSlug).toBe("fallback");
-    expect(result.source).toBe("jira");
+    expect(result.appSlug).toBe("");
+    expect(result.source).toBe("fallback");
   });
 
   test("requestAppSlug has higher confidence than jira inference", () => {
@@ -191,6 +190,6 @@ test.describe("App Slug Resolution Priority", () => {
     expect(withRequest.source).toBe("request");
 
     expect(withJira.confidence).toBe("low");
-    expect(withJira.source).toBe("jira");
+    expect(withJira.source).toBe("fallback");
   });
 });

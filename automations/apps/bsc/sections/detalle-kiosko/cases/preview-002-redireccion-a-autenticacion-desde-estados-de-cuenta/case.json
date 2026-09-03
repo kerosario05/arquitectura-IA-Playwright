@@ -1,0 +1,10 @@
+{
+  "id": "preview-002-redireccion-a-autenticacion-desde-estados-de-cuenta",
+  "externalId": "PREVIEW-002",
+  "caseId": 0,
+  "title": "Redireccion a autenticacion desde Estados de cuenta",
+  "source": "discovery",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "createdAt": "2026-09-03T13:31:42.938Z"
+}

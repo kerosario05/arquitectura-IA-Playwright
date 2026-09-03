@@ -1,0 +1,29 @@
+{
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../../src/automations/runtime/promoted-spec-runtime';\n\nprocess.env.APP_SLUG = 'bsc';\nprocess.env.SECTION_SLUG = 'detalle-kiosko';\nprocess.env.SCENARIO_ID = 'PREVIEW-002';\nprocess.env.SCENARIO_TITLE = 'Seleccionar Estados de cuenta y observar redirecciÃ³n a autenticaciÃ³n';\n\ntest('PREVIEW-002 Seleccionar Estados de cuenta y observar redirecciÃ³n a autenticaciÃ³n', async ({ page }) => {\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 0,\n      target: 'Estados de cuenta',\n      actionIntent: 'click',\n      expectedEffect: 'navegar al lÃ­mite observable de autenticaciÃ³n del kiosco',\n      action: async () => {\n        await page.getByText('Estados de cuenta', { exact: true }).click();\n      },\n    });\n\n    await promotedRuntime.waitForPromotedUiStable(0, 'Estados de cuenta');\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 0,\n      target: 'Estados de cuenta',\n      assertion: async () => {\n        await expect(page).toHaveURL(/https:\\/\\/172\\.27\\.4\\.50\\/client-identification/);\n      },\n    });\n\n    await promotedRuntime.waitForPromotedUiStable(1, 'pantalla de autenticaciÃ³n del kiosco');\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 1,\n      target: 'pantalla de autenticaciÃ³n del kiosco',\n      assertion: async () => {\n        await expect(page.getByText('pantalla de autenticaciÃ³n del kiosco', { exact: true })).toBeVisible();\n      },\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    0,
+    1
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "La opciÃ³n dirige al lÃ­mite observable de autenticaciÃ³n del kiosco.",
+      "implementation": "await expect(page).toHaveURL(/https:\\/\\/172\\.27\\.4\\.50\\/client-identification/);"
+    },
+    {
+      "requirement": "pantalla de autenticaciÃ³n del kiosco",
+      "implementation": "await expect(page.getByText('pantalla de autenticaciÃ³n del kiosco', { exact: true })).toBeVisible();"
+    }
+  ],
+  "usedPageObjects": [],
+  "declaredIdentifiers": [
+    "promotedRuntime"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

@@ -8,7 +8,91 @@ import { AiProviderError } from "../ai/ai-provider.types";
 import type { AppAutomationPaths, AppProfile } from "./app-profile";
 import type { ExecutionPlan } from "../types/execution-plan.types";
 import type { PageObjectRegistry } from "../types/page-object.types";
-import { normalizeMojibakeUtf8, runHybridSpecGeneration } from "./spec-generation-hybrid";
+import {
+  normalizeMojibakeUtf8,
+  repairMissingExpectImport,
+  rewritePromotedRuntimeImport,
+  runHybridSpecGeneration,
+  summarizePlaywrightDiscoveryError,
+  validatePromotedSpecInternalImports,
+} from "./spec-generation-hybrid";
+
+test("T1: repairs a missing expect binding in a compatible Playwright import", () => {
+  const source = "import { test } from '@playwright/test';\nawait expect(page).toBeVisible();";
+  assert.strictEqual(repairMissingExpectImport(source), "import { test, expect } from '@playwright/test';\nawait expect(page).toBeVisible();");
+});
+
+test("T2: does not change an existing expect import", () => {
+  const source = "import { test, expect } from '@playwright/test';\nawait expect(page).toBeVisible();";
+  assert.strictEqual(repairMissingExpectImport(source), source);
+});
+
+test("T1 imports are rewritten independently for candidate and final spec locations", async () => {
+  const finalSpecPath = path.resolve(process.cwd(), "automations/apps/xc/sections/detalle-kiosko/cases/C/case.spec.ts");
+  const candidateSpecPath = path.resolve(path.dirname(finalSpecPath), "spec-generation/candidate.spec.ts");
+  const source = [
+    "import { createPromotedSpecRuntime } from 'BROKEN';",
+    "import { detectAuthGate } from '../../../../../../../../src/discovery/auth-gate-detector';",
+    "import { scanCurrentPage } from '../../../../../../../../src/explorer/page-scanner';",
+    "import { test } from '@playwright/test';",
+  ].join("\n");
+  const candidate = rewritePromotedRuntimeImport(source, candidateSpecPath);
+  const final = rewritePromotedRuntimeImport(candidate, finalSpecPath);
+  assert.notStrictEqual(candidate, final);
+  assert.match(final, /auth-gate-detector/);
+  assert.match(final, /page-scanner/);
+  assert.match(final, /from ['\"]@playwright\/test['\"]/);
+  const validation = await validatePromotedSpecInternalImports(final, finalSpecPath);
+  assert.deepStrictEqual(validation.unresolved, []);
+  assert.strictEqual(validation.internalImports, 3);
+  assert.strictEqual(validation.resolved, 3);
+});
+
+test("T2-T5 final internal imports resolve and external imports remain unchanged", async () => {
+  const finalSpecPath = path.resolve(process.cwd(), "automations/apps/xc/sections/detalle-kiosko/cases/C/case.spec.ts");
+  const content = rewritePromotedRuntimeImport([
+    "import { createPromotedSpecRuntime } from 'BROKEN';",
+    "import { detectAuthGate } from '../../../../../../../../src/discovery/auth-gate-detector';",
+    "import { scanCurrentPage } from '../../../../../../../../src/explorer/page-scanner';",
+    "import { test } from '@playwright/test';",
+  ].join("\n"), finalSpecPath);
+  assert.match(content, /from ['\"]@playwright\/test['\"]/);
+  const validation = await validatePromotedSpecInternalImports(content, finalSpecPath);
+  assert.strictEqual(validation.internalImports, 3);
+  assert.strictEqual(validation.resolved, 3);
+  assert.strictEqual(validation.unresolved.length, 0);
+});
+
+test("T6 unresolved final internal imports fail closed", async () => {
+  const finalSpecPath = path.resolve(process.cwd(), "automations/apps/xc/sections/detalle-kiosko/cases/C/case.spec.ts");
+  const validation = await validatePromotedSpecInternalImports(
+    "import { missing } from '../../../../../../../src/not-real/module';",
+    finalSpecPath,
+  );
+  assert.strictEqual(validation.internalImports, 1);
+  assert.strictEqual(validation.resolved, 0);
+  assert.deepStrictEqual(validation.unresolved, ["../../../../../../../src/not-real/module"]);
+});
+
+test("T3: does not add expect when it is unused", () => {
+  const source = "import { test } from '@playwright/test';\ntest('case', async () => {});";
+  assert.strictEqual(repairMissingExpectImport(source), source);
+});
+
+test("T4: fails closed for a local expect binding", () => {
+  const source = "import { test } from '@playwright/test';\nconst expect = customExpect;\nexpect(page);";
+  assert.strictEqual(repairMissingExpectImport(source), source);
+  const parameterBinding = "import { test } from '@playwright/test';\nfunction check(expect: unknown) { return expect; }\nexpect(page);";
+  assert.strictEqual(repairMissingExpectImport(parameterBinding), parameterBinding);
+});
+
+test("T7/T8: keeps the useful Playwright discovery cause after Listing tests", () => {
+  assert.strictEqual(
+    summarizePlaywrightDiscoveryError("Listing tests:", "Error: Cannot find module './missing'") ,
+    "Error: Cannot find module './missing'",
+  );
+  assert.strictEqual(summarizePlaywrightDiscoveryError("Listing tests:", ""), "Listing tests:");
+});
 
 if (process.env.AI_SPEC_FUNCTIONAL_EXECUTION_ENABLED === undefined) {
   process.env.AI_SPEC_FUNCTIONAL_EXECUTION_ENABLED = "false";
@@ -4652,5 +4736,64 @@ test("hybrid spec generation", async (t) => {
       !result.diagnostics.errors.some((error) => error.startsWith("technical_metadata_used_as_runtime_target:")),
       result.diagnostics.errors.join("\n")
     );
+  });
+
+  await t.test("runtime import is resolved from the actual spec file location", () => {
+    const specPath = path.resolve(process.cwd(), "automations", "apps", "A", "sections", "S", "cases", "C", "spec-generation", "candidate.spec.ts");
+    const content = "import { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';";
+    const rewritten = rewritePromotedRuntimeImport(content, specPath);
+
+    assert.ok(rewritten.includes("/src/automations/runtime/promoted-spec-runtime"));
+    assert.ok(!rewritten.includes("\\"));
+  });
+
+  await t.test("runtime import stays valid for different nesting depths", () => {
+    const specPath = path.resolve(process.cwd(), "some", "deep", "nested", "candidate.spec.ts");
+    const content = "import { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';";
+    const rewritten = rewritePromotedRuntimeImport(content, specPath);
+
+    assert.ok(rewritten.includes("createPromotedSpecRuntime"));
+    assert.ok(rewritten.includes("/src/automations/runtime/promoted-spec-runtime"));
+  });
+
+  await t.test("windows separators are normalized in the generated import", () => {
+    const specPath = path.resolve(process.cwd(), "automations", "apps", "A", "sections", "S", "cases", "C", "spec-generation", "candidate.spec.ts");
+    const content = "import { createPromotedSpecRuntime } from 'BROKEN';";
+    const rewritten = rewritePromotedRuntimeImport(content, specPath);
+
+    assert.ok(!rewritten.includes("\\"));
+    assert.ok(rewritten.includes("/src/automations/runtime/promoted-spec-runtime"));
+  });
+
+  await t.test("candidate spec path resolves the runtime module on disk", async () => {
+    const candidatePath = path.resolve(process.cwd(), "automations", "apps", "A", "sections", "S", "cases", "C", "spec-generation", "candidate.spec.ts");
+    const content = "import { createPromotedSpecRuntime } from 'BROKEN';";
+    const rewritten = rewritePromotedRuntimeImport(content, candidatePath);
+    const importPath = rewritten.match(/from '([^']+)'/)?.[1];
+    assert.ok(importPath);
+    assert.equal((await fs.stat(path.resolve(path.dirname(candidatePath), `${importPath}.ts`))).isFile(), true);
+  });
+
+  await t.test("candidate written to spec-generation contains the corrected import", async () => {
+    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "promoted-runtime-candidate-"));
+    const candidatePath = path.join(tempRoot, "spec-generation", "candidate.spec.ts");
+    await fs.mkdir(path.dirname(candidatePath), { recursive: true });
+    const rewritten = rewritePromotedRuntimeImport(
+      "import { createPromotedSpecRuntime } from 'BROKEN';",
+      candidatePath,
+    );
+    await fs.writeFile(candidatePath, rewritten, "utf-8");
+    const persisted = await fs.readFile(candidatePath, "utf-8");
+    assert.equal(persisted, rewritten);
+    await fs.rm(tempRoot, { recursive: true, force: true });
+  });
+
+  await t.test("already promoted spec content remains intact", () => {
+    const specPath = path.resolve(process.cwd(), "automations", "apps", "A", "sections", "S", "cases", "C", "case.spec.ts");
+    const content = "import { createPromotedSpecRuntime } from '../../../../../../../src/automations/runtime/promoted-spec-runtime';\nconst x = 1;";
+    const rewritten = rewritePromotedRuntimeImport(content, specPath);
+
+    assert.ok(rewritten.includes("const x = 1;"));
+    assert.ok(rewritten.includes("createPromotedSpecRuntime"));
   });
 });

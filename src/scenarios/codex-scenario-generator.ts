@@ -6,10 +6,12 @@ import type {
   ScenarioGenerationMode,
   FunctionalBranchRef,
   CanonicalClaim,
+  McpScenario,
 } from "./scenario-types";
 import { buildMcpScenarioMessages } from "./mcp-scenario-prompt-builder";
 import { buildRequirementManifest, buildCanonicalClaims, isRequirementFunctionallyCoverable } from "./scenario-functional-quality";
 import { detectOptionFlows } from "./hu-scope-guard";
+import { buildCanonicalHuContext } from "./canonical-hu-context";
 import { parseAiResponse } from "./scenario-output-parser";
 import type { JiraIssueSource } from "./scenario-types";
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -181,7 +183,9 @@ function extractHuCoverage(issue: JiraIssueSource, pathSelection?: any): {
   hasNoDataCase: boolean;
 } {
   const corpus = [issue.summary, issue.description, issue.acceptanceCriteria].filter(Boolean).join(" ").toLowerCase();
-  const rawTarget = String(pathSelection?.selectedPath?.target || "depósito a plazo").replace(/"/g, "").trim();
+  const rawTarget = typeof pathSelection?.selectedPath?.target === "string"
+    ? pathSelection.selectedPath.target.replace(/"/g, "").trim()
+    : "";
   let singularTerm = rawTarget.toLowerCase();
 
   // Simple singularization: remove 's' at end for common Spanish plurals
@@ -195,7 +199,7 @@ function extractHuCoverage(issue: JiraIssueSource, pathSelection?: any): {
     domainTerm: rawTarget.toLowerCase(),
     singularTerm,
     hasExpiryAlert: corpus.includes("alerta") || corpus.includes("vencimiento"),
-    hasNoDataCase: corpus.includes("sin depósitos") || corpus.includes("sin depositos"),
+    hasNoDataCase: Boolean(rawTarget && corpus.includes(`sin ${rawTarget.toLowerCase()}`)),
   };
 }
 
@@ -216,11 +220,14 @@ function buildHuFallbackScenarios(
 
   const resolution = routeResolutions.get(primaryIssue.key);
   const pathSelection = pathSelectionMap?.get(primaryIssue.key);
+  if (!pathSelection?.selectedPath?.target) {
+    return [];
+  }
   const isPrivateSynthetic = pathSelection?.accessMode === "private" &&
     (pathSelection?.source === "synthetic" || pathSelection?.selectedPath?.targetPathKey?.startsWith("synthetic_"));
   const entryPrefix = isPrivateSynthetic
     ? (entrySteps || [])
-        .filter(step => step.action === "click" && !/informaci[oó]n de productos/i.test(step.target))
+        .filter(step => step.action === "click")
         .slice(0, 1)
         .map(step => `Clic en "${step.target}".`)
     : (entrySteps || []).slice(0, 2).map(step =>
@@ -230,12 +237,10 @@ function buildHuFallbackScenarios(
       );
   const routePrefix = (resolution?.executableRouteSteps || []).slice(0, 3);
   const syntheticPrefix = ((pathSelection?.selectedPath?.requiredIntermediates || []) as string[])
-    .filter(step => !/informaci[oó]n de productos/i.test(step))
     .slice(0, 3)
     .map(step => `Clic en "${step}".`);
   const navigationPrefix = [...entryPrefix, ...(routePrefix.length > 0 && !isPrivateSynthetic ? routePrefix : syntheticPrefix)]
     .filter((step, index, allSteps) =>
-      !/informaci[oó]n de productos/i.test(step) &&
       allSteps.findIndex(candidate => candidate.toLowerCase() === step.toLowerCase()) === index
     );
   const coverage = extractHuCoverage(primaryIssue, pathSelection);
@@ -296,7 +301,7 @@ function buildHuFallbackScenarios(
 
   const sanitizedScenarios = scenarios.map((scenario) => ({
     ...scenario,
-    steps: scenario.steps.filter((step: string) => !/informaci[oó]n de productos/i.test(step)),
+    steps: scenario.steps,
     preconditions: ["AuthGate"],
     caseOracle: "assert_visible",
     type: "Automated",
@@ -389,7 +394,18 @@ export function deriveProviderStepRequirementRefs(
   const canonicalById = new Map(canonicalClaims.map((claim) => [claim.claimId, claim]));
   return scenarios.map((scenario) => {
     const seen = new Set<string>();
-    const refs = (Array.isArray(scenario.stepClaims) ? scenario.stepClaims : []).flatMap((claim: any) => {
+    const refs: any[] = [];
+    for (const ref of Array.isArray(scenario.stepRequirementRefs) ? scenario.stepRequirementRefs : []) {
+      if (!canonicalClaims.some((claim) => claim.requirementId === ref.requirementId)) continue;
+      if (!Number.isInteger(ref.stepIndex) || ref.stepIndex < 0 || ref.stepIndex >= (scenario.steps?.length ?? 0)) continue;
+      const descriptor = canonicalClaims.find((claim) => claim.requirementId === ref.requirementId);
+      if (descriptor?.scope === "branch" && descriptor.scopeId !== scenario.functionalBranch?.branchId) continue;
+      const key = `${ref.stepIndex}:${ref.requirementId}:${ref.facet ?? ""}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      refs.push({ stepIndex: ref.stepIndex, requirementId: ref.requirementId, ...(ref.facet ? { facet: ref.facet } : {}) });
+    }
+    refs.push(...(Array.isArray(scenario.stepClaims) ? scenario.stepClaims : []).flatMap((claim: any) => {
       const descriptor = canonicalById.get(claim.claimId);
       const stepIndex = claim.stepIndex;
       if (!descriptor || !Number.isInteger(stepIndex) || stepIndex < 0 || stepIndex >= (scenario.steps?.length ?? 0)) return [];
@@ -398,7 +414,7 @@ export function deriveProviderStepRequirementRefs(
       if (seen.has(key)) return [];
       seen.add(key);
       return [{ stepIndex, requirementId: descriptor.requirementId, facet: descriptor.facet }];
-    });
+    }));
     return { ...scenario, stepRequirementRefs: refs };
   });
 }
@@ -419,14 +435,18 @@ export function evaluateProviderRequirementCompliance(
   const referenced = new Set<string>();
   for (const scenario of scenarios) {
     for (const ref of scenario.stepRequirementRefs ?? []) {
-      if (!canonical.has(ref.requirementId)) continue;
+      const requirement = requirementManifest.find((candidate) => (candidate.requirementId ?? candidate.id) === ref.requirementId);
+      if (!requirement || !canonical.has(ref.requirementId)) continue;
       if (!Number.isInteger(ref.stepIndex) || ref.stepIndex < 0 || ref.stepIndex >= (scenario.steps?.length ?? 0)) continue;
+      if (requirement.associatedBranchId && scenario.functionalBranch?.branchId !== requirement.associatedBranchId) continue;
       referenced.add(ref.requirementId);
     }
     for (const claim of scenario.stepClaims ?? []) {
       const requirementId = claimRequirementIds.get(claim.claimId);
+      const requirement = requirementManifest.find((candidate) => (candidate.requirementId ?? candidate.id) === requirementId);
       if (!requirementId || !canonical.has(requirementId)) continue;
       if (!Number.isInteger(claim.stepIndex) || claim.stepIndex < 0 || claim.stepIndex >= (scenario.steps?.length ?? 0)) continue;
+      if (requirement?.associatedBranchId && scenario.functionalBranch?.branchId !== requirement.associatedBranchId) continue;
       referenced.add(requirementId);
     }
   }
@@ -437,11 +457,113 @@ export function evaluateProviderRequirementCompliance(
   };
 }
 
+function buildCoverageCompletionMessages(
+  issue: JiraIssueSource,
+  missingRequirements: ReturnType<typeof buildRequirementManifest>,
+  canonicalClaims: CanonicalClaim[],
+): Array<{ role: "system" | "user"; content: string }> {
+  const missingIds = new Set(missingRequirements.map((requirement) => requirement.requirementId ?? requirement.id));
+  const claims = canonicalClaims.filter((claim) => claim.required && claim.coverable && missingIds.has(claim.requirementId));
+  const manifest = missingRequirements.map((requirement) => ({
+    requirementId: requirement.requirementId ?? requirement.id,
+    associatedBranchId: requirement.associatedBranchId,
+    prerequisiteRequirementIds: (requirement.prerequisiteRequirementIds ?? []).filter((id) => missingIds.has(id) || missingRequirements.some((candidate) => (candidate.requirementId ?? candidate.id) === id)),
+    expectedBehavior: requirement.expectedBehavior,
+  }));
+  return [
+    {
+      role: "system",
+      content: "Generate only valid scenarios that cover the supplied missing requirements. Use only requirement IDs from the manifest, include valid stepRequirementRefs, preserve associatedBranchId lineage, and do not generate scenarios for any other requirement.",
+    },
+    {
+      role: "user",
+      content: JSON.stringify({
+        hu: [issue.summary, issue.description, issue.acceptanceCriteria ?? ""].filter(Boolean).join("\n"),
+        missingRequirements: manifest,
+        canonicalClaims: claims,
+      }),
+    },
+  ];
+}
+
+function mergeScenariosByLineage(firstPass: any[], completionPass: any[]): any[] {
+  const byLineage = new Map<string, any>();
+  for (const scenario of [...firstPass, ...completionPass]) {
+    const branchId = scenario.functionalBranch?.branchId ?? scenario.branchAssociation?.branchId ?? "none";
+    const refs = (scenario.stepRequirementRefs ?? []).map((ref: any) => `${ref.requirementId}:${ref.stepIndex}`).sort().join("|");
+    const claims = (scenario.stepClaims ?? []).map((claim: any) => `${claim.claimId}:${claim.stepIndex}`).sort().join("|");
+    const key = `${scenario.sourceIssueKey ?? ""}::${branchId}::${refs}::${claims}`;
+    if (!byLineage.has(key)) byLineage.set(key, scenario);
+  }
+  return [...byLineage.values()];
+}
+
+type CoverageCompletionResult = {
+  scenarios: any[];
+  compliance: ReturnType<typeof evaluateProviderRequirementCompliance>;
+  completionCalls: number;
+};
+
+export async function runCoverageCompletionPass(
+  firstPassScenarios: any[],
+  requirementManifest: ReturnType<typeof buildRequirementManifest>,
+  canonicalClaims: CanonicalClaim[],
+  provider: AiProvider,
+  issue: JiraIssueSource,
+  prepareCompletionScenarios: (scenarios: any[]) => Promise<any[]> | any[],
+): Promise<CoverageCompletionResult> {
+  const coverableRequirements = requirementManifest.filter(isRequirementFunctionallyCoverable);
+  let scenarios = firstPassScenarios;
+  let compliance = evaluateProviderRequirementCompliance(scenarios, requirementManifest, canonicalClaims);
+  let completionCalls = 0;
+  console.log(`[coverage-completion] firstPass scenarios=${scenarios.length} required=${compliance.expectedCoverableRequirementIds.length} covered=${compliance.referencedRequirementIds.length} missing=${compliance.missingRequirementIds.length}`);
+  if (compliance.missingRequirementIds.length === 0) {
+    console.log(`[coverage-completion] final required=${compliance.expectedCoverableRequirementIds.length} covered=${compliance.referencedRequirementIds.length} missing=0 valid=true`);
+    return { scenarios, compliance, completionCalls };
+  }
+
+  completionCalls = 1;
+  const missingRequirements = coverableRequirements.filter((requirement) => {
+    const requirementId = requirement.requirementId ?? requirement.id;
+    return typeof requirementId === "string" && compliance.missingRequirementIds.includes(requirementId);
+  });
+  console.log(`[coverage-completion] secondPass missingRequirementIds=${compliance.missingRequirementIds.join(",")}`);
+  try {
+    const response = await provider.completeJson({
+      messages: buildCoverageCompletionMessages(issue, missingRequirements, canonicalClaims),
+      temperature: 0.4,
+      requireJson: true,
+      requireJsonSchema: false,
+      purpose: "scenario_generation",
+    });
+    const parsed = response.parsedJson ? parseAiResponse(response.rawText) : null;
+    const completionScenarios = await prepareCompletionScenarios(parsed?.scenarios ?? []);
+    const missingIds = new Set(missingRequirements.map((requirement) => requirement.requirementId ?? requirement.id));
+    scenarios = mergeScenariosByLineage(
+      scenarios,
+      completionScenarios.filter((scenario: any) => (scenario.stepRequirementRefs ?? []).some((ref: any) => missingIds.has(ref.requirementId))),
+    );
+    compliance = evaluateProviderRequirementCompliance(scenarios, requirementManifest, canonicalClaims);
+  } catch (error) {
+    console.log(`[coverage-completion] secondPass failed reason=${error instanceof Error ? error.message : String(error)}`);
+  }
+  console.log(`[coverage-completion] final required=${compliance.expectedCoverableRequirementIds.length} covered=${compliance.referencedRequirementIds.length} missing=${compliance.missingRequirementIds.length} valid=${compliance.missingRequirementIds.length === 0}`);
+  return { scenarios, compliance, completionCalls };
+}
+
 export type ProviderClaimCompliance = {
   expectedClaims: string[];
   referencedClaims: string[];
   missingClaims: string[];
-  invalidClaims: Array<{ stepIndex: number; claimId?: string; reason: string }>;
+  invalidClaims: Array<{
+    scenarioId?: string;
+    stepIndex: number;
+    claimId?: string;
+    requirementId?: string;
+    facet?: string;
+    branchId?: string;
+    reason: string;
+  }>;
 };
 
 export function evaluateProviderClaimCompliance(
@@ -454,17 +576,50 @@ export function evaluateProviderClaimCompliance(
   for (const scenario of scenarios) {
     const seen = new Set<string>();
     for (const claim of Array.isArray(scenario.stepClaims) ? scenario.stepClaims : []) {
+      const scenarioId = scenario.scenarioId ?? scenario.sourceIssueKey;
+      const branchId = scenario.functionalBranch?.branchId;
+      const invalid = (reason: string, descriptor?: CanonicalClaim): void => {
+        invalidClaims.push({
+          scenarioId,
+          stepIndex: claim.stepIndex,
+          claimId: claim.claimId,
+          requirementId: claim.requirementId ?? descriptor?.requirementId,
+          facet: claim.facet ?? descriptor?.facet,
+          branchId,
+          reason,
+        });
+      };
       const descriptor = canonicalById.get(claim.claimId);
       if (!descriptor) {
-        invalidClaims.push({ stepIndex: claim.stepIndex, claimId: claim.claimId, reason: "unknown_claim_id" });
+        invalid("provider_only_claim");
         continue;
       }
       if (!Number.isInteger(claim.stepIndex) || claim.stepIndex < 0 || claim.stepIndex >= (scenario.steps?.length ?? 0)) {
-        invalidClaims.push({ stepIndex: claim.stepIndex, claimId: claim.claimId, reason: "invalid_step_index" });
+        invalid("other", descriptor);
         continue;
       }
-      if (descriptor.scope === "branch" && descriptor.scopeId !== scenario.functionalBranch?.branchId) {
-        invalidClaims.push({ stepIndex: claim.stepIndex, claimId: claim.claimId, reason: "scope_mismatch" });
+      if (claim.requirementId !== undefined && claim.requirementId !== descriptor.requirementId) {
+        invalid("wrong_requirement_lineage", descriptor);
+        continue;
+      }
+      if (claim.facet !== undefined && claim.facet !== descriptor.facet) {
+        invalid("wrong_requirement_lineage", descriptor);
+        continue;
+      }
+      if (claim.claimType !== undefined && claim.claimType !== descriptor.claimType) {
+        invalid("wrong_claim_type", descriptor);
+        continue;
+      }
+      if (claim.scope !== undefined && claim.scope !== descriptor.scope) {
+        invalid("wrong_requirement_lineage", descriptor);
+        continue;
+      }
+      if (claim.scopeId !== undefined && claim.scopeId !== descriptor.scopeId) {
+        invalid("wrong_requirement_lineage", descriptor);
+        continue;
+      }
+      if (descriptor.scope === "branch" && descriptor.scopeId !== branchId) {
+        invalid("branch_scope_mismatch", descriptor);
         continue;
       }
       const key = `${scenario.scenarioId ?? scenario.sourceIssueKey ?? "scenario"}:${claim.stepIndex}:${claim.claimId}`;
@@ -606,7 +761,7 @@ export function applyScenarioQualityGate(
 
     const normalizedSteps: string[] = [];
     const normalizedOrigins: number[] = [];
-    const referencedIndexes = new Set((scenario.stepRequirementRefs ?? []).map((ref) => ref.stepIndex));
+    const referencedIndexes = new Set((scenario.stepRequirementRefs ?? []).map((ref: NonNullable<McpScenario["stepRequirementRefs"]>[number]) => ref.stepIndex));
     const seenSteps = new Set<string>();
     let rejectedReason: string | undefined;
     const visibleControls = new Set(((routeProfile?.visibleControls || []) as string[]).map((value) => value.toLowerCase()));
@@ -719,7 +874,7 @@ export function applyScenarioQualityGate(
       continue;
     }
 
-    const remappedRefs = scenario.stepRequirementRefs?.flatMap((ref) => {
+    const remappedRefs = scenario.stepRequirementRefs?.flatMap((ref: NonNullable<McpScenario["stepRequirementRefs"]>[number]) => {
       const stepIndex = normalizedOrigins.indexOf(ref.stepIndex);
       return stepIndex >= 0 ? [{ ...ref, stepIndex }] : [];
     });
@@ -1061,13 +1216,6 @@ export async function generateScenariosWithAi(
   const normalizedSourceIssueKey = typeof primaryIssue?.key === "string" && primaryIssue.key.trim().length > 0
     ? primaryIssue.key.trim()
     : undefined;
-  const primaryHuEvidence = primaryIssue ? huEvidenceMap?.get(primaryIssue.key) : null;
-  const primaryPathSelection = primaryIssue ? pathSelectionMap?.get(primaryIssue.key) : null;
-  const privateSyntheticSelectedPath = !!primaryHuEvidence &&
-    primaryHuEvidence.accessMode === "private" &&
-    !!primaryPathSelection?.selectedPath &&
-    (primaryPathSelection?.source === "synthetic" || primaryPathSelection?.selectedPath?.targetPathKey?.startsWith("synthetic_"));
-
   // Extract additional entry targets from entrySteps parameter
   const additionalEntryTargets: string[] = [];
   if (entrySteps) {
@@ -1081,27 +1229,13 @@ export async function generateScenariosWithAi(
   // Also extract from old-style entry labels (from routeProfile.entry)
   if (routeProfile?.entry) {
     for (const entry of routeProfile.entry) {
-      if (privateSyntheticSelectedPath && /informaci[oó]n de productos/i.test(entry.visibleLabel || "")) {
-        continue;
-      }
       if (entry.visibleLabel && !additionalEntryTargets.includes(entry.visibleLabel)) {
         additionalEntryTargets.push(entry.visibleLabel);
-      }
-      if (privateSyntheticSelectedPath && /informaci[oó]n de productos/i.test(entry.businessLabel || "")) {
-        continue;
       }
       if (entry.businessLabel && !additionalEntryTargets.includes(entry.businessLabel)) {
         additionalEntryTargets.push(entry.businessLabel);
       }
     }
-  }
-  if (privateSyntheticSelectedPath) {
-    const beforeFilter = additionalEntryTargets.length;
-    const filteredTargets = additionalEntryTargets.filter((target) => !/informaci[oó]n de productos/i.test(target));
-    const removed = beforeFilter - filteredTargets.length;
-    additionalEntryTargets.length = 0;
-    additionalEntryTargets.push(...filteredTargets);
-    console.log(`[scenario-route] privateSynthetic ignoresPublicEntryTargets=true removed=${removed}`);
   }
 
   console.log(`[scenario-route] additionalEntryTargets=${JSON.stringify(additionalEntryTargets)}`);
@@ -1119,7 +1253,7 @@ export async function generateScenariosWithAi(
       {
         summary: issue.summary,
         description: issue.description,
-        acceptanceCriteria: issue.acceptanceCriteria,
+        acceptanceCriteria: issue.acceptanceCriteria ?? undefined,
         labels: (issue as any).labels,
         components: (issue as any).components
       },
@@ -1312,36 +1446,80 @@ export async function generateScenariosWithAi(
         }
 
         if (!response.parsedJson) {
+          const completion = await runCoverageCompletionPass(
+            [],
+            requirementManifest,
+            canonicalClaims,
+            provider,
+            routePendingIssues[0],
+            (scenarios) => deriveProviderStepRequirementRefs(
+              scenarios.map((scenario: any) => normalizeAiScenario(normalizeScenarioSteps({
+                ...scenario,
+                nonExecutableCriteria: "requires_route_discovery",
+              }), appSlug)),
+              canonicalClaims,
+            ),
+          );
           console.log(`[scenario-preview] aiGeneration routePending empty fallback=plan_based`);
           return {
             appSlug, targetAppSlug, targetAppName, confidence: "low",
             reason: "Route pending — AI returned no scenarios",
             functionalRoute: "", routeProfile: routeProfile || { name: "", entry: [], aliases: {}, intermediates: {}, domainTerms: {}, visibleControls: [], representativeFixture: {}, notes: [] },
-            scenarios: [],
+            scenarios: completion.scenarios,
             warnings: blockedIssues.map(b => `Route pending — ${b.key}: ${b.reason}`),
             rejected: blockedIssues.map(b => ({ sourceIssueKey: b.key, reason: b.reason })),
-            routeResolutions, generationDiagnostics: genDiag,
+            routeResolutions,
+            generationDiagnostics: {
+              ...genDiag,
+              generationSuccess: completion.compliance.missingRequirementIds.length === 0,
+              generationFailureReason: completion.compliance.missingRequirementIds.length === 0 ? undefined : "required_coverage_incomplete",
+              coverageCompletion: completion,
+            },
           };
         }
 
-        const parsed = parseAiResponseWithMode(response.parsedJson, "route_pending");
-        const routePendingScenarios = parsed.scenarios.map((sc: any) => ({
-          ...sc,
-          nonExecutableCriteria: "requires_route_discovery",
-        }));
+         const parsed = parseAiResponseWithMode(response.parsedJson, "route_pending");
+         const routePendingScenarios = parsed.scenarios.map((sc: any) => ({
+           ...sc,
+           nonExecutableCriteria: "requires_route_discovery",
+         }));
 
-        genDiag.aiGenerated = routePendingScenarios.length;
-        genDiag.finalValid = routePendingScenarios.length;
-        console.log(`[scenario-preview] aiGeneration routePending generated=${routePendingScenarios.length}`);
-        for (const sc of routePendingScenarios) {
+         const completion = await runCoverageCompletionPass(
+           deriveProviderStepRequirementRefs(routePendingScenarios, canonicalClaims),
+           requirementManifest,
+           canonicalClaims,
+           provider,
+           routePendingIssues[0],
+           (scenarios) => deriveProviderStepRequirementRefs(
+             scenarios.map((scenario: any) => normalizeAiScenario(normalizeScenarioSteps({
+               ...scenario,
+               nonExecutableCriteria: "requires_route_discovery",
+             }), appSlug)),
+             canonicalClaims,
+           ),
+         );
+
+         genDiag.aiGenerated = routePendingScenarios.length;
+         genDiag.finalValid = completion.scenarios.length;
+         genDiag.coverageCompletion = {
+           completionCalls: completion.completionCalls,
+           requiredRequirementIds: completion.compliance.expectedCoverableRequirementIds,
+           coveredRequirementIds: completion.compliance.referencedRequirementIds,
+           missingRequirementIds: completion.compliance.missingRequirementIds,
+           generationSuccess: completion.compliance.missingRequirementIds.length === 0,
+         };
+         genDiag.generationSuccess = completion.compliance.missingRequirementIds.length === 0;
+         genDiag.generationFailureReason = genDiag.generationSuccess ? undefined : "required_coverage_incomplete";
+         console.log(`[scenario-preview] aiGeneration routePending generated=${completion.scenarios.length}`);
+         for (const sc of completion.scenarios) {
           console.log(`[scenario-auth-intent] scenarioId=${sc.scenarioId ?? sc.sourceIssueKey} authIntent=${sc.authIntent ?? "undefined"}`);
         }
 
         return {
           appSlug, targetAppSlug, targetAppName, confidence: "low",
-          reason: "Route pending — scenarios generated without validated route",
+           reason: genDiag.generationSuccess ? "Route pending — scenarios generated without validated route" : "required_coverage_incomplete",
           functionalRoute: "", routeProfile: routeProfile || { name: "", entry: [], aliases: {}, intermediates: {}, domainTerms: {}, visibleControls: [], representativeFixture: {}, notes: [] },
-          scenarios: routePendingScenarios,
+           scenarios: completion.scenarios,
           warnings: [`Route pending: scenarios require route validation before MCP execution. ${blockedIssues.length} issue(s) blocked.`],
           rejected: blockedIssues.map(b => ({ sourceIssueKey: b.key, reason: b.reason })),
           routeResolutions, generationDiagnostics: genDiag,
@@ -1470,6 +1648,17 @@ export async function generateScenariosWithAi(
   }
 
   // AI generation (default path)
+  const canonicalContext = primaryIssue ? buildCanonicalHuContext(primaryIssue) : null;
+  console.log(`[HU-CANONICAL-TRACE] ${JSON.stringify({
+    issueKey: canonicalContext?.issueKey ?? "",
+    sourceFields: canonicalContext?.sourceFields ?? [],
+    alternativeCount: huScenarioModel?.optionFlows?.length ?? 0,
+    visibleOptionsCount: huScenarioModel?.visibleOptions?.length ?? 0,
+    optionFlowsCount: huScenarioModel?.optionFlows?.length ?? 0,
+    functionalBranchCount: functionalBranches?.length ?? 0,
+    requirementCount: requirementManifest.length,
+    effectiveIntent: huScenarioModel?.mainIntent ?? "",
+  })}`);
   console.log(`[scenarios:ai] calling AI for scenario generation mode=${generationMode}`);
   generationDiagnostics.aiCalled = true;
 
@@ -1689,6 +1878,32 @@ export async function generateScenariosWithAi(
       complianceValidation.invalidScenarios.length
     );
 
+    const completion = await runCoverageCompletionPass(
+      complianceValidation.validScenarios,
+      requirementManifest,
+      canonicalClaims,
+      provider,
+      routeBackedIssues[0]!,
+      (scenarios) => {
+        const normalized = deriveProviderStepRequirementRefs(
+          scenarios.map((scenario: any) => normalizeAiScenario(normalizeScenarioSteps(scenario), appSlug)),
+          canonicalClaims,
+        );
+        const quality = applyScenarioQualityGate(normalized, routeBackedIssues, routeProfile || null, pathSelectionMap, huEvidenceMap);
+        return validateScenariosCompliance(quality.scenarios, derivedContext, routeResolutions, canonicalClaims).validScenarios;
+      },
+    );
+    const coverableRequirements = requirementManifest.filter(isRequirementFunctionallyCoverable);
+    const finalValidScenarios = completion.scenarios;
+    const finalProviderCompliance = completion.compliance;
+    generationDiagnostics.coverageCompletion = {
+      completionCalls: completion.completionCalls,
+      requiredRequirementIds: finalProviderCompliance.expectedCoverableRequirementIds,
+      coveredRequirementIds: finalProviderCompliance.referencedRequirementIds,
+      generationSuccess: finalProviderCompliance.missingRequirementIds.length === 0,
+    };
+    console.log(`[coverage-completion] final required=${finalProviderCompliance.expectedCoverableRequirementIds.length} covered=${finalProviderCompliance.referencedRequirementIds.length} missing=${finalProviderCompliance.missingRequirementIds.length} valid=${finalProviderCompliance.missingRequirementIds.length === 0}`);
+
     // Log acceptance of learned path clicks
     if (learnedPathNormalizedTargets.size > 0) {
       for (const scenario of complianceValidation.validScenarios) {
@@ -1717,8 +1932,12 @@ export async function generateScenariosWithAi(
 
     // Update generation diagnostics
     generationDiagnostics.aiGenerated = repairedScenarios.length;
-    generationDiagnostics.finalValid = complianceValidation.validScenarios.length;
+    generationDiagnostics.finalValid = finalValidScenarios.length;
     generationDiagnostics.finalRejected = allRejected.length;
+    generationDiagnostics.generationSuccess = finalProviderCompliance.missingRequirementIds.length === 0;
+    generationDiagnostics.generationFailureReason = finalProviderCompliance.missingRequirementIds.length === 0
+      ? undefined
+      : "required_coverage_incomplete";
 
     const primaryIssue = routeBackedIssues[0];
     const hasHuEvidence = !!primaryIssue && !!huEvidenceMap?.get(primaryIssue.key);
@@ -1762,7 +1981,7 @@ export async function generateScenariosWithAi(
       }
     }
 
-    if (complianceValidation.validScenarios.length > 0 && complianceValidation.validScenarios.length < 3 && hasHuEvidence && hasSelectedPath) {
+    if (coverableRequirements.length === 0 && complianceValidation.validScenarios.length > 0 && complianceValidation.validScenarios.length < 3 && hasHuEvidence && hasSelectedPath) {
       const fallbackScenarios = buildHuFallbackScenarios(
         routeBackedIssues,
         appSlug,
@@ -1805,18 +2024,20 @@ export async function generateScenariosWithAi(
       `finalValid=${generationDiagnostics.finalValid} ` +
       `finalRejected=${generationDiagnostics.finalRejected}`
     );
-    writeScenarioGenerationTrace(routeBackedIssues, requirementManifest, complianceValidation.validScenarios, {
+    writeScenarioGenerationTrace(routeBackedIssues, requirementManifest, finalValidScenarios, {
       ...traceStages,
-      finalGenerator: traceScenarios(complianceValidation.validScenarios),
+      finalGenerator: traceScenarios(finalValidScenarios),
       providerCompliance: [providerCompliance],
     }, canonicalClaims);
-    for (const sc of complianceValidation.validScenarios) {
+    for (const sc of finalValidScenarios) {
       console.log(`[scenario-auth-intent] scenarioId=${sc.scenarioId ?? sc.sourceIssueKey} authIntent=${sc.authIntent ?? "undefined"}`);
     }
 
     return {
       ...parsed,
-      scenarios: complianceValidation.validScenarios,
+      scenarios: finalValidScenarios,
+      reason: finalProviderCompliance.missingRequirementIds.length === 0 ? parsed.reason : "required_coverage_incomplete",
+      missingRequirementIds: finalProviderCompliance.missingRequirementIds,
       rejected: allRejected,
       routeResolutions,
       generationDiagnostics

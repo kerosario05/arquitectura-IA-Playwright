@@ -1,0 +1,44 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C44717",
+    "caseId": 44717,
+    "title": "Seleccionar Consulta de balance y observar redirección a autenticación"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "description": "Clic en \"Consulta de balance\".",
+      "target": {
+        "strategy": "text",
+        "value": "Consulta de balance",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Consulta de balance",
+          "resolvedTargetName": "Consulta de balance",
+          "resolvedCandidateId": "el-12",
+          "aiAssisted": true,
+          "aiReason": "ai_selection_resolution",
+          "repairType": "selection_resolution",
+          "decisionStatus": "repaired_plan",
+          "validationStatus": "valid"
+        }
+      }
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-09-03T11:38:25.576Z"
+}

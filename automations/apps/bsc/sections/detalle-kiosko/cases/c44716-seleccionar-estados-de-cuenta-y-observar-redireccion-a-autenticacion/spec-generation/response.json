@@ -1,0 +1,29 @@
+{
+  "specContent": "import { expect, test } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../../src/automations/runtime/promoted-spec-runtime';\n\ntest('Seleccionar Estados de cuenta y observar redirecciÃ³n a autenticaciÃ³n', async ({ page }) => {\n  process.env.APP_SLUG = 'bsc';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'C44716';\n  process.env.SCENARIO_TITLE = 'Seleccionar Estados de cuenta y observar redirecciÃ³n a autenticaciÃ³n';\n\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 1,\n      target: 'Estados de cuenta',\n      actionIntent: 'Seleccionar la opciÃ³n de Estados de cuenta',\n      expectedEffect: 'Navegar al lÃ­mite observable de autenticaciÃ³n del kiosco',\n      action: async () => {\n        await page.getByText('Estados de cuenta', { exact: true }).click();\n      }\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 1,\n      target: 'Estados de cuenta',\n      assertion: async () => {\n        await expect(page).toHaveURL('https://172.27.4.50/client-identification');\n      }\n    });\n\n    await promotedRuntime.waitForPromotedUiStable(2, 'La opciÃ³n dirige al lÃ­mite observable de autenticaciÃ³n del kiosco.');\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 2,\n      target: 'La opciÃ³n dirige al lÃ­mite observable de autenticaciÃ³n del kiosco.',\n      assertion: async () => {\n        await expect(page).toHaveURL('https://172.27.4.50/client-identification');\n      }\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    1,
+    2
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "<p>La opci&oacute;n dirige al l&iacute;mite observable de autenticaci&oacute;n del kiosco.</p>",
+      "implementation": "await expect(page).toHaveURL('https://172.27.4.50/client-identification');"
+    },
+    {
+      "requirement": "<p>La opci&oacute;n dirige al l&iacute;mite observable de autenticaci&oacute;n del kiosco.</p>",
+      "implementation": "await expect(page).toHaveURL('https://172.27.4.50/client-identification');"
+    }
+  ],
+  "usedPageObjects": [],
+  "declaredIdentifiers": [
+    "promotedRuntime"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

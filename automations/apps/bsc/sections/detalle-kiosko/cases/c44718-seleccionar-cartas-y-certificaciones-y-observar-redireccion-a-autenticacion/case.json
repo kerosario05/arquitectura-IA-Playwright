@@ -1,0 +1,10 @@
+{
+  "id": "c44718-seleccionar-cartas-y-certificaciones-y-observar-redireccion-a-autenticacion",
+  "externalId": "C44718",
+  "caseId": 44718,
+  "title": "Seleccionar Cartas y certificaciones y observar redirección a autenticación",
+  "source": "discovery",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "createdAt": "2026-09-03T11:40:33.782Z"
+}

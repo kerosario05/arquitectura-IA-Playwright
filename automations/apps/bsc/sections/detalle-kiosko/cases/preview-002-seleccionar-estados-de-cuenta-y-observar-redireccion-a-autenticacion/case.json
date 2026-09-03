@@ -1,0 +1,10 @@
+{
+  "id": "preview-002-seleccionar-estados-de-cuenta-y-observar-redireccion-a-autenticacion",
+  "externalId": "PREVIEW-002",
+  "caseId": 0,
+  "title": "Seleccionar Estados de cuenta y observar redirección a autenticación",
+  "source": "discovery",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "createdAt": "2026-09-03T11:35:43.199Z"
+}

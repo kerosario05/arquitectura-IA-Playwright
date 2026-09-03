@@ -309,6 +309,9 @@ function deriveAssertionOnlyTerms(
   const assertionOnly = new Set<string>();
 
   if (!routeProfile) return [];
+  const visibleControls = Array.isArray(routeProfile.visibleControls)
+    ? routeProfile.visibleControls
+    : [];
 
   // Check domain terms for assertion-only indicators
   if (routeProfile.domainTerms) {
@@ -339,8 +342,8 @@ function deriveAssertionOnlyTerms(
 
   // Check visibleControls for detail section patterns
   // Detail sections (Detalles, Requisitos, etc.) should be validated, not clicked
-  if (routeProfile.visibleControls) {
-    for (const control of routeProfile.visibleControls) {
+  if (visibleControls.length > 0) {
+    for (const control of visibleControls) {
       if (DETAIL_SECTION_PATTERNS.some(pattern => pattern.test(control))) {
         assertionOnly.add(control);
       }
@@ -362,10 +365,13 @@ function deriveVisibleButNotExecutableTerms(
   const visibleButNotExecutable = new Set<string>();
 
   if (!routeProfile) return [];
+  const visibleControls = Array.isArray(routeProfile.visibleControls)
+    ? routeProfile.visibleControls
+    : [];
 
   // Add visibleControls that are NOT in allowedExecutableClicks
-  if (routeProfile.visibleControls) {
-    for (const control of routeProfile.visibleControls) {
+  if (visibleControls.length > 0) {
+    for (const control of visibleControls) {
       if (!allowedExecutableClicks.includes(control)) {
         visibleButNotExecutable.add(control);
       }
@@ -397,10 +403,13 @@ function deriveSensitiveActions(
   const sensitive = new Set<string>();
 
   if (!routeProfile) return [];
+  const visibleControls = Array.isArray(routeProfile.visibleControls)
+    ? routeProfile.visibleControls
+    : [];
 
   // Check visible controls for sensitive action patterns
-  if (routeProfile.visibleControls) {
-    for (const control of routeProfile.visibleControls) {
+  if (visibleControls.length > 0) {
+    for (const control of visibleControls) {
       if (SENSITIVE_ACTION_PATTERNS.some(pattern => pattern.test(control))) {
         sensitive.add(control);
       }

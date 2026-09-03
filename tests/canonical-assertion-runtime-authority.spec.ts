@@ -3,6 +3,8 @@ import {
   buildDiscoveryAssertionContract,
   findAssertionRecoveryByLaterSuccess,
   resolveDiscoveryStatusFromAssertionContract,
+  hasObservableAssertionAuthority,
+  reconcileFailureMarkers,
 } from "../src/discovery/case-discovery";
 import {
   buildSpecExecutionContract,
@@ -116,6 +118,22 @@ test("T14 authority comes from structured refs, not title or text", () => {
   });
   expect(contract.steps[0].required).toBe(true);
   expect(contract.steps[0].executionStatus).toBe("unresolved");
+});
+
+test("narrative and semantic destination metadata do not create observable authority", () => {
+  expect(hasObservableAssertionAuthority({ canonicalRequirementRefs: [], assertionDiagnostics: {} })).toBe(false);
+  expect(hasObservableAssertionAuthority({ canonicalRequirementRefs: [{ requirementId: "destination", facet: "destination" }], assertionDiagnostics: {} })).toBe(false);
+  expect(hasObservableAssertionAuthority({ canonicalRequirementRefs: [{ requirementId: "visible", facet: "visibility", claimId: "claim-visible" }], assertionDiagnostics: {} })).toBe(true);
+});
+
+test("reconciled assertion clears stale failure markers but an unresolved failure remains", () => {
+  const markers = { failedAtStep: 5, failedTarget: "narrative destination", failedReason: "assertion_not_found_unrecovered" };
+  expect(reconcileFailureMarkers([
+    { index: 5, action: "assert", status: "satisfied_by_previous_assertion", assertionStatus: "satisfied_by_previous_assertion" } as any,
+  ], markers)).toEqual({ failedAtStep: undefined, failedTarget: undefined, failedReason: undefined });
+  expect(reconcileFailureMarkers([
+    { index: 5, action: "assert", status: "not_found", assertionClassification: "literal_observable", functionalRequired: true } as any,
+  ], markers)).toEqual(markers);
 });
 
 test("T11/T15 negative control keeps functional accounting separate from runtime success", () => {

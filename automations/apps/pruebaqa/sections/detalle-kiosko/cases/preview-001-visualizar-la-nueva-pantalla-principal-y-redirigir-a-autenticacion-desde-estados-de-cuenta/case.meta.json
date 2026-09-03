@@ -1,0 +1,9 @@
+{
+  "appSlug": "pruebaqa",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sourceScenarioId": "PREVIEW-001",
+  "testRailCaseId": 0,
+  "generatedAt": "2026-09-02T18:04:06.354Z",
+  "title": "Visualizar la nueva pantalla principal y redirigir a autenticacion desde Estados de cuenta"
+}

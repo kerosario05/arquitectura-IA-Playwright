@@ -1,0 +1,10 @@
+{
+  "appSlug": "bsc",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sectionId": 4903,
+  "sourceScenarioId": "C44730",
+  "testRailCaseId": 44730,
+  "generatedAt": "2026-09-03T13:00:04.215Z",
+  "title": "Redirigir a autenticacion desde Cartas y certificaciones"
+}

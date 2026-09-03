@@ -1,0 +1,10 @@
+{
+  "id": "preview-004-redirigir-a-autenticacion-al-seleccionar-cartas-y-certificaciones",
+  "externalId": "PREVIEW-004",
+  "caseId": 0,
+  "title": "Redirigir a autenticación al seleccionar Cartas y certificaciones",
+  "source": "discovery",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "createdAt": "2026-09-03T13:45:56.103Z"
+}

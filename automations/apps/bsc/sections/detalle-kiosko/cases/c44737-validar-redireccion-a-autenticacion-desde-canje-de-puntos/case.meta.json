@@ -1,0 +1,10 @@
+{
+  "appSlug": "bsc",
+  "sectionSlug": "detalle-kiosko",
+  "sectionName": "Detalle_KIOSKO",
+  "sectionId": 4903,
+  "sourceScenarioId": "C44737",
+  "testRailCaseId": 44737,
+  "generatedAt": "2026-09-03T13:23:13.825Z",
+  "title": "Validar redireccion a autenticacion desde Canje de Puntos"
+}

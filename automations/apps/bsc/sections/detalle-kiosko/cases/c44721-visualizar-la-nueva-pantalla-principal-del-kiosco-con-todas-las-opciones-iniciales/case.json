@@ -1,0 +1,10 @@
+{
+  "id": "c44721-visualizar-la-nueva-pantalla-principal-del-kiosco-con-todas-las-opciones-iniciales",
+  "externalId": "C44721",
+  "caseId": 44721,
+  "title": "Visualizar la nueva pantalla principal del kiosco con todas las opciones iniciales",
+  "source": "discovery",
+  "appSlug": "bsc",
+  "appConfigPath": "automations\\apps\\bsc\\app.config.json",
+  "createdAt": "2026-09-03T11:55:10.401Z"
+}

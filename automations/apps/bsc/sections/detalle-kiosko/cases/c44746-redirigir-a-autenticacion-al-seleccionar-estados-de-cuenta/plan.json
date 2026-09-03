@@ -1,0 +1,45 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C44746",
+    "caseId": 44746,
+    "title": "Redirigir a autenticación al seleccionar Estados de cuenta"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "description": "Clic en \"Estados de cuenta\".",
+      "target": {
+        "strategy": "product_condition",
+        "value": "Estados de cuentaGenera y recibe tus estados por correo",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Estados de cuenta",
+          "resolvedTargetName": "Estados de cuentaGenera y recibe tus estados por correo",
+          "resolvedCandidateId": "el-9",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed",
+          "confidence": 0.85
+        }
+      },
+      "locatorStrategy": "product_condition"
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-09-03T13:41:09.432Z"
+}

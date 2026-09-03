@@ -984,7 +984,8 @@ export async function buildMcpScenarioMessages(
       "All coverable requirements in this manifest must be represented by at least one valid stepRequirementRef across the candidate scenarios. " +
       "Use only IDs from this manifest, use 0-based stepIndex, and never invent requirement IDs. " +
       "A step may have multiple refs and a requirement may appear in multiple scenarios. " +
-      "Non-automatable requirements do not require executable refs.\n";
+      "Non-automatable requirements do not require executable refs. " +
+      "The scenario limit is advisory only: never omit a scenario required to cover a mandatory coverable requirement.\n";
   }
   if (canonicalClaims?.length) {
     const requiredClaims = canonicalClaims.filter((claim) => claim.required && claim.coverable);

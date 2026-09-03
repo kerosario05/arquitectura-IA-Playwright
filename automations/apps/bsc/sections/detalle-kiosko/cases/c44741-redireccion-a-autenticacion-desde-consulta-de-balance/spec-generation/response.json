@@ -1,0 +1,40 @@
+{
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../../src/automations/runtime/promoted-spec-runtime';\nimport { OperationsMenuPage } from '../../../../pages/operationsmenu.page';\nimport { detectAuthGate } from '../../../../../../../../src/discovery/auth-gate-detector';\nimport { scanCurrentPage } from '../../../../../../../../src/explorer/page-scanner';\n\ntest('C44741 - Redireccion a autenticacion desde Consulta de balance', async ({ page }) => {\n  process.env.APP_SLUG = 'bsc';\n  process.env.SECTION_SLUG = 'detalle-kiosko';\n  process.env.SCENARIO_ID = 'C44741';\n  process.env.SCENARIO_TITLE = 'Redireccion a autenticacion desde Consulta de balance';\n\n  const promotedRuntime = createPromotedSpecRuntime(page);\n  const operationsMenuPage = new OperationsMenuPage(page);\n\n  try {\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 1,\n      target: 'Consulta de balance',\n      assertion: async () => {\n        await operationsMenuPage.expectModuleVisible('Consulta de balance');\n      },\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 2,\n      target: 'Consulta de balance',\n      actionIntent: 'open the balance consultation entry',\n      expectedEffect: 'navigate into the balance consultation flow',\n      action: async () => {\n        await operationsMenuPage.openModule('Consulta de balance');\n      },\n    });\n\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 3,\n      target: 'Consulta de balance redirige a la autenticacion del kiosco.',\n      assertion: async () => {\n        await promotedRuntime.waitForPromotedUiStable(3, 'Consulta de balance redirige a la autenticacion del kiosco.');\n        const authGateState = await detectAuthGate(await scanCurrentPage(page));\n        expect(authGateState).toBeTruthy();\n      },\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "Consulta de balance",
+      "implementation": "await operationsMenuPage.expectModuleVisible('Consulta de balance');"
+    },
+    {
+      "requirement": "pantalla de autenticaci&oacute;n del kiosco para iniciar sesi&oacute;n",
+      "implementation": "expect(authGateState).toBeTruthy();"
+    }
+  ],
+  "usedPageObjects": [
+    {
+      "className": "OperationsMenuPage",
+      "methods": [
+        "expectModuleVisible",
+        "openModule"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "promotedRuntime",
+    "operationsMenuPage",
+    "authGateState"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "mode": "ai_hybrid",
+  "provider": "codex",
+  "model": "gpt-5.4-mini",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "invocations": 1,
+  "invocationsConsumed": 1,
+  "durationMs": 94937,
+  "usage": {
+    "inputTokens": 189681,
+    "cachedInputTokens": 153088,
+    "cacheWriteInputTokens": 0,
+    "nonCachedInputTokens": 36593,
+    "outputTokens": 3044,
+    "reasoningOutputTokens": 930,
+    "totalPhysicalTokens": 192725,
+    "durationMs": 85382,
+    "credits": null
+  },
+  "validation": {
+    "schema": "passed",
+    "structure": "failed",
+    "traceFidelity": "passed",
+    "typescript": "passed",
+    "playwrightDiscovery": "passed",
+    "semanticCoverage": "passed",
+    "functionalExecution": "skipped"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [
+    "structuralValidation"
+  ],
+  "regressedGates": [],
+  "missingRequirements": [],
+  "oracleTypes": [
+    "auth_gate"
+  ],
+  "errors": [
+    "missing_expect_import_for_assertions"
+  ],
+  "warnings": [],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

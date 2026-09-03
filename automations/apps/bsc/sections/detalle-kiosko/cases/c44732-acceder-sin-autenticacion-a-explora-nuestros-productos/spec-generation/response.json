@@ -1,0 +1,34 @@
+{
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../../src/automations/runtime/promoted-spec-runtime';\n\ntest.describe('C44732 - Acceder sin autenticacion a Explora nuestros productos', () => {\n  test('Acceder sin autenticacion a Explora nuestros productos', async ({ page }) => {\n    process.env.APP_SLUG = 'bsc';\n    process.env.SECTION_SLUG = 'detalle-kiosko';\n    process.env.SCENARIO_ID = 'C44732';\n    process.env.SCENARIO_TITLE = 'Acceder sin autenticacion a Explora nuestros productos';\n\n    const promotedRuntime = createPromotedSpecRuntime(page);\n\n    try {\n      await promotedRuntime.expectPromotedVisible({\n        stepIndex: 1,\n        target: 'Explora nuestros productos',\n        assertion: async () => {\n          await expect(page.getByText('Explora nuestros productos')).toBeVisible();\n        }\n      });\n\n      await promotedRuntime.clickPromotedTarget({\n        stepIndex: 2,\n        target: 'Explora nuestros productos',\n        actionIntent: 'open the unauthenticated products information',\n        expectedEffect: 'the products information is shown without authentication',\n        action: async () => {\n          await page.getByText('Explora nuestros productos').click();\n        }\n      });\n\n      await promotedRuntime.expectPromotedVisible({\n        stepIndex: 3,\n        target: 'La opcion Explora nuestros productos abre la informacion de productos sin autenticacion.',\n        assertion: async () => {\n          await expect(page.getByText('La opcion Explora nuestros productos abre la informacion de productos sin autenticacion.')).toBeVisible();\n        }\n      });\n    } finally {\n      await promotedRuntime.finishEvidence();\n    }\n  });\n});",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "Explora nuestros productos",
+      "implementation": "await expect(page.getByText('Explora nuestros productos')).toBeVisible();"
+    },
+    {
+      "requirement": "Explora nuestros productos",
+      "implementation": "await page.getByText('Explora nuestros productos').click();"
+    },
+    {
+      "requirement": "Explora nuestros productos",
+      "implementation": "await expect(page.getByText('La opcion Explora nuestros productos abre la informacion de productos sin autenticacion.')).toBeVisible();"
+    }
+  ],
+  "usedPageObjects": [],
+  "declaredIdentifiers": [
+    "promotedRuntime"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

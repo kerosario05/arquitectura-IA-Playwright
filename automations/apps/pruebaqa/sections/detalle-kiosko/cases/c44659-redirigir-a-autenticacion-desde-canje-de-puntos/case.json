@@ -1,0 +1,10 @@
+{
+  "id": "c44659-redirigir-a-autenticacion-desde-canje-de-puntos",
+  "externalId": "C44659",
+  "caseId": 44659,
+  "title": "Redirigir a autenticacion desde Canje de Puntos",
+  "source": "discovery",
+  "appSlug": "pruebaqa",
+  "appConfigPath": "automations\\apps\\pruebaqa\\app.config.json",
+  "createdAt": "2026-09-02T18:15:12.010Z"
+}

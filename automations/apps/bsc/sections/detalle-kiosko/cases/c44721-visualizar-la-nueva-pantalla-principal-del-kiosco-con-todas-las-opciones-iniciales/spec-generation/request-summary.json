@@ -1,0 +1,220 @@
+{
+  "appSlug": "bsc",
+  "sectionSlug": "detalle-kiosko",
+  "scenarioId": "C44721",
+  "scenarioTitle": "Visualizar la nueva pantalla principal del kiosco con todas las opciones iniciales",
+  "stepCount": 5,
+  "sourceExpectedResultPresent": true,
+  "requiredAssertionCount": 10,
+  "observableOracles": [
+    {
+      "id": "observed-01",
+      "requirement": "Estados de cuenta",
+      "type": "literal_visible_text",
+      "backed": true,
+      "source": "discovery",
+      "evidence": [
+        "assertion_resolved_during_discovery"
+      ]
+    },
+    {
+      "id": "observed-02",
+      "requirement": "Consulta de balance",
+      "type": "literal_visible_text",
+      "backed": true,
+      "source": "discovery",
+      "evidence": [
+        "assertion_resolved_during_discovery"
+      ]
+    },
+    {
+      "id": "observed-03",
+      "requirement": "Cartas y certificaciones",
+      "type": "literal_visible_text",
+      "backed": true,
+      "source": "discovery",
+      "evidence": [
+        "assertion_resolved_during_discovery"
+      ]
+    },
+    {
+      "id": "observed-04",
+      "requirement": "Canje de Puntos",
+      "type": "literal_visible_text",
+      "backed": true,
+      "source": "discovery",
+      "evidence": [
+        "assertion_resolved_during_discovery"
+      ]
+    },
+    {
+      "id": "observed-05",
+      "requirement": "Explora nuestros productos",
+      "type": "literal_visible_text",
+      "backed": true,
+      "source": "discovery",
+      "evidence": [
+        "assertion_resolved_during_discovery"
+      ]
+    },
+    {
+      "id": "expected-01",
+      "requirement": "<p>La pantalla principal del kiosco muestra las opciones iniciales esperadas.</p>",
+      "type": "literal_visible_text",
+      "backed": false,
+      "source": "inferred",
+      "evidence": [
+        "narrative_covered_by_explicit_scenario_assertions"
+      ]
+    },
+    {
+      "id": "expected-02",
+      "requirement": "La pantalla principal del kiosco muestra las opciones iniciales esperadas.",
+      "type": "literal_visible_text",
+      "backed": false,
+      "source": "inferred",
+      "evidence": [
+        "narrative_covered_by_explicit_scenario_assertions"
+      ]
+    }
+  ],
+  "oracleTypes": [
+    "literal_visible_text"
+  ],
+  "availablePageObjectCount": 2,
+  "mode": "ai_hybrid",
+  "functionalExecutionEnabled": false,
+  "provider": "codex",
+  "model": "gpt-5.4-mini",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "C44721",
+    "title": "Visualizar la nueva pantalla principal del kiosco con todas las opciones iniciales",
+    "appSlug": "bsc",
+    "sectionSlug": "detalle-kiosko",
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Validar que se muestre \"Estados de cuenta\".",
+        "operation": "assertVisible",
+        "target": {
+          "strategy": "text",
+          "value": "Estados de cuenta"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "literal_visible_text",
+          "backed": true,
+          "implementationKind": "heading_or_control",
+          "requirement": "Estados de cuenta"
+        },
+        "evidenceRefs": [
+          "oracle:observed-01"
+        ]
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Validar que se muestre \"Consulta de balance\".",
+        "operation": "assertVisible",
+        "target": {
+          "strategy": "text",
+          "value": "Consulta de balance"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "literal_visible_text",
+          "backed": true,
+          "implementationKind": "heading_or_control",
+          "requirement": "Consulta de balance"
+        },
+        "evidenceRefs": [
+          "oracle:observed-02"
+        ]
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Validar que se muestre \"Cartas y certificaciones\".",
+        "operation": "assertVisible",
+        "target": {
+          "strategy": "text",
+          "value": "Cartas y certificaciones"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "literal_visible_text",
+          "backed": true,
+          "implementationKind": "heading_or_control",
+          "requirement": "Cartas y certificaciones"
+        },
+        "evidenceRefs": [
+          "oracle:observed-03"
+        ]
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Validar que se muestre \"Canje de Puntos\".",
+        "operation": "assertVisible",
+        "target": {
+          "strategy": "text",
+          "value": "Canje de Puntos"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "literal_visible_text",
+          "backed": true,
+          "implementationKind": "heading_or_control",
+          "requirement": "Canje de Puntos"
+        },
+        "evidenceRefs": [
+          "oracle:observed-04"
+        ]
+      },
+      {
+        "contractStepIndex": 4,
+        "scenarioStepIndex": 5,
+        "originalText": "Validar que se muestre \"Explora nuestros productos\".",
+        "operation": "assertVisible",
+        "target": {
+          "strategy": "text",
+          "value": "La pantalla principal del kiosco muestra las opciones iniciales esperadas."
+        },
+        "required": false,
+        "executionStatus": "contextual_unresolved",
+        "evidenceRefs": []
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 4,
+      "representedScenarioSteps": 4,
+      "missingScenarioSteps": []
+    }
+  },
+  "executionContractChars": 2307,
+  "promptChars": 25413,
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": true,
+  "promotionAllowed": true,
+  "failedGatesAttempt1": [],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

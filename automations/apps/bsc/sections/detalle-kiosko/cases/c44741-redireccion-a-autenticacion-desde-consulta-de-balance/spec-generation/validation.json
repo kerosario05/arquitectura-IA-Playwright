@@ -1,0 +1,61 @@
+{
+  "mode": "ai_hybrid",
+  "provider": "codex",
+  "model": "gpt-5.4-mini",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "invocations": 1,
+  "invocationsConsumed": 1,
+  "durationMs": 63776,
+  "usage": {
+    "inputTokens": 63054,
+    "cachedInputTokens": 22784,
+    "cacheWriteInputTokens": 0,
+    "nonCachedInputTokens": 40270,
+    "outputTokens": 2103,
+    "reasoningOutputTokens": 1170,
+    "totalPhysicalTokens": 65157,
+    "durationMs": 53842,
+    "credits": null
+  },
+  "validation": {
+    "schema": "passed",
+    "structure": "passed",
+    "traceFidelity": "passed",
+    "typescript": "passed",
+    "playwrightDiscovery": "failed",
+    "semanticCoverage": "passed",
+    "functionalExecution": "skipped"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [
+    "playwrightDiscovery"
+  ],
+  "regressedGates": [],
+  "missingRequirements": [],
+  "oracleTypes": [
+    "literal_visible_text",
+    "auth_gate"
+  ],
+  "errors": [
+    "playwright_discovery_failed:exitCode=1:discovered=0",
+    "playwright_discovery_error:Error: Cannot find module '../../../../pages/operationsmenu.page'"
+  ],
+  "warnings": [],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

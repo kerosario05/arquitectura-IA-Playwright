@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "appSlug": "pruebaqa",
+  "createdAt": "2026-09-02 17:40:54.788",
+  "updatedAt": "2026-09-02T18:16:30.797Z",
+  "items": [
+    {
+      "id": "90636e208670",
+      "knowledgeKind": "route_transition",
+      "source": "mcp_runtime_observation",
+      "actionDescription": "Clic en \"Estados de cuenta\".",
+      "actionLocatorIdentity": "el-9",
+      "sourceTechnicalScreenKey": "4b8ecc79fa2c33ff",
+      "destinationTechnicalScreenKey": "11d106cccb26b9cd",
+      "transitionValidated": true,
+      "validationStatus": "validated_technical",
+      "trustedForReuse": false,
+      "runCount": 2,
+      "createdAt": "2026-09-02T18:03:44.436Z",
+      "lastSeenAt": "2026-09-02T18:04:05.028Z",
+      "lastValidatedAt": "2026-09-02T18:04:05.028Z"
+    },
+    {
+      "id": "0a8e0150ec20",
+      "knowledgeKind": "route_transition",
+      "source": "mcp_runtime_observation",
+      "actionDescription": "Clic en \"Explora nuestros productos\".",
+      "actionLocatorIdentity": "el-21",
+      "sourceTechnicalScreenKey": "38d02fb0ed5494e8",
+      "destinationTechnicalScreenKey": "fbb49d696e7128b2",
+      "transitionValidated": true,
+      "validationStatus": "validated_technical",
+      "trustedForReuse": false,
+      "runCount": 2,
+      "createdAt": "2026-09-02T18:13:53.590Z",
+      "lastSeenAt": "2026-09-02T18:16:29.944Z",
+      "lastValidatedAt": "2026-09-02T18:16:29.944Z"
+    },
+    {
+      "id": "route_edge_pruebaqa_xf4na1",
+      "source": "scenario_derived",
+      "coverageRefs": [
+        "learned_navigation_path",
+        "relation:child_route"
+      ],
+      "steps": [
+        "Clic en \"Explora nuestros productos\"."
+      ],
+      "clickTargets": [
+        "Explora nuestros productos"
+      ],
+      "assertionTargets": [],
+      "negativeAssertions": [],
+      "optionLabels": [],
+      "authTerms": [],
+      "manual": false,
+      "confidence": "scenario_derived",
+      "createdAt": "2026-09-02T18:16:30.797Z",
+      "updatedAt": "2026-09-02T18:16:30.797Z",
+      "lastSeenAt": "2026-09-02T18:16:30.797Z",
+      "runCount": 1,
+      "validationStatus": "pending",
+      "trustedForReuse": false,
+      "successCount": 1,
+      "confidenceScore": 0.9999999999999999,
+      "knowledgeKind": "route_functional_observed",
+      "destinationUrl": "https://172.27.4.50/product-catalog",
+      "routeFrom": "entry",
+      "actionTarget": "Explora nuestros productos",
+      "transitionValidated": true,
+      "sourceTechnicalScreenKey": "38d02fb0ed5494e8",
+      "destinationTechnicalScreenKey": "fbb49d696e7128b2"
+    }
+  ]
+}
