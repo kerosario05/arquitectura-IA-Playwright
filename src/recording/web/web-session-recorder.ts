@@ -41,6 +41,8 @@ export type WebRecorderOptions = {
   framesDir: string;
   /** Project-scoped TLS policy; false remains the safe default. */
   ignoreHTTPSErrors?: boolean;
+  /** QA-only project policy; false keeps secure values out of the trace. */
+  persistQaCredentials?: boolean;
   browserName?: "chromium" | "firefox" | "webkit";
   /** Labels or names whose typed content must never be stored verbatim. */
   sensitiveLabels?: string[];
@@ -73,6 +75,7 @@ type RawInteraction = {
   text?: string;
   placeholder?: string;
   href?: string;
+  valueSource?: "user" | "application";
   /** Measured in the page at click time — absent for an interaction captured before this. */
   ranks?: LocatorRanks;
 };
@@ -222,7 +225,7 @@ const CAPTURE_SCRIPT = `
     return ranks;
   };
 
-  const describe = (el, kind, value) => ({
+  const describe = (el, kind, value, valueSource) => ({
     kind,
     label: accessibleName(el),
     ranks: ranksFor(el),
@@ -230,7 +233,8 @@ const CAPTURE_SCRIPT = `
     tagName: el.tagName ? el.tagName.toLowerCase() : undefined,
     inputType: el.type || undefined,
     disabled: el.disabled === true,
-    value: el.type === 'password' ? undefined : value,
+    value: (el.type === 'password' && !window.__qaRecorderPersistQaCredentials) ? undefined : value,
+    valueSource,
     testId: el.getAttribute ? (el.getAttribute('data-testid') || el.getAttribute('data-test-id') || undefined) : undefined,
     domId: el.id || undefined,
     name: el.name || undefined,
@@ -248,7 +252,7 @@ const CAPTURE_SCRIPT = `
     const el = e.target && e.target.closest
       ? (e.target.closest('button, a, [role="button"], input, select, label, [onclick]') || e.target)
       : e.target;
-    if (el) send(describe(el, 'click'));
+    if (el) send(describe(el, 'click', undefined, 'user'));
   }, true);
 
   document.addEventListener('change', (e) => {
@@ -256,12 +260,12 @@ const CAPTURE_SCRIPT = `
     if (!el) return;
     const tag = (el.tagName || '').toLowerCase();
     if (tag === 'input' || tag === 'textarea' || tag === 'select') {
-      send(describe(el, 'input', el.value));
+      send(describe(el, 'input', el.value, e.isTrusted ? 'user' : 'application'));
     }
   }, true);
 
   document.addEventListener('submit', (e) => {
-    if (e.target) send(describe(e.target, 'submit'));
+    if (e.target) send(describe(e.target, 'submit', undefined, e.isTrusted ? 'user' : 'application'));
   }, true);
 })();
 `;
@@ -354,7 +358,7 @@ export class WebSessionRecorder {
 
   private async onInteraction(raw: RawInteraction): Promise<void> {
     if (this.stopped) return;
-    const sensitive = isSensitiveField(raw, this.options.sensitiveLabels);
+  const sensitive = isSensitiveField(raw, this.options.sensitiveLabels);
     const locators = buildWebLocators(raw);
     const framePath = await this.captureFrame(raw.kind);
 
@@ -366,8 +370,9 @@ export class WebSessionRecorder {
         fingerprint: this.lastFingerprint,
         url: this.page?.url(),
         target: { label: raw.label || raw.name || "campo", role: "input", locators, sensitive },
-        value: sensitive ? undefined : raw.value,
+        value: sensitive && !this.options.persistQaCredentials ? undefined : raw.value,
         redactedKey: sensitive ? normalizeLabel(raw.label || raw.name || "campo").replace(/\s+/g, "_") : undefined,
+        valueSource: raw.valueSource ?? "user",
         framePath,
       });
       return;
@@ -422,7 +427,9 @@ export class WebSessionRecorder {
         this.log(`[recording] error procesando interacción: ${err instanceof Error ? err.message : String(err)}`),
       );
     });
-    await this.context.addInitScript(CAPTURE_SCRIPT);
+    await this.context.addInitScript({
+      content: `window.__qaRecorderPersistQaCredentials = ${this.options.persistQaCredentials === true ? "true" : "false"};\n${CAPTURE_SCRIPT}`,
+    });
 
     this.page = await this.context.newPage();
     this.page.on("framenavigated", (frame) => {

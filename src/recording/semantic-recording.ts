@@ -1,6 +1,8 @@
 import type {
   RecordedEvent,
   RecordedScreen,
+  RecordingDataPolicy,
+  RecordingGoal,
   RecordedTarget,
   SessionTrace,
 } from "./session-trace.types";
@@ -29,11 +31,12 @@ export type RecordedRuntimeValue = {
   semanticField: string;
   valueRole: RecordedValueRole;
   value?: string;
-  source: "RECORDED_CONFIRMED" | "secure";
+  source: "RECORDED_CONFIRMED" | "secure" | "OBSERVED";
   verified: boolean;
   sensitive: boolean;
   generated: false;
   dependsOn?: string[];
+  dependencyConfidence?: number;
   recordingId: string;
 };
 
@@ -102,6 +105,8 @@ export type ScenarioSuggestion = {
   title: string;
   provenance: "OBSERVED_HAPPY_PATH" | "DERIVED_ALTERNATIVE" | "DERIVED_VALIDATION" | "AI_PROPOSED";
   confidence: number;
+  goalRelevanceScore: number;
+  goalRelevanceReasons: string[];
   needsReview: boolean;
   rationale: string;
   sourceEventRefs: string[];
@@ -118,6 +123,17 @@ export type SemanticRecordingModel = {
   projectSlug: string;
   appSlug: string;
   platform: SessionTrace["platform"];
+  recordingGoal?: RecordingGoal;
+  recordingDataPolicy: RecordingDataPolicy;
+  primaryScenario?: {
+    scenarioId: string;
+    title: string;
+    provenance: "OBSERVED";
+    sourceEventRefs: string[];
+    traceBacked: true;
+    containsUnexecutedActions: false;
+    needsReview: boolean;
+  };
   semanticScreens: SemanticScreen[];
   semanticComponents: SemanticComponent[];
   semanticEvents: SemanticEvent[];
@@ -126,6 +142,38 @@ export type SemanticRecordingModel = {
   scenarioSuggestions: ScenarioSuggestion[];
   source: "SessionTrace";
 };
+
+export const DEFAULT_RECORDING_DATA_POLICY: RecordingDataPolicy = {
+  persistRecordedValues: true,
+  persistQaCredentials: false,
+  includeQaCredentialsInTestRail: false,
+};
+
+export function normalizeRecordingDataPolicy(
+  policy?: Partial<RecordingDataPolicy>,
+): RecordingDataPolicy {
+  const persistQaCredentials = policy?.persistQaCredentials === true;
+  return {
+    persistRecordedValues: policy?.persistRecordedValues !== false,
+    persistQaCredentials,
+    includeQaCredentialsInTestRail: persistQaCredentials && policy?.includeQaCredentialsInTestRail === true,
+  };
+}
+
+export function normalizeRecordingGoal(declaredGoal?: string): RecordingGoal | undefined {
+  const declared = declaredGoal?.trim().replace(/\s+/g, " ");
+  if (!declared) return undefined;
+  const normalizedGoal = declared
+    .replace(/^(?:quiero|vamos a|necesito)\s+/i, "")
+    .replace(/[.!?]+$/, "")
+    .trim();
+  return {
+    declaredGoal: declared,
+    normalizedGoal: normalizedGoal || declared,
+    provenance: "USER_DECLARED",
+    needsReview: normalizedGoal.length < declared.length * 0.5,
+  };
+}
 
 /** Conservative, platform-neutral classification for credentials captured by older traces. */
 export function isSensitiveRecordedEvent(event: RecordedEvent): boolean {
@@ -188,6 +236,7 @@ export function buildSemanticRecordingModel(
   inputEvents: readonly RecordedEvent[] = normalizeEvents(trace.events),
 ): SemanticRecordingModel {
   const events = [...inputEvents];
+  const recordingDataPolicy = normalizeRecordingDataPolicy(trace.recordingDataPolicy);
   const screens = trace.screens.map((screen) => ({
     screenIdentity: screen.screenKey,
     title: cleanTitle(screen),
@@ -238,15 +287,20 @@ export function buildSemanticRecordingModel(
     const valueKey = field;
     if (event.kind === "fill" && valueKey) {
       const sensitive = isSensitiveRecordedEvent(event);
+      const applicationDerived = event.valueSource === "application";
+      const dependency = event.dependsOnEventRef
+        ? semanticEvents.find((candidate) => candidate.eventRef === event.dependsOnEventRef)?.valueKey
+        : undefined;
       datasets.set(valueKey, {
         valueKey: slugify(event.redactedKey ?? valueKey),
         semanticField: valueKey,
-        valueRole: sensitive ? "secure_input" : "action_input",
-        value: sensitive ? undefined : event.value,
-        source: sensitive ? "secure" : "RECORDED_CONFIRMED",
+        valueRole: applicationDerived ? "runtime_derived_oracle" : sensitive ? "secure_input" : "action_input",
+        value: sensitive && !recordingDataPolicy.persistQaCredentials ? undefined : event.value,
+        source: applicationDerived ? "OBSERVED" : sensitive ? "secure" : "RECORDED_CONFIRMED",
         verified: true,
         sensitive,
         generated: false,
+        ...(dependency ? { dependsOn: [dependency], dependencyConfidence: 0.9 } : {}),
         recordingId: trace.recordingId,
       });
     }
@@ -258,7 +312,11 @@ export function buildSemanticRecordingModel(
       field,
       controlAffordance: target ? affordance(target) : undefined,
       valueKey: event.kind === "fill" && valueKey ? slugify(event.redactedKey ?? valueKey) : valueKey,
-      valueRole: event.kind === "fill" ? (isSensitiveRecordedEvent(event) ? "secure_input" : "action_input") : undefined,
+      valueRole: event.kind === "fill"
+        ? event.valueSource === "application"
+          ? "runtime_derived_oracle"
+          : isSensitiveRecordedEvent(event) ? "secure_input" : "action_input"
+        : undefined,
       technicalTargetRef: target ? technicalTargetRef : undefined,
       provenance: "OBSERVED",
       confidence: target?.locators?.length ? 0.9 : 0.4,
@@ -347,6 +405,8 @@ export function buildSemanticRecordingModel(
     projectSlug: trace.projectSlug,
     appSlug: trace.appSlug,
     platform: trace.platform,
+    recordingGoal: trace.recordingGoal,
+    recordingDataPolicy,
     semanticScreens: screens,
     semanticComponents: [...components.values()],
     semanticEvents,

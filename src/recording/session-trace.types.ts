@@ -22,6 +22,19 @@ export type RecordingStatus =
   | "derived"
   | "failed";
 
+export type RecordingDataPolicy = {
+  persistRecordedValues: boolean;
+  persistQaCredentials: boolean;
+  includeQaCredentialsInTestRail: boolean;
+};
+
+export type RecordingGoal = {
+  declaredGoal?: string;
+  normalizedGoal?: string;
+  provenance: "USER_DECLARED" | "LEGACY_LABEL";
+  needsReview: boolean;
+};
+
 /** A locator candidate for the element an event touched, strongest first. */
 export type RecordedLocator = {
   strategy: string;
@@ -50,6 +63,14 @@ export type RecordedTarget = {
   enabled?: boolean;
   /** True when the control holds data that must never leave the environment verbatim. */
   sensitive?: boolean;
+  /** Optional semantic context captured by richer recorders; absent in legacy traces. */
+  entityScope?: string;
+  rowIdentity?: string;
+  columnIdentity?: string;
+  associatedField?: string;
+  beforeValue?: string;
+  afterValue?: string;
+  observedOptions?: string[];
 };
 
 export type RecordedEventKind =
@@ -81,6 +102,8 @@ export type RecordedEvent = {
   /** Ephemeral frame captured for this event. Cleared once derivation consumes it. */
   framePath?: string;
   note?: string;
+  valueSource?: "user" | "application";
+  dependsOnEventRef?: string;
 };
 
 export type RecordedControl = {
@@ -101,6 +124,7 @@ export type RecordedScreen = {
   controls: RecordedControl[];
   /** Visible non-interactive text — the raw material for assertions. */
   texts: string[];
+  headerRelationships?: Array<{ header: string; field: string }>;
 };
 
 /** A contiguous run of events on one screen, after normalization. */
@@ -122,6 +146,8 @@ export type SessionTrace = {
   appPackage?: string;
   baseUrl?: string;
   label?: string;
+  recordingGoal?: RecordingGoal;
+  recordingDataPolicy?: RecordingDataPolicy;
   startedAt: string;
   endedAt?: string;
   durationMs?: number;
@@ -150,5 +176,6 @@ export type RecordingSummary = {
   actionCount: number;
   hasNarrative: boolean;
   scenarioCount: number;
+  recordingGoal?: string;
   errorMessage?: string;
 };

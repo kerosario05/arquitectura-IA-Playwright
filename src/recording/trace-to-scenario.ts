@@ -55,8 +55,8 @@ export type RecordedDataField = {
   stepIndex: number;
   exampleValue?: string;
   sensitive: boolean;
-  valueRole?: "action_input" | "secure_input";
-  source?: "RECORDED_CONFIRMED" | "secure";
+  valueRole?: "action_input" | "secure_input" | "runtime_derived_oracle";
+  source?: "RECORDED_CONFIRMED" | "secure" | "OBSERVED";
 };
 
 export type RecordedScenario = {
@@ -90,6 +90,20 @@ export type RecordedScenario = {
   sourceRecordingId: string;
   /** True when at least one step rests on a fallback hit-test rather than a real locator. */
   hasUncertainSteps: boolean;
+  /** Exactly one scenario per recording may be marked primary. */
+  primary?: boolean;
+  sourceEventRefs?: string[];
+  traceBacked?: boolean;
+  containsUnexecutedActions?: boolean;
+  functionalReadiness?: boolean;
+  technicalReadiness?: boolean;
+  expectedResultCandidate?: string;
+  oracleAuthority?: "observed_only" | "review_required";
+  goalRelevanceScore?: number;
+  goalRelevanceReasons?: string[];
+  suggestionCategory?: "DERIVED_ALTERNATIVE" | "DERIVED_VALIDATION" | "AI_PROPOSED";
+  confidence?: number;
+  rationale?: string;
 };
 
 const MOBILE_STRATEGIES = new Set<MobileLocatorStrategy>([
@@ -162,6 +176,88 @@ export type BuildScenarioOptions = {
   title?: string;
   scenarioIdPrefix?: string;
 };
+
+function normalizeGoalToken(value: string): string[] {
+  const stop = new Set(["el", "la", "los", "las", "un", "una", "de", "del", "en", "para", "por", "y", "a", "con"]);
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((token) => token.length > 2 && !stop.has(token));
+}
+
+export type GoalRelevance = { score: number; reasons: string[] };
+
+/** Scores suggestions from structural evidence, never from an application-specific vocabulary. */
+export function scoreGoalRelevance(
+  goal: string | undefined,
+  candidate: Pick<RecordedScenario, "title" | "description" | "requiredData" | "testRailSteps">,
+): GoalRelevance {
+  const goalTokens = new Set(normalizeGoalToken(goal ?? ""));
+  if (goalTokens.size === 0) return { score: 0.5, reasons: ["goal_not_declared"] };
+  const candidateText = [
+    candidate.title,
+    candidate.description,
+    ...candidate.requiredData.map((field) => field.label),
+    ...candidate.testRailSteps.map((step) => step.content),
+  ].join(" ");
+  const candidateTokens = new Set(normalizeGoalToken(candidateText));
+  const overlap = [...goalTokens].filter((token) => candidateTokens.has(token));
+  const reasons = overlap.length > 0 ? [`shared_semantic_tokens:${overlap.length}`] : [];
+  const score = overlap.length === 0 ? 0.1 : Math.min(0.95, 0.35 + overlap.length / Math.max(goalTokens.size, 1) * 0.6);
+  if (candidate.requiredData.length > 0) reasons.push("candidate_has_observed_data");
+  return { score, reasons };
+}
+
+export function deduplicateGoalSuggestions(
+  suggestions: readonly RecordedScenario[],
+): { suggestions: RecordedScenario[]; duplicatesRemoved: number } {
+  const seen = new Set<string>();
+  const result: RecordedScenario[] = [];
+  for (const suggestion of suggestions) {
+    const identity = [
+      suggestion.suggestionCategory ?? "DERIVED_ALTERNATIVE",
+      suggestion.requiredData.map((field) => field.key).sort().join(","),
+      suggestion.testRailSteps.map((step) => normalizeGoalToken(step.content).join(" ")).join("|"),
+    ].join("::");
+    if (seen.has(identity)) continue;
+    seen.add(identity);
+    result.push(suggestion);
+  }
+  return { suggestions: result, duplicatesRemoved: suggestions.length - result.length };
+}
+
+export function filterGoalScopedSuggestions(
+  goal: string | undefined,
+  suggestions: readonly RecordedScenario[],
+  threshold = 0.35,
+): { suggestions: RecordedScenario[]; irrelevantCandidatesRejected: number; duplicatesRemoved: number } {
+  const scored = suggestions.map((suggestion) => {
+    const relevance = scoreGoalRelevance(goal, suggestion);
+    return {
+      ...suggestion,
+      goalRelevanceScore: relevance.score,
+      goalRelevanceReasons: relevance.reasons,
+      confidence: suggestion.confidence ?? (suggestion.hasUncertainSteps ? 0.6 : 0.85),
+      rationale: suggestion.rationale ?? "Derivado de evidencia observada y separado del recorrido principal.",
+      suggestionCategory: suggestion.suggestionCategory
+        ?? (suggestion.kind === "negative" ? "DERIVED_VALIDATION" : "DERIVED_ALTERNATIVE"),
+      traceBacked: true,
+      containsUnexecutedActions: true,
+      functionalReadiness: suggestion.testRailSteps.length > 0,
+      technicalReadiness: !suggestion.hasUncertainSteps,
+      oracleAuthority: "review_required" as const,
+    };
+  });
+  const relevant = scored.filter((suggestion) => (suggestion.goalRelevanceScore ?? 0) >= threshold);
+  const deduped = deduplicateGoalSuggestions(relevant);
+  return {
+    suggestions: deduped.suggestions,
+    irrelevantCandidatesRejected: scored.length - relevant.length,
+    duplicatesRemoved: deduped.duplicatesRemoved,
+  };
+}
 
 /**
  * Converts the normalized walkthrough into one happy-path scenario.
@@ -275,6 +371,7 @@ export function buildHappyPathScenario(
       const label = target.label?.trim() || "campo";
       const stepIndex = isMobile ? mobileSteps.length : webSteps.length;
       const sensitive = isSensitiveRecordedEvent(event);
+      const applicationDerived = event.valueSource === "application";
       const valueKey = valueKeyFor(event, label);
       requiredData.push({
         key: valueKey,
@@ -282,8 +379,8 @@ export function buildHappyPathScenario(
         stepIndex,
         exampleValue: sensitive ? undefined : event.value,
         sensitive,
-        valueRole: sensitive ? "secure_input" : "action_input",
-        source: sensitive ? "secure" : "RECORDED_CONFIRMED",
+        valueRole: applicationDerived ? "runtime_derived_oracle" : sensitive ? "secure_input" : "action_input",
+        source: applicationDerived ? "OBSERVED" : sensitive ? "secure" : "RECORDED_CONFIRMED",
       });
       if (isMobile) {
         const t = toMobileTarget(event);
@@ -318,6 +415,8 @@ export function buildHappyPathScenario(
 
   const lastScreen = trace.screens[trace.screens.length - 1];
   const title =
+    trace.recordingGoal?.declaredGoal?.trim() ||
+    trace.recordingGoal?.normalizedGoal?.trim() ||
     options.title?.trim() ||
     trace.label?.trim() ||
     (lastScreen ? `Recorrido ${trace.platform === "web" ? "web" : "móvil"} observado` : "Recorrido observado");
@@ -337,6 +436,15 @@ export function buildHappyPathScenario(
     stepTargets,
     sourceRecordingId: trace.recordingId,
     hasUncertainSteps,
+    primary: true,
+    sourceEventRefs: events.map((_, index) => `event-${index + 1}`),
+    traceBacked: true,
+    containsUnexecutedActions: false,
+    functionalReadiness: testRailSteps.length > 0,
+    technicalReadiness: !hasUncertainSteps,
+    expectedResultCandidate: testRailSteps.at(-1)?.expected,
+    oracleAuthority: "observed_only",
+    confidence: 0.95,
   };
 }
 
@@ -418,6 +526,7 @@ export function buildGateNegatives(
         stepTargets: [],
         sourceRecordingId: trace.recordingId,
         hasUncertainSteps: false,
+        suggestionCategory: "DERIVED_VALIDATION",
       });
     }
   }
@@ -614,7 +723,8 @@ export function buildAlternativePathScenarios(
             ]
           : preamble.stepTargets,
         sourceRecordingId: trace.recordingId,
-        hasUncertainSteps: true,
+      hasUncertainSteps: true,
+      suggestionCategory: "DERIVED_ALTERNATIVE",
       });
     }
   }

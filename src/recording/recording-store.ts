@@ -153,6 +153,7 @@ export function toSummary(trace: SessionTrace, scenarioCount = 0): RecordingSumm
     actionCount: stats.actions,
     hasNarrative: Boolean(trace.narrative?.trim()),
     scenarioCount,
+    recordingGoal: trace.recordingGoal?.declaredGoal ?? trace.recordingGoal?.normalizedGoal ?? trace.label,
     errorMessage: trace.errorMessage,
   };
 }

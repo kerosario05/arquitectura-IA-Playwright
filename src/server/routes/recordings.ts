@@ -98,6 +98,14 @@ recordingsRouter.post("/start", async (req, res) => {
     const result = await startRecording({
       projectSlug,
       label: typeof body.label === "string" ? body.label.trim() || undefined : undefined,
+      recordingGoal: typeof body.recordingGoal === "string" ? body.recordingGoal.trim() || undefined : undefined,
+      recordingDataPolicy: body.recordingDataPolicy && typeof body.recordingDataPolicy === "object"
+        ? {
+            persistRecordedValues: (body.recordingDataPolicy as any).persistRecordedValues === true,
+            persistQaCredentials: (body.recordingDataPolicy as any).persistQaCredentials === true,
+            includeQaCredentialsInTestRail: (body.recordingDataPolicy as any).includeQaCredentialsInTestRail === true,
+          }
+        : undefined,
       avdName: typeof body.avdName === "string" ? body.avdName : undefined,
       headless: typeof body.headless === "boolean" ? body.headless : undefined,
       sensitiveLabels: Array.isArray(body.sensitiveLabels)

@@ -174,8 +174,8 @@ describe("buildHappyPathScenario", () => {
   test("exposes each typed field as editable required data", () => {
     assert.strictEqual(scenario.requiredData.length, 1);
     assert.strictEqual(scenario.requiredData[0].key, "usuario");
-    assert.strictEqual(scenario.requiredData[0].exampleValue, "juan");
-    assert.strictEqual(scenario.requiredData[0].sensitive, false);
+    assert.strictEqual(scenario.requiredData[0].exampleValue, undefined);
+    assert.strictEqual(scenario.requiredData[0].sensitive, true);
   });
 
   test("never puts a redacted value in the TestRail step text", () => {
@@ -185,7 +185,7 @@ describe("buildHappyPathScenario", () => {
     const s = buildHappyPathScenario(TRACE, redacted);
     const stepText = s.testRailSteps.map((x) => x.content).join(" ");
     assert.ok(!stepText.includes("undefined"));
-    assert.match(stepText, /Ingresar clave en "Clave"/);
+    assert.match(stepText, /Ingresar el valor seguro asociado a "Clave"/);
     assert.strictEqual(s.requiredData[0].sensitive, true);
     assert.strictEqual(s.requiredData[0].exampleValue, undefined);
   });
@@ -313,7 +313,7 @@ describe("buildAlternativePathScenarios", () => {
   test("proposes the controls the walkthrough saw but never pressed", () => {
     assert.deepStrictEqual(
       scenarios.map((s) => s.title),
-      ["Desde Iniciar sesión: Crear cuenta", "Desde Iniciar sesión: Olvidé mi clave"],
+      ["Alternativa observada 1: Crear cuenta", "Alternativa observada 2: Olvidé mi clave"],
     );
   });
 
@@ -398,7 +398,7 @@ describe("stepTargets", () => {
   test("exposes the locator behind each executable step", () => {
     assert.deepStrictEqual(
       scenario.stepTargets.map((t) => [t.description, t.strategy]),
-      [['Ingresar "juan" en "Usuario"', "accessibilityId"], ['Presionar "Enviar código de validación"', "androidUiAutomator"]],
+      [['Ingresar el valor seguro asociado a "Usuario"', "accessibilityId"], ['Presionar "Enviar código de validación"', "androidUiAutomator"]],
     );
   });
 

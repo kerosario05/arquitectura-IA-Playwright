@@ -55,6 +55,8 @@ export type AndroidRecorderOptions = {
   settleAfterTapMs?: number;
   /** Labels whose typed content must never be stored verbatim. */
   sensitiveLabels?: string[];
+  /** QA-only project policy; false keeps secure values out of the trace. */
+  persistQaCredentials?: boolean;
   onLog?: (line: string) => void;
   onEvent?: (event: RecordedEvent) => void;
 };
@@ -68,7 +70,7 @@ const ALWAYS_SENSITIVE = [
   "pin",
   "otp",
   "codigo de validacion",
-  "token",
+  "token", "usuario", "username", "identificacion", "empresa", "company", "rnc",
   "cvv",
 ];
 
@@ -369,7 +371,7 @@ export class AndroidSessionRecorder {
           enabled: node?.enabled,
           sensitive,
         },
-        value: sensitive ? undefined : state.text,
+        value: sensitive && !this.options.persistQaCredentials ? undefined : state.text,
         redactedKey: sensitive ? normalizeLabel(state.label).replace(/\s+/g, "_") : undefined,
       });
     }

@@ -25,12 +25,19 @@ import {
   buildHappyPathScenario,
   buildSegmentScenarios,
   capTitle,
+  filterGoalScopedSuggestions,
   type RecordedScenario,
 } from "../../recording/trace-to-scenario";
 import { applyStory, enrichFromTrace } from "../../recording/trace-ai-enricher";
 import { createGeneralAiProvider } from "../../ai/ai-provider-factory";
-import type { RecordingPlatform, RecordingSummary, SessionTrace } from "../../recording/session-trace.types";
-import { attachScenarioSuggestions, buildSemanticRecordingModel, type SemanticRecordingModel } from "../../recording/semantic-recording";
+import type { RecordingDataPolicy, RecordingPlatform, RecordingSummary, SessionTrace } from "../../recording/session-trace.types";
+import {
+  attachScenarioSuggestions,
+  buildSemanticRecordingModel,
+  normalizeRecordingDataPolicy,
+  normalizeRecordingGoal,
+  type SemanticRecordingModel,
+} from "../../recording/semantic-recording";
 
 const execFileAsync = promisify(execFile);
 
@@ -52,6 +59,8 @@ export type StartRecordingParams = {
   /** Project whose configuration decides WHICH app is recorded. */
   projectSlug: string;
   label?: string;
+  recordingGoal?: string;
+  recordingDataPolicy?: Partial<RecordingDataPolicy>;
   /** Overrides the platform implied by the project type. Rarely needed. */
   platform?: RecordingPlatform;
   avdName?: string;
@@ -200,6 +209,8 @@ export async function startRecording(params: StartRecordingParams): Promise<{
     appPackage: target.appPackage,
     baseUrl: target.baseUrl,
     label: params.label,
+    recordingGoal: normalizeRecordingGoal(params.recordingGoal ?? params.label),
+    recordingDataPolicy: normalizeRecordingDataPolicy(params.recordingDataPolicy),
     startedAt: new Date().toISOString(),
     status: "starting",
     events: [],
@@ -231,6 +242,7 @@ export async function startRecording(params: StartRecordingParams): Promise<{
         deviceId,
         appPackage: target.appPackage,
         framesDir,
+        persistQaCredentials: trace.recordingDataPolicy?.persistQaCredentials === true,
         sensitiveLabels: params.sensitiveLabels,
         onLog,
       });
@@ -239,6 +251,7 @@ export async function startRecording(params: StartRecordingParams): Promise<{
         baseUrl: target.baseUrl!,
         ignoreHTTPSErrors: target.ignoreHTTPSErrors,
         framesDir,
+        persistQaCredentials: trace.recordingDataPolicy?.persistQaCredentials === true,
         sensitiveLabels: params.sensitiveLabels,
         onLog,
       });
@@ -374,40 +387,55 @@ export async function deriveScenarios(
       stepTargets: [],
       sourceRecordingId: recordingId,
       hasUncertainSteps: false,
+      suggestionCategory: "AI_PROPOSED",
     }));
 
     // Ordered as a reviewer reads them: what was walked end to end, then its blocks, then
     // everything the recording only justifies.
+    // Segments remain derivation evidence only. A recording goal has one observed primary;
+    // top-level suggestions are filtered and deduplicated separately.
     const segmentScenarios = buildSegmentScenarios(trace, events, segments, enrichedHappyPath);
     const alternatives = buildAlternativePathScenarios(trace, events, enrichedHappyPath);
-    const scenarios = [
-      enrichedHappyPath,
-      ...segmentScenarios,
-      ...negatives,
-      ...aiNegatives,
-      ...alternatives,
-    ];
+    const scoped = filterGoalScopedSuggestions(
+      trace.recordingGoal?.normalizedGoal ?? trace.label,
+      [...negatives, ...aiNegatives, ...alternatives],
+    );
+    const scenarios = [enrichedHappyPath, ...scoped.suggestions];
     const baseSemantic = buildSemanticRecordingModel(trace, events);
-    const semantic = attachScenarioSuggestions(baseSemantic, scenarios.map((scenario) => ({
+    const semantic = attachScenarioSuggestions({
+      ...baseSemantic,
+      primaryScenario: {
+        scenarioId: enrichedHappyPath.scenarioId,
+        title: enrichedHappyPath.title,
+        provenance: "OBSERVED" as const,
+        sourceEventRefs: enrichedHappyPath.sourceEventRefs ?? [],
+        traceBacked: true as const,
+        containsUnexecutedActions: false as const,
+        needsReview: enrichedHappyPath.hasUncertainSteps,
+      },
+    }, scoped.suggestions.map((scenario) => ({
       suggestionId: scenario.scenarioId,
       title: scenario.title,
       provenance: scenario.scenarioId.includes("-AI-")
         ? "AI_PROPOSED"
-        : scenario.provenance === "observed" ? "OBSERVED_HAPPY_PATH" : "DERIVED_ALTERNATIVE",
-      confidence: scenario.hasUncertainSteps ? 0.6 : 0.95,
-      needsReview: scenario.provenance !== "observed" || scenario.hasUncertainSteps || scenario.scenarioId.includes("-AI-"),
-      rationale: scenario.provenance === "observed" ? "Construido únicamente con eventos ejecutados." : "Derivado de evidencia observada; requiere revisión.",
-      sourceEventRefs: events.map((_, index) => `event-${index + 1}`),
+        : scenario.suggestionCategory === "DERIVED_VALIDATION" ? "DERIVED_VALIDATION" : "DERIVED_ALTERNATIVE",
+      confidence: scenario.confidence ?? 0.85,
+      needsReview: true,
+      rationale: scenario.rationale ?? "Derivado de evidencia observada; requiere revisión.",
+      goalRelevanceScore: scenario.goalRelevanceScore ?? 0.5,
+      goalRelevanceReasons: scenario.goalRelevanceReasons ?? [],
+      sourceEventRefs: scenario.sourceEventRefs ?? events.map((_, index) => `event-${index + 1}`),
       steps: scenario.testRailSteps.map((step) => step.content),
-      expectedResultCandidate: scenario.testRailSteps.at(-1)?.expected,
-      oracleAuthority: "observed_only",
+      expectedResultCandidate: scenario.expectedResultCandidate ?? scenario.testRailSteps.at(-1)?.expected,
+      oracleAuthority: scenario.oracleAuthority ?? "review_required",
       dataRequirements: scenario.requiredData.map((data) => data.key),
       technicalObservationRefs: baseSemantic.technicalObservations.map((observation) => observation.observationId),
     })));
     saveSemanticRecording(semantic);
     onLog(
-      `[recording] escenarios: 1 extremo a extremo, ${segmentScenarios.length} por bloque, ` +
-        `${negatives.length} de compuerta, ${aiNegatives.length} negativos de IA, ${alternatives.length} caminos alternativos`,
+      `[recording] escenarios: 1 principal observado, ${scoped.suggestions.length} sugerencias relevantes; ` +
+        `segmentos internos=${segmentScenarios.length}, candidatos_rechazados=${scoped.irrelevantCandidatesRejected}, ` +
+        `duplicados_eliminados=${scoped.duplicatesRemoved}`,
     );
     saveScenarios(appSlug, recordingId, scenarios);
 
