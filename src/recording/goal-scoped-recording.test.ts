@@ -11,6 +11,7 @@ import {
   normalizeRecordingDataPolicy,
   normalizeRecordingGoal,
 } from "./semantic-recording";
+import { toPublishableScenario } from "./scenario-to-testrail";
 
 function trace(overrides: Partial<SessionTrace> = {}): SessionTrace {
   return {
@@ -112,4 +113,17 @@ test("QA credential persistence is project-scoped and opt-in", () => {
     persistQaCredentials: true,
     includeQaCredentialsInTestRail: true,
   });
+});
+
+test("TestRail preview keeps the primary first and applies credential policy", () => {
+  const primary = buildHappyPathScenario(trace({ recordingGoal: normalizeRecordingGoal("Crear cliente") }), []);
+  primary.requiredData.push({ key: "auth_password", label: "Password", stepIndex: 1, sensitive: true, exampleValue: "fixture-only" });
+  const referenceOnly = toPublishableScenario(primary, "app-test", "recording-goal-test", normalizeRecordingDataPolicy());
+  const allowed = toPublishableScenario(primary, "app-test", "recording-goal-test", normalizeRecordingDataPolicy({
+    persistQaCredentials: true,
+    includeQaCredentialsInTestRail: true,
+  }));
+  assert.equal(referenceOnly.dataRequirements, "auth_password");
+  assert.equal(allowed.dataRequirements, "auth_password=fixture-only");
+  assert.equal(primary.primary, true);
 });

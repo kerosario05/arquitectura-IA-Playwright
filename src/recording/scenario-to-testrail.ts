@@ -1,5 +1,6 @@
 import type { McpScenario } from "../scenarios/scenario-types";
 import type { RecordedScenario } from "./trace-to-scenario";
+import type { RecordingDataPolicy } from "./session-trace.types";
 
 /**
  * Adapts a recorded scenario to what the shared TestRail publisher expects.
@@ -20,6 +21,7 @@ export function toPublishableScenario(
   scenario: RecordedScenario,
   appSlug: string,
   recordingId: string,
+  recordingDataPolicy?: RecordingDataPolicy,
 ): McpScenario {
   const lastExpected = scenario.testRailSteps[scenario.testRailSteps.length - 1]?.expected?.trim();
   return {
@@ -37,7 +39,14 @@ export function toPublishableScenario(
     setupStrategy: "recorded_walkthrough",
     appSlug,
     routeProfile: "",
-    dataRequirements: "",
+    dataRequirements: scenario.requiredData
+      .map((field) => {
+        const includeValue = recordingDataPolicy?.includeQaCredentialsInTestRail === true
+          && field.sensitive
+          && field.exampleValue;
+        return includeValue ? `${field.key}=${field.exampleValue}` : field.key;
+      })
+      .join(", "),
     nonExecutableCriteria: "",
     // A derived scenario is a proposal the recording never walked, so it is not executable.
     mcpExecutable: scenario.provenance !== "derived",
