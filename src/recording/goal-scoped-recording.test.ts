@@ -8,6 +8,7 @@ import {
 } from "./trace-to-scenario";
 import {
   buildSemanticRecordingModel,
+  hasSignificantSemanticChange,
   normalizeRecordingDataPolicy,
   normalizeRecordingGoal,
 } from "./semantic-recording";
@@ -127,4 +128,13 @@ test("TestRail preview keeps the primary first and applies credential policy", (
   assert.equal(referenceOnly.dataRequirements, "auth_password");
   assert.equal(allowed.dataRequirements, "auth_password=fixture-only");
   assert.equal(primary.primary, true);
+});
+
+test("live refresh ignores non-semantic polling noise", () => {
+  const base = { events: [fillEvent()], screens: trace().screens };
+  const noisy = { events: [{ ...fillEvent(), target: { ...fillEvent().target, beforeValue: "old", afterValue: "input" } }], screens: trace().screens };
+  const meaningful = { events: [{ ...fillEvent(), seq: 1, t: 50, target: { ...fillEvent().target, label: "Correo" } }], screens: trace().screens };
+  assert.equal(hasSignificantSemanticChange(undefined, base), true);
+  assert.equal(hasSignificantSemanticChange(base, noisy), false);
+  assert.equal(hasSignificantSemanticChange(base, meaningful), true);
 });

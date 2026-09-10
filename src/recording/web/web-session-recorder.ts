@@ -48,6 +48,7 @@ export type WebRecorderOptions = {
   sensitiveLabels?: string[];
   onLog?: (line: string) => void;
   onEvent?: (event: RecordedEvent) => void;
+  onScreen?: (screen: RecordedScreen) => void;
 };
 
 export function buildWebRecorderContextOptions(ignoreHTTPSErrors?: boolean): { ignoreHTTPSErrors: boolean } {
@@ -341,7 +342,7 @@ export class WebSessionRecorder {
           ? [{ strategy: "aria-label", value: c.locatorIdentity, confidence: 0.9 }]
           : [{ strategy: "text", value: c.label, confidence: 0.7 }],
       }));
-      this.screens.set(screenKey, {
+      const recordedScreen: RecordedScreen = {
         screenKey,
         title: snapshot.headings[0] ?? screenKey,
         fingerprint,
@@ -349,7 +350,9 @@ export class WebSessionRecorder {
         firstSeenAt: this.now(),
         controls,
         texts: snapshot.assertionTargets.slice(0, 40),
-      });
+      };
+      this.screens.set(screenKey, recordedScreen);
+      this.options.onScreen?.(recordedScreen);
     }
 
     this.lastFingerprint = fingerprint;

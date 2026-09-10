@@ -30,10 +30,11 @@ import {
 } from "../../recording/trace-to-scenario";
 import { applyStory, enrichFromTrace } from "../../recording/trace-ai-enricher";
 import { createGeneralAiProvider } from "../../ai/ai-provider-factory";
-import type { RecordingDataPolicy, RecordingPlatform, RecordingSummary, SessionTrace } from "../../recording/session-trace.types";
+import type { RecordedEvent, RecordingDataPolicy, RecordingPlatform, RecordingSummary, SessionTrace } from "../../recording/session-trace.types";
 import {
   attachScenarioSuggestions,
   buildSemanticRecordingModel,
+  hasSignificantSemanticChange,
   normalizeRecordingDataPolicy,
   normalizeRecordingGoal,
   type SemanticRecordingModel,
@@ -69,11 +70,20 @@ export type StartRecordingParams = {
   sensitiveLabels?: string[];
 };
 
+type LiveSemanticProjection = {
+  source: { events: RecordedEvent[]; screens: SessionTrace["screens"] };
+  scenarios: RecordedScenario[];
+  semanticModel: SemanticRecordingModel;
+  refreshCount: number;
+  noiseRefreshSkipped: number;
+};
+
 type ActiveRecording = {
   recordingId: string;
   jobId: string;
   trace: SessionTrace;
   recorder: AndroidSessionRecorder | WebSessionRecorder;
+  liveProjection?: LiveSemanticProjection;
 };
 
 const active = new Map<string, ActiveRecording>();
@@ -244,6 +254,16 @@ export async function startRecording(params: StartRecordingParams): Promise<{
         framesDir,
         persistQaCredentials: trace.recordingDataPolicy?.persistQaCredentials === true,
         sensitiveLabels: params.sensitiveLabels,
+        onEvent: (event) => {
+          trace.events.push(event);
+          saveTrace(trace);
+        },
+        onScreen: (screen) => {
+          const existingIndex = trace.screens.findIndex((item) => item.screenKey === screen.screenKey);
+          if (existingIndex >= 0) trace.screens[existingIndex] = screen;
+          else trace.screens.push(screen);
+          saveTrace(trace);
+        },
         onLog,
       });
     } else {
@@ -253,6 +273,16 @@ export async function startRecording(params: StartRecordingParams): Promise<{
         framesDir,
         persistQaCredentials: trace.recordingDataPolicy?.persistQaCredentials === true,
         sensitiveLabels: params.sensitiveLabels,
+        onEvent: (event) => {
+          trace.events.push(event);
+          saveTrace(trace);
+        },
+        onScreen: (screen) => {
+          const existingIndex = trace.screens.findIndex((item) => item.screenKey === screen.screenKey);
+          if (existingIndex >= 0) trace.screens[existingIndex] = screen;
+          else trace.screens.push(screen);
+          saveTrace(trace);
+        },
         onLog,
       });
     }
@@ -286,11 +316,76 @@ export async function startRecording(params: StartRecordingParams): Promise<{
 
 export function recordingProgress(recordingId: string): {
   summary: RecordingSummary;
-  live: { events: number; screens: number; currentScreen: string };
+  live: { events: number; screens: number; currentScreen: string; semanticRefreshCount: number; noiseRefreshSkipped: number };
+  scenarios: RecordedScenario[];
+  semanticModel: SemanticRecordingModel;
 } | null {
   const entry = active.get(recordingId);
   if (!entry) return null;
-  return { summary: toSummary(entry.trace), live: entry.recorder.snapshotProgress() };
+  const source = { events: [...entry.trace.events], screens: [...entry.trace.screens] };
+  if (entry.liveProjection && !hasSignificantSemanticChange(entry.liveProjection.source, source)) {
+    entry.liveProjection.noiseRefreshSkipped += 1;
+    return {
+      summary: toSummary(entry.trace),
+      live: { ...entry.recorder.snapshotProgress(), semanticRefreshCount: entry.liveProjection.refreshCount, noiseRefreshSkipped: entry.liveProjection.noiseRefreshSkipped },
+      scenarios: entry.liveProjection.scenarios,
+      semanticModel: entry.liveProjection.semanticModel,
+    };
+  }
+  const events = normalizeEvents(source.events);
+  const primary = buildHappyPathScenario(entry.trace, events);
+  const livePrimary: RecordedScenario = { ...primary, status: "IN_PROGRESS" };
+  const segments = segmentTrace(events, entry.trace);
+  const candidates = [
+    ...buildGateNegatives(entry.trace, segments, primary),
+    ...buildAlternativePathScenarios(entry.trace, events, primary),
+  ];
+  const scoped = filterGoalScopedSuggestions(
+    entry.trace.recordingGoal?.normalizedGoal ?? entry.trace.label,
+    candidates,
+  );
+  const semanticBase = buildSemanticRecordingModel(entry.trace, events);
+  const semanticModel = attachScenarioSuggestions({
+    ...semanticBase,
+    primaryScenario: {
+      scenarioId: livePrimary.scenarioId,
+      title: livePrimary.title,
+      provenance: "OBSERVED" as const,
+      status: "IN_PROGRESS" as const,
+      sourceEventRefs: livePrimary.sourceEventRefs ?? [],
+      traceBacked: true as const,
+      containsUnexecutedActions: false as const,
+      needsReview: livePrimary.hasUncertainSteps,
+    },
+  }, scoped.suggestions.map((scenario) => ({
+    suggestionId: scenario.scenarioId,
+    title: scenario.title,
+    provenance: scenario.suggestionCategory === "DERIVED_VALIDATION" ? "DERIVED_VALIDATION" as const : "DERIVED_ALTERNATIVE" as const,
+    confidence: scenario.confidence ?? 0.85,
+    goalRelevanceScore: scenario.goalRelevanceScore ?? 0.5,
+    goalRelevanceReasons: scenario.goalRelevanceReasons ?? [],
+    needsReview: true,
+    rationale: scenario.rationale ?? "Derivado de evidencia observada durante la grabación.",
+    sourceEventRefs: scenario.sourceEventRefs ?? events.map((_, index) => `event-${index + 1}`),
+    steps: scenario.testRailSteps.map((step) => step.content),
+    expectedResultCandidate: scenario.testRailSteps.at(-1)?.expected,
+    oracleAuthority: "review_required" as const,
+    dataRequirements: scenario.requiredData.map((item) => item.key),
+    technicalObservationRefs: semanticBase.technicalObservations.map((item) => item.observationId),
+  })));
+  entry.liveProjection = {
+    source,
+    scenarios: [livePrimary, ...scoped.suggestions],
+    semanticModel,
+    refreshCount: (entry.liveProjection?.refreshCount ?? 0) + 1,
+    noiseRefreshSkipped: entry.liveProjection?.noiseRefreshSkipped ?? 0,
+  };
+  return {
+    summary: toSummary(entry.trace),
+    live: { ...entry.recorder.snapshotProgress(), semanticRefreshCount: entry.liveProjection.refreshCount, noiseRefreshSkipped: entry.liveProjection.noiseRefreshSkipped },
+    scenarios: entry.liveProjection.scenarios,
+    semanticModel,
+  };
 }
 
 export async function stopRecording(recordingId: string): Promise<RecordingSummary> {

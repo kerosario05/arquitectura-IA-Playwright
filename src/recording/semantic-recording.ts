@@ -129,6 +129,7 @@ export type SemanticRecordingModel = {
     scenarioId: string;
     title: string;
     provenance: "OBSERVED";
+    status?: "IN_PROGRESS" | "COMPLETED";
     sourceEventRefs: string[];
     traceBacked: true;
     containsUnexecutedActions: false;
@@ -422,4 +423,24 @@ export function attachScenarioSuggestions(
   suggestions: readonly ScenarioSuggestion[],
 ): SemanticRecordingModel {
   return { ...model, scenarioSuggestions: [...suggestions] };
+}
+
+/** Stable signal used by live polling to ignore focus/hover/duplicate noise. */
+export function semanticChangeSignature(
+  events: readonly RecordedEvent[],
+  screens: readonly RecordedScreen[],
+): string {
+  const meaningful = events
+    .filter((event) => ["launch", "tap", "fill", "navigate", "back", "screen_change"].includes(event.kind))
+    .map((event) => [event.kind, event.screenKey, event.toScreenKey ?? "", event.target?.label ?? "", event.target?.associatedField ?? ""].join("|"));
+  const screenKeys = screens.map((screen) => `${screen.screenKey}:${screen.controls.length}`).sort();
+  return [...meaningful, ...screenKeys].join(";");
+}
+
+export function hasSignificantSemanticChange(
+  previous: { events: readonly RecordedEvent[]; screens: readonly RecordedScreen[] } | undefined,
+  next: { events: readonly RecordedEvent[]; screens: readonly RecordedScreen[] },
+): boolean {
+  if (!previous) return true;
+  return semanticChangeSignature(previous.events, previous.screens) !== semanticChangeSignature(next.events, next.screens);
 }

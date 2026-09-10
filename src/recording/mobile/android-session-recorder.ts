@@ -59,6 +59,7 @@ export type AndroidRecorderOptions = {
   persistQaCredentials?: boolean;
   onLog?: (line: string) => void;
   onEvent?: (event: RecordedEvent) => void;
+  onScreen?: (screen: RecordedScreen) => void;
 };
 
 /** Field labels whose content is redacted regardless of project configuration. */
@@ -313,14 +314,16 @@ export class AndroidSessionRecorder {
     const changed = snapshot.fingerprint !== this.lastFingerprint;
 
     if (!this.screens.has(screenKey)) {
-      this.screens.set(screenKey, {
+      const recordedScreen: RecordedScreen = {
         screenKey,
         title: readableTitle(snapshot) ?? screenKey,
         fingerprint: snapshot.fingerprint,
         firstSeenAt: this.now(),
         controls,
         texts: snapshot.assertionTargets.slice(0, 40),
-      });
+      };
+      this.screens.set(screenKey, recordedScreen);
+      this.options.onScreen?.(recordedScreen);
     }
 
     // Track every input's current content so a change between polls reads as a fill.

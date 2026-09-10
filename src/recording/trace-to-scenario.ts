@@ -92,6 +92,7 @@ export type RecordedScenario = {
   hasUncertainSteps: boolean;
   /** Exactly one scenario per recording may be marked primary. */
   primary?: boolean;
+  status?: "IN_PROGRESS" | "COMPLETED";
   sourceEventRefs?: string[];
   traceBacked?: boolean;
   containsUnexecutedActions?: boolean;
