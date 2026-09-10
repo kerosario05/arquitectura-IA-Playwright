@@ -23,7 +23,38 @@ export type AuthInputResolverConfig = {
   env: Record<string, unknown>;
   missingInputBehavior: MissingInputBehavior;
   alias?: string;
+  runtimeEntries?: Array<{ key: string; value: string; source?: string }>;
 };
+
+function normalizeRuntimeKey(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+function resolveRuntimeEntry(
+  entries: AuthInputResolverConfig["runtimeEntries"],
+  keys: string[],
+): { value: string; source: string } | undefined {
+  if (!Array.isArray(entries)) return undefined;
+  const byKey = new Map(
+    entries
+      .filter((entry) => entry && typeof entry.key === "string" && typeof entry.value === "string" && entry.value.trim())
+      .map((entry) => [normalizeRuntimeKey(entry.key), entry] as const),
+  );
+  for (const key of keys) {
+    const entry = byKey.get(normalizeRuntimeKey(key));
+    if (entry) {
+      return {
+        value: entry.value.trim(),
+        source: entry.source === "user_provided_qa_credentials" ? "user_provided_qa_credentials" : "runtime_context",
+      };
+    }
+  }
+  return undefined;
+}
 
 export function maskValue(value: string | undefined, visibleChars = 4): string {
   if (!value) return "";
@@ -79,7 +110,7 @@ function resolveAlias(aliases: Record<string, unknown>, alias: string): string {
 }
 
 export function resolveAuthInputs(config: AuthInputResolverConfig): AuthInputResolution {
-  const { env, missingInputBehavior, alias = "defaultClient" } = config;
+  const { env, missingInputBehavior, alias = "defaultClient", runtimeEntries } = config;
   const result: AuthInputResolution = {
     success: true,
     data: {},
@@ -97,9 +128,23 @@ export function resolveAuthInputs(config: AuthInputResolverConfig): AuthInputRes
 
   const resolvedAlias = resolveAlias(testDataAliases, alias);
 
+  const runtimeIdentificationNumber = resolveRuntimeEntry(runtimeEntries, [
+    "auth.company_identifier",
+    "auth.identification_number",
+    "identificationNumber",
+    "Identity_Provider",
+  ]);
+  const runtimeIdentificationType = resolveRuntimeEntry(runtimeEntries, ["auth.identification_type", "identificationType"]);
+  const runtimeOtp = resolveRuntimeEntry(runtimeEntries, ["auth.otp", "otp", "OTP_SECRET"]);
+  const runtimeUsername = resolveRuntimeEntry(runtimeEntries, ["auth.username", "username", "APP_USERNAME"]);
+  const runtimePassword = resolveRuntimeEntry(runtimeEntries, ["auth.password", "password", "APP_PASSWORD"]);
+
   // identificationNumber
   const idFromTestData = resolveFromTestData(testData, testDataAliases, alias, "identificationNumber");
-  if (idFromTestData) {
+  if (runtimeIdentificationNumber) {
+    result.data.identificationNumber = runtimeIdentificationNumber.value;
+    result.sources.identificationNumber = runtimeIdentificationNumber.source;
+  } else if (idFromTestData) {
     result.data.identificationNumber = idFromTestData;
     result.sources.identificationNumber = `APP_TEST_DATA_JSON.clients[${resolvedAlias}]`;
   } else if (typeof env.Identity_Provider === "string" && env.Identity_Provider) {
@@ -109,7 +154,10 @@ export function resolveAuthInputs(config: AuthInputResolverConfig): AuthInputRes
 
   // identificationType
   const typeFromTestData = resolveFromTestData(testData, testDataAliases, alias, "identificationType");
-  if (typeFromTestData) {
+  if (runtimeIdentificationType) {
+    result.data.identificationType = runtimeIdentificationType.value;
+    result.sources.identificationType = runtimeIdentificationType.source;
+  } else if (typeFromTestData) {
     result.data.identificationType = typeFromTestData;
     result.sources.identificationType = `APP_TEST_DATA_JSON.clients[${resolvedAlias}]`;
   } else {
@@ -119,7 +167,10 @@ export function resolveAuthInputs(config: AuthInputResolverConfig): AuthInputRes
 
   // otp
   const otpFromTestData = resolveFromTestData(testData, testDataAliases, alias, "otp");
-  if (otpFromTestData) {
+  if (runtimeOtp) {
+    result.data.otp = runtimeOtp.value;
+    result.sources.otp = runtimeOtp.source;
+  } else if (otpFromTestData) {
     result.data.otp = otpFromTestData;
     result.sources.otp = `APP_TEST_DATA_JSON.clients[${resolvedAlias}]`;
   } else if (typeof env.OTP_SECRET === "string" && env.OTP_SECRET) {
@@ -129,7 +180,10 @@ export function resolveAuthInputs(config: AuthInputResolverConfig): AuthInputRes
 
   // username
   const userFromTestData = resolveFromTestData(testData, testDataAliases, alias, "username");
-  if (userFromTestData) {
+  if (runtimeUsername) {
+    result.data.username = runtimeUsername.value;
+    result.sources.username = runtimeUsername.source;
+  } else if (userFromTestData) {
     result.data.username = userFromTestData;
     result.sources.username = `APP_TEST_DATA_JSON.auth[${resolvedAlias}]`;
   } else if (typeof env.APP_USERNAME === "string" && env.APP_USERNAME) {
@@ -139,7 +193,10 @@ export function resolveAuthInputs(config: AuthInputResolverConfig): AuthInputRes
 
   // password
   const passFromTestData = resolveFromTestData(testData, testDataAliases, alias, "password");
-  if (passFromTestData) {
+  if (runtimePassword) {
+    result.data.password = runtimePassword.value;
+    result.sources.password = runtimePassword.source;
+  } else if (passFromTestData) {
     result.data.password = passFromTestData;
     result.sources.password = `APP_TEST_DATA_JSON.auth[${resolvedAlias}]`;
   } else if (typeof env.APP_PASSWORD === "string" && env.APP_PASSWORD) {

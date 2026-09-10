@@ -1,0 +1,82 @@
+- generic [ref=f1e1]:
+  - generic [ref=f1e3]:
+    - complementary [ref=f1e4]:
+      - generic [ref=f1e5]:
+        - generic [ref=f1e6]: Q
+        - generic [ref=f1e9]:
+          - generic [ref=f1e10]: QA Lab
+          - generic [ref=f1e11]: Santa Cruz
+      - navigation [ref=f1e12]:
+        - button "Panorama" [ref=f1e13] [cursor=pointer]
+        - button "Lanzar pruebas" [ref=f1e20] [cursor=pointer]
+        - button "Ejecuciones" [ref=f1e26] [cursor=pointer]
+        - button "Configuración" [ref=f1e31] [cursor=pointer]
+      - generic [ref=f1e37]:
+        - generic [ref=f1e41]: Pro tip
+        - generic [ref=f1e42]: Programa ejecuciones nocturnas para optimizar recursos.
+      - generic [ref=f1e43]:
+        - generic [ref=f1e44]: CM
+        - generic [ref=f1e45]:
+          - generic [ref=f1e46]: Carlos Martínez
+          - generic [ref=f1e47]: QA Lead
+    - main [ref=f1e48]:
+      - generic [ref=f1e49]:
+        - generic [ref=f1e50]:
+          - generic [ref=f1e51]:
+            - generic [ref=f1e53]: En vivo · 16:25
+            - generic [ref=f1e54]: ·
+            - generic [ref=f1e55]: Configura una nueva ejecución en 4 pasos
+          - heading "Lanzar pruebas" [level=1] [ref=f1e655]
+        - generic [ref=f1e57]:
+          - generic [ref=f1e58]:
+            - textbox "Buscar..." [ref=f1e62]
+            - generic [ref=f1e63]: ⌘K
+          - button [ref=f1e64] [cursor=pointer]
+      - generic [ref=f1e656]:
+        - generic [ref=f1e658]:
+          - button "Proyecto" [ref=f1e659] [cursor=pointer]
+          - button "Fuentes" [ref=f1e664] [cursor=pointer]
+          - button "Casos" [ref=f1e671] [cursor=pointer]
+          - button "Lanzar" [ref=f1e679] [cursor=pointer]
+        - generic [ref=f1e686]:
+          - generic [ref=f1e687]:
+            - generic [ref=f1e688]: Paso dos · Conecta las fuentes
+            - heading "¿De dónde vienen los casos?" [level=2] [ref=f1e689]
+            - paragraph [ref=f1e690]: Configura las herramientas que alimentarán la ejecución.
+            - generic [ref=f1e692]:
+              - button "Solo Jira Tests del sprint activo" [ref=f1e693] [cursor=pointer]:
+                - generic [ref=f1e699]: Solo Jira
+                - generic [ref=f1e700]: Tests del sprint activo
+              - button "Solo TestRail Suite completa" [ref=f1e701] [cursor=pointer]:
+                - generic [ref=f1e708]: Solo TestRail
+                - generic [ref=f1e709]: Suite completa
+              - button "Ambos combinados Máxima cobertura" [ref=f1e710] [cursor=pointer]:
+                - generic [ref=f1e716]: Ambos combinados
+                - generic [ref=f1e717]: Máxima cobertura
+            - generic [ref=f1e719]:
+              - generic [ref=f1e720]: TestRail
+              - generic [ref=f1e727]:
+                - generic [ref=f1e728]: Proyecto
+                - button "Portal Empresarial" [ref=f1e765] [cursor=pointer]
+              - generic [ref=f1e767]:
+                - generic [ref=f1e768]:
+                  - generic [ref=f1e769]: Suite ID
+                  - generic [ref=f1e770]: "37"
+                - generic [ref=f1e771]:
+                  - generic [ref=f1e772]: Test Cases
+                  - generic [ref=f1e773]: "51"
+              - generic [ref=f1e774]:
+                - generic [ref=f1e775]: Sección
+                - button "Selecciona una sección..." [ref=f1e777] [cursor=pointer]
+          - generic [ref=f1e735]:
+            - button "Atrás" [ref=f1e736] [cursor=pointer]
+            - button "Generar escenarios" [ref=f1e739] [cursor=pointer]
+  - generic [ref=f1e653]: "30"
+  - generic [ref=f1e781]:
+    - generic [ref=f1e782]:
+      - textbox "Buscar sección..." [active] [ref=f1e787]
+      - generic [ref=f1e788]: 3 de 3 secciones
+    - generic [ref=f1e789]:
+      - button "Test Cases" [ref=f1e790] [cursor=pointer]
+      - button "Automatizacion 1" [ref=f1e793] [cursor=pointer]
+      - button "Casos de prueba" [ref=f1e796] [cursor=pointer]

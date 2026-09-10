@@ -1,6 +1,7 @@
 import { chromium, firefox, webkit } from "@playwright/test";
 import { config } from "../config/env";
 import { getLoginStrategy } from "../auth/login-strategy.factory";
+import { launchRuntimeBrowserSession } from "../browser/browser-session";
 import { discoverProductCatalog } from "../discovery/product-catalog-discovery";
 import { persistDiscoveredProducts, loadAppConfig, getRouteProfile } from "../discovery/product-catalog-persistence";
 import type { ProductCatalogDiscoveryOptions } from "../discovery/product-catalog-discovery";
@@ -96,11 +97,16 @@ async function main(): Promise<void> {
 
   // Launch browser
   const browserType = { chromium, firefox, webkit }[config.execution.browser];
-  const browser = await browserType.launch({ headless: args.headless });
+  const session = await launchRuntimeBrowserSession({
+    browserType,
+    headless: args.headless,
+    targetUrl: appConfig.baseUrl,
+    profilePath: config.execution.qaBrowserProfilePath,
+    channel: config.execution.qaBrowserChannel,
+  });
 
   try {
-    const context = await browser.newContext();
-    const page = await context.newPage();
+    const page = session.page;
     page.setDefaultTimeout(config.execution.defaultTimeoutMs);
 
     // Login if required
@@ -151,7 +157,7 @@ async function main(): Promise<void> {
       console.log(`Output written to: ${args.output}\n`);
     }
   } finally {
-    await browser.close();
+    await session.close();
   }
 }
 

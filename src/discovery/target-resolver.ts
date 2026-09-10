@@ -79,6 +79,10 @@ export type TargetResolutionResult = {
     consistentWithNextTarget: boolean;
     reason: string;
   };
+  gridDiagnostics?: GridEditorResolution["diagnostics"];
+  /** True when a custom selection surface was selected and verified by the resolver. */
+  selectionApplied?: boolean;
+  selectionDiagnostics?: SelectionSurfaceDiagnostics;
 };
 
 export type ResolveActionTargetOptions = {
@@ -86,6 +90,11 @@ export type ResolveActionTargetOptions = {
   ambiguousThreshold?: number;
   semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "first_visible_item" | "unknown";
   relationContext?: string;
+  selectionField?: string;
+  selectionValue?: string;
+  rowScope?: number;
+  entityScope?: string;
+  associatedField?: string;
   activeContainer?: ActiveContainerContext;
   routeProfile?: AppRouteProfile;
   actionText?: string;
@@ -714,6 +723,1960 @@ async function attemptContextualOptionResolution(
   return undefined;
 }
 
+function fieldLabelMatchesHeader(fieldLabel: string, headerText: string): boolean {
+  const field = normalizeText(fieldLabel);
+  const header = normalizeText(headerText);
+  if (!field || !header) return false;
+  if (field === header || field.includes(header) || header.includes(field)) return true;
+
+  const fieldTokens = field.split(/\s+/).filter((token) => !["el", "la", "los", "las", "de", "del", "en", "the", "of", "in"].includes(token));
+  const headerTokens = header.split(/\s+/).filter((token) => !["el", "la", "los", "las", "de", "del", "en", "the", "of", "in"].includes(token));
+  if (fieldTokens.some((token) => headerTokens.includes(token))) return true;
+
+  // Common UI abbreviations are structural field aliases, not case data.
+  const idTerms = new Set(["id", "identificacion", "identidad", "documento", "doc"]);
+  return fieldTokens.some((token) => idTerms.has(token)) && headerTokens.some((token) => idTerms.has(token));
+}
+
+export type GridTargetContext = {
+  rowScope?: number;
+  entityScope?: string;
+  associatedField?: string;
+};
+
+export type GridEditorResolution = {
+  locator?: Locator;
+  cell?: Locator;
+  strategy?: string;
+  ambiguous?: boolean;
+  diagnostics: {
+    rowResolved: boolean;
+    columnResolved: boolean;
+    cellResolved: boolean;
+    editorInitiallyPresent: boolean;
+    cellActivationAttempted: boolean;
+    editorResolvedAfterActivation: boolean;
+    rowIndex?: number;
+    columnIndex?: number;
+    containerIndex?: number;
+    candidateCount?: number;
+    candidateCountAfterControlType?: number;
+    candidateCountAfterOptionCompatibility?: number;
+    candidates?: Array<{
+      rowIdentity?: string;
+      columnIdentity?: string;
+      associatedField?: string;
+      tag: string;
+      role?: string;
+      visible: boolean;
+      enabled: boolean;
+      boundingRelation: "cell" | "outside_cell" | "unknown";
+      availableOptionTexts: string[];
+      locatorStrategy: string;
+      confidence: number;
+    }>;
+  };
+};
+
+export type GridEditorResolutionOptions = {
+  includeInteractiveControls?: boolean;
+  controlKind?: "selection" | "fill" | "any";
+  optionText?: string;
+  allowActivation?: boolean;
+};
+
+export type SelectionSurfaceDiagnostics = {
+  triggerResolved: boolean;
+  triggerStrategy: string;
+  ariaRelationshipFound: boolean;
+  surfaceType?: string;
+  surfacePortalized?: boolean;
+  surfaceCausallyBound: boolean;
+  optionCandidateCount: number;
+  desiredOptionFound: boolean;
+  optionResolutionStrategy?: string;
+  stateVerified: boolean;
+  overlayClosed?: boolean;
+  initialState?: "DISPLAY" | "CELL_ACTIVE" | "EDITOR_MATERIALIZED" | "SELECTION_CONTROL_READY" | "OPTIONS_VISIBLE" | "OPTION_SELECTED" | "VALUE_COMMITTED";
+  transitionsObserved?: string[];
+  activationAttempts?: number;
+  progressPerAttempt?: boolean[];
+  domReplacementObserved?: boolean;
+  editorMaterialized?: boolean;
+  editorIdentity?: string;
+  comboboxObserved?: boolean;
+  comboboxObservedAtState?: string;
+  optionObservedAtState?: string;
+  comboboxIdentity?: string;
+  ariaExpanded?: string;
+  ariaControlsValue?: string;
+  oldControlDetached?: boolean;
+  newControlIdentity?: string;
+  ariaControlsReadFromNewControl?: boolean;
+  controlledSurfaceExistsBefore?: boolean;
+  controlledSurfaceExistsAfter?: boolean;
+  controlledSurfaceLifecycle?: "inserted" | "visibility_changed" | "children_changed" | "existing_hidden" | "missing" | "outside_controlled_node" | "unchanged";
+  controlledSurfaceRole?: string;
+  controlledSurfaceVisible?: boolean;
+  controlledSurfaceChildCount?: number;
+  controlledSurfaceOptionCount?: number;
+  controlledSurfaceVisibleOptionCount?: number;
+  controlledSurfaceOptionVisibility?: string[];
+  globalRoleOptionCount?: number;
+  globalListboxCount?: number;
+  globalMenuCount?: number;
+  nativeOptionCount?: number;
+  visibleSelectableCount?: number;
+  optionsFirstObservedAtMs?: number;
+  candidateDropReason?: string;
+  openingMethod?: "CLICK_OPENS" | "FOCUS_THEN_CLICK_OPENS" | "KEYBOARD_OPENS" | "NO_OPENING_METHOD_OBSERVED";
+  failureReason?: "selection_surface_not_observed" | "option_not_supported" | "ambiguous_option" | "selection_state_not_verified";
+};
+
+export type GridCollectionSnapshot = {
+  rowCount: number;
+  rowIdentities: string[];
+  containerIndex?: number;
+};
+
+/** Capture structural row identity before/after a row-creation action. */
+export async function captureGridCollectionSnapshot(page: Page): Promise<GridCollectionSnapshot> {
+  const containers = page.locator("table, [role='grid']");
+  const count = await containers.count().catch(() => 0);
+  for (let containerIndex = 0; containerIndex < count; containerIndex += 1) {
+    const container = containers.nth(containerIndex);
+    const rows = container.locator("tbody tr, [role='row']");
+    const rowCount = await rows.count().catch(() => 0);
+    const rowIdentities: string[] = [];
+    for (let rowIndex = 0; rowIndex < rowCount; rowIndex += 1) {
+      const row = rows.nth(rowIndex);
+      if (await row.locator("td, th, [role='gridcell']").count().catch(() => 0) === 0) continue;
+      const identity = await row.evaluate((element) => {
+        const el = element as HTMLElement;
+        return el.getAttribute("data-row-id")
+          || el.getAttribute("data-id")
+          || el.getAttribute("aria-rowindex")
+          || el.id
+          || undefined;
+      }).catch(() => undefined);
+      if (identity) rowIdentities.push(identity);
+    }
+    return { rowCount: rowIdentities.length, rowIdentities, containerIndex };
+  }
+  return { rowCount: 0, rowIdentities: [] };
+}
+
+export function compareGridCollection(before: GridCollectionSnapshot, after: GridCollectionSnapshot): {
+  rowCountIncreased: boolean;
+  newRowObserved: boolean;
+  newRowIdentityDistinct: boolean;
+} {
+  const beforeIds = new Set(before.rowIdentities);
+  const newRowObserved = after.rowIdentities.some((identity) => !beforeIds.has(identity));
+  return {
+    rowCountIncreased: after.rowCount > before.rowCount,
+    newRowObserved,
+    newRowIdentityDistinct: newRowObserved,
+  };
+}
+
+const GRID_EDITOR_SELECTOR = "input, textarea, select, [contenteditable='true'], [role='textbox'], [role='combobox']";
+const GRID_INTERACTIVE_CONTROL_SELECTOR = `${GRID_EDITOR_SELECTOR}, button:not([role='option']), [role='button']`;
+
+/**
+ * Resolves an editable grid cell from its structural row/column intersection.
+ * An ordinal is accepted only when it is part of the parsed scenario scope;
+ * the resolver never chooses a page-wide nth control as an authority.
+ */
+export async function resolveGridEditor(
+  page: Page,
+  fieldLabel: string,
+  context: GridTargetContext = {},
+  options: GridEditorResolutionOptions = {},
+): Promise<GridEditorResolution> {
+  const empty: GridEditorResolution = {
+    diagnostics: {
+      rowResolved: false,
+      columnResolved: false,
+      cellResolved: false,
+      editorInitiallyPresent: false,
+      cellActivationAttempted: false,
+      editorResolvedAfterActivation: false,
+    },
+  };
+  const containers = page.locator("table, [role='grid']");
+  const containerCount = await containers.count().catch(() => 0);
+  for (let containerIndex = 0; containerIndex < containerCount; containerIndex += 1) {
+    const container = containers.nth(containerIndex);
+    const headerCandidates = container.locator("thead th, thead td, [role='columnheader']");
+    const headerCount = await headerCandidates.count().catch(() => 0);
+    const firstRow = container.locator("tr, [role='row']").first();
+    const fallbackHeaders = headerCount > 0 ? headerCandidates : firstRow.locator("th, td, [role='columnheader']");
+    const effectiveHeaderCount = await fallbackHeaders.count().catch(() => 0);
+    let columnIndex = -1;
+    for (let candidateIndex = 0; candidateIndex < effectiveHeaderCount; candidateIndex += 1) {
+      const headerText = await fallbackHeaders.nth(candidateIndex).innerText().catch(() => "");
+      if (fieldLabelMatchesHeader(fieldLabel, headerText)) {
+        columnIndex = candidateIndex;
+        break;
+      }
+    }
+    if (columnIndex < 0) continue;
+
+    const rowCandidates = container.locator("tbody tr, [role='row']");
+    const candidateRows: Locator[] = [];
+    const rowCandidateCount = await rowCandidates.count().catch(() => 0);
+    for (let candidateIndex = 0; candidateIndex < rowCandidateCount; candidateIndex += 1) {
+      const row = rowCandidates.nth(candidateIndex);
+      const cells = row.locator("td, th, [role='gridcell']");
+      if (await cells.count().catch(() => 0) > 0) candidateRows.push(row);
+    }
+    if (candidateRows.length === 0) continue;
+
+    const requestedRowIndex = context.rowScope !== undefined ? context.rowScope - 1 : 0;
+    const row = candidateRows[requestedRowIndex];
+    if (!row) continue;
+    const cells = row.locator("td, th, [role='gridcell']");
+    const cellCount = await cells.count().catch(() => 0);
+    const leadingOffset = Math.max(0, cellCount - effectiveHeaderCount);
+    const cellIndex = columnIndex + leadingOffset;
+    const cell = cells.nth(cellIndex);
+    if (cellIndex >= cellCount) continue;
+
+    const diagnostics: GridEditorResolution["diagnostics"] = {
+      rowResolved: true,
+      columnResolved: true,
+      cellResolved: true,
+      editorInitiallyPresent: false,
+      cellActivationAttempted: false,
+      editorResolvedAfterActivation: false,
+      rowIndex: requestedRowIndex,
+      columnIndex,
+      containerIndex,
+    };
+    const rowIdentity = await row.evaluate((element) => {
+      const el = element as HTMLElement;
+      return el.getAttribute("data-row-id") || el.getAttribute("data-id") || el.getAttribute("aria-rowindex") || el.id || undefined;
+    }).catch(() => undefined);
+    const columnIdentity = await fallbackHeaders.nth(columnIndex).innerText().catch(() => fieldLabel);
+    const candidateDetails: NonNullable<typeof diagnostics.candidates> = [];
+    const inspectEditor = async (editor: Locator, locatorStrategy: string) => {
+      const details = await editor.evaluate((element) => {
+        const el = element as HTMLElement;
+        const tag = el.tagName.toLowerCase();
+        const role = el.getAttribute("role") || undefined;
+        const ariaHasPopup = el.getAttribute("aria-haspopup") || undefined;
+        const ariaExpanded = el.getAttribute("aria-expanded");
+        const contentEditable = el.isContentEditable;
+        const visible = Boolean(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
+        const enabled = !("disabled" in el) || !(el as HTMLInputElement).disabled;
+        const optionTexts = tag === "select"
+          ? Array.from((el as HTMLSelectElement).options).map((option) => option.textContent?.trim() || option.value).filter(Boolean)
+          : [];
+        return { tag, role, ariaHasPopup, ariaExpanded, contentEditable, visible, enabled, optionTexts };
+      }).catch(() => ({ tag: "unknown", role: undefined, ariaHasPopup: undefined, ariaExpanded: null, contentEditable: false, visible: false, enabled: false, optionTexts: [] as string[] }));
+      const editorBox = await editor.boundingBox().catch(() => null);
+      const cellBox = await cell.boundingBox().catch(() => null);
+      const boundingRelation = editorBox && cellBox
+        && editorBox.x >= cellBox.x - 1
+        && editorBox.y >= cellBox.y - 1
+        && editorBox.x + editorBox.width <= cellBox.x + cellBox.width + 1
+        && editorBox.y + editorBox.height <= cellBox.y + cellBox.height + 1
+        ? "cell" : editorBox && cellBox ? "outside_cell" : "unknown";
+      const candidate = {
+        rowIdentity,
+        columnIdentity,
+        associatedField: context.associatedField,
+        tag: details.tag,
+        role: details.role,
+        visible: details.visible,
+        enabled: details.enabled,
+        boundingRelation: boundingRelation as "cell" | "outside_cell" | "unknown",
+        availableOptionTexts: details.optionTexts,
+        locatorStrategy,
+        confidence: 0.95,
+      };
+      candidateDetails.push(candidate);
+      console.log(`[grid-selection-candidate] rowIdentity=${rowIdentity ?? "unresolved"} columnIdentity=${JSON.stringify(columnIdentity)} associatedField=${JSON.stringify(context.associatedField ?? "")} tag=${details.tag} role=${details.role ?? ""} visible=${details.visible} enabled=${details.enabled} boundingRelation=${candidate.boundingRelation} availableOptionTexts=${JSON.stringify(details.optionTexts)} locatorStrategy=${locatorStrategy} confidence=${candidate.confidence.toFixed(2)}`);
+      return { locator: editor, ...details, boundingRelation: candidate.boundingRelation };
+    };
+    const findEditor = async (): Promise<{ locator?: Locator; ambiguous?: boolean; cell?: Locator }> => {
+      const editors = cell.locator(
+        options.includeInteractiveControls ? GRID_INTERACTIVE_CONTROL_SELECTOR : GRID_EDITOR_SELECTOR,
+      );
+      const editorCount = await editors.count().catch(() => 0);
+      const candidates: Array<Awaited<ReturnType<typeof inspectEditor>>> = [];
+      for (let editorIndex = 0; editorIndex < editorCount; editorIndex += 1) {
+        const editor = editors.nth(editorIndex);
+        const inspected = await inspectEditor(editor, options.controlKind === "selection" ? "grid_cell_selection_control" : options.controlKind === "fill" ? "grid_cell_fill_control" : "grid_cell_editor");
+        if (inspected.visible && inspected.enabled && inspected.boundingRelation === "cell") candidates.push(inspected);
+      }
+    const selectionControls = candidates.filter((candidate) =>
+      candidate.tag === "select"
+      || candidate.role === "combobox"
+      || candidate.role === "button"
+      || (candidate.tag === "button" && !candidate.role)
+      || Boolean(candidate.ariaHasPopup)
+      || candidate.ariaExpanded !== null
+    );
+      const fillControls = candidates.filter((candidate) =>
+        candidate.tag === "input" || candidate.tag === "textarea" || candidate.role === "textbox" || candidate.role === "spinbutton"
+      );
+      let eligible = options.controlKind === "selection" ? selectionControls : options.controlKind === "fill" ? fillControls : candidates;
+      if (options.controlKind === "selection") {
+        const nativeOrCombobox = eligible.filter((candidate) => candidate.tag === "select" || candidate.role === "combobox");
+        if (nativeOrCombobox.length > 0) eligible = nativeOrCombobox;
+      }
+      if (options.optionText?.trim()) {
+        const wanted = normalizeText(options.optionText);
+        const compatible = eligible.filter((candidate) => candidate.optionTexts.some((option) => normalizeText(option) === wanted));
+        if (compatible.length > 0) eligible = compatible;
+        else if (eligible.some((candidate) => candidate.tag === "select")) eligible = [];
+        diagnostics.candidateCountAfterOptionCompatibility = compatible.length;
+      }
+      diagnostics.candidateCount = candidates.length;
+      diagnostics.candidateCountAfterControlType = eligible.length;
+      diagnostics.candidates = candidateDetails;
+      if (eligible.length > 1) return { ambiguous: true };
+      if (eligible.length === 1) return { locator: eligible[0].locator, cell };
+      return {};
+    };
+    const existingEditor = await findEditor();
+    if (existingEditor.ambiguous) return { ambiguous: true, diagnostics };
+    if (existingEditor.locator) {
+      diagnostics.editorInitiallyPresent = true;
+      return { locator: existingEditor.locator, cell, strategy: options.controlKind === "selection" ? "grid_cell_selection_control" : "grid_cell_editor", diagnostics };
+    }
+
+    if (options.allowActivation === false) return { cell, diagnostics };
+
+    diagnostics.cellActivationAttempted = true;
+    await cell.click().catch(() => undefined);
+    const deadline = Date.now() + 2000;
+    while (Date.now() < deadline) {
+      const activatedEditor = await findEditor();
+      if (activatedEditor.ambiguous) return { ambiguous: true, diagnostics };
+      if (activatedEditor.locator) {
+        diagnostics.editorResolvedAfterActivation = true;
+        return { locator: activatedEditor.locator, cell, strategy: options.controlKind === "selection" ? "grid_cell_selection_control_after_activation" : "grid_cell_editor_after_activation", diagnostics };
+      }
+      await page.waitForTimeout(100).catch(() => undefined);
+    }
+    return { diagnostics };
+  }
+  return empty;
+}
+
+async function findVisibleTextLocator(page: Page, target: string): Promise<Locator | undefined> {
+  const exactTarget = new RegExp(`^${escapeRegex(target)}$`, "i");
+  const candidates = page.getByText(exactTarget);
+  const count = await candidates.count().catch(() => 0);
+  for (let index = 0; index < count; index += 1) {
+    const candidate = candidates.nth(index);
+    if (await candidate.isVisible().catch(() => false)) return candidate;
+  }
+  return undefined;
+}
+
+async function resolveVisibleSelectionOption(page: Page, target: string): Promise<Locator | undefined> {
+  const optionTarget = normalizeText(target);
+  const optionMatches = async (candidate: Locator): Promise<boolean> => {
+    const text = await candidate.innerText().catch(() => "");
+    const normalized = normalizeText(text);
+    return normalized === optionTarget || normalized.includes(optionTarget) || optionTarget.includes(normalized);
+  };
+  const findOnce = async (): Promise<Locator | undefined> => {
+    const roleOption = page.getByRole("option", { name: new RegExp(escapeRegex(target), "i") });
+    if (await roleOption.count().catch(() => 0) > 0) {
+      for (let index = 0; index < await roleOption.count().catch(() => 0); index += 1) {
+        const candidate = roleOption.nth(index);
+        if (await candidate.isVisible().catch(() => false) && await optionMatches(candidate)) return candidate;
+      }
+    }
+    const buttonOption = page.getByRole("button", { name: new RegExp(escapeRegex(target), "i") });
+    const buttonCount = await buttonOption.count().catch(() => 0);
+    for (let index = 0; index < buttonCount; index += 1) {
+      const candidate = buttonOption.nth(index);
+      if (await candidate.isVisible().catch(() => false) && await optionMatches(candidate)) return candidate;
+    }
+    const textCandidates = page.getByText(new RegExp(escapeRegex(target), "i"));
+    const textCount = await textCandidates.count().catch(() => 0);
+    for (let index = 0; index < textCount; index += 1) {
+      const candidate = textCandidates.nth(index);
+      if (await candidate.isVisible().catch(() => false) && await optionMatches(candidate)) return candidate;
+    }
+    return undefined;
+  };
+  const deadline = Date.now() + 2000;
+  while (Date.now() < deadline) {
+    const option = await findOnce();
+    if (option) return option;
+    await page.waitForTimeout(100).catch(() => undefined);
+  }
+  return undefined;
+}
+
+type SelectionSurfaceSnapshot = {
+  key: string;
+  xpath: string;
+  type: string;
+  role?: string;
+  relatedId?: string;
+  visible: boolean;
+  portalized: boolean;
+  ariaControls?: string;
+  ariaOwns?: string;
+  optionCandidates: Array<{ xpath: string; text: string; value?: string; role?: string; marker?: string }>;
+};
+
+type SelectionTriggerState = {
+  text: string;
+  value: string;
+  ariaValueText: string;
+  ariaSelected: string;
+  ariaChecked: string;
+  dataValue: string;
+};
+
+function selectionFailureResult(
+  target: string,
+  reason: SelectionSurfaceDiagnostics["failureReason"],
+  diagnostics: SelectionSurfaceDiagnostics,
+  gridDiagnostics?: GridEditorResolution["diagnostics"],
+): TargetResolutionResult {
+  return {
+    status: reason === "ambiguous_option" ? "ambiguous" : "not_found",
+    target,
+    confidence: 0,
+    matchReason: reason ?? "selection_surface_not_observed",
+    candidateText: target,
+    candidates: [],
+    gridDiagnostics,
+    selectionDiagnostics: diagnostics,
+  };
+}
+
+async function installSelectionMutationObserver(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const runtimeWindow = window as typeof window & { __codexSelectionObserver?: MutationObserver; __codexSelectionMutationCount?: number };
+    runtimeWindow.__codexSelectionMutationCount = 0;
+    runtimeWindow.__codexSelectionObserver?.disconnect();
+    runtimeWindow.__codexSelectionObserver = new MutationObserver((records) => {
+      runtimeWindow.__codexSelectionMutationCount = (runtimeWindow.__codexSelectionMutationCount ?? 0) + records.length;
+    });
+    runtimeWindow.__codexSelectionObserver.observe(document.body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ["class", "style", "hidden", "aria-hidden", "aria-expanded", "aria-selected", "aria-checked", "data-state"]
+    });
+  }).catch(() => undefined);
+}
+
+async function readSelectionMutationCount(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    const runtimeWindow = window as typeof window & { __codexSelectionMutationCount?: number };
+    return runtimeWindow.__codexSelectionMutationCount ?? 0;
+  }).catch(() => 0);
+}
+
+async function removeSelectionMutationObserver(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const runtimeWindow = window as typeof window & { __codexSelectionObserver?: MutationObserver; __codexSelectionMutationCount?: number };
+    runtimeWindow.__codexSelectionObserver?.disconnect();
+    delete runtimeWindow.__codexSelectionObserver;
+    delete runtimeWindow.__codexSelectionMutationCount;
+  }).catch(() => undefined);
+}
+
+type ControlledSurfaceSnapshot = {
+  exists: boolean;
+  connected: boolean;
+  tag: string;
+  role: string;
+  hidden: boolean;
+  ariaHidden: string;
+  display: string;
+  visibility: string;
+  childCount: number;
+  textSummary: string;
+  roles: string[];
+  optionCount: number;
+  visibleOptionCount: number;
+  optionVisibility: string[];
+  visible: boolean;
+  selectionSurface?: SelectionSurfaceSnapshot;
+};
+
+type ControlledSurfacePoll = {
+  elapsedMs: number;
+  ariaExpanded: string;
+  ariaControls: string;
+  controlled: ControlledSurfaceSnapshot;
+  globalRoleOptionCount: number;
+  globalListboxCount: number;
+  globalMenuCount: number;
+  nativeOptionCount: number;
+  visibleSelectableCount: number;
+  mutationCount: number;
+};
+
+async function inspectControlledSurface(page: Page, id?: string): Promise<ControlledSurfaceSnapshot> {
+  if (!id) return { exists: false, connected: false, tag: "", role: "", hidden: false, ariaHidden: "", display: "", visibility: "", childCount: 0, textSummary: "empty", roles: [], optionCount: 0, visibleOptionCount: 0, optionVisibility: [], visible: false };
+  return page.evaluate((controlledId) => {
+    const node = document.getElementById(controlledId);
+    if (!node) return { exists: false, connected: false, tag: "", role: "", hidden: false, ariaHidden: "", display: "", visibility: "", childCount: 0, textSummary: "empty", roles: [], optionCount: 0, visibleOptionCount: 0, optionVisibility: [], visible: false };
+    const element = node as HTMLElement;
+    const style = window.getComputedStyle(element);
+    const visible = !element.hidden && element.getAttribute("aria-hidden") !== "true"
+      && style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity || "1") > 0
+      && Boolean(element.offsetWidth || element.offsetHeight || element.getClientRects().length);
+    const roles = Array.from(node.querySelectorAll("[role]")).map((child) => child.getAttribute("role") || "").filter(Boolean);
+    const uniqueRoles = [...new Set(roles)];
+    const options = Array.from(node.querySelectorAll("[role='option']"));
+    const optionVisibility = options.map((option) => {
+      const optionNode = option as HTMLElement;
+      const optionStyle = window.getComputedStyle(optionNode);
+      const optionVisible = !optionNode.hidden && optionNode.getAttribute("aria-hidden") !== "true"
+        && optionStyle.display !== "none" && optionStyle.visibility !== "hidden" && Number(optionStyle.opacity || "1") > 0
+        && Boolean(optionNode.offsetWidth || optionNode.offsetHeight || optionNode.getClientRects().length);
+      return `${optionVisible ? "visible" : "hidden"}|display=${optionStyle.display}|visibility=${optionStyle.visibility}|width=${optionNode.offsetWidth}|height=${optionNode.offsetHeight}`;
+    });
+    const xpathFor = (target: Element): string => {
+      const parts: string[] = [];
+      let current: Element | null = target;
+      while (current && current !== document.documentElement) {
+        let index = 1;
+        let sibling = current.previousElementSibling;
+        while (sibling) {
+          if (sibling.tagName === current.tagName) index++;
+          sibling = sibling.previousElementSibling;
+        }
+        parts.unshift(`${current.tagName.toLowerCase()}[${index}]`);
+        current = current.parentElement;
+      }
+      return `/html/${parts.join("/")}`;
+    };
+    const optionSelector = "[role='option'], [role='menuitem'], [role='menuitemradio'], [role='menuitemcheckbox'], [data-value], [data-radix-collection-item], button";
+    const surfaceOptions = Array.from(node.querySelectorAll(optionSelector))
+      .filter((candidate) => {
+        const candidateNode = candidate as HTMLElement;
+        const candidateStyle = window.getComputedStyle(candidateNode);
+        return !candidateNode.hidden && candidateNode.getAttribute("aria-hidden") !== "true"
+          && candidateStyle.display !== "none" && candidateStyle.visibility !== "hidden"
+          && Number(candidateStyle.opacity || "1") > 0 && (visible || Boolean(candidateNode.offsetWidth || candidateNode.offsetHeight || candidateNode.getClientRects().length));
+      })
+      .map((candidate, candidateIndex) => {
+        const candidateNode = candidate as HTMLElement;
+        const marker = `codex-selection-option-${Date.now()}-${candidateIndex}-${Math.random().toString(36).slice(2)}`;
+        candidateNode.setAttribute("data-codex-selection-option", marker);
+        return {
+          xpath: xpathFor(candidate),
+          text: (candidateNode.innerText || candidateNode.textContent || "").trim(),
+          value: candidateNode.getAttribute("data-value") || candidateNode.getAttribute("value") || undefined,
+          role: candidateNode.getAttribute("role") || undefined,
+          marker,
+        };
+      })
+      .filter((candidate) => Boolean(candidate.text || candidate.value));
+    const text = (element.innerText || element.textContent || "").trim();
+    return {
+      exists: true,
+      connected: node.isConnected,
+      tag: node.tagName.toLowerCase(),
+      role: node.getAttribute("role") || "",
+      hidden: element.hidden,
+      ariaHidden: node.getAttribute("aria-hidden") || "",
+      display: style.display,
+      visibility: style.visibility,
+      childCount: node.children.length,
+      textSummary: text ? `non-empty(${text.length})` : "empty",
+      roles: uniqueRoles,
+      optionCount: options.length,
+      visibleOptionCount: optionVisibility.filter((item) => item.startsWith("visible|" )).length,
+      optionVisibility,
+      visible,
+      selectionSurface: {
+        key: node.id ? `id:${node.id}` : xpathFor(node),
+        xpath: xpathFor(node),
+        type: node.getAttribute("role") || (node.hasAttribute("popover") ? "popover" : "surface"),
+        role: node.getAttribute("role") || undefined,
+        relatedId: controlledId,
+        visible: visible || surfaceOptions.length > 0,
+        portalized: !node.closest("td, th, [role='gridcell']"),
+        ariaControls: node.getAttribute("aria-controls") || undefined,
+        ariaOwns: node.getAttribute("aria-owns") || undefined,
+        optionCandidates: surfaceOptions,
+      },
+    };
+  }, id).catch(() => ({ exists: false, connected: false, tag: "", role: "", hidden: false, ariaHidden: "", display: "", visibility: "", childCount: 0, textSummary: "empty", roles: [], optionCount: 0, visibleOptionCount: 0, optionVisibility: [], visible: false }));
+}
+
+async function inspectGlobalSelectableCounts(page: Page): Promise<Pick<ControlledSurfacePoll, "globalRoleOptionCount" | "globalListboxCount" | "globalMenuCount" | "nativeOptionCount" | "visibleSelectableCount">> {
+  return page.evaluate(() => {
+    const isVisible = (element: Element): boolean => {
+      const node = element as HTMLElement;
+      const style = window.getComputedStyle(node);
+      return !node.hidden && node.getAttribute("aria-hidden") !== "true" && style.display !== "none" && style.visibility !== "hidden"
+        && Number(style.opacity || "1") > 0 && Boolean(node.offsetWidth || node.offsetHeight || node.getClientRects().length);
+    };
+    const roleOptions = document.querySelectorAll("[role='option']").length;
+    const listboxes = document.querySelectorAll("[role='listbox']").length;
+    const menus = document.querySelectorAll("[role='menu']").length;
+    const nativeOptions = document.querySelectorAll("select option").length;
+    const selectable = Array.from(document.querySelectorAll("[role='option'], [role='menuitem'], [role='menuitemradio'], [role='menuitemcheckbox'], select option, [data-value], button")).filter(isVisible).length;
+    return { globalRoleOptionCount: roleOptions, globalListboxCount: listboxes, globalMenuCount: menus, nativeOptionCount: nativeOptions, visibleSelectableCount: selectable };
+  }).catch(() => ({ globalRoleOptionCount: 0, globalListboxCount: 0, globalMenuCount: 0, nativeOptionCount: 0, visibleSelectableCount: 0 }));
+}
+
+async function readSelectionTriggerMeta(trigger: Locator): Promise<{ identity: string; role: string; ariaExpanded: string; ariaControls: string; present: boolean }> {
+  if (await trigger.count().catch(() => 0) === 0) return { identity: "detached", role: "", ariaExpanded: "", ariaControls: "", present: false };
+  return trigger.evaluate((element) => ({
+    identity: `${element.tagName.toLowerCase()}|role=${element.getAttribute("role") || ""}|aria-controls=${element.hasAttribute("aria-controls") ? "present" : "absent"}`,
+    role: element.getAttribute("role") || "",
+    ariaExpanded: element.getAttribute("aria-expanded") || "",
+    ariaControls: (element.getAttribute("aria-controls") || "").split(/\s+/).filter(Boolean)[0] || "",
+    present: true,
+  })).catch(() => ({ identity: "detached", role: "", ariaExpanded: "", ariaControls: "", present: false }));
+}
+
+async function collectControlledSurfaceDiagnostics(
+  page: Page,
+  trigger: Locator,
+  beforeIds: string[],
+): Promise<{ before: ControlledSurfaceSnapshot; after: ControlledSurfaceSnapshot; polls: ControlledSurfacePoll[]; meta: Awaited<ReturnType<typeof readSelectionTriggerMeta>>; surface?: SelectionSurfaceSnapshot; }> {
+  const before = await inspectControlledSurface(page, beforeIds[0]);
+  const polls: ControlledSurfacePoll[] = [];
+  const startedAt = Date.now();
+  const offsets = [0, 50, 100, 250, 500, 1000];
+  for (const offset of offsets) {
+    const remaining = offset - (Date.now() - startedAt);
+    if (remaining > 0) await page.waitForTimeout(remaining).catch(() => undefined);
+    const meta = await readSelectionTriggerMeta(trigger);
+    const controlledId = meta.ariaControls || beforeIds[0] || "";
+    const controlled = await inspectControlledSurface(page, controlledId);
+    const global = await inspectGlobalSelectableCounts(page);
+    polls.push({ elapsedMs: Date.now() - startedAt, ariaExpanded: meta.ariaExpanded, ariaControls: meta.ariaControls, controlled, ...global, mutationCount: await readSelectionMutationCount(page) });
+  }
+  const meta = await readSelectionTriggerMeta(trigger);
+  const after = await inspectControlledSurface(page, meta.ariaControls || beforeIds[0]);
+  console.log(`[selection-controlled-surface] comboboxIdentity=${meta.identity} ariaExpanded=${meta.ariaExpanded} ariaControlsValue=${meta.ariaControls || "none"} controlledNodeExists=${after.exists} controlledNodeConnected=${after.connected} controlledNodeTag=${after.tag || "none"} controlledNodeRole=${after.role || "none"} controlledNodeHidden=${after.hidden} controlledNodeAriaHidden=${after.ariaHidden || "none"} controlledNodeDisplay=${after.display || "none"} controlledNodeVisibility=${after.visibility || "none"} controlledNodeChildCount=${after.childCount} controlledNodeTextSummary=${after.textSummary} controlledNodeRoles=${JSON.stringify(after.roles)} controlledNodeOptionCount=${after.optionCount} controlledNodeVisibleOptionCount=${after.visibleOptionCount} controlledNodeOptionVisibility=${JSON.stringify(after.optionVisibility)}`);
+  for (const poll of polls) console.log(`[selection-controlled-poll] elapsedMs=${poll.elapsedMs} ariaExpanded=${poll.ariaExpanded} controlledNodeExists=${poll.controlled.exists} controlledNodeVisible=${poll.controlled.visible} roleOptionCount=${poll.controlled.optionCount} visibleRoleOptionCount=${poll.controlled.visibleOptionCount} globalRoleOptionCount=${poll.globalRoleOptionCount} globalListboxCount=${poll.globalListboxCount} globalMenuCount=${poll.globalMenuCount} nativeOptionCount=${poll.nativeOptionCount} visibleSelectableCount=${poll.visibleSelectableCount} domMutationCount=${poll.mutationCount}`);
+  return { before, after, polls, meta, surface: after.selectionSurface };
+}
+
+function controlledSurfaceLifecycle(before: ControlledSurfaceSnapshot, after: ControlledSurfaceSnapshot, polls: ControlledSurfacePoll[]): SelectionSurfaceDiagnostics["controlledSurfaceLifecycle"] {
+  if (!before.exists && after.exists) return "inserted";
+  if (before.exists && !after.exists) return "missing";
+  if (before.exists && before.hidden && after.visible) return "visibility_changed";
+  if (before.exists && before.childCount !== after.childCount) return "children_changed";
+  if (after.exists && polls.some((poll) => poll.globalRoleOptionCount > 0) && after.optionCount === 0) return "outside_controlled_node";
+  return after.exists ? "unchanged" : "missing";
+}
+
+async function inspectSelectionSurfaces(page: Page, relatedIds: string[] = []): Promise<SelectionSurfaceSnapshot[]> {
+  return page.evaluate((ids) => {
+    const visible = (element: Element): boolean => {
+      const node = element as HTMLElement;
+      if (node.hidden || node.getAttribute("aria-hidden") === "true") return false;
+      const style = window.getComputedStyle(node);
+      return style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity || "1") > 0
+        && Boolean(node.offsetWidth || node.offsetHeight || node.getClientRects().length);
+    };
+    const xpathFor = (element: Element): string => {
+      const parts: string[] = [];
+      let current: Element | null = element;
+      while (current && current !== document.documentElement) {
+        let index = 1;
+        let sibling = current.previousElementSibling;
+        while (sibling) {
+          if (sibling.tagName === current.tagName) index++;
+          sibling = sibling.previousElementSibling;
+        }
+        parts.unshift(`${current.tagName.toLowerCase()}[${index}]`);
+        current = current.parentElement;
+      }
+      return `/html/${parts.join("/")}`;
+    };
+    const surfaceSelector = "[role='listbox'], [role='menu'], [role='dialog'], [aria-modal='true'], [popover]";
+    const optionSelector = "[role='option'], [role='menuitem'], [role='menuitemradio'], [role='menuitemcheckbox'], [data-value], [data-radix-collection-item], button";
+    const roots = new Map<Element, string | undefined>();
+    for (const element of Array.from(document.querySelectorAll(surfaceSelector))) roots.set(element, undefined);
+    for (const id of ids) {
+      const related = document.getElementById(id);
+      if (!related) continue;
+      // aria-controls/aria-owns may point at a semantic surface, a zero-size
+      // viewport, or an implementation wrapper. Keep the relationship while
+      // walking only the local portal ancestry; never fall back to body-wide
+      // option discovery.
+      let current: Element | null = related;
+      for (let depth = 0; current && current !== document.body && current !== document.documentElement && depth < 6; depth += 1) {
+        roots.set(current, id);
+        current = current.parentElement;
+      }
+    }
+    // Custom controls may render role=option items in a portal container that
+    // has no listbox/menu role. Treat the nearest option-owning container as a
+    // candidate surface; causal binding is still enforced later by the
+    // trigger relationship or post-activation mutation evidence.
+    for (const option of Array.from(document.querySelectorAll("[role='option'], [role='menuitem'], [role='menuitemradio'], [role='menuitemcheckbox']"))) {
+      let owner = option.parentElement;
+      let depth = 0;
+      while (owner && owner !== document.body && owner !== document.documentElement && depth < 4) {
+        roots.set(owner, undefined);
+        if (owner.getAttribute("role") === "listbox" || owner.getAttribute("role") === "menu") break;
+        owner = owner.parentElement;
+        depth += 1;
+      }
+    }
+    const snapshots: SelectionSurfaceSnapshot[] = [];
+    for (const [root, relatedId] of roots) {
+      const role = root.getAttribute("role") || undefined;
+      const type = role || (root.hasAttribute("popover") ? "popover" : "surface");
+      const relatedControlledRoot = relatedId ? document.getElementById(relatedId) : undefined;
+      const optionCandidates = Array.from(root.querySelectorAll(optionSelector))
+        .filter((candidate) => {
+          if (visible(candidate)) return true;
+          // Custom listboxes can keep the option's own box at zero size while
+          // the related controlled surface owns the visible interaction area.
+          // The aria-controls/aria-owns relationship is the authority here;
+          // do not broaden this to unrelated page-wide options.
+          if (!relatedControlledRoot || !relatedControlledRoot.contains(candidate) || !visible(relatedControlledRoot)) return false;
+          const node = candidate as HTMLElement;
+          const style = window.getComputedStyle(node);
+          return !node.hidden && node.getAttribute("aria-hidden") !== "true"
+            && style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity || "1") > 0;
+        })
+        .map((candidate, candidateIndex) => {
+          const element = candidate as HTMLElement;
+          const marker = `codex-selection-option-${Date.now()}-${candidateIndex}-${Math.random().toString(36).slice(2)}`;
+          element.setAttribute("data-codex-selection-option", marker);
+          return {
+            xpath: xpathFor(candidate),
+            text: (element.innerText || element.textContent || "").trim(),
+            value: element.getAttribute("data-value") || element.getAttribute("value") || undefined,
+            role: element.getAttribute("role") || undefined,
+            marker,
+          };
+        })
+        .filter((candidate) => Boolean(candidate.text || candidate.value));
+      // Some portal implementations keep the related content wrapper at
+      // zero-size while its viewport/items carry the visible geometry.
+      const rootVisible = visible(root) || optionCandidates.length > 0;
+      snapshots.push({
+        key: root.id ? `id:${root.id}` : xpathFor(root),
+        xpath: xpathFor(root),
+        type,
+        role,
+        relatedId,
+        visible: rootVisible,
+        portalized: !root.closest("td, th, [role='gridcell']"),
+        ariaControls: root.getAttribute("aria-controls") || undefined,
+        ariaOwns: root.getAttribute("aria-owns") || undefined,
+        optionCandidates,
+      });
+    }
+    return snapshots;
+  }, relatedIds).catch(() => []);
+}
+
+/**
+ * Capture the controlled surface at the same observation instant as the
+ * trigger metadata. Some portal implementations replace or detach the
+ * wrapper before the subsequent global scan, so the direct ARIA relationship
+ * must remain the causal source of the snapshot.
+ */
+async function inspectRelatedControlledSurface(page: Page, id?: string): Promise<SelectionSurfaceSnapshot | undefined> {
+  if (!id) return undefined;
+  return page.evaluate((controlledId) => {
+    const root = document.getElementById(controlledId);
+    if (!root) return undefined;
+    const xpathFor = (element: Element): string => {
+      const parts: string[] = [];
+      let current: Element | null = element;
+      while (current && current !== document.documentElement) {
+        let index = 1;
+        let sibling = current.previousElementSibling;
+        while (sibling) {
+          if (sibling.tagName === current.tagName) index++;
+          sibling = sibling.previousElementSibling;
+        }
+        parts.unshift(`${current.tagName.toLowerCase()}[${index}]`);
+        current = current.parentElement;
+      }
+      return `/html/${parts.join("/")}`;
+    };
+    const isVisible = (element: Element): boolean => {
+      const node = element as HTMLElement;
+      const style = window.getComputedStyle(node);
+      return !node.hidden && node.getAttribute("aria-hidden") !== "true"
+        && style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity || "1") > 0
+        && Boolean(node.offsetWidth || node.offsetHeight || node.getClientRects().length);
+    };
+    const optionSelector = "[role='option'], [role='menuitem'], [role='menuitemradio'], [role='menuitemcheckbox'], [data-value], [data-radix-collection-item], button";
+    const rootVisible = isVisible(root);
+    const optionCandidates = Array.from(root.querySelectorAll(optionSelector))
+      .filter((candidate) => {
+        if (isVisible(candidate)) return true;
+        const node = candidate as HTMLElement;
+        const style = window.getComputedStyle(node);
+        return rootVisible && !node.hidden && node.getAttribute("aria-hidden") !== "true"
+          && style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity || "1") > 0;
+      })
+      .map((candidate, candidateIndex) => {
+        const node = candidate as HTMLElement;
+        const marker = `codex-selection-option-${Date.now()}-${candidateIndex}-${Math.random().toString(36).slice(2)}`;
+        node.setAttribute("data-codex-selection-option", marker);
+        return {
+          xpath: xpathFor(candidate),
+          text: (node.innerText || node.textContent || "").trim(),
+          value: node.getAttribute("data-value") || node.getAttribute("value") || undefined,
+          role: node.getAttribute("role") || undefined,
+          marker,
+        };
+      })
+      .filter((candidate) => Boolean(candidate.text || candidate.value));
+    return {
+      key: root.id ? `id:${root.id}` : xpathFor(root),
+      xpath: xpathFor(root),
+      type: root.getAttribute("role") || (root.hasAttribute("popover") ? "popover" : "surface"),
+      role: root.getAttribute("role") || undefined,
+      relatedId: controlledId,
+      visible: rootVisible || optionCandidates.length > 0,
+      portalized: !root.closest("td, th, [role='gridcell']"),
+      ariaControls: root.getAttribute("aria-controls") || undefined,
+      ariaOwns: root.getAttribute("aria-owns") || undefined,
+      optionCandidates,
+    };
+  }, id).catch(() => undefined);
+}
+
+async function captureSelectionTriggerState(trigger: Locator): Promise<SelectionTriggerState> {
+  if (await trigger.count().catch(() => 0) === 0) {
+    return { text: "", value: "", ariaValueText: "", ariaSelected: "", ariaChecked: "", dataValue: "" };
+  }
+  return trigger.evaluate((element) => {
+    const node = element as HTMLInputElement;
+    return {
+      text: (node.innerText || node.textContent || "").trim(),
+      value: node.value || "",
+      ariaValueText: node.getAttribute("aria-valuetext") || "",
+      ariaSelected: node.getAttribute("aria-selected") || "",
+      ariaChecked: node.getAttribute("aria-checked") || "",
+      dataValue: node.getAttribute("data-value") || "",
+    };
+  }).catch(() => ({ text: "", value: "", ariaValueText: "", ariaSelected: "", ariaChecked: "", dataValue: "" }));
+}
+
+async function getSelectionTriggerRelationship(trigger: Locator): Promise<{ controls: string[]; owns: string[] }> {
+  if (await trigger.count().catch(() => 0) === 0) return { controls: [], owns: [] };
+  return trigger.evaluate((element) => ({
+    controls: (element.getAttribute("aria-controls") || "").split(/\s+/).filter(Boolean),
+    owns: (element.getAttribute("aria-owns") || "").split(/\s+/).filter(Boolean),
+  })).catch(() => ({ controls: [], owns: [] }));
+}
+
+async function resolveStableSelectionCell(page: Page, trigger: Locator): Promise<Locator | undefined> {
+  const token = await trigger.evaluate((element) => {
+    const cell = element.closest("td, th, [role='gridcell']");
+    if (!cell) return "";
+    const value = `selection-cell-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    cell.setAttribute("data-codex-selection-cell", value);
+    return value;
+  }).catch(() => "");
+  if (!token) return undefined;
+  const cell = page.locator(`[data-codex-selection-cell="${escapeRegex(token)}"]`);
+  return await cell.count().catch(() => 0) > 0 ? cell : undefined;
+}
+
+async function verifySelectionState(
+  trigger: Locator,
+  optionTarget: string,
+  before: SelectionTriggerState,
+  beforeCellText: string,
+  surfaceBefore: SelectionSurfaceSnapshot[],
+  stableCell?: Locator,
+): Promise<{ verified: boolean; overlayClosed: boolean }> {
+  const wanted = normalizeText(optionTarget);
+  const cell = stableCell ?? trigger.locator("xpath=ancestor::*[self::td or @role='gridcell'][1]");
+  const cellPresent = await cell.count().catch(() => 0) > 0;
+  const deadline = Date.now() + 1800;
+  while (Date.now() < deadline) {
+    const state = await captureSelectionTriggerState(trigger);
+    const cellText = await cell.innerText().catch(() => "");
+    const normalizedState = normalizeText([state.text, state.value, state.ariaValueText, state.dataValue].join(" "));
+    const stateChanged = JSON.stringify(state) !== JSON.stringify(before);
+    const cellChanged = Boolean(beforeCellText) && cellText !== beforeCellText;
+    const valueMatches = normalizedState === wanted || normalizedState.includes(wanted);
+    const cellMatches = normalizeText(cellText).includes(wanted);
+    const selectedState = /true|selected|checked/i.test(`${state.ariaSelected} ${state.ariaChecked}`);
+    const surfacesAfter = await inspectSelectionSurfaces(trigger.page());
+    const overlayClosed = surfaceBefore.some((surface) => surface.visible)
+      ? !surfacesAfter.some((surface) => surface.visible && surface.key === surfaceBefore.find((candidate) => candidate.visible)?.key)
+      : true;
+    if ((valueMatches || cellMatches || (stateChanged && selectedState && cellChanged)) && (stateChanged || cellChanged)) {
+      console.log(`[selection-surface-verify] cellPresent=${cellPresent} stateChanged=${stateChanged} cellChanged=${cellChanged} valueMatches=${valueMatches} cellMatches=${cellMatches} selectedState=${selectedState} overlayClosed=${overlayClosed}`);
+      return { verified: true, overlayClosed };
+    }
+    await trigger.page().waitForTimeout(100).catch(() => undefined);
+  }
+  console.log(`[selection-surface-verify] cellPresent=${cellPresent} stateChanged=false cellChanged=false valueMatches=false cellMatches=false selectedState=false overlayClosed=false`);
+  return { verified: false, overlayClosed: false };
+}
+
+/**
+ * Opens a resolved selection trigger and resolves only options on a surface
+ * causally associated with that activation. The surface may be portalized.
+ */
+type DynamicEditorControlSnapshot = {
+  identity: string;
+  tag: string;
+  role?: string;
+  visible: boolean;
+  enabled: boolean;
+  editable: boolean;
+  selectionAffordance: boolean;
+};
+
+type DynamicEditorSnapshot = {
+  cellIdentity: string;
+  targetIdentity: string;
+  targetTag: string;
+  targetRole: string;
+  targetAttributes: string[];
+  ariaExpanded: string;
+  ariaHaspopup: string;
+  ariaControls: string;
+  tabindex: string;
+  activeElementIdentity: string;
+  editableDescendants: number;
+  selectableDescendants: number;
+  visibleDescendants: number;
+  controls: DynamicEditorControlSnapshot[];
+};
+
+type DynamicEditorProgress = {
+  targetIdentityChanged: boolean;
+  domReplaced: boolean;
+  roleChanged: boolean;
+  newDescendants: number;
+  activeElementChanged: boolean;
+  newEditableControl: boolean;
+  newSelectableControl: boolean;
+  observableProgress: boolean;
+};
+
+function dynamicEditorStateFor(snapshot: DynamicEditorSnapshot, surfaceObserved = false): SelectionSurfaceDiagnostics["initialState"] {
+  if (surfaceObserved) return "OPTIONS_VISIBLE";
+  if (snapshot.selectableDescendants > 0 || snapshot.targetRole === "combobox" || snapshot.targetTag === "select") return "SELECTION_CONTROL_READY";
+  if (snapshot.editableDescendants > 0) return "EDITOR_MATERIALIZED";
+  return "DISPLAY";
+}
+
+async function captureDynamicEditorSnapshot(cell: Locator, trigger?: Locator): Promise<DynamicEditorSnapshot> {
+  const cellSnapshot = await cell.evaluate((element) => {
+    const identity = (node: Element | null): string => {
+      if (!node) return "";
+      const attrs = ["data-testid", "data-row-id", "data-id", "id", "name", "aria-controls", "aria-haspopup", "aria-label", "role", "tabindex"]
+        .map((name) => `${name}=${node.getAttribute(name) || ""}`)
+        .join("|");
+      return `${node.tagName.toLowerCase()}|${attrs}`;
+    };
+    const visible = (node: Element): boolean => {
+      const element = node as HTMLElement;
+      if (element.hidden || element.getAttribute("aria-hidden") === "true") return false;
+      const style = window.getComputedStyle(element);
+      return style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity || "1") > 0
+        && Boolean(element.offsetWidth || element.offsetHeight || element.getClientRects().length);
+    };
+    const enabled = (node: Element): boolean => !("disabled" in node) || !(node as HTMLInputElement).disabled;
+    const controls = Array.from(element.querySelectorAll("select, input, textarea, [contenteditable='true'], [role='textbox'], [role='combobox'], [aria-haspopup], button, [role='button']"))
+      .map((node) => {
+        const tag = node.tagName.toLowerCase();
+        const role = node.getAttribute("role") || undefined;
+        const editable = tag === "input" || tag === "textarea" || node.getAttribute("contenteditable") === "true" || role === "textbox";
+        const selectionAffordance = tag === "select" || role === "combobox" || Boolean(node.getAttribute("aria-haspopup")) || role === "button" || tag === "button";
+        return { identity: identity(node), tag, role, visible: visible(node), enabled: enabled(node), editable, selectionAffordance };
+      });
+    const activeElement = document.activeElement && element.contains(document.activeElement) ? document.activeElement : null;
+    return {
+      cellIdentity: identity(element),
+      activeElementIdentity: identity(activeElement),
+      editableDescendants: controls.filter((control) => control.editable && control.visible && control.enabled).length,
+      selectableDescendants: controls.filter((control) => control.selectionAffordance && control.visible && control.enabled).length,
+      visibleDescendants: controls.filter((control) => control.visible).length,
+      controls,
+    };
+  }).catch(() => ({ cellIdentity: "", activeElementIdentity: "", editableDescendants: 0, selectableDescendants: 0, visibleDescendants: 0, controls: [] as DynamicEditorControlSnapshot[] }));
+  const triggerState = trigger && await trigger.count().catch(() => 0) > 0
+    ? await trigger.evaluate((element) => ({
+        targetIdentity: ["data-testid", "data-row-id", "data-id", "id", "name", "aria-controls", "aria-haspopup", "aria-label", "role", "tabindex"]
+          .map((name) => `${name}=${element.getAttribute(name) || ""}`).join("|"),
+        targetTag: element.tagName.toLowerCase(),
+        targetRole: element.getAttribute("role") || "",
+        targetAttributes: Array.from(element.attributes).map((attribute) => attribute.name),
+        ariaExpanded: element.getAttribute("aria-expanded") || "",
+        ariaHaspopup: element.getAttribute("aria-haspopup") || "",
+        ariaControls: element.getAttribute("aria-controls") || "",
+        tabindex: element.getAttribute("tabindex") || "",
+      })).catch(() => ({ targetIdentity: "", targetTag: "", targetRole: "", targetAttributes: [], ariaExpanded: "", ariaHaspopup: "", ariaControls: "", tabindex: "" }))
+    : { targetIdentity: "", targetTag: "", targetRole: "", targetAttributes: [], ariaExpanded: "", ariaHaspopup: "", ariaControls: "", tabindex: "" };
+  return { ...cellSnapshot, ...triggerState };
+}
+
+function compareDynamicEditorSnapshots(before: DynamicEditorSnapshot, after: DynamicEditorSnapshot): DynamicEditorProgress {
+  const beforeIdentities = new Set(before.controls.map((control) => control.identity));
+  const afterIdentities = new Set(after.controls.map((control) => control.identity));
+  const newDescendants = after.controls.filter((control) => !beforeIdentities.has(control.identity)).length;
+  const newEditableControl = after.controls.some((control) => control.editable && control.visible && control.enabled && !beforeIdentities.has(control.identity));
+  const newSelectableControl = after.controls.some((control) => control.selectionAffordance && control.visible && control.enabled && !beforeIdentities.has(control.identity));
+  const roleChanged = before.targetRole !== after.targetRole || before.targetTag !== after.targetTag || before.ariaExpanded !== after.ariaExpanded || before.ariaHaspopup !== after.ariaHaspopup || before.ariaControls !== after.ariaControls;
+  const targetIdentityChanged = Boolean(before.targetIdentity && after.targetIdentity && before.targetIdentity !== after.targetIdentity);
+  const domReplaced = targetIdentityChanged || beforeIdentities.size !== afterIdentities.size || [...beforeIdentities].some((identity) => !afterIdentities.has(identity));
+  const activeElementChanged = before.activeElementIdentity !== after.activeElementIdentity && Boolean(after.activeElementIdentity);
+  const observableProgress = domReplaced || roleChanged || activeElementChanged || newEditableControl || newSelectableControl;
+  return { targetIdentityChanged, domReplaced, roleChanged, newDescendants, activeElementChanged, newEditableControl, newSelectableControl, observableProgress };
+}
+
+async function findRematerializedEditor(
+  cell: Locator,
+  before: DynamicEditorSnapshot,
+): Promise<{ locator?: Locator; snapshot?: DynamicEditorControlSnapshot }> {
+  const controls = cell.locator("select, input, textarea, [contenteditable='true'], [role='textbox'], [role='combobox'], [aria-haspopup], button, [role='button']");
+  const count = await controls.count().catch(() => 0);
+  const candidates: Array<{ locator: Locator; snapshot: DynamicEditorControlSnapshot; score: number }> = [];
+  for (let index = 0; index < count; index += 1) {
+    const locator = controls.nth(index);
+    const snapshot = await locator.evaluate((element) => {
+      const tag = element.tagName.toLowerCase();
+      const role = element.getAttribute("role") || undefined;
+      const editable = tag === "input" || tag === "textarea" || element.getAttribute("contenteditable") === "true" || role === "textbox";
+      const selectionAffordance = tag === "select" || role === "combobox" || Boolean(element.getAttribute("aria-haspopup")) || role === "button" || tag === "button";
+      const visible = Boolean((element as HTMLElement).offsetWidth || (element as HTMLElement).offsetHeight || element.getClientRects().length);
+      const enabled = !("disabled" in element) || !(element as HTMLInputElement).disabled;
+      return {
+        identity: ["data-testid", "data-row-id", "data-id", "id", "name", "aria-controls", "aria-haspopup", "aria-label", "role", "tabindex"]
+          .map((name) => `${name}=${element.getAttribute(name) || ""}`).join("|"),
+        tag, role, visible, enabled, editable, selectionAffordance,
+      };
+    }).catch(() => undefined);
+    if (!snapshot || !snapshot.visible || !snapshot.enabled || before.controls.some((control) => control.identity === snapshot.identity)) continue;
+    const score = (snapshot.role === "combobox" || snapshot.tag === "select" ? 4 : snapshot.selectionAffordance ? 3 : snapshot.editable ? 2 : 0);
+    if (score > 0) candidates.push({ locator, snapshot, score });
+  }
+  if (candidates.length === 0) return {};
+  const bestScore = Math.max(...candidates.map((candidate) => candidate.score));
+  const best = candidates.filter((candidate) => candidate.score === bestScore);
+  if (best.length !== 1) return {};
+  return { locator: best[0].locator, snapshot: best[0].snapshot };
+}
+
+async function resolveAndApplySelectionSurfaceOnce(
+  page: Page,
+  trigger: Locator,
+  optionTarget: string,
+  triggerStrategy: string,
+  gridDiagnostics?: GridEditorResolution["diagnostics"],
+  activationAlreadyPerformed = false,
+): Promise<TargetResolutionResult> {
+  const beforeSurfaces = await inspectSelectionSurfaces(page);
+  const beforeState = await captureSelectionTriggerState(trigger);
+  const stableCell = await resolveStableSelectionCell(page, trigger);
+  const beforeCellText = await stableCell?.innerText().catch(() => "") ?? "";
+  const relationshipBefore = await getSelectionTriggerRelationship(trigger);
+  const controlledBefore = await inspectControlledSurface(page, relationshipBefore.controls[0] || relationshipBefore.owns[0]);
+  console.log(`[selection-controlled-before] ariaControlsValue=${relationshipBefore.controls[0] || "none"} controlledNodeExists=${controlledBefore.exists} controlledNodeConnected=${controlledBefore.connected} controlledNodeTag=${controlledBefore.tag || "none"} controlledNodeRole=${controlledBefore.role || "none"} controlledNodeHidden=${controlledBefore.hidden} controlledNodeAriaHidden=${controlledBefore.ariaHidden || "none"} controlledNodeDisplay=${controlledBefore.display || "none"} controlledNodeVisibility=${controlledBefore.visibility || "none"} controlledNodeChildCount=${controlledBefore.childCount} controlledNodeTextSummary=${controlledBefore.textSummary} controlledNodeRoles=${JSON.stringify(controlledBefore.roles)}`);
+  let controlledDiagnostics: Awaited<ReturnType<typeof collectControlledSurfaceDiagnostics>> | undefined;
+  await installSelectionMutationObserver(page);
+  if (!activationAlreadyPerformed) {
+    try {
+      console.log(`[selection-surface-activation] triggerCount=${await trigger.count().catch(() => 0)} action=click`);
+      await trigger.click();
+      console.log(`[selection-surface-activation] action=click completed=true`);
+    } catch {
+      await removeSelectionMutationObserver(page);
+      return selectionFailureResult(optionTarget, "selection_surface_not_observed", {
+        triggerResolved: true,
+        triggerStrategy,
+        ariaRelationshipFound: false,
+        surfaceCausallyBound: false,
+        optionCandidateCount: 0,
+        desiredOptionFound: false,
+        stateVerified: false,
+        failureReason: "selection_surface_not_observed",
+      }, gridDiagnostics);
+    }
+  }
+  const triggerStillConnected = await trigger.count().catch(() => 0) > 0;
+  controlledDiagnostics = activationAlreadyPerformed && !triggerStillConnected
+    ? undefined
+    : await collectControlledSurfaceDiagnostics(page, trigger, [...relationshipBefore.controls, ...relationshipBefore.owns]);
+  const observeUntil = Date.now() + 2000;
+  let mutationCount = 0;
+  let afterSurfaces: SelectionSurfaceSnapshot[] = [];
+  let relationshipAfter = { controls: [] as string[], owns: [] as string[] };
+  const beforeByKey = new Map(beforeSurfaces.map((surface) => [surface.key, surface]));
+  const findCausalSurfaces = (surfaces: SelectionSurfaceSnapshot[], relationship: { controls: string[]; owns: string[] }) => {
+    const relatedIds = new Set([...relationship.controls, ...relationship.owns]);
+    return surfaces.filter((surface) => {
+      if (!surface.visible) return false;
+      const related = (surface.key.startsWith("id:") && relatedIds.has(surface.key.slice(3)))
+        || Boolean(surface.relatedId && relatedIds.has(surface.relatedId))
+        || relationship.controls.includes(surface.key) || relationship.owns.includes(surface.key);
+      const before = beforeByKey.get(surface.key);
+      const newlyVisible = !before || !before.visible;
+      return related
+        || (newlyVisible && mutationCount > 0)
+        || (activationAlreadyPerformed && !surface.portalized && surface.optionCandidates.length > 0);
+    });
+  };
+  let causalSurfaces: SelectionSurfaceSnapshot[] = [];
+  const directControlledSurface = controlledDiagnostics?.surface
+    ?? await inspectRelatedControlledSurface(page, controlledDiagnostics?.meta.ariaControls || relationshipBefore.controls[0] || relationshipBefore.owns[0]);
+  if (directControlledSurface) {
+    afterSurfaces = [directControlledSurface];
+    causalSurfaces = findCausalSurfaces(afterSurfaces, {
+      controls: [...new Set([...relationshipBefore.controls, controlledDiagnostics.meta.ariaControls].filter(Boolean))],
+      owns: relationshipBefore.owns,
+    });
+  }
+  while (Date.now() < observeUntil) {
+    if (causalSurfaces.some((candidate) => candidate.optionCandidates.length > 0)) break;
+    mutationCount = await readSelectionMutationCount(page);
+    relationshipAfter = await getSelectionTriggerRelationship(trigger);
+    const liveRelatedIds = [...new Set([...relationshipBefore.controls, ...relationshipBefore.owns, ...relationshipAfter.controls, ...relationshipAfter.owns])];
+    afterSurfaces = await inspectSelectionSurfaces(page, liveRelatedIds);
+    causalSurfaces = findCausalSurfaces(afterSurfaces, relationshipAfter);
+    if (causalSurfaces.some((candidate) => candidate.optionCandidates.length > 0)) break;
+    await page.waitForTimeout(100).catch(() => undefined);
+  }
+  // Some accessible custom comboboxes expose aria-expanded before mounting
+  // their popup and complete the opening transaction on the standard
+  // keyboard interaction. This is one bounded, state-backed activation: it
+  // is attempted only after the control is observable as an expanded
+  // combobox, never as a blind retry of the original display click.
+  const triggerStillPresent = await trigger.count().catch(() => 0) > 0;
+  const expandedCombobox = triggerStillPresent
+    && (await trigger.getAttribute("role").catch(() => "")) === "combobox"
+    && (await trigger.getAttribute("aria-expanded").catch(() => "")) === "true";
+  if (causalSurfaces.every((candidate) => candidate.optionCandidates.length === 0) && expandedCombobox) {
+    await trigger.press("ArrowDown").catch(() => undefined);
+    const keyboardObserveUntil = Date.now() + 1500;
+    while (Date.now() < keyboardObserveUntil) {
+      mutationCount = await readSelectionMutationCount(page);
+      relationshipAfter = await getSelectionTriggerRelationship(trigger);
+      const liveRelatedIds = [...new Set([...relationshipBefore.controls, ...relationshipBefore.owns, ...relationshipAfter.controls, ...relationshipAfter.owns])];
+      afterSurfaces = await inspectSelectionSurfaces(page, liveRelatedIds);
+      causalSurfaces = findCausalSurfaces(afterSurfaces, relationshipAfter);
+      if (causalSurfaces.some((candidate) => candidate.optionCandidates.length > 0)) break;
+      await page.waitForTimeout(100).catch(() => undefined);
+    }
+  }
+  const relationship = {
+    controls: [...new Set([...relationshipBefore.controls, ...relationshipAfter.controls])],
+    owns: [...new Set([...relationshipBefore.owns, ...relationshipAfter.owns])],
+  };
+  const relatedIds = new Set([...relationship.controls, ...relationship.owns]);
+  if (causalSurfaces.length === 0) {
+    causalSurfaces = findCausalSurfaces(afterSurfaces, relationship);
+  }
+  const surface = causalSurfaces.find((candidate) => candidate.optionCandidates.length > 0);
+  const diagnosticsBase: SelectionSurfaceDiagnostics = {
+    triggerResolved: true,
+    triggerStrategy,
+    ariaRelationshipFound: causalSurfaces.some((candidate) =>
+      (candidate.key.startsWith("id:") && relatedIds.has(candidate.key.slice(3)))
+      || Boolean(candidate.relatedId && relatedIds.has(candidate.relatedId))),
+    surfaceType: surface?.type,
+    surfacePortalized: surface?.portalized,
+    surfaceCausallyBound: Boolean(surface),
+    optionCandidateCount: surface?.optionCandidates.length ?? 0,
+    desiredOptionFound: false,
+    stateVerified: false,
+    comboboxIdentity: controlledDiagnostics?.meta.identity,
+    ariaExpanded: controlledDiagnostics?.meta.ariaExpanded,
+    ariaControlsValue: controlledDiagnostics?.meta.ariaControls,
+    oldControlDetached: !await trigger.count().catch(() => 0),
+    newControlIdentity: controlledDiagnostics?.meta.identity,
+    ariaControlsReadFromNewControl: Boolean(controlledDiagnostics?.meta.ariaControls),
+    controlledSurfaceExistsBefore: controlledBefore.exists,
+    controlledSurfaceExistsAfter: controlledDiagnostics?.after.exists,
+    controlledSurfaceLifecycle: controlledDiagnostics ? controlledSurfaceLifecycle(controlledBefore, controlledDiagnostics.after, controlledDiagnostics.polls) : "missing",
+    controlledSurfaceRole: controlledDiagnostics?.after.role,
+    controlledSurfaceVisible: controlledDiagnostics?.after.visible,
+    controlledSurfaceChildCount: controlledDiagnostics?.after.childCount,
+    controlledSurfaceOptionCount: controlledDiagnostics?.after.optionCount,
+    controlledSurfaceVisibleOptionCount: controlledDiagnostics?.after.visibleOptionCount,
+    controlledSurfaceOptionVisibility: controlledDiagnostics?.after.optionVisibility,
+    globalRoleOptionCount: controlledDiagnostics?.polls.at(-1)?.globalRoleOptionCount,
+    globalListboxCount: controlledDiagnostics?.polls.at(-1)?.globalListboxCount,
+    globalMenuCount: controlledDiagnostics?.polls.at(-1)?.globalMenuCount,
+    nativeOptionCount: controlledDiagnostics?.polls.at(-1)?.nativeOptionCount,
+    visibleSelectableCount: controlledDiagnostics?.polls.at(-1)?.visibleSelectableCount,
+    optionsFirstObservedAtMs: controlledDiagnostics?.polls.find((poll) => poll.globalRoleOptionCount > 0 || poll.controlled.visibleOptionCount > 0)?.elapsedMs,
+    candidateDropReason: undefined,
+    openingMethod: controlledDiagnostics?.polls.some((poll) => poll.globalRoleOptionCount > 0) ? "CLICK_OPENS" : "NO_OPENING_METHOD_OBSERVED",
+  };
+  if (!surface && controlledDiagnostics?.polls.some((poll) => poll.globalRoleOptionCount > 0)) {
+    diagnosticsBase.candidateDropReason = controlledDiagnostics.after.optionCount > 0 ? "causal-surface-filter" : "controlled-node-binding";
+  }
+  const triggerPresent = await trigger.count().catch(() => 0) > 0;
+  const triggerTag = triggerPresent ? await trigger.evaluate((element) => element.tagName.toLowerCase()).catch(() => "unknown") : "detached";
+  const triggerRole = triggerPresent ? await trigger.getAttribute("role").catch(() => "") : "";
+  const triggerExpanded = triggerPresent ? await trigger.getAttribute("aria-expanded").catch(() => "") : "";
+  console.log(`[selection-surface-observation] triggerTag=${triggerTag} triggerRole=${triggerRole} ariaControlsPresent=${relationship.controls.length > 0} ariaOwnsPresent=${relationship.owns.length > 0} ariaExpanded=${triggerExpanded} surfaceRoots=${afterSurfaces.length} visibleSurfaceRoots=${afterSurfaces.filter((candidate) => candidate.visible).length} rootsWithOptions=${afterSurfaces.filter((candidate) => candidate.optionCandidates.length > 0).length} relatedRoots=${afterSurfaces.filter((candidate) => Boolean(candidate.relatedId)).length}`);
+  console.log(`[selection-surface] triggerResolved=true triggerStrategy=${triggerStrategy} ariaRelationshipFound=${diagnosticsBase.ariaRelationshipFound} surfaceType=${surface?.type ?? "none"} portalized=${surface?.portalized ?? false} causallyBound=${diagnosticsBase.surfaceCausallyBound} optionCandidateCount=${diagnosticsBase.optionCandidateCount} desiredOptionFound=${diagnosticsBase.desiredOptionFound} mutations=${mutationCount}`);
+  if (!surface) {
+    await removeSelectionMutationObserver(page);
+    return selectionFailureResult(optionTarget, "selection_surface_not_observed", { ...diagnosticsBase, failureReason: "selection_surface_not_observed" }, gridDiagnostics);
+  }
+  const wanted = normalizeText(optionTarget);
+  const compatible = surface.optionCandidates.filter((candidate) => {
+    const candidateText = normalizeText([candidate.text, candidate.value || ""].join(" "));
+    return candidateText === wanted || candidateText.includes(wanted) || wanted.includes(candidateText);
+  });
+  if (compatible.length === 0) {
+    await removeSelectionMutationObserver(page);
+    return selectionFailureResult(optionTarget, "option_not_supported", { ...diagnosticsBase, desiredOptionFound: false, failureReason: "option_not_supported", optionResolutionStrategy: "causal_surface_option_compatibility" }, gridDiagnostics);
+  }
+  if (compatible.length > 1) {
+    await removeSelectionMutationObserver(page);
+    return selectionFailureResult(optionTarget, "ambiguous_option", { ...diagnosticsBase, desiredOptionFound: true, failureReason: "ambiguous_option", optionResolutionStrategy: "causal_surface_option_compatibility" }, gridDiagnostics);
+  }
+  const surfaceMarked = await page.evaluate((xpath) => {
+    document.querySelectorAll("[data-codex-selection-surface='active']").forEach((element) => element.removeAttribute("data-codex-selection-surface"));
+    const result = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    if (!(result instanceof HTMLElement)) return false;
+    result.setAttribute("data-codex-selection-surface", "active");
+    return true;
+  }, surface.xpath).catch(() => false);
+  const candidateRole = compatible[0].role === "menuitem" || compatible[0].role === "menuitemradio" || compatible[0].role === "menuitemcheckbox"
+    ? compatible[0].role
+    : compatible[0].role === "option" ? "option" : "button";
+  const liveOptions = page.locator(candidateRole === "option"
+    ? "[role='option']"
+    : candidateRole === "menuitem" ? "[role='menuitem']"
+      : candidateRole === "menuitemradio" ? "[role='menuitemradio']"
+      : candidateRole === "menuitemcheckbox" ? "[role='menuitemcheckbox']" : "button");
+  const domOptionCount = await page.evaluate(() => document.querySelectorAll("[role='option'], [role='menuitem'], [role='menuitemradio'], [role='menuitemcheckbox'], [data-value], button").length).catch(() => 0);
+  console.log(`[selection-surface-options] candidateRole=${candidateRole} surfaceMarked=${surfaceMarked} liveOptionCount=${await liveOptions.count().catch(() => 0)} domOptionCount=${domOptionCount}`);
+  let option: Locator | undefined;
+  let optionRequiresDomActivation = false;
+  const observedOptionMarker = compatible[0].marker;
+  if (observedOptionMarker) {
+    const observedOption = page.locator(`[data-codex-selection-option="${observedOptionMarker}"]`);
+    if (await observedOption.count().catch(() => 0) === 1) {
+      if (await observedOption.isVisible().catch(() => false)) {
+        option = observedOption;
+      } else if (await observedOption.evaluate((element) => {
+        const root = element.closest("[data-codex-selection-surface='active']");
+        if (!root) return false;
+        const rootNode = root as HTMLElement;
+        const rootStyle = window.getComputedStyle(rootNode);
+        const node = element as HTMLElement;
+        const style = window.getComputedStyle(node);
+        return !rootNode.hidden && rootNode.getAttribute("aria-hidden") !== "true"
+          && rootStyle.display !== "none" && rootStyle.visibility !== "hidden" && Number(rootStyle.opacity || "1") > 0
+          && !node.hidden && node.getAttribute("aria-hidden") !== "true"
+          && style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity || "1") > 0;
+      }).catch(() => false)) {
+        // The related surface is the visible interaction owner even when the
+        // option itself has no layout box. Keep the causal marker and use a
+        // DOM activation followed by the same state verification.
+        option = observedOption;
+        optionRequiresDomActivation = true;
+      }
+    }
+  }
+  for (let index = 0; index < await liveOptions.count().catch(() => 0); index += 1) {
+    if (option) break;
+    const candidate = liveOptions.nth(index);
+    if (!(await candidate.isVisible().catch(() => false))) continue;
+    const candidateState = await candidate.evaluate((element) => ({
+      text: (element as HTMLElement).innerText || element.textContent || "",
+      value: element.getAttribute("data-value") || element.getAttribute("value") || "",
+    })).catch(() => ({ text: "", value: "" }));
+    const candidateKey = normalizeText([candidateState.text, candidateState.value].join(" "));
+    const compatibleKey = normalizeText([compatible[0].text, compatible[0].value || ""].join(" "));
+    const inCausalSurface = await candidate.evaluate((element, expected) => {
+      if (element.closest("[data-codex-selection-surface='active']")) return true;
+      const root = element.closest("[role='listbox'], [role='menu'], [role='dialog'], [aria-modal='true'], [popover]");
+      if (!root || !expected.surfaceRole || root.getAttribute("role") !== expected.surfaceRole) return false;
+      const visibleItems = Array.from(root.querySelectorAll("[role='option'], [role='menuitem'], [role='menuitemradio'], [role='menuitemcheckbox'], [data-value], button"))
+        .filter((item) => {
+          const node = item as HTMLElement;
+          const style = window.getComputedStyle(node);
+          return !node.hidden && node.getAttribute("aria-hidden") !== "true" && style.display !== "none" && style.visibility !== "hidden"
+            && Number(style.opacity || "1") > 0 && Boolean(node.offsetWidth || node.offsetHeight || node.getClientRects().length);
+        })
+        .map((item) => ((item as HTMLElement).innerText || item.textContent || "").trim())
+        .filter(Boolean);
+      const expectedItems = expected.optionTexts.map((text) => normalizeText(text)).sort();
+      return visibleItems.map((text) => normalizeText(text)).sort().join("|") === expectedItems.join("|");
+    }, { surfaceRole: surface.role || "", optionTexts: surface.optionCandidates.map((candidate) => candidate.text || candidate.value || "") }).catch(() => false);
+    if (inCausalSurface && (candidateKey === compatibleKey || candidateKey.includes(compatibleKey) || compatibleKey.includes(candidateKey))) {
+      option = candidate;
+      break;
+    }
+  }
+  if (!option && !surface.portalized && stableCell) {
+    const scopedOptions = stableCell.locator("[role='option'], [role='menuitem'], [role='menuitemradio'], [role='menuitemcheckbox'], [data-value], button");
+    const compatibleScoped: Locator[] = [];
+    const scopedCount = await scopedOptions.count().catch(() => 0);
+    for (let index = 0; index < scopedCount; index += 1) {
+      const candidate = scopedOptions.nth(index);
+      if (!(await candidate.isVisible().catch(() => false))) continue;
+      const state = await candidate.evaluate((element) => ({
+        text: (element as HTMLElement).innerText || element.textContent || "",
+        value: element.getAttribute("data-value") || element.getAttribute("value") || "",
+      })).catch(() => ({ text: "", value: "" }));
+      const key = normalizeText([state.text, state.value].join(" "));
+      const wantedKey = normalizeText([compatible[0].text, compatible[0].value || ""].join(" "));
+      if (key === wantedKey || key.includes(wantedKey) || wantedKey.includes(key)) compatibleScoped.push(candidate);
+    }
+    console.log(`[selection-surface-cell-option] stableCell=true scopedOptionCount=${scopedCount} compatibleOptionCount=${compatibleScoped.length}`);
+    if (compatibleScoped.length === 1) option = compatibleScoped[0];
+  }
+  let optionClickedBySurfaceIdentity = false;
+  // The option snapshot is already scoped to the causal surface. Prefer its
+  // structural identity when a rematerialized in-cell surface cannot be
+  // marked through the parent XPath (for example while React replaces the
+  // cell subtree between observation and interaction).
+  if (!option) {
+    const directOption = page.locator(`xpath=${compatible[0].xpath}`);
+    const directOptionCount = await directOption.count().catch(() => 0);
+    console.log(`[selection-surface-direct-option] surfacePathResolved=${surfaceMarked} directOptionCount=${directOptionCount}`);
+    if (directOptionCount === 1 && await directOption.isVisible().catch(() => false)) {
+      const directState = await directOption.evaluate((element) => ({
+        text: (element as HTMLElement).innerText || element.textContent || "",
+        value: element.getAttribute("data-value") || element.getAttribute("value") || "",
+      })).catch(() => ({ text: "", value: "" }));
+      const directKey = normalizeText([directState.text, directState.value].join(" "));
+      const compatibleKey = normalizeText([compatible[0].text, compatible[0].value || ""].join(" "));
+      if (directKey === compatibleKey || directKey.includes(compatibleKey) || compatibleKey.includes(directKey)) option = directOption;
+    }
+  }
+  if (!option) {
+    optionClickedBySurfaceIdentity = await page.evaluate(async ({ surfaceRole, optionTexts, wanted }) => {
+      if (!surfaceRole) return false;
+      const normalize = (text: string): string => text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim();
+      const isVisible = (element: Element): boolean => {
+        const node = element as HTMLElement;
+        const style = window.getComputedStyle(node);
+        return !node.hidden && node.getAttribute("aria-hidden") !== "true" && style.display !== "none" && style.visibility !== "hidden"
+          && Number(style.opacity || "1") > 0 && Boolean(node.offsetWidth || node.offsetHeight || node.getClientRects().length);
+      };
+      const expectedItems = optionTexts.map(normalize).sort().join("|");
+      const deadline = Date.now() + 1500;
+      while (Date.now() < deadline) {
+        const roots = Array.from(document.querySelectorAll("[role='listbox'], [role='menu'], [role='dialog'], [aria-modal='true'], [popover]"))
+          .filter((root) => root.getAttribute("role") === surfaceRole && isVisible(root))
+          .map((root) => {
+            const items = Array.from(root.querySelectorAll("[role='option'], [role='menuitem'], [role='menuitemradio'], [role='menuitemcheckbox'], [data-value], button"))
+              .filter(isVisible);
+            return { root, items, itemTexts: items.map((item) => normalize((item as HTMLElement).innerText || item.textContent || "")).sort() };
+          })
+          .filter((candidate) => candidate.itemTexts.join("|") === expectedItems);
+        if (roots.length === 1) {
+          const wantedKey = normalize(wanted);
+          const matches = roots[0].items.filter((item) => {
+            const text = normalize((item as HTMLElement).innerText || item.textContent || "");
+            const value = normalize(item.getAttribute("data-value") || item.getAttribute("value") || "");
+            return text === wantedKey || value === wantedKey || text.includes(wantedKey) || wantedKey.includes(text);
+          });
+          if (matches.length === 1) {
+            (matches[0] as HTMLElement).click();
+            return true;
+          }
+        }
+        await new Promise((resolve) => window.setTimeout(resolve, 50));
+      }
+      return false;
+    }, {
+      surfaceRole: surface.role || "",
+      optionTexts: surface.optionCandidates.map((candidate) => candidate.text || candidate.value || ""),
+      wanted: optionTarget,
+    }).catch(() => false);
+  }
+  if (!option && !optionClickedBySurfaceIdentity) {
+    await page.locator("[data-codex-selection-surface='active']").evaluateAll((elements) => elements.forEach((element) => element.removeAttribute("data-codex-selection-surface"))).catch(() => undefined);
+    await removeSelectionMutationObserver(page);
+    return selectionFailureResult(optionTarget, "selection_surface_not_observed", { ...diagnosticsBase, failureReason: "selection_surface_not_observed" }, gridDiagnostics);
+  }
+  if (option) {
+    if (optionRequiresDomActivation) await option.evaluate((element) => (element as HTMLElement).click());
+    else await option.click();
+  }
+  await page.locator("[data-codex-selection-surface='active']").evaluateAll((elements) => elements.forEach((element) => element.removeAttribute("data-codex-selection-surface"))).catch(() => undefined);
+  const verification = await verifySelectionState(trigger, optionTarget, beforeState, beforeCellText, beforeSurfaces, stableCell);
+  await removeSelectionMutationObserver(page);
+  const diagnostics: SelectionSurfaceDiagnostics = {
+    ...diagnosticsBase,
+    desiredOptionFound: true,
+    optionResolutionStrategy: "causal_surface_option_compatibility",
+    stateVerified: verification.verified,
+    overlayClosed: verification.overlayClosed,
+    failureReason: verification.verified ? undefined : "selection_state_not_verified",
+  };
+  if (!verification.verified) return selectionFailureResult(optionTarget, "selection_state_not_verified", diagnostics, gridDiagnostics);
+  return {
+    status: "resolved",
+    target: optionTarget,
+    locator: option,
+    locatorStrategy: "selection_option_causal_surface",
+    confidence: 0.98,
+    matchReason: "selection_option_state_verified",
+    candidateText: optionTarget,
+    candidates: [],
+    selectionApplied: true,
+    selectionDiagnostics: diagnostics,
+    gridDiagnostics,
+  };
+}
+
+/**
+ * Bounded state machine for compound grid editors. A click is retried only
+ * after the same cell reports an observable editor/control transition.
+ */
+async function resolveAndApplySelectionSurface(
+  page: Page,
+  trigger: Locator,
+  optionTarget: string,
+  triggerStrategy: string,
+  gridDiagnostics?: GridEditorResolution["diagnostics"],
+  cellOverride?: Locator,
+): Promise<TargetResolutionResult> {
+  const cell = cellOverride ?? await resolveStableSelectionCell(page, trigger);
+  if (!cell) return resolveAndApplySelectionSurfaceOnce(page, trigger, optionTarget, triggerStrategy, gridDiagnostics);
+
+  let currentTrigger = trigger;
+  let before = await captureDynamicEditorSnapshot(cell, currentTrigger);
+  const initialState = dynamicEditorStateFor(before);
+  const transitionsObserved: string[] = [initialState ?? "DISPLAY"];
+  const progressPerAttempt: boolean[] = [];
+  let activationAttempts = 0;
+  let domReplacementObserved = false;
+  let editorMaterialized = before.editableDescendants > 0;
+  let editorIdentity = before.targetIdentity;
+  let comboboxObserved = before.targetRole === "combobox" || before.controls.some((control) => control.role === "combobox");
+  let comboboxObservedAtState = comboboxObserved ? "SELECTION_CONTROL_READY" : undefined;
+  let optionObservedAtState: string | undefined;
+  let lastResult: TargetResolutionResult | undefined;
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    activationAttempts += 1;
+    lastResult = await resolveAndApplySelectionSurfaceOnce(page, currentTrigger, optionTarget, triggerStrategy, gridDiagnostics);
+    const selectionDiagnostics = lastResult.selectionDiagnostics;
+    if (selectionDiagnostics?.surfaceCausallyBound && selectionDiagnostics.optionCandidateCount > 0) {
+      optionObservedAtState = "OPTIONS_VISIBLE";
+      if (!transitionsObserved.includes("OPTIONS_VISIBLE")) transitionsObserved.push("OPTIONS_VISIBLE");
+    }
+    if (lastResult.matchReason !== "selection_surface_not_observed") break;
+
+    const after = await captureDynamicEditorSnapshot(cell, currentTrigger);
+    const progress = compareDynamicEditorSnapshots(before, after);
+    progressPerAttempt.push(progress.observableProgress);
+    domReplacementObserved ||= progress.domReplaced;
+    editorMaterialized ||= progress.newEditableControl || after.editableDescendants > 0;
+    if (after.targetRole === "combobox" || after.controls.some((control) => control.role === "combobox")) {
+      comboboxObserved = true;
+      comboboxObservedAtState ||= "SELECTION_CONTROL_READY";
+    }
+    const afterState = dynamicEditorStateFor(after);
+    if (afterState && afterState !== transitionsObserved[transitionsObserved.length - 1]) transitionsObserved.push(afterState);
+    console.log(`[selection-editor-state] attempt=${activationAttempts} observableProgress=${progress.observableProgress} targetIdentityChanged=${progress.targetIdentityChanged} domReplaced=${progress.domReplaced} roleChanged=${progress.roleChanged} newDescendants=${progress.newDescendants} activeElementChanged=${progress.activeElementChanged} newEditableControl=${progress.newEditableControl} newSelectableControl=${progress.newSelectableControl} afterTag=${after.targetTag} afterRole=${after.targetRole} afterAriaControls=${Boolean(after.ariaControls)} afterAriaExpanded=${after.ariaExpanded || ""}`);
+    if (!progress.observableProgress) break;
+
+    // If a prior activation left an expandable control open but no usable
+    // surface was observed, close it before the next bounded activation.
+    // Escape is reversible and avoids a blind click being intercepted by the
+    // overlay/backdrop.
+    if (await currentTrigger.count().catch(() => 0) > 0
+      && await currentTrigger.getAttribute("aria-expanded").catch(() => "") === "true") {
+      await page.keyboard.press("Escape").catch(() => undefined);
+    }
+
+    const rematerialized = await findRematerializedEditor(cell, before);
+    if (rematerialized.locator && rematerialized.snapshot) {
+      currentTrigger = rematerialized.locator;
+      editorIdentity = rematerialized.snapshot.identity;
+      const nextState = rematerialized.snapshot.role === "combobox" || rematerialized.snapshot.tag === "select"
+        ? "SELECTION_CONTROL_READY"
+        : rematerialized.snapshot.editable ? "EDITOR_MATERIALIZED" : "CELL_ACTIVE";
+      if (!transitionsObserved.includes(nextState)) transitionsObserved.push(nextState);
+      if (nextState === "SELECTION_CONTROL_READY") {
+        comboboxObserved ||= rematerialized.snapshot.role === "combobox";
+        comboboxObservedAtState ||= nextState;
+      }
+      before = after;
+      continue;
+    }
+
+    // A replaced display can leave only the already-observed option surface
+    // in the cell. It is not a new trigger and retrying the detached locator
+    // would wait for the default Playwright timeout without adding evidence.
+    const hasNewSelectionControl = after.controls.some((control) =>
+      control.visible && control.enabled && control.selectionAffordance
+      && !["option", "menuitem", "menuitemradio", "menuitemcheckbox"].includes(control.role || ""));
+    if (!hasNewSelectionControl && await currentTrigger.count().catch(() => 0) === 0) break;
+
+    // A role/ARIA transition can rematerialize the same DOM address. Reuse
+    // the locator only when that transition itself is the observed progress.
+    if (progress.roleChanged || progress.activeElementChanged) {
+      editorIdentity = after.targetIdentity || editorIdentity;
+      before = after;
+      continue;
+    }
+    break;
+  }
+
+  const diagnostics = {
+    ...(lastResult?.selectionDiagnostics ?? {
+      triggerResolved: true,
+      triggerStrategy,
+      ariaRelationshipFound: false,
+      surfaceCausallyBound: false,
+      optionCandidateCount: 0,
+      desiredOptionFound: false,
+      stateVerified: false,
+      failureReason: "selection_surface_not_observed" as const,
+    }),
+    initialState,
+    transitionsObserved,
+    activationAttempts,
+    progressPerAttempt,
+    domReplacementObserved,
+    editorMaterialized,
+    editorIdentity,
+    comboboxObserved,
+    comboboxObservedAtState,
+    optionObservedAtState,
+  } satisfies SelectionSurfaceDiagnostics;
+  if (!lastResult) return selectionFailureResult(optionTarget, "selection_surface_not_observed", diagnostics, gridDiagnostics);
+  return { ...lastResult, selectionDiagnostics: diagnostics };
+}
+
+async function tryResolveSelectionOptionViaField(
+  page: Page,
+  target: string,
+  selectionField?: string,
+  context: GridTargetContext = {},
+  selectionValue?: string,
+): Promise<TargetResolutionResult | undefined> {
+  const fieldLabel = selectionField?.trim();
+  if (!fieldLabel) return undefined;
+  const optionTarget = selectionValue?.trim() || target;
+
+  const buildResult = (locator: Locator, strategy: string, reason: string): TargetResolutionResult => ({
+    status: "resolved",
+    target,
+    locator,
+    locatorStrategy: strategy,
+    confidence: 0.93,
+    matchReason: reason,
+    candidateText: target,
+    candidates: []
+  });
+
+  // A scoped grid row has authority over any page-wide accessible-label match.
+  // Resolve its cell before trying generic form labels so another row cannot
+  // consume the action merely because it rendered first.
+  if (context.rowScope !== undefined || context.entityScope || context.associatedField) {
+    // A logical selection may be rendered by the control of its associated
+    // column (e.g. a currency chooser inside the income cell). Use only the
+    // declared relationship as a fallback; no column/index inference is used.
+    const gridFields = [fieldLabel, context.associatedField]
+      .map((field) => field?.trim())
+      .filter((field, index, fields): field is string => Boolean(field) && fields.indexOf(field) === index);
+    for (const gridField of gridFields) {
+      const grid = await resolveGridEditor(page, gridField, context, {
+        includeInteractiveControls: true,
+        controlKind: "selection",
+        optionText: optionTarget,
+      });
+      if (grid.ambiguous) {
+        return {
+          status: "ambiguous",
+          target,
+          confidence: 0.5,
+          matchReason: "ambiguous_grid_selection_control",
+          candidateText: target,
+          candidates: [],
+          gridDiagnostics: grid.diagnostics,
+        };
+      }
+      if (!grid.locator) continue;
+      const tagName = await grid.locator.evaluate((element) => element.tagName.toLowerCase()).catch(() => "");
+      if (tagName === "select") {
+        return {
+          ...buildResult(grid.locator, grid.strategy ?? "grid_cell_select", "grid_cell_editor_resolved"),
+          gridDiagnostics: grid.diagnostics,
+        };
+      }
+      // A selection without a runtime value is an exploratory/action step.
+      // Preserve its existing behavior: activate the resolved trigger and
+      // resolve the declared visible option. Causal value selection below is
+      // reserved for runtime-backed selections with an explicit desired value.
+      if (!selectionValue?.trim()) {
+        await grid.locator.click().catch(() => undefined);
+        await page.waitForTimeout(100).catch(() => undefined);
+        const option = await resolveVisibleSelectionOption(page, optionTarget);
+        if (option) {
+          return {
+            ...buildResult(option, "selection_option_grid_cell", "grid_cell_activated_and_option_opened"),
+            gridDiagnostics: grid.diagnostics,
+          };
+        }
+        continue;
+      }
+      const initialRole = await grid.locator.getAttribute("role").catch(() => "");
+      const initialPopup = await grid.locator.getAttribute("aria-haspopup").catch(() => "");
+      const initialExpanded = await grid.locator.getAttribute("aria-expanded").catch(() => null);
+      const initialControls = await grid.locator.getAttribute("aria-controls").catch(() => "");
+      const displayOnlyTrigger = tagName === "button"
+        && !initialRole && !initialPopup && !initialExpanded && !initialControls;
+      console.log(`[grid-compound] selectionValuePresent=${Boolean(selectionValue?.trim())} tag=${tagName} role=${initialRole || "none"} expanded=${initialExpanded ?? "missing"} controls=${Boolean(initialControls)} displayOnly=${displayOnlyTrigger}`);
+      if (displayOnlyTrigger && grid.cell) {
+        const beforeCellText = await grid.cell.innerText().catch(() => "");
+        const beforeCellMarkup = await grid.cell.evaluate((element) => element.outerHTML).catch(() => "");
+        const beforeSurfaceKeys = new Set((await inspectSelectionSurfaces(page)).map((surface) => surface.key));
+        const beforeTriggerState = await captureSelectionTriggerState(grid.locator);
+        let secondActivationAttempted = false;
+        console.log(`[grid-compound-activation] strategy=${grid.strategy ?? "grid_cell_activation"} action=click`);
+        await grid.locator.click({ noWaitAfter: true }).catch(() => undefined);
+        console.log(`[grid-compound-activation] clickCompleted=true`);
+        const materializationDeadline = Date.now() + 2000;
+        while (Date.now() < materializationDeadline) {
+          const rematerialized = await resolveGridEditor(page, gridField, context, {
+            includeInteractiveControls: true,
+            controlKind: "selection",
+            optionText: optionTarget,
+            allowActivation: false,
+          });
+          if (rematerialized.locator) {
+            const rematerializedTag = await rematerialized.locator.evaluate((element) => element.tagName.toLowerCase()).catch(() => "");
+            const rematerializedRole = await rematerialized.locator.getAttribute("role").catch(() => "");
+            const rematerializedPopup = await rematerialized.locator.getAttribute("aria-haspopup").catch(() => "");
+            const rematerializedExpanded = await rematerialized.locator.getAttribute("aria-expanded").catch(() => null);
+            const rematerializedControls = await rematerialized.locator.getAttribute("aria-controls").catch(() => "");
+            const selectable = rematerializedTag === "select" || rematerializedRole === "combobox"
+              || Boolean(rematerializedPopup) || rematerializedExpanded !== null || Boolean(rematerializedControls);
+            const stillDisplayOnly = rematerializedTag === "button" && !rematerializedRole
+              && !rematerializedPopup && !rematerializedExpanded && !rematerializedControls;
+            if (selectable && !stillDisplayOnly) {
+              if (rematerializedTag === "select") {
+                return {
+                  ...buildResult(rematerialized.locator, rematerialized.strategy ?? "grid_cell_select_after_activation", "grid_cell_selection_control_after_activation"),
+                  gridDiagnostics: rematerialized.diagnostics,
+                };
+              }
+              return resolveAndApplySelectionSurface(
+                page,
+                rematerialized.locator,
+                optionTarget,
+                rematerialized.strategy ?? "grid_cell_selection_control_after_activation",
+                rematerialized.diagnostics,
+                rematerialized.cell,
+              );
+            }
+          }
+          const observedSurface = (await inspectSelectionSurfaces(page)).find((surface) => !beforeSurfaceKeys.has(surface.key) && surface.visible && surface.optionCandidates.length > 0);
+          if (observedSurface) {
+            const wanted = normalizeText(optionTarget);
+            const compatible = observedSurface.optionCandidates.filter((candidate) => {
+              const candidateKey = normalizeText([candidate.text, candidate.value || ""].join(" "));
+              return candidateKey === wanted || candidateKey.includes(wanted) || wanted.includes(candidateKey);
+            });
+            if (compatible.length !== 1) {
+              return selectionFailureResult(optionTarget, compatible.length > 1 ? "ambiguous_option" : "option_not_supported", {
+                triggerResolved: true,
+                triggerStrategy: grid.strategy ?? "grid_cell_activation",
+                surfaceType: observedSurface.type,
+                surfacePortalized: observedSurface.portalized,
+                surfaceCausallyBound: true,
+                optionCandidateCount: observedSurface.optionCandidates.length,
+                desiredOptionFound: compatible.length > 0,
+                stateVerified: false,
+                optionResolutionStrategy: "causal_surface_option_compatibility",
+                failureReason: compatible.length > 1 ? "ambiguous_option" : "option_not_supported",
+              }, grid.diagnostics);
+            }
+            const option = page.locator(`xpath=${compatible[0].xpath}`);
+            if (await option.count().catch(() => 0) !== 1 || !(await option.isVisible().catch(() => false))) {
+              return selectionFailureResult(optionTarget, "selection_surface_not_observed", {
+                triggerResolved: true,
+                triggerStrategy: grid.strategy ?? "grid_cell_activation",
+                surfaceType: observedSurface.type,
+                surfacePortalized: observedSurface.portalized,
+                surfaceCausallyBound: true,
+                optionCandidateCount: observedSurface.optionCandidates.length,
+                desiredOptionFound: true,
+                stateVerified: false,
+                failureReason: "selection_surface_not_observed",
+              }, grid.diagnostics);
+            }
+            await option.click();
+            const verification = await verifySelectionState(grid.locator, optionTarget, beforeTriggerState, beforeCellText, [observedSurface], grid.cell);
+            return verification.verified
+              ? {
+                status: "resolved",
+                target: optionTarget,
+                locator: option,
+                locatorStrategy: "selection_option_causal_surface",
+                confidence: 0.98,
+                matchReason: "selection_option_state_verified",
+                candidateText: optionTarget,
+                candidates: [],
+                selectionApplied: true,
+                gridDiagnostics: grid.diagnostics,
+                selectionDiagnostics: {
+                  triggerResolved: true,
+                  triggerStrategy: grid.strategy ?? "grid_cell_activation",
+                  surfaceType: observedSurface.type,
+                  surfacePortalized: observedSurface.portalized,
+                  surfaceCausallyBound: true,
+                  optionCandidateCount: observedSurface.optionCandidates.length,
+                  desiredOptionFound: true,
+                  optionResolutionStrategy: "causal_surface_option_compatibility",
+                  stateVerified: true,
+                  overlayClosed: verification.overlayClosed,
+                },
+              }
+              : selectionFailureResult(optionTarget, "selection_state_not_verified", {
+                triggerResolved: true,
+                triggerStrategy: grid.strategy ?? "grid_cell_activation",
+                surfaceType: observedSurface.type,
+                surfacePortalized: observedSurface.portalized,
+                surfaceCausallyBound: true,
+                optionCandidateCount: observedSurface.optionCandidates.length,
+                desiredOptionFound: true,
+                stateVerified: false,
+                failureReason: "selection_state_not_verified",
+              }, grid.diagnostics);
+          }
+          const currentCellMarkup = await grid.cell.evaluate((element) => element.innerHTML).catch(() => beforeCellMarkup);
+          if (!secondActivationAttempted && currentCellMarkup !== beforeCellMarkup) {
+            secondActivationAttempted = true;
+            const secondOpening = await resolveAndApplySelectionSurface(
+              page,
+              grid.locator,
+              optionTarget,
+              grid.strategy ?? "grid_cell_selection_control_after_activation",
+              grid.diagnostics,
+              grid.cell,
+            );
+            if (secondOpening.status === "resolved" || secondOpening.matchReason !== "selection_surface_not_observed") return secondOpening;
+          }
+          await page.waitForTimeout(100).catch(() => undefined);
+        }
+        return selectionFailureResult(optionTarget, "selection_surface_not_observed", {
+          triggerResolved: true,
+          triggerStrategy: grid.strategy ?? "grid_cell_activation",
+          surfaceCausallyBound: false,
+          optionCandidateCount: 0,
+          desiredOptionFound: false,
+          stateVerified: false,
+          failureReason: "selection_surface_not_observed",
+        }, grid.diagnostics);
+      }
+      const firstSurfaceResolution = await resolveAndApplySelectionSurface(
+        page,
+        grid.locator,
+        optionTarget,
+        grid.strategy ?? "grid_cell_selection_control",
+        grid.diagnostics,
+        grid.cell,
+      );
+      if (firstSurfaceResolution.status === "resolved" || firstSurfaceResolution.matchReason !== "selection_surface_not_observed") {
+        return firstSurfaceResolution;
+      }
+      // Compound cells may expose a trigger first and render the actual
+      // selection control only after activation. Re-resolve the same
+      // row/column intersection before falling back to page-wide options.
+      const activatedGrid = await resolveGridEditor(page, gridField, context, {
+        includeInteractiveControls: true,
+        controlKind: "selection",
+        optionText: optionTarget,
+      });
+      if (activatedGrid.ambiguous) {
+        return {
+          status: "ambiguous",
+          target,
+          confidence: 0.5,
+          matchReason: "ambiguous_grid_selection_control_after_activation",
+          candidateText: target,
+          candidates: [],
+          gridDiagnostics: activatedGrid.diagnostics,
+        };
+      }
+      const activatedTagName = activatedGrid.locator
+        ? await activatedGrid.locator.evaluate((element) => element.tagName.toLowerCase()).catch(() => "")
+        : "";
+      if (activatedGrid.locator && (activatedTagName === "select" || activatedTagName === "input" || activatedTagName === "textarea" || activatedTagName === "button" || activatedTagName === "div" || activatedTagName === "span")) {
+        if (activatedTagName === "select") {
+          return {
+            ...buildResult(activatedGrid.locator, activatedGrid.strategy ?? "grid_cell_select_after_activation", "grid_cell_selection_control_after_activation"),
+            gridDiagnostics: activatedGrid.diagnostics,
+          };
+        }
+        const secondSurfaceResolution = await resolveAndApplySelectionSurface(
+          page,
+          activatedGrid.locator,
+          optionTarget,
+          activatedGrid.strategy ?? "grid_cell_selection_control_after_activation",
+          activatedGrid.diagnostics,
+          activatedGrid.cell,
+        );
+        if (secondSurfaceResolution.status === "resolved" || secondSurfaceResolution.matchReason !== "selection_surface_not_observed") {
+          return secondSurfaceResolution;
+        }
+        return secondSurfaceResolution;
+      }
+      return firstSurfaceResolution;
+    }
+  }
+
+  const alreadyVisible = await resolveVisibleSelectionOption(page, optionTarget);
+  if (alreadyVisible) return buildResult(alreadyVisible, "selection_option", "option_already_visible");
+
+  const fieldLocators = [
+    page.getByRole("combobox", { name: fieldLabel, exact: false }),
+    page.getByLabel(fieldLabel, { exact: false })
+  ];
+  for (const fieldLocator of fieldLocators) {
+    const count = await fieldLocator.count().catch(() => 0);
+    for (let index = 0; index < count; index += 1) {
+      const candidate = fieldLocator.nth(index);
+      if (!(await candidate.isVisible().catch(() => false))) continue;
+      await candidate.click().catch(() => undefined);
+      await page.waitForTimeout(250).catch(() => undefined);
+      const option = await resolveVisibleSelectionOption(page, optionTarget);
+      if (option) {
+        console.log(`[target-resolver] selection_field_resolved target="${target}" field="${fieldLabel}" strategy=label`);
+        return buildResult(option, "selection_field_label", "field_opened_by_label");
+      }
+    }
+  }
+
+  const tables = page.locator("table");
+  const tableCount = await tables.count().catch(() => 0);
+  for (let tableIndex = 0; tableIndex < tableCount; tableIndex += 1) {
+    const table = tables.nth(tableIndex);
+    const headerCells = table.locator("thead th, thead td, [role='columnheader']");
+    const headerCount = await headerCells.count().catch(() => 0);
+    const effectiveHeaders = headerCount > 0 ? headerCells : table.locator("tr").first().locator("th, td, [role='columnheader']");
+    const effectiveHeaderCount = await effectiveHeaders.count().catch(() => 0);
+    let fieldColumn = -1;
+    for (let columnIndex = 0; columnIndex < effectiveHeaderCount; columnIndex += 1) {
+      const headerText = await effectiveHeaders.nth(columnIndex).innerText().catch(() => "");
+      if (fieldLabelMatchesHeader(fieldLabel, headerText)) {
+        fieldColumn = columnIndex;
+        break;
+      }
+    }
+    if (fieldColumn < 0) continue;
+
+    const rows = table.locator("tbody tr");
+    const rowCount = await rows.count().catch(() => 0);
+    const effectiveRows = rowCount > 0 ? rows : table.locator("tr").nth(1);
+    const effectiveRowCount = rowCount > 0 ? rowCount : await effectiveRows.count().catch(() => 0);
+    for (let rowIndex = 0; rowIndex < effectiveRowCount; rowIndex += 1) {
+      const row = rowCount > 0 ? rows.nth(rowIndex) : effectiveRows;
+      const rowCells = row.locator("td, th");
+      const rowCellCount = await rowCells.count().catch(() => 0);
+      // Data rows may prepend selection/action cells that are not represented
+      // by column headers. Derive that structural offset from the DOM rather
+      // than assuming a fixed table position.
+      const leadingCellOffset = Math.max(0, rowCellCount - effectiveHeaderCount);
+      const cell = rowCells.nth(fieldColumn + leadingCellOffset);
+      const controls = cell.locator("button, [role='button'], select, input, [role='combobox']");
+      if (await controls.count().catch(() => 0) === 0) continue;
+      const control = controls.first();
+      if (!(await control.isVisible().catch(() => false))) continue;
+      await control.click().catch(() => undefined);
+      await page.waitForTimeout(250).catch(() => undefined);
+      const option = await resolveVisibleSelectionOption(page, target);
+      if (option) {
+        console.log(`[target-resolver] selection_field_resolved target="${target}" field="${fieldLabel}" strategy=table_column`);
+        return buildResult(option, "selection_field_table", "field_opened_by_table_column");
+      }
+    }
+  }
+
+  console.log(`[target-resolver] selection_field_unresolved target="${optionTarget}" field="${fieldLabel}"`);
+  return undefined;
+}
+
+async function tryResolveTableFieldControl(
+  page: Page,
+  target: string,
+  context: GridTargetContext = {},
+): Promise<TargetResolutionResult | undefined> {
+  const grid = await resolveGridEditor(page, target, context);
+  if (grid.locator) {
+    return {
+      status: "resolved",
+      target,
+      locator: grid.locator,
+      locatorStrategy: grid.strategy ?? "grid_cell_editor",
+      confidence: 0.95,
+      matchReason: "grid_header_cell_editor",
+      candidateText: target,
+      candidates: [],
+      gridDiagnostics: grid.diagnostics,
+    };
+  }
+  if (context.rowScope !== undefined || context.entityScope || context.associatedField) return undefined;
+  const tables = page.locator("table");
+  const tableCount = await tables.count().catch(() => 0);
+  for (let tableIndex = 0; tableIndex < tableCount; tableIndex += 1) {
+    const table = tables.nth(tableIndex);
+    const headerCells = table.locator("thead th, thead td, [role='columnheader']");
+    const headerCount = await headerCells.count().catch(() => 0);
+    const effectiveHeaders = headerCount > 0 ? headerCells : table.locator("tr").first().locator("th, td, [role='columnheader']");
+    const effectiveHeaderCount = await effectiveHeaders.count().catch(() => 0);
+    let fieldColumn = -1;
+    for (let columnIndex = 0; columnIndex < effectiveHeaderCount; columnIndex += 1) {
+      const headerText = await effectiveHeaders.nth(columnIndex).innerText().catch(() => "");
+      if (fieldLabelMatchesHeader(target, headerText)) {
+        fieldColumn = columnIndex;
+        break;
+      }
+    }
+    if (fieldColumn < 0) continue;
+
+    const rows = table.locator("tbody tr");
+    const rowCount = await rows.count().catch(() => 0);
+    const effectiveRows = rowCount > 0 ? rows : table.locator("tr").nth(1);
+    const effectiveRowCount = rowCount > 0 ? rowCount : await effectiveRows.count().catch(() => 0);
+    for (let rowIndex = 0; rowIndex < effectiveRowCount; rowIndex += 1) {
+      const row = rowCount > 0 ? rows.nth(rowIndex) : effectiveRows;
+      const rowCells = row.locator("td, th");
+      const rowCellCount = await rowCells.count().catch(() => 0);
+      const leadingCellOffset = Math.max(0, rowCellCount - effectiveHeaderCount);
+      const cell = rowCells.nth(fieldColumn + leadingCellOffset);
+      const controls = cell.locator("button, [role='button'], input, textarea, select, [contenteditable='true'], [role='textbox'], [role='combobox']");
+      const controlCount = await controls.count().catch(() => 0);
+      for (let controlIndex = 0; controlIndex < controlCount; controlIndex += 1) {
+        const control = controls.nth(controlIndex);
+        if (!(await control.isVisible().catch(() => false))) continue;
+        if (!(await control.isEnabled().catch(() => true))) continue;
+        return {
+          status: "resolved",
+          target,
+          locator: control,
+          locatorStrategy: "table_field_control",
+          confidence: 0.92,
+          matchReason: "table_header_field_control",
+          candidateText: target,
+          candidates: []
+        };
+      }
+    }
+  }
+  return undefined;
+}
+
 export async function resolveActionTarget(
   page: Page,
   snapshot: PageSnapshot,
@@ -721,6 +2684,22 @@ export async function resolveActionTarget(
   options?: ResolveActionTargetOptions
 ): Promise<TargetResolutionResult> {
   const opts = { ...DEFAULT_OPTIONS, ...options };
+
+  const gridContext: GridTargetContext = {
+    rowScope: opts.rowScope,
+    entityScope: opts.entityScope,
+    associatedField: opts.associatedField,
+  };
+  const fieldSelectionResult = await tryResolveSelectionOptionViaField(
+    page,
+    target,
+    opts.selectionField,
+    gridContext,
+    opts.selectionValue,
+  );
+  if (fieldSelectionResult) return fieldSelectionResult;
+  const tableFieldResult = await tryResolveTableFieldControl(page, target, gridContext);
+  if (tableFieldResult) return tableFieldResult;
   
   // === Ordinal Selection Pattern Resolution (BEFORE product_condition) ===
   // Must run first to handle "Seleccionar la primera tarjeta visible del listado" patterns
@@ -925,6 +2904,40 @@ export async function resolveActionTarget(
       }
       
       console.log(`[target-alias] alias "` + '$' + `{aliasResult.resolvedTarget}" resolved but not found as visible element, falling through`);
+    }
+  }
+
+  // Common dismiss controls are frequently rendered as an icon or as an
+  // English accessible name while the business step uses a short label such
+  // such as "X". Resolve only a unique visible button, preferring the active
+  // dialog, before broad contextual candidate scoring can make it ambiguous.
+  if (/^(x|×|cerrar|close|dismiss|descartar)$/i.test(normalizedTargetAlias)) {
+    const closeName = /^(x|×|cerrar|close|dismiss|descartar)$/i;
+    const dialogClose = page.getByRole("dialog").getByRole("button", { name: closeName }).first();
+    if (await dialogClose.count().catch(() => 0) === 1) {
+      return {
+        status: "resolved",
+        target,
+        locator: dialogClose,
+        locatorStrategy: "common_dismiss_control",
+        confidence: 0.95,
+        matchReason: "unique_dialog_dismiss_control",
+        candidateText: "close",
+        candidates: [],
+      };
+    }
+    const closeButton = page.getByRole("button", { name: closeName }).first();
+    if (await closeButton.count().catch(() => 0) === 1) {
+      return {
+        status: "resolved",
+        target,
+        locator: closeButton,
+        locatorStrategy: "common_dismiss_control",
+        confidence: 0.9,
+        matchReason: "unique_dismiss_control",
+        candidateText: "close",
+        candidates: [],
+      };
     }
   }
 
@@ -1899,6 +3912,7 @@ export type FillTargetResolutionResult = {
   };
   localResolversTried?: string[];
   autoRepairSkippedReason?: string;
+  gridDiagnostics?: GridEditorResolution["diagnostics"];
 };
 
 export type ActiveContainerContext = {
@@ -2344,11 +4358,63 @@ async function tryFillLocator(
   return {};
 }
 
+async function resolveTableFieldEditor(
+  page: Page,
+  target: string,
+  context: GridTargetContext = {},
+  options: GridEditorResolutionOptions = {},
+): Promise<{ locator?: Locator; strategy?: string; diagnostics?: GridEditorResolution["diagnostics"] }> {
+  const grid = await resolveGridEditor(page, target, context, options);
+  if (grid.locator || context.rowScope !== undefined || context.entityScope || context.associatedField) {
+    return { locator: grid.locator, strategy: grid.strategy, diagnostics: grid.diagnostics };
+  }
+  const tables = page.locator("table");
+  const tableCount = await tables.count().catch(() => 0);
+  for (let tableIndex = 0; tableIndex < tableCount; tableIndex += 1) {
+    const table = tables.nth(tableIndex);
+    const headerCells = table.locator("thead th, thead td, [role='columnheader']");
+    const headerCount = await headerCells.count().catch(() => 0);
+    const effectiveHeaders = headerCount > 0 ? headerCells : table.locator("tr").first().locator("th, td, [role='columnheader']");
+    const effectiveHeaderCount = await effectiveHeaders.count().catch(() => 0);
+    let fieldColumn = -1;
+    for (let columnIndex = 0; columnIndex < effectiveHeaderCount; columnIndex += 1) {
+      const headerText = await effectiveHeaders.nth(columnIndex).innerText().catch(() => "");
+      if (fieldLabelMatchesHeader(target, headerText)) {
+        fieldColumn = columnIndex;
+        break;
+      }
+    }
+    if (fieldColumn < 0) continue;
+
+    const rows = table.locator("tbody tr");
+    const rowCount = await rows.count().catch(() => 0);
+    const effectiveRows = rowCount > 0 ? rows : table.locator("tr").nth(1);
+    const effectiveRowCount = rowCount > 0 ? rowCount : await effectiveRows.count().catch(() => 0);
+    for (let rowIndex = 0; rowIndex < effectiveRowCount; rowIndex += 1) {
+      const row = rowCount > 0 ? rows.nth(rowIndex) : effectiveRows;
+      const rowCells = row.locator("td, th");
+      const rowCellCount = await rowCells.count().catch(() => 0);
+      const leadingCellOffset = Math.max(0, rowCellCount - effectiveHeaderCount);
+      const cell = rowCells.nth(fieldColumn + leadingCellOffset);
+      const editors = cell.locator("input, textarea, select, [contenteditable='true'], [role='textbox'], [role='combobox']");
+      const editorCount = await editors.count().catch(() => 0);
+      for (let editorIndex = 0; editorIndex < editorCount; editorIndex += 1) {
+        const editor = editors.nth(editorIndex);
+        if (!(await editor.isVisible().catch(() => false))) continue;
+        if (!(await editor.isEnabled().catch(() => true))) continue;
+        return { locator: editor, strategy: "table_field_editor" };
+      }
+    }
+  }
+  return {};
+}
+
 export async function resolveFillTarget(
   page: Page,
   snapshot: PageSnapshot,
   target: string,
-  activeContainer?: ActiveContainerContext
+  activeContainer?: ActiveContainerContext,
+  gridContext: GridTargetContext = {},
 ): Promise<FillTargetResolutionResult> {
   const attemptedLocators: string[] = [];
   const rejectedCandidates: Array<{ strategy: string; reason: string; tagName?: string; text?: string }> = [];
@@ -2379,6 +4445,50 @@ export async function resolveFillTarget(
     if (EDITABLE_TAGS.has(tagName.toLowerCase())) return true;
     if (role && EDITABLE_ROLES.has(role.toLowerCase())) return true;
     return false;
+  }
+
+  const tableEditor = await resolveTableFieldEditor(page, target, gridContext, { controlKind: "fill" });
+  if (tableEditor.locator) {
+    const tagName = await tableEditor.locator.evaluate((el) => el.tagName.toLowerCase()).catch(() => "input");
+    console.log(`[fill-resolver] Candidate accepted: tag="${tagName}" strategy="${tableEditor.strategy}" visible=true enabled=true editable=true`);
+    return {
+      status: "resolved",
+      target,
+      locator: tableEditor.locator,
+      locatorStrategy: tableEditor.strategy,
+      confidence: 1.0,
+      matchReason: "table_header_field_editor",
+      matchedTag: tagName,
+      attemptedLocators: [tableEditor.strategy ?? "table_field_editor"],
+      editableCandidatesCount: 1,
+      fillDiagnostics: {
+        field: target,
+        activeContainerUsed: false,
+        activeContainerType: activeContainer?.type,
+        candidatesEvaluated: 1,
+        candidatesEvaluatedDetails: [{
+          strategy: tableEditor.strategy ?? "table_field_editor",
+          tagName,
+          visible: true,
+          enabled: true,
+          editable: true,
+          insideActiveContainer: false,
+          text: target
+        }],
+        rejectedCandidates: [],
+        selectedCandidate: {
+          strategy: tableEditor.strategy ?? "table_field_editor",
+          tagName,
+          visible: true,
+          enabled: true,
+          editable: true,
+          insideActiveContainer: false
+        }
+      },
+      ...(tableEditor.diagnostics ? { gridDiagnostics: tableEditor.diagnostics } : {}),
+      localResolversTried: ["table_field_editor"],
+      autoRepairSkippedReason: "local_diagnostic_sufficient"
+    };
   }
 
   // Phase 0: Try scoped strategies within active container first (if exists)

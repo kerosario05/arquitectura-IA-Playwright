@@ -7,11 +7,12 @@ import { config, requireTestRailConfig } from "../../config/env";
 import { TestRailClient } from "../../clients/testrail.client";
 import { publishScenariosToTestRail } from "../services/testrail-case-publisher";
 import { buildScenarioPreviewScenarioId } from "../services/testrail-sync-types";
+import type { DataContextEntry } from "../../data/data-context";
 import type { McpRouteProfile, McpScenario } from "../../scenarios/scenario-types";
 import type { PromotedAutomationIndexEntry } from "../../types/automation-promotion.types";
 import { defectChecklistStore } from "../services/defect-checklist-store";
 import { jobStore } from "./job-store";
-import { startDiscoveryBatchRun, validatePromotedEntryForExecution } from "./discovery-batch-runner";
+import { buildRediscoveryProvenanceLine, startDiscoveryBatchRun, validatePromotedEntryForExecution } from "./discovery-batch-runner";
 import { buildMcpScenarioContractFromTestRailCase, evaluateCaseContractSufficiency, extractCaseContractMetadata } from "../../automations/case-contract-evaluator";
 import { normalizeTestRailCase } from "../../testrail/testrail-normalizer";
 import type { RawTestRailCase } from "../../types/testrail.types";
@@ -60,9 +61,71 @@ export type LaunchExecutionInput = {
   sprintName?: string;
   selectedScenarios: LaunchScenario[];
   existingTestRailCaseIds?: number[];
+  forceRediscovery?: boolean;
+  overwrite?: boolean;
+  contextOnly?: boolean;
+  runtimeEntriesByCase?: Record<string, DataContextEntry[]>;
   adaptiveScenarios?: LaunchScenario[];
   publishStrategy?: "always_create" | "use_existing";
 };
+
+export function buildRediscoveryCreateHandoffLine(input: {
+  launchId: string;
+  jobId: string;
+  prePresent: boolean;
+  preValue?: unknown;
+  storedPresent: boolean;
+  storedValue?: unknown;
+}): string {
+  const describe = (prefix: "pre" | "stored", present: boolean, value: unknown): string =>
+    `${prefix}Present=${present} ${prefix}Value=${value === undefined ? "undefined" : String(value)} ${prefix}Type=${value === undefined ? "undefined" : typeof value}`;
+  return [
+    "[rediscovery-provenance] boundary=create_handoff producer=launch_execution",
+    `launchId=${input.launchId}`,
+    `jobId=${input.jobId}`,
+    describe("pre", input.prePresent, input.preValue),
+    describe("stored", input.storedPresent, input.storedValue),
+  ].join(" ");
+}
+
+export function buildDiscoveryBatchParamsFromLaunch(input: {
+  launch: LaunchExecutionInput;
+  executionCaseIds: number[];
+  publishedCases: PublishedCaseEntry[];
+  routeProfile?: McpRouteProfile;
+  launchId: string;
+  testRunId?: number;
+}): Record<string, unknown> {
+  const launchRecord = input.launch as unknown as Record<string, unknown>;
+  const params: Record<string, unknown> = {
+    caseIds: input.executionCaseIds,
+    appSlug: input.launch.appSlug,
+    sectionSlug: input.launch.sectionSlug,
+    sectionName: input.launch.sectionName,
+    executePromotedSpecs: true,
+    ...(input.launch.projectId !== undefined ? { testRailProjectId: input.launch.projectId } : {}),
+    ...(input.launch.suiteId !== undefined ? { testRailSuiteId: input.launch.suiteId } : {}),
+    ...((input.launch.testrailSectionId ?? input.launch.sectionId) !== undefined
+      ? { testRailSectionId: Number(input.launch.testrailSectionId ?? input.launch.sectionId) }
+      : {}),
+    overwrite: input.launch.overwrite === true,
+    rerunActive: false,
+    launchId: input.launchId,
+    testRunId: input.testRunId,
+    jiraKey: input.launch.jiraKey,
+    publishedCases: input.publishedCases,
+    ...(input.launch.contextOnly === true ? { contextOnly: true } : {}),
+    ...(input.launch.runtimeEntriesByCase ? { runtimeEntriesByCase: input.launch.runtimeEntriesByCase } : {}),
+    ...(input.routeProfile ? { routeProfile: input.routeProfile } : {}),
+  };
+
+  // Preserve explicit presence semantics: absent stays absent, false stays false,
+  // and only true can authorize Full Discovery downstream.
+  if (Object.prototype.hasOwnProperty.call(launchRecord, "forceRediscovery")) {
+    params.forceRediscovery = input.launch.forceRediscovery === true;
+  }
+  return params;
+}
 
 export type PublishedCaseEntry = {
   scenarioId: string; // TestRail custom_scenario_id (same as testrailCustomScenarioId)
@@ -379,7 +442,11 @@ export function resolveExistingCaseExecutionPlan(input: {
   sectionSlug?: string;
   entries: PromotedAutomationIndexEntry[];
   validateSpec?: (entry: PromotedAutomationIndexEntry) => ExistingSpecValidation;
-  caseContracts?: Map<number, { usable: boolean; reasonCode: string }>;
+  caseContracts?: Map<number, {
+    usable: boolean;
+    reasonCode: string;
+    recommendedRoute?: "targeted_discovery" | "full_discovery" | "automation_from_case_contract" | "blocked";
+  }>;
 }): ExistingCaseExecutionPlan {
   const requestedApp = normalizeOwnedAppSlug(input.appSlug);
   const existingSpec: ExistingCaseExecutionUnit[] = [];
@@ -391,7 +458,9 @@ export function resolveExistingCaseExecutionPlan(input: {
     const allCandidates = input.entries.filter((entry) => entry.caseId === caseId && entry.id?.trim());
     if (allCandidates.length === 0) {
       const contract = input.caseContracts?.get(caseId);
-      if (contract?.usable) {
+      const discoveryAllowed = contract?.recommendedRoute === "targeted_discovery"
+        || contract?.recommendedRoute === "full_discovery";
+      if (contract?.usable || discoveryAllowed) {
         mcpRequired.push({ caseId, executionSource: "mcp_required", reasonCode: contract.reasonCode, mcpRequired: true });
       } else {
         blocked.push({ caseId, executionSource: "blocked", reasonCode: contract?.reasonCode ?? (input.caseContracts ? "case_not_found" : "automation_mapping_not_found"), mcpRequired: false });
@@ -614,7 +683,11 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
   }
   routeDiscoveryCount = routeDiscoveryScenarios.length;
   const existingCaseEntries = await loadExistingCaseAutomationEntries(input.appSlug);
-  const caseContracts = new Map<number, { usable: boolean; reasonCode: string }>();
+  const caseContracts = new Map<number, {
+    usable: boolean;
+    reasonCode: string;
+    recommendedRoute?: "targeted_discovery" | "full_discovery" | "automation_from_case_contract" | "blocked";
+  }>();
   if (selectionPlan.existingTestRailCaseIds.length > 0) {
     try {
       const trClient = new TestRailClient(requireTestRailConfig(config));
@@ -631,7 +704,11 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
             metadata,
             hasRouteProfileConfig: true,
           });
-          caseContracts.set(caseId, { usable: evaluation.sufficient, reasonCode: evaluation.reasonCode });
+          caseContracts.set(caseId, {
+            usable: evaluation.sufficient,
+            reasonCode: evaluation.reasonCode,
+            recommendedRoute: evaluation.recommendedRoute,
+          });
         } catch {
           caseContracts.set(caseId, { usable: false, reasonCode: "case_not_found" });
         }
@@ -931,20 +1008,38 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
     const childPublishedCases = publishedCases.filter((publishedCase) => executionCaseIds.includes(publishedCase.caseId));
     const routeProfile = [...routeDiscoveryScenarios, ...selectionPlan.normalizedScenarios]
       .find((scenario) => scenario.routeProfile)?.routeProfile;
-    const discoveryJob = jobStore.create("discovery-batch", {
-      caseIds: executionCaseIds,
-      appSlug: input.appSlug,
-      sectionSlug: input.sectionSlug,
-      sectionName: input.sectionName,
-      executePromotedSpecs: true,
-      overwrite: false,
-      rerunActive: false,
+    const inputRecord = input as unknown as Record<string, unknown>;
+    const hasForceRediscovery = Object.prototype.hasOwnProperty.call(inputRecord, "forceRediscovery");
+    const forceRediscovery = inputRecord.forceRediscovery;
+    console.log(buildRediscoveryProvenanceLine({
+      boundary: "pre_job_store",
+      sourceEndpoint: "/api/runs/launch-execution",
+      jobType: "discovery-batch",
+      correlationField: "launchId",
+      correlationValue: launchId,
+      value: hasForceRediscovery ? forceRediscovery : undefined,
+      valueSource: hasForceRediscovery ? "input.forceRediscovery" : "absent",
+    }));
+    const discoveryJobParams = buildDiscoveryBatchParamsFromLaunch({
+      launch: input,
+      executionCaseIds,
+      publishedCases: childPublishedCases,
+      routeProfile,
       launchId,
       testRunId,
-      jiraKey: input.jiraKey,
-      publishedCases: childPublishedCases,
-      ...(routeProfile ? { routeProfile } : {}),
     });
+    const createPrePresent = Object.prototype.hasOwnProperty.call(discoveryJobParams, "forceRediscovery");
+    const createPreValue = discoveryJobParams.forceRediscovery;
+    const discoveryJob = jobStore.create("discovery-batch", discoveryJobParams);
+    const storedParams = discoveryJob.params as Record<string, unknown>;
+    jobStore.appendLog(discoveryJob.id, buildRediscoveryCreateHandoffLine({
+      launchId,
+      jobId: discoveryJob.id,
+      prePresent: createPrePresent,
+      preValue: createPreValue,
+      storedPresent: Object.prototype.hasOwnProperty.call(storedParams, "forceRediscovery"),
+      storedValue: storedParams.forceRediscovery,
+    }));
     discoveryJobId = discoveryJob.id;
     jobStore.appendLog(discoveryJobId, `[launch-execution-plan] existingSpec=${existingCasePlan.existingSpec.length} mcpRequired=${existingCasePlan.mcpRequired.length} routeDiscovery=${routeDiscoveryScenarios.length}`);
     startDiscoveryBatchRun(discoveryJobId);

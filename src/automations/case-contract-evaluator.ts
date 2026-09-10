@@ -36,6 +36,7 @@ export type CaseContractMetadata = {
   navigationPrefix?: string;
   routeEvidence?: string;
   dataRequirements?: string;
+  manualOnly?: boolean;
 };
 
 function nonEmpty(value: string | undefined): string | undefined {
@@ -50,6 +51,18 @@ function readStringField(rawCase: RawTestRailCase, keys: string[]): string | und
     if (typeof value !== "string") continue;
     const normalized = nonEmpty(value);
     if (normalized) return normalized;
+  }
+  return undefined;
+}
+
+function readBooleanField(rawCase: RawTestRailCase, keys: string[]): boolean | undefined {
+  for (const key of keys) {
+    const value = rawCase[key];
+    if (typeof value === "boolean") return value;
+    if (typeof value !== "string") continue;
+    const normalized = value.trim().toLowerCase();
+    if (["true", "1", "yes", "si", "sí"].includes(normalized)) return true;
+    if (["false", "0", "no"].includes(normalized)) return false;
   }
   return undefined;
 }
@@ -131,6 +144,12 @@ export function extractCaseContractMetadata(rawCase: RawTestRailCase): CaseContr
       "dataRequirements",
       "data_requirements",
     ]),
+    manualOnly: readBooleanField(rawCase, [
+      "custom_manual_only",
+      "manualOnly",
+      "manual_only",
+      "custom_non_automatable_manual",
+    ]),
   };
 }
 
@@ -164,6 +183,7 @@ export function buildMcpScenarioContractFromTestRailCase(input: {
     dataRequirements: buildDataRequirements(input.scenario, input.metadata),
     nonExecutableCriteria: "",
     mcpExecutable: true,
+    ...(input.metadata.manualOnly !== undefined ? { manualOnly: input.metadata.manualOnly } : {}),
   };
 }
 

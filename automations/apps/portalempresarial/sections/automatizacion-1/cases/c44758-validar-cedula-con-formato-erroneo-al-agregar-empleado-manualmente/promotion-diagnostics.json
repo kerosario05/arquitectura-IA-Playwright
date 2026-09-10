@@ -1,0 +1,24 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "spec_generation_validation_failed",
+  "blockers": [
+    "spec_generation_validation_failed"
+  ],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage",
+    "FormPage",
+    "LoginPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\portalempresarial\\sections\\automatizacion-1\\cases\\c44758-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente\\case.spec.ts",
+  "specHash": "1e745bf8c6115123919874bdafb81ad0c8e31086bb58482c490e022c246f6f40",
+  "specSource": "ai_candidate"
+}

@@ -21,6 +21,7 @@ export type WebConfig = {
   testDataAliasesJson: string | null;
   missingInputBehavior: number;
   extraLoginFieldsJson: string | null;
+  ignoreHTTPSErrors?: boolean;
 };
 
 export type MobileConfig = {
@@ -102,13 +103,17 @@ export async function readProjectConfigurationOnConnection(
     knowledge: null,
   };
 
-  const web = await conn.query<Omit<WebConfig, never>>(
+  const web = await conn.query<Omit<WebConfig, "ignoreHTTPSErrors"> & {
+    ignoreHTTPSErrors: boolean | number | string | null | undefined;
+  }>(
     `SELECT baseUrl, loginMode, username, passwordSecretRef, missingInputBehavior,
-            testDataJson, testDataAliasesJson, extraLoginFieldsJson
+            ignoreHTTPSErrors, testDataJson, testDataAliasesJson, extraLoginFieldsJson
      FROM dbo.WebProjectConfiguration WHERE projectId = ?`,
     [project.id]
   );
-  if (web.length > 0) base.web = web[0];
+  if (web.length > 0) {
+    base.web = { ...web[0], ignoreHTTPSErrors: toBool(web[0].ignoreHTTPSErrors) };
+  }
 
   const mobile = await conn.query<MobileConfig>(
     `SELECT apkPath, packageName, mainActivity, appName, platform, framework, metadataSource, metadataResolvedAt

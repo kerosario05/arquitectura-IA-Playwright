@@ -2,6 +2,7 @@ import path from "node:path";
 import { chromium, firefox, webkit } from "@playwright/test";
 import { config } from "../config/env";
 import { getLoginStrategy } from "../auth/login-strategy.factory";
+import { launchRuntimeBrowserSession } from "../browser/browser-session";
 import { scanCurrentPage } from "../explorer/page-scanner";
 import { writePageSnapshot } from "../explorer/snapshot-writer";
 
@@ -51,11 +52,16 @@ async function main(): Promise<void> {
   const browserType = { chromium, firefox, webkit }[config.execution.browser];
   const outputPath = args.output ? path.resolve(args.output) : getDefaultOutputPath();
 
-  let browser;
+  let session: Awaited<ReturnType<typeof launchRuntimeBrowserSession>> | undefined;
   try {
-    browser = await browserType.launch({ headless: config.execution.headless });
-    const context = await browser.newContext();
-    const page = await context.newPage();
+    session = await launchRuntimeBrowserSession({
+      browserType,
+      headless: config.execution.headless,
+      targetUrl: config.app.baseUrl,
+      profilePath: config.execution.qaBrowserProfilePath,
+      channel: config.execution.qaBrowserChannel,
+    });
+    const page = session.page;
     page.setDefaultTimeout(config.execution.defaultTimeoutMs);
 
     if (args.noLogin) {
@@ -84,8 +90,8 @@ async function main(): Promise<void> {
     );
     console.log(`Snapshot path: ${outputPath}`);
   } finally {
-    if (browser) {
-      await browser.close();
+    if (session) {
+      await session.close();
     }
   }
 }

@@ -1,0 +1,10 @@
+{
+  "appSlug": "portalempresarial",
+  "sectionSlug": "automatizacion-1",
+  "sectionName": "Automatizacion 1",
+  "sectionId": 5794,
+  "sourceScenarioId": "C44758",
+  "testRailCaseId": 44758,
+  "generatedAt": "2026-09-09T16:16:28.649Z",
+  "title": "Validar cédula con formato erróneo al agregar empleado manualmente"
+}

@@ -1,6 +1,8 @@
 export type EvidenceStepStatus = "passed" | "failed" | "skipped";
 
 export type EvidenceScenarioStatus = "Exitoso" | "Fallido" | "No ejecutado" | "Parcial / Con observaciones";
+export type EvidenceCaptureStatus = "success" | "failed" | "not_run";
+export type EvidenceFunctionalStatus = "passed" | "failed" | "not_run";
 
 export interface EvidenceConfig {
   enabled: boolean;
@@ -70,6 +72,10 @@ export interface EvidenceScenarioRecord {
   analyst: string;
   date: string;
   status: EvidenceScenarioStatus;
+  captureStatus?: EvidenceCaptureStatus;
+  discoveryStatus?: string;
+  functionalStatus?: EvidenceFunctionalStatus;
+  statusContradiction?: boolean;
   appSlug: string;
   sectionSlug: string;
   sectionName?: string;

@@ -1,0 +1,137 @@
+- generic [active] [ref=f4e1]:
+  - generic [ref=f4e3]:
+    - complementary [ref=f4e4]:
+      - generic [ref=f4e5]:
+        - generic [ref=f4e6]: Q
+        - generic [ref=f4e9]:
+          - generic [ref=f4e10]: QA Lab
+          - generic [ref=f4e11]: Santa Cruz
+      - navigation [ref=f4e12]:
+        - button "Panorama" [ref=f4e13] [cursor=pointer]
+        - button "Lanzar pruebas" [ref=f4e20] [cursor=pointer]
+        - button "Ejecuciones" [ref=f4e26] [cursor=pointer]
+        - button "Configuración" [ref=f4e31] [cursor=pointer]
+      - generic [ref=f4e37]:
+        - generic [ref=f4e41]: Pro tip
+        - generic [ref=f4e42]: Programa ejecuciones nocturnas para optimizar recursos.
+      - generic [ref=f4e43]:
+        - generic [ref=f4e44]: CM
+        - generic [ref=f4e45]:
+          - generic [ref=f4e46]: Carlos Martínez
+          - generic [ref=f4e47]: QA Lead
+    - main [ref=f4e48]:
+      - generic [ref=f4e49]:
+        - generic [ref=f4e50]:
+          - generic [ref=f4e51]:
+            - generic [ref=f4e53]: En vivo · 17:15
+            - generic [ref=f4e54]: ·
+            - generic [ref=f4e55]: Monitoreo en tiempo real del progreso
+          - heading "Ejecución en vivo" [level=1] [ref=f4e1023]
+        - generic [ref=f4e57]:
+          - generic [ref=f4e58]:
+            - textbox "Buscar..." [ref=f4e62]
+            - generic [ref=f4e63]: ⌘K
+          - button [ref=f4e64] [cursor=pointer]
+      - generic [ref=f4e1025]:
+        - generic [ref=f4e1026]:
+          - button "Volver al dashboard" [ref=f4e1027] [cursor=pointer]
+          - generic [ref=f4e1030]:
+            - button "Pausar" [ref=f4e1031] [cursor=pointer]
+            - button "Detener" [ref=f4e1035] [cursor=pointer]
+        - generic [ref=f4e1043]:
+          - generic [ref=f4e1044]: Ejecución en curso · 87a16dc4-bab5-419c-9e3e-883e97d22567
+          - heading "PortalEmpresarial" [level=2] [ref=f4e1049]
+          - generic [ref=f4e1050]: Disparado por Carlos M. · iniciado Hace 0m
+          - generic [ref=f4e1053]:
+            - generic [ref=f4e1054]: Progreso
+            - generic [ref=f4e1055]: 0%
+          - generic [ref=f4e1057]:
+            - generic [ref=f4e1058]:
+              - generic [ref=f4e1059]: Procesados
+              - generic [ref=f4e1060]:
+                - text: "0"
+                - generic [ref=f4e1061]: /1
+            - generic [ref=f4e1062]:
+              - generic [ref=f4e1063]: Ejecutados
+              - generic [ref=f4e1064]: "0"
+            - generic [ref=f4e1065]:
+              - generic [ref=f4e1066]: Aprobados
+              - generic [ref=f4e1067]: "0"
+            - generic [ref=f4e1068]:
+              - generic [ref=f4e1069]: Fallidos
+              - generic [ref=f4e1070]: "0"
+        - generic [ref=f4e1071]:
+          - generic [ref=f4e1072]:
+            - generic [ref=f4e1073]: Ejecutándose ahora
+            - generic [ref=f4e1078]: Esperando escenario activo...
+          - generic [ref=f4e1079]:
+            - generic [ref=f4e1080]: Resultados
+            - heading "Distribución" [level=3] [ref=f4e1081]
+            - generic [ref=f4e1082]:
+              - application [ref=f4e1085]
+              - generic:
+                - generic: Pendiente
+                - generic: Pass rate
+            - generic [ref=f4e1109]:
+              - generic [ref=f4e1110]:
+                - generic [ref=f4e1111]: Pass
+                - generic [ref=f4e1112]: "0"
+              - generic [ref=f4e1113]:
+                - generic [ref=f4e1114]: Fail
+                - generic [ref=f4e1115]: "0"
+        - generic [ref=f4e1116]:
+          - generic [ref=f4e1117]:
+            - generic [ref=f4e1118]:
+              - generic [ref=f4e1121]: Live logs
+              - generic [ref=f4e1122]: job://87a16dc4-bab5-419c-9e3e-883e97d22567
+            - generic [ref=f4e1123]:
+              - generic [ref=f4e1124]: stream
+              - generic [ref=f4e1126]: 14 eventos
+              - button [ref=f4e1127] [cursor=pointer]
+          - generic [ref=f4e1133]:
+            - generic [ref=f4e1134]:
+              - generic [ref=f4e1135]: 17:16:32
+              - generic [ref=f4e1136]: "[execution-plan] jobId=87a16dc4-bab5-419c-9e3e-883e97d22567 mode=testrail_only jiraPreviewCount=0 testRailCount=1 total=1 order=testrail_only"
+            - generic [ref=f4e1137]:
+              - generic [ref=f4e1138]: 17:16:32
+              - generic [ref=f4e1139]: "[defect-checklist] started identity=launch:922a504e-4228-488a-825d-be7e65a69812 issueKey=none defectCount=0"
+            - generic [ref=f4e1140]:
+              - generic [ref=f4e1141]: 17:16:32
+              - generic [ref=f4e1142]: "[source-group] jobId=87a16dc4-bab5-419c-9e3e-883e97d22567 sourceGroup=jira_preview action=skipped caseCount=0 durationMs=0 reason=empty_group"
+            - generic [ref=f4e1143]:
+              - generic [ref=f4e1144]: 17:16:32
+              - generic [ref=f4e1145]: "[source-group] jobId=87a16dc4-bab5-419c-9e3e-883e97d22567 sourceGroup=testrail_case action=start caseCount=1 durationMs=0 reason=none"
+            - generic [ref=f4e1146]:
+              - generic [ref=f4e1147]: 17:16:32
+              - generic [ref=f4e1148]: "[case-schedule] jobId=87a16dc4-bab5-419c-9e3e-883e97d22567 caseId=44757 sourceGroup=testrail_case groupIndex=1 overallIndex=1 action=start"
+            - generic [ref=f4e1149]:
+              - generic [ref=f4e1150]: 17:16:32
+              - generic [ref=f4e1151]: "[rediscovery-intent] jobId=87a16dc4-bab5-419c-9e3e-883e97d22567 caseId=44757 explicit=false source=legacy_default overwrite=true rerunActive=true"
+            - generic [ref=f4e1152]:
+              - generic [ref=f4e1153]: 17:16:32
+              - generic [ref=f4e1154]: "[case-contract-evaluation] jobId=87a16dc4-bab5-419c-9e3e-883e97d22567 caseId=44757 appSlug=portalempresarial sufficient=false recommendedRoute=full_discovery gapCount=4 reason=missing_route_evidence"
+            - generic [ref=f4e1155]:
+              - generic [ref=f4e1156]: 17:16:32
+              - generic [ref=f4e1157]: "[execution-route] jobId=87a16dc4-bab5-419c-9e3e-883e97d22567 caseId=44757 appSlug=portalempresarial route=full_discovery reason=missing_route_evidence specPath=none"
+            - generic [ref=f4e1158]:
+              - generic [ref=f4e1159]: 17:16:32
+              - generic [ref=f4e1160]: "[execution-phase] jobId=87a16dc4-bab5-419c-9e3e-883e97d22567 caseId=44757 phase=resolve durationMs=334 result=completed reason=missing_route_evidence"
+            - generic [ref=f4e1161]:
+              - generic [ref=f4e1162]: 17:16:32
+              - generic [ref=f4e1163]: "[execution-phase] jobId=87a16dc4-bab5-419c-9e3e-883e97d22567 caseId=44757 phase=contract_validation durationMs=334 result=completed reason=missing_route_evidence"
+            - generic [ref=f4e1164]:
+              - generic [ref=f4e1165]: 17:16:32
+              - generic [ref=f4e1166]: "[case-lifecycle] jobId=87a16dc4-bab5-419c-9e3e-883e97d22567 caseId=44757 sourceGroup=testrail_case phase=contract_validation result=completed durationMs=334 reason=missing_route_evidence"
+            - generic [ref=f4e1167]:
+              - generic [ref=f4e1168]: 17:16:32
+              - generic [ref=f4e1169]: "[case-lifecycle] jobId=87a16dc4-bab5-419c-9e3e-883e97d22567 caseId=44757 sourceGroup=testrail_case phase=resolve result=completed durationMs=334 reason=missing_route_evidence"
+            - generic [ref=f4e1170]:
+              - generic [ref=f4e1171]: 17:16:32
+              - generic [ref=f4e1172]: "[run:discovery-batch] caseIds=44757 appSlug=portalempresarial"
+            - generic [ref=f4e1173]:
+              - generic [ref=f4e1174]: 17:16:32
+              - generic [ref=f4e1175]: "[run:discovery-batch] command=npm.cmd run discovery:batch -- --case-ids 44757 --app portalempresarial --overwrite --auto-promote --auto-pom --rerun-active --testrail-project-id 30 --testrail-suite-id 37 --testrail-section-id 5794"
+            - generic [ref=f4e1176]:
+              - generic [ref=f4e1177]: 00:00
+              - generic [ref=f4e1178]: C44757
+  - generic [ref=f4e653]: "30"

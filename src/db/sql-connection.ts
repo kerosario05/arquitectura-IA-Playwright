@@ -20,6 +20,19 @@ export async function getConnection(): Promise<odbc.Connection> {
   return _pool;
 }
 
+export async function withConnection<T>(fn: (conn: odbc.Connection) => Promise<T>): Promise<T> {
+  const conn = await odbc.connect(connectionString);
+  try {
+    return await fn(conn);
+  } finally {
+    try {
+      await conn.close();
+    } catch {
+      // preserve the operation result or error
+    }
+  }
+}
+
 export async function closeConnection(): Promise<void> {
   if (_pool) {
     await _pool.close();

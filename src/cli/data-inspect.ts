@@ -17,6 +17,9 @@ function isConfiguredJsonLike(rawValue: string | undefined): boolean {
 
 function countBySource(entries: DataContextEntry[]): Record<DataContextEntry["source"], number> {
   const counts: Record<DataContextEntry["source"], number> = {
+    explicit_runtime_input: 0,
+    runtime_context: 0,
+    user_provided_qa_credentials: 0,
     app_username: 0,
     app_password: 0,
     extra_login_field: 0,
@@ -25,7 +28,11 @@ function countBySource(entries: DataContextEntry[]): Record<DataContextEntry["so
     promoted_manifest: 0,
     auto_generated: 0,
     fixture: 0,
-    environment_variable: 0
+    environment_variable: 0,
+    data_override: 0,
+    suggested_value: 0,
+    qa_dataset: 0,
+    project_config: 0
   };
 
   for (const entry of entries) {
@@ -63,6 +70,8 @@ function runInspection(): void {
   console.log(`- auto_generated: ${sourceCounts.auto_generated}`);
   console.log(`- fixture: ${sourceCounts.fixture}`);
   console.log(`- environment_variable: ${sourceCounts.environment_variable}`);
+  console.log(`- data_override: ${sourceCounts.data_override}`);
+  console.log(`- suggested_value: ${sourceCounts.suggested_value}`);
   console.log("");
   console.log(`Dynamic aliases groups: ${Object.keys(config.app.testDataAliases).length}`);
   console.log(`Missing input behavior: ${config.app.missingInputBehavior}`);

@@ -3,6 +3,23 @@ import {
   applyPromotedBrowserMode,
   resolvePromotedBrowserMode,
 } from "../src/cli/test-promoted-browser-mode";
+import { buildPromotedExecutionEnv } from "../src/cli/test-promoted";
+
+test("promoted execution uses project URL over global APP_BASE_URL without mutation", () => {
+  const baseEnv = { APP_BASE_URL: "https://legacy.example" } as NodeJS.ProcessEnv;
+  const childEnv = buildPromotedExecutionEnv(baseEnv, "portalempresarial");
+  expect(childEnv.APP_BASE_URL).toBe("https://172.27.4.31/login");
+  expect(baseEnv.APP_BASE_URL).toBe("https://legacy.example");
+});
+
+test("promoted execution keeps project environments isolated", () => {
+  const baseEnv = { APP_BASE_URL: "https://legacy.example" } as NodeJS.ProcessEnv;
+  const projectA = buildPromotedExecutionEnv(baseEnv, "portalempresarial");
+  const projectB = buildPromotedExecutionEnv({ ...baseEnv, APP_BASE_URL: "https://project-b.example/login" }, "missing-project");
+  expect(projectA.APP_BASE_URL).toBe("https://172.27.4.31/login");
+  expect(projectB.APP_BASE_URL).toBe("https://project-b.example/login");
+  expect(baseEnv.APP_BASE_URL).toBe("https://legacy.example");
+});
 
 test("browser mode: explicit --headed has top priority", () => {
   const resolved = resolvePromotedBrowserMode({

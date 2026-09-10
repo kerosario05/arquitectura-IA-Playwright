@@ -5,7 +5,7 @@ import { CodexCliProvider } from "./providers/codex-cli-provider";
 import { CopilotCliProvider } from "./providers/copilot-cli-provider";
 import { ClaudeCliProvider } from "./providers/claude-cli-provider";
 import { resolveCodexCliPath } from "../agent/codex-cli-resolver";
-import { resolveScenarioAiConfig, resolveRepairAiConfig, resolveSpecGenerationAiConfig, resolveGeneralAiConfig } from "./ai-config-resolver";
+import { resolveCanonicalSemanticAiConfig, resolveScenarioAiConfig, resolveScenarioSemanticAiConfig, resolveRepairAiConfig, resolveSpecGenerationAiConfig, resolveGeneralAiConfig } from "./ai-config-resolver";
 
 function parseBool(value: string | undefined, defaultValue = false): boolean {
   if (!value) return defaultValue;
@@ -149,6 +149,16 @@ export async function createAiProviderFromConfig(config: AiProviderConfig): Prom
  */
 export async function createScenarioAiProvider(): Promise<AiProvider> {
   const config = resolveScenarioAiConfig();
+  return createAiProviderFromConfig(config);
+}
+
+export async function createScenarioSemanticAiProvider(): Promise<AiProvider> {
+  const config = resolveScenarioSemanticAiConfig();
+  return createAiProviderFromConfig(config);
+}
+
+export async function createCanonicalSemanticAiProvider(): Promise<AiProvider> {
+  const config = resolveCanonicalSemanticAiConfig();
   return createAiProviderFromConfig(config);
 }
 

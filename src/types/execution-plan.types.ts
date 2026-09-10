@@ -1,3 +1,5 @@
+import type { ControlIdentity } from "./control-identity";
+
 export type ExecutionPlanVersion = "1.0";
 
 export type ExecutionPlanSource = "manual" | "rule_based" | "ai_generated" | "discovery_generated";
@@ -64,6 +66,14 @@ export type RequiredDataRef = {
   sensitive?: boolean;
   source?: string;
   reason?: string;
+  valueRole?: "runtime_input" | "expected_oracle" | "runtime_derived_oracle";
+  oracleSource?: string;
+  dependsOn?: string[];
+};
+
+export type InputIntent = {
+  mode: "set_value" | "leave_unset" | "invalid_value" | "preserve_state";
+  requirementRefs?: string[];
 };
 
 export type ExecutionPlanStep = {
@@ -73,6 +83,19 @@ export type ExecutionPlanStep = {
   target?: PlanTarget | "APP_BASE_URL";
   value?: string;
   valueKey?: string;
+  inputIntent?: InputIntent;
+  requirementRefs?: string[];
+  entityScope?: string;
+  rowScope?: number;
+  rowRelation?: "next" | "added";
+  associatedField?: string;
+  expectedValueKey?: string;
+  controlIdentity?: ControlIdentity;
+  supportingStrategy?: {
+    kind: "select_valid_option" | "radio_valid_option" | "checkbox_required_state" | "combobox_valid_option" | "autocomplete_valid_option" | "date_valid_value" | "multiselect_valid_options";
+    strategy: "first_valid" | "ensure_checked" | "valid_in_range" | "ensure_valid_selection";
+  };
+  conditionalAction?: import("../scenarios/canonical-scenario").CanonicalConditionalAction;
   expected?: string;
   timeoutMs?: number;
   optional?: boolean;

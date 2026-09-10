@@ -1,0 +1,332 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e3]:
+    - complementary [ref=f1e4]:
+      - generic [ref=f1e5]:
+        - generic [ref=f1e6]: Q
+        - generic [ref=f1e9]:
+          - generic [ref=f1e10]: QA Lab
+          - generic [ref=f1e11]: Santa Cruz
+      - navigation [ref=f1e12]:
+        - button "Panorama" [ref=f1e13] [cursor=pointer]
+        - button "Lanzar pruebas" [ref=f1e20] [cursor=pointer]
+        - button "Ejecuciones" [ref=f1e26] [cursor=pointer]
+        - button "Configuración" [ref=f1e31] [cursor=pointer]
+      - generic [ref=f1e37]:
+        - generic [ref=f1e41]: Pro tip
+        - generic [ref=f1e42]: Programa ejecuciones nocturnas para optimizar recursos.
+      - generic [ref=f1e43]:
+        - generic [ref=f1e44]: CM
+        - generic [ref=f1e45]:
+          - generic [ref=f1e46]: Carlos Martínez
+          - generic [ref=f1e47]: QA Lead
+    - main [ref=f1e48]:
+      - generic [ref=f1e49]:
+        - generic [ref=f1e50]:
+          - generic [ref=f1e51]:
+            - generic [ref=f1e53]: En vivo · 16:38
+            - generic [ref=f1e54]: ·
+            - generic [ref=f1e55]: Aquí está el pulso de tus pruebas automatizadas hoy
+          - heading "Buenos días, Carlos" [level=1] [ref=f1e56]
+        - generic [ref=f1e57]:
+          - generic [ref=f1e58]:
+            - textbox "Buscar..." [ref=f1e62]
+            - generic [ref=f1e63]: ⌘K
+          - button [ref=f1e64] [cursor=pointer]
+          - button "Nueva ejecución" [ref=f1e69] [cursor=pointer]
+      - generic [ref=f1e72]:
+        - generic [ref=f1e73]:
+          - generic [ref=f1e74]:
+            - button "Todo" [ref=f1e75] [cursor=pointer]
+            - combobox [ref=f1e76] [cursor=pointer]:
+              - option "Por proyecto..." [disabled] [selected]
+              - option "Core Banking"
+              - option "Mobile Banking"
+              - option "Portal Web Clientes"
+              - option "API Pagos"
+              - option "Originación Créditos"
+              - option "Cajeros ATM"
+          - button "Mayo 2026" [ref=f1e78] [cursor=pointer]
+        - generic [ref=f1e83]:
+          - generic [ref=f1e84]:
+            - generic [ref=f1e85]:
+              - generic [ref=f1e95]:
+                - generic [ref=f1e96]: En ejecución ahora
+                - heading "3 corridas activas" [level=3] [ref=f1e97]
+              - button "Ver todas" [ref=f1e98] [cursor=pointer]
+            - generic [ref=f1e101]:
+              - button "Portal Web Clientes EXE-4821 · Hace 3m En vivo 42% 60/142 57 3 ETA 7m 12s ▸ C1058 · Transferencia entre cuentas propias" [ref=f1e102] [cursor=pointer]:
+                - generic [ref=f1e104]:
+                  - generic [ref=f1e109]:
+                    - generic [ref=f1e110]: Portal Web Clientes
+                    - generic [ref=f1e111]: EXE-4821 · Hace 3m
+                  - generic [ref=f1e112]: En vivo
+                - generic [ref=f1e117]:
+                  - generic [ref=f1e118]:
+                    - generic [ref=f1e119]: 42%
+                    - generic [ref=f1e120]: 60/142
+                    - generic [ref=f1e121]: "57"
+                    - generic [ref=f1e124]: "3"
+                  - generic [ref=f1e129]: ETA 7m 12s
+                - generic [ref=f1e130]: ▸ C1058 · Transferencia entre cuentas propias
+              - button "API Pagos EXE-4820 · Hace 1m En vivo 12% 19/156 19 ETA 3m 45s ▸ C2103 · Validación de token OAuth" [ref=f1e131] [cursor=pointer]:
+                - generic [ref=f1e133]:
+                  - generic [ref=f1e138]:
+                    - generic [ref=f1e139]: API Pagos
+                    - generic [ref=f1e140]: EXE-4820 · Hace 1m
+                  - generic [ref=f1e141]: En vivo
+                - generic [ref=f1e146]:
+                  - generic [ref=f1e147]:
+                    - generic [ref=f1e148]: 12%
+                    - generic [ref=f1e149]: 19/156
+                    - generic [ref=f1e150]: "19"
+                  - generic [ref=f1e153]: ETA 3m 45s
+                - generic [ref=f1e154]: ▸ C2103 · Validación de token OAuth
+              - button "Mobile Banking EXE-4819 · Hace 6m En vivo 78% 67/86 62 5 ETA 1m 50s ▸ C3045 · Validación biométrica iOS" [ref=f1e155] [cursor=pointer]:
+                - generic [ref=f1e157]:
+                  - generic [ref=f1e162]:
+                    - generic [ref=f1e163]: Mobile Banking
+                    - generic [ref=f1e164]: EXE-4819 · Hace 6m
+                  - generic [ref=f1e165]: En vivo
+                - generic [ref=f1e170]:
+                  - generic [ref=f1e171]:
+                    - generic [ref=f1e172]: 78%
+                    - generic [ref=f1e173]: 67/86
+                    - generic [ref=f1e174]: "62"
+                    - generic [ref=f1e177]: "5"
+                  - generic [ref=f1e182]: ETA 1m 50s
+                - generic [ref=f1e183]: ▸ C3045 · Validación biométrica iOS
+          - generic [ref=f1e184]:
+            - generic [ref=f1e189]:
+              - generic [ref=f1e190]: Resumen ejecutivo
+              - generic [ref=f1e197]: 9,570
+              - generic [ref=f1e198]: ejecuciones en mayo · todos los proyectos
+              - generic [ref=f1e199]:
+                - generic [ref=f1e200]: +18% vs abril
+                - generic [ref=f1e204]: Récord histórico
+              - generic [ref=f1e207]:
+                - generic [ref=f1e208]:
+                  - generic [ref=f1e209]: Proyectos
+                  - generic [ref=f1e210]: "24"
+                - generic [ref=f1e211]:
+                  - generic [ref=f1e212]: Equipos
+                  - generic [ref=f1e213]: "8"
+                - generic [ref=f1e214]:
+                  - generic [ref=f1e215]: Test Cases
+                  - generic [ref=f1e216]: 1,064
+            - generic [ref=f1e217]:
+              - generic [ref=f1e218]: Tasa de éxito
+              - generic [ref=f1e223]:
+                - application [ref=f1e226]
+                - generic:
+                  - generic: 91.4%
+                  - generic: +2.1%
+            - generic [ref=f1e250]:
+              - generic [ref=f1e252]:
+                - generic [ref=f1e253]: Defectos
+                - generic [ref=f1e264]: "100"
+                - generic [ref=f1e265]: encontrados este mes
+              - generic [ref=f1e266]:
+                - generic [ref=f1e267]: "-5%"
+                - generic [ref=f1e271]: vs anterior
+            - generic [ref=f1e272]:
+              - generic [ref=f1e273]: ROI
+              - generic [ref=f1e278]: 847h
+              - generic [ref=f1e279]: ahorradas en mayo
+              - generic [ref=f1e280]: ~RD$2.1M en costo evitado
+          - generic [ref=f1e284]:
+            - generic [ref=f1e285]:
+              - generic [ref=f1e286]:
+                - generic [ref=f1e287]:
+                  - generic [ref=f1e288]: Pulso de la semana
+                  - heading "Ejecuciones diarias" [level=3] [ref=f1e289]
+                - generic [ref=f1e290]:
+                  - generic [ref=f1e291]: Total
+                  - generic [ref=f1e293]: Exitosas
+              - application [ref=f1e297]:
+                - generic [ref=f1e316]:
+                  - generic [ref=f1e317]:
+                    - generic [ref=f1e318]: L
+                    - generic [ref=f1e320]: M
+                    - generic [ref=f1e322]: X
+                    - generic [ref=f1e324]: J
+                    - generic [ref=f1e326]: V
+                    - generic [ref=f1e328]: S
+                    - generic [ref=f1e330]: D
+                  - generic [ref=f1e332]:
+                    - generic [ref=f1e333]: "0"
+                    - generic [ref=f1e335]: "60"
+                    - generic [ref=f1e337]: "120"
+                    - generic [ref=f1e339]: "180"
+                    - generic [ref=f1e341]: "240"
+            - generic [ref=f1e343]:
+              - generic [ref=f1e344]: Defectos abiertos
+              - heading "Por severidad" [level=3] [ref=f1e345]
+              - generic [ref=f1e346]:
+                - generic [ref=f1e348]:
+                  - generic [ref=f1e349]: Crítico
+                  - generic [ref=f1e350]: "8"
+                - generic [ref=f1e354]:
+                  - generic [ref=f1e355]: Alto
+                  - generic [ref=f1e356]: "24"
+                - generic [ref=f1e360]:
+                  - generic [ref=f1e361]: Medio
+                  - generic [ref=f1e362]: "42"
+                - generic [ref=f1e366]:
+                  - generic [ref=f1e367]: Bajo
+                  - generic [ref=f1e368]: "26"
+            - generic [ref=f1e371]:
+              - generic [ref=f1e372]:
+                - generic [ref=f1e373]: Cobertura
+                - generic [ref=f1e374]: 76%
+              - generic [ref=f1e375]: Automatizado vs manual
+          - generic [ref=f1e388]:
+            - generic [ref=f1e389]:
+              - generic [ref=f1e390]:
+                - generic [ref=f1e391]:
+                  - generic [ref=f1e392]: Tu portafolio
+                  - heading "Proyectos automatizados" [level=3] [ref=f1e393]
+                - button "Ver todos" [ref=f1e394] [cursor=pointer]
+              - generic [ref=f1e397]:
+                - button "Core Banking Plataforma · Selenium · Java OK Pass 94.2% Runs 1,842 Bugs 12" [ref=f1e398] [cursor=pointer]:
+                  - generic [ref=f1e400]:
+                    - generic [ref=f1e401]:
+                      - generic [ref=f1e402]: Core Banking
+                      - generic [ref=f1e403]: Plataforma · Selenium · Java
+                    - generic [ref=f1e404]: OK
+                  - generic [ref=f1e407]:
+                    - generic [ref=f1e408]:
+                      - generic [ref=f1e409]: Pass
+                      - generic [ref=f1e410]: 94.2%
+                    - generic [ref=f1e411]:
+                      - generic [ref=f1e412]: Runs
+                      - generic [ref=f1e413]: 1,842
+                    - generic [ref=f1e414]:
+                      - generic [ref=f1e415]: Bugs
+                      - generic [ref=f1e416]: "12"
+                - button "Mobile Banking Mobile · Appium · JS OK Pass 87.5% Runs 1,203 Bugs 23" [ref=f1e421] [cursor=pointer]:
+                  - generic [ref=f1e423]:
+                    - generic [ref=f1e424]:
+                      - generic [ref=f1e425]: Mobile Banking
+                      - generic [ref=f1e426]: Mobile · Appium · JS
+                    - generic [ref=f1e427]: OK
+                  - generic [ref=f1e430]:
+                    - generic [ref=f1e431]:
+                      - generic [ref=f1e432]: Pass
+                      - generic [ref=f1e433]: 87.5%
+                    - generic [ref=f1e434]:
+                      - generic [ref=f1e435]: Runs
+                      - generic [ref=f1e436]: 1,203
+                    - generic [ref=f1e437]:
+                      - generic [ref=f1e438]: Bugs
+                      - generic [ref=f1e439]: "23"
+                - button "Portal Web Clientes Digital · Cypress · TS Activo Pass 91.8% Runs 2,451 Bugs 18" [ref=f1e444] [cursor=pointer]:
+                  - generic [ref=f1e446]:
+                    - generic [ref=f1e447]:
+                      - generic [ref=f1e448]: Portal Web Clientes
+                      - generic [ref=f1e449]: Digital · Cypress · TS
+                    - generic [ref=f1e450]: Activo
+                  - generic [ref=f1e453]:
+                    - generic [ref=f1e454]:
+                      - generic [ref=f1e455]: Pass
+                      - generic [ref=f1e456]: 91.8%
+                    - generic [ref=f1e457]:
+                      - generic [ref=f1e458]: Runs
+                      - generic [ref=f1e459]: 2,451
+                    - generic [ref=f1e460]:
+                      - generic [ref=f1e461]: Bugs
+                      - generic [ref=f1e462]: "18"
+                - button "API Pagos Backend · Newman OK Pass 96.7% Runs 3,120 Bugs 7" [ref=f1e467] [cursor=pointer]:
+                  - generic [ref=f1e469]:
+                    - generic [ref=f1e470]:
+                      - generic [ref=f1e471]: API Pagos
+                      - generic [ref=f1e472]: Backend · Newman
+                    - generic [ref=f1e473]: OK
+                  - generic [ref=f1e476]:
+                    - generic [ref=f1e477]:
+                      - generic [ref=f1e478]: Pass
+                      - generic [ref=f1e479]: 96.7%
+                    - generic [ref=f1e480]:
+                      - generic [ref=f1e481]: Runs
+                      - generic [ref=f1e482]: 3,120
+                    - generic [ref=f1e483]:
+                      - generic [ref=f1e484]: Bugs
+                      - generic [ref=f1e485]: "7"
+            - generic [ref=f1e490]:
+              - generic [ref=f1e491]: Tendencia mensual
+              - 'heading "Defectos: hallados vs resueltos" [level=3] [ref=f1e492]'
+              - application [ref=f1e495]:
+                - generic [ref=f1e499]:
+                  - generic [ref=f1e500]:
+                    - generic [ref=f1e501]: Ene
+                    - generic [ref=f1e503]: Feb
+                    - generic [ref=f1e505]: Mar
+                    - generic [ref=f1e507]: Abr
+                    - generic [ref=f1e509]: May
+                  - generic [ref=f1e511]:
+                    - generic [ref=f1e512]: "0"
+                    - generic [ref=f1e514]: "30"
+                    - generic [ref=f1e516]: "60"
+                    - generic [ref=f1e518]: "90"
+                    - generic [ref=f1e520]: "120"
+          - generic [ref=f1e522]:
+            - generic [ref=f1e523]:
+              - generic [ref=f1e524]:
+                - generic [ref=f1e525]: Actividad reciente
+                - heading "Últimas ejecuciones" [level=3] [ref=f1e526]
+              - button "Filtrar" [ref=f1e528] [cursor=pointer]
+            - generic [ref=f1e531]:
+              - generic [ref=f1e532] [cursor=pointer]:
+                - generic [ref=f1e533]: 20 May · 14:32
+                - generic [ref=f1e534]: Portal Web Clientes
+                - generic [ref=f1e535]:
+                  - generic [ref=f1e536]: C
+                  - text: Carlos M.
+                - generic [ref=f1e537]: 12m 34s
+                - generic [ref=f1e538]: 138/142
+                - generic [ref=f1e543]: OK
+              - generic [ref=f1e546] [cursor=pointer]:
+                - generic [ref=f1e547]: 20 May · 13:15
+                - generic [ref=f1e548]: Mobile Banking
+                - generic [ref=f1e549]:
+                  - generic [ref=f1e550]: S
+                  - text: Scheduler
+                - generic [ref=f1e551]: 8m 12s
+                - generic [ref=f1e552]: 79/86
+                - generic [ref=f1e557]: Parcial
+              - generic [ref=f1e560] [cursor=pointer]:
+                - generic [ref=f1e561]: 20 May · 11:48
+                - generic [ref=f1e562]: API Pagos
+                - generic [ref=f1e563]:
+                  - generic [ref=f1e564]: M
+                  - text: María R.
+                - generic [ref=f1e565]: 4m 22s
+                - generic [ref=f1e566]: 156/156
+                - generic [ref=f1e570]: OK
+              - generic [ref=f1e573] [cursor=pointer]:
+                - generic [ref=f1e574]: 20 May · 10:22
+                - generic [ref=f1e575]: Core Banking
+                - generic [ref=f1e576]:
+                  - generic [ref=f1e577]: P
+                  - text: Pipeline CI
+                - generic [ref=f1e578]: 18m 45s
+                - generic [ref=f1e579]: 232/248
+                - generic [ref=f1e584]: Parcial
+              - generic [ref=f1e587] [cursor=pointer]:
+                - generic [ref=f1e588]: 20 May · 09:05
+                - generic [ref=f1e589]: Originación Créditos
+                - generic [ref=f1e590]:
+                  - generic [ref=f1e591]: J
+                  - text: Juan P.
+                - generic [ref=f1e592]: 15m 03s
+                - generic [ref=f1e593]: 78/98
+                - generic [ref=f1e598]: Fallo
+              - generic [ref=f1e601] [cursor=pointer]:
+                - generic [ref=f1e602]: 19 May · 22:00
+                - generic [ref=f1e603]: Portal Web Clientes
+                - generic [ref=f1e604]:
+                  - generic [ref=f1e605]: S
+                  - text: Scheduler
+                - generic [ref=f1e606]: 11m 56s
+                - generic [ref=f1e607]: 140/142
+                - generic [ref=f1e612]: OK
+  - generic [ref=f1e615]: "30"

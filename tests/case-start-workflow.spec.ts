@@ -1,5 +1,8 @@
 import { test, expect } from "@playwright/test";
 import type { CaseStartWorkflowInput, CaseStartWorkflowResult } from "../src/types/case-start.types";
+import { buildDataContext } from "../src/data/data-context";
+import { resolveStepValue } from "../src/runner/plan-value-resolver";
+import { composeRuntimeDataContext } from "../src/cases/case-start-workflow";
 
 test("CaseStartWorkflowInput requires caseId and projectId", () => {
   const input: CaseStartWorkflowInput = {
@@ -13,6 +16,32 @@ test("CaseStartWorkflowInput requires caseId and projectId", () => {
   expect(input.continueOnFailure).toBeUndefined();
   expect(input.reportToTestRail).toBeUndefined();
   expect(input.dryRun).toBeUndefined();
+});
+
+test("runtime entries take precedence without mutating the base DataContext", () => {
+  const config = {
+    app: {
+      username: "base-user",
+      password: undefined,
+      extraLoginFields: {},
+      testData: { "auth.username": "base-user" },
+      testDataAliases: {},
+    },
+  } as any;
+  const base = buildDataContext(config);
+  const originalEntries = base.entries.map((entry) => ({ ...entry }));
+  const composed = composeRuntimeDataContext(base, [{
+    key: "auth.username",
+    value: "olivam",
+    source: "test_data",
+    sensitive: false,
+  }]);
+
+  expect(resolveStepValue({
+    step: { index: 1, action: "fill", target: "username", valueKey: "auth.username" } as any,
+    dataContext: composed,
+  })).toBe("olivam");
+  expect(base.entries).toEqual(originalEntries);
 });
 
 test("CaseStartWorkflowInput accepts optional flags", () => {

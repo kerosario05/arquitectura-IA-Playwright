@@ -51,6 +51,9 @@ export function buildAuthFlowCall(options: AuthFlowOptions): string {
   if (options.landing) {
     parts.push(`    landing: '${options.landing}',`);
   }
+  if (options.contractBinding) {
+    parts.push(`    contractBinding: ${JSON.stringify(options.contractBinding)},`);
+  }
   parts.push("  });");
   return parts.join("\n");
 }

@@ -48,6 +48,7 @@ export type SnapshotElement = {
   dataTestid?: string;
   className?: string;
   domId?: string;
+  controlIdentity?: ControlIdentity;
 };
 
 export type PageSnapshot = {
@@ -69,3 +70,4 @@ export type PageSnapshot = {
     headings: number;
   };
 };
+import type { ControlIdentity } from "./control-identity";

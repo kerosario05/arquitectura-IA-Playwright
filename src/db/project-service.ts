@@ -59,6 +59,7 @@ export type CreateWebProjectInput = {
   loginMode: LoginMode;
   username?: string;
   passwordSecretRef?: string;
+  ignoreHTTPSErrors?: boolean;
 };
 
 export type CreateMobileProjectInput = {
@@ -107,9 +108,9 @@ export async function createWebProject(input: CreateWebProjectInput): Promise<Pr
       conn
     );
     await conn.query(
-      `INSERT INTO dbo.WebProjectConfiguration (projectId, baseUrl, loginMode, username, passwordSecretRef)
-       VALUES (?, ?, ?, ?, ?)`,
-      [project.id, input.baseUrl, input.loginMode, input.username ?? null, input.passwordSecretRef ?? null]
+      `INSERT INTO dbo.WebProjectConfiguration (projectId, baseUrl, loginMode, username, passwordSecretRef, ignoreHTTPSErrors)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [project.id, input.baseUrl, input.loginMode, input.username ?? null, input.passwordSecretRef ?? null, input.ignoreHTTPSErrors ?? false]
     );
     await conn.query(
       `INSERT INTO dbo.ProjectKnowledge (projectId, schemaVersion, knowledgeJson)
@@ -213,6 +214,7 @@ export type UpdateProjectInput = {
   loginMode?: LoginMode;
   username?: string;
   passwordSecretRef?: string;
+  ignoreHTTPSErrors?: boolean;
   // Mobile fields
   apkPath?: string;
   packageName?: string;
@@ -281,6 +283,7 @@ export async function updateProject(
       if (input.loginMode !== undefined) { sets.push("loginMode = ?"); vals.push(input.loginMode); }
       if (input.username !== undefined) { sets.push("username = ?"); vals.push(input.username || null); }
       if (input.passwordSecretRef !== undefined) { sets.push("passwordSecretRef = ?"); vals.push(input.passwordSecretRef || null); }
+      if (input.ignoreHTTPSErrors !== undefined) { sets.push("ignoreHTTPSErrors = ?"); vals.push(input.ignoreHTTPSErrors ? 1 : 0); }
       if (sets.length > 0) {
         vals.push(project.id);
         await conn.query(`UPDATE dbo.WebProjectConfiguration SET ${sets.join(", ")} WHERE projectId = ?`, vals);
@@ -444,6 +447,22 @@ export type DeleteProjectResult = {
   warning?: string;
 };
 
+export function buildProjectDeleteStatements(projectId: string): string[] {
+  return [
+    "DELETE FROM dbo.ProjectConfigurationHistory WHERE projectId = ?",
+    "DELETE FROM dbo.ProjectJiraConfiguration WHERE projectId = ?",
+    "DELETE FROM dbo.ProjectTestRailConfiguration WHERE projectId = ?",
+    "DELETE FROM dbo.ProjectOtpConfiguration WHERE projectId = ?",
+    "DELETE FROM dbo.ProjectKnowledge WHERE projectId = ?",
+    "DELETE FROM dbo.WebProjectConfiguration WHERE projectId = ?",
+    "DELETE FROM dbo.MobileProjectConfiguration WHERE projectId = ?",
+    "DELETE FROM dbo.ProjectCaseInputRequirement WHERE projectId = ?",
+    "DELETE FROM dbo.ProjectCaseRuntimeValue WHERE projectId = ?",
+    "DELETE FROM dbo.ProjectGenerationConfig WHERE projectId = ?",
+    "DELETE FROM dbo.Projects WHERE id = ?",
+  ];
+}
+
 export async function deleteProject(slug: string): Promise<DeleteProjectResult> {
   if (!slug?.trim()) throw new Error("slug is required");
 
@@ -454,14 +473,9 @@ export async function deleteProject(slug: string): Promise<DeleteProjectResult> 
     if (rows.length === 0) throw new Error(`project not found: ${slug}`);
     const projectId = rows[0].id;
 
-    await conn.query("DELETE FROM dbo.ProjectConfigurationHistory WHERE projectId = ?", [projectId]);
-    await conn.query("DELETE FROM dbo.ProjectJiraConfiguration WHERE projectId = ?", [projectId]);
-    await conn.query("DELETE FROM dbo.ProjectTestRailConfiguration WHERE projectId = ?", [projectId]);
-    await conn.query("DELETE FROM dbo.ProjectOtpConfiguration WHERE projectId = ?", [projectId]);
-    await conn.query("DELETE FROM dbo.ProjectKnowledge WHERE projectId = ?", [projectId]);
-    await conn.query("DELETE FROM dbo.WebProjectConfiguration WHERE projectId = ?", [projectId]);
-    await conn.query("DELETE FROM dbo.MobileProjectConfiguration WHERE projectId = ?", [projectId]);
-    await conn.query("DELETE FROM dbo.Projects WHERE id = ?", [projectId]);
+    for (const statement of buildProjectDeleteStatements(projectId)) {
+      await conn.query(statement, [projectId]);
+    }
   });
 
   const warning = removeRuntimeDirectory(slug);

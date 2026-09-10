@@ -48,6 +48,12 @@ export function generateRuleBasedExecutionPlan(
       action: "noop",
       description: sourceStep.action,
       expected: sourceStep.expected,
+      ...(sourceStep.conditionalAction ? {
+        action: sourceStep.conditionalAction.operation,
+        target: { strategy: "text" as const, value: sourceStep.conditionalAction.actionTarget, exact: false },
+        optional: true,
+        conditionalAction: sourceStep.conditionalAction
+      } : {}),
       evidence: true
     });
     stepIndex += 1;

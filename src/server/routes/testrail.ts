@@ -1,18 +1,92 @@
-import { Router } from "express";
+import { Router, type Response } from "express";
 import { config, requireTestRailConfig } from "../../config/env";
 import { TestRailClient } from "../../clients/testrail.client";
 import { generateScenarioPreview } from "../../scenarios/scenario-preview.service";
 import type { ScenarioPreviewRequest } from "../../scenarios/scenario-types";
+import {
+  transformTestRailCaseForRuntime,
+  type TestRailRuntimeTransformation,
+} from "../../testrail/testrail-runtime-transformer";
+import {
+  approveReviewItem,
+  listReviewItems,
+  rejectReviewItem,
+} from "../../testrail/testrail-requirement-review-store";
+import { getProjectById, getProjectByTestRailProjectId } from "../../db/project-repository";
+import { replaceForProjectAndCase } from "../../db/project-case-input-requirement-service";
 
 export const testrailRouter = Router();
+
+function parsePositiveCaseId(value: string): number | undefined {
+  if (!/^\d+$/.test(value)) return undefined;
+  const caseId = Number(value);
+  return Number.isSafeInteger(caseId) && caseId > 0 ? caseId : undefined;
+}
+
+function parseCaseIds(value: unknown): number[] | undefined {
+  if (typeof value !== "string" || value.trim() === "") return undefined;
+  const values = value.split(",").map((part) => part.trim());
+  if (values.some((part) => parsePositiveCaseId(part) === undefined)) return undefined;
+  return [...new Set(values.map((part) => parsePositiveCaseId(part)!))];
+}
+
+testrailRouter.get("/requirement-reviews", (req, res) => {
+  const caseIds = parseCaseIds(req.query.caseIds);
+  if (!caseIds) {
+    res.status(400).json({ ok: false, error: "invalid_caseIds", message: "caseIds must contain positive integers" });
+    return;
+  }
+  res.json({ reviews: listReviewItems(caseIds) });
+});
+
+function updateRequirementReviewStatus(
+  caseIdValue: string,
+  update: (caseId: number) => ReturnType<typeof approveReviewItem>,
+  res: Response,
+): void {
+  const caseId = parsePositiveCaseId(caseIdValue);
+  if (caseId === undefined) {
+    res.status(400).json({ ok: false, error: "invalid_caseId", message: "caseId must be a positive integer" });
+    return;
+  }
+  const review = update(caseId);
+  if (!review) {
+    res.status(404).json({ ok: false, error: "review_not_found", caseId });
+    return;
+  }
+  res.json(review);
+}
+
+testrailRouter.post("/requirement-reviews/:caseId/approve", (req, res) => {
+  updateRequirementReviewStatus(req.params.caseId, approveReviewItem, res);
+});
+
+testrailRouter.post("/requirement-reviews/:caseId/reject", (req, res) => {
+  updateRequirementReviewStatus(req.params.caseId, rejectReviewItem, res);
+});
 
 function client(): TestRailClient {
   return new TestRailClient(requireTestRailConfig(config));
 }
 
+type RuntimeCaseMaterializationInput = {
+  localProjectId: string;
+  localProjectSlug: string;
+  caseId: number;
+  requirements: TestRailRuntimeTransformation["inputRequirements"];
+};
+
+type ResolveSectionCasesDependencies = {
+  resolveLocalProject?: (testRailProjectId: string) => Promise<{ id: string; slug: string } | null>;
+  resolveLocalProjectById?: (localProjectId: string) => Promise<{ id: string; slug: string } | null>;
+  materialize?: (input: RuntimeCaseMaterializationInput) => Promise<void>;
+};
+
 export async function resolveSectionCases(
   tr: Pick<TestRailClient, "getSection" | "getCases">,
-  params: { sectionId: number; projectId?: number; suiteId?: number },
+  params: { sectionId: number; projectId?: number; suiteId?: number; localProjectId?: string },
+  runtimeTransformer: (rawCase: Parameters<typeof transformTestRailCaseForRuntime>[0]) => TestRailRuntimeTransformation = transformTestRailCaseForRuntime,
+  dependencies: ResolveSectionCasesDependencies = {},
 ) {
   const section = await tr.getSection(params.sectionId);
   if (!section) {
@@ -48,11 +122,70 @@ export async function resolveSectionCases(
     };
   }
 
+  const hasExplicitLocalProjectId = params.localProjectId !== undefined;
+  const requestedLocalProjectId = params.localProjectId?.trim();
+  let localProject: { id: string; slug: string } | null = null;
+  if (hasExplicitLocalProjectId) {
+    if (!requestedLocalProjectId) {
+      return {
+        status: 400,
+        body: { ok: false, error: "invalid_local_project_id", message: "localProjectId must be a non-empty string" },
+      };
+    }
+    localProject = await (dependencies.resolveLocalProjectById ?? getProjectById)(requestedLocalProjectId);
+    if (!localProject) {
+      return {
+        status: 404,
+        body: { ok: false, error: "local_project_not_found", message: "localProjectId does not identify a local project" },
+      };
+    }
+  }
+
   const cases = await tr.getCases(
     String(effectiveProjectId),
     effectiveSuiteId ? String(effectiveSuiteId) : undefined,
     String(params.sectionId),
   );
+
+  const enrichedCases = cases.map((rawCase) => {
+    try {
+      const transformation = runtimeTransformer(rawCase);
+      return {
+        ...rawCase,
+        ...transformation,
+        runtimeTransformStatus: "success" as const,
+      };
+    } catch {
+      return {
+        ...rawCase,
+        normalizedScenario: null,
+        inputRequirements: [],
+        unresolvedPlaceholders: [],
+        conflicts: [],
+        runtimeTransformStatus: "error" as const,
+        runtimeTransformErrorCode: "runtime_transform_failed",
+      };
+    }
+  });
+
+  if (!hasExplicitLocalProjectId) {
+    localProject = await (dependencies.resolveLocalProject ?? getProjectByTestRailProjectId)(String(effectiveProjectId));
+  }
+  if (localProject) {
+    for (const [index, rawCase] of cases.entries()) {
+      const enrichedCase = enrichedCases[index];
+      if (enrichedCase.runtimeTransformStatus !== "success") continue;
+      if (enrichedCase.inputRequirements.length === 0) continue;
+      await (dependencies.materialize ?? (async (input: RuntimeCaseMaterializationInput) => {
+        await replaceForProjectAndCase(input.localProjectSlug, input.caseId, input.requirements);
+      }))({
+        localProjectId: localProject.id,
+        localProjectSlug: localProject.slug,
+        caseId: rawCase.id,
+        requirements: enrichedCase.inputRequirements,
+      });
+    }
+  }
 
   return {
     status: 200,
@@ -61,7 +194,7 @@ export async function resolveSectionCases(
       sectionId: params.sectionId,
       projectId: effectiveProjectId,
       suiteId: effectiveSuiteId,
-      cases,
+      cases: enrichedCases,
     },
   };
 }
@@ -416,6 +549,7 @@ testrailRouter.get("/sections/:sectionId/cases", async (req, res, next) => {
 
     const projectId = req.query.projectId ? Number(req.query.projectId) : undefined;
     const suiteId = req.query.suiteId ? Number(req.query.suiteId) : undefined;
+    const localProjectId = req.query.localProjectId === undefined ? undefined : String(req.query.localProjectId);
 
     if (req.query.projectId && (!Number.isFinite(projectId) || String(projectId) !== String(req.query.projectId))) {
       res.status(400).json({ ok: false, error: "invalid_request", message: "projectId must be numeric" });
@@ -426,7 +560,7 @@ testrailRouter.get("/sections/:sectionId/cases", async (req, res, next) => {
       return;
     }
 
-    const result = await resolveSectionCases(client(), { sectionId, projectId, suiteId });
+    const result = await resolveSectionCases(client(), { sectionId, projectId, suiteId, localProjectId });
     res.status(result.status).json(result.body);
   } catch (err) {
     next(err);

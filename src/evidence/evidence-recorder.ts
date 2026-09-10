@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import type { Page } from "@playwright/test";
-import { loadEvidenceConfig, type EvidenceConfig, type EvidenceScenarioContext, type EvidenceStepRecord, type EvidenceScenarioRecord, type DetailEvidenceMetadata, type InitialScreenEvidence, deriveScenarioStatus } from "./evidence-types";
+import { loadEvidenceConfig, type EvidenceConfig, type EvidenceScenarioContext, type EvidenceStepRecord, type EvidenceScenarioRecord, type DetailEvidenceMetadata, type InitialScreenEvidence, deriveScenarioStatus, type EvidenceCaptureStatus, type EvidenceFunctionalStatus } from "./evidence-types";
 import { buildEvidencePaths, buildScreenshotFilename } from "./evidence-paths";
 import { generateEvidenceDocx } from "./evidence-docx-generator";
 
@@ -19,6 +19,8 @@ export class EvidenceRecorder {
   private isDetailEvidence?: boolean;
   private lastActionTarget?: string;
   private initialScreenEvidence?: InitialScreenEvidence;
+  private discoveryStatus?: string;
+  private functionalStatus?: EvidenceFunctionalStatus;
 
   constructor(context: EvidenceScenarioContext, config?: Partial<EvidenceConfig>) {
     this.config = { ...loadEvidenceConfig(), ...config };
@@ -334,6 +336,11 @@ export class EvidenceRecorder {
     console.log(`[detail-evidence] detailOpened set to ${opened}`);
   }
 
+  setExecutionStatuses(input: { discoveryStatus?: string; functionalStatus?: EvidenceFunctionalStatus }): void {
+    this.discoveryStatus = input.discoveryStatus;
+    this.functionalStatus = input.functionalStatus;
+  }
+
   async finish(page?: Page): Promise<EvidenceScenarioRecord> {
     if (!this.config.enabled) {
       this.finished = true;
@@ -373,7 +380,15 @@ export class EvidenceRecorder {
       }
     }
 
-    let status = this.initialScreenEvidence?.status === "load_failed" ? "Fallido" : deriveScenarioStatus(this.steps);
+    const captureStatus: EvidenceCaptureStatus = this.initialScreenEvidence?.status === "load_failed"
+      ? "failed"
+      : this.steps.some((step) => Boolean(step.screenshotPath)) || this.initialScreenEvidence?.captured === true
+        ? "success"
+        : this.steps.length > 0 ? "failed" : "not_run";
+    const discoveryFailed = Boolean(this.discoveryStatus && !["discovered_passed", "repaired_passed", "passed"].includes(this.discoveryStatus));
+    let status = this.initialScreenEvidence?.status === "load_failed" || discoveryFailed || this.functionalStatus === "failed"
+      ? "Fallido"
+      : deriveScenarioStatus(this.steps);
 
     // EVIDENCE GATE: Validate detail screenshot requirement
     // Task 2: Skip detail screenshot requirement for listing/navigation scenarios (no detailTarget AND no finalProductClickStepIndex)
@@ -475,6 +490,11 @@ export class EvidenceRecorder {
       captured: Boolean(finalScreenshot),
       path: finalScreenshot,
       capturedAt: new Date().toISOString(),
+    }, {
+      captureStatus,
+      discoveryStatus: this.discoveryStatus,
+      functionalStatus: this.functionalStatus ?? (discoveryFailed ? "not_run" : status === "Exitoso" ? "passed" : "failed"),
+      statusContradiction: discoveryFailed && status === "Exitoso",
     });
 
     console.log(`[evidence:scenario] persisted evidenceKind=${this.evidenceKind ?? "unknown"} isDetail=${this.isDetailEvidence ?? false} detailRequired=${this.detailEvidence?.required ?? false}`);
@@ -538,6 +558,7 @@ function buildRecord(
   lastActionTarget?: string,
   initialScreenEvidence?: InitialScreenEvidence,
   finalScreenEvidence?: EvidenceScenarioRecord["finalScreenEvidence"],
+  statuses?: Pick<EvidenceScenarioRecord, "captureStatus" | "discoveryStatus" | "functionalStatus" | "statusContradiction">,
 ): EvidenceScenarioRecord {
   return {
     scenarioId: context.scenarioId,
@@ -550,6 +571,7 @@ function buildRecord(
       year: "numeric", month: "long", day: "numeric",
     }),
     status: (status ?? deriveScenarioStatus(steps)) as any,
+    ...statuses,
     appSlug: context.appSlug,
     sectionSlug: context.sectionSlug,
     sectionName: context.sectionName,

@@ -13,6 +13,18 @@ export type StepIntentType =
   | "select_first_visible_item"
   | "unknown";
 
+export type ConditionalAction = {
+  operation: "click" | "select";
+  actionTarget: string;
+  condition: {
+    type: "visibility" | "presence";
+    target: string;
+  };
+  required: false;
+  conditionalRequired: true;
+  skipAllowedWhenConditionFalse: true;
+};
+
 type SplitFragment = {
   text: string;
   order: number;
@@ -34,9 +46,18 @@ export type ParsedStepIntent = {
   valueKey?: string;
   valueKeys?: string[];
   valueSource?: string;
+  /** Structured row/entity context extracted from a leading human clause. */
+  entityScope?: string;
+  rowScope?: number;
+  rowRelation?: "next" | "added";
+  associatedField?: string;
+  expectedValueKey?: string;
   associatedEntity?: string;
+  selectionField?: string;
   semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "first_visible_item" | "unknown";
   relationContext?: string;
+  canonicalAssertion?: CanonicalAssertion;
+  conditionalAction?: ConditionalAction;
 };
 
 export type StepSetIntent = {
@@ -55,10 +76,20 @@ export type ActionTargetItem = {
   value?: string;
   valueKey?: string;
   valueSource?: FillValueSource;
+  entityScope?: string;
+  rowScope?: number;
+  rowRelation?: "next" | "added";
+  associatedField?: string;
+  expectedValueKey?: string;
   associatedEntity?: string;
+  selectionField?: string;
   actionType?: StepIntentType;
   semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "first_visible_item" | "unknown";
   relationContext?: string;
+  inputIntent?: import("../types/execution-plan.types").InputIntent;
+  requirementRefs?: string[];
+  controlIdentity?: import("../types/control-identity").ControlIdentity;
+  conditionalAction?: ConditionalAction;
 };
 
 export type FillValueSource = "literal" | "test_data" | "unknown";
@@ -138,10 +169,67 @@ export function parseStepIntent(stepText: string, _context?: Record<string, unkn
   trimmed = trimmed.replace(/^\d+\s*[.)]\s*/, "").trim();
   if (!trimmed) return intents;
 
+  const scope = extractLeadingRowScope(trimmed);
+  trimmed = scope?.remainingText ?? trimmed;
+  const withScope = (intent: ParsedStepIntent): ParsedStepIntent => ({
+    ...intent,
+    ...(scope?.entityScope ? { entityScope: scope.entityScope } : {}),
+    ...(scope?.rowScope !== undefined ? { rowScope: scope.rowScope } : {}),
+    ...(scope?.rowRelation
+      ? { rowRelation: scope.rowRelation }
+      : intent.type !== "assertion" && /\b(?:agregar|anadir|añadir|add|new|nueva?|nuevo)\b.*\b(?:linea|fila|row|registro|record)\b|\b(?:linea|fila|row|registro|record)\b.*\b(?:agregar|anadir|añadir|add|new|nueva?|nuevo)\b/i.test(intent.originalText)
+        ? { rowRelation: "added" as const }
+        : {}),
+  });
+  const withAssertionValueKey = (intent: ParsedStepIntent): ParsedStepIntent => {
+    if (intent.type !== "assertion" || intent.expectedValueKey) return intent;
+    const source = intent.canonicalAssertion?.expectedState ?? intent.actionTarget ?? "";
+    const expectedValueKey = extractPlaceholderKey(source);
+    return expectedValueKey
+      ? {
+          ...intent,
+          expectedValueKey,
+          canonicalAssertion: intent.canonicalAssertion
+            ? { ...intent.canonicalAssertion, oracleType: intent.canonicalAssertion.oracleType ?? (scope?.rowScope !== undefined ? "row_scoped_value" : undefined), prerequisite: intent.canonicalAssertion.prerequisite ?? (scope?.rowScope !== undefined ? "source_value_resolved" : undefined) }
+            : undefined,
+        }
+      : intent;
+  };
+
+  // TestRail's step is the semantic boundary. A single assertion may contain
+  // commas, subordinate clauses, or repeated conjunctions; preserve it as one
+  // intent and expose structured metadata instead of fragmenting the sentence.
+  const parsedCanonicalAssertion = parseCanonicalAssertion(trimmed);
+  const canonicalAssertion = parsedCanonicalAssertion
+    ? {
+        ...parsedCanonicalAssertion,
+        ...(parsedCanonicalAssertion.oracleType ? {} : scope?.rowRelation === "added" ? { oracleType: "structural_row_count" as const, prerequisite: "row_added" as const } : {}),
+      }
+    : undefined;
+  if (canonicalAssertion) {
+    const parsed = parseSingleIntent(trimmed);
+    return [withScope(withAssertionValueKey({
+      ...(parsed ?? {
+        type: "assertion" as const,
+        originalText: trimmed,
+        normalizedText: normalizeText(trimmed),
+        priority: 3,
+      }),
+      type: "assertion",
+      actionTarget: parsed?.actionTarget ?? canonicalAssertion.expectedState ?? trimmed,
+      canonicalAssertion,
+      originalText: trimmed,
+    }))];
+  }
+
+  const conditionalAction = tryParseConditionalAction(trimmed, normalizeText(trimmed));
+  if (conditionalAction) return [withScope(conditionalAction)];
+
   const fragments = splitStepText(trimmed);
 
   for (const fragment of fragments) {
     const subFragments = splitByIntentBoundaries(fragment.text);
+    const fragmentIntents: ParsedStepIntent[] = [];
 
     for (let idx = 0; idx < subFragments.length; idx += 1) {
       let subText = subFragments[idx];
@@ -153,9 +241,9 @@ export function parseStepIntent(stepText: string, _context?: Record<string, unkn
       for (const part of mixedParts) {
         const parsed = parseSingleIntent(part);
         if (parsed) {
-          intents.push({ ...parsed, originalText: part });
+          fragmentIntents.push(withScope(withAssertionValueKey({ ...parsed, originalText: part })));
         } else {
-          intents.push({
+          fragmentIntents.push({
             type: "unknown",
             originalText: part,
             normalizedText: normalizeText(part),
@@ -164,9 +252,140 @@ export function parseStepIntent(stepText: string, _context?: Record<string, unkn
         }
       }
     }
+
+    // A single TestRail sentence may describe a compound interaction as
+    // "activate field, then select/fill value". The boundary splitter is
+    // intentionally allowed to expose both actions, but the second action
+    // must retain the structural field relationship from the preceding
+    // activation. This is semantic lineage, not a DOM/text fallback.
+    for (let intentIndex = 0; intentIndex < fragmentIntents.length; intentIndex += 1) {
+      const intent = fragmentIntents[intentIndex];
+      if (intent.type !== "action_select" && intent.type !== "action_fill") continue;
+      const activation = [...fragmentIntents.slice(0, intentIndex)]
+        .reverse()
+        .find((candidate) => candidate.type === "action_click" && Boolean(candidate.actionTarget));
+      if (!activation) continue;
+
+      const activationTarget = activation.selectionField ?? activation.actionTarget;
+      if (!activationTarget) continue;
+      if (!intent.selectionField && intent.type === "action_select") intent.selectionField = activationTarget;
+      if (!intent.actionTarget || normalizeText(intent.actionTarget) === "valor") intent.actionTarget = activationTarget;
+      if (!intent.associatedField && activation.associatedField) intent.associatedField = activation.associatedField;
+    }
+
+    intents.push(...fragmentIntents);
   }
 
   return intents;
+}
+
+function tryParseConditionalAction(text: string, normalized: string): ParsedStepIntent | null {
+  const match = text.match(/^(?:si|en\s+caso\s+de\s+que)\s+(.+?)\s*[,;]\s*(.+)$/i);
+  if (!match) return null;
+
+  const conditionText = match[1].trim();
+  const actionText = match[2].trim();
+  const conditionType: ConditionalAction["condition"]["type"] =
+    /\b(?:visible|visible\b|se\s+muestra|aparece|est[aá]\s+visible|est[aá]\s+disponible)\b/i.test(conditionText)
+      ? "visibility"
+      : /\b(?:existe|exist[ae]|est[aáé]\s+presente|disponible)\b/i.test(conditionText)
+        ? "presence"
+        : "visibility";
+  if (!/\b(?:visible|se\s+muestra|aparece|existe|disponible|presente)\b/i.test(conditionText)) return null;
+
+  const actionMatch = actionText.match(/^(?:hacer\s+clic\s+en|clic\s+en|click\s+en|click|presionar|tocar|seleccionar|escoger|elegir)\s+(.+)$/i);
+  if (!actionMatch) return null;
+  const operation: ConditionalAction["operation"] = /^(?:seleccionar|escoger|elegir)\b/i.test(actionText) ? "select" : "click";
+
+  const quoted = [...text.matchAll(/["“‘']([^"”’']+)["”’']/g)].map((item) => item[1].trim()).filter(Boolean);
+  const conditionTarget = quoted[0]
+    ?? conditionText
+      .replace(/^(?:el|la|los|las|un|una)\s+(?:bot[oó]n|opci[oó]n|control|elemento)\s+/i, "")
+      .replace(/\s+(?:est[aá]|se\s+muestra|aparece|existe|est[aá]\s+disponible|est[aá]\s+presente).+$/i, "")
+      .trim();
+  const actionTarget = quoted[quoted.length - 1]
+    ?? actionMatch[1].replace(/^(?:el|la|los|las|un|una)\s+(?:bot[oó]n|opci[oó]n|control|elemento)\s+/i, "").replace(/[.!?]+$/, "").trim();
+  if (!conditionTarget || !actionTarget) return null;
+
+  return {
+    type: operation === "click" ? "action_click" : "action_select",
+    originalText: text,
+    normalizedText: normalized,
+    actionTarget,
+    actionVerb: operation === "click" ? "click" : "select",
+    isOptional: true,
+    conditionalAction: {
+      operation,
+      actionTarget,
+      condition: { type: conditionType, target: conditionTarget },
+      required: false,
+      conditionalRequired: true,
+      skipAllowedWhenConditionFalse: true,
+    },
+    priority: 6,
+  };
+}
+
+type LeadingRowScope = {
+  remainingText: string;
+  entityScope?: string;
+  rowScope?: number;
+  rowRelation?: "next" | "added";
+};
+
+const ORDINAL_ROW_VALUES: Record<string, number> = {
+  primero: 1,
+  primera: 1,
+  segundo: 2,
+  segunda: 2,
+  tercero: 3,
+  tercera: 3,
+  cuarto: 4,
+  cuarta: 4,
+  quinto: 5,
+  quinta: 5,
+  sexto: 6,
+  sexta: 6,
+};
+
+function extractPlaceholderKey(value: string): string | undefined {
+  const match = value.match(/\[([^\]\r\n]+)\]/);
+  return match?.[1]?.trim() || undefined;
+}
+
+/** Extracts human row scope without turning the clause into an intent. */
+export function extractLeadingRowScope(text: string): LeadingRowScope | undefined {
+  const normalized = text.trim();
+  const ordinal = Object.keys(ORDINAL_ROW_VALUES).join("|");
+  const indexed = `(?:${ordinal}|\\d+)`;
+  const unit = "(?:l[ií]nea|fila|registro|elemento|[ií]tem|row|record|line)";
+  const indexedPattern = new RegExp(
+    `^en\\s+(?:la\\s+|el\\s+)?(${indexed})\\s+${unit}(?:\\s+de\\s+([^,]+?))?\\s*,\\s*`,
+    "i",
+  );
+  const indexedMatch = normalized.match(indexedPattern);
+  if (indexedMatch) {
+    const ordinalText = indexedMatch[1].toLowerCase();
+    const rowScope = /^\\d+$/.test(ordinalText) ? Number(ordinalText) : ORDINAL_ROW_VALUES[ordinalText];
+    return {
+      remainingText: normalized.slice(indexedMatch[0].length).trim(),
+      ...(Number.isInteger(rowScope) ? { rowScope } : {}),
+      ...(indexedMatch[2]?.trim() ? { entityScope: indexedMatch[2].trim() } : {}),
+    };
+  }
+
+  const relativePattern = /^en\\s+(?:la\\s+|el\\s+)?(fila|registro|elemento|[ií]tem|row|record|line)\\s+(siguiente|a[ñn]adid[oa]|nuevo|nueva)(?:\\s+de\\s+([^,]+?))?\\s*,\\s*/i;
+  const relativeMatch = normalized.match(relativePattern);
+  if (relativeMatch) {
+    const relationText = relativeMatch[2].toLowerCase();
+    return {
+      remainingText: normalized.slice(relativeMatch[0].length).trim(),
+      rowRelation: /a[ñn]adid|nuev/.test(relationText) ? "added" : "next",
+      ...(relativeMatch[3]?.trim() ? { entityScope: relativeMatch[3].trim() } : {}),
+    };
+  }
+
+  return undefined;
 }
 
 export function parseSingleIntent(text: string): ParsedStepIntent | null {
@@ -352,17 +571,9 @@ function splitStepText(text: string): SplitFragment[] {
       }
       current = "";
     } else if (ch === "," && !inQuote) {
-      const restTrimmed = sourceText.slice(i + 1).trim();
-      const isModifier = MODIFIER_PATTERNS.some((mp) => mp.test(restTrimmed));
-      if (isModifier) {
-        current += ch;
-      } else {
-        const trimmed = current.trim();
-        if (trimmed) {
-          fragments.push({ text: trimmed, order: order++ });
-        }
-        current = "";
-      }
+      // Commas are internal punctuation, never an implicit step/intent
+      // boundary. Explicit action boundaries are handled separately.
+      current += ch;
     } else {
       current += ch;
     }
@@ -608,6 +819,45 @@ function tryParseClickAction(text: string, normalized: string): ParsedStepIntent
   if (!verbMatch) return null;
 
   const afterVerb = text.slice(verbMatch[0].length).trim();
+  const activationText = afterVerb.replace(
+    /\s+(?:y|e)\s+(?=(?:seleccionar|escoger|elegir|ingresar|digitar|escribir|completar|llenar|type|enter|fill)\b).*$/i,
+    ""
+  ).replace(/\s+(?:y|e)\s*$/i, "").trim();
+
+  // Preserve the relationship of a selector/control and its compound field.
+  // The labels remain data from the source step; no application vocabulary is
+  // embedded here.
+  const selectorInField = activationText.match(
+    /^(?:el|la|un|una)?\s*(?:selector|control)\s+["']([^"']+)["']\s+(?:del|de|en)\s+(?:el|la)?\s*campo\s+["']([^"']+)["']$/i
+  );
+  if (selectorInField) {
+    const selectionField = cleanActionTarget(selectorInField[1]);
+    return {
+      type: "action_click",
+      originalText: text,
+      normalizedText: normalized,
+      actionTarget: selectionField,
+      selectionField,
+      associatedField: cleanActionTarget(selectorInField[2]),
+      actionVerb: verbMatch[0].trim().toLowerCase(),
+      priority: 5
+    };
+  }
+
+  const associatedControl = activationText.match(
+    /^(?:el|la|un|una)?\s*(?:campo|control|selector)\s+(?:de|del|para)\s+(.+?)\s+asociad[oa]\s+(?:a|con)\s+["']([^"']+)["']$/i
+  );
+  if (associatedControl) {
+    return {
+      type: "action_click",
+      originalText: text,
+      normalizedText: normalized,
+      actionTarget: cleanActionTarget(associatedControl[1]),
+      associatedField: cleanActionTarget(associatedControl[2]),
+      actionVerb: verbMatch[0].trim().toLowerCase(),
+      priority: 5
+    };
+  }
 
   // Pattern: action target 'X' associated with entity 'Y'
   const associatedPattern = text.match(
@@ -656,7 +906,7 @@ function tryParseClickAction(text: string, normalized: string): ParsedStepIntent
     };
   }
 
-  const quoted = extractQuotedTarget(afterVerb);
+  const quoted = extractQuotedTarget(activationText);
   if (quoted) {
     return {
       type: "action_click",
@@ -668,7 +918,7 @@ function tryParseClickAction(text: string, normalized: string): ParsedStepIntent
     };
   }
 
-  const raw = cleanActionTarget(stripTrailingPeriod(afterVerb));
+  const raw = cleanActionTarget(stripTrailingPeriod(activationText));
   if (raw && raw.length < 100) {
     return {
       type: "action_click",
@@ -697,6 +947,56 @@ function tryParseSelectAction(text: string, normalized: string): ParsedStepInten
   if (!verbMatch) return null;
 
   const afterVerb = text.slice(verbMatch[0].length).trim();
+
+  const standaloneRuntimeValue = afterVerb.match(
+    /^(?:el|la|un|una)?\s*(?:valor|opci[oó]n)\s+\[([^\]\r\n]+)\]$/i
+  );
+  if (standaloneRuntimeValue) {
+    return {
+      type: "action_select",
+      originalText: text,
+      normalizedText: normalized,
+      // The compound-action binder replaces this placeholder with the
+      // preceding activation field. It is only a transient parser marker.
+      actionTarget: "valor",
+      valueKey: standaloneRuntimeValue[1].trim(),
+      valueSource: "test_data",
+      actionVerb: verbMatch[0].trim().toLowerCase(),
+      priority: 5
+    };
+  }
+
+  // Preserve the field relationship for option selections. Many applications
+  // render the option only after opening the field control (for example, a
+  // table cell or a combobox), so resolving the option text alone is unsafe.
+  const optionInField = afterVerb.match(
+    /^(?:la\s+|el\s+)?opci[oó]n\s+(?:\[([^\]\r\n]+)\]|["']([^"']+)["']|([^\r\n]+?))\s+en\s+(?:el\s+)?campo\s+(.+?)\.?$/i
+  );
+  if (optionInField) {
+    const optionValueKey = optionInField[1]?.trim();
+    const literalOption = optionInField[2]?.trim();
+    const rawField = optionInField[4]?.trim() ?? "";
+    const associated = rawField.match(
+      /^(.*?)(?:\s+asociad[oa]\s+(?:a|con)\s+(?:["']([^"']+)["']|([^\r\n.]+?)))$/i
+    );
+    const selectionField = cleanActionTarget(associated?.[1] ?? rawField).replace(/^de\s+/i, "");
+    const associatedField = cleanActionTarget(associated?.[2] ?? associated?.[3] ?? "");
+    return {
+      type: "action_select",
+      originalText: text,
+      normalizedText: normalized,
+      // A runtime-backed option must resolve its field first; a literal option
+      // keeps the legacy option target so existing flows remain compatible.
+      actionTarget: optionValueKey
+        ? selectionField
+        : cleanActionTarget(literalOption ?? rawField),
+      ...(optionValueKey ? { valueKey: optionValueKey, valueSource: "test_data" } : {}),
+      ...(selectionField ? { selectionField } : {}),
+      ...(associatedField ? { associatedField } : {}),
+      actionVerb: verbMatch[0].trim().toLowerCase(),
+      priority: 5
+    };
+  }
 
   const quoted = extractQuotedTarget(afterVerb);
   if (quoted) {
@@ -875,6 +1175,40 @@ function tryParseFillAction(text: string, normalized: string): ParsedStepIntent 
   if (!verbMatch) return null;
 
   const verb = verbMatch[0].trim().toLowerCase();
+
+  const standaloneRuntimeValue = text.slice(verbMatch[0].length).trim().match(
+    /^(?:el|la|un|una)?\s*(?:valor)\s+\[([^\]\r\n]+)\]$/i
+  );
+  if (standaloneRuntimeValue) {
+    return {
+      type: "action_fill",
+      originalText: text,
+      normalizedText: normalized,
+      // The compound-action binder replaces this placeholder with the
+      // preceding activation field. It is only a transient parser marker.
+      actionTarget: "valor",
+      actionVerb: verb,
+      valueKey: standaloneRuntimeValue[1].trim(),
+      valueSource: "test_data",
+      priority: 5
+    };
+  }
+
+  const bracketDataToField = text.match(
+    /^(?:ingresar|digitar|escribir|completar|llenar|type|enter|fill)\s+(?:(?:el\s+)?valor(?:\s+secreto)?\s+)?\[([^\]\r\n]+)\]\s+en\s+(?:el\s+)?campo\s+(?:["']([^"']+)["']|([^\.\r\n]+?))\.?$/i
+  );
+  if (bracketDataToField) {
+    return {
+      type: "action_fill",
+      originalText: text,
+      normalizedText: normalized,
+      actionTarget: cleanActionTarget(bracketDataToField[2] ?? bracketDataToField[3] ?? "").replace(/^de\s+/i, ""),
+      actionVerb: verb,
+      valueKey: bracketDataToField[1].trim(),
+      valueSource: "unknown",
+      priority: 5,
+    };
+  }
 
   // === Pattern 1: dato 'KEY' en campo 'FIELD' (test data) ===
   // Spanish: Escribir el valor del dato 'KEY' en el campo 'FIELD'
@@ -1091,6 +1425,7 @@ function protectSplitSensitiveTokens(text: string): { protectedText: string; tok
   const tokenMap = new Map<string, string>();
   let index = 0;
   const patterns = [
+    /\[[^\]\r\n]+\]/g,
     /https?:\/\/[^\s,;]+/gi,
     /www\.[^\s,;]+/gi,
     /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi,
@@ -1197,3 +1532,4 @@ export function classifyStepSet(steps: ParsedStepIntent[]): StepSetIntent {
 
   return result;
 }
+import { parseCanonicalAssertion, type CanonicalAssertion } from "../scenarios/canonical-scenario";

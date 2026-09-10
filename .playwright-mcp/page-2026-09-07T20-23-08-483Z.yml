@@ -1,0 +1,70 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]: Q
+        - generic [ref=e9]:
+          - generic [ref=e10]: QA Lab
+          - generic [ref=e11]: Santa Cruz
+      - navigation [ref=e12]:
+        - button "Panorama" [ref=e13] [cursor=pointer]
+        - button "Lanzar pruebas" [ref=e20] [cursor=pointer]
+        - button "Ejecuciones" [ref=e26] [cursor=pointer]
+        - button "Configuración" [ref=e31] [cursor=pointer]
+      - generic [ref=e37]:
+        - generic [ref=e41]: Pro tip
+        - generic [ref=e42]: Programa ejecuciones nocturnas para optimizar recursos.
+      - generic [ref=e43]:
+        - generic [ref=e44]: CM
+        - generic [ref=e45]:
+          - generic [ref=e46]: Carlos Martínez
+          - generic [ref=e47]: QA Lead
+    - main [ref=e48]:
+      - generic [ref=e49]:
+        - generic [ref=e50]:
+          - generic [ref=e51]:
+            - generic [ref=e53]: En vivo · 16:22
+            - generic [ref=e54]: ·
+            - generic [ref=e55]: Configura una nueva ejecución en 4 pasos
+          - heading "Lanzar pruebas" [level=1] [ref=e666]
+        - generic [ref=e57]:
+          - generic [ref=e58]:
+            - textbox "Buscar..." [ref=e62]
+            - generic [ref=e63]: ⌘K
+          - button [ref=e64] [cursor=pointer]
+      - generic [ref=e667]:
+        - generic [ref=e669]:
+          - button "Proyecto" [ref=e670] [cursor=pointer]
+          - button "Fuentes" [ref=e683] [cursor=pointer]
+          - button "Casos" [ref=e690] [cursor=pointer]
+          - button "Lanzar" [ref=e698] [cursor=pointer]
+        - generic [ref=e705]:
+          - generic [ref=e706]:
+            - generic [ref=e707]: Paso uno · Elige tu lanzadera
+            - heading "¿Qué proyecto vamos a correr?" [level=2] [ref=e708]
+            - paragraph [ref=e709]: Selecciona el framework de automatización.
+            - generic [ref=e710]:
+              - button "Web · Playwright BSCLINEA Web · Playwright" [ref=e711] [cursor=pointer]:
+                - generic [ref=e712]: Web · Playwright
+                - generic [ref=e714]: BSCLINEA
+                - generic [ref=e715]: Web · Playwright
+              - button "Mobile · Android appmobil Mobile · Android" [ref=e716] [cursor=pointer]:
+                - generic [ref=e717]: Mobile · Android
+                - generic [ref=e719]: appmobil
+                - generic [ref=e720]: Mobile · Android
+              - button "Web · Playwright PortalEmpresarial Web · Playwright" [active] [ref=e721] [cursor=pointer]:
+                - generic [ref=e722]: Web · Playwright
+                - generic [ref=e724]: PortalEmpresarial
+                - generic [ref=e725]: Web · Playwright
+              - button "Web · Playwright PruebaQA Web · Playwright" [ref=e726] [cursor=pointer]:
+                - generic [ref=e727]: Web · Playwright
+                - generic [ref=e729]: PruebaQA
+                - generic [ref=e730]: Web · Playwright
+              - button "Web · Playwright BSC Web · Playwright" [ref=e731] [cursor=pointer]:
+                - generic [ref=e732]: Web · Playwright
+                - generic [ref=e734]: BSC
+                - generic [ref=e735]: Web · Playwright
+          - generic [ref=e736]:
+            - button "Atrás" [disabled] [ref=e737]
+            - button "Continuar" [ref=e740] [cursor=pointer]
+  - generic [ref=e615]: "30"

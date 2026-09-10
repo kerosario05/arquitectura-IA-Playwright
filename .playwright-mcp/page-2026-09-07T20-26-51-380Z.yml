@@ -1,0 +1,86 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e3]:
+    - complementary [ref=f1e4]:
+      - generic [ref=f1e5]:
+        - generic [ref=f1e6]: Q
+        - generic [ref=f1e9]:
+          - generic [ref=f1e10]: QA Lab
+          - generic [ref=f1e11]: Santa Cruz
+      - navigation [ref=f1e12]:
+        - button "Panorama" [ref=f1e13] [cursor=pointer]
+        - button "Lanzar pruebas" [ref=f1e20] [cursor=pointer]
+        - button "Ejecuciones" [ref=f1e26] [cursor=pointer]
+        - button "Configuración" [ref=f1e31] [cursor=pointer]
+      - generic [ref=f1e37]:
+        - generic [ref=f1e41]: Pro tip
+        - generic [ref=f1e42]: Programa ejecuciones nocturnas para optimizar recursos.
+      - generic [ref=f1e43]:
+        - generic [ref=f1e44]: CM
+        - generic [ref=f1e45]:
+          - generic [ref=f1e46]: Carlos Martínez
+          - generic [ref=f1e47]: QA Lead
+    - main [ref=f1e48]:
+      - generic [ref=f1e49]:
+        - generic [ref=f1e50]:
+          - generic [ref=f1e51]:
+            - generic [ref=f1e53]: En vivo · 16:26
+            - generic [ref=f1e54]: ·
+            - generic [ref=f1e55]: Configura una nueva ejecución en 4 pasos
+          - heading "Lanzar pruebas" [level=1] [ref=f1e655]
+        - generic [ref=f1e57]:
+          - generic [ref=f1e58]:
+            - textbox "Buscar..." [ref=f1e62]
+            - generic [ref=f1e63]: ⌘K
+          - button [ref=f1e64] [cursor=pointer]
+      - generic [ref=f1e656]:
+        - generic [ref=f1e658]:
+          - button "Proyecto" [ref=f1e659] [cursor=pointer]
+          - button "Fuentes" [ref=f1e664] [cursor=pointer]
+          - button "Casos" [ref=f1e671] [cursor=pointer]
+          - button "Lanzar" [ref=f1e679] [cursor=pointer]
+        - generic [ref=f1e686]:
+          - generic [ref=f1e802]:
+            - generic [ref=f1e803]:
+              - generic [ref=f1e804]: Paso tres · Selecciona los casos
+              - generic [ref=f1e805]:
+                - generic [ref=f1e806]:
+                  - heading "6 casos encontrados" [level=2] [ref=f1e807]
+                  - generic [ref=f1e808]: Portal Empresarial · Automatizacion 1
+                - generic [ref=f1e810]:
+                  - generic [ref=f1e811]: 0 de 6 seleccionados
+                  - button "Seleccionar todos" [ref=f1e812] [cursor=pointer]
+            - generic [ref=f1e813]:
+              - generic [ref=f1e815]:
+                - button [ref=f1e816] [cursor=pointer]
+                - generic [ref=f1e817]: C44757
+                - button "Login satisfactorio" [ref=f1e818] [cursor=pointer]
+                - button [ref=f1e821] [cursor=pointer]
+              - generic [ref=f1e825]:
+                - button [ref=f1e826] [cursor=pointer]
+                - generic [ref=f1e827]: C44758
+                - button "Validar cédula con formato erróneo al agregar empleado manualmente" [ref=f1e828] [cursor=pointer]
+                - button [ref=f1e831] [cursor=pointer]
+              - generic [ref=f1e835]:
+                - button [ref=f1e836] [cursor=pointer]
+                - generic [ref=f1e837]: C44759
+                - button "Agregar varios empleados manualmente con cédula" [ref=f1e838] [cursor=pointer]
+                - button [ref=f1e841] [cursor=pointer]
+              - generic [ref=f1e845]:
+                - button [ref=f1e846] [cursor=pointer]
+                - generic [ref=f1e847]: C44760
+                - button "Agregar un empleado manualmente con cédula" [ref=f1e848] [cursor=pointer]
+                - button [ref=f1e851] [cursor=pointer]
+              - generic [ref=f1e855]:
+                - button [ref=f1e856] [cursor=pointer]
+                - generic [ref=f1e857]: C44761
+                - button "Gestionar nómina mediante carga de archivo" [ref=f1e858] [cursor=pointer]
+                - button [ref=f1e861] [cursor=pointer]
+              - generic [ref=f1e865]:
+                - button [ref=f1e866] [cursor=pointer]
+                - generic [ref=f1e867]: C44762
+                - button "Descargar plantilla para carga de nómina" [ref=f1e868] [cursor=pointer]
+                - button [ref=f1e871] [cursor=pointer]
+          - generic [ref=f1e735]:
+            - button "Atrás" [ref=f1e736] [cursor=pointer]
+            - button "Continuar" [disabled] [ref=f1e874]
+  - generic [ref=f1e653]: "30"

@@ -3,6 +3,7 @@ import { runCaseDiscoveryWorkflow, printCaseDiscoverySummary } from "../discover
 import type { CaseDiscoveryWorkflowOptions } from "../discovery/case-discovery-workflow";
 import { resolveAppProfile, ensureAppStructure, logAppProfile, resolveSectionProfile } from "../automations/app-profile";
 import type { AppProfile, SectionProfile } from "../automations/app-profile";
+import { loadRuntimeContextFromPath, resolveRuntimeEntriesForCase } from "./discovery-batch";
 
 type CliArgs = {
   caseId: number;
@@ -12,6 +13,7 @@ type CliArgs = {
   output?: string;
   autoPromote: boolean;
   promotionDryRun: boolean;
+  contextOnly: boolean;
   promotionStrict: boolean;
   requirePromotionApproval: boolean;
   pageObjectMode: boolean;
@@ -34,6 +36,7 @@ export function parseDiscoveryCaseArgs(argv: string[]): CliArgs {
     headed: false,
     autoPromote: false,
     promotionDryRun: false,
+    contextOnly: false,
     promotionStrict: false,
     requirePromotionApproval: false,
     pageObjectMode: true,
@@ -78,6 +81,10 @@ export function parseDiscoveryCaseArgs(argv: string[]): CliArgs {
     }
     if (token === "--promotion-dry-run") {
       args.promotionDryRun = true;
+      continue;
+    }
+    if (token === "--context-only") {
+      args.contextOnly = true;
       continue;
     }
     if (token === "--promotion-strict") {
@@ -214,6 +221,7 @@ async function main(): Promise<void> {
   console.log(`[discovery:case] Overwrite enabled: ${args.overwrite}`);
 
   const appProfile = await resolveAndEnsureApp(args);
+  const runtimeContext = await loadRuntimeContextFromPath(process.env.DISCOVERY_RUNTIME_CONTEXT);
 
   // Resolve sectionProfile from CLI --section flag (if provided)
   let sectionProfile: SectionProfile | undefined;
@@ -227,10 +235,12 @@ async function main(): Promise<void> {
 
   const workflowOptions: CaseDiscoveryWorkflowOptions = {
     caseId: args.caseId,
+    runtimeEntries: resolveRuntimeEntriesForCase(runtimeContext, args.caseId),
     headed: args.headed,
     outputDir: args.output,
     autoPromote: args.autoPromote,
     promotionDryRun: args.promotionDryRun,
+    contextOnly: args.contextOnly,
     promotionStrict: args.promotionStrict,
     requirePromotionApproval: args.requirePromotionApproval,
     pageObjectMode: args.pageObjectMode,

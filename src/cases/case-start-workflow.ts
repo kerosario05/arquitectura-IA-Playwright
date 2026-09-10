@@ -17,6 +17,8 @@ import { runPostExecutionReporting } from "../reporting/post-execution-reporting
 import { buildPlanRepairGoal } from "./plan-repair-goal";
 import { scanCurrentPage } from "../explorer/page-scanner";
 import { listSupportedActions } from "../registry";
+import { launchRuntimeBrowserSession } from "../browser/browser-session";
+import type { DataContext, DataContextEntry } from "../data/data-context";
 import type { CaseStartWorkflowInput, CaseStartWorkflowResult, PromotionResult, HandoffResult, AutoRepairResult, ReuseResult } from "../types/case-start.types";
 import type { TestScenario } from "../types/testrail.types";
 import type { ExecutionPlan } from "../types/execution-plan.types";
@@ -27,6 +29,45 @@ import type { AgentHandoffResponse } from "../types/agent-handoff.types";
 function buildArtifactsDir(): string {
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
   return path.resolve(`.artifacts/cases/${stamp}`);
+}
+
+function normalizeDataContextKey(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+function runtimeSourcePriority(source: DataContextEntry["source"]): number {
+  if (source === "explicit_runtime_input" || source === "user_provided_qa_credentials" || source === "data_override") return 0;
+  if (source === "runtime_context" || source === "fixture") return 1;
+  if (source === "suggested_value" || source === "auto_generated") return 5;
+  return 3;
+}
+
+export function composeRuntimeDataContext(base: DataContext, runtimeEntries: DataContextEntry[] = []): DataContext {
+  const entriesByKey = new Map<string, DataContextEntry>();
+  const priorities = new Map<string, number>();
+  for (const entry of [...runtimeEntries, ...base.entries]) {
+    const normalizedKey = normalizeDataContextKey(entry.key);
+    const priority = runtimeSourcePriority(entry.source);
+    if (!entriesByKey.has(normalizedKey) || priority < (priorities.get(normalizedKey) ?? Number.MAX_SAFE_INTEGER)) {
+      entriesByKey.set(normalizedKey, { ...entry });
+      priorities.set(normalizedKey, priority);
+    }
+  }
+
+  const entries = Array.from(entriesByKey.values());
+  const sensitive = entries.filter((entry) => entry.sensitive).length;
+  return {
+    entries,
+    counts: {
+      total: entries.length,
+      sensitive,
+      nonSensitive: entries.length - sensitive,
+    },
+  };
 }
 
 async function loadSnapshotIfExists(): Promise<PageSnapshot | undefined> {
@@ -46,14 +87,20 @@ async function loadSnapshotIfExists(): Promise<PageSnapshot | undefined> {
 }
 
 export async function startCaseAutomationWorkflow(
-  input: CaseStartWorkflowInput
+  input: CaseStartWorkflowInput & { runtimeEntries?: DataContextEntry[] }
 ): Promise<CaseStartWorkflowResult> {
   const startedAt = new Date().toISOString();
   const artifactsDir = buildArtifactsDir();
   await mkdir(artifactsDir, { recursive: true });
 
-  const browser = await chromium.launch({ headless: !input.headed });
-  const page = await browser.newPage();
+  const session = await launchRuntimeBrowserSession({
+    browserType: chromium,
+    headless: !input.headed,
+    targetUrl: config.app.baseUrl,
+    profilePath: config.execution.qaBrowserProfilePath,
+    channel: config.execution.qaBrowserChannel,
+  });
+  const page = session.page;
 
   try {
     const testRailRuntimeConfig = requireTestRailConfig(config);
@@ -105,7 +152,7 @@ export async function startCaseAutomationWorkflow(
     const planPath = path.join(artifactsDir, `plan-${input.caseId}.json`);
     await writeFile(planPath, JSON.stringify(plan, null, 2), "utf-8");
 
-    const dataContext = buildDataContext(config);
+    const dataContext = composeRuntimeDataContext(buildDataContext(config), input.runtimeEntries);
     const snapshot = await loadSnapshotIfExists();
 
     let enrichedPlan: ExecutionPlan = plan;
@@ -633,6 +680,6 @@ export async function startCaseAutomationWorkflow(
       completedAt: new Date().toISOString()
     };
   } finally {
-    await browser.close();
+    await session.close();
   }
 }

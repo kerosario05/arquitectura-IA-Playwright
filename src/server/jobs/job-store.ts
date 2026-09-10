@@ -117,6 +117,13 @@ class JobStore {
     job.emitter.emit("update", this.serialize(job));
   }
 
+  clearTransientParams(id: string): void {
+    const job = this.jobs.get(id);
+    if (!job) return;
+    delete job.params.runtimeEntriesByCase;
+    delete job.params.dataOverrides;
+  }
+
   appendLog(id: string, line: string): void {
     const job = this.jobs.get(id);
     if (!job) return;
@@ -140,7 +147,27 @@ class JobStore {
 
   private serialize(job: JobInternal): Job {
     const { process: _proc, emitter: _em, ...pub } = job;
-    return pub;
+    const params = { ...pub.params };
+    const runtimeEntriesByCase = params.runtimeEntriesByCase;
+    if (runtimeEntriesByCase && typeof runtimeEntriesByCase === "object" && !Array.isArray(runtimeEntriesByCase)) {
+      params.runtimeEntriesByCase = Object.fromEntries(
+        Object.entries(runtimeEntriesByCase as Record<string, unknown>).map(([caseId, entries]) => [
+          caseId,
+          Array.isArray(entries)
+            ? entries.map((entry) => {
+                const value = entry && typeof entry === "object" ? entry as Record<string, unknown> : {};
+                return {
+                  key: value.key,
+                  source: value.source,
+                  sensitive: value.sensitive === true,
+                  present: typeof value.value === "string" && value.value.length > 0,
+                };
+              })
+            : [],
+        ]),
+      );
+    }
+    return { ...pub, params };
   }
 }
 

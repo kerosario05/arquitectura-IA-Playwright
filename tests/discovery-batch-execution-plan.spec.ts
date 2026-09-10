@@ -193,6 +193,42 @@ test("discovery args include overwrite/rerun-active only when explicitly request
   expect(args).toContain("--rerun-active");
 });
 
+test("promoted execution forwards the existing runtime context path only", () => {
+  const runtimeContextPath = ".artifacts/tmp/discovery-runtime/job-a.json";
+  const env = buildPromotedExecutionEnv(
+    { caseIds: [44757], appSlug: "app-a", sectionSlug: "section-a" },
+    "job-a",
+    { HEADLESS: "false", APP_USERNAME: "must-not-be-copied" } as NodeJS.ProcessEnv,
+    runtimeContextPath,
+  );
+
+  expect(env.DISCOVERY_RUNTIME_CONTEXT).toBe(runtimeContextPath);
+  expect(env.APP_USERNAME).toBe("must-not-be-copied");
+  expect(Object.keys(env).filter((key) => key.includes("PASSWORD") || key.includes("COMPANY"))).toEqual([]);
+});
+
+test("promoted execution leaves runtime context absent when no path exists", () => {
+  const env = buildPromotedExecutionEnv({ caseIds: [44757] }, "job-a", {} as NodeJS.ProcessEnv);
+  expect(env.DISCOVERY_RUNTIME_CONTEXT).toBeUndefined();
+});
+
+test("discovery and functional children reuse the same case-scoped path without cross-case contamination", () => {
+  const pathA = ".artifacts/tmp/discovery-runtime/job-a.json";
+  const pathB = ".artifacts/tmp/discovery-runtime/job-b.json";
+  const envA = buildPromotedExecutionEnv({ caseIds: [44757] }, "job-a", {} as NodeJS.ProcessEnv, pathA);
+  const envB = buildPromotedExecutionEnv({ caseIds: [44758] }, "job-b", {} as NodeJS.ProcessEnv, pathB);
+
+  expect(envA.DISCOVERY_RUNTIME_CONTEXT).toBe(pathA);
+  expect(envB.DISCOVERY_RUNTIME_CONTEXT).toBe(pathB);
+  expect(envA.DISCOVERY_RUNTIME_CONTEXT).not.toBe(envB.DISCOVERY_RUNTIME_CONTEXT);
+  expect(Object.keys(envA).sort()).toEqual([
+    "AUTOMATION_HEADLESS",
+    "AUTOMATION_SOURCE",
+    "DISCOVERY_RUNTIME_CONTEXT",
+    "EVIDENCE_RUN_ID",
+  ]);
+});
+
 test("resolved rediscovery intent is propagated to the child discovery command", () => {
   const intent = resolveRediscoveryIntent({
     forceRediscovery: false,
@@ -374,6 +410,48 @@ test("T3: discovered_passed without persisted promotion is not admitted", () => 
   const result = resolvePostDiscoveryExecutionAdmission({
     caseId: 5010,
     appSlug: "app-a",
+    childStatus: "discovered_passed",
+    promotionPersisted: false,
+    entries: [postDiscoveryEntry()],
+    fileExists: () => true,
+  });
+  expect(result).toMatchObject({ admitted: false, reason: "child_status_discovered_passed" });
+});
+
+test("context-only admits only a fully materialized discovered_passed child", () => {
+  const result = resolvePostDiscoveryExecutionAdmission({
+    caseId: 5010,
+    appSlug: "app-a",
+    contextOnly: true,
+    contextMaterialized: true,
+    childStatus: "discovered_passed",
+    promotionPersisted: false,
+    entries: [],
+  });
+  expect(result).toEqual({ admitted: true, reason: "context_materialized" });
+});
+
+test("context-only rejects missing materialization, failed, and partial children", () => {
+  for (const childStatus of ["discovered_passed", "failed", "discovered_partial"]) {
+    const result = resolvePostDiscoveryExecutionAdmission({
+      caseId: 5010,
+      appSlug: "app-a",
+      contextOnly: true,
+      contextMaterialized: childStatus === "discovered_passed" ? false : true,
+      childStatus,
+      promotionPersisted: false,
+      entries: [],
+    });
+    expect(result.admitted).toBe(false);
+  }
+});
+
+test("context-only does not relax normal discovered_passed admission", () => {
+  const result = resolvePostDiscoveryExecutionAdmission({
+    caseId: 5010,
+    appSlug: "app-a",
+    contextOnly: false,
+    contextMaterialized: true,
     childStatus: "discovered_passed",
     promotionPersisted: false,
     entries: [postDiscoveryEntry()],

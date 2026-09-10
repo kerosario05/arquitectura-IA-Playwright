@@ -5,6 +5,7 @@ import { getLoginStrategy } from "../auth/login-strategy.factory";
 import { config } from "../config/env";
 import { ensureEvidenceDir, getRunEvidenceDir, getTimestampedRunName } from "../evidence/evidence-manager";
 import type { SmokeExecutionResult } from "../types/execution.types";
+import { launchRuntimeBrowserSession } from "../browser/browser-session";
 
 export async function runSmokeExecution(): Promise<void> {
   const startedAt = new Date().toISOString();
@@ -30,11 +31,16 @@ export async function runSmokeExecution(): Promise<void> {
     webkit
   }[config.execution.browser];
 
-  let browser;
+  let session;
   try {
-    browser = await browserType.launch({ headless: config.execution.headless });
-    const context = await browser.newContext();
-    const page = await context.newPage();
+    session = await launchRuntimeBrowserSession({
+      browserType,
+      headless: config.execution.headless,
+      targetUrl: config.app.baseUrl,
+      profilePath: config.execution.qaBrowserProfilePath,
+      channel: config.execution.qaBrowserChannel,
+    });
+    const page = session.page;
     page.setDefaultTimeout(config.execution.defaultTimeoutMs);
 
     const loginStrategy = getLoginStrategy(config.app.loginMode);
@@ -50,8 +56,8 @@ export async function runSmokeExecution(): Promise<void> {
     result.finishedAt = new Date().toISOString();
     await writeFile(path.join(runEvidenceDir, "result.json"), JSON.stringify(result, null, 2), "utf-8");
 
-    if (browser) {
-      await browser.close();
+    if (session) {
+      await session.close();
     }
   }
 }

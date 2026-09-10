@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
-import { isAuthenticationTestScenario, shouldPerformBusinessFlowAuthSetup, getLoginStepsToConsume, loadProjectAuthProfile } from "../src/discovery/case-discovery";
+import { isAuthenticationTestScenario, shouldPerformBusinessFlowAuthSetup, shouldInvokeAuthGateRecovery, getLoginStepsToConsume, loadProjectAuthProfile } from "../src/discovery/case-discovery";
 import { parseScenarioStepsForDiscovery } from "../src/discovery/case-discovery";
 
 test("parseScenarioStepsForDiscovery preserves structured requiredContext", () => {
@@ -46,6 +46,12 @@ function makeScenario(overrides: any = {}) {
 }
 
 test.describe("auth contract business setup", () => {
+  test("auth-test decision skips proactive auth recovery while business flows preserve it", () => {
+    expect(shouldInvokeAuthGateRecovery(true)).toBe(false);
+    expect(shouldInvokeAuthGateRecovery(false)).toBe(true);
+    // gate_observation remains a separate contract and is not reclassified here.
+  });
+
   test("CASE A: negative login with authIntent full + subject authentication_test + credenciales inválidas => no preAuth", () => {
     const scenario = makeScenario({
       title: "Ingresar credenciales incorrectas",

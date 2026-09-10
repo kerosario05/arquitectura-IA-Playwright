@@ -57,6 +57,17 @@ export type TestScenarioStep = {
   action: string;
   expected?: string;
   dataHints: string[];
+  inputIntent?: import("./execution-plan.types").InputIntent;
+  requirementRefs?: string[];
+  polarity?: "positive" | "negative";
+  canonicalAssertion?: import("../scenarios/canonical-scenario").CanonicalAssertion;
+  conditionalAction?: import("../scenarios/canonical-scenario").CanonicalConditionalAction;
+  entityScope?: string;
+  rowScope?: number;
+  rowRelation?: "next" | "added";
+  associatedField?: string;
+  selectionField?: string;
+  expectedValueKey?: string;
 };
 
 export type TestScenario = {
@@ -71,6 +82,22 @@ export type TestScenario = {
   raw?: RawTestRailCase;
   sectionId?: number;
   sectionName?: string;
+  canonicalScenarioId?: string;
+  canonicalRequirements?: import("../scenarios/canonical-scenario").CanonicalRequirement[];
+  canonicalInputRequirements?: import("../scenarios/canonical-scenario").CanonicalInputRequirement[];
+  expectedResultRequirementRefs?: string[];
+  stepRequirementRefs?: Array<{ stepIndex: number; requirementId: string; facet?: string }>;
+  stepClaims?: Array<{ stepIndex: number; claimId: string; requirementId?: string; facet?: string; required?: boolean; coverable?: boolean }>;
+  /** Contract-derived inputs carried into discovery without materializing values. */
+  runtimeInputRequirements?: Array<{
+    key: string;
+    required?: boolean;
+    source?: "contract" | "runtime_inferred";
+    provenance?: "contract_declaration" | "placeholder_reference" | "runtime_inference";
+    valueRole?: "runtime_input" | "expected_oracle" | "runtime_derived_oracle";
+    oracleSource?: string;
+    dependsOn?: string[];
+  }>;
 };
 
 export type TestRailCaseFetchResult = {
@@ -134,6 +161,7 @@ export type AddCaseInput = {
 };
 
 export type UpdateCaseInput = {
+  custom_preconds?: string;
   title?: string;
   refs?: string;
   preconditions?: string;

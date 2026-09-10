@@ -4,6 +4,7 @@ import { extractDataHintsFromElementText } from "./data-hint-extractor";
 import { sanitizeSnapshotText } from "./snapshot-sanitizer";
 import type { PageSnapshot, SnapshotElement, SnapshotElementType } from "../types/page-snapshot.types";
 import { createHash } from "node:crypto";
+import { buildRuntimeControlIdentity } from "../types/control-identity";
 
 type RawDomElement = {
   id: string;
@@ -23,6 +24,8 @@ type RawDomElement = {
   domId?: string;
   href?: string;
   ariaLabel?: string;
+  ariaControls?: string;
+  controlName?: string;
   title?: string;
   alt?: string;
   className?: string;
@@ -160,6 +163,8 @@ export async function scanCurrentPage(page: Page): Promise<PageSnapshot> {
       const testId = el.getAttribute("data-testid") || el.getAttribute("data-test") || undefined;
       const href = (el as HTMLAnchorElement).href || undefined;
       const ariaLabel = el.getAttribute("aria-label") || undefined;
+      const ariaControls = el.getAttribute("aria-controls") || undefined;
+      const controlName = el.getAttribute("name") || undefined;
       const titleAttr = el.getAttribute("title") || undefined;
       const altAttr = (el as HTMLImageElement).alt || undefined;
       const className = el.getAttribute("class") || undefined;
@@ -193,6 +198,8 @@ export async function scanCurrentPage(page: Page): Promise<PageSnapshot> {
         domId,
         href,
         ariaLabel,
+        ariaControls,
+        controlName,
         title: titleAttr,
         alt: altAttr,
         className,
@@ -247,7 +254,17 @@ export async function scanCurrentPage(page: Page): Promise<PageSnapshot> {
       alt: raw.alt,
       dataTestid: raw.testId,
       className: raw.className,
-      domId: raw.domId
+      domId: raw.domId,
+      controlIdentity: buildRuntimeControlIdentity({
+        tagName: raw.tagName,
+        inputType: raw.inputType,
+        role: raw.role,
+        name: raw.controlName,
+        id: raw.domId,
+        ariaControls: raw.ariaControls,
+        candidateLocator: candidateLocators[0],
+        snapshotId: raw.id,
+      }) ?? undefined
     };
   });
 

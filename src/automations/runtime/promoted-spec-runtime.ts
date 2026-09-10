@@ -1,11 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { Page } from "@playwright/test";
+import type { AssertionPolarity } from "../../scenarios/canonical-scenario";
 import type { AppRouteProfile } from "../../types/env.types";
 import { capturePageDiagnostics, waitForListReadiness, waitForPromotedSpecStepReady } from "../../browser/promoted-spec-helpers";
 import { waitForStablePageState } from "../../discovery/page-stability-detector";
 import { EvidenceRecorder } from "../../evidence/evidence-recorder";
 import { loadEvidenceConfig } from "../../evidence/evidence-types";
+import { normalizeSemanticText } from "../semantic-text-normalization";
 import { findSemanticTargetMatch, type SemanticMatchOptions } from "./semantic-target-matcher";
 
 export type SafeReplayStep = {
@@ -83,7 +85,8 @@ export type PromotedActionOptions = {
 
 export type PromotedFillOptions = {
   stepIndex: number;
-  field: string;
+  field?: string;
+  target?: string;
   value: string;
   sensitive?: boolean;
   actionIntent?: string;
@@ -94,13 +97,44 @@ export type PromotedFillOptions = {
   evidenceDir?: string;
 };
 
+function normalizePromotedFieldAlias(value: string): string {
+  return value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ");
+}
+
+export function resolvePromotedFieldTarget(options: { field?: unknown; target?: unknown }): string {
+  const field = typeof options.field === "string" && options.field.trim() !== "" ? options.field : undefined;
+  const target = typeof options.target === "string" && options.target.trim() !== "" ? options.target : undefined;
+  if (field && target && normalizePromotedFieldAlias(field) !== normalizePromotedFieldAlias(target)) {
+    throw new Error("conflicting_field_target: field and legacy target aliases differ");
+  }
+  const resolved = field ?? target;
+  if (!resolved) throw new Error("invalid_context_action_target: field or target is required");
+  return resolved;
+}
+
 export type PromotedAssertOptions = {
   stepIndex: number;
   target: string;
   description?: string;
+  polarity?: AssertionPolarity;
+  expectedUrl?: string;
   assertion: () => Promise<void>;
   evidenceDir?: string;
 };
+
+export function evaluatePromotedAssertionState(
+  currentUrl: string,
+  descriptor: { polarity?: AssertionPolarity; expectedUrl?: string },
+): boolean {
+  if (descriptor.polarity !== "positive" && descriptor.polarity !== "negative") {
+    throw new Error("PROMOTED_ASSERTION_POLARITY_UNRESOLVED");
+  }
+  if (typeof descriptor.expectedUrl !== "string" || descriptor.expectedUrl.trim() === "") {
+    throw new Error("PROMOTED_ASSERTION_DESCRIPTOR_UNRESOLVED");
+  }
+  const matchesExpected = currentUrl.includes(descriptor.expectedUrl);
+  return descriptor.polarity === "positive" ? matchesExpected : !matchesExpected;
+}
 
 function boolFromEnv(name: string, fallback: boolean): boolean {
   const raw = process.env[name];
@@ -187,8 +221,8 @@ export async function findBestActiveContainerForField(page: Page, fieldName?: st
   best?: ContainerCandidate;
   candidates: ContainerCandidate[];
 }> {
-  const normalizedField = normalizeText(fieldName ?? "");
-  const candidates = await page.evaluate((field) => {
+  const normalizedField = normalizeText(normalizeSemanticText(fieldName ?? ""));
+  const rawCandidates = await page.evaluate((field) => {
     const selectors = [
       '[role="dialog"]',
       '[aria-modal="true"]',
@@ -217,24 +251,6 @@ export async function findBestActiveContainerForField(page: Page, fieldName?: st
       return `${node.tagName.toLowerCase()}[data-promoted-idx="${idx}"]`;
     };
 
-    const matchesField = (container: Element): boolean => {
-      if (!field) return false;
-      const text = (container.textContent || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, " ");
-      if (text.includes(field)) return true;
-      const fields = Array.from(container.querySelectorAll("input, textarea, select"));
-      return fields.some((item) => {
-        const node = item as HTMLInputElement;
-        const attrs = [
-          node.name || "",
-          node.id || "",
-          node.getAttribute("aria-label") || "",
-          node.getAttribute("placeholder") || "",
-          node.getAttribute("data-testid") || ""
-        ].join(" ").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, " ");
-        return attrs.includes(field);
-      });
-    };
-
     const unique = new Set<Element>();
     for (const selector of selectors) {
       for (const el of Array.from(document.querySelectorAll(selector))) {
@@ -256,18 +272,40 @@ export async function findBestActiveContainerForField(page: Page, fieldName?: st
       idx += 1;
       const editableCount = container.querySelectorAll("input:not([disabled]), textarea:not([disabled]), select:not([disabled])").length;
       const visible = isVisible(container);
-      const matchingFieldFound = matchesField(container);
+      const fieldSignals = [
+        container.textContent || "",
+        ...Array.from(container.querySelectorAll("input, textarea, select")).flatMap((item) => {
+          const node = item as HTMLInputElement;
+          return [
+            node.name || "",
+            node.id || "",
+            node.getAttribute("aria-label") || "",
+            node.getAttribute("placeholder") || "",
+            node.getAttribute("data-testid") || "",
+          ];
+        }),
+      ];
       const role = container.getAttribute("role") || container.tagName.toLowerCase();
       const id = (container as HTMLElement).id ? `#${(container as HTMLElement).id}` : "";
       const descriptor = `${role}${id}`;
       const selector = buildSelector(container, idx);
-      const rank = (matchingFieldFound ? 100 : 0) + (visible ? 10 : 0) + editableCount;
-      list.push({ selector, descriptor, visible, editableCount, matchingFieldFound, rank });
+      const rank = (visible ? 10 : 0) + editableCount;
+      list.push({ selector, descriptor, visible, editableCount, matchingFieldFound: false, rank, fieldSignals });
     }
 
     list.sort((a, b) => b.rank - a.rank);
     return list;
   }, normalizedField);
+
+  const candidates = rawCandidates.map(({ fieldSignals, ...candidate }) => ({
+    ...candidate,
+    matchingFieldFound: fieldName
+      ? fieldSignals.some((signal) => normalizeText(normalizeSemanticText(signal)).includes(normalizedField))
+      : false,
+  })).map((candidate) => ({
+    ...candidate,
+    rank: candidate.rank + (candidate.matchingFieldFound ? 100 : 0),
+  })).sort((a, b) => b.rank - a.rank);
 
   const valid = candidates.filter((c) => c.visible && c.editableCount > 0);
   const best = valid.find((c) => (fieldName ? c.matchingFieldFound : true)) ?? valid[0];
@@ -293,11 +331,63 @@ export async function resolvePromotedFieldLocator(
   enabled: boolean;
   editable: boolean;
 } | undefined> {
-  const normalizedField = normalizeText(field);
+  const normalizedField = normalizeText(normalizeSemanticText(field));
   const timeoutMs = options?.timeoutMs ?? 5000;
   const container = options?.containerLocator
     ? page.locator(options.containerLocator)
     : undefined;
+
+  const resolveSemanticCandidate = async (scopeLocator: any, scope: "container" | "page") => {
+    const fields = scopeLocator.locator("input, textarea, select");
+    const count = await fields.count().catch(() => 0);
+    const matches: number[] = [];
+    for (let index = 0; index < count; index += 1) {
+      const candidate = fields.nth(index);
+      const signals = await candidate.evaluate((element: Element) => {
+        const node = element as HTMLInputElement;
+        const signals = [
+          node.getAttribute("aria-label") || "",
+          node.getAttribute("placeholder") || "",
+          node.getAttribute("name") || "",
+          node.id || "",
+        ];
+        if (node.id) {
+          const label = document.querySelector(`label[for="${CSS.escape(node.id)}"]`);
+          if (label?.textContent) signals.push(label.textContent);
+        }
+        const ancestorLabel = node.closest("label");
+        if (ancestorLabel?.textContent) signals.push(ancestorLabel.textContent);
+        return signals;
+      }).catch(() => [] as string[]);
+      const matchesTarget = signals.some((signal: unknown) =>
+        typeof signal === "string"
+        && signal.trim() !== ""
+        && normalizeText(normalizeSemanticText(signal)).includes(normalizedField)
+      );
+      if (matchesTarget) matches.push(index);
+    }
+    if (matches.length !== 1) return { matched: matches.length > 0, ambiguous: matches.length > 1 };
+
+    const locator = fields.nth(matches[0]);
+    const visible = await locator.isVisible({ timeout: timeoutMs }).catch(() => false);
+    if (!visible) return { matched: true, ambiguous: false };
+    const disabled = await locator.isDisabled({ timeout: timeoutMs }).catch(() => true);
+    if (disabled) return { matched: true, ambiguous: false };
+    const tagName = await locator.evaluate((el: Element) => el.tagName.toLowerCase()).catch(() => "");
+    if (!["input", "textarea", "select"].includes(tagName)) return { matched: true, ambiguous: false };
+    return {
+      matched: true,
+      ambiguous: false,
+      result: { locator, strategy: `${scope}:semanticCandidate`, scope, visible: true, enabled: true, editable: true },
+    };
+  };
+
+  if (container) {
+    const containerCandidate = await resolveSemanticCandidate(container, "container");
+    if (containerCandidate.ambiguous || containerCandidate.matched) return containerCandidate.result;
+  }
+  const pageCandidate = await resolveSemanticCandidate(page, "page");
+  if (pageCandidate.ambiguous || pageCandidate.matched) return pageCandidate.result;
 
   const strategies: Array<{
     name: string;
@@ -738,6 +828,36 @@ async function shouldUseSafeForceClick(
   return targetVisible && targetEnabled;
 }
 
+export function doesVisibleFieldSignalMatch(signals: unknown[], target: string): boolean {
+  if (typeof target !== "string" || target.trim() === "") return false;
+  const normalizedTarget = normalizeSemanticText(target).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return signals.some((signal) =>
+    typeof signal === "string"
+    && signal.trim() !== ""
+    && normalizeSemanticText(signal).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(normalizedTarget)
+  );
+}
+
+async function captureVisibleFieldSignals(page: Page): Promise<string[]> {
+  return page.locator("input:visible, textarea:visible, select:visible").evaluateAll((elements) => {
+    const signals: string[] = [];
+    for (const element of elements) {
+      const attributes = ["aria-label", "name", "placeholder", "id"];
+      for (const attribute of attributes) {
+        const value = element.getAttribute(attribute);
+        if (value) signals.push(value);
+      }
+      if (element.id) {
+        const label = document.querySelector(`label[for="${CSS.escape(element.id)}"]`);
+        if (label?.textContent) signals.push(label.textContent);
+      }
+      const parentLabel = element.closest("label");
+      if (parentLabel?.textContent) signals.push(parentLabel.textContent);
+    }
+    return signals;
+  }).catch(() => []);
+}
+
 /**
  * Validate screen context before executing context-dependent actions
  * Prevents executing deep functional actions from wrong screen (Home/Login/Menu)
@@ -763,12 +883,20 @@ async function validateScreenContextForAction(
   if (!CONTEXT_DEPENDENT_ACTIONS.has(options.actionIntent)) {
     return;
   }
+
+  if (typeof options.target !== "string" || options.target.trim() === "") {
+    throw new Error(`invalid_context_action_target: target is required for '${options.actionIntent}' at step ${options.stepIndex}`);
+  }
   
   // Capture current page state
   const pageDiag = await capturePageDiagnostics(page);
   const currentUrl = pageDiag.currentUrl;
-  const visibleButtons = pageDiag.visibleButtons;
-  const visibleHeadings = pageDiag.visibleHeadings;
+  const visibleButtons = pageDiag.visibleButtons.filter((value): value is string => typeof value === "string" && value.trim() !== "");
+  const visibleHeadings = pageDiag.visibleHeadings.filter((value): value is string => typeof value === "string" && value.trim() !== "");
+  const normalizedTarget = options.target.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const visibleFieldSignals = options.actionIntent === "fill_form_field"
+    ? await captureVisibleFieldSignals(page)
+    : [];
   
   // Check for clear signals of being on wrong screen
   const isOnHomeScreen = currentUrl === "/" || currentUrl === "" || 
@@ -802,10 +930,13 @@ async function validateScreenContextForAction(
   
   if (isOnWrongScreen) {
     // Check if target exists on current page
-    const targetExists = visibleButtons.some(b => 
-      b.toLowerCase().includes(options.target.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+    const genericTargetExists = visibleButtons.some(b =>
+      b.toLowerCase().includes(normalizedTarget)
     ) || visibleHeadings.some(h =>
-      h.toLowerCase().includes(options.target.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+      h.toLowerCase().includes(normalizedTarget)
+    );
+    const targetExists = genericTargetExists || (
+      options.actionIntent === "fill_form_field" && doesVisibleFieldSignalMatch(visibleFieldSignals, options.target)
     );
     
     if (!targetExists) {
@@ -844,7 +975,7 @@ async function validateScreenContextForAction(
     if (isOnListPage) {
       // Check if the primary action target exists on current page
       const primaryActionExists = visibleButtons.some(b => 
-        b.toLowerCase().includes(options.target.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+        b.toLowerCase().includes(normalizedTarget)
       );
       
       if (!primaryActionExists) {
@@ -2065,15 +2196,16 @@ export class PromotedSpecRuntime {
 
   async fillPromotedField(options: PromotedFillOptions): Promise<void> {
     await this.ensureInitialEvidence();
+    const resolvedField = resolvePromotedFieldTarget(options);
     const masked = maskIfSensitive(options.value, options.sensitive);
     const previousActiveContainer = this.activeContainer?.descriptor;
-    const refresh = await this.refreshActiveContainerForField(options.field);
+    const refresh = await this.refreshActiveContainerForField(resolvedField);
     const refreshedActiveContainer = this.activeContainer?.descriptor;
     const searchedContainers = refresh.candidates.length;
     
     // Validate screen context before executing context-dependent actions
     await validateScreenContextForAction(this.page, {
-      target: options.field,
+      target: resolvedField,
       actionIntent: options.actionIntent ?? "fill_form_field",
       stepIndex: options.stepIndex
     });
@@ -2099,7 +2231,7 @@ export class PromotedSpecRuntime {
       const containerSelector = refresh.best.selector;
       
       try {
-        const resolved = await resolvePromotedFieldLocator(this.page, options.field, {
+          const resolved = await resolvePromotedFieldLocator(this.page, resolvedField, {
           containerLocator: containerSelector,
           timeoutMs: this.config.actionTimeoutMs
         });
@@ -2190,7 +2322,7 @@ export class PromotedSpecRuntime {
 
     // Step 3: Wait for UI stability
     try {
-      await this.waitForPromotedUiStable(options.stepIndex, options.field);
+      await this.waitForPromotedUiStable(options.stepIndex, resolvedField);
     } catch (error) {
       // Don't fail the fill, but log it
       verificationSkippedReason = "stability_check_failed";
@@ -2203,7 +2335,7 @@ export class PromotedSpecRuntime {
         {
           currentUrl: this.page.url(),
           actionIntent: "fill",
-          target: options.field,
+          target: resolvedField,
           stepIndex: options.stepIndex,
           timeoutMs: this.config.actionTimeoutMs,
           activeContainer: this.activeContainer?.descriptor,
@@ -2232,7 +2364,7 @@ export class PromotedSpecRuntime {
         this.config.captureDiagnostics
       );
       throw new Error(
-        `Promoted fill failed at step ${options.stepIndex} field="${options.field}" value="${masked}". ` +
+        `Promoted fill failed at step ${options.stepIndex} field="${resolvedField}" value="${masked}". ` +
         `fillPath=${fillPath} nativeFillAttempted=${nativeFillAttempted} nativeFillSucceeded=${nativeFillSucceeded} ` +
         `callbackAttempted=${callbackAttempted} callbackSucceeded=${callbackSucceeded} ` +
         `diagnostics=${JSON.stringify(diagnostics)}`
@@ -2254,7 +2386,18 @@ export class PromotedSpecRuntime {
     await this.ensureInitialEvidence();
     const stepText = options.description?.trim() || `Validar que se muestre "${options.target}".`;
     try {
-      await withTimeout(options.assertion(), this.config.actionTimeoutMs, "assert visible");
+      if (options.polarity !== "positive" && options.polarity !== "negative") {
+        throw new Error("PROMOTED_ASSERTION_POLARITY_UNRESOLVED");
+      }
+      if (options.polarity === "negative" && !options.expectedUrl) {
+        throw new Error("PROMOTED_ASSERTION_DESCRIPTOR_UNRESOLVED");
+      }
+      if (options.expectedUrl) {
+        const stateMatches = evaluatePromotedAssertionState(this.page.url(), options);
+        if (!stateMatches) throw new Error("PROMOTED_ASSERTION_STATE_MISMATCH");
+      } else {
+        await withTimeout(options.assertion(), this.config.actionTimeoutMs, "assert visible");
+      }
       await this.captureEvidenceStep(stepText, "passed", undefined, {
         sourceStepIndex: options.stepIndex,
         target: options.target

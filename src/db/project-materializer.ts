@@ -43,7 +43,7 @@ function writeJsonAtomic(filePath: string, data: unknown): void {
   fs.renameSync(tmpPath, filePath);
 }
 
-function buildWebAppConfig(cfg: ProjectConfiguration, warnings: string[]): Record<string, unknown> {
+export function buildWebAppConfig(cfg: ProjectConfiguration, warnings: string[]): Record<string, unknown> {
   const w = cfg.web!;
   const appConfig: Record<string, unknown> = {
     name: cfg.name,
@@ -52,6 +52,7 @@ function buildWebAppConfig(cfg: ProjectConfiguration, warnings: string[]): Recor
     testData: safeParseObject(w.testDataJson),
     testDataAliases: safeParseObject(w.testDataAliasesJson),
     missingInputBehavior: MISSING_INPUT_MAP[w.missingInputBehavior] ?? w.missingInputBehavior,
+    ignoreHTTPSErrors: w.ignoreHTTPSErrors === true,
   };
   if (w.username) appConfig.username = w.username;
   if (w.extraLoginFieldsJson) appConfig.extraLoginFields = safeParseObject(w.extraLoginFieldsJson);

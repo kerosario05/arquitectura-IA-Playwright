@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import type { DiscoveryStepResult } from '../src/types/discovery.types';
-import { calculateUnresolvedBlockingFailures, reconcileAuthGateAssertionFailures } from '../src/discovery/case-discovery';
+import { calculateUnresolvedBlockingFailures, reconcileAssertionFailuresAfterPass, reconcileAuthGateAssertionFailures } from '../src/discovery/case-discovery';
 
 test.describe('Assertion Recovery Reconciliation', () => {
   test('T1: discovery-batch runtime evidence reconciles a missing authentication assertion', () => {
@@ -109,6 +109,105 @@ test.describe('Assertion Recovery Reconciliation', () => {
       detectedAtStepIndex: 2,
       requiresAuthFlowCompletion: true,
     })).toHaveLength(1);
+  });
+
+  test('final pass reconciles transient failures for the same assertion step', () => {
+    const steps = [
+      {
+        index: 5,
+        action: 'assert',
+        status: 'not_found',
+        targetText: 'authentication completed',
+        assertionClassification: 'structural_assertion',
+        functionalRequired: true,
+        error: 'assertion_not_found',
+      },
+      {
+        index: 5,
+        action: 'assert',
+        status: 'found',
+        targetText: 'authentication completed',
+        assertionStatus: 'passed',
+        runtimeBacked: true,
+        assertionClassification: 'structural_assertion',
+        functionalRequired: true,
+      },
+    ] as DiscoveryStepResult[];
+
+    expect(calculateUnresolvedBlockingFailures(steps)).toHaveLength(0);
+    expect(steps[0]).toMatchObject({ recoveryStatus: 'recovered', recoveryMetadata: { blocking: false } });
+  });
+
+  test('a final failure remains active when no pass exists', () => {
+    const steps = [{
+      index: 5, action: 'assert', status: 'not_found', targetText: 'result',
+      assertionClassification: 'structural_assertion', functionalRequired: true,
+    }] as DiscoveryStepResult[];
+    expect(calculateUnresolvedBlockingFailures(steps)).toHaveLength(1);
+  });
+
+  test('a pass reconciles only its assertion and preserves another failure', () => {
+    const steps = [
+      { index: 1, action: 'assert', status: 'not_found', targetText: 'A', assertionClassification: 'structural_assertion', functionalRequired: true },
+      { index: 1, action: 'assert', status: 'found', assertionStatus: 'passed', targetText: 'A', assertionClassification: 'structural_assertion', functionalRequired: true, runtimeBacked: true },
+      { index: 2, action: 'assert', status: 'not_found', targetText: 'B', assertionClassification: 'structural_assertion', functionalRequired: true },
+    ] as DiscoveryStepResult[];
+    expect(calculateUnresolvedBlockingFailures(steps).map((step) => step.index)).toEqual([2]);
+  });
+
+  test('similar assertion text at another step is not reconciled', () => {
+    const steps = [
+      { index: 1, action: 'assert', status: 'not_found', targetText: 'same text', assertionClassification: 'structural_assertion', functionalRequired: true },
+      { index: 2, action: 'assert', status: 'found', assertionStatus: 'passed', targetText: 'same text', assertionClassification: 'structural_assertion', functionalRequired: true },
+    ] as DiscoveryStepResult[];
+    expect(calculateUnresolvedBlockingFailures(steps)).toHaveLength(1);
+  });
+
+  test('structural assertion pass is idempotent and clears its retry record', () => {
+    const steps = [
+      { index: 3, action: 'assert', status: 'not_found', targetText: 'confirmed', assertionClassification: 'structural_assertion', functionalRequired: true, pendingDiscovery: true, error: 'not_found' },
+      { index: 3, action: 'assert', status: 'found', assertionStatus: 'passed', targetText: 'confirmed', assertionClassification: 'structural_assertion', functionalRequired: true, runtimeBacked: true },
+    ] as DiscoveryStepResult[];
+    expect(reconcileAssertionFailuresAfterPass(steps)).toBe(1);
+    expect(reconcileAssertionFailuresAfterPass(steps)).toBe(0);
+    expect(steps[0]).toMatchObject({ recoveryStatus: 'recovered', pendingDiscovery: false, error: undefined });
+  });
+
+  test('final pass reconciles prior retries without a later passed discovery step', () => {
+    const steps = [
+      { index: 5, action: 'assert', status: 'not_found', targetText: 'A', assertionClassification: 'structural_assertion', functionalRequired: true, pendingDiscovery: true, error: 'assertion_not_found' },
+    ] as DiscoveryStepResult[];
+
+    const finalPass = {
+      index: 5,
+      action: 'assert' as const,
+      status: 'found' as const,
+      assertionStatus: 'passed' as const,
+      targetText: 'A',
+    };
+
+    expect(steps[0].recoveryStatus).toBeUndefined();
+    expect(reconcileAssertionFailuresAfterPass(steps, finalPass)).toBe(1);
+    expect(steps[0]).toMatchObject({ recoveryStatus: 'recovered', pendingDiscovery: false, error: undefined });
+    expect(calculateUnresolvedBlockingFailures(steps)).toHaveLength(0);
+  });
+
+  test('final failure remains active after retry failures', () => {
+    const steps = [
+      { index: 5, action: 'assert', status: 'not_found', targetText: 'A', assertionClassification: 'structural_assertion', functionalRequired: true, pendingDiscovery: true, error: 'assertion_not_found' },
+    ] as DiscoveryStepResult[];
+
+    expect(calculateUnresolvedBlockingFailures(steps)).toHaveLength(1);
+  });
+
+  test('final pass reconciles only its step and preserves another assertion failure', () => {
+    const steps = [
+      { index: 5, action: 'assert', status: 'not_found', targetText: 'A', assertionClassification: 'structural_assertion', functionalRequired: true },
+      { index: 6, action: 'assert', status: 'not_found', targetText: 'A', assertionClassification: 'structural_assertion', functionalRequired: true },
+    ] as DiscoveryStepResult[];
+
+    reconcileAssertionFailuresAfterPass(steps, { index: 5, action: 'assert', status: 'found', assertionStatus: 'passed', targetText: 'A' });
+    expect(calculateUnresolvedBlockingFailures(steps).map((step) => step.index)).toEqual([6]);
   });
   test('getUnresolvedBlockingFailures ignores recovered steps', () => {
     // Simulate the helper function behavior
@@ -340,5 +439,32 @@ test.describe('Assertion Recovery Reconciliation', () => {
 
     expect(expectedLogs.length).toBe(4);
     expect(expectedLogs).toContain('[discovery:case] unresolvedBlockingFailures=0 after assertion recovery');
+  });
+
+  test('real assertion decision shape records a final pass for retry reconciliation', () => {
+    const steps = [
+      {
+        index: 5,
+        action: 'Validar que finalice el proceso de autenticación.',
+        status: 'not_found',
+        targetText: 'que finalice el proceso de autenticación',
+        assertionClassification: 'passive_visibility',
+        functionalRequired: true,
+        error: 'assertion_not_found',
+        pendingDiscovery: true,
+      },
+      {
+        index: 5,
+        action: 'Validar que finalice el proceso de autenticación.',
+        status: 'found',
+        targetText: 'que finalice el proceso de autenticación',
+        assertionStatus: 'passed',
+        matchedText: 'structural authentication evidence',
+        runtimeBacked: true,
+      },
+    ] as DiscoveryStepResult[];
+
+    expect(calculateUnresolvedBlockingFailures(steps, { detected: false })).toHaveLength(0);
+    expect(steps[0]).toMatchObject({ recoveryStatus: 'recovered', recoveredBy: 'assertion_pass' });
   });
 });

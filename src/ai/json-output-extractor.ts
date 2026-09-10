@@ -35,7 +35,7 @@ export async function extractJsonFromSources(
   try {
     const fileContent = await fs.readFile(source.outputFilePath, "utf-8");
     const parsed = JSON.parse(fileContent);
-    if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
+    if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed) && !isCodexProtocolEvent(parsed as Record<string, unknown>)) {
       if (purpose === "scenario_generation") {
         console.log(`[${logPrefix}] parseStrategy=output_file_json success=true`);
       }
@@ -49,6 +49,15 @@ export async function extractJsonFromSources(
   attempts.push("stdout_json");
   const stdoutTrimmed = source.stdout?.trim() ?? "";
   if (stdoutTrimmed) {
+    // Codex emits JSONL transport events; only parse JSON found in an explicitly
+    // identified assistant message, never the event envelope itself.
+    const assistantJson = extractAssistantJsonFromJsonl(stdoutTrimmed);
+    if (assistantJson) {
+      return { success: true, raw: assistantJson.raw, parsed: assistantJson.parsed, strategy: "assistant_event_json", attempts };
+    }
+    if (containsCodexProtocolEventLine(stdoutTrimmed)) {
+      return { success: false, raw: "", parsed: {}, strategy: "none", attempts };
+    }
     try {
       const parsed = JSON.parse(stdoutTrimmed);
       if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed) && !isCodexProtocolEvent(parsed as Record<string, unknown>)) {
@@ -196,7 +205,73 @@ function isCodexProtocolEvent(parsed: Record<string, unknown>): boolean {
     || type === "event"
     || type === "user_message"
     || type === "assistant_message"
+    || type.startsWith("item.")
+    || type.startsWith("thread.")
+    || type.startsWith("turn.")
+    || "item" in parsed
   );
+}
+
+function extractAssistantJsonFromJsonl(text: string): { raw: string; parsed: Record<string, unknown> } | null {
+  const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  if (lines.length < 2) return null;
+
+  for (const line of lines) {
+    let event: unknown;
+    try {
+      event = JSON.parse(line);
+    } catch {
+      continue;
+    }
+    if (!isRecord(event)) continue;
+    const candidates = [event, isRecord(event.item) ? event.item : undefined];
+    for (const candidate of candidates) {
+      if (!isRecord(candidate)) continue;
+      const type = typeof candidate.type === "string" ? candidate.type : "";
+      if (!(type === "assistant" || type === "assistant_message" || type === "agent_message")) continue;
+      for (const field of ["text", "content", "message"]) {
+        if (typeof candidate[field] !== "string") continue;
+        const parsed = parseJsonCandidate(candidate[field]);
+        if (parsed) return parsed;
+      }
+    }
+  }
+  return null;
+}
+
+function containsCodexProtocolEventLine(text: string): boolean {
+  return text.split(/\r?\n/).some((line) => {
+    try {
+      const parsed = JSON.parse(line);
+      return isRecord(parsed) && isCodexProtocolEvent(parsed);
+    } catch {
+      return false;
+    }
+  });
+}
+
+function parseJsonCandidate(text: string): { raw: string; parsed: Record<string, unknown> } | null {
+  const trimmed = text.trim();
+  try {
+    const parsed = JSON.parse(trimmed);
+    if (isRecord(parsed) && !isCodexProtocolEvent(parsed)) return { raw: trimmed, parsed };
+  } catch {
+    // Try fenced or embedded assistant content below.
+  }
+  const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+  if (fenced) {
+    try {
+      const parsed = JSON.parse(fenced[1]);
+      if (isRecord(parsed) && !isCodexProtocolEvent(parsed)) return { raw: fenced[1], parsed };
+    } catch {
+      // Continue with balanced extraction.
+    }
+  }
+  return extractBalancedJson(trimmed);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 /**

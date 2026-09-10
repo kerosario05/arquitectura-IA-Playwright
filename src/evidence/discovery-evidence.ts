@@ -127,7 +127,25 @@ export async function finalizeDiscoveryEvidence(
       }
     }
 
+    if (discoveryResult) {
+      const discoveryStatus = discoveryResult.status;
+      recorder.setExecutionStatuses({
+        discoveryStatus,
+        functionalStatus: discoveryStatus === "exploration_failed"
+          ? "not_run"
+          : discoveryStatus === "discovered_passed" || discoveryStatus === "repaired_passed"
+            ? "passed"
+            : "failed",
+      });
+    }
+
     const record = await recorder.finish(page);
+    console.log(
+      `[evidence-status] captureStatus=${record.captureStatus ?? "unknown"} ` +
+      `discoveryStatus=${record.discoveryStatus ?? "unknown"} ` +
+      `functionalStatus=${record.functionalStatus ?? "unknown"} ` +
+      `statusContradiction=${record.statusContradiction ?? false}`
+    );
     const stepCount = record.steps.length;
     const screenshotCount = record.steps.filter((s: any) => {
       if (!s.screenshotPath) return false;

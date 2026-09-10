@@ -39,6 +39,28 @@ function buildProvider(): CodexCliProvider {
   });
 }
 
+function buildJsonRequest(): AiCompletionRequest {
+  return {
+    purpose: "general",
+    requireJson: true,
+    messages: [
+      { role: "system", content: "Return JSON." },
+      { role: "user", content: "Return a JSON object." },
+    ],
+  };
+}
+
+function buildSemanticRequest(): AiCompletionRequest {
+  return {
+    purpose: "scenario_data_semantic_enrichment",
+    requireJson: true,
+    messages: [
+      { role: "system", content: "Return status and confidence." },
+      { role: "user", content: "Return the semantic JSON object." },
+    ],
+  };
+}
+
 async function writeScenarioFile(cwd: string): Promise<void> {
   const outputPath = path.join(cwd, "scenario-generation-result.json");
   await fs.writeFile(outputPath, JSON.stringify({ scenarios: [] }), "utf-8");
@@ -366,6 +388,106 @@ test("C12 stdout recovery is transport-level and does not consume the repair bud
     });
     assert.ok(logs.some((line) => line.includes("recovered=true extraAiInvocation=false")));
     assert.ok(!logs.some((line) => line.includes("repair")));
+  } finally {
+    __setRunCodexCliForTesting(runCodexCli);
+  }
+});
+
+test("Codex JSONL transport envelopes are never returned as assistant JSON", async () => {
+  const provider = buildProvider();
+  __setRunCodexCliForTesting(async () => ({
+    ...baseRunnerResult(),
+    exitCode: 1,
+    stdout: [
+      JSON.stringify({ type: "thread.started", thread_id: "safe" }),
+      JSON.stringify({ type: "item.completed", item: { type: "error", message: "provider failure" } }),
+      JSON.stringify({ type: "turn.failed", error: { message: "provider failure" } }),
+    ].join("\n"),
+  }));
+
+  try {
+    await assert.rejects(provider.completeJson(buildJsonRequest()), (err: any) => {
+      assert.strictEqual(err.code, "ai_provider_execution_failed");
+      return true;
+    });
+  } finally {
+    __setRunCodexCliForTesting(runCodexCli);
+  }
+});
+
+test("Codex JSONL extracts JSON only from an assistant event", async () => {
+  const provider = buildProvider();
+  __setRunCodexCliForTesting(async () => ({
+    ...baseRunnerResult(),
+    exitCode: 1,
+    stdout: [
+      JSON.stringify({ type: "thread.started", thread_id: "safe" }),
+      JSON.stringify({ type: "item.completed", item: { type: "agent_message", text: "{\"answer\":\"ok\"}" } }),
+      JSON.stringify({ type: "turn.failed", error: { message: "provider warning" } }),
+    ].join("\n"),
+  }));
+
+  try {
+    const response = await provider.completeJson(buildJsonRequest());
+    assert.deepStrictEqual(response.parsedJson, { answer: "ok" });
+    assert.strictEqual(response.diagnostics?.warning, "ai_provider_exited_non_zero_but_output_valid");
+  } finally {
+    __setRunCodexCliForTesting(runCodexCli);
+  }
+});
+
+test("Semantic Enrichment uses generic JSON output instead of the repair contract", async () => {
+  const provider = buildProvider();
+  let prompt = "";
+  let repairSchemaExists = true;
+  __setRunCodexCliForTesting(async (input) => {
+    prompt = await fs.readFile(path.join(input.cwd, "prompt.txt"), "utf-8");
+    repairSchemaExists = await fs.access(path.join(input.cwd, "repair-decision.schema.json")).then(() => true).catch(() => false);
+    return { ...baseRunnerResult(), stdout: JSON.stringify({ status: "unresolved", confidence: "low", semanticEvidence: [] }) };
+  });
+
+  try {
+    const response = await provider.completeJson(buildSemanticRequest());
+    assert.deepStrictEqual(response.parsedJson, { status: "unresolved", confidence: "low", semanticEvidence: [] });
+    assert.equal(repairSchemaExists, false);
+    assert.equal(prompt.includes("repair-decision.schema.json"), false);
+    assert.equal(prompt.includes("decision and reason"), false);
+    assert.equal(prompt.includes('"decision"'), false);
+    assert.equal(prompt.includes("Return status and confidence."), true);
+  } finally {
+    __setRunCodexCliForTesting(runCodexCli);
+  }
+});
+
+test("Unknown Codex purpose fails explicitly instead of silently using repair", async () => {
+  const provider = buildProvider();
+  __setRunCodexCliForTesting(async () => baseRunnerResult());
+  try {
+    await assert.rejects(provider.completeJson({ ...buildJsonRequest(), purpose: "future_task" }), (err: any) => {
+      assert.equal(err.code, "ai_provider_unsupported");
+      return true;
+    });
+  } finally {
+    __setRunCodexCliForTesting(runCodexCli);
+  }
+});
+
+test("Repair purpose retains the repair decision result contract", async () => {
+  const provider = buildProvider();
+  let schemaExists = false;
+  let prompt = "";
+  __setRunCodexCliForTesting(async (input) => {
+    schemaExists = await fs.access(path.join(input.cwd, "repair-decision.schema.json")).then(() => true).catch(() => false);
+    prompt = await fs.readFile(path.join(input.cwd, "prompt.txt"), "utf-8");
+    await fs.writeFile(path.join(input.cwd, "repair-decision.json"), JSON.stringify({ decision: "no_safe_action", reason: "fixture" }), "utf-8");
+    return baseRunnerResult();
+  });
+
+  try {
+    const response = await provider.completeJson({ ...buildJsonRequest(), purpose: "repair" });
+    assert.equal(schemaExists, true);
+    assert.equal(prompt.includes('"decision"'), true);
+    assert.deepStrictEqual(response.parsedJson, { decision: "no_safe_action", reason: "fixture" });
   } finally {
     __setRunCodexCliForTesting(runCodexCli);
   }

@@ -4,6 +4,7 @@ import { deriveSemanticMethodIntent } from "./pom-classification";
 import { findMethodBySemanticIntent } from "./page-object-registry";
 import { getPreferredOwnerForIntent, METHOD_INTENT_NAME_MAP } from "../types/pom-ownership";
 import { decodeJsStringLiteralBody, normalizeSemanticText, semanticallyEqualText } from "./semantic-text-normalization";
+import type { AssertionPolarity } from "../scenarios/canonical-scenario";
 
 // Local copies of the minimal source-scenario/oracle shapes to avoid a circular
 // dependency with the spec-generation-hybrid module that consumes this contract.
@@ -24,6 +25,8 @@ export type ContractObservableOracle = {
   backed: boolean;
   source?: "discovery" | "scenario" | "inferred";
   stepIndex?: number;
+  requirementRefs?: string[];
+  polarity?: AssertionPolarity;
   target?: string;
   evidence: string[];
   details?: Record<string, unknown>;
@@ -31,15 +34,17 @@ export type ContractObservableOracle = {
 
 export type ContractSourceScenario = {
   title?: string;
-  steps?: Array<{ index: number; action: string; description?: string; expected?: string; assertionImportance?: "blocking" | "contextual" | "optional" }>;
+  steps?: Array<{ index: number; action: string; description?: string; expected?: string; polarity?: AssertionPolarity; assertionImportance?: "blocking" | "contextual" | "optional"; canonicalAssertion?: import("../scenarios/canonical-scenario").CanonicalAssertion; conditionalAction?: import("../scenarios/canonical-scenario").CanonicalConditionalAction }>;
   expectedResult?: string;
   preconditions?: string[];
   observedAssertions?: string[];
   auth?: ContractSourceScenarioAuth;
   observableOracles?: ContractObservableOracle[];
+  expectedResultRequirementRefs?: string[];
   stepStatuses?: Array<{ index: number; status: string }>;
   stepRequirementRefs?: Array<{ stepIndex: number; requirementId: string; facet?: string }>;
   stepClaims?: Array<{ stepIndex: number; claimId: string; requirementId?: string; facet?: string; required?: boolean; coverable?: boolean }>;
+  requirements?: Array<{ requirementId: string; description: string; coverability?: string; polarity?: AssertionPolarity }>;
 };
 
 export type SpecStepOperation =
@@ -52,6 +57,7 @@ export type SpecStepOperation =
   | "assertVisible"
   | "assertText"
   | "assertUrl"
+  | "assertState"
   | "wait"
   | "noop";
 
@@ -95,9 +101,14 @@ export type SpecOracleMechanism = {
   expected: { oracleKind: string; stage?: string; target?: string; urlPattern?: string };
 };
 
+function oracleRequiresPolarity(type: string): boolean {
+  return type === "navigation_transition" || type === "url_state";
+}
+
 export type SpecStepOracle = {
   type: string;
   backed: boolean;
+  polarity?: AssertionPolarity;
   implementationKind?: string;
   mechanism?: SpecOracleMechanism;
   sourceActionStepIndex?: number;
@@ -109,6 +120,8 @@ export type SpecExecutionContractStep = {
   scenarioStepIndex: number;
   originalText: string;
   operation: SpecStepOperation;
+  conditional?: boolean;
+  conditionalAction?: import("../scenarios/canonical-scenario").CanonicalConditionalAction;
   target?: SpecStepTarget;
   value?: string;
   valueKey?: string;
@@ -116,6 +129,14 @@ export type SpecExecutionContractStep = {
   executionStatus: "executed" | "observed" | "skipped" | "unresolved" | "contextual_unresolved";
   implementation?: SpecStepImplementation;
   oracle?: SpecStepOracle;
+  assertionIntent?: import("../scenarios/canonical-scenario").CanonicalAssertionIntent;
+  polarity?: AssertionPolarity;
+  subject?: string;
+  trigger?: string;
+  condition?: string;
+  expectedState?: string;
+  childExpectations?: string[];
+  requirementRefs?: string[];
   sourceActionStepIndex?: number;
   resolvedExecutionTarget?: string;
   evidenceRefs: string[];
@@ -128,6 +149,12 @@ export type SpecExecutionContractAuth = {
   insertionAfterStepIndex?: number;
   flowAlias?: string;
   flowLanding?: string;
+  aggregate?: {
+    kind: "auth_flow";
+    helper: "ensureAuthenticated";
+    bindingId: string;
+    coveredScenarioStepIndices: number[];
+  };
 };
 
 export type SpecExecutionContract = {
@@ -307,6 +334,7 @@ function resolveStepOracle(
       oracle: {
         type: direct.type,
         backed: direct.backed,
+        polarity: direct.polarity,
         implementationKind: resolveOracleImplementationKind(direct),
         mechanism: buildOracleMechanism(direct),
         sourceActionStepIndex: findSourceActionStepIndex(direct, planSteps),
@@ -365,11 +393,19 @@ function resolveImplementationDescriptor(
     // Registry lookup has legacy name-based fallbacks. A contract binding must
     // be capability-based, never just a similar method name.
     if (resolved.method.intent !== semanticIntent) return undefined;
+    const stepTarget = getStepTargetValue(step);
+    const targetBinding = resolved.method.targetBinding?.trim();
+    // A POM descriptor is authoritative only when its structured target binding
+    // belongs to this exact business target. Otherwise leave implementation
+    // metadata unset so the runtime/scenario representation remains authoritative.
+    if (step.action === "click" && stepTarget && (!targetBinding || normalizeSemanticText(targetBinding) !== normalizeSemanticText(stepTarget))) {
+      return undefined;
+    }
     const expectedArgs = resolved.method.parameters?.length ?? 0;
     // The contract currently carries one optional argument. Do not emit a
     // partial call for methods requiring multiple parameters.
     if (expectedArgs > 1) return undefined;
-    const arg = getStepTargetValue(step);
+    const arg = stepTarget;
     return {
       kind: "page_object",
       owner: resolved.pageObject.className,
@@ -413,17 +449,54 @@ function resolveAuthContext(
   const authRequired = sourceScenario?.auth?.required === true || metadata.authFlowRequired === true;
   const gateDetected = sourceScenario?.auth?.gateDetected === true || metadata.authGateDetectedDuringDiscovery === true;
   if (!authRequired && !gateDetected) return undefined;
+  const scenarioSteps = sourceScenario?.steps ?? [];
+  const authValuePlanSteps = plan.steps.filter((step) =>
+    typeof step.valueKey === "string" && step.valueKey.startsWith("auth.")
+  );
+  const authValueScenarioIndexes = new Set<number>();
+  for (const planStep of authValuePlanSteps) {
+    const compatible = scenarioSteps.find((scenarioStep) =>
+      scenarioStep.index === planStep.index
+      || (scenarioStep.action && planStep.description && normalizeSemanticText(scenarioStep.action) === normalizeSemanticText(planStep.description))
+    );
+    if (compatible) authValueScenarioIndexes.add(compatible.index);
+  }
+  // The auth submit action is the first validated action immediately after the
+  // last auth data binding. This is data-derived and works across app profiles;
+  // it is not a text/position fallback for credentials.
+  const lastAuthPlanIndex = Math.max(...authValuePlanSteps.map((step) => step.index), -1);
+  const authSubmitPlanStep = lastAuthPlanIndex >= 0
+    ? plan.steps.find((step) => step.index > lastAuthPlanIndex && step.action === "click")
+    : undefined;
+  if (authSubmitPlanStep) {
+    const compatible = scenarioSteps.find((scenarioStep) =>
+      scenarioStep.index === authSubmitPlanStep.index
+      || (scenarioStep.action && authSubmitPlanStep.description && normalizeSemanticText(scenarioStep.action) === normalizeSemanticText(authSubmitPlanStep.description))
+    );
+    if (compatible) authValueScenarioIndexes.add(compatible.index);
+  }
+  const coveredScenarioStepIndices = [...authValueScenarioIndexes].sort((a, b) => a - b);
   return {
     gateDetected,
     required: authRequired,
     stage: sourceScenario?.auth?.detectedStage ?? metadata.authGateStage,
     insertionAfterStepIndex: sourceScenario?.auth?.insertionAfterStepIndex ?? metadata.authFlowInsertionAfterStepIndex,
     flowAlias: sourceScenario?.auth?.flowAlias ?? metadata.authFlowAlias,
-    flowLanding: sourceScenario?.auth?.flowLanding ?? metadata.authFlowLanding
+    flowLanding: sourceScenario?.auth?.flowLanding ?? metadata.authFlowLanding,
+    ...(coveredScenarioStepIndices.length > 0
+      ? {
+          aggregate: {
+            kind: "auth_flow" as const,
+            helper: "ensureAuthenticated" as const,
+            bindingId: "auth-flow-aggregate",
+            coveredScenarioStepIndices,
+          }
+        }
+      : {})
   };
 }
 
-type ScenarioStepLike = { index: number; action: string; description?: string; expected?: string; assertionImportance?: "blocking" | "contextual" | "optional" };
+type ScenarioStepLike = { index: number; action: string; description?: string; expected?: string; assertionImportance?: "blocking" | "contextual" | "optional"; canonicalAssertion?: import("../scenarios/canonical-scenario").CanonicalAssertion; conditionalAction?: import("../scenarios/canonical-scenario").CanonicalConditionalAction };
 
 function extractQuotedText(value: string | undefined): string | undefined {
   if (!value) return undefined;
@@ -433,7 +506,9 @@ function extractQuotedText(value: string | undefined): string | undefined {
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
-function classifyScenarioAction(action: string): SpecStepOperation {
+function classifyScenarioAction(action: string, canonicalAssertion?: ScenarioStepLike["canonicalAssertion"], conditionalAction?: ScenarioStepLike["conditionalAction"]): SpecStepOperation {
+  if (conditionalAction) return conditionalAction.operation;
+  if (canonicalAssertion) return "assertState";
   const lower = (action ?? "").trim().toLowerCase();
   if (!lower) return "noop";
   if (/^(noop|screenshot)$/.test(lower)) return "noop";
@@ -459,6 +534,12 @@ function extractSelectSemanticTarget(text: string): string {
 }
 
 function buildScenarioStepTarget(scenarioStep: ScenarioStepLike, operation: SpecStepOperation): SpecStepTarget | undefined {
+  if (scenarioStep.conditionalAction) {
+    return { strategy: "text", value: scenarioStep.conditionalAction.actionTarget };
+  }
+  if (scenarioStep.canonicalAssertion?.expectedState) {
+    return { strategy: "text", value: scenarioStep.canonicalAssertion.expectedState };
+  }
   const text = extractQuotedText(scenarioStep.expected) ?? extractQuotedText(scenarioStep.description);
   if (!text) return undefined;
   const value = operation === "select" ? extractSelectSemanticTarget(text) : text;
@@ -482,6 +563,7 @@ function oracleToStepOracle(
     oracle: {
       type: oracle.type,
       backed: oracle.backed,
+      polarity: oracle.polarity,
       implementationKind: resolveOracleImplementationKind(oracle),
       mechanism: buildOracleMechanism(oracle),
       sourceActionStepIndex: findSourceActionStepIndex(oracle, planSteps),
@@ -540,16 +622,22 @@ function findCompatiblePlanStep(
   const byIndex = planSteps.find(
     (step) => step.index === scenarioStep.index && mapPlanAction(step.action) === operation
   );
-  if (byIndex) return byIndex;
+  if (byIndex) {
+    const indexedTarget = getStepTargetValue(byIndex);
+    if (!normalizedScenarioTarget || normalizeOracleMatch(indexedTarget) === normalizedScenarioTarget) return byIndex;
+    // An explicit step identity with a different target is authoritative evidence
+    // that this plan metadata is foreign; do not fall back to an accidental match.
+    return undefined;
+  }
 
   // 2. Same operation + same normalized business target.
   if (normalizedScenarioTarget) {
-    const byTarget = planSteps.find((step) => {
+    const byTarget = planSteps.filter((step) => {
       if (mapPlanAction(step.action) !== operation) return false;
       const planTarget = getStepTargetValue(step);
       return planTarget.length > 0 && normalizeOracleMatch(planTarget) === normalizedScenarioTarget;
     });
-    if (byTarget) return byTarget;
+    if (byTarget.length === 1) return byTarget[0];
   }
 
   return undefined;
@@ -575,11 +663,26 @@ function resolveResolvedExecutionTarget(
   return undefined;
 }
 
-function hasCanonicalRequiredness(sourceScenario: ContractSourceScenario | undefined, scenarioStepIndex: number): boolean {
-  const refs = (sourceScenario?.stepRequirementRefs ?? []).filter((ref) =>
-    ref.stepIndex === scenarioStepIndex || ref.stepIndex === scenarioStepIndex - 1
+function hasCanonicalRequiredness(
+  sourceScenario: ContractSourceScenario | undefined,
+  scenarioStepIndex: number,
+  scenarioStep?: ScenarioStepLike
+): boolean {
+  const allRefs = sourceScenario?.stepRequirementRefs ?? [];
+  const exactRefs = allRefs.filter((ref) => ref.stepIndex === scenarioStepIndex);
+  const refs = exactRefs.length > 0
+    ? exactRefs
+    : allRefs.filter((ref) => ref.stepIndex === scenarioStepIndex - 1);
+  const canonicalRequirements = sourceScenario?.requirements ?? [];
+  const directText = normalizeSemanticText(
+    `${scenarioStep?.action ?? ""} ${scenarioStep?.description ?? ""} ${scenarioStep?.expected ?? ""}`
   );
-  if (refs.length === 0) return false;
+  const canonicalTextMatch = canonicalRequirements.some((requirement) => {
+    if (requirement.coverability === "nonAutomatable") return false;
+    const requirementText = normalizeSemanticText(requirement.description);
+    return requirementText.length > 0 && (directText.includes(requirementText) || requirementText.includes(directText));
+  });
+  if (refs.length === 0) return canonicalTextMatch;
   const claims = sourceScenario?.stepClaims ?? [];
   return refs.every((ref) => {
     const claim = claims.find((candidate) =>
@@ -592,8 +695,9 @@ function hasCanonicalRequiredness(sourceScenario: ContractSourceScenario | undef
 }
 
 function canonicalRequirementIds(sourceScenario: ContractSourceScenario | undefined, scenarioStepIndex: number): string[] {
-  return (sourceScenario?.stepRequirementRefs ?? [])
-    .filter((ref) => ref.stepIndex === scenarioStepIndex || ref.stepIndex === scenarioStepIndex - 1)
+  const allRefs = sourceScenario?.stepRequirementRefs ?? [];
+  const exactRefs = allRefs.filter((ref) => ref.stepIndex === scenarioStepIndex);
+  return (exactRefs.length > 0 ? exactRefs : allRefs.filter((ref) => ref.stepIndex === scenarioStepIndex - 1))
     .map((ref) => ref.requirementId);
 }
 
@@ -607,7 +711,7 @@ export function buildSpecExecutionContract(
   // Scenario steps are authoritative for WHICH steps exist. The validated plan only
   // enriches (target/implementation/evidence). Fall back to plan steps when the source
   // scenario carries no steps.
-  const scenarioSteps = sourceScenario?.steps && sourceScenario.steps.length > 0
+  const scenarioSteps: ScenarioStepLike[] = sourceScenario?.steps && sourceScenario.steps.length > 0
     ? sourceScenario.steps
     : plan.steps.map((step) => ({
         index: step.index,
@@ -623,7 +727,7 @@ export function buildSpecExecutionContract(
 
   const steps: SpecExecutionContractStep[] = requiredScenarioSteps.map((scenarioStep, index) => {
     // Operation always comes from the scenario step intent, never from the validated plan.
-    const operation = classifyScenarioAction(scenarioStep.action);
+    const operation = classifyScenarioAction(scenarioStep.action, scenarioStep.canonicalAssertion, scenarioStep.conditionalAction);
     const isAssertion = operation.startsWith("assert");
 
     // Assertions are never enriched from the validated plan (never substituted with
@@ -660,14 +764,32 @@ export function buildSpecExecutionContract(
     // 3. no backing AND not explicitly non-blocking -> required=true, unresolved.
     const assertionImportance = scenarioStep.assertionImportance ?? "blocking";
     const hasBackedOracle = Boolean(oracle && oracle.backed);
-    const canonicalRequired = isAssertion && hasCanonicalRequiredness(sourceScenario, scenarioStep.index);
+    const canonicalRequired = isAssertion && hasCanonicalRequiredness(sourceScenario, scenarioStep.index, scenarioStep);
+    // A bare contextual verb is not enough to make an assertion blocking.  A
+    // scenario assertion becomes required without a backed oracle only when
+    // the persisted source also carries assertion authority (expected result,
+    // observed assertion, canonical requirement/ref, or oracle metadata).
+    const sourceHasAssertionAuthority = Boolean(
+      sourceScenario
+      && (
+        Boolean(sourceScenario.expectedResult?.trim())
+        || (sourceScenario.observedAssertions?.length ?? 0) > 0
+        || (sourceScenario.requirements?.length ?? 0) > 0
+        || (sourceScenario.stepRequirementRefs?.length ?? 0) > 0
+        || (sourceScenario.stepClaims?.length ?? 0) > 0
+        || observableOracles.some((candidate) => candidate.stepIndex === scenarioStep.index)
+      )
+    );
+    const explicitScenarioAssertion = isAssertion && sourceHasAssertionAuthority;
 
-    let required = true;
+    let required = scenarioStep.conditionalAction ? false : true;
     let executionStatus: SpecExecutionContractStep["executionStatus"] = "executed";
-    if (planStep?.optional) {
+    if (scenarioStep.conditionalAction) {
+      executionStatus = "skipped";
+    } else if (planStep?.optional) {
       executionStatus = "skipped";
     } else if (isAssertion && !hasBackedOracle) {
-      if (!canonicalRequired && assertionImportance !== "blocking") {
+      if (!canonicalRequired && !explicitScenarioAssertion && assertionImportance !== "blocking") {
         required = false;
         executionStatus = "contextual_unresolved";
       } else {
@@ -697,6 +819,7 @@ export function buildSpecExecutionContract(
       scenarioStepIndex: scenarioStep.index,
       originalText: getScenarioStepOriginalText(scenarioStep),
       operation,
+      ...(scenarioStep.conditionalAction ? { conditional: true, conditionalAction: scenarioStep.conditionalAction } : {}),
       target,
       value: planStep?.value,
       valueKey: planStep?.valueKey,
@@ -704,6 +827,16 @@ export function buildSpecExecutionContract(
       executionStatus,
       implementation,
       oracle,
+      ...(scenarioStep.canonicalAssertion ? {
+        assertionIntent: scenarioStep.canonicalAssertion.intent,
+        ...(scenarioStep.canonicalAssertion.polarity ? { polarity: scenarioStep.canonicalAssertion.polarity } : {}),
+        subject: scenarioStep.canonicalAssertion.subject,
+        trigger: scenarioStep.canonicalAssertion.trigger,
+        condition: scenarioStep.canonicalAssertion.condition,
+        expectedState: scenarioStep.canonicalAssertion.expectedState,
+        childExpectations: scenarioStep.canonicalAssertion.childExpectations,
+        requirementRefs: canonicalIds,
+      } : canonicalIds.length > 0 ? { requirementRefs: canonicalIds } : {}),
       sourceActionStepIndex: oracle?.sourceActionStepIndex,
       resolvedExecutionTarget,
       evidenceRefs: oracleResult.evidenceRefs
@@ -776,6 +909,14 @@ export function validateSpecExecutionContract(
       errors.push(`required_oracle_mechanism_unresolved:scenarioStepIndex=${step.scenarioStepIndex}:oracleType=${step.oracle.type}`);
       console.log(`[execution-contract] valid=false reason=required_oracle_mechanism_unresolved scenarioStepIndex=${step.scenarioStepIndex} oracleType=${step.oracle.type}`);
     }
+    if (
+      step.required !== false
+      && step.oracle?.backed === true
+      && oracleRequiresPolarity(step.oracle.type)
+      && step.oracle.polarity === undefined
+    ) {
+      errors.push(`required_oracle_polarity_unresolved:scenarioStepIndex=${step.scenarioStepIndex}:oracleType=${step.oracle.type}`);
+    }
     if (step.implementation?.kind === "page_object") {
       const expectedArgs = step.implementation.expectedArgs;
       if (expectedArgs !== undefined) {
@@ -792,6 +933,19 @@ export function validateSpecExecutionContract(
 
   for (const unresolved of contract.unresolvedRequiredOracles) {
     errors.push(`execution_contract_unresolved:requirement=${unresolved.requirement}:reason=${unresolved.reason}`);
+  }
+
+  const aggregate = contract.auth?.aggregate;
+  if (aggregate) {
+    const unique = new Set(aggregate.coveredScenarioStepIndices);
+    if (unique.size !== aggregate.coveredScenarioStepIndices.length) {
+      errors.push("auth_aggregate_duplicate_coverage");
+    }
+    for (const scenarioStepIndex of aggregate.coveredScenarioStepIndices) {
+      const step = contract.steps.find((candidate) => candidate.scenarioStepIndex === scenarioStepIndex);
+      if (!step) errors.push(`auth_aggregate_unknown_step:${scenarioStepIndex}`);
+      else if (step.required === false) errors.push(`auth_aggregate_non_required_step:${scenarioStepIndex}`);
+    }
   }
 
   for (const missing of contract.diagnostics?.missingScenarioSteps ?? []) {
@@ -988,14 +1142,46 @@ function extractDirectNavigationCalls(specContent: string): Array<{ kind: string
   return calls;
 }
 
-function extractAuthFlowCompletionCalls(specContent: string): Array<{ kind: string; position: number }> {
-  const calls: Array<{ kind: string; position: number }> = [];
-  const regex = /authFlow\.ensureAuthenticated\s*\(/g;
+function isBootstrapNavigation(
+  navigation: { kind: string; position: number },
+  traceContext: { firstFunctionalStepPosition?: number; hasContractNavigateStep: boolean }
+): boolean {
+  if (traceContext.hasContractNavigateStep) return false;
+  if (traceContext.firstFunctionalStepPosition === undefined) return false;
+  return navigation.position < traceContext.firstFunctionalStepPosition;
+}
+
+type AuthFlowCompletionCall = {
+  kind: string;
+  position: number;
+  bindingId?: string;
+  coveredScenarioStepIndices: number[];
+};
+
+function extractAuthFlowCompletionCalls(specContent: string): AuthFlowCompletionCall[] {
+  const calls: AuthFlowCompletionCall[] = [];
+  const regex = /authFlow\.ensureAuthenticated\s*\(([^;]*?)\)\s*;?/g;
   let match: RegExpExecArray | null;
   while ((match = regex.exec(specContent)) !== null) {
-    calls.push({ kind: "authFlow.ensureAuthenticated", position: match.index });
+    const body = match[1] ?? "";
+    const bindingId = /["']?bindingId["']?\s*:\s*["']([^"']+)["']/.exec(body)?.[1];
+    const coverageBody = /["']?coveredScenarioStepIndices["']?\s*:\s*\[([^\]]*)\]/.exec(body)?.[1] ?? "";
+    const coveredScenarioStepIndices = [...coverageBody.matchAll(/\b\d+\b/g)].map((item) => Number(item[0]));
+    calls.push({ kind: "authFlow.ensureAuthenticated", position: match.index, bindingId, coveredScenarioStepIndices });
   }
   return calls;
+}
+
+export function extractAuthFlowAggregateBindings(specContent: string): Array<{
+  bindingId?: string;
+  coveredScenarioStepIndices: number[];
+  position: number;
+}> {
+  return extractAuthFlowCompletionCalls(specContent).map((call) => ({
+    bindingId: call.bindingId,
+    coveredScenarioStepIndices: call.coveredScenarioStepIndices,
+    position: call.position,
+  }));
 }
 
 function getContractTargetValue(step: SpecExecutionContractStep): string | undefined {
@@ -1026,16 +1212,51 @@ export function computeTraceFidelity(
   }
 
   const contractStepIndexes = new Set(contract.steps.map((s) => s.scenarioStepIndex));
+  const requiredSteps = contract.steps.filter((step) => step.required !== false);
+  const aggregate = contract.auth?.aggregate;
+  const declaredAggregateCoverage = new Set(aggregate?.coveredScenarioStepIndices ?? []);
+  const validAggregateCall = aggregate
+    ? authCompletions.filter((call) =>
+        call.bindingId === aggregate.bindingId
+        && call.coveredScenarioStepIndices.length === aggregate.coveredScenarioStepIndices.length
+        && call.coveredScenarioStepIndices.every((index) => declaredAggregateCoverage.has(index))
+      )
+    : [];
+  const aggregateCoverage = validAggregateCall.length === 1 ? declaredAggregateCoverage : new Set<number>();
   let implemented = 0;
   let lastPosition = -1;
 
+  if (aggregate) {
+    if (authCompletions.length === 0) {
+      errors.push(`missing_auth_flow_aggregate_binding:bindingId=${aggregate.bindingId}`);
+    } else if (authCompletions.length !== 1) {
+      errors.push(`auth_flow_aggregate_duplicate_execution:count=${authCompletions.length}`);
+    } else if (validAggregateCall.length !== 1) {
+      errors.push(`auth_flow_aggregate_partial_or_invalid_binding:bindingId=${aggregate.bindingId}`);
+    }
+    if (validAggregateCall.length === 1) implemented += aggregate.coveredScenarioStepIndices.length;
+  }
+
+  if (aggregateCoverage.size > 0) {
+    for (const call of runtimeCalls) {
+      if (aggregateCoverage.has(call.stepIndex)) {
+        errors.push(`auth_flow_aggregate_duplicate_manual_step:stepIndex=${call.stepIndex}`);
+      }
+    }
+  }
+
   for (const step of contract.steps) {
-    const calls = callsByStepIndex.get(step.scenarioStepIndex) ?? [];
-    if (calls.length === 0) {
-      errors.push(`missing_contract_step:stepIndex=${step.scenarioStepIndex}:contractStepIndex=${step.contractStepIndex}:operation=${step.operation}`);
+    if (aggregateCoverage.has(step.scenarioStepIndex)) {
       continue;
     }
-    implemented += 1;
+    const calls = callsByStepIndex.get(step.scenarioStepIndex) ?? [];
+    if (calls.length === 0) {
+      if (step.required !== false) {
+        errors.push(`missing_contract_step:stepIndex=${step.scenarioStepIndex}:contractStepIndex=${step.contractStepIndex}:operation=${step.operation}`);
+      }
+      continue;
+    }
+    if (step.required !== false) implemented += 1;
 
     const firstCall = calls.reduce(( earliest, current ) => (current.position < earliest.position ? current : earliest), calls[0]);
     if (firstCall.position < lastPosition) {
@@ -1048,7 +1269,7 @@ export function computeTraceFidelity(
       const targetPreserved = calls.some((call) =>
         call.target && normalizeOracleMatch(call.target) === normalizeOracleMatch(expectedTarget)
       );
-      if (!targetPreserved) {
+      if (!targetPreserved && step.required !== false) {
         errors.push(`contract_target_changed:stepIndex=${step.scenarioStepIndex}:contractStepIndex=${step.contractStepIndex}:expected="${expectedTarget}"`);
       }
       const candidateBusinessTarget = calls.map((call) => call.target ?? "").filter(Boolean).join("|");
@@ -1089,7 +1310,7 @@ export function computeTraceFidelity(
       const oraclePreserved = calls.some((call) =>
         call.method === "expectPromotedVisible" || call.method === "expectPromotedState"
       );
-      if (!oraclePreserved) {
+      if (!oraclePreserved && step.required !== false) {
         errors.push(`contract_oracle_changed:stepIndex=${step.scenarioStepIndex}:contractStepIndex=${step.contractStepIndex}:expectedType=${step.oracle.type}`);
       }
     }
@@ -1137,14 +1358,22 @@ export function computeTraceFidelity(
   }
 
   const hasContractNavigateStep = contract.steps.some((s) => s.operation === "navigate");
-  if (!hasContractNavigateStep && directNavigations.length > 0) {
-    errors.push(`extraneous_business_step:kind=page.goto:count=${directNavigations.length}`);
+  const firstFunctionalStepPosition = runtimeCalls.length > 0
+    ? Math.min(...runtimeCalls.map((call) => call.position))
+    : undefined;
+  const bootstrapNavigations = directNavigations.filter((navigation) => isBootstrapNavigation(
+    navigation,
+    { firstFunctionalStepPosition, hasContractNavigateStep }
+  ));
+  const functionalNavigations = directNavigations.length - bootstrapNavigations.length;
+  if (!hasContractNavigateStep && functionalNavigations > 0) {
+    errors.push(`extraneous_business_step:kind=page.goto:count=${functionalNavigations}`);
   }
 
   return {
     status: errors.length === 0 ? "passed" : "failed",
     errors,
-    expected: contract.steps.length,
+    expected: requiredSteps.length,
     implemented
   };
 }

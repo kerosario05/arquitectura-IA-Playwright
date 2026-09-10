@@ -63,6 +63,7 @@ export type AppConfig = {
   rawTestData?: Record<string, unknown>;
   testDataAliases: TestDataAliasesMap;
   missingInputBehavior: MissingInputBehavior;
+  ignoreHTTPSErrors?: boolean;
   appProfile?: string;
   autoGenerateTestData?: boolean;
   autoGenerateSensitiveData?: boolean;
@@ -77,6 +78,10 @@ export type BrowserExecutionConfig = {
   headless: boolean;
   evidenceDir: string;
   defaultTimeoutMs: number;
+  /** Dedicated persistent browser profile used by runtime sessions. */
+  qaBrowserProfilePath?: string;
+  /** Optional Playwright browser channel, for example the installed Edge channel. */
+  qaBrowserChannel?: string;
   promotedSpecTimeoutMs?: number;
   // Stale loading overlay handling
   staleLoadingMs?: number;

@@ -9,6 +9,7 @@ interface CliArgs {
   from?: string;
   result?: string;
   source?: "agent_handoff" | "manual" | "rule_based" | "discovery";
+  sectionSlug?: string;
   overwrite: boolean;
   allowDraft: boolean;
   requirePomRuntime: boolean;
@@ -19,6 +20,7 @@ function parseArgs(argv: string[]): CliArgs {
   let from: string | undefined;
   let result: string | undefined;
   let source: CliArgs["source"];
+  let sectionSlug: string | undefined;
   let overwrite = false;
   let allowDraft = false;
   let requirePomRuntime = false;
@@ -70,6 +72,11 @@ function parseArgs(argv: string[]): CliArgs {
       i += 1;
       continue;
     }
+    if (token === "--section") {
+      sectionSlug = next;
+      i += 1;
+      continue;
+    }
 
     throw new Error(`Unknown argument: ${token}`);
   }
@@ -78,7 +85,14 @@ function parseArgs(argv: string[]): CliArgs {
     throw new Error("--plan or --from is required. Usage: npm run plans:promote -- --plan <path> OR --from <discovery-output-dir>");
   }
 
-  return { plan, from, result, source, overwrite, allowDraft, requirePomRuntime };
+  return { plan, from, result, source, sectionSlug, overwrite, allowDraft, requirePomRuntime };
+}
+
+function inferSectionSlug(sourcePlanPath: string): string | undefined {
+  const normalized = path.resolve(sourcePlanPath).split(path.sep);
+  const sectionIndex = normalized.findIndex((segment) => segment.toLowerCase() === "sections");
+  const sectionSlug = sectionIndex >= 0 ? normalized[sectionIndex + 1] : undefined;
+  return sectionSlug && sectionSlug.toLowerCase() !== "cases" ? sectionSlug : undefined;
 }
 
 interface ParsedPlanInput {
@@ -120,9 +134,10 @@ async function promoteAll(
   resultPath: string | undefined,
   source: CliArgs["source"],
   overwrite: boolean,
-  allowDraft: boolean
-  ,requirePomRuntime: boolean
-): Promise<void> {
+  allowDraft: boolean,
+  requirePomRuntime: boolean,
+  sectionSlug?: string
+): Promise<boolean> {
   const promoted: string[] = [];
   const skipped: string[] = [];
   const errors: string[] = [];
@@ -142,13 +157,21 @@ async function promoteAll(
           lastExecutionResultPath: resultPath ?? undefined,
           source,
           overwrite,
-          fullConfig: config
-          ,requirePomRuntime
+          fullConfig: config,
+          requirePomRuntime,
+          sectionSlug
         },
         allowDraft
       );
-      promoted.push(`${label} -> ${entry.id}`);
-      console.log(`  [OK] ${label}`);
+      const promotionSucceeded = entry.status === "active";
+      if (promotionSucceeded) {
+        promoted.push(`${label} -> ${entry.id}`);
+        console.log(`  [OK] ${label}`);
+      } else {
+        errors.push(`${label}: promotion_not_allowed:${entry.status}`);
+        console.log(`  [BLOCKED] ${label}`);
+        console.log(`           promotion_not_allowed:${entry.status}`);
+      }
       if (entry.appSlug) {
         console.log(`       app:     ${entry.appSlug}`);
       }
@@ -183,9 +206,10 @@ async function promoteAll(
       console.log(`  - ${e}`);
     }
   }
+  return errors.length === 0;
 }
 
-async function main(): Promise<void> {
+async function main(): Promise<boolean> {
   const args = parseArgs(process.argv.slice(2));
 
   const sourceRef = args.plan ? path.resolve(args.plan) : path.resolve(args.from ?? ".");
@@ -197,22 +221,24 @@ async function main(): Promise<void> {
 
   console.log(`Found ${plans.length} plan(s)\n`);
 
-  await promoteAll(
+  const allPromoted = await promoteAll(
     plans,
     sourcePlanPath,
     args.result,
     args.source,
     args.overwrite,
-    args.allowDraft
-    ,args.requirePomRuntime
+    args.allowDraft,
+    args.requirePomRuntime,
+    args.sectionSlug ?? inferSectionSlug(sourcePlanPath)
   );
 
   console.log("\nAutomation index: automations/index.json");
+  return allPromoted;
 }
 
 main()
-  .then(() => {
-    process.exitCode = 0;
+  .then((success) => {
+    process.exitCode = success ? 0 : 1;
   })
   .catch((error) => {
     const message = error instanceof Error ? error.message : String(error);

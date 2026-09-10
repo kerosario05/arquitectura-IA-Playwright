@@ -84,7 +84,12 @@ function isVisibleAssertion(text: string): boolean {
     "botón visible", "se presenta", "está visible", "visible",
     "disponible", "muestra", "visualiza", "presente"
   ];
-  const combined = visibilityKeywords.map(k => k.replace(/\./g, "\\s+")).join("|");
+  // Preserve wildcard phrases such as `validar.*visible` while converting
+  // literal dots to whitespace. Replacing the dot first produced `\\s+*`,
+  // which is an invalid regular expression and could abort promotion.
+  const combined = visibilityKeywords
+    .map(k => k.replace(/\.\*|\./g, token => token === ".*" ? "\\s+.*" : "\\s+"))
+    .join("|");
   return new RegExp(combined, "i").test(text);
 }
 

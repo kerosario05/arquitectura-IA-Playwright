@@ -1,6 +1,8 @@
 import { test, expect } from "@playwright/test";
 import { jobStore } from "../src/server/jobs/job-store";
-import { buildDiscoveryPreviewArgs, startDiscoveryBatchRun } from "../src/server/jobs/discovery-batch-runner";
+import { buildRediscoveryCreateHandoffLine } from "../src/server/jobs/launch-orchestrator";
+import { resolveJobStoreSourceJobId } from "../src/server/routes/runs";
+import { buildDiscoveryPreviewArgs, buildRediscoveryProvenanceLine, resolveRediscoveryIntent, startDiscoveryBatchRun } from "../src/server/jobs/discovery-batch-runner";
 
 // Helper to simulate the route handler validation logic
 function validateDiscoveryBatchRequest(body: Record<string, unknown>): { ok: true } | { ok: false; status: number; error: string; invalidIds?: unknown[] } {
@@ -83,6 +85,68 @@ test("discovery-batch route: accepts valid numeric caseIds", () => {
 test("discovery-batch route: accepts single caseId", () => {
   const result = validateDiscoveryBatchRequest({ caseIds: [100] });
   expect(result.ok).toBe(true);
+});
+
+test("rediscovery provenance: preserves false, true, and undefined without coercion", () => {
+  const cases = [
+    { value: false, expected: { explicit: false, source: "none" } },
+    { value: true, expected: { explicit: true, source: "user_request" } },
+    { value: undefined, expected: { explicit: false, source: "none" } },
+  ] as const;
+
+  for (const entry of cases) {
+    const intent = resolveRediscoveryIntent({ forceRediscovery: entry.value, rerunActive: false });
+    const line = buildRediscoveryProvenanceLine({ boundary: "intent_input", value: entry.value });
+    expect(line).toContain(`value=${entry.value === undefined ? "undefined" : entry.value}`);
+    expect(line).toContain(`type=${entry.value === undefined ? "undefined" : "boolean"}`);
+    expect(intent.explicit).toBe(entry.expected.explicit);
+    expect(intent.source).toBe(entry.expected.source);
+  }
+});
+
+test("rediscovery provenance: marks an absent producer property without inventing a value", () => {
+  const line = buildRediscoveryProvenanceLine({
+    boundary: "pre_job_store",
+    sourceEndpoint: "/api/runs/launch-execution",
+    jobType: "discovery-batch",
+    correlationField: "launchId",
+    correlationValue: "launch-test",
+    valueSource: "absent",
+  });
+
+  expect(line).toContain("propertyPresent=false");
+  expect(line).toContain("value=undefined");
+  expect(line).toContain("type=undefined");
+  expect(line).toContain("valueSource=absent");
+  expect(line).toContain("launchId=launch-test");
+});
+
+test("rediscovery create handoff: correlates pre-create and stored snapshots", () => {
+  const cases = [
+    { value: undefined, present: false },
+    { value: false, present: true },
+    { value: true, present: true },
+  ];
+
+  for (const entry of cases) {
+    const line = buildRediscoveryCreateHandoffLine({
+      launchId: "launch-test",
+      jobId: "job-test",
+      prePresent: entry.present,
+      preValue: entry.value,
+      storedPresent: entry.present,
+      storedValue: entry.value,
+    });
+    expect(line).toContain("boundary=create_handoff producer=launch_execution");
+    expect(line).toContain("launchId=launch-test jobId=job-test");
+    expect(line).toContain(`prePresent=${entry.present} preValue=${entry.value === undefined ? "undefined" : entry.value} preType=${entry.value === undefined ? "undefined" : "boolean"}`);
+    expect(line).toContain(`storedPresent=${entry.present} storedValue=${entry.value === undefined ? "undefined" : entry.value} storedType=${entry.value === undefined ? "undefined" : "boolean"}`);
+  }
+});
+
+test("job_store provenance: distinguishes direct and rerun sourceJobId", () => {
+  expect(resolveJobStoreSourceJobId({ forceRediscovery: true })).toBe("none");
+  expect(resolveJobStoreSourceJobId({ forceRediscovery: true, sourceJobId: "previous-job" })).toBe("previous-job");
 });
 
 // ── Job store tests ──

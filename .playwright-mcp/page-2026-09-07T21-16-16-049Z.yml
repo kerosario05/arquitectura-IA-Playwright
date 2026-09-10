@@ -1,0 +1,77 @@
+- generic [active] [ref=f4e1]:
+  - generic [ref=f4e3]:
+    - complementary [ref=f4e4]:
+      - generic [ref=f4e5]:
+        - generic [ref=f4e6]: Q
+        - generic [ref=f4e9]:
+          - generic [ref=f4e10]: QA Lab
+          - generic [ref=f4e11]: Santa Cruz
+      - navigation [ref=f4e12]:
+        - button "Panorama" [ref=f4e13] [cursor=pointer]
+        - button "Lanzar pruebas" [ref=f4e20] [cursor=pointer]
+        - button "Ejecuciones" [ref=f4e26] [cursor=pointer]
+        - button "Configuración" [ref=f4e31] [cursor=pointer]
+      - generic [ref=f4e37]:
+        - generic [ref=f4e41]: Pro tip
+        - generic [ref=f4e42]: Programa ejecuciones nocturnas para optimizar recursos.
+      - generic [ref=f4e43]:
+        - generic [ref=f4e44]: CM
+        - generic [ref=f4e45]:
+          - generic [ref=f4e46]: Carlos Martínez
+          - generic [ref=f4e47]: QA Lead
+    - main [ref=f4e48]:
+      - generic [ref=f4e49]:
+        - generic [ref=f4e50]:
+          - generic [ref=f4e51]:
+            - generic [ref=f4e53]: En vivo · 17:15
+            - generic [ref=f4e54]: ·
+            - generic [ref=f4e55]: Configura una nueva ejecución en 4 pasos
+          - heading "Lanzar pruebas" [level=1] [ref=f4e655]
+        - generic [ref=f4e57]:
+          - generic [ref=f4e58]:
+            - textbox "Buscar..." [ref=f4e62]
+            - generic [ref=f4e63]: ⌘K
+          - button [ref=f4e64] [cursor=pointer]
+      - generic [ref=f4e656]:
+        - generic [ref=f4e658]:
+          - button "Proyecto" [ref=f4e659] [cursor=pointer]
+          - button "Fuentes" [ref=f4e664] [cursor=pointer]
+          - button "Casos" [ref=f4e669] [cursor=pointer]
+          - button "Lanzar" [ref=f4e677] [cursor=pointer]
+        - generic [ref=f4e684]:
+          - generic [ref=f4e983]:
+            - generic [ref=f4e988]:
+              - generic [ref=f4e989]: Listo para despegar
+              - heading "PortalEmpresarial" [level=2] [ref=f4e990]
+              - generic [ref=f4e991]: Web · Playwright
+              - generic [ref=f4e992]:
+                - generic [ref=f4e993]:
+                  - generic [ref=f4e994]: Casos
+                  - generic [ref=f4e995]: "1"
+                - generic [ref=f4e996]:
+                  - generic [ref=f4e997]: Tiempo estimado
+                  - generic [ref=f4e998]: ~2min
+                - generic [ref=f4e999]:
+                  - generic [ref=f4e1000]: Fuente
+                  - generic [ref=f4e1001]: TestRail
+            - generic [ref=f4e1002]:
+              - generic [ref=f4e1003]:
+                - generic [ref=f4e1004]: Suite TestRail
+                - generic [ref=f4e1005]: Portal Empresarial
+              - generic [ref=f4e1006]:
+                - generic [ref=f4e1007]: Sección TestRail
+                - generic [ref=f4e1008]: Automatizacion 1
+              - generic [ref=f4e1010]:
+                - text: Los resultados se reportarán automáticamente a
+                - strong [ref=f4e1011]: Jira
+                - text: "y"
+                - strong [ref=f4e1012]: TestRail
+                - text: .
+          - generic [ref=f4e805]:
+            - button "Atrás" [ref=f4e806] [cursor=pointer]
+            - generic [ref=f4e1013]:
+              - generic [ref=f4e1014]:
+                - checkbox "Solo materializar contexto" [ref=f4e1015]
+                - text: Solo materializar contexto
+              - button "Lanzar ejecución" [ref=f4e1016] [cursor=pointer]
+  - generic [ref=f4e653]: "30"

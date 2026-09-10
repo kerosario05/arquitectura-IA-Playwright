@@ -4,6 +4,7 @@ import { spawn } from "node:child_process";
 import { RunEvidenceRecorder } from "../../evidence/run-evidence-recorder";
 import { buildEvidenceRunPaths } from "../../evidence/evidence-paths";
 import { loadAutomationIndex } from "../../automations/automation-index";
+import { validatePromotedArtifactForReuse } from "../../automations/automation-reuse";
 import {
   buildMcpScenarioContractFromTestRailCase,
   buildVirtualCaseFromContract,
@@ -14,6 +15,8 @@ import {
 import { loadAppConfig } from "../../automations/scenario-normalizer";
 import { config, requireTestRailConfig } from "../../config/env";
 import { TestRailClient } from "../../clients/testrail.client";
+import type { DataContextEntry } from "../../data/data-context";
+import { persistConfirmedRuntimeValues } from "../../db/project-case-runtime-value-service";
 import { normalizeTestRailCase } from "../../testrail/testrail-normalizer";
 import type { PromotedAutomationIndexEntry, PromotedAutomationStatus } from "../../types/automation-promotion.types";
 import type { RawTestRailCase } from "../../types/testrail.types";
@@ -36,6 +39,7 @@ import {
 
 const ROOT = path.resolve(__dirname, "..", "..", "..");
 const APPS_ROOT = path.join(ROOT, "automations", "apps");
+const DISCOVERY_RUNTIME_TMP_DIR = path.join(ROOT, ".artifacts", "tmp", "discovery-runtime");
 const DISCOVERY_CASE_FINISHED_RE = /\[discovery:batch\] Case C(\d+)\s+finished:\s+([a-z_]+)(?:\s+\((\d+)ms\))?/i;
 const RUNTIME_MODULE_MODE = (() => {
   try {
@@ -48,6 +52,9 @@ const RUNTIME_MODULE_MODE = (() => {
 type DiscoveryBatchParams = {
   caseIds: number[];
   appSlug?: string;
+  testRailProjectId?: number;
+  testRailSuiteId?: number;
+  testRailSectionId?: number;
   sectionName?: string;
   sectionSlug?: string;
   overwrite?: boolean;
@@ -60,18 +67,54 @@ type DiscoveryBatchParams = {
   launchId?: string;
   testRunId?: number;
   jiraKey?: string;
+  contextOnly?: boolean;
+  contextMaterialized?: boolean;
   publishedCases?: PublishedCaseEntry[];
   routeProfile?: McpRouteProfile;
+  runtimeEntriesByCase?: Record<string, DataContextEntry[]>;
 };
 
 export type RediscoveryIntentSource = "user_request" | "job_default" | "legacy_default" | "none";
 
 export type RediscoveryIntent = {
   explicit: boolean;
+  rerunIntent: boolean;
+  rediscoveryIntent: boolean;
   source: RediscoveryIntentSource;
   overwrite: boolean;
   rerunActive: boolean;
 };
+
+type RediscoveryProvenanceBoundary = "request" | "job_store" | "runner_input" | "intent_input" | "intent_output";
+
+export function buildRediscoveryProvenanceLine(input: {
+  boundary: RediscoveryProvenanceBoundary;
+  value?: unknown;
+  jobId?: string;
+  caseId?: number;
+  explicit?: boolean;
+  source?: RediscoveryIntentSource;
+  valueSource?: string;
+  sourceEndpoint?: string;
+  jobType?: string;
+  correlationField?: string;
+  correlationValue?: string;
+}): string {
+  const parts = ["[rediscovery-provenance]", `boundary=${input.boundary}`];
+  if (input.sourceEndpoint) parts.push(`sourceEndpoint=${input.sourceEndpoint}`);
+  if (input.jobType) parts.push(`jobType=${input.jobType}`);
+  if (input.correlationField && input.correlationValue) parts.push(`${input.correlationField}=${input.correlationValue}`);
+  if (input.jobId) parts.push(`jobId=${input.jobId}`);
+  if (input.caseId !== undefined) parts.push(`caseId=${input.caseId}`);
+  if (input.boundary === "intent_output") {
+    parts.push(`explicit=${input.explicit === true}`, `source=${input.source ?? "none"}`);
+  } else {
+    const present = input.value !== undefined;
+    parts.push(`propertyPresent=${present}`, `value=${present ? input.value : "undefined"}`, `type=${present ? typeof input.value : "undefined"}`);
+    if (input.valueSource) parts.push(`valueSource=${input.valueSource}`);
+  }
+  return parts.join(" ");
+}
 
 type ExecutionRoute =
   | "promoted_reuse"
@@ -454,21 +497,51 @@ export function resolvePromotedSpecTargetFromEntries(input: {
   fileExists?: (filePath: string) => boolean;
 }): ReturnType<typeof validatePromotedEntryForExecution> {
   const entry = selectCandidateEntryForCase(input.caseId, input.entries, input.appSlug);
-  const validation = validatePromotedEntryForExecution({ ...input, entry });
-  if (validation.reusable && (
-    entry?.status !== "active" ||
-    entry.pomStatus !== "promoted" ||
-    entry.specVerificationStatus !== "passed"
-  )) {
-    validation.reusable = false;
-    validation.specPath = undefined;
-    validation.reason = entry?.status !== "active"
-      ? `status_${entry?.status}`
-      : entry.pomStatus !== "promoted"
-        ? "pom_not_promoted"
-        : "spec_not_verified";
+  const structuralValidation = validatePromotedEntryForExecution({ ...input, entry });
+  if (!structuralValidation.reusable || !entry || !structuralValidation.specPath) {
+    return structuralValidation;
   }
-  return validation;
+
+  let specText: string;
+  try {
+    specText = fs.readFileSync(structuralValidation.specPath, "utf8");
+  } catch {
+    return { reusable: false, blocked: false, reason: "missing_spec_file" };
+  }
+
+  const sectionSlug = nonEmptyString(input.sectionSlug)
+    ?? extractSectionSlugFromSpecPath(structuralValidation.specPath)
+    ?? "";
+  const integrity = validatePromotedArtifactForReuse(entry, {
+    specPath: structuralValidation.specPath,
+    specExists: true,
+    specText,
+    appSlug: input.appSlug ?? entry.appSlug ?? entry.appProfile ?? "",
+    sectionSlug,
+    caseId: input.caseId,
+  });
+  if (!integrity.valid) {
+    return {
+      reusable: false,
+      blocked: false,
+      reason: integrity.reason ?? "promoted_artifact_invalid",
+    };
+  }
+
+  if (specUsesPromotedPom(specText) && entry.pomStatus !== "promoted") {
+    return { reusable: false, blocked: false, reason: "pom_not_promoted" };
+  }
+
+  return { reusable: true, blocked: false, reason: "promoted_spec_valid", specPath: structuralValidation.specPath };
+}
+
+export function specUsesPromotedPom(specText: string): boolean {
+  const imports = specText.match(/(?:from\s*["']|import\s*["']|require\(\s*["'])([^"']+)["']/g) ?? [];
+  return imports.some((statement) => {
+    const modulePath = statement.replace(/^.*?["']|["'].*$/g, "").replace(/\\/g, "/").toLowerCase();
+    return /(?:^|\/)(?:pages|components)\//.test(modulePath)
+      || /(?:^|\/)[^/]+\.(?:page|component)(?:\.[cm]?[jt]s)?$/.test(modulePath);
+  });
 }
 
 export async function resolvePromotedSpecForExecution(input: {
@@ -498,10 +571,24 @@ export function resolvePostDiscoveryExecutionAdmission(input: {
   appSlug: string;
   sectionSlug?: string;
   childStatus?: string;
+  contextOnly?: boolean;
+  contextMaterialized?: boolean;
   promotionPersisted: boolean;
   entries: PromotedAutomationIndexEntry[];
   fileExists?: (filePath: string) => boolean;
 }): { admitted: boolean; reason: string; specPath?: string } {
+  if (input.contextOnly === true) {
+    const admitted = input.childStatus === "discovered_passed" && input.contextMaterialized === true;
+    return {
+      admitted,
+      reason: admitted
+        ? "context_materialized"
+        : input.childStatus !== "discovered_passed"
+          ? `child_status_${input.childStatus ?? "unknown"}`
+          : "context_materialization_missing",
+    };
+  }
+
   const validation = resolvePromotedSpecTargetFromEntries(input);
   const admitted = input.childStatus === "promoted"
     && input.promotionPersisted
@@ -521,6 +608,7 @@ export function resolveRouteFromValidation(input: {
   caseId: number;
   appSlug: string;
   forceRediscovery: boolean;
+  rediscoveryIntent?: boolean;
   targetedDiscoverySupported?: boolean;
   contractEvaluation?: CaseContractSufficiencyResult;
   validation: {
@@ -530,7 +618,8 @@ export function resolveRouteFromValidation(input: {
     specPath?: string;
   };
 }): RouteDecision {
-  if (input.forceRediscovery) {
+  const rediscoveryIntent = input.rediscoveryIntent ?? input.forceRediscovery;
+  if (rediscoveryIntent) {
     return {
       caseId: input.caseId,
       appSlug: input.appSlug,
@@ -614,18 +703,20 @@ export function resolveRediscoveryIntent(input: {
   executePromotedSpecs?: boolean;
 }): RediscoveryIntent {
   const overwrite = input.overwrite === true;
-  const rerunActive = input.rerunActive === true;
-  const explicit = input.forceRediscovery === true;
-  const source: RediscoveryIntentSource = explicit
+  const rerunIntent = input.rerunActive === true;
+  const rediscoveryIntent = input.forceRediscovery === true;
+  const source: RediscoveryIntentSource = rediscoveryIntent
     ? "user_request"
-    : (overwrite || rerunActive)
+    : (overwrite || rerunIntent)
       ? (input.executePromotedSpecs === true ? "legacy_default" : "job_default")
       : "none";
   return {
-    explicit,
+    explicit: rediscoveryIntent,
+    rerunIntent,
+    rediscoveryIntent,
     source,
     overwrite,
-    rerunActive,
+    rerunActive: rerunIntent,
   };
 }
 
@@ -785,6 +876,8 @@ export function buildCaseSchedule(plan: MixedExecutionPlan): ScheduledCase[] {
 }
 
 export function buildDiscoveryBatchArgs(params: DiscoveryBatchParams, caseIds: number[]): string[] {
+  const runnerInputContextOnly = (params as Record<string, unknown>).contextOnly;
+  console.log(`[context-only-trace] boundary=runner inputValue=${runnerInputContextOnly === undefined ? "undefined" : runnerInputContextOnly}`);
   const caseIdsStr = caseIds.join(",");
   const args: string[] = [
     "run",
@@ -795,13 +888,40 @@ export function buildDiscoveryBatchArgs(params: DiscoveryBatchParams, caseIds: n
   ];
 
   if (params.appSlug) args.push("--app", params.appSlug);
+  if ((params as Record<string, unknown>).contextOnly === true) args.push("--context-only");
   if (params.overwrite === true) args.push("--overwrite");
   if (params.autoPromote !== false) args.push("--auto-promote");
   if (params.autoPom !== false) args.push("--auto-pom");
   if (params.rerunActive === true) args.push("--rerun-active");
+  console.log(`[context-only-trace] boundary=runner argsContainContextOnly=${args.includes("--context-only")}`);
   if (params.headed) args.push("--headed");
+  if (params.testRailProjectId !== undefined) args.push("--testrail-project-id", String(params.testRailProjectId));
+  if (params.testRailSuiteId !== undefined) args.push("--testrail-suite-id", String(params.testRailSuiteId));
+  if (params.testRailSectionId !== undefined) args.push("--testrail-section-id", String(params.testRailSectionId));
 
   return args;
+}
+
+function positiveManifestId(value: unknown): number | undefined {
+  const id = Number(value);
+  return Number.isInteger(id) && id > 0 ? id : undefined;
+}
+
+function loadLaunchTestRailIdentity(params: DiscoveryBatchParams): DiscoveryBatchParams {
+  if (!params.launchId) return params;
+  try {
+    const manifestPath = path.join(ROOT, ".artifacts", "scenario-launch-runs", params.launchId, "launch-manifest.json");
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8")) as { testRail?: Record<string, unknown> };
+    const testRail = manifest.testRail ?? {};
+    return {
+      ...params,
+      testRailProjectId: params.testRailProjectId ?? positiveManifestId(testRail.projectId),
+      testRailSuiteId: params.testRailSuiteId ?? positiveManifestId(testRail.suiteId),
+      testRailSectionId: params.testRailSectionId ?? positiveManifestId(testRail.sectionId),
+    };
+  } catch {
+    return params;
+  }
 }
 
 function buildContractPreviewArtifactPath(jobId: string, caseId: number): string {
@@ -843,6 +963,7 @@ export function buildPromotedExecutionEnv(
   params: DiscoveryBatchParams,
   jobId: string,
   baseEnv: NodeJS.ProcessEnv = process.env as NodeJS.ProcessEnv,
+  runtimeContextPath?: string,
 ): NodeJS.ProcessEnv {
   const resolvedAppSlug = nonEmptyString(params.appSlug);
   const resolvedSectionSlug = nonEmptyString(params.sectionSlug);
@@ -856,6 +977,7 @@ export function buildPromotedExecutionEnv(
     ...(resolvedSectionName ? { SECTION_NAME: resolvedSectionName } : {}),
     ...(resolvedAppSlug ? { EVIDENCE_APP_SLUG: resolvedAppSlug } : {}),
     ...(resolvedSectionSlug ? { EVIDENCE_SECTION_SLUG: resolvedSectionSlug } : {}),
+    ...(runtimeContextPath ? { DISCOVERY_RUNTIME_CONTEXT: runtimeContextPath } : {}),
     ...(forceHeadlessForAutomation
       ? {
           AUTOMATION_HEADLESS: "true",
@@ -867,6 +989,160 @@ export function buildPromotedExecutionEnv(
 
 function log(jobId: string, line: string): void {
   jobStore.appendLog(jobId, line);
+}
+
+export function buildRuntimeContextPath(jobId: string, runtimeDir = DISCOVERY_RUNTIME_TMP_DIR): string {
+  return path.join(runtimeDir, `${jobId}.json`);
+}
+
+const AUTH_RUNTIME_KEYS = new Set([
+  "auth.company_identifier",
+  "auth.identification_number",
+  "auth.identification_type",
+  "auth.username",
+  "auth.password",
+  "auth.otp",
+  "auth.pin",
+  "auth.token",
+  "identificationnumber",
+  "identificationtype",
+  "username",
+  "password",
+  "otp",
+  "pin",
+  "token",
+  "identity_provider",
+  "app_username",
+  "app_password",
+  "otp_secret",
+]);
+
+function normalizeRuntimeKey(key: string): string {
+  return key
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+/** Translate the UI's user-entered runtime marker into internal authority markers. */
+export function normalizeRuntimeEntry(entry: DataContextEntry): DataContextEntry {
+  if (entry.source !== ("manual_runtime" as DataContextEntry["source"])) return entry;
+  const source = AUTH_RUNTIME_KEYS.has(normalizeRuntimeKey(entry.key))
+    ? "user_provided_qa_credentials"
+    : "explicit_runtime_input";
+  return { ...entry, source };
+}
+
+function normalizeRuntimeEntriesByCase(
+  entriesByCase: Record<string, DataContextEntry[]>,
+): Record<string, DataContextEntry[]> {
+  return Object.fromEntries(
+    Object.entries(entriesByCase).map(([caseId, entries]) => [
+      caseId,
+      Array.isArray(entries) ? entries.map(normalizeRuntimeEntry) : [],
+    ]),
+  );
+}
+
+export function buildBatchResultPath(jobId: string): string {
+  return path.join(ROOT, ".artifacts", "tmp", "discovery-batch-results", `${jobId}.json`);
+}
+
+export function writeRuntimeContextIfPresent(
+  jobId: string,
+  params: DiscoveryBatchParams,
+  runtimeDir = DISCOVERY_RUNTIME_TMP_DIR,
+): string | undefined {
+  const byCase = params.runtimeEntriesByCase;
+  if (!byCase || typeof byCase !== "object" || Array.isArray(byCase)) return undefined;
+  const entries = normalizeRuntimeEntriesByCase(byCase);
+  const hasAny = Object.values(entries).some((list) => Array.isArray(list) && list.length > 0);
+  if (!hasAny) return undefined;
+  const targetPath = buildRuntimeContextPath(jobId, runtimeDir);
+  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+  // A job id is the runtime-context identity. Invalidate any residue before
+  // materializing the new case-scoped values, even if a previous attempt left
+  // a file behind after an interrupted process.
+  try {
+    fs.unlinkSync(targetPath);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException)?.code !== "ENOENT") throw error;
+  }
+  fs.writeFileSync(targetPath, JSON.stringify(entries), { encoding: "utf-8", mode: 0o600 });
+  try {
+    fs.chmodSync(targetPath, 0o600);
+  } catch {
+    // Windows ACLs do not always expose POSIX chmod semantics. The file is
+    // still created in the caller-owned temporary directory and removed in
+    // the runner's finally block.
+  }
+  return targetPath;
+}
+
+function logRuntimeInputAuthority(jobId: string, params: DiscoveryBatchParams): void {
+  const byCase = params.runtimeEntriesByCase;
+  const entries = byCase && typeof byCase === "object" && !Array.isArray(byCase)
+    ? Object.values(normalizeRuntimeEntriesByCase(byCase)).flatMap((value) => Array.isArray(value) ? value : [])
+    : [];
+  const credentials = entries.filter((entry): entry is DataContextEntry => Boolean(
+    entry && typeof entry === "object"
+      && typeof (entry as DataContextEntry).key === "string"
+      && typeof (entry as DataContextEntry).value === "string"
+      && (entry as DataContextEntry).source === "user_provided_qa_credentials"
+      && (entry as DataContextEntry).value.trim(),
+  ));
+  const explicit = entries.filter((entry): entry is DataContextEntry => Boolean(
+    entry && typeof entry === "object"
+      && typeof (entry as DataContextEntry).key === "string"
+      && typeof (entry as DataContextEntry).value === "string"
+      && (entry as DataContextEntry).source === "explicit_runtime_input"
+      && (entry as DataContextEntry).value.trim(),
+  ));
+  if (credentials.length > 0) {
+    log(jobId, "runtimeInputAuthority=user_provided_qa_credentials fallbackUsed=false autoGenerated=false demoDataUsed=false staleContextUsed=false");
+  }
+  for (const entry of credentials) {
+    log(jobId, `key=${entry.key} source=user_provided_qa_credentials present=true`);
+  }
+  for (const entry of explicit) {
+    log(jobId, `runtimeInputKey=${entry.key} source=explicit_runtime_input present=true fallbackUsed=false autoGenerated=false`);
+  }
+}
+
+export async function deleteRuntimeContextIfExists(jobId: string, runtimeDir = DISCOVERY_RUNTIME_TMP_DIR): Promise<void> {
+  const targetPath = buildRuntimeContextPath(jobId, runtimeDir);
+  try {
+    await fs.promises.unlink(targetPath);
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException)?.code !== "ENOENT") throw err;
+  }
+}
+
+export function buildDiscoveryChildEnv(
+  base: NodeJS.ProcessEnv,
+  runtimeContextPath: string | undefined,
+  batchResultPath?: string,
+): NodeJS.ProcessEnv {
+  if (!runtimeContextPath && !batchResultPath) return base;
+  return {
+    ...base,
+    ...(runtimeContextPath ? { DISCOVERY_RUNTIME_CONTEXT: runtimeContextPath } : {}),
+    ...(batchResultPath ? { DISCOVERY_BATCH_RESULT_PATH: batchResultPath } : {}),
+  };
+}
+
+export async function readStructuredChildResult(
+  resultPath: string,
+  caseId: number,
+): Promise<{ status?: string; contextMaterialized: boolean } | undefined> {
+  try {
+    const parsed = JSON.parse(await fs.promises.readFile(resultPath, "utf8")) as { cases?: Array<{ caseId?: number; status?: string; contextMaterialized?: boolean }> };
+    const entry = parsed.cases?.find((candidate) => candidate.caseId === caseId);
+    return entry ? { status: entry.status, contextMaterialized: entry.contextMaterialized === true } : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 async function runCommand(
@@ -1252,7 +1528,7 @@ export function buildDiscoveryBatchExecutionPlan(
   };
 }
 
-function startLegacyDiscoveryBatchRun(jobId: string, params: DiscoveryBatchParams): void {
+function startLegacyDiscoveryBatchRun(jobId: string, params: DiscoveryBatchParams, runtimeContextPath?: string): void {
   const caseIds = Array.from(new Set((params.caseIds ?? []).filter(isPositiveCaseId)));
   if (caseIds.length === 0) {
     jobStore.update(jobId, {
@@ -1264,12 +1540,16 @@ function startLegacyDiscoveryBatchRun(jobId: string, params: DiscoveryBatchParam
   }
 
   const caseIdsStr = caseIds.join(",");
+  const jobContextOnly = (params as Record<string, unknown>).contextOnly;
+  log(jobId, `[context-only-trace] boundary=job jobHasField=${Object.prototype.hasOwnProperty.call(params, "contextOnly")} jobValue=${jobContextOnly === undefined ? "undefined" : jobContextOnly}`);
   const args = buildDiscoveryBatchArgs(params, caseIds);
   const cmd = process.platform === "win32" ? "npm.cmd" : "npm";
+  const childEnv = buildDiscoveryChildEnv(process.env as NodeJS.ProcessEnv, runtimeContextPath);
 
   log(jobId, `[run:discovery-batch] caseIds=${caseIdsStr} appSlug=${params.appSlug ?? "N/A"}`);
   log(jobId, `[run:discovery-batch] command=${cmd} ${args.join(" ")}`);
   log(jobId, `[run:discovery-batch] jobId=${jobId}`);
+  if (runtimeContextPath) log(jobId, `[run:discovery-batch] runtimeContext=${runtimeContextPath}`);
   log(jobId, "[run:discovery-batch] started");
 
   jobStore.update(jobId, {
@@ -1285,7 +1565,7 @@ function startLegacyDiscoveryBatchRun(jobId: string, params: DiscoveryBatchParam
     },
   });
 
-  void runCommand(jobId, cmd, args, process.env as NodeJS.ProcessEnv)
+  void runCommand(jobId, cmd, args, childEnv)
     .then((result) => {
       jobStore.update(jobId, {
         status: result.exitCode === 0 ? "done" : "failed",
@@ -1297,10 +1577,20 @@ function startLegacyDiscoveryBatchRun(jobId: string, params: DiscoveryBatchParam
     .catch((err: any) => {
       jobStore.update(jobId, { status: "failed", completedAt: new Date().toISOString() });
       log(jobId, `[run:discovery-batch] Error al iniciar proceso: ${err.message}`);
+    })
+    .finally(async () => {
+      await deleteRuntimeContextIfExists(jobId);
+      jobStore.clearTransientParams(jobId);
     });
 }
 
-async function startDiscoveryBatchExecutionFlow(jobId: string, params: DiscoveryBatchParams): Promise<void> {
+async function startDiscoveryBatchExecutionFlow(jobId: string, params: DiscoveryBatchParams, runtimeContextPath?: string): Promise<void> {
+  log(jobId, buildRediscoveryProvenanceLine({
+    boundary: "runner_input",
+    jobId,
+    value: params.forceRediscovery,
+    valueSource: "params.forceRediscovery",
+  }));
   const mixedPlan = buildMixedExecutionPlan({
     caseIds: params.caseIds ?? [],
     publishedCases: params.publishedCases,
@@ -1332,13 +1622,27 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
     rerunActive: params.rerunActive,
     executePromotedSpecs: params.executePromotedSpecs,
   });
+  log(jobId, buildRediscoveryProvenanceLine({
+    boundary: "intent_input",
+    jobId,
+    value: params.forceRediscovery,
+    valueSource: "params.forceRediscovery",
+  }));
+  log(jobId, buildRediscoveryProvenanceLine({
+    boundary: "intent_output",
+    jobId,
+    explicit: rediscoveryIntent.explicit,
+    source: rediscoveryIntent.source,
+  }));
   const forceRediscovery = rediscoveryIntent.explicit;
   const targetedDiscoverySupported = supportsTargetedDiscoveryPreview();
   const routeDecisions = new Map<number, RouteDecision>();
   const fullDiscoveryCommandParams: DiscoveryBatchParams = {
     ...params,
-    overwrite: rediscoveryIntent.overwrite,
-    rerunActive: rediscoveryIntent.rerunActive,
+    // An explicit rediscovery request must be able to re-run an already active
+    // artifact. The legacy flags remain inert unless forceRediscovery is true.
+    overwrite: forceRediscovery ? true : rediscoveryIntent.overwrite,
+    rerunActive: forceRediscovery ? true : rediscoveryIntent.rerunActive,
   };
   const promotedEntriesBefore = await loadPromotedEntriesForRouting(effectiveAppSlug);
   const appConfig = await loadAppConfig(effectiveAppSlug);
@@ -1715,6 +2019,7 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
       caseId,
       appSlug: effectiveAppSlug,
       forceRediscovery,
+      rediscoveryIntent: rediscoveryIntent.rediscoveryIntent,
       targetedDiscoverySupported,
       contractEvaluation,
       validation,
@@ -1755,6 +2060,7 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
     const runFullDiscoveryForCase = async (currentRoute: RouteDecision): Promise<RouteDecision> => {
       const fullDiscoveryArgs = buildDiscoveryBatchArgs(fullDiscoveryCommandParams, [caseId]);
       let discoveredState: string | undefined;
+      let runnerContextMaterialized = false;
       let promotionPersisted = false;
       let discoveryDurationMs = 0;
       log(jobId, `[run:discovery-batch] caseIds=${caseId} appSlug=${params.appSlug ?? "N/A"}`);
@@ -1763,7 +2069,7 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
         jobId,
         cmd,
         fullDiscoveryArgs,
-        process.env as NodeJS.ProcessEnv,
+        buildDiscoveryChildEnv(process.env as NodeJS.ProcessEnv, runtimeContextPath, buildBatchResultPath(jobId)),
         (line) => {
           const persistedMatch = /\[discovery:workflow\].*promotionPersisted=(true|false)/i.exec(line);
           if (persistedMatch) promotionPersisted = persistedMatch[1].toLowerCase() === "true";
@@ -1778,6 +2084,10 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
           }
         },
       );
+      const structuredChildResult = await readStructuredChildResult(buildBatchResultPath(jobId), caseId);
+      runnerContextMaterialized = structuredChildResult?.contextMaterialized === true;
+      if (structuredChildResult?.status) discoveredState = structuredChildResult.status;
+      log(jobId, `[structured-child-result] caseId=${caseId} childStatus=${discoveredState ?? "unknown"} contextMaterialized=${runnerContextMaterialized}`);
 
       if (discoveryResult.exitCode !== 0) {
         const blockedRoute: RouteDecision = {
@@ -1804,6 +2114,8 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
         appSlug: effectiveAppSlug,
         sectionSlug: params.sectionSlug,
         childStatus: discoveredState,
+        contextOnly: params.contextOnly === true,
+        contextMaterialized: runnerContextMaterialized,
         promotionPersisted,
         entries: promotedEntriesAfter,
       });
@@ -1812,6 +2124,22 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
         `[post-discovery-execution-admission] caseId=${caseId} childStatus=${discoveredState ?? "unknown"} promotionPersisted=${promotionPersisted ? "true" : "false"} promotedSpecResolved=${admission.specPath ? "true" : "false"} admitted=${admission.admitted ? "true" : "false"} reason=${admission.reason}`,
       );
       if (admission.admitted) {
+        if (params.contextOnly === true) {
+          const contextMaterializedRoute: RouteDecision = {
+            caseId,
+            appSlug: effectiveAppSlug,
+            route: "blocked",
+            reason: "context_materialized",
+          };
+          prepareResult = "completed";
+          prepareReason = "context_materialized";
+          promotionResult = "skipped";
+          promotionReason = "context_only";
+          log(jobId, `[execution-phase] jobId=${jobId} caseId=${caseId} phase=full_discovery durationMs=${discoveryDurationMs} result=completed reason=context_materialized`);
+          log(jobId, `[execution-phase] jobId=${jobId} caseId=${caseId} phase=pom durationMs=0 result=skipped reason=context_only`);
+          log(jobId, `[execution-phase] jobId=${jobId} caseId=${caseId} phase=promotion durationMs=0 result=skipped reason=context_only`);
+          return contextMaterializedRoute;
+        }
         const discoveredRoute: RouteDecision = {
           caseId,
           appSlug: effectiveAppSlug,
@@ -2007,6 +2335,12 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
     const scenarioTitle = nonEmptyString(scenarioRef?.title) ?? `C${caseId}`;
 
     if (route.route === "blocked") {
+      if (route.reason === "context_materialized") {
+        completed += 1;
+        skipped += 1;
+        updateProgressSummary(caseId);
+        continue;
+      }
       const blockedReason = route.reason;
       await recordPreFunctionalFailure({
         caseId,
@@ -2027,7 +2361,7 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
     const testArgs = buildTestPromotedArgs(params, caseId);
     log(jobId, `[run:functional-execution] caseId=${caseId} command=${cmd} ${testArgs.join(" ")}`);
     const functionalStartedAt = Date.now();
-    const promotedExecutionEnv = buildPromotedExecutionEnv(params, jobId);
+    const promotedExecutionEnv = buildPromotedExecutionEnv(params, jobId, process.env as NodeJS.ProcessEnv, runtimeContextPath);
     const testResult = await runCommand(jobId, cmd, testArgs, promotedExecutionEnv);
     const caseCompletedAt = new Date().toISOString();
     const functionalDurationMs = Math.max(0, Date.now() - functionalStartedAt);
@@ -2089,6 +2423,29 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
     if (discoveryStatus === "passed") passed += 1;
     else failed += 1;
     executed += 1;
+    if (discoveryStatus === "passed" && params.appSlug) {
+      const runtimeEntries = params.runtimeEntriesByCase?.[String(caseId)] ?? [];
+      if (runtimeEntries.length > 0) {
+        try {
+          const confirmedPersisted = await persistConfirmedRuntimeValues({
+            projectSlug: params.appSlug,
+            caseId,
+            values: runtimeEntries.map((entry) => ({
+              key: entry.key,
+              value: entry.value,
+              semanticType: entry.semanticType,
+              fieldKind: entry.fieldKind,
+              datasetIdentity: entry.datasetIdentity,
+              contractVersion: entry.contractVersion,
+              verified: true,
+            })),
+          });
+          log(jobId, `[runtime-replay] caseId=${caseId} confirmedPersisted=${confirmedPersisted} secretsPersistedRaw=false`);
+        } catch (error) {
+          log(jobId, `[runtime-replay] caseId=${caseId} confirmedPersisted=0 persistenceWarning=${error instanceof Error ? error.message : "unknown_error"}`);
+        }
+      }
+    }
     caseResults.push({
       caseId,
       status: discoveryStatus,
@@ -2328,13 +2685,20 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
 export function startDiscoveryBatchRun(jobId: string): void {
   const job = jobStore.getInternal(jobId);
   if (!job) return;
-  const params = job.params as DiscoveryBatchParams;
+  const params = loadLaunchTestRailIdentity(job.params as DiscoveryBatchParams);
+  const runtimeContextPath = writeRuntimeContextIfPresent(jobId, params);
+  logRuntimeInputAuthority(jobId, params);
   if (params.executePromotedSpecs === true) {
-    void startDiscoveryBatchExecutionFlow(jobId, params).catch((err: any) => {
-      jobStore.update(jobId, { status: "failed", completedAt: new Date().toISOString() });
-      log(jobId, `[run:discovery-batch] Error al ejecutar flujo de ejecución: ${err?.message ?? String(err)}`);
-    });
+    void startDiscoveryBatchExecutionFlow(jobId, params, runtimeContextPath)
+      .catch((err: any) => {
+        jobStore.update(jobId, { status: "failed", completedAt: new Date().toISOString() });
+        log(jobId, `[run:discovery-batch] Error al ejecutar flujo de ejecución: ${err?.message ?? String(err)}`);
+      })
+      .finally(async () => {
+        await deleteRuntimeContextIfExists(jobId);
+        jobStore.clearTransientParams(jobId);
+      });
     return;
   }
-  startLegacyDiscoveryBatchRun(jobId, params);
+  startLegacyDiscoveryBatchRun(jobId, params, runtimeContextPath);
 }

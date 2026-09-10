@@ -4,6 +4,9 @@ export type DataContextEntry = {
   key: string;
   value: string;
   source:
+    | "explicit_runtime_input"
+    | "runtime_context"
+    | "user_provided_qa_credentials"
     | "app_username"
     | "app_password"
     | "extra_login_field"
@@ -12,8 +15,24 @@ export type DataContextEntry = {
     | "promoted_manifest"
     | "auto_generated"
     | "fixture"
-    | "environment_variable";
+    | "environment_variable"
+    | "data_override"
+    | "suggested_value"
+    | "qa_dataset"
+    | "project_config"
+    | "manual_runtime";
   sensitive: boolean;
+  /** Optional lineage retained across the transient runtime context. */
+  provenance?: "user_entered" | "confirmed_case_runtime" | "selection_runtime" | string;
+  semanticType?: string;
+  fieldKind?: string;
+  datasetIdentity?: string;
+  contractVersion?: string;
+  generated?: boolean;
+  verified?: boolean;
+  valueRole?: string;
+  oracleSource?: string;
+  dependsOn?: string[];
 };
 
 export type DataContext = {
@@ -90,19 +109,7 @@ export function buildDataContext(config: FullConfig, overrides?: { dataOverrides
   // Priority 0: runtime overrides and suggested values per scenario (generic, no hardcode)
   if (overrides?.dataOverrides) {
     for (const [k,v] of Object.entries(overrides.dataOverrides)) {
-      addEntry(entriesMap, k, v, "test_data" as any);
-      // mark as not sensitive to preserve masking logic via isSensitive
-      const e = entriesMap.get(normalize(k));
-      if (e) (e as any).source = "dataOverrides";
-    }
-  }
-  if (overrides?.suggestedData) {
-    for (const [k,v] of Object.entries(overrides.suggestedData)) {
-      const norm = normalize(k);
-      if (entriesMap.has(norm)) continue;
-      addEntry(entriesMap, k, v, "test_data" as any);
-      const e = entriesMap.get(norm);
-      if (e) (e as any).source = "suggestedValue";
+      addEntry(entriesMap, k, v, "data_override");
     }
   }
 
@@ -128,6 +135,12 @@ export function buildDataContext(config: FullConfig, overrides?: { dataOverrides
 
   for (const [key, value] of Object.entries(config.app.testData)) {
     addEntry(entriesMap, key, value, "test_data");
+  }
+
+  // Suggestions are intentionally inserted after configured data so they can
+  // never replace a QA dataset or project credential.
+  if (overrides?.suggestedData) {
+    for (const [key, value] of Object.entries(overrides.suggestedData)) addEntry(entriesMap, key, value, "suggested_value");
   }
 
   for (const [canonicalKey, aliases] of Object.entries(config.app.testDataAliases ?? {})) {

@@ -1,0 +1,232 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "needs_discovery",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "C44757",
+    "caseId": 44757,
+    "title": "Login satisfactorio"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "login",
+      "description": "Execute login"
+    }
+  ],
+  "notes": [
+    "Discovery failed at step 1: fill_target_not_editable - \"RNC de la empresa\""
+  ],
+  "createdAt": "2026-09-07T19:13:06.258Z",
+  "sourceScenario": {
+    "title": "Login satisfactorio",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Ingresar el valor [auth.company_identifier] en el campo \"RNC de la empresa\".",
+        "description": "Ingresar el valor [auth.company_identifier] en el campo \"RNC de la empresa\"."
+      },
+      {
+        "index": 2,
+        "action": "Ingresar el valor [auth.username] en el campo \"Nombre de usuario\".",
+        "description": "Ingresar el valor [auth.username] en el campo \"Nombre de usuario\"."
+      },
+      {
+        "index": 3,
+        "action": "Ingresar el valor secreto [auth.password] en el campo \"Contraseña\".",
+        "description": "Ingresar el valor secreto [auth.password] en el campo \"Contraseña\"."
+      },
+      {
+        "index": 4,
+        "action": "Hacer clic en el botón \"Continuar\".",
+        "description": "Hacer clic en el botón \"Continuar\"."
+      },
+      {
+        "index": 5,
+        "action": "Esperar que finalice el proceso de autenticación.",
+        "description": "Esperar que finalice el proceso de autenticación."
+      },
+      {
+        "index": 6,
+        "action": "Clic en el boton \"Salir\"",
+        "description": "Clic en el boton \"Salir\""
+      },
+      {
+        "index": 7,
+        "action": "Validar que el formulario de acceso ya no sea la pantalla activa.",
+        "description": "Validar que el formulario de acceso ya no sea la pantalla activa."
+      },
+      {
+        "index": 8,
+        "action": "Validar que se muestre la pantalla inicial autenticada del aplicativo.",
+        "description": "Validar que se muestre la pantalla inicial autenticada del aplicativo."
+      }
+    ],
+    "expectedResult": "<p>La autenticación finaliza correctamente, el formulario de acceso deja de ser la pantalla activa y se muestra la pantalla inicial autenticada del aplicativo.</p>",
+    "preconditions": [
+      "El usuario de prueba debe estar creado, activo y autorizado para ingresar al Portal Empresarial.",
+      "La URL del proyecto debe estar disponible.",
+      "Datos de ejecución requeridos:",
+      "RNC de la empresa (auth.company_identifier, text)",
+      "Nombre de usuario (auth.username, text)",
+      "Contraseña (auth.password, secret) [SECRETO]",
+      "<p>El usuario de prueba debe estar creado, activo y autorizado para ingresar al Portal Empresarial.<br>La URL del proyecto debe estar disponible.</p><p>Datos de ejecución requeridos:</p><ul><li>RNC de la empresa (auth.company_identifier, text)</li><li>Nombre de usuario (auth.username, text)</li><li>Contraseña (auth.password, secret) [SECRETO]</li></ul>"
+    ],
+    "observedAssertions": [],
+    "observableOracles": [
+      {
+        "id": "expected-01",
+        "requirement": "<p>La autenticación finaliza correctamente, el formulario de acceso deja de ser la pantalla activa y se muestra la pantalla inicial autenticada del aplicativo.</p>",
+        "type": "unsupported_or_unresolved",
+        "backed": false,
+        "source": "inferred",
+        "evidence": [
+          "backing_evidence_missing"
+        ]
+      }
+    ],
+    "stepStatuses": [
+      {
+        "index": 1,
+        "status": "fill_target_not_editable"
+      }
+    ],
+    "auth": {}
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "C44757",
+    "title": "Login satisfactorio",
+    "appSlug": "arquitectura-automatizacion",
+    "sectionSlug": "automatizacion-1",
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Ingresar el valor [auth.company_identifier] en el campo \"RNC de la empresa\".",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "RNC de la empresa"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Ingresar el valor [auth.username] en el campo \"Nombre de usuario\".",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Nombre de usuario"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Ingresar el valor secreto [auth.password] en el campo \"Contraseña\".",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Contraseña"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Hacer clic en el botón \"Continuar\".",
+        "operation": "noop",
+        "target": {
+          "strategy": "text",
+          "value": "Continuar"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 4,
+        "scenarioStepIndex": 5,
+        "originalText": "Esperar que finalice el proceso de autenticación.",
+        "operation": "wait",
+        "target": {
+          "strategy": "text",
+          "value": "Esperar que finalice el proceso de autenticación."
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 5,
+        "scenarioStepIndex": 6,
+        "originalText": "Clic en el boton \"Salir\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Salir"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 6,
+        "scenarioStepIndex": 7,
+        "originalText": "Validar que el formulario de acceso ya no sea la pantalla activa.",
+        "operation": "assertVisible",
+        "target": {
+          "strategy": "text",
+          "value": "Validar que el formulario de acceso ya no sea la pantalla activa."
+        },
+        "required": true,
+        "executionStatus": "unresolved",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 7,
+        "scenarioStepIndex": 8,
+        "originalText": "Validar que se muestre la pantalla inicial autenticada del aplicativo.",
+        "operation": "assertVisible",
+        "target": {
+          "strategy": "text",
+          "value": "Validar que se muestre la pantalla inicial autenticada del aplicativo."
+        },
+        "required": true,
+        "executionStatus": "unresolved",
+        "evidenceRefs": []
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 8,
+      "representedScenarioSteps": 6,
+      "missingScenarioSteps": [
+        {
+          "scenarioStepIndex": 7,
+          "reason": "required_scenario_step_missing"
+        },
+        {
+          "scenarioStepIndex": 8,
+          "reason": "required_scenario_step_missing"
+        }
+      ]
+    }
+  }
+}

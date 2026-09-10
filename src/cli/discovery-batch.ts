@@ -12,17 +12,23 @@ import { ensureAppStructure, logAppProfile, resolveAppProfile, type AppProfile }
 import { buildAiRepairBatchSummary, formatAiRepairBatchConsoleOutput } from "../ai/repair/ai-repair-summary-builder";
 import { writeJsonSafe } from "../utils/json-utils";
 import type { AiRepairCaseSummary } from "../ai/repair/ai-repair-metrics";
+export { loadRuntimeContextFromPath, resolveRuntimeEntriesForCase } from "./runtime-context";
+import { loadRuntimeContextFromPath, resolveRuntimeEntriesForCase } from "./runtime-context";
 
 export type BatchCaseMode = "all" | "not-automated" | "by-ids" | "by-range";
 
 export type BatchCliArgs = {
   mode: BatchCaseMode;
   app?: string;
+  testRailProjectId?: number;
+  testRailSuiteId?: number;
+  testRailSectionId?: number;
   caseIds: number[];
   from?: number;
   to?: number;
   limit?: number;
   headed: boolean;
+  contextOnly: boolean;
   autoPromote: boolean;
   promotionDryRun: boolean;
   promotionStrict: boolean;
@@ -68,6 +74,7 @@ export type BatchCaseState =
 export type BatchCaseResultEntry = {
   caseId: number;
   title: string;
+  contextMaterialized?: boolean;
   selected: boolean;
   activeAtSelection?: boolean;
   skipReason?: string;
@@ -148,6 +155,7 @@ export function parseBatchArgs(argv: string[]): BatchCliArgs {
     app: undefined,
     caseIds: [],
     headed: false,
+    contextOnly: false,
     autoPromote: false,
     promotionDryRun: false,
     promotionStrict: false,
@@ -190,8 +198,26 @@ export function parseBatchArgs(argv: string[]): BatchCliArgs {
       i += 1;
       continue;
     }
+    if (token === "--testrail-project-id" || token === "--testrail-suite-id" || token === "--testrail-section-id") {
+      if (!nextValue || nextValue.startsWith("--")) {
+        throw new Error(`Missing value for ${token}`);
+      }
+      const parsed = Number(nextValue);
+      if (!Number.isInteger(parsed) || parsed <= 0) {
+        throw new Error(`Invalid value for ${token}: ${nextValue}. Expected a positive integer.`);
+      }
+      if (token === "--testrail-project-id") args.testRailProjectId = parsed;
+      if (token === "--testrail-suite-id") args.testRailSuiteId = parsed;
+      if (token === "--testrail-section-id") args.testRailSectionId = parsed;
+      i += 1;
+      continue;
+    }
     if (token === "--auto-promote") {
       args.autoPromote = true;
+      continue;
+    }
+    if (token === "--context-only") {
+      args.contextOnly = true;
       continue;
     }
     if (token === "--promotion-dry-run") {
@@ -447,12 +473,13 @@ export async function selectCases(
   client: TestRailClient,
   args: BatchCliArgs
 ): Promise<BatchCaseResultEntry[]> {
-  const projectId = config.integrations.testRail?.projectId;
+  const ids = resolveTestRailSelectionIds(args);
+  const projectId = ids.projectId;
   if (!projectId) {
     throw new Error("TESTRAIL_PROJECT_ID is not configured.");
   }
-  const suiteId = config.integrations.testRail?.suiteId;
-  const sectionId = config.integrations.testRail?.sectionId;
+  const suiteId = ids.suiteId;
+  const sectionId = ids.sectionId;
 
   let rawCases = await client.getCases(projectId, suiteId, sectionId);
 
@@ -526,6 +553,18 @@ export async function selectCases(
   return entries;
 }
 
+export function resolveTestRailSelectionIds(args: BatchCliArgs): {
+  projectId?: string;
+  suiteId?: string;
+  sectionId?: string;
+} {
+  return {
+    projectId: args.testRailProjectId?.toString() ?? config.integrations.testRail?.projectId,
+    suiteId: args.testRailSuiteId?.toString() ?? config.integrations.testRail?.suiteId,
+    sectionId: args.testRailSectionId?.toString() ?? config.integrations.testRail?.sectionId,
+  };
+}
+
 export async function executeBatch(
   args: BatchCliArgs,
   entries: BatchCaseResultEntry[],
@@ -581,6 +620,7 @@ export async function executeBatch(
 
   const testRailRuntimeConfig = requireTestRailConfig(config);
   const sharedClient = new TestRailClient(testRailRuntimeConfig);
+  const runtimeContext = await loadRuntimeContextFromPath(process.env.DISCOVERY_RUNTIME_CONTEXT);
 
   async function runSingleCase(entry: BatchCaseResultEntry, _ctx: QueueItemContext): Promise<BatchCaseResultEntry> {
     const caseStartTime = Date.now();
@@ -589,7 +629,9 @@ export async function executeBatch(
     const caseOutputDir = path.join(batchDir, "cases", `case-${entry.caseId}`);
     const workflowOptions: CaseDiscoveryWorkflowOptions = {
       caseId: entry.caseId,
+      runtimeEntries: resolveRuntimeEntriesForCase(runtimeContext, entry.caseId),
       headed: args.headed,
+      contextOnly: args.contextOnly,
       outputDir: caseOutputDir,
       autoPromote: args.autoPromote,
       promotionDryRun: args.promotionDryRun,
@@ -642,6 +684,7 @@ export async function executeBatch(
     const resultEntry: BatchCaseResultEntry = {
       caseId: entry.caseId,
       title: entry.title,
+      contextMaterialized: workflowResult.contextMaterialized === true ? true : undefined,
       selected: true,
       status: state,
       promoted: workflowResult.promoted,
@@ -783,10 +826,11 @@ export async function executeBatch(
 }
 
 export async function resolveBatchAppProfile(args: BatchCliArgs): Promise<{ appProfile: AppProfile; baseDir: string }> {
+  const ids = resolveTestRailSelectionIds(args);
   const resolvedApp = await resolveAppProfile({
     cliAppSlug: args.app,
     envAppSlug: process.env.APP_SLUG,
-    testRailProjectId: config.integrations.testRail?.projectId,
+    testRailProjectId: ids.projectId,
     testRailBaseUrl: config.integrations.testRail?.url,
     testRailEmail: config.integrations.testRail?.email,
     testRailApiKey: config.integrations.testRail?.apiKey,
@@ -808,6 +852,7 @@ function serializeArgs(args: BatchCliArgs): BatchResult["args"] {
     to: args.to,
     limit: args.limit,
     headed: args.headed,
+    contextOnly: args.contextOnly,
     autoPromote: args.autoPromote,
     promotionDryRun: args.promotionDryRun,
     promotionStrict: args.promotionStrict,
@@ -826,7 +871,8 @@ function serializeArgs(args: BatchCliArgs): BatchResult["args"] {
 }
 
 async function writeBatchArtifacts(batchDir: string, result: BatchResult): Promise<void> {
-  const jsonPath = path.join(batchDir, "batch-result.json");
+  const jsonPath = process.env.DISCOVERY_BATCH_RESULT_PATH ?? path.join(batchDir, "batch-result.json");
+  await fs.mkdir(path.dirname(jsonPath), { recursive: true });
   await fs.writeFile(jsonPath, JSON.stringify(result, null, 2), "utf-8");
 
   const mdLines: string[] = [];
@@ -953,7 +999,7 @@ function printSummary(result: BatchResult): void {
 async function main(): Promise<void> {
   const args = parseBatchArgs(process.argv.slice(2));
 
-  const projectId = config.integrations.testRail?.projectId;
+  const projectId = resolveTestRailSelectionIds(args).projectId;
   if (!projectId) {
     throw new Error("TESTRAIL_PROJECT_ID is not configured in .env.");
   }

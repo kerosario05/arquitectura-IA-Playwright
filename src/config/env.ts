@@ -10,6 +10,7 @@ import type {
 } from "../types/env.types";
 import type { RequiredJiraRuntimeConfig } from "../types/jira.types";
 import { loadDotenvWithPowerShellSupport } from "./dotenv-loader";
+import { resolveQaBrowserProfilePath } from "../browser/browser-profile";
 
 loadDotenvWithPowerShellSupport();
 
@@ -360,6 +361,8 @@ export const config: FullConfig = {
     headless,
     evidenceDir,
     defaultTimeoutMs,
+    qaBrowserProfilePath: resolveQaBrowserProfilePath(process.env.QA_BROWSER_PROFILE_PATH),
+    qaBrowserChannel: parseOptionalString(process.env.QA_BROWSER_CHANNEL),
     promotedSpecTimeoutMs,
     ...promotedRuntimeConfig
   },

@@ -1,0 +1,10 @@
+{
+  "id": "c44757-login-satisfactorio",
+  "externalId": "C44757",
+  "caseId": 44757,
+  "title": "Login satisfactorio",
+  "source": "discovery",
+  "appSlug": "portalempresarial",
+  "appConfigPath": "automations\\apps\\portalempresarial\\app.config.json",
+  "createdAt": "2026-09-10T11:31:55.368Z"
+}

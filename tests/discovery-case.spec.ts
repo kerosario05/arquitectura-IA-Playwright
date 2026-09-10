@@ -6,6 +6,7 @@ import {
   extractCleanTarget,
   parseScenarioStepsForDiscovery,
   evaluateEarlyCompletion,
+  shouldDeferAssertionEvaluation,
   buildDiscoveryAssertionContract,
   resolveDiscoveryStatusFromAssertionContract
 } from "../src/discovery/case-discovery";
@@ -1512,6 +1513,14 @@ test("computeSemanticScore puntua alto aria-label con 'Shopping cart' y devuelve
 });
 
 // --- Early Completion Tests ---
+
+test("early completion distingue pre-acción y post-acción del trigger", () => {
+  expect(shouldDeferAssertionEvaluation({ assertionIndex: 5, currentStepIndex: 3, triggerStepIndex: 4, triggerExecuted: false })).toBe(true);
+  expect(shouldDeferAssertionEvaluation({ assertionIndex: 5, currentStepIndex: 4, triggerStepIndex: 4, triggerExecuted: false })).toBe(true);
+  expect(shouldDeferAssertionEvaluation({ assertionIndex: 5, currentStepIndex: 4, triggerStepIndex: 4, triggerExecuted: true })).toBe(false);
+  expect(shouldDeferAssertionEvaluation({ assertionIndex: 2, currentStepIndex: 3, triggerStepIndex: 4, triggerExecuted: false })).toBe(false);
+  expect(shouldDeferAssertionEvaluation({ assertionIndex: 5, currentStepIndex: 3 })).toBe(false);
+});
 
 test("evaluateEarlyCompletion returns satisfied=true when mandatory assertions are satisfied", () => {
   const snapshot = makeAssertionSnapshot([

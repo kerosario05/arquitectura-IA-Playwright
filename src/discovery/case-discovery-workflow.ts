@@ -6,9 +6,9 @@ import { config as envConfig, requireTestRailConfig } from "../config/env";
 import { TestRailClient } from "../clients/testrail.client";
 import { normalizeTestRailCases } from "../testrail/testrail-normalizer";
 import { getLoginStrategy } from "../auth/login-strategy.factory";
-import { runCaseDiscovery } from "./case-discovery";
+import { runCaseDiscovery, reconcilePendingAssertionsWithBackedOracles } from "./case-discovery";
 import { evaluatePromotionGate } from "../automations/promotion-gate";
-import { promoteExecutionPlan } from "../automations/promote-plan";
+import { materializePromotionContext, promoteExecutionPlan } from "../automations/promote-plan";
 import type {
   SpecGenerationObservableOracle,
   SpecGenerationObservableOracleType,
@@ -18,6 +18,7 @@ import { DEFAULT_PROMOTION_POLICY } from "../types/automation-promotion.types";
 import type { PromotionPolicy } from "../types/automation-promotion.types";
 import { executeExecutionPlan } from "../runner/execution-plan-executor";
 import { buildDataContext } from "../data/data-context";
+import type { DataContextEntry } from "../data/data-context";
 import { resolveAgentAutoRepairConfig, runAgentAutoRepairAttempt } from "../agent";
 import { runSegmentedRouteRecovery } from "../agent/segment-route-recovery";
 import type { PageSnapshot } from "../types/page-snapshot.types";
@@ -26,6 +27,11 @@ import type { CaseDiscoveryResult, RuntimeEvidenceTrace, PendingAssertionForensi
 import type { AppProfile, SectionProfile } from "../automations/app-profile";
 import { resolveSectionProfile } from "../automations/app-profile";
 import type { TestScenario } from "../types/testrail.types";
+import type { AssertionPolarity, CanonicalRequirement } from "../scenarios/canonical-scenario";
+import { canonicalizeTestRailCase, extractCanonicalInputRequirements } from "../testrail/testrail-canonical-adapter";
+import { transformTestRailCaseForRuntime } from "../testrail/testrail-runtime-transformer";
+import { launchRuntimeBrowserSession } from "../browser/browser-session";
+import { buildControlledAdvanceProbeOracles, type CanonicalAssertionIntent } from "./controlled-advance-probe";
 
 export type CaseDiscoveryWorkflowOptions = {
   caseId?: number;
@@ -34,6 +40,7 @@ export type CaseDiscoveryWorkflowOptions = {
   outputDir?: string;
   autoPromote: boolean;
   promotionDryRun: boolean;
+  contextOnly?: boolean;
   promotionStrict: boolean;
   requirePromotionApproval: boolean;
   pageObjectMode?: boolean;
@@ -62,6 +69,7 @@ export type CaseDiscoveryWorkflowOptions = {
   runId?: string;
   executionMode?: string;
   executionSource?: string;
+  runtimeEntries?: DataContextEntry[];
   adaptiveContext?: {
     targetScreen?: string;
     knownSteps?: string[];
@@ -74,6 +82,7 @@ export type CaseDiscoveryWorkflowOptions = {
 
 export type CaseDiscoveryWorkflowResult = {
   caseResult: CaseDiscoveryResult;
+  contextMaterialized?: boolean;
   promoted: boolean;
   promotionStatus: string;
   promotionReason?: string;
@@ -114,6 +123,62 @@ export type CaseDiscoveryWorkflowResult = {
   evidenceDir: string;
   durationMs: number;
 };
+
+function attachCanonicalScenarioLineage(scenario: TestScenario): TestScenario {
+  const rawCase = scenario.raw;
+  if (!rawCase || rawCase.id !== scenario.caseId || typeof rawCase.title !== "string") {
+    return scenario;
+  }
+  const canonicalScenario = canonicalizeTestRailCase(rawCase);
+  const canonicalInputRequirements = extractCanonicalInputRequirements(rawCase);
+  const runtimeTransformation = transformTestRailCaseForRuntime(rawCase);
+  const canonicalStepByOrder = new Map(canonicalScenario.steps.map((step) => [step.order, step]));
+  const steps = scenario.steps.map((step) => {
+    const canonicalStep = canonicalStepByOrder.get(step.index);
+    return {
+      ...step,
+      ...(canonicalStep?.valueKey ? { valueKey: canonicalStep.valueKey } : {}),
+      ...(canonicalStep?.entityScope ? { entityScope: canonicalStep.entityScope } : {}),
+      ...(canonicalStep?.rowScope !== undefined ? { rowScope: canonicalStep.rowScope } : {}),
+      ...(canonicalStep?.rowRelation ? { rowRelation: canonicalStep.rowRelation } : {}),
+      ...(canonicalStep?.associatedField ? { associatedField: canonicalStep.associatedField } : {}),
+      ...(canonicalStep?.selectionField ? { selectionField: canonicalStep.selectionField } : {}),
+      ...(canonicalStep?.expectedValueKey ? { expectedValueKey: canonicalStep.expectedValueKey } : {}),
+      ...(canonicalStep?.requirementRefs ? { requirementRefs: [...canonicalStep.requirementRefs] } : {}),
+      ...(canonicalStep?.polarity ? { polarity: canonicalStep.polarity } : {}),
+      ...(canonicalStep?.canonicalAssertion ? { canonicalAssertion: { ...canonicalStep.canonicalAssertion, ...(canonicalStep.canonicalAssertion.childExpectations ? { childExpectations: [...canonicalStep.canonicalAssertion.childExpectations] } : {}) } } : {}),
+      ...(canonicalStep?.conditionalAction ? { conditionalAction: { ...canonicalStep.conditionalAction, condition: { ...canonicalStep.conditionalAction.condition } } } : {}),
+    };
+  });
+  const stepRequirementRefs = canonicalScenario.steps.flatMap((step) =>
+    (step.requirementRefs ?? []).map((requirementId) => ({ stepIndex: step.order, requirementId }))
+  );
+  return {
+    ...scenario,
+    steps,
+    canonicalScenarioId: canonicalScenario.scenarioId,
+    canonicalRequirements: canonicalScenario.requirements,
+    canonicalInputRequirements,
+    expectedResultRequirementRefs: canonicalScenario.expectedResultRequirementRefs,
+    stepRequirementRefs,
+    stepClaims: stepRequirementRefs.map((ref) => ({
+      stepIndex: ref.stepIndex,
+      claimId: `${ref.requirementId}:claim`,
+      requirementId: ref.requirementId,
+      required: true,
+      coverable: true,
+    })),
+    runtimeInputRequirements: runtimeTransformation.inputRequirements.map((requirement) => ({
+      key: requirement.key,
+      ...(requirement.required !== undefined ? { required: requirement.required } : {}),
+      source: requirement.source,
+      ...(requirement.provenance ? { provenance: requirement.provenance } : {}),
+      ...(requirement.valueRole ? { valueRole: requirement.valueRole } : {}),
+      ...(requirement.oracleSource ? { oracleSource: requirement.oracleSource } : {}),
+      ...(requirement.dependsOn ? { dependsOn: [...requirement.dependsOn] } : {}),
+    })),
+  };
+}
 
 export function resolvePromotionOutcome(input: {
   promotionAllowed: boolean;
@@ -336,11 +401,25 @@ type TransitionClickLike = {
 
 function findCausalTransition(
   transitionEvidence: TransitionClickLike[],
-  assertionStepIndex: number
+  assertionStepIndex: number,
+  caseResult?: CaseDiscoveryResult,
 ): TransitionClickLike | undefined {
   const before = transitionEvidence.filter((t) => typeof t.stepIndex === "number" && t.stepIndex < assertionStepIndex);
-  if (before.length === 0) return transitionEvidence[0];
-  return before.reduce((best, current) => (current.stepIndex > best.stepIndex ? current : best), before[0]);
+  if (before.length === 0) return undefined;
+  const candidate = before.reduce((best, current) => (current.stepIndex > best.stepIndex ? current : best), before[0]);
+  if (caseResult?.steps.some((step) =>
+    step.index > candidate.stepIndex
+    && step.index < assertionStepIndex
+    && step.status === "found"
+    && !isAssertionLikeStep(step)
+  )) return undefined;
+  return candidate;
+}
+
+function isStructuralStateAssertion(text: string): boolean {
+  const normalized = normalizeOracleText(text);
+  return /\b(pantalla|pagina|vista|estado|sesion|inicio|landing)\b/.test(normalized)
+    && /\b(muestre|muestra|mostrar|visible|presente|autenticad|activa|estado|pantalla|vista)\b/.test(normalized);
 }
 
 function findAssertionStepIndexAfter(
@@ -368,7 +447,9 @@ function buildExpectedObservableOracles(
     source: "runtime_snapshot" | "runtime_transition" | "runtime_auth_gate";
     evidence: string[];
   }> | undefined,
-  scenarioSteps?: Array<{ index: number; action: string; expected?: string }>,
+  scenarioSteps?: Array<{ index: number; action: string; expected?: string; polarity?: AssertionPolarity; requirementRefs?: string[]; canonicalAssertion?: import("../scenarios/canonical-scenario").CanonicalAssertion; conditionalAction?: import("../scenarios/canonical-scenario").CanonicalConditionalAction }>,
+  canonicalRequirements?: CanonicalRequirement[],
+  expectedResultRequirementRefs?: string[],
 ): SpecGenerationObservableOracle[] {
   const transitionEvidence = caseResult.runtimeEvidenceTrace?.clickActions
     ?.filter((click) => click.success && (click.transitionDetected === true || Boolean(click.postClickUiChange)))
@@ -387,7 +468,18 @@ function buildExpectedObservableOracles(
       index: step.index,
       requirement: extractQuotedAssertionTarget(step.action) ?? step.expected?.trim() ?? step.action.trim(),
       combined: normalizeOracleText(`${step.action} ${step.expected ?? ""}`),
+      requirementRefs: step.requirementRefs,
     }));
+  const resolveScenarioAssertionPolarity = (
+    _requirement: string | undefined,
+    stepIndex?: number,
+  ): AssertionPolarity | undefined => {
+    const scenarioStep = typeof stepIndex === "number"
+      ? scenarioSteps?.find((step) => step.index === stepIndex)
+      : undefined;
+    if (scenarioStep?.polarity) return scenarioStep.polarity;
+    return resolveObservableOraclePolarity(scenarioStep?.requirementRefs, canonicalRequirements);
+  };
   const authAssertionCandidates = assertionCandidates.filter((candidate) =>
     /(auth|autentic|identific|otp|flujo)/.test(candidate.combined)
   );
@@ -417,10 +509,18 @@ function buildExpectedObservableOracles(
         };
       })
       .sort((a, b) => b.confidence - a.confidence)[0];
+    const semanticAssertionPolarity = (() => {
+      const scenarioStep = typeof bestSemanticTarget?.candidate.stepIndex === "number"
+        ? scenarioSteps?.find((step) => step.index === bestSemanticTarget.candidate.stepIndex)
+        : undefined;
+      return scenarioStep?.polarity
+        ?? resolveObservableOraclePolarity(scenarioStep?.requirementRefs, canonicalRequirements);
+    })();
     const semanticEquivalent = Boolean(
       bestSemanticTarget
       && bestSemanticTarget.confidence >= 0.72
       && normalizeOracleText(bestSemanticTarget.candidate.observedTarget) !== normalized
+      && semanticAssertionPolarity === "positive"
     );
 
     let type: SpecGenerationObservableOracleType = "unsupported_or_unresolved";
@@ -429,6 +529,7 @@ function buildExpectedObservableOracles(
     let details: Record<string, unknown> | undefined;
     let stepIndex: number | undefined;
     let target: string | undefined;
+    let polarity: AssertionPolarity | undefined;
 
     if (authSignal && (authGateEvidence?.authGateDiagnostics?.detected || authMetadata?.authGateDetectedDuringDiscovery === true)) {
       type = "auth_gate";
@@ -450,15 +551,29 @@ function buildExpectedObservableOracles(
         detectedBeforeStep: authGateEvidence?.authGateDiagnostics?.detectedBeforeStep ?? null,
         authFlowLanding: typeof authMetadata?.authFlowLanding === "string" ? authMetadata.authFlowLanding : null,
       };
-    } else if (navigationSignal && transitionEvidence.length > 0) {
+    } else if ((navigationSignal || isStructuralStateAssertion(line)) && transitionEvidence.length > 0) {
       type = "navigation_transition";
       backed = true;
-      const navigationAssertion = navigationAssertionCandidates[0];
+      const navigationAssertion = assertionCandidates.find((candidate) =>
+        isStructuralStateAssertion(candidate.requirement)
+        && (normalizeOracleText(candidate.requirement).includes(normalized)
+          || normalized.includes(normalizeOracleText(candidate.requirement)))
+      ) ?? navigationAssertionCandidates[0];
       // Causal action: the closest executed action with transition evidence BEFORE the
       // assertion step. Never default to the first action of the scenario.
       const causalTransition = navigationAssertion
-        ? findCausalTransition(transitionEvidence, navigationAssertion.index) ?? transitionEvidence[transitionEvidence.length - 1]
+        ? findCausalTransition(transitionEvidence, navigationAssertion.index, caseResult)
         : transitionEvidence[transitionEvidence.length - 1];
+      if (!causalTransition) {
+        return {
+          id: `expected-${String(index + 1).padStart(2, "0")}`,
+          requirement,
+          type: "unsupported_or_unresolved" as const,
+          backed: false,
+          source: "inferred" as const,
+          evidence: ["post_action_state_invalidated_by_intervening_action"],
+        };
+      }
       // Scenario step index of the assertion/outcome: prefer the text-based navigation
       // assertion, otherwise the first scenario assertion immediately after the causal action.
       const assertionIndex = navigationAssertion?.index
@@ -471,6 +586,10 @@ function buildExpectedObservableOracles(
       if (navigationAssertion) {
         requirement = navigationAssertion.requirement;
       }
+      polarity = resolveObservableOraclePolarity(
+        navigationAssertion?.requirementRefs,
+        canonicalRequirements,
+      ) ?? resolveScenarioAssertionPolarity(requirement, assertionIndex);
       target = causalTransition.resolvedTarget ?? causalTransition.target;
       evidence.push(
         `transition_observed:${causalTransition.transitionDetected === true}`,
@@ -496,6 +615,7 @@ function buildExpectedObservableOracles(
         sourceActionStepIndex: causalTransition.stepIndex,
         ...(expectedUrl ? { expectedUrl } : {})
       };
+      if (polarity) evidence.push(`assertion_polarity:${polarity}`);
     } else if (semanticEquivalent && bestSemanticTarget) {
       type = "heading_or_control";
       backed = true;
@@ -556,17 +676,117 @@ function buildExpectedObservableOracles(
       backed,
       source: backed ? "discovery" : "inferred",
       stepIndex,
+      ...(expectedResultRequirementRefs?.[index] ? { requirementRefs: [expectedResultRequirementRefs[index]] } : {}),
       target,
+      ...(type === "navigation_transition" && polarity ? { polarity } : {}),
       evidence,
       details,
     };
   });
 }
 
+export function reconcileWorkflowAssertionsBeforeFinalStatus(
+  scenario: TestScenario,
+  steps: DiscoveryStepResult[]
+): number {
+  const provisionalResult = {
+    steps,
+    runtimeEvidenceTrace: buildRuntimeEvidenceTrace({ steps } as CaseDiscoveryResult),
+  } as CaseDiscoveryResult;
+  const sourceOracles = buildPromotionSourceScenario(scenario, provisionalResult).observableOracles;
+  const oracles = [...sourceOracles];
+  const expectedNarratives = [
+    typeof scenario.raw?.custom_expected === "string" ? scenario.raw.custom_expected : "",
+    ...scenario.steps.map((step) => step.expected ?? ""),
+  ].filter((value) => value.trim().length > 0);
+  const pendingAssertions = steps.filter((step) =>
+    isAssertionLikeStep(step)
+    && (step.status === "not_found" || step.status === "needs_assertion_resolution")
+    && step.pendingDiscovery === true
+  );
+
+  // The shared oracle builder may bind one narrative oracle to the first
+  // assertion candidate. Reuse that same backed evidence for other pending
+  // assertions only when their wording is semantically covered by the
+  // generated requirement, preserving step identity for reconciliation.
+  for (const pending of pendingAssertions) {
+    const target = normalizeOracleText(pending.targetText ?? pending.action);
+    const alreadyBound = oracles.some((oracle) =>
+      oracle.backed === true
+      && typeof oracle.stepIndex === "number"
+      && oracle.stepIndex === pending.index
+    );
+    if (!target || alreadyBound) continue;
+
+    const supportingOracle = sourceOracles.find((oracle) => {
+      if (oracle.backed !== true || !["navigation_transition", "auth_gate"].includes(oracle.type)) return false;
+      const requirement = normalizeOracleText(oracle.requirement);
+      const targetTokens = new Set(target.split(" ").filter((token) => token.length > 2));
+      const narrativeCoversTarget = expectedNarratives.some((narrative) => {
+        const narrativeTokens = new Set(normalizeOracleText(narrative).split(" ").filter((token) => token.length > 2));
+        const narrativeShared = [...targetTokens].filter((token) => narrativeTokens.has(token)).length;
+        return targetTokens.size > 0 && narrativeShared / targetTokens.size >= 0.5;
+      });
+      return requirement.includes(target)
+        || target.includes(requirement)
+        || scoreSemanticEquivalence(pending.targetText ?? pending.action, oracle.requirement) >= 0.35
+        || narrativeCoversTarget;
+    });
+    if (!supportingOracle) continue;
+
+    oracles.push({
+      ...supportingOracle,
+      id: `${supportingOracle.id}-step-${pending.index}`,
+      requirement: pending.targetText ?? pending.action,
+      stepIndex: pending.index,
+      details: {
+        ...(supportingOracle.details ?? {}),
+        reconciledAssertionStepIndex: pending.index,
+      },
+    });
+  }
+
+  return reconcilePendingAssertionsWithBackedOracles(steps, oracles);
+}
+
+export function attachObservableOracleRequirementRefs(
+  oracles: SpecGenerationObservableOracle[],
+  sourceSteps: Array<{ index: number; requirementRefs?: string[] }>,
+): SpecGenerationObservableOracle[] {
+  const refsByStep = new Map(sourceSteps.map((step) => [step.index, step.requirementRefs]));
+  return oracles.map((oracle) => {
+    const refs = typeof oracle.stepIndex === "number" ? refsByStep.get(oracle.stepIndex) : undefined;
+    return refs && refs.length > 0
+      ? { ...oracle, requirementRefs: [...refs] }
+      : { ...oracle, requirementRefs: undefined };
+  });
+}
+
+export function resolveCanonicalRequirementById(
+  requirements: CanonicalRequirement[] | undefined,
+  requirementId: string,
+): CanonicalRequirement | undefined {
+  if (!requirements || !requirementId) return undefined;
+  return requirements.find((requirement) => requirement.requirementId === requirementId);
+}
+
+export function resolveObservableOraclePolarity(
+  requirementRefs: string[] | undefined,
+  requirements: CanonicalRequirement[] | undefined,
+): AssertionPolarity | undefined {
+  if (!requirementRefs || requirementRefs.length === 0 || !requirements) return undefined;
+  const polarities = requirementRefs.map((ref) => resolveCanonicalRequirementById(requirements, ref)?.polarity);
+  if (polarities.some((polarity) => polarity === undefined)) return undefined;
+  const distinct = new Set(polarities);
+  return distinct.size === 1 ? polarities[0] : undefined;
+}
+
 export function buildPromotionSourceScenario(
   scenario: TestScenario,
   caseResult: CaseDiscoveryResult
 ): SpecGenerationSourceScenario {
+  const canonicalRequirements = (scenario as TestScenario & { canonicalRequirements?: CanonicalRequirement[] }).canonicalRequirements;
+  const expectedResultRequirementRefs = (scenario as TestScenario & { expectedResultRequirementRefs?: string[] }).expectedResultRequirementRefs;
   const rawExpected = typeof scenario.raw?.custom_expected === "string" ? scenario.raw.custom_expected : "";
   const stepExpected = scenario.steps
     .map((step) => step.expected?.trim())
@@ -603,8 +823,17 @@ export function buildPromotionSourceScenario(
   const transitionEvidence = caseResult.runtimeEvidenceTrace?.clickActions
     ?.filter((click) => click.success && (click.transitionDetected === true || Boolean(click.postClickUiChange)))
     ?? [];
+  const resolveScenarioStepPolarity = (stepIndex: number, _requirement: string): AssertionPolarity | undefined => {
+    const scenarioStep = scenario.steps.find((candidate) => candidate.index === stepIndex);
+    const declaredPolarity = (scenarioStep as (typeof scenarioStep & { polarity?: AssertionPolarity }) | undefined)?.polarity;
+    if (declaredPolarity) return declaredPolarity;
+    const requirementRefs = Array.isArray((scenarioStep as (typeof scenarioStep & { requirementRefs?: string[] }) | undefined)?.requirementRefs)
+      ? (scenarioStep as (typeof scenarioStep & { requirementRefs?: string[] })).requirementRefs
+      : undefined;
+    return resolveObservableOraclePolarity(requirementRefs, canonicalRequirements);
+  };
   const satisfiedReconciledOracles: SpecGenerationObservableOracle[] = satisfiedByPreviousAssertionSteps
-    .map((step) => {
+    .map((step): SpecGenerationObservableOracle | null => {
       const requirement = (step.targetText ?? step.action ?? "").trim();
       if (!requirement) return null;
       const normalized = normalizeOracleText(requirement);
@@ -637,8 +866,9 @@ export function buildPromotionSourceScenario(
           },
         };
       }
-      if (navigationSignal && transitionEvidence.length > 0) {
-        const causalTransition = findCausalTransition(transitionEvidence, step.index) ?? transitionEvidence[0];
+      if ((navigationSignal || isStructuralStateAssertion(requirement)) && transitionEvidence.length > 0) {
+        const causalTransition = findCausalTransition(transitionEvidence, step.index, caseResult);
+        if (!causalTransition) return null;
         const expectedUrl = typeof causalTransition.afterUrl === "string" && causalTransition.afterUrl.trim()
           ? causalTransition.afterUrl.trim()
           : undefined;
@@ -653,6 +883,7 @@ export function buildPromotionSourceScenario(
           source: "discovery" as const,
           stepIndex: step.index,
           target: causalTransition.resolvedTarget ?? causalTransition.target,
+          polarity: resolveScenarioStepPolarity(step.index, requirement),
           evidence: [
             `transition_observed:${causalTransition.transitionDetected === true}`,
             `click_target:${causalTransition.target}`,
@@ -690,8 +921,28 @@ export function buildPromotionSourceScenario(
     index: step.index,
     action: step.action,
     expected: step.expected?.trim() || undefined,
+    polarity: (step as typeof step & { polarity?: AssertionPolarity }).polarity,
+    requirementRefs: Array.isArray(step.requirementRefs) && step.requirementRefs.length > 0
+      ? [...step.requirementRefs]
+      : undefined,
+      canonicalAssertion: step.canonicalAssertion,
+      conditionalAction: (step as typeof step & { conditionalAction?: import("../scenarios/canonical-scenario").CanonicalConditionalAction }).conditionalAction,
     assertionImportance: discoveryStepByIndex.get(step.index)?.assertionImportance
   }));
+  const canonicalRequirementById = new Map((canonicalRequirements ?? []).map((requirement) => [requirement.requirementId, requirement]));
+  const seenControlledAdvanceAssertions = new Set<string>();
+  const controlledAdvanceAssertions = scenario.steps.flatMap((step) => {
+    const refs = Array.isArray(step.requirementRefs) ? step.requirementRefs : [];
+    return refs.flatMap((ref) => (((canonicalRequirementById.get(ref) as (CanonicalRequirement & { assertionIntents?: CanonicalAssertionIntent[] }) | undefined)?.assertionIntents ?? []).flatMap((intent) => {
+      const key = `${ref}:${intent}`;
+      if (seenControlledAdvanceAssertions.has(key)) return [];
+      seenControlledAdvanceAssertions.add(key);
+      return [{ index: step.index, requirement: step.action, requirementRefs: [ref], intent, polarity: canonicalRequirementById.get(ref)?.polarity }];
+    })));
+  });
+  const controlledAdvanceOracles = caseResult.controlledAdvanceProbe && controlledAdvanceAssertions.length > 0
+    ? buildControlledAdvanceProbeOracles({ result: caseResult.controlledAdvanceProbe, assertions: controlledAdvanceAssertions })
+    : [];
   const semanticReconciliations: Array<{
     expectedTarget: string;
     observedTarget: string;
@@ -709,6 +960,7 @@ export function buildPromotionSourceScenario(
       source: "discovery" as const,
       evidence: ["assertion_resolved_during_discovery"],
     })),
+    ...controlledAdvanceOracles,
     ...buildExpectedObservableOracles(
       expectedLines,
       observedAssertions,
@@ -717,6 +969,8 @@ export function buildPromotionSourceScenario(
       authMetadata as Record<string, unknown> | undefined,
       semanticReconciliations,
       scenarioSteps,
+      canonicalRequirements,
+      expectedResultRequirementRefs,
     ),
     ...satisfiedReconciledOracles,
   ];
@@ -729,7 +983,7 @@ export function buildPromotionSourceScenario(
       .filter((oracle) => oracle.backed === true && oracle.type !== "unsupported_or_unresolved" && typeof oracle.stepIndex === "number")
       .map((oracle) => oracle.stepIndex as number)
   );
-  const observableOracles = observableOraclesRaw.filter((oracle) => {
+  const filteredObservableOracles = observableOraclesRaw.filter((oracle) => {
     const provisional = oracle.type === "unsupported_or_unresolved"
       && oracle.backed === false
       && typeof oracle.stepIndex === "number"
@@ -739,6 +993,11 @@ export function buildPromotionSourceScenario(
     }
     return !provisional;
   });
+  const observableOracles = attachObservableOracleRequirementRefs(filteredObservableOracles, scenarioSteps)
+    .map((oracle) => {
+      const polarity = resolveObservableOraclePolarity(oracle.requirementRefs, canonicalRequirements);
+      return polarity ? { ...oracle, polarity } : oracle;
+    });
   return {
     title: scenario.title,
     steps: scenario.steps.map((step) => ({
@@ -746,6 +1005,12 @@ export function buildPromotionSourceScenario(
       action: step.action,
       description: step.action,
       expected: step.expected?.trim() || undefined,
+      polarity: (step as typeof step & { polarity?: AssertionPolarity }).polarity,
+    requirementRefs: Array.isArray(step.requirementRefs) && step.requirementRefs.length > 0
+      ? [...step.requirementRefs]
+      : undefined,
+    canonicalAssertion: step.canonicalAssertion,
+      conditionalAction: (step as typeof step & { conditionalAction?: import("../scenarios/canonical-scenario").CanonicalConditionalAction }).conditionalAction,
       assertionImportance: discoveryStepByIndex.get(step.index)?.assertionImportance
     })),
     expectedResult: expectedResult || undefined,
@@ -755,7 +1020,31 @@ export function buildPromotionSourceScenario(
     ]),
     observedAssertions,
     observableOracles,
+    requirements: canonicalRequirements,
+    expectedResultRequirementRefs: expectedResultRequirementRefs ? [...expectedResultRequirementRefs] : undefined,
+    stepRequirementRefs: (scenario as TestScenario & { stepRequirementRefs?: Array<{ stepIndex: number; requirementId: string; facet?: string }> }).stepRequirementRefs?.map((ref) => ({
+      stepIndex: ref.stepIndex,
+      requirementId: ref.requirementId,
+      facet: ref.facet,
+    })),
+    stepClaims: (scenario as TestScenario & { stepClaims?: Array<{ stepIndex: number; claimId: string; requirementId?: string; facet?: string }> }).stepClaims?.map((claim) => ({
+      stepIndex: claim.stepIndex,
+      claimId: claim.claimId,
+      requirementId: claim.requirementId,
+      facet: claim.facet,
+      required: undefined,
+      coverable: undefined,
+    })),
     stepStatuses: caseResult.steps.map((step) => ({ index: step.index, status: step.status })),
+    ...(caseResult.controlledAdvanceProbe ? {
+      controlledAdvanceProbe: {
+        candidateFound: caseResult.controlledAdvanceProbe.candidateFound,
+        attemptObserved: caseResult.controlledAdvanceProbe.attemptObserved,
+        validationObserved: caseResult.controlledAdvanceProbe.validationObserved,
+        blockedObserved: caseResult.controlledAdvanceProbe.blockedObserved,
+        transitionOccurred: caseResult.controlledAdvanceProbe.transitionOccurred,
+      }
+    } : {}),
     auth: {
       required: authMetadata?.authFlowRequired === true ? true : undefined,
       gateDetected: authMetadata?.authGateDetectedDuringDiscovery === true || Boolean(authGateEvidence) ? true : undefined,
@@ -854,7 +1143,8 @@ export function buildRuntimeEvidenceTrace(caseResult: CaseDiscoveryResult): Runt
       resolvedTarget: s.resolvedTargetName ?? s.candidateText,
       actionType: s.action,
       ownerContext: (s.assertionDiagnostics as any)?.assertionContextDiagnostics?.currentContext,
-      locatorStrategy: s.locatorStrategy,
+       locatorStrategy: s.locatorStrategy,
+       controlIdentity: s.controlIdentity,
       success: true,
       transitionDetected: s.status !== "click_no_transition",
       postClickUiChange: (s.assertionDiagnostics as any)?.postClickUiChangeReason,
@@ -872,7 +1162,8 @@ export function buildRuntimeEvidenceTrace(caseResult: CaseDiscoveryResult): Runt
       source: (s.assertionDiagnostics as any)?.valueSource,
       locatorStrategy: s.locatorStrategy,
       success: true,
-      activeContainerType: (s.assertionDiagnostics as any)?.activeContainer?.type
+       activeContainerType: (s.assertionDiagnostics as any)?.activeContainer?.type
+       ,controlIdentity: s.controlIdentity
     }));
   const formEvidence = caseResult.steps
     .filter((s) => isClickAction(s.action) && /place order|submit|purchase|form|modal|dialog/i.test(s.targetText ?? ""))
@@ -1375,16 +1666,6 @@ export function collectLocalPendingAssertionDiagnostics(
       console.log(`[observable-oracle] type=auth_gate stage=${stage} backed=true`);
       return true;
     }
-    if (
-      bestSemanticMatch
-      && bestSemanticMatch.confidence >= 0.72
-      && normalize(bestSemanticMatch.candidate.observedTarget) !== normalized
-    ) {
-      console.log(
-        `[semantic-reconciliation] expected="${assertionText}" observed="${bestSemanticMatch.candidate.observedTarget}" equivalent=true confidence=${bestSemanticMatch.confidence.toFixed(2)} source=${bestSemanticMatch.candidate.source}`
-      );
-      return true;
-    }
     if (wasActionExecutedForAssertion(assertionText)) return true;
     if (hasFeedbackEvidenceFor(assertionText)) return true;
     if (hasStructuralEvidenceFor(assertionText, inferredType)) return true;
@@ -1748,6 +2029,25 @@ export function printCaseDiscoverySummary(result: CaseDiscoveryResult, workflowR
   }
 }
 
+export function toScenarioDataOverrides(runtimeEntries: DataContextEntry[] | undefined): Record<string, string> {
+  const overrides: Record<string, string> = {};
+  if (!Array.isArray(runtimeEntries)) return overrides;
+  for (const entry of runtimeEntries) {
+    if (!entry || typeof entry.key !== "string" || entry.key.trim() === "") continue;
+    if (entry.value === undefined || entry.value === null) continue;
+    const value = String(entry.value).trim();
+    if (!value) continue;
+    overrides[entry.key] = value;
+  }
+  return overrides;
+}
+
+export function buildDiscoveryBrowserContextOptions(config: {
+  app?: { ignoreHTTPSErrors?: unknown };
+}): { ignoreHTTPSErrors: boolean } {
+  return { ignoreHTTPSErrors: config.app?.ignoreHTTPSErrors === true };
+}
+
 export async function runCaseDiscoveryWorkflow(
   options: CaseDiscoveryWorkflowOptions
 ): Promise<CaseDiscoveryWorkflowResult> {
@@ -1766,6 +2066,13 @@ export async function runCaseDiscoveryWorkflow(
   try {
     const { loadPromotedAppConfigSync: loadCfg } = await import("../automations/app-profile");
     const cfg: any = loadCfg({ appSlug: workflowAppSlug });
+    activeConfig = {
+      ...activeConfig,
+      app: {
+        ...activeConfig.app,
+        ignoreHTTPSErrors: cfg?.ignoreHTTPSErrors === true,
+      } as typeof activeConfig.app,
+    };
     const configured: string | undefined = typeof cfg?.baseUrl === "string" ? cfg.baseUrl.trim() : undefined;
     const requested: string | undefined = activeConfig.app.baseUrl?.trim();
     if (configured) {
@@ -1791,7 +2098,10 @@ export async function runCaseDiscoveryWorkflow(
   let client: TestRailClient;
   
   if (options.scenario) {
-    scenario = options.scenario;
+    scenario = attachCanonicalScenarioLineage(options.scenario);
+    if (scenario.canonicalScenarioId) {
+      console.log(`[canonical-lineage] requirementCount=${scenario.canonicalRequirements?.length ?? 0} linkedStepRefs=${scenario.stepRequirementRefs?.length ?? 0} polaritySource=canonical_only`);
+    }
     if (!options.testRailClient) {
       const testRailRuntimeConfig = requireTestRailConfig(activeConfig);
       client = new TestRailClient(testRailRuntimeConfig);
@@ -1813,7 +2123,56 @@ export async function runCaseDiscoveryWorkflow(
     if (scenarios.length === 0) {
       throw new Error(`No scenario could be generated for case C${options.caseId}.`);
     }
-    scenario = scenarios[0];
+    const normalizedScenario = scenarios[0];
+    const canonicalScenario = canonicalizeTestRailCase(rawCase);
+    const canonicalInputRequirements = extractCanonicalInputRequirements(rawCase);
+    const runtimeTransformation = transformTestRailCaseForRuntime(rawCase);
+    const canonicalStepByOrder = new Map(canonicalScenario.steps.map((step) => [step.order, step]));
+    const canonicalSteps = normalizedScenario.steps.map((step) => {
+      const canonicalStep = canonicalStepByOrder.get(step.index);
+      return {
+        ...step,
+        ...(canonicalStep?.valueKey ? { valueKey: canonicalStep.valueKey } : {}),
+        ...(canonicalStep?.entityScope ? { entityScope: canonicalStep.entityScope } : {}),
+        ...(canonicalStep?.rowScope !== undefined ? { rowScope: canonicalStep.rowScope } : {}),
+        ...(canonicalStep?.rowRelation ? { rowRelation: canonicalStep.rowRelation } : {}),
+        ...(canonicalStep?.associatedField ? { associatedField: canonicalStep.associatedField } : {}),
+        ...(canonicalStep?.selectionField ? { selectionField: canonicalStep.selectionField } : {}),
+        ...(canonicalStep?.expectedValueKey ? { expectedValueKey: canonicalStep.expectedValueKey } : {}),
+        ...(canonicalStep?.requirementRefs ? { requirementRefs: [...canonicalStep.requirementRefs] } : {}),
+        ...(canonicalStep?.polarity ? { polarity: canonicalStep.polarity } : {}),
+        ...(canonicalStep?.canonicalAssertion ? { canonicalAssertion: { ...canonicalStep.canonicalAssertion, ...(canonicalStep.canonicalAssertion.childExpectations ? { childExpectations: [...canonicalStep.canonicalAssertion.childExpectations] } : {}) } } : {}),
+      };
+    });
+    const stepRequirementRefs = canonicalScenario.steps.flatMap((step) =>
+      (step.requirementRefs ?? []).map((requirementId) => ({ stepIndex: step.order, requirementId }))
+    );
+    scenario = {
+      ...normalizedScenario,
+      steps: canonicalSteps,
+      canonicalScenarioId: canonicalScenario.scenarioId,
+      canonicalRequirements: canonicalScenario.requirements,
+      canonicalInputRequirements,
+      expectedResultRequirementRefs: canonicalScenario.expectedResultRequirementRefs,
+      stepRequirementRefs,
+      stepClaims: stepRequirementRefs.map((ref) => ({
+        stepIndex: ref.stepIndex,
+        claimId: `${ref.requirementId}:claim`,
+        requirementId: ref.requirementId,
+        required: true,
+        coverable: true,
+      })),
+      runtimeInputRequirements: runtimeTransformation.inputRequirements.map((requirement) => ({
+        key: requirement.key,
+        ...(requirement.required !== undefined ? { required: requirement.required } : {}),
+        source: requirement.source,
+        ...(requirement.provenance ? { provenance: requirement.provenance } : {}),
+        ...(requirement.valueRole ? { valueRole: requirement.valueRole } : {}),
+        ...(requirement.oracleSource ? { oracleSource: requirement.oracleSource } : {}),
+        ...(requirement.dependsOn ? { dependsOn: [...requirement.dependsOn] } : {}),
+      })),
+    };
+    console.log(`[canonical-lineage] requirementCount=${canonicalScenario.requirements.length} linkedStepRefs=${stepRequirementRefs.length} polaritySource=canonical_only`);
   }
 
   // Resolve sectionProfile from TestRail case or scenario
@@ -1848,7 +2207,7 @@ export async function runCaseDiscoveryWorkflow(
   const headless = !options.headed;
   const browserLaunchSource = options.executionSource?.trim() || "cli";
 
-  let browser;
+  let session: Awaited<ReturnType<typeof launchRuntimeBrowserSession>> | undefined;
   let caseResult: CaseDiscoveryResult | undefined;
   let promoted = false;
   let automationId: string | undefined;
@@ -1859,12 +2218,46 @@ export async function runCaseDiscoveryWorkflow(
   let specGeneration: CaseDiscoveryWorkflowResult["specGeneration"] | undefined;
   try {
     console.log(`[browser-launch] source=${browserLaunchSource} headless=${headless}`);
-    browser = await browserType.launch({ headless });
-    const context = await browser.newContext();
-    const page = await context.newPage();
+    const contextOptions = buildDiscoveryBrowserContextOptions(activeConfig);
+    console.log(`[initial-navigation] phase=context ignoreHTTPSErrors=${contextOptions.ignoreHTTPSErrors}`);
+    session = await launchRuntimeBrowserSession({
+      browserType,
+      headless,
+      targetUrl: activeConfig.app.baseUrl,
+      profilePath: activeConfig.execution.qaBrowserProfilePath,
+      channel: activeConfig.execution.qaBrowserChannel,
+      contextOptions,
+    });
+    const context = session.context;
+    const page = session.page;
+    console.log(`[initial-navigation] phase=target_page_selected targetOrigin=${new URL(activeConfig.app.baseUrl).origin}`);
     page.setDefaultTimeout(activeConfig.execution.defaultTimeoutMs);
 
-    const loginStrategy = getLoginStrategy(activeConfig.app.loginMode);
+    const runtimeEntries = options.runtimeEntries ?? [];
+    const runtimeEntryByKey = new Map(runtimeEntries.map((entry) => [entry.key.trim().toLowerCase(), entry] as const));
+    const runtimeValue = (...keys: string[]): string | undefined => {
+      for (const key of keys) {
+        const entry = runtimeEntryByKey.get(key.toLowerCase());
+        if (entry?.value?.trim()) return entry.value.trim();
+      }
+      return undefined;
+    };
+    const runtimeUsername = runtimeValue("auth.username", "username", "APP_USERNAME");
+    const runtimePassword = runtimeValue("auth.password", "password", "APP_PASSWORD");
+    const runtimeIdentity = runtimeValue("auth.company_identifier", "auth.identification_number", "identificationNumber", "Identity_Provider");
+    const runtimeOtp = runtimeValue("auth.otp", "otp", "OTP_SECRET");
+    const hasRuntimeContext = runtimeEntries.length > 0;
+    const loginConfig = runtimeUsername || runtimePassword
+      ? {
+          ...activeConfig,
+          app: {
+            ...activeConfig.app,
+            ...(runtimeUsername ? { username: runtimeUsername } : {}),
+            ...(runtimePassword ? { password: runtimePassword } : {}),
+          },
+        }
+      : activeConfig;
+    const loginStrategy = getLoginStrategy(loginConfig.app.loginMode);
 
     const aiExplorerProvider = activeConfig.integrations.ai?.agentProvider === "none"
       ? "custom"
@@ -1911,7 +2304,7 @@ export async function runCaseDiscoveryWorkflow(
         appSlug: workflowAppSlug,
         testData: activeConfig.app.testData,
         loginAction: async () => {
-          await loginStrategy.execute(page, activeConfig);
+          await loginStrategy.execute(page, loginConfig);
         },
         aiAssistedDiscovery: {
           explorer: createAIExplorer({
@@ -1927,19 +2320,19 @@ export async function runCaseDiscoveryWorkflow(
           }
         },
         env: {
-          APP_TEST_DATA_JSON: activeConfig.app.rawTestData,
-          APP_TEST_DATA_ALIASES_JSON: activeConfig.app.testDataAliases,
-          Identity_Provider: process.env.Identity_Provider,
-          OTP_SECRET: process.env.OTP_SECRET,
-          APP_USERNAME: activeConfig.app.username,
-          APP_PASSWORD: activeConfig.app.password,
+          APP_TEST_DATA_JSON: hasRuntimeContext ? {} : activeConfig.app.rawTestData,
+          APP_TEST_DATA_ALIASES_JSON: hasRuntimeContext ? {} : activeConfig.app.testDataAliases,
+          Identity_Provider: runtimeIdentity ?? (hasRuntimeContext ? undefined : process.env.Identity_Provider),
+          OTP_SECRET: runtimeOtp ?? (hasRuntimeContext ? undefined : process.env.OTP_SECRET),
+          APP_USERNAME: runtimeUsername ?? (hasRuntimeContext ? undefined : activeConfig.app.username),
+          APP_PASSWORD: runtimePassword ?? (hasRuntimeContext ? undefined : activeConfig.app.password),
           APP_SLUG: workflowAppSlug,
           APP_PROFILE: workflowAppSlug,
           APP_EXTRA_LOGIN_FIELDS_JSON: activeConfig.app.extraLoginFields,
-          MISSING_INPUT_BEHAVIOR: activeConfig.app.missingInputBehavior,
-          AUTO_GENERATE_TEST_DATA: activeConfig.app.autoGenerateTestData,
-          AUTO_GENERATE_SENSITIVE_DATA: activeConfig.app.autoGenerateSensitiveData,
-          APP_TEST_DATA_PROFILE: activeConfig.app.testDataProfile,
+          MISSING_INPUT_BEHAVIOR: hasRuntimeContext ? "fail" : activeConfig.app.missingInputBehavior,
+          AUTO_GENERATE_TEST_DATA: hasRuntimeContext ? false : activeConfig.app.autoGenerateTestData,
+          AUTO_GENERATE_SENSITIVE_DATA: hasRuntimeContext ? false : activeConfig.app.autoGenerateSensitiveData,
+          APP_TEST_DATA_PROFILE: hasRuntimeContext ? "qa" : activeConfig.app.testDataProfile,
           AUTO_SELECT_SAFE_DEFAULTS: activeConfig.app.autoSelectSafeDefaults,
           AUTO_ACCEPT_SAFE_CHECKBOXES: activeConfig.app.autoAcceptSafeCheckboxes
         },
@@ -1948,6 +2341,9 @@ export async function runCaseDiscoveryWorkflow(
         evidenceRecorder: evidenceRecorder || undefined,
         executionMode: options.executionMode,
         adaptiveContext: options.adaptiveContext,
+        runtimeEntries: options.runtimeEntries,
+        scenarioDataOverrides: toScenarioDataOverrides(options.runtimeEntries),
+        beforeFinalStatusCalculation: (steps) => reconcileWorkflowAssertionsBeforeFinalStatus(scenario, steps),
       });
     } finally {
       // Finalize evidence recording (always runs, even on failure)
@@ -2381,6 +2777,20 @@ export async function runCaseDiscoveryWorkflow(
 
     const promotionResultPath = path.join(outputDir, "promotion-result.json");
     const sourceScenario = buildPromotionSourceScenario(scenario, caseResult);
+    if (options.contextOnly) {
+      if (!caseResult.candidatePlan || !sourceScenario.steps?.length) {
+        return { ...caseResult, status: "discovery_failed", failedReason: "insufficient_context", outputDir } as any;
+      }
+      await materializePromotionContext({ plan: caseResult.candidatePlan, sourceScenario, appProfile: options.appProfile!, sectionSlug: sectionProfile?.sectionSlug, outputRoot: path.resolve(".") });
+      return {
+        caseResult,
+        contextMaterialized: true,
+        promoted: false,
+        promotionStatus: "context_materialized",
+        promotionReason: "context_only",
+        appSlug: options.appProfile?.appSlug,
+      };
+    }
     const gate = evaluatePromotionGate({
       discoveryResult: caseResult,
       candidatePlan: caseResult.candidatePlan,
@@ -2530,8 +2940,8 @@ export async function runCaseDiscoveryWorkflow(
 
     await writeFile(promotionResultPath, JSON.stringify(promotionReport, null, 2), "utf-8");
   } finally {
-    if (browser) {
-      await browser.close();
+    if (session) {
+      await session.close();
     }
   }
 

@@ -37,6 +37,7 @@
     "cases:start": "tsx src/cli/cases-start.ts",
     "discovery:scan": "tsx src/cli/discovery-scan.ts",
     "discovery:case": "tsx src/cli/discovery-case.ts",
+    "discovery:secure-runtime": "tsx src/cli/secure-runtime-runner.ts",
     "discovery:batch": "tsx src/cli/discovery-batch.ts",
     "discovery:catalog": "tsx src/cli/discovery-catalog.ts",
     "discovery:preview": "tsx src/cli/discovery-preview.ts",
@@ -54,6 +55,8 @@
     "cors": "^2.8.6",
     "dotenv": "^16.6.1",
     "express": "^5.2.1",
+    "multer": "^2.3.0",
+    "odbc": "^2.5.0",
     "oracledb": "^7.0.1",
     "webdriverio": "^9.30.0"
   },

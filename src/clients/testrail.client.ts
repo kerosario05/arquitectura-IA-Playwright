@@ -60,6 +60,15 @@ type CasesPagePayload = {
   };
 };
 
+export type TestRailCaseFieldMetadata = {
+  id: number;
+  name: string;
+  label: string;
+  type: string;
+  configs: unknown;
+  is_active: boolean;
+};
+
 export class TestRailClient {
   private readonly baseApiUrl: string;
 
@@ -81,6 +90,26 @@ export class TestRailClient {
       throw new Error(`Invalid get_case response for case ${caseId}.`);
     }
     return payload;
+  }
+
+  async getCaseFields(): Promise<TestRailCaseFieldMetadata[]> {
+    const payload = await this.requestJson<unknown>("get_case_fields");
+    const rawFields = Array.isArray(payload)
+      ? payload
+      : payload && typeof payload === "object" && Array.isArray((payload as { fields?: unknown[] }).fields)
+        ? (payload as { fields: unknown[] }).fields
+        : [];
+
+    return rawFields
+      .filter((field): field is Record<string, unknown> => Boolean(field) && typeof field === "object")
+      .map((field) => ({
+        id: Number(field.id),
+        name: String(field.name ?? ""),
+        label: String(field.label ?? ""),
+        type: String(field.type ?? ""),
+        configs: field.configs,
+        is_active: Boolean(field.is_active),
+      }));
   }
 
   async getSection(sectionId: number): Promise<{ id: number; name: string; project_id?: number; suite_id?: number } | null> {
@@ -410,6 +439,15 @@ export class TestRailClient {
   }
 
   async updateCase(caseId: number, input: UpdateCaseInput): Promise<RawTestRailCase> {
+    if (input.custom_preconds !== undefined) {
+      const payload = await this.requestJson<RawTestRailCase>(`update_case/${caseId}`, "POST", {
+        custom_preconds: input.custom_preconds,
+      });
+      if (!payload || typeof payload.id !== "number") {
+        throw new Error("Invalid update_case response from TestRail.");
+      }
+      return payload;
+    }
     console.log(`[testrail-debug] updateCase invoked caseId=${caseId} title="${input.title?.substring(0, 50) ?? "no-title"}..."`);
     
     const body: Record<string, unknown> = {};

@@ -29,7 +29,13 @@ export type GenerateSpecOptions = {
   promotionPolicy?: PromotionPolicy;
   inlineDebugMode?: boolean;
   pageObjectRegistry?: PageObjectRegistry;
-  authFlowOptions?: { alias?: string; landing?: string; testDataJson?: string; insertionAfterStepIndex?: number };
+  authFlowOptions?: {
+    alias?: string;
+    landing?: string;
+    testDataJson?: string;
+    insertionAfterStepIndex?: number;
+    contractBinding?: { bindingId: string; coveredScenarioStepIndices: number[] };
+  };
 };
 
 export type GenerateSpecResult = {

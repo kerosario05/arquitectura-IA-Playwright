@@ -57,6 +57,7 @@ export type AppProfile = {
   name?: string;
   baseUrl?: string;
   baseUrlHash?: string;
+  ignoreHTTPSErrors?: boolean;
   projectId?: string | number;
   projectName?: string;
   createdAt: string;
@@ -571,6 +572,7 @@ export type PromotedAppConfig = {
   passwordRef?: string;
   extraLoginFields?: Record<string, string>;
   missingInputBehavior: MissingInputBehavior;
+  ignoreHTTPSErrors?: boolean;
   routeProfile?: AppRouteProfile;
   updatedAt: string;
 };
@@ -727,7 +729,7 @@ export function serializeRuntimeConfigForPromotion(config: FullConfig, existingC
   });
 
   return {
-    appProfile: profile,
+    appProfile: { ...profile, ignoreHTTPSErrors: config.app.ignoreHTTPSErrors },
     baseUrl: config.app.baseUrl,
     loginMode: config.app.loginMode,
     testData: config.app.testData,
@@ -739,6 +741,7 @@ export function serializeRuntimeConfigForPromotion(config: FullConfig, existingC
     passwordRef: config.app.password ? "APP_PASSWORD" : undefined,
     extraLoginFields: sanitizeExtraLoginFields(config.app.extraLoginFields),
     missingInputBehavior: config.app.missingInputBehavior,
+    ignoreHTTPSErrors: config.app.ignoreHTTPSErrors,
     // Preserve routeProfile from existing config if available
     routeProfile: existingConfig?.routeProfile,
     updatedAt: new Date().toISOString()
@@ -746,6 +749,9 @@ export function serializeRuntimeConfigForPromotion(config: FullConfig, existingC
 }
 
 export function buildMergedConfig(appConfig: PromotedAppConfig, globalConfig: FullConfig): FullConfig {
+  const ignoreHTTPSErrors = appConfig.ignoreHTTPSErrors !== undefined
+    ? appConfig.ignoreHTTPSErrors
+    : globalConfig.app.ignoreHTTPSErrors;
   const mergedApp: AppConfig = {
     ...globalConfig.app,
     name: appConfig.appProfile.name ?? globalConfig.app.name,
@@ -757,7 +763,8 @@ export function buildMergedConfig(appConfig: PromotedAppConfig, globalConfig: Fu
     extraLoginFields: appConfig.extraLoginFields,
     testData: appConfig.testData,
     testDataAliases: appConfig.testDataAliases,
-    missingInputBehavior: appConfig.missingInputBehavior
+    missingInputBehavior: appConfig.missingInputBehavior,
+    ignoreHTTPSErrors
   };
 
   return {

@@ -2,6 +2,7 @@ import path from "node:path";
 import { chromium, firefox, webkit } from "@playwright/test";
 import { config } from "../config/env";
 import { getLoginStrategy } from "../auth/login-strategy.factory";
+import { launchRuntimeBrowserSession } from "../browser/browser-session";
 import { runDiscoveryScan, printDiscoverySummary } from "../discovery/discovery-scanner";
 
 type CliArgs = {
@@ -72,11 +73,16 @@ async function main(): Promise<void> {
   const outputPath = args.output ? path.resolve(args.output) : getDefaultOutputPath();
   const targetUrl = args.url || config.app.baseUrl;
 
-  let browser;
+  let session: Awaited<ReturnType<typeof launchRuntimeBrowserSession>> | undefined;
   try {
-    browser = await browserType.launch({ headless: config.execution.headless });
-    const context = await browser.newContext();
-    const page = await context.newPage();
+    session = await launchRuntimeBrowserSession({
+      browserType,
+      headless: config.execution.headless,
+      targetUrl,
+      profilePath: config.execution.qaBrowserProfilePath,
+      channel: config.execution.qaBrowserChannel,
+    });
+    const page = session.page;
     page.setDefaultTimeout(config.execution.defaultTimeoutMs);
 
     if (args.noLogin) {
@@ -107,8 +113,8 @@ async function main(): Promise<void> {
     }
     console.log(`\nTo review proposed objects, run: npm run registry:inspect`);
   } finally {
-    if (browser) {
-      await browser.close();
+    if (session) {
+      await session.close();
     }
   }
 }

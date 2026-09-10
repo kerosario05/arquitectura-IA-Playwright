@@ -6,6 +6,14 @@ dotenv.config();
 const headless = (process.env.HEADLESS ?? "false").toLowerCase() === "true";
 const browser = process.env.BROWSER ?? "chromium";
 
+export function resolvePromotedIgnoreHTTPSErrors(value: string | undefined): boolean | undefined {
+  if (value === "true") return true;
+  if (value === "false") return false;
+  return undefined;
+}
+
+const ignoreHTTPSErrors = resolvePromotedIgnoreHTTPSErrors(process.env.APP_IGNORE_HTTPS_ERRORS);
+
 export default defineConfig({
   testDir: ".",
   testMatch: [
@@ -24,6 +32,7 @@ export default defineConfig({
   reporter: [["list"], ["html", { open: "never" }]],
   use: {
     baseURL: process.env.APP_BASE_URL,
+    ...(ignoreHTTPSErrors === undefined ? {} : { ignoreHTTPSErrors }),
     browserName: browser === "firefox" || browser === "webkit" ? browser : "chromium",
     headless,
     screenshot: "only-on-failure",

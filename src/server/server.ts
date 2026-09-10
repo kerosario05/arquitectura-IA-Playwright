@@ -14,6 +14,7 @@ import { internalOtpRouter } from "./routes/internal-otp";
 import { projectsRouter } from "./routes/projects";
 import { resolveServerPort } from "./config";
 import { captureRawJsonBody, mobileUtf8JsonReconciler } from "./middleware/mobile-utf8-json";
+import { runtimeInputsRouter } from "./routes/runtime-inputs";
 
 const PORT = resolveServerPort(process.env as Record<string, string | undefined>);
 const HOST = process.env.API_HOST || "0.0.0.0";
@@ -58,6 +59,7 @@ app.use("/api/internal/otp", internalOtpRouter);
 app.use("/api/projects", projectsRouter);
 app.use(checklistRouter);
 app.use(executionsRouter);
+app.use(runtimeInputsRouter);
 
 const isDebugEnabled =
   process.env.NODE_ENV !== "production" ||

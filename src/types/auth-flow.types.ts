@@ -21,6 +21,11 @@ export type AuthFlowOptions = {
   alias?: string;
   landing?: string;
   requiredCapabilities?: string[];
+  /** Structured execution-contract binding for aggregate auth coverage. */
+  contractBinding?: {
+    bindingId: string;
+    coveredScenarioStepIndices: number[];
+  };
 };
 
 export type AuthFlowStage =

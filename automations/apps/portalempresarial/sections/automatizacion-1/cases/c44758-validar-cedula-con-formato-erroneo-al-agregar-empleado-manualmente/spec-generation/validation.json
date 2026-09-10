@@ -1,0 +1,71 @@
+{
+  "mode": "deterministic",
+  "provider": null,
+  "model": null,
+  "skill": {
+    "name": null,
+    "version": null,
+    "hash": null,
+    "loaded": false
+  },
+  "invocations": 0,
+  "invocationsConsumed": 0,
+  "durationMs": 95,
+  "usage": {
+    "inputTokens": null,
+    "cachedInputTokens": null,
+    "cacheWriteInputTokens": null,
+    "nonCachedInputTokens": null,
+    "outputTokens": null,
+    "reasoningOutputTokens": null,
+    "totalPhysicalTokens": null,
+    "durationMs": null,
+    "credits": null
+  },
+  "validation": {
+    "schema": "skipped",
+    "structure": "skipped",
+    "traceFidelity": "skipped",
+    "typescript": "skipped",
+    "playwrightDiscovery": "skipped",
+    "semanticCoverage": "skipped",
+    "functionalExecution": "skipped"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 0,
+  "specGenerationAttempts": 0,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [],
+  "regressedGates": [],
+  "missingRequirements": [
+    {
+      "text": "Validar que, mientras el campo \"Colaborador\" permanezca en estado inválido, la acción \"Validar\" permanezca deshabilitada y no permita continuar.",
+      "type": "runtime_state",
+      "stepIndex": 14
+    }
+  ],
+  "oracleTypes": [
+    "literal_visible_text",
+    "runtime_state",
+    "auth_gate"
+  ],
+  "errors": [
+    "execution_contract_unresolved:step=14:operation=assertVisible",
+    "execution_contract_unresolved:requirement=Validar que, mientras el campo \"Colaborador\" permanezca en estado inválido, la acción \"Validar\" permanezca deshabilitada y no permita continuar.:reason=oracle_not_backed_by_runtime_evidence",
+    "execution_contract_unresolved:requirement=Validar que, mientras el campo \"Colaborador\" permanezca en estado inválido, la acción \"Validar\" permanezca deshabilitada y no permita continuar.:reason=oracle_not_backed_by_runtime_evidence",
+    "required_scenario_step_missing:scenarioStepIndex=14:reason=required_scenario_step_missing",
+    "promotion_oracle_gate:unresolved_required_requirement:Validar que, mientras el campo \"Colaborador\" permanezca en estado inválido, la acción \"Validar\" permanezca deshabilitada y no permita continuar.:oracleType=runtime_state:source=observable_oracle"
+  ],
+  "warnings": [
+    "promotion_oracle_gate:contract_invalid:unresolved_required_requirements=1"
+  ],
+  "finalSpec": {
+    "origin": "deterministic_draft",
+    "generatedBy": "core",
+    "strategy": "deterministic_draft",
+    "fallback": null
+  }
+}

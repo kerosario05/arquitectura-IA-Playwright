@@ -1,0 +1,51 @@
+{
+  "version": "1.0",
+  "appSlug": "portalempresarial",
+  "flows": [
+    {
+      "id": "flow_1788724119664_t4oba7",
+      "name": "Login satisfactorio",
+      "filePath": "flows\\login-satisfactorio.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "LoginPage",
+          "methodName": "open"
+        },
+        {
+          "action": "click",
+          "target": "RNC de la empresa",
+          "pageObjectId": "LoginPage",
+          "methodName": "fillField"
+        },
+        {
+          "action": "click",
+          "target": "Nombre de usuario",
+          "pageObjectId": "LoginPage",
+          "methodName": "fillField"
+        },
+        {
+          "action": "click",
+          "target": "Contraseña",
+          "pageObjectId": "LoginPage",
+          "methodName": "fillField"
+        },
+        {
+          "action": "click",
+          "target": "Continuar",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-09-06T19:48:39.664Z",
+      "updatedAt": "2026-09-06T19:48:39.664Z"
+    }
+  ],
+  "updatedAt": "2026-09-07T13:37:06.832Z"
+}

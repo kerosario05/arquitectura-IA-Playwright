@@ -1,7 +1,7 @@
 import { expect, type Page } from "@playwright/test";
 import type { DataContext } from "../data/data-context";
 import { assertValidExecutionPlan } from "../plans";
-import type { ExecutionPlan } from "../types/execution-plan.types";
+import type { ExecutionPlan, ExecutionPlanStep } from "../types/execution-plan.types";
 import type { PlanExecutionResult, PlanExecutionStatus, StepExecutionResult } from "../types/plan-execution.types";
 import type { FullConfig } from "../types/env.types";
 import { resolveLocatorFromPlanTarget } from "./plan-target-resolver";
@@ -9,6 +9,9 @@ import { resolveStepValue } from "./plan-value-resolver";
 import { captureStepScreenshot } from "./step-evidence";
 import { extractRuntimeUiSnapshot } from "../knowledge/runtime-knowledge-extractor";
 import { persistRuntimeSnapshot, persistRuntimeRoute } from "../knowledge/runtime-knowledge-persister";
+import { ensureSupportingCheckbox, ensureSupportingMultiselect, resolveSupportingDate, selectSupportingAutocomplete, selectSupportingCombobox, selectSupportingOption, selectSupportingRadio } from "./runtime-field-capability";
+import { resolveSupportingAutofill, type ResolvableObservedControl } from "./supporting-autofill";
+import type { RuntimeInputRequirement } from "../testrail/testrail-runtime-transformer";
 
 /**
  * Classify scenario evidence kind from its steps — no hardcoded HUs or entities.
@@ -55,16 +58,143 @@ import { resolveSemanticAssertion } from "./semantic-assertion";
  * Universal: detects loading states by aria attributes, common text patterns, and DOM elements.
  * Timeout is configurable via env LOADING_STABILITY_TIMEOUT_MS (default 8000ms).
  */
-export async function waitForStableInteractiveScreen(page: Page): Promise<{ stable: boolean; waitedMs: number; signals: string[] }> {
+export type ScreenProgressProbe = boolean | {
+  active?: boolean;
+  progressed?: boolean;
+  signal?: string;
+  pendingCount?: number;
+  lastProgressAt?: number;
+};
+
+export type ScreenStabilityResult = {
+  stable: boolean;
+  waitedMs: number;
+  signals: string[];
+  progressSignals: string[];
+  relevantPendingRequests: number;
+  lastProgressAgeMs: number;
+  absoluteDeadlineMs: number;
+  waitState: "stalled" | "active_pending" | "completed" | "failed";
+  terminationReason: "stable" | "stalled" | "absolute_deadline_reached" | "request_failed" | "page_closed" | "context_closed";
+  reason?: "loading_timeout";
+};
+
+/**
+ * Wait for a stable screen without treating a single request event as ongoing
+ * progress. Progress is revision-based: each new network lifecycle event (or
+ * an explicit probe revision) may extend the bounded deadline, while a quiet
+ * pending request is classified as stalled.
+ */
+export async function waitForStableInteractiveScreen(
+  page: Page,
+  options?: {
+    progressProbe?: () => ScreenProgressProbe;
+    waitForPendingTransport?: boolean;
+    absoluteDeadlineMs?: number;
+  },
+): Promise<ScreenStabilityResult> {
   const start = Date.now();
   const timeout = Number(process.env.LOADING_STABILITY_TIMEOUT_MS) || 8000;
-  const pollMs = 250;
+  const configuredProgressBudget = Number(process.env.LOADING_STABILITY_PROGRESS_BUDGET_MS ?? 4000);
+  const extendedProgressBudgetMs = Number.isFinite(configuredProgressBudget) && configuredProgressBudget > 0 ? configuredProgressBudget : 4000;
+  const configuredAbsoluteDeadline = options?.absoluteDeadlineMs ?? Number(process.env.LOADING_STABILITY_ABSOLUTE_DEADLINE_MS ?? 30000);
+  const absoluteDeadlineDurationMs = Number.isFinite(configuredAbsoluteDeadline) && configuredAbsoluteDeadline > 0
+    ? Math.max(timeout, configuredAbsoluteDeadline)
+    : Math.max(timeout, 30000);
+  const absoluteDeadlineAt = start + absoluteDeadlineDurationMs;
+  const pollMs = Math.min(250, Math.max(10, Math.floor(extendedProgressBudgetMs / 4)));
   const signals: string[] = [];
+  const progressSignals: string[] = [];
+  let loadingObserved = false;
+  let clearPolls = 0;
+  let deadline = start + timeout;
+  let pageClosed = false;
+  let contextClosed = false;
+  let requestFailed = false;
+  const pendingRelevantRequests = new Set<object>();
+  let lastProgressAt = start;
+  let probePendingCount = 0;
+  let probeActive = false;
+  let lastProbeProgressAt = start;
+  const relevantResourceTypes = new Set(["document", "xhr", "fetch", "eventsource", "websocket"]);
+  const isRelevant = (request: any) => relevantResourceTypes.has(String(request.resourceType?.() ?? "other"));
+  const noteProgress = (signal: string) => {
+    lastProgressAt = Date.now();
+    if (!progressSignals.includes(signal)) progressSignals.push(signal);
+  };
+  const onRequest = (request: any) => {
+    if (isRelevant(request)) pendingRelevantRequests.add(request as object);
+    noteProgress("request_started");
+  };
+  const onResponse = (response: any) => {
+    pendingRelevantRequests.delete(response.request?.() as object);
+    noteProgress("response_received");
+  };
+  const onRequestFinished = (request: any) => {
+    pendingRelevantRequests.delete(request as object);
+    noteProgress("request_finished");
+  };
+  const onRequestFailed = (request: any) => {
+    pendingRelevantRequests.delete(request as object);
+    requestFailed = true;
+    noteProgress("request_failed");
+  };
+  const onPageClose = () => { pageClosed = true; };
+  const onContextClose = () => { contextClosed = true; };
+  const pageEvents = page as Page & { on?: (event: string, listener: (...args: any[]) => void) => unknown; off?: (event: string, listener: (...args: any[]) => void) => unknown };
+  const supportsPageEvents = typeof pageEvents.on === "function" && typeof pageEvents.off === "function";
+  const cleanup = () => {
+    if (supportsPageEvents) {
+      pageEvents.off!("request", onRequest);
+      pageEvents.off!("response", onResponse);
+      pageEvents.off!("requestfinished", onRequestFinished);
+      pageEvents.off!("requestfailed", onRequestFailed);
+      pageEvents.off!("close", onPageClose);
+    }
+    try { (page.context?.() as any)?.off?.("close", onContextClose); } catch { /* best effort */ }
+  };
+  // Playwright pages are event emitters, but keeping this probe usable with
+  // lightweight page doubles is important: stability is also a pre-browser
+  // contract gate and must not fail merely because the observer is absent.
+  if (supportsPageEvents) {
+    pageEvents.on("request", onRequest);
+    pageEvents.on("response", onResponse);
+    pageEvents.on("requestfinished", onRequestFinished);
+    pageEvents.on("requestfailed", onRequestFailed);
+    pageEvents.on("close", onPageClose);
+  }
+  try { (page.context?.() as any)?.on?.("close", onContextClose); } catch { /* best effort */ }
+
+  const readProgressProbe = (): { active: boolean; progressed: boolean } => {
+    const raw = options?.progressProbe?.();
+    if (typeof raw === "boolean") {
+      probeActive = raw;
+      probePendingCount = raw ? Math.max(1, probePendingCount) : 0;
+      return { active: raw, progressed: false };
+    }
+    if (!raw) {
+      probeActive = false;
+      probePendingCount = 0;
+      return { active: false, progressed: false };
+    }
+    probeActive = raw.active === true || (raw.pendingCount ?? 0) > 0;
+    probePendingCount = Math.max(0, Number(raw.pendingCount ?? 0));
+    let progressed = raw.progressed === true;
+    if (typeof raw.lastProgressAt === "number" && raw.lastProgressAt > lastProbeProgressAt) {
+      lastProbeProgressAt = raw.lastProgressAt;
+      progressed = true;
+    }
+    if (progressed) {
+      noteProgress(raw.signal || "probe_progress");
+    }
+    if (raw.signal && !progressSignals.includes(raw.signal)) progressSignals.push(raw.signal);
+    return { active: probeActive, progressed };
+  };
 
   // Loading text patterns (lowercase for matching)
   const LOADING_TEXTS = /cargando|procesando|consultando|buscando|generando|espere|por favor espere|redirigiendo|loading|please wait/i;
 
-  while (Date.now() - start < timeout) {
+  while (Date.now() < deadline) {
     let loadingDetected = false;
 
     try {
@@ -91,21 +221,148 @@ export async function waitForStableInteractiveScreen(page: Page): Promise<{ stab
 
     } catch {
       // Page may have navigated or closed — exit wait
+      cleanup();
       break;
+    }
+
+    // SPA route transitions can have no visible spinner while their fetch or
+    // dynamically imported route chunk is still pending. Treat that pending
+    // transport as a readiness signal so the next scan does not run against
+    // the previous screen. The probe remains bounded by the existing wait
+    // budget and is agnostic to the application or route.
+    const probeState = readProgressProbe();
+    if (!loadingDetected && options?.waitForPendingTransport === true && probeState.active) {
+      loadingDetected = true;
+      if (!signals.includes("network_pending")) signals.push("network_pending");
     }
 
     if (!loadingDetected) {
       // Extra stability: wait one more poll cycle to confirm DOM settled
+      if (loadingObserved && clearPolls === 0) {
+      clearPolls = 1;
+      await page.waitForTimeout(pollMs);
+      continue;
+      }
       await page.waitForTimeout(pollMs);
       const waited = Date.now() - start;
-      return { stable: true, waitedMs: waited, signals };
+      cleanup();
+      return {
+        stable: true,
+        waitedMs: waited,
+        signals,
+        progressSignals,
+        relevantPendingRequests: Math.max(pendingRelevantRequests.size, probePendingCount),
+        lastProgressAgeMs: Math.max(0, Date.now() - lastProgressAt),
+        absoluteDeadlineMs: absoluteDeadlineAt,
+        waitState: "completed",
+        terminationReason: "stable",
+      };
     }
 
+    loadingObserved = true;
+    clearPolls = 0;
+    const tryProgressExtension = () => {
+      const now = Date.now();
+      if (now - start < timeout || now >= absoluteDeadlineAt) return;
+      const pendingRelevantRequest = pendingRelevantRequests.size > 0 || probeActive;
+      const progressAge = now - lastProgressAt;
+      const hasRecentProgress = progressAge <= extendedProgressBudgetMs;
+      if (loadingDetected && pendingRelevantRequest && hasRecentProgress && !requestFailed && !pageClosed && !contextClosed) {
+        const candidateDeadline = Math.min(absoluteDeadlineAt, now + extendedProgressBudgetMs);
+        if (candidateDeadline <= deadline) return;
+        deadline = candidateDeadline;
+        if (!signals.includes("progress_extension")) signals.push("progress_extension");
+        console.log(`[screen-stability] adaptive-extension baseTimeoutMs=${timeout} progressBudgetMs=${extendedProgressBudgetMs} absoluteDeadlineMs=${absoluteDeadlineAt}`);
+      }
+    };
+    tryProgressExtension();
     await page.waitForTimeout(pollMs);
+    tryProgressExtension();
   }
 
   const waited = Date.now() - start;
-  return { stable: false, waitedMs: waited, signals };
+  cleanup();
+  const activePending = pendingRelevantRequests.size > 0 || probeActive;
+  const terminationReason = pageClosed
+    ? "page_closed"
+    : contextClosed
+      ? "context_closed"
+      : requestFailed
+        ? "request_failed"
+        : Date.now() >= absoluteDeadlineAt && activePending
+          ? "absolute_deadline_reached"
+          : "stalled";
+  return {
+    stable: false,
+    waitedMs: waited,
+    signals,
+    progressSignals,
+    relevantPendingRequests: Math.max(pendingRelevantRequests.size, probePendingCount),
+    lastProgressAgeMs: Math.max(0, Date.now() - lastProgressAt),
+    absoluteDeadlineMs: absoluteDeadlineAt,
+    waitState: activePending && terminationReason === "absolute_deadline_reached" ? "active_pending" : terminationReason === "request_failed" ? "failed" : "stalled",
+    terminationReason,
+    reason: "loading_timeout",
+  };
+}
+
+async function retryCausalPlanStep(page: Page, step: ExecutionPlan["steps"][number], dataContext: DataContext): Promise<void> {
+  if (!step.target || step.target === "APP_BASE_URL") throw new Error("Causal retry requires a concrete target.");
+  const locator = resolveLocatorFromPlanTarget(page, step.target).first();
+  if (step.action === "click") {
+    await locator.click();
+    return;
+  }
+  if (step.action === "fill") {
+    if (step.value !== undefined || step.valueKey !== undefined) {
+      const value = resolveStepValue({ step, dataContext });
+      if (value === undefined) throw new Error("fill requires value or valueKey.");
+      await locator.fill(value);
+      return;
+    }
+    if (step.supportingStrategy?.kind === "date_valid_value") {
+      await resolveSupportingDate(locator, { strategy: "valid_in_range" });
+      return;
+    }
+  }
+  if (step.action === "select") {
+    if (step.value !== undefined || step.valueKey !== undefined) {
+      const value = resolveStepValue({ step, dataContext });
+      if (value === undefined) throw new Error("select requires value or valueKey.");
+      await locator.selectOption(value);
+      return;
+    }
+    if (step.supportingStrategy?.kind === "select_valid_option") {
+      const value = await selectSupportingOption(locator, { strategy: "first_valid" });
+      await locator.selectOption(value);
+      return;
+    }
+    if (step.supportingStrategy?.kind === "combobox_valid_option") {
+      await selectSupportingCombobox(locator, { strategy: "first_valid" });
+      return;
+    }
+    if (step.supportingStrategy?.kind === "autocomplete_valid_option") {
+      await selectSupportingAutocomplete(locator, { strategy: "first_valid" });
+      return;
+    }
+    if (step.supportingStrategy?.kind === "multiselect_valid_options") {
+      await ensureSupportingMultiselect(locator, { strategy: "ensure_valid_selection" });
+      return;
+    }
+  }
+  if (step.action === "check") {
+    if (step.supportingStrategy?.kind === "radio_valid_option") {
+      await selectSupportingRadio(locator, { strategy: "first_valid" });
+      return;
+    }
+    if (step.supportingStrategy?.kind === "checkbox_required_state") {
+      await ensureSupportingCheckbox(locator, { strategy: "ensure_checked" });
+      return;
+    }
+    await locator.check();
+    return;
+  }
+  throw new Error(`Unsupported causal retry action: ${step.action}`);
 }
 
 export async function executeExecutionPlan(input: {
@@ -116,6 +373,12 @@ export async function executeExecutionPlan(input: {
   continueOnFailure?: boolean;
   appBaseUrl?: string;
   runtimeConfig?: FullConfig;
+  supportingAutofill?: {
+    runtimeRequirements: RuntimeInputRequirement[];
+    observedControls: ResolvableObservedControl[];
+    executionSeed: string | number;
+    causal: boolean;
+  };
 }): Promise<PlanExecutionResult> {
   assertValidExecutionPlan(input.plan);
 
@@ -211,29 +474,57 @@ export async function executeExecutionPlan(input: {
           if (!step.target || step.target === "APP_BASE_URL") {
             throw new Error("fill requires concrete target.");
           }
-          const value = resolveStepValue({ step, dataContext: input.dataContext });
-          if (value === undefined) {
-            throw new Error("fill requires value or valueKey.");
+          const locator = resolveLocatorFromPlanTarget(input.page, step.target).first();
+          const hasExplicitValue = step.value !== undefined || step.valueKey !== undefined;
+          if (hasExplicitValue) {
+            const value = resolveStepValue({ step, dataContext: input.dataContext });
+            if (value === undefined) throw new Error("fill requires value or valueKey.");
+            await locator.fill(value);
+          } else if (step.supportingStrategy?.kind === "date_valid_value") {
+            await resolveSupportingDate(locator, { strategy: "valid_in_range" });
+          } else {
+            throw new Error("fill requires value, valueKey, or supportingStrategy.");
           }
-          await resolveLocatorFromPlanTarget(input.page, step.target).first().fill(value);
           break;
         }
         case "select": {
           if (!step.target || step.target === "APP_BASE_URL") {
             throw new Error("select requires concrete target.");
           }
-          const value = resolveStepValue({ step, dataContext: input.dataContext });
-          if (value === undefined) {
-            throw new Error("select requires value or valueKey.");
+          const locator = resolveLocatorFromPlanTarget(input.page, step.target).first();
+          const hasExplicitValue = step.value !== undefined || step.valueKey !== undefined;
+          if (hasExplicitValue) {
+            const value = resolveStepValue({ step, dataContext: input.dataContext });
+            if (value === undefined) throw new Error("select requires value or valueKey.");
+            await locator.selectOption(value);
+          } else if (step.supportingStrategy?.kind === "select_valid_option") {
+            const value = await selectSupportingOption(locator, { strategy: "first_valid" });
+            await locator.selectOption(value);
+          } else if (step.supportingStrategy?.kind === "combobox_valid_option") {
+            await selectSupportingCombobox(locator, { strategy: "first_valid" });
+          } else if (step.supportingStrategy?.kind === "autocomplete_valid_option") {
+            await selectSupportingAutocomplete(locator, { strategy: "first_valid" });
+          } else if (step.supportingStrategy?.kind === "multiselect_valid_options") {
+            await ensureSupportingMultiselect(locator, { strategy: "ensure_valid_selection" });
+          } else {
+            throw new Error("select requires value, valueKey, or supportingStrategy.");
           }
-          await resolveLocatorFromPlanTarget(input.page, step.target).first().selectOption(value);
           break;
         }
         case "check": {
           if (!step.target || step.target === "APP_BASE_URL") {
             throw new Error("check requires concrete target.");
           }
-          await resolveLocatorFromPlanTarget(input.page, step.target).first().check();
+          const locator = resolveLocatorFromPlanTarget(input.page, step.target).first();
+          if (step.value !== undefined || step.valueKey !== undefined) {
+            await locator.check();
+          } else if (step.supportingStrategy?.kind === "radio_valid_option") {
+            await selectSupportingRadio(locator, { strategy: "first_valid" });
+          } else if (step.supportingStrategy?.kind === "checkbox_required_state") {
+            await ensureSupportingCheckbox(locator, { strategy: "ensure_checked" });
+          } else {
+            await locator.check();
+          }
           break;
         }
         case "uncheck": {
@@ -313,9 +604,25 @@ export async function executeExecutionPlan(input: {
     } catch (error) {
       stepStatus = "failed";
       errorMessage = error instanceof Error ? error.message : String(error);
+      const autofillConfig = input.supportingAutofill;
+      if (autofillConfig?.causal === true) {
+        const autofill = await resolveSupportingAutofill({
+          page: input.page,
+          executionPlan: steps,
+          runtimeRequirements: autofillConfig.runtimeRequirements,
+          observedControls: autofillConfig.observedControls,
+          dependentAction: { causal: true },
+          executionSeed: autofillConfig.executionSeed,
+          retryDependentAction: () => retryCausalPlanStep(input.page, step, input.dataContext),
+        });
+        if (autofill.retryAttempted) {
+          stepStatus = "passed";
+          errorMessage = undefined;
+        }
+      }
       if (!input.continueOnFailure) {
-        aborted = true;
-        fatalError = errorMessage;
+        aborted = stepStatus === "failed";
+        fatalError = stepStatus === "failed" ? errorMessage : undefined;
       }
     }
 

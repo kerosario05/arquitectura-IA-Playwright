@@ -1,10 +1,17 @@
 import { spawn } from "node:child_process";
+import fs from "node:fs/promises";
 import path from "node:path";
 import {
   resolvePromotedSpecForExecution,
   resolvePromotedSpecTargetFromEntries,
 } from "../server/jobs/discovery-batch-runner";
+import {
+  loadRuntimeContextFromPath,
+  resolveRuntimeEntriesForCase,
+} from "./runtime-context";
+import type { DataContextEntry } from "../data/data-context";
 import type { PromotedAutomationIndexEntry } from "../types/automation-promotion.types";
+import { loadPromotedAppConfigSync } from "../automations/app-profile";
 import {
   applyPromotedBrowserMode,
   resolvePromotedBrowserMode,
@@ -140,6 +147,170 @@ function nonEmpty(value: string | undefined): string | undefined {
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
+function validUrl(value: string | undefined): string | undefined {
+  const candidate = nonEmpty(value);
+  if (!candidate) return undefined;
+  try {
+    const parsed = new URL(candidate);
+    return parsed.protocol === "http:" || parsed.protocol === "https:" ? candidate : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+const PROMOTED_RUNTIME_INPUT_ENV: Record<string, string> = {
+  "auth.company_identifier": "APP_COMPANY_IDENTIFIER",
+  "auth.username": "APP_USERNAME",
+  "auth.password": "APP_PASSWORD",
+};
+
+export type PromotedRuntimeInputResult = {
+  ok: boolean;
+  env: NodeJS.ProcessEnv;
+  missingKey?: string;
+  resolvedKeys: string[];
+  resolvedSources: Record<string, "user_provided_qa_credentials" | "explicit_runtime_input" | "runtime_context" | "configured_fallback">;
+};
+
+const EXPLICIT_RUNTIME_INPUTS_ENV = "PROMOTED_RUNTIME_EXPLICIT_INPUTS_JSON";
+const RUNTIME_DATA_OVERRIDES_ENV = "PROMOTED_RUNTIME_DATA_OVERRIDES_JSON";
+const ALLOW_CONFIGURED_FALLBACK_ENV = "PROMOTED_RUNTIME_ALLOW_CONFIGURED_FALLBACK";
+
+function envNameForRuntimeKey(key: string): string | undefined {
+  return PROMOTED_RUNTIME_INPUT_ENV[key];
+}
+
+function normalizeRuntimeKey(key: string): string {
+  return key.trim().toLowerCase();
+}
+
+function getRuntimeValue(entries: Map<string, { value?: string }>, key: string): string | undefined {
+  return entries.get(normalizeRuntimeKey(key))?.value;
+}
+
+function readExplicitRuntimeInputs(baseEnv: NodeJS.ProcessEnv): Record<string, string> {
+  const raw = baseEnv[EXPLICIT_RUNTIME_INPUTS_ENV];
+  if (typeof raw !== "string" || raw.trim().length === 0) return {};
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+    return Object.fromEntries(
+      Object.entries(parsed as Record<string, unknown>)
+        .filter(([, value]) => typeof value === "string" && value.trim().length > 0)
+        .map(([key, value]) => [key, String(value)])
+    );
+  } catch {
+    return {};
+  }
+}
+
+export async function preparePromotedRuntimeInputs(options: {
+  contextPath: string | undefined;
+  caseId: number;
+  baseEnv: NodeJS.ProcessEnv;
+  requiredKeys: string[];
+}): Promise<PromotedRuntimeInputResult> {
+  if (options.requiredKeys.length === 0) {
+    return { ok: true, env: { ...options.baseEnv }, resolvedKeys: [], resolvedSources: {} };
+  }
+
+  const context = await loadRuntimeContextFromPath(options.contextPath);
+  const entries = resolveRuntimeEntriesForCase(context, options.caseId) ?? [];
+  const byKey = new Map(entries.map((entry) => [normalizeRuntimeKey(entry.key), entry]));
+  const explicit = readExplicitRuntimeInputs(options.baseEnv);
+  const explicitByKey = new Map(Object.entries(explicit).map(([key, value]) => [normalizeRuntimeKey(key), { value }]));
+  const allowConfiguredFallback = options.baseEnv[ALLOW_CONFIGURED_FALLBACK_ENV] === "true";
+  const resolvedSources: PromotedRuntimeInputResult["resolvedSources"] = {};
+  const missingKey = options.requiredKeys.find((key) => {
+    if (getRuntimeValue(explicitByKey, key)) {
+      resolvedSources[key] = envNameForRuntimeKey(key) ? "user_provided_qa_credentials" : "explicit_runtime_input";
+      return false;
+    }
+    const entry = byKey.get(normalizeRuntimeKey(key));
+    if (entry && typeof entry.value === "string" && entry.value.trim().length > 0) {
+      resolvedSources[key] = entry.source === "user_provided_qa_credentials"
+        ? "user_provided_qa_credentials"
+        : "runtime_context";
+      return false;
+    }
+    const envName = envNameForRuntimeKey(key);
+    if (allowConfiguredFallback && envName && typeof options.baseEnv[envName] === "string" && options.baseEnv[envName]!.trim().length > 0) {
+      resolvedSources[key] = "configured_fallback";
+      return false;
+    }
+    return true;
+  });
+  if (missingKey) {
+    return { ok: false, env: { ...options.baseEnv }, missingKey, resolvedKeys: [], resolvedSources: {} };
+  }
+
+  const childEnv: NodeJS.ProcessEnv = { ...options.baseEnv };
+  const runtimeDataOverrides: Record<string, string> = {};
+  for (const key of options.requiredKeys) {
+    const envName = PROMOTED_RUNTIME_INPUT_ENV[key];
+    const explicitValue = getRuntimeValue(explicitByKey, key);
+    const contextValue = getRuntimeValue(byKey, key);
+    const value = explicitValue
+      ?? contextValue
+      ?? (allowConfiguredFallback && envName ? childEnv[envName] : undefined);
+    if (typeof value !== "string") continue;
+    if (envName) childEnv[envName] = value;
+    if (!explicitValue && contextValue) runtimeDataOverrides[key] = contextValue;
+  }
+  if (Object.keys(runtimeDataOverrides).length > 0) {
+    childEnv[RUNTIME_DATA_OVERRIDES_ENV] = JSON.stringify(runtimeDataOverrides);
+  }
+  return {
+    ok: true,
+    env: childEnv,
+    resolvedKeys: options.requiredKeys,
+    resolvedSources,
+  };
+}
+
+export function resolvePromotedRuntimeInputKeys(specSource: string): string[] {
+  const envKeys = Object.entries(PROMOTED_RUNTIME_INPUT_ENV)
+    .filter(([, envName]) => specSource.includes(`process.env.${envName}`))
+    .map(([key]) => key);
+  const dataKeys = Array.from(specSource.matchAll(
+    /requirePromotedData\(\s*dataContext\s*,\s*["']([^"']+)["']/g,
+  )).map((match) => match[1].trim()).filter(Boolean);
+  return Array.from(new Set([...envKeys, ...dataKeys]));
+}
+
+export function buildPromotedExecutionEnv(
+  baseEnv: NodeJS.ProcessEnv,
+  appSlug: string | undefined,
+): NodeJS.ProcessEnv {
+  const projectConfig = appSlug
+    ? loadPromotedAppConfigSync({ appSlug })
+    : undefined;
+  return buildPromotedExecutionEnvWithConfig(baseEnv, appSlug, projectConfig);
+}
+
+export function buildPromotedExecutionEnvWithConfig(
+  baseEnv: NodeJS.ProcessEnv,
+  appSlug: string | undefined,
+  projectConfig: ReturnType<typeof loadPromotedAppConfigSync>,
+): NodeJS.ProcessEnv {
+  const projectConfiguredUrl = validUrl(projectConfig?.baseUrl);
+  const legacyUrl = validUrl(baseEnv.APP_BASE_URL);
+  const effectiveUrl = projectConfiguredUrl ?? legacyUrl;
+  if (!effectiveUrl) {
+    throw new Error(`[promoted-runtime-config] missing valid project baseUrl and APP_BASE_URL fallback appSlug=${appSlug ?? "unknown"}`);
+  }
+  const source = projectConfiguredUrl ? "project_config" : "legacy_env";
+  console.log(`[promoted-runtime-config] appSlug=${appSlug ?? "unknown"} baseUrlSource=${source} projectScoped=${Boolean(projectConfiguredUrl)}`);
+  const { APP_IGNORE_HTTPS_ERRORS: _legacyTlsValue, ...envWithoutTls } = baseEnv;
+  return {
+    ...envWithoutTls,
+    APP_BASE_URL: effectiveUrl,
+    ...(projectConfig?.ignoreHTTPSErrors === undefined
+      ? {}
+      : { APP_IGNORE_HTTPS_ERRORS: String(projectConfig.ignoreHTTPSErrors) }),
+  };
+}
+
 function buildTestPath(options: { app?: string; section?: string; caseId?: string }): string | null {
   if (options.caseId) return null;
 
@@ -209,6 +380,11 @@ async function main(): Promise<void> {
 
   const playwrightArgs: string[] = [];
 
+  // Keep execution semantics identical for default, app, section and exact
+  // case runs. Without the apps config Playwright falls back to its default
+  // discovery rules and executes candidate artifacts as promoted specs.
+  playwrightArgs.push("--config=playwright.config.apps.ts");
+
   // Add test path if specified
   if (testPath) {
     playwrightArgs.push(testPath);
@@ -260,6 +436,27 @@ async function main(): Promise<void> {
     ...(resolvedAppSlug ? { EVIDENCE_APP_SLUG: resolvedAppSlug } : {}),
     ...(resolvedSectionSlug ? { EVIDENCE_SECTION_SLUG: resolvedSectionSlug } : {}),
   };
+  const projectScopedPlaywrightEnv = buildPromotedExecutionEnv(basePlaywrightEnv, resolvedAppSlug);
+  let promotedRuntimeEnv = projectScopedPlaywrightEnv;
+  if (options.caseId && testPath) {
+    const specSource = await fs.readFile(path.resolve(process.cwd(), testPath), "utf8");
+    const requiredKeys = resolvePromotedRuntimeInputKeys(specSource);
+    const runtimeInputs = await preparePromotedRuntimeInputs({
+      contextPath: process.env.DISCOVERY_RUNTIME_CONTEXT,
+      caseId: Number(options.caseId),
+      baseEnv: projectScopedPlaywrightEnv,
+      requiredKeys,
+    });
+    if (!runtimeInputs.ok) {
+      console.error(`[test:promoted] pre-browser input gate blocked missingKey=${runtimeInputs.missingKey}`);
+      process.exitCode = 1;
+      return;
+    }
+    for (const key of runtimeInputs.resolvedKeys) {
+      console.log(`[promoted-runtime-input] key=${key} source=${runtimeInputs.resolvedSources[key] ?? "runtime_context"} present=true`);
+    }
+    promotedRuntimeEnv = runtimeInputs.env;
+  }
   const browserMode = resolvePromotedBrowserMode({
     headedFlag: options.headed,
     headlessFlag: options.headless,
@@ -267,7 +464,7 @@ async function main(): Promise<void> {
     automationSource: process.env.AUTOMATION_SOURCE,
   });
   const browserModeApplied = applyPromotedBrowserMode({
-    baseEnv: basePlaywrightEnv,
+    baseEnv: promotedRuntimeEnv,
     playwrightArgs,
     browserMode,
   });

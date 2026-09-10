@@ -1,9 +1,13 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { createHash } from "node:crypto";
 
 export type PromotedStrategyMarker = "pom_runtime" | "inline_executor" | "unknown";
 
 export type PromotionDiagnosticsLike = {
+  specSource?: "previousSpec" | "ai_candidate" | "generatedSpec";
+  specPath?: string;
+  specHash?: string;
   selectedStrategy?: "pom" | "inline";
   fallbackUsed?: boolean;
   requirePomRuntime?: boolean;
@@ -130,7 +134,23 @@ export async function validatePromotedSpecRuntimeContract(
     }
   }
 
-  const selectedStrategy = diagnostics?.selectedStrategy;
+  const currentSpecHash = createHash("sha256").update(specContent).digest("hex");
+  const normalizedSpecPath = path.resolve(specPath);
+  const normalizedDiagnosticsPath = diagnostics?.specPath ? path.resolve(diagnostics.specPath) : undefined;
+  const identityReason = !diagnostics?.specHash || !diagnostics?.specSource || !diagnostics?.specPath
+    ? "missing_identity"
+    : normalizedDiagnosticsPath !== normalizedSpecPath
+      ? "source_mismatch"
+      : diagnostics.specHash !== currentSpecHash
+        ? "hash_mismatch"
+        : "matched";
+  const diagnosticsApplicable = identityReason === "matched";
+  console.log(`[promotion-diagnostics-identity] matched=${diagnosticsApplicable} reason=${identityReason}`);
+
+  // A stale candidate must not dictate the selected strategy, but an explicit
+  // requirement is a runtime safety constraint and remains fail-closed even
+  // when its metadata cannot be matched to the current physical spec.
+  const selectedStrategy = diagnosticsApplicable ? diagnostics?.selectedStrategy : undefined;
   const requirePomRuntime = diagnostics?.requirePomRuntime === true;
 
   if (selectedStrategy === "pom") {
@@ -180,7 +200,7 @@ export async function validatePromotedSpecRuntimeContract(
     warnings.push("pom_selected_with_fallback_used");
   }
 
-  if (selectedStrategy === "pom" && Array.isArray(diagnostics?.blockers) && diagnostics!.blockers!.length > 0) {
+  if (diagnosticsApplicable && selectedStrategy === "pom" && Array.isArray(diagnostics?.blockers) && diagnostics!.blockers!.length > 0) {
     const fatalBlocker = diagnostics!.blockers!.some((b) => /missing_|validation_error|unavailable|failed/i.test(b));
     if (fatalBlocker) {
       errors.push("pom_selected_with_fatal_blockers");
@@ -210,28 +230,26 @@ export async function collectPromotedSpecs(appSlug?: string): Promise<Array<{ ca
     : (await fs.readdir(appsRoot)).map((d) => path.join(appsRoot, d));
   const rows: Array<{ caseSlug: string; specPath: string; diagnosticsPath: string }> = [];
 
-  for (const appDir of appDirs) {
-    const casesDir = path.join(appDir, "cases");
-    try {
-      const caseSlugs = await fs.readdir(casesDir);
-      for (const caseSlug of caseSlugs) {
-        const caseDir = path.join(casesDir, caseSlug);
-        const specPath = path.join(caseDir, "case.spec.ts");
-        try {
-          await fs.access(specPath);
-          rows.push({
-            caseSlug,
-            specPath,
-            diagnosticsPath: path.join(caseDir, "promotion-diagnostics.json")
-          });
-        } catch {
-          // ignore non-promoted cases
-        }
+  async function collectCaseSpecs(root: string): Promise<void> {
+    let entries: Awaited<ReturnType<typeof fs.readdir>>;
+    try { entries = await fs.readdir(root, { withFileTypes: true }); } catch { return; }
+    for (const entry of entries) {
+      const entryPath = path.join(root, entry.name);
+      if (entry.isDirectory()) {
+        if (entry.name === "spec-generation") continue;
+        await collectCaseSpecs(entryPath);
+        continue;
       }
-    } catch {
-      // ignore missing apps/cases directory
+      if (entry.name !== "case.spec.ts" && entry.name !== "spec.ts") continue;
+      const caseDir = path.dirname(entryPath);
+      rows.push({
+        caseSlug: path.basename(caseDir),
+        specPath: entryPath,
+        diagnosticsPath: path.join(caseDir, "promotion-diagnostics.json")
+      });
     }
   }
+  for (const appDir of appDirs) await collectCaseSpecs(appDir);
 
   return rows;
 }

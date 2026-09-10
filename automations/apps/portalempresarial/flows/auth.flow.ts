@@ -8,6 +8,9 @@ import { detectAuthGate } from '../../../../src/discovery/auth-gate-detector';
 import type { PageSnapshot } from '../../../../src/types/page-snapshot.types';
 import { scanCurrentPage } from '../../../../src/explorer/page-scanner';
 
+// Loader contract: the implementation identity is metadata, not runtime data.
+export const AUTH_FLOW_IMPLEMENTATION_ID = "project_auth_flow_v1";
+
 export class AuthFlow {
   private identificationPage: IdentificationPage;
   private phoneConfirmationPage: PhoneConfirmationPage;
@@ -110,6 +113,17 @@ export class AuthFlow {
       return 'authenticated';
     }
 
+    // A protected landing may contain authentication-related copy (for
+    // example, a user menu) without exposing login controls. Treat a
+    // non-public route without an auth surface as authenticated so repeated
+    // AuthGate checks remain idempotent across project profiles.
+    const pathname = new URL(currentUrl).pathname;
+    const authSurfaceVisible = await this.isAuthSurfaceVisible();
+    if (!authSurfaceVisible && pathname !== "/" && !/login|auth|identif/i.test(pathname)) {
+      console.log(`[auth-flow] Detected stage: authenticated (protected route without auth surface)`);
+      return 'authenticated';
+    }
+
     // Check for AuthGate stages
     if (detection.detected) {
       console.log(`[auth-flow] Detected AuthGate: ${detection.gateType} at stage: ${detection.stage}`);
@@ -168,6 +182,16 @@ export class AuthFlow {
     try {
       const txBtn = this.page.getByRole('button', { name: /transacciones y servicios|transacciones y services/i });
       return await txBtn.isVisible({ timeout: 2000 });
+    } catch {
+      return false;
+    }
+  }
+
+  private async isAuthSurfaceVisible(): Promise<boolean> {
+    try {
+      return await this.page.locator(
+        'input[name="username"], input[name="password"], input[type="password"], input[id*="password" i], input[id*="username" i], input[id*="usuario" i]'
+      ).first().isVisible({ timeout: 1000 });
     } catch {
       return false;
     }
@@ -254,7 +278,8 @@ export class AuthFlow {
     if (currentStage === 'not_started') {
       console.log(`[auth-flow] Not started, navigating to home...`);
       const previousUrl = this.page.url();
-      await this.page.goto('/');
+      const current = new URL(previousUrl);
+      await this.page.goto(new URL("/", current.origin).toString());
       await this.waitForPageTransition(previousUrl);
       currentStage = await this.detectCurrentStage();
 

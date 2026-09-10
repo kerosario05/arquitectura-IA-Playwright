@@ -17,9 +17,16 @@ import {
 import { materializeProjectRuntime } from "../../db/project-materializer";
 import { inspectApk, ApkInspectorError } from "../../utils/apk-inspector";
 import { getConnection } from "../../db/sql-connection";
+import {
+  getByProjectAndCase,
+  replaceForProjectAndCase,
+  type InputRequirement,
+} from "../../db/project-case-input-requirement-service";
+import { syncTestRailInputRequirements } from "../../testrail/testrail-input-requirements-sync";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
+import { getProjectGenerationConfig, upsertProjectGenerationConfig } from "../../db/project-generation-config-service";
 
 export const projectsRouter = Router();
 
@@ -116,12 +123,144 @@ function sendError(res: any, status: number, code: string, message: string) {
   res.status(status).json({ ok: false, error: code, message });
 }
 
+export type InputRequirementService = {
+  getByProjectAndCase: typeof getByProjectAndCase;
+  replaceForProjectAndCase: typeof replaceForProjectAndCase;
+};
+
+export function createInputRequirementsHandlers(service?: InputRequirementService) {
+  const svc: InputRequirementService = service ?? { getByProjectAndCase, replaceForProjectAndCase };
+
+  function validateParams(req: any): { projectSlug?: string; caseId?: number; error?: { status: number; code: string; message: string } } {
+    const projectSlug = String(req?.params?.projectSlug ?? "").trim();
+    if (!projectSlug) {
+      return { error: { status: 400, code: "invalid_project_slug", message: "projectSlug is required" } };
+    }
+    const caseId = Number(req?.params?.caseId);
+    if (!Number.isInteger(caseId) || caseId <= 0) {
+      return { error: { status: 400, code: "invalid_case_id", message: "caseId must be a positive integer" } };
+    }
+    return { projectSlug, caseId };
+  }
+
+  function isProjectNotFoundError(err: unknown): boolean {
+    return err instanceof Error && err.message.includes("project not found");
+  }
+
+  function isNamedProfileReferenceError(err: unknown): boolean {
+    return typeof err === "object" && err !== null && "code" in err && (err as { code?: unknown }).code === "named_profile_reference_not_configured";
+  }
+
+  async function getInputRequirements(req: any, res: any, next: any): Promise<void> {
+    try {
+      const parsed = validateParams(req);
+      if (parsed.error) {
+        sendError(res, parsed.error.status, parsed.error.code, parsed.error.message);
+        return;
+      }
+      const inputRequirements = await svc.getByProjectAndCase(parsed.projectSlug!, parsed.caseId!);
+      res.json({ projectSlug: parsed.projectSlug, caseId: parsed.caseId, inputRequirements });
+    } catch (err) {
+      if (isProjectNotFoundError(err)) {
+        sendError(res, 404, "project_not_found", err instanceof Error ? err.message : String(err));
+        return;
+      }
+      if (isNamedProfileReferenceError(err)) {
+        sendError(res, 400, "named_profile_reference_not_configured", "named profile reference is not configured for this project");
+        return;
+      }
+      next(err);
+    }
+  }
+
+  async function putInputRequirements(req: any, res: any, next: any): Promise<void> {
+    try {
+      const parsed = validateParams(req);
+      if (parsed.error) {
+        sendError(res, parsed.error.status, parsed.error.code, parsed.error.message);
+        return;
+      }
+      const inputRequirements = (req?.body ?? {})?.inputRequirements;
+      if (!Array.isArray(inputRequirements)) {
+        sendError(res, 400, "invalid_input_requirements", "inputRequirements must be an array");
+        return;
+      }
+      await svc.replaceForProjectAndCase(parsed.projectSlug!, parsed.caseId!, inputRequirements as InputRequirement[]);
+      const persisted = await svc.getByProjectAndCase(parsed.projectSlug!, parsed.caseId!);
+      res.json({ projectSlug: parsed.projectSlug, caseId: parsed.caseId, inputRequirements: persisted });
+    } catch (err) {
+      if (isProjectNotFoundError(err)) {
+        sendError(res, 404, "project_not_found", err instanceof Error ? err.message : String(err));
+        return;
+      }
+      if (isNamedProfileReferenceError(err)) {
+        sendError(res, 400, "named_profile_reference_not_configured", "named profile reference is not configured for this project");
+        return;
+      }
+      next(err);
+    }
+  }
+
+  return { getInputRequirements, putInputRequirements };
+}
+
+const inputRequirementsHandlers = createInputRequirementsHandlers();
+
+projectsRouter.get("/:projectSlug/cases/:caseId/input-requirements", inputRequirementsHandlers.getInputRequirements);
+projectsRouter.put("/:projectSlug/cases/:caseId/input-requirements", inputRequirementsHandlers.putInputRequirements);
+
+projectsRouter.post("/:projectSlug/cases/:caseId/input-requirements/sync", async (req: any, res: any, next: any) => {
+  try {
+    const projectSlug = String(req?.params?.projectSlug ?? "").trim();
+    const caseId = Number(req?.params?.caseId);
+    const rawTestRailCase = req?.body?.rawTestRailCase;
+    if (!projectSlug || !Number.isInteger(caseId) || caseId <= 0 || !rawTestRailCase || typeof rawTestRailCase !== "object") {
+      sendError(res, 400, "invalid_input_requirements_sync", "projectSlug, caseId and rawTestRailCase are required");
+      return;
+    }
+    const result = await syncTestRailInputRequirements({ projectSlug, caseId, rawTestRailCase });
+    res.json({ projectSlug, caseId, inputRequirements: result.requirements, persisted: result.persisted });
+  } catch (err) {
+    if (err instanceof Error && err.message.includes("project not found")) {
+      sendError(res, 404, "project_not_found", err.message);
+      return;
+    }
+    next(err);
+  }
+});
+
 // GET /api/projects
 projectsRouter.get("/", async (_req, res, next) => {
   try {
     const projects = await listProjects();
     res.json({ projects: projects.map(publicProject) });
   } catch (err) {
+    next(err);
+  }
+});
+
+projectsRouter.get("/:projectId/generation-config", async (req, res, next) => {
+  try {
+    const config = await getProjectGenerationConfig(req.params.projectId);
+    if (!config) { sendError(res, 404, "generation_config_not_found", "project generation config not found"); return; }
+    res.json({ config });
+  } catch (err: any) {
+    if (/valid UUID/i.test(err?.message || "")) { sendError(res, 400, "invalid_project_id", err.message); return; }
+    next(err);
+  }
+});
+
+projectsRouter.put("/:projectId/generation-config", async (req, res, next) => {
+  try {
+    const config = await upsertProjectGenerationConfig(req.params.projectId, req.body ?? {});
+    res.json({ config });
+  } catch (err: any) {
+    const code = err?.code;
+    if (/valid UUID/i.test(err?.message || "")) { sendError(res, 400, "invalid_project_id", err.message); return; }
+    if (code === "invalid_project_generation_config") {
+      res.status(400).json({ ok: false, error: code, message: err.message, details: err.details });
+      return;
+    }
     next(err);
   }
 });

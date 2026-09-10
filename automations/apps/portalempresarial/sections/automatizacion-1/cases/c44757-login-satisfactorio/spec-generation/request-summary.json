@@ -1,0 +1,358 @@
+{
+  "appSlug": "portalempresarial",
+  "sectionSlug": "automatizacion-1",
+  "scenarioId": "C44757",
+  "scenarioTitle": "Login satisfactorio",
+  "stepCount": 8,
+  "sourceExpectedResultPresent": true,
+  "requiredAssertionCount": 2,
+  "unresolvedRequiredCount": 2,
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "C44757",
+    "title": "Login satisfactorio",
+    "appSlug": "portalempresarial",
+    "sectionSlug": "automatizacion-1",
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Ingresar el valor [auth.company_identifier] en el campo \"RNC de la empresa\".",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "RNC de la empresa"
+        },
+        "valueKey": "auth.company_identifier",
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Ingresar el valor [auth.username] en el campo \"Nombre de usuario\".",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Nombre de usuario"
+        },
+        "valueKey": "auth.username",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "page_object",
+          "owner": "LoginPage",
+          "method": "fillUsername",
+          "expectedArgs": 1,
+          "semanticActionIdentity": "fill_username",
+          "argument": "Nombre de usuario"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Ingresar el valor secreto [auth.password] en el campo \"Contraseña\".",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Contraseña"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Hacer clic en el botón \"Continuar\".",
+        "operation": "noop",
+        "target": {
+          "strategy": "text",
+          "value": "Continuar"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 4,
+        "scenarioStepIndex": 5,
+        "originalText": "Esperar que finalice el proceso de autenticación.",
+        "operation": "wait",
+        "target": {
+          "strategy": "text",
+          "value": "Esperar que finalice el proceso de autenticación."
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 5,
+        "scenarioStepIndex": 6,
+        "originalText": "Clic en el boton \"Salir\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Salir"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "navigation_transition",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "url_state",
+          "mechanism": {
+            "source": "url_state",
+            "method": "expectPromotedVisible",
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "navigation_transition",
+              "urlPattern": "https://172.27.4.31/dashboard"
+            }
+          },
+          "sourceActionStepIndex": 6,
+          "requirement": "Validar que el formulario de acceso ya no sea la pantalla activa."
+        },
+        "sourceActionStepIndex": 6,
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      },
+      {
+        "contractStepIndex": 6,
+        "scenarioStepIndex": 7,
+        "originalText": "Validar que el formulario de acceso ya no sea la pantalla activa.",
+        "operation": "assertState",
+        "target": {
+          "strategy": "text",
+          "value": "el formulario de acceso ya no sea la pantalla activa"
+        },
+        "required": true,
+        "executionStatus": "unresolved",
+        "assertionIntent": "validation_present",
+        "polarity": "positive",
+        "expectedState": "el formulario de acceso ya no sea la pantalla activa",
+        "requirementRefs": [
+          "requirement:testrail:case:44757:step:7:assertion"
+        ],
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 7,
+        "scenarioStepIndex": 8,
+        "originalText": "Validar que se muestre la pantalla inicial autenticada del aplicativo.",
+        "operation": "assertState",
+        "target": {
+          "strategy": "text",
+          "value": "se muestre la pantalla inicial autenticada del aplicativo"
+        },
+        "required": true,
+        "executionStatus": "unresolved",
+        "assertionIntent": "validation_present",
+        "polarity": "positive",
+        "expectedState": "se muestre la pantalla inicial autenticada del aplicativo",
+        "requirementRefs": [
+          "requirement:testrail:case:44757:step:8:assertion"
+        ],
+        "evidenceRefs": []
+      }
+    ],
+    "unresolvedRequiredOracles": [
+      {
+        "requirement": "Validar que se muestre la pantalla inicial autenticada del aplicativo.",
+        "reason": "oracle_not_backed_by_runtime_evidence"
+      }
+    ],
+    "diagnostics": {
+      "requiredScenarioSteps": 8,
+      "representedScenarioSteps": 6,
+      "missingScenarioSteps": [
+        {
+          "scenarioStepIndex": 7,
+          "reason": "required_scenario_step_missing"
+        },
+        {
+          "scenarioStepIndex": 8,
+          "reason": "required_scenario_step_missing"
+        }
+      ]
+    }
+  },
+  "executionContractChars": 3880,
+  "mode": "deterministic",
+  "functionalExecutionEnabled": false,
+  "provider": null,
+  "model": null,
+  "skill": {
+    "name": null,
+    "version": null,
+    "hash": null,
+    "loaded": false
+  },
+  "observableOracles": [
+    {
+      "id": "controlled-advance-validation_present-7",
+      "requirement": "Validar que el formulario de acceso ya no sea la pantalla activa.",
+      "type": "runtime_state",
+      "backed": false,
+      "source": "discovery",
+      "stepIndex": 7,
+      "requirementRefs": [
+        "requirement:testrail:case:44757:step:7:assertion"
+      ],
+      "polarity": "positive",
+      "evidence": [
+        "controlled_advance_probe",
+        "validation_not_observed",
+        "attempt_observed:false",
+        "validation_mutation:false",
+        "validation_transport:false",
+        "forbidden_transition_reached:false",
+        "form_state_preserved:false",
+        "subject_found:false",
+        "subject_validation_mutation:false",
+        "advance_enabled_before:unknown",
+        "advance_enabled_after:unknown",
+        "advance_causality:not_observed",
+        "other_invalid_required_controls:0",
+        "other_empty_required_controls:0"
+      ],
+      "details": {
+        "stateKind": "controlled_advance_validation",
+        "candidateFound": true,
+        "candidateEnabled": true,
+        "attemptPossible": true,
+        "resolutionState": "found_enabled",
+        "attemptObserved": false,
+        "subjectFound": false,
+        "subjectValidationMutation": false,
+        "validationMutation": false,
+        "transitionOccurred": false,
+        "blockedObserved": false,
+        "advanceCausality": "not_observed",
+        "otherInvalidRequiredControls": 0,
+        "otherEmptyRequiredControls": 0
+      }
+    },
+    {
+      "id": "controlled-advance-validation_present-8",
+      "requirement": "Validar que se muestre la pantalla inicial autenticada del aplicativo.",
+      "type": "runtime_state",
+      "backed": false,
+      "source": "discovery",
+      "stepIndex": 8,
+      "requirementRefs": [
+        "requirement:testrail:case:44757:step:8:assertion"
+      ],
+      "polarity": "positive",
+      "evidence": [
+        "controlled_advance_probe",
+        "validation_not_observed",
+        "attempt_observed:false",
+        "validation_mutation:false",
+        "validation_transport:false",
+        "forbidden_transition_reached:false",
+        "form_state_preserved:false",
+        "subject_found:false",
+        "subject_validation_mutation:false",
+        "advance_enabled_before:unknown",
+        "advance_enabled_after:unknown",
+        "advance_causality:not_observed",
+        "other_invalid_required_controls:0",
+        "other_empty_required_controls:0"
+      ],
+      "details": {
+        "stateKind": "controlled_advance_validation",
+        "candidateFound": true,
+        "candidateEnabled": true,
+        "attemptPossible": true,
+        "resolutionState": "found_enabled",
+        "attemptObserved": false,
+        "subjectFound": false,
+        "subjectValidationMutation": false,
+        "validationMutation": false,
+        "transitionOccurred": false,
+        "blockedObserved": false,
+        "advanceCausality": "not_observed",
+        "otherInvalidRequiredControls": 0,
+        "otherEmptyRequiredControls": 0
+      }
+    },
+    {
+      "id": "expected-01",
+      "requirement": "Validar que el formulario de acceso ya no sea la pantalla activa.",
+      "type": "navigation_transition",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 7,
+      "requirementRefs": [
+        "requirement:testrail:case:44757:step:7:assertion"
+      ],
+      "polarity": "positive",
+      "target": "Salir",
+      "evidence": [
+        "transition_observed:true",
+        "click_target:Salir",
+        "action_type:Clic en el boton \"Salir\"",
+        "after_url:https://172.27.4.31/dashboard",
+        "assertion_polarity:positive"
+      ],
+      "details": {
+        "transitionObserved": true,
+        "clickTarget": "Salir",
+        "resolvedTarget": null,
+        "postClickUiChange": null,
+        "sourceActionStepIndex": 6,
+        "expectedUrl": "https://172.27.4.31/dashboard"
+      }
+    },
+    {
+      "id": "reconciled-navigation-8",
+      "requirement": "Validar que se muestre la pantalla inicial autenticada del aplicativo.",
+      "type": "navigation_transition",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 8,
+      "requirementRefs": [
+        "requirement:testrail:case:44757:step:8:assertion"
+      ],
+      "polarity": "positive",
+      "target": "Salir",
+      "evidence": [
+        "transition_observed:true",
+        "click_target:Salir",
+        "after_url:https://172.27.4.31/dashboard",
+        "satisfied_by:navigation_transition"
+      ],
+      "details": {
+        "transitionObserved": true,
+        "clickTarget": "Salir",
+        "resolvedTarget": null,
+        "sourceActionStepIndex": 6,
+        "expectedUrl": "https://172.27.4.31/dashboard",
+        "satisfiedBy": "navigation_transition"
+      }
+    }
+  ],
+  "oracleTypes": [
+    "runtime_state",
+    "navigation_transition"
+  ],
+  "specGenerationAttempts": 0,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [],
+  "finalSpec": {
+    "origin": "deterministic_draft",
+    "generatedBy": "core",
+    "strategy": "deterministic_draft",
+    "fallback": null
+  }
+}

@@ -139,13 +139,19 @@ function findPatternMatch(
  * - Out-of-scope validations
  */
 const MANUAL_PATTERNS = [
+  // Explicit manual execution intent. Business controls may legitimately be
+  // labelled "manual" or "manualmente" and must not match these rules.
+  /\bmanual[-\s]?only\b/i,
+  /\bmanual[_\s]+test\b/i,
+  /\b(?:solo|exclusivamente)\s+(?:ejecuci[oó]n|prueba|caso|escenario)\s+manual(?:mente)?\b/i,
+  /\b(?:validar|verificar|inspeccionar)\s+manualmente\b/i,
+  /\b(?:prueba|caso|escenario|ejecuci[oó]n)\s+(?:debe\s+ser\s+)?manual(?:mente)?\b/i,
   // Physical actions
   /tocar.*pantalla/i,
   /presionar.*bot[oó]n.*f[ií]sico/i,
   /insertar.*tarjeta.*f[ií]sica/i,
 
   // Manual validations
-  /validar.*manualmente/i,
   /inspecci[oó]n.*manual/i,
   /verificar.*con.*usuario.*real/i,
 
@@ -210,6 +216,28 @@ export function classifyScenarioAutomatability(
   huContext?: JiraIssueSource
 ): AutomatabilityDecision {
   const detectedPatterns: string[] = [];
+
+  const scenarioWithAuthority = scenario as McpScenario & {
+    manualOnly?: boolean;
+    nonAutomatable?: boolean;
+  };
+  const explicitManualOnly = scenarioWithAuthority.manualOnly === true
+    || scenarioWithAuthority.nonAutomatable === true
+    || scenario.executionMode === "nonAutomatable"
+    || scenario.launchClassification === "nonAutomatable";
+  if (explicitManualOnly) {
+    detectedPatterns.push("explicit_manual_only_authority");
+    return {
+      classification: "non_automatable_manual",
+      isAutomatable: false,
+      reasonCode: "manual_only_metadata",
+      reason: "Scenario is explicitly marked manual-only by structured execution authority",
+      matchedRule: "explicit_manual_only_authority",
+      matchedText: scenarioWithAuthority.manualOnly === true ? "manualOnly=true" : "structured_non_automatable_authority",
+      matchedSource: "metadata",
+      detectedPatterns,
+    };
+  }
 
   // Evaluate actionable scenario content first (steps + scenario metadata).
   const scenarioStepsText = normalizeWhitespace((scenario.steps || []).join(" "));

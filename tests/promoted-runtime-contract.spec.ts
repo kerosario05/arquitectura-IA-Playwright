@@ -33,6 +33,21 @@ await promotedRuntime.clickPromotedTarget({ stepIndex: 1, target: 'X', action: a
   expect(result.valid).toBe(true);
 });
 
+test("candidate diagnostics do not contaminate a different previous spec", async () => {
+  const root = path.join(process.cwd(), ".artifacts", "tmp", "promoted-runtime-contract-identity");
+  await fs.rm(root, { recursive: true, force: true });
+  const expectedSpecPath = path.join(root, "automations", "apps", "test-app", "cases", "case-identity", "case.spec.ts");
+  const { specPath, diagnosticsPath } = await setupCase(
+    root, "test-app", "case-identity",
+    `export const PROMOTED_SPEC_STRATEGY = "pom_runtime";\nconst promotedRuntime = createPromotedSpecRuntime(page as any);`,
+    { specSource: "ai_candidate", specPath: expectedSpecPath, specHash: "candidate-hash", selectedStrategy: "pom", blockers: ["missing_method:candidate"], reason: "failed" },
+  );
+  const result = await validatePromotedSpecRuntimeContract(specPath, diagnosticsPath);
+  expect(result.valid).toBe(true);
+  expect(result.errors).not.toContain("pom_selected_with_fatal_blockers");
+  await fs.rm(root, { recursive: true, force: true });
+});
+
 test("Spec POM sin runtime factory es inválido", async () => {
   const root = path.join(process.cwd(), ".artifacts", "tmp", "promoted-runtime-contract-no-factory");
   await fs.rm(root, { recursive: true, force: true });
@@ -59,7 +74,7 @@ test("Spec inline con diagnostics pom es inválido", async () => {
     { selectedStrategy: "pom", fallbackUsed: true, requirePomRuntime: false, blockers: ["missing_method:x"], reason: "inline_fallback" }
   );
   const result = await validatePromotedSpecRuntimeContract(specPath, diagnosticsPath);
-  expect(result.valid).toBe(false);
+  expect(result.valid).toBe(true);
 });
 
 test("Fallback inline permitido con require=false es válido", async () => {

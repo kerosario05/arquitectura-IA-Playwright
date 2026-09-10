@@ -32,6 +32,18 @@ const REPAIR_DECISION_SCHEMA = {
   additionalProperties: false
 };
 
+function isRepairPurpose(purpose: string): boolean {
+  return purpose === "repair" || purpose === "general" || purpose.includes("repair");
+}
+
+function isSupportedCodexPurpose(purpose: string): boolean {
+  return purpose === "scenario_generation"
+    || purpose === "spec_generation"
+    || purpose === "scenario_data_semantic_enrichment"
+    || purpose === "canonical_scenario_semantic_normalization"
+    || isRepairPurpose(purpose);
+}
+
 let runCodexCliFn: typeof runCodexCli = runCodexCli;
 export function __setRunCodexCliForTesting(fn: typeof runCodexCli): void {
   runCodexCliFn = fn;
@@ -72,6 +84,9 @@ export class CodexCliProvider {
   async completeJson(request: AiCompletionRequest): Promise<AiCompletionResponse> {
     const startedAt = Date.now();
     const purpose = request.purpose ?? "general";
+    if (!isSupportedCodexPurpose(purpose)) {
+      throw new AiProviderError("ai_provider_unsupported", `Unsupported Codex task purpose "${purpose}"`);
+    }
     const tempDir = await this.createTempDir(purpose);
     const outputFileName = this.getOutputFileName(purpose);
     const outputPath = path.join(tempDir, outputFileName);
@@ -341,6 +356,12 @@ export class CodexCliProvider {
     if (purpose === "spec_generation") {
       return "spec-generation-result.json";
     }
+    if (purpose === "scenario_data_semantic_enrichment") {
+      return "semantic-enrichment-result.json";
+    }
+    if (purpose === "canonical_scenario_semantic_normalization") {
+      return "canonical-semantic-normalization-result.json";
+    }
     // Default to repair-decision.json for repair and general purposes
     return "repair-decision.json";
   }
@@ -417,7 +438,9 @@ export class CodexCliProvider {
     const timestamp = Date.now();
     const purposeDir = purpose === "scenario_generation"
       ? "scenario"
-      : (purpose === "spec_generation" ? "spec" : "repair");
+      : (purpose === "spec_generation"
+        ? "spec"
+        : (purpose === "canonical_scenario_semantic_normalization" ? "canonical-semantic" : "repair"));
     const tempDir = path.join(process.cwd(), ".artifacts", "ai-provider", "codex", purposeDir, `${timestamp}`);
     await fs.mkdir(tempDir, { recursive: true });
     return tempDir;
@@ -431,13 +454,13 @@ export class CodexCliProvider {
     userMessage: string,
     purpose: string
   ): Promise<void> {
-    // Write repair schema only for repair/general purposes, not for generation flows.
-    if (purpose !== "scenario_generation" && purpose !== "spec_generation") {
+    // Only repair tasks use the repair decision schema.
+    if (isRepairPurpose(purpose)) {
       const schemaPath = path.join(tempDir, "repair-decision.schema.json");
       await fs.writeFile(schemaPath, JSON.stringify(REPAIR_DECISION_SCHEMA, null, 2), "utf-8");
     }
 
-    const fileOutputPrompt = (purpose === "scenario_generation" || purpose === "spec_generation")
+    const fileOutputPrompt = !isRepairPurpose(purpose)
       ? this.buildGenericFileOutputPrompt(outputPath, promptPath, systemMessage, userMessage)
       : this.buildRepairFileOutputPrompt(outputPath, promptPath, systemMessage, userMessage);
 

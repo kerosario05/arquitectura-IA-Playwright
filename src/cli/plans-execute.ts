@@ -6,6 +6,7 @@ import { readFile } from "node:fs/promises";
 import type { ExecutionPlan } from "../types/execution-plan.types";
 import { assertValidExecutionPlan } from "../plans";
 import { getLoginStrategy } from "../auth/login-strategy.factory";
+import { launchRuntimeBrowserSession } from "../browser/browser-session";
 import { executeExecutionPlan } from "../runner/execution-plan-executor";
 import { writePlanExecutionResults } from "../runner/plan-execution-writer";
 import type { PlansExecutionSummary } from "../types/plan-execution.types";
@@ -85,13 +86,18 @@ async function run(): Promise<number> {
   const outputPath = args.output ? path.resolve(args.output) : path.resolve(`./.artifacts/executions/results-${timestamp}.json`);
 
   const browserType = { chromium, firefox, webkit }[config.execution.browser];
-  const browser = await browserType.launch({ headless: args.headed ? false : config.execution.headless });
+  const session = await launchRuntimeBrowserSession({
+    browserType,
+    headless: args.headed ? false : config.execution.headless,
+    targetUrl: config.app.baseUrl,
+    profilePath: config.execution.qaBrowserProfilePath,
+    channel: config.execution.qaBrowserChannel,
+  });
 
   const results: PlansExecutionSummary["results"] = [];
 
   try {
-    const context = await browser.newContext();
-    const page = await context.newPage();
+    const page = session.page;
     page.setDefaultTimeout(config.execution.defaultTimeoutMs);
 
     const loginStrategy = getLoginStrategy(config.app.loginMode);
@@ -110,7 +116,7 @@ async function run(): Promise<number> {
       results.push(result);
     }
   } finally {
-    await browser.close();
+    await session.close();
   }
 
   const summary: PlansExecutionSummary = {

@@ -1,4 +1,5 @@
 import type { RawTestRailCase, TestScenario, TestScenarioStep } from "../types/testrail.types";
+import { parseStepIntent } from "../discovery/step-intent-parser";
 
 const hintDictionary = [
   "cedula",
@@ -135,11 +136,61 @@ function cleanText(value?: string): string | undefined {
   return cleaned || undefined;
 }
 
+export type PostSubmitActionRole = "auth_auxiliary" | undefined;
+
+export function classifyPostSubmitActionRole(intents: ReturnType<typeof parseStepIntent>): PostSubmitActionRole {
+  const actionIndexes = intents
+    .map((intent, index) => ({ intent, index }))
+    .filter(({ intent }) => intent.type === "action_click");
+  if (actionIndexes.length !== 1) return undefined;
+
+  const [{ intent: action, index: actionIndex }] = actionIndexes;
+  const hasAuthWaitBeforeAction = intents
+    .slice(0, actionIndex)
+    .some((intent) => intent.type === "assertion" && /^(?:esperar|wait\s+for)\b/i.test(intent.originalText.trim()));
+  const hasOnlyAuthOutcomeAssertionsAfterAction = intents
+    .slice(actionIndex + 1)
+    .length > 0 && intents
+    .slice(actionIndex + 1)
+    .every((intent) => intent.type === "assertion");
+
+  return action && hasAuthWaitBeforeAction && hasOnlyAuthOutcomeAssertionsAfterAction
+    ? "auth_auxiliary"
+    : undefined;
+}
+
+function inferExplicitAuthenticationFlow(steps: TestScenarioStep[]): boolean {
+  const intents = steps.flatMap((step) => parseStepIntent(step.action));
+  const fills = intents.filter((intent) => intent.type === "action_fill" && Boolean(intent.valueKey));
+  const submitIndex = intents.findIndex((intent) =>
+    intent.type === "action_submit" ||
+    (intent.type === "action_click" && /\b(?:continuar|submit|sign\s*in|log\s*in|ingresar)\b/i.test(intent.actionTarget ?? ""))
+  );
+  if (fills.length < 2 || submitIndex < 0) return false;
+
+  const hasAuthenticationOutcome = intents.some((intent, index) =>
+    index > submitIndex && intent.type === "assertion"
+  );
+  const postSubmitIntents = intents.slice(submitIndex + 1);
+  const hasPostSubmitAction = postSubmitIntents.some((intent) =>
+    ["navigation_path", "action_click", "action_fill", "action_select", "action_submit"].includes(intent.type)
+  );
+  const postSubmitRole = classifyPostSubmitActionRole(postSubmitIntents);
+
+  return hasAuthenticationOutcome && (!hasPostSubmitAction || postSubmitRole === "auth_auxiliary");
+}
+
+function resolveTestRailAuthIntent(rawCase: RawTestRailCase, steps: TestScenarioStep[]): "gate_observation" | "full_authentication" | undefined {
+  const explicit = (rawCase as any).authIntent;
+  if (explicit === "gate_observation" || explicit === "full_authentication") return explicit;
+  return inferExplicitAuthenticationFlow(steps) ? "full_authentication" : undefined;
+}
+
 /**
  * Clean and format expected result text for readability
  * Preserves list structure and repairs concatenated items
  */
-function cleanExpectedResult(value?: string): string | undefined {
+export function cleanExpectedResult(value?: string): string | undefined {
   if (!value) {
     return undefined;
   }
@@ -161,7 +212,7 @@ function cleanExpectedResult(value?: string): string | undefined {
   return processed || undefined;
 }
 
-function splitIntoSteps(customSteps: string, expected?: string): TestScenarioStep[] {
+function splitIntoSteps(customSteps: string): TestScenarioStep[] {
   const normalized = cleanText(customSteps);
   if (!normalized) {
     return [];
@@ -251,12 +302,11 @@ function splitIntoSteps(customSteps: string, expected?: string): TestScenarioSte
   }
   
   return actions.map((action, index) => {
-    const expectedText = index === actions.length - 1 ? cleanExpectedResult(expected) : undefined;
     return {
       index: index + 1,
       action,
-      expected: expectedText,
-      dataHints: extractDataHintsFromText(`${action}\n${expectedText ?? ""}`)
+      expected: undefined,
+      dataHints: extractDataHintsFromText(action)
     };
   });
 }
@@ -303,7 +353,7 @@ export function normalizeTestRailCase(rawCase: RawTestRailCase): TestScenario {
       };
     });
   } else if (rawCase.custom_steps) {
-    steps = splitIntoSteps(rawCase.custom_steps, rawCase.custom_expected).map((step) => ({
+    steps = splitIntoSteps(rawCase.custom_steps).map((step) => ({
       ...step,
       dataHints: extractDataHintsFromText(
         `${step.action}\n${step.expected ?? ""}\n${cleanText(rawCase.custom_preconds) ?? ""}`
@@ -322,7 +372,8 @@ export function normalizeTestRailCase(rawCase: RawTestRailCase): TestScenario {
     ];
   }
 
-  return {
+  const authIntent = resolveTestRailAuthIntent(rawCase, steps);
+  const normalized = {
     source: "testrail",
     externalId: `C${rawCase.id}`,
     caseId: rawCase.id,
@@ -332,8 +383,12 @@ export function normalizeTestRailCase(rawCase: RawTestRailCase): TestScenario {
     steps,
     raw: rawCase,
     sectionId: rawCase.section_id,
-    sectionName: undefined
-  };
+    sectionName: undefined,
+    authIntent,
+    ...(authIntent === "full_authentication" ? { type: "authentication_test" } : {})
+  } as TestScenario & { type?: string };
+
+  return normalized;
 }
 
 export function normalizeTestRailCases(rawCases: RawTestRailCase[]): TestScenario[] {

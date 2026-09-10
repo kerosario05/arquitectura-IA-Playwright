@@ -84,6 +84,18 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
   return result.length > 0 ? mapRow(result[0]) : null;
 }
 
+export async function getProjectByTestRailProjectId(testRailProjectId: string): Promise<Project | null> {
+  const conn = await getConnection();
+  const result = await conn.query<ProjectRow>(
+    `SELECT p.id, p.slug, p.name, p.projectType, p.status, p.enabled, p.createdAt, p.updatedAt
+       FROM dbo.Projects p
+       JOIN dbo.ProjectTestRailConfiguration tr ON tr.projectId = p.id
+      WHERE tr.projectIdTr = ?`,
+    [testRailProjectId],
+  );
+  return result.length > 0 ? mapRow(result[0]) : null;
+}
+
 export async function listProjects(): Promise<Project[]> {
   const conn = await getConnection();
   const result = await conn.query<ProjectRow>(

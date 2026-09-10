@@ -18,7 +18,7 @@
           "status": "active",
           "sensitive": false,
           "confidence": 1,
-          "source": ""
+          "source": "c44757-login-satisfactorio-step-5,c44757-login-satisfactorio-step-6"
         },
         {
           "name": "selectFirstVisibleCard",
@@ -29,6 +29,28 @@
           "sensitive": false,
           "confidence": 1,
           "source": ""
+        },
+        {
+          "name": "openLoginModal",
+          "intent": "open_login_modal",
+          "parameters": [],
+          "available": true,
+          "source": "c44757-login-satisfactorio-missing-open_login_modal",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        },
+        {
+          "name": "clickPrimaryAction",
+          "intent": "click_primary_action",
+          "parameters": [
+            "actionName"
+          ],
+          "available": true,
+          "source": "c44757-login-satisfactorio-missing-click_primary_action",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
         }
       ],
       "confidence": 1,
@@ -36,7 +58,7 @@
       "sourcePlanIds": [],
       "caseIds": [],
       "createdAt": "2026-09-03T14:00:40.691Z",
-      "updatedAt": "2026-09-03T14:00:40.691Z"
+      "updatedAt": "2026-09-06T19:48:39.665Z"
     },
     {
       "id": "po_framework_operationsmenupage",
@@ -75,8 +97,101 @@
       "caseIds": [],
       "createdAt": "2026-09-03T14:00:40.691Z",
       "updatedAt": "2026-09-03T14:00:40.691Z"
+    },
+    {
+      "id": "po_1788724119663_1qmyc7",
+      "className": "FormPage",
+      "filePath": "automations/apps/portalempresarial/pages/form.page.ts",
+      "screenSignature": "screen:portalempresarial-form",
+      "methods": [
+        {
+          "name": "fillField",
+          "intent": "fill_form_field",
+          "parameters": [
+            "fieldName",
+            "value"
+          ],
+          "available": true,
+          "source": "candidate,c44757-login-satisfactorio-step-2,c44757-login-satisfactorio-step-3",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "active",
+      "sourcePlanIds": [
+        "c44757-login-satisfactorio"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-09-06T19:48:39.663Z",
+      "updatedAt": "2026-09-06T19:48:39.663Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-09-06T19:48:39.682Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/portalempresarial/pages/form.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-09-06T19:48:39.698Z",
+        "approvedFrom": "automations/apps/portalempresarial/pages/form.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
+    },
+    {
+      "id": "po_1788788226829_dhny1a",
+      "className": "LoginPage",
+      "filePath": "automations/apps/portalempresarial/pages/login.page.ts",
+      "screenSignature": "screen:portalempresarial-login",
+      "methods": [
+        {
+          "name": "fillUsername",
+          "intent": "fill_username",
+          "parameters": [
+            "value"
+          ],
+          "available": true,
+          "source": "candidate,c44757-login-satisfactorio-step-4,c44757-login-satisfactorio-missing-fill_username",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        },
+        {
+          "name": "fillPassword",
+          "intent": "fill_password",
+          "parameters": [
+            "value"
+          ],
+          "available": true,
+          "source": "candidate,c44757-login-satisfactorio-step-5,c44757-login-satisfactorio-missing-fill_password",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "active",
+      "sourcePlanIds": [
+        "c44757-login-satisfactorio"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-09-07T13:37:06.829Z",
+      "updatedAt": "2026-09-07T13:37:06.829Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-09-07T13:37:06.842Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/portalempresarial/pages/login.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-09-07T13:37:06.854Z",
+        "approvedFrom": "automations/apps/portalempresarial/pages/login.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
     }
   ],
   "componentCandidates": [],
-  "updatedAt": "2026-09-03T14:01:17.007Z"
+  "updatedAt": "2026-09-10T16:39:15.014Z"
 }

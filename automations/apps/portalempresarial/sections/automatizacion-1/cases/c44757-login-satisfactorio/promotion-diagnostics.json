@@ -1,0 +1,24 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "spec_generation_validation_failed",
+  "blockers": [
+    "spec_generation_validation_failed"
+  ],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage",
+    "FormPage",
+    "LoginPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\portalempresarial\\sections\\automatizacion-1\\cases\\c44757-login-satisfactorio\\case.spec.ts",
+  "specHash": "4614937252383d6b013a885120f51ce6ae0fa12bf985f0ea2f72d62d78644720",
+  "specSource": "ai_candidate"
+}

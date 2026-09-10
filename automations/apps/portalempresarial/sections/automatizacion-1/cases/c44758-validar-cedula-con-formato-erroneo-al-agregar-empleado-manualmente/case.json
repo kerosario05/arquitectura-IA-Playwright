@@ -1,0 +1,10 @@
+{
+  "id": "c44758-validar-cedula-con-formato-erroneo-al-agregar-empleado-manualmente",
+  "externalId": "C44758",
+  "caseId": 44758,
+  "title": "Validar cédula con formato erróneo al agregar empleado manualmente",
+  "source": "discovery",
+  "appSlug": "portalempresarial",
+  "appConfigPath": "automations\\apps\\portalempresarial\\app.config.json",
+  "createdAt": "2026-09-09T16:16:28.874Z"
+}

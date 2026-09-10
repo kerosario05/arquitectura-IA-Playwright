@@ -1,5 +1,6 @@
 import assert from "node:assert";
-import type { LaunchExecutionInput } from "./launch-orchestrator";
+import { resolveExistingCaseExecutionPlan, type LaunchExecutionInput } from "./launch-orchestrator";
+import { resolveRediscoveryIntent, resolveRouteFromValidation } from "./discovery-batch-runner";
 
 function test(label: string, fn: () => void): void {
   try { fn(); console.log(`  PASS  ${label}`); }
@@ -14,6 +15,77 @@ const validScenarios = [{ scenarioId: "LAUNCH-001", title: "Test", steps: ["Step
 const originalEnv = { ...process.env };
 
 describe("launchExecution validation", () => {
+  test("targeted discovery without reusable automation is admitted as mcp_required", () => {
+    const plan = resolveExistingCaseExecutionPlan({
+      caseIds: [100], appSlug: "app-a", entries: [],
+      caseContracts: new Map([[100, { usable: false, reasonCode: "targeted_gap_resolution_required", recommendedRoute: "targeted_discovery" }]]),
+    });
+    assert.strictEqual(plan.mcpRequired[0]?.executionSource, "mcp_required");
+    assert.deepStrictEqual(plan.blocked, []);
+  });
+
+  test("full discovery without reusable automation is admitted as mcp_required", () => {
+    const plan = resolveExistingCaseExecutionPlan({
+      caseIds: [101], appSlug: "app-a", entries: [],
+      caseContracts: new Map([[101, { usable: false, reasonCode: "contract_insufficient_for_fast_path", recommendedRoute: "full_discovery" }]]),
+    });
+    assert.strictEqual(plan.mcpRequired[0]?.executionSource, "mcp_required");
+    assert.deepStrictEqual(plan.blocked, []);
+  });
+
+  test("hard-blocked contract remains blocked", () => {
+    const plan = resolveExistingCaseExecutionPlan({
+      caseIds: [102], appSlug: "app-a", entries: [],
+      caseContracts: new Map([[102, { usable: false, reasonCode: "non_automatable_contract" }]]),
+    });
+    assert.strictEqual(plan.blocked[0]?.executionSource, "blocked");
+    assert.deepStrictEqual(plan.mcpRequired, []);
+  });
+
+  test("reusable automation remains existing_spec", () => {
+    const plan = resolveExistingCaseExecutionPlan({
+      caseIds: [103], appSlug: "app-a",
+      entries: [{ id: "automation-103", caseId: 103, appSlug: "app-a", status: "active", pomStatus: "promoted", specVerificationStatus: "passed", title: "Reusable" } as any],
+      validateSpec: () => ({ reusable: true, blocked: false, reason: "promoted_spec_valid", specPath: "spec.ts" }),
+    });
+    assert.strictEqual(plan.existingSpec[0]?.executionSource, "existing_spec");
+    assert.deepStrictEqual(plan.mcpRequired, []);
+  });
+
+  test("separa rerun de rediscovery y conserva el routing semántico", () => {
+    const manual = resolveRouteFromValidation({
+      caseId: 201, appSlug: "app-a", forceRediscovery: false,
+      contractEvaluation: { sufficient: false, reasonCode: "missing_route_evidence", recommendedRoute: "full_discovery" } as any,
+      validation: { reusable: false, blocked: false, reason: "missing_route_evidence" },
+    });
+    const reusable = {
+      caseId: 202, appSlug: "app-a", forceRediscovery: false,
+      validation: { reusable: true, blocked: false, reason: "promoted_spec_valid", specPath: "spec.ts" },
+    } as const;
+    const normal = resolveRouteFromValidation(reusable);
+    const rerunIntent = resolveRediscoveryIntent({ rerunActive: true, executePromotedSpecs: true });
+    const rerun = resolveRouteFromValidation({ ...reusable, rediscoveryIntent: rerunIntent.rediscoveryIntent });
+    const stale = resolveRouteFromValidation({
+      caseId: 203, appSlug: "app-a", forceRediscovery: false, targetedDiscoverySupported: true,
+      contractEvaluation: { sufficient: false, reasonCode: "contract_stale", recommendedRoute: "targeted_discovery" } as any,
+      validation: { reusable: false, blocked: false, reason: "contract_stale", specPath: "spec.ts" },
+    });
+    const explicitRediscovery = resolveRouteFromValidation({
+      caseId: 204, appSlug: "app-a", forceRediscovery: true,
+      validation: { reusable: true, blocked: false, reason: "promoted_spec_valid", specPath: "spec.ts" },
+    });
+    const overwrite = resolveRediscoveryIntent({ overwrite: true, executePromotedSpecs: true });
+
+    assert.strictEqual(manual.route, "full_discovery");
+    assert.strictEqual(normal.route, "promoted_reuse");
+    assert.strictEqual(rerunIntent.rerunIntent, true);
+    assert.strictEqual(rerunIntent.rediscoveryIntent, false);
+    assert.strictEqual(rerun.route, "promoted_reuse");
+    assert.strictEqual(stale.route, "targeted_discovery");
+    assert.strictEqual(explicitRediscovery.route, "full_discovery");
+    assert.strictEqual(overwrite.rediscoveryIntent, false);
+  });
+
   test("fails if no projectId", async () => {
     const { launchExecution } = await import("./launch-orchestrator");
     const input: LaunchExecutionInput = { appSlug: "test", selectedScenarios: validScenarios };

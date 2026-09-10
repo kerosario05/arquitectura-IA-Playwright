@@ -1,0 +1,391 @@
+{
+  "appSlug": "portalempresarial",
+  "sectionSlug": "automatizacion-1",
+  "scenarioId": "C44758",
+  "scenarioTitle": "Validar cédula con formato erróneo al agregar empleado manualmente",
+  "stepCount": 14,
+  "sourceExpectedResultPresent": true,
+  "requiredAssertionCount": 4,
+  "unresolvedRequiredCount": 1,
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "C44758",
+    "title": "Validar cédula con formato erróneo al agregar empleado manualmente",
+    "appSlug": "portalempresarial",
+    "sectionSlug": "automatizacion-1",
+    "auth": {
+      "gateDetected": true,
+      "required": true,
+      "stage": "identification_input",
+      "insertionAfterStepIndex": 7,
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu",
+      "aggregate": {
+        "kind": "auth_flow",
+        "helper": "ensureAuthenticated",
+        "bindingId": "auth-flow-aggregate",
+        "coveredScenarioStepIndices": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Ingresar el valor [auth.company_identifier] en el campo \"RNC de la empresa\".",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "RNC de la empresa"
+        },
+        "valueKey": "auth.company_identifier",
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Ingresar el valor [auth.username] en el campo \"Nombre de usuario\".",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Nombre de usuario"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Ingresar el valor secreto [auth.password] en el campo \"Contraseña\".",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Contraseña"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Hacer clic en el botón \"Continuar\".",
+        "operation": "noop",
+        "target": {
+          "strategy": "text",
+          "value": "Continuar"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 4,
+        "scenarioStepIndex": 5,
+        "originalText": "Esperar que finalice el proceso de autenticación.",
+        "operation": "wait",
+        "target": {
+          "strategy": "text",
+          "value": "Esperar que finalice el proceso de autenticación."
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "auth_gate",
+          "backed": true,
+          "implementationKind": "runtime_auth_state",
+          "mechanism": {
+            "source": "auth_gate_detector",
+            "method": "detectAuthGate",
+            "scanner": {
+              "source": "page_scanner",
+              "method": "scanCurrentPage"
+            },
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "auth_gate"
+            }
+          },
+          "requirement": "que finalice el proceso de autenticación"
+        },
+        "evidenceRefs": [
+          "oracle:reconciled-auth-5"
+        ]
+      },
+      {
+        "contractStepIndex": 5,
+        "scenarioStepIndex": 6,
+        "originalText": "Si el botón \"Salir\" está visible en un mensaje de advertencia inicial, hacer clic en el botón \"Salir\".",
+        "operation": "noop",
+        "target": {
+          "strategy": "text",
+          "value": "Salir"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "literal_visible_text",
+          "backed": true,
+          "implementationKind": "heading_or_control",
+          "requirement": "Salir"
+        },
+        "evidenceRefs": [
+          "oracle:observed-01"
+        ]
+      },
+      {
+        "contractStepIndex": 6,
+        "scenarioStepIndex": 7,
+        "originalText": "Hacer clic en la opción \"Gestión de nómina\".",
+        "operation": "noop",
+        "target": {
+          "strategy": "text",
+          "value": "Gestión de nómina"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 7,
+        "scenarioStepIndex": 8,
+        "originalText": "Hacer clic en la opción \"Crear Manualmente\".",
+        "operation": "noop",
+        "target": {
+          "strategy": "text",
+          "value": "Crear Manualmente"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 8,
+        "scenarioStepIndex": 9,
+        "originalText": "Si el botón \"X\" de cierre está visible en un mensaje de advertencia, hacer clic en el botón \"X\".",
+        "operation": "noop",
+        "target": {
+          "strategy": "text",
+          "value": "X"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "literal_visible_text",
+          "backed": true,
+          "implementationKind": "heading_or_control",
+          "requirement": "X"
+        },
+        "evidenceRefs": [
+          "oracle:observed-02"
+        ]
+      },
+      {
+        "contractStepIndex": 9,
+        "scenarioStepIndex": 10,
+        "originalText": "Seleccionar la opción \"Cédula\" en el campo de tipo de identificación.",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "Cédula"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 10,
+        "scenarioStepIndex": 11,
+        "originalText": "Ingresar el valor [employee.invalid_document] en el campo \"Colaborador\".",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Colaborador"
+        },
+        "valueKey": "employee.invalid_document",
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 11,
+        "scenarioStepIndex": 12,
+        "originalText": "Hacer clic en el campo \"Puesto\".",
+        "operation": "noop",
+        "target": {
+          "strategy": "text",
+          "value": "Puesto"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 12,
+        "scenarioStepIndex": 13,
+        "originalText": "Al salir del campo \"Colaborador\", validar que el campo quede en estado inválido y que se muestre un mensaje de validación asociado al documento ingresado.",
+        "operation": "noop",
+        "target": {
+          "strategy": "text",
+          "value": "Colaborador"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 13,
+        "scenarioStepIndex": 14,
+        "originalText": "Validar que, mientras el campo \"Colaborador\" permanezca en estado inválido, la acción \"Validar\" permanezca deshabilitada y no permita continuar.",
+        "operation": "assertVisible",
+        "target": {
+          "strategy": "text",
+          "value": "Colaborador"
+        },
+        "required": true,
+        "executionStatus": "unresolved",
+        "evidenceRefs": []
+      }
+    ],
+    "unresolvedRequiredOracles": [
+      {
+        "requirement": "Validar que, mientras el campo \"Colaborador\" permanezca en estado inválido, la acción \"Validar\" permanezca deshabilitada y no permita continuar.",
+        "reason": "oracle_not_backed_by_runtime_evidence"
+      },
+      {
+        "requirement": "Validar que, mientras el campo \"Colaborador\" permanezca en estado inválido, la acción \"Validar\" permanezca deshabilitada y no permita continuar.",
+        "reason": "oracle_not_backed_by_runtime_evidence"
+      }
+    ],
+    "diagnostics": {
+      "requiredScenarioSteps": 14,
+      "representedScenarioSteps": 13,
+      "missingScenarioSteps": [
+        {
+          "scenarioStepIndex": 14,
+          "reason": "required_scenario_step_missing"
+        }
+      ]
+    }
+  },
+  "executionContractChars": 5785,
+  "mode": "deterministic",
+  "functionalExecutionEnabled": false,
+  "provider": null,
+  "model": null,
+  "skill": {
+    "name": null,
+    "version": null,
+    "hash": null,
+    "loaded": false
+  },
+  "observableOracles": [
+    {
+      "id": "observed-01",
+      "requirement": "Salir",
+      "type": "literal_visible_text",
+      "backed": true,
+      "source": "discovery",
+      "evidence": [
+        "assertion_resolved_during_discovery"
+      ]
+    },
+    {
+      "id": "observed-02",
+      "requirement": "X",
+      "type": "literal_visible_text",
+      "backed": true,
+      "source": "discovery",
+      "evidence": [
+        "assertion_resolved_during_discovery"
+      ]
+    },
+    {
+      "id": "controlled-advance-validation_present-14",
+      "requirement": "Validar que, mientras el campo \"Colaborador\" permanezca en estado inválido, la acción \"Validar\" permanezca deshabilitada y no permita continuar.",
+      "type": "runtime_state",
+      "backed": false,
+      "source": "discovery",
+      "stepIndex": 14,
+      "requirementRefs": [
+        "requirement:testrail:case:44758:step:14:assertion"
+      ],
+      "polarity": "positive",
+      "evidence": [
+        "controlled_advance_probe",
+        "validation_not_observed",
+        "advance_candidate_found_ambiguous"
+      ],
+      "details": {
+        "stateKind": "controlled_advance_validation",
+        "candidateFound": false,
+        "candidateEnabled": false,
+        "attemptPossible": false,
+        "resolutionState": "found_ambiguous",
+        "attemptObserved": false,
+        "subjectFound": false,
+        "subjectValidationMutation": false,
+        "validationMutation": false,
+        "transitionOccurred": false,
+        "blockedObserved": false,
+        "advanceCausality": "not_observed",
+        "otherInvalidRequiredControls": 0,
+        "otherEmptyRequiredControls": 0
+      }
+    },
+    {
+      "id": "expected-01",
+      "requirement": "<p>El sistema muestra una validación visible asociada al documento inválido o incompleto y bloquea el avance normal del formulario hasta que el dato sea corregido.</p>",
+      "type": "literal_visible_text",
+      "backed": false,
+      "source": "inferred",
+      "evidence": [
+        "narrative_covered_by_explicit_scenario_assertions"
+      ]
+    },
+    {
+      "id": "reconciled-auth-5",
+      "requirement": "que finalice el proceso de autenticación",
+      "type": "auth_gate",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 5,
+      "evidence": [
+        "auth_gate_detected:true",
+        "auth_stage:unknown",
+        "satisfied_by:auth_gate"
+      ],
+      "details": {
+        "gateDetected": true,
+        "stage": null,
+        "detectedBeforeStep": null,
+        "satisfiedBy": "auth_gate"
+      }
+    }
+  ],
+  "oracleTypes": [
+    "literal_visible_text",
+    "runtime_state",
+    "auth_gate"
+  ],
+  "specGenerationAttempts": 0,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [],
+  "finalSpec": {
+    "origin": "deterministic_draft",
+    "generatedBy": "core",
+    "strategy": "deterministic_draft",
+    "fallback": null
+  }
+}

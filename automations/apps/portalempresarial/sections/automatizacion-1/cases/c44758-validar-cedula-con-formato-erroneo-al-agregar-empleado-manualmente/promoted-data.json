@@ -1,0 +1,50 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-09-09T16:16:28.656Z",
+  "entries": [
+    {
+      "key": "auth.company_identifier",
+      "source": "unknown",
+      "fieldName": "RNC de la empresa",
+      "stepIndex": 2,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "auth.username",
+      "source": "unknown",
+      "fieldName": "Nombre de usuario",
+      "stepIndex": 3,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "auth.password",
+      "source": "unknown",
+      "fieldName": "Contraseña",
+      "stepIndex": 4,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "employee.invalid_document",
+      "source": "unknown",
+      "fieldName": "Colaborador",
+      "stepIndex": 11,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

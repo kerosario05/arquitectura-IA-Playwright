@@ -4,7 +4,7 @@ import type { ExecutionPlan } from "../types/execution-plan.types";
 import type { DataContext, DataContextEntry } from "./data-context";
 import { autoGenerateTestData } from "./auto-test-data-generator";
 
-export type PromotedDataSource = "env" | "app_test_data" | "auto_generated" | "alias" | "fixture" | "unknown";
+export type PromotedDataSource = "env" | "app_test_data" | "auto_generated" | "alias" | "fixture" | "runtime_context" | "explicit_runtime_input" | "unknown";
 
 export type PromotedDataManifestEntry = {
   key: string;
@@ -44,9 +44,12 @@ export function maskValue(value: string, sensitive: boolean): string {
 
 function inferSource(source: DataContextEntry["source"] | undefined): PromotedDataSource {
   if (!source) return "unknown";
+  if (source === "explicit_runtime_input") return "explicit_runtime_input";
+  if (source === "runtime_context") return "runtime_context";
   if (source === "environment_variable" || source === "app_username" || source === "app_password") return "env";
   if (source === "test_data") return "app_test_data";
   if (source === "test_data_alias") return "alias";
+  if (source === "data_override") return "explicit_runtime_input";
   if (source === "auto_generated") return "auto_generated";
   if (source === "fixture") return "fixture";
   return "unknown";
@@ -80,7 +83,8 @@ export function buildPromotedDataManifest(plan: ExecutionPlan, dataContext: Data
     if (!key) continue;
     const ctxEntry = dataIndex.get(normalize(key));
     const requiredRef = requiredMap.get(normalize(key));
-    const sensitive = requiredRef?.sensitive ?? ctxEntry?.sensitive ?? isSensitiveDataKey(key);
+    const runtimeOnly = ctxEntry?.source === "explicit_runtime_input" || ctxEntry?.source === "runtime_context";
+    const sensitive = runtimeOnly || requiredRef?.sensitive === true || ctxEntry?.sensitive === true || isSensitiveDataKey(key);
     const demoSafe = !sensitive;
     const value = ctxEntry?.value;
     entries.push({
@@ -93,7 +97,7 @@ export function buildPromotedDataManifest(plan: ExecutionPlan, dataContext: Data
       demoSafe,
       required: requiredRef?.required ?? true,
       maskedValue: maskValue(value ?? "", sensitive),
-      value: value && canPersistValue({ sensitive, demoSafe }) ? value : undefined
+      value: value && !runtimeOnly && canPersistValue({ sensitive, demoSafe }) ? value : undefined
     });
   }
 
@@ -127,6 +131,24 @@ export type PromotedDataContext = DataContext & {
   };
 };
 
+const EXPLICIT_RUNTIME_INPUTS_ENV = "PROMOTED_RUNTIME_EXPLICIT_INPUTS_JSON";
+const RUNTIME_DATA_OVERRIDES_ENV = "PROMOTED_RUNTIME_DATA_OVERRIDES_JSON";
+
+function parseRuntimeDataObject(raw: string | undefined): Record<string, string> {
+  if (!raw?.trim()) return {};
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+    return Object.fromEntries(
+      Object.entries(parsed as Record<string, unknown>)
+        .filter(([, value]) => typeof value === "string" && value.trim().length > 0)
+        .map(([key, value]) => [key, String(value).trim()]),
+    );
+  } catch {
+    return {};
+  }
+}
+
 function toMap(entries: DataContextEntry[]): Map<string, DataContextEntry> {
   return new Map(entries.map((entry) => [normalize(entry.key), entry]));
 }
@@ -143,6 +165,18 @@ export function buildPromotedDataContext(options: {
   const generatedFallbackKeys: string[] = [];
   const profile = (options.testDataProfile ?? "qa").toLowerCase();
   const allowDemoFallback = options.autoGenerateTestData === true && (profile === "demo" || profile === "ecommerce" || profile === "qa");
+
+  // Runtime-only values are applied after configured/test data and before
+  // manifest hydration. Explicit input wins over case context by normalized
+  // declared key; neither source is persisted into the promoted manifest.
+  const runtimeContext = parseRuntimeDataObject(process.env[RUNTIME_DATA_OVERRIDES_ENV]);
+  const explicitRuntime = parseRuntimeDataObject(process.env[EXPLICIT_RUNTIME_INPUTS_ENV]);
+  for (const [key, value] of Object.entries(runtimeContext)) {
+    map.set(normalize(key), { key, value, source: "runtime_context", sensitive: isSensitiveDataKey(key) });
+  }
+  for (const [key, value] of Object.entries(explicitRuntime)) {
+    map.set(normalize(key), { key, value, source: "explicit_runtime_input", sensitive: isSensitiveDataKey(key) });
+  }
 
   for (const item of options.manifest?.entries ?? []) {
     const nKey = normalize(item.key);

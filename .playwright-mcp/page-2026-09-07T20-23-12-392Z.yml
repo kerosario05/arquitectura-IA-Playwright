@@ -1,0 +1,70 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]: Q
+        - generic [ref=e9]:
+          - generic [ref=e10]: QA Lab
+          - generic [ref=e11]: Santa Cruz
+      - navigation [ref=e12]:
+        - button "Panorama" [ref=e13] [cursor=pointer]
+        - button "Lanzar pruebas" [ref=e20] [cursor=pointer]
+        - button "Ejecuciones" [ref=e26] [cursor=pointer]
+        - button "Configuración" [ref=e31] [cursor=pointer]
+      - generic [ref=e37]:
+        - generic [ref=e41]: Pro tip
+        - generic [ref=e42]: Programa ejecuciones nocturnas para optimizar recursos.
+      - generic [ref=e43]:
+        - generic [ref=e44]: CM
+        - generic [ref=e45]:
+          - generic [ref=e46]: Carlos Martínez
+          - generic [ref=e47]: QA Lead
+    - main [ref=e48]:
+      - generic [ref=e49]:
+        - generic [ref=e50]:
+          - generic [ref=e51]:
+            - generic [ref=e53]: En vivo · 16:22
+            - generic [ref=e54]: ·
+            - generic [ref=e55]: Configura una nueva ejecución en 4 pasos
+          - heading "Lanzar pruebas" [level=1] [ref=e666]
+        - generic [ref=e57]:
+          - generic [ref=e58]:
+            - textbox "Buscar..." [ref=e62]
+            - generic [ref=e63]: ⌘K
+          - button [ref=e64] [cursor=pointer]
+      - generic [ref=e667]:
+        - generic [ref=e669]:
+          - button "Proyecto" [ref=e670] [cursor=pointer]
+          - button "Fuentes" [ref=e683] [cursor=pointer]
+          - button "Casos" [ref=e690] [cursor=pointer]
+          - button "Lanzar" [ref=e698] [cursor=pointer]
+        - generic [ref=e705]:
+          - generic [ref=e749]:
+            - generic [ref=e750]: Paso dos · Conecta las fuentes
+            - heading "¿De dónde vienen los casos?" [level=2] [ref=e751]
+            - paragraph [ref=e752]: Configura las herramientas que alimentarán la ejecución.
+            - generic [ref=e754]:
+              - button "Solo Jira Tests del sprint activo" [ref=e755] [cursor=pointer]:
+                - generic [ref=e761]: Solo Jira
+                - generic [ref=e762]: Tests del sprint activo
+              - button "Solo TestRail Suite completa" [ref=e763] [cursor=pointer]:
+                - generic [ref=e769]: Solo TestRail
+                - generic [ref=e770]: Suite completa
+              - button "Ambos combinados Máxima cobertura" [ref=e771] [cursor=pointer]:
+                - generic [ref=e778]: Ambos combinados
+                - generic [ref=e779]: Máxima cobertura
+            - generic [ref=e780]:
+              - generic [ref=e781]:
+                - generic [ref=e782]: Jira
+                - generic [ref=e789]:
+                  - generic [ref=e790]: Proyecto
+                  - button "Selecciona un proyecto..." [ref=e792] [cursor=pointer]
+              - generic [ref=e797]:
+                - generic [ref=e798]: TestRail
+                - generic [ref=e805]:
+                  - generic [ref=e806]: Proyecto
+                  - button "Selecciona un proyecto..." [ref=e808] [cursor=pointer]
+          - generic [ref=e736]:
+            - button "Atrás" [ref=e737] [cursor=pointer]
+            - button "Generar escenarios" [disabled] [ref=e813]
+  - generic [ref=e615]: "30"

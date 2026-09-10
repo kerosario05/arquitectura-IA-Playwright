@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import { existsSync } from "node:fs";
 import path from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
@@ -17,9 +18,11 @@ import {
   validateSpecExecutionContract,
   computeTraceFidelity,
   computeExecutionContractMetrics,
+  extractAuthFlowAggregateBindings,
   type SpecExecutionContract
 } from "./spec-execution-contract";
 import { decodeJsStringLiteralBody, normalizeSemanticText, semanticallyEqualText } from "./semantic-text-normalization";
+import type { AssertionPolarity, CanonicalRequirement } from "../scenarios/canonical-scenario";
 
 export function rewritePromotedRuntimeImport(specContent: string, specFilePath: string): string {
   const sourceRoot = path.resolve(process.cwd(), "src");
@@ -202,6 +205,10 @@ export type SpecGenerationScenarioStep = {
   action: string;
   description?: string;
   expected?: string;
+  requirementRefs?: string[];
+  polarity?: AssertionPolarity;
+  assertionImportance?: "blocking" | "contextual" | "optional";
+  canonicalAssertion?: import("../scenarios/canonical-scenario").CanonicalAssertion;
 };
 
 export type SpecGenerationSourceScenarioAuth = {
@@ -231,6 +238,8 @@ export type SpecGenerationObservableOracle = {
   backed: boolean;
   source: "discovery" | "scenario" | "inferred";
   stepIndex?: number;
+  requirementRefs?: string[];
+  polarity?: "positive" | "negative";
   target?: string;
   evidence: string[];
   details?: Record<string, unknown>;
@@ -246,6 +255,7 @@ export type PromotedOracleImplementation = {
   oracleType: SpecGenerationObservableOracleType;
   scenarioStepIndex?: number;
   backed: boolean;
+  polarity?: AssertionPolarity;
   implementationKind: PromotedOracleImplementationKind;
   target?: string;
   expectedStage?: string;
@@ -261,7 +271,18 @@ export type SpecGenerationSourceScenario = {
   observedAssertions?: string[];
   auth?: SpecGenerationSourceScenarioAuth;
   observableOracles?: SpecGenerationObservableOracle[];
+  requirements?: CanonicalRequirement[];
+  expectedResultRequirementRefs?: string[];
+  stepRequirementRefs?: Array<{ stepIndex: number; requirementId: string; facet?: string }>;
+  stepClaims?: Array<{ stepIndex: number; claimId: string; requirementId?: string; facet?: string; required?: boolean; coverable?: boolean }>;
   stepStatuses?: Array<{ index: number; status: string }>;
+  controlledAdvanceProbe?: {
+    candidateFound: boolean;
+    attemptObserved: boolean;
+    validationObserved: boolean;
+    blockedObserved: boolean;
+    transitionOccurred: boolean;
+  };
 };
 
 /**
@@ -321,6 +342,7 @@ export type HybridSpecGenerationResult = {
   specContent: string;
   diagnostics: SpecGenerationDiagnostics;
   artifactsDir?: string;
+  executionContract?: SpecExecutionContract;
 };
 
 type AuthFlowRuntimeContext = {
@@ -340,6 +362,12 @@ type AuthFlowRuntimeContext = {
   importPath: string;
   availableMethods: string[];
   methodSignatures: Array<{ name: string; minArgs: number; maxArgs: number }>;
+  aggregateBinding?: {
+    kind: "auth_flow";
+    helper: "ensureAuthenticated";
+    bindingId: string;
+    coveredScenarioStepIndices: number[];
+  };
 };
 
 const execFileAsync = promisify(execFile);
@@ -424,23 +452,23 @@ const SPEC_RESPONSE_EXAMPLE = {
 } as const;
 const SENSITIVE_LITERAL_RULES: Array<{
   pattern: RegExp;
-  replace: (match: string, p1?: string, p2?: string) => string;
+  replace: (match: string, p1?: string, p2?: string, p3?: string) => string;
 }> = [
   {
     pattern: /(\b(?:api[_-]?key|password|secret|token|otp)\b\s*[:=]\s*)(["'`])([^"'`\r\n]{4,})\2/gi,
-    replace: (_match: string, prefix: string, quote: string) => `${prefix}${quote}[REDACTED]${quote}`
+    replace: (_match: string, prefix = "", quote = "") => `${prefix}${quote}[REDACTED]${quote}`
   },
   {
     pattern: /(["'][^"']*(?:api[_-]?key|password|secret|token|otp)[^"']*["']\s*:\s*)(["'`])([^"'`\r\n]{4,})\2/gi,
-    replace: (_match: string, prefix: string, quote: string) => `${prefix}${quote}[REDACTED]${quote}`
+    replace: (_match: string, prefix = "", quote = "") => `${prefix}${quote}[REDACTED]${quote}`
   },
   {
     pattern: /(\bBearer\s+)([A-Za-z0-9._~+/-]{8,})/g,
-    replace: (_match: string, prefix: string) => `${prefix}[REDACTED]`
+    replace: (_match: string, prefix = "") => `${prefix}[REDACTED]`
   },
   {
     pattern: /(\bBasic\s+)([A-Za-z0-9+/=]{8,})/g,
-    replace: (_match: string, prefix: string) => `${prefix}[REDACTED]`
+    replace: (_match: string, prefix = "") => `${prefix}[REDACTED]`
   }
 ] as const;
 
@@ -664,7 +692,7 @@ function buildSpecRepairContext(input: {
   };
 }
 
-function buildSemanticCoverageDiagnostics(input: {
+export function buildSemanticCoverageDiagnostics(input: {
   semanticErrors: string[];
   requiredAssertions: string[];
   observableOracles: SpecGenerationObservableOracle[];
@@ -1095,7 +1123,7 @@ const PROMOTED_SPEC_RUNTIME_API_DESCRIPTOR: Record<string, { signature: string; 
   clickPromotedTarget: { signature: "clickPromotedTarget({ stepIndex: number, target: string, actionIntent: string, expectedEffect: string, action: () => Promise<void> })", returns: "Promise<void>" },
   fillPromotedField: { signature: "fillPromotedField({ stepIndex: number, target: string, value: string, action: () => Promise<void> })", returns: "Promise<void>" },
   selectPromotedItem: { signature: "selectPromotedItem({ stepIndex: number, target: string, action: () => Promise<void> })", returns: "Promise<void>" },
-  expectPromotedVisible: { signature: "expectPromotedVisible({ stepIndex: number, target: string, assertion: () => Promise<void> })", returns: "Promise<void>" },
+  expectPromotedVisible: { signature: "expectPromotedVisible({ stepIndex: number, target: string, polarity: AssertionPolarity, expectedUrl?: string, assertion: () => Promise<void> })", returns: "Promise<void>" },
   waitForPromotedUiStable: { signature: "waitForPromotedUiStable(stepIndex: number, target: string)", returns: "Promise<void>" },
   handlePromotedDialogOrAlert: { signature: "handlePromotedDialogOrAlert()", returns: "Promise<string | undefined>" },
   safeReplayContext: { signature: "safeReplayContext(replaySteps, stepIndex)", returns: "Promise<{ success: boolean; replayedSteps: string[]; reason?: string }>" },
@@ -1126,6 +1154,7 @@ function buildContractStepBindings(contract: SpecExecutionContract): { block: st
       lines.push(`oracleType=${step.oracle.type}`);
       const expectedUrl = step.oracle.mechanism?.expected?.urlPattern;
       if (expectedUrl) lines.push(`expectedUrl=${expectedUrl}`);
+      if (step.oracle.polarity) lines.push(`polarity=${step.oracle.polarity}`);
       if (typeof step.oracle.sourceActionStepIndex === "number") {
         lines.push(`sourceActionStepIndex=${step.oracle.sourceActionStepIndex}`);
       }
@@ -1138,6 +1167,64 @@ function buildContractStepBindings(contract: SpecExecutionContract): { block: st
   lines.push("D) For implementationKind=page_object: the step's action callback MUST invoke the contractual implementationOwner.implementationMethod. Do not substitute another page-object method even if the runtime wrapper target is correct.");
   const block = lines.join("\n");
   return { block, steps, chars: block.length };
+}
+
+export function materializePromotedOracleDescriptors(
+  specContent: string,
+  implementations: PromotedOracleImplementation[],
+): string {
+  let materialized = specContent;
+  for (const implementation of implementations) {
+    if (implementation.implementationKind !== "url_state") continue;
+    if (implementation.polarity === undefined) {
+      throw new Error("PROMOTED_ORACLE_POLARITY_UNRESOLVED");
+    }
+    if (typeof implementation.expectedUrlPattern !== "string" || implementation.expectedUrlPattern.length === 0) {
+      throw new Error("PROMOTED_ASSERTION_DESCRIPTOR_UNRESOLVED");
+    }
+    const callRegex = /promotedRuntime\.expectPromotedVisible\s*\(\s*\{([\s\S]*?)\}\s*\)/gm;
+    let match: RegExpExecArray | null;
+    let replaced = false;
+    while ((match = callRegex.exec(materialized)) !== null) {
+      const body = match[1] ?? "";
+      const stepIndex = /\bstepIndex\s*:\s*(\d+)\b/.exec(body);
+      if (!stepIndex || Number(stepIndex[1]) !== implementation.scenarioStepIndex) continue;
+      const descriptor = `polarity: ${JSON.stringify(implementation.polarity)},\n  expectedUrl: ${JSON.stringify(implementation.expectedUrlPattern)},\n  `;
+      let nextBody = body.includes("polarity:")
+        ? body.replace(/\bpolarity\s*:\s*(['"])(?:positive|negative)\1\s*,?/, `polarity: ${JSON.stringify(implementation.polarity)},`)
+        : body.replace(/\bassertion\s*:/, `${descriptor}assertion:`);
+      if (body.includes("polarity:") && !body.includes("expectedUrl:")) {
+        nextBody = nextBody.replace(/\bassertion\s*:/, `expectedUrl: ${JSON.stringify(implementation.expectedUrlPattern)},\n  assertion:`);
+      }
+      materialized = `${materialized.slice(0, match.index + match[0].indexOf(body))}${nextBody}${materialized.slice(match.index + match[0].indexOf(body) + body.length)}`;
+      replaced = true;
+      break;
+    }
+    if (!replaced) continue;
+  }
+  return materialized;
+}
+
+export function materializeAuthFlowAggregateBinding(
+  specContent: string,
+  binding: AuthFlowRuntimeContext["aggregateBinding"] | undefined
+): string {
+  if (!binding) return specContent;
+  const serialized = JSON.stringify(binding);
+  const callRegex = /authFlow\.ensureAuthenticated\s*\(\s*([\s\S]*?)\)\s*;?/m;
+  const match = callRegex.exec(specContent);
+  if (!match) return specContent;
+  const rawBody = match[1]?.trim() ?? "";
+  if (/\bcontractBinding\s*:/.test(rawBody)) return specContent;
+  const body = rawBody.replace(/^\{\s*/, "").replace(/\s*\}$/, "").trim();
+  if (!body) {
+    return `${specContent.slice(0, match.index)}authFlow.ensureAuthenticated({ contractBinding: ${serialized} });${specContent.slice(match.index + match[0].length)}`;
+  }
+  if (/\bcontractBinding\s*:/.test(body)) {
+    const replaced = body.replace(/contractBinding\s*:\s*\{[\s\S]*?\}/, `contractBinding: ${serialized}`);
+    return `${specContent.slice(0, match.index)}authFlow.ensureAuthenticated({ ${replaced} });${specContent.slice(match.index + match[0].length)}`;
+  }
+  return `${specContent.slice(0, match.index)}authFlow.ensureAuthenticated({ contractBinding: ${serialized}, ${body} });${specContent.slice(match.index + match[0].length)}`;
 }
 
 function buildSpecGenerationUserPromptFromContract(input: {
@@ -1201,7 +1288,15 @@ function buildSpecGenerationUserPromptFromContract(input: {
       authOutcomeMode: input.authFlowContext.authOutcomeMode,
       importPath: input.authFlowContext.importPath,
       availableMethods: input.authFlowContext.availableMethods,
+      aggregateBinding: input.authFlowContext.aggregateBinding,
     }, null, 2));
+    if (input.authFlowContext.aggregateBinding) {
+      sections.push("AUTH_FLOW_BINDING");
+      sections.push(JSON.stringify({
+        rule: "The single auth flow invocation is the implementation for every coveredScenarioStepIndices entry. Pass this exact object as ensureAuthenticated({ contractBinding }). Do not add individual auth fills/clicks for those steps and do not call the auth helper more than once.",
+        contractBinding: input.authFlowContext.aggregateBinding,
+      }, null, 2));
+    }
   }
   if (input.repairContext) {
     sections.push("REPAIR_CONTEXT");
@@ -1320,6 +1415,10 @@ function normalizeObservableOracles(
       backed: oracle.backed === true,
       source: oracle.source ?? "scenario",
       stepIndex: typeof oracle.stepIndex === "number" ? oracle.stepIndex : undefined,
+      requirementRefs: Array.isArray(oracle.requirementRefs) && oracle.requirementRefs.length > 0
+        ? [...oracle.requirementRefs]
+        : undefined,
+      polarity: oracle.polarity === "positive" || oracle.polarity === "negative" ? oracle.polarity : undefined,
       target: typeof oracle.target === "string" ? oracle.target.trim() || undefined : undefined,
       evidence,
       details: oracle.details && typeof oracle.details === "object" ? oracle.details : undefined,
@@ -1475,6 +1574,10 @@ function buildSourceScenarioContext(
   observableOracles: SpecGenerationObservableOracle[];
   sourceExpectedResultPresent: boolean;
   auth: SpecGenerationSourceScenarioAuth;
+  requirements: CanonicalRequirement[];
+  expectedResultRequirementRefs: string[];
+  stepRequirementRefs: Array<{ stepIndex: number; requirementId: string; facet?: string }>;
+  stepClaims: Array<{ stepIndex: number; claimId: string; requirementId?: string; facet?: string; required?: boolean; coverable?: boolean }>;
 } {
   const scenarioTitle = sourceScenario?.title?.trim() || plan.scenario.title;
   const fallbackSteps = plan.steps.map((step) => ({
@@ -1490,6 +1593,10 @@ function buildSourceScenarioContext(
   const preconditions = sourceScenario?.preconditions?.map((item) => item.trim()).filter(Boolean) ?? [];
   const observedAssertions = sourceScenario?.observedAssertions?.map((item) => item.trim()).filter(Boolean) ?? [];
   const observableOracles = normalizeObservableOracles(sourceScenario?.observableOracles);
+  const requirements = sourceScenario?.requirements ?? [];
+  const expectedResultRequirementRefs = sourceScenario?.expectedResultRequirementRefs ?? [];
+  const stepRequirementRefs = sourceScenario?.stepRequirementRefs ?? [];
+  const stepClaims = sourceScenario?.stepClaims ?? [];
   const backedAuthGateOracle = observableOracles.some((oracle) => oracle.type === "auth_gate" && oracle.backed === true);
   const hasLoginStep = plan.steps.some((step) => step.action === "login");
   // Auth requirements are never inferred from narrative text, section privacy,
@@ -1517,7 +1624,11 @@ function buildSourceScenarioContext(
     observedAssertions,
     observableOracles,
     sourceExpectedResultPresent: expectedResult.length > 0,
-    auth
+    auth,
+    requirements,
+    expectedResultRequirementRefs,
+    stepRequirementRefs,
+    stepClaims
   };
 }
 
@@ -1741,7 +1852,8 @@ async function buildAuthFlowRuntimeContext(
   appPaths: AppAutomationPaths,
   sourceAuth: SpecGenerationSourceScenarioAuth,
   plan: ExecutionPlan,
-  authContractMode: "none" | "gate_observation" | "flow_execution"
+  authContractMode: "none" | "gate_observation" | "flow_execution",
+  aggregateBinding?: AuthFlowRuntimeContext["aggregateBinding"]
 ): Promise<AuthFlowRuntimeContext | undefined> {
   const required = sourceAuth.required === true;
   const gateDetected = sourceAuth.gateDetected === true;
@@ -1776,11 +1888,12 @@ async function buildAuthFlowRuntimeContext(
     className,
     importPath: toRelativeImportPath(appPaths.specPath, authFlowPath.replace(/\.ts$/i, "")),
     availableMethods,
-    methodSignatures
+    methodSignatures,
+    aggregateBinding
   };
 }
 
-function buildPromotedOracleImplementations(
+export function buildPromotedOracleImplementations(
   observableOracles: SpecGenerationObservableOracle[],
   authFlowContext: AuthFlowRuntimeContext | null
 ): PromotedOracleImplementation[] {
@@ -1794,12 +1907,17 @@ function buildPromotedOracleImplementations(
       : typeof details.url === "string" && details.url.trim()
         ? details.url
         : undefined;
+    const requiresPolarity = oracle.type === "navigation_transition" || oracle.type === "url_state";
+    if (requiresPolarity && oracle.polarity === undefined) {
+      throw new Error("PROMOTED_ORACLE_POLARITY_UNRESOLVED");
+    }
     if (oracle.type === "auth_gate") {
       if (stage) {
         implementations.push({
           oracleType: oracle.type,
           scenarioStepIndex: oracle.stepIndex,
           backed: true,
+          polarity: oracle.polarity,
           implementationKind: "auth_stage",
           expectedStage: stage,
           sourceEvidenceId: oracle.id,
@@ -1809,6 +1927,7 @@ function buildPromotedOracleImplementations(
           oracleType: oracle.type,
           scenarioStepIndex: oracle.stepIndex,
           backed: true,
+          polarity: oracle.polarity,
           implementationKind: "url_state",
           expectedUrlPattern: urlPattern,
           sourceEvidenceId: oracle.id,
@@ -1818,6 +1937,7 @@ function buildPromotedOracleImplementations(
           oracleType: oracle.type,
           scenarioStepIndex: oracle.stepIndex,
           backed: true,
+          polarity: oracle.polarity,
           implementationKind: "heading_or_control",
           target: oracle.target,
           sourceEvidenceId: oracle.id,
@@ -1827,6 +1947,7 @@ function buildPromotedOracleImplementations(
           oracleType: oracle.type,
           scenarioStepIndex: oracle.stepIndex,
           backed: true,
+          polarity: oracle.polarity,
           implementationKind: "runtime_auth_state",
           sourceEvidenceId: oracle.id,
         });
@@ -1838,6 +1959,7 @@ function buildPromotedOracleImplementations(
         oracleType: oracle.type,
         scenarioStepIndex: oracle.stepIndex,
         backed: true,
+        polarity: oracle.polarity,
         implementationKind: urlPattern ? "url_state" : "heading_or_control",
         target: urlPattern ? undefined : oracle.target,
         expectedUrlPattern: urlPattern,
@@ -1850,6 +1972,7 @@ function buildPromotedOracleImplementations(
         oracleType: oracle.type,
         scenarioStepIndex: oracle.stepIndex,
         backed: true,
+        polarity: oracle.polarity,
         implementationKind: "url_state",
         expectedUrlPattern: urlPattern,
         sourceEvidenceId: oracle.id,
@@ -1861,6 +1984,7 @@ function buildPromotedOracleImplementations(
         oracleType: oracle.type,
         scenarioStepIndex: oracle.stepIndex,
         backed: true,
+        polarity: oracle.polarity,
         implementationKind: "heading_or_control",
         target: oracle.target,
         sourceEvidenceId: oracle.id,
@@ -1872,6 +1996,7 @@ function buildPromotedOracleImplementations(
         oracleType: oracle.type,
         scenarioStepIndex: oracle.stepIndex,
         backed: true,
+        polarity: oracle.polarity,
         implementationKind: "runtime_auth_state",
         sourceEvidenceId: oracle.id,
       });
@@ -2688,6 +2813,19 @@ async function validateImportContracts(input: {
   return errors;
 }
 
+function isValidAuthAggregateBinding(
+  specContent: string,
+  expected: AuthFlowRuntimeContext["aggregateBinding"]
+): boolean {
+  if (!expected) return false;
+  const bindings = extractAuthFlowAggregateBindings(specContent);
+  if (bindings.length !== 1) return false;
+  const [binding] = bindings;
+  return binding.bindingId === expected.bindingId
+    && binding.coveredScenarioStepIndices.length === expected.coveredScenarioStepIndices.length
+    && binding.coveredScenarioStepIndices.every((index) => expected.coveredScenarioStepIndices.includes(index));
+}
+
 export function structuralValidation(input: {
   specContent: string;
   expectedAppSlug: string;
@@ -2779,7 +2917,8 @@ export function structuralValidation(input: {
       (input.authFlowContext?.required || input.authFlowContext?.gateDetected)
       && isAuthFlowRequirement(requirement)
       && (
-        (input.authFlowContext.authOutcomeMode === "complete_authentication" && /authFlow\.ensureAuthenticated\(/.test(content))
+        (input.authFlowContext.authOutcomeMode === "complete_authentication"
+          && isValidAuthAggregateBinding(content, input.authFlowContext.aggregateBinding))
         || (input.authFlowContext.authOutcomeMode === "gate_start_only"
           && runtimeStepCalls.some((call) => call.method === "expectPromotedVisible" && input.planStepActions.get(call.stepIndex) === "login"))
       )
@@ -2834,7 +2973,7 @@ export function structuralValidation(input: {
         input.authFlowContext?.required
         && isAuthRequirement
         && (
-          /authFlow\.ensureAuthenticated\(/.test(content)
+          isValidAuthAggregateBinding(content, input.authFlowContext.aggregateBinding)
           || (
             input.authFlowContext.authOutcomeMode === "gate_start_only"
             && runtimeStepCalls.some((call) =>
@@ -2904,7 +3043,7 @@ export function structuralValidation(input: {
       const loginViaAuthFlow = isLoginStep
         && (input.authFlowContext?.required === true || input.authFlowContext?.gateDetected === true)
         && input.authFlowContext.authOutcomeMode === "complete_authentication"
-        && /authFlow\.ensureAuthenticated\(/.test(content)
+        && isValidAuthAggregateBinding(content, input.authFlowContext.aggregateBinding)
         && hasRuntimeStepCall(content, stepIndex);
       const loginViaAuthGateAssertion = isLoginStep
         && (input.authFlowContext?.required === true || input.authFlowContext?.gateDetected === true)
@@ -3215,11 +3354,29 @@ function buildTypeValidationSource(specContent: string): string {
       declarations.add(`declare const ${imp.namespaceBinding}: any;`);
     }
   }
+
+  // Keep the lightweight validator resilient to multiline/aliased import
+  // shapes that the structural import parser may intentionally ignore. The
+  // validation source removes imports before type-checking, so every named
+  // binding still needs a declaration in that synthetic source.
+  for (const match of specContent.matchAll(/import\s*\{([^}]*)\}\s*from\s*['"][^'"]+['"]/g)) {
+    for (const binding of String(match[1] ?? "").split(",")) {
+      const normalized = binding.trim().replace(/^type\s+/, "");
+      const alias = normalized.match(/\s+as\s+([A-Za-z_]\w*)$/)?.[1];
+      const name = alias ?? normalized;
+      if (/^[A-Za-z_]\w*$/.test(name)
+        && name !== "test"
+        && name !== "expect"
+        && name !== "createPromotedSpecRuntime") {
+        declarations.add(`declare const ${name}: any;`);
+      }
+    }
+  }
   const contentWithoutImports = stripImportStatements(specContent);
   return `${[...declarations].join("\n")}\n\n${contentWithoutImports}`;
 }
 
-async function defaultRunTypeScriptValidation(specPath: string): Promise<CommandResult> {
+export async function defaultRunTypeScriptValidation(specPath: string): Promise<CommandResult> {
   try {
     const ts = await import("typescript");
     const specContent = await fs.readFile(specPath, "utf-8");
@@ -3266,17 +3423,49 @@ async function defaultRunTypeScriptValidation(specPath: string): Promise<Command
   }
 }
 
-async function defaultRunPlaywrightDiscovery(
+export async function defaultRunPlaywrightDiscovery(
   specPath: string,
   launchContext?: PlaywrightLaunchContext,
 ): Promise<CommandResult> {
   const cliPath = path.resolve(process.cwd(), "node_modules", "@playwright", "test", "cli.js");
-  const normalizedSpecPath = specPath.replace(/\\/g, "/");
-  return runNodeCommand(
-    process.execPath,
-    [cliPath, "test", normalizedSpecPath, "--list", "--config", "playwright.config.apps.ts"],
-    buildPlaywrightCommandEnv(launchContext),
-  );
+  const sourcePath = path.resolve(specPath);
+  const sourceDir = path.dirname(sourcePath);
+  const isCandidate = path.basename(sourceDir).toLowerCase() === "spec-generation";
+  let validationPath = sourcePath;
+
+  // Candidate files are stored one directory below the physical case so the
+  // promoted-apps config can exclude them. Their generated imports are a mix
+  // of candidate-relative and physical-spec-relative paths. Validate a
+  // temporary copy in the physical case directory and rebase each relative
+  // import to the copy, preserving the exact candidate source semantics.
+  if (isCandidate) {
+    const physicalCaseDir = path.dirname(sourceDir);
+    const candidateText = await fs.readFile(sourcePath, "utf8");
+    const rebased = candidateText.replace(
+      /(from\s*["'])(\.{1,2}[\\/][^"']+)(["'])/g,
+      (full, prefix: string, importPath: string, suffix: string) => {
+        const candidateResolved = path.resolve(sourceDir, importPath);
+        const physicalResolved = path.resolve(physicalCaseDir, importPath);
+        const target = existsSync(candidateResolved) || existsSync(`${candidateResolved}.ts`)
+          ? candidateResolved
+          : physicalResolved;
+        const rebasedPath = path.relative(physicalCaseDir, target).replace(/\\/g, "/").replace(/\.ts$/i, "");
+        return `${prefix}${rebasedPath.startsWith(".") ? rebasedPath : `./${rebasedPath}`}${suffix}`;
+      },
+    );
+    validationPath = path.join(physicalCaseDir, `.candidate-validation-${process.pid}-${Date.now()}.spec.ts`);
+    await fs.writeFile(validationPath, rebased, "utf8");
+  }
+
+  try {
+    return await runNodeCommand(
+      process.execPath,
+      [cliPath, "test", validationPath.replace(/\\/g, "/"), "--list", "--config", "playwright.config.ts"],
+      buildPlaywrightCommandEnv(launchContext),
+    );
+  } finally {
+    if (validationPath !== sourcePath) await fs.rm(validationPath, { force: true }).catch(() => undefined);
+  }
 }
 
 function parseFunctionalExecutionOutput(output: string): {
@@ -3348,11 +3537,38 @@ async function runHybridSpecGenerationInternal(
       console.log(`[execution-contract] error=${error}`);
     }
   }
-  const requiredRequirements = buildScenarioRequiredRequirements({
+  const sourceRequirements = buildScenarioRequiredRequirements({
     plan: input.plan,
     sourceScenario: input.sourceScenario,
     context: sourceScenario
   });
+  // Keep contract-level unresolved assertions visible to the oracle gate even
+  // when the source-step requirement itself was provisionally backed by its
+  // narrative text.  A required assert operation without a resolved oracle is
+  // not executable and must reconcile as unresolved, never as false coverage.
+  const unresolvedContractAssertions = executionContract.steps
+    .filter((step) => step.required && step.operation.startsWith("assert") && step.executionStatus === "unresolved")
+    .map((step) => ({
+      id: `contract-assertion-${step.scenarioStepIndex}`,
+      text: step.originalText,
+      type: step.operation,
+      source: "observable_oracle" as const,
+      scenarioStepIndex: step.scenarioStepIndex,
+      oracleType: step.oracle?.type ?? "unsupported_or_unresolved",
+      backed: false,
+      required: true,
+      assertionLike: true,
+    }));
+  const requiredRequirements = [
+    ...sourceRequirements,
+    ...unresolvedContractAssertions.filter((candidate) =>
+      !sourceRequirements.some((existing) =>
+        existing.scenarioStepIndex === candidate.scenarioStepIndex
+        && existing.assertionLike
+        && existing.backed === false
+      )
+    ),
+  ];
   const requiredAssertions = dedupeRequirements(
     requiredRequirements
       .filter((requirement) => requirement.required && requirement.backed && requirement.assertionLike)
@@ -3367,12 +3583,13 @@ async function runHybridSpecGenerationInternal(
       ? "gate_observation"
       : "none";
   console.log(`[spec-auth-contract] mode=${authContractMode} required=${sourceScenario.auth.required === true} gateDetected=${sourceScenario.auth.gateDetected === true} backedAuthGateOracle=${sourceScenario.observableOracles.some((oracle) => oracle.type === "auth_gate" && oracle.backed === true)}`);
-  const authFlowContext = await buildAuthFlowRuntimeContext(
+  const authFlowContext = (await buildAuthFlowRuntimeContext(
     input.appPaths,
     sourceScenario.auth,
     input.plan,
-    authContractMode
-  );
+    authContractMode,
+    executionContract.auth?.aggregate
+  )) ?? null;
   if (authFlowContext) {
     console.log(
       `[spec-auth-outcome] mode=${authFlowContext.authOutcomeMode === "gate_start_only" ? "gate_observation" : "flow_execution"} source=${authFlowContext.authOutcomeSource} reason=${authFlowContext.authOutcomeReason} stepIndex=${authFlowContext.authOutcomeStepIndex ?? "-"}`
@@ -3512,7 +3729,7 @@ async function runHybridSpecGenerationInternal(
     await fs.writeFile(candidateSpecPath, sanitizeText(rewritePromotedRuntimeImport(input.deterministicDraft, candidateSpecPath)), "utf-8");
     await fs.writeFile(path.join(artifactsDir, "validation.json"), JSON.stringify(sanitizeForArtifact(diagnostics), null, 2), "utf-8");
     console.log(`[spec-generation] promotionAllowed=false reason=execution_contract_invalid attempts=0`);
-    return { promotionAllowed: false, specContent: input.deterministicDraft, diagnostics, artifactsDir };
+    return { promotionAllowed: false, specContent: input.deterministicDraft, diagnostics, artifactsDir, executionContract };
   }
 
   const playwrightLaunchContext = resolvePlaywrightLaunchContext(input);
@@ -3748,7 +3965,7 @@ async function runHybridSpecGenerationInternal(
           const candidatePath = path.join(artifactsDir, "candidate.spec.ts");
           await fs.writeFile(candidatePath, sanitizeText(rewritePromotedRuntimeImport(candidate.specContent, candidatePath)), "utf-8");
           await fs.writeFile(path.join(artifactsDir, "validation.json"), JSON.stringify(sanitizeForArtifact(diagnostics), null, 2), "utf-8");
-          return { promotionAllowed: false, specContent: candidate.specContent, diagnostics, artifactsDir };
+          return { promotionAllowed: false, specContent: candidate.specContent, diagnostics, artifactsDir, executionContract };
         }
       } else {
         candidate = parsed.value;
@@ -3793,7 +4010,7 @@ async function runHybridSpecGenerationInternal(
         const candidatePath = path.join(artifactsDir, "candidate.spec.ts");
         await fs.writeFile(candidatePath, sanitizeText(rewritePromotedRuntimeImport(candidate.specContent, candidatePath)), "utf-8");
         await fs.writeFile(path.join(artifactsDir, "validation.json"), JSON.stringify(sanitizeForArtifact(diagnostics), null, 2), "utf-8");
-        return { promotionAllowed: false, specContent: candidate.specContent, diagnostics, artifactsDir };
+        return { promotionAllowed: false, specContent: candidate.specContent, diagnostics, artifactsDir, executionContract };
       }
       diagnostics.warnings.push("ai_provider_failed_using_deterministic_fallback");
     }
@@ -3809,6 +4026,11 @@ async function runHybridSpecGenerationInternal(
     console.log("[spec-repair] deterministic=missing_expect_import applied=true");
   }
   executableSpecContent = sanitizeText(rewritePromotedRuntimeImport(executableSpecContent, candidateSpecPath));
+  executableSpecContent = materializeAuthFlowAggregateBinding(
+    executableSpecContent,
+    authFlowContext?.aggregateBinding
+  );
+  executableSpecContent = materializePromotedOracleDescriptors(executableSpecContent, promotedOracleImplementations);
   await fs.writeFile(candidateSpecPath, executableSpecContent, "utf-8");
 
   let lastSemanticCoverageDiag: ReturnType<typeof buildSemanticCoverageDiagnostics> | undefined;
@@ -3852,7 +4074,7 @@ async function runHybridSpecGenerationInternal(
       executionContract,
       availablePageObjects,
       observedEvidencePhrases,
-      authFlowContext,
+      authFlowContext: authFlowContext ?? undefined,
       promotedRuntimeMethodsAllowlist: PROMOTED_SPEC_RUNTIME_PUBLIC_METHODS,
       mode: diagnostics.mode,
       skipTechnicalTargetGate: options?.skipTechnicalTargetGate === true
@@ -3862,7 +4084,7 @@ async function runHybridSpecGenerationInternal(
       specPath: input.appPaths.specPath,
       availablePageObjects,
       response,
-      authFlowContext
+      authFlowContext: authFlowContext ?? undefined
     });
     errors.push(...structure.structureErrors, ...importContractErrors);
     warnings.push(...structure.warnings);
@@ -3873,13 +4095,28 @@ async function runHybridSpecGenerationInternal(
 
     let semanticErrors = structure.semanticErrors;
     if (specInputMode === "execution_contract") {
-      // Single authority: required contract steps only. required=false (contextual)
-      // steps and legacy/duplicated oracle requirements never participate here.
+      // Single authority: required contract steps only. An aggregate auth
+      // helper covers exactly the scenario steps named by its structured
+      // binding; it never receives credit from a bare helper name.
       const requiredContractSteps = executionContract.steps.filter((step) => step.required !== false);
       const implementedStepIndices = new Set(extractRuntimeStepCalls(specContent).map((call) => call.stepIndex));
-      const missingSteps = requiredContractSteps.filter((step) => !implementedStepIndices.has(step.scenarioStepIndex));
-      semanticErrors = missingSteps.map((step) => `missing_contract_semantic_coverage:scenarioStepIndex=${step.scenarioStepIndex}:operation=${step.operation}`);
-      console.log(`[semantic-coverage] mode=execution_contract required=${requiredContractSteps.length} covered=${requiredContractSteps.length - missingSteps.length} missingScenarioStepIndices=[${missingSteps.map((step) => step.scenarioStepIndex).join(",")}]`);
+      const aggregateCovered = isValidAuthAggregateBinding(specContent, authFlowContext?.aggregateBinding)
+        ? new Set(authFlowContext?.aggregateBinding?.coveredScenarioStepIndices ?? [])
+        : new Set<number>();
+      const missingSteps = requiredContractSteps.filter((step) =>
+        !aggregateCovered.has(step.scenarioStepIndex) && !implementedStepIndices.has(step.scenarioStepIndex)
+      );
+      const retainedSemanticErrors = structure.semanticErrors.filter((error) =>
+        !error.startsWith("missing_step_coverage:")
+        && !error.startsWith("step_not_implemented_in_spec:")
+        && !error.startsWith("unexpected_step_coverage:")
+        && error !== "duplicate_covered_step_indexes"
+      );
+      semanticErrors = [
+        ...retainedSemanticErrors,
+        ...missingSteps.map((step) => `missing_contract_semantic_coverage:scenarioStepIndex=${step.scenarioStepIndex}:operation=${step.operation}`)
+      ];
+      console.log(`[semantic-coverage] mode=execution_contract required=${requiredContractSteps.length} covered=${requiredContractSteps.length - missingSteps.length} aggregateCovered=[${[...aggregateCovered].join(",")}] missingScenarioStepIndices=[${missingSteps.map((step) => step.scenarioStepIndex).join(",")}]`);
     } else {
       lastSemanticCoverageDiag = buildSemanticCoverageDiagnostics({
         semanticErrors: structure.semanticErrors,
@@ -4216,7 +4453,8 @@ async function runHybridSpecGenerationInternal(
     promotionAllowed: passed,
     specContent: executableSpecContent,
     diagnostics,
-    artifactsDir
+    artifactsDir,
+    executionContract
   };
 }
 

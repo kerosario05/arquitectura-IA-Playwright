@@ -5,6 +5,7 @@ import { jobStore } from "../jobs/job-store";
 import { startSprintRun } from "../jobs/run-runner";
 import {
   buildDiscoveryBatchChecklistIdentity,
+  buildRediscoveryProvenanceLine,
   resolveDiscoveryBatchIssueKeyMetadata,
   startDiscoveryBatchRun,
 } from "../jobs/discovery-batch-runner";
@@ -14,8 +15,13 @@ import { prepareRerun } from "../jobs/rerun-runner";
 import { launchExecution, type LaunchScenario } from "../jobs/launch-orchestrator";
 import { defectChecklistStore } from "../services/defect-checklist-store";
 import type { McpRouteProfile, McpScenario } from "../../scenarios/scenario-types";
+import type { DataContextEntry } from "../../data/data-context";
 
 export const runsRouter = Router();
+
+export function resolveJobStoreSourceJobId(params: Record<string, unknown>): string {
+  return typeof params.sourceJobId === "string" && params.sourceJobId.length > 0 ? params.sourceJobId : "none";
+}
 
 const SENSITIVE_PATTERNS = [
   /delete\s+all/i,
@@ -453,6 +459,12 @@ runsRouter.post("/discovery-batch", (req, res) => {
   }
 
   const job = jobStore.create("discovery-batch", body as Record<string, unknown>);
+  console.log(buildRediscoveryProvenanceLine({ boundary: "request", caseId: body.caseIds[0], value: body.forceRediscovery }));
+  jobStore.appendLog(job.id, buildRediscoveryProvenanceLine({
+    boundary: "job_store",
+    jobId: job.id,
+    value: job.params.forceRediscovery as boolean | undefined,
+  }) + ` sourceJobId=${resolveJobStoreSourceJobId(job.params)}`);
   const checklistIdentity = buildDiscoveryBatchChecklistIdentity({
     jobId: job.id,
     launchId: body.launchId,
@@ -802,13 +814,16 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
   runsRouter.post("/launch-execution", async (req, res, next) => {
   try {
     const body = req.body as Record<string, unknown>;
+    const requestHasContextOnly = Object.prototype.hasOwnProperty.call(body, "contextOnly");
+    const requestContextOnly = body.contextOnly;
+    console.log(`[context-only-trace] boundary=backend_route requestHasField=${requestHasContextOnly} requestValue=${requestContextOnly === undefined ? "undefined" : requestContextOnly} parsedValue=${requestContextOnly === undefined ? "undefined" : requestContextOnly}`);
     const appSlug = String(body.appSlug ?? "");
     const selectedScenarios = extractLaunchScenariosFromPayload(body);
     const existingTestRailCaseIds = extractExistingTestRailCaseIdsFromPayload(body, selectedScenarios);
     console.log(
       `[launch-execution] received payload appSlug=${appSlug} scenarios=${selectedScenarios.length} existingCaseIds=${existingTestRailCaseIds.length} projectId=${body.projectId} sectionId=${body.sectionId}`,
     );
-    const result = await launchExecution({
+    const launchInput = {
       appSlug: String(body.appSlug ?? ""),
       sectionSlug: body.sectionSlug as string | undefined,
       sectionName: body.sectionName as string | undefined,
@@ -820,10 +835,21 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
       jiraTitle: (body.jiraTitle ?? body.storyTitle ?? body.huTitle) as string | undefined,
       sprintName: body.sprintName as string | undefined,
       selectedScenarios,
-      existingTestRailCaseIds,
-      adaptiveScenarios: Array.isArray(body.adaptiveScenarios) ? body.adaptiveScenarios : undefined,
-      publishStrategy: (body.publishStrategy as string) === "use_existing" ? "use_existing" : "always_create",
-    });
+       existingTestRailCaseIds,
+       ...(Object.prototype.hasOwnProperty.call(body, "forceRediscovery")
+         ? { forceRediscovery: body.forceRediscovery === true }
+         : {}),
+       ...(Object.prototype.hasOwnProperty.call(body, "overwrite")
+         ? { overwrite: body.overwrite === true }
+         : {}),
+       contextOnly: body.contextOnly === true,
+       ...(body.runtimeEntriesByCase && typeof body.runtimeEntriesByCase === "object" && !Array.isArray(body.runtimeEntriesByCase)
+         ? { runtimeEntriesByCase: body.runtimeEntriesByCase as Record<string, DataContextEntry[]> }
+         : {}),
+       adaptiveScenarios: Array.isArray(body.adaptiveScenarios) ? body.adaptiveScenarios : undefined,
+       publishStrategy: (body.publishStrategy as string) === "use_existing" ? "use_existing" : "always_create",
+    };
+    const result = await launchExecution(launchInput);
 
     if (!result.ok) {
       console.log(`[launch-execution] failed error=${result.error} message=${result.message}`);

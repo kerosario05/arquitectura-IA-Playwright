@@ -4,6 +4,9 @@ import type { ExecutionPlan } from "./execution-plan.types";
 import type { AiExplorerOutput } from "../ai/ai-explorer.types";
 import type { AssertionClassification, AssertionResolutionStatus } from "../discovery/assertion-resolver";
 import type { AiRepairCaseSummary } from "../ai/repair/ai-repair-metrics";
+import type { ControlIdentity } from "./control-identity";
+import type { AssertionObservationArtifact } from "../discovery/assertion-observation";
+import type { ControlledAdvanceProbeResult } from "../discovery/controlled-advance-probe";
 
 export type RuntimeEvidenceTrace = {
   clickActions: Array<{
@@ -16,6 +19,7 @@ export type RuntimeEvidenceTrace = {
     actionType: string;
     ownerContext?: string;
     locatorStrategy?: string;
+    controlIdentity?: ControlIdentity;
     success: boolean;
     transitionDetected?: boolean;
     beforeStructuralFingerprint?: string;
@@ -36,6 +40,7 @@ export type RuntimeEvidenceTrace = {
     locatorStrategy?: string;
     success: boolean;
     activeContainerType?: string;
+    controlIdentity?: ControlIdentity;
   }>;
   formEvidence: Array<{
     openedAtStep?: number;
@@ -229,6 +234,16 @@ export type DiscoveryStepResult = {
   functionalRequired?: boolean;
   runtimeBacked?: boolean;
   canonicalRequirementRefs?: Array<{ requirementId: string; facet?: string; claimId?: string }>;
+  canonicalAssertion?: import("../scenarios/canonical-scenario").CanonicalAssertion;
+  rowMutationDiagnostics?: {
+    beforeRowCount: number;
+    afterRowCount: number;
+    rowCountIncreased: boolean;
+    newRowObserved: boolean;
+    newRowIdentityDistinct: boolean;
+    dataset2BoundToNewRow: boolean;
+  };
+  controlIdentity?: ControlIdentity;
   conditionalAssertion?: boolean;
   conditionalRisk?: "low" | "medium" | "high";
   conditionalReason?: string;
@@ -449,4 +464,6 @@ export type CaseDiscoveryResult = {
   };
   rootCauseCategory?: BatchCaseRootCause;
   runtimeEvidenceTrace?: RuntimeEvidenceTrace;
+  assertionObservations?: AssertionObservationArtifact[];
+  controlledAdvanceProbe?: ControlledAdvanceProbeResult;
 };

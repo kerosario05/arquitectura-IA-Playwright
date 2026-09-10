@@ -252,6 +252,8 @@ export type McpScenario = {
   standardExecutable?: boolean;
   publicationClassification?: "executable" | "documentation" | "blocked";
   launchClassification?: "standard" | "adaptive" | "nonAutomatable";
+  /** Explicit execution authority; business wording such as "manualmente" is not enough. */
+  manualOnly?: boolean;
   scenarioId?: string;
   caseId?: number;
   generationSource?: "ai" | "deterministic_seed"; // Track source for seeds vs AI

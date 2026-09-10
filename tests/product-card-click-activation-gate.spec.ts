@@ -1,6 +1,19 @@
 import { test, expect } from "@playwright/test";
+import { isProductCardClickEligible } from "../src/discovery/case-discovery";
 
 test.describe("Product Card Click Resolver - Activation Gate", () => {
+  test("does not treat a generic final action as a product card", () => {
+    const eligible = isProductCardClickEligible({
+      isFinalProductClick: true,
+      targetMatchesDetail: true,
+      isOrdinalBoundToDetail: false,
+      finalLocatorPresent: true,
+      detailTargetSource: "lastAction"
+    });
+
+    expect(eligible).toBe(false);
+  });
+
   test("should not activate for intermediate navigation step", () => {
     // Simulate case discovery context
     const actionTarget = { target: "Información de productos", index: 2 };

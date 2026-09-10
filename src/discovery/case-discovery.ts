@@ -1,6 +1,6 @@
 import path from "node:path";
 import { mkdir, writeFile } from "node:fs/promises";
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import { createAIExplorer, type AIExplorer } from "../ai/ai-explorer";
 import { scanCurrentPage } from "../explorer/page-scanner";
 import { buildTechnicalScreenKey } from "../explorer/page-scanner";
@@ -11,6 +11,8 @@ import {
   resolveAssociatedActionTarget,
   clickResolvedTarget,
   resolveSnapshotElementLocator,
+  captureGridCollectionSnapshot,
+  compareGridCollection,
   shouldInvokeAiAssistedDiscovery,
   resolveFillTarget,
   type ActiveContainerContext
@@ -41,6 +43,9 @@ import {
 import {
   buildConcreteAssertionsFromExpected,
   resolveAssertionTargets,
+  resolveRowScopedAssertion,
+  resolveStructuralRowAssertion,
+  resolveEntityWithinContainerAssertion,
   type AssertionTargetInput,
   type ExpectedResultConsumption
 } from "./assertion-resolver";
@@ -62,7 +67,9 @@ import type {
   DiscoveredObject
 } from "../types/discovery.types";
 import type { TestScenario, TestScenarioStep } from "../types/testrail.types";
-import type { ExecutionPlan, ExecutionPlanStep, RequiredDataRef, LocatorStrategy } from "../types/execution-plan.types";
+import type { ExecutionPlan, ExecutionPlanStep, RequiredDataRef, LocatorStrategy, InputIntent } from "../types/execution-plan.types";
+import type { ControlIdentity } from "../types/control-identity";
+import { buildRuntimeControlIdentity } from "../types/control-identity";
 import type { PageSnapshot } from "../types/page-snapshot.types";
 import type { TestDataMap, TestDataValue, MissingInputBehavior, ExpectedResultMode } from "../types/env.types";
 import { config as envConfig } from "../config/env";
@@ -86,6 +93,482 @@ import { evaluateEarlyCompletionPolicy, type EarlyCompletionPolicyResult } from 
 import { detectSelectionSuccess, isSelectionLikeTarget, isSubmitLikeTarget, promoteToClickableAncestor, type SelectionDiagnostics } from "./selection-state-detector";
 import { resolveDataKey, formatDataKeyForLog, type DataKeyResolution } from "../data/data-key-resolver";
 import { type AutoGenerateConfig } from "../data/auto-test-data-generator";
+import {
+  captureAssertionObservationSnapshot,
+  diffAssertionObservation,
+  classifyNetworkActivity,
+  writeAssertionObservationArtifact,
+  type AssertionObservationArtifact,
+  type AssertionObservationSnapshot,
+} from "./assertion-observation";
+import {
+  runControlledAdvanceProbe,
+  type CanonicalAssertionIntent,
+  type ControlledAdvanceProbeResult,
+} from "./controlled-advance-probe";
+import type { AssertionPolarity } from "../scenarios/canonical-scenario";
+import { extractTestRailInputRequirements } from "../testrail/testrail-input-requirements-adapter";
+import { isAuthTransientNoResponse, resolveAuthTransientRetryMax } from "./auth-transient-retry";
+import { isPendingOracleAuthority } from "./oracle-authority";
+
+async function captureRuntimeFieldIdentity(locator: Locator): Promise<string | undefined> {
+  return locator.evaluate(function identifyRuntimeField(element) {
+    const tag = element.tagName.toLowerCase();
+    const id = element.getAttribute("id");
+    const testId = element.getAttribute("data-testid");
+    const name = element.getAttribute("name");
+    const role = element.getAttribute("role");
+    const type = element.getAttribute("type");
+    const identity = [
+      tag,
+      id ? `id=${id}` : "",
+      testId ? `testid=${testId}` : "",
+      name ? `name=${name}` : "",
+      role ? `role=${role}` : "",
+      type ? `type=${type}` : "",
+    ].filter(Boolean).join("|");
+    return identity || undefined;
+  }).catch(() => undefined);
+}
+
+async function captureRuntimeControlIdentity(locator: Locator): Promise<ControlIdentity | undefined> {
+  const metadata = await locator.evaluate(function identifyRuntimeControl(element) {
+    return {
+      tagName: element.tagName,
+      inputType: element.getAttribute("type") ?? undefined,
+      role: element.getAttribute("role") ?? undefined,
+      name: element.getAttribute("name") ?? undefined,
+      id: element.getAttribute("id") ?? undefined,
+      ariaControls: element.getAttribute("aria-controls") ?? undefined,
+    };
+  }).catch(() => undefined);
+  return metadata ? (buildRuntimeControlIdentity(metadata) ?? undefined) : undefined;
+}
+
+export type SafeNetworkEvent = {
+  requestId?: string;
+  method: string;
+  resourceType: string;
+  path: string;
+  state: "completed" | "pending" | "failed";
+  startedAt?: number;
+  status?: number;
+  statusCategory?: "2xx" | "3xx" | "4xx" | "5xx";
+  durationMs?: number;
+  failureCategory?: "timeout" | "connection_refused" | "connection_reset" | "dns" | "tls" | "cors" | "cancelled" | "browser_error" | "unknown";
+  terminalReason?: "diagnostic_timeout";
+  redirectTargetPathSafe?: string;
+  redirectObserved?: boolean;
+  redirectChain?: SafeRedirectHop[];
+  chainCompleted?: boolean;
+};
+
+export type SafeRedirectHop = {
+  status: number;
+  targetPath?: string;
+  followupMethod?: string;
+  followupPath?: string;
+  followupState?: "completed" | "pending" | "failed";
+  followupStatus?: number;
+  durationMs?: number;
+  terminalReason?: "diagnostic_timeout";
+};
+
+export const safePathname = (rawUrl: string, baseUrl?: string): string => {
+  try {
+    return new URL(rawUrl, baseUrl).pathname || "/";
+  } catch {
+    return "/";
+  }
+};
+
+export type InitialNavigationErrorInfo = {
+  errorType: string;
+  errorCode?: string;
+  errorMessageSafe: string;
+};
+
+export function describeInitialNavigationError(error: unknown): InitialNavigationErrorInfo {
+  const candidate = error as { name?: unknown; code?: unknown; message?: unknown } | undefined;
+  const message = typeof candidate?.message === "string" ? candidate.message : String(error ?? "unknown error");
+  return {
+    errorType: typeof candidate?.name === "string" && candidate.name.trim() ? candidate.name : "Error",
+    errorCode: typeof candidate?.code === "string" && candidate.code.trim() ? candidate.code : undefined,
+    errorMessageSafe: message.replace(/https?:\/\/[^\s)]+/gi, "<url>").replace(/[\r\n]+/g, " ").slice(0, 240)
+  };
+}
+
+const statusCategory = (status: number): SafeNetworkEvent["statusCategory"] => {
+  if (status >= 200 && status < 300) return "2xx";
+  if (status >= 300 && status < 400) return "3xx";
+  if (status >= 400 && status < 500) return "4xx";
+  if (status >= 500 && status < 600) return "5xx";
+  return undefined;
+};
+
+const failureCategory = (message: string): SafeNetworkEvent["failureCategory"] => {
+  const normalized = message.toLowerCase();
+  if (/timeout|timed out/.test(normalized)) return "timeout";
+  if (/connection refused|econnrefused/.test(normalized)) return "connection_refused";
+  if (/connection reset|connection_reset|econnreset/.test(normalized)) return "connection_reset";
+  if (/dns|enotfound|name not resolved/.test(normalized)) return "dns";
+  if (/certificate|tls|ssl|err_cert/.test(normalized)) return "tls";
+  if (/cors/.test(normalized)) return "cors";
+  if (/cancel/.test(normalized)) return "cancelled";
+  return "browser_error";
+};
+
+export type NetworkObservationWindow = {
+  stop(options?: { passiveTail?: boolean }): Promise<SafeNetworkEvent[]>;
+  waitForPassiveTail(): Promise<void>;
+  hasPending(): boolean;
+  getProgressState(): {
+    active: boolean;
+    progressed: boolean;
+    signal?: string;
+    pendingCount: number;
+    lastProgressAt: number;
+  };
+};
+
+/** Observes one action window only; request data, headers and query strings are never retained. */
+export function startNetworkObservation(page: Page, stepIndex: number, maxEvents = 100, options?: { diagnosticMs?: number }): NetworkObservationWindow {
+  const startedAt = new Map<object, number>();
+  const events = new Map<object, SafeNetworkEvent>();
+  const requestIds = new Map<object, string>();
+  let stopped = false;
+  let stopping = false;
+  let passiveTailActive = false;
+  let passiveTailTimer: ReturnType<typeof setTimeout> | undefined;
+  let resolvePassiveTail: (() => void) | undefined;
+  let passiveTailPromise = Promise.resolve();
+  const passiveTailRequests = new Set<object>();
+  const passiveTailStartedAt = new Map<object, number>();
+  let progressRevision = 0;
+  let progressRevisionRead = 0;
+  let lastProgressAt = Date.now();
+  let lastProgressSignal: string | undefined;
+  const noteProgress = (signal: string) => {
+    progressRevision += 1;
+    lastProgressAt = Date.now();
+    lastProgressSignal = signal;
+  };
+  const passiveTailCleanup = (expired = false) => {
+    if (!passiveTailActive) return;
+    if (expired) {
+      for (const request of passiveTailRequests) passiveLog(request, "diagnosticTailExpired");
+    }
+    passiveTailActive = false;
+    if (passiveTailTimer) clearTimeout(passiveTailTimer);
+    page.off("response", onPassiveResponse);
+    page.off("requestfinished", onPassiveFinished);
+    page.off("requestfailed", onPassiveFailed);
+    page.off("close", onPassivePageClose);
+    try { (page.context?.() as any)?.off?.("close", onPassiveContextClose); } catch { /* best effort */ }
+    passiveTailRequests.clear();
+    passiveTailStartedAt.clear();
+    resolvePassiveTail?.();
+    resolvePassiveTail = undefined;
+  };
+  const passiveElapsed = (request: object) => Math.max(0, Date.now() - (passiveTailStartedAt.get(request) ?? Date.now()));
+  const safeFailureReason = (request: any): string => String(request.failure?.()?.errorText ?? "unknown")
+    .replace(/https?:\/\/[^\s]+/gi, "<url>")
+    .replace(/[?&](?:token|password|passwd|secret|authorization|username)=[^&\s]*/gi, "")
+    .slice(0, 160);
+  const removePassiveRequest = (request: object) => {
+    passiveTailRequests.delete(request);
+    passiveTailStartedAt.delete(request);
+    if (passiveTailRequests.size === 0) passiveTailCleanup();
+  };
+  const passiveLog = (request: object, event: string, extra: Record<string, unknown> = {}) => {
+    const observed = events.get(request);
+    if (!observed) return;
+    console.log(`[network-post-timeout] ${JSON.stringify({
+      requestId: requestIds.get(request),
+      method: observed.method,
+      path: observed.path,
+      event,
+      elapsedSinceTimeoutMs: passiveElapsed(request),
+      ...extra
+    })}`);
+  };
+  const onPassiveResponse = (response: any) => {
+    const request = response.request?.() as object;
+    if (!passiveTailRequests.has(request)) return;
+    const status = Number(response.status?.() ?? 0);
+    passiveLog(request, "response", { status });
+  };
+  const onPassiveFinished = (request: any) => {
+    const key = request as object;
+    if (!passiveTailRequests.has(key)) return;
+    passiveLog(key, "requestfinished");
+    removePassiveRequest(key);
+  };
+  const onPassiveFailed = (request: any) => {
+    const key = request as object;
+    if (!passiveTailRequests.has(key)) return;
+    passiveLog(key, "requestfailed", { failureReason: safeFailureReason(request) });
+    removePassiveRequest(key);
+  };
+  const onPassivePageClose = () => {
+    for (const request of passiveTailRequests) passiveLog(request, "pageClosed", { pageClosed: true });
+    passiveTailCleanup();
+  };
+  const onPassiveContextClose = () => {
+    for (const request of passiveTailRequests) passiveLog(request, "contextClosed", { contextClosed: true });
+    passiveTailCleanup();
+  };
+  const startPassiveTail = () => {
+    const pending = Array.from(events.entries()).filter(([, event]) => event.state === "pending");
+    if (pending.length === 0 || passiveTailActive) return;
+    passiveTailActive = true;
+    for (const [request] of pending) {
+      passiveTailRequests.add(request);
+      passiveTailStartedAt.set(request, Date.now());
+      const event = events.get(request);
+      if (event) console.log(`[network-post-timeout] ${JSON.stringify({ requestId: requestIds.get(request), method: event.method, path: event.path, event: "pendingSnapshot", elapsedSinceTimeoutMs: 0 })}`);
+    }
+    page.on("response", onPassiveResponse);
+    page.on("requestfinished", onPassiveFinished);
+    page.on("requestfailed", onPassiveFailed);
+    page.on("close", onPassivePageClose);
+    try { (page.context?.() as any)?.on?.("close", onPassiveContextClose); } catch { /* best effort */ }
+    const configuredTailMs = Number(process.env.NETWORK_POST_TIMEOUT_TAIL_MS ?? 250);
+    const diagnosticTailMs = Number.isFinite(configuredTailMs) && configuredTailMs > 0 ? configuredTailMs : 250;
+    passiveTailPromise = new Promise<void>((resolve) => { resolvePassiveTail = resolve; });
+    passiveTailTimer = setTimeout(() => passiveTailCleanup(true), diagnosticTailMs);
+  };
+  let resolveStop: ((events: SafeNetworkEvent[]) => void) | undefined;
+  let diagnosticTimer: ReturnType<typeof setTimeout> | undefined;
+  let redirectGraceTimer: ReturnType<typeof setTimeout> | undefined;
+  let redirectGracePending = false;
+  const redirectHops: Array<SafeRedirectHop & { source: object; followup?: object }> = [];
+  const envDiagnosticMs = Number(process.env.NETWORK_OBSERVATION_DIAGNOSTIC_MS ?? 0);
+  const diagnosticMs = options?.diagnosticMs ?? (Number.isFinite(envDiagnosticMs) && envDiagnosticMs > 0 ? envDiagnosticMs : 0);
+  const snapshot = () => Array.from(events.values());
+  const hasPending = () => snapshot().some((event) => event.state === "pending");
+  const finish = (reason?: "diagnostic_timeout") => {
+    if (stopped) return snapshot();
+    stopped = true;
+    if (diagnosticTimer) clearTimeout(diagnosticTimer);
+    if (redirectGraceTimer) clearTimeout(redirectGraceTimer);
+    if (reason) {
+      for (const event of events.values()) {
+        if (event.state === "pending") event.terminalReason = reason;
+      }
+      for (const hop of redirectHops) {
+        if (!hop.followup || hop.followupState === "pending") {
+          hop.followupState = "pending";
+          hop.terminalReason = reason;
+        }
+      }
+    }
+    page.off("request", onRequest);
+    page.off("response", onResponse);
+    page.off("requestfailed", onRequestFailed);
+    page.off("requestfinished", onRequestFinished);
+    const result = snapshot();
+    const publicChain = redirectHops.map(({ source: _source, followup: _followup, ...hop }) => ({ ...hop }));
+    const chainCompleted = publicChain.every((hop) => !hop.targetPath || Boolean(hop.followupState && hop.followupState !== "pending"));
+    for (const event of result) {
+      if (event.redirectObserved) {
+        event.redirectChain = publicChain;
+        event.chainCompleted = chainCompleted;
+      }
+    }
+    console.log(`[network-observation] stepIndex=${stepIndex} requests=${result.length} completed=${result.filter((e) => e.state === "completed").length} pending=${result.filter((e) => e.state === "pending").length} failed=${result.filter((e) => e.state === "failed").length}`);
+    resolveStop?.(result);
+    resolveStop = undefined;
+    return result;
+  };
+  const settleIfComplete = () => {
+    if (!stopping || hasPending()) return;
+    const hasUnresolvedRedirect = redirectHops.some((hop) => hop.targetPath && !hop.followupState);
+    const hasObservedRedirect = redirectHops.length > 0;
+    if (!hasObservedRedirect) {
+      finish();
+      return;
+    }
+    if (hasUnresolvedRedirect) {
+      if (!redirectGracePending) {
+        redirectGracePending = true;
+        redirectGraceTimer = setTimeout(() => finish(), Math.min(100, Math.max(10, diagnosticMs)));
+      }
+      return;
+    }
+    if (!redirectGracePending) {
+      redirectGracePending = true;
+      redirectGraceTimer = setTimeout(() => finish(), Math.min(100, Math.max(10, diagnosticMs)));
+    }
+  };
+  const onRequest = (request: any) => {
+    if (stopped || events.size >= maxEvents) return;
+    const key = request as object;
+    startedAt.set(key, Date.now());
+    const requestId = `${stepIndex}-${events.size + 1}`;
+    requestIds.set(key, requestId);
+    const event: SafeNetworkEvent = { requestId, method: String(request.method?.() ?? "GET"), resourceType: String(request.resourceType?.() ?? "other"), path: safePathname(String(request.url?.() ?? "")), state: "pending", startedAt: Date.now() };
+    events.set(key, event);
+    noteProgress("request_started");
+    const redirectedFrom = request.redirectedFrom?.() as object | undefined;
+    if (redirectedFrom) {
+      const hop = redirectHops.find((candidate) => candidate.source === redirectedFrom && !candidate.followup);
+      if (hop) {
+        hop.followup = key;
+        hop.followupMethod = event.method;
+        hop.followupPath = event.path;
+        hop.followupState = "pending";
+        redirectGracePending = false;
+        if (redirectGraceTimer) clearTimeout(redirectGraceTimer);
+      }
+    }
+  };
+  const onResponse = (response: any) => {
+    const key = response.request?.() as object;
+    const event = events.get(key);
+    if (!event) return;
+    noteProgress("response_received");
+    event.state = "completed";
+    event.status = Number(response.status?.() ?? 0);
+    event.statusCategory = statusCategory(event.status);
+    if (event.statusCategory === "3xx") {
+      try {
+        const location = String(response.headers?.()?.location ?? "").trim();
+        event.redirectObserved = true;
+        if (location) event.redirectTargetPathSafe = safePathname(location, String(response.url?.() ?? ""));
+        redirectHops.push({ status: event.status, targetPath: event.redirectTargetPathSafe, source: key });
+      } catch {
+        // Redirect metadata is best-effort and never affects functional execution.
+      }
+    }
+    event.durationMs = Math.max(0, Date.now() - (startedAt.get(key) ?? Date.now()));
+    const hop = redirectHops.find((candidate) => candidate.source === key);
+    if (hop) {
+      // The response is terminal for this hop; its follow-up, if any, is tracked separately.
+      if (!hop.followup) settleIfComplete();
+    }
+    const followedHop = redirectHops.find((candidate) => candidate.followup === key);
+    if (followedHop) {
+      followedHop.followupState = "completed";
+      followedHop.followupStatus = event.status;
+      followedHop.durationMs = event.durationMs;
+    }
+    settleIfComplete();
+  };
+  const onRequestFailed = (request: any) => {
+    const key = request as object;
+    const event = events.get(key);
+    if (!event) return;
+    noteProgress("request_failed");
+    event.state = "failed";
+    event.durationMs = Math.max(0, Date.now() - (startedAt.get(key) ?? Date.now()));
+    event.failureCategory = failureCategory(String(request.failure?.()?.errorText ?? ""));
+    const followedHop = redirectHops.find((candidate) => candidate.followup === key);
+    if (followedHop) {
+      followedHop.followupState = "failed";
+      followedHop.durationMs = event.durationMs;
+    }
+    settleIfComplete();
+  };
+  const onRequestFinished = (request: any) => {
+    const key = request as object;
+    const event = events.get(key);
+    if (!event || event.state !== "pending") return;
+    noteProgress("request_finished");
+    event.state = "completed";
+    event.durationMs = Math.max(0, Date.now() - (startedAt.get(key) ?? Date.now()));
+    settleIfComplete();
+  };
+  page.on("request", onRequest);
+  page.on("response", onResponse);
+  page.on("requestfinished", onRequestFinished);
+  page.on("requestfailed", onRequestFailed);
+  return {
+    hasPending: () => hasPending(),
+    getProgressState: () => {
+      const progressed = progressRevision > progressRevisionRead;
+      progressRevisionRead = progressRevision;
+      return {
+        active: hasPending(),
+        progressed,
+        signal: lastProgressSignal,
+        pendingCount: snapshot().filter((event) => event.state === "pending").length,
+        lastProgressAt,
+      };
+    },
+    stop: (options?: { passiveTail?: boolean }) => {
+      const passiveTailRequested = options?.passiveTail !== false;
+      if (stopped) return Promise.resolve(snapshot());
+      if (stopping) return new Promise<SafeNetworkEvent[]>((resolve) => { resolveStop = resolve; });
+      if (diagnosticMs <= 0) {
+        if (passiveTailRequested) startPassiveTail();
+        return Promise.resolve(finish());
+      }
+      stopping = true;
+      if (!hasPending()) return Promise.resolve(finish());
+      return new Promise<SafeNetworkEvent[]>((resolve) => {
+        resolveStop = resolve;
+        diagnosticTimer = setTimeout(() => {
+          if (passiveTailRequested) startPassiveTail();
+          finish("diagnostic_timeout");
+        }, diagnosticMs);
+      });
+    },
+    waitForPassiveTail: () => passiveTailPromise
+  };
+}
+
+export type RuntimeFillObservation = {
+  before?: AssertionObservationSnapshot;
+  after?: AssertionObservationSnapshot;
+  networkEvents: SafeNetworkEvent[];
+  committedBy: "blur";
+  mutation?: ReturnType<typeof diffAssertionObservation>;
+};
+
+/**
+ * Commits a row-scoped fill and observes the resulting runtime transition.
+ * The primitive is intentionally independent of any application label or URL:
+ * it only uses the resolved control, a bounded DOM snapshot, and sanitized
+ * network metadata.
+ */
+export async function fillAndObserveRuntimeInput(input: {
+  page: Page;
+  locator: Locator;
+  value: string;
+  stepIndex: number;
+  observe?: boolean;
+  waitMs?: number;
+}): Promise<RuntimeFillObservation> {
+  if (!input.observe) {
+    await input.locator.fill(input.value);
+    return { networkEvents: [], committedBy: "blur" };
+  }
+
+  const before = await captureAssertionObservationSnapshot(input.page).catch(() => undefined);
+  const observation = startNetworkObservation(input.page, input.stepIndex, 100, { diagnosticMs: input.waitMs ?? 1500 });
+  await input.locator.fill(input.value);
+  await input.locator.blur().catch(() => undefined);
+  await input.page.waitForTimeout(input.waitMs ?? 1500);
+  const networkEvents = await observation.stop({ passiveTail: false });
+  const after = await captureAssertionObservationSnapshot(input.page).catch(() => undefined);
+  const mutation = before && after
+    ? diffAssertionObservation(before, after, networkEvents.length > 0)
+    : undefined;
+  const networkClass = classifyNetworkActivity(
+    networkEvents,
+    before?.urlPath,
+    after?.urlPath,
+  );
+  console.log(
+    `[fill-observation] stepIndex=${input.stepIndex} committedBy=blur `
+      + `requestObserved=${networkEvents.length > 0} `
+      + `responseObserved=${networkEvents.some((event) => event.state !== "pending")} `
+      + `responseStatuses=${networkEvents.filter((event) => event.status !== undefined).map((event) => event.status).join(",") || "none"} `
+      + `domMutation=${mutation?.changed ?? false} networkClassification=${networkClass}`,
+  );
+  return { before, after, networkEvents, committedBy: "blur", mutation };
+}
 
 function normalizeText(text: string): string {
   return text
@@ -300,6 +783,72 @@ function getUnresolvedBlockingFailures(steps: DiscoveryStepResult[]): DiscoveryS
   return result;
 }
 
+function isPassedAssertion(step: DiscoveryStepResult): boolean {
+  const isAssertionRecord = step.action === "assert"
+    || step.assertionStatus !== undefined
+    || step.assertionClassification !== undefined;
+  return isAssertionRecord
+    && (step.status === "found"
+      || step.status === "satisfied_by_children"
+      || step.status === "satisfied_by_previous_assertion"
+      || step.assertionStatus === "passed"
+      || step.assertionStatus === "satisfied_by_children"
+      || step.assertionStatus === "satisfied_by_previous_assertion");
+}
+
+function sameAssertionIdentity(failed: DiscoveryStepResult, passed: DiscoveryStepResult): boolean {
+  if (typeof failed.index === "number" && typeof passed.index === "number") {
+    return failed.index === passed.index;
+  }
+
+  return Boolean(
+    failed.targetText
+    && passed.targetText
+    && normalizeText(failed.targetText) === normalizeText(passed.targetText),
+  );
+}
+
+export function reconcileAssertionFailuresAfterPass(
+  steps: DiscoveryStepResult[],
+  finalPass?: Pick<DiscoveryStepResult, "index" | "targetText" | "action" | "status" | "assertionStatus">,
+): number {
+  const passedAssertions = [
+    ...steps.filter(isPassedAssertion),
+    ...(finalPass && isPassedAssertion(finalPass as DiscoveryStepResult) ? [finalPass as DiscoveryStepResult] : []),
+  ];
+  let reconciled = 0;
+
+  for (const passedAssertion of passedAssertions) {
+    for (const failedAssertion of steps) {
+      if (failedAssertion === passedAssertion
+        || (failedAssertion.action !== "assert"
+          && failedAssertion.assertionStatus === undefined
+          && failedAssertion.assertionClassification === undefined)
+        || failedAssertion.recoveryStatus === "recovered"
+        || failedAssertion.recoveryStatus === "repaired"
+        || !(failedAssertion.status === "not_found" || failedAssertion.status === "needs_assertion_resolution")
+        || !sameAssertionIdentity(failedAssertion, passedAssertion)) {
+        continue;
+      }
+
+      failedAssertion.recoveryStatus = "recovered";
+      failedAssertion.recoveredBy = "assertion_pass";
+      failedAssertion.recoveryMetadata = {
+        ...failedAssertion.recoveryMetadata,
+        originalFailureReason: failedAssertion.error,
+        recoveredAfterStep: passedAssertion.index,
+        recoveredBecause: "same_assertion_passed",
+        blocking: false,
+      };
+      failedAssertion.pendingDiscovery = false;
+      failedAssertion.error = undefined;
+      reconciled++;
+    }
+  }
+
+  return reconciled;
+}
+
 export function reconcileFailureMarkers(
   steps: DiscoveryStepResult[],
   markers: { failedAtStep?: number; failedTarget?: string; failedReason?: string },
@@ -337,6 +886,7 @@ export function calculateUnresolvedBlockingFailures(
     step.functionalRequired === true
     && (step.status === "not_found" || step.status === "needs_assertion_resolution"),
   ).length;
+  reconcileAssertionFailuresAfterPass(steps);
   reconcileAuthGateAssertionFailures(steps, authGateEvidence);
   const remaining = getUnresolvedBlockingFailures(steps);
   console.log(`[auth-gate-reconciliation] candidateFailures=${candidateFailures} reconciled=${steps.filter((step) => step.recoveredBy === "auth_flow" && step.recoveryMetadata?.recoveredBecause === "auth_gate_completed").length} remainingBlocking=${remaining.length}`);
@@ -503,6 +1053,50 @@ export function hasObservableAssertionAuthority(step: Pick<DiscoveryStepResult, 
     return OBSERVABLE_REQUIREMENT_FACETS.has(facet)
       || Boolean(ref.claimId && normalizeText(facet).includes("visible"));
   });
+}
+
+export type PendingAssertionOracle = {
+  backed: boolean;
+  consumed?: boolean;
+  requirement?: string;
+  stepIndex?: number;
+  details?: { sourceActionStepIndex?: number; satisfiedBy?: string };
+};
+
+/** Reconcile only the pending assertion represented by a supported oracle. */
+export function reconcilePendingAssertionsWithBackedOracles(
+  steps: DiscoveryStepResult[],
+  oracles: PendingAssertionOracle[],
+): number {
+  let reconciled = 0;
+  for (const step of steps) {
+    if (!(step.status === "not_found" || step.status === "needs_assertion_resolution")
+      || (step as any).pendingDiscovery !== true) continue;
+    const assertion = normalizeText(step.targetText ?? step.action);
+    const oracle = oracles.find((candidate) => {
+      if (candidate.backed !== true || candidate.consumed === false) return false;
+      const sameStep = candidate.stepIndex === step.index;
+      const sameRequirement = Boolean(candidate.requirement)
+        && normalizeText(candidate.requirement ?? "") === assertion;
+      const sourceActionMatches = candidate.details?.sourceActionStepIndex === step.index;
+      return sameStep || sameRequirement || sourceActionMatches;
+    });
+    if (!oracle) continue;
+    (step as any).pendingDiscovery = false;
+    step.recoveryStatus = "recovered";
+    step.recoveredBy = "later_success";
+    step.recoveryMetadata = {
+      ...(step.recoveryMetadata ?? {}),
+      blocking: false,
+      originalFailureReason: step.error ?? "assertion_not_found",
+      recoveredBecause: "backed_observable_oracle",
+    };
+    step.status = "satisfied_by_previous_assertion";
+    step.assertionStatus = "satisfied_by_previous_assertion";
+    step.error = undefined;
+    reconciled++;
+  }
+  return reconciled;
 }
 
 function isPendingDiscoveryFailureStep(step: DiscoveryStepResult): boolean {
@@ -802,7 +1396,57 @@ export type ExecutableStep = {
   valueSource?: FillValueSource;
   isOptional?: boolean;
   source: "action" | "expected" | "expanded_nav";
+  inputIntent?: InputIntent;
+  requirementRefs?: string[];
+  entityScope?: string;
+  rowScope?: number;
+  rowRelation?: "next" | "added";
+  associatedField?: string;
+  expectedValueKey?: string;
+  triggerStepIndex?: number;
+  controlIdentity?: ControlIdentity;
+  canonicalAssertion?: import("../scenarios/canonical-scenario").CanonicalAssertion;
+  conditionalAction?: import("../scenarios/canonical-scenario").CanonicalConditionalAction;
 };
+
+export function projectScenarioInputMetadata(step: {
+  inputIntent?: InputIntent;
+  requirementRefs?: string[];
+}): Pick<ExecutionPlanStep, "inputIntent" | "requirementRefs"> {
+  const requirementRefs = step.requirementRefs ?? step.inputIntent?.requirementRefs;
+  return {
+    ...(step.inputIntent ? { inputIntent: { ...step.inputIntent, ...(step.inputIntent.requirementRefs ? { requirementRefs: [...step.inputIntent.requirementRefs] } : {}) } } : {}),
+    ...(requirementRefs ? { requirementRefs: [...requirementRefs] } : {}),
+  };
+}
+
+export function isFillActionTarget(target: Pick<ActionTargetItem, "actionType" | "valueKey" | "valueSource">): boolean {
+  return target.actionType === "action_fill" &&
+    Boolean(target.valueKey) &&
+    (target.valueSource === "unknown" || target.valueSource === "test_data");
+}
+
+/** Product-card escalation requires positive card/detail evidence. */
+export function isProductCardClickEligible(input: {
+  isFinalProductClick: boolean;
+  targetMatchesDetail: boolean;
+  isOrdinalBoundToDetail: boolean;
+  finalLocatorPresent: boolean;
+  detailTargetSource?: string;
+}): boolean {
+  const hasPositiveDetailEvidence = [
+    "targetPath",
+    "productAssertion",
+    "precedingActionViaAssertion",
+    "ordinalAssertionFallback",
+    "ordinalActionTarget"
+  ].includes(input.detailTargetSource ?? "");
+
+  return input.isFinalProductClick && input.finalLocatorPresent && (
+    input.isOrdinalBoundToDetail ||
+    (input.targetMatchesDetail && hasPositiveDetailEvidence)
+  );
+}
 
 export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
   actionTargets: ActionTargetItem[];
@@ -829,9 +1473,50 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
   const findExistingAssertionByTarget = (target: string): boolean =>
     assertionTargets.some((a) => a.source === "action" && normalizeText(a.target) === normalizeText(target));
 
+  const scenarioRequirementRefs = (scenario as TestScenario & {
+    stepRequirementRefs?: Array<{ stepIndex: number; requirementId: string }>;
+  }).stepRequirementRefs ?? [];
+
   for (const step of scenario.steps) {
-    const intents = parseStepIntent(step.action);
     const requiredContext = (step as any).requiredContext ?? (step as any).requirement?.requiredContext;
+    const canonicalAssertion = step.canonicalAssertion;
+    const requirementRefs = step.requirementRefs ?? scenarioRequirementRefs
+      .filter((ref) => ref.stepIndex === step.index)
+      .map((ref) => ref.requirementId);
+    if (canonicalAssertion) {
+      const scopedIntent = parseStepIntent(step.action).find((intent) => intent.type === "assertion");
+      const assertionTarget = canonicalAssertion.trigger || canonicalAssertion.condition
+        ? step.action
+        : canonicalAssertion.subject ?? canonicalAssertion.expectedState ?? step.action;
+      orderedSteps.push({
+        stepIndex: step.index,
+        originalText: step.action,
+        type: "assertion",
+        target: assertionTarget,
+        source: "action",
+        ...(requirementRefs.length > 0 ? { requirementRefs: [...requirementRefs] } : {}),
+        ...(scopedIntent?.entityScope ? { entityScope: scopedIntent.entityScope } : {}),
+        ...(scopedIntent?.rowScope !== undefined ? { rowScope: scopedIntent.rowScope } : {}),
+        ...(scopedIntent?.rowRelation ? { rowRelation: scopedIntent.rowRelation } : {}),
+        ...(scopedIntent?.expectedValueKey ? { expectedValueKey: scopedIntent.expectedValueKey } : {}),
+        canonicalAssertion,
+      });
+      assertionTargets.push({
+        index: step.index,
+        action: step.action,
+        target: assertionTarget,
+        source: "action",
+        ...(requirementRefs.length > 0 ? { requirementRefs: [...requirementRefs] } : {}),
+        ...(scopedIntent?.entityScope ? { entityScope: scopedIntent.entityScope } : {}),
+        ...(scopedIntent?.rowScope !== undefined ? { rowScope: scopedIntent.rowScope } : {}),
+        ...(scopedIntent?.rowRelation ? { rowRelation: scopedIntent.rowRelation } : {}),
+        ...(scopedIntent?.expectedValueKey ? { expectedValueKey: scopedIntent.expectedValueKey } : {}),
+        canonicalAssertion,
+        ...(requiredContext ? { requiredContext } : {}),
+      });
+      continue;
+    }
+    const intents = parseStepIntent(step.action);
 
     for (const intent of intents) {
       if (intent.type === "precondition_context" || intent.type === "navigation_path" || intent.type === "setup_route") {
@@ -844,13 +1529,25 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
           originalText: step.action,
           type: "assertion",
           target: intent.actionTarget,
-          source: "action"
+          source: "action",
+          ...(requirementRefs.length > 0 ? { requirementRefs: [...requirementRefs] } : {}),
+          ...(intent.entityScope ? { entityScope: intent.entityScope } : {}),
+          ...(intent.rowScope !== undefined ? { rowScope: intent.rowScope } : {}),
+          ...(intent.rowRelation ? { rowRelation: intent.rowRelation } : {}),
+          ...(intent.expectedValueKey ? { expectedValueKey: intent.expectedValueKey } : {}),
+          ...(intent.canonicalAssertion ? { canonicalAssertion: intent.canonicalAssertion } : {}),
         });
         assertionTargets.push({
           index: step.index,
           action: step.action,
           target: intent.actionTarget,
           source: "action",
+          ...(requirementRefs.length > 0 ? { requirementRefs: [...requirementRefs] } : {}),
+          ...(intent.entityScope ? { entityScope: intent.entityScope } : {}),
+          ...(intent.rowScope !== undefined ? { rowScope: intent.rowScope } : {}),
+          ...(intent.rowRelation ? { rowRelation: intent.rowRelation } : {}),
+          ...(intent.expectedValueKey ? { expectedValueKey: intent.expectedValueKey } : {}),
+          ...(intent.canonicalAssertion ? { canonicalAssertion: intent.canonicalAssertion } : {}),
           ...(requiredContext ? { requiredContext } : {})
         });
       } else if (intent.type === "unknown") {
@@ -887,15 +1584,28 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
           target: targetText,
           isOptional: intent.isOptional,
           associatedEntity,
+          selectionField: intent.selectionField,
+          entityScope: intent.entityScope,
+          rowScope: intent.rowScope,
+          rowRelation: intent.rowRelation,
+          associatedField: intent.associatedField,
+          expectedValueKey: intent.expectedValueKey,
           actionType: intent.type,
           semanticRole: intent.semanticRole,
           relationContext: intent.relationContext
         };
-        if (intent.valueSource === "test_data" || intent.valueSource === "literal") {
-          item.valueSource = intent.valueSource;
-          if (intent.valueKey) item.valueKey = intent.valueKey;
-          if (intent.value) item.value = intent.value;
-        }
+        if (intent.conditionalAction) item.conditionalAction = intent.conditionalAction;
+        const sourceStep = step as TestScenarioStep;
+        const structuredMetadata = projectScenarioInputMetadata({
+          ...sourceStep,
+          requirementRefs: sourceStep.requirementRefs ?? scenarioRequirementRefs
+            .filter((ref) => ref.stepIndex === step.index)
+            .map((ref) => ref.requirementId),
+        });
+        Object.assign(item, structuredMetadata);
+        if (intent.valueSource !== undefined) item.valueSource = intent.valueSource;
+        if (intent.valueKey) item.valueKey = intent.valueKey;
+        if (intent.value !== undefined) item.value = intent.value;
         actionTargets.push(item);
         orderedSteps.push({
           stepIndex: step.index,
@@ -906,10 +1616,62 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
           value: intent.value,
           valueSource: item.valueSource,
           isOptional: intent.isOptional,
-          source: "action"
+          source: "action",
+          entityScope: intent.entityScope,
+          rowScope: intent.rowScope,
+          rowRelation: intent.rowRelation,
+          associatedField: intent.associatedField,
+          expectedValueKey: intent.expectedValueKey,
+          conditionalAction: intent.conditionalAction,
+          ...structuredMetadata
         });
       }
     }
+  }
+
+  // Bind each canonical oracle to the latest structurally relevant action in
+  // the scenario sequence. This is lineage, not DOM/text inference: the live
+  // resolver receives the same prerequisite identity that the canonical model
+  // derived from the source step order.
+  const findOracleTrigger = (assertion: AssertionTargetInput): number | undefined => {
+    const oracleType = assertion.canonicalAssertion?.oracleType;
+    const priorSteps = scenario.steps.filter((candidate) => candidate.index < assertion.index);
+    if (priorSteps.length === 0) return undefined;
+    if (oracleType === "row_scoped_value") {
+      const matchingSource = priorSteps
+        .filter((candidate) => {
+          const intent = parseStepIntent(candidate.action).find((item) => item.type !== "assertion");
+          return intent?.type === "action_fill"
+            && (assertion.rowScope === undefined || intent.rowScope === undefined || intent.rowScope === assertion.rowScope)
+            && Boolean((candidate as any).valueKey ?? intent.valueKey);
+        })
+        .at(-1);
+      return matchingSource?.index ?? priorSteps.at(-1)?.index;
+    }
+    if (oracleType === "structural_row_count") {
+      const rowAction = priorSteps
+        .filter((candidate) => {
+          const intent = parseStepIntent(candidate.action).find((item) => item.type !== "assertion");
+          return intent?.rowRelation === "added";
+        })
+        .at(-1);
+      return rowAction?.index ?? priorSteps.at(-1)?.index;
+    }
+    if (oracleType === "entity_within_container") {
+      return priorSteps
+        .filter((candidate) => parseStepIntent(candidate.action).some((item) => item.type !== "assertion"))
+        .at(-1)?.index;
+    }
+    return undefined;
+  };
+  for (const assertion of assertionTargets) {
+    const triggerStepIndex = findOracleTrigger(assertion);
+    if (triggerStepIndex !== undefined) assertion.triggerStepIndex = triggerStepIndex;
+  }
+  for (const executable of orderedSteps) {
+    if (executable.type !== "assertion") continue;
+    const source = assertionTargets.find((assertion) => assertion.index === executable.stepIndex);
+    if (source?.triggerStepIndex !== undefined) executable.triggerStepIndex = source.triggerStepIndex;
   }
 
   // Process expected results based on mode
@@ -1020,11 +1782,75 @@ async function capturePageState(page: Page): Promise<PageState> {
   return { url, bodyText, elementCount };
 }
 
+/**
+ * Dismiss one obstructing dialog only when the next action is outside it and
+ * the dialog exposes exactly one generic close control. This is structural
+ * recovery for transient overlays; it does not inspect application labels or
+ * infer a business action from dialog text.
+ */
+async function dismissObstructingDialog(page: Page, nextTarget: string): Promise<boolean> {
+  const dialogs = page.locator('[role="dialog"], [role="alertdialog"], dialog');
+  const visibleDialogs: Locator[] = [];
+  for (let index = 0; index < await dialogs.count(); index++) {
+    const dialog = dialogs.nth(index);
+    if (await dialog.isVisible().catch(() => false)) visibleDialogs.push(dialog);
+  }
+  if (visibleDialogs.length !== 1) return false;
+  const dialog = visibleDialogs[0];
+  const targetInsideDialog = await dialog.getByText(nextTarget, { exact: false }).count().catch(() => 0);
+  if (targetInsideDialog > 0) return false;
+
+  const namedClose = dialog.getByRole("button", { name: /^(?:close|cerrar|dismiss|descartar|x|×)$/i });
+  const namedCount = await namedClose.count().catch(() => 0);
+  const structuralClose = dialog.locator('[data-slot="dialog-close"]');
+  const structuralCount = await structuralClose.count().catch(() => 0);
+  const close = namedCount === 1
+    ? namedClose
+    : structuralCount === 1
+      ? structuralClose
+      : undefined;
+  if (!close) return false;
+  await close.click({ timeout: 3000 });
+  await page.waitForTimeout(250);
+  console.log(`[dialog-recovery] dismissed=true reason=obstructing_dialog nextActionTargetPresent=${Boolean(nextTarget.trim())}`);
+  return true;
+}
+
+async function hasBlockingOverlay(page: Page): Promise<boolean> {
+  const surfaces = page.locator('[role="dialog"], [role="alertdialog"], dialog, [data-slot="dialog-overlay"]');
+  for (let index = 0; index < await surfaces.count(); index++) {
+    const surface = surfaces.nth(index);
+    const blocking = await surface.evaluate((element) => {
+      const style = window.getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      return style.display !== "none"
+        && style.visibility !== "hidden"
+        && style.pointerEvents !== "none"
+        && rect.width > 0
+        && rect.height > 0;
+    }).catch(() => false);
+    if (blocking) return true;
+  }
+  return false;
+}
+
+export function shouldDeferAssertionEvaluation(params: {
+  assertionIndex: number;
+  currentStepIndex: number;
+  triggerStepIndex?: number;
+  triggerExecuted?: boolean;
+}): boolean {
+  return params.triggerStepIndex != null
+    && params.assertionIndex > params.triggerStepIndex
+    && params.triggerExecuted !== true;
+}
+
 export function evaluateEarlyCompletion(
   snapshot: PageSnapshot,
   assertionTargets: AssertionTargetInput[],
   remainingActionTargets: ActionTargetItem[],
-  appConfig?: any
+  appConfig?: any,
+  scheduling?: { currentStepIndex?: number; triggerStepIndex?: number; triggerExecuted?: boolean }
 ): {
   checked: boolean;
   satisfied: boolean;
@@ -1137,7 +1963,27 @@ export function evaluateEarlyCompletion(
     return { checked: false, satisfied: false, satisfiedAssertions: [], pendingAssertions: [], deferredAssertions: [], blockingAssertions: [], skippedAssertions: [], weakSignals: [], skippedRemainingActions: 0 };
   }
 
-  const resolutionResults = resolveAssertionTargets(snapshot, assertionTargets, { appConfig });
+  const deferredBeforeTrigger = assertionTargets.filter((assertion) =>
+    (() => {
+      const currentStepIndex = scheduling?.currentStepIndex ?? Number.POSITIVE_INFINITY;
+      const triggerStepIndex = assertion.triggerStepIndex ?? scheduling?.triggerStepIndex;
+      const triggerExecuted = assertion.triggerStepIndex !== undefined
+        ? currentStepIndex >= assertion.triggerStepIndex
+        : scheduling?.triggerExecuted;
+      const deferred = shouldDeferAssertionEvaluation({
+        assertionIndex: assertion.index,
+        currentStepIndex,
+        triggerStepIndex,
+        triggerExecuted,
+      });
+      if (deferred) {
+        console.log(`[assertion-eligibility] index=${assertion.index} oracleType=${assertion.canonicalAssertion?.oracleType ?? "unstructured"} eligibility=not_eligible_yet triggerStepIndex=${triggerStepIndex ?? "unknown"}`);
+      }
+      return deferred;
+    })()
+  );
+  const assertionsToResolve = assertionTargets.filter((assertion) => !deferredBeforeTrigger.includes(assertion));
+  const resolutionResults = resolveAssertionTargets(snapshot, assertionsToResolve, { appConfig });
   
   const satisfiedAssertions: string[] = [];
   const pendingAssertions: string[] = [];
@@ -1145,9 +1991,13 @@ export function evaluateEarlyCompletion(
   const skippedAssertions: string[] = [];
   const weakSignals: string[] = [];
 
+  for (const assertion of deferredBeforeTrigger) {
+    deferredAssertions.push(assertion.target);
+  }
+
   for (let i = 0; i < resolutionResults.length; i++) {
     const res = resolutionResults[i];
-    const input = assertionTargets[i];
+    const input = assertionsToResolve[i];
     const isExpectedSource = input?.source === "expected";
 
     const isWeakDescriptor = (isExpectedSource && (
@@ -1248,7 +2098,7 @@ export function evaluateEarlyCompletion(
     return Boolean(intent) && !["passed", "satisfied", "completed"].includes(status);
   });
 
-  let satisfied = pendingAssertions.length === 0 && satisfiedAssertions.length > 0;
+  let satisfied = deferredBeforeTrigger.length === 0 && pendingAssertions.length === 0 && satisfiedAssertions.length > 0;
   
   if (hasSensitiveActionsRemaining && satisfied) {
     const explicitMandatorySatisfied = resolutionResults.some(res => 
@@ -1377,9 +2227,99 @@ export type CaseDiscoveryOptions = {
   evidenceRecorder?: import("../evidence/evidence-recorder").EvidenceRecorder;
   /** Per-scenario runtime overrides from QA Lab (dataOverrides) - generic per key */
   scenarioDataOverrides?: Record<string, string>;
+  /** Case-scoped runtime entries with explicit provenance from QA Lab. */
+  runtimeEntries?: Array<{
+    key: string;
+    value: string;
+    source?: string;
+    sensitive?: boolean;
+    generated?: boolean;
+    verified?: boolean;
+    provenance?: string;
+    valueRole?: string;
+    oracleSource?: string;
+  }>;
   /** Per-scenario suggested values from dataRequirements - generic per key */
   scenarioSuggestedData?: Record<string, string>;
+  /** Reconcile workflow evidence before the first final blocking/status calculation. */
+  beforeFinalStatusCalculation?: (steps: DiscoveryStepResult[]) => number | Promise<number>;
 };
+
+function resolveControlledAdvanceAssertions(
+  scenario: TestScenario,
+): Array<{ index: number; requirement: string; requirementRefs: string[]; intent: CanonicalAssertionIntent; polarity?: AssertionPolarity; advanceAction?: string }> {
+  const requirements = (scenario.canonicalRequirements ?? []) as Array<{
+    requirementId: string;
+    description: string;
+    assertionIntents?: CanonicalAssertionIntent[];
+    polarity?: AssertionPolarity;
+  }>;
+  const byId = new Map(requirements.map((requirement) => [requirement.requirementId, requirement]));
+  const seen = new Set<string>();
+  return scenario.steps.flatMap((step) => {
+    const refs = Array.isArray(step.requirementRefs) ? step.requirementRefs : [];
+    return refs.flatMap((ref) => (byId.get(ref)?.assertionIntents ?? []).flatMap((intent) => {
+      const key = `${ref}:${intent}`;
+      if (seen.has(key)) return [];
+      seen.add(key);
+      return [{
+        index: step.index,
+        requirement: step.action,
+        requirementRefs: [ref],
+        intent,
+        polarity: byId.get(ref)?.polarity,
+        ...(step.canonicalAssertion?.advanceAction ? { advanceAction: step.canonicalAssertion.advanceAction } : {}),
+      }];
+    }));
+  });
+}
+
+function applyControlledAdvanceProbeToSteps(
+  steps: DiscoveryStepResult[],
+  scenario: TestScenario,
+  assertions: Array<{ index: number; requirement: string; requirementRefs: string[]; intent: CanonicalAssertionIntent; polarity?: AssertionPolarity; advanceAction?: string }>,
+  result: ControlledAdvanceProbeResult,
+): void {
+  for (const assertion of assertions) {
+    const backed = assertion.intent === "validation_present" ? result.validationObserved : result.blockedObserved;
+    const existing = steps.find((step) => step.index === assertion.index);
+    const scenarioStep = scenario.steps.find((step) => step.index === assertion.index);
+    const next: DiscoveryStepResult = {
+      index: assertion.index,
+      action: scenarioStep?.action ?? assertion.requirement,
+      targetText: assertion.requirement,
+      status: backed ? "found" : "needs_assertion_resolution",
+      assertionStatus: backed ? "passed" : "needs_assertion_resolution",
+      assertionImportance: "blocking",
+      runtimeBacked: backed,
+      canonicalRequirementRefs: assertion.requirementRefs.map((requirementId) => ({ requirementId })),
+      ...(scenarioStep?.canonicalAssertion ? { canonicalAssertion: scenarioStep.canonicalAssertion } : {}),
+      assertionDiagnostics: {
+        controlledAdvanceProbe: true,
+        intent: assertion.intent,
+        advanceAction: assertion.advanceAction,
+        polarity: assertion.polarity,
+        polaritySource: assertion.polarity ? "canonical" : "unresolved",
+        candidateFound: result.candidateFound,
+        candidateEnabled: result.candidateEnabled,
+        attemptPossible: result.attemptPossible,
+        resolutionState: result.resolutionState,
+        attemptObserved: result.attemptObserved,
+        subjectFound: result.subjectFound,
+        subjectValidationMutation: result.subjectValidationMutation,
+        validationObserved: result.validationObserved,
+        transitionOccurred: result.transitionOccurred,
+        blockedObserved: result.blockedObserved,
+        advanceCausality: result.advanceCausality,
+        otherInvalidRequiredControls: result.otherInvalidRequiredControls,
+        otherEmptyRequiredControls: result.otherEmptyRequiredControls,
+        functionalDefectAssertion13: result.functionalDefectAssertion13,
+      },
+    };
+    if (existing) Object.assign(existing, next);
+    else steps.push(next);
+  }
+}
 
 export function resolveCaseDiscoveryAppSlug(options: Pick<CaseDiscoveryOptions, "appSlug" | "env">): string {
   const explicitAppSlug = typeof options.appSlug === "string" ? options.appSlug.trim() : "";
@@ -1409,6 +2349,68 @@ function getAiConstraints(): string[] {
   ];
 }
 
+export function buildCandidateRequiredData(
+  scenario: TestScenario,
+  planSteps: ExecutionPlanStep[],
+  resolvedKeys?: Set<string>,
+): RequiredDataRef[] {
+  type CandidateAuthorityRequirement = {
+    key: string;
+    required?: boolean;
+    source?: string;
+    provenance?: string;
+    sensitive?: boolean;
+    valueRole?: "runtime_input" | "expected_oracle" | "runtime_derived_oracle";
+    oracleSource?: string;
+    dependsOn?: string[];
+  };
+  const authoritativeRequirements = new Map<string, CandidateAuthorityRequirement>();
+  const addRequirements = (requirements: readonly CandidateAuthorityRequirement[] | undefined) => {
+    for (const requirement of requirements ?? []) {
+      if (!requirement?.key?.trim()) continue;
+      const key = requirement.key.trim();
+      const existing = authoritativeRequirements.get(key);
+      authoritativeRequirements.set(key, existing ? { ...existing, ...requirement, key } : { ...requirement, key });
+    }
+  };
+
+  // Prefer the current raw TestRail contract, then the Canonical contract,
+  // then the runtime projection. None of these are reconstructed from the
+  // subset of steps reached before a partial discovery failure.
+  if (scenario.raw) {
+    addRequirements(extractTestRailInputRequirements(scenario.raw).requirements);
+  }
+  addRequirements(scenario.canonicalInputRequirements);
+  addRequirements(scenario.runtimeInputRequirements);
+  const planValueKeys = new Set(
+    planSteps.map((step) => step.valueKey?.trim()).filter((key): key is string => Boolean(key)),
+  );
+  const keys = new Set<string>(authoritativeRequirements.keys());
+  for (const key of planValueKeys) keys.add(key);
+  return Array.from(keys).map((key) => ({
+    key,
+    required: authoritativeRequirements.get(key)?.required !== false,
+    resolved: (resolvedKeys ?? planValueKeys).has(key),
+    ...(authoritativeRequirements.get(key)?.source
+      ? { source: authoritativeRequirements.get(key)!.source }
+      : authoritativeRequirements.get(key)?.provenance
+        ? { source: authoritativeRequirements.get(key)!.provenance }
+        : {}),
+    ...(authoritativeRequirements.get(key)?.sensitive !== undefined
+      ? { sensitive: authoritativeRequirements.get(key)!.sensitive }
+      : {}),
+    ...(authoritativeRequirements.get(key)?.valueRole
+      ? { valueRole: authoritativeRequirements.get(key)!.valueRole }
+      : {}),
+    ...(authoritativeRequirements.get(key)?.oracleSource
+      ? { oracleSource: authoritativeRequirements.get(key)!.oracleSource }
+      : {}),
+    ...(authoritativeRequirements.get(key)?.dependsOn
+      ? { dependsOn: [...authoritativeRequirements.get(key)!.dependsOn!] }
+      : {}),
+  }));
+}
+
 function buildFailureResult(
   scenario: TestScenario,
   steps: DiscoveryStepResult[],
@@ -1422,6 +2424,7 @@ function buildFailureResult(
   failedReason: string,
   allDiscoveredObjects: DiscoveredObject[]
 ): CaseDiscoveryResult {
+  const requiredData = buildCandidateRequiredData(scenario, planSteps);
   const partialPlan: ExecutionPlan = {
     version: "1.0",
     source: "discovery_generated",
@@ -1432,7 +2435,7 @@ function buildFailureResult(
       caseId: scenario.caseId,
       title: scenario.title
     },
-    requiredData: [],
+    requiredData,
     steps: planSteps,
     notes: [`Discovery failed at step ${failedAtStep}: ${failedReason} - "${failedTarget}"`],
     createdAt: new Date().toISOString()
@@ -1675,6 +2678,25 @@ async function tryAuthGateRecovery(
   console.log(`[auth-gate] Required inputs: ${detection.requiredInputs.join(", ")}`);
   console.log(`[auth-gate] Virtual keyboard: ${detection.hasVirtualKeyboard}, Native input: ${detection.hasNativeInput}`);
 
+  // Classic username/password screens are executable scenario actions. Do
+  // not route them through the customer identification/OTP AuthFlow, which
+  // would duplicate the declared login steps and can misclassify the page.
+  // AuthFlow remains responsible for non-classic gates.
+  if (detection.gateType === "classic_login") {
+    console.log(`[auth-gate] classic_login delegated=true owner=scenario_actions`);
+    return {
+      recovered: false,
+      diagnostics: {
+        detected: true,
+        gateType: detection.gateType,
+        stage: detection.stage,
+        confidence: detection.confidence,
+        requiredInputs: detection.requiredInputs,
+        delegated: true,
+      },
+    };
+  }
+
   if (options.scenario.authIntent === "gate_observation") {
     console.log(`[auth-gate-observation] detected=true action=stop_before_auth`);
     return {
@@ -1692,7 +2714,8 @@ async function tryAuthGateRecovery(
   const resolverConfig: AuthInputResolverConfig = {
     env,
     missingInputBehavior,
-    alias: "defaultClient"
+    alias: "defaultClient",
+    runtimeEntries: options.runtimeEntries,
   };
 
   const resolution = resolveAuthInputs(resolverConfig);
@@ -1777,7 +2800,18 @@ async function tryAuthGateRecovery(
     const hasTestDataClients = testDataJson && typeof testDataJson === "object" && (testDataJson as any).clients && Object.keys((testDataJson as any).clients).length > 0;
 
     if (hasTestDataClients) {
-      globalThisWithTestData.__authFlowTestData = testDataJson as Record<string, unknown>;
+      const configuredData = testDataJson as Record<string, unknown>;
+      const configuredClients = configuredData.clients as Record<string, Record<string, unknown>>;
+      const configuredClient = { ...(configuredClients.defaultClient ?? {}) };
+      if (resolution.data.identificationNumber) configuredClient.identificationNumber = resolution.data.identificationNumber;
+      if (resolution.data.identificationType) configuredClient.identificationType = resolution.data.identificationType;
+      if (resolution.data.otp) configuredClient.otp = resolution.data.otp;
+      if (resolution.data.username) configuredClient.username = resolution.data.username;
+      if (resolution.data.password) configuredClient.password = resolution.data.password;
+      globalThisWithTestData.__authFlowTestData = {
+        ...configuredData,
+        clients: { ...configuredClients, defaultClient: configuredClient },
+      };
     } else {
       globalThisWithTestData.__authFlowTestData = {
         clients: {
@@ -1785,6 +2819,8 @@ async function tryAuthGateRecovery(
             identificationType: resolution.data.identificationType || "cedula",
             identificationNumber: resolution.data.identificationNumber || "",
             otp: resolution.data.otp || "",
+            username: resolution.data.username,
+            password: resolution.data.password,
             expectedPhoneLast4: resolution.data.expectedPhoneLast4
           }
         },
@@ -2157,6 +3193,10 @@ export function shouldPerformBusinessFlowAuthSetup(scenario: TestScenario, parse
   return true;
 }
 
+export function shouldInvokeAuthGateRecovery(authenticationTestDetection: boolean): boolean {
+  return authenticationTestDetection !== true;
+}
+
 export function getLoginStepsToConsume(parsed: { actionTargets: ActionTargetItem[] }): Set<number> {
   const s = new Set<number>();
   for (const at of parsed.actionTargets) {
@@ -2206,11 +3246,20 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
   const steps: DiscoveryStepResult[] = [];
   const allDiscoveredObjects: DiscoveredObject[] = [];
-  const planSteps: ExecutionPlanStep[] = [];
+  let activePlanInputMetadata: Pick<ExecutionPlanStep, "inputIntent" | "requirementRefs" | "controlIdentity"> = {};
+  const planSteps: ExecutionPlanStep[] = new Proxy([] as ExecutionPlanStep[], {
+    get(target, property, receiver) {
+      if (property === "push") {
+        return (...items: ExecutionPlanStep[]) => target.push(...items.map((item) => ({ ...item, ...activePlanInputMetadata })));
+      }
+      return Reflect.get(target, property, receiver);
+    }
+  });
   const executedStepIndices = new Set<number>();
   const executedActionOrders = new Set<number>();
   const skippedActionOrders = new Set<number>();
   const routeProfileSuggestions: RouteProfileSuggestion[] = [];
+  const assertionObservations: AssertionObservationArtifact[] = [];
   const routeProfileLearningConfig: RouteProfileLearningConfig = (options as any)?.aiAssistedDiscovery?.config?.routeProfileLearning ?? {
     enabled: false,
     autoApproveThreshold: 0.90,
@@ -2258,6 +3307,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   let authGateDetectedStage: string | undefined; // Stage at which the auth gate was detected
   let activeContainer: ActiveContainerContext | undefined;
   const resolvedDataKeys = new Set<string>();
+  const runtimeAuthFieldValues = new Map<string, { target: string; value: string }>();
+  const runtimeFieldIdentities = new Map<string, string>();
+  const runtimeFieldControlIdentities = new Map<string, ControlIdentity>();
+  const runtimeFieldLabels = new Map<string, string>();
   let postResumeTargetContext:
     | {
         target: string;
@@ -2272,6 +3325,18 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .trim();
+
+  const resolveRuntimeSubjectIdentity = (assertion: AssertionTargetInput): string | undefined => {
+    const subject = normalizeText(assertion.canonicalAssertion?.subject);
+    if (!subject) return undefined;
+    for (const [key, label] of runtimeFieldLabels.entries()) {
+      const labelText = normalizeText(label);
+      if (!labelText || !(labelText === subject || labelText.includes(subject) || subject.includes(labelText))) continue;
+      const identity = runtimeFieldIdentities.get(key);
+      if (identity) return identity;
+    }
+    return undefined;
+  };
 
   const summarizeSnapshot = (snapshot: PageSnapshot) => {
     const texts = Array.from(new Set(
@@ -2309,10 +3374,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   console.log(`[auth-contract-audit] authIntent=${scenario.authIntent ?? "undefined"} loginGate=${initialRequiresExplicitAuth} credentialSource=${options.env ? "env/test_data" : "none"} variantSupport=${initialAuthProfileInfo.variantSupport} profileSource=${initialAuthProfileInfo.source}`);
   // Defer actual login plan step until after parsing to handle full_authentication business vs auth-test distinction; no push here yet
 
+  const navigationStartedAt = Date.now();
+  console.log(`[initial-navigation] phase=goto_start url=${safePathname(appBaseUrl)}`);
   try {
     await page.goto(appBaseUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
-    await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
-  } catch {
+  } catch (error) {
+    const details = describeInitialNavigationError(error);
+    console.log(`[initial-navigation] phase=goto_error errorType=${details.errorType} errorCode=${details.errorCode ?? "not_observable"} errorMessageSafe=${JSON.stringify(details.errorMessageSafe)}`);
     if (evidenceRec && !(await evidenceRec.captureInitialScreen(page, "full_discovery"))) {
       return {
         version: "1.0",
@@ -2326,8 +3394,20 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         failedReason: "navigation_failed",
       };
     }
-    throw new Error("navigation_failed");
+    throw error;
   }
+  console.log(`[initial-navigation] phase=goto_complete durationMs=${Date.now() - navigationStartedAt} finalPath=${safePathname(page.url(), appBaseUrl)}`);
+
+  const readinessStartedAt = Date.now();
+  console.log(`[initial-readiness] phase=start timeoutMs=5000`);
+  try {
+    await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+  } catch (error) {
+    const details = describeInitialNavigationError(error);
+    console.log(`[initial-readiness] phase=complete ready=false durationMs=${Date.now() - readinessStartedAt} reason=readiness_error errorType=${details.errorType} errorCode=${details.errorCode ?? "not_observable"}`);
+    throw error;
+  }
+  console.log(`[initial-readiness] phase=complete ready=true durationMs=${Date.now() - readinessStartedAt} reason=none`);
 
   if (evidenceRec && !(await evidenceRec.captureInitialScreen(page, "full_discovery"))) {
     return {
@@ -2348,6 +3428,113 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
   const parsed = parseScenarioStepsForDiscovery(scenario);
   const actionOrderIndexByTarget = new WeakMap<ActionTargetItem, number>();
+
+  const canonicalAssertionAfterAction = (actionIndex: number): AssertionTargetInput | undefined =>
+    parsed.assertionTargets
+      .filter((candidate) => candidate.index > actionIndex && candidate.canonicalAssertion)
+      .sort((a, b) => a.index - b.index)[0];
+
+  const captureCanonicalFillObservation = async (input: {
+    actionTarget: ActionTargetItem;
+    before?: AssertionObservationSnapshot;
+    fieldIdentity?: string;
+    controlIdentity?: ControlIdentity;
+    networkEvents?: SafeNetworkEvent[];
+  }): Promise<void> => {
+    const pending = canonicalAssertionAfterAction(input.actionTarget.index);
+    const observationEligible = pending?.canonicalAssertion
+      && (pending.canonicalAssertion.trigger === "leave_field" || pending.canonicalAssertion.oracleType === "row_scoped_value");
+    if (!observationEligible || !input.before) return;
+    const subjectIdentity = resolveRuntimeSubjectIdentity(pending);
+    const currentIdentity = input.fieldIdentity
+      ?? (input.actionTarget.valueKey ? runtimeFieldIdentities.get(input.actionTarget.valueKey) : undefined);
+    const currentControlIdentity = input.controlIdentity
+      ?? (input.actionTarget.valueKey ? runtimeFieldControlIdentities.get(input.actionTarget.valueKey) : undefined);
+    const subjectControlIdentity = subjectIdentity
+      ? [...runtimeFieldControlIdentities.entries()].find(([key]) => runtimeFieldIdentities.get(key) === subjectIdentity)?.[1]
+      : undefined;
+    const sameExecutedSubject = Boolean(
+      (currentIdentity && subjectIdentity && currentIdentity === subjectIdentity)
+      || (currentControlIdentity && subjectControlIdentity && currentControlIdentity.fingerprint === subjectControlIdentity.fingerprint),
+    );
+    if (!sameExecutedSubject) return;
+    const after = await captureAssertionObservationSnapshot(page).catch(() => undefined);
+    if (!after) return;
+    const mutation = diffAssertionObservation(input.before, after, false);
+    const refs = pending.requirementRefs ?? [];
+    const artifact: AssertionObservationArtifact = {
+      version: "1.0",
+      caseId: scenario.caseId,
+      ...(scenario.canonicalScenarioId ? { scenarioId: scenario.canonicalScenarioId } : {}),
+      ...(refs[0] ? { requirementId: refs[0], requirementRefs: [...refs] } : {}),
+      triggerActionIdentity: { action: input.actionTarget.action, stepIndex: input.actionTarget.index, target: input.actionTarget.target },
+      before: input.before,
+      after,
+      mutation,
+      network: {
+        eventCount: input.networkEvents?.length ?? 0,
+        classification: classifyNetworkActivity(input.networkEvents ?? [], input.before.urlPath, after.urlPath),
+      },
+      ...(mutation.validationMutation
+        ? { candidate: { oracleType: "runtime_state", targetIdentity: subjectIdentity ?? refs[0], confidence: 0.9, source: "runtime_observation" } }
+        : {}),
+      createdAt: new Date().toISOString(),
+    };
+    assertionObservations.push(artifact);
+    try {
+      await writeAssertionObservationArtifact(evidenceDir, artifact);
+    } catch {
+      // Diagnostic observation must not change discovery status.
+    }
+    console.log(
+      `[canonical-runtime-observation] scenarioStepIndex=${pending.index} requirementRefs=${refs.length} `
+        + `intent=${pending.canonicalAssertion.intent} subjectLineage=${subjectIdentity ? "available" : "unavailable"} `
+        + `validationMutation=${mutation.validationMutation} networkEvents=${input.networkEvents?.length ?? 0} associatedError=${after.validationNodes.length > 0}`,
+    );
+  };
+
+  const recordRuntimeFillObservation = async (input: {
+    actionTarget: ActionTargetItem;
+    observation: RuntimeFillObservation;
+  }): Promise<void> => {
+    const { observation } = input;
+    if (!observation.before || !observation.after || !observation.mutation) return;
+    const artifact: AssertionObservationArtifact = {
+      version: "1.0",
+      caseId: scenario.caseId,
+      triggerActionIdentity: {
+        action: input.actionTarget.action,
+        stepIndex: input.actionTarget.index,
+        target: input.actionTarget.target,
+      },
+      before: observation.before,
+      after: observation.after,
+      mutation: observation.mutation,
+      network: {
+        eventCount: observation.networkEvents.length,
+        classification: classifyNetworkActivity(
+          observation.networkEvents,
+          observation.before.urlPath,
+          observation.after.urlPath,
+        ),
+      },
+      ...(observation.mutation.changed
+        ? { candidate: { oracleType: "runtime_state", confidence: 0.8, source: "runtime_observation" } }
+        : {}),
+      createdAt: new Date().toISOString(),
+    };
+    assertionObservations.push(artifact);
+    try {
+      await writeAssertionObservationArtifact(evidenceDir, artifact);
+    } catch {
+      // Diagnostic observation must not change discovery status.
+    }
+    console.log(
+      `[runtime-fill-observation] stepIndex=${input.actionTarget.index} `
+        + `mutation=${observation.mutation.changed} networkEvents=${observation.networkEvents.length} `
+        + `candidate=${Boolean(artifact.candidate)}`,
+    );
+  };
 
   // ── Runtime sanitizer: remove action/assertion steps using fields from wrong target screens ──
   // Runs even on rerun artifacts — protects against cached scenarios with old field assignments.
@@ -2520,7 +3707,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   if (routeProfileWithPaths?.targetPaths) {
     console.log(`[detail-runtime] targetPathMatches found=${Object.keys(routeProfileWithPaths.targetPaths).length}`);
 
-    for (const actionTarget of parsed.actionTargets) {
+  for (const actionTarget of parsed.actionTargets) {
       const actionLabel = actionTarget.target.toLowerCase().trim();
 
       for (const [pathKey, tp] of Object.entries(routeProfileWithPaths.targetPaths)) {
@@ -2942,6 +4129,18 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   orderedItems.sort((a, b) => a.index - b.index || 0);
 
   let currentSnapshot = initialScan.snapshot;
+  const reapplyResolvedRuntimeAuthFields = async (): Promise<void> => {
+    for (const field of runtimeAuthFieldValues.values()) {
+      try {
+        const resolution = await resolveFillTarget(page, currentSnapshot, field.target, activeContainer);
+        if (resolution.status === "resolved" && resolution.locator) {
+          await resolution.locator.fill(field.value);
+        }
+      } catch {
+        // A field may no longer belong to the current screen after a submit.
+      }
+    }
+  };
   const evaluateAndApplyEarlyCompletionAfterAction = async (
     currentIndex: number,
     currentTarget: string,
@@ -3201,7 +4400,17 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       })()
     }));
 
-    const earlyCompletion = evaluateEarlyCompletion(currentSnapshot, parsed.assertionTargets, remainingActionTargets, (options as any).appConfig);
+    const earlyCompletion = evaluateEarlyCompletion(
+      currentSnapshot,
+      parsed.assertionTargets,
+      remainingActionTargets,
+      (options as any).appConfig,
+      {
+        currentStepIndex: currentIndex,
+        triggerStepIndex: finalProductClickStepIndex,
+        triggerExecuted: finalProductClickStepIndex != null && currentIndex >= finalProductClickStepIndex,
+      }
+    );
 
     // CRITICAL: Extract critical assertions from targetPath metadata for detail scenarios
     let criticalAssertions: { target?: string; detailSections?: string[]; actionButtons?: string[] } | undefined;
@@ -3628,11 +4837,18 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   }
 
   for (const orderedItem of orderedItems) {
+    const sourceMetadata = orderedItem.type === "action"
+      ? orderedItem.actionTarget
+      : orderedItem.executableStep;
+    activePlanInputMetadata = sourceMetadata ? {
+      ...projectScenarioInputMetadata(sourceMetadata),
+      ...(sourceMetadata.controlIdentity ? { controlIdentity: sourceMetadata.controlIdentity } : {}),
+    } : {};
     const currentActionOrder = orderedItem.type === "action" && orderedItem.actionTarget
       ? actionOrderIndexByTarget.get(orderedItem.actionTarget)
       : undefined;
 
-    if (!authGateState) {
+    if (!authGateState && shouldInvokeAuthGateRecovery(isAuthTest)) {
       const proactiveAuthCheck = await tryAuthGateRecovery(
         page,
         currentSnapshot,
@@ -3953,15 +5169,33 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       let resolutionResults: ReturnType<typeof resolveAssertionTargets> | undefined;
       let retryCount = 0;
       let lastFailureReason: string | undefined;
-      
-      while (retryCount < ASSERTION_RETRY_COUNT) {
-        const assertionTargetInputs: AssertionTargetInput[] = [{
+      const assertionTargetInputs: AssertionTargetInput[] = [{
+        index: es.stepIndex,
+        action: es.originalText,
+        target: es.target ?? "",
+        source: "action",
+        ...(es.requirementRefs ? { requirementRefs: [...es.requirementRefs] } : {}),
+        ...(es.canonicalAssertion ? { canonicalAssertion: es.canonicalAssertion } : {}),
+        ...(es.canonicalAssertion ? { subjectControlIdentity: resolveRuntimeSubjectIdentity({
           index: es.stepIndex,
           action: es.originalText,
           target: es.target ?? "",
-          source: "action"
-        }];
+          source: "action",
+          ...(es.requirementRefs ? { requirementRefs: [...es.requirementRefs] } : {}),
+          canonicalAssertion: es.canonicalAssertion,
+        }) } : {}),
+        ...(es.entityScope ? { entityScope: es.entityScope } : {}),
+        ...(es.rowScope !== undefined ? { rowScope: es.rowScope } : {}),
+        ...(es.rowRelation ? { rowRelation: es.rowRelation } : {}),
+        ...(es.expectedValueKey ? { expectedValueKey: es.expectedValueKey } : {}),
+        ...(es.triggerStepIndex !== undefined ? { triggerStepIndex: es.triggerStepIndex } : {}),
+      }];
+      const rowScopedInput = assertionTargetInputs.find((input) => input.rowScope !== undefined && input.expectedValueKey);
+      const containmentInput = assertionTargetInputs.find((input) => input.canonicalAssertion?.oracleType === "entity_within_container");
+      const structuralRowInput = assertionTargetInputs.find((input) => input.canonicalAssertion?.oracleType === "structural_row_count");
+      const exactStructuredAssertion = Boolean(rowScopedInput || containmentInput || structuralRowInput);
 
+      while (retryCount < ASSERTION_RETRY_COUNT) {
         const executedActionsForAssertions = steps
           .filter((step) =>
             step.status === "found" ||
@@ -3974,16 +5208,63 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             status: "found" as const
           }));
 
-        resolutionResults = resolveAssertionTargets(snapshotForAssertion, assertionTargetInputs, {
-          executedActions: executedActionsForAssertions,
-          appConfig: (options as any).appConfig
-        });
+        if (containmentInput) {
+          const keys = [...containmentInput.target.matchAll(/\[([^\]]+)\]/g)].map((match) => match[1].trim()).filter(Boolean);
+          const values = keys.map((key) => {
+            const entry = (options.runtimeEntries ?? []).find((candidate) => candidate.key.trim().toLowerCase() === key.toLowerCase());
+            const resolved = entry ? resolveDataKey(key, {
+              testData: testData ?? {},
+              env: Object.fromEntries(Object.entries(options.env ?? {}).filter(([, value]) => typeof value === "string")) as Record<string, string>,
+              missingInputBehavior: options.missingInputBehavior ?? "fail",
+              autoGenerateConfig: { enabled: false, generateSensitiveData: false, profile: "qa" },
+              runtimeEntries: options.runtimeEntries,
+            }) : undefined;
+            return { entry, resolved };
+          });
+          resolutionResults = [await resolveEntityWithinContainerAssertion(page, containmentInput, {
+            entityValue: values[0]?.resolved?.status === "resolved" ? values[0].resolved.value : undefined,
+            containerValue: values[1]?.resolved?.status === "resolved" ? values[1].resolved.value : undefined,
+            entitySource: values[0]?.resolved?.source,
+            containerSource: values[1]?.resolved?.source,
+            entityVerified: values[0]?.entry ? values[0].entry.generated !== true && values[0].entry.verified !== false : undefined,
+            containerVerified: values[1]?.entry ? values[1].entry.generated !== true && values[1].entry.verified !== false : undefined,
+          })];
+        } else if (rowScopedInput) {
+          const expectedEntry = (options.runtimeEntries ?? []).find((entry) =>
+            entry.key.trim().toLowerCase() === rowScopedInput.expectedValueKey!.trim().toLowerCase(),
+          );
+          const expectedResolution = expectedEntry
+            ? resolveDataKey(rowScopedInput.expectedValueKey!, {
+                testData: testData ?? {},
+                env: Object.fromEntries(Object.entries(options.env ?? {}).filter(([, value]) => typeof value === "string")) as Record<string, string>,
+                missingInputBehavior: options.missingInputBehavior ?? "fail",
+                autoGenerateConfig: { enabled: false, generateSensitiveData: false, profile: "qa" },
+                runtimeEntries: options.runtimeEntries,
+              })
+            : undefined;
+          resolutionResults = [await resolveRowScopedAssertion(page, rowScopedInput, {
+            expectedValue: expectedResolution?.status === "resolved" ? expectedResolution.value : undefined,
+            expectedValueSource: expectedResolution?.source,
+            expectedValueVerified: expectedEntry
+              ? expectedEntry.verified !== undefined
+                ? expectedEntry.verified !== false && expectedEntry.generated !== true
+                : expectedEntry.generated !== true && !/synthetic|generated|suggested|demo|default|autogenerated/i.test(expectedEntry.source ?? "")
+              : undefined,
+          })];
+        } else if (structuralRowInput) {
+          resolutionResults = [await resolveStructuralRowAssertion(page, structuralRowInput)];
+        } else {
+          resolutionResults = resolveAssertionTargets(snapshotForAssertion, assertionTargetInputs, {
+            executedActions: executedActionsForAssertions,
+            appConfig: (options as any).appConfig
+          });
+        }
         
         // Check if any assertion passed
         const anyPassed = resolutionResults.some(r => r.status === "passed" || r.status === "satisfied_by_children" || r.status === "satisfied_by_previous_assertion");
         
         // Semantic assertion pre-check: resolve by DOM signal before falling back to text matching
-        if (!anyPassed && resolutionResults.length > 0) {
+        if (!anyPassed && resolutionResults.length > 0 && !exactStructuredAssertion) {
           for (const r of resolutionResults) {
             if (r.status === "failed" || r.status === "needs_assertion_resolution") {
               try {
@@ -4036,6 +5317,22 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       }
       
       for (const assertionResult of resolutionResults) {
+        const runtimeAssertionInput = assertionTargetInputs.find((input) => input.index === es.stepIndex);
+        const canonicalRuntimeBinding = runtimeAssertionInput?.canonicalAssertion
+          ? {
+              received: true,
+              requirementRefs: runtimeAssertionInput.requirementRefs ?? [],
+              intent: runtimeAssertionInput.canonicalAssertion.intent,
+              subjectControlIdentity: runtimeAssertionInput.subjectControlIdentity,
+            }
+          : undefined;
+        if (canonicalRuntimeBinding) {
+          console.log(
+            `[canonical-runtime-binding] scenarioStepIndex=${es.stepIndex} received=true `
+              + `requirementRefs=${canonicalRuntimeBinding.requirementRefs.length} `
+              + `intent=${canonicalRuntimeBinding.intent} subjectLineage=${canonicalRuntimeBinding.subjectControlIdentity ? "available" : "unavailable"}`,
+          );
+        }
         const mappedStatus: DiscoveryStepResult["status"] =
           assertionResult.status === "passed"
             ? "found"
@@ -4092,6 +5389,25 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           };
         }
 
+        const precedingActionIndex = typeof es.triggerStepIndex === "number"
+          ? es.triggerStepIndex
+          : Math.max(...[...executedStepIndices].filter((index) => index < es.stepIndex), -1);
+        const runtimeFillObservation = [...assertionObservations].reverse().find((observation) =>
+          observation.triggerActionIdentity.stepIndex === precedingActionIndex
+            && observation.mutation.changed
+            && (observation.network.eventCount > 0 || observation.mutation.navigationMutation),
+        );
+        const runtimeObservationFound = assertionResult.reason === "row_scoped_requires_runtime_observation"
+          && Boolean(runtimeFillObservation);
+        if (runtimeObservationFound) {
+          assertionDiag.runtimeObservation = {
+            observed: true,
+            triggerStepIndex: precedingActionIndex,
+            mutation: runtimeFillObservation!.mutation,
+            networkEventCount: runtimeFillObservation!.network.eventCount,
+          };
+        }
+
         steps.push({
           index: es.stepIndex,
           action: es.originalText,
@@ -4110,8 +5426,33 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           matchedTokens: assertionResult.matchedTokens,
           structuralSignals: assertionResult.structuralSignals,
           childAssertionsUsed: assertionResult.childAssertionsUsed,
-          assertionDiagnostics: assertionDiag
+          assertionDiagnostics: {
+            ...assertionDiag,
+            ...(canonicalRuntimeBinding ? { canonicalRuntimeBinding } : {}),
+          },
+          ...(runtimeAssertionInput?.requirementRefs?.length
+            ? { canonicalRequirementRefs: runtimeAssertionInput.requirementRefs.map((requirementId) => ({ requirementId })) }
+            : {}),
+          ...(runtimeAssertionInput?.canonicalAssertion
+            ? { canonicalAssertion: runtimeAssertionInput.canonicalAssertion } as any
+            : {})
         });
+
+        if (isPendingOracleAuthority({ reason: assertionResult.reason })) {
+          const pendingOracleStep = steps[steps.length - 1] as any;
+          pendingOracleStep.oracleStatus = "pending_authority";
+          pendingOracleStep.validationBlocker = true;
+          pendingOracleStep.pendingDiscovery = true;
+          pendingOracleStep.functionalRequired = false;
+          pendingOracleStep.assertionImportance = "contextual";
+          pendingOracleStep.recoveryMetadata = {
+            ...(pendingOracleStep.recoveryMetadata ?? {}),
+            blocking: false,
+            reason: "oracle_authority_pending",
+          };
+          console.log(`[oracle-authority] status=pending_authority validationBlocker=true executionBlocker=false key=${runtimeAssertionInput?.expectedValueKey ?? "unresolved"}`);
+          continue;
+        }
 
         if (assertionResult.status === "passed" && assertionResult.classification === "literal_observable") {
           planSteps.push({
@@ -4124,12 +5465,14 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         } else if (assertionResult.status === "failed" || assertionResult.status === "needs_assertion_resolution") {
           // ── LOCAL ASSERTION RECOVERY ──
           // Try to recover failed assertion using accent-insensitive matching, aliases, plural/singular variants, etc.
-          const recoveryResult = attemptAssertionRecovery(currentSnapshot, assertionResult.assertionText, {
-            routeProfile,
-            appConfig: (options as any).appConfig,
-            scenarioTitle: scenario.title,
-            expectedResult: (scenario as any).expectedResult ?? "",
-          });
+          const recoveryResult = exactStructuredAssertion
+            ? { recovered: false, decision: "not_recovered" as const, matchedText: "", confidence: 0, recoveryAttempts: [] }
+            : attemptAssertionRecovery(currentSnapshot, assertionResult.assertionText, {
+                routeProfile,
+                appConfig: (options as any).appConfig,
+                scenarioTitle: scenario.title,
+                expectedResult: (scenario as any).expectedResult ?? "",
+              });
 
             const canonicalMetadata = getCanonicalAssertionMetadata(scenario, es.stepIndex);
             const observableAuthority = hasObservableAssertionAuthority({
@@ -4208,7 +5551,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
              const runtimeFound =
               assertionResult.matchedText != null ||
-              (assertionResult.matchedTokens?.length ?? 0) > 0;
+              (assertionResult.matchedTokens?.length ?? 0) > 0 ||
+              runtimeObservationFound;
 
              const functionalRequired =
                (observableAuthority || authGateAuthority) && (canonicalMetadata.required || isBlockingRequirement)
@@ -4220,10 +5564,34 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
              console.log(`[assertion-contract] target="${assertionResult.assertionText}" blocking=${isBlockingRequirement}`);
              console.log(`[assertion-backing] target="${assertionResult.assertionText}" backed=${hasObservableBacking} source=${hasObservableBacking ? "structural" : "none"}`);
              console.log(`[assertion-requiredness] target="${assertionResult.assertionText}" functionalRequired=${functionalRequired} observableAuthority=${observableAuthority} runtimeBacked=${hasObservableBacking} canonical=${canonicalMetadata.refs.length > 0}`);
-            console.log(`[assertion-runtime] target="${assertionResult.assertionText}" found=${runtimeFound}`);
+            console.log(`[assertion-runtime] target="${assertionResult.assertionText}" found=${runtimeFound} observationBacked=${runtimeObservationFound}`);
 
             if (runtimeFound) {
               console.log(`[assertion-decision] target="${assertionResult.assertionText}" result=passed runtimeFound=true`);
+              const currentAssertion = steps[steps.length - 1] as any;
+              if (runtimeObservationFound && currentAssertion) {
+                currentAssertion.status = "found";
+                currentAssertion.assertionStatus = "passed";
+                currentAssertion.error = undefined;
+                currentAssertion.pendingDiscovery = false;
+                currentAssertion.runtimeBacked = true;
+                currentAssertion.recoveryStatus = "recovered";
+                currentAssertion.recoveredBy = "runtime_observation";
+                currentAssertion.recoveryMetadata = {
+                  ...(currentAssertion.recoveryMetadata ?? {}),
+                  blocking: false,
+                  recoveredBecause: "row_scoped_runtime_observation",
+                  triggerStepIndex: precedingActionIndex,
+                };
+              }
+              const reconciled = reconcileAssertionFailuresAfterPass(steps, {
+                index: es.stepIndex,
+                action: "assert",
+                status: "found",
+                assertionStatus: "passed",
+                targetText: assertionResult.assertionText,
+              });
+              console.log(`[assertion-final-pass-reconciliation] stepIndex=${es.stepIndex} matchedFailures=${reconciled} reconciled=${reconciled}`);
             } else if (isBlockingRequirement && hasObservableBacking) {
               console.log(`[assertion-decision] target="${assertionResult.assertionText}" result=failed blocking=true backed=true runtimeFound=false`);
              } else if (functionalRequired && !hasObservableBacking) {
@@ -4621,7 +5989,86 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       continue;
     }
 
-    if (normalizedActionTarget.valueSource === "test_data" && normalizedActionTarget.valueKey) {
+    // Conditional actions are evaluated at runtime. They must never be routed
+    // through assertion/noop handling or through unconditional dialog recovery.
+    const conditionalAction = normalizedActionTarget.conditionalAction;
+    if (conditionalAction) {
+      const conditionResolution = await resolveActionTarget(page, currentSnapshot, conditionalAction.condition.target, { routeProfile });
+      const conditionVisible = conditionResolution.status === "resolved"
+        && Boolean(conditionResolution.locator)
+        && await conditionResolution.locator!.isVisible().catch(() => false);
+      if (!conditionVisible) {
+        console.log(`[conditional-action] stepIndex=${orderedItem.index} operation=${conditionalAction.operation} status=conditional_skipped conditionType=${conditionalAction.condition.type}`);
+        steps.push({
+          index: orderedItem.index,
+          action: actionTarget.action,
+          status: "skipped",
+          targetText: normalizedActionTarget.target,
+          snapshotUrl: page.url(),
+          snapshotTitle: await page.title().catch(() => ""),
+          elementsFound: 0,
+          error: "conditional_skipped"
+        } as any);
+        planSteps.push({
+          index: planSteps.length + 1,
+          action: conditionalAction.operation,
+          description: actionTarget.action,
+          target: { strategy: "text", value: conditionalAction.actionTarget, exact: false },
+          optional: true,
+          conditionalAction
+        });
+        continue;
+      }
+
+      const actionResolution = normalizeText(conditionalAction.actionTarget) === normalizeText(conditionalAction.condition.target)
+        ? conditionResolution
+        : await resolveActionTarget(page, currentSnapshot, conditionalAction.actionTarget, { routeProfile });
+      if (actionResolution.status !== "resolved" || !actionResolution.locator) {
+        throw new Error(`[conditional-action] action_target_not_resolved stepIndex=${orderedItem.index}`);
+      }
+      if (conditionalAction.operation === "select") {
+        await actionResolution.locator.click();
+      } else {
+        await clickResolvedTarget(actionResolution.locator, false);
+      }
+      await page.waitForTimeout(250);
+      const stillIntercepting = await hasBlockingOverlay(page);
+      console.log(`[conditional-action] stepIndex=${orderedItem.index} operation=${conditionalAction.operation} status=executed overlayCleared=${!stillIntercepting}`);
+      if (stillIntercepting) {
+        throw new Error(`[conditional-action] blocker_still_intercepts stepIndex=${orderedItem.index}`);
+      }
+      const conditionalScan = await scanAndCollectObjects(page, orderedItem.index, evidenceDir);
+      currentSnapshot = conditionalScan.snapshot;
+      allDiscoveredObjects.push(...conditionalScan.objects);
+      executedStepIndices.add(orderedItem.index);
+      steps.push({
+        index: orderedItem.index,
+        action: actionTarget.action,
+        status: "found",
+        targetText: normalizedActionTarget.target,
+        snapshotUrl: conditionalScan.url,
+        snapshotTitle: conditionalScan.title,
+        elementsFound: conditionalScan.elementsCount,
+        evidencePath: path.join(evidenceDir, `step-${orderedItem.index}-snapshot.json`)
+      });
+      planSteps.push({
+        index: planSteps.length + 1,
+        action: conditionalAction.operation,
+        description: actionTarget.action,
+        target: { strategy: "text", value: conditionalAction.actionTarget, exact: false },
+        optional: true,
+        conditionalAction
+      });
+      continue;
+    }
+
+    if (await dismissObstructingDialog(page, normalizedActionTarget.target)) {
+      const dialogRecoveryScan = await scanAndCollectObjects(page, orderedItem.index, evidenceDir);
+      currentSnapshot = dialogRecoveryScan.snapshot;
+      allDiscoveredObjects.push(...dialogRecoveryScan.objects);
+    }
+
+    if (isFillActionTarget(normalizedActionTarget)) {
       console.log(`[discovery:case] Resolving fill target: ${normalizedActionTarget.target}`);
       
       // Build auto-generate config from env/config
@@ -4671,6 +6118,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         context: scenario.title,
         overrides,
         suggestedData,
+        runtimeEntries: options.runtimeEntries,
       });
       
       console.log(formatDataKeyForLog(dataResolution));
@@ -4731,6 +6179,14 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       }
 
       const fillValue = dataResolution.value!;
+      if (normalizedActionTarget.valueKey
+        && normalizedActionTarget.valueKey.toLowerCase().startsWith("auth.")
+        && ["dataOverrides", "explicit_runtime_input", "user_provided_qa_credentials"].includes(dataResolution.source ?? "")) {
+        runtimeAuthFieldValues.set(normalizedActionTarget.valueKey, {
+          target: normalizedActionTarget.target,
+          value: fillValue,
+        });
+      }
 
       const fillStability = await waitForStablePageState(page, { timeoutMs: 10000, pollMs: 500, stableForMs: 800 });
       if (fillStability.waited) {
@@ -4739,7 +6195,11 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         currentSnapshot = scan.snapshot;
       }
 
-      const resolution = await resolveFillTarget(page, currentSnapshot, normalizedActionTarget.target, activeContainer);
+      const resolution = await resolveFillTarget(page, currentSnapshot, normalizedActionTarget.target, activeContainer, {
+        rowScope: normalizedActionTarget.rowScope,
+        entityScope: normalizedActionTarget.entityScope,
+        associatedField: normalizedActionTarget.associatedField,
+      });
 
       if (resolution.status === "not_found") {
         if (actionTarget.isOptional) {
@@ -4757,7 +6217,20 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
 
-        const authRecovery = await tryAuthGateRecovery(page, currentSnapshot, options, actionTarget.target);
+        // A resolved selection trigger with a failed causal surface is a
+        // functional selection failure, not an authentication-gate signal.
+        // Do not let generic auth recovery convert it into a false pass.
+        const selectionFailureReason = resolution.selectionDiagnostics?.failureReason;
+        const authRecovery = selectionFailureReason
+          ? {
+              recovered: false,
+              diagnostics: { detected: false, reason: selectionFailureReason },
+              error: `Selection surface resolution failed: ${selectionFailureReason}`,
+            }
+          : await tryAuthGateRecovery(page, currentSnapshot, options, actionTarget.target);
+        if (selectionFailureReason) {
+          console.log(`[discovery:case] Auth gate recovery skipped for selection failure reason=${selectionFailureReason}`);
+        }
         if (authRecovery.diagnostics?.detected === true) {
           authGateDetectedDuringDiscovery = true;
           authGateDetectedAtStepIndex = actionTarget.index;
@@ -4792,11 +6265,22 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           currentSnapshot = retryScan.snapshot;
           allDiscoveredObjects.push(...retryScan.objects);
 
-          const retryResolution = await resolveFillTarget(page, currentSnapshot, actionTarget.target, activeContainer);
+          const retryResolution = await resolveFillTarget(page, currentSnapshot, actionTarget.target, activeContainer, {
+            rowScope: actionTarget.rowScope,
+            entityScope: actionTarget.entityScope,
+            associatedField: actionTarget.associatedField,
+          });
           if (retryResolution.status === "resolved" && retryResolution.locator) {
             console.log(`[discovery:case] Filling target after auth recovery: ${actionTarget.target}`);
             try {
               await retryResolution.locator.fill(fillValue);
+              const controlIdentity = await captureRuntimeControlIdentity(retryResolution.locator);
+              const identity = await captureRuntimeFieldIdentity(retryResolution.locator);
+              if (normalizedActionTarget.valueKey) {
+                runtimeFieldLabels.set(normalizedActionTarget.valueKey, normalizedActionTarget.target);
+                if (identity) runtimeFieldIdentities.set(normalizedActionTarget.valueKey, identity);
+                if (controlIdentity) runtimeFieldControlIdentities.set(normalizedActionTarget.valueKey, controlIdentity);
+              }
             } catch (err) {
               const errorMsg = `Fill failed after auth recovery: ${err instanceof Error ? err.message : String(err)}`;
               steps.push({
@@ -5051,9 +6535,39 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       }
 
       console.log(`[discovery:case] Filling target: ${actionTarget.target} (strategy: ${resolution.locatorStrategy}, confidence: ${resolution.confidence.toFixed(2)})`);
+      const fillObservationCandidate = canonicalAssertionAfterAction(actionTarget.index);
+      const observeRuntimeFill = actionTarget.rowScope !== undefined
+        && Boolean(fillObservationCandidate?.canonicalAssertion
+          && (fillObservationCandidate.canonicalAssertion.trigger === "leave_field"
+            || fillObservationCandidate.canonicalAssertion.oracleType === "row_scoped_value"));
+      const fillObservationBefore = observeRuntimeFill
+        ? await captureAssertionObservationSnapshot(page).catch(() => undefined)
+        : undefined;
 
       try {
-        await resolution.locator.fill(fillValue);
+        const runtimeFillObservation = await fillAndObserveRuntimeInput({
+          page,
+          locator: resolution.locator,
+          value: fillValue,
+          stepIndex: actionTarget.index,
+          observe: observeRuntimeFill,
+        });
+        const fillControlIdentity = await captureRuntimeControlIdentity(resolution.locator);
+        const fillIdentity = await captureRuntimeFieldIdentity(resolution.locator);
+        if (normalizedActionTarget.valueKey) {
+          runtimeFieldLabels.set(normalizedActionTarget.valueKey, normalizedActionTarget.target);
+          if (fillIdentity) runtimeFieldIdentities.set(normalizedActionTarget.valueKey, fillIdentity);
+          if (fillControlIdentity) runtimeFieldControlIdentities.set(normalizedActionTarget.valueKey, fillControlIdentity);
+        }
+        await captureCanonicalFillObservation({
+          actionTarget,
+          before: runtimeFillObservation.before ?? fillObservationBefore,
+          fieldIdentity: fillIdentity,
+          controlIdentity: fillControlIdentity,
+          networkEvents: runtimeFillObservation.networkEvents,
+        });
+        await recordRuntimeFillObservation({ actionTarget, observation: runtimeFillObservation });
+        await reapplyResolvedRuntimeAuthFields();
       } catch (err) {
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
@@ -5127,7 +6641,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         elementsFound: scan.elementsCount,
         evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
         semanticRole: actionTarget.semanticRole,
-        relationContext: actionTarget.relationContext
+        relationContext: actionTarget.relationContext,
+        controlIdentity: normalizedActionTarget.valueKey
+          ? runtimeFieldControlIdentities.get(normalizedActionTarget.valueKey)
+          : undefined
       });
 
       planSteps.push({
@@ -5152,7 +6669,11 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         currentSnapshot = scan.snapshot;
       }
 
-      const resolution = await resolveFillTarget(page, currentSnapshot, actionTarget.target, activeContainer);
+      const resolution = await resolveFillTarget(page, currentSnapshot, actionTarget.target, activeContainer, {
+        rowScope: actionTarget.rowScope,
+        entityScope: actionTarget.entityScope,
+        associatedField: actionTarget.associatedField,
+      });
 
       if (resolution.status === "not_found") {
         if (actionTarget.isOptional) {
@@ -5360,9 +6881,31 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       }
 
       console.log(`[discovery:case] Filling target: ${actionTarget.target} (strategy: ${resolution.locatorStrategy}, confidence: ${resolution.confidence.toFixed(2)})`);
+      const literalFillObservationCandidate = canonicalAssertionAfterAction(actionTarget.index);
+      const observeLiteralRuntimeFill = actionTarget.rowScope !== undefined
+        && Boolean(literalFillObservationCandidate?.canonicalAssertion
+          && (literalFillObservationCandidate.canonicalAssertion.trigger === "leave_field"
+            || literalFillObservationCandidate.canonicalAssertion.oracleType === "row_scoped_value"));
+      const literalFillObservationBefore = observeLiteralRuntimeFill
+        ? await captureAssertionObservationSnapshot(page).catch(() => undefined)
+        : undefined;
 
       try {
-        await resolution.locator.fill(actionTarget.value);
+        const runtimeFillObservation = await fillAndObserveRuntimeInput({
+          page,
+          locator: resolution.locator,
+          value: actionTarget.value,
+          stepIndex: actionTarget.index,
+          observe: observeLiteralRuntimeFill,
+        });
+        await captureCanonicalFillObservation({
+          actionTarget,
+          before: runtimeFillObservation.before ?? literalFillObservationBefore,
+          fieldIdentity: await captureRuntimeFieldIdentity(resolution.locator),
+          controlIdentity: await captureRuntimeControlIdentity(resolution.locator),
+          networkEvents: runtimeFillObservation.networkEvents,
+        });
+        await recordRuntimeFillObservation({ actionTarget, observation: runtimeFillObservation });
       } catch (err) {
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
@@ -5663,6 +7206,39 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     // Get previous target from relation context or route history
     const previousTarget = actionTarget.relationContext || routeHistory[routeHistory.length - 1];
 
+    // Selection steps can be backed by runtime data just like fills. Resolve
+    // the value through the same provenance-aware resolver before opening a
+    // row-scoped editor; no option is inferred from position or demo data.
+    let selectionValue: string | undefined;
+    if (actionTarget.actionType === "action_select" && actionTarget.valueKey) {
+      const runtimeEnv = options.env ?? {};
+      const envVars: Record<string, string> = {};
+      for (const [key, value] of Object.entries(runtimeEnv)) {
+        if (typeof value === "string") envVars[key] = value;
+      }
+      const selectionResolution = resolveDataKey(actionTarget.valueKey, {
+        testData: testData ?? {},
+        testDataAliases: (runtimeEnv.APP_TEST_DATA_ALIASES_JSON as Record<string, string[]>) ?? {},
+        env: envVars,
+        missingInputBehavior: options.missingInputBehavior ?? "fail",
+        autoGenerateConfig: {
+          enabled: runtimeEnv.AUTO_GENERATE_TEST_DATA === true || runtimeEnv.AUTO_GENERATE_TEST_DATA === "true",
+          generateSensitiveData: runtimeEnv.AUTO_GENERATE_SENSITIVE_DATA === true || runtimeEnv.AUTO_GENERATE_SENSITIVE_DATA === "true",
+          profile: (runtimeEnv.APP_TEST_DATA_PROFILE as "demo" | "qa" | "staging" | "production_like") || "qa",
+        },
+        field: actionTarget.target,
+        context: scenario.title,
+        overrides: (options as any).scenarioDataOverrides as Record<string, string> | undefined,
+        suggestedData: (options as any).scenarioSuggestedData as Record<string, string> | undefined,
+        runtimeEntries: options.runtimeEntries,
+      });
+      console.log(formatDataKeyForLog(selectionResolution));
+      if (selectionResolution.status === "resolved") {
+        selectionValue = selectionResolution.value;
+        resolvedDataKeys.add(actionTarget.valueKey);
+      }
+    }
+
     const postResumeTargetNorm = normalizeText(actionTarget.target);
     const postResumeCandidates = shouldUsePostResumeSnapshot
       ? currentSnapshot.elements
@@ -5703,6 +7279,11 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     let resolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target, {
       semanticRole: actionTarget.semanticRole,
       relationContext: actionTarget.relationContext,
+      selectionField: actionTarget.selectionField,
+      selectionValue,
+      rowScope: actionTarget.rowScope,
+      entityScope: actionTarget.entityScope,
+      associatedField: actionTarget.associatedField,
       activeContainer,
       routeProfile,
       actionText: actionTarget.action,
@@ -5739,7 +7320,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     let finalLocator = resolution.locator;
     let promotedToAncestor = false;
 
-    if (resolution.locator && isSelectionLikeTarget(actionTarget.target, { action: actionTarget.action, actionType: actionTarget.actionType, snapshot: currentSnapshot })) {
+    if (resolution.locator && !resolution.selectionApplied && isSelectionLikeTarget(actionTarget.target, { action: actionTarget.action, actionType: actionTarget.actionType, snapshot: currentSnapshot })) {
       console.log(`[discovery:case] Selection-like target detected: action=${actionTarget.action} target="${actionTarget.target}"`);
       const promotion = await promoteToClickableAncestor(resolution.locator);
       if (promotion.promoted) {
@@ -5809,7 +7390,17 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       }
     }
 
-    const earlyCompletion = evaluateEarlyCompletion(currentSnapshot, parsed.assertionTargets, parsed.actionTargets.filter(a => a.index > actionTarget.index), (options as any).appConfig);
+    const earlyCompletion = evaluateEarlyCompletion(
+      currentSnapshot,
+      parsed.assertionTargets,
+      parsed.actionTargets.filter(a => a.index > actionTarget.index),
+      (options as any).appConfig,
+      {
+        currentStepIndex: actionTarget.index,
+        triggerStepIndex: finalProductClickStepIndex,
+        triggerExecuted: false,
+      }
+    );
     if (needsEarlyCompletionCheck && earlyCompletion.pendingAssertions.length > 0) {
       console.log(`[discovery:case] Early completion not satisfied at step ${actionTarget.index}. Pending: [${earlyCompletion.pendingAssertions.map(a => `"${a}"`).join(", ")}]. Satisfied: [${earlyCompletion.satisfiedAssertions.map(a => `"${a}"`).join(", ")}].`);
     }
@@ -6060,7 +7651,22 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
 
-        const authRecovery = await tryAuthGateRecovery(page, currentSnapshot, options, actionTarget.target);
+        // A resolved selection trigger with a failed causal surface is a
+        // functional selection failure, not an authentication-gate signal.
+        // Keep the original selection diagnostic intact and do not retry the
+        // trigger through the generic auth path, which could turn a failed
+        // selection into a false-positive click.
+        const selectionFailureReason = resolution.selectionDiagnostics?.failureReason;
+        const authRecovery = selectionFailureReason
+          ? {
+              recovered: false,
+              diagnostics: { detected: false, reason: selectionFailureReason },
+              error: `Selection surface resolution failed: ${selectionFailureReason}`,
+            }
+          : await tryAuthGateRecovery(page, currentSnapshot, options, actionTarget.target);
+        if (selectionFailureReason) {
+          console.log(`[discovery:case] Auth gate recovery skipped for selection failure reason=${selectionFailureReason}`);
+        }
         if (authRecovery.diagnostics?.detected === true) {
           authGateDetectedDuringDiscovery = true;
           authGateDetectedAtStepIndex = actionTarget.index;
@@ -6149,7 +7755,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         if (diagnosis && Array.isArray(diagnosis) && diagnosis.length > 0) {
           errorMsg += " Diagnosis: " + JSON.stringify(diagnosis);
         }
-        if (authRecovery.error) {
+        if (selectionFailureReason) {
+          errorMsg = `Selection target "${actionTarget.target}" failed: ${selectionFailureReason}.`;
+        } else if (authRecovery.error) {
           errorMsg += ` Auth gate recovery attempted but failed: ${authRecovery.error}`;
         }
 
@@ -7255,6 +8863,16 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     console.log(`[discovery:case] Clicking target: ${actionTarget.target} (strategy: ${resolution.locatorStrategy}, confidence: ${resolution.confidence.toFixed(2)})`);
 
     const beforeState = await capturePageState(page);
+    const pendingAssertion = parsed.assertionTargets
+      .filter((candidate) => candidate.index > actionTarget.index)
+      .sort((a, b) => a.index - b.index)[0];
+    const assertionObservationBefore: AssertionObservationSnapshot | undefined = pendingAssertion
+      ? await captureAssertionObservationSnapshot(page).catch(() => undefined)
+      : undefined;
+    if (assertionObservationBefore) {
+      const refs = getCanonicalAssertionMetadata(scenario, pendingAssertion.index).refs;
+      console.log(`[assertion-observation-before] requirementId=${refs[0]?.requirementId ?? "unresolved"} triggerCandidate=${actionTarget.index} observableCount=${assertionObservationBefore.controls.length + assertionObservationBefore.validationNodes.length}`);
+    }
 
     // PRODUCT CARD CLICK: Try escalated click strategies ONLY for final product click
     let productCardClickResult: ProductCardClickResult | undefined;
@@ -7276,10 +8894,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     const ordinalSelectedCandidateText = (resolution as any).recoveryMetadata?.ordinalSelectionDiagnostics?.selectedCandidateText ||
                                          (resolution as any).ordinalSelectionDiagnostics?.selectedCandidateText;
 
-    const shouldUseProductCardClick =
-      isFinalProductClick &&
-      (targetMatchesDetail || isOrdinalBoundToDetail) &&
-      finalLocator;
+    const shouldUseProductCardClick = isProductCardClickEligible({
+      isFinalProductClick: Boolean(isFinalProductClick),
+      targetMatchesDetail: Boolean(targetMatchesDetail),
+      isOrdinalBoundToDetail: Boolean(isOrdinalBoundToDetail),
+      finalLocatorPresent: Boolean(finalLocator),
+      detailTargetSource
+    });
 
     if (shouldUseProductCardClick) {
       // For ordinal selection with candidate, use the candidate text, not the detail target
@@ -7708,6 +9329,16 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       );
     }
 
+    const actionNetworkObservation = startNetworkObservation(page, actionTarget.index);
+    const authDetectionBeforeClick = detectAuthGate(currentSnapshot);
+    const authSubmitAction = authDetectionBeforeClick.detected
+      && authDetectionBeforeClick.gateType === "classic_login"
+      && authDetectionBeforeClick.continueButtonPresent;
+    const rowCreationAction = /\b(?:add|añadir|agregar|insertar|nuevo|nueva|another|otro|otra)\b/i.test(actionTarget.action)
+      && /\b(?:row|fila|registro|linea|línea|elemento|item|emplead|entidad|another|otro|otra)\b/i.test(actionTarget.action);
+    const rowCreationBefore = rowCreationAction ? await captureGridCollectionSnapshot(page) : undefined;
+    let rowCreationDiagnostics: DiscoveryStepResult["rowMutationDiagnostics"];
+
     // Skip standard click if product card click succeeded
     if (productCardClickResult?.success) {
       // Product card click already executed and validated
@@ -7715,7 +9346,20 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     } else {
       // Standard click execution
       try {
-        await clickResolvedTarget(finalLocator, false);
+        const isRuntimeBackedSelection = actionTarget.actionType === "action_select" && Boolean(selectionValue);
+        const finalTagName = isRuntimeBackedSelection
+          ? await finalLocator.evaluate((element) => element.tagName.toLowerCase()).catch(() => "")
+          : "";
+        if (isRuntimeBackedSelection && resolution.selectionApplied) {
+          console.log(`[discovery:case] Runtime-backed custom selection already applied and state verified strategy=${resolution.locatorStrategy ?? "unknown"}`);
+        } else if (isRuntimeBackedSelection && finalTagName === "select") {
+          await finalLocator.selectOption({ label: selectionValue! }).catch(async () => {
+            await finalLocator.selectOption({ value: selectionValue! });
+          });
+          console.log(`[discovery:case] Runtime-backed selection applied through resolved grid editor strategy=${resolution.locatorStrategy ?? "unknown"}`);
+        } else {
+          await clickResolvedTarget(finalLocator, false);
+        }
       } catch {
         try {
           console.log(`[discovery:case] Retrying with force click...`);
@@ -7748,6 +9392,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           failedAtStep, failedTarget, failedReason, allDiscoveredObjects
         ).candidatePlan ?? {}, null, 2), "utf-8");
 
+        void actionNetworkObservation.stop({ passiveTail: false });
         return buildFailureResult(
           scenario, steps, allDiscoveredObjects, planSteps,
           pendingObjectsPath, pendingPlansPath, evidenceDir,
@@ -7761,9 +9406,123 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     console.log("[discovery:case] Waiting after click...");
     // Check for loading indicators post-click before proceeding
     const { waitForStableInteractiveScreen } = await import("../runner/execution-plan-executor");
-    const stability = await waitForStableInteractiveScreen(page);
-    if (stability.signals.length > 0) {
-      console.log(`[screen-stability] phase=after_click target="${actionTarget.target}" stable=${stability.stable} signals=${stability.signals.join(",")} waitedMs=${stability.waitedMs}`);
+          let stability = await waitForStableInteractiveScreen(page, {
+            progressProbe: () => actionNetworkObservation.getProgressState(),
+            waitForPendingTransport: true,
+          });
+    const actionNetworkEvents = await actionNetworkObservation.stop({
+      passiveTail: !stability.stable && stability.reason === "loading_timeout"
+    });
+    const relevantNetworkEvents = actionNetworkEvents.filter((event) =>
+      event.resourceType === "fetch" ||
+      event.resourceType === "xhr" ||
+      event.resourceType === "document" ||
+      event.resourceType === "eventsource" ||
+      event.resourceType === "websocket"
+    );
+    const finalPath = safePathname(page.url());
+    const relevantNetworkSettled = relevantNetworkEvents.length > 0 && relevantNetworkEvents.every((event) =>
+      event.state === "completed" ||
+      (
+        event.state === "failed" &&
+        event.failureCategory === "browser_error" &&
+        event.status !== undefined &&
+        event.status >= 200 &&
+        event.status < 300 &&
+        event.path === finalPath
+      )
+    );
+    const cleanNetworkTransition = relevantNetworkSettled && relevantNetworkEvents.some((event) =>
+      event.resourceType === "fetch" || event.resourceType === "xhr" || event.resourceType === "document"
+    );
+    if (!stability.stable && stability.reason === "loading_timeout" && cleanNetworkTransition) {
+      // Some applications keep a decorative loading class mounted after all
+      // navigation/data requests have completed. Static assets are not part of
+      // the readiness boundary, and a browser-reported 2xx on the final route
+      // is not a failed business transition. The network observer is the
+      // stronger transition signal in that case.
+      console.log(`[screen-stability] cleanNetworkTransition=true relevantEvents=${relevantNetworkEvents.length} finalPath=${finalPath} spinnerTimeoutTolerated=true`);
+      stability = { ...stability, stable: true, reason: undefined, waitState: "completed", terminationReason: "stable" };
+    }
+
+    // A classic login submit can transiently leave its request pending without
+    // producing a response or browser failure. Retry only that generic state,
+    // once at most, while the auth surface is still present and no protected
+    // surface or terminal auth error has appeared.
+    let authTransientRetryUsed = false;
+    const authRetryMax = resolveAuthTransientRetryMax(process.env.AUTH_TRANSIENT_RETRY_MAX);
+    const authSnapshotAfterFirstAttempt = await scanCurrentPage(page);
+    const authDetectionAfterFirstAttempt = detectAuthGate(authSnapshotAfterFirstAttempt);
+    const authTerminalErrorVisible = authSnapshotAfterFirstAttempt.elements.some((element: any) => {
+      if (element.visible === false) return false;
+      const role = String(element.role ?? "").toLowerCase();
+      const text = String(element.text ?? element.label ?? element.name ?? "");
+      return (role === "alert" || role === "status") && /invalid|incorrect|error|failed|fall[oó]|incorrecta|inv[aá]lida/i.test(text);
+    });
+    const protectedSurfaceDetected = !authDetectionAfterFirstAttempt.detected
+      && authSnapshotAfterFirstAttempt.elements.some((element: any) => element.visible !== false && /button|link|menuitem/i.test(String(element.role ?? "")));
+    const responseObserved = actionNetworkEvents.some((event) => event.state !== "pending");
+    const requestFailed = actionNetworkEvents.some((event) => event.state === "failed");
+    const transientAuth = authSubmitAction && isAuthTransientNoResponse({
+      submitClicked: true,
+      requestObserved: actionNetworkEvents.length > 0,
+      responseObserved,
+      requestFailed,
+      authSurfacePresent: authDetectionAfterFirstAttempt.detected,
+      protectedSurfaceDetected,
+      terminalErrorVisible: authTerminalErrorVisible,
+      absoluteDeadlineReached: !stability.stable && stability.reason === "loading_timeout",
+      events: actionNetworkEvents,
+    });
+    if (!stability.stable && transientAuth && authRetryMax > 0) {
+      authTransientRetryUsed = true;
+      console.log(`[auth-transient-retry] classification=AUTH_TRANSIENT_NO_RESPONSE retry=1 max=${authRetryMax} authSurfacePresent=true protectedSurfaceDetected=false terminalErrorVisible=false`);
+      await actionNetworkObservation.waitForPassiveTail().catch(() => {});
+      const retryObservation = startNetworkObservation(page, actionTarget.index);
+      try {
+        await clickResolvedTarget(finalLocator, false);
+        console.log(`[auth-transient-retry] submitClicked=true`);
+      } catch (error) {
+        console.log(`[auth-transient-retry] submitClicked=false error="${error instanceof Error ? error.message : "unknown"}"`);
+      }
+      await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+      const retryStability = await waitForStableInteractiveScreen(page, {
+        progressProbe: () => retryObservation.getProgressState(),
+        waitForPendingTransport: true,
+      });
+      const retryEvents = await retryObservation.stop({
+        passiveTail: !retryStability.stable && retryStability.reason === "loading_timeout",
+      });
+      console.log(`[auth-transient-retry] result=${retryStability.stable ? "settled" : "AUTH_TRANSIENT_NO_RESPONSE"} requestObserved=${retryEvents.length > 0} responseObserved=${retryEvents.some((event) => event.state !== "pending")} requestFailed=${retryEvents.some((event) => event.state === "failed")}`);
+      if (retryStability.stable) {
+        stability = retryStability;
+        actionNetworkEvents.splice(0, actionNetworkEvents.length, ...retryEvents);
+      }
+    }
+    console.log(`[network-observation:events] stepIndex=${actionTarget.index} events=${JSON.stringify(actionNetworkEvents)}`);
+    console.log(
+      `[screen-stability] phase=after_click target="${actionTarget.target}" ` +
+      `stable=${stability.stable} signals=${stability.signals.join(",") || "none"} ` +
+      `progressSignals=${stability.progressSignals.join(",") || "none"} waitedMs=${stability.waitedMs} ` +
+      `waitState=${stability.waitState} relevantPendingRequests=${stability.relevantPendingRequests} ` +
+      `lastProgressAgeMs=${stability.lastProgressAgeMs} absoluteDeadlineMs=${stability.absoluteDeadlineMs} ` +
+      `terminationReason=${stability.terminationReason}`
+    );
+    if (!stability.stable) {
+      failedAtStep = actionTarget.index;
+      failedTarget = actionTarget.target;
+      failedReason = authTransientRetryUsed
+        ? "auth_transient_no_response_retry_exhausted"
+        : stability.reason ?? "loading_timeout";
+      console.log(`[discovery:case] Loading state did not settle; stopping before next action reason=${failedReason}`);
+      if (failedReason === "loading_timeout" && actionNetworkEvents.some((event) => event.state === "pending")) {
+        await actionNetworkObservation.waitForPassiveTail();
+      }
+      return buildFailureResult(
+        scenario, steps, allDiscoveredObjects, planSteps,
+        pendingObjectsPath, pendingPlansPath, evidenceDir,
+        failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+      );
     }
     if (shouldUsePostResumeSnapshot && postResumeTargetContext?.target === actionTarget.target) {
       postResumeTargetContext = undefined;
@@ -8294,6 +10053,58 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     }
 
     const afterState = await capturePageState(page);
+    if (rowCreationBefore) {
+      const rowCreationAfter = await captureGridCollectionSnapshot(page);
+      rowCreationDiagnostics = {
+        beforeRowCount: rowCreationBefore.rowCount,
+        afterRowCount: rowCreationAfter.rowCount,
+        ...compareGridCollection(rowCreationBefore, rowCreationAfter),
+        dataset2BoundToNewRow: compareGridCollection(rowCreationBefore, rowCreationAfter).newRowIdentityDistinct,
+      };
+      console.log(`[grid-row-mutation] beforeRowCount=${rowCreationBefore.rowCount} afterRowCount=${rowCreationAfter.rowCount} rowCountIncreased=${rowCreationDiagnostics.rowCountIncreased} newRowObserved=${rowCreationDiagnostics.newRowObserved} newRowIdentityDistinct=${rowCreationDiagnostics.newRowIdentityDistinct}`);
+    }
+    if (assertionObservationBefore && pendingAssertion) {
+      const assertionObservationAfter = await captureAssertionObservationSnapshot(page).catch(() => undefined);
+      if (assertionObservationAfter) {
+        const observationDiff = diffAssertionObservation(
+          assertionObservationBefore,
+          assertionObservationAfter,
+          actionNetworkEvents.length > 0,
+        );
+        const refs = getCanonicalAssertionMetadata(scenario, pendingAssertion.index).refs;
+        const requirementId = refs[0]?.requirementId;
+        const artifact: AssertionObservationArtifact = {
+          version: "1.0",
+          caseId: scenario.caseId,
+          ...(scenario.canonicalScenarioId ? { scenarioId: scenario.canonicalScenarioId } : {}),
+          ...(requirementId ? { requirementId, requirementRefs: refs.map((ref) => ref.requirementId) } : {}),
+          triggerActionIdentity: { action: actionTarget.action, stepIndex: actionTarget.index, target: actionTarget.target },
+          before: assertionObservationBefore,
+          after: assertionObservationAfter,
+          mutation: observationDiff,
+          network: {
+            eventCount: actionNetworkEvents.length,
+            classification: classifyNetworkActivity(
+              actionNetworkEvents,
+              assertionObservationBefore.urlPath,
+              assertionObservationAfter.urlPath,
+            ),
+          },
+          ...(observationDiff.validationMutation && requirementId
+            ? { candidate: { oracleType: "runtime_state", targetIdentity: requirementId, confidence: 0.8, source: "runtime_observation" } }
+            : {}),
+          createdAt: new Date().toISOString(),
+        };
+        assertionObservations.push(artifact);
+        try {
+          await writeAssertionObservationArtifact(evidenceDir, artifact);
+        } catch {
+          // Observation artifacts are diagnostic and must not change execution status.
+        }
+        console.log(`[assertion-observation-after] requirementId=${requirementId ?? "unresolved"} mutationCount=${observationDiff.changedPaths.length} validationMutation=${observationDiff.validationMutation} navigationMutation=${observationDiff.navigationMutation} networkMutation=${observationDiff.networkActivityDetected}`);
+        console.log(`[assertion-observable-candidate] requirementId=${requirementId ?? "unresolved"} oracleType=${artifact.candidate?.oracleType ?? "none"} targetIdentity=${artifact.candidate?.targetIdentity ?? "unresolved"} evidenceSource=runtime_observation backedCandidate=false`);
+      }
+    }
     const transitionDetected = hasPageTransition(beforeState, afterState, actionTarget.target);
     const afterTransitionSnapshot = await scanCurrentPage(page);
     const beforeStructuralFingerprint = currentSnapshot.structuralFingerprint;
@@ -8859,7 +10670,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
       semanticRole: actionTarget.semanticRole,
       relationContext: actionTarget.relationContext,
+      controlIdentity: currentSnapshot.elements.find((element) => element.id === resolution.candidateId)?.controlIdentity,
       locatorStrategy: resolution.locatorStrategy,
+      ...(rowCreationDiagnostics ? { rowMutationDiagnostics: rowCreationDiagnostics } : {}),
       recoveryMetadata: (resolution.locatorStrategy === "ordinal_selection" || 
                         resolution.locatorStrategy === "contextual_intermediate_already_satisfied"
         ? {
@@ -8883,6 +10696,11 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         : undefined) as any
     });
 
+      const planControlIdentity = currentSnapshot.elements.find((element) => element.id === resolution.candidateId)?.controlIdentity;
+      activePlanInputMetadata = {
+        ...activePlanInputMetadata,
+        ...(planControlIdentity ? { controlIdentity: planControlIdentity } : {}),
+      };
       const planResolvedTargetName =
         typeof resolution.candidateText === "string" && resolution.candidateText.trim().length > 0
           ? resolution.candidateText.trim()
@@ -8912,6 +10730,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           } : undefined
         },
         locatorStrategy: resolution.locatorStrategy,
+        controlIdentity: planControlIdentity,
         recoveryMetadata: resolution.locatorStrategy === "ordinal_selection" || 
                           resolution.locatorStrategy === "contextual_intermediate_already_satisfied"
           ? {
@@ -8938,6 +10757,70 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     if (await evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder, evidenceStepIndex)) {
       break;
     }
+  }
+
+  // A canonical blocking intent may require one controlled submit attempt to
+  // make validation and non-transition behavior observable. This is a bounded
+  // probe over structural submit semantics, never a text-specific click.
+  const controlledAdvanceAssertions = resolveControlledAdvanceAssertions(scenario);
+  let controlledAdvanceProbe: ControlledAdvanceProbeResult | undefined;
+  const unresolvedControlledAssertions = controlledAdvanceAssertions.filter((assertion) => {
+    const existing = steps.find((step) => step.index === assertion.index);
+    return existing?.assertionStatus !== "passed" && existing?.status !== "found";
+  });
+  if (unresolvedControlledAssertions.length > 0) {
+    const intents = [...new Set(unresolvedControlledAssertions.map((assertion) => assertion.intent))];
+    console.log(`[controlled-advance-probe] eligible=true intents=${intents.join(",")} unresolvedAssertions=${unresolvedControlledAssertions.length}`);
+    const subjectRuntimeIdentities = new Set(runtimeFieldIdentities.values());
+    const canonicalValidationRefs = new Set(
+      unresolvedControlledAssertions
+        .filter((assertion) => assertion.intent === "validation_present")
+        .flatMap((assertion) => assertion.requirementRefs),
+    );
+    const triggerObservation = [...assertionObservations].reverse().find((observation) =>
+      observation.mutation.validationMutation
+      && observation.requirementRefs?.some((requirementRef) => canonicalValidationRefs.has(requirementRef))
+      && observation.candidate?.targetIdentity
+      && subjectRuntimeIdentities.has(observation.candidate.targetIdentity),
+    ) ?? (assertionObservations.length > 0
+      ? assertionObservations[assertionObservations.length - 1]
+      : undefined);
+    controlledAdvanceProbe = await runControlledAdvanceProbe({
+      page,
+      intent: intents,
+      advanceAction: unresolvedControlledAssertions.find((assertion) => assertion.advanceAction)?.advanceAction,
+      subjectIdentities: [...new Set(runtimeFieldIdentities.values())],
+      subjectControlIdentities: [...runtimeFieldControlIdentities.values()],
+      subjectInputApplied: runtimeFieldIdentities.size > 0,
+      ...(triggerObservation ? { triggerObservation: { before: triggerObservation.before, after: triggerObservation.after } } : {}),
+    });
+    console.log(
+      `[controlled-advance-probe] candidateFound=${controlledAdvanceProbe.candidateFound} `
+      + `candidateEnabled=${controlledAdvanceProbe.candidateEnabled} attemptPossible=${controlledAdvanceProbe.attemptPossible} `
+      + `resolutionState=${controlledAdvanceProbe.resolutionState} `
+      + `candidateResolutionSource=${controlledAdvanceProbe.candidateResolutionSource ?? "none"} `
+      + `attemptObserved=${controlledAdvanceProbe.attemptObserved} beforeCaptured=${controlledAdvanceProbe.beforeCaptured} `
+      + `afterCaptured=${controlledAdvanceProbe.afterCaptured} validationMutation=${controlledAdvanceProbe.validationMutation} `
+      + `subjectFound=${controlledAdvanceProbe.subjectFound} subjectValidationMutation=${controlledAdvanceProbe.subjectValidationMutation} `
+      + `validationObserved=${controlledAdvanceProbe.validationObserved} transitionOccurred=${controlledAdvanceProbe.transitionOccurred} `
+      + `advanceCausality=${controlledAdvanceProbe.advanceCausality} otherInvalidRequired=${controlledAdvanceProbe.otherInvalidRequiredControls} `
+      + `blockedObserved=${controlledAdvanceProbe.blockedObserved} functionalDefectAssertion13=${controlledAdvanceProbe.functionalDefectAssertion13} `
+      + `networkEvents=${controlledAdvanceProbe.networkEvents.length}`,
+    );
+    applyControlledAdvanceProbeToSteps(steps, scenario, unresolvedControlledAssertions, controlledAdvanceProbe);
+  } else {
+    console.log("[controlled-advance-probe] eligible=false reason=no_unresolved_canonical_blocking_assertion");
+  }
+
+  // Reconcile backed workflow evidence before any final blocker/status decision.
+  const reconciledBeforeFinalStatus = options.beforeFinalStatusCalculation
+    ? await options.beforeFinalStatusCalculation(steps)
+    : 0;
+  if (reconciledBeforeFinalStatus > 0) {
+    failedAtStep = undefined;
+    failedTarget = undefined;
+    failedReason = undefined;
+    console.log(`[observable-oracle-reconciliation] reconciled=${reconciledBeforeFinalStatus} before=first_blocking_failure_calculation`);
   }
 
   // Recover transient assertion failures BEFORE calculating final status
@@ -9090,19 +10973,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     console.log(`[discovery:case] status reconciled: discovered_partial -> discovered_passed (all failures recovered no blockers)`);
   }
 
-  // Collect unique valueKeys from planSteps for requiredData
-  const requiredDataKeys = new Set<string>();
-  for (const step of planSteps) {
-    if (step.valueKey) {
-      requiredDataKeys.add(step.valueKey);
-    }
-  }
-  const requiredData: RequiredDataRef[] = Array.from(requiredDataKeys).map(key => ({
-    key,
-    required: true,
-    resolved: resolvedDataKeys.has(key),
-    source: resolvedDataKeys.has(key) ? "env" : undefined
-  }));
+  const requiredData = buildCandidateRequiredData(scenario, planSteps, resolvedDataKeys);
 
   const discoverySatisfied = status === "discovered_passed" || status === "repaired_passed";
   const candidatePlan: ExecutionPlan = {
@@ -9294,7 +11165,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     failedAtStep: effectiveFailedAtStep,
     failedTarget: effectiveFailedTarget,
     failedReason: effectiveFailedReason,
-    aiRepairSummary
+    aiRepairSummary,
+    assertionObservations,
+    ...(controlledAdvanceProbe ? { controlledAdvanceProbe } : {})
   };
 }
 

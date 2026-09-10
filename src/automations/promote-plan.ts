@@ -55,6 +55,16 @@ import { buildDataContext } from "../data/data-context";
 import { buildPromotedDataManifest, savePromotedDataManifestSync } from "../data/promoted-data";
 import { validatePromotedSpecRuntimeContract } from "./runtime/promoted-runtime-contract";
 import { rewritePromotedRuntimeImport, runHybridSpecGeneration, validatePromotedSpecInternalImports, type SpecGenerationDiagnostics, type SpecGenerationSourceScenario } from "./spec-generation-hybrid";
+import { buildSpecExecutionContract } from "./spec-execution-contract";
+import {
+  buildPromotedArtifactIdentity,
+  isEligibleForDeterministicRevalidation,
+  loadExistingSpecRevalidationContext,
+  persistSuccessfulExistingSpecRevalidation,
+  promoteExistingVerifiedSpec,
+} from "./persisted-spec-revalidation";
+import { revalidateExistingSpecDeterministically } from "./existing-spec-revalidation";
+import { validatePromotedArtifactForReuse, type PromotedArtifactPhysicalContext } from "./automation-reuse";
 
 interface PromoteInput {
   plan: ExecutionPlan;
@@ -79,6 +89,25 @@ interface PromoteInput {
   sourceScenario?: SpecGenerationSourceScenario;
   headed?: boolean;
   executionSource?: string;
+  skipExistingSpecAdmission?: boolean;
+  persistAppConfig?: boolean;
+}
+
+export async function materializePromotionContext(input: {
+  plan: ExecutionPlan;
+  sourceScenario: SpecGenerationSourceScenario;
+  appProfile: AppProfile;
+  sectionSlug?: string;
+  outputRoot?: string;
+}): Promise<{ planPath: string; sourceScenario: unknown; executionContract: unknown }> {
+  const automationId = buildAutomationId({ externalId: input.plan.scenario.externalId, caseId: input.plan.scenario.caseId, title: input.plan.scenario.title });
+  const paths = buildAppAutomationPaths(input.appProfile, automationId, input.outputRoot, input.sectionSlug);
+  await fs.mkdir(path.dirname(paths.planPath), { recursive: true });
+  const executionContract = buildSpecExecutionContract(input.plan, input.sourceScenario, { appSlug: input.appProfile.appSlug, sectionSlug: input.sectionSlug });
+  const persistedPlan = { ...input.plan, sourceScenario: input.sourceScenario, executionContract };
+  await writeFileAtomicWithRetry(paths.planPath, JSON.stringify(persistedPlan, null, 2));
+  console.log(`[promotion-context-materialization] caseId=${input.plan.scenario.caseId ?? input.plan.scenario.externalId} sourceScenario=true executionContract=true stoppedBeforeGeneration=true`);
+  return { planPath: paths.planPath, sourceScenario: input.sourceScenario, executionContract };
 }
 
 const PROMOTION_IO_RETRIES = 3;
@@ -124,6 +153,20 @@ async function writeFileAtomicWithRetry(filePath: string, content: string): Prom
 
 }
 
+export async function persistFreshPlanForExistingSpecReuse(input: {
+  planPath: string;
+  plan: ExecutionPlan;
+  sourceScenario: SpecGenerationSourceScenario;
+  executionContract: Record<string, unknown>;
+}): Promise<void> {
+  const persistedPlan = {
+    ...input.plan,
+    sourceScenario: input.sourceScenario,
+    executionContract: input.executionContract,
+  };
+  await writeFileAtomicWithRetry(input.planPath, JSON.stringify(persistedPlan, null, 2));
+}
+
 async function readExistingSpecInfo(specPath: string): Promise<{ existed: boolean; hash: string | null; lastModifiedAt: string | null }> {
   try {
     const [content, stat] = await Promise.all([
@@ -143,6 +186,134 @@ async function readExistingSpecInfo(specPath: string): Promise<{ existed: boolea
       lastModifiedAt: null
     };
   }
+}
+
+export type ExistingSpecPreGenerationRouteInput = {
+  caseDir: string;
+  specPath: string;
+  planPath?: string;
+  freshPlan?: ExecutionPlan;
+  appSlug: string;
+  sectionSlug?: string;
+  caseId?: number;
+  sourceScenario?: SpecGenerationSourceScenario;
+  executionContract?: Record<string, unknown>;
+  semanticContext?: Parameters<typeof revalidateExistingSpecDeterministically>[0]["semanticContext"];
+  dependencies?: {
+    loadContext?: typeof loadExistingSpecRevalidationContext;
+    isEligible?: typeof isEligibleForDeterministicRevalidation;
+    revalidate?: typeof revalidateExistingSpecDeterministically;
+    persist?: typeof persistSuccessfulExistingSpecRevalidation;
+    promote?: typeof promoteExistingVerifiedSpec;
+    persistFreshPlan?: typeof persistFreshPlanForExistingSpecReuse;
+    loadAutomation?: (caseDir: string) => Promise<PromotedAutomationIndexEntry>;
+    validateAuthority?: typeof validatePromotedArtifactForReuse;
+  };
+};
+
+export type ExistingSpecPreGenerationRouteResult = {
+  handled: boolean;
+  promoted: boolean;
+  reason?: string;
+};
+
+/** Admit a matching physical spec before any deterministic/AI generation occurs. */
+export async function tryPromoteExistingSpecBeforeGeneration(
+  input: ExistingSpecPreGenerationRouteInput
+): Promise<ExistingSpecPreGenerationRouteResult> {
+  if (!input.sourceScenario || !input.executionContract || !input.semanticContext) {
+    return { handled: false, promoted: false, reason: "current_context_missing" };
+  }
+
+  let context;
+  const dependencies = input.dependencies ?? {};
+  try {
+    context = await (dependencies.loadContext ?? loadExistingSpecRevalidationContext)({
+      caseDir: input.caseDir,
+      appSlug: input.appSlug,
+      sectionSlug: input.sectionSlug,
+      caseId: input.caseId,
+    });
+  } catch {
+    return { handled: false, promoted: false, reason: "existing_spec_missing" };
+  }
+
+  const eligible = (dependencies.isEligible ?? isEligibleForDeterministicRevalidation)({
+    previousSpecExisted: true,
+    specText: context.specText,
+    specPath: context.specPath,
+    sourceScenario: input.sourceScenario,
+    executionContract: input.executionContract,
+    identityValidated: context.identityValidated,
+    semanticContext: input.semanticContext,
+  });
+  if (!eligible) return { handled: false, promoted: false, reason: "existing_spec_not_eligible" };
+
+  const result = await (dependencies.revalidate ?? revalidateExistingSpecDeterministically)({
+    specText: context.specText,
+    specPath: context.specPath,
+    sourceScenario: input.sourceScenario,
+    executionContract: input.executionContract as never,
+    semanticContext: input.semanticContext,
+  });
+  if (result.status !== "passed" || !result.allRequiredGatesPassed) {
+    return { handled: false, promoted: false, reason: "deterministic_revalidation_failed" };
+  }
+
+  const persisted = await (dependencies.persist ?? persistSuccessfulExistingSpecRevalidation)({
+    caseDir: input.caseDir,
+    appSlug: input.appSlug,
+    sectionSlug: input.sectionSlug,
+    caseId: input.caseId,
+    identityValidated: context.identityValidated,
+    specText: context.specText,
+    result,
+  });
+  if (!persisted.persisted) return { handled: false, promoted: false, reason: persisted.reason ?? "revalidation_persistence_failed" };
+
+  const persistFreshPlan = async (): Promise<void> => {
+    if (!input.freshPlan || !input.planPath) return;
+    await (dependencies.persistFreshPlan ?? persistFreshPlanForExistingSpecReuse)({
+      planPath: input.planPath,
+      plan: input.freshPlan,
+      sourceScenario: input.sourceScenario,
+      executionContract: input.executionContract,
+    });
+  };
+
+  const loadAutomation = dependencies.loadAutomation ?? (async (caseDir: string) =>
+    JSON.parse(await fs.readFile(path.join(caseDir, "automation.json"), "utf8")) as PromotedAutomationIndexEntry);
+  let automation: PromotedAutomationIndexEntry;
+  try {
+    automation = await loadAutomation(input.caseDir);
+  } catch {
+    return { handled: false, promoted: false, reason: "promotion_authority_missing" };
+  }
+  const physical: PromotedArtifactPhysicalContext = {
+    specPath: context.specPath,
+    specExists: true,
+    specText: context.specText,
+    appSlug: input.appSlug,
+    sectionSlug: input.sectionSlug ?? "",
+    caseId: input.caseId ?? Number.NaN,
+  };
+  const authority = (dependencies.validateAuthority ?? validatePromotedArtifactForReuse)(automation, physical);
+  if (automation.status === "active") {
+    if (!authority.valid) return { handled: false, promoted: false, reason: `active_authority_${authority.reason ?? "invalid"}` };
+    await persistFreshPlan();
+    return { handled: true, promoted: true, reason: "existing_active_revalidated" };
+  }
+
+  const promoted = await (dependencies.promote ?? promoteExistingVerifiedSpec)({
+    caseDir: input.caseDir,
+    appSlug: input.appSlug,
+    sectionSlug: input.sectionSlug ?? "default-section",
+    caseId: input.caseId ?? Number.NaN,
+    specPath: context.specPath,
+  });
+  if (!promoted.promotionSucceeded) return { handled: false, promoted: false, reason: promoted.reason ?? "existing_promotion_failed" };
+  await persistFreshPlan();
+  return { handled: true, promoted: true };
 }
 
 function assertPromotable(status: string, allowDraft: boolean): void {
@@ -726,6 +897,11 @@ export async function promoteExecutionPlan(
   metadata?: PromotedAutomationIndexEntry["metadata"]
 ): Promise<PromotedAutomationIndexEntry> {
   const plan = input.plan;
+  // A persisted plan is itself an authoritative promotion input.  The CLI
+  // commonly reloads only `plan.json`, so do not silently fall back to the
+  // reduced execution-plan shape when the caller omits sourceScenario.
+  const authoritativeSourceScenario = input.sourceScenario
+    ?? (plan as ExecutionPlan & { sourceScenario?: SpecGenerationSourceScenario }).sourceScenario;
 
   const validation = validateExecutionPlan(plan);
 
@@ -770,6 +946,7 @@ export async function promoteExecutionPlan(
   }
 
   const appPaths = buildAppAutomationPaths(appProfile, automationId, input.outputRoot, sectionSlug);
+  const promotionPolicy = input.promotionPolicy;
 
   const planHasAuthConsumedSteps = plan.steps.some(s => {
     const desc = (s.description ?? "").toLowerCase();
@@ -831,24 +1008,6 @@ export async function promoteExecutionPlan(
 
   await ensureDirectories(appPaths);
 
-  const planContent = JSON.stringify(plan, null, 2);
-  await writeFileAtomicWithRetry(appPaths.planPath, planContent);
-  if (appPaths.caseConfigPath) {
-    await writeFileAtomicWithRetry(
-      appPaths.caseConfigPath,
-      JSON.stringify({
-        id: automationId,
-        externalId: plan.scenario.externalId,
-        caseId: plan.scenario.caseId,
-        title: plan.scenario.title,
-        source: input.source ?? "manual",
-        appSlug: appProfile.appSlug,
-        appConfigPath: appPaths.configPath,
-        createdAt: new Date().toISOString()
-      }, null, 2)
-    );
-  }
-
   // Write case.meta.json with section and app metadata
   if (appPaths.caseDir) {
     const caseMeta = {
@@ -874,8 +1033,42 @@ export async function promoteExecutionPlan(
     savePromotedDataManifestSync(path.join(appPaths.caseDir, "promoted-data.json"), promotedDataManifest);
   }
 
+  // Existing physical specs are admitted before generation. The contract and
+  // semantic context here are rebuilt from the current discovery inputs.
+  if (appPaths.caseDir && authoritativeSourceScenario && !input.skipExistingSpecAdmission) {
+    const currentRegistry = promotionPolicy?.specMode === "page-object"
+      ? await loadPageObjectRegistry(appProfile, input.outputRoot).catch(() => undefined)
+      : undefined;
+    const currentExecutionContract = buildSpecExecutionContract(plan, authoritativeSourceScenario, {
+      appSlug: appProfile.appSlug,
+      sectionSlug,
+      pageObjectRegistry: currentRegistry,
+    });
+    const semanticContext = {
+      requiredAssertions: (authoritativeSourceScenario.observableOracles ?? []).map((oracle) => oracle.requirement),
+      observableOracles: authoritativeSourceScenario.observableOracles ?? [],
+      scenarioSteps: authoritativeSourceScenario.steps ?? [],
+      semanticErrors: [],
+    };
+    const existingRoute = await tryPromoteExistingSpecBeforeGeneration({
+      caseDir: appPaths.caseDir,
+      specPath: appPaths.specPath,
+      planPath: appPaths.planPath,
+      freshPlan: plan,
+      appSlug: appProfile.appSlug,
+      sectionSlug,
+      caseId: plan.scenario.caseId,
+      sourceScenario: authoritativeSourceScenario,
+      executionContract: currentExecutionContract as unknown as Record<string, unknown>,
+      semanticContext,
+    });
+    if (existingRoute.handled && existingRoute.promoted) {
+      const promotedEntry = JSON.parse(await fs.readFile(path.join(appPaths.caseDir, "automation.json"), "utf8")) as PromotedAutomationIndexEntry;
+      return promotedEntry;
+    }
+  }
+
   // Generate spec — POM-aware when policy provided
-  const promotionPolicy = input.promotionPolicy;
   const inlineDebugMode = input.inlineDebugMode ?? false;
   let pomStatus: POMPromotionStatus | undefined;
   let strategyDiagnostics: {
@@ -917,7 +1110,8 @@ export async function promoteExecutionPlan(
       ? {
           alias: plan.metadata.authFlowAlias || "defaultClient",
           landing: plan.metadata.authFlowLanding || "transactions_menu",
-          insertionAfterStepIndex: plan.metadata.authFlowInsertionAfterStepIndex
+          insertionAfterStepIndex: plan.metadata.authFlowInsertionAfterStepIndex,
+          contractBinding: (plan.executionContract as any)?.auth?.aggregate
         }
       : undefined;
     
@@ -1099,10 +1293,34 @@ export async function promoteExecutionPlan(
     scenarioId: plan.scenario.externalId,
     promotionPolicy,
     pageObjectRegistry: registryForSpecValidation,
-    sourceScenario: input.sourceScenario,
+    sourceScenario: authoritativeSourceScenario,
     headed: input.headed,
     executionSource: input.executionSource,
   });
+  const generatedExecutionContract = (specGenerationResult as typeof specGenerationResult & {
+    executionContract?: unknown;
+  }).executionContract;
+  const planContent = JSON.stringify({
+    ...plan,
+    ...(authoritativeSourceScenario ? { sourceScenario: authoritativeSourceScenario } : {}),
+    ...(generatedExecutionContract ? { executionContract: generatedExecutionContract } : {})
+  }, null, 2);
+  await writeFileAtomicWithRetry(appPaths.planPath, planContent);
+  if (appPaths.caseConfigPath) {
+    await writeFileAtomicWithRetry(
+      appPaths.caseConfigPath,
+      JSON.stringify({
+        id: automationId,
+        externalId: plan.scenario.externalId,
+        caseId: plan.scenario.caseId,
+        title: plan.scenario.title,
+        source: input.source ?? "manual",
+        appSlug: appProfile.appSlug,
+        appConfigPath: appPaths.configPath,
+        createdAt: new Date().toISOString()
+      }, null, 2)
+    );
+  }
   specGenerationDiagnostics = specGenerationResult.diagnostics;
   generatedSpecContent = specGenerationResult.specContent;
   generatedSpecContent = rewritePromotedRuntimeImport(generatedSpecContent, appPaths.specPath);
@@ -1132,6 +1350,12 @@ export async function promoteExecutionPlan(
   }
 
   if (appPaths.caseDir && strategyDiagnostics) {
+    strategyDiagnostics = {
+      ...strategyDiagnostics,
+      specPath: appPaths.specPath,
+      specHash: createHash("sha256").update(generatedSpecContent).digest("hex"),
+      specSource: specWritten ? "generatedSpec" : "ai_candidate",
+    } as typeof strategyDiagnostics & { specPath: string; specHash: string; specSource: "generatedSpec" | "ai_candidate" };
     await writeFileAtomicWithRetry(path.join(appPaths.caseDir, "promotion-diagnostics.json"), JSON.stringify(strategyDiagnostics, null, 2));
   }
 
@@ -1146,17 +1370,19 @@ export async function promoteExecutionPlan(
     }
   }
 
-  const existingConfig = loadPromotedAppConfigSync({ appSlug: appProfile.appSlug });
-  const appConfig = serializeRuntimeConfigForPromotion(input.fullConfig ?? envConfig, existingConfig);
-  appConfig.appProfile = {
-    ...appConfig.appProfile,
-    appSlug: appProfile.appSlug,
-    name: appProfile.name ?? appConfig.appProfile.name,
-    baseUrl: appProfile.baseUrl ?? appConfig.appProfile.baseUrl,
-    baseUrlHash: appProfile.baseUrlHash ?? appConfig.appProfile.baseUrlHash,
-    updatedAt: new Date().toISOString()
-  };
-  await savePromotedAppConfig(appConfig, input.outputRoot);
+  if (input.persistAppConfig !== false) {
+    const existingConfig = loadPromotedAppConfigSync({ appSlug: appProfile.appSlug });
+    const appConfig = serializeRuntimeConfigForPromotion(input.fullConfig ?? envConfig, existingConfig);
+    appConfig.appProfile = {
+      ...appConfig.appProfile,
+      appSlug: appProfile.appSlug,
+      name: appProfile.name ?? appConfig.appProfile.name,
+      baseUrl: appProfile.baseUrl ?? appConfig.appProfile.baseUrl,
+      baseUrlHash: appProfile.baseUrlHash ?? appConfig.appProfile.baseUrlHash,
+      updatedAt: new Date().toISOString()
+    };
+    await savePromotedAppConfig(appConfig, input.outputRoot);
+  }
 
   const appDirPaths = buildAppAutomationPaths(appProfile, undefined, input.outputRoot);
   const appIndexPath = appDirPaths.indexPath;
@@ -1208,7 +1434,8 @@ export async function promoteExecutionPlan(
         previousAutomationPath,
         previousStatus
       } : {})
-    } : metadata
+    } : metadata,
+    ...(specPromotionAllowed ? buildPromotedArtifactIdentity(appPaths.specPath, generatedSpecContent) : {})
   };
 
   // --- Verify promoted spec if requested ---
@@ -1224,6 +1451,9 @@ export async function promoteExecutionPlan(
     if (verificationResult.status === "failed") {
       console.error(`[promote-plan] Spec verification FAILED. Promotion marked as spec_failed.`);
       appIndexEntry.status = "spec_failed";
+      delete (appIndexEntry as any).promotionPersisted;
+      delete (appIndexEntry as any).promotedSpecPath;
+      delete (appIndexEntry as any).promotedSpecHash;
       appIndexEntry.metadata = {
         ...appIndexEntry.metadata,
         specVerification: {
