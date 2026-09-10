@@ -93,6 +93,7 @@ type ResolvedProject = {
   appActivity?: string;
   apkPath?: string;
   baseUrl?: string;
+  ignoreHTTPSErrors?: boolean;
 };
 
 /**
@@ -129,7 +130,12 @@ export async function resolveRecordingTarget(projectSlug: string): Promise<Resol
       `El proyecto ${projectSlug} no tiene baseUrl configurada para grabar`,
     );
   }
-  return { appSlug: cfg.slug, platform: "web", baseUrl: cfg.web.baseUrl };
+  return {
+    appSlug: cfg.slug,
+    platform: "web",
+    baseUrl: cfg.web.baseUrl,
+    ignoreHTTPSErrors: cfg.web.ignoreHTTPSErrors === true,
+  };
 }
 
 /** Brings the app to the foreground so the walkthrough starts where the user expects. */
@@ -229,6 +235,7 @@ export async function startRecording(params: StartRecordingParams): Promise<{
     } else {
       recorder = new WebSessionRecorder({
         baseUrl: target.baseUrl!,
+        ignoreHTTPSErrors: target.ignoreHTTPSErrors,
         framesDir,
         sensitiveLabels: params.sensitiveLabels,
         onLog,

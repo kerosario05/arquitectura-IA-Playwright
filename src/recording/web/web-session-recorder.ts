@@ -39,12 +39,18 @@ export function fingerprintSnapshot(snapshot: RuntimeUiSnapshot): string {
 export type WebRecorderOptions = {
   baseUrl: string;
   framesDir: string;
+  /** Project-scoped TLS policy; false remains the safe default. */
+  ignoreHTTPSErrors?: boolean;
   browserName?: "chromium" | "firefox" | "webkit";
   /** Labels or names whose typed content must never be stored verbatim. */
   sensitiveLabels?: string[];
   onLog?: (line: string) => void;
   onEvent?: (event: RecordedEvent) => void;
 };
+
+export function buildWebRecorderContextOptions(ignoreHTTPSErrors?: boolean): { ignoreHTTPSErrors: boolean } {
+  return { ignoreHTTPSErrors: ignoreHTTPSErrors === true };
+}
 
 /** How many elements one identity matched in the page, and where the clicked one sat. */
 export type LocatorRank = { count: number; index: number };
@@ -405,7 +411,9 @@ export class WebSessionRecorder {
       this.options.browserName === "firefox" ? firefox : this.options.browserName === "webkit" ? webkit : chromium;
 
     this.browser = await engine.launch({ headless: false });
-    this.context = await this.browser.newContext();
+    this.context = await this.browser.newContext(
+      buildWebRecorderContextOptions(this.options.ignoreHTTPSErrors),
+    );
     await this.context.exposeBinding("__qaRecord", async (_source, payload: RawInteraction) => {
       await this.onInteraction(payload).catch((err) =>
         this.log(`[recording] error procesando interacción: ${err instanceof Error ? err.message : String(err)}`),
