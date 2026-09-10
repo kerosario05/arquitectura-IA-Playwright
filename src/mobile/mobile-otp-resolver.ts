@@ -138,8 +138,9 @@ function mapOtpHttpError(status: number, data: any): MobileOtpResolverError {
 }
 
 /**
- * Generates a fresh OTP and immediately fetches it via latest. Returns the OTP value
- * (6 digits) plus requestId/channel. Never persists the OTP.
+ * Generates a fresh OTP and returns it (6 digits) plus requestId/channel. Prefers the token
+ * the generate call returns directly; falls back to fetching it via latest. Never persists
+ * the OTP.
  */
 export async function resolveMobileOtp(
   opts: OtpResolveOptions,
@@ -170,6 +171,18 @@ export async function resolveMobileOtp(
   const genMs = Date.now() - genStart;
   console.log(`[mobile:otp] phase=generate durationMs=${genMs} requestId=${requestId}`);
 
+  // Preferred path: the generate response carries the token straight from the procedure's
+  // pTokenGen OUT bind. It belongs unambiguously to this invocation, so it needs neither the
+  // second round-trip nor the generatedAfter window that `latest` correlates on.
+  const directOtp = typeof gen.data?.otp === "string" ? gen.data.otp.trim() : "";
+  if (directOtp) {
+    const totalMs = Date.now() - started;
+    console.log(`[mobile:otp] phase=fill source=generate success=true totalMs=${totalMs} otp=${maskOtp(directOtp)}`);
+    return { otp: directOtp, requestId, channel };
+  }
+
+  // Fallback: older servers (and any run where pTokenGen came back unusable) still resolve
+  // the token through the token table.
   // latest (immediately, no sleep)
   const latStart = Date.now();
   const lat = await postOtp("/api/internal/otp/local-token/latest", {
@@ -196,6 +209,6 @@ export async function resolveMobileOtp(
   console.log(`[mobile:otp] phase=latest durationMs=${latMs} found=true ageMs=${ageMs}`);
 
   const totalMs = Date.now() - started;
-  console.log(`[mobile:otp] phase=fill success=true totalMs=${totalMs} otp=${maskOtp(otpValue)}`);
+  console.log(`[mobile:otp] phase=fill source=latest success=true totalMs=${totalMs} otp=${maskOtp(otpValue)}`);
   return { otp: otpValue, requestId, channel };
 }

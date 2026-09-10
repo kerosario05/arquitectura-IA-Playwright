@@ -1,0 +1,8 @@
+{
+  "name": "portal comercial",
+  "baseUrl": "https://srvqacgowb01.local.bsc.com:5000/login",
+  "loginMode": "manual",
+  "testData": {},
+  "testDataAliases": {},
+  "missingInputBehavior": "fail"
+}

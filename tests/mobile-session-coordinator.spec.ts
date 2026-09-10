@@ -398,3 +398,61 @@ test("mobile_automation_channel_lost blocks execution run and skips remaining sc
   expect(updated?.logs.some((line) => line.includes("testRailFunctionalStatusSkipped=true"))).toBe(true);
   expect(updated?.logs.some((line) => line.includes("skipped_infrastructure_blocked"))).toBe(true);
 });
+
+test("launch execution forwards requiredData and dataOverrides so OTP steps can resolve an identity", async () => {
+  const seen: Array<Record<string, unknown>> = [];
+  // Mirrors the manifest of run 4471e1f8, which failed with otp_identity_unresolved: the OTP
+  // step carries no identityField, so the identity can only come from requiredData +
+  // dataOverrides reaching the step executor.
+  const job = jobStore.create("mobile-launch-execution", {
+    launchId: "launch-otp-context",
+    testRunId: 4207,
+    appSlug: "app-conversacional",
+    publishedCases: [{ caseId: 44801, scenarioId: "MOBILE-AA-94-001" }],
+    scenarios: [
+      {
+        scenarioId: "MOBILE-AA-94-001",
+        title: "Confirmación de datos con OTP",
+        steps: [
+          { action: "fill", description: "Completar el número de documento del cliente" },
+          { action: "fill", description: "Validar el código OTP recibido.", otp: { required: true } },
+        ],
+        requiredData: [
+          {
+            key: "completar_el_numero_de_documento_del_cliente",
+            label: "Completar el número de documento del cliente",
+            kind: "text",
+            stepIndex: 0,
+            exampleValue: "40229993734",
+            sensitive: true,
+          },
+        ],
+      },
+    ],
+    dataOverrides: { "MOBILE-AA-94-001": { 0: "40229993734" } },
+  });
+
+  await startMobileLaunchExecutionJobWithDeps(job.id, {
+    ensureMobileInfraFn: async () => ({
+      deviceId: "emulator-5554",
+      emulatorStartedByRunner: false,
+      ownership: "external_reused",
+      ownershipReason: "already_running_reused",
+    }),
+    runOneScenarioFn: async (opts: Record<string, unknown>) => {
+      seen.push(opts);
+      return { passed: 2, failed: 0, blocked: 0, artifactsDir: "", results: [] };
+    },
+    syncResultFn: async () => ({ statusId: 1, syncStatus: "synced", syncedAt: new Date().toISOString() }),
+    consolidateEvidenceFn: async () => undefined,
+  } as never);
+
+  expect(seen).toHaveLength(1);
+  expect(seen[0].appSlug).toBe("app-conversacional");
+  // Both are required: the identity value lives in dataOverrides, keyed by the stepIndex that
+  // only requiredData can map back to a field.
+  expect(seen[0].dataOverrides).toEqual({ 0: "40229993734" });
+  expect((seen[0].requiredData as Array<{ key: string }>)?.[0]?.key).toBe(
+    "completar_el_numero_de_documento_del_cliente",
+  );
+});

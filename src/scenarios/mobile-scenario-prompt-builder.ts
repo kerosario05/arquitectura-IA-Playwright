@@ -205,6 +205,15 @@ function formatLearnedKnowledge(learnedScreens: MobileLearnedScreen[]): string {
     if (screen.assertionTargets.length > 0) {
       lines.push(`- Textos visibles (para aserciones): ${screen.assertionTargets.map((t) => `"${t}"`).join(", ")}`);
     }
+    if (screen.disabledTargets.length > 0) {
+      // A disabled control is the screen telling us a precondition is still unmet. Saying so
+      // explicitly is what lets the model notice that steps are missing before it.
+      lines.push(
+        `- Controles DESHABILITADOS en este estado: ${screen.disabledTargets.map((t) => `"${t}"`).join(", ")}. ` +
+        `Un control deshabilitado significa que la pantalla exige acciones previas todavía no realizadas: ` +
+        `el escenario debe incluir esos pasos ANTES de intentar usarlo.`,
+      );
+    }
     lines.push("");
   }
   return lines.join("\n").trim();

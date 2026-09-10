@@ -1,0 +1,12 @@
+{
+  "recordingId": "d4bc8ed6-19c5-424e-96a5-1a661c64b949",
+  "projectSlug": "app-conversacional",
+  "appSlug": "app-conversacional",
+  "platform": "android",
+  "appPackage": "com.appconversacionalbsc",
+  "startedAt": "2026-09-08T21:34:41.557Z",
+  "status": "failed",
+  "events": [],
+  "screens": [],
+  "errorMessage": "No se pueden capturar los toques en este dispositivo (getevent no reporta ejes multitouch). La grabación se detiene en lugar de producir un recorrido sin acciones."
+}

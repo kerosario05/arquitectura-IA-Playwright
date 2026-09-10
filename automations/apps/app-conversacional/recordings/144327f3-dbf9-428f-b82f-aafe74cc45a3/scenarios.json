@@ -1,0 +1,1486 @@
+[
+  {
+    "scenarioId": "REC-144327F3-01",
+    "title": "registro 6",
+    "description": "Recorrido observado sobre unknown → Bienvenido → Queremos conocerte → Queremos conocerte → No pudimos realizar esta validación exitosamente.. Se registraron 8 acciones del usuario en 5 pantallas. Escenario derivado de la grabación 144327f3-dbf9-428f-b82f-aafe74cc45a3.",
+    "preconditions": [
+      "Aplicación com.appconversacionalbsc instalada en el dispositivo",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [
+      {
+        "action": "launchApp",
+        "description": "Abrir la aplicación com.appconversacionalbsc"
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Bienvenido\")"
+        },
+        "description": "Verificar que se muestra \"Bienvenido\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().descriptionContains(\"Crea tu cuenta en minutos\")"
+        },
+        "description": "Presionar \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "android:id/content"
+        },
+        "description": "Presionar \"content\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().text(\"402-12345678-9\")"
+        },
+        "value": "402-12345678-9",
+        "description": "Ingresar \"402-12345678-9\" en \"402-12345678-9\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Queremos conocerte\")"
+        },
+        "description": "Verificar que se muestra \"Queremos conocerte\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "android:id/content"
+        },
+        "description": "Presionar \"content\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().text(\"402-2999373-4\")"
+        },
+        "value": "402-2999373-4",
+        "description": "Ingresar \"402-2999373-4\" en \"402-2999373-4\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Queremos conocerte\")"
+        },
+        "description": "Verificar que se muestra \"Queremos conocerte\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "accessibilityId",
+          "value": "Acepto los Términos y condiciones y la Política de datos personales"
+        },
+        "description": "Presionar \"Acepto los Términos y condiciones y la Política de datos personales\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().text(\"Continuar\")"
+        },
+        "description": "Presionar \"Continuar\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"unknown\")"
+        },
+        "description": "Verificar que se muestra \"unknown\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"No pudimos realizar esta validación exitosamente.\")"
+        },
+        "description": "Verificar que se muestra \"No pudimos realizar esta validación exitosamente.\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "accessibilityId",
+          "value": "Ir al inicio"
+        },
+        "description": "Presionar \"Ir al inicio\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Bienvenido\")"
+        },
+        "description": "Verificar que se muestra \"Bienvenido\""
+      }
+    ],
+    "webSteps": [],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación app-conversacional",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "El sistema navega a \"Bienvenido\"",
+        "expected": "Se muestra \"Bienvenido\""
+      },
+      {
+        "content": "Presionar \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"402-12345678-9\" en \"402-12345678-9\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "El sistema navega a \"Queremos conocerte\"",
+        "expected": "Se muestra \"Queremos conocerte\""
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"402-2999373-4\" en \"402-2999373-4\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "El sistema navega a \"Queremos conocerte\"",
+        "expected": "Se muestra \"Queremos conocerte\""
+      },
+      {
+        "content": "Presionar \"Acepto los Términos y condiciones y la Política de datos personales\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"unknown\"",
+        "expected": "Se muestra \"unknown\""
+      },
+      {
+        "content": "El sistema navega a \"No pudimos realizar esta validación exitosamente.\"",
+        "expected": "Se muestra \"No pudimos realizar esta validación exitosamente.\""
+      },
+      {
+        "content": "Presionar \"Ir al inicio\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Bienvenido\"",
+        "expected": "Se muestra \"Bienvenido\""
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "402_12345678_9",
+        "label": "402-12345678-9",
+        "stepIndex": 4,
+        "exampleValue": "402-12345678-9",
+        "sensitive": false
+      },
+      {
+        "key": "402_2999373_4",
+        "label": "402-2999373-4",
+        "stepIndex": 7,
+        "exampleValue": "402-2999373-4",
+        "sensitive": false
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 2,
+        "description": "Presionar \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().descriptionContains(\"Crea tu cuenta en minutos\")"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"content\"",
+        "strategy": "id",
+        "value": "android:id/content"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Ingresar \"402-12345678-9\" en \"402-12345678-9\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().text(\"402-12345678-9\")"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Presionar \"content\"",
+        "strategy": "id",
+        "value": "android:id/content"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Ingresar \"402-2999373-4\" en \"402-2999373-4\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().text(\"402-2999373-4\")"
+      },
+      {
+        "stepIndex": 9,
+        "description": "Presionar \"Acepto los Términos y condiciones y la Política de datos personales\"",
+        "strategy": "accessibilityId",
+        "value": "Acepto los Términos y condiciones y la Política de datos personales"
+      },
+      {
+        "stepIndex": 10,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().text(\"Continuar\")"
+      },
+      {
+        "stepIndex": 13,
+        "description": "Presionar \"Ir al inicio\"",
+        "strategy": "accessibilityId",
+        "value": "Ir al inicio"
+      }
+    ],
+    "sourceRecordingId": "144327f3-dbf9-428f-b82f-aafe74cc45a3",
+    "hasUncertainSteps": false
+  },
+  {
+    "scenarioId": "REC-144327F3-01-SEG-1",
+    "title": "Recorrido hasta Bienvenido",
+    "description": "Bloque del recorrido que termina en \"Bienvenido\". Cubre 6 de los 15 pasos del flujo completo.",
+    "preconditions": [
+      "Aplicación com.appconversacionalbsc instalada en el dispositivo",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "segment",
+    "mobileSteps": [
+      {
+        "action": "launchApp",
+        "description": "Abrir la aplicación com.appconversacionalbsc"
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Bienvenido\")"
+        },
+        "description": "Verificar que se muestra \"Bienvenido\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().descriptionContains(\"Crea tu cuenta en minutos\")"
+        },
+        "description": "Presionar \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "android:id/content"
+        },
+        "description": "Presionar \"content\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().text(\"402-12345678-9\")"
+        },
+        "value": "402-12345678-9",
+        "description": "Ingresar \"402-12345678-9\" en \"402-12345678-9\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Queremos conocerte\")"
+        },
+        "description": "Verificar que se muestra \"Queremos conocerte\""
+      }
+    ],
+    "webSteps": [],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación app-conversacional",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "El sistema navega a \"Bienvenido\"",
+        "expected": "Se muestra \"Bienvenido\""
+      },
+      {
+        "content": "Presionar \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"402-12345678-9\" en \"402-12345678-9\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "El sistema navega a \"Queremos conocerte\"",
+        "expected": "Se muestra \"Queremos conocerte\""
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "402_12345678_9",
+        "label": "402-12345678-9",
+        "stepIndex": 4,
+        "exampleValue": "402-12345678-9",
+        "sensitive": false
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 2,
+        "description": "Presionar \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().descriptionContains(\"Crea tu cuenta en minutos\")"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"content\"",
+        "strategy": "id",
+        "value": "android:id/content"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Ingresar \"402-12345678-9\" en \"402-12345678-9\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().text(\"402-12345678-9\")"
+      }
+    ],
+    "sourceRecordingId": "144327f3-dbf9-428f-b82f-aafe74cc45a3",
+    "hasUncertainSteps": false
+  },
+  {
+    "scenarioId": "REC-144327F3-01-SEG-2",
+    "title": "Recorrido hasta Queremos conocerte",
+    "description": "Bloque del recorrido que termina en \"Queremos conocerte\". Cubre 9 de los 15 pasos del flujo completo.",
+    "preconditions": [
+      "Aplicación com.appconversacionalbsc instalada en el dispositivo",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "segment",
+    "mobileSteps": [
+      {
+        "action": "launchApp",
+        "description": "Abrir la aplicación com.appconversacionalbsc"
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Bienvenido\")"
+        },
+        "description": "Verificar que se muestra \"Bienvenido\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().descriptionContains(\"Crea tu cuenta en minutos\")"
+        },
+        "description": "Presionar \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "android:id/content"
+        },
+        "description": "Presionar \"content\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().text(\"402-12345678-9\")"
+        },
+        "value": "402-12345678-9",
+        "description": "Ingresar \"402-12345678-9\" en \"402-12345678-9\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Queremos conocerte\")"
+        },
+        "description": "Verificar que se muestra \"Queremos conocerte\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "android:id/content"
+        },
+        "description": "Presionar \"content\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().text(\"402-2999373-4\")"
+        },
+        "value": "402-2999373-4",
+        "description": "Ingresar \"402-2999373-4\" en \"402-2999373-4\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Queremos conocerte\")"
+        },
+        "description": "Verificar que se muestra \"Queremos conocerte\""
+      }
+    ],
+    "webSteps": [],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación app-conversacional",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "El sistema navega a \"Bienvenido\"",
+        "expected": "Se muestra \"Bienvenido\""
+      },
+      {
+        "content": "Presionar \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"402-12345678-9\" en \"402-12345678-9\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "El sistema navega a \"Queremos conocerte\"",
+        "expected": "Se muestra \"Queremos conocerte\""
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"402-2999373-4\" en \"402-2999373-4\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "El sistema navega a \"Queremos conocerte\"",
+        "expected": "Se muestra \"Queremos conocerte\""
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "402_12345678_9",
+        "label": "402-12345678-9",
+        "stepIndex": 4,
+        "exampleValue": "402-12345678-9",
+        "sensitive": false
+      },
+      {
+        "key": "402_2999373_4",
+        "label": "402-2999373-4",
+        "stepIndex": 7,
+        "exampleValue": "402-2999373-4",
+        "sensitive": false
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 2,
+        "description": "Presionar \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().descriptionContains(\"Crea tu cuenta en minutos\")"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"content\"",
+        "strategy": "id",
+        "value": "android:id/content"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Ingresar \"402-12345678-9\" en \"402-12345678-9\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().text(\"402-12345678-9\")"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Presionar \"content\"",
+        "strategy": "id",
+        "value": "android:id/content"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Ingresar \"402-2999373-4\" en \"402-2999373-4\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().text(\"402-2999373-4\")"
+      }
+    ],
+    "sourceRecordingId": "144327f3-dbf9-428f-b82f-aafe74cc45a3",
+    "hasUncertainSteps": false
+  },
+  {
+    "scenarioId": "REC-144327F3-01-SEG-3",
+    "title": "Recorrido hasta Queremos conocerte",
+    "description": "Bloque del recorrido que termina en \"Queremos conocerte\". Cubre 12 de los 15 pasos del flujo completo.",
+    "preconditions": [
+      "Aplicación com.appconversacionalbsc instalada en el dispositivo",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "segment",
+    "mobileSteps": [
+      {
+        "action": "launchApp",
+        "description": "Abrir la aplicación com.appconversacionalbsc"
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Bienvenido\")"
+        },
+        "description": "Verificar que se muestra \"Bienvenido\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().descriptionContains(\"Crea tu cuenta en minutos\")"
+        },
+        "description": "Presionar \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "android:id/content"
+        },
+        "description": "Presionar \"content\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().text(\"402-12345678-9\")"
+        },
+        "value": "402-12345678-9",
+        "description": "Ingresar \"402-12345678-9\" en \"402-12345678-9\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Queremos conocerte\")"
+        },
+        "description": "Verificar que se muestra \"Queremos conocerte\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "android:id/content"
+        },
+        "description": "Presionar \"content\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().text(\"402-2999373-4\")"
+        },
+        "value": "402-2999373-4",
+        "description": "Ingresar \"402-2999373-4\" en \"402-2999373-4\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Queremos conocerte\")"
+        },
+        "description": "Verificar que se muestra \"Queremos conocerte\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "accessibilityId",
+          "value": "Acepto los Términos y condiciones y la Política de datos personales"
+        },
+        "description": "Presionar \"Acepto los Términos y condiciones y la Política de datos personales\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().text(\"Continuar\")"
+        },
+        "description": "Presionar \"Continuar\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"unknown\")"
+        },
+        "description": "Verificar que se muestra \"unknown\""
+      }
+    ],
+    "webSteps": [],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación app-conversacional",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "El sistema navega a \"Bienvenido\"",
+        "expected": "Se muestra \"Bienvenido\""
+      },
+      {
+        "content": "Presionar \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"402-12345678-9\" en \"402-12345678-9\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "El sistema navega a \"Queremos conocerte\"",
+        "expected": "Se muestra \"Queremos conocerte\""
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"402-2999373-4\" en \"402-2999373-4\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "El sistema navega a \"Queremos conocerte\"",
+        "expected": "Se muestra \"Queremos conocerte\""
+      },
+      {
+        "content": "Presionar \"Acepto los Términos y condiciones y la Política de datos personales\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"unknown\"",
+        "expected": "Se muestra \"unknown\""
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "402_12345678_9",
+        "label": "402-12345678-9",
+        "stepIndex": 4,
+        "exampleValue": "402-12345678-9",
+        "sensitive": false
+      },
+      {
+        "key": "402_2999373_4",
+        "label": "402-2999373-4",
+        "stepIndex": 7,
+        "exampleValue": "402-2999373-4",
+        "sensitive": false
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 2,
+        "description": "Presionar \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().descriptionContains(\"Crea tu cuenta en minutos\")"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"content\"",
+        "strategy": "id",
+        "value": "android:id/content"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Ingresar \"402-12345678-9\" en \"402-12345678-9\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().text(\"402-12345678-9\")"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Presionar \"content\"",
+        "strategy": "id",
+        "value": "android:id/content"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Ingresar \"402-2999373-4\" en \"402-2999373-4\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().text(\"402-2999373-4\")"
+      },
+      {
+        "stepIndex": 9,
+        "description": "Presionar \"Acepto los Términos y condiciones y la Política de datos personales\"",
+        "strategy": "accessibilityId",
+        "value": "Acepto los Términos y condiciones y la Política de datos personales"
+      },
+      {
+        "stepIndex": 10,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().text(\"Continuar\")"
+      }
+    ],
+    "sourceRecordingId": "144327f3-dbf9-428f-b82f-aafe74cc45a3",
+    "hasUncertainSteps": false
+  },
+  {
+    "scenarioId": "REC-144327F3-01-ALT-1",
+    "title": "Desde Bienvenido: example@gmail.com",
+    "description": "La pantalla \"Bienvenido\" ofrece \"example@gmail.com\", que el recorrido grabado no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.",
+    "preconditions": [
+      "Aplicación com.appconversacionalbsc instalada en el dispositivo",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "mobileSteps": [
+      {
+        "action": "launchApp",
+        "description": "Abrir la aplicación com.appconversacionalbsc"
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Bienvenido\")"
+        },
+        "description": "Verificar que se muestra \"Bienvenido\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().text(\"example@gmail.com\")"
+        },
+        "description": "Seleccionar \"example@gmail.com\""
+      }
+    ],
+    "webSteps": [],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación app-conversacional",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "El sistema navega a \"Bienvenido\"",
+        "expected": "Se muestra \"Bienvenido\""
+      },
+      {
+        "content": "Seleccionar \"example@gmail.com\"",
+        "expected": "Por confirmar: la grabación no recorrió esta opción"
+      }
+    ],
+    "requiredData": [],
+    "stepTargets": [
+      {
+        "stepIndex": 2,
+        "description": "Seleccionar \"example@gmail.com\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().text(\"example@gmail.com\")"
+      }
+    ],
+    "sourceRecordingId": "144327f3-dbf9-428f-b82f-aafe74cc45a3",
+    "hasUncertainSteps": true
+  },
+  {
+    "scenarioId": "REC-144327F3-01-ALT-2",
+    "title": "Desde Bienvenido: Acceso biométrico",
+    "description": "La pantalla \"Bienvenido\" ofrece \"Acceso biométrico\", que el recorrido grabado no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.",
+    "preconditions": [
+      "Aplicación com.appconversacionalbsc instalada en el dispositivo",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "mobileSteps": [
+      {
+        "action": "launchApp",
+        "description": "Abrir la aplicación com.appconversacionalbsc"
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Bienvenido\")"
+        },
+        "description": "Verificar que se muestra \"Bienvenido\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "accessibilityId",
+          "value": "Acceso biométrico"
+        },
+        "description": "Seleccionar \"Acceso biométrico\""
+      }
+    ],
+    "webSteps": [],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación app-conversacional",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "El sistema navega a \"Bienvenido\"",
+        "expected": "Se muestra \"Bienvenido\""
+      },
+      {
+        "content": "Seleccionar \"Acceso biométrico\"",
+        "expected": "Por confirmar: la grabación no recorrió esta opción"
+      }
+    ],
+    "requiredData": [],
+    "stepTargets": [
+      {
+        "stepIndex": 2,
+        "description": "Seleccionar \"Acceso biométrico\"",
+        "strategy": "accessibilityId",
+        "value": "Acceso biométrico"
+      }
+    ],
+    "sourceRecordingId": "144327f3-dbf9-428f-b82f-aafe74cc45a3",
+    "hasUncertainSteps": true
+  },
+  {
+    "scenarioId": "REC-144327F3-01-ALT-3",
+    "title": "Desde Queremos conocerte: , Cédula",
+    "description": "La pantalla \"Queremos conocerte\" ofrece \", Cédula\", que el recorrido grabado no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.",
+    "preconditions": [
+      "Aplicación com.appconversacionalbsc instalada en el dispositivo",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "mobileSteps": [
+      {
+        "action": "launchApp",
+        "description": "Abrir la aplicación com.appconversacionalbsc"
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Bienvenido\")"
+        },
+        "description": "Verificar que se muestra \"Bienvenido\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().descriptionContains(\"Crea tu cuenta en minutos\")"
+        },
+        "description": "Presionar \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "android:id/content"
+        },
+        "description": "Presionar \"content\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().text(\"402-12345678-9\")"
+        },
+        "value": "402-12345678-9",
+        "description": "Ingresar \"402-12345678-9\" en \"402-12345678-9\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Queremos conocerte\")"
+        },
+        "description": "Verificar que se muestra \"Queremos conocerte\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().descriptionContains(\"Cédula\")"
+        },
+        "description": "Seleccionar \", Cédula\""
+      }
+    ],
+    "webSteps": [],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación app-conversacional",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "El sistema navega a \"Bienvenido\"",
+        "expected": "Se muestra \"Bienvenido\""
+      },
+      {
+        "content": "Presionar \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"402-12345678-9\" en \"402-12345678-9\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "El sistema navega a \"Queremos conocerte\"",
+        "expected": "Se muestra \"Queremos conocerte\""
+      },
+      {
+        "content": "Seleccionar \", Cédula\"",
+        "expected": "Por confirmar: la grabación no recorrió esta opción"
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "402_12345678_9",
+        "label": "402-12345678-9",
+        "stepIndex": 4,
+        "exampleValue": "402-12345678-9",
+        "sensitive": false
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 2,
+        "description": "Presionar \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().descriptionContains(\"Crea tu cuenta en minutos\")"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"content\"",
+        "strategy": "id",
+        "value": "android:id/content"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Ingresar \"402-12345678-9\" en \"402-12345678-9\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().text(\"402-12345678-9\")"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Seleccionar \", Cédula\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().descriptionContains(\"Cédula\")"
+      }
+    ],
+    "sourceRecordingId": "144327f3-dbf9-428f-b82f-aafe74cc45a3",
+    "hasUncertainSteps": true
+  },
+  {
+    "scenarioId": "REC-144327F3-01-ALT-4",
+    "title": "Desde Queremos conocerte: , Pasaporte",
+    "description": "La pantalla \"Queremos conocerte\" ofrece \", Pasaporte\", que el recorrido grabado no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.",
+    "preconditions": [
+      "Aplicación com.appconversacionalbsc instalada en el dispositivo",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "mobileSteps": [
+      {
+        "action": "launchApp",
+        "description": "Abrir la aplicación com.appconversacionalbsc"
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Bienvenido\")"
+        },
+        "description": "Verificar que se muestra \"Bienvenido\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().descriptionContains(\"Crea tu cuenta en minutos\")"
+        },
+        "description": "Presionar \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "android:id/content"
+        },
+        "description": "Presionar \"content\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().text(\"402-12345678-9\")"
+        },
+        "value": "402-12345678-9",
+        "description": "Ingresar \"402-12345678-9\" en \"402-12345678-9\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Queremos conocerte\")"
+        },
+        "description": "Verificar que se muestra \"Queremos conocerte\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().descriptionContains(\"Pasaporte\")"
+        },
+        "description": "Seleccionar \", Pasaporte\""
+      }
+    ],
+    "webSteps": [],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación app-conversacional",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "El sistema navega a \"Bienvenido\"",
+        "expected": "Se muestra \"Bienvenido\""
+      },
+      {
+        "content": "Presionar \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"402-12345678-9\" en \"402-12345678-9\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "El sistema navega a \"Queremos conocerte\"",
+        "expected": "Se muestra \"Queremos conocerte\""
+      },
+      {
+        "content": "Seleccionar \", Pasaporte\"",
+        "expected": "Por confirmar: la grabación no recorrió esta opción"
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "402_12345678_9",
+        "label": "402-12345678-9",
+        "stepIndex": 4,
+        "exampleValue": "402-12345678-9",
+        "sensitive": false
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 2,
+        "description": "Presionar \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().descriptionContains(\"Crea tu cuenta en minutos\")"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"content\"",
+        "strategy": "id",
+        "value": "android:id/content"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Ingresar \"402-12345678-9\" en \"402-12345678-9\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().text(\"402-12345678-9\")"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Seleccionar \", Pasaporte\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().descriptionContains(\"Pasaporte\")"
+      }
+    ],
+    "sourceRecordingId": "144327f3-dbf9-428f-b82f-aafe74cc45a3",
+    "hasUncertainSteps": true
+  },
+  {
+    "scenarioId": "REC-144327F3-01-ALT-5",
+    "title": "Desde Queremos conocerte: 402-12345678-9",
+    "description": "La pantalla \"Queremos conocerte\" ofrece \"402-12345678-9\", que el recorrido grabado no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.",
+    "preconditions": [
+      "Aplicación com.appconversacionalbsc instalada en el dispositivo",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "mobileSteps": [
+      {
+        "action": "launchApp",
+        "description": "Abrir la aplicación com.appconversacionalbsc"
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Bienvenido\")"
+        },
+        "description": "Verificar que se muestra \"Bienvenido\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().descriptionContains(\"Crea tu cuenta en minutos\")"
+        },
+        "description": "Presionar \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "android:id/content"
+        },
+        "description": "Presionar \"content\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().text(\"402-12345678-9\")"
+        },
+        "value": "402-12345678-9",
+        "description": "Ingresar \"402-12345678-9\" en \"402-12345678-9\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Queremos conocerte\")"
+        },
+        "description": "Verificar que se muestra \"Queremos conocerte\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().text(\"402-12345678-9\")"
+        },
+        "description": "Seleccionar \"402-12345678-9\""
+      }
+    ],
+    "webSteps": [],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación app-conversacional",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "El sistema navega a \"Bienvenido\"",
+        "expected": "Se muestra \"Bienvenido\""
+      },
+      {
+        "content": "Presionar \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"402-12345678-9\" en \"402-12345678-9\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "El sistema navega a \"Queremos conocerte\"",
+        "expected": "Se muestra \"Queremos conocerte\""
+      },
+      {
+        "content": "Seleccionar \"402-12345678-9\"",
+        "expected": "Por confirmar: la grabación no recorrió esta opción"
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "402_12345678_9",
+        "label": "402-12345678-9",
+        "stepIndex": 4,
+        "exampleValue": "402-12345678-9",
+        "sensitive": false
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 2,
+        "description": "Presionar \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().descriptionContains(\"Crea tu cuenta en minutos\")"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"content\"",
+        "strategy": "id",
+        "value": "android:id/content"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Ingresar \"402-12345678-9\" en \"402-12345678-9\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().text(\"402-12345678-9\")"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Seleccionar \"402-12345678-9\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().text(\"402-12345678-9\")"
+      }
+    ],
+    "sourceRecordingId": "144327f3-dbf9-428f-b82f-aafe74cc45a3",
+    "hasUncertainSteps": true
+  },
+  {
+    "scenarioId": "REC-144327F3-01-ALT-6",
+    "title": "Desde Queremos conocerte: , Cédula",
+    "description": "La pantalla \"Queremos conocerte\" ofrece \", Cédula\", que el recorrido grabado no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.",
+    "preconditions": [
+      "Aplicación com.appconversacionalbsc instalada en el dispositivo",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "mobileSteps": [
+      {
+        "action": "launchApp",
+        "description": "Abrir la aplicación com.appconversacionalbsc"
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Bienvenido\")"
+        },
+        "description": "Verificar que se muestra \"Bienvenido\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().descriptionContains(\"Crea tu cuenta en minutos\")"
+        },
+        "description": "Presionar \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "android:id/content"
+        },
+        "description": "Presionar \"content\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().text(\"402-12345678-9\")"
+        },
+        "value": "402-12345678-9",
+        "description": "Ingresar \"402-12345678-9\" en \"402-12345678-9\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Queremos conocerte\")"
+        },
+        "description": "Verificar que se muestra \"Queremos conocerte\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "android:id/content"
+        },
+        "description": "Presionar \"content\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().text(\"402-2999373-4\")"
+        },
+        "value": "402-2999373-4",
+        "description": "Ingresar \"402-2999373-4\" en \"402-2999373-4\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Queremos conocerte\")"
+        },
+        "description": "Verificar que se muestra \"Queremos conocerte\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().descriptionContains(\"Cédula\")"
+        },
+        "description": "Seleccionar \", Cédula\""
+      }
+    ],
+    "webSteps": [],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación app-conversacional",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "El sistema navega a \"Bienvenido\"",
+        "expected": "Se muestra \"Bienvenido\""
+      },
+      {
+        "content": "Presionar \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"402-12345678-9\" en \"402-12345678-9\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "El sistema navega a \"Queremos conocerte\"",
+        "expected": "Se muestra \"Queremos conocerte\""
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"402-2999373-4\" en \"402-2999373-4\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "El sistema navega a \"Queremos conocerte\"",
+        "expected": "Se muestra \"Queremos conocerte\""
+      },
+      {
+        "content": "Seleccionar \", Cédula\"",
+        "expected": "Por confirmar: la grabación no recorrió esta opción"
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "402_12345678_9",
+        "label": "402-12345678-9",
+        "stepIndex": 4,
+        "exampleValue": "402-12345678-9",
+        "sensitive": false
+      },
+      {
+        "key": "402_2999373_4",
+        "label": "402-2999373-4",
+        "stepIndex": 7,
+        "exampleValue": "402-2999373-4",
+        "sensitive": false
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 2,
+        "description": "Presionar \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().descriptionContains(\"Crea tu cuenta en minutos\")"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"content\"",
+        "strategy": "id",
+        "value": "android:id/content"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Ingresar \"402-12345678-9\" en \"402-12345678-9\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().text(\"402-12345678-9\")"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Presionar \"content\"",
+        "strategy": "id",
+        "value": "android:id/content"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Ingresar \"402-2999373-4\" en \"402-2999373-4\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().text(\"402-2999373-4\")"
+      },
+      {
+        "stepIndex": 9,
+        "description": "Seleccionar \", Cédula\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().descriptionContains(\"Cédula\")"
+      }
+    ],
+    "sourceRecordingId": "144327f3-dbf9-428f-b82f-aafe74cc45a3",
+    "hasUncertainSteps": true
+  }
+]

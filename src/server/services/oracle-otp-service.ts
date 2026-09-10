@@ -71,6 +71,12 @@ export type GenerateLocalTokenOutput = {
   requestId: string;
   generatedAt: string;
   channel: string;
+  /**
+   * Token returned straight from the procedure's pTokenGen OUT bind, when it is usable.
+   * Callers that get it can skip the `latest` round-trip entirely. Optional on purpose:
+   * an absent or unparseable pTokenGen leaves this undefined and the caller falls back.
+   */
+  otp?: string;
 };
 
 export type GetLatestLocalTokenOutput = {
@@ -796,12 +802,26 @@ export async function generateLocalToken(
         }),
       });
     }
+    // The procedure hands the token back in pTokenGen, so the caller does not need the
+    // `latest` query — whose `FECHA_ADICION >= generatedAfter` filter silently matches
+    // nothing whenever the database clock lags the API host's. Best-effort by design:
+    // a missing or malformed pTokenGen leaves `otp` absent instead of failing a generate
+    // that Oracle already reported as successful, and the caller falls back to `latest`.
+    let directOtp: string | undefined;
+    if (procedureResult.tokenGenerated) {
+      try {
+        directOtp = normalizeOtp(procedureResult.tokenGenerated);
+      } catch {
+        directOtp = undefined;
+      }
+    }
     return {
       ok: true,
       generated: true,
       requestId,
       generatedAt,
       channel,
+      ...(directOtp ? { otp: directOtp } : {}),
     };
   } catch (err) {
     throw classifyOracleRuntimeError({

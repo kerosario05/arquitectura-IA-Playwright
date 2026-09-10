@@ -3,6 +3,7 @@ import { ensureConsentCheckboxChecked, findUncheckedConsentCheckboxes, isSubmitG
 import { dismissBlockingModal } from "./mobile-modal-dismisser";
 import { buildTextVariants, normalizeComparableText, repairUtf8Mojibake } from "./mobile-text-normalization";
 import { resolveMobileOtp, MobileOtpResolverError } from "./mobile-otp-resolver";
+import { analyzeSegmentedGroup, joinSegmentValues, parseBounds, type SegmentCandidate } from "./mobile-segmented-input";
 
 /**
  * Optional runtime context for executing a step. Only used to resolve just-in-time OTPs:
@@ -13,6 +14,12 @@ export type MobileStepRuntimeContext = {
   appSlug?: string;
   requiredData?: MobileDataField[];
   dataOverrides?: Record<number, string>;
+  /**
+   * The scenario's full step list. An OTP step uses it to find the control that sent the code
+   * (the nearest preceding click) and to check whether a later step already drives the next
+   * validation cycle — see `completeRemainingOtpChallenges`.
+   */
+  steps?: MobileStep[];
 };
 
 function maskSensitive(v: string): string {
@@ -20,25 +27,103 @@ function maskSensitive(v: string): string {
   return v.length <= 4 ? "*".repeat(v.length) : `${"*".repeat(v.length - 4)}${v.slice(-4)}`;
 }
 
-async function resolveOtpForStep(step: MobileStep, ctx?: MobileStepRuntimeContext): Promise<string> {
+/** Field names that read as an identification document. */
+const IDENTITY_LABEL_PATTERN = /(documento|c[eé]dula|cedula|identificaci[oó]n|identidad|identity|\bdni\b|\brnc\b|pasaporte)/i;
+/** Field names that are secrets rather than identities — never a source for the OTP identity. */
+const SECRET_LABEL_PATTERN = /(otp|c[oó]digo|codigo|token|clave|contrase[nñ]a|password|\bpin\b)/i;
+/** Digit-count window an identification number plausibly falls in (a cédula is 11). */
+const IDENTITY_MIN_DIGITS = 8;
+const IDENTITY_MAX_DIGITS = 20;
+
+function isDigitsOnly(value: string): boolean {
+  return /^\d+$/.test(value);
+}
+
+/**
+ * Resolves which identity an OTP must be issued for.
+ *
+ * `step.otp.identityField` is only a hint: the generator prompt instructs the model to omit it
+ * whenever the evidence does not name the field safely, on the promise that "runtime lo resuelva".
+ * That runtime resolution never existed, so every OTP step generated without the hint died with
+ * `otp_identity_unresolved` even when the value was sitting right there in `dataOverrides`.
+ *
+ * The tiers below close that gap. Each one demands a single unambiguous match, so an identity is
+ * never guessed when the data allows two readings — a wrong identity would issue a valid OTP for
+ * the wrong client and fail the run for a reason nobody could see.
+ */
+export function resolveOtpIdentity(
+  step: MobileStep,
+  ctx: MobileStepRuntimeContext,
+  stepIndex: number,
+  env: NodeJS.ProcessEnv = process.env,
+): { identity: string; source: string } | null {
+  // Mirror what applyDataOverrides actually types into the app: the override when present,
+  // otherwise the value already carried by the step.
+  const valueFor = (f: MobileDataField): string => (ctx.dataOverrides?.[f.stepIndex] ?? f.exampleValue ?? "").trim();
+  const nameOf = (f: MobileDataField): string => `${f.key ?? ""} ${f.label ?? ""}`;
+  // The OTP step's own field is never the identity.
+  const fields = (ctx.requiredData ?? []).filter((f) => f.stepIndex !== stepIndex);
+
+  // Tier 1 — the explicit hint, when the scenario declared one.
+  const identityField = step.otp?.identityField;
+  if (identityField) {
+    const field = fields.find((f) =>
+      f.key === identityField || f.label === identityField || slugifyKey(f.label) === slugifyKey(identityField),
+    );
+    const value = field ? valueFor(field) : "";
+    if (value) return { identity: value, source: "field" };
+  }
+
+  // Tier 2 — exactly one field whose name reads as an identification document.
+  const byName = fields.filter((f) =>
+    IDENTITY_LABEL_PATTERN.test(nameOf(f)) && !SECRET_LABEL_PATTERN.test(nameOf(f)) && isDigitsOnly(valueFor(f)),
+  );
+  if (byName.length === 1) return { identity: valueFor(byName[0]), source: "inferred_label" };
+
+  // Tier 3 — exactly one sensitive, all-digit field that is not a secret.
+  const bySensitivity = fields.filter((f) =>
+    f.sensitive && !SECRET_LABEL_PATTERN.test(nameOf(f)) && isDigitsOnly(valueFor(f)),
+  );
+  if (bySensitivity.length === 1) return { identity: valueFor(bySensitivity[0]), source: "inferred_sensitive" };
+
+  // Tier 4 — exactly one field whose value simply looks like an identification number.
+  // Generated labels are not stable: the same field has appeared as "Completar el número de
+  // documento del cliente" (sensitive) and as `Completar "402-12345678-9"` (not sensitive, and
+  // matching no keyword). The value's shape is the one signal that survives both.
+  const byShape = fields.filter((f) => {
+    if (SECRET_LABEL_PATTERN.test(nameOf(f))) return false;
+    const value = valueFor(f);
+    return isDigitsOnly(value) && value.length >= IDENTITY_MIN_DIGITS && value.length <= IDENTITY_MAX_DIGITS;
+  });
+  if (byShape.length === 1) return { identity: valueFor(byShape[0]), source: "inferred_value_shape" };
+
+  // Tier 5 — the repo-wide identification fallback, the same variable the web auth flow reads.
+  // Last resort on purpose: it is a fixed value, so it is right only when the scenario happens
+  // to target that same client.
+  const envIdentity = (env.Identity_Provider ?? "").trim();
+  if (isDigitsOnly(envIdentity)) return { identity: envIdentity, source: "env_identity_provider" };
+
+  return null;
+}
+
+async function resolveOtpForStep(
+  step: MobileStep,
+  ctx?: MobileStepRuntimeContext,
+  stepIndex = -1,
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<string> {
   if (!ctx?.appSlug) {
     throw new MobileOtpResolverError("otp_identity_unresolved", "OTP step requires appSlug in runtime context.");
   }
-  const identityField = step.otp?.identityField;
-  let identity = "";
-  let identitySource = "config";
-  if (identityField) {
-    identitySource = "field";
-    const field = (ctx.requiredData ?? []).find((f) =>
-      f.key === identityField || f.label === identityField || slugifyKey(f.label) === slugifyKey(identityField),
-    );
-    const stepIndex = field?.stepIndex;
-    if (stepIndex !== undefined) {
-      identity = ctx.dataOverrides?.[stepIndex] ?? "";
-    }
-  }
-  if (!identity) {
+  const resolvedIdentity = resolveOtpIdentity(step, ctx, stepIndex, env);
+  if (!resolvedIdentity) {
     throw new MobileOtpResolverError("otp_identity_unresolved", "OTP identity could not be resolved from runtime data.");
+  }
+  const { identity, source: identitySource } = resolvedIdentity;
+  if (identitySource !== "field") {
+    console.warn(
+      `[mobile:otp] identity resolved without an explicit hint (source=${identitySource}) — declare otp.identityField on the step to pin it`,
+    );
   }
   console.log(`[mobile:otp] phase=resolve identitySource=${identitySource} identity=${maskSensitive(identity)} channel=${step.otp?.channel ?? "-"}`);
   const resolved = await resolveMobileOtp({
@@ -245,6 +330,305 @@ function hasMaskSeparators(value: string): boolean {
 /** Keeps letters/digits, drops only format/separator characters. */
 function canonicalizeSignificant(value: string): string {
   return value.replace(/[^a-zA-Z0-9]/g, "");
+}
+
+async function matchesForSelector(browser: WebdriverIO.Browser, selector: string): Promise<WdioElement[]> {
+  try {
+    const found = await browser.$$(selector);
+    return Array.from(found as unknown as ArrayLike<WdioElement>);
+  } catch {
+    return [];
+  }
+}
+
+async function readElementText(el: WdioElement | undefined): Promise<string> {
+  if (!el) return "";
+  for (const read of [
+    async () => String((await el.getAttribute("text")) ?? ""),
+    async () => String((await el.getText()) ?? ""),
+  ]) {
+    try {
+      const value = (await read()).trim();
+      if (value) return value;
+    } catch {
+      // probe unavailable on this element; try the next one
+    }
+  }
+  return "";
+}
+
+/**
+ * Writes one character per box when the target resolves to a segmented input (the "one box per
+ * digit" OTP layout). Returns the ordered box indices on success, or null when the layout is not
+ * segmented — in which case the caller performs the ordinary single-field fill.
+ *
+ * Each box is addressed directly rather than typed through, so the result does not depend on the
+ * app auto-advancing focus between boxes.
+ */
+async function buildSegmentCandidates(elements: WdioElement[]): Promise<SegmentCandidate[]> {
+  const candidates: SegmentCandidate[] = [];
+  for (let i = 0; i < elements.length; i++) {
+    let displayed = false;
+    let bounds = null;
+    try {
+      displayed = await elements[i].isDisplayed();
+    } catch {
+      displayed = false;
+    }
+    let text = "";
+    if (displayed) {
+      try {
+        bounds = parseBounds(String((await elements[i].getAttribute("bounds")) ?? ""));
+      } catch {
+        bounds = null;
+      }
+      // Needed to tell an already-filled group from the one still awaiting input when the
+      // screen shows two segmented groups at once (email validated, phone pending).
+      text = await readElementText(elements[i]);
+    }
+    candidates.push({ index: i, bounds, displayed, text });
+  }
+  return candidates;
+}
+
+/**
+ * Finds a segmented group whose boxes are all still empty. Unlike the general detection, this
+ * never returns an already-filled group, so it can be polled after clicking "send code" to wait
+ * for the next set of boxes to appear without ever pointing back at the one just completed.
+ */
+async function findEmptySegmentedGroup(
+  browser: WebdriverIO.Browser,
+  selector: string,
+  length: number,
+): Promise<number[] | null> {
+  const elements = await matchesForSelector(browser, selector);
+  if (elements.length < 2) return null;
+  const candidates = await buildSegmentCandidates(elements);
+  const empty = candidates.filter((c) => (c.text ?? "").trim() === "");
+  return analyzeSegmentedGroup(empty, length).group;
+}
+
+async function tryFillSegmentedInput(
+  browser: WebdriverIO.Browser,
+  selector: string,
+  value: string,
+): Promise<number[] | null> {
+  const chars = Array.from(value);
+  if (chars.length < 2) return null;
+
+  const elements = await matchesForSelector(browser, selector);
+  if (elements.length < 2) {
+    console.log(`[mobile:fill] segmented=no reason=single_match;matched=${elements.length}`);
+    return null;
+  }
+
+  const candidates = await buildSegmentCandidates(elements);
+
+  // Geometry of every match, so a decline can be diagnosed from the run log alone.
+  const geometry = candidates
+    .map((c) => (c.bounds ? `${c.index}:[${c.bounds.x1},${c.bounds.y1}][${c.bounds.x2},${c.bounds.y2}]` : `${c.index}:none`))
+    .join(" ");
+  const { group, reason } = analyzeSegmentedGroup(candidates, chars.length);
+  if (!group) {
+    console.log(`[mobile:fill] segmented=no reason=${reason} matched=${elements.length} geometry=${geometry}`);
+    return null;
+  }
+
+  console.log(`[mobile:fill] segmented=yes boxes=${group.length} chars=${chars.length} order=${group.join(",")} geometry=${geometry}`);
+  let current = elements;
+  for (let i = 0; i < group.length; i++) {
+    try {
+      await current[group[i]].setValue(chars[i]);
+    } catch {
+      // Writing a box can make the app re-render as focus auto-advances, invalidating the
+      // element references captured before the loop. Re-resolve once and continue.
+      current = await matchesForSelector(browser, selector);
+      const refreshed = current[group[i]];
+      if (!refreshed) return null;
+      await refreshed.setValue(chars[i]);
+    }
+  }
+  return group;
+}
+
+/** Extra send→fill cycles a single OTP step may drive on its own. */
+const MAX_EXTRA_OTP_CYCLES = 2;
+
+/**
+ * Completes the OTP validations a screen still has pending after the step's own fill.
+ *
+ * The contact-confirmation screen validates two data points — email and phone — each with its own
+ * "send code" button, and `Continuar` stays disabled until both are done. Generated scenarios keep
+ * modelling a single cycle, because the generator has no evidence of the OTP screen and says so in
+ * its own rejection notes. Rather than depend on a scenario shape that changes with every
+ * regeneration, an OTP step here means "complete this screen's OTP validation".
+ *
+ * Deliberately yields to an explicit scenario: if a later step is itself an OTP step, the scenario
+ * drives the next cycle and this does nothing, so the two never double-send.
+ */
+export function planOtpAutoContinue(
+  steps: MobileStep[],
+  index: number,
+): { proceed: boolean; sendTarget?: MobileStepTarget; reason: string } {
+  if (steps.slice(index + 1).some((s) => s.otp?.required === true)) {
+    return { proceed: false, reason: "scenario_drives_next_cycle" };
+  }
+  // The control that sent this code is the nearest preceding click — the scenario names it, so
+  // nothing app-specific is hardcoded here.
+  for (let i = index - 1; i >= 0; i--) {
+    if (steps[i]?.action === "click" && steps[i]?.target) {
+      return { proceed: true, sendTarget: steps[i].target, reason: `send_control_from_step_${i}` };
+    }
+  }
+  return { proceed: false, reason: "no_preceding_send_control" };
+}
+
+function sameTarget(a?: MobileStepTarget, b?: MobileStepTarget): boolean {
+  return Boolean(a && b && a.strategy === b.strategy && a.value === b.value);
+}
+
+/**
+ * Decides whether to press the screen's submit control once every OTP challenge is satisfied.
+ *
+ * Generated scenarios have been ending at the OTP fill, with no step that submits. Such a run goes
+ * green having proved nothing: the code was typed into the boxes, but the app was never asked to
+ * accept it. Pressing the control the scenario itself uses to advance — and failing when it stays
+ * disabled — is what turns the step into an actual verification.
+ *
+ * Only applies when the OTP fill is the scenario's last step; anything after it drives the flow.
+ */
+export function planPostOtpSubmit(
+  steps: MobileStep[],
+  index: number,
+  sendTarget?: MobileStepTarget,
+): { proceed: boolean; submitTarget?: MobileStepTarget; reason: string } {
+  if (steps.length === 0) return { proceed: false, reason: "no_steps_in_context" };
+  if (index !== steps.length - 1) return { proceed: false, reason: "scenario_has_later_steps" };
+  for (let i = index - 1; i >= 0; i--) {
+    const candidate = steps[i];
+    if (!candidate?.target || !isSubmitLikeClick(candidate)) continue;
+    // "Enviar código de validación" reads as submit-like too; it is the OTP trigger, not the
+    // control that advances the screen.
+    if (sameTarget(candidate.target, sendTarget)) continue;
+    return { proceed: true, submitTarget: candidate.target, reason: `submit_control_from_step_${i}` };
+  }
+  return { proceed: false, reason: "no_submit_control_in_scenario" };
+}
+
+async function submitAfterOtpChallenges(
+  browser: WebdriverIO.Browser,
+  index: number,
+  ctx: MobileStepRuntimeContext,
+  sendTarget?: MobileStepTarget,
+): Promise<void> {
+  const plan = planPostOtpSubmit(ctx.steps ?? [], index, sendTarget);
+  if (!plan.proceed || !plan.submitTarget) {
+    console.log(`[mobile:otp] post-otp submit skipped reason=${plan.reason}`);
+    return;
+  }
+  const submitTarget = plan.submitTarget;
+  const selector = selectorFromTarget(submitTarget);
+  let observation = await observeEnabledState(browser, selector, submitTarget);
+  for (let attempt = 0; attempt < 10 && !observation.enabledObserved; attempt++) {
+    await browser.pause(500);
+    observation = await observeEnabledState(browser, selector, submitTarget);
+  }
+  if (!observation.enabledObserved) {
+    // The gate not opening means the app did not accept the codes — the very thing a scenario
+    // ending at the fill was silently skipping.
+    throw new Error(
+      `data_precondition_failure: submit gate not satisfied after OTP validation target=${JSON.stringify(submitTarget)} enabledSource=${observation.enabledSource}`,
+    );
+  }
+  const el = await locateTarget(browser, submitTarget, selector, 5000, "displayed");
+  if (!el) {
+    throw new Error(`data_precondition_failure: submit control vanished after OTP validation target=${JSON.stringify(submitTarget)}`);
+  }
+  await el.click();
+  console.log(`[mobile:otp] post-otp submit clicked ${JSON.stringify(submitTarget)} (${plan.reason})`);
+}
+
+async function completeRemainingOtpChallenges(
+  browser: WebdriverIO.Browser,
+  step: MobileStep,
+  index: number,
+  ctx: MobileStepRuntimeContext,
+  fillSelector: string,
+  otpLength: number,
+): Promise<MobileStepTarget | undefined> {
+  const plan = planOtpAutoContinue(ctx.steps ?? [], index);
+  if (!plan.proceed || !plan.sendTarget) {
+    console.log(`[mobile:otp] auto-continue skipped reason=${plan.reason}`);
+    return undefined;
+  }
+  const sendTarget = plan.sendTarget;
+
+  const sendSelector = selectorFromTarget(sendTarget);
+  for (let cycle = 1; cycle <= MAX_EXTRA_OTP_CYCLES; cycle++) {
+    const sendEl = await locateTarget(browser, sendTarget, sendSelector, 3000, "displayed");
+    if (!sendEl) {
+      console.log(`[mobile:otp] auto-continue finished: no further send control (extra cycles=${cycle - 1})`);
+      return sendTarget;
+    }
+    console.log(`[mobile:otp] auto-continue cycle=${cycle} clicking send control ${JSON.stringify(sendTarget)}`);
+    await sendEl.click();
+
+    // Wait for the next set of boxes to render. Only an empty group qualifies, so this can never
+    // point back at the group just completed.
+    let group: number[] | null = null;
+    for (let attempt = 0; attempt < 10 && !group; attempt++) {
+      group = await findEmptySegmentedGroup(browser, fillSelector, otpLength);
+      if (!group) await browser.pause(500);
+    }
+    if (!group) {
+      console.log(`[mobile:otp] auto-continue cycle=${cycle}: no empty segmented group appeared after sending`);
+      return sendTarget;
+    }
+
+    const otp = await resolveOtpForStep(step, ctx, index);
+    const filled = await tryFillSegmentedInput(browser, fillSelector, otp);
+    if (!filled) {
+      throw new Error(`data_precondition_failure: additional OTP cycle ${cycle} could not fill the segmented group`);
+    }
+    const observation = await readSegmentedObservation(browser, fillSelector, filled, otp);
+    if (!observation.fieldAccepted) {
+      throw new Error(`data_precondition_failure: additional OTP cycle ${cycle} not accepted ${observation.acceptanceSource}`);
+    }
+    console.log(`[mobile:otp] auto-continue cycle=${cycle} completed`);
+  }
+  console.log(`[mobile:otp] auto-continue stopped at the ${MAX_EXTRA_OTP_CYCLES}-cycle limit`);
+  return sendTarget;
+}
+
+/** Verifies a segmented fill by reading the boxes back in visual order. */
+async function readSegmentedObservation(
+  browser: WebdriverIO.Browser,
+  selector: string,
+  group: number[],
+  submittedValue: string,
+): Promise<FillObservation> {
+  const elements = await matchesForSelector(browser, selector);
+  const observedChars: string[] = [];
+  for (const index of group) {
+    observedChars.push(await readElementText(elements[index]));
+  }
+  const observed = joinSegmentValues(observedChars);
+  // Boxes that mask their content cannot be compared by value, only by how many are filled.
+  const masked = observed.length > 0 && /^[*•]+$/.test(observed);
+  const accepted = masked ? observed.length === submittedValue.length : observed === submittedValue;
+  // Shapes only — the value can be a one-time code.
+  console.log(
+    `[mobile:fill] segmented verify boxes=${group.length} filled=${observedChars.filter((c) => c.length > 0).length} masked=${masked} accepted=${accepted}`,
+  );
+  // The submitted value can be a one-time code, so report only shapes here — never the digits.
+  return {
+    fieldLocated: true,
+    valueEntered: submittedValue,
+    fieldAccepted: accepted,
+    acceptanceSource: accepted
+      ? `segmented:boxes=${group.length}`
+      : `segmented_mismatch;boxes=${group.length};filled=${observed.length};expected=${submittedValue.length}`,
+  };
 }
 
 async function readFilledValueObservation(el: WdioElement, submittedValue: string, options?: { maskAware?: boolean }): Promise<FillObservation> {
@@ -775,7 +1159,7 @@ export async function executeMobileStep(
         let submittedValue = effectiveStep.value ?? "";
         if (effectiveStep.otp?.required === true) {
           // Just-in-time OTP: resolve a fresh code and use it as the fill input, in memory only.
-          submittedValue = await resolveOtpForStep(effectiveStep, otpContext);
+          submittedValue = await resolveOtpForStep(effectiveStep, otpContext, index);
         }
         // Detect masked inputs (e.g. a formatted identifier field) before sending keys:
         // the control's mask reformats separators as they are typed, so send only the
@@ -801,7 +1185,15 @@ export async function executeMobileStep(
           console.log(`[mobile:fill] mask-aware input detected hint="${hintAttr}" inputType="${inputTypeAttr}" payload="${significantChars}"`);
         }
         const inputPayload = maskAware ? significantChars : submittedValue;
-        await el.setValue(inputPayload);
+        const fillSelector = selectorFromTarget(effectiveStep.target);
+        // A selector like className("android.widget.EditText") resolves to the first box on a
+        // screen that splits the value across one box per character. Writing the whole payload
+        // there keeps a single character and leaves the submit button disabled, so try the
+        // per-box path first; it declines whenever the layout is not unambiguously segmented.
+        const segmentGroup = await tryFillSegmentedInput(browser, fillSelector, inputPayload);
+        if (!segmentGroup) {
+          await el.setValue(inputPayload);
+        }
         try {
           await browser.hideKeyboard();
         } catch {
@@ -809,12 +1201,26 @@ export async function executeMobileStep(
         }
         // hideKeyboard may trigger a re-render; re-resolve the element using the step selector
         // instead of reusing the pre-keyboard reference, then validate the filled value against it.
-        const fillSelector = selectorFromTarget(effectiveStep.target);
         const postFillEl = await browser.$(fillSelector);
-        const fillObservation = await readFilledValueObservation(postFillEl, submittedValue, { maskAware });
+        const fillObservation = segmentGroup
+          ? await readSegmentedObservation(browser, fillSelector, segmentGroup, inputPayload)
+          : await readFilledValueObservation(postFillEl, submittedValue, { maskAware });
         getRuntimeState(browser).lastFillByTarget.set(targetKey(effectiveStep.target), fillObservation);
         if (!fillObservation.fieldAccepted) {
           throw new Error(`data_precondition_failure: fill not accepted target=${JSON.stringify(effectiveStep.target)} acceptanceSource=${fillObservation.acceptanceSource}`);
+        }
+        if (effectiveStep.otp?.required === true && segmentGroup && otpContext) {
+          const sendTarget = await completeRemainingOtpChallenges(
+            browser,
+            effectiveStep,
+            index,
+            otpContext,
+            fillSelector,
+            Array.from(inputPayload).length,
+          );
+          // A scenario that ends at the fill never asks the app to accept the codes. Press the
+          // control it uses to advance, and fail if the gate stays shut.
+          await submitAfterOtpChallenges(browser, index, otpContext, sendTarget);
         }
         resultExtras = {
           fieldLocated: fillObservation.fieldLocated,

@@ -62,6 +62,9 @@ npm run testrail:inspect -- --case-id <N>      # inspect raw TestRail case data
 npm run testrail:report                        # push results back to TestRail
 npm run explorer:scan -- --url <URL>           # scan a page and dump its accessibility snapshot
 npm run data:inspect                           # inspect resolved env/test-data config
+npm run db:init                                # create/verify the project registry DB, print row counts
+npm run db:inspect                             # alias of db:init
+npm run server                                 # start the Express API (default http://localhost:3001)
 npm run typecheck                              # run tsc --noEmit
 npm run clean:tmp                              # remove .artifacts/tmp and temp files
 ```
@@ -75,6 +78,35 @@ npm run clean:tmp                              # remove .artifacts/tmp and temp 
 3. On success, `promote-plan` writes the validated plan to `automations/apps/<app>/cases/<case-id>/plan.json` and generates a `.spec.ts` (POM-based or inline-debug)
 4. The **auto-pom** pipeline generates `*.page.candidate.ts` files, auto-approves safe ones, updates `page-objects.index.json`, and regenerates the spec
 5. `npm test` / `npm run test:apps` executes all promoted specs via Playwright
+
+### Project registry database (`src/db/`)
+
+`/api/projects` stores project definitions in a relational DB and **materializes** them onto
+disk: `POST /api/projects/:slug/materialize` writes `automations/apps/<slug>/app.config.json`,
+`mobile.config.json` and `app.knowledge.json` from the DB rows. The DB is the source of truth;
+the app-profile files are generated artifacts.
+
+Two drivers sit behind one interface (`DbConnection` in `src/db/db-connection.ts`), selected by
+`DB_DRIVER`:
+
+| Driver | Value | Notes |
+|---|---|---|
+| SQLite | `sqlite` (default) | Uses Node's built-in `node:sqlite` — no install, no service. File at `SQLITE_DB_PATH` (default `data/qa-lab.db`), schema applied automatically on first connect. |
+| SQL Server | `sqlserver` | Original behaviour. Requires `npm install odbc` + ODBC Driver 18, and `SQL_SERVER_HOST` / `SQL_SERVER_DATABASE`. |
+
+Repositories and routes keep writing T-SQL (`dbo.` prefixes, `SYSUTCDATETIME()`,
+`OUTPUT INSERTED.*`, lock hints); `translateSql` in `src/db/sqlite-connection.ts` rewrites those
+constructs for SQLite. Schema DDL lives in `src/db/sqlite-schema.ts`.
+
+Two SQLite-specific behaviours worth knowing:
+- Unlike ODBC, all transactions share one file handle, so top-level `withTransaction` calls are
+  serialized through a promise chain and nested ones become `SAVEPOINT`s.
+- `id` and `slug` columns are `COLLATE NOCASE` to reproduce SQL Server's case-insensitive
+  comparisons (the API returns uppercase ids for shared connections).
+
+Tables: `Projects`, `SharedConnection`, `WebProjectConfiguration`, `MobileProjectConfiguration`,
+`ProjectOtpConfiguration`, `ProjectJiraConfiguration`, `ProjectTestRailConfiguration`,
+`ProjectKnowledge`, `ProjectConfigurationHistory`.
 
 ### App profiles (`automations/apps/<app-slug>/`)
 
@@ -150,6 +182,11 @@ Agent is configured via env vars: `AGENT_PROVIDER` (`codex | copilot | custom`),
 | `TESTRAIL_*` | TestRail API credentials and project/suite/section IDs |
 | `AGENT_PROVIDER` | AI agent used for auto-repair |
 | `APP_PROFILE` / `APP_SLUG` | App profile slug override |
+| `DB_DRIVER` | `sqlite` (default) \| `sqlserver` |
+| `SQLITE_DB_PATH` | SQLite file, relative to repo root. Default `data/qa-lab.db` |
+| `SQL_SERVER_HOST` / `SQL_SERVER_DATABASE` / `SQL_SERVER_TRUSTED_CONNECTION` | Only for `DB_DRIVER=sqlserver` |
+| `PORT` / `API_PORT` | API server port (default 3001) |
+| `API_KEY` | When set, all routes except `/health` require the `X-Api-Key` header |
 
 ### POM status lifecycle
 

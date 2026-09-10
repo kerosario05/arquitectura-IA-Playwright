@@ -229,6 +229,15 @@ projectsRouter.post("/:projectSlug/cases/:caseId/input-requirements/sync", async
   }
 });
 
+// The service layer signals bad input with plain Errors ("name is required",
+// "loginMode=password requires username", "loginMode must be 1 ..."). Matching both
+// "required" and "requires" matters — missing the latter turned validation into a 500.
+const VALIDATION_ERROR = /\brequire[sd]\b|loginMode must/i;
+
+function isValidationError(err: any): boolean {
+  return VALIDATION_ERROR.test(err?.message || "");
+}
+
 // GET /api/projects
 projectsRouter.get("/", async (_req, res, next) => {
   try {
@@ -432,7 +441,7 @@ projectsRouter.put("/:slug", async (req, res, next) => {
       sendError(res, 404, "project_not_found", err.message);
       return;
     }
-    if (/required|loginMode must/i.test(err?.message || "")) {
+    if (isValidationError(err)) {
       sendError(res, 400, "validation_error", err.message);
       return;
     }
@@ -459,7 +468,7 @@ projectsRouter.post("/web", async (req, res, next) => {
       sendError(res, 409, "duplicate_slug", err.message);
       return;
     }
-    if (/required|loginMode must/i.test(err?.message || "")) {
+    if (isValidationError(err)) {
       sendError(res, 400, "validation_error", err.message);
       return;
     }
@@ -488,7 +497,7 @@ projectsRouter.post("/mobile", async (req, res, next) => {
       sendError(res, 409, "duplicate_slug", err.message);
       return;
     }
-    if (/required|loginMode must/i.test(err?.message || "")) {
+    if (isValidationError(err)) {
       sendError(res, 400, "validation_error", err.message);
       return;
     }
@@ -525,7 +534,7 @@ projectsRouter.put("/:slug/jira", async (req, res, next) => {
   } catch (err: any) {
     const msg = err?.message || "";
     if (/project not found/i.test(msg)) { sendError(res, 404, "project_not_found", msg); return; }
-    if (/required/i.test(msg)) { sendError(res, 400, "validation_error", msg); return; }
+    if (isValidationError(err)) { sendError(res, 400, "validation_error", msg); return; }
     if (/sharedConnection/i.test(msg)) { sendError(res, 400, "connection_error", msg); return; }
     next(err);
   }
@@ -546,7 +555,7 @@ projectsRouter.put("/:slug/testrail", async (req, res, next) => {
   } catch (err: any) {
     const msg = err?.message || "";
     if (/project not found/i.test(msg)) { sendError(res, 404, "project_not_found", msg); return; }
-    if (/required/i.test(msg)) { sendError(res, 400, "validation_error", msg); return; }
+    if (isValidationError(err)) { sendError(res, 400, "validation_error", msg); return; }
     if (/sharedConnection/i.test(msg)) { sendError(res, 400, "connection_error", msg); return; }
     next(err);
   }

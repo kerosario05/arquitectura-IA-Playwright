@@ -229,7 +229,38 @@ test("generateLocalToken executes only PL/SQL procedure path", async () => {
   expect(calls.latest).toBe(0);
   expect(result.generatedAt).toBe("2026-08-07T09:00:00.000Z");
   expect(result.requestId).toBe("req-1");
-  expect((result as unknown as Record<string, unknown>).otp).toBeUndefined();
+  // pTokenGen is surfaced so callers can skip the `latest` round-trip, whose
+  // FECHA_ADICION >= generatedAfter filter matches nothing when the database clock
+  // lags the API host's. Still a single procedure call — latest stays at 0.
+  expect(result.otp).toBe("999999");
+});
+
+test("generateLocalToken omits otp when pTokenGen is unusable", async () => {
+  const { adapter, calls } = createAdapterMock();
+  adapter.executeGenerateLocalToken = async () => {
+    calls.generate += 1;
+    return { tokenGenerated: "not-a-token", errorCode: "0", errorDescription: "OK" };
+  };
+  const result = await generateLocalToken(
+    {
+      identity: "40224679551",
+      channel: "ONBOARDINGWEB",
+      appSlug: "app-a",
+    },
+    {
+      env: createBaseEnv(),
+      adapter,
+      requestIdFactory: () => "req-1",
+      now: () => new Date("2026-08-07T09:00:00.000Z"),
+      appConfigLoader: async () => createOtpProfileConfig(),
+    },
+  );
+  // A malformed pTokenGen must not fail a generate Oracle already reported as successful:
+  // the caller falls back to `latest`.
+  expect(result.ok).toBe(true);
+  expect(result.otp).toBeUndefined();
+  expect(calls.generate).toBe(1);
+  expect(calls.latest).toBe(0);
 });
 
 test("getLatestLocalToken executes only SELECT path", async () => {

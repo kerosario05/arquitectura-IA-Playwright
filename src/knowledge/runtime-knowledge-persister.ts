@@ -100,8 +100,12 @@ function itemSignature(item: KnowledgeItem): string {
   const kind = (item.knowledgeKind as string) ?? "";
   const targets = (item.clickTargets as string[]) ?? [];
   const screenKey = (item.screenKey as string) ?? "";
+  // Included so two states of one screen stay two items. Kept out of the first-5 truncation the
+  // clickTargets use, because the distinguishing text is often not among the first few.
+  const assertions = ((item.assertionTargets as string[]) ?? []).slice().sort().join("|");
+  const disabled = ((item.disabledLabels as string[]) ?? []).join("|");
   const hash = createHash("sha256")
-    .update(`${kind}:${screenKey}:${targets.slice(0, 5).join("|")}`)
+    .update(`${kind}:${screenKey}:${targets.slice(0, 5).join("|")}:${assertions}:${disabled}`)
     .digest("hex")
     .slice(0, 12);
   return hash;
@@ -127,10 +131,22 @@ export function persistRuntimeSnapshot(
     return;
   }
 
+  // The signature decides whether an observation is a new item or merges into an existing one.
+  // clickTargets alone cannot tell two states of the same screen apart: the contact-confirmation
+  // screen exposes the same tappables before and after a code is sent, so the state showing the
+  // OTP boxes kept collapsing into the first one ever captured and the generator never saw it.
+  // assertionTargets carry the texts that do change ("Indica el código recibido en el correo"),
+  // and a disabled control is itself a distinct state — a gate still closed.
+  const disabledLabels = (snapshot.observedControls ?? [])
+    .filter((c) => (c as { enabled?: boolean }).enabled === false)
+    .map((c) => `disabled:${(c as { label?: string }).label ?? ""}`)
+    .sort();
   const sign = itemSignature({
     knowledgeKind: "route_menu_snapshot",
     screenKey: snapshot.screenKey,
     clickTargets: snapshot.clickTargets,
+    assertionTargets: snapshot.assertionTargets,
+    disabledLabels,
   });
 
   const now = new Date().toISOString();
@@ -209,6 +225,58 @@ export function persistRuntimeRoute(
   persistItem(appSlug, newItem);
 }
 
+/**
+ * Mirrors an item that was just written to app.knowledge.json into ProjectKnowledge.knowledgeJson.
+ *
+ * The file is NOT durable on its own. Anything that materializes a project rewrites
+ * app.knowledge.json from SQL (`buildKnowledgeFile` emits exactly what SQL holds), and
+ * scenario generation materializes as part of persisting hu_declared knowledge. So runtime
+ * evidence that only ever reached the file is erased at the very moment the generation that
+ * needs it runs — a learned walk disappears before a single locator can be backed by it.
+ *
+ * Merge semantics stay in `persistItem`: this receives the already-merged item and upserts it
+ * by id, so SQL never diverges from the file.
+ */
+async function mirrorItemToSql(appSlug: string, item: KnowledgeItem): Promise<boolean> {
+  try {
+    return await withTransaction(async (conn) => {
+      const rows = await conn.query<{ id: string }>("SELECT id FROM dbo.Projects WHERE slug = ?", [appSlug]);
+      if (rows.length === 0) {
+        console.log(`[runtime-knowledge:sql] skipped id=${item.id} reason=project_not_registered slug=${appSlug}`);
+        return false;
+      }
+      const projectId = rows[0].id;
+      const kRows = await conn.query<{ knowledgeJson: string }>(
+        "SELECT knowledgeJson FROM dbo.ProjectKnowledge WITH (UPDLOCK, ROWLOCK) WHERE projectId = ?",
+        [projectId]
+      );
+      if (kRows.length === 0) {
+        console.log(`[runtime-knowledge:sql] skipped id=${item.id} reason=no_knowledge_row projectId=${projectId}`);
+        return false;
+      }
+      let data: { items: KnowledgeItem[] } = { items: [] };
+      if (kRows[0].knowledgeJson) {
+        try {
+          const parsed = JSON.parse(kRows[0].knowledgeJson);
+          data = parsed && Array.isArray(parsed.items) ? parsed : { items: [] };
+        } catch { data = { items: [] }; }
+      }
+      const idx = data.items.findIndex((i) => i.id === item.id);
+      if (idx >= 0) data.items[idx] = item;
+      else data.items.push(item);
+      await conn.query(
+        "UPDATE dbo.ProjectKnowledge SET knowledgeJson = ?, updatedAt = SYSUTCDATETIME() WHERE projectId = ?",
+        [Buffer.from(JSON.stringify(data), "utf16le"), projectId]
+      );
+      console.log(`[runtime-knowledge:sql] mirrored id=${item.id} kind=${item.knowledgeKind} items=${data.items.length}`);
+      return true;
+    });
+  } catch (e: any) {
+    console.log(`[runtime-knowledge:sql] mirror FAILED id=${item.id} reason=${e?.message ?? e}`);
+    return false;
+  }
+}
+
 function persistItem(appSlug: string, newItem: KnowledgeItem): void {
   const kp = knowledgePath(appSlug);
   let data: { items: KnowledgeItem[] } = { items: [] };
@@ -225,7 +293,12 @@ function persistItem(appSlug: string, newItem: KnowledgeItem): void {
     const nKind = newItem.knowledgeKind as string;
     if (iKind !== nKind) return false;
     if (nKind === "route_menu_snapshot") {
-      return (i.screenKey as string) === (newItem.screenKey as string);
+      // Match on the signature-derived id, not on screenKey. screenKey comes from the screen's
+      // heading and is identical across every state of a screen, so matching on it merged them
+      // all into one item: the state showing the OTP boxes overwrote the initial one, the file
+      // never grew past one entry per screen, and the generator kept reporting that it had no
+      // evidence of the OTP screen. Identical states still share an id and still merge.
+      return (i.id as string) === (newItem.id as string);
     }
     if (nKind === "route_functional_observed") {
       const iTargets = (i.clickTargets as string[]) ?? [];
@@ -308,6 +381,13 @@ function persistItem(appSlug: string, newItem: KnowledgeItem): void {
     // Fallback: write directly
     fs.writeFileSync(kp, JSON.stringify(data, null, 2), "utf-8");
   }
+
+  // Make it durable. Without this the item lives only in the file, and the next
+  // materialization rewrites that file from SQL and drops it. Fire-and-forget with an
+  // internal catch: the file write above already succeeded, so a SQL outage must not fail
+  // the walk — it only costs durability, which the log records.
+  const persisted = existingIdx >= 0 ? data.items[existingIdx] : newItem;
+  void mirrorItemToSql(appSlug, persisted);
 }
 
 export type RuntimeTransitionInput = {
