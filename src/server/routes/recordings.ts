@@ -31,7 +31,7 @@ import {
   type ScenarioPreviewPublishContext,
 } from "../services/testrail-sync-types";
 import { toPublishableScenario } from "../../recording/scenario-to-testrail";
-import type { RecordedScenario } from "../../recording/trace-to-scenario";
+import { materializeRecordedScenario, type RecordedScenario } from "../../recording/trace-to-scenario";
 import { buildSemanticRecordingModel, attachScenarioSuggestions } from "../../recording/semantic-recording";
 
 export const recordingsRouter = Router();
@@ -381,8 +381,16 @@ recordingsRouter.post("/:recordingId/testrail", async (req, res) => {
     const recordingId = req.params.recordingId;
     const cacheKey = `recording-${recordingId}`;
     const recordingTrace = loadTrace(appSlug, recordingId);
+    const datasetValues: Record<string, string> = body.datasetValues && typeof body.datasetValues === "object"
+      ? Object.fromEntries(Object.entries(body.datasetValues).filter((entry): entry is [string, string] => typeof entry[1] === "string"))
+      : {};
     const publishable = selected.map((scenario) =>
-      toPublishableScenario(scenario, appSlug, recordingId, recordingTrace?.recordingDataPolicy),
+      toPublishableScenario(
+        materializeRecordedScenario(scenario, datasetValues),
+        appSlug,
+        recordingId,
+        recordingTrace?.recordingDataPolicy,
+      ),
     );
     const publishIdOf = (index: number) =>
       buildScenarioPreviewScenarioId(publishable[index], index, { launchId: recordingId });

@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { buildSemanticRecordingModel } from "./semantic-recording";
-import { buildHappyPathScenario } from "./trace-to-scenario";
+import { buildHappyPathScenario, materializeRecordedScenario } from "./trace-to-scenario";
 import type { SessionTrace } from "./session-trace.types";
 
-function trace(): SessionTrace {
+function trace(overrides: Partial<SessionTrace> = {}): SessionTrace {
   return {
     recordingId: "recording-1",
     projectSlug: "web-project",
@@ -28,6 +28,7 @@ function trace(): SessionTrace {
       { seq: 1, t: 2, kind: "fill", screenKey: "screen-a", target: { label: "Contraseña", role: "textbox", sensitive: true, locators: [{ strategy: "aria-label", value: "Contraseña" }] }, redactedKey: "auth.password" },
       { seq: 2, t: 3, kind: "tap", screenKey: "screen-a", target: { label: "Selector", role: "combobox", locators: [{ strategy: "role", value: "combobox|Selector" }] } },
     ],
+    ...overrides,
   };
 }
 
@@ -51,7 +52,7 @@ test("never exposes a technical fingerprint as a semantic title", () => {
   assert.equal(model.semanticScreens[0].title, undefined);
 });
 
-test("keeps credential fills as references in the derived scenario", () => {
+test("keeps username as a normal action input while the web plan stays key-based", () => {
   const input = trace();
   input.events = [{
     seq: 0,
@@ -64,5 +65,34 @@ test("keeps credential fills as references in the derived scenario", () => {
   const scenario = buildHappyPathScenario(input, input.events);
   assert.equal(scenario.webSteps[1]?.value, undefined);
   assert.equal(scenario.webSteps[1]?.valueKey, "nombre_de_usuario");
-  assert.equal(JSON.stringify(scenario).includes("should-not-appear"), false);
+  assert.equal(scenario.requiredData[0]?.sensitive, false);
+  assert.equal(scenario.requiredData[0]?.valueRole, "action_input");
+  assert.equal(scenario.testRailSteps[1]?.stepTemplate, "Ingresar [nombre_de_usuario] en \"Nombre de usuario\"");
+  assert.equal(scenario.testRailSteps[1]?.renderedStep, 'Ingresar "should-not-appear" en "Nombre de usuario"');
+});
+
+test("materializes password only when the project policy allows it", () => {
+  const input = trace({
+    recordingDataPolicy: { persistRecordedValues: true, persistQaCredentials: false, includeQaCredentialsInTestRail: false },
+    events: [{
+      seq: 0,
+      t: 1,
+      kind: "fill",
+      screenKey: "screen-a",
+      target: { label: "Contraseña", role: "input", inputType: "password", locators: [{ strategy: "aria-label", value: "Contraseña" }] },
+      value: "secret-value",
+    }],
+  });
+  const protectedScenario = buildHappyPathScenario(input, input.events);
+  assert.equal(protectedScenario.testRailSteps[1]?.sensitive, true);
+  assert.match(protectedScenario.testRailSteps[1]?.renderedStep ?? "", /valor seguro/);
+  assert.equal(protectedScenario.requiredData[0]?.exampleValue, undefined);
+
+  input.recordingDataPolicy = { persistRecordedValues: true, persistQaCredentials: true, includeQaCredentialsInTestRail: true };
+  const allowedScenario = buildHappyPathScenario(input, input.events);
+  assert.equal(allowedScenario.requiredData[0]?.exampleValue, "secret-value");
+  assert.equal(allowedScenario.testRailSteps[1]?.renderedStep, 'Ingresar "secret-value" en "Contraseña"');
+  const edited = materializeRecordedScenario(allowedScenario, { [allowedScenario.testRailSteps[1]?.valueKey ?? ""]: "edited-value" });
+  assert.equal(edited.testRailSteps[1]?.stepTemplate, allowedScenario.testRailSteps[1]?.stepTemplate);
+  assert.equal(edited.testRailSteps[1]?.renderedStep, 'Ingresar "edited-value" en "Contraseña"');
 });

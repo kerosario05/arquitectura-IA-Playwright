@@ -81,9 +81,8 @@ type RawInteraction = {
   ranks?: LocatorRanks;
 };
 
-const ALWAYS_SENSITIVE = [
-  "clave", "contrasena", "contraseña", "password", "pin", "otp", "token", "cvv",
-  "usuario", "username", "identificacion", "empresa", "company", "rnc",
+const SECRET_FIELD_TOKENS = [
+  "clave", "contrasena", "contraseña", "password", "pin", "otp", "token", "cvv", "secret",
 ];
 
 function normalizeLabel(raw: string): string {
@@ -97,7 +96,7 @@ export function isSensitiveField(interaction: RawInteraction, extra: readonly st
       .filter(Boolean)
       .join(" "),
   );
-  return [...ALWAYS_SENSITIVE, ...extra.map(normalizeLabel)].some(
+  return [...SECRET_FIELD_TOKENS, ...extra.map(normalizeLabel)].some(
     (needle) => needle.length > 0 && haystack.includes(needle),
   );
 }
@@ -372,7 +371,7 @@ export class WebSessionRecorder {
         screenKey: this.lastScreenKey,
         fingerprint: this.lastFingerprint,
         url: this.page?.url(),
-        target: { label: raw.label || raw.name || "campo", role: "input", locators, sensitive },
+        target: { label: raw.label || raw.name || "campo", role: "input", inputType: raw.inputType, locators, sensitive },
         value: sensitive && !this.options.persistQaCredentials ? undefined : raw.value,
         redactedKey: sensitive ? normalizeLabel(raw.label || raw.name || "campo").replace(/\s+/g, "_") : undefined,
         valueSource: raw.valueSource ?? "user",

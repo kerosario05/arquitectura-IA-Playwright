@@ -64,15 +64,8 @@ export type AndroidRecorderOptions = {
 
 /** Field labels whose content is redacted regardless of project configuration. */
 const ALWAYS_SENSITIVE = [
-  "clave",
-  "contrasena",
-  "contraseña",
-  "password",
-  "pin",
-  "otp",
-  "codigo de validacion",
-  "token", "usuario", "username", "identificacion", "empresa", "company", "rnc",
-  "cvv",
+  "clave", "contrasena", "contraseña", "password", "pin", "otp", "codigo de validacion",
+  "token", "cvv", "secret",
 ];
 
 function normalizeLabel(raw: string): string {

@@ -5,6 +5,7 @@ import {
   buildHappyPathScenario,
   deduplicateGoalSuggestions,
   filterGoalScopedSuggestions,
+  materializeRecordedScenario,
 } from "./trace-to-scenario";
 import {
   buildSemanticRecordingModel,
@@ -128,6 +129,82 @@ test("TestRail preview keeps the primary first and applies credential policy", (
   assert.equal(referenceOnly.dataRequirements, "auth_password");
   assert.equal(allowed.dataRequirements, "auth_password=fixture-only");
   assert.equal(primary.primary, true);
+});
+
+test("human preview uses rendered values while the execution template stays key-based", () => {
+  const current = trace({
+    recordingDataPolicy: { persistRecordedValues: true, persistQaCredentials: true, includeQaCredentialsInTestRail: true },
+    events: [{
+      ...fillEvent(),
+      target: { ...fillEvent().target, label: "Identificador", locators: [{ strategy: "aria-label", value: "Identificador" }] },
+      value: "ABC123",
+    }],
+  });
+  const scenario = buildHappyPathScenario(current, current.events);
+  const preview = toPublishableScenario(scenario, "app-test", "recording-goal-test", current.recordingDataPolicy);
+  assert.equal(scenario.webSteps[1]?.value, undefined);
+  assert.equal(scenario.webSteps[1]?.valueKey, "identificador");
+  assert.match(preview.steps[1], /ABC123/);
+  assert.match(preview.steps[1], /Esperado:/);
+});
+
+test("TestRail uses rendered values only when the credential policy allows it", () => {
+  const baseEvent = fillEvent();
+  const event = {
+    ...baseEvent,
+    value: "fixture-secret",
+    target: { ...baseEvent.target, label: "Contraseña", inputType: "password" },
+  };
+  const protectedTrace = trace({
+    events: [event],
+    recordingDataPolicy: normalizeRecordingDataPolicy(),
+  });
+  const protectedScenario = buildHappyPathScenario(protectedTrace, protectedTrace.events);
+  const protectedPreview = toPublishableScenario(protectedScenario, "app-test", "recording-goal-test", protectedTrace.recordingDataPolicy);
+  assert.ok(protectedPreview.steps.every((step) => !step.includes("fixture-secret")));
+
+  const allowedTrace = trace({
+    events: [event],
+    recordingDataPolicy: normalizeRecordingDataPolicy({ persistQaCredentials: true, includeQaCredentialsInTestRail: true }),
+  });
+  const allowedScenario = buildHappyPathScenario(allowedTrace, allowedTrace.events);
+  const allowedPreview = toPublishableScenario(allowedScenario, "app-test", "recording-goal-test", allowedTrace.recordingDataPolicy);
+  assert.ok(allowedPreview.steps.some((step) => step.includes("fixture-secret")));
+});
+
+test("selection values are materialized without replacing the runtime target", () => {
+  const current = trace({
+    events: [{
+      seq: 0,
+      t: 1,
+      kind: "tap",
+      screenKey: "screen-a",
+      target: {
+        label: "Moneda",
+        role: "combobox",
+        associatedField: "currency",
+        afterValue: "DOP",
+        locators: [{ strategy: "role", value: "combobox|Moneda" }],
+      },
+    }],
+  });
+  const scenario = buildHappyPathScenario(current, current.events);
+  assert.equal(scenario.webSteps[1]?.value, undefined);
+  assert.equal(scenario.webSteps[1]?.valueKey, "currency");
+  assert.match(scenario.testRailSteps[1]?.content ?? "", /\[currency\]/);
+  assert.match(scenario.testRailSteps[1]?.renderedStep ?? "", /DOP/);
+});
+
+test("editing the confirmed dataset updates rendered steps without changing the template", () => {
+  const current = trace({
+    events: [fillEvent()],
+  });
+  const scenario = buildHappyPathScenario(current, current.events);
+  const original = scenario.testRailSteps[1];
+  const edited = materializeRecordedScenario(scenario, { nombre_cliente: "valor-editado" });
+  assert.equal(original?.stepTemplate, 'Ingresar [nombre_cliente] en "Nombre cliente"');
+  assert.equal(edited.testRailSteps[1]?.stepTemplate, original?.stepTemplate);
+  assert.equal(edited.testRailSteps[1]?.renderedStep, 'Ingresar "valor-editado" en "Nombre cliente"');
 });
 
 test("live refresh ignores non-semantic polling noise", () => {

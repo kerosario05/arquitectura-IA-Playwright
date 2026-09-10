@@ -27,7 +27,17 @@ export type RecordedWebStep = {
   description: string;
 };
 
-export type RecordedScenarioStep = { content: string; expected: string };
+export type RecordedScenarioStep = {
+  /** Stable template retained for execution/runtime binding. */
+  content: string;
+  /** Human-facing materialization for QA Lab and TestRail preview. */
+  renderedStep?: string;
+  /** Explicit alias for callers that distinguish template from legacy `content`. */
+  stepTemplate?: string;
+  valueKey?: string;
+  sensitive?: boolean;
+  expected: string;
+};
 
 /**
  * The identifier each executable step will act on, flattened for review.
@@ -137,6 +147,14 @@ function valueKeyFor(event: RecordedEvent, label: string): string {
   return explicit ? slugifyKey(explicit) : slugifyKey(label);
 }
 
+function uniqueValueKeyFor(event: RecordedEvent, label: string, fields: readonly RecordedDataField[]): string {
+  const base = valueKeyFor(event, label);
+  if (!fields.some((field) => field.key === base)) return base;
+  let suffix = 2;
+  while (fields.some((field) => field.key === `${base}_${suffix}`)) suffix += 1;
+  return `${base}_${suffix}`;
+}
+
 /**
  * The text that proves the app landed where the walkthrough went next.
  *
@@ -165,11 +183,35 @@ function describeTap(event: RecordedEvent): string {
   return label ? `Presionar "${label}"` : "Presionar el control indicado";
 }
 
-function describeFill(event: RecordedEvent): string {
-  const label = event.target?.label?.trim() || "el campo";
-  return isSensitiveRecordedEvent(event)
-    ? `Ingresar el valor seguro asociado a "${label}"`
-    : `Ingresar "${event.value ?? ""}" en "${label}"`;
+function quoteHumanValue(value: string): string {
+  return JSON.stringify(value);
+}
+
+function describeFillTemplate(label: string, valueKey: string): string {
+  return `Ingresar [${valueKey}] en "${label}"`;
+}
+
+function describeFillRendered(
+  event: RecordedEvent,
+  label: string,
+  template: string,
+  trace: SessionTrace,
+): string {
+  const sensitive = isSensitiveRecordedEvent(event);
+  const canMaterializeSecret = trace.recordingDataPolicy?.persistQaCredentials === true;
+  if (sensitive && !canMaterializeSecret) return `Ingresar el valor seguro asociado a "${label}"`;
+  if (event.value !== undefined) return `Ingresar ${quoteHumanValue(event.value)} en "${label}"`;
+  return template;
+}
+
+function selectionValueKey(event: RecordedEvent, label: string): string {
+  return slugifyKey(event.target?.associatedField?.trim() || label);
+}
+
+function describeSelectionRendered(event: RecordedEvent, label: string, template: string): string {
+  return event.target?.afterValue === undefined
+    ? template
+    : `Seleccionar ${quoteHumanValue(event.target.afterValue)} en "${label}"`;
 }
 
 export type BuildScenarioOptions = {
@@ -329,7 +371,39 @@ export function buildHappyPathScenario(
     }
 
     const target = event.target;
-    if (!target?.locators?.length) continue;
+    if (!target) continue;
+    if (!target.locators?.length) {
+      // A recorder may still have a confirmed value when the technical locator was lost during
+      // a DOM replacement. Keep the human/TestRail evidence and its dataset binding, but do not
+      // invent an executable web target. The missing locator remains visible through the
+      // scenario's technical readiness flag.
+      if (event.kind === "fill") {
+        const label = target.label?.trim() || "campo";
+        const stepIndex = testRailSteps.length;
+        const sensitive = isSensitiveRecordedEvent(event);
+        const valueKey = uniqueValueKeyFor(event, label, requiredData);
+        const stepTemplate = describeFillTemplate(label, valueKey);
+        requiredData.push({
+          key: valueKey,
+          label,
+          stepIndex,
+          exampleValue: sensitive && trace.recordingDataPolicy?.persistQaCredentials !== true ? undefined : event.value,
+          sensitive,
+          valueRole: sensitive ? "secure_input" : "action_input",
+          source: sensitive ? "secure" : "RECORDED_CONFIRMED",
+        });
+        testRailSteps.push({
+          content: stepTemplate,
+          stepTemplate,
+          renderedStep: describeFillRendered(event, label, stepTemplate, trace),
+          valueKey,
+          sensitive,
+          expected: "El campo acepta el valor ingresado",
+        });
+        hasUncertainSteps = true;
+      }
+      continue;
+    }
     // Ambiguous is checked on its own and not left to the confidence it carries: a locator
     // pinned to a position is executable but positional, and a reviewer has to see that even
     // if the confidence scale is ever retuned.
@@ -339,7 +413,22 @@ export function buildHappyPathScenario(
     }
 
     if (event.kind === "tap") {
-      const description = describeTap(event);
+      const label = target.label?.trim() || "el control";
+      const selection = target.afterValue !== undefined;
+      const selectionKey = selection ? selectionValueKey(event, label) : undefined;
+      const description = selection ? `Seleccionar [${selectionKey}] en "${label}"` : describeTap(event);
+      const renderedStep = selection ? describeSelectionRendered(event, label, description) : description;
+      if (selection && selectionKey) {
+        requiredData.push({
+          key: selectionKey,
+          label,
+          stepIndex: isMobile ? mobileSteps.length : webSteps.length,
+          exampleValue: target.afterValue,
+          sensitive: false,
+          valueRole: "action_input",
+          source: "RECORDED_CONFIRMED",
+        });
+      }
       if (isMobile) {
         const t = toMobileTarget(event);
         if (!t) continue;
@@ -349,6 +438,7 @@ export function buildHappyPathScenario(
         webSteps.push({
           action: "click",
           target: { strategy: best.strategy, value: best.value },
+          ...(selectionKey ? { valueKey: selectionKey } : {}),
           description,
         });
         stepTargets.push({
@@ -361,6 +451,10 @@ export function buildHappyPathScenario(
       }
       testRailSteps.push({
         content: description,
+        stepTemplate: selection ? description : undefined,
+        renderedStep: selection ? renderedStep : description,
+        valueKey: selectionKey,
+        sensitive: false,
         expected: target.enabled === false
           ? "El control permanece deshabilitado hasta cumplir su condición"
           : "La acción se registra y la pantalla responde",
@@ -369,17 +463,18 @@ export function buildHappyPathScenario(
     }
 
     if (event.kind === "fill") {
-      const description = describeFill(event);
       const label = target.label?.trim() || "campo";
       const stepIndex = isMobile ? mobileSteps.length : webSteps.length;
       const sensitive = isSensitiveRecordedEvent(event);
       const applicationDerived = event.valueSource === "application";
       const valueKey = valueKeyFor(event, label);
+      const stepTemplate = describeFillTemplate(label, valueKey);
+      const renderedStep = describeFillRendered(event, label, stepTemplate, trace);
       requiredData.push({
         key: valueKey,
         label,
         stepIndex,
-        exampleValue: sensitive ? undefined : event.value,
+        exampleValue: sensitive && trace.recordingDataPolicy?.persistQaCredentials !== true ? undefined : event.value,
         sensitive,
         valueRole: applicationDerived ? "runtime_derived_oracle" : sensitive ? "secure_input" : "action_input",
         source: applicationDerived ? "OBSERVED" : sensitive ? "secure" : "RECORDED_CONFIRMED",
@@ -387,25 +482,34 @@ export function buildHappyPathScenario(
       if (isMobile) {
         const t = toMobileTarget(event);
         if (!t) continue;
-        mobileSteps.push({ action: "fill", target: t, value: event.value ?? "", description });
-        stepTargets.push({ stepIndex: mobileSteps.length - 1, description, ...t, ambiguous: best.ambiguous });
+        mobileSteps.push({ action: "fill", target: t, value: event.value ?? "", description: stepTemplate });
+        stepTargets.push({ stepIndex: mobileSteps.length - 1, description: stepTemplate, ...t, ambiguous: best.ambiguous });
       } else {
         webSteps.push({
           action: "fill",
           target: { strategy: best.strategy, value: best.value },
-          value: sensitive ? undefined : event.value ?? "",
-          valueKey: sensitive ? valueKey : undefined,
-          description,
+          // Web execution must bind through the semantic key. The human materialization lives
+          // only on the review/TestRail step and never becomes a literal in a generated spec.
+          value: undefined,
+          valueKey,
+          description: stepTemplate,
         });
         stepTargets.push({
           stepIndex: webSteps.length - 1,
-          description,
+          description: stepTemplate,
           strategy: best.strategy,
           value: best.value,
           ambiguous: best.ambiguous,
         });
       }
-      testRailSteps.push({ content: description, expected: "El campo acepta el valor ingresado" });
+      testRailSteps.push({
+        content: stepTemplate,
+        stepTemplate,
+        renderedStep,
+        valueKey,
+        sensitive,
+        expected: "El campo acepta el valor ingresado",
+      });
       continue;
     }
 
@@ -447,6 +551,25 @@ export function buildHappyPathScenario(
     expectedResultCandidate: testRailSteps.at(-1)?.expected,
     oracleAuthority: "observed_only",
     confidence: 0.95,
+  };
+}
+
+/** Applies current reviewer values to human-facing steps without changing execution templates. */
+export function materializeRecordedScenario(
+  scenario: RecordedScenario,
+  values: Readonly<Record<string, string | undefined>> = {},
+): RecordedScenario {
+  return {
+    ...scenario,
+    testRailSteps: scenario.testRailSteps.map((step) => {
+      if (!step.valueKey || values[step.valueKey] === undefined) return step;
+      const template = step.stepTemplate ?? step.content;
+      const marker = `[${step.valueKey}]`;
+      return {
+        ...step,
+        renderedStep: template.split(marker).join(quoteHumanValue(values[step.valueKey]!)),
+      };
+    }),
   };
 }
 

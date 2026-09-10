@@ -178,10 +178,15 @@ export function normalizeRecordingGoal(declaredGoal?: string): RecordingGoal | u
 
 /** Conservative, platform-neutral classification for credentials captured by older traces. */
 export function isSensitiveRecordedEvent(event: RecordedEvent): boolean {
-  if (event.redactedKey || event.target?.sensitive) return true;
+  if (event.target?.inputType?.toLowerCase() === "password") return true;
   const label = [event.target?.label, event.target?.role, event.target?.locators?.[0]?.value]
     .filter(Boolean).join(" ").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  return /(?:password|contrasena|clave|usuario|username|identificacion|empresa|company|\brnc\b)/i.test(label);
+  if (/(?:password|contrasena|clave|pin|otp|token|cvv|secret)/i.test(label)) return true;
+  // Identifiers and usernames are ordinary action inputs. Older traces marked them as
+  // sensitive by label; recover their useful recorded values without weakening true secret
+  // detection or any explicit custom sensitive label on a different field.
+  if (/(?:usuario|username|identificacion|identificador|empresa|company|\brnc\b)/i.test(label)) return false;
+  return Boolean(event.redactedKey || event.target?.sensitive);
 }
 
 function slugify(value: string): string {

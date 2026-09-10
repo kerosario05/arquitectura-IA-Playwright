@@ -56,6 +56,8 @@ export type RecordedBounds = { x: number; y: number; width: number; height: numb
 export type RecordedTarget = {
   label: string;
   role?: string;
+  /** Native input type when the recorder could observe it (for example, password). */
+  inputType?: string;
   /** Ranked locator candidates. The first entry is what a generated step uses. */
   locators: RecordedLocator[];
   bounds?: RecordedBounds;

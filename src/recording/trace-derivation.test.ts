@@ -171,11 +171,12 @@ describe("buildHappyPathScenario", () => {
     assert.match(assertion?.description ?? "", /Código de validación/);
   });
 
-  test("exposes each typed field as editable required data", () => {
+  test("exposes each typed field as editable required data without misclassifying username", () => {
     assert.strictEqual(scenario.requiredData.length, 1);
     assert.strictEqual(scenario.requiredData[0].key, "usuario");
-    assert.strictEqual(scenario.requiredData[0].exampleValue, undefined);
-    assert.strictEqual(scenario.requiredData[0].sensitive, true);
+    assert.strictEqual(scenario.requiredData[0].exampleValue, "juan");
+    assert.strictEqual(scenario.requiredData[0].sensitive, false);
+    assert.strictEqual(scenario.requiredData[0].valueRole, "action_input");
   });
 
   test("never puts a redacted value in the TestRail step text", () => {
@@ -185,7 +186,8 @@ describe("buildHappyPathScenario", () => {
     const s = buildHappyPathScenario(TRACE, redacted);
     const stepText = s.testRailSteps.map((x) => x.content).join(" ");
     assert.ok(!stepText.includes("undefined"));
-    assert.match(stepText, /Ingresar el valor seguro asociado a "Clave"/);
+    assert.match(s.testRailSteps[1].renderedStep ?? "", /Ingresar el valor seguro asociado a "Clave"/);
+    assert.match(stepText, /Ingresar \[clave\] en "Clave"/);
     assert.strictEqual(s.requiredData[0].sensitive, true);
     assert.strictEqual(s.requiredData[0].exampleValue, undefined);
   });
@@ -205,6 +207,32 @@ describe("buildHappyPathScenario", () => {
     assert.strictEqual(s.mobileSteps.length, 0);
     assert.strictEqual(s.webSteps[0].action, "navigate");
     assert.strictEqual(s.webSteps[0].value, "https://app.test");
+  });
+
+  test("keeps a confirmed value in the human model when its technical locator is unavailable", () => {
+    const webTrace: SessionTrace = {
+      ...TRACE,
+      platform: "web",
+      baseUrl: "https://app.test",
+      appPackage: undefined,
+      recordingDataPolicy: {
+        persistRecordedValues: true,
+        persistQaCredentials: false,
+        includeQaCredentialsInTestRail: false,
+      },
+    };
+    const s = buildHappyPathScenario(webTrace, [
+      ev({ kind: "fill", t: 100, target: { label: "Documento", role: "input", locators: [] }, value: "ABC123" }),
+    ]);
+    const field = s.requiredData[0];
+    const humanStep = s.testRailSteps.at(-1);
+    assert.equal(s.webSteps.length, 1);
+    assert.equal(field.key, "documento");
+    assert.equal(field.exampleValue, "ABC123");
+    assert.equal(field.sensitive, false);
+    assert.equal(humanStep?.stepTemplate, 'Ingresar [documento] en "Documento"');
+    assert.equal(humanStep?.renderedStep, 'Ingresar "ABC123" en "Documento"');
+    assert.equal(s.technicalReadiness, false);
   });
 });
 
@@ -398,7 +426,7 @@ describe("stepTargets", () => {
   test("exposes the locator behind each executable step", () => {
     assert.deepStrictEqual(
       scenario.stepTargets.map((t) => [t.description, t.strategy]),
-      [['Ingresar el valor seguro asociado a "Usuario"', "accessibilityId"], ['Presionar "Enviar código de validación"', "androidUiAutomator"]],
+      [['Ingresar [usuario] en "Usuario"', "accessibilityId"], ['Presionar "Enviar código de validación"', "androidUiAutomator"]],
     );
   });
 

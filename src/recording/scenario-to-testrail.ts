@@ -27,8 +27,13 @@ export function toPublishableScenario(
   return {
     sourceIssueKey: `REC-${recordingId.slice(0, 8).toUpperCase()}`,
     title: scenario.title,
-    steps: scenario.testRailSteps.map((step) =>
-      step.expected ? `${step.content}\nEsperado: ${step.expected}` : step.content,
+    steps: scenario.testRailSteps.map((step) => {
+      const canIncludeSensitiveValue = recordingDataPolicy?.includeQaCredentialsInTestRail === true;
+      const humanStep = step.sensitive && !canIncludeSensitiveValue
+        ? step.stepTemplate ?? step.content
+        : step.renderedStep ?? step.content;
+      return step.expected ? `${humanStep}\nEsperado: ${step.expected}` : humanStep;
+    },
     ),
     preconditions: scenario.preconditions,
     expectedResult: lastExpected || "",
