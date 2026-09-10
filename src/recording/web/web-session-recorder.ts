@@ -77,7 +77,10 @@ type RawInteraction = {
   ranks?: LocatorRanks;
 };
 
-const ALWAYS_SENSITIVE = ["clave", "contrasena", "contraseña", "password", "pin", "otp", "token", "cvv"];
+const ALWAYS_SENSITIVE = [
+  "clave", "contrasena", "contraseña", "password", "pin", "otp", "token", "cvv",
+  "usuario", "username", "identificacion", "empresa", "company", "rnc",
+];
 
 function normalizeLabel(raw: string): string {
   return raw.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();

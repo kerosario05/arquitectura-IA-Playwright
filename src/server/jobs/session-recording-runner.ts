@@ -15,6 +15,7 @@ import {
   loadTrace,
   saveScenarios,
   saveTrace,
+  saveSemanticRecording,
   toSummary,
 } from "../../recording/recording-store";
 import { normalizeEvents, segmentTrace, summarizeTrace } from "../../recording/trace-normalizer";
@@ -29,6 +30,7 @@ import {
 import { applyStory, enrichFromTrace } from "../../recording/trace-ai-enricher";
 import { createGeneralAiProvider } from "../../ai/ai-provider-factory";
 import type { RecordingPlatform, RecordingSummary, SessionTrace } from "../../recording/session-trace.types";
+import { attachScenarioSuggestions, buildSemanticRecordingModel, type SemanticRecordingModel } from "../../recording/semantic-recording";
 
 const execFileAsync = promisify(execFile);
 
@@ -310,6 +312,7 @@ export type DeriveResult = {
   summary: RecordingSummary;
   scenarios: RecordedScenario[];
   narrative: string;
+  semanticModel: SemanticRecordingModel;
 };
 
 /**
@@ -384,6 +387,24 @@ export async function deriveScenarios(
       ...aiNegatives,
       ...alternatives,
     ];
+    const baseSemantic = buildSemanticRecordingModel(trace, events);
+    const semantic = attachScenarioSuggestions(baseSemantic, scenarios.map((scenario) => ({
+      suggestionId: scenario.scenarioId,
+      title: scenario.title,
+      provenance: scenario.scenarioId.includes("-AI-")
+        ? "AI_PROPOSED"
+        : scenario.provenance === "observed" ? "OBSERVED_HAPPY_PATH" : "DERIVED_ALTERNATIVE",
+      confidence: scenario.hasUncertainSteps ? 0.6 : 0.95,
+      needsReview: scenario.provenance !== "observed" || scenario.hasUncertainSteps || scenario.scenarioId.includes("-AI-"),
+      rationale: scenario.provenance === "observed" ? "Construido únicamente con eventos ejecutados." : "Derivado de evidencia observada; requiere revisión.",
+      sourceEventRefs: events.map((_, index) => `event-${index + 1}`),
+      steps: scenario.testRailSteps.map((step) => step.content),
+      expectedResultCandidate: scenario.testRailSteps.at(-1)?.expected,
+      oracleAuthority: "observed_only",
+      dataRequirements: scenario.requiredData.map((data) => data.key),
+      technicalObservationRefs: baseSemantic.technicalObservations.map((observation) => observation.observationId),
+    })));
+    saveSemanticRecording(semantic);
     onLog(
       `[recording] escenarios: 1 extremo a extremo, ${segmentScenarios.length} por bloque, ` +
         `${negatives.length} de compuerta, ${aiNegatives.length} negativos de IA, ${alternatives.length} caminos alternativos`,
@@ -398,7 +419,7 @@ export async function deriveScenarios(
     saveTrace(derived);
 
     onLog(`[recording] ${scenarios.length} escenarios generados desde la grabación ${recordingId}`);
-    return { summary: toSummary(derived, scenarios.length), scenarios, narrative: enrichment.narrative };
+    return { summary: toSummary(derived, scenarios.length), scenarios, narrative: enrichment.narrative, semanticModel: semantic };
   } finally {
     // Even on failure the frames go: they only ever existed to feed this call.
     const current = loadTrace(appSlug, recordingId);

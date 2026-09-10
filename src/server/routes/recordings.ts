@@ -9,6 +9,8 @@ import {
   loadTrace,
   saveScenarios,
   toSummary,
+  saveSemanticRecording,
+  loadSemanticRecording,
 } from "../../recording/recording-store";
 import {
   RecordingError,
@@ -30,6 +32,7 @@ import {
 } from "../services/testrail-sync-types";
 import { toPublishableScenario } from "../../recording/scenario-to-testrail";
 import type { RecordedScenario } from "../../recording/trace-to-scenario";
+import { buildSemanticRecordingModel, attachScenarioSuggestions } from "../../recording/semantic-recording";
 
 export const recordingsRouter = Router();
 
@@ -196,6 +199,26 @@ recordingsRouter.get("/:recordingId/trace", async (req, res) => {
       return;
     }
     res.json({ ok: true, trace });
+  } catch (err) {
+    handle(res, err);
+  }
+});
+
+// GET /api/recordings/:recordingId/semantic — derived semantic assets, separate from raw trace.
+recordingsRouter.get("/:recordingId/semantic", async (req, res) => {
+  try {
+    const projectSlug = String(req.query.projectSlug ?? "").trim();
+    if (!projectSlug) {
+      sendError(res, 400, "MISSING_PROJECT_SLUG", "projectSlug es obligatorio");
+      return;
+    }
+    const appSlug = await appSlugFor(projectSlug);
+    const model = loadSemanticRecording(appSlug, req.params.recordingId);
+    if (!model) {
+      sendError(res, 404, "SEMANTIC_RECORDING_NOT_FOUND", "No existe el modelo semántico de esta grabación");
+      return;
+    }
+    res.json({ ok: true, model });
   } catch (err) {
     handle(res, err);
   }

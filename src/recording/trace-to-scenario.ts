@@ -6,6 +6,7 @@ import type {
   SessionTrace,
   TraceSegment,
 } from "./session-trace.types";
+import { isSensitiveRecordedEvent } from "./semantic-recording";
 
 /**
  * Builds executable scenarios from a recorded walkthrough — deterministically.
@@ -22,6 +23,7 @@ export type RecordedWebStep = {
   action: "navigate" | "click" | "fill" | "assert" | "wait";
   target?: { strategy: string; value: string };
   value?: string;
+  valueKey?: string;
   description: string;
 };
 
@@ -53,6 +55,8 @@ export type RecordedDataField = {
   stepIndex: number;
   exampleValue?: string;
   sensitive: boolean;
+  valueRole?: "action_input" | "secure_input";
+  source?: "RECORDED_CONFIRMED" | "secure";
 };
 
 export type RecordedScenario = {
@@ -113,6 +117,11 @@ function slugifyKey(label: string): string {
     .slice(0, 40) || "campo";
 }
 
+function valueKeyFor(event: RecordedEvent, label: string): string {
+  const explicit = event.redactedKey?.trim();
+  return explicit ? slugifyKey(explicit) : slugifyKey(label);
+}
+
 /**
  * The text that proves the app landed where the walkthrough went next.
  *
@@ -123,8 +132,17 @@ function slugifyKey(label: string): string {
 function assertionTextFor(screen: RecordedScreen | undefined): string | undefined {
   if (!screen) return undefined;
   const title = screen.title?.trim();
-  if (title && title !== screen.screenKey && title.length > 2) return title;
+  if (title && title !== screen.screenKey && title.length > 2 && !isTechnicalTitle(title)) return title;
   return screen.texts.find((t) => t.trim().length > 3)?.trim();
+}
+
+function isTechnicalTitle(value: string): boolean {
+  return /hash|fingerprint|^[a-f0-9]{8,}$/i.test(value.trim()) || /^(?:screen|pantalla)[-_ ]?[a-f0-9]{6,}$/i.test(value.trim());
+}
+
+function humanScreenTitle(screen: RecordedScreen | undefined, fallback: string): string {
+  const title = screen?.title?.trim();
+  return title && !isTechnicalTitle(title) ? title : fallback;
 }
 
 function describeTap(event: RecordedEvent): string {
@@ -134,8 +152,8 @@ function describeTap(event: RecordedEvent): string {
 
 function describeFill(event: RecordedEvent): string {
   const label = event.target?.label?.trim() || "el campo";
-  return event.redactedKey
-    ? `Ingresar ${event.redactedKey} en "${label}"`
+  return isSensitiveRecordedEvent(event)
+    ? `Ingresar el valor seguro asociado a "${label}"`
     : `Ingresar "${event.value ?? ""}" en "${label}"`;
 }
 
@@ -181,9 +199,7 @@ export function buildHappyPathScenario(
     });
   }
   testRailSteps.push({
-    content: isMobile
-      ? `Abrir la aplicación ${trace.appSlug}`
-      : `Navegar a ${trace.baseUrl ?? "la aplicación"}`,
+    content: isMobile ? "Abrir la aplicación configurada" : "Abrir la aplicación configurada del proyecto",
     expected: "La aplicación carga su pantalla inicial",
   });
 
@@ -258,12 +274,16 @@ export function buildHappyPathScenario(
       const description = describeFill(event);
       const label = target.label?.trim() || "campo";
       const stepIndex = isMobile ? mobileSteps.length : webSteps.length;
+      const sensitive = isSensitiveRecordedEvent(event);
+      const valueKey = valueKeyFor(event, label);
       requiredData.push({
-        key: slugifyKey(label),
+        key: valueKey,
         label,
         stepIndex,
-        exampleValue: event.redactedKey ? undefined : event.value,
-        sensitive: Boolean(event.redactedKey || target.sensitive),
+        exampleValue: sensitive ? undefined : event.value,
+        sensitive,
+        valueRole: sensitive ? "secure_input" : "action_input",
+        source: sensitive ? "secure" : "RECORDED_CONFIRMED",
       });
       if (isMobile) {
         const t = toMobileTarget(event);
@@ -274,7 +294,8 @@ export function buildHappyPathScenario(
         webSteps.push({
           action: "fill",
           target: { strategy: best.strategy, value: best.value },
-          value: event.value ?? "",
+          value: sensitive ? undefined : event.value ?? "",
+          valueKey: sensitive ? valueKey : undefined,
           description,
         });
         stepTargets.push({
@@ -290,8 +311,8 @@ export function buildHappyPathScenario(
     }
 
     if (event.kind === "navigate" && !isMobile && event.url) {
-      webSteps.push({ action: "navigate", value: event.url, description: `Navegar a ${event.url}` });
-      testRailSteps.push({ content: `Navegar a ${event.url}`, expected: "La página carga correctamente" });
+      webSteps.push({ action: "navigate", value: event.url, description: "Abrir la aplicación configurada del proyecto" });
+      testRailSteps.push({ content: "Abrir la aplicación configurada del proyecto", expected: "La página carga correctamente" });
     }
   }
 
@@ -299,7 +320,7 @@ export function buildHappyPathScenario(
   const title =
     options.title?.trim() ||
     trace.label?.trim() ||
-    (lastScreen ? `Flujo grabado hasta ${lastScreen.title}` : "Flujo grabado");
+    (lastScreen ? `Recorrido ${trace.platform === "web" ? "web" : "móvil"} observado` : "Recorrido observado");
 
   return {
     scenarioId: `${options.scenarioIdPrefix ?? "REC"}-${trace.recordingId.slice(0, 8).toUpperCase()}-01`,
@@ -324,7 +345,7 @@ function buildPreconditions(trace: SessionTrace): string[] {
   if (trace.platform === "android") {
     preconditions.push(`Aplicación ${trace.appPackage ?? trace.appSlug} instalada en el dispositivo`);
   } else if (trace.baseUrl) {
-    preconditions.push(`Acceso a ${trace.baseUrl}`);
+    preconditions.push("Acceso a la aplicación configurada del proyecto");
   }
   preconditions.push("Datos de prueba válidos disponibles para el proyecto");
   return preconditions;
@@ -337,13 +358,12 @@ function buildPreconditions(trace: SessionTrace): string[] {
  * tell what was recorded even when the AI pass never ran or was rejected.
  */
 function buildFallbackStory(trace: SessionTrace, events: readonly RecordedEvent[]): string {
-  const screens = trace.screens.map((s) => s.title).filter(Boolean);
+  const screens = trace.screens.map((s, index) => humanScreenTitle(s, `pantalla ${index + 1}`)).filter(Boolean);
   const actions = events.filter((e) => e.kind === "tap" || e.kind === "fill").length;
   const path = screens.length > 0 ? screens.join(" → ") : "la aplicación";
   return (
     `Recorrido observado sobre ${path}. ` +
-    `Se registraron ${actions} acciones del usuario en ${screens.length} pantallas. ` +
-    `Escenario derivado de la grabación ${trace.recordingId}.`
+    `Se registraron ${actions} acciones del usuario en ${screens.length} pantallas.`
   );
 }
 
@@ -469,7 +489,7 @@ export function buildSegmentScenarios(
 
     const upToHere = events.slice(0, consumed);
     const scenario = buildHappyPathScenario(trace, upToHere, {
-      title: `Recorrido hasta ${shortTitle(segment.title)}`,
+      title: `${trace.label?.trim() || "Bloque observado"} ${index + 1}`,
     });
     // A truncation that kept every step is the end-to-end scenario under another name.
     if (scenario.testRailSteps.length >= happyPath.testRailSteps.length) return;
@@ -478,7 +498,7 @@ export function buildSegmentScenarios(
       ...scenario,
       scenarioId: `${happyPath.scenarioId}-SEG-${scenarios.length + 1}`,
       description:
-        `Bloque del recorrido que termina en "${shortTitle(segment.title, 80)}". ` +
+        `Bloque del recorrido que termina en "${isTechnicalTitle(segment.title) ? "la pantalla observada" : shortTitle(segment.title, 80)}". ` +
         `Cubre ${scenario.testRailSteps.length} de los ${happyPath.testRailSteps.length} pasos del flujo completo.`,
       scope: "segment",
       provenance: "observed",
@@ -567,9 +587,9 @@ export function buildAlternativePathScenarios(
 
       scenarios.push({
         scenarioId: `${happyPath.scenarioId}-ALT-${scenarios.length + 1}`,
-        title: capTitle(`Desde ${shortTitle(screen.title)}: ${control.label}`),
+        title: capTitle(`Alternativa observada ${scenarios.length + 1}: ${control.label}`),
         description:
-          `La pantalla "${shortTitle(screen.title, 80)}" ofrece "${control.label}", que el recorrido grabado ` +
+          `La pantalla "${humanScreenTitle(screen, "la pantalla observada")}" ofrece "${control.label}", que el recorrido grabado ` +
           `no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.`,
         preconditions: preamble.preconditions,
         kind: "happy_path",

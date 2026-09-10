@@ -2,6 +2,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import type { RecordingSummary, SessionTrace } from "./session-trace.types";
 import type { RecordedScenario } from "./trace-to-scenario";
+import type { SemanticRecordingModel } from "./semantic-recording";
 import { normalizeEvents, summarizeTrace } from "./trace-normalizer";
 
 /**
@@ -49,6 +50,10 @@ function scenariosPath(appSlug: string, recordingId: string): string {
   return path.join(recordingDir(appSlug, recordingId), "scenarios.json");
 }
 
+function semanticPath(appSlug: string, recordingId: string): string {
+  return path.join(recordingDir(appSlug, recordingId), "semantic-recording.json");
+}
+
 export function saveTrace(trace: SessionTrace): void {
   const dir = recordingDir(trace.appSlug, trace.recordingId);
   fs.mkdirSync(dir, { recursive: true });
@@ -69,6 +74,18 @@ export function saveScenarios(appSlug: string, recordingId: string, scenarios: R
   const dir = recordingDir(appSlug, recordingId);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(scenariosPath(appSlug, recordingId), JSON.stringify(scenarios, null, 2), "utf8");
+}
+
+export function saveSemanticRecording(model: SemanticRecordingModel): void {
+  const dir = recordingDir(model.appSlug, model.recordingId);
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(semanticPath(model.appSlug, model.recordingId), JSON.stringify(model, null, 2), "utf8");
+}
+
+export function loadSemanticRecording(appSlug: string, recordingId: string): SemanticRecordingModel | null {
+  const file = semanticPath(appSlug, recordingId);
+  if (!fs.existsSync(file)) return null;
+  try { return JSON.parse(fs.readFileSync(file, "utf8")) as SemanticRecordingModel; } catch { return null; }
 }
 
 export function loadScenarios(appSlug: string, recordingId: string): RecordedScenario[] {
