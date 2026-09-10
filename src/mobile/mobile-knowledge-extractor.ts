@@ -14,6 +14,14 @@ export type MobileObservedControl = {
   className?: string;
   /** Android package that owns this control, from the XML `package` attribute. */
   package?: string;
+  /**
+   * Whether the control is currently actionable, from the XML `enabled` attribute. Only recorded
+   * for clickable controls, where it carries meaning: a submit button gated behind a precondition
+   * (an OTP still to validate, a consent still to tick) reads as disabled until the gate opens.
+   * Without it the learning file cannot express that "Continuar" is not yet pressable, and a
+   * generated scenario has no way to know a step is missing before it.
+   */
+  enabled?: boolean;
 };
 
 export type MobileScreenSnapshot = {
@@ -99,6 +107,15 @@ export function extractMobileScreenSnapshot(pageSourceXml: string): MobileScreen
     if (resourceId) control.resourceId = resourceId;
     if (className) control.className = className;
     if (pkg) control.package = pkg;
+    // Recorded whenever the source states it, not only for tappables.
+    //
+    // Restricting this to `clickable` controls looked like noise control and instead threw away
+    // the one case that matters: this app renders a gated button as clickable="false", so the
+    // disabled "Continuar" — the whole point of capturing gate state — was the single control
+    // guaranteed to be skipped. Across a real run, 50 of 186 controls carried the flag and not
+    // one of them was ever false.
+    const enabledAttr = attr(attrs, "enabled");
+    if (enabledAttr !== undefined) control.enabled = enabledAttr !== "false";
 
     observedControls.push(control);
 
@@ -123,7 +140,14 @@ export function extractMobileScreenSnapshot(pageSourceXml: string): MobileScreen
     ? title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 60) || "screen"
     : "screen_" + createHash("sha256").update(assertionTargets.slice(0, 8).join("|")).digest("hex").slice(0, 10);
 
-  const structuralTokens = [...clickTargets, ...assertionTargets].sort().join("|");
+  // Gate state is structural: the same screen with "Continuar" disabled and with it enabled are
+  // two different states of the flow, and the second is the observable proof that the
+  // preconditions were satisfied. Folding it into the fingerprint is what lets both be learned.
+  const gateTokens = observedControls
+    .filter((c) => c.enabled === false)
+    .map((c) => `disabled:${c.label}`)
+    .sort();
+  const structuralTokens = [...clickTargets, ...assertionTargets].sort().concat(gateTokens).join("|");
   const fingerprint = "screen_" + createHash("sha256").update(structuralTokens).digest("hex").slice(0, 10);
 
   const dominantPackage = (() => {

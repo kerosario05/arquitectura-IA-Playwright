@@ -480,6 +480,24 @@ function hierarchyContainsAnyVariant(pageSource: string, rawValue: string | unde
   return false;
 }
 
+/**
+ * The literal a target can be looked for by inside a page source.
+ *
+ * `hierarchyContainsAnyVariant` searches for an attribute VALUE, but an androidUiAutomator
+ * target carries a selector EXPRESSION (`new UiSelector().className("…")`), which never
+ * appears in the hierarchy — so the "did the next element show up?" probe silently answered
+ * "no" every single time. Pulling the anchor literal out lets the probe answer the question it
+ * was meant to ask. A class-only selector anchors on nothing identifying, so it returns
+ * undefined: callers must read that as "cannot tell", never as "not present".
+ */
+function targetProbeValue(target: { strategy?: string; value?: string } | undefined): string | undefined {
+  const raw = target?.value?.trim();
+  if (!raw) return undefined;
+  if (target?.strategy !== "androidUiAutomator") return raw;
+  const anchor = raw.match(/\.(?:description|descriptionContains|descriptionMatches|text|textContains|textMatches|resourceId)\(\s*"((?:[^"\\]|\\.)*)"\s*\)/);
+  return anchor ? anchor[1].replace(/\\"/g, '"') : undefined;
+}
+
 function resolveTransitionSignalMatch(pageSource: string, signals: MobileExecutionSignals): string | undefined {
   const normalizedPage = normalizeSignalToken(pageSource);
   const groups: Array<{ name: string; values: string[] }> = [
@@ -508,7 +526,7 @@ async function assessClickTransitionOutcome(
 ): Promise<{ reached: boolean; reason?: string }> {
   if (step.action !== "click") return { reached: true };
   const startedAt = Date.now();
-  const requiredNextTargetValue = step.requiredNextTarget?.value ?? nextStep?.target?.value;
+  const requiredNextTargetValue = targetProbeValue(step.requiredNextTarget) ?? targetProbeValue(nextStep?.target);
   const beforeFingerprint = previousPageSource ? buildHierarchyFingerprint(previousPageSource) : "";
   const beforeSelectedCount = (previousPageSource?.match(/selected="true"/g) ?? []).length;
   const beforeCheckedCount = (previousPageSource?.match(/checked="true"/g) ?? []).length;
@@ -545,10 +563,20 @@ async function assessClickTransitionOutcome(
       continue;
     }
 
-    if (changedFingerprint || nextTargetVisible) {
+    if (changedFingerprint || nextTargetVisible || selectionChanged) {
       return { reached: true };
     }
     await delay(200);
+  }
+
+  // Nothing observable changed. That is only evidence of failure when there was something to
+  // observe: a declared next element that never appeared. Without one, this click had no
+  // declared consequence — and some legitimately have none. Selecting a document type here
+  // leaves the hierarchy byte-identical: the app exposes no selected="true"/checked="true"
+  // anywhere, so a real, successful tap is indistinguishable from a no-op. Failing it means
+  // failing every scenario that picks an option, for something the click did correctly.
+  if (!requiredNextTargetValue) {
+    return { reached: true, reason: "no_observable_transition" };
   }
   return { reached: false, reason: "transition_not_reached: transitionTimeout" };
 }
@@ -853,7 +881,13 @@ export async function runOneScenario(
   // Knowledge learning: capture the real screen (accessibility tree) after each step so
   // future generations know the actual elements of screens never declared by hand.
   const learningEnabled = (config.integrations.android?.knowledgeLearningEnabled ?? true) && Boolean(opts.appSlug);
+  // Bounds how many states of a single screen a run may learn. Enough for a multi-step gate
+  // (initial → first code sent → second code sent → gate open) without letting a screen with
+  // volatile content — a countdown, a spinner — fill the knowledge file with near-duplicates.
+  const MAX_LEARNED_STATES_PER_SCREEN = 4;
+  // Keyed by `${screenKey}:${fingerprint}` — one entry per distinct STATE of a screen.
   const screensByKey = new Map<string, MobileScreenSnapshot>();
+  const statesByScreenKey = new Map<string, number>();
   const executedClickTargets: string[] = [];
   const observedTransitions: Array<{
     stepIndex?: number;
@@ -931,6 +965,9 @@ export async function runOneScenario(
         appSlug: opts.appSlug,
         requiredData: opts.requiredData,
         dataOverrides: opts.dataOverrides,
+        // Lets an OTP step find the control that sent the code and see whether a later step
+        // already drives the next validation cycle.
+        steps: opts.steps,
       });
       if (result.status === "failed") {
         result.reasonCode = mapMobileStepFailureReasonCode(result.errorMessage ?? "");
@@ -1019,8 +1056,26 @@ export async function runOneScenario(
             ? false
             : (snapshot?.clickTargets.length ?? 0) > 0 || (snapshot?.assertionTargets.length ?? 0) > 0;
           const afterFingerprint = afterSnapshotFailed ? undefined : snapshot?.fingerprint;
-          if (!afterSnapshotFailed && snapshot && !screensByKey.has(snapshot.screenKey)) {
-            screensByKey.set(snapshot.screenKey, snapshot);
+          if (!afterSnapshotFailed && snapshot) {
+            // Key by state, not by screen. screenKey comes from the screen's heading, so every
+            // state of one screen collapses into it: the contact-confirmation screen keeps the
+            // same heading whether it shows two "send code" buttons, the email boxes, or the
+            // phone boxes with Continuar finally enabled. Keying by screenKey kept only the first
+            // state ever seen, which is why the generator reported no evidence of the OTP screen
+            // and produced scenarios that stopped at the first code. The fingerprint is
+            // content-derived (and now includes gate state), so each state is learned once.
+            const stateKey = `${snapshot.screenKey}:${snapshot.fingerprint}`;
+            const statesForScreen = statesByScreenKey.get(snapshot.screenKey) ?? 0;
+            if (screensByKey.has(stateKey)) {
+              // already learned this exact state
+            } else if (statesForScreen >= MAX_LEARNED_STATES_PER_SCREEN) {
+              onLog(
+                `[mobile:knowledge] state skipped screen=${snapshot.screenKey} reason=state_cap_reached cap=${MAX_LEARNED_STATES_PER_SCREEN}`,
+              );
+            } else {
+              screensByKey.set(stateKey, snapshot);
+              statesByScreenKey.set(snapshot.screenKey, statesForScreen + 1);
+            }
           }
           // Learn a structured navigation transition ONLY when we observed a click with valid
           // STRUCTURAL fingerprints (real observed content) on both sides AND the state changed.
@@ -1135,6 +1190,15 @@ export async function runOneScenario(
   }
 
   // Persist observed screens + route via shared SQL-first persister (ProjectKnowledge -> app.knowledge.json)
+  //
+  // When learning is off this block used to do nothing and say nothing, so a run could complete
+  // green while the knowledge file never grew — indistinguishable from a run that learned and
+  // found nothing new. Reporting the reason makes the difference visible in the run log.
+  if (!learningEnabled || !opts.appSlug) {
+    onLog(
+      `[mobile:knowledge] disabled reason=${!opts.appSlug ? "no_app_slug" : "MOBILE_KNOWLEDGE_LEARNING_ENABLED=false"} appSlug=${opts.appSlug ?? "-"}`,
+    );
+  }
   if (learningEnabled && opts.appSlug) {
     const status: "passed" | "failed" = failedCount === 0 ? "passed" : "failed";
     const expectedPackage = opts.appPackage?.trim();

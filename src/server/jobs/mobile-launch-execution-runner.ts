@@ -459,6 +459,13 @@ export async function startMobileLaunchExecutionJobWithDeps(
             sectionSlug,
             appSlug: params.appSlug,
             sourceIssueKey: scenario.scenarioId.startsWith("MOBILE-") ? scenario.scenarioId.split("-").slice(1, -1).join("-") : undefined,
+            // Needed downstream to resolve the identity an OTP step must be issued for. The
+            // single-test path (runMobileTest) already forwards both; this path did not, so an
+            // OTP step reaching executeMobileStep saw an empty runtime context and could only
+            // fail with otp_identity_unresolved. Overrides are keyed by scenarioId here and by
+            // stepIndex downstream, hence the lookup.
+            requiredData: scenario.requiredData,
+            dataOverrides: params.dataOverrides?.[scenario.scenarioId],
             stepRequirementRefs: scenario.stepRequirementRefs,
           },
           onLog

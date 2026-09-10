@@ -3032,48 +3032,49 @@
     "defects": [
       {
         "id": "1786133666618-z7olx32",
-        "description": "Paso fallido:\nPaso 8: Continuar\n\nQué pasó:\nEl botón/elemento estaba deshabilitado y no se pudo accionar (no se cumplió una condición previa).\n\nEvidencia:\nEvidencia técnica disponible.",
-        "severity": "medium",
-        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
-        "jobId": "34af9661-c2d3-4cc0-b75e-b86513fea071",
+        "description": "Paso fallido:\nPaso 10: Validar el código OTP recibido.\n\nQué pasó:\notp_identity_unresolved: OTP identity could not be resolved from runtime data.\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "critical",
+        "severityReason": "Fallo de autenticación o bloqueo total que impide ejecutar el flujo.",
+        "jobId": "4471e1f8-2996-42b6-bcbf-d8c983cd1891",
         "status": "pending_review",
         "scenarioId": "MOBILE-AA-94-001",
         "scenarioTitle": "Confirmar datos de contacto y validar OTP",
-        "title": "[Media] No se encontró \"Continuar\" (paso 8) — Confirmar datos de contacto correctos y continuar con OTP",
+        "title": "[Crítica] No se encontró \"Validar el código OTP recibido.\" (paso 10) — Visualización y confirmación de datos de contacto enmascarados con OTP",
         "technicalContext": {
-          "reasonCode": "target_disabled",
-          "failedAtStep": 8,
-          "failedTarget": "Continuar",
-          "rawError": "target_disabled: el botón/elemento está deshabilitado y no se puede clickear (no se cumplió la condición para habilitarlo): {\"strategy\":\"accessibilityId\",\"value\":\"Continuar\"}",
-          "evidenceDir": ".artifacts\\evidence\\mobile\\com_appconversacionalbsc\\runs\\34af9661-c2d3-4cc0-b75e-b86513fea071\\scenarios\\MOBILE-AA-94-001",
-          "diagnosticsPath": ".artifacts\\evidence\\mobile\\com_appconversacionalbsc\\runs\\34af9661-c2d3-4cc0-b75e-b86513fea071\\scenarios\\MOBILE-AA-94-001\\diagnostics\\step-9-selector-diagnostics.json",
-          "testRailCaseId": 43265,
-          "testRailRunId": 3903
+          "reasonCode": "execution_exception",
+          "failedAtStep": 10,
+          "failedTarget": "Validar el código OTP recibido.",
+          "rawError": "otp_identity_unresolved: OTP identity could not be resolved from runtime data.",
+          "evidenceDir": ".artifacts\\evidence\\mobile\\com_appconversacionalbsc\\runs\\4471e1f8-2996-42b6-bcbf-d8c983cd1891\\scenarios\\MOBILE-AA-94-001",
+          "testRailCaseId": 44801,
+          "testRailRunId": 4207
         },
         "createdAt": "2026-08-07T20:14:26.618Z",
-        "updatedAt": "2026-08-10T20:03:58.810Z"
+        "updatedAt": "2026-09-04T12:53:28.949Z",
+        "runId": "4471e1f8-2996-42b6-bcbf-d8c983cd1891"
       },
       {
         "id": "1786133688381-xyr4wxd",
-        "description": "Paso fallido:\nPaso 8: Correo electrónico\n\nQué pasó:\nLa validación esperada no fue encontrada en la pantalla.\n\nEvidencia:\nEvidencia técnica disponible.",
-        "severity": "medium",
-        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
-        "jobId": "34af9661-c2d3-4cc0-b75e-b86513fea071",
+        "description": "Paso fallido:\nPaso 9: Validar el código OTP recibido.\n\nQué pasó:\notp_identity_unresolved: OTP identity could not be resolved from runtime data.\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "critical",
+        "severityReason": "Fallo de autenticación o bloqueo total que impide ejecutar el flujo.",
+        "jobId": "381e6e64-72a0-4e2a-bc1f-3544a720d149",
         "status": "pending_review",
         "scenarioId": "MOBILE-AA-94-002",
         "scenarioTitle": "Indicar que los datos de contacto son incorrectos",
-        "title": "[Media] No se encontró \"Correo electrónico\" (paso 8) — Indicar que los datos de contacto no son correctos",
+        "title": "[Crítica] No se encontró \"Validar el código OTP recibido.\" (paso 9) — Confirmación de datos correctos y validación mediante OTP",
         "technicalContext": {
-          "reasonCode": "assertion_not_found",
-          "failedAtStep": 8,
-          "failedTarget": "Correo electrónico",
-          "rawError": "Expected element to be visible: {\"strategy\":\"accessibilityId\",\"value\":\"Correo electrónico\"}",
-          "evidenceDir": ".artifacts\\evidence\\mobile\\com_appconversacionalbsc\\runs\\34af9661-c2d3-4cc0-b75e-b86513fea071\\scenarios\\MOBILE-AA-94-002",
-          "testRailCaseId": 43266,
-          "testRailRunId": 3903
+          "reasonCode": "execution_exception",
+          "failedAtStep": 9,
+          "failedTarget": "Validar el código OTP recibido.",
+          "rawError": "otp_identity_unresolved: OTP identity could not be resolved from runtime data.",
+          "evidenceDir": ".artifacts\\evidence\\mobile\\com_appconversacionalbsc\\runs\\381e6e64-72a0-4e2a-bc1f-3544a720d149\\scenarios\\MOBILE-AA-94-002",
+          "testRailCaseId": 44795,
+          "testRailRunId": 4204
         },
         "createdAt": "2026-08-07T20:14:48.381Z",
-        "updatedAt": "2026-08-10T20:04:51.850Z"
+        "updatedAt": "2026-09-03T20:58:02.444Z",
+        "runId": "381e6e64-72a0-4e2a-bc1f-3544a720d149"
       },
       {
         "id": "1786133761986-ie5fzq6",
@@ -3123,5 +3124,29 @@
     ],
     "createdAt": "2026-08-07T19:34:33.226Z",
     "updatedAt": "2026-08-10T20:07:46.281Z"
+  },
+  {
+    "id": "1788545158848-gw1tah5",
+    "issueKey": "AA-96",
+    "urlSlug": "AA-96",
+    "defects": [],
+    "createdAt": "2026-09-04T18:05:58.848Z",
+    "updatedAt": "2026-09-04T18:05:58.848Z"
+  },
+  {
+    "id": "1788979385825-qt92hdx",
+    "issueKey": "REC-144327F3",
+    "urlSlug": "REC-144327F3",
+    "defects": [],
+    "createdAt": "2026-09-09T18:43:05.825Z",
+    "updatedAt": "2026-09-09T18:43:05.825Z"
+  },
+  {
+    "id": "1788981048201-bade642",
+    "issueKey": "REC-D44A1E52",
+    "urlSlug": "REC-D44A1E52",
+    "defects": [],
+    "createdAt": "2026-09-09T19:10:48.201Z",
+    "updatedAt": "2026-09-09T19:10:48.201Z"
   }
 ]

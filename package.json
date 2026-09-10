@@ -17,6 +17,8 @@
     "install:browsers": "playwright install",
     "typecheck": "tsc --noEmit",
     "data:inspect": "tsx src/cli/data-inspect.ts",
+    "db:init": "tsx src/cli/db-init.ts",
+    "db:inspect": "tsx src/cli/db-init.ts",
     "testrail:projects": "tsx src/cli/testrail-projects.ts",
     "testrail:inspect": "tsx src/cli/testrail-inspect.ts",
     "jira:inspect": "tsx src/cli/jira-inspect.ts",
@@ -46,7 +48,8 @@
     "ai:validate:real": "tsx scripts/validate-ai-repair.ts --real-provider",
     "page-objects:generate": "tsx src/cli/page-objects-generate.ts",
     "page-objects:approve": "tsx src/cli/page-objects-approve.ts",
-    "clean:tmp": "node -e \"const fs=require('fs'),path=require('path');const root=process.cwd();const tmpRoot=path.join(root,'.artifacts','tmp');if(fs.existsSync(tmpRoot))fs.rmSync(tmpRoot,{recursive:true,force:true});fs.readdirSync(root).filter(f=>/^\\.tmp-?/.test(f)).forEach(f=>{const p=path.join(root,f);try{fs.rmSync(p,{recursive:true,force:true});console.log('Removed '+f)}catch(e){}});['codex-test.txt','codex-runner-test.txt'].forEach(f=>{const p=path.join(root,f);if(fs.existsSync(p)){fs.unlinkSync(p);console.log('Removed '+f)}});console.log('Temp cleanup complete')\""
+    "clean:tmp": "node -e \"const fs=require('fs'),path=require('path');const root=process.cwd();const tmpRoot=path.join(root,'.artifacts','tmp');if(fs.existsSync(tmpRoot))fs.rmSync(tmpRoot,{recursive:true,force:true});fs.readdirSync(root).filter(f=>/^\\.tmp-?/.test(f)).forEach(f=>{const p=path.join(root,f);try{fs.rmSync(p,{recursive:true,force:true});console.log('Removed '+f)}catch(e){}});['codex-test.txt','codex-runner-test.txt'].forEach(f=>{const p=path.join(root,f);if(fs.existsSync(p)){fs.unlinkSync(p);console.log('Removed '+f)}});console.log('Temp cleanup complete')\"",
+    "knowledge:health": "tsx src/cli/knowledge-health.ts"
   },
   "dependencies": {
     "@google/genai": "^2.6.0",
@@ -54,6 +57,7 @@
     "cors": "^2.8.6",
     "dotenv": "^16.6.1",
     "express": "^5.2.1",
+    "multer": "^2.3.0",
     "oracledb": "^7.0.1",
     "webdriverio": "^9.30.0"
   },
@@ -61,6 +65,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jszip": "^3.4.0",
+    "@types/multer": "^2.2.0",
     "@types/node": "^24.3.0",
     "appium": "^3.5.0",
     "appium-uiautomator2-driver": "^8.4.0",

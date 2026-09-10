@@ -10,9 +10,31 @@ import { generateMobileScenarios, mobileScenarioToLaunchScenario, type MobileGen
 import { launchExecution } from "../jobs/launch-orchestrator";
 import { startMobileLaunchExecutionJob, deriveSourceIssueKey, type MobileLaunchExecutionParams } from "../jobs/mobile-launch-execution-runner";
 import { getMobileScenarioGenerationJob, startOrReuseMobileScenarioGenerationJob } from "../jobs/mobile-scenario-generation-manager";
+import { startMobileRouteLearningJob, type MobileRouteLearningParams } from "../jobs/mobile-route-learning-runner";
 import { normalizeMobileLaunchExecutionParams, persistMobileExecutionManifest } from "../jobs/mobile-rerun-artifacts";
+import { findActiveRouteLearningJob, findDeviceBusyJob, findRecentRouteLearningJob, isFlowAlreadyLearned, planRouteLearningAutostart } from "../jobs/mobile-route-learning-autostart";
+import { loadMobileRouteProfile } from "../../mobile/mobile-route-profile";
 
 export const mobileRouter = Router();
+
+/**
+ * True when the runner will be able to resolve an app to drive.
+ *
+ * The guards below used to check only the request body and .env, but resolveMobileTarget()
+ * also falls back to the project profile (mobile.config.json, resolved from appSlug) — so a
+ * perfectly serviceable request was rejected before it ever reached the runner. QA-lab sends
+ * appSlug and no package when it executes, which is exactly that case. Mirroring the same
+ * resolution order here keeps the guard from being stricter than what actually runs.
+ */
+function hasResolvableApp(body: { apkPath?: string; appPackage?: string; appSlug?: string }): boolean {
+  if (body.apkPath?.trim() || body.appPackage?.trim()) return true;
+  if (config.integrations.android?.apkPath || config.integrations.android?.appPackage) return true;
+  const slug = body.appSlug?.trim();
+  if (!slug) return false;
+  const profile = loadMobileRouteProfile(slug);
+  return Boolean(profile?.packageName?.trim());
+}
+
 let activeEmulatorBootJobId: string | null = null;
 
 function normalizeSelectedIssueKeys(value: unknown): string[] {
@@ -176,10 +198,7 @@ mobileRouter.post("/tests/run", (req, res) => {
   // apkPath/appPackage/appActivity can also come from .env (ANDROID_APK_PATH,
   // ANDROID_APP_PACKAGE, ANDROID_APP_ACTIVITY) — only reject if neither the request
   // nor the config has one, matching what mobile-test-runner.ts actually resolves.
-  const hasApp = Boolean(
-    body.apkPath?.trim() || body.appPackage?.trim() ||
-    config.integrations.android?.apkPath || config.integrations.android?.appPackage
-  );
+  const hasApp = hasResolvableApp(body as { apkPath?: string; appPackage?: string; appSlug?: string });
   if (!hasApp) {
     res.status(400).json({
       ok: false,
@@ -206,6 +225,49 @@ mobileRouter.post("/tests/run", (req, res) => {
     jobId: job.id,
     status: job.status,
     mode: "mobile-test-run"
+  });
+});
+
+// POST /api/mobile/route-learning — walks the app to capture REAL screens and records the
+// traversed path as a named flow in mobile.config.json. The mobile counterpart of
+// /api/scenarios/route-discovery/* (those drive Playwright and cannot serve a native app).
+// Never presses a control that would commit the flow unless stopBeforeSubmit is false.
+// Watch progress via GET /api/runs/:jobId/logs (SSE).
+mobileRouter.post("/route-learning", (req, res) => {
+  const body = req.body as MobileRouteLearningParams;
+
+  if (!body.appSlug?.trim()) {
+    res.status(400).json({
+      ok: false,
+      error: "invalid_request",
+      errorCode: "MISSING_APP_SLUG",
+      message: "appSlug is required — it is what enables knowledge learning for the walk",
+    });
+    return;
+  }
+
+  const hasApp = hasResolvableApp(body as { apkPath?: string; appPackage?: string; appSlug?: string });
+  if (!hasApp) {
+    res.status(400).json({
+      ok: false,
+      error: "invalid_request",
+      errorCode: "MISSING_APP",
+      message: "Either apkPath or appPackage is required (in the request body or via ANDROID_APK_PATH/ANDROID_APP_PACKAGE in .env)"
+    });
+    return;
+  }
+
+  const job = jobStore.create("mobile-route-learning", body as unknown as Record<string, unknown>);
+  setImmediate(() => startMobileRouteLearningJob(job.id));
+
+  res.status(202).json({
+    ok: true,
+    jobId: job.id,
+    status: job.status,
+    mode: "mobile-route-learning",
+    appSlug: body.appSlug,
+    flowId: body.flowId ?? null,
+    stopBeforeSubmit: body.stopBeforeSubmit !== false,
   });
 });
 
@@ -385,6 +447,13 @@ mobileRouter.post("/runs/launch-execution", async (req, res, next) => {
       sprintName?: string;
       publishStrategy?: "always_create" | "use_existing";
       scenarios?: MobileGeneratedScenario[];
+      /** Set false to get the plain `requires_route_learning` answer without starting the walk. */
+      autoRouteLearning?: boolean;
+      apkPath?: string;
+      appPackage?: string;
+      appActivity?: string;
+      avdName?: string;
+      headless?: boolean;
     };
 
     if (!body.projectId) {
@@ -411,6 +480,51 @@ mobileRouter.post("/runs/launch-execution", async (req, res, next) => {
         `[runs:launch] routeLearningExcluded=${routeLearningScenarios.length} standard=${standardScenarios.length} reason=requires_route_learning scenarioIds=${routeLearningScenarios.map((s) => s.scenarioId).join(",")}`,
       );
     }
+
+    // Excluding these scenarios is right, but on its own it leaves the story parked until
+    // somebody fires the walk by hand. Start it here so a new story reaching unknown screens
+    // resolves itself.
+    const learningFlowId = routeLearningScenarios.find((s) => s.sourceIssueKey)?.sourceIssueKey;
+    const autostart = planRouteLearningAutostart({
+      flowId: learningFlowId,
+      flowAlreadyLearned: isFlowAlreadyLearned(
+        loadMobileRouteProfile((body.appSlug ?? "").trim()) as { flows?: Record<string, unknown> } | null,
+        learningFlowId,
+      ),
+      appSlug: body.appSlug,
+      routeLearningScenarios,
+      hasApp: hasResolvableApp(body as { apkPath?: string; appPackage?: string; appSlug?: string }),
+      autoEnabled: body.autoRouteLearning !== false,
+      busyJob: findDeviceBusyJob(jobStore.list()),
+      recentWalk: findRecentRouteLearningJob(
+        jobStore.list(),
+        (body.appSlug ?? "").trim(),
+        learningFlowId,
+        Date.now(),
+      ),
+      base: {
+        apkPath: body.apkPath,
+        appPackage: body.appPackage,
+        appActivity: body.appActivity,
+        avdName: body.avdName,
+        headless: body.headless,
+      },
+    });
+    let routeLearningJobId: string | null = null;
+    if (autostart.start && autostart.params) {
+      const learningJob = jobStore.create("mobile-route-learning", autostart.params as unknown as Record<string, unknown>);
+      routeLearningJobId = learningJob.id;
+      setImmediate(() => startMobileRouteLearningJob(learningJob.id));
+      console.log(
+        `[runs:launch] routeLearningAutostarted jobId=${learningJob.id} reason=${autostart.reason} preferLabels=${(autostart.params.preferLabels ?? []).join("|")}`,
+      );
+    } else if (routeLearningScenarios.length > 0) {
+      console.log(`[runs:launch] routeLearningAutostartSkipped reason=${autostart.reason}`);
+    }
+    const routeLearningInfo = {
+      routeLearningJobId,
+      routeLearningAutostart: { started: autostart.start, reason: autostart.reason },
+    };
     if (standardScenarios.length === 0) {
       res.status(202).json({
         ok: true,
@@ -425,7 +539,10 @@ mobileRouter.post("/runs/launch-execution", async (req, res, next) => {
           requiresRouteLearning: true,
           locatorExecutionBacked: s.locatorExecutionBacked ?? false,
         })),
-        message: "Todos los escenarios requieren aprendizaje de ruta: no se publicaron ni ejecutaron como estándar.",
+        ...routeLearningInfo,
+        message: routeLearningJobId
+          ? "Todos los escenarios requieren aprendizaje de ruta: se inició la exploración automáticamente. Al terminar, regenera los escenarios."
+          : "Todos los escenarios requieren aprendizaje de ruta: no se publicaron ni ejecutaron como estándar.",
       });
       return;
     }
@@ -459,6 +576,7 @@ mobileRouter.post("/runs/launch-execution", async (req, res, next) => {
               requiresRouteLearning: true,
               locatorExecutionBacked: s.locatorExecutionBacked ?? false,
             })),
+            ...routeLearningInfo,
           }
         : {}),
     });
@@ -487,10 +605,24 @@ mobileRouter.post("/runs/execute", (req, res) => {
     return;
   }
 
-  const hasApp = Boolean(
-    body.apkPath?.trim() || body.appPackage?.trim() ||
-    config.integrations.android?.apkPath || config.integrations.android?.appPackage
-  );
+  // Refuse while a walk holds the emulator. Without this the run starts, fights the walk for the
+  // Appium session lock and dies inside session creation as `mobile_session_state_unknown` —
+  // which reads as an infrastructure fault and says nothing about the walk that caused it.
+  const activeWalk = findActiveRouteLearningJob(jobStore.list());
+  if (activeWalk) {
+    console.log(`[runs:execute] rejected reason=route_learning_in_progress jobId=${activeWalk.id}`);
+    res.status(409).json({
+      ok: false,
+      error: "route_learning_in_progress",
+      routeLearningJobId: activeWalk.id,
+      message:
+        `Hay un aprendizaje de ruta en curso (job ${activeWalk.id}) usando el emulador. ` +
+        `Espera a que termine y vuelve a ejecutar; su progreso está en GET /api/runs/${activeWalk.id}/logs.`,
+    });
+    return;
+  }
+
+  const hasApp = hasResolvableApp(body as { apkPath?: string; appPackage?: string; appSlug?: string });
   if (!hasApp) {
     res.status(400).json({
       ok: false,

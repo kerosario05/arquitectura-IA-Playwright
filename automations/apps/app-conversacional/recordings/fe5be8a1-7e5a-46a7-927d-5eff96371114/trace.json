@@ -1,0 +1,14 @@
+{
+  "recordingId": "fe5be8a1-7e5a-46a7-927d-5eff96371114",
+  "projectSlug": "app-conversacional",
+  "appSlug": "app-conversacional",
+  "platform": "android",
+  "appPackage": "com.appconversacionalbsc",
+  "label": "Registro 1",
+  "startedAt": "2026-09-08T22:03:10.822Z",
+  "status": "stopped",
+  "events": [],
+  "screens": [],
+  "endedAt": "2026-09-08T22:04:56.824Z",
+  "durationMs": 106002
+}

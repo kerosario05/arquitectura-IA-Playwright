@@ -1,0 +1,755 @@
+{
+  "recordingId": "aaccdbc7-8615-47bc-a622-6e7331bda65c",
+  "projectSlug": "app-conversacional",
+  "appSlug": "app-conversacional",
+  "platform": "android",
+  "appPackage": "com.appconversacionalbsc",
+  "label": "registro 5",
+  "startedAt": "2026-09-09T15:00:42.036Z",
+  "status": "derived",
+  "events": [
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "screen_b6d9dd5b39",
+      "fingerprint": "screen_b6d9dd5b39",
+      "seq": 0
+    },
+    {
+      "t": 22660,
+      "kind": "tap",
+      "screenKey": "screen_b6d9dd5b39",
+      "fingerprint": "screen_b6d9dd5b39",
+      "target": {
+        "label": ", ¿Primera vez aquí?, Crea tu cuenta en minutos, ",
+        "role": "button",
+        "locators": [
+          {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"Crea tu cuenta en minutos\")",
+            "confidence": 0.8
+          }
+        ],
+        "bounds": {
+          "x": 196,
+          "y": 2035,
+          "width": 1048,
+          "height": 252
+        },
+        "enabled": true
+      },
+      "seq": 1
+    },
+    {
+      "t": 24420,
+      "kind": "screen_change",
+      "screenKey": "screen_b6d9dd5b39",
+      "toScreenKey": "screen_6b33d7ee85",
+      "fingerprint": "screen_6b33d7ee85",
+      "seq": 2
+    },
+    {
+      "t": 24949,
+      "kind": "tap",
+      "screenKey": "screen_6b33d7ee85",
+      "fingerprint": "screen_6b33d7ee85",
+      "target": {
+        "label": "content",
+        "role": "text",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "android:id/content",
+            "confidence": 0.9
+          }
+        ],
+        "bounds": {
+          "x": 0,
+          "y": 144,
+          "width": 1440,
+          "height": 2892
+        },
+        "enabled": true
+      },
+      "note": "Resuelto sin control clickeable bajo el toque",
+      "seq": 3
+    },
+    {
+      "t": 27197,
+      "kind": "screen_change",
+      "screenKey": "screen_6b33d7ee85",
+      "toScreenKey": "screen_0be1bcf6c0",
+      "fingerprint": "screen_0be1bcf6c0",
+      "seq": 4
+    },
+    {
+      "t": 27333,
+      "kind": "tap",
+      "screenKey": "screen_0be1bcf6c0",
+      "fingerprint": "screen_0be1bcf6c0",
+      "target": {
+        "label": "Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica",
+        "role": "button",
+        "locators": [
+          {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"necesitarás lo siguiente. El proceso es rápido y sencillo.\")",
+            "confidence": 0.8
+          }
+        ],
+        "bounds": {
+          "x": 0,
+          "y": 451,
+          "width": 1440,
+          "height": 2585
+        },
+        "enabled": true
+      },
+      "seq": 5
+    },
+    {
+      "t": 35245,
+      "kind": "fill",
+      "screenKey": "screen_0be1bcf6c0",
+      "fingerprint": "screen_0be1bcf6c0",
+      "target": {
+        "label": "402-2999373-4",
+        "role": "input",
+        "locators": [
+          {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().text(\"402-2999373-4\")",
+            "confidence": 0.7
+          }
+        ],
+        "bounds": {
+          "x": 242,
+          "y": 1350,
+          "width": 1055,
+          "height": 98
+        },
+        "enabled": true,
+        "sensitive": false
+      },
+      "value": "402-2999373-4",
+      "seq": 6
+    },
+    {
+      "t": 35245,
+      "kind": "screen_change",
+      "screenKey": "screen_0be1bcf6c0",
+      "toScreenKey": "screen_351ccf9f3f",
+      "fingerprint": "screen_351ccf9f3f",
+      "seq": 7
+    },
+    {
+      "t": 35551,
+      "kind": "tap",
+      "screenKey": "screen_351ccf9f3f",
+      "fingerprint": "screen_351ccf9f3f",
+      "target": {
+        "label": "Acepto los Términos y condiciones y la Política de datos personales",
+        "role": "button",
+        "locators": [
+          {
+            "strategy": "accessibilityId",
+            "value": "Acepto los Términos y condiciones y la Política de datos personales",
+            "confidence": 0.95
+          }
+        ],
+        "bounds": {
+          "x": 140,
+          "y": 1623,
+          "width": 1160,
+          "height": 126
+        },
+        "enabled": true
+      },
+      "seq": 8
+    },
+    {
+      "t": 37201,
+      "kind": "tap",
+      "screenKey": "screen_351ccf9f3f",
+      "fingerprint": "screen_351ccf9f3f",
+      "target": {
+        "label": "Continuar",
+        "role": "text",
+        "locators": [
+          {
+            "strategy": "accessibilityId",
+            "value": "Continuar",
+            "confidence": 0.95
+          }
+        ],
+        "bounds": {
+          "x": 84,
+          "y": 1861,
+          "width": 1272,
+          "height": 188
+        },
+        "enabled": false
+      },
+      "note": "Resuelto sin control clickeable bajo el toque",
+      "seq": 9
+    },
+    {
+      "t": 38854,
+      "kind": "screen_change",
+      "screenKey": "screen_351ccf9f3f",
+      "toScreenKey": "screen_e3b0c44298",
+      "fingerprint": "screen_e3b0c44298",
+      "seq": 10
+    },
+    {
+      "t": 55153,
+      "kind": "screen_change",
+      "screenKey": "screen_b6d9dd5b39",
+      "toScreenKey": "screen_d9ccb33ee6",
+      "fingerprint": "screen_d9ccb33ee6",
+      "seq": 11
+    },
+    {
+      "t": 57901,
+      "kind": "tap",
+      "screenKey": "screen_d9ccb33ee6",
+      "fingerprint": "screen_d9ccb33ee6",
+      "target": {
+        "label": "Ir al inicio",
+        "role": "button",
+        "locators": [
+          {
+            "strategy": "accessibilityId",
+            "value": "Ir al inicio",
+            "confidence": 0.95
+          }
+        ],
+        "bounds": {
+          "x": 70,
+          "y": 2812,
+          "width": 1300,
+          "height": 168
+        },
+        "enabled": true
+      },
+      "seq": 12
+    },
+    {
+      "t": 59259,
+      "kind": "screen_change",
+      "screenKey": "screen_d9ccb33ee6",
+      "toScreenKey": "screen_b6d9dd5b39",
+      "fingerprint": "screen_b6d9dd5b39",
+      "seq": 13
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "screen_b6d9dd5b39",
+      "title": "Bienvenido",
+      "fingerprint": "screen_b6d9dd5b39",
+      "firstSeenAt": 7568,
+      "controls": [
+        {
+          "label": "example@gmail.com",
+          "role": "input",
+          "locators": [
+            {
+              "strategy": "androidUiAutomator",
+              "value": "new UiSelector().text(\"example@gmail.com\")",
+              "confidence": 0.7
+            }
+          ],
+          "enabled": true,
+          "bounds": {
+            "x": 256,
+            "y": 936,
+            "width": 929,
+            "height": 98
+          }
+        },
+        {
+          "label": "",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "accessibilityId",
+              "value": "",
+              "confidence": 0.95
+            }
+          ],
+          "enabled": true,
+          "bounds": {
+            "x": 1115,
+            "y": 1272,
+            "width": 70,
+            "height": 73
+          }
+        },
+        {
+          "label": "Acceso biométrico",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "accessibilityId",
+              "value": "Acceso biométrico",
+              "confidence": 0.95
+            }
+          ],
+          "enabled": true,
+          "bounds": {
+            "x": 196,
+            "y": 1720,
+            "width": 1048,
+            "height": 203
+          }
+        },
+        {
+          "label": ", ¿Primera vez aquí?, Crea tu cuenta en minutos, ",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "androidUiAutomator",
+              "value": "new UiSelector().descriptionContains(\"Crea tu cuenta en minutos\")",
+              "confidence": 0.8
+            }
+          ],
+          "enabled": true,
+          "bounds": {
+            "x": 196,
+            "y": 2035,
+            "width": 1048,
+            "height": 252
+          }
+        }
+      ],
+      "texts": [
+        "Bienvenido",
+        "Accede a tu Canal Conversacional BSC",
+        "Usuario",
+        "Contraseña",
+        "",
+        "Iniciar sesión",
+        "Acceso biométrico",
+        "",
+        "¿Primera vez aquí?",
+        "Crea tu cuenta en minutos",
+        ""
+      ]
+    },
+    {
+      "screenKey": "screen_6b33d7ee85",
+      "title": "Lo que debes tener en cuenta",
+      "fingerprint": "screen_6b33d7ee85",
+      "firstSeenAt": 24420,
+      "controls": [
+        {
+          "label": "Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "androidUiAutomator",
+              "value": "new UiSelector().descriptionContains(\"necesitarás lo siguiente. El proceso es rápido y sencillo.\")",
+              "confidence": 0.8
+            }
+          ],
+          "enabled": true,
+          "bounds": {
+            "x": 0,
+            "y": 451,
+            "width": 1440,
+            "height": 2585
+          }
+        },
+        {
+          "label": "",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "accessibilityId",
+              "value": "",
+              "confidence": 0.95
+            }
+          ],
+          "enabled": true,
+          "bounds": {
+            "x": 70,
+            "y": 507,
+            "width": 140,
+            "height": 140
+          }
+        },
+        {
+          "label": "Continuar",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "accessibilityId",
+              "value": "Continuar",
+              "confidence": 0.95
+            }
+          ],
+          "enabled": true,
+          "bounds": {
+            "x": 70,
+            "y": 2604,
+            "width": 1300,
+            "height": 188
+          }
+        },
+        {
+          "label": "Salir",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "accessibilityId",
+              "value": "Salir",
+              "confidence": 0.95
+            }
+          ],
+          "enabled": true,
+          "bounds": {
+            "x": 70,
+            "y": 2792,
+            "width": 1300,
+            "height": 188
+          }
+        }
+      ],
+      "texts": [
+        "",
+        "Lo que debes tener en cuenta",
+        "Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo.",
+        "",
+        "Indicar tu cédula",
+        "",
+        "Conexión a internet estable",
+        "",
+        "Validar tu documento de identidad",
+        "",
+        "Comprobación biométrica",
+        "Continuar",
+        "Salir"
+      ]
+    },
+    {
+      "screenKey": "screen_0be1bcf6c0",
+      "title": "Queremos conocerte",
+      "fingerprint": "screen_0be1bcf6c0",
+      "firstSeenAt": 27197,
+      "controls": [
+        {
+          "label": "",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "accessibilityId",
+              "value": "",
+              "confidence": 0.95
+            }
+          ],
+          "enabled": true,
+          "bounds": {
+            "x": 56,
+            "y": 221,
+            "width": 140,
+            "height": 140
+          }
+        },
+        {
+          "label": ", Cédula",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "androidUiAutomator",
+              "value": "new UiSelector().descriptionContains(\"Cédula\")",
+              "confidence": 0.8
+            }
+          ],
+          "enabled": true,
+          "bounds": {
+            "x": 102,
+            "y": 1003,
+            "width": 604,
+            "height": 140
+          }
+        },
+        {
+          "label": ", Pasaporte",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "androidUiAutomator",
+              "value": "new UiSelector().descriptionContains(\"Pasaporte\")",
+              "confidence": 0.8
+            }
+          ],
+          "enabled": true,
+          "bounds": {
+            "x": 734,
+            "y": 1003,
+            "width": 605,
+            "height": 140
+          }
+        },
+        {
+          "label": "402-12345678-9",
+          "role": "input",
+          "locators": [
+            {
+              "strategy": "androidUiAutomator",
+              "value": "new UiSelector().text(\"402-12345678-9\")",
+              "confidence": 0.7
+            }
+          ],
+          "enabled": true,
+          "bounds": {
+            "x": 242,
+            "y": 1350,
+            "width": 1055,
+            "height": 98
+          }
+        },
+        {
+          "label": "Acepto los Términos y condiciones y la Política de datos personales",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "accessibilityId",
+              "value": "Acepto los Términos y condiciones y la Política de datos personales",
+              "confidence": 0.95
+            }
+          ],
+          "enabled": true,
+          "bounds": {
+            "x": 140,
+            "y": 1623,
+            "width": 1160,
+            "height": 126
+          }
+        },
+        {
+          "label": "Salir",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "accessibilityId",
+              "value": "Salir",
+              "confidence": 0.95
+            }
+          ],
+          "enabled": true,
+          "bounds": {
+            "x": 84,
+            "y": 2886,
+            "width": 1272,
+            "height": 150
+          }
+        }
+      ],
+      "texts": [
+        "",
+        "Queremos conocerte",
+        "Ingresa tu documento de identidad para comenzar tu registro.",
+        "Tipo de documento",
+        "",
+        "Cédula",
+        "",
+        "Pasaporte",
+        "Número de identificación",
+        "Acepto los Términos y condiciones y la Política de datos personales",
+        "Continuar",
+        "Salir"
+      ]
+    },
+    {
+      "screenKey": "screen_351ccf9f3f",
+      "title": "Queremos conocerte",
+      "fingerprint": "screen_351ccf9f3f",
+      "firstSeenAt": 35244,
+      "controls": [
+        {
+          "label": "",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "accessibilityId",
+              "value": "",
+              "confidence": 0.95
+            }
+          ],
+          "enabled": true,
+          "bounds": {
+            "x": 56,
+            "y": 221,
+            "width": 140,
+            "height": 140
+          }
+        },
+        {
+          "label": ", Cédula",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "androidUiAutomator",
+              "value": "new UiSelector().descriptionContains(\"Cédula\")",
+              "confidence": 0.8
+            }
+          ],
+          "enabled": true,
+          "bounds": {
+            "x": 102,
+            "y": 1003,
+            "width": 604,
+            "height": 140
+          }
+        },
+        {
+          "label": ", Pasaporte",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "androidUiAutomator",
+              "value": "new UiSelector().descriptionContains(\"Pasaporte\")",
+              "confidence": 0.8
+            }
+          ],
+          "enabled": true,
+          "bounds": {
+            "x": 734,
+            "y": 1003,
+            "width": 605,
+            "height": 140
+          }
+        },
+        {
+          "label": "402-2999373-4",
+          "role": "input",
+          "locators": [
+            {
+              "strategy": "androidUiAutomator",
+              "value": "new UiSelector().text(\"402-2999373-4\")",
+              "confidence": 0.7
+            }
+          ],
+          "enabled": true,
+          "bounds": {
+            "x": 242,
+            "y": 1350,
+            "width": 1055,
+            "height": 98
+          }
+        },
+        {
+          "label": "Acepto los Términos y condiciones y la Política de datos personales",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "accessibilityId",
+              "value": "Acepto los Términos y condiciones y la Política de datos personales",
+              "confidence": 0.95
+            }
+          ],
+          "enabled": true,
+          "bounds": {
+            "x": 140,
+            "y": 1623,
+            "width": 1160,
+            "height": 126
+          }
+        },
+        {
+          "label": "Salir",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "accessibilityId",
+              "value": "Salir",
+              "confidence": 0.95
+            }
+          ],
+          "enabled": true,
+          "bounds": {
+            "x": 84,
+            "y": 2077,
+            "width": 1272,
+            "height": 21
+          }
+        }
+      ],
+      "texts": [
+        "",
+        "Queremos conocerte",
+        "Ingresa tu documento de identidad para comenzar tu registro.",
+        "Tipo de documento",
+        "",
+        "Cédula",
+        "",
+        "Pasaporte",
+        "Número de identificación",
+        "Acepto los Términos y condiciones y la Política de datos personales",
+        "Continuar"
+      ]
+    },
+    {
+      "screenKey": "screen_e3b0c44298",
+      "title": "unknown",
+      "fingerprint": "screen_e3b0c44298",
+      "firstSeenAt": 38854,
+      "controls": [],
+      "texts": []
+    },
+    {
+      "screenKey": "screen_d9ccb33ee6",
+      "title": "No pudimos realizar esta validación exitosamente.",
+      "fingerprint": "screen_d9ccb33ee6",
+      "firstSeenAt": 55153,
+      "controls": [
+        {
+          "label": "No pudimos realizar esta validación exitosamente., Llama a nuestro Centro de Contacto al 809-726-1000 o visita tu centro de Negocios más cercano, consultando en nuestro sitio web, para que te asistan con el proceso.",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "androidUiAutomator",
+              "value": "new UiSelector().descriptionContains(\"Llama a nuestro Centro de Contacto al 809-726-1000 o visita tu centro de Negocios más cercano\")",
+              "confidence": 0.8
+            }
+          ],
+          "enabled": true,
+          "bounds": {
+            "x": 0,
+            "y": 1779,
+            "width": 1440,
+            "height": 1257
+          }
+        },
+        {
+          "label": "Ir al inicio",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "accessibilityId",
+              "value": "Ir al inicio",
+              "confidence": 0.95
+            }
+          ],
+          "enabled": true,
+          "bounds": {
+            "x": 70,
+            "y": 2812,
+            "width": 1300,
+            "height": 168
+          }
+        }
+      ],
+      "texts": [
+        "No pudimos realizar esta validación exitosamente.",
+        "Llama a nuestro Centro de Contacto al 809-726-1000 o visita tu centro de Negocios más cercano, consultando en nuestro sitio web, para que te asistan con el proceso.",
+        "Ir al inicio"
+      ]
+    }
+  ],
+  "endedAt": "2026-09-09T15:03:40.062Z",
+  "durationMs": 178026,
+  "narrative": "Recorrido grabado en aplicación Android: app-conversacional\nEtiqueta del recorrido: registro 5\n\nPantalla 1: Bienvenido\n  - El usuario presionó \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \"\n  - La aplicación navegó a otra pantalla\n  Textos visibles: Bienvenido | Accede a tu Canal Conversacional BSC | Usuario | Contraseña |  | Iniciar sesión\n\nPantalla 2: Lo que debes tener en cuenta\n  - El usuario presionó \"content\"\n  - La aplicación navegó a otra pantalla\n  Textos visibles:  | Lo que debes tener en cuenta | Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo. |  | Indicar tu cédula | \n\nPantalla 3: Queremos conocerte\n  - El usuario presionó \"Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica\"\n  - El usuario ingresó \"402-2999373-4\" en \"402-2999373-4\"\n  - La aplicación navegó a otra pantalla\n  Textos visibles:  | Queremos conocerte | Ingresa tu documento de identidad para comenzar tu registro. | Tipo de documento |  | Cédula\n\nPantalla 4: Queremos conocerte\n  - El usuario presionó \"Acepto los Términos y condiciones y la Política de datos personales\"\n  - El usuario presionó \"Continuar\" (el control estaba deshabilitado)\n  - La aplicación navegó a otra pantalla\n  Textos visibles:  | Queremos conocerte | Ingresa tu documento de identidad para comenzar tu registro. | Tipo de documento |  | Cédula\n\nPantalla 5: Bienvenido\n  - La aplicación navegó a otra pantalla\n  Textos visibles: Bienvenido | Accede a tu Canal Conversacional BSC | Usuario | Contraseña |  | Iniciar sesión\n\nPantalla 6: No pudimos realizar esta validación exitosamente.\n  - El usuario presionó \"Ir al inicio\"\n  - La aplicación navegó a otra pantalla\n  Textos visibles: No pudimos realizar esta validación exitosamente. | Llama a nuestro Centro de Contacto al 809-726-1000 o visita tu centro de Negocios más cercano, consultando en nuestro sitio web, para que te asistan con el proceso. | Ir al inicio"
+}

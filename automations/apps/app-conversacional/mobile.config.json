@@ -1,0 +1,492 @@
+{
+  "appSlug": "app-conversacional",
+  "packageName": "com.appconversacionalbsc",
+  "appName": "App Conversacional",
+  "platform": "android",
+  "mainActivity": "com.appconversacionalbsc.MainActivity",
+  "screens": {
+    "bienvenido": {
+      "screenId": "bienvenido",
+      "title": "Bienvenido",
+      "isEntryScreen": true,
+      "elements": [
+        {
+          "label": "example@gmail.com",
+          "role": "input",
+          "locator": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().className(\"android.widget.EditText\")"
+          },
+          "hasAccessibilityLabel": false
+        },
+        {
+          "label": "example@gmail.com",
+          "role": "button",
+          "locator": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().className(\"android.widget.EditText\").text(\"example@gmail.com\")"
+          },
+          "hasAccessibilityLabel": false
+        },
+        {
+          "label": "Acceso biométrico",
+          "role": "button",
+          "locator": {
+            "strategy": "accessibilityId",
+            "value": "Acceso biométrico"
+          },
+          "hasAccessibilityLabel": true
+        },
+        {
+          "label": ", ¿Primera vez aquí?, Crea tu cuenta en minutos, ",
+          "role": "button",
+          "locator": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"Crea tu cuenta en minutos\")"
+          },
+          "hasAccessibilityLabel": true
+        }
+      ],
+      "discoveredAt": "2026-09-04T20:46:31.876Z",
+      "discoverySource": "automated_discovery"
+    },
+    "screen": {
+      "screenId": "screen",
+      "title": "",
+      "elements": [
+        {
+          "label": "Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica",
+          "role": "button",
+          "locator": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"necesitarás lo siguiente. El proceso es rápido y sencillo.\")"
+          },
+          "hasAccessibilityLabel": true
+        },
+        {
+          "label": "Continuar",
+          "role": "button",
+          "locator": {
+            "strategy": "accessibilityId",
+            "value": "Continuar"
+          },
+          "hasAccessibilityLabel": true
+        },
+        {
+          "label": "Salir",
+          "role": "button",
+          "locator": {
+            "strategy": "accessibilityId",
+            "value": "Salir"
+          },
+          "hasAccessibilityLabel": true
+        }
+      ],
+      "discoveredAt": "2026-09-04T20:46:31.876Z",
+      "discoverySource": "automated_discovery"
+    },
+    "screen_2": {
+      "screenId": "screen_2",
+      "title": "",
+      "elements": [
+        {
+          "label": "402-12345678-9",
+          "role": "input",
+          "locator": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().className(\"android.widget.EditText\")"
+          },
+          "hasAccessibilityLabel": false
+        },
+        {
+          "label": ", Cédula",
+          "role": "button",
+          "locator": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"Cédula\")"
+          },
+          "hasAccessibilityLabel": true
+        },
+        {
+          "label": ", Pasaporte",
+          "role": "button",
+          "locator": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"Pasaporte\")"
+          },
+          "hasAccessibilityLabel": true
+        },
+        {
+          "label": "402-12345678-9",
+          "role": "button",
+          "locator": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().className(\"android.widget.EditText\").text(\"402-12345678-9\")"
+          },
+          "hasAccessibilityLabel": false
+        },
+        {
+          "label": "Acepto los Términos y condiciones y la Política de datos personales",
+          "role": "button",
+          "locator": {
+            "strategy": "accessibilityId",
+            "value": "Acepto los Términos y condiciones y la Política de datos personales"
+          },
+          "hasAccessibilityLabel": true
+        },
+        {
+          "label": "Salir",
+          "role": "button",
+          "locator": {
+            "strategy": "accessibilityId",
+            "value": "Salir"
+          },
+          "hasAccessibilityLabel": true
+        }
+      ],
+      "discoveredAt": "2026-09-04T17:15:32.662Z",
+      "discoverySource": "automated_discovery"
+    },
+    "screen_3": {
+      "screenId": "screen_3",
+      "title": "",
+      "elements": [
+        {
+          "label": "402-2999373-4",
+          "role": "input",
+          "locator": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().className(\"android.widget.EditText\")"
+          },
+          "hasAccessibilityLabel": false
+        },
+        {
+          "label": ", Cédula",
+          "role": "button",
+          "locator": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"Cédula\")"
+          },
+          "hasAccessibilityLabel": true
+        },
+        {
+          "label": ", Pasaporte",
+          "role": "button",
+          "locator": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"Pasaporte\")"
+          },
+          "hasAccessibilityLabel": true
+        },
+        {
+          "label": "402-2999373-4",
+          "role": "button",
+          "locator": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().className(\"android.widget.EditText\").text(\"402-2999373-4\")"
+          },
+          "hasAccessibilityLabel": false
+        },
+        {
+          "label": ", Acepto los Términos y condiciones y la Política de datos personales",
+          "role": "button",
+          "locator": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"Acepto los Términos y condiciones y la Política de datos personales\")"
+          },
+          "hasAccessibilityLabel": true
+        },
+        {
+          "label": "Continuar",
+          "role": "button",
+          "locator": {
+            "strategy": "accessibilityId",
+            "value": "Continuar"
+          },
+          "hasAccessibilityLabel": true
+        },
+        {
+          "label": "Salir",
+          "role": "button",
+          "locator": {
+            "strategy": "accessibilityId",
+            "value": "Salir"
+          },
+          "hasAccessibilityLabel": true
+        }
+      ],
+      "discoveredAt": "2026-09-04T17:15:32.662Z",
+      "discoverySource": "automated_discovery"
+    },
+    "screen_4": {
+      "screenId": "screen_4",
+      "title": "",
+      "elements": [
+        {
+          "label": "Confirma tus datos, Confirma que tus datos de nombre(s) y apellido(s) estén correctos para proceder., NOMBRES Y APELLIDOS, XZZNXRZ UNXMRN NR2RC MZZUR",
+          "role": "button",
+          "locator": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"Confirma que tus datos de nombre(s) y apellido(s) estén correctos para proceder.\")"
+          },
+          "hasAccessibilityLabel": true
+        },
+        {
+          "label": "Continuar",
+          "role": "button",
+          "locator": {
+            "strategy": "accessibilityId",
+            "value": "Continuar"
+          },
+          "hasAccessibilityLabel": true
+        },
+        {
+          "label": "No soy yo",
+          "role": "button",
+          "locator": {
+            "strategy": "accessibilityId",
+            "value": "No soy yo"
+          },
+          "hasAccessibilityLabel": true
+        }
+      ],
+      "discoveredAt": "2026-09-04T17:15:32.662Z",
+      "discoverySource": "automated_discovery"
+    },
+    "screen_5": {
+      "screenId": "screen_5",
+      "title": "",
+      "elements": [
+        {
+          "label": "kev*****05@gmail.com, ",
+          "role": "button",
+          "locator": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"kev*****05@gmail.com\")"
+          },
+          "hasAccessibilityLabel": true
+        },
+        {
+          "label": "Enviar código de validación",
+          "role": "button",
+          "locator": {
+            "strategy": "accessibilityId",
+            "value": "Enviar código de validación"
+          },
+          "hasAccessibilityLabel": true
+        },
+        {
+          "label": "(829) ***-**00, ",
+          "role": "button",
+          "locator": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"(829) ***-**00\")"
+          },
+          "hasAccessibilityLabel": true
+        },
+        {
+          "label": "Salir",
+          "role": "button",
+          "locator": {
+            "strategy": "accessibilityId",
+            "value": "Salir"
+          },
+          "hasAccessibilityLabel": true
+        }
+      ],
+      "discoveredAt": "2026-09-04T17:15:32.662Z",
+      "discoverySource": "automated_discovery"
+    },
+    "screen_cdca129ce8": {
+      "screenId": "screen_cdca129ce8",
+      "title": "No pudimos realizar esta validación exitosamente.",
+      "elements": [
+        {
+          "label": "No pudimos realizar esta validación exitosamente., Llama a nuestro Centro de Contacto al 809-726-1000 o visita tu centro de Negocios más cercano, consultando en nuestro sitio web, para que te asistan con el proceso.",
+          "role": "button",
+          "locator": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"Llama a nuestro Centro de Contacto al 809-726-1000 o visita tu centro de Negocios más cercano\")"
+          },
+          "hasAccessibilityLabel": true
+        },
+        {
+          "label": "Ir al inicio",
+          "role": "button",
+          "locator": {
+            "strategy": "accessibilityId",
+            "value": "Ir al inicio"
+          },
+          "hasAccessibilityLabel": true
+        }
+      ],
+      "discoveredAt": "2026-09-04T01:36:29.550Z",
+      "discoverySource": "automated_discovery"
+    }
+  },
+  "flows": {
+    "AA-96": {
+      "description": "Flujo AA-96 aprendido del recorrido real",
+      "triggerKeywords": [],
+      "entryFromScreen": "bienvenido",
+      "entrySteps": [
+        {
+          "action": "click",
+          "description": "Avanzar con \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \"",
+          "target": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"Crea tu cuenta en minutos\")"
+          }
+        },
+        {
+          "action": "click",
+          "description": "Avanzar con \"Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica\"",
+          "target": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"necesitarás lo siguiente. El proceso es rápido y sencillo.\")"
+          }
+        }
+      ]
+    },
+    "aa-96": {
+      "description": "Flujo aa-96 aprendido del recorrido real",
+      "triggerKeywords": [
+        "firma",
+        "convenio",
+        "unico",
+        "codigo",
+        "completar",
+        "registro"
+      ],
+      "entryFromScreen": "bienvenido",
+      "entrySteps": [
+        {
+          "action": "click",
+          "description": "Avanzar con \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \"",
+          "target": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"Crea tu cuenta en minutos\")"
+          }
+        },
+        {
+          "action": "click",
+          "description": "Avanzar con \"Continuar\"",
+          "target": {
+            "strategy": "accessibilityId",
+            "value": "Continuar"
+          }
+        },
+        {
+          "action": "fill",
+          "description": "Completar \"402-12345678-9\"",
+          "target": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().className(\"android.widget.EditText\")"
+          },
+          "value": "40229993734"
+        },
+        {
+          "action": "click",
+          "description": "Avanzar con \"Continuar\"",
+          "target": {
+            "strategy": "accessibilityId",
+            "value": "Continuar"
+          }
+        },
+        {
+          "action": "click",
+          "description": "Avanzar con \"Continuar\"",
+          "target": {
+            "strategy": "accessibilityId",
+            "value": "Continuar"
+          }
+        }
+      ]
+    },
+    "registro": {
+      "description": "Registro de nuevo cliente: identificacion, consentimiento, validacion y OTP",
+      "triggerKeywords": [
+        "registro",
+        "registrarse",
+        "nuevo cliente",
+        "crea tu cuenta",
+        "primera vez"
+      ],
+      "entryFromScreen": "bienvenido",
+      "entrySteps": [
+        {
+          "action": "click",
+          "description": "Avanzar con \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \"",
+          "target": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"Crea tu cuenta en minutos\")"
+          }
+        },
+        {
+          "action": "click",
+          "description": "Avanzar con \"Continuar\"",
+          "target": {
+            "strategy": "accessibilityId",
+            "value": "Continuar"
+          }
+        },
+        {
+          "action": "fill",
+          "description": "Completar \"402-12345678-9\"",
+          "target": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().className(\"android.widget.EditText\")"
+          },
+          "value": "40229993734"
+        },
+        {
+          "action": "click",
+          "description": "Avanzar con \"Continuar\"",
+          "target": {
+            "strategy": "accessibilityId",
+            "value": "Continuar"
+          }
+        }
+      ]
+    },
+    "aa-93": {
+      "description": "Flujo aa-93 aprendido del recorrido real",
+      "triggerKeywords": [
+        "validacion",
+        "documento",
+        "disponibles",
+        "formato",
+        "invalido",
+        "impide"
+      ],
+      "entryFromScreen": "bienvenido",
+      "entrySteps": [
+        {
+          "action": "click",
+          "description": "Avanzar con \", ¿Primera vez aquí?, Crea tu cuenta en minutos, \"",
+          "target": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"Crea tu cuenta en minutos\")"
+          }
+        },
+        {
+          "action": "click",
+          "description": "Avanzar con \"Continuar\"",
+          "target": {
+            "strategy": "accessibilityId",
+            "value": "Continuar"
+          }
+        },
+        {
+          "action": "click",
+          "description": "Avanzar con \", Cédula\"",
+          "target": {
+            "strategy": "androidUiAutomator",
+            "value": "new UiSelector().descriptionContains(\"Cédula\")"
+          }
+        }
+      ]
+    }
+  },
+  "updatedAt": "2026-09-09T19:14:01.648Z"
+}

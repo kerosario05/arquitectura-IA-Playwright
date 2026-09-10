@@ -1,5 +1,5 @@
 import { getConnection } from "./sql-connection";
-import type { Connection } from "odbc";
+import type { DbConnection as Connection } from "./db-connection";
 
 export type ProjectRow = {
   id: string;

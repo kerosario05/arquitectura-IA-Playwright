@@ -1,55 +1,43 @@
-import odbc from "odbc";
 import { config as loadEnv } from "dotenv";
+import type { DbConnection } from "./db-connection";
+import * as sqlite from "./sqlite-connection";
+import * as sqlserver from "./sqlserver-connection";
 
 loadEnv();
 
-const server = process.env.SQL_SERVER_HOST?.trim() || "localhost";
-const database = process.env.SQL_SERVER_DATABASE?.trim() || "QA_LAB";
-const trustedConnection =
-  (process.env.SQL_SERVER_TRUSTED_CONNECTION ?? "true").toLowerCase() === "true";
+export type { DbConnection, DbRow } from "./db-connection";
 
-const connectionString = trustedConnection
-  ? `Driver={ODBC Driver 18 for SQL Server};Server=${server};Database=${database};Trusted_Connection=yes;Encrypt=no;TrustServerCertificate=yes;`
-  : `Driver={ODBC Driver 18 for SQL Server};Server=${server};Database=${database};Encrypt=no;TrustServerCertificate=yes;`;
+export type DbDriverName = "sqlite" | "sqlserver";
 
-let _pool: odbc.Connection | null = null;
+export function resolveDriverName(): DbDriverName {
+  const raw = (process.env.DB_DRIVER || "sqlite").trim().toLowerCase();
+  if (raw === "sqlserver" || raw === "mssql") return "sqlserver";
+  if (raw === "sqlite") return "sqlite";
+  throw new Error(`Unsupported DB_DRIVER "${raw}" — expected "sqlite" or "sqlserver"`);
+}
 
-export async function getConnection(): Promise<odbc.Connection> {
-  if (_pool) return _pool;
-  _pool = await odbc.connect(connectionString);
-  return _pool;
+function driver() {
+  return resolveDriverName() === "sqlserver" ? sqlserver : sqlite;
+}
+
+/** Human-readable description of the active datastore, for logs and CLIs. */
+export function describeDatasource(): string {
+  if (resolveDriverName() === "sqlserver") {
+    const server = process.env.SQL_SERVER_HOST?.trim() || "localhost";
+    const database = process.env.SQL_SERVER_DATABASE?.trim() || "QA_LAB";
+    return `sqlserver ${server}/${database}`;
+  }
+  return `sqlite ${sqlite.resolveDbPath()}`;
+}
+
+export async function getConnection(): Promise<DbConnection> {
+  return driver().getConnection();
 }
 
 export async function closeConnection(): Promise<void> {
-  if (_pool) {
-    await _pool.close();
-    _pool = null;
-  }
+  return driver().closeConnection();
 }
 
-export async function withTransaction<T>(
-  fn: (conn: odbc.Connection) => Promise<T>
-): Promise<T> {
-  const conn = await odbc.connect(connectionString);
-  try {
-    await conn.beginTransaction();
-    const result = await fn(conn);
-    await conn.commit();
-    return result;
-  } catch (err) {
-    try {
-      await conn.rollback();
-    } catch {
-      // ignore rollback failure; original error propagates
-    }
-    throw err;
-  } finally {
-    try {
-      await conn.close();
-    } catch {
-      // ignore close failure
-    }
-  }
+export async function withTransaction<T>(fn: (conn: DbConnection) => Promise<T>): Promise<T> {
+  return driver().withTransaction(fn);
 }
-
-export { odbc };

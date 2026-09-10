@@ -80,7 +80,10 @@ function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function buildLockKey(appiumHost: string, appiumPort: number, deviceId: string, systemPort: number): string {
+/** Exported so callers can release a lock even when acquireSession() threw before
+ *  returning a handle — on error the coordinator marks the entry resolved_error but
+ *  leaves it in place, and only the caller can decide the acquisition is over. */
+export function buildLockKey(appiumHost: string, appiumPort: number, deviceId: string, systemPort: number): string {
   return `${appiumHost}:${appiumPort}|${deviceId}|${systemPort}`;
 }
 

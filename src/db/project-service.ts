@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
-import type { Connection } from "odbc";
+import type { DbConnection as Connection } from "./db-connection";
 import { withTransaction } from "./sql-connection";
 import { createProject, type Project } from "./project-repository";
 import {

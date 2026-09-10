@@ -1,5 +1,5 @@
 import { getConnection } from "./sql-connection";
-import type { Connection } from "odbc";
+import type { DbConnection as Connection } from "./db-connection";
 
 export type ProjectType = 1 | 2;
 export type ProjectStatus = 0 | 1 | 2;
@@ -29,7 +29,8 @@ type ProjectRow = {
   name: string;
   projectType: number;
   status: number;
-  enabled: boolean;
+  // SQLite stores booleans as 0/1 and SQL Server's BIT arrives as boolean.
+  enabled: boolean | number | string;
   createdAt: Date;
   updatedAt: Date;
 };

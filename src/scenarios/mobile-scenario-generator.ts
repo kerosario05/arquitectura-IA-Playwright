@@ -279,6 +279,49 @@ function matchFlowForPrerequisite(
   return null;
 }
 
+/**
+ * Strict flow matching for intent-driven materialization.
+ *
+ * Unlike matchFlowForPrerequisite — whose morphological tolerance is deliberately loose
+ * because it runs on an explicit precondition sentence — this runs on EVERY story's text,
+ * so a loose match silently routes a login story down the registration flow. It therefore
+ * requires the whole trigger keyword to appear as a word-bounded phrase, and when several
+ * flows match it prefers the most specific (longest) keyword instead of declaration order.
+ */
+function matchFlowByIntent(
+  routeProfile: MobileRouteProfile | null | undefined,
+  text: string,
+): { flow: MobileFlow; flowId: string; keyword: string } | null {
+  if (!routeProfile?.flows) return null;
+  const corpus = ` ${repairUtf8Mojibake(text).toLowerCase().replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim()} `;
+  if (corpus.trim().length === 0) return null;
+
+  let best: { flow: MobileFlow; flowId: string; keyword: string } | null = null;
+  for (const [flowId, flow] of Object.entries(routeProfile.flows)) {
+    for (const rawKw of flow.triggerKeywords ?? []) {
+      const kw = repairUtf8Mojibake(rawKw).toLowerCase().replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
+      if (!kw) continue;
+      if (!corpus.includes(` ${kw} `)) continue;
+      if (!best || kw.length > best.keyword.length) best = { flow, flowId, keyword: kw };
+    }
+  }
+  return best;
+}
+
+/**
+ * True when the scenario's own steps already walk every targeted step of the flow's entry
+ * path. Prevents prepending a duplicate registration prologue to a scenario the AI already
+ * wrote end-to-end from the app launch.
+ */
+function scenarioAlreadyCoversFlowEntry(scenario: MobileGeneratedScenario, flow: MobileFlow): boolean {
+  const targeted = flow.entrySteps.filter((st) => Boolean(st.target?.value));
+  if (targeted.length === 0) return true;
+  const present = new Set(
+    scenario.steps.map((s) => s.target?.value).filter((v): v is string => Boolean(v)),
+  );
+  return targeted.every((st) => present.has(st.target!.value));
+}
+
 /** Collects the data fields of every screen a flow touches (entry screen + screens referenced
  *  by its entry steps via description/screen mentions) so a prerequisite can surface them. */
 function collectFlowDataFields(routeProfile: MobileRouteProfile | null | undefined, flow: MobileFlow): MobileScreenDataField[] {
@@ -312,18 +355,35 @@ export function materializeFunctionalPrerequisite(
   if (scenario.requiresRouteLearning) return scenario;
   const preconditions = scenario.preconditions ?? [];
   const functionalPrecondition = preconditions.find((p) => PREREQUISITE_STATE_RE.test(p));
-  if (!functionalPrecondition) return scenario;
-  // Scenario already contains an explicit setup path — nothing to materialize.
-  if (scenario.steps.some((s) => s.action === "fill") || scenario.steps.some((s) => s.action === "click" && s.target?.value)) {
-    return scenario;
-  }
+  const scenarioText = `${scenario.title} ${preconditions.join(" ")} ${scenario.steps.map((s) => `${s.description ?? ""} ${s.target?.value ?? ""}`).join(" ")}`;
 
-  const matched = matchFlowForPrerequisite(routeProfile, functionalPrecondition, `${scenario.title} ${scenario.steps.map((s) => `${s.description ?? ""} ${s.target?.value ?? ""}`).join(" ")}`);
-  if (!matched) {
+  let matched: { flow: MobileFlow; flowId: string } | null;
+
+  if (functionalPrecondition) {
+    // Scenario already contains an explicit setup path — nothing to materialize.
+    if (scenario.steps.some((s) => s.action === "fill") || scenario.steps.some((s) => s.action === "click" && s.target?.value)) {
+      return scenario;
+    }
+
+    matched = matchFlowForPrerequisite(routeProfile, functionalPrecondition, scenarioText);
+    if (!matched) {
+      console.log(
+        `[mobile:prerequisite] appSlug=${routeProfile?.appSlug ?? "-"} scenario=${scenario.scenarioId} status=requires_route_learning precondition="${functionalPrecondition.slice(0, 120)}" flow=none`,
+      );
+      return { ...scenario, requiresRouteLearning: true };
+    }
+  } else {
+    // Intent-driven materialization: the story itself belongs to a flow (a registration HU
+    // describes a step *inside* registration), so the scenario must start at the flow's
+    // beginning instead of assuming the app is already on a mid-flow screen. Only the flow's
+    // triggerKeywords decide this — no intent is hardcoded here.
+    const byIntent = matchFlowByIntent(routeProfile, scenarioText);
+    if (!byIntent) return scenario;
+    if (scenarioAlreadyCoversFlowEntry(scenario, byIntent.flow)) return scenario;
+    matched = { flow: byIntent.flow, flowId: byIntent.flowId };
     console.log(
-      `[mobile:prerequisite] appSlug=${routeProfile?.appSlug ?? "-"} scenario=${scenario.scenarioId} status=requires_route_learning precondition="${functionalPrecondition.slice(0, 120)}" flow=none`,
+      `[mobile:prerequisite] appSlug=${routeProfile?.appSlug ?? "-"} scenario=${scenario.scenarioId} status=flow_intent_matched flow=${byIntent.flowId} keyword="${byIntent.keyword}" source=hu_text`,
     );
-    return { ...scenario, requiresRouteLearning: true };
   }
 
   const { flow } = matched;
@@ -481,11 +541,86 @@ function buildEvidenceSets(knowledge: { items: MobileKnowledgeItem[] }): {
  * Semantic matches (labels/text) never grant technical authority — if the required technical
  * attribute is absent, the locator stays unbacked (requiresRouteLearning).
  */
+/**
+ * Backs an `androidUiAutomator` locator by the TECHNICAL attribute it actually anchors on.
+ *
+ * A UiSelector is an expression, not an identity, so comparing the whole string against
+ * observed evidence can never match — which left every `descriptionContains("Continuar")`
+ * unbacked even when a control with exactly that content-desc had just been walked. Worse,
+ * the route learner itself emits this form, so its own recorded steps failed the gate.
+ *
+ * The anchor literal is what decides whether the selector resolves at runtime, so that is what
+ * gets checked, against the same evidence the equivalent direct strategy would use:
+ * `description*` → observed content-desc, `resourceId` → observed resource-id. `text(...)` is
+ * deliberately NOT accepted: visible text is semantic evidence, and semantic evidence never
+ * grants technical authority. `className(...)` alone identifies nothing.
+ */
+function isUiSelectorBacked(
+  strategy: LocatorStrategy,
+  raw: string,
+  contentDescEvidence: Set<string>,
+  resourceIdEvidence: Set<string>,
+): boolean {
+  if (strategy !== "androidUiAutomator") return false;
+
+  const anchors = (method: string): string[] => {
+    const re = new RegExp(`\\.${method}\\(\\s*"((?:[^"\\\\]|\\\\.)*)"\\s*\\)`, "g");
+    const out: string[] = [];
+    for (const m of raw.matchAll(re)) out.push(m[1].replace(/\\"/g, '"'));
+    return out;
+  };
+
+  // Exact-identity forms: the observed attribute must equal the anchor.
+  for (const value of [...anchors("description"), ...anchors("descriptionMatches")]) {
+    if (contentDescEvidence.has(normalizeLocatorToken(value))) return true;
+  }
+  for (const value of anchors("resourceId")) {
+    if (resourceIdEvidence.has(normalizeLocatorToken(value))) return true;
+  }
+  // Containment form: the selector resolves when SOME observed content-desc contains it,
+  // which is exactly the runtime semantics of descriptionContains.
+  for (const value of anchors("descriptionContains")) {
+    const needle = normalizeLocatorToken(value);
+    if (!needle) continue;
+    for (const observed of contentDescEvidence) {
+      if (observed.includes(needle)) return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Accepts the positional locator a text field is addressed by.
+ *
+ * Text fields in these apps expose no content-desc and no resource-id, and their visible text
+ * is the placeholder — which typing replaces, so anchoring on it breaks the moment the value
+ * is entered. `inputControlToTarget` therefore locates an input by class plus position on
+ * purpose. Demanding a technical attribute for a `fill` contradicts the engine's own strategy
+ * for inputs and makes every form-filling scenario permanently unexecutable.
+ *
+ * The tie to reality is kept: the class must have been observed at runtime. Only the identity
+ * requirement is relaxed, and only for `fill` — clicks and assertions stay strict, since those
+ * do have a stable technical identity to demand.
+ */
+function isObservedInputLocator(
+  strategy: LocatorStrategy,
+  raw: string,
+  classEvidence: Set<string>,
+): boolean {
+  if (strategy !== "androidUiAutomator") return false;
+  const match = raw.trim().match(/^new UiSelector\(\)\.className\("((?:[^"\\]|\\.)*)"\)(?:\.instance\(\d+\))?$/);
+  if (!match) return false;
+  return classEvidence.has(normalizeLocatorToken(match[1].replace(/\\"/g, '"')));
+}
+
 export function classifyLocatorExecutionBacking(
   scenario: MobileGeneratedScenario,
   knowledge: { items: MobileKnowledgeItem[] },
 ): MobileGeneratedScenario {
   const { technicalByStrategy, semantic } = buildEvidenceSets(knowledge);
+  const contentDescEvidence = technicalByStrategy.get("accessibilityId") ?? new Set<string>();
+  const resourceIdEvidence = technicalByStrategy.get("id") ?? new Set<string>();
+  const classEvidence = technicalByStrategy.get("className") ?? new Set<string>();
   let anyTargetStep = false;
   let allBacked = true;
   let anySemanticOnly = false;
@@ -497,7 +632,9 @@ export function classifyLocatorExecutionBacking(
     if (!isLocatorStrategy(strategy)) continue;
     anyTargetStep = true;
     const normalized = normalizeLocatorToken(raw);
-    const technicalBacked = (technicalByStrategy.get(strategy)?.has(normalized) ?? false);
+    const technicalBacked = (technicalByStrategy.get(strategy)?.has(normalized) ?? false)
+      || isUiSelectorBacked(strategy, raw, contentDescEvidence, resourceIdEvidence)
+      || (step.action === "fill" && isObservedInputLocator(strategy, raw, classEvidence));
     const semanticMatch = semantic.has(normalized);
     if (!technicalBacked) {
       allBacked = false;
@@ -1326,6 +1463,13 @@ export function mobileScenarioToLaunchScenario(s: MobileGeneratedScenario): Laun
     expectedResult: s.expectedResult,
     preconditions: s.preconditions,
     sourceIssueKey: s.sourceIssueKey,
+    // The shared launch orchestrator classifies anything without `mcpExecutable === true` as
+    // "adaptive", and then blocks it for lacking targetScreen/actualChain/requiredChain —
+    // web-only fields a mobile scenario never has. Every mobile scenario therefore fell out as
+    // "no launchable scenarios", no matter how well it had been learned. Mobile readiness is
+    // decided before this adapter runs: the route already excluded everything still requiring
+    // route learning, so what reaches here is exactly the executable set.
+    mcpExecutable: s.requiresRouteLearning !== true,
     ...(Object.keys(metadata).length > 0 ? { metadata } : {}),
   };
 }

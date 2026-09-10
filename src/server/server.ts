@@ -12,6 +12,8 @@ import { checklistRouter } from "./routes/checklist";
 import { executionsRouter } from "./routes/executions";
 import { internalOtpRouter } from "./routes/internal-otp";
 import { projectsRouter } from "./routes/projects";
+import { recordingsRouter } from "./routes/recordings";
+import { sweepOrphanFrames } from "../recording/recording-store";
 import { resolveServerPort } from "./config";
 import { captureRawJsonBody, mobileUtf8JsonReconciler } from "./middleware/mobile-utf8-json";
 
@@ -56,6 +58,7 @@ app.use("/api/scenarios", scenariosRouter);
 app.use("/api/mobile", mobileRouter);
 app.use("/api/internal/otp", internalOtpRouter);
 app.use("/api/projects", projectsRouter);
+app.use("/api/recordings", recordingsRouter);
 app.use(checklistRouter);
 app.use(executionsRouter);
 
@@ -72,6 +75,11 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
   res.status(500).json({ error: message });
 });
 
+// Screenshots from a crashed recording must never survive a restart: they were only ever
+// meant to feed one derivation pass.
+const sweptFrames = sweepOrphanFrames();
+if (sweptFrames > 0) console.log(`[server] limpieza: ${sweptFrames} carpetas de frames huérfanos eliminadas`);
+
 const server = app.listen(PORT, HOST, () => {
   console.log(`\n[server] Automation Engine API → http://${HOST === "0.0.0.0" ? "localhost" : HOST}:${PORT}`);
   console.log(`[server] CORS origin : ${CORS_ORIGIN}`);
@@ -86,6 +94,13 @@ const server = app.listen(PORT, HOST, () => {
   console.log(`  GET  /api/testrail/runs`);
   console.log(`  GET  /api/testrail/sections`);
   console.log(`  POST /api/testrail/cases/preview`);
+  console.log(`  POST /api/recordings/start   { projectSlug, label? }`);
+  console.log(`  GET  /api/recordings?projectSlug=...`);
+  console.log(`  GET  /api/recordings/:recordingId`);
+  console.log(`  POST /api/recordings/:recordingId/stop`);
+  console.log(`  POST /api/recordings/:recordingId/derive`);
+  console.log(`  GET  /api/recordings/:recordingId/scenarios`);
+  console.log(`  POST /api/recordings/:recordingId/testrail`);
   console.log(`  POST /api/runs/scenario-preview`);
   console.log(`  POST /api/runs/discovery-batch`);
   console.log(`  POST /api/runs/sprint`);
