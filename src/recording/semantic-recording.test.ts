@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { buildSemanticRecordingModel } from "./semantic-recording";
+import { buildHappyPathScenario } from "./trace-to-scenario";
 import type { SessionTrace } from "./session-trace.types";
 
 function trace(): SessionTrace {
@@ -48,4 +49,20 @@ test("never exposes a technical fingerprint as a semantic title", () => {
   input.screens[0].title = "screen-a-fingerprint";
   const model = buildSemanticRecordingModel(input);
   assert.equal(model.semanticScreens[0].title, undefined);
+});
+
+test("keeps credential fills as references in the derived scenario", () => {
+  const input = trace();
+  input.events = [{
+    seq: 0,
+    t: 1,
+    kind: "fill",
+    screenKey: "screen-a",
+    target: { label: "Nombre de usuario", role: "input", locators: [{ strategy: "aria-label", value: "Nombre de usuario" }] },
+    value: "should-not-appear",
+  }];
+  const scenario = buildHappyPathScenario(input, input.events);
+  assert.equal(scenario.webSteps[1]?.value, undefined);
+  assert.equal(scenario.webSteps[1]?.valueKey, "nombre_de_usuario");
+  assert.equal(JSON.stringify(scenario).includes("should-not-appear"), false);
 });
