@@ -81,6 +81,7 @@ test("irrelevant controls are rejected while relevant alternatives remain candid
   const result = filterGoalScopedSuggestions("Crear cliente", [related, unrelated]);
   assert.equal(result.suggestions.length, 1);
   assert.equal(result.irrelevantCandidatesRejected, 1);
+  assert.equal(result.suggestions[0].primary, false);
   assert.ok((result.suggestions[0].goalRelevanceScore ?? 0) >= 0.35);
 });
 

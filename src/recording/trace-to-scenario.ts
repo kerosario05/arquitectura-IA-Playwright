@@ -237,6 +237,7 @@ export function filterGoalScopedSuggestions(
     const relevance = scoreGoalRelevance(goal, suggestion);
     return {
       ...suggestion,
+      primary: false,
       goalRelevanceScore: relevance.score,
       goalRelevanceReasons: relevance.reasons,
       confidence: suggestion.confidence ?? (suggestion.hasUncertainSteps ? 0.6 : 0.85),
