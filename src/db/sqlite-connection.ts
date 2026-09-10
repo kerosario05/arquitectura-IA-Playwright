@@ -31,8 +31,19 @@ function openDatabase(): DatabaseSync {
   handle.exec("PRAGMA foreign_keys = ON");
   handle.exec("PRAGMA busy_timeout = 5000");
   handle.exec(SQLITE_SCHEMA);
+  ensureSchemaCompatibility(handle);
   dbPath = file;
   return handle;
+}
+
+/** Applies additive changes to databases created by an older SQLite schema. */
+function ensureSchemaCompatibility(handle: DatabaseSync): void {
+  const columns = handle
+    .prepare("PRAGMA table_info(WebProjectConfiguration)")
+    .all() as Array<{ name?: string }>;
+  if (!columns.some((column) => column.name === "ignoreHTTPSErrors")) {
+    handle.exec("ALTER TABLE WebProjectConfiguration ADD COLUMN ignoreHTTPSErrors INTEGER NOT NULL DEFAULT 0");
+  }
 }
 
 export function getDatabase(): DatabaseSync {

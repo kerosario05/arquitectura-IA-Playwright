@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS WebProjectConfiguration (
   loginMode            INTEGER NOT NULL,          -- 1 = password, 2 = no_login, 3 = manual
   username             TEXT,
   passwordSecretRef    TEXT,
+  ignoreHTTPSErrors    INTEGER NOT NULL DEFAULT 0,
   missingInputBehavior INTEGER NOT NULL DEFAULT 1,-- 1 fail, 2 prompt, 3 skip, 4 auto_generate
   testDataJson         TEXT,
   testDataAliasesJson  TEXT,
