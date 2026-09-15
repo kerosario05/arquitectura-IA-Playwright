@@ -1,0 +1,135 @@
+{
+  "appSlug": "default",
+  "sectionSlug": "default-section",
+  "scenarioId": "REC-3CB8EE27-01",
+  "scenarioTitle": "Registro",
+  "stepCount": 6,
+  "sourceExpectedResultPresent": false,
+  "requiredAssertionCount": 1,
+  "unresolvedRequiredCount": 0,
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "REC-3CB8EE27-01",
+    "title": "Registro",
+    "appSlug": "default",
+    "sectionSlug": "default-section",
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Navegar a https://172.27.4.50/",
+        "operation": "navigate",
+        "target": {
+          "strategy": "text",
+          "value": "Navegar a https://172.27.4.50/"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Presionar \"Estados de cuenta\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Estados de cuenta"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Verificar que se muestra \"Identificación del cliente\"",
+        "operation": "assertVisible",
+        "target": {
+          "strategy": "text",
+          "value": "Identificación del cliente"
+        },
+        "required": true,
+        "executionStatus": "unresolved",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Presionar \"Cédula de identidad dominicana\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Cédula de identidad dominicana"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 4,
+        "scenarioStepIndex": 5,
+        "originalText": "Verificar que se muestra \"Identificación del cliente\"",
+        "operation": "assertVisible",
+        "target": {
+          "strategy": "text",
+          "value": "Identificación del cliente"
+        },
+        "required": true,
+        "executionStatus": "unresolved",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 5,
+        "scenarioStepIndex": 6,
+        "originalText": "Presionar \"Ingrese el número\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Ingrese el número"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 6,
+      "representedScenarioSteps": 4,
+      "missingScenarioSteps": [
+        {
+          "scenarioStepIndex": 3,
+          "reason": "required_scenario_step_missing"
+        },
+        {
+          "scenarioStepIndex": 5,
+          "reason": "required_scenario_step_missing"
+        }
+      ]
+    }
+  },
+  "executionContractChars": 1925,
+  "mode": "deterministic",
+  "functionalExecutionEnabled": false,
+  "provider": null,
+  "model": null,
+  "skill": {
+    "name": null,
+    "version": null,
+    "hash": null,
+    "loaded": false
+  },
+  "observableOracles": [],
+  "oracleTypes": [],
+  "specGenerationAttempts": 0,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [],
+  "finalSpec": {
+    "origin": "deterministic_draft",
+    "generatedBy": "core",
+    "strategy": "deterministic_draft",
+    "fallback": null
+  }
+}

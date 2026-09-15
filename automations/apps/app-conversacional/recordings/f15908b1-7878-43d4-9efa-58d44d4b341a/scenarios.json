@@ -1,0 +1,1522 @@
+[
+  {
+    "scenarioId": "REC-F15908B1-01",
+    "title": "registro 8",
+    "description": "Recorrido observado sobre unknown → Lo que debes tener en cuenta → Queremos conocerte → Queremos conocerte → No te pudimos validar como cliente → Bienvenido. Se registraron 7 acciones del usuario en 6 pantallas. Escenario derivado de la grabación f15908b1-7878-43d4-9efa-58d44d4b341a.",
+    "preconditions": [
+      "Aplicación com.appconversacionalbsc instalada en el dispositivo",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [
+      {
+        "action": "launchApp",
+        "description": "Abrir la aplicación com.appconversacionalbsc"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "android:id/content"
+        },
+        "description": "Presionar \"content\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Lo que debes tener en cuenta\")"
+        },
+        "description": "Verificar que se muestra \"Lo que debes tener en cuenta\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "accessibilityId",
+          "value": "Continuar"
+        },
+        "description": "Presionar \"Continuar\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Queremos conocerte\")"
+        },
+        "description": "Verificar que se muestra \"Queremos conocerte\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().descriptionContains(\"necesitarás lo siguiente. El proceso es rápido y sencillo.\")"
+        },
+        "description": "Presionar \"Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().text(\"402-2999333-7\")"
+        },
+        "value": "402-2999333-7",
+        "description": "Ingresar \"402-2999333-7\" en \"402-2999333-7\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "accessibilityId",
+          "value": "Acepto los Términos y condiciones y la Política de datos personales"
+        },
+        "description": "Presionar \"Acepto los Términos y condiciones y la Política de datos personales\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Queremos conocerte\")"
+        },
+        "description": "Verificar que se muestra \"Queremos conocerte\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "accessibilityId",
+          "value": "Continuar"
+        },
+        "description": "Presionar \"Continuar\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"No te pudimos validar como cliente\")"
+        },
+        "description": "Verificar que se muestra \"No te pudimos validar como cliente\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "accessibilityId",
+          "value": "Ir al inicio"
+        },
+        "description": "Presionar \"Ir al inicio\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Bienvenido\")"
+        },
+        "description": "Verificar que se muestra \"Bienvenido\""
+      }
+    ],
+    "webSteps": [],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación app-conversacional",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Lo que debes tener en cuenta\"",
+        "expected": "Se muestra \"Lo que debes tener en cuenta\""
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Queremos conocerte\"",
+        "expected": "Se muestra \"Queremos conocerte\""
+      },
+      {
+        "content": "Presionar \"Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"402-2999333-7\" en \"402-2999333-7\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "Presionar \"Acepto los Términos y condiciones y la Política de datos personales\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Queremos conocerte\"",
+        "expected": "Se muestra \"Queremos conocerte\""
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "expected": "El control permanece deshabilitado hasta cumplir su condición"
+      },
+      {
+        "content": "El sistema navega a \"No te pudimos validar como cliente\"",
+        "expected": "Se muestra \"No te pudimos validar como cliente\""
+      },
+      {
+        "content": "Presionar \"Ir al inicio\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Bienvenido\"",
+        "expected": "Se muestra \"Bienvenido\""
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "402_2999333_7",
+        "label": "402-2999333-7",
+        "stepIndex": 6,
+        "exampleValue": "402-2999333-7",
+        "sensitive": false
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"content\"",
+        "strategy": "id",
+        "value": "android:id/content"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "accessibilityId",
+        "value": "Continuar"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().descriptionContains(\"necesitarás lo siguiente. El proceso es rápido y sencillo.\")"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Ingresar \"402-2999333-7\" en \"402-2999333-7\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().text(\"402-2999333-7\")"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Presionar \"Acepto los Términos y condiciones y la Política de datos personales\"",
+        "strategy": "accessibilityId",
+        "value": "Acepto los Términos y condiciones y la Política de datos personales"
+      },
+      {
+        "stepIndex": 9,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "accessibilityId",
+        "value": "Continuar"
+      },
+      {
+        "stepIndex": 11,
+        "description": "Presionar \"Ir al inicio\"",
+        "strategy": "accessibilityId",
+        "value": "Ir al inicio"
+      }
+    ],
+    "sourceRecordingId": "f15908b1-7878-43d4-9efa-58d44d4b341a",
+    "hasUncertainSteps": false
+  },
+  {
+    "scenarioId": "REC-F15908B1-01-SEG-1",
+    "title": "Recorrido hasta unknown",
+    "description": "Bloque del recorrido que termina en \"unknown\". Cubre 3 de los 13 pasos del flujo completo.",
+    "preconditions": [
+      "Aplicación com.appconversacionalbsc instalada en el dispositivo",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "segment",
+    "mobileSteps": [
+      {
+        "action": "launchApp",
+        "description": "Abrir la aplicación com.appconversacionalbsc"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "android:id/content"
+        },
+        "description": "Presionar \"content\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Lo que debes tener en cuenta\")"
+        },
+        "description": "Verificar que se muestra \"Lo que debes tener en cuenta\""
+      }
+    ],
+    "webSteps": [],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación app-conversacional",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Lo que debes tener en cuenta\"",
+        "expected": "Se muestra \"Lo que debes tener en cuenta\""
+      }
+    ],
+    "requiredData": [],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"content\"",
+        "strategy": "id",
+        "value": "android:id/content"
+      }
+    ],
+    "sourceRecordingId": "f15908b1-7878-43d4-9efa-58d44d4b341a",
+    "hasUncertainSteps": false
+  },
+  {
+    "scenarioId": "REC-F15908B1-01-SEG-2",
+    "title": "Recorrido hasta Lo que debes tener en cuenta",
+    "description": "Bloque del recorrido que termina en \"Lo que debes tener en cuenta\". Cubre 5 de los 13 pasos del flujo completo.",
+    "preconditions": [
+      "Aplicación com.appconversacionalbsc instalada en el dispositivo",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "segment",
+    "mobileSteps": [
+      {
+        "action": "launchApp",
+        "description": "Abrir la aplicación com.appconversacionalbsc"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "android:id/content"
+        },
+        "description": "Presionar \"content\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Lo que debes tener en cuenta\")"
+        },
+        "description": "Verificar que se muestra \"Lo que debes tener en cuenta\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "accessibilityId",
+          "value": "Continuar"
+        },
+        "description": "Presionar \"Continuar\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Queremos conocerte\")"
+        },
+        "description": "Verificar que se muestra \"Queremos conocerte\""
+      }
+    ],
+    "webSteps": [],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación app-conversacional",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Lo que debes tener en cuenta\"",
+        "expected": "Se muestra \"Lo que debes tener en cuenta\""
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Queremos conocerte\"",
+        "expected": "Se muestra \"Queremos conocerte\""
+      }
+    ],
+    "requiredData": [],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"content\"",
+        "strategy": "id",
+        "value": "android:id/content"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "accessibilityId",
+        "value": "Continuar"
+      }
+    ],
+    "sourceRecordingId": "f15908b1-7878-43d4-9efa-58d44d4b341a",
+    "hasUncertainSteps": false
+  },
+  {
+    "scenarioId": "REC-F15908B1-01-SEG-3",
+    "title": "Recorrido hasta Queremos conocerte",
+    "description": "Bloque del recorrido que termina en \"Queremos conocerte\". Cubre 7 de los 13 pasos del flujo completo.",
+    "preconditions": [
+      "Aplicación com.appconversacionalbsc instalada en el dispositivo",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "segment",
+    "mobileSteps": [
+      {
+        "action": "launchApp",
+        "description": "Abrir la aplicación com.appconversacionalbsc"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "android:id/content"
+        },
+        "description": "Presionar \"content\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Lo que debes tener en cuenta\")"
+        },
+        "description": "Verificar que se muestra \"Lo que debes tener en cuenta\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "accessibilityId",
+          "value": "Continuar"
+        },
+        "description": "Presionar \"Continuar\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Queremos conocerte\")"
+        },
+        "description": "Verificar que se muestra \"Queremos conocerte\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().descriptionContains(\"necesitarás lo siguiente. El proceso es rápido y sencillo.\")"
+        },
+        "description": "Presionar \"Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().text(\"402-2999333-7\")"
+        },
+        "value": "402-2999333-7",
+        "description": "Ingresar \"402-2999333-7\" en \"402-2999333-7\""
+      }
+    ],
+    "webSteps": [],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación app-conversacional",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Lo que debes tener en cuenta\"",
+        "expected": "Se muestra \"Lo que debes tener en cuenta\""
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Queremos conocerte\"",
+        "expected": "Se muestra \"Queremos conocerte\""
+      },
+      {
+        "content": "Presionar \"Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"402-2999333-7\" en \"402-2999333-7\"",
+        "expected": "El campo acepta el valor ingresado"
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "402_2999333_7",
+        "label": "402-2999333-7",
+        "stepIndex": 6,
+        "exampleValue": "402-2999333-7",
+        "sensitive": false
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"content\"",
+        "strategy": "id",
+        "value": "android:id/content"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "accessibilityId",
+        "value": "Continuar"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().descriptionContains(\"necesitarás lo siguiente. El proceso es rápido y sencillo.\")"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Ingresar \"402-2999333-7\" en \"402-2999333-7\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().text(\"402-2999333-7\")"
+      }
+    ],
+    "sourceRecordingId": "f15908b1-7878-43d4-9efa-58d44d4b341a",
+    "hasUncertainSteps": false
+  },
+  {
+    "scenarioId": "REC-F15908B1-01-SEG-4",
+    "title": "Recorrido hasta Queremos conocerte",
+    "description": "Bloque del recorrido que termina en \"Queremos conocerte\". Cubre 8 de los 13 pasos del flujo completo.",
+    "preconditions": [
+      "Aplicación com.appconversacionalbsc instalada en el dispositivo",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "segment",
+    "mobileSteps": [
+      {
+        "action": "launchApp",
+        "description": "Abrir la aplicación com.appconversacionalbsc"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "android:id/content"
+        },
+        "description": "Presionar \"content\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Lo que debes tener en cuenta\")"
+        },
+        "description": "Verificar que se muestra \"Lo que debes tener en cuenta\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "accessibilityId",
+          "value": "Continuar"
+        },
+        "description": "Presionar \"Continuar\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Queremos conocerte\")"
+        },
+        "description": "Verificar que se muestra \"Queremos conocerte\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().descriptionContains(\"necesitarás lo siguiente. El proceso es rápido y sencillo.\")"
+        },
+        "description": "Presionar \"Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().text(\"402-2999333-7\")"
+        },
+        "value": "402-2999333-7",
+        "description": "Ingresar \"402-2999333-7\" en \"402-2999333-7\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "accessibilityId",
+          "value": "Acepto los Términos y condiciones y la Política de datos personales"
+        },
+        "description": "Presionar \"Acepto los Términos y condiciones y la Política de datos personales\""
+      }
+    ],
+    "webSteps": [],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación app-conversacional",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Lo que debes tener en cuenta\"",
+        "expected": "Se muestra \"Lo que debes tener en cuenta\""
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Queremos conocerte\"",
+        "expected": "Se muestra \"Queremos conocerte\""
+      },
+      {
+        "content": "Presionar \"Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"402-2999333-7\" en \"402-2999333-7\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "Presionar \"Acepto los Términos y condiciones y la Política de datos personales\"",
+        "expected": "La acción se registra y la pantalla responde"
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "402_2999333_7",
+        "label": "402-2999333-7",
+        "stepIndex": 6,
+        "exampleValue": "402-2999333-7",
+        "sensitive": false
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"content\"",
+        "strategy": "id",
+        "value": "android:id/content"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "accessibilityId",
+        "value": "Continuar"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().descriptionContains(\"necesitarás lo siguiente. El proceso es rápido y sencillo.\")"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Ingresar \"402-2999333-7\" en \"402-2999333-7\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().text(\"402-2999333-7\")"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Presionar \"Acepto los Términos y condiciones y la Política de datos personales\"",
+        "strategy": "accessibilityId",
+        "value": "Acepto los Términos y condiciones y la Política de datos personales"
+      }
+    ],
+    "sourceRecordingId": "f15908b1-7878-43d4-9efa-58d44d4b341a",
+    "hasUncertainSteps": false
+  },
+  {
+    "scenarioId": "REC-F15908B1-01-SEG-5",
+    "title": "Recorrido hasta Queremos conocerte",
+    "description": "Bloque del recorrido que termina en \"Queremos conocerte\". Cubre 11 de los 13 pasos del flujo completo.",
+    "preconditions": [
+      "Aplicación com.appconversacionalbsc instalada en el dispositivo",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "segment",
+    "mobileSteps": [
+      {
+        "action": "launchApp",
+        "description": "Abrir la aplicación com.appconversacionalbsc"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "android:id/content"
+        },
+        "description": "Presionar \"content\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Lo que debes tener en cuenta\")"
+        },
+        "description": "Verificar que se muestra \"Lo que debes tener en cuenta\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "accessibilityId",
+          "value": "Continuar"
+        },
+        "description": "Presionar \"Continuar\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Queremos conocerte\")"
+        },
+        "description": "Verificar que se muestra \"Queremos conocerte\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().descriptionContains(\"necesitarás lo siguiente. El proceso es rápido y sencillo.\")"
+        },
+        "description": "Presionar \"Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().text(\"402-2999333-7\")"
+        },
+        "value": "402-2999333-7",
+        "description": "Ingresar \"402-2999333-7\" en \"402-2999333-7\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "accessibilityId",
+          "value": "Acepto los Términos y condiciones y la Política de datos personales"
+        },
+        "description": "Presionar \"Acepto los Términos y condiciones y la Política de datos personales\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Queremos conocerte\")"
+        },
+        "description": "Verificar que se muestra \"Queremos conocerte\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "accessibilityId",
+          "value": "Continuar"
+        },
+        "description": "Presionar \"Continuar\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"No te pudimos validar como cliente\")"
+        },
+        "description": "Verificar que se muestra \"No te pudimos validar como cliente\""
+      }
+    ],
+    "webSteps": [],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación app-conversacional",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Lo que debes tener en cuenta\"",
+        "expected": "Se muestra \"Lo que debes tener en cuenta\""
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Queremos conocerte\"",
+        "expected": "Se muestra \"Queremos conocerte\""
+      },
+      {
+        "content": "Presionar \"Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"402-2999333-7\" en \"402-2999333-7\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "Presionar \"Acepto los Términos y condiciones y la Política de datos personales\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Queremos conocerte\"",
+        "expected": "Se muestra \"Queremos conocerte\""
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "expected": "El control permanece deshabilitado hasta cumplir su condición"
+      },
+      {
+        "content": "El sistema navega a \"No te pudimos validar como cliente\"",
+        "expected": "Se muestra \"No te pudimos validar como cliente\""
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "402_2999333_7",
+        "label": "402-2999333-7",
+        "stepIndex": 6,
+        "exampleValue": "402-2999333-7",
+        "sensitive": false
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"content\"",
+        "strategy": "id",
+        "value": "android:id/content"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "accessibilityId",
+        "value": "Continuar"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().descriptionContains(\"necesitarás lo siguiente. El proceso es rápido y sencillo.\")"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Ingresar \"402-2999333-7\" en \"402-2999333-7\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().text(\"402-2999333-7\")"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Presionar \"Acepto los Términos y condiciones y la Política de datos personales\"",
+        "strategy": "accessibilityId",
+        "value": "Acepto los Términos y condiciones y la Política de datos personales"
+      },
+      {
+        "stepIndex": 9,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "accessibilityId",
+        "value": "Continuar"
+      }
+    ],
+    "sourceRecordingId": "f15908b1-7878-43d4-9efa-58d44d4b341a",
+    "hasUncertainSteps": false
+  },
+  {
+    "scenarioId": "REC-F15908B1-01-NEG-1",
+    "title": "Queremos conocerte: \"Continuar\" permanece deshabilitado sin cumplir su condición",
+    "description": "Durante la grabación el control \"Continuar\" se observó deshabilitado en la pantalla \"Queremos conocerte\". Este escenario verifica que la aplicación mantiene ese bloqueo.",
+    "preconditions": [
+      "Aplicación com.appconversacionalbsc instalada en el dispositivo",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "negative",
+    "provenance": "derived",
+    "mobileSteps": [],
+    "webSteps": [],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación app-conversacional",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Lo que debes tener en cuenta\"",
+        "expected": "Se muestra \"Lo que debes tener en cuenta\""
+      },
+      {
+        "content": "Intentar continuar sin completar los requisitos de \"Continuar\"",
+        "expected": "El control \"Continuar\" permanece deshabilitado y el flujo no avanza"
+      }
+    ],
+    "requiredData": [],
+    "stepTargets": [],
+    "sourceRecordingId": "f15908b1-7878-43d4-9efa-58d44d4b341a",
+    "hasUncertainSteps": false
+  },
+  {
+    "scenarioId": "REC-F15908B1-01-ALT-1",
+    "title": "Desde Lo que debes tener en cuenta: Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación…",
+    "description": "La pantalla \"Lo que debes tener en cuenta\" ofrece \"Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica\", que el recorrido grabado no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.",
+    "preconditions": [
+      "Aplicación com.appconversacionalbsc instalada en el dispositivo",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "mobileSteps": [
+      {
+        "action": "launchApp",
+        "description": "Abrir la aplicación com.appconversacionalbsc"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "android:id/content"
+        },
+        "description": "Presionar \"content\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Lo que debes tener en cuenta\")"
+        },
+        "description": "Verificar que se muestra \"Lo que debes tener en cuenta\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().descriptionContains(\"necesitarás lo siguiente. El proceso es rápido y sencillo.\")"
+        },
+        "description": "Seleccionar \"Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica\""
+      }
+    ],
+    "webSteps": [],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación app-conversacional",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Lo que debes tener en cuenta\"",
+        "expected": "Se muestra \"Lo que debes tener en cuenta\""
+      },
+      {
+        "content": "Seleccionar \"Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica\"",
+        "expected": "Por confirmar: la grabación no recorrió esta opción"
+      }
+    ],
+    "requiredData": [],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"content\"",
+        "strategy": "id",
+        "value": "android:id/content"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Seleccionar \"Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().descriptionContains(\"necesitarás lo siguiente. El proceso es rápido y sencillo.\")"
+      }
+    ],
+    "sourceRecordingId": "f15908b1-7878-43d4-9efa-58d44d4b341a",
+    "hasUncertainSteps": true
+  },
+  {
+    "scenarioId": "REC-F15908B1-01-ALT-2",
+    "title": "Desde Lo que debes tener en cuenta: Salir",
+    "description": "La pantalla \"Lo que debes tener en cuenta\" ofrece \"Salir\", que el recorrido grabado no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.",
+    "preconditions": [
+      "Aplicación com.appconversacionalbsc instalada en el dispositivo",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "mobileSteps": [
+      {
+        "action": "launchApp",
+        "description": "Abrir la aplicación com.appconversacionalbsc"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "android:id/content"
+        },
+        "description": "Presionar \"content\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Lo que debes tener en cuenta\")"
+        },
+        "description": "Verificar que se muestra \"Lo que debes tener en cuenta\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "accessibilityId",
+          "value": "Salir"
+        },
+        "description": "Seleccionar \"Salir\""
+      }
+    ],
+    "webSteps": [],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación app-conversacional",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Lo que debes tener en cuenta\"",
+        "expected": "Se muestra \"Lo que debes tener en cuenta\""
+      },
+      {
+        "content": "Seleccionar \"Salir\"",
+        "expected": "Por confirmar: la grabación no recorrió esta opción"
+      }
+    ],
+    "requiredData": [],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"content\"",
+        "strategy": "id",
+        "value": "android:id/content"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Seleccionar \"Salir\"",
+        "strategy": "accessibilityId",
+        "value": "Salir"
+      }
+    ],
+    "sourceRecordingId": "f15908b1-7878-43d4-9efa-58d44d4b341a",
+    "hasUncertainSteps": true
+  },
+  {
+    "scenarioId": "REC-F15908B1-01-ALT-3",
+    "title": "Desde Queremos conocerte: , Cédula",
+    "description": "La pantalla \"Queremos conocerte\" ofrece \", Cédula\", que el recorrido grabado no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.",
+    "preconditions": [
+      "Aplicación com.appconversacionalbsc instalada en el dispositivo",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "mobileSteps": [
+      {
+        "action": "launchApp",
+        "description": "Abrir la aplicación com.appconversacionalbsc"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "android:id/content"
+        },
+        "description": "Presionar \"content\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Lo que debes tener en cuenta\")"
+        },
+        "description": "Verificar que se muestra \"Lo que debes tener en cuenta\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "accessibilityId",
+          "value": "Continuar"
+        },
+        "description": "Presionar \"Continuar\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Queremos conocerte\")"
+        },
+        "description": "Verificar que se muestra \"Queremos conocerte\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().descriptionContains(\"Cédula\")"
+        },
+        "description": "Seleccionar \", Cédula\""
+      }
+    ],
+    "webSteps": [],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación app-conversacional",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Lo que debes tener en cuenta\"",
+        "expected": "Se muestra \"Lo que debes tener en cuenta\""
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Queremos conocerte\"",
+        "expected": "Se muestra \"Queremos conocerte\""
+      },
+      {
+        "content": "Seleccionar \", Cédula\"",
+        "expected": "Por confirmar: la grabación no recorrió esta opción"
+      }
+    ],
+    "requiredData": [],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"content\"",
+        "strategy": "id",
+        "value": "android:id/content"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "accessibilityId",
+        "value": "Continuar"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Seleccionar \", Cédula\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().descriptionContains(\"Cédula\")"
+      }
+    ],
+    "sourceRecordingId": "f15908b1-7878-43d4-9efa-58d44d4b341a",
+    "hasUncertainSteps": true
+  },
+  {
+    "scenarioId": "REC-F15908B1-01-ALT-4",
+    "title": "Desde Queremos conocerte: , Pasaporte",
+    "description": "La pantalla \"Queremos conocerte\" ofrece \", Pasaporte\", que el recorrido grabado no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.",
+    "preconditions": [
+      "Aplicación com.appconversacionalbsc instalada en el dispositivo",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "mobileSteps": [
+      {
+        "action": "launchApp",
+        "description": "Abrir la aplicación com.appconversacionalbsc"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "android:id/content"
+        },
+        "description": "Presionar \"content\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Lo que debes tener en cuenta\")"
+        },
+        "description": "Verificar que se muestra \"Lo que debes tener en cuenta\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "accessibilityId",
+          "value": "Continuar"
+        },
+        "description": "Presionar \"Continuar\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Queremos conocerte\")"
+        },
+        "description": "Verificar que se muestra \"Queremos conocerte\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().descriptionContains(\"Pasaporte\")"
+        },
+        "description": "Seleccionar \", Pasaporte\""
+      }
+    ],
+    "webSteps": [],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación app-conversacional",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Lo que debes tener en cuenta\"",
+        "expected": "Se muestra \"Lo que debes tener en cuenta\""
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Queremos conocerte\"",
+        "expected": "Se muestra \"Queremos conocerte\""
+      },
+      {
+        "content": "Seleccionar \", Pasaporte\"",
+        "expected": "Por confirmar: la grabación no recorrió esta opción"
+      }
+    ],
+    "requiredData": [],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"content\"",
+        "strategy": "id",
+        "value": "android:id/content"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "accessibilityId",
+        "value": "Continuar"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Seleccionar \", Pasaporte\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().descriptionContains(\"Pasaporte\")"
+      }
+    ],
+    "sourceRecordingId": "f15908b1-7878-43d4-9efa-58d44d4b341a",
+    "hasUncertainSteps": true
+  },
+  {
+    "scenarioId": "REC-F15908B1-01-ALT-5",
+    "title": "Desde Queremos conocerte: 402-12345678-9",
+    "description": "La pantalla \"Queremos conocerte\" ofrece \"402-12345678-9\", que el recorrido grabado no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.",
+    "preconditions": [
+      "Aplicación com.appconversacionalbsc instalada en el dispositivo",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "mobileSteps": [
+      {
+        "action": "launchApp",
+        "description": "Abrir la aplicación com.appconversacionalbsc"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "android:id/content"
+        },
+        "description": "Presionar \"content\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Lo que debes tener en cuenta\")"
+        },
+        "description": "Verificar que se muestra \"Lo que debes tener en cuenta\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "accessibilityId",
+          "value": "Continuar"
+        },
+        "description": "Presionar \"Continuar\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Queremos conocerte\")"
+        },
+        "description": "Verificar que se muestra \"Queremos conocerte\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().text(\"402-12345678-9\")"
+        },
+        "description": "Seleccionar \"402-12345678-9\""
+      }
+    ],
+    "webSteps": [],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación app-conversacional",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Lo que debes tener en cuenta\"",
+        "expected": "Se muestra \"Lo que debes tener en cuenta\""
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Queremos conocerte\"",
+        "expected": "Se muestra \"Queremos conocerte\""
+      },
+      {
+        "content": "Seleccionar \"402-12345678-9\"",
+        "expected": "Por confirmar: la grabación no recorrió esta opción"
+      }
+    ],
+    "requiredData": [],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"content\"",
+        "strategy": "id",
+        "value": "android:id/content"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "accessibilityId",
+        "value": "Continuar"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Seleccionar \"402-12345678-9\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().text(\"402-12345678-9\")"
+      }
+    ],
+    "sourceRecordingId": "f15908b1-7878-43d4-9efa-58d44d4b341a",
+    "hasUncertainSteps": true
+  },
+  {
+    "scenarioId": "REC-F15908B1-01-ALT-6",
+    "title": "Desde Queremos conocerte: , Cédula",
+    "description": "La pantalla \"Queremos conocerte\" ofrece \", Cédula\", que el recorrido grabado no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.",
+    "preconditions": [
+      "Aplicación com.appconversacionalbsc instalada en el dispositivo",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "mobileSteps": [
+      {
+        "action": "launchApp",
+        "description": "Abrir la aplicación com.appconversacionalbsc"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "id",
+          "value": "android:id/content"
+        },
+        "description": "Presionar \"content\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Lo que debes tener en cuenta\")"
+        },
+        "description": "Verificar que se muestra \"Lo que debes tener en cuenta\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "accessibilityId",
+          "value": "Continuar"
+        },
+        "description": "Presionar \"Continuar\""
+      },
+      {
+        "action": "assertVisible",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().textContains(\"Queremos conocerte\")"
+        },
+        "description": "Verificar que se muestra \"Queremos conocerte\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().descriptionContains(\"necesitarás lo siguiente. El proceso es rápido y sencillo.\")"
+        },
+        "description": "Presionar \"Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().text(\"402-2999333-7\")"
+        },
+        "value": "402-2999333-7",
+        "description": "Ingresar \"402-2999333-7\" en \"402-2999333-7\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "androidUiAutomator",
+          "value": "new UiSelector().descriptionContains(\"Cédula\")"
+        },
+        "description": "Seleccionar \", Cédula\""
+      }
+    ],
+    "webSteps": [],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación app-conversacional",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"content\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Lo que debes tener en cuenta\"",
+        "expected": "Se muestra \"Lo que debes tener en cuenta\""
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Queremos conocerte\"",
+        "expected": "Se muestra \"Queremos conocerte\""
+      },
+      {
+        "content": "Presionar \"Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"402-2999333-7\" en \"402-2999333-7\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "Seleccionar \", Cédula\"",
+        "expected": "Por confirmar: la grabación no recorrió esta opción"
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "402_2999333_7",
+        "label": "402-2999333-7",
+        "stepIndex": 6,
+        "exampleValue": "402-2999333-7",
+        "sensitive": false
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"content\"",
+        "strategy": "id",
+        "value": "android:id/content"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "accessibilityId",
+        "value": "Continuar"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"Lo que debes tener en cuenta, Para continuar, necesitarás lo siguiente. El proceso es rápido y sencillo., , Indicar tu cédula, , Conexión a internet estable, , Validar tu documento de identidad, , Comprobación biométrica\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().descriptionContains(\"necesitarás lo siguiente. El proceso es rápido y sencillo.\")"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Ingresar \"402-2999333-7\" en \"402-2999333-7\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().text(\"402-2999333-7\")"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Seleccionar \", Cédula\"",
+        "strategy": "androidUiAutomator",
+        "value": "new UiSelector().descriptionContains(\"Cédula\")"
+      }
+    ],
+    "sourceRecordingId": "f15908b1-7878-43d4-9efa-58d44d4b341a",
+    "hasUncertainSteps": true
+  }
+]

@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { filterByProjectAccess } from "../middleware/route-policy";
 import fs from "fs";
 import path from "path";
 import { jobStore } from "../jobs/job-store";
@@ -508,8 +509,13 @@ runsRouter.post("/sprint", (req, res) => {
   res.status(202).json({ jobId: job.id, status: job.status });
 });
 
-runsRouter.get("/", (_req, res) => {
-  res.json({ jobs: jobStore.list() });
+runsRouter.get("/", (req, res) => {
+  const jobs = filterByProjectAccess(req.principal, jobStore.list(), (job) => {
+    const params = (job.params ?? {}) as Record<string, unknown>;
+    const value = params.appSlug ?? params.projectSlug;
+    return typeof value === "string" ? value : null;
+  });
+  res.json({ jobs });
 });
 
 runsRouter.get("/:jobId", (req, res) => {

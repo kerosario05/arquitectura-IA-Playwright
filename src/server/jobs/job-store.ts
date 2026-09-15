@@ -44,11 +44,26 @@ export type JobSummary = {
   scenarioEvidenceCount?: number;
   evidenceResults?: number;
   documentError?: string;
+  /**
+   * Per-scenario outcome of replaying a recorded web walkthrough.
+   *
+   * Kept here rather than in a store of its own because the panel already polls the job for
+   * everything else it shows, and a replay has nothing to report once the job is gone.
+   */
+  recordingResults?: Array<{
+    scenarioId: string;
+    title: string;
+    status: "passed" | "failed" | "partial" | "skipped";
+    failedStep?: { index: number; description?: string; error?: string };
+    evidenceDir?: string;
+    specPath?: string;
+    promotionError?: string;
+  }>;
 };
 
 export type Job = {
   id: string;
-  type: "sprint" | "discovery-batch" | "scenario-preview" | "mobile-emulator-boot" | "mobile-test-run" | "mobile-launch-execution" | "mobile-route-learning" | "session-recording";
+  type: "sprint" | "discovery-batch" | "scenario-preview" | "mobile-emulator-boot" | "mobile-test-run" | "mobile-launch-execution" | "mobile-route-learning" | "session-recording" | "web-recording-execution";
   status: JobStatus;
   params: Record<string, unknown>;
   issueKey?: string;
@@ -75,7 +90,7 @@ export type JobInternal = Job & {
 class JobStore {
   private readonly jobs = new Map<string, JobInternal>();
 
-  create(type: "sprint" | "discovery-batch" | "scenario-preview" | "mobile-emulator-boot" | "mobile-test-run" | "mobile-launch-execution" | "mobile-route-learning" | "session-recording", params: Record<string, unknown>): Job {
+  create(type: "sprint" | "discovery-batch" | "scenario-preview" | "mobile-emulator-boot" | "mobile-test-run" | "mobile-launch-execution" | "mobile-route-learning" | "session-recording" | "web-recording-execution", params: Record<string, unknown>): Job {
     const id = randomUUID();
     const job: JobInternal = {
       id,

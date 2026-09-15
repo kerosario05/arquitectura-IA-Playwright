@@ -1,0 +1,12 @@
+{
+  "recordingId": "46dbe9f0-4d8e-482f-a74b-e8c29d82453a",
+  "projectSlug": "portal-comercial",
+  "appSlug": "portal-comercial",
+  "platform": "web",
+  "baseUrl": "https://srvqacgowb01.local.bsc.com:5000/login",
+  "label": "registro 2",
+  "startedAt": "2026-09-10T15:02:01.975Z",
+  "status": "recording",
+  "events": [],
+  "screens": []
+}

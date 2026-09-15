@@ -17,6 +17,7 @@ import {
 import { materializeProjectRuntime } from "../../db/project-materializer";
 import { inspectApk, ApkInspectorError } from "../../utils/apk-inspector";
 import { getConnection } from "../../db/sql-connection";
+import { filterByProjectAccess } from "../middleware/route-policy";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
@@ -126,10 +127,12 @@ function isValidationError(err: any): boolean {
 }
 
 // GET /api/projects
-projectsRouter.get("/", async (_req, res, next) => {
+projectsRouter.get("/", async (req, res, next) => {
   try {
     const projects = await listProjects();
-    res.json({ projects: projects.map(publicProject) });
+    // A scoped user must not even learn that other projects exist.
+    const visible = filterByProjectAccess(req.principal, projects, (project) => project.slug);
+    res.json({ projects: visible.map(publicProject) });
   } catch (err) {
     next(err);
   }

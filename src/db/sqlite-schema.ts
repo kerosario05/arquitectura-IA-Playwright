@@ -136,4 +136,85 @@ CREATE TABLE IF NOT EXISTS ProjectConfigurationHistory (
 
 CREATE INDEX IF NOT EXISTS IX_ProjectConfigurationHistory_projectId
   ON ProjectConfigurationHistory (projectId, createdAt);
+
+-- ---------------------------------------------------------------------------
+-- Identity: users, roles, permissions, per-project scope and sessions.
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS Users (
+  id                 TEXT    PRIMARY KEY COLLATE NOCASE DEFAULT (${UUID_DEFAULT_EXPR}),
+  username           TEXT    NOT NULL UNIQUE COLLATE NOCASE,
+  email              TEXT    COLLATE NOCASE,
+  fullName           TEXT    NOT NULL,
+  passwordHash       TEXT    NOT NULL,
+  mustChangePassword INTEGER NOT NULL DEFAULT 1,
+  enabled            INTEGER NOT NULL DEFAULT 1,
+  allProjects        INTEGER NOT NULL DEFAULT 0,  -- 1 = skip UserProjectAccess checks
+  failedLoginCount   INTEGER NOT NULL DEFAULT 0,
+  lockedUntil        TEXT,
+  lastLoginAt        TEXT,
+  passwordUpdatedAt  TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  createdBy          TEXT    COLLATE NOCASE,
+  createdAt          TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  updatedAt          TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR})
+);
+
+CREATE TABLE IF NOT EXISTS Roles (
+  id          TEXT    PRIMARY KEY COLLATE NOCASE DEFAULT (${UUID_DEFAULT_EXPR}),
+  slug        TEXT    NOT NULL UNIQUE COLLATE NOCASE,
+  name        TEXT    NOT NULL,
+  description TEXT,
+  isSystem    INTEGER NOT NULL DEFAULT 0,        -- 1 = seeded, cannot be deleted
+  createdAt   TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  updatedAt   TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR})
+);
+
+CREATE TABLE IF NOT EXISTS RolePermissions (
+  roleId        TEXT NOT NULL COLLATE NOCASE
+                     REFERENCES Roles(id) ON DELETE CASCADE,
+  permissionKey TEXT NOT NULL COLLATE NOCASE,    -- key from src/auth/permissions.ts
+  PRIMARY KEY (roleId, permissionKey)
+);
+
+CREATE TABLE IF NOT EXISTS UserRoles (
+  userId     TEXT NOT NULL COLLATE NOCASE REFERENCES Users(id) ON DELETE CASCADE,
+  roleId     TEXT NOT NULL COLLATE NOCASE REFERENCES Roles(id) ON DELETE CASCADE,
+  assignedAt TEXT NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  PRIMARY KEY (userId, roleId)
+);
+
+CREATE TABLE IF NOT EXISTS UserProjectAccess (
+  userId      TEXT    NOT NULL COLLATE NOCASE REFERENCES Users(id) ON DELETE CASCADE,
+  projectId   TEXT    NOT NULL COLLATE NOCASE REFERENCES Projects(id) ON DELETE CASCADE,
+  accessLevel INTEGER NOT NULL DEFAULT 1,        -- 1 = read, 2 = write
+  grantedAt   TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  PRIMARY KEY (userId, projectId)
+);
+
+CREATE TABLE IF NOT EXISTS UserSessions (
+  id         TEXT PRIMARY KEY COLLATE NOCASE DEFAULT (${UUID_DEFAULT_EXPR}),
+  userId     TEXT NOT NULL COLLATE NOCASE REFERENCES Users(id) ON DELETE CASCADE,
+  tokenHash  TEXT NOT NULL UNIQUE,               -- SHA-256 of the opaque bearer token
+  scope      TEXT NOT NULL DEFAULT 'full',       -- 'full' | 'password_change_only'
+  issuedAt   TEXT NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  expiresAt  TEXT NOT NULL,
+  revokedAt  TEXT,
+  lastSeenAt TEXT,
+  userAgent  TEXT,
+  ipAddress  TEXT
+);
+
+CREATE INDEX IF NOT EXISTS IX_UserSessions_userId ON UserSessions (userId, expiresAt);
+
+-- No foreign keys: the trail must outlive the rows it describes.
+CREATE TABLE IF NOT EXISTS UserAuditLog (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  actorUserId  TEXT COLLATE NOCASE,
+  targetUserId TEXT COLLATE NOCASE,
+  action       TEXT NOT NULL,
+  detailsJson  TEXT,
+  createdAt    TEXT NOT NULL DEFAULT (${UTC_NOW_EXPR})
+);
+
+CREATE INDEX IF NOT EXISTS IX_UserAuditLog_target ON UserAuditLog (targetUserId, createdAt);
 `;

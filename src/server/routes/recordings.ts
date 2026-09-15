@@ -29,6 +29,7 @@ import {
   type ScenarioPreviewPublishContext,
 } from "../services/testrail-sync-types";
 import { toPublishableScenario } from "../../recording/scenario-to-testrail";
+import { startWebRecordingExecution } from "../jobs/web-recording-execution-runner";
 import type { RecordedScenario } from "../../recording/trace-to-scenario";
 
 export const recordingsRouter = Router();
@@ -213,6 +214,71 @@ recordingsRouter.put("/:recordingId/scenarios", async (req, res) => {
     const appSlug = await appSlugFor(projectSlug);
     saveScenarios(appSlug, req.params.recordingId, body.scenarios as RecordedScenario[]);
     res.json({ ok: true, scenarios: loadScenarios(appSlug, req.params.recordingId) });
+  } catch (err) {
+    handle(res, err);
+  }
+});
+
+/**
+ * POST /api/recordings/:recordingId/execute — replays a web walkthrough in a real browser.
+ *
+ * Only for web recordings. An Android one is executed through the mobile launch chain, which
+ * owns the emulator and Appium; sending it here would find no `webSteps` and fail obscurely,
+ * so it is refused with the reason instead.
+ *
+ * Answers immediately with a job id: a replay opens a browser and walks the flow, which takes
+ * as long as the flow takes. The panel follows it on `GET /api/runs/:jobId`, the same way it
+ * follows every other operation.
+ */
+recordingsRouter.post("/:recordingId/execute", async (req, res) => {
+  try {
+    const body = req.body ?? {};
+    const projectSlug = String(body.projectSlug ?? "").trim();
+    if (!projectSlug) {
+      sendError(res, 400, "MISSING_PROJECT_SLUG", "projectSlug es obligatorio");
+      return;
+    }
+
+    const appSlug = await appSlugFor(projectSlug);
+    const trace = loadTrace(appSlug, req.params.recordingId);
+    if (!trace) {
+      sendError(res, 404, "RECORDING_NOT_FOUND", `No se encontró la grabación ${req.params.recordingId}`);
+      return;
+    }
+    if (trace.platform !== "web") {
+      sendError(
+        res,
+        400,
+        "NOT_A_WEB_RECORDING",
+        "Esta grabación es de Android: se ejecuta desde el lanzamiento móvil, no por esta ruta",
+      );
+      return;
+    }
+
+    const all = loadScenarios(appSlug, req.params.recordingId);
+    if (all.length === 0) {
+      sendError(res, 404, "NO_SCENARIOS", "La grabación no tiene escenarios generados");
+      return;
+    }
+    const requested: string[] | undefined = Array.isArray(body.scenarioIds)
+      ? body.scenarioIds.filter((s: unknown): s is string => typeof s === "string")
+      : undefined;
+    const selected = requested ? all.filter((s) => requested.includes(s.scenarioId)) : all;
+    if (selected.length === 0) {
+      sendError(res, 400, "NO_SCENARIOS_SELECTED", "Ninguno de los escenarios indicados existe en la grabación");
+      return;
+    }
+
+    const { jobId } = startWebRecordingExecution({
+      appSlug,
+      recordingId: req.params.recordingId,
+      scenarios: selected,
+      baseUrl: trace.baseUrl,
+      dataOverrides:
+        body.dataOverrides && typeof body.dataOverrides === "object" ? body.dataOverrides : undefined,
+    });
+
+    res.status(202).json({ ok: true, jobId, scenarioCount: selected.length });
   } catch (err) {
     handle(res, err);
   }

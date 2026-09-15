@@ -1,0 +1,1420 @@
+[
+  {
+    "scenarioId": "REC-DB317FB9-01",
+    "title": "registro 3",
+    "description": "Recorrido observado sobre fbf08c6ecee9 → a5bf9e3e4c28 → 69bd2047dc83. Se registraron 8 acciones del usuario en 3 pantallas. Escenario derivado de la grabación db317fb9-9280-4104-b865-c0c7428cbb6d.",
+    "preconditions": [
+      "Acceso a https://srvqacgowb01.local.bsc.com:5000/login",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "description": "Navegar a https://srvqacgowb01.local.bsc.com:5000/login"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#username"
+        },
+        "description": "Presionar \"Usuario\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "css",
+          "value": "#username"
+        },
+        "value": "radames",
+        "description": "Ingresar \"radames\" en \"Usuario\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#password"
+        },
+        "description": "Presionar \"Contraseña\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "css",
+          "value": "#password"
+        },
+        "value": "",
+        "description": "Ingresar contrasena en \"Contraseña\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "aria-label",
+          "value": "Iniciar sesión"
+        },
+        "description": "Presionar \"Iniciar sesión\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Usuario\nContraseña\nRecordarme\nIniciar sesión"
+        },
+        "description": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Solicitud multiproducto"
+        },
+        "description": "Presionar \"Solicitud multiproducto\""
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Navegar a https://srvqacgowb01.local.bsc.com:5000/login",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"Usuario\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"radames\" en \"Usuario\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "Presionar \"Contraseña\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar contrasena en \"Contraseña\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "Presionar \"Iniciar sesión\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Solicitud multiproducto\"",
+        "expected": "La acción se registra y la pantalla responde"
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "usuario",
+        "label": "Usuario",
+        "stepIndex": 2,
+        "exampleValue": "radames",
+        "sensitive": false
+      },
+      {
+        "key": "contrasena",
+        "label": "Contraseña",
+        "stepIndex": 4,
+        "sensitive": true
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Usuario\"",
+        "strategy": "css",
+        "value": "#username"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Ingresar \"radames\" en \"Usuario\"",
+        "strategy": "css",
+        "value": "#username"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Contraseña\"",
+        "strategy": "css",
+        "value": "#password"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Ingresar contrasena en \"Contraseña\"",
+        "strategy": "css",
+        "value": "#password"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"Iniciar sesión\"",
+        "strategy": "aria-label",
+        "value": "Iniciar sesión"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\"",
+        "strategy": "text",
+        "value": "Usuario\nContraseña\nRecordarme\nIniciar sesión"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Presionar \"Solicitud multiproducto\"",
+        "strategy": "text",
+        "value": "Solicitud multiproducto",
+        "ambiguous": true
+      }
+    ],
+    "sourceRecordingId": "db317fb9-9280-4104-b865-c0c7428cbb6d",
+    "hasUncertainSteps": true
+  },
+  {
+    "scenarioId": "REC-DB317FB9-01-SEG-1",
+    "title": "Recorrido hasta fbf08c6ecee9",
+    "description": "Bloque del recorrido que termina en \"fbf08c6ecee9\". Cubre 7 de los 8 pasos del flujo completo.",
+    "preconditions": [
+      "Acceso a https://srvqacgowb01.local.bsc.com:5000/login",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "segment",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "description": "Navegar a https://srvqacgowb01.local.bsc.com:5000/login"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#username"
+        },
+        "description": "Presionar \"Usuario\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "css",
+          "value": "#username"
+        },
+        "value": "radames",
+        "description": "Ingresar \"radames\" en \"Usuario\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#password"
+        },
+        "description": "Presionar \"Contraseña\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "css",
+          "value": "#password"
+        },
+        "value": "",
+        "description": "Ingresar contrasena en \"Contraseña\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "aria-label",
+          "value": "Iniciar sesión"
+        },
+        "description": "Presionar \"Iniciar sesión\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Usuario\nContraseña\nRecordarme\nIniciar sesión"
+        },
+        "description": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\""
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Navegar a https://srvqacgowb01.local.bsc.com:5000/login",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"Usuario\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"radames\" en \"Usuario\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "Presionar \"Contraseña\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar contrasena en \"Contraseña\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "Presionar \"Iniciar sesión\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\"",
+        "expected": "La acción se registra y la pantalla responde"
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "usuario",
+        "label": "Usuario",
+        "stepIndex": 2,
+        "exampleValue": "radames",
+        "sensitive": false
+      },
+      {
+        "key": "contrasena",
+        "label": "Contraseña",
+        "stepIndex": 4,
+        "sensitive": true
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Usuario\"",
+        "strategy": "css",
+        "value": "#username"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Ingresar \"radames\" en \"Usuario\"",
+        "strategy": "css",
+        "value": "#username"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Contraseña\"",
+        "strategy": "css",
+        "value": "#password"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Ingresar contrasena en \"Contraseña\"",
+        "strategy": "css",
+        "value": "#password"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"Iniciar sesión\"",
+        "strategy": "aria-label",
+        "value": "Iniciar sesión"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\"",
+        "strategy": "text",
+        "value": "Usuario\nContraseña\nRecordarme\nIniciar sesión"
+      }
+    ],
+    "sourceRecordingId": "db317fb9-9280-4104-b865-c0c7428cbb6d",
+    "hasUncertainSteps": false
+  },
+  {
+    "scenarioId": "REC-DB317FB9-01-ALT-1",
+    "title": "Desde a5bf9e3e4c28: Portal Comercial",
+    "description": "La pantalla \"a5bf9e3e4c28\" ofrece \"Portal Comercial\", que el recorrido grabado no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.",
+    "preconditions": [
+      "Acceso a https://srvqacgowb01.local.bsc.com:5000/login",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "description": "Navegar a https://srvqacgowb01.local.bsc.com:5000/login"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#username"
+        },
+        "description": "Presionar \"Usuario\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "css",
+          "value": "#username"
+        },
+        "value": "radames",
+        "description": "Ingresar \"radames\" en \"Usuario\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#password"
+        },
+        "description": "Presionar \"Contraseña\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "css",
+          "value": "#password"
+        },
+        "value": "",
+        "description": "Ingresar contrasena en \"Contraseña\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "aria-label",
+          "value": "Iniciar sesión"
+        },
+        "description": "Presionar \"Iniciar sesión\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Usuario\nContraseña\nRecordarme\nIniciar sesión"
+        },
+        "description": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": " Portal Comercial "
+        },
+        "description": "Seleccionar \"Portal Comercial\""
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Navegar a https://srvqacgowb01.local.bsc.com:5000/login",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"Usuario\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"radames\" en \"Usuario\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "Presionar \"Contraseña\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar contrasena en \"Contraseña\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "Presionar \"Iniciar sesión\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Seleccionar \"Portal Comercial\"",
+        "expected": "Por confirmar: la grabación no recorrió esta opción"
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "usuario",
+        "label": "Usuario",
+        "stepIndex": 2,
+        "exampleValue": "radames",
+        "sensitive": false
+      },
+      {
+        "key": "contrasena",
+        "label": "Contraseña",
+        "stepIndex": 4,
+        "sensitive": true
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Usuario\"",
+        "strategy": "css",
+        "value": "#username"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Ingresar \"radames\" en \"Usuario\"",
+        "strategy": "css",
+        "value": "#username"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Contraseña\"",
+        "strategy": "css",
+        "value": "#password"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Ingresar contrasena en \"Contraseña\"",
+        "strategy": "css",
+        "value": "#password"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"Iniciar sesión\"",
+        "strategy": "aria-label",
+        "value": "Iniciar sesión"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\"",
+        "strategy": "text",
+        "value": "Usuario\nContraseña\nRecordarme\nIniciar sesión"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Seleccionar \"Portal Comercial\"",
+        "strategy": "text",
+        "value": " Portal Comercial "
+      }
+    ],
+    "sourceRecordingId": "db317fb9-9280-4104-b865-c0c7428cbb6d",
+    "hasUncertainSteps": true
+  },
+  {
+    "scenarioId": "REC-DB317FB9-01-ALT-2",
+    "title": "Desde a5bf9e3e4c28: Configuración",
+    "description": "La pantalla \"a5bf9e3e4c28\" ofrece \"Configuración\", que el recorrido grabado no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.",
+    "preconditions": [
+      "Acceso a https://srvqacgowb01.local.bsc.com:5000/login",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "description": "Navegar a https://srvqacgowb01.local.bsc.com:5000/login"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#username"
+        },
+        "description": "Presionar \"Usuario\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "css",
+          "value": "#username"
+        },
+        "value": "radames",
+        "description": "Ingresar \"radames\" en \"Usuario\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#password"
+        },
+        "description": "Presionar \"Contraseña\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "css",
+          "value": "#password"
+        },
+        "value": "",
+        "description": "Ingresar contrasena en \"Contraseña\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "aria-label",
+          "value": "Iniciar sesión"
+        },
+        "description": "Presionar \"Iniciar sesión\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Usuario\nContraseña\nRecordarme\nIniciar sesión"
+        },
+        "description": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Configuración"
+        },
+        "description": "Seleccionar \"Configuración\""
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Navegar a https://srvqacgowb01.local.bsc.com:5000/login",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"Usuario\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"radames\" en \"Usuario\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "Presionar \"Contraseña\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar contrasena en \"Contraseña\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "Presionar \"Iniciar sesión\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Seleccionar \"Configuración\"",
+        "expected": "Por confirmar: la grabación no recorrió esta opción"
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "usuario",
+        "label": "Usuario",
+        "stepIndex": 2,
+        "exampleValue": "radames",
+        "sensitive": false
+      },
+      {
+        "key": "contrasena",
+        "label": "Contraseña",
+        "stepIndex": 4,
+        "sensitive": true
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Usuario\"",
+        "strategy": "css",
+        "value": "#username"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Ingresar \"radames\" en \"Usuario\"",
+        "strategy": "css",
+        "value": "#username"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Contraseña\"",
+        "strategy": "css",
+        "value": "#password"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Ingresar contrasena en \"Contraseña\"",
+        "strategy": "css",
+        "value": "#password"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"Iniciar sesión\"",
+        "strategy": "aria-label",
+        "value": "Iniciar sesión"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\"",
+        "strategy": "text",
+        "value": "Usuario\nContraseña\nRecordarme\nIniciar sesión"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Seleccionar \"Configuración\"",
+        "strategy": "text",
+        "value": "Configuración"
+      }
+    ],
+    "sourceRecordingId": "db317fb9-9280-4104-b865-c0c7428cbb6d",
+    "hasUncertainSteps": true
+  },
+  {
+    "scenarioId": "REC-DB317FB9-01-ALT-3",
+    "title": "Desde a5bf9e3e4c28: Sesión",
+    "description": "La pantalla \"a5bf9e3e4c28\" ofrece \"Sesión\", que el recorrido grabado no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.",
+    "preconditions": [
+      "Acceso a https://srvqacgowb01.local.bsc.com:5000/login",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "description": "Navegar a https://srvqacgowb01.local.bsc.com:5000/login"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#username"
+        },
+        "description": "Presionar \"Usuario\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "css",
+          "value": "#username"
+        },
+        "value": "radames",
+        "description": "Ingresar \"radames\" en \"Usuario\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#password"
+        },
+        "description": "Presionar \"Contraseña\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "css",
+          "value": "#password"
+        },
+        "value": "",
+        "description": "Ingresar contrasena en \"Contraseña\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "aria-label",
+          "value": "Iniciar sesión"
+        },
+        "description": "Presionar \"Iniciar sesión\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Usuario\nContraseña\nRecordarme\nIniciar sesión"
+        },
+        "description": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Sesión"
+        },
+        "description": "Seleccionar \"Sesión\""
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Navegar a https://srvqacgowb01.local.bsc.com:5000/login",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"Usuario\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"radames\" en \"Usuario\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "Presionar \"Contraseña\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar contrasena en \"Contraseña\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "Presionar \"Iniciar sesión\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Seleccionar \"Sesión\"",
+        "expected": "Por confirmar: la grabación no recorrió esta opción"
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "usuario",
+        "label": "Usuario",
+        "stepIndex": 2,
+        "exampleValue": "radames",
+        "sensitive": false
+      },
+      {
+        "key": "contrasena",
+        "label": "Contraseña",
+        "stepIndex": 4,
+        "sensitive": true
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Usuario\"",
+        "strategy": "css",
+        "value": "#username"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Ingresar \"radames\" en \"Usuario\"",
+        "strategy": "css",
+        "value": "#username"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Contraseña\"",
+        "strategy": "css",
+        "value": "#password"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Ingresar contrasena en \"Contraseña\"",
+        "strategy": "css",
+        "value": "#password"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"Iniciar sesión\"",
+        "strategy": "aria-label",
+        "value": "Iniciar sesión"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\"",
+        "strategy": "text",
+        "value": "Usuario\nContraseña\nRecordarme\nIniciar sesión"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Seleccionar \"Sesión\"",
+        "strategy": "text",
+        "value": "Sesión"
+      }
+    ],
+    "sourceRecordingId": "db317fb9-9280-4104-b865-c0c7428cbb6d",
+    "hasUncertainSteps": true
+  },
+  {
+    "scenarioId": "REC-DB317FB9-01-ALT-4",
+    "title": "Desde 69bd2047dc83: Portal Comercial",
+    "description": "La pantalla \"69bd2047dc83\" ofrece \"Portal Comercial\", que el recorrido grabado no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.",
+    "preconditions": [
+      "Acceso a https://srvqacgowb01.local.bsc.com:5000/login",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "description": "Navegar a https://srvqacgowb01.local.bsc.com:5000/login"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#username"
+        },
+        "description": "Presionar \"Usuario\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "css",
+          "value": "#username"
+        },
+        "value": "radames",
+        "description": "Ingresar \"radames\" en \"Usuario\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#password"
+        },
+        "description": "Presionar \"Contraseña\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "css",
+          "value": "#password"
+        },
+        "value": "",
+        "description": "Ingresar contrasena en \"Contraseña\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "aria-label",
+          "value": "Iniciar sesión"
+        },
+        "description": "Presionar \"Iniciar sesión\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Usuario\nContraseña\nRecordarme\nIniciar sesión"
+        },
+        "description": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Solicitud multiproducto"
+        },
+        "description": "Presionar \"Solicitud multiproducto\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": " Portal Comercial "
+        },
+        "description": "Seleccionar \"Portal Comercial\""
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Navegar a https://srvqacgowb01.local.bsc.com:5000/login",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"Usuario\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"radames\" en \"Usuario\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "Presionar \"Contraseña\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar contrasena en \"Contraseña\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "Presionar \"Iniciar sesión\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Solicitud multiproducto\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Seleccionar \"Portal Comercial\"",
+        "expected": "Por confirmar: la grabación no recorrió esta opción"
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "usuario",
+        "label": "Usuario",
+        "stepIndex": 2,
+        "exampleValue": "radames",
+        "sensitive": false
+      },
+      {
+        "key": "contrasena",
+        "label": "Contraseña",
+        "stepIndex": 4,
+        "sensitive": true
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Usuario\"",
+        "strategy": "css",
+        "value": "#username"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Ingresar \"radames\" en \"Usuario\"",
+        "strategy": "css",
+        "value": "#username"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Contraseña\"",
+        "strategy": "css",
+        "value": "#password"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Ingresar contrasena en \"Contraseña\"",
+        "strategy": "css",
+        "value": "#password"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"Iniciar sesión\"",
+        "strategy": "aria-label",
+        "value": "Iniciar sesión"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\"",
+        "strategy": "text",
+        "value": "Usuario\nContraseña\nRecordarme\nIniciar sesión"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Presionar \"Solicitud multiproducto\"",
+        "strategy": "text",
+        "value": "Solicitud multiproducto",
+        "ambiguous": true
+      },
+      {
+        "stepIndex": 8,
+        "description": "Seleccionar \"Portal Comercial\"",
+        "strategy": "text",
+        "value": " Portal Comercial "
+      }
+    ],
+    "sourceRecordingId": "db317fb9-9280-4104-b865-c0c7428cbb6d",
+    "hasUncertainSteps": true
+  },
+  {
+    "scenarioId": "REC-DB317FB9-01-ALT-5",
+    "title": "Desde 69bd2047dc83: Configuración",
+    "description": "La pantalla \"69bd2047dc83\" ofrece \"Configuración\", que el recorrido grabado no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.",
+    "preconditions": [
+      "Acceso a https://srvqacgowb01.local.bsc.com:5000/login",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "description": "Navegar a https://srvqacgowb01.local.bsc.com:5000/login"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#username"
+        },
+        "description": "Presionar \"Usuario\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "css",
+          "value": "#username"
+        },
+        "value": "radames",
+        "description": "Ingresar \"radames\" en \"Usuario\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#password"
+        },
+        "description": "Presionar \"Contraseña\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "css",
+          "value": "#password"
+        },
+        "value": "",
+        "description": "Ingresar contrasena en \"Contraseña\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "aria-label",
+          "value": "Iniciar sesión"
+        },
+        "description": "Presionar \"Iniciar sesión\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Usuario\nContraseña\nRecordarme\nIniciar sesión"
+        },
+        "description": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Solicitud multiproducto"
+        },
+        "description": "Presionar \"Solicitud multiproducto\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Configuración"
+        },
+        "description": "Seleccionar \"Configuración\""
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Navegar a https://srvqacgowb01.local.bsc.com:5000/login",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"Usuario\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"radames\" en \"Usuario\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "Presionar \"Contraseña\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar contrasena en \"Contraseña\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "Presionar \"Iniciar sesión\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Solicitud multiproducto\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Seleccionar \"Configuración\"",
+        "expected": "Por confirmar: la grabación no recorrió esta opción"
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "usuario",
+        "label": "Usuario",
+        "stepIndex": 2,
+        "exampleValue": "radames",
+        "sensitive": false
+      },
+      {
+        "key": "contrasena",
+        "label": "Contraseña",
+        "stepIndex": 4,
+        "sensitive": true
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Usuario\"",
+        "strategy": "css",
+        "value": "#username"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Ingresar \"radames\" en \"Usuario\"",
+        "strategy": "css",
+        "value": "#username"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Contraseña\"",
+        "strategy": "css",
+        "value": "#password"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Ingresar contrasena en \"Contraseña\"",
+        "strategy": "css",
+        "value": "#password"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"Iniciar sesión\"",
+        "strategy": "aria-label",
+        "value": "Iniciar sesión"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\"",
+        "strategy": "text",
+        "value": "Usuario\nContraseña\nRecordarme\nIniciar sesión"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Presionar \"Solicitud multiproducto\"",
+        "strategy": "text",
+        "value": "Solicitud multiproducto",
+        "ambiguous": true
+      },
+      {
+        "stepIndex": 8,
+        "description": "Seleccionar \"Configuración\"",
+        "strategy": "text",
+        "value": "Configuración"
+      }
+    ],
+    "sourceRecordingId": "db317fb9-9280-4104-b865-c0c7428cbb6d",
+    "hasUncertainSteps": true
+  },
+  {
+    "scenarioId": "REC-DB317FB9-01-ALT-6",
+    "title": "Desde 69bd2047dc83: Sesión",
+    "description": "La pantalla \"69bd2047dc83\" ofrece \"Sesión\", que el recorrido grabado no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.",
+    "preconditions": [
+      "Acceso a https://srvqacgowb01.local.bsc.com:5000/login",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "description": "Navegar a https://srvqacgowb01.local.bsc.com:5000/login"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#username"
+        },
+        "description": "Presionar \"Usuario\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "css",
+          "value": "#username"
+        },
+        "value": "radames",
+        "description": "Ingresar \"radames\" en \"Usuario\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#password"
+        },
+        "description": "Presionar \"Contraseña\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "css",
+          "value": "#password"
+        },
+        "value": "",
+        "description": "Ingresar contrasena en \"Contraseña\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "aria-label",
+          "value": "Iniciar sesión"
+        },
+        "description": "Presionar \"Iniciar sesión\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Usuario\nContraseña\nRecordarme\nIniciar sesión"
+        },
+        "description": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Solicitud multiproducto"
+        },
+        "description": "Presionar \"Solicitud multiproducto\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Sesión"
+        },
+        "description": "Seleccionar \"Sesión\""
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Navegar a https://srvqacgowb01.local.bsc.com:5000/login",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"Usuario\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"radames\" en \"Usuario\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "Presionar \"Contraseña\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar contrasena en \"Contraseña\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "Presionar \"Iniciar sesión\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Solicitud multiproducto\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Seleccionar \"Sesión\"",
+        "expected": "Por confirmar: la grabación no recorrió esta opción"
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "usuario",
+        "label": "Usuario",
+        "stepIndex": 2,
+        "exampleValue": "radames",
+        "sensitive": false
+      },
+      {
+        "key": "contrasena",
+        "label": "Contraseña",
+        "stepIndex": 4,
+        "sensitive": true
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Usuario\"",
+        "strategy": "css",
+        "value": "#username"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Ingresar \"radames\" en \"Usuario\"",
+        "strategy": "css",
+        "value": "#username"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Contraseña\"",
+        "strategy": "css",
+        "value": "#password"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Ingresar contrasena en \"Contraseña\"",
+        "strategy": "css",
+        "value": "#password"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"Iniciar sesión\"",
+        "strategy": "aria-label",
+        "value": "Iniciar sesión"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\"",
+        "strategy": "text",
+        "value": "Usuario\nContraseña\nRecordarme\nIniciar sesión"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Presionar \"Solicitud multiproducto\"",
+        "strategy": "text",
+        "value": "Solicitud multiproducto",
+        "ambiguous": true
+      },
+      {
+        "stepIndex": 8,
+        "description": "Seleccionar \"Sesión\"",
+        "strategy": "text",
+        "value": "Sesión"
+      }
+    ],
+    "sourceRecordingId": "db317fb9-9280-4104-b865-c0c7428cbb6d",
+    "hasUncertainSteps": true
+  }
+]
