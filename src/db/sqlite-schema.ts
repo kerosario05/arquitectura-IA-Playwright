@@ -217,4 +217,42 @@ CREATE TABLE IF NOT EXISTS UserAuditLog (
 );
 
 CREATE INDEX IF NOT EXISTS IX_UserAuditLog_target ON UserAuditLog (targetUserId, createdAt);
+
+-- ---------------------------------------------------------------------------
+-- Jobs: execution runs survive a restart instead of dying with the process.
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS Jobs (
+  id               TEXT    PRIMARY KEY COLLATE NOCASE,
+  type             TEXT    NOT NULL,
+  status           TEXT    NOT NULL,
+  paramsJson       TEXT,
+  issueKey         TEXT,
+  checklistUrl     TEXT,
+  defectCount      INTEGER,
+  createdAt        TEXT    NOT NULL,
+  startedAt        TEXT,
+  completedAt      TEXT,
+  durationMs       INTEGER,
+  exitCode         INTEGER,
+  summaryJson      TEXT,
+  currentCase      TEXT,
+  currentCaseId    TEXT,
+  currentCaseTitle TEXT,
+  errorMessage     TEXT,
+  updatedAt        TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR})
+);
+
+CREATE INDEX IF NOT EXISTS IX_Jobs_createdAt ON Jobs (createdAt);
+
+-- One row per log line: append-only, batched by the store so a chatty run does
+-- not turn into thousands of individual writes.
+CREATE TABLE IF NOT EXISTS JobLogs (
+  id    INTEGER PRIMARY KEY AUTOINCREMENT,
+  jobId TEXT    NOT NULL COLLATE NOCASE REFERENCES Jobs(id) ON DELETE CASCADE,
+  seq   INTEGER NOT NULL,
+  line  TEXT    NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS IX_JobLogs_job ON JobLogs (jobId, seq);
 `;

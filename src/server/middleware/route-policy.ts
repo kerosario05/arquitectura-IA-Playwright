@@ -92,6 +92,8 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   R("DELETE", "/api/runs/:jobId", ["tests.launch"], "job"),
 
   // --- recordings --------------------------------------------------------
+  // Static capability probe: no project involved, any viewer may ask.
+  R("GET", "/api/recordings/capabilities", ["recordings.view"]),
   R("GET", "/api/recordings", ["recordings.view"], "required"),
   R("POST", "/api/recordings/start", ["recordings.create"], "required"),
   R("GET", "/api/recordings/:recordingId/scenarios", ["recordings.view"], "required"),

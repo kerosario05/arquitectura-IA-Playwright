@@ -17,6 +17,7 @@ import { usersRouter } from "./routes/users";
 import { rolesRouter, permissionsRouter } from "./routes/roles";
 import { recordingsRouter } from "./routes/recordings";
 import { sweepOrphanFrames } from "../recording/recording-store";
+import { jobStore } from "./jobs/job-store";
 import { resolveServerPort } from "./config";
 import { captureRawJsonBody, mobileUtf8JsonReconciler } from "./middleware/mobile-utf8-json";
 import { attachPrincipal, isPublicPath, requireFullScope } from "./middleware/auth";
@@ -100,6 +101,32 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
 // meant to feed one derivation pass.
 const sweptFrames = sweepOrphanFrames();
 if (sweptFrames > 0) console.log(`[server] limpieza: ${sweptFrames} carpetas de frames huérfanos eliminadas`);
+
+// Jobs live in SQLite, so a restart no longer loses the run list. Anything that
+// was still running belonged to the dead process and is closed out as failed.
+const JOB_RETENTION_DAYS = Number(process.env.JOB_RETENTION_DAYS ?? 30);
+jobStore
+  .hydrate({ retentionDays: Number.isFinite(JOB_RETENTION_DAYS) ? JOB_RETENTION_DAYS : 30 })
+  .then(({ restored, interrupted, pruned }) => {
+    console.log(
+      `[server] jobs      : ${restored} recuperados de SQLite` +
+        (interrupted > 0 ? `, ${interrupted} marcados como interrumpidos` : "") +
+        (pruned > 0 ? `, ${pruned} purgados por antigüedad` : ""),
+    );
+  })
+  .catch((err) => {
+    console.error(`[server] no se pudieron recuperar los jobs:`, err instanceof Error ? err.message : err);
+  });
+
+// Give the write-behind queue a chance to land before the process exits.
+for (const signal of ["SIGINT", "SIGTERM"] as const) {
+  process.once(signal, () => {
+    jobStore
+      .drain()
+      .catch(() => undefined)
+      .finally(() => process.exit(0));
+  });
+}
 
 const server = app.listen(PORT, HOST, () => {
   console.log(`\n[server] Automation Engine API → http://${HOST === "0.0.0.0" ? "localhost" : HOST}:${PORT}`);

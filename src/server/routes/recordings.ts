@@ -30,6 +30,8 @@ import {
 } from "../services/testrail-sync-types";
 import { toPublishableScenario } from "../../recording/scenario-to-testrail";
 import { startWebRecordingExecution } from "../jobs/web-recording-execution-runner";
+import { resolveRecordingAvailability } from "../../recording/recording-availability";
+import { limitFor } from "../jobs/job-queue";
 import type { RecordedScenario } from "../../recording/trace-to-scenario";
 
 export const recordingsRouter = Router();
@@ -54,7 +56,10 @@ function handle(res: any, err: unknown): void {
         ? 404
         : err.code === "RECORDING_ALREADY_ACTIVE"
           ? 409
-          : 400;
+          // The server is full, not the request wrong: 503 tells the client to retry later.
+          : err.code === "RECORDING_CAPACITY_REACHED" || err.code === "RECORDING_UNAVAILABLE"
+            ? 503
+            : 400;
     sendError(res, status, err.code, err.message);
     return;
   }
@@ -68,6 +73,22 @@ async function appSlugFor(projectSlug: string): Promise<string> {
   const target = await resolveRecordingTarget(projectSlug);
   return target.appSlug;
 }
+
+/**
+ * GET /api/recordings/capabilities
+ *
+ * Whether this engine can record at all. The UI asks first so it can hide the
+ * module on a server instead of offering a button that will always fail.
+ * Declared before "/:recordingId" so the literal path wins.
+ */
+recordingsRouter.get("/capabilities", (_req, res) => {
+  const availability = resolveRecordingAvailability();
+  res.json({
+    ok: true,
+    recording: availability,
+    maxConcurrent: limitFor("recording"),
+  });
+});
 
 // GET /api/recordings?projectSlug=slug — recordings already captured for a project.
 recordingsRouter.get("/", async (req, res) => {

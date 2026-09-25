@@ -14,6 +14,7 @@ import { startMobileRouteLearningJob, type MobileRouteLearningParams } from "../
 import { normalizeMobileLaunchExecutionParams, persistMobileExecutionManifest } from "../jobs/mobile-rerun-artifacts";
 import { findActiveRouteLearningJob, findDeviceBusyJob, findRecentRouteLearningJob, isFlowAlreadyLearned, planRouteLearningAutostart } from "../jobs/mobile-route-learning-autostart";
 import { loadMobileRouteProfile } from "../../mobile/mobile-route-profile";
+import { jobQueue } from "../jobs/job-queue";
 
 export const mobileRouter = Router();
 
@@ -141,7 +142,7 @@ mobileRouter.post("/emulator/start", (req, res) => {
     headless: body.headless
   });
   activeEmulatorBootJobId = job.id;
-  setImmediate(() => startMobileEmulatorBootJob(job.id));
+  jobQueue.schedule(job.id, "emulator", () => startMobileEmulatorBootJob(job.id));
 
   res.status(202).json(emulatorStartResponse({
     ok: true,
@@ -218,7 +219,7 @@ mobileRouter.post("/tests/run", (req, res) => {
   }
 
   const job = jobStore.create("mobile-test-run", body as unknown as Record<string, unknown>);
-  setImmediate(() => startMobileTestRunJob(job.id));
+  jobQueue.schedule(job.id, "execution", () => startMobileTestRunJob(job.id));
 
   res.status(202).json({
     ok: true,
@@ -258,7 +259,7 @@ mobileRouter.post("/route-learning", (req, res) => {
   }
 
   const job = jobStore.create("mobile-route-learning", body as unknown as Record<string, unknown>);
-  setImmediate(() => startMobileRouteLearningJob(job.id));
+  jobQueue.schedule(job.id, "execution", () => startMobileRouteLearningJob(job.id));
 
   res.status(202).json({
     ok: true,
@@ -514,7 +515,7 @@ mobileRouter.post("/runs/launch-execution", async (req, res, next) => {
     if (autostart.start && autostart.params) {
       const learningJob = jobStore.create("mobile-route-learning", autostart.params as unknown as Record<string, unknown>);
       routeLearningJobId = learningJob.id;
-      setImmediate(() => startMobileRouteLearningJob(learningJob.id));
+      jobQueue.schedule(learningJob.id, "execution", () => startMobileRouteLearningJob(learningJob.id));
       console.log(
         `[runs:launch] routeLearningAutostarted jobId=${learningJob.id} reason=${autostart.reason} preferLabels=${(autostart.params.preferLabels ?? []).join("|")}`,
       );
@@ -644,7 +645,7 @@ mobileRouter.post("/runs/execute", (req, res) => {
       `[mobile:rerun] failed to persist mobile execution manifest jobId=${job.id} error=${err instanceof Error ? err.message : String(err)}`,
     );
   }
-  setImmediate(() => startMobileLaunchExecutionJob(job.id));
+  jobQueue.schedule(job.id, "execution", () => startMobileLaunchExecutionJob(job.id));
 
   // Surface the HU story + its defect checklist so the front can link straight to it once the run
   // produces defects. Defects are keyed by this issueKey (derived from the scenarioIds). The mobile
