@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { filterByProjectAccess } from "../middleware/route-policy";
 import fs from "fs";
 import path from "path";
 import { jobStore } from "../jobs/job-store";
@@ -17,6 +18,7 @@ import { launchExecution, type LaunchScenario } from "../jobs/launch-orchestrato
 import { defectChecklistStore } from "../services/defect-checklist-store";
 import type { McpRouteProfile, McpScenario } from "../../scenarios/scenario-types";
 import type { DataContextEntry } from "../../data/data-context";
+import { jobQueue } from "../jobs/job-queue";
 
 export const runsRouter = Router();
 
@@ -408,7 +410,7 @@ runsRouter.post("/scenario-preview", (req, res) => {
   if (issueKey) {
     jobStore.update(job.id, { issueKey, checklistUrl } as any);
   }
-  setImmediate(() => startScenarioPreviewRun(job.id));
+  jobQueue.schedule(job.id, "execution", () => startScenarioPreviewRun(job.id));
 
   res.status(202).json({
     ok: true,
@@ -482,7 +484,7 @@ runsRouter.post("/discovery-batch", (req, res) => {
     defectCount,
     ...(issueKey ? { issueKey } : {}),
   });
-  setImmediate(() => startDiscoveryBatchRun(job.id));
+  jobQueue.schedule(job.id, "execution", () => startDiscoveryBatchRun(job.id));
 
   res.status(202).json({
     jobId: job.id,
@@ -518,13 +520,26 @@ runsRouter.post("/sprint", (req, res) => {
   }
 
   const job = jobStore.create("sprint", body as Record<string, unknown>);
-  setImmediate(() => startSprintRun(job.id));
+  jobQueue.schedule(job.id, "execution", () => startSprintRun(job.id));
 
   res.status(202).json({ jobId: job.id, status: job.status });
 });
 
-runsRouter.get("/", (_req, res) => {
-  res.json({ jobs: jobStore.list() });
+runsRouter.get("/", (req, res) => {
+  const jobs = filterByProjectAccess(req.principal, jobStore.list(), (job) => {
+    const params = (job.params ?? {}) as Record<string, unknown>;
+    const value = params.appSlug ?? params.projectSlug;
+    return typeof value === "string" ? value : null;
+  });
+  // `capacity` lets the UI explain a wait instead of showing a job that just sits there.
+  res.json({
+    jobs: jobs.map((job) =>
+      job.status === "queued"
+        ? { ...job, queuePosition: jobQueue.positionOf(job.id) || undefined }
+        : job,
+    ),
+    capacity: jobQueue.stats(),
+  });
 });
 
 runsRouter.get("/:jobId", (req, res) => {
@@ -898,9 +913,9 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
   jobStore.appendLog(newJob.id, `[runs:rerun] sourceJobType=${prepared.jobType}`);
 
   if (prepared.jobType === "mobile-launch-execution") {
-    setImmediate(() => startMobileLaunchExecutionJob(newJob.id));
+    jobQueue.schedule(newJob.id, "execution", () => startMobileLaunchExecutionJob(newJob.id));
   } else {
-    setImmediate(() => startScenarioPreviewRun(newJob.id));
+    jobQueue.schedule(newJob.id, "execution", () => startScenarioPreviewRun(newJob.id));
   }
 
   res.json({
@@ -974,6 +989,16 @@ runsRouter.delete("/:jobId", (req, res) => {
   const internal = jobStore.getInternal(req.params.jobId);
   if (!internal) {
     res.status(404).json({ error: "Job not found" });
+    return;
+  }
+
+  // A queued job has no process yet: dropping it from the queue is the cancel.
+  if (internal.status === "queued" && jobQueue.cancel(req.params.jobId)) {
+    jobStore.update(req.params.jobId, {
+      status: "cancelled",
+      completedAt: new Date().toISOString(),
+    });
+    res.json({ ok: true, jobId: req.params.jobId, wasQueued: true });
     return;
   }
 

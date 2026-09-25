@@ -12,16 +12,24 @@ import { checklistRouter } from "./routes/checklist";
 import { executionsRouter } from "./routes/executions";
 import { internalOtpRouter } from "./routes/internal-otp";
 import { projectsRouter } from "./routes/projects";
+import { authRouter } from "./routes/auth";
+import { usersRouter } from "./routes/users";
+import { rolesRouter, permissionsRouter } from "./routes/roles";
 import { recordingsRouter } from "./routes/recordings";
 import { sweepOrphanFrames } from "../recording/recording-store";
+import { jobStore } from "./jobs/job-store";
 import { resolveServerPort } from "./config";
 import { captureRawJsonBody, mobileUtf8JsonReconciler } from "./middleware/mobile-utf8-json";
 import { runtimeInputsRouter } from "./routes/runtime-inputs";
+import { attachPrincipal, isPublicPath, requireFullScope } from "./middleware/auth";
+import { enforceRoutePolicy } from "./middleware/route-policy";
+import { resolveAuthConfig } from "../auth/config";
 
 const PORT = resolveServerPort(process.env as Record<string, string | undefined>);
 const HOST = process.env.API_HOST || "0.0.0.0";
 const CORS_ORIGIN = process.env.API_CORS_ORIGIN || "*";
 const API_KEY = process.env.API_KEY || "";
+const AUTH_ENABLED = resolveAuthConfig().enabled;
 
 const app = express();
 const JSON_LIMIT = process.env.RECORDING_JSON_LIMIT ?? "2mb";
@@ -49,18 +57,32 @@ app.use((req, res, next) => {
   next();
 });
 
-if (API_KEY) {
-  app.use((req, res, next) => {
-    if (req.path === "/health") return next();
-    if (req.headers["x-api-key"] !== API_KEY) {
-      res.status(401).json({ error: "Unauthorized — missing or invalid X-Api-Key header" });
-      return;
-    }
-    next();
+// Identity pipeline. `attachPrincipal` resolves an X-Api-Key or a bearer session
+// into req.principal without rejecting; the gate below turns "no principal" into
+// a 401, and `requireFullScope` keeps a pending password change unskippable.
+app.use(attachPrincipal());
+app.use((req, res, next) => {
+  if (isPublicPath(req.path)) return next();
+  if (req.principal) return next();
+  if (API_KEY && !AUTH_ENABLED) {
+    res.status(401).json({ error: "Unauthorized — missing or invalid X-Api-Key header" });
+    return;
+  }
+  res.status(401).json({
+    ok: false,
+    error: "missing_token",
+    message: "Se requiere iniciar sesión",
   });
-}
+});
+app.use(requireFullScope());
+// Declarative per-route permissions and project scoping (see route-policy.ts).
+app.use(enforceRoutePolicy());
 
 app.use(healthRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/users", usersRouter);
+app.use("/api/roles", rolesRouter);
+app.use("/api/permissions", permissionsRouter);
 app.use("/api/jira", jiraRouter);
 app.use("/api/testrail", testrailRouter);
 app.use("/api/runs", runsRouter);
@@ -91,12 +113,60 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
 const sweptFrames = sweepOrphanFrames();
 if (sweptFrames > 0) console.log(`[server] limpieza: ${sweptFrames} carpetas de frames huérfanos eliminadas`);
 
+// Jobs live in SQLite, so a restart no longer loses the run list. Anything that
+// was still running belonged to the dead process and is closed out as failed.
+const JOB_RETENTION_DAYS = Number(process.env.JOB_RETENTION_DAYS ?? 30);
+jobStore
+  .hydrate({ retentionDays: Number.isFinite(JOB_RETENTION_DAYS) ? JOB_RETENTION_DAYS : 30 })
+  .then(({ restored, interrupted, pruned }) => {
+    console.log(
+      `[server] jobs      : ${restored} recuperados de SQLite` +
+        (interrupted > 0 ? `, ${interrupted} marcados como interrumpidos` : "") +
+        (pruned > 0 ? `, ${pruned} purgados por antigüedad` : ""),
+    );
+  })
+  .catch((err) => {
+    console.error(`[server] no se pudieron recuperar los jobs:`, err instanceof Error ? err.message : err);
+  });
+
+// Give the write-behind queue a chance to land before the process exits.
+for (const signal of ["SIGINT", "SIGTERM"] as const) {
+  process.once(signal, () => {
+    jobStore
+      .drain()
+      .catch(() => undefined)
+      .finally(() => process.exit(0));
+  });
+}
+
 const server = app.listen(PORT, HOST, () => {
   console.log(`\n[server] Automation Engine API → http://${HOST === "0.0.0.0" ? "localhost" : HOST}:${PORT}`);
   console.log(`[server] CORS origin : ${CORS_ORIGIN}`);
-  console.log(`[server] Auth        : ${API_KEY ? "API key enabled (X-Api-Key header)" : "disabled"}`);
+  console.log(`[server] Auth        : ${AUTH_ENABLED ? "sesiones de usuario (Bearer)" : "sesiones opcionales"}` +
+    `${API_KEY ? " + API key (X-Api-Key)" : ""}`);
   console.log(`\n[server] Endpoints disponibles:`);
   console.log(`  GET  /health`);
+  console.log(`  POST /api/auth/login          { username, password }`);
+  console.log(`  POST /api/auth/logout`);
+  console.log(`  GET  /api/auth/me`);
+  console.log(`  POST /api/auth/change-password { currentPassword, newPassword }`);
+  console.log(`  GET  /api/auth/permissions`);
+  console.log(`  GET  /api/permissions`);
+  console.log(`  GET  /api/users?enabled=&role=&q=`);
+  console.log(`  POST /api/users            { username, fullName, email?, password?, roles[], allProjects?, projects[] }`);
+  console.log(`  GET  /api/users/:id`);
+  console.log(`  PATCH /api/users/:id       { fullName?, email?, username?, enabled? }`);
+  console.log(`  DEL  /api/users/:id        (desactiva)`);
+  console.log(`  POST /api/users/:id/reset-password  { password? }`);
+  console.log(`  PUT  /api/users/:id/roles           { roles: [slug|id] }`);
+  console.log(`  PUT  /api/users/:id/projects        { allProjects?, projects[] }`);
+  console.log(`  GET  /api/users/:id/audit`);
+  console.log(`  GET  /api/roles`);
+  console.log(`  POST /api/roles            { slug, name, description?, permissions[] }`);
+  console.log(`  GET  /api/roles/:id`);
+  console.log(`  PATCH /api/roles/:id       { name?, description? }`);
+  console.log(`  PUT  /api/roles/:id/permissions  { permissions[] }`);
+  console.log(`  DEL  /api/roles/:id`);
   console.log(`  GET  /api/jira/projects`);
   console.log(`  GET  /api/jira/projects/:key/sprints`);
   console.log(`  GET  /api/jira/projects/:key/sprint/active`);

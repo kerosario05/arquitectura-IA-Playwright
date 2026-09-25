@@ -40,6 +40,9 @@ import { jobStore } from "../jobs/job-store";
 import { startScenarioPreviewRun, startReuseExistingPromotedSpecRun, type ReuseExistingPromotedSpecScenario } from "../jobs/scenario-preview-runner";
 import { resolveReplayAdmission } from "../services/replay-admission";
 import { resolveScenarioAutomationPlans, partitionScenariosForExecution, computeTestRailPublishCandidates, type ScenarioAutomationPlan, type TestRailCaseLookup, type TestRailDestination } from "../../automations/recording-automation-resolution";
+import { startWebRecordingExecution } from "../jobs/web-recording-execution-runner";
+import { resolveRecordingAvailability } from "../../recording/recording-availability";
+import { limitFor } from "../jobs/job-queue";
 
 export const recordingsRouter = Router();
 
@@ -63,7 +66,10 @@ function handle(res: any, err: unknown): void {
         ? 404
         : err.code === "RECORDING_ALREADY_ACTIVE"
           ? 409
-          : 400;
+          // The server is full, not the request wrong: 503 tells the client to retry later.
+          : err.code === "RECORDING_CAPACITY_REACHED" || err.code === "RECORDING_UNAVAILABLE"
+            ? 503
+            : 400;
     sendError(res, status, err.code, err.message);
     return;
   }
@@ -218,6 +224,21 @@ function readRecordingScenarios(appSlug: string, recordingId: string): RecordedS
     loadTrace(appSlug, recordingId),
   );
 }
+/**
+ * GET /api/recordings/capabilities
+ *
+ * Whether this engine can record at all. The UI asks first so it can hide the
+ * module on a server instead of offering a button that will always fail.
+ * Declared before "/:recordingId" so the literal path wins.
+ */
+recordingsRouter.get("/capabilities", (_req, res) => {
+  const availability = resolveRecordingAvailability();
+  res.json({
+    ok: true,
+    recording: availability,
+    maxConcurrent: limitFor("recording"),
+  });
+});
 
 // GET /api/recordings?projectSlug=slug — recordings already captured for a project.
 recordingsRouter.get("/", async (req, res) => {
@@ -760,6 +781,71 @@ recordingsRouter.post("/:recordingId/execute", async (req, res) => {
       unresolvedRequestedScenarioIds,
       executionMode: "shared_mcp_core",
     });
+  } catch (err) {
+    handle(res, err);
+  }
+});
+
+/**
+ * POST /api/recordings/:recordingId/execute — replays a web walkthrough in a real browser.
+ *
+ * Only for web recordings. An Android one is executed through the mobile launch chain, which
+ * owns the emulator and Appium; sending it here would find no `webSteps` and fail obscurely,
+ * so it is refused with the reason instead.
+ *
+ * Answers immediately with a job id: a replay opens a browser and walks the flow, which takes
+ * as long as the flow takes. The panel follows it on `GET /api/runs/:jobId`, the same way it
+ * follows every other operation.
+ */
+recordingsRouter.post("/:recordingId/execute", async (req, res) => {
+  try {
+    const body = req.body ?? {};
+    const projectSlug = String(body.projectSlug ?? "").trim();
+    if (!projectSlug) {
+      sendError(res, 400, "MISSING_PROJECT_SLUG", "projectSlug es obligatorio");
+      return;
+    }
+
+    const appSlug = await appSlugFor(projectSlug);
+    const trace = loadTrace(appSlug, req.params.recordingId);
+    if (!trace) {
+      sendError(res, 404, "RECORDING_NOT_FOUND", `No se encontró la grabación ${req.params.recordingId}`);
+      return;
+    }
+    if (trace.platform !== "web") {
+      sendError(
+        res,
+        400,
+        "NOT_A_WEB_RECORDING",
+        "Esta grabación es de Android: se ejecuta desde el lanzamiento móvil, no por esta ruta",
+      );
+      return;
+    }
+
+    const all = loadScenarios(appSlug, req.params.recordingId);
+    if (all.length === 0) {
+      sendError(res, 404, "NO_SCENARIOS", "La grabación no tiene escenarios generados");
+      return;
+    }
+    const requested: string[] | undefined = Array.isArray(body.scenarioIds)
+      ? body.scenarioIds.filter((s: unknown): s is string => typeof s === "string")
+      : undefined;
+    const selected = requested ? all.filter((s) => requested.includes(s.scenarioId)) : all;
+    if (selected.length === 0) {
+      sendError(res, 400, "NO_SCENARIOS_SELECTED", "Ninguno de los escenarios indicados existe en la grabación");
+      return;
+    }
+
+    const { jobId } = startWebRecordingExecution({
+      appSlug,
+      recordingId: req.params.recordingId,
+      scenarios: selected,
+      baseUrl: trace.baseUrl,
+      dataOverrides:
+        body.dataOverrides && typeof body.dataOverrides === "object" ? body.dataOverrides : undefined,
+    });
+
+    res.status(202).json({ ok: true, jobId, scenarioCount: selected.length });
   } catch (err) {
     handle(res, err);
   }

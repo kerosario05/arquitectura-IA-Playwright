@@ -1,11 +1,16 @@
 import { Router, Request, Response } from "express";
 import { buildExecutionSummary, listExecutionSummaries } from "../services/execution-summary.service";
+import { filterByProjectAccess } from "../middleware/route-policy";
 
 const router = Router();
 
 // GET /api/executions — list all finished executions (compact), newest first.
-router.get("/api/executions", (_req: Request, res: Response) => {
-  const executions = listExecutionSummaries();
+router.get("/api/executions", (req: Request, res: Response) => {
+  const executions = filterByProjectAccess(
+    req.principal,
+    listExecutionSummaries(),
+    (execution) => (execution as { appSlug?: string }).appSlug ?? null,
+  );
   return res.json({ ok: true, total: executions.length, executions });
 });
 

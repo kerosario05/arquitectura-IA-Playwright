@@ -1,0 +1,9 @@
+{
+  "id": "rec-3cb8ee27-01-registro",
+  "externalId": "REC-3CB8EE27-01",
+  "title": "Registro",
+  "source": "manual",
+  "appSlug": "default",
+  "appConfigPath": "automations\\apps\\default\\app.config.json",
+  "createdAt": "2026-09-10T15:31:00.853Z"
+}

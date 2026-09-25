@@ -92,3 +92,12 @@ docs/ai/.obsidian/
 data/*.db
 data/*.db-wal
 data/*.db-shm
+
+
+# ============================================
+# Deploy packages / DB backups (artefactos locales)
+# ============================================
+*.zip
+deploy/paquete/
+data/backups/
+deploy/env.servidor.txt
