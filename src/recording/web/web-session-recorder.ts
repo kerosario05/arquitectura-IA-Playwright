@@ -117,6 +117,12 @@ type RawInteraction = {
   technicalRoleName?: string;
   roleTechnicalIdentityEligible?: boolean;
   href?: string;
+  /**
+   * `window.location.href` captured SYNCHRONOUSLY in the browser at click time -- never confuse
+   * with `href` above (an anchor tag's href ATTRIBUTE). See CaptureAction.pageUrlAtClick for why
+   * `page.url()` read later, on the Node side, is not reliable once clicks arrive quickly.
+   */
+  pageUrlAtClick?: string;
   valueSource?: "user" | "application";
   beforeValue?: string;
   afterValue?: string;
@@ -1657,7 +1663,15 @@ export class WebSessionRecorder {
       console.log(describeFieldOwnerUnresolvedDetail(raw.fieldOwnerDiagnostic));
     }
     const technicalTargetCandidates = preserveCapturedTechnicalTargetLocators(raw.technicalTargetCandidates, locators);
-    const framePath = raw.kind === "observation" ? undefined : await this.captureFrame(raw.kind);
+    // FIRST_LOSS fix (recordingId=a65455ab-...): a per-interaction screenshot was awaited here on
+    // every single click/fill during RECORDING. framePath is never read by anything downstream
+    // (not the recording review panel, not evidencia.docx, not discovery/replay -- confirmed by
+    // grep, execution's own evidence screenshots are a completely separate path). Playwright
+    // serializes commands on one page/CDP connection, so a burst of clicks (e.g. a numeric keypad)
+    // queued behind each other's screenshot call, producing exactly the reported "captures much
+    // later, or not at all" lag/loss. Removed: recording no longer screenshots at all, only
+    // execution (a separate, unrelated code path) still does for evidence purposes.
+    const framePath: string | undefined = undefined;
 
     const commonTarget = {
       label: raw.label || raw.name || raw.text || "control",
@@ -1718,7 +1732,7 @@ export class WebSessionRecorder {
         kind: "note",
         screenKey: this.lastScreenKey,
         fingerprint: this.lastFingerprint,
-        url: this.page?.url(),
+        url: raw.pageUrlAtClick ?? this.page?.url(),
         target: commonTarget,
         note: `Observación técnica (${raw.observationType ?? "post_action"}) sobre "${commonTarget.label}"`,
         observationType: raw.observationType ?? "post_action",
@@ -1732,7 +1746,7 @@ export class WebSessionRecorder {
         kind: "fill",
         screenKey: this.lastScreenKey,
         fingerprint: this.lastFingerprint,
-        url: this.page?.url(),
+        url: raw.pageUrlAtClick ?? this.page?.url(),
         target: {
           ...commonTarget,
           label: raw.label || raw.name || "campo",
@@ -1761,7 +1775,7 @@ export class WebSessionRecorder {
         kind: "press",
         screenKey: this.lastScreenKey,
         fingerprint: this.lastFingerprint,
-        url: this.page?.url(),
+        url: raw.pageUrlAtClick ?? this.page?.url(),
         target: commonTarget,
         note: raw.key,
         framePath,
@@ -1775,7 +1789,7 @@ export class WebSessionRecorder {
       kind: "tap",
       screenKey: this.lastScreenKey,
       fingerprint: this.lastFingerprint,
-      url: this.page?.url(),
+      url: raw.pageUrlAtClick ?? this.page?.url(),
       target: commonTarget,
       framePath,
     });
@@ -1798,7 +1812,7 @@ export class WebSessionRecorder {
         screenKey: from,
         toScreenKey: screenKey,
         fingerprint: this.lastFingerprint,
-        url: this.page?.url(),
+        url: raw.pageUrlAtClick ?? this.page?.url(),
         framePath: await this.captureFrame("screen"),
       });
       this.log(`[recording] pantalla -> ${this.screens.get(screenKey)?.title ?? screenKey}`);

@@ -231,6 +231,17 @@ export type CaptureAction = {
   editingSession?: CaptureEditingSession;
   /** Only present when `actionType === "press"` -- the discrete command key (e.g. "Enter"). */
   key?: string;
+  /**
+   * FIRST_LOSS fix (recordingId=167d06f4-...): `window.location.href`, read SYNCHRONOUSLY in the
+   * SAME browser-side event handler that fired this action -- never `page.url()` read later on
+   * the Node side, which can run well after real navigation has already advanced (Node's own
+   * exposeBinding processing has an artificial per-click wait, so a burst of fast clicks queues
+   * up and every queued handler ends up reading the SAME, much-later "current" URL). This is the
+   * only accurate per-action route source once clicks arrive faster than that wait. Named
+   * `pageUrlAtClick`, never `href` -- `href` already means an anchor's href ATTRIBUTE elsewhere
+   * in this same pipeline (RawInteraction.href), a completely different thing.
+   */
+  pageUrlAtClick?: string;
 };
 
 /**

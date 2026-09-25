@@ -3224,6 +3224,12 @@ async function resolveActionTargetCore(
   // cannot be selected when the recorded control is absent or duplicated.
   const surfaceCompatibility = classifyRecordedSurfaceCompatibility(page.url(), opts.expectedRouteBefore, opts.learnedRouteAuthority);
   const expectedSurfaceMismatch = surfaceCompatibility.routeMismatch;
+  // DIAGNOSE-only instrumentation (recordingId=be64f9b7-...): pins down the exact expectedRouteBefore
+  // vs live page.url() pair a surface-mismatch verdict was computed from, since static recording JSON
+  // alone cannot show which interaction's expectedRouteBefore actually reached this call.
+  if (expectedSurfaceMismatch) {
+    console.log(`[recording-replay][surface-diagnostic] currentUrl=${page.url()} expectedRouteBefore=${opts.expectedRouteBefore ?? "undefined"} reasons=${JSON.stringify(surfaceCompatibility.reasons)}`);
+  }
   // DIAGNOSE-only instrumentation (jobId a368285a-e35d-4a01-9873-88bd49d97bc7): confirms, before
   // any resolution is attempted, whether `opts.associatedField` -- the only existing generic
   // owner-lineage channel on this call -- actually reaches this boundary for a transient

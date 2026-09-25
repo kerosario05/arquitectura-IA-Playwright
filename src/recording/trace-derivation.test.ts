@@ -243,9 +243,13 @@ describe("normalizeEvents", () => {
   });
 
   test("drops a digitizer double-report on the same control", () => {
+    // FIRST_LOSS fix (recordingId=9af73b45-...): a genuine deliberate repeated-digit press now
+    // measures 106-107ms apart physically -- a bounce fixture at 120ms is no longer distinguishable
+    // from real input and would cause the debounce to eat real digits again. 15ms represents a
+    // same-tick/same-frame duplicate DOM dispatch, the only case wall-clock time can safely catch.
     const out = normalizeEvents([
       ev({ kind: "tap", t: 1000, target: target("Ingresar") }),
-      ev({ kind: "tap", t: 1120, target: target("Ingresar") }),
+      ev({ kind: "tap", t: 1015, target: target("Ingresar") }),
     ]);
     assert.strictEqual(out.length, 1);
   });
@@ -253,7 +257,7 @@ describe("normalizeEvents", () => {
   test("keeps a deliberate second press outside the debounce window", () => {
     const out = normalizeEvents([
       ev({ kind: "tap", t: 1000, target: target("Ingresar") }),
-      ev({ kind: "tap", t: 3000, target: target("Ingresar") }),
+      ev({ kind: "tap", t: 1040, target: target("Ingresar") }),
     ]);
     assert.strictEqual(out.length, 2);
   });
@@ -303,7 +307,7 @@ describe("normalizeEvents", () => {
   test("renumbers the surviving events contiguously", () => {
     const out = normalizeEvents([
       ev({ kind: "tap", t: 1000, target: target("A") }),
-      ev({ kind: "tap", t: 1100, target: target("A") }),
+      ev({ kind: "tap", t: 1015, target: target("A") }),
       ev({ kind: "tap", t: 5000, target: target("B") }),
     ]);
     assert.deepStrictEqual(out.map((e) => e.seq), [0, 1]);

@@ -85,8 +85,10 @@ export type ShadowBrowserMessage =
        * programmatic `.click()`), never a timing heuristic.
        */
       syntheticProvenance?: boolean;
+      /** `window.location.href` at the exact moment of this click -- see CaptureAction.pageUrlAtClick. */
+      pageUrlAtClick?: string;
     }
-  | (ShadowDocumentEnvelope & { type: "pointer"; composedPath: ShadowOwnerCandidate[]; identity?: CaptureActionIdentity; sourceRefs?: CaptureSourceRefs; interactionId?: string; trusted?: boolean });
+  | (ShadowDocumentEnvelope & { type: "pointer"; composedPath: ShadowOwnerCandidate[]; identity?: CaptureActionIdentity; sourceRefs?: CaptureSourceRefs; interactionId?: string; trusted?: boolean; pageUrlAtClick?: string });
 
 export type ShadowDiagnostic = {
   seq: number;
@@ -413,6 +415,7 @@ export class CaptureEngineV2ShadowBridge {
         owner: resolution.owner,
         documentContext: documentHandleOf(message),
         sourceRefs: message.sourceRefs,
+        ...(message.pageUrlAtClick ? { pageUrlAtClick: message.pageUrlAtClick } : {}),
       },
     });
   }
@@ -654,6 +657,7 @@ export class CaptureEngineV2ShadowBridge {
           ...(scopedEvidence ? { technicalEvidence: scopedEvidence } : {}),
           ...(semanticRuntimeEvidence ? { semanticRuntimeEvidence } : {}),
           ...(playwrightRecorderEvidence ? { playwrightRecorderEvidence } : {}),
+          ...(message.pageUrlAtClick ? { pageUrlAtClick: message.pageUrlAtClick } : {}),
         });
       }
       return;
@@ -725,6 +729,7 @@ export class CaptureEngineV2ShadowBridge {
       ...(technicalEvidence ? { technicalEvidence } : {}),
       ...(semanticRuntimeEvidence ? { semanticRuntimeEvidence } : {}),
       ...(playwrightRecorderEvidence ? { playwrightRecorderEvidence } : {}),
+      ...(message.pageUrlAtClick ? { pageUrlAtClick: message.pageUrlAtClick } : {}),
     });
 
     const observation = this.selectionSessions.observeTechnicalClick({

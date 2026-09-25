@@ -18,7 +18,7 @@
   },
   "captureAuthority": "v2",
   "startedAt": "2026-09-22T20:32:27.953Z",
-  "status": "stopped",
+  "status": "derived",
   "events": [
     {
       "t": 1973,
@@ -53,7 +53,6 @@
       "kind": "launch",
       "screenKey": "fbf08c6ecee9",
       "url": "https://srvqacgowb01.local.bsc.com:5000/",
-      "framePath": ".artifacts\\tmp\\recordings\\12ab7abf-e1c7-476a-81c1-3dbdc775598f\\0004-launch.png",
       "seq": 4
     },
     {
@@ -87,7 +86,6 @@
       },
       "value": "radames",
       "valueSource": "user",
-      "framePath": ".artifacts\\tmp\\recordings\\12ab7abf-e1c7-476a-81c1-3dbdc775598f\\0005-input.png",
       "seq": 5
     },
     {
@@ -122,7 +120,6 @@
       },
       "redactedKey": "contrasena",
       "valueSource": "user",
-      "framePath": ".artifacts\\tmp\\recordings\\12ab7abf-e1c7-476a-81c1-3dbdc775598f\\0006-input.png",
       "seq": 6
     },
     {
@@ -154,7 +151,6 @@
         ]
       },
       "note": "Enter",
-      "framePath": ".artifacts\\tmp\\recordings\\12ab7abf-e1c7-476a-81c1-3dbdc775598f\\0007-press.png",
       "seq": 7
     },
     {
@@ -230,7 +226,6 @@
           }
         ]
       },
-      "framePath": ".artifacts\\tmp\\recordings\\12ab7abf-e1c7-476a-81c1-3dbdc775598f\\0009-click.png",
       "seq": 11
     },
     {
@@ -249,7 +244,6 @@
       },
       "value": "056-0154046-0",
       "valueSource": "user",
-      "framePath": ".artifacts\\tmp\\recordings\\12ab7abf-e1c7-476a-81c1-3dbdc775598f\\0012-input.png",
       "seq": 12
     },
     {
@@ -292,7 +286,6 @@
           }
         ]
       },
-      "framePath": ".artifacts\\tmp\\recordings\\12ab7abf-e1c7-476a-81c1-3dbdc775598f\\0013-click.png",
       "seq": 13
     },
     {
@@ -347,7 +340,6 @@
           }
         ]
       },
-      "framePath": ".artifacts\\tmp\\recordings\\12ab7abf-e1c7-476a-81c1-3dbdc775598f\\0014-click.png",
       "seq": 14
     },
     {
@@ -409,7 +401,6 @@
           }
         ]
       },
-      "framePath": ".artifacts\\tmp\\recordings\\12ab7abf-e1c7-476a-81c1-3dbdc775598f\\0016-click.png",
       "seq": 16
     },
     {
@@ -453,7 +444,6 @@
         ],
         "coveredByFunctionalSelection": true
       },
-      "framePath": ".artifacts\\tmp\\recordings\\12ab7abf-e1c7-476a-81c1-3dbdc775598f\\0017-click.png",
       "seq": 17
     },
     {
@@ -519,7 +509,6 @@
         ],
         "coveredByFunctionalSelection": true
       },
-      "framePath": ".artifacts\\tmp\\recordings\\12ab7abf-e1c7-476a-81c1-3dbdc775598f\\0018-click.png",
       "seq": 18
     },
     {
@@ -585,7 +574,6 @@
         ],
         "coveredByFunctionalSelection": true
       },
-      "framePath": ".artifacts\\tmp\\recordings\\12ab7abf-e1c7-476a-81c1-3dbdc775598f\\0020-click.png",
       "seq": 20
     },
     {
@@ -651,7 +639,6 @@
         ],
         "coveredByFunctionalSelection": true
       },
-      "framePath": ".artifacts\\tmp\\recordings\\12ab7abf-e1c7-476a-81c1-3dbdc775598f\\0021-click.png",
       "seq": 21
     },
     {
@@ -692,7 +679,6 @@
       },
       "value": "DOP 15,000.00",
       "valueSource": "user",
-      "framePath": ".artifacts\\tmp\\recordings\\12ab7abf-e1c7-476a-81c1-3dbdc775598f\\0023-input.png",
       "seq": 23
     },
     {
@@ -711,7 +697,6 @@
       },
       "value": "6 mes/es",
       "valueSource": "user",
-      "framePath": ".artifacts\\tmp\\recordings\\12ab7abf-e1c7-476a-81c1-3dbdc775598f\\0024-input.png",
       "seq": 24
     },
     {
@@ -766,7 +751,6 @@
           }
         ]
       },
-      "framePath": ".artifacts\\tmp\\recordings\\12ab7abf-e1c7-476a-81c1-3dbdc775598f\\0025-click.png",
       "seq": 25
     }
   ],
@@ -1489,5 +1473,6 @@
     }
   ],
   "endedAt": "2026-09-22T20:34:35.631Z",
-  "durationMs": 127678
+  "durationMs": 127678,
+  "narrative": "Recorrido grabado en aplicación web: portal-comercial\nEtiqueta del recorrido: Certificado de Deposito\n\nPantalla 1: inicio\n\nPantalla 2: fbf08c6ecee9\n  - El usuario ingresó \"radames\" en \"Usuario\"\n  - El usuario ingresó un valor sensible en \"Contraseña\" (contrasena)\n  - El usuario presionó \"Solicitud multiproducto\"\n  - El usuario ingresó \"056-0154046-0\" en \"control\"\n  - El usuario presionó \"control\"\n  - El usuario presionó \"Depurar\"\n  - El usuario presionó \"Continuar\"\n  - El usuario presionó \"control\"\n  - El usuario presionó \"Certificados de Deposito\"\n  - El usuario presionó \"Certificados de Deposito\"\n  - El usuario presionó \"control\"\n  - El usuario presionó \"300 - Depósito a plazo Financiero Personal Capitalizable DOP\"\n  - El usuario presionó \"300 - Depósito a plazo Financiero Personal Capitalizable DOP\"\n  - El usuario ingresó \"DOP 15,000.00\" en \"control\"\n  - El usuario ingresó \"6 mes/es\" en \"control\"\n  - El usuario presionó \"Aceptar\""
 }

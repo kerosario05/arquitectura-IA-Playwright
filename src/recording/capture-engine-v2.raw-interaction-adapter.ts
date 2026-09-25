@@ -46,6 +46,8 @@ export type RawInteractionLike = {
   currentTargetRef?: string;
   composedPathRefs?: string[];
   deepestEditableTargetRef?: string;
+  /** `window.location.href` captured synchronously at click time. See CaptureAction.pageUrlAtClick. */
+  pageUrlAtClick?: string;
 };
 
 const FUNCTIONAL_KIND_BY_ACTION_TYPE: Partial<Record<CaptureAction["actionType"], RawInteractionLike["kind"]>> = {
@@ -115,6 +117,7 @@ export function adaptCaptureActionToRawInteraction(action: CaptureAction): RawIn
     currentTargetRef: action.sourceRefs?.currentTargetRef,
     composedPathRefs: action.sourceRefs?.composedPathRefs,
     deepestEditableTargetRef: action.sourceRefs?.deepestEditableTargetRef,
+    pageUrlAtClick: action.pageUrlAtClick,
   };
 
   if (kind === "input") {

@@ -563,7 +563,21 @@ export function normalizeEvents(
   events: readonly RecordedEvent[],
   options: NormalizeOptions = {},
 ): RecordedEvent[] {
-  const debounce = options.tapDebounceMs ?? 400;
+  // FIRST_LOSS fix (recordingId=30aef9c3-..., then 9af73b45-...): 400ms was tuned against click
+  // events that mutate their own visible state, where an unchanged afterValue across two rapid
+  // taps is real evidence of a duplicate dispatch. A stateless emit-only control (a numeric
+  // keypad digit button) never has a state delta or an afterValue AT ALL, on any tap -- so those
+  // two guards below give zero discriminating power there, and a genuine fast repeated digit (the
+  // SAME button pressed twice in a row, e.g. "22" inside a typed ID) was silently collapsed to
+  // one, dropping real digits. First lowered to 150ms (dropped taps were then 217-230ms apart),
+  // but removing the per-interaction recording screenshot (a separate fix, same investigation)
+  // made the UI faster, and a fresh physical recording immediately produced genuine repeated-digit
+  // gaps of 106-107ms -- BELOW that threshold, reproducing the same data loss. Real human/digitizer
+  // gaps cannot be reliably told apart by wall-clock time alone once both land under ~150ms. 30ms
+  // stays only large enough to catch a genuine same-tick/same-frame duplicate DOM dispatch (the
+  // kind a debounce circuit or a double-registered handler produces), never a second deliberate
+  // press -- test coverage lowered to match (see trace-derivation.test.ts).
+  const debounce = options.tapDebounceMs ?? 30;
   const dropUnidentified = options.dropUnidentifiedTaps !== false;
 
   // Pass 1 — a screen_change that did not change the screen is a poller artifact.

@@ -416,9 +416,20 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
     return (clone.textContent || "").trim();
   }
 
+  // FIRST_LOSS fix (recordingId=59595c90-...): a dropdown-option click whose real element gets
+  // removed from the DOM as the dropdown closes can retarget the click event to <html>/<body> by
+  // the time this reads it -- ownVisibleText(html) then returns nearly the WHOLE page's text
+  // (confirmed: targetTag=html, normalizedName ending in the recorded page's actual option list
+  // "...DOPUSD"). <html>/<body> is never a real click target's own label; fail closed here rather
+  // than fabricate a giant wrong display value -- the SAME principle already applied to containers
+  // elsewhere in this file, never a full textContent dump of a container.
+  var DOCUMENT_ROOT_TAGS = ["html", "body"];
+
   function semanticDisplayValueOf(el) {
+    var tag = (el.tagName || "").toLowerCase();
+    if (DOCUMENT_ROOT_TAGS.indexOf(tag) !== -1) return { value: "", source: "visible_text" };
     var nativeRoleIdentity = classifyNativeRoleIdentity({
-      tag: (el.tagName || "").toLowerCase(),
+      tag: tag,
       explicitName: explicitAccessibleName(el),
       textContent: ownVisibleText(el),
       semanticFragments: semanticTextFragments(el),
@@ -471,10 +482,11 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
   // ALSO produce scope-bound evidence for the ORIGINAL target specifically -- see
   // scopeBoundOriginalTargetIdentity below.
   function toCandidate(el, depth, trustedInteraction, originalTarget) {
+    var candidateTag = (el.tagName || "").toLowerCase();
     var nativeRoleIdentity = classifyNativeRoleIdentity({
-      tag: (el.tagName || "").toLowerCase(),
+      tag: candidateTag,
       explicitName: explicitAccessibleName(el),
-      textContent: ownVisibleText(el),
+      textContent: DOCUMENT_ROOT_TAGS.indexOf(candidateTag) !== -1 ? "" : ownVisibleText(el),
       semanticFragments: semanticTextFragments(el),
       headingFragments: semanticHeadingFragments(el),
     });
@@ -995,7 +1007,7 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
     }
     var interactionId = pendingPointerInteractionId;
     pendingPointerInteractionId = null;
-    send({ type: "click", composedPath: buildComposedPath(event), interactionId: interactionId || undefined, syntheticProvenance: event.detail === 0 });
+    send({ type: "click", composedPath: buildComposedPath(event), interactionId: interactionId || undefined, syntheticProvenance: event.detail === 0, pageUrlAtClick: location.href });
   }, true);
 
   // Read-only lifecycle trace: pointer reception distinguishes a document that never receives
@@ -1005,7 +1017,7 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
     var interactionId = event.isTrusted === true ? "pointer-" + (++pointerInteractionCounter) : undefined;
     pendingPointerInteractionId = interactionId;
     send({ type: "capture_trace", stage: "pointer_observed", trusted: event.isTrusted === true, diagnostic: { interactionIdCreated: Boolean(interactionId), interactionIdPresent: Boolean(interactionId) } });
-    send({ type: "pointer", composedPath: buildComposedPath(event), interactionId: interactionId, trusted: event.isTrusted === true });
+    send({ type: "pointer", composedPath: buildComposedPath(event), interactionId: interactionId, trusted: event.isTrusted === true, pageUrlAtClick: location.href });
   }, true);
 
   send({ type: "capture_trace", stage: "instrumentation_revision", diagnostic: {

@@ -150,9 +150,18 @@ export function normalizeStructuralOwnerIdentity(input: StructuralOwnerIdentityI
     semanticShape,
     stableDirectAttributes,
     ...(landmarkAncestor ? { landmarkAncestor } : {}),
-    deterministicStructuralIdentity: typeof count === "number"
-      ? count === 1 && (hasStableEvidence || topologyTieBreakUnique)
-      : hasStableEvidence,
+    // FIRST_LOSS fix (recordingId=4c6d3a38-...): `count` already comes from a genuine same-tag
+    // scan across the WHOLE scope/page (capture-engine-v2.structural-evidence.ts), fingerprint-
+    // filtered by tag+stableAttributes+stableDescendants+semanticShape+landmark -- count===1 on
+    // its own IS a real, page-verified uniqueness fact, not a narrowed/tautological one. Requiring
+    // ALSO hasStableEvidence or topologyTieBreakUnique wrongly distrusted an owner with a durable
+    // page-wide-unique coarse shape but no id/data-testid/aria-label at all (a bare icon/category
+    // button) -- confirmed via two independent fresh recordings both losing this exact owner's
+    // structural authority to a fragile role+name-only fallback, which then intermittently failed
+    // to reach the recorded post-action surface. The runtime resolver (resolveRecordedStructuralOwner)
+    // still independently re-verifies live DOM uniqueness before ever clicking -- this flag only
+    // permits the ATTEMPT, it never itself certifies or clicks anything.
+    deterministicStructuralIdentity: typeof count === "number" ? count === 1 : hasStableEvidence,
     ...(topologyTieBreakUnique ? { topologyTieBreakUnique: true as const } : {}),
     ...(topologySignature ? { topologySignature } : {}),
     ...(typeof count === "number" ? { structuralIdentityMatchCount: count, ...(count > 1 ? { identityAmbiguous: true } : {}) } : {}),
