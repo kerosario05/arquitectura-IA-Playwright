@@ -18,7 +18,7 @@
   },
   "captureAuthority": "v2",
   "startedAt": "2026-09-25T13:17:40.051Z",
-  "status": "stopped",
+  "status": "derived",
   "events": [
     {
       "t": 4112,
@@ -39,7 +39,6 @@
       "kind": "launch",
       "screenKey": "943b3d6d7412",
       "url": "https://172.27.4.31/login",
-      "framePath": ".artifacts\\tmp\\recordings\\a92a5216-8e78-46d7-a2e9-0f1df8eac4b7\\0002-launch.png",
       "seq": 2
     },
     {
@@ -74,7 +73,6 @@
       },
       "value": "130598983",
       "valueSource": "user",
-      "framePath": ".artifacts\\tmp\\recordings\\a92a5216-8e78-46d7-a2e9-0f1df8eac4b7\\0003-input.png",
       "seq": 3
     },
     {
@@ -109,7 +107,6 @@
       },
       "value": "olivam",
       "valueSource": "user",
-      "framePath": ".artifacts\\tmp\\recordings\\a92a5216-8e78-46d7-a2e9-0f1df8eac4b7\\0004-input.png",
       "seq": 4
     },
     {
@@ -168,7 +165,6 @@
       },
       "redactedKey": "contrasena*",
       "valueSource": "user",
-      "framePath": ".artifacts\\tmp\\recordings\\a92a5216-8e78-46d7-a2e9-0f1df8eac4b7\\0006-input.png",
       "seq": 6
     },
     {
@@ -230,7 +226,6 @@
           "runtimeResolutionRequired": true
         }
       },
-      "framePath": ".artifacts\\tmp\\recordings\\a92a5216-8e78-46d7-a2e9-0f1df8eac4b7\\0007-click.png",
       "seq": 7
     },
     {
@@ -334,7 +329,6 @@
           "runtimeResolutionRequired": true
         }
       },
-      "framePath": ".artifacts\\tmp\\recordings\\a92a5216-8e78-46d7-a2e9-0f1df8eac4b7\\0010-click.png",
       "seq": 10
     },
     {
@@ -423,7 +417,6 @@
           }
         ]
       },
-      "framePath": ".artifacts\\tmp\\recordings\\a92a5216-8e78-46d7-a2e9-0f1df8eac4b7\\0012-click.png",
       "seq": 13
     },
     {
@@ -512,7 +505,6 @@
           }
         ]
       },
-      "framePath": ".artifacts\\tmp\\recordings\\a92a5216-8e78-46d7-a2e9-0f1df8eac4b7\\0015-click.png",
       "seq": 16
     },
     {
@@ -613,7 +605,6 @@
           "runtimeResolutionRequired": true
         }
       },
-      "framePath": ".artifacts\\tmp\\recordings\\a92a5216-8e78-46d7-a2e9-0f1df8eac4b7\\0018-click.png",
       "seq": 18
     },
     {
@@ -688,7 +679,6 @@
           "runtimeResolutionRequired": true
         }
       },
-      "framePath": ".artifacts\\tmp\\recordings\\a92a5216-8e78-46d7-a2e9-0f1df8eac4b7\\0020-click.png",
       "seq": 20
     }
   ],
@@ -1693,5 +1683,6 @@
     }
   ],
   "endedAt": "2026-09-25T13:24:46.466Z",
-  "durationMs": 426415
+  "durationMs": 426415,
+  "narrative": "Recorrido grabado en aplicación web: qa\nEtiqueta del recorrido: fresh capture physical verifier\n\nPantalla 1: inicio\n\nPantalla 2: 943b3d6d7412\n  - El usuario ingresó \"130598983\" en \"RNC de la empresa*\"\n  - El usuario ingresó \"olivam\" en \"Nombre de usuario*\"\n  - (Observación técnica (pointer) sobre \"Continuar\")\n  - El usuario ingresó un valor sensible en \"Contraseña*\" (contrasena*)\n  - El usuario presionó \"Continuar\"\n  - (Observación técnica (pointer) sobre \"Salir\")\n  - El usuario presionó \"Salir\"\n  - (Observación técnica (pointer) sobre \"Gestión de Nóminas\")\n  - El usuario presionó \"Gestión de Nóminas\"\n  - (Observación técnica (pointer) sobre \"Crear Manualmente\")\n  - El usuario presionó \"Crear Manualmente\"\n  - (Observación técnica (pointer) sobre \"Close\")\n  - El usuario presionó \"Close\"\n  - (Observación técnica (pointer) sobre \"Seleccionar fila\")\n  - (Toque sin locator utilizable sobre \"Seleccionar fila\")"
 }

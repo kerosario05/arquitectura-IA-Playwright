@@ -2444,7 +2444,243 @@
       ]
     }
   ],
-  "scenarioSuggestions": [],
+  "scenarioSuggestions": [
+    {
+      "suggestionId": "REC-A92A5216-01-MUT-field_omission",
+      "title": "Capture login and employee form flow through dop currency selection: comprobar la omisión de un dato",
+      "provenance": "DERIVED_VALIDATION",
+      "confidence": 0.95,
+      "needsReview": true,
+      "rationale": "Derivado de evidencia observada y separado del recorrido principal.",
+      "goalRelevanceScore": 0.55,
+      "goalRelevanceReasons": [
+        "shared_semantic_tokens:10",
+        "candidate_has_observed_data",
+        "shared_entity_without_operation_evidence"
+      ],
+      "sourceEventRefs": [
+        "event-1",
+        "event-2",
+        "event-3",
+        "event-4",
+        "event-5",
+        "event-6",
+        "event-7",
+        "event-8",
+        "event-9",
+        "event-10",
+        "event-11",
+        "event-12",
+        "event-13",
+        "event-14",
+        "event-15",
+        "event-16",
+        "event-17",
+        "event-18",
+        "event-19",
+        "event-20",
+        "event-21"
+      ],
+      "steps": [
+        "Abrir la aplicación configurada del proyecto",
+        "Ingresar [nombre_de_usuario] en \"Nombre de usuario*\"",
+        "Ingresar [contrasena] en \"Contraseña*\"",
+        "Presionar \"Continuar\"",
+        "Presionar \"Salir\"",
+        "Presionar \"Gestión de Nóminas\"",
+        "Presionar \"Crear Manualmente\"",
+        "Presionar \"Close\""
+      ],
+      "expectedResultCandidate": "",
+      "oracleAuthority": "review_required",
+      "dataRequirements": [
+        "rnc_de_la_empresa",
+        "nombre_de_usuario",
+        "contrasena"
+      ],
+      "technicalObservationRefs": [
+        "obs-4",
+        "obs-5",
+        "obs-6",
+        "obs-7",
+        "obs-8",
+        "obs-10",
+        "obs-11",
+        "obs-12",
+        "obs-14",
+        "obs-15",
+        "obs-17",
+        "obs-18",
+        "obs-19",
+        "obs-20",
+        "obs-21",
+        "screen-943b3d6d7412-control-1",
+        "screen-943b3d6d7412-control-2",
+        "screen-943b3d6d7412-control-3",
+        "screen-943b3d6d7412-control-4",
+        "screen-943b3d6d7412-control-5",
+        "screen-943b3d6d7412-control-6",
+        "screen-943b3d6d7412-control-7",
+        "screen-943b3d6d7412-control-8",
+        "screen-943b3d6d7412-control-9",
+        "screen-220acbf65cf8-control-1",
+        "screen-220acbf65cf8-control-2",
+        "screen-220acbf65cf8-control-3",
+        "screen-220acbf65cf8-control-4",
+        "screen-220acbf65cf8-control-5",
+        "screen-220acbf65cf8-control-6",
+        "screen-220acbf65cf8-control-7",
+        "screen-220acbf65cf8-control-8",
+        "screen-220acbf65cf8-control-9",
+        "screen-d2ea73d6014a-control-1",
+        "screen-d2ea73d6014a-control-2",
+        "screen-d2ea73d6014a-control-3",
+        "screen-d2ea73d6014a-control-4",
+        "screen-d2ea73d6014a-control-5",
+        "screen-d2ea73d6014a-control-6",
+        "screen-d2ea73d6014a-control-7",
+        "screen-7104389fcb16-control-1",
+        "screen-7104389fcb16-control-2",
+        "screen-7104389fcb16-control-3",
+        "screen-7104389fcb16-control-4",
+        "screen-7104389fcb16-control-5",
+        "screen-7104389fcb16-control-6",
+        "screen-54579a477d51-control-1",
+        "screen-54579a477d51-control-2",
+        "screen-54579a477d51-control-3",
+        "screen-54579a477d51-control-4",
+        "screen-54579a477d51-control-5",
+        "screen-54579a477d51-control-6",
+        "screen-54579a477d51-control-7",
+        "screen-54579a477d51-control-8",
+        "screen-54579a477d51-control-9",
+        "screen-54579a477d51-control-10",
+        "screen-54579a477d51-control-11",
+        "screen-54579a477d51-control-12",
+        "screen-54579a477d51-control-13",
+        "screen-ee556c152738-control-1",
+        "screen-ee556c152738-control-2",
+        "screen-ee556c152738-control-3",
+        "screen-ee556c152738-control-4",
+        "screen-ee556c152738-control-5",
+        "screen-ee556c152738-control-6",
+        "screen-ee556c152738-control-7",
+        "screen-ee556c152738-control-8",
+        "screen-ee556c152738-control-9",
+        "screen-ee556c152738-control-10",
+        "screen-ee556c152738-control-11",
+        "screen-ee556c152738-control-12"
+      ],
+      "scenarioSpecificSteps": [
+        "Abrir la aplicación configurada del proyecto",
+        "Ingresar [nombre_de_usuario] en \"Nombre de usuario*\"",
+        "Ingresar [contrasena] en \"Contraseña*\"",
+        "Presionar \"Continuar\"",
+        "Presionar \"Salir\"",
+        "Presionar \"Gestión de Nóminas\"",
+        "Presionar \"Crear Manualmente\"",
+        "Presionar \"Close\""
+      ],
+      "fullStepsAvailable": true,
+      "entityScopes": [],
+      "runtimeInputRequirements": [
+        {
+          "valueKey": "rnc_de_la_empresa",
+          "semanticField": "RNC de la empresa*",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "130598983",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 1,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "recorded_confirmed",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "nombre_de_usuario",
+          "semanticField": "Nombre de usuario*",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "olivam",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 2,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "olivam",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña*",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 3,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "readiness": {
+        "functionalReadiness": true,
+        "dataReadiness": false,
+        "technicalReadiness": true,
+        "oracleReadiness": false,
+        "reviewReadiness": false,
+        "publicationContentReadiness": true,
+        "executionReadiness": false,
+        "publicationReadiness": false,
+        "missingInputs": [
+          {
+            "valueKey": "contrasena",
+            "semanticField": "Contraseña*",
+            "valueRole": "secure_input",
+            "required": true,
+            "value": null,
+            "source": "unresolved",
+            "resolved": false,
+            "sensitive": true,
+            "stepIndex": 3,
+            "readOnly": false,
+            "computed": false,
+            "systemGenerated": false,
+            "masked": true,
+            "editable": true,
+            "authority": "unresolved",
+            "authorityValue": null,
+            "datasetAuthorityMismatch": false
+          }
+        ],
+        "datasetAuthorityMismatches": [],
+        "dataReadinessReasons": [
+          "missing_runtime_input:contrasena",
+          "RUNTIME_DATA_REQUIRED"
+        ]
+      },
+      "mutationType": "FIELD_OMISSION"
+    }
+  ],
   "canonicalInteractions": [
     {
       "id": "interaction-1",
@@ -2922,5 +3158,157 @@
       }
     ]
   },
-  "source": "SessionTrace"
+  "source": "SessionTrace",
+  "mutationOpportunities": [
+    {
+      "opportunityId": "REC-A92A5216-01:field_omission",
+      "title": "Capture login and employee form flow through dop currency selection: comprobar la omisión de un dato",
+      "mutationType": "FIELD_OMISSION",
+      "basePrimaryScenarioId": "REC-A92A5216-01",
+      "operations": [
+        {
+          "type": "remove_action",
+          "interactionId": "interaction-4"
+        }
+      ],
+      "evidenceRefs": [
+        "event-1",
+        "event-2",
+        "event-3",
+        "event-4",
+        "event-5",
+        "event-6",
+        "event-7",
+        "event-8",
+        "event-9",
+        "event-10",
+        "event-11",
+        "event-12",
+        "event-13",
+        "event-14",
+        "event-15",
+        "event-16",
+        "event-17",
+        "event-18",
+        "event-19",
+        "event-20",
+        "event-21"
+      ],
+      "rationale": "Existen varios inputs observados; se propone una omisión agrupada sin inventar el resultado.",
+      "oracleAuthority": "MISSING",
+      "confidence": 0.5,
+      "needsReview": true
+    }
+  ],
+  "suggestionDiagnostics": {
+    "opportunitiesDetected": 1,
+    "candidatesGenerated": 4,
+    "acceptedForDisplay": 1,
+    "rejectedBecause": [
+      "goal_relevance_gate"
+    ]
+  },
+  "derivation": {
+    "version": 1,
+    "generatedAt": "2026-09-25T13:25:38.688Z",
+    "executed": true,
+    "primaryCount": 1,
+    "suggestionCount": 1,
+    "opportunitiesDetected": 1,
+    "candidatesGenerated": 4,
+    "rejectedBecause": [
+      "goal_relevance_gate"
+    ]
+  },
+  "primaryScenario": {
+    "scenarioId": "REC-A92A5216-01",
+    "title": "Capture login and employee form flow through DOP currency selection",
+    "provenance": "OBSERVED",
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7",
+      "event-8",
+      "event-9",
+      "event-10",
+      "event-11",
+      "event-12",
+      "event-13",
+      "event-14",
+      "event-15",
+      "event-16",
+      "event-17",
+      "event-18",
+      "event-19",
+      "event-20",
+      "event-21"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "needsReview": false
+  },
+  "aiGeneration": {
+    "providerSuccess": true,
+    "schemaValidation": true,
+    "fallbackUsed": false,
+    "provider": "codex_cli",
+    "model": "gpt-5.6-luna",
+    "inputTokens": 63862,
+    "cachedTokens": 39424,
+    "nonCachedTokens": 24438,
+    "outputTokens": 1076,
+    "totalTokens": 64938,
+    "contextBeforeChars": 25486,
+    "contextAfterChars": 6831,
+    "candidates": [],
+    "providerRejected": [
+      {
+        "reason": "No se propone una variante de campo obligatorio vacío o con formato inválido porque el recorrido solo evidencia el ingreso de valores válidos en los campos de acceso y no declara restricciones de validación.",
+        "sourceEvidenceRefs": [
+          "event-4",
+          "event-5",
+          "event-7",
+          "event-8"
+        ]
+      },
+      {
+        "reason": "No se propone una variante de código de validación porque el recorrido no usa ni evidencia ningún OTP.",
+        "sourceEvidenceRefs": [
+          "event-8"
+        ]
+      },
+      {
+        "reason": "No se propone una variante de cancelar o volver a mitad del flujo porque solo se evidencia la acción Salir después de continuar y no se documenta una salida alternativa durante el proceso.",
+        "sourceEvidenceRefs": [
+          "event-8",
+          "event-11"
+        ]
+      },
+      {
+        "reason": "No se propone una variante de reintentos o bloqueo porque el recorrido no evidencia un control de reintento ni intentos fallidos.",
+        "sourceEvidenceRefs": [
+          "event-8"
+        ]
+      },
+      {
+        "reason": "No se propone una variante de sesión expirada o interrumpida porque el recorrido no evidencia expiración, interrupción ni un control relacionado.",
+        "sourceEvidenceRefs": [
+          "event-8",
+          "event-14",
+          "event-17"
+        ]
+      },
+      {
+        "reason": "No se propone una variante sobre un control deshabilitado porque no se observa ningún control deshabilitado en la evidencia del recorrido.",
+        "sourceEvidenceRefs": [
+          "event-17",
+          "event-19"
+        ]
+      }
+    ]
+  }
 }
