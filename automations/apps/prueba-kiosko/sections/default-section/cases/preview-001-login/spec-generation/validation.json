@@ -10,7 +10,7 @@
   },
   "invocations": 0,
   "invocationsConsumed": 0,
-  "durationMs": 151793,
+  "durationMs": 80648,
   "usage": {
     "inputTokens": null,
     "cachedInputTokens": null,
@@ -29,31 +29,24 @@
     "typescript": "passed",
     "playwrightDiscovery": "passed",
     "semanticCoverage": "passed",
-    "functionalExecution": "failed"
+    "functionalExecution": "passed"
   },
-  "promotionAllowed": false,
+  "promotionAllowed": true,
   "specsRequested": 1,
-  "specsValidated": 0,
-  "specsRejected": 1,
+  "specsValidated": 1,
+  "specsRejected": 0,
   "specGenerationAttempts": 0,
   "specRepairAttempts": 0,
-  "firstPassPromotion": false,
-  "failedGatesAttempt1": [
-    "functionalExecution"
-  ],
+  "firstPassPromotion": true,
+  "failedGatesAttempt1": [],
   "regressedGates": [],
   "missingRequirements": [],
   "oracleTypes": [
     "navigation_transition"
   ],
-  "errors": [
-    "functional_execution_failed:exitCode=1",
-    "functional_execution_error:Error: Promoted click failed at step 18 target=\"role:button|Generar Turno\". failureClass=ACTION_FAILED exactRuntimeError=\"Retry failed: locator.click: Target page, context or browser has been closed\" currentUrl=https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica clickPath=pom_callback nativeClickAttempted=true nativeClickSucceeded=false callbackAttempted=true callbackSucceeded=false retryAttempted=true diagnostics={\"currentUrl\":\"https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica\",\"actionIntent\":\"click\",\"target\":\"role:button|Generar Turno\",\"stepIndex\":18,\"timeoutMs\":15000,\"stability\":{\"currentUrl\":\"(page closed)\",\"title\":\"\",\"visibleHeadings\":[],\"visibleButtons\":[],\"visibleTexts\":[],\"loadingDetected\":false,\"skeletonDetected\":false,\"listReadiness\":{\"cardsVisible\":0,\"listItemsVisible\":0,\"loadingDetected\":false,\"zeroProductsDetected\":false,\"hasEntityContainers\":false,\"visibleHeadings\":[],\"visibleButtons\":[],\"ready\":false},\"diagnosticStatus\":\"completed\",\"pageClosed\":true,\"pageClosedReason\":\"context_closed_during_diagnostics\"},\"retryAttempted\":true,\"clickPath\":\"pom_callback\",\"nativeClickAttempted\":true,\"nativeClickSucceeded\":false,\"callbackAttempted\":true,\"callbackSucceeded\":false,\"callbackError\":\"Retry failed: locator.click: Target page, context or browser has been closed\",\"expectedEffect\":\"ui_change\",\"effectDetected\":false,\"fallbackUsed\":\"callback\",\"matchedLocatorStrategy\":\"callback\",\"screenshotPath\":\"[REDACTED]\"}"
-  ],
+  "errors": [],
   "warnings": [
-    "step_index_not_explicit_in_spec:19",
-    "functional_execution_screenshots=14",
-    "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 18)."
+    "step_index_not_explicit_in_spec:19"
   ],
   "finalSpec": {
     "origin": "deterministic_compiler",
@@ -62,8 +55,8 @@
     "fallback": null
   },
   "runtimeGate": {
-    "decision": "block",
-    "promotionStatus": "blocked",
-    "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 18)."
+    "decision": "promote",
+    "promotionStatus": "promoted",
+    "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
   }
 }

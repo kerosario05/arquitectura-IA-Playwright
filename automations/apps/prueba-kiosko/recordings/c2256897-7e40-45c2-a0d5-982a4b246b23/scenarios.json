@@ -1670,6 +1670,14 @@
       "resolvedValues": {},
       "missingValues": []
     },
-    "mutationOpportunities": []
+    "mutationOpportunities": [],
+    "promotedSpec": {
+      "appSlug": "prueba-kiosko",
+      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\prueba-kiosko\\sections\\default-section\\cases\\preview-001-login\\case.spec.ts",
+      "specHash": "3c1d7fbbc852fcb1de47097d140b9b83cb4c496ef7259ad880f63f5b6c91dc9d",
+      "automationId": "preview-001-login",
+      "sectionSlug": "default-section",
+      "generatedAt": "2026-09-25T12:56:45.334Z"
+    }
   }
 ]

@@ -400,11 +400,27 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
   // Never a hardcode -- the value is read from the live DOM at capture time, exactly once, and
   // is compared against the SAME live DOM at runtime. Never becomes a certified owner or a
   // technicalTarget; consumed only by SemanticRuntimeEvidence transport.
+  // FIRST_LOSS fix (recordingId=175c4bd6-...): plain el.textContent concatenates the raw text of
+  // ANY descendant, including <style>/<script> -- a click near a component that injects an inline
+  // <style> tag into the same subtree (e.g. a toaster library) produced a "display text" that was
+  // actually hundreds of characters of CSS. Never a hardcode: strips only non-visual tag kinds,
+  // still reads the live DOM at capture time.
+  function ownVisibleText(el) {
+    if (!el.textContent) return "";
+    if (!el.querySelectorAll) return el.textContent.trim();
+    var nonVisual = el.querySelectorAll("style,script");
+    if (nonVisual.length === 0) return el.textContent.trim();
+    var clone = el.cloneNode(true);
+    var toStrip = clone.querySelectorAll ? clone.querySelectorAll("style,script") : [];
+    for (var i = 0; i < toStrip.length; i++) toStrip[i].remove();
+    return (clone.textContent || "").trim();
+  }
+
   function semanticDisplayValueOf(el) {
     var nativeRoleIdentity = classifyNativeRoleIdentity({
       tag: (el.tagName || "").toLowerCase(),
       explicitName: explicitAccessibleName(el),
-      textContent: el.textContent || "",
+      textContent: ownVisibleText(el),
       semanticFragments: semanticTextFragments(el),
       headingFragments: semanticHeadingFragments(el),
     });
@@ -412,7 +428,7 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
     if (strong) return { value: strong, source: "accessible_name" };
     var weak = computeWeakAccessibleName(el);
     if (weak) return { value: weak, source: "accessible_name" };
-    var ownText = el.textContent ? el.textContent.trim() : "";
+    var ownText = ownVisibleText(el);
     return { value: ownText, source: "visible_text" };
   }
 
@@ -458,7 +474,7 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
     var nativeRoleIdentity = classifyNativeRoleIdentity({
       tag: (el.tagName || "").toLowerCase(),
       explicitName: explicitAccessibleName(el),
-      textContent: el.textContent || "",
+      textContent: ownVisibleText(el),
       semanticFragments: semanticTextFragments(el),
       headingFragments: semanticHeadingFragments(el),
     });

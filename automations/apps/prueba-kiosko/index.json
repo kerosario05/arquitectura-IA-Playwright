@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-09-25T12:51:37.410Z",
+  "updatedAt": "2026-09-25T12:56:17.537Z",
   "automations": [
     {
       "id": "preview-001-prueba",
@@ -135,17 +135,17 @@
       "specPath": "automations\\apps\\prueba-kiosko\\sections\\default-section\\cases\\preview-001-login\\case.spec.ts",
       "appSlug": "prueba-kiosko",
       "appConfigPath": "automations\\apps\\prueba-kiosko\\app.config.json",
-      "status": "spec_failed",
+      "status": "active",
       "source": "discovery",
       "appProfile": "prueba-kiosko",
       "createdAt": "2026-09-25T01:49:19.475Z",
-      "updatedAt": "2026-09-25T12:51:37.410Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-25T12-48-20-471Z\\discovered-plans.pending.json",
-      "pomStatus": "needs_manual_review",
+      "updatedAt": "2026-09-25T12:56:17.537Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-25T12-54-13-540Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
       "inlineDebugMode": false,
-      "specVerificationStatus": "failed",
+      "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-25T12-48-20-471Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-25T12-54-13-540Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -169,7 +169,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 151793,
+          "durationMs": 80648,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -188,31 +188,24 @@
             "typescript": "passed",
             "playwrightDiscovery": "passed",
             "semanticCoverage": "passed",
-            "functionalExecution": "failed"
+            "functionalExecution": "passed"
           },
-          "promotionAllowed": false,
+          "promotionAllowed": true,
           "specsRequested": 1,
-          "specsValidated": 0,
-          "specsRejected": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
           "specGenerationAttempts": 0,
           "specRepairAttempts": 0,
-          "firstPassPromotion": false,
-          "failedGatesAttempt1": [
-            "functionalExecution"
-          ],
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
           "regressedGates": [],
           "missingRequirements": [],
           "oracleTypes": [
             "navigation_transition"
           ],
-          "errors": [
-            "functional_execution_failed:exitCode=1",
-            "functional_execution_error:Error: Promoted click failed at step 18 target=\"role:button|Generar Turno\". failureClass=ACTION_FAILED exactRuntimeError=\"Retry failed: locator.click: Target page, context or browser has been closed\" currentUrl=https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica clickPath=pom_callback nativeClickAttempted=true nativeClickSucceeded=false callbackAttempted=true callbackSucceeded=false retryAttempted=true diagnostics={\"currentUrl\":\"https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica\",\"actionIntent\":\"click\",\"target\":\"role:button|Generar Turno\",\"stepIndex\":18,\"timeoutMs\":15000,\"stability\":{\"currentUrl\":\"(page closed)\",\"title\":\"\",\"visibleHeadings\":[],\"visibleButtons\":[],\"visibleTexts\":[],\"loadingDetected\":false,\"skeletonDetected\":false,\"listReadiness\":{\"cardsVisible\":0,\"listItemsVisible\":0,\"loadingDetected\":false,\"zeroProductsDetected\":false,\"hasEntityContainers\":false,\"visibleHeadings\":[],\"visibleButtons\":[],\"ready\":false},\"diagnosticStatus\":\"completed\",\"pageClosed\":true,\"pageClosedReason\":\"context_closed_during_diagnostics\"},\"retryAttempted\":true,\"clickPath\":\"pom_callback\",\"nativeClickAttempted\":true,\"nativeClickSucceeded\":false,\"callbackAttempted\":true,\"callbackSucceeded\":false,\"callbackError\":\"Retry failed: locator.click: Target page, context or browser has been closed\",\"expectedEffect\":\"ui_change\",\"effectDetected\":false,\"fallbackUsed\":\"callback\",\"matchedLocatorStrategy\":\"callback\",\"screenshotPath\":\"C:\\\\MisProyectos\\\\arquitectura-IA-Playwright-feature-auth-gate\\\\.artifacts\\\\promoted-runtime\\\\step-018.png\"}"
-          ],
+          "errors": [],
           "warnings": [
-            "step_index_not_explicit_in_spec:19",
-            "functional_execution_screenshots=14",
-            "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 18)."
+            "step_index_not_explicit_in_spec:19"
           ],
           "finalSpec": {
             "origin": "deterministic_compiler",
@@ -221,11 +214,11 @@
             "fallback": null
           },
           "runtimeGate": {
-            "decision": "block",
-            "promotionStatus": "blocked",
-            "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 18)."
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
           },
-          "specWritten": false,
+          "specWritten": true,
           "previousSpec": {
             "existed": false,
             "hash": null,
@@ -236,10 +229,8 @@
           "requestedStrategy": "auto",
           "autoPomEnabled": true,
           "selectedStrategy": "pom",
-          "reason": "spec_generation_validation_failed",
-          "blockers": [
-            "spec_generation_validation_failed"
-          ],
+          "reason": "promoted",
+          "blockers": [],
           "availablePageObjects": [
             "ProductListPage",
             "OperationsMenuPage"
@@ -252,12 +243,15 @@
           "requirePomRuntime": false,
           "specPath": "automations\\apps\\prueba-kiosko\\sections\\default-section\\cases\\preview-001-login\\case.spec.ts",
           "specHash": "3c1d7fbbc852fcb1de47097d140b9b83cb4c496ef7259ad880f63f5b6c91dc9d",
-          "specSource": "ai_candidate"
+          "specSource": "generatedSpec"
         },
         "overwritten": true,
         "previousAutomationPath": "automations\\apps\\prueba-kiosko\\sections\\default-section\\cases\\preview-001-login\\plan.json",
         "previousStatus": "spec_failed"
-      }
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\prueba-kiosko\\sections\\default-section\\cases\\preview-001-login\\case.spec.ts",
+      "promotedSpecHash": "3c1d7fbbc852fcb1de47097d140b9b83cb4c496ef7259ad880f63f5b6c91dc9d"
     },
     {
       "id": "0-login",
