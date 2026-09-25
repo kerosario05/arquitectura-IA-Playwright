@@ -67,10 +67,15 @@ export class CopilotCliProvider {
     return result;
   }
 
-  private buildCopilotPromptContent(systemMessage: string, userMessage: string): string {
+  private buildCopilotPromptContent(
+    systemMessage: string,
+    userMessage: string,
+    jsonSchema?: AiCompletionRequest["jsonSchema"],
+  ): string {
     const parts: string[] = [];
     if (systemMessage) parts.push("SYSTEM:\n" + systemMessage);
     if (userMessage) parts.push("USER:\n" + userMessage);
+    if (jsonSchema) parts.push(`STRUCTURED OUTPUT SCHEMA (${jsonSchema.name}):\n${JSON.stringify(jsonSchema.schema, null, 2)}`);
     parts.push("OUTPUT: Respond with ONLY valid JSON. No explanations, no markdown fences.");
     return parts.join("\n\n");
   }
@@ -137,7 +142,7 @@ export class CopilotCliProvider {
       const systemMessage = request.messages.find(m => m.role === "system")?.content ?? "";
       const userMessage = request.messages.find(m => m.role === "user")?.content ?? "";
 
-      const fullPrompt = this.buildCopilotPromptContent(systemMessage, userMessage);
+      const fullPrompt = this.buildCopilotPromptContent(systemMessage, userMessage, request.jsonSchema);
 
       // Write full prompt to file to handle long prompts in Windows
       await fs.writeFile(promptPath, fullPrompt, "utf-8");

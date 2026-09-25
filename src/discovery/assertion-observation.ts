@@ -23,6 +23,8 @@ export type ObservationControlState = {
   disabled: boolean;
   required: boolean;
   focused: boolean;
+  /** Redacted value identity used only to detect same-control mutations; never the value itself. */
+  valueFingerprint?: string;
   validity?: { valid: boolean; valueMissing: boolean; typeMismatch: boolean; patternMismatch: boolean };
   validationMessagePresent?: boolean;
   patternPresent?: boolean;
@@ -48,7 +50,36 @@ export type AssertionObservationSnapshot = {
   validationNodes: Array<{ identity: string; role?: string; ariaLive?: string; id?: string }>;
   forms: Array<{ identity: string; valid: boolean }>;
   requiredControls?: { total: number; invalid: number; empty: number };
+  /**
+   * DIAGNOSTIC ONLY (redacted, never a value). A structured fingerprint of elements that can carry
+   * functional state through a channel the `controls` selector does not cover (ARIA value/state,
+   * contenteditable, a data display attribute). Captured so a physical run can NAME the exact node
+   * kind and property that changed WITHOUT ever serializing the value. It never participates in
+   * `diffAssertionObservation` nor in the snapshot `fingerprint`, so it cannot change completion
+   * behavior.
+   */
+  stateCandidates?: ObservationStateCandidate[];
   fingerprint: string;
+};
+
+export type ObservationStateCandidate = {
+  tag: string;
+  role?: string;
+  inputType?: string;
+  contentEditable: boolean;
+  /** Stable redacted structural identity used to pair the same node across before/after snapshots. */
+  identity?: string;
+  propertyFingerprints: Record<string, string>;
+};
+
+export type StateCandidateMutation = {
+  tag: string;
+  role?: string;
+  inputType?: string;
+  contentEditable: boolean;
+  changedProperties: string[];
+  fingerprintBefore: string;
+  fingerprintAfter: string;
 };
 
 export type AssertionObservationDiff = {
@@ -58,6 +89,15 @@ export type AssertionObservationDiff = {
   accessibilityMutation: boolean;
   navigationMutation: boolean;
   formStateChanged: boolean;
+  /**
+   * Causal structured-state mutation: exactly ONE state candidate that existed before the action
+   * changed one of its observed properties (text/ARIA value/state) between the before and after
+   * snapshots. This is the signal for a same-surface action that mutates a related display/control
+   * without navigation/network/a newly-visible next target. Fail-closed: more than one changed
+   * candidate, or a node that only appeared after the action, does not satisfy it.
+   */
+  stateMutation: boolean;
+  stateMutationProperties: string[];
   networkActivityDetected: boolean;
 };
 
@@ -129,7 +169,7 @@ function safePath(rawUrl: string): string {
   }
 }
 
-function fingerprint(snapshot: RawObservationSnapshot): string {
+function fingerprint(snapshot: Omit<RawObservationSnapshot, "stateCandidates">): string {
   return createHash("sha256").update(JSON.stringify(snapshot)).digest("hex").slice(0, 16);
 }
 
@@ -144,6 +184,14 @@ export async function captureAssertionObservationSnapshot(
       if (id) validationIds.add(id);
     }
     const controls: ObservationControlState[] = [];
+    const fingerprintValue = (value: string) => {
+      let hash = 2166136261;
+      for (let index = 0; index < value.length; index++) {
+        hash ^= value.charCodeAt(index);
+        hash = Math.imul(hash, 16777619);
+      }
+      return `${value.length}:${hash >>> 0}`;
+    };
     for (const element of Array.from(document.querySelectorAll("input, select, textarea, button, [role=button], [role=combobox], [role=checkbox], [role=radio]")).slice(0, 120)) {
         const tag = element.tagName.toLowerCase();
         const elementId = element.getAttribute("id");
@@ -155,6 +203,11 @@ export async function captureAssertionObservationSnapshot(
           .join("|") || tag;
         const html = element as HTMLElement & { validity?: ValidityState; disabled?: boolean; required?: boolean };
         const inputLike = element as HTMLInputElement;
+        const observedValue = "value" in element
+          ? String(inputLike.value ?? "")
+          : element.getAttribute("contenteditable") === "true"
+            ? element.textContent ?? ""
+            : "";
         const describedBy = element.getAttribute("aria-describedby") ?? "";
         const describedValidationIds: string[] = [];
         for (const id of describedBy.split(/\s+/)) {
@@ -224,6 +277,7 @@ export async function captureAssertionObservationSnapshot(
           disabled: html.disabled === true || element.getAttribute("aria-disabled") === "true",
           required: html.required === true || element.getAttribute("aria-required") === "true",
           focused: document.activeElement === element,
+          valueFingerprint: fingerprintValue(observedValue),
           ...(validity ? { validity: { valid: validity.valid, valueMissing: validity.valueMissing, typeMismatch: validity.typeMismatch, patternMismatch: validity.patternMismatch } } : {}),
           ...(typeof inputLike.validationMessage === "string" ? { validationMessagePresent: inputLike.validationMessage.length > 0 } : {}),
           ...(element.getAttribute("pattern") !== null ? { patternPresent: true } : {}),
@@ -236,6 +290,78 @@ export async function captureAssertionObservationSnapshot(
           ...(siblingIdentities.length > 0 ? { siblingIdentities } : {}),
           validationNodeIds: describedValidationIds,
         });
+    }
+    // DIAGNOSTIC ONLY (never the value): bounded, redacted fingerprints of structured state
+    // carriers OUTSIDE the `controls` selector, so a physical run can name which node kind/property
+    // actually changed without serializing anything. Excluded from the snapshot fingerprint.
+    const stateCandidates: ObservationStateCandidate[] = [];
+    const stateCandidateSelector = "[role=textbox], [role=spinbutton], [role=slider], [role=progressbar], [contenteditable=''], [contenteditable=true], [aria-valuetext], [aria-valuenow], [data-display-value], output";
+    const statePropertyReaders: Array<[string, (element: Element) => string | null]> = [
+      ["value", (element) => ("value" in element ? String((element as HTMLInputElement).value ?? "") : null)],
+      ["textContent", (element) => (element.textContent ?? "").trim() || null],
+      ["ariaValueText", (element) => element.getAttribute("aria-valuetext")],
+      ["ariaValueNow", (element) => element.getAttribute("aria-valuenow")],
+      ["ariaLabel", (element) => element.getAttribute("aria-label")],
+      ["dataDisplayValue", (element) => element.getAttribute("data-display-value")],
+      ["ariaDisabled", (element) => element.getAttribute("aria-disabled")],
+      ["ariaSelected", (element) => element.getAttribute("aria-selected")],
+      ["ariaChecked", (element) => element.getAttribute("aria-checked")],
+      ["ariaPressed", (element) => element.getAttribute("aria-pressed")],
+      ["ariaExpanded", (element) => element.getAttribute("aria-expanded")],
+    ];
+    for (const element of Array.from(document.querySelectorAll(stateCandidateSelector)).slice(0, 40)) {
+      const propertyFingerprints: Record<string, string> = {};
+      for (const [propertyName, read] of statePropertyReaders) {
+        let observed: string | null = null;
+        try { observed = read(element); } catch { observed = null; }
+        if (observed === null) continue;
+        propertyFingerprints[propertyName] = fingerprintValue(observed);
+      }
+      stateCandidates.push({
+        tag: element.tagName.toLowerCase(),
+        ...(element.getAttribute("role") ? { role: element.getAttribute("role")! } : {}),
+        ...(element.getAttribute("type") ? { inputType: element.getAttribute("type")! } : {}),
+        contentEditable: (element as HTMLElement).isContentEditable === true
+          || element.getAttribute("contenteditable") === "true" || element.getAttribute("contenteditable") === "",
+        identity: [
+          element.tagName.toLowerCase(),
+          element.getAttribute("id") ? `id=${element.getAttribute("id")}` : "",
+          element.getAttribute("data-testid") ? `testid=${element.getAttribute("data-testid")}` : "",
+          element.getAttribute("role") ? `role=${element.getAttribute("role")}` : "",
+          element.getAttribute("type") ? `type=${element.getAttribute("type")}` : "",
+        ].filter(Boolean).join("|"),
+        propertyFingerprints,
+      });
+    }
+    // Bounded, redacted text-state carriers: non-interactive elements whose visible text is the
+    // functional state a same-surface action mutates (a display, a masked amount, a counter). Not a
+    // global page hash -- each node is fingerprinted individually and keyed by its own structural
+    // identity; the value is never serialized. These never join the `controls`/validation diff and
+    // never participate in the snapshot fingerprint (only in `stateMutation`/`diffStateCandidates`).
+    const textCarrierSelector = "div, span, p, b, strong, em, i, small, h1, h2, h3, h4, h5, h6, td, th, output, [data-testid], [id]";
+    const interactiveSelector = "input, select, textarea, button, [role=button], [role=combobox], [role=checkbox], [role=radio], [role=link], a, [contenteditable=''], [contenteditable=true]";
+    for (const element of Array.from(document.querySelectorAll(textCarrierSelector)).slice(0, 80)) {
+      if (element.matches(interactiveSelector)) continue;
+      if (element.closest(interactiveSelector)) continue;
+      const text = (element.textContent ?? "").replace(/\s+/g, " ").trim();
+      if (!text) continue;
+      // Stable identity deliberately EXCLUDES className (a class toggle is an irrelevant style
+      // change and must never break the before/after pairing of the same state node).
+      const identity = [
+        element.tagName.toLowerCase(),
+        element.getAttribute("id") ? `id=${element.getAttribute("id")}` : "",
+        element.getAttribute("data-testid") ? `testid=${element.getAttribute("data-testid")}` : "",
+        element.getAttribute("role") ? `role=${element.getAttribute("role")}` : "",
+        element.getAttribute("aria-label") ? `arialabel=${element.getAttribute("aria-label")}` : "",
+      ].filter(Boolean).join("|");
+      if (stateCandidates.length >= 120) break;
+      stateCandidates.push({
+        tag: element.tagName.toLowerCase(),
+        ...(element.getAttribute("role") ? { role: element.getAttribute("role")! } : {}),
+        contentEditable: false,
+        identity,
+        propertyFingerprints: { textContent: fingerprintValue(text) },
+      });
     }
     const validationNodes: AssertionObservationSnapshot["validationNodes"] = [];
     for (const node of Array.from(document.querySelectorAll("[role=alert], [aria-live], [aria-errormessage], [data-validation], .error, .invalid")).slice(0, 80)) {
@@ -292,13 +418,17 @@ export async function captureAssertionObservationSnapshot(
       urlPath: location.pathname || "/",
       ...(focused ? { focusedIdentity: focused } : {}),
       controls,
+      ...(stateCandidates.length > 0 ? { stateCandidates } : {}),
       validationNodes,
       forms,
       requiredControls: { total: requiredTotal, invalid: requiredInvalid, empty: requiredEmpty },
     };
   };
   const raw = await page.evaluate<RawObservationSnapshot>(rawEvaluator);
-  return { ...raw, fingerprint: fingerprint(raw) };
+  // `stateCandidates` is diagnostic-only: it is deliberately excluded from the snapshot
+  // fingerprint so its presence can never alter a completion/identity decision.
+  const { stateCandidates, ...fingerprintInput } = raw;
+  return { ...raw, fingerprint: fingerprint(fingerprintInput) };
 }
 
 export function diffAssertionObservation(
@@ -326,6 +456,12 @@ export function diffAssertionObservation(
     || before.controls.some((control) => after.controls.find((candidate) => candidate.identity === control.identity)?.ariaDescribedBy !== control.ariaDescribedBy)
     || before.validationNodes.length !== after.validationNodes.length;
   const formStateChanged = before.forms.some((form) => after.forms.find((candidate) => candidate.identity === form.identity)?.valid !== form.valid);
+  // Causal structured-state mutation: a state candidate that existed BEFORE the action and changed
+  // after it. Ambiguity fails closed -- exactly one such candidate is required, and a candidate that
+  // only appeared after the action (no before fingerprint) is never causal.
+  const causalStateMutations = diffStateCandidates(before, after).filter((mutation) => mutation.fingerprintBefore !== "");
+  const stateMutation = causalStateMutations.length === 1;
+  const stateMutationProperties = causalStateMutations.flatMap((mutation) => mutation.changedProperties);
   return {
     changed: changedPaths.length > 0,
     changedPaths,
@@ -333,8 +469,62 @@ export function diffAssertionObservation(
     accessibilityMutation,
     navigationMutation: before.urlPath !== after.urlPath,
     formStateChanged,
+    stateMutation,
+    stateMutationProperties,
     networkActivityDetected,
   };
+}
+
+function stateCandidateKey(candidate: ObservationStateCandidate): string {
+  return candidate.identity
+    ?? [candidate.tag, candidate.role ?? "", candidate.inputType ?? "", candidate.contentEditable ? "ce" : ""].join("|");
+}
+
+function stateCandidateFingerprint(candidate: ObservationStateCandidate): string {
+  return Object.keys(candidate.propertyFingerprints).sort()
+    .map((name) => `${name}:${candidate.propertyFingerprints[name]}`)
+    .join(",");
+}
+
+/**
+ * DIAGNOSTIC ONLY. Compares the redacted structured-state candidates of two snapshots and reports
+ * WHICH node kind changed and WHICH property names changed -- never a value (only opaque
+ * fingerprints). Returns [] when no candidate changed. It never feeds a completion decision; it
+ * exists so a physical run can name the exact channel a same-surface action mutated when the
+ * `controls` diff stayed empty.
+ */
+export function diffStateCandidates(
+  before: AssertionObservationSnapshot | undefined,
+  after: AssertionObservationSnapshot | undefined,
+): StateCandidateMutation[] {
+  if (!before || !after) return [];
+  const beforeByKey = new Map<string, ObservationStateCandidate>();
+  for (const candidate of before.stateCandidates ?? []) beforeByKey.set(stateCandidateKey(candidate), candidate);
+  const mutations: StateCandidateMutation[] = [];
+  for (const candidate of after.stateCandidates ?? []) {
+    const previous = beforeByKey.get(stateCandidateKey(candidate));
+    const changedProperties: string[] = [];
+    const propertyNames = new Set([
+      ...Object.keys(candidate.propertyFingerprints),
+      ...Object.keys(previous?.propertyFingerprints ?? {}),
+    ]);
+    for (const propertyName of propertyNames) {
+      if (candidate.propertyFingerprints[propertyName] !== previous?.propertyFingerprints[propertyName]) {
+        changedProperties.push(propertyName);
+      }
+    }
+    if (changedProperties.length === 0) continue;
+    mutations.push({
+      tag: candidate.tag,
+      ...(candidate.role ? { role: candidate.role } : {}),
+      ...(candidate.inputType ? { inputType: candidate.inputType } : {}),
+      contentEditable: candidate.contentEditable,
+      changedProperties: changedProperties.sort(),
+      fingerprintBefore: previous ? stateCandidateFingerprint(previous) : "",
+      fingerprintAfter: stateCandidateFingerprint(candidate),
+    });
+  }
+  return mutations;
 }
 
 export async function writeAssertionObservationArtifact(

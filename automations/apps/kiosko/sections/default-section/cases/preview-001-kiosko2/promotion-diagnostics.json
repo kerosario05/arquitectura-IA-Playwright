@@ -1,0 +1,21 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage",
+    "CategoryPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-kiosko2\\case.spec.ts",
+  "specHash": "d32ba5e5bf097e8193a02ed5a396992623d30d202681a29130ce8aac22f38afc",
+  "specSource": "generatedSpec"
+}

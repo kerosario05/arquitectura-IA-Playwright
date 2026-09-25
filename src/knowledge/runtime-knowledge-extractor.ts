@@ -11,6 +11,20 @@ export type ObservedControl = {
   ariaSelected?: string | null;
   ariaPressed?: string | null;
   parentRole?: string | null;
+  tag?: string;
+  placeholder?: string;
+  attributes?: Record<string, string>;
+  containerContext?: string;
+  headerContext?: string;
+  rowContext?: string;
+  rowIdentity?: string;
+  columnIdentity?: string;
+  associatedField?: string;
+  gridRef?: string;
+  rowRef?: string;
+  cellRef?: string;
+  headerRef?: string;
+  containerIdentity?: string;
   sourceScreenKey: string;
 };
 
@@ -24,7 +38,25 @@ export type RuntimeUiSnapshot = {
   assertionTargets: string[];
   inputLabels: string[];
   selectLabels: string[];
+  gridMetadata?: {
+    detected: boolean;
+    grids?: number;
+    rows: number;
+    cells: number;
+    headers: string[];
+    headerRelationships: Array<{ header: string; field: string }>;
+  };
   capturedAt: string;
+};
+
+type RuntimeSnapshotRaw = {
+  headings: string[];
+  clickTargets: string[];
+  businessLabels: string[];
+  controls: Array<Omit<ObservedControl, "sourceScreenKey">>;
+  inputs: string[];
+  selects: string[];
+  gridMetadata: NonNullable<RuntimeUiSnapshot["gridMetadata"]>;
 };
 
 /**
@@ -32,27 +64,72 @@ export type RuntimeUiSnapshot = {
  * No discovery — just captures visible navigation elements.
  */
 export async function extractRuntimeUiSnapshot(page: Page): Promise<RuntimeUiSnapshot> {
-  const raw = await page.evaluate(() => {
+  const raw = await page.evaluate(String.raw`(() => {
     const els = Array.from(document.querySelectorAll("*")).filter(e => {
       const style = window.getComputedStyle(e);
       return style.display !== "none" && style.visibility !== "hidden" && e.getBoundingClientRect().width > 0;
     });
 
-    const headings: string[] = [];
-    const clickTargets: string[] = [];
-    const businessLabels: string[] = [];
-    const controls: Array<{
-      label: string;
-      businessLabel?: string;
-      locatorIdentity?: string;
-      href?: string;
-      role?: string;
-    }> = [];
-    const inputs: string[] = [];
-    const selects: string[] = [];
+    const headings = [];
+    const clickTargets = [];
+    const businessLabels = [];
+    const controls = [];
+    const inputs = [];
+    const selects = [];
 
-    const seenClick = new Set<string>();
-    const seenHeading = new Set<string>();
+    const clean = (value, max = 120) => (value || '').replace(/\s+/g, ' ').trim().slice(0, max);
+    const attributesFor = (element) => {
+      const names = ['id', 'name', 'type', 'aria-label', 'aria-labelledby', 'placeholder', 'data-testid', 'data-test-id', 'data-field', 'data-column', 'role'];
+      return Object.fromEntries(names.flatMap((name) => {
+        const value = element.getAttribute(name);
+        return value ? [[name, value]] : [];
+      }));
+    };
+    const structuralContext = (element) => {
+      const row = element.closest('tr, [role="row"]');
+      const cell = element.closest('td, th, [role="gridcell"], [role="cell"]');
+      const table = element.closest('table, [role="grid"], [data-grid], [data-testid*="grid"], [data-testid*="table"]')
+        || Array.from(document.querySelectorAll('*')).find((candidate) => {
+          const style = window.getComputedStyle(candidate);
+          return style.display === 'grid' && candidate.contains(element) && Boolean(candidate.querySelector('input, select, [role="row"], [data-row-id], [data-rowindex]'));
+        });
+      let headerContext = '';
+      let columnIdentity = '';
+      if (cell && table) {
+        const explicit = cell.getAttribute('aria-colindex');
+        const cells = row ? Array.from(row.querySelectorAll('td, th, [role="gridcell"], [role="cell"], [data-cell], [data-column]')) : [];
+        const cellIndex = cells.indexOf(cell);
+        const headers = Array.from(table.querySelectorAll('thead th, thead td, [role="columnheader"], [data-header], [data-column-header]'));
+        const header = explicit ? headers.find((candidate) => candidate.getAttribute('aria-colindex') === explicit) : headers[cellIndex];
+        headerContext = clean(header?.textContent);
+        columnIdentity = clean(cell.getAttribute('data-column') || cell.getAttribute('data-field') || explicit || '');
+      }
+      const fieldset = element.closest('fieldset');
+      const form = element.closest('form, [role="group"], [role="region"]');
+      const legend = fieldset?.querySelector('legend');
+      const containerContext = clean(
+        legend?.textContent || form?.getAttribute('aria-label') || form?.getAttribute('data-label') || '',
+      );
+      const rowIdentity = clean(row?.getAttribute('aria-rowindex') || row?.getAttribute('data-row-id') || row?.getAttribute('data-rowindex') || row?.getAttribute('data-id') || '');
+      const rowContext = clean(row?.getAttribute('aria-label') || row?.getAttribute('data-label') || '');
+      const gridRef = table
+        ? (table.getAttribute('data-testid') || table.getAttribute('data-test-id') || table.id || ('grid:' + (table.getAttribute('role') || table.tagName.toLowerCase())))
+        : '';
+      const rowRef = row
+        ? (row.getAttribute('data-row-id') || row.getAttribute('data-id') || row.getAttribute('aria-rowindex') || row.getAttribute('data-rowindex') || clean(row.getAttribute('aria-label') || row.getAttribute('data-label') || ''))
+        : '';
+      const cellRef = cell
+        ? (cell.getAttribute('data-cell-id') || cell.getAttribute('data-field') || cell.getAttribute('data-column') || [headerContext, rowRef, cell.getAttribute('aria-colindex') || 'cell'].filter(Boolean).join(':'))
+        : '';
+      const headerRef = headerContext ? 'header:' + headerContext : '';
+      const containerIdentity = form
+        ? (form.getAttribute('data-testid') || form.getAttribute('data-test-id') || form.id || ('container:' + (form.getAttribute('role') || form.tagName.toLowerCase())))
+        : '';
+      return { headerContext, columnIdentity, containerContext, rowIdentity, rowContext, gridRef, rowRef, cellRef, headerRef, containerIdentity };
+    };
+
+    const seenClick = new Set();
+    const seenHeading = new Set();
 
     // Flat-string approximation of the accessible name: textContent concatenates
     // child text without separators (primary label + descriptive child become one
@@ -65,14 +142,33 @@ export async function extractRuntimeUiSnapshot(page: Page): Promise<RuntimeUiSna
       const rawText = (el.textContent ?? "").trim();
       const role = el.getAttribute("role") ?? "";
       const ariaLabel = el.getAttribute("aria-label") ?? "";
-      let accessibleName = ariaLabel;
-      let businessLabel = ariaLabel;
-      if (!accessibleName) {
+      const placeholder = el.getAttribute("placeholder") ?? "";
+      let accessibleName = '';
+      let businessLabel = '';
+      const associatedLabel = el.labels && el.labels.length
+        ? Array.from(el.labels).map((label) => label.textContent || '').join(' ').replace(/\s+/g, ' ').trim()
+        : '';
+      const labelledBy = el.getAttribute('aria-labelledby')
+        ? el.getAttribute('aria-labelledby').split(/\s+/).map((id) => document.getElementById(id)).filter(Boolean).map((node) => node.textContent || '').join(' ').replace(/\s+/g, ' ').trim()
+        : '';
+      if (associatedLabel) {
+        accessibleName = associatedLabel;
+        businessLabel = associatedLabel;
+      } else if (labelledBy) {
+        accessibleName = labelledBy;
+        businessLabel = labelledBy;
+      } else if (ariaLabel) {
+        accessibleName = ariaLabel;
+        businessLabel = ariaLabel;
+      } else if (placeholder) {
+        accessibleName = placeholder;
+        businessLabel = placeholder;
+      } else if (!accessibleName) {
         let flat = "";
         let primary = "";
-        const stack: Node[] = [el];
+        const stack = [el];
         while (stack.length > 0) {
-          const node = stack.pop()!;
+          const node = stack.pop();
           if (node.nodeType === Node.TEXT_NODE) {
             flat += node.textContent ?? "";
           } else if (node.nodeType === Node.ELEMENT_NODE) {
@@ -98,9 +194,10 @@ export async function extractRuntimeUiSnapshot(page: Page): Promise<RuntimeUiSna
 
       // Clickable elements (buttons, links, roles)
       const isClickable = tag === "button" || tag === "a" || role === "button" || role === "link" || role === "menuitem";
-      if (isClickable && accessibleName.length > 1 && accessibleName.length < 80 && !seenClick.has(accessibleName)) {
-        seenClick.add(accessibleName);
-        clickTargets.push(accessibleName);
+      const isEditor = tag === 'input' || tag === 'textarea' || tag === 'select' || role === 'textbox' || role === 'combobox';
+      if ((isClickable || isEditor) && accessibleName.length > 1 && accessibleName.length < 120 && !seenClick.has(tag + ':' + accessibleName)) {
+        seenClick.add(tag + ':' + accessibleName);
+        if (isClickable) clickTargets.push(accessibleName);
         const cleanBiz = cleanBusiness || accessibleName;
         businessLabels.push(cleanBiz);
         // Per-control identity — only genuinely observed signals, never invented.
@@ -109,11 +206,12 @@ export async function extractRuntimeUiSnapshot(page: Page): Promise<RuntimeUiSna
           el.getAttribute("data-testid") ||
           el.getAttribute("data-test-id") ||
           el.getAttribute("data-qa") ||
-          ((el as HTMLElement).id ? (el as HTMLElement).id : undefined);
+          (el.id ? el.id : undefined);
         const dataToggle = el.getAttribute("data-toggle") ?? undefined;
         const ariaSelected = el.getAttribute("aria-selected");
         const ariaPressed = el.getAttribute("aria-pressed");
-        const parentRole = (el.parentElement?.getAttribute("role") ?? undefined) as string | undefined;
+        const parentRole = el.parentElement?.getAttribute("role") ?? undefined;
+        const context = structuralContext(el);
         controls.push({
           label: accessibleName,
           businessLabel: cleanBiz,
@@ -124,6 +222,19 @@ export async function extractRuntimeUiSnapshot(page: Page): Promise<RuntimeUiSna
           ...(ariaSelected !== null ? { ariaSelected } : {}),
           ...(ariaPressed !== null ? { ariaPressed } : {}),
           ...(parentRole ? { parentRole } : {}),
+          tag,
+          ...(placeholder ? { placeholder } : {}),
+          attributes: attributesFor(el),
+          ...(context.containerContext ? { containerContext: context.containerContext } : {}),
+          ...(context.headerContext ? { headerContext: context.headerContext, associatedField: context.headerContext } : {}),
+          ...(context.rowContext ? { rowContext: context.rowContext } : {}),
+          ...(context.rowIdentity ? { rowIdentity: context.rowIdentity } : {}),
+          ...(context.columnIdentity ? { columnIdentity: context.columnIdentity } : {}),
+          ...(context.gridRef ? { gridRef: context.gridRef } : {}),
+          ...(context.rowRef ? { rowRef: context.rowRef } : {}),
+          ...(context.cellRef ? { cellRef: context.cellRef } : {}),
+          ...(context.headerRef ? { headerRef: context.headerRef } : {}),
+          ...(context.containerIdentity ? { containerIdentity: context.containerIdentity } : {}),
         });
       }
 
@@ -141,7 +252,7 @@ export async function extractRuntimeUiSnapshot(page: Page): Promise<RuntimeUiSna
     // Also look for labels associated with inputs
     for (const el of els) {
       if (el.tagName.toLowerCase() === "label") {
-        const forAttr = (el as HTMLLabelElement).htmlFor;
+        const forAttr = el.htmlFor;
         if (forAttr && document.getElementById(forAttr)) {
           const labelText = (el.textContent ?? "").trim();
           if (labelText && !inputs.includes(labelText)) inputs.push(labelText);
@@ -149,8 +260,27 @@ export async function extractRuntimeUiSnapshot(page: Page): Promise<RuntimeUiSna
       }
     }
 
-    return { headings, clickTargets, businessLabels, controls, inputs, selects };
-  });
+    const explicitGrids = Array.from(document.querySelectorAll('table, [role="grid"], [data-grid], [data-testid*="grid"], [data-testid*="table"]'));
+    const layoutGrids = Array.from(document.querySelectorAll('*')).filter((element) => {
+      const style = window.getComputedStyle(element);
+      return style.display === 'grid' && Boolean(element.querySelector('input, select, [role="row"], [data-row-id], [data-rowindex]'));
+    });
+    const grids = Array.from(new Set([...explicitGrids, ...layoutGrids]));
+    const headers = Array.from(document.querySelectorAll('thead th, thead td, [role="columnheader"], [data-header], [data-column-header]')).map((header) => clean(header.textContent)).filter(Boolean);
+    const relationships = [];
+    for (const control of controls) {
+      if (control.headerContext) relationships.push({ header: control.headerContext, field: control.associatedField || control.label });
+    }
+    const gridMetadata = {
+      detected: grids.length > 0,
+      grids: grids.length,
+      rows: grids.reduce((total, grid) => total + grid.querySelectorAll('tr, [role="row"], [data-row-id], [data-rowindex]').length, 0),
+      cells: grids.reduce((total, grid) => total + grid.querySelectorAll('td, th, [role="gridcell"], [role="cell"], [data-cell], [data-column]').length, 0),
+      headers: Array.from(new Set(headers)),
+      headerRelationships: relationships,
+    };
+    return { headings, clickTargets, businessLabels, controls, inputs, selects, gridMetadata };
+  })()`) as RuntimeSnapshotRaw;
 
   const url = page.url().split("?")[0]; // Strip query params
   const clickKey = raw.clickTargets.slice(0, 8).join("|").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -172,6 +302,7 @@ export async function extractRuntimeUiSnapshot(page: Page): Promise<RuntimeUiSna
     assertionTargets: raw.headings.slice(0, 3),
     inputLabels: raw.inputs.slice(0, 10),
     selectLabels: raw.selects.slice(0, 5),
+    gridMetadata: raw.gridMetadata,
     capturedAt: new Date().toISOString(),
   };
 }

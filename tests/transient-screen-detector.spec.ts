@@ -120,6 +120,19 @@ test("detectTransientScreen considers '0 productos' as transient (data_loading)"
   expect(result.reason).toBe("data_loading");
 });
 
+test("detectTransientScreen keeps a loaded screen with empty subsections stable", () => {
+  const snapshot = makeSnapshot([
+    { text: "No hay resultados", tagName: "p" },
+    { text: "Anterior", tagName: "button" },
+    { text: "Siguiente", tagName: "button" },
+    { text: "Descargar lista", tagName: "button" }
+  ], "https://example.com/payroll/manualCreationTable");
+
+  const result = detectTransientScreen(snapshot);
+  expect(result.transient).toBe(false);
+  expect(result.evidence).toContain("actionable_empty_state_detected");
+});
+
 test("detectTransientScreen considers 'Cargando productos' as transient", () => {
   const snapshot = makeSnapshot([
     { text: "Cargando productos...", tagName: "p" }

@@ -1,0 +1,973 @@
+[
+  {
+    "scenarioId": "REC-1352148F-01",
+    "title": "Certificado de Deposito",
+    "description": "Recorrido observado para completar \"Certificado de Deposito\". Se registraron 8 acciones funcionales.",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://srvqacgowb01.local.bsc.com:5000/",
+        "description": "Navegar a https://srvqacgowb01.local.bsc.com:5000/"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Usuario"
+        },
+        "valueKey": "usuario",
+        "description": "Ingresar [usuario] en \"Usuario\"",
+        "interactionId": "interaction-6"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Contraseña"
+        },
+        "valueKey": "contrasena",
+        "description": "Ingresar [contrasena] en \"Contraseña\"",
+        "interactionId": "interaction-7"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "link|Solicitud multiproducto"
+        },
+        "description": "Presionar \"Solicitud multiproducto\"",
+        "interactionId": "interaction-12"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Depurar"
+        },
+        "description": "Presionar \"Depurar\"",
+        "interactionId": "interaction-15"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Cerrar"
+        },
+        "description": "Presionar \"Cerrar\"",
+        "interactionId": "interaction-16"
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Ingresar [usuario] en \"Usuario\"",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "stepTemplate": "Ingresar [usuario] en \"Usuario\"",
+        "renderedStep": "Ingresar \"radames\" en \"Usuario\"",
+        "valueKey": "usuario",
+        "interactionId": "interaction-6",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 2
+      },
+      {
+        "content": "Ingresar [contrasena] en \"Contraseña\"",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "stepTemplate": "Ingresar [contrasena] en \"Contraseña\"",
+        "renderedStep": "Ingresar el valor seguro asociado a \"Contraseña\"",
+        "valueKey": "contrasena",
+        "interactionId": "interaction-7",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 3
+      },
+      {
+        "content": "Presionar \"Enter\" en \"Contraseña\"",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "renderedStep": "Presionar \"Enter\" en \"Contraseña\"",
+        "interactionId": "interaction-8",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 4
+      },
+      {
+        "content": "Presionar \"Solicitud multiproducto\"",
+        "sourceEventRefs": [
+          "event-12"
+        ],
+        "renderedStep": "Presionar \"Solicitud multiproducto\"",
+        "interactionId": "interaction-12",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 5
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"056-0154046-0\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "interactionId": "interaction-13",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 6
+      },
+      {
+        "content": "Presionar botón asociado a \"Número de identificación\"",
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "renderedStep": "Presionar botón asociado a \"Número de identificación\"",
+        "interactionId": "interaction-14",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 7
+      },
+      {
+        "content": "Presionar \"Depurar\"",
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "renderedStep": "Presionar \"Depurar\"",
+        "interactionId": "interaction-15",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 8
+      },
+      {
+        "content": "Presionar \"Cerrar\"",
+        "sourceEventRefs": [
+          "event-16"
+        ],
+        "renderedStep": "Presionar \"Cerrar\"",
+        "interactionId": "interaction-16",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 9
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "usuario",
+        "label": "Usuario",
+        "stepIndex": 1,
+        "technicalTargetRefs": [
+          "role:textbox|Usuario",
+          "css:#username",
+          "id:username"
+        ],
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "exampleValue": "radames",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Usuario",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "contrasena",
+        "label": "Contraseña",
+        "stepIndex": 2,
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#password",
+          "id:password"
+        ],
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "secure",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Contraseña",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "numero_de_identificacion",
+        "label": "Número de identificación",
+        "stepIndex": 5,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "exampleValue": "056-0154046-0",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Número de identificación",
+        "needsReview": false,
+        "reviewReason": "explicit_associated_label"
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Ingresar [usuario] en \"Usuario\"",
+        "strategy": "role",
+        "value": "textbox|Usuario"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Ingresar [contrasena] en \"Contraseña\"",
+        "strategy": "role",
+        "value": "textbox|Contraseña"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Solicitud multiproducto\"",
+        "strategy": "role",
+        "value": "link|Solicitud multiproducto"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Presionar \"Depurar\"",
+        "strategy": "role",
+        "value": "button|Depurar"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"Cerrar\"",
+        "strategy": "role",
+        "value": "button|Cerrar"
+      }
+    ],
+    "sourceRecordingId": "1352148f-4779-41da-820f-22e531a92fcd",
+    "hasUncertainSteps": true,
+    "primary": true,
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7",
+      "event-8",
+      "event-9",
+      "event-10",
+      "event-11",
+      "event-12",
+      "event-13",
+      "event-14",
+      "event-15",
+      "event-16"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "functionalReadiness": true,
+    "technicalReadiness": false,
+    "expectedResultCandidate": "La aplicación carga su pantalla inicial",
+    "oracleAuthority": "observed_only",
+    "confidence": 0.95,
+    "scenarioStepCount": 9,
+    "functionalActionCount": 8,
+    "nonUserSetupSteps": 1,
+    "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
+    "scenarioGoal": "Certificado de Deposito",
+    "stateSequenceValid": true,
+    "stateSequenceIssues": [],
+    "postGoalObservations": [],
+    "goalContract": {
+      "nonGeneric": true,
+      "goalCoherent": true,
+      "mutationIntentExpressed": true
+    },
+    "replayEligible": true,
+    "canonicalInteractions": [
+      {
+        "id": "interaction-1",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-1"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-2",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-2"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-3",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-3"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-4",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-4"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-6",
+        "controlIdentity": "fbf08c6ecee9|Usuario|role|textbox|Usuario",
+        "semanticField": "Usuario",
+        "action": "fill",
+        "valueKey": "usuario",
+        "recordedValue": "radames",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Usuario",
+          "css:#username",
+          "id:username"
+        ],
+        "editingSessionRef": "edit-1",
+        "description": "Ingresar en \"Usuario\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-7",
+        "controlIdentity": "fbf08c6ecee9|Contraseña|role|textbox|Contraseña",
+        "semanticField": "Contraseña",
+        "action": "fill",
+        "valueKey": "contrasena",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#password",
+          "id:password"
+        ],
+        "editingSessionRef": "edit-2",
+        "description": "Ingresar en \"Contraseña\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-8",
+        "controlIdentity": "fbf08c6ecee9|Contraseña|role|textbox|Contraseña",
+        "action": "press",
+        "key": "Enter",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#password",
+          "id:password"
+        ],
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/",
+        "stateScope": "fbf08c6ecee9",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-10",
+        "controlIdentity": "fbf08c6ecee9",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/",
+        "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-11",
+        "controlIdentity": "fbf08c6ecee9",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-12",
+        "controlIdentity": "fbf08c6ecee9|Solicitud multiproducto|role|link|Solicitud multiproducto",
+        "semanticField": "Solicitud multiproducto",
+        "action": "click",
+        "valueKey": "solicitud_multiproducto",
+        "sourceEventRefs": [
+          "event-12"
+        ],
+        "technicalTargetRefs": [
+          "role:link|Solicitud multiproducto"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Solicitud multiproducto",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "/requests/create/multiproduct"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Solicitud multiproducto\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-13",
+        "controlIdentity": "fbf08c6ecee9|Número de identificación",
+        "semanticField": "Número de identificación",
+        "action": "fill",
+        "valueKey": "numero_de_identificacion",
+        "recordedValue": "056-0154046-0",
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "technicalTargetRefs": [],
+        "editingSessionRef": "edit-3",
+        "description": "Ingresar en \"Número de identificación\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-14",
+        "controlIdentity": "fbf08c6ecee9|Número de identificación",
+        "semanticField": "Número de identificación",
+        "action": "click",
+        "valueKey": "numero_de_identificacion",
+        "recordedValue": "056-0154046-0",
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 2
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Número de identificación\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-15",
+        "controlIdentity": "fbf08c6ecee9|Depurar|role|button|Depurar",
+        "semanticField": "Depurar",
+        "action": "click",
+        "valueKey": "depurar",
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Depurar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Depurar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Depurar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Depurar\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-16",
+        "controlIdentity": "fbf08c6ecee9|Cerrar|role|button|Cerrar",
+        "semanticField": "Cerrar",
+        "action": "click",
+        "valueKey": "cerrar",
+        "sourceEventRefs": [
+          "event-16"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Cerrar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Cerrar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Cerrar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Cerrar\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      }
+    ],
+    "entityActionBlocks": [],
+    "readiness": {
+      "functionalReadiness": true,
+      "dataReadiness": false,
+      "technicalReadiness": false,
+      "oracleReadiness": true,
+      "reviewReadiness": true,
+      "publicationContentReadiness": true,
+      "executionReadiness": false,
+      "publicationReadiness": false,
+      "missingInputs": [
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 2,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "datasetAuthorityMismatches": [],
+      "dataReadinessReasons": [
+        "missing_runtime_input:contrasena",
+        "RUNTIME_DATA_REQUIRED"
+      ]
+    },
+    "technicalKnowledgeRefs": [],
+    "runtimeInputRequirements": [
+      {
+        "valueKey": "usuario",
+        "semanticField": "Usuario",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "radames",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 1,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "radames",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "contrasena",
+        "semanticField": "Contraseña",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": null,
+        "source": "unresolved",
+        "resolved": false,
+        "sensitive": true,
+        "stepIndex": 2,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "unresolved",
+        "authorityValue": null,
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "numero_de_identificacion",
+        "semanticField": "Número de identificación",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "056-0154046-0",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 5,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "056-0154046-0",
+        "datasetAuthorityMismatch": false
+      }
+    ],
+    "runtimeDataset": {
+      "scenarioId": "REC-1352148F-01",
+      "requirements": [
+        {
+          "valueKey": "usuario",
+          "semanticField": "Usuario",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "radames",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 1,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "radames",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 2,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "numero_de_identificacion",
+          "semanticField": "Número de identificación",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "056-0154046-0",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 5,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "056-0154046-0",
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "resolvedValues": {
+        "usuario": "radames",
+        "numero_de_identificacion": "056-0154046-0"
+      },
+      "missingValues": [
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 2,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        }
+      ]
+    },
+    "mutationOpportunities": [
+      {
+        "opportunityId": "REC-1352148F-01:field_omission",
+        "title": "Certificado de deposito: comprobar la omisión de un dato",
+        "mutationType": "FIELD_OMISSION",
+        "basePrimaryScenarioId": "REC-1352148F-01",
+        "operations": [
+          {
+            "type": "remove_action",
+            "interactionId": "interaction-6"
+          }
+        ],
+        "evidenceRefs": [
+          "event-1",
+          "event-2",
+          "event-3",
+          "event-4",
+          "event-5",
+          "event-6",
+          "event-7",
+          "event-8",
+          "event-9",
+          "event-10",
+          "event-11",
+          "event-12",
+          "event-13",
+          "event-14",
+          "event-15",
+          "event-16"
+        ],
+        "rationale": "Existen varios inputs observados; se propone una omisión agrupada sin inventar el resultado.",
+        "oracleAuthority": "MISSING",
+        "confidence": 0.5,
+        "needsReview": true
+      }
+    ]
+  }
+]

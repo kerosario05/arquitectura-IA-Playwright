@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-consultar-tarjeta",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Consultar Tarjeta",
+  "source": "discovery",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "createdAt": "2026-09-15T21:40:44.486Z"
+}

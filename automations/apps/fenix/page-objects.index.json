@@ -1,0 +1,82 @@
+{
+  "version": "1.0",
+  "appSlug": "fenix",
+  "pageObjects": [
+    {
+      "id": "po_framework_productlistpage",
+      "className": "ProductListPage",
+      "filePath": "automations/apps/fenix/pages/productlist.page.ts",
+      "screenSignature": "screen:fenix-product_list",
+      "methods": [
+        {
+          "name": "selectProduct",
+          "intent": "select_product",
+          "parameters": [
+            "productName"
+          ],
+          "available": true,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        },
+        {
+          "name": "selectFirstVisibleCard",
+          "intent": "select_first_visible_card",
+          "parameters": [],
+          "available": true,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        }
+      ],
+      "confidence": 1,
+      "status": "active",
+      "sourcePlanIds": [],
+      "caseIds": [],
+      "createdAt": "2026-09-23T14:53:50.076Z",
+      "updatedAt": "2026-09-23T14:53:50.076Z"
+    },
+    {
+      "id": "po_framework_operationsmenupage",
+      "className": "OperationsMenuPage",
+      "filePath": "automations/apps/fenix/pages/operationsmenu.page.ts",
+      "screenSignature": "screen:fenix-operations_menu",
+      "methods": [
+        {
+          "name": "openModule",
+          "intent": "open_module",
+          "parameters": [
+            "moduleName"
+          ],
+          "available": false,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        },
+        {
+          "name": "expectModuleVisible",
+          "intent": "expect_loaded",
+          "parameters": [
+            "moduleName"
+          ],
+          "available": false,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        }
+      ],
+      "confidence": 1,
+      "status": "active",
+      "sourcePlanIds": [],
+      "caseIds": [],
+      "createdAt": "2026-09-23T14:53:50.076Z",
+      "updatedAt": "2026-09-23T14:53:50.076Z"
+    }
+  ],
+  "componentCandidates": [],
+  "updatedAt": "2026-09-24T23:59:22.532Z"
+}

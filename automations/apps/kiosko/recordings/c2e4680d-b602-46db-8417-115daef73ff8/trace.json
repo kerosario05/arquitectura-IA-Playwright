@@ -1,0 +1,397 @@
+{
+  "recordingId": "c2e4680d-b602-46db-8417-115daef73ff8",
+  "projectSlug": "kiosko",
+  "appSlug": "kiosko",
+  "platform": "web",
+  "baseUrl": "http://127.0.0.1:8088/QA_Field_Lab.html",
+  "label": "Cuenta efectivo",
+  "recordingGoal": {
+    "declaredGoal": "Cuenta efectivo",
+    "normalizedGoal": "Cuenta efectivo",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-09-20T23:05:19.266Z",
+  "status": "stopped",
+  "events": [
+    {
+      "t": 1093,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "seq": 0
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "e5f5edc43160",
+      "url": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "framePath": ".artifacts\\tmp\\recordings\\c2e4680d-b602-46db-8417-115daef73ff8\\0001-launch.png",
+      "seq": 1
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "e5f5edc43160",
+      "title": "Un recorrido. Todos los retos del campo.",
+      "fingerprint": "688f025fafcec9809dd36ee5ff0e63c4e50084acf681c2db63a1c25192b5db4b",
+      "url": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "firstSeenAt": 1573,
+      "controls": [
+        {
+          "label": "QA Field Lab, inicio",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "QA Field Lab, inicio"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "QA Field Lab, inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "01",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "01 Texto, formato y teclado 0/9",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "02",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "02 Listas y selecciones 0/11",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "03",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "03 Fechas y calendarios 0/8",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "04",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "04 Radios, casillas y estados 0/8",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "05",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "05 Contexto y contenido dinámico 0/9",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "06",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "06 Edición avanzada 0/8",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "07",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "07 Archivos y carpetas 0/4",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "08",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "08 Iframe y Shadow DOM 0/5",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "09",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "09 Validación y resultado 0/4",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Iniciar recorrido",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "start-run",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "start-run",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Descargar guion",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "download-guide",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "download-guide",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "↥ Archivos de prueba",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "download-fixtures",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "download-fixtures",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "{ } Ver eventos",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "show-audit",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "show-audit",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Exportar auditoría",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "export-audit",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "export-audit",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Reiniciar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reset-run",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reset-run",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Latencia simulada",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "id": "latency-enabled",
+            "type": "checkbox"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "latency-enabled",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Nombre de prueba",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Lucía QA",
+          "attributes": {
+            "id": "f-nombre",
+            "type": "text",
+            "placeholder": "Lucía QA",
+            "data-field": "nombre"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "f-nombre",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Correo de prueba",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "nombre@example.test",
+          "attributes": {
+            "id": "f-correo",
+            "type": "email",
+            "placeholder": "nombre@example.test",
+            "data-field": "correo"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "f-correo",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Contraseña ficticia",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Sólo una clave ficticia",
+          "attributes": {
+            "id": "f-clave",
+            "type": "password",
+            "placeholder": "Sólo una clave ficticia",
+            "data-field": "clave"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "f-clave",
+              "confidence": 0.9
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Un recorrido. Todos los retos del campo.",
+        "Texto, formato y teclado",
+        "Nombre de prueba"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 12,
+        "rows": 13,
+        "cells": 43,
+        "headers": [
+          "Servicio",
+          "Importe",
+          "Acción",
+          "Cantidad",
+          "Lu",
+          "Ma",
+          "Mi",
+          "Ju",
+          "Vi",
+          "Sá",
+          "Do"
+        ],
+        "headerRelationships": [
+          {
+            "header": "Acción",
+            "field": "Acción"
+          },
+          {
+            "header": "Acción",
+            "field": "Acción"
+          }
+        ]
+      },
+      "headerRelationships": [
+        {
+          "header": "Acción",
+          "field": "Acción"
+        },
+        {
+          "header": "Acción",
+          "field": "Acción"
+        }
+      ]
+    }
+  ],
+  "endedAt": "2026-09-20T23:05:51.936Z",
+  "durationMs": 32670
+}

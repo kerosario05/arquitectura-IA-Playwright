@@ -38,7 +38,37 @@ export type PageDiagnostics = {
   listReadiness: ListReadinessState;
   pageClosed?: boolean;
   pageClosedReason?: string;
+  /** "completed" unless this diagnostic run itself hit its own bounded deadline (see
+   *  `capturePageDiagnostics`'s `timeoutMs` option) -- a caller MUST treat "timeout" as
+   *  incomplete/unknown data, never as "nothing detected". */
+  diagnosticStatus?: "completed" | "timeout";
 };
+
+const DEFAULT_DIAGNOSTICS_TIMEOUT_MS = 10000;
+
+function emptyPageDiagnostics(overrides: Partial<PageDiagnostics>): PageDiagnostics {
+  return {
+    currentUrl: "(unknown)",
+    title: "",
+    visibleHeadings: [],
+    visibleButtons: [],
+    visibleTexts: [],
+    loadingDetected: false,
+    skeletonDetected: false,
+    listReadiness: {
+      cardsVisible: 0,
+      listItemsVisible: 0,
+      loadingDetected: false,
+      zeroProductsDetected: false,
+      hasEntityContainers: false,
+      visibleHeadings: [],
+      visibleButtons: [],
+      ready: false,
+    },
+    diagnosticStatus: "completed",
+    ...overrides,
+  };
+}
 
 const LOADING_KEYWORDS = [
   "cargando", "loading", "procesando", "processing", "espere",
@@ -63,12 +93,29 @@ function normalizeText(text: string): string {
 async function scanPageTexts(page: Page): Promise<string[]> {
   return page.evaluate(() => {
     const texts: string[] = [];
+    // FIRST_LOSS fix: `getComputedStyle(parent).display` reflects only that ELEMENT's own
+    // `display` rule -- it never reflects an ANCESTOR's `display: none`, which is the common
+    // pattern for a modal/dialog wrapper toggled hidden while its own inner text-holding elements
+    // (p/span/etc.) keep whatever `display` they'd normally have. Checking only the immediate
+    // parent (as this used to) reported that inner text as "visible" even when the whole dialog
+    // was hidden by an ancestor -- a real false-positive source for any text-based session/dialog
+    // detection. Walk the FULL ancestor chain (display is never inherited; visibility is, but is
+    // still checked per-level here for the same reason) so a node is only ever accepted when
+    // genuinely nothing between it and <body> hides it.
+    const isRenderedInDocument = (element: Element): boolean => {
+      let current: Element | null = element;
+      while (current && current !== document.body.parentElement) {
+        const style = window.getComputedStyle(current);
+        if (style.display === "none" || style.visibility === "hidden") return false;
+        current = current.parentElement;
+      }
+      return true;
+    };
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
       acceptNode: (node) => {
         const parent = node.parentElement;
         if (!parent) return NodeFilter.FILTER_REJECT;
-        const style = window.getComputedStyle(parent);
-        if (style.display === "none" || style.visibility === "hidden") return NodeFilter.FILTER_REJECT;
+        if (!isRenderedInDocument(parent)) return NodeFilter.FILTER_REJECT;
         return NodeFilter.FILTER_ACCEPT;
       }
     });
@@ -81,13 +128,21 @@ async function scanPageTexts(page: Page): Promise<string[]> {
   });
 }
 
-async function scanVisibleElements(page: Page, selector: string): Promise<string[]> {
+const VISIBLE_ELEMENT_SCAN_BUDGET_MS = 2000;
+const VISIBLE_ELEMENT_READ_TIMEOUT_MS = 250;
+
+export async function scanVisibleElements(page: Page, selector: string): Promise<string[]> {
   try {
     const elements = await page.locator(selector).all();
     const texts: string[] = [];
+    const deadline = Date.now() + VISIBLE_ELEMENT_SCAN_BUDGET_MS;
     for (const el of elements.slice(0, 20)) {
+      const remainingMs = deadline - Date.now();
+      if (remainingMs <= 0) break;
       try {
-        const text = await el.textContent();
+        const text = await el.textContent({
+          timeout: Math.min(VISIBLE_ELEMENT_READ_TIMEOUT_MS, remainingMs)
+        });
         if (text && text.trim().length > 0) {
           texts.push(text.trim());
         }
@@ -232,57 +287,61 @@ async function checkListReadiness(
   };
 }
 
-export async function capturePageDiagnostics(page: Page): Promise<PageDiagnostics> {
+/**
+ * FIRST_LOSS fix (recordingId=1f9415f3-...): physical evidence showed the promoted runtime hang
+ * silently for the full 90s Playwright test timeout with no further log after `[promoted-step]
+ * stepIndex=6 phase=start` -- inside THIS function's own sequence of independent Playwright reads
+ * (title/heading/button/text scans + list readiness), none of which shared a common deadline.
+ * Bounded here, generically, by `timeoutMs` (defaulting to `DEFAULT_DIAGNOSTICS_TIMEOUT_MS`, but a
+ * caller reusing the runtime's own configured action timeout -- see
+ * `detectHomeResetOrInactivity` -- passes that instead of a second, independent budget). On
+ * timeout, returns an EXPLICIT `diagnosticStatus: "timeout"` shape -- never the ordinary "nothing
+ * detected" shape -- so a caller can fail closed instead of silently treating incomplete data as
+ * a clean page.
+ */
+export async function capturePageDiagnostics(page: Page, options?: { timeoutMs?: number }): Promise<PageDiagnostics> {
+  const timeoutMs = options?.timeoutMs ?? DEFAULT_DIAGNOSTICS_TIMEOUT_MS;
+  let timeoutRef: NodeJS.Timeout | undefined;
+  const timeoutPromise = new Promise<PageDiagnostics>((resolve) => {
+    timeoutRef = setTimeout(() => resolve(emptyPageDiagnostics({
+      currentUrl: safeCurrentUrl(page),
+      diagnosticStatus: "timeout",
+    })), timeoutMs);
+  });
+  try {
+    return await Promise.race([capturePageDiagnosticsUnbounded(page), timeoutPromise]);
+  } finally {
+    if (timeoutRef) clearTimeout(timeoutRef);
+  }
+}
+
+function safeCurrentUrl(page: Page): string {
+  try {
+    return page.url();
+  } catch {
+    return "(unknown)";
+  }
+}
+
+async function capturePageDiagnosticsUnbounded(page: Page): Promise<PageDiagnostics> {
   // Check if page/context is closed before attempting diagnostics
   try {
     if (!page.context() || !page.isClosed()) {
       // Page is accessible, continue with diagnostics
     } else {
-      return {
+      return emptyPageDiagnostics({
         currentUrl: "(page closed)",
-        title: "",
-        visibleHeadings: [],
-        visibleButtons: [],
-        visibleTexts: [],
-        loadingDetected: false,
-        skeletonDetected: false,
-        listReadiness: {
-          cardsVisible: 0,
-          listItemsVisible: 0,
-          loadingDetected: false,
-          zeroProductsDetected: false,
-          hasEntityContainers: false,
-          visibleHeadings: [],
-          visibleButtons: [],
-          ready: false
-        },
         pageClosed: true,
-        pageClosedReason: "context_closed_during_diagnostics"
-      };
+        pageClosedReason: "context_closed_during_diagnostics",
+      });
     }
   } catch {
     // Page/context is closed or inaccessible
-    return {
+    return emptyPageDiagnostics({
       currentUrl: "(page closed)",
-      title: "",
-      visibleHeadings: [],
-      visibleButtons: [],
-      visibleTexts: [],
-      loadingDetected: false,
-      skeletonDetected: false,
-      listReadiness: {
-        cardsVisible: 0,
-        listItemsVisible: 0,
-        loadingDetected: false,
-        zeroProductsDetected: false,
-        hasEntityContainers: false,
-        visibleHeadings: [],
-        visibleButtons: [],
-        ready: false
-      },
       pageClosed: true,
-      pageClosedReason: "error_accessing_page"
-    };
+      pageClosedReason: "error_accessing_page",
+    });
   }
 
   const currentUrl = page.url();
@@ -317,7 +376,8 @@ export async function capturePageDiagnostics(page: Page): Promise<PageDiagnostic
     visibleTexts,
     loadingDetected,
     skeletonDetected,
-    listReadiness
+    listReadiness,
+    diagnosticStatus: "completed"
   };
 }
 

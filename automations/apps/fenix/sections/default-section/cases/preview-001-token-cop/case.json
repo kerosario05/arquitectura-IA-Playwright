@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-token-cop",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "TOKEN COP",
+  "source": "discovery",
+  "appSlug": "fenix",
+  "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+  "createdAt": "2026-09-25T00:00:23.107Z"
+}

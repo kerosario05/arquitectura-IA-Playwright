@@ -1,6 +1,15 @@
-import type { AiProvider } from "../ai/ai-provider.types";
+import type { AiProvider, AiUsageMetrics } from "../ai/ai-provider.types";
 import type { RecordedEvent, SessionTrace, TraceSegment } from "./session-trace.types";
 import { capTitle, type RecordedScenario } from "./trace-to-scenario";
+import { isSensitiveRecordedEvent } from "./semantic-recording";
+import {
+  RECORDING_AI_SCENARIO_SCHEMA,
+  RECORDING_AI_SCENARIO_SCHEMA_NAME,
+  recordingAiSchemaInstruction,
+  validateRecordingAiScenarioResponse,
+  type RecordingAiScenarioProposal,
+  type RecordingAiScenarioRejected,
+} from "./ai-scenario-contract";
 
 /**
  * Adds the judgement a recording cannot supply on its own.
@@ -27,6 +36,13 @@ export type TraceNarrativeResult = {
   narrative: string;
   story: { title: string; description: string; preconditions: string[] } | null;
   extraNegatives: AiNegative[];
+  aiProposals: RecordingAiScenarioProposal[];
+  aiRejected: RecordingAiScenarioRejected[];
+  schemaValid: boolean;
+  fallbackUsed: boolean;
+  contextBeforeChars?: number;
+  contextAfterChars?: number;
+  usage?: AiUsageMetrics;
 };
 
 /**
@@ -90,7 +106,7 @@ export function renderWalkthrough(
 
 const SYSTEM_PROMPT = [
   "Eres un analista QA. Recibes la transcripción de un recorrido REAL que una persona hizo sobre una aplicación.",
-  "Tu tarea es reconstruir la historia de usuario que ese recorrido representa y proponer escenarios negativos.",
+  "El escenario Primary ya fue construido determinísticamente desde la evidencia. Tu única tarea es proponer variantes adicionales del mismo objetivo, o devolver cero propuestas.",
   "CATEGORÍAS a considerar, siempre que la transcripción las respalde:",
   "- Campo obligatorio vacío o con formato inválido, cuando el recorrido llenó ese campo.",
   "- Código de validación (OTP) incorrecto, expirado o reenviado, cuando el recorrido lo usó.",
@@ -98,14 +114,19 @@ const SYSTEM_PROMPT = [
   "- Reintentos y bloqueos tras varios intentos fallidos, cuando hay un control de reintento.",
   "- Sesión expirada o interrumpida, cuando el flujo requiere sesión.",
   "- Un control observado deshabilitado que debe seguir bloqueado.",
-  "Propón entre 4 y 8 escenarios negativos, solo los que la transcripción sostenga. Menos es correcto si no hay más.",
+  "Propón escenarios adicionales solo si el modelo semántico y el objetivo los sostienen. Menos es correcto, incluso cero.",
   "REGLAS ESTRICTAS:",
   "- No inventes pantallas, controles ni datos que no aparezcan en la transcripción.",
   "- No propongas pasos técnicos ni selectores: los pasos ejecutables ya existen y no se tocan.",
-  "- Cada escenario negativo DEBE incluir 'basedOn' con el texto EXACTO del control o mensaje de la",
-  "  transcripción en el que se apoya. Un escenario sin ese anclaje será descartado.",
+  "- Cada propuesta debe anclarse a sourceEvidenceRefs presentes en el contexto.",
+  "- sharedSetupRef debe ser el scenarioId del Primary y steps debe ser el camino completo materializado; scenarioSpecificSteps contiene solo la variante.",
+  "- Nunca uses frases vagas como 'completar los demás campos', 'llenar datos requeridos' o 'continuar normalmente'.",
+  "- No generes negativos solo porque existe un campo. Requieren constraint/evidence explícita; si no existe, recházalos.",
+  "- No inventes resultados como 'el sistema rechaza' o 'solicita corregir'. Usa oracleAuthority=AI_HYPOTHESIS, hypothesis=true y needsReview=true, o rechaza.",
+  "- Una variante debe conservar el proceso del objetivo y poder llegar desde el inicio usando el setup común.",
   "- Nunca reproduzcas valores sensibles; refiérete a ellos por su nombre de campo.",
   "- Responde en español.",
+  "- La respuesta debe cumplir exactamente el esquema canónico incluido en la petición.",
 ].join("\n");
 
 /** Case- and accent-insensitive form, so an anchor matches the transcript as a person reads it. */
@@ -132,21 +153,99 @@ function isAnchored(basedOn: string, transcript: string): boolean {
   return normalizeForMatch(transcript).includes(anchor);
 }
 
-function buildUserPrompt(walkthrough: string, happyPath: RecordedScenario): string {
+/**
+ * Context sent to the suggester. It is intentionally a semantic projection, not a trace dump:
+ * raw DOM, locator candidates, screenshots and repeated observations remain available in the
+ * stored technical model for review/MCP, but do not spend generation tokens.
+ */
+export function buildCompactSemanticAiContext(
+  trace: SessionTrace,
+  segments: readonly TraceSegment[],
+  happyPath: RecordedScenario,
+): { context: string; beforeChars: number; afterChars: number } {
+  const events = trace.events.filter((event) => ["tap", "fill", "screen_change", "navigate"].includes(event.kind));
+  const latestByControl = new Map<string, RecordedEvent>();
+  for (const event of events) {
+    if (event.kind !== "fill") continue;
+    const key = [event.screenKey, event.target?.rowIdentity ?? "", event.target?.associatedField ?? event.target?.label ?? ""].join("|");
+    latestByControl.set(key, event);
+  }
+  const actions = [...latestByControl.values()];
+  for (const event of events) if (event.kind !== "fill") actions.push(event);
+  const compact = {
+    recordingGoal: trace.recordingGoal?.declaredGoal ?? trace.recordingGoal?.normalizedGoal ?? null,
+    primaryScenario: {
+      scenarioId: happyPath.scenarioId,
+      title: happyPath.title,
+      functionalSteps: happyPath.testRailSteps.filter((step) => step.classification === "FUNCTIONAL_ACTION").map((step) => ({ content: step.content, expected: step.expected })),
+      observedSetup: happyPath.preconditions,
+      observedNavigation: happyPath.testRailSteps.filter((step) => /abrir|navegar|gestión|crear|pantalla|muestra/i.test(step.content)).map((step) => step.content),
+      observedActions: happyPath.testRailSteps.filter((step) => step.classification === "FUNCTIONAL_ACTION").map((step) => step.content),
+      observedOutcome: happyPath.testRailSteps.at(-1)?.expected,
+    },
+    semanticComponents: happyPath.requiredData.map((field) => ({
+      valueKey: field.key,
+      semanticField: field.semanticField ?? field.label,
+      valueRole: field.valueRole,
+      needsReview: field.needsReview ?? false,
+    })),
+    observedChoices: actions.filter((event) => event.target?.afterValue !== undefined || (event.target?.observedOptions?.length ?? 0) > 0).map((event) => ({
+      ref: `event-${event.seq + 1}`,
+      field: event.target?.associatedField ?? event.target?.headerContext ?? event.target?.label,
+      selected: event.target?.afterValue,
+      options: event.target?.observedOptions?.slice(0, 12),
+    })),
+    constraints: trace.events
+      .map((event, index) => ({ ref: `event-${index + 1}`, attributes: event.target?.attributes }))
+      .filter((item) => item.attributes && Object.keys(item.attributes).some((key) => /required|pattern|min|max|length|step/i.test(key)))
+      .slice(0, 40),
+    screens: [...new Map(trace.screens.map((screen) => [screen.screenKey, {
+      screenKey: screen.screenKey,
+      title: screen.title === screen.screenKey ? undefined : screen.title,
+      grid: screen.gridMetadata?.detected ? {
+        rows: screen.gridMetadata.rows,
+        cells: screen.gridMetadata.cells,
+        headers: screen.gridMetadata.headers,
+        headerRelationships: screen.gridMetadata.headerRelationships,
+      } : undefined,
+    }])).values()],
+    primaryFunctionalActions: actions.slice(0, 100).map((event) => ({
+      ref: `event-${event.seq + 1}`,
+      action: event.kind,
+      field: event.target?.associatedField ?? event.target?.headerContext ?? event.target?.label,
+      role: event.target?.role,
+      value: event.kind === "fill" && !isSensitiveRecordedEvent(event) ? event.value : undefined,
+      selectedOption: event.target?.afterValue,
+      observedOptions: event.target?.observedOptions?.slice(0, 12),
+      row: event.target?.rowIdentity,
+      column: event.target?.columnIdentity,
+    })),
+    deterministicCandidates: happyPath.testRailSteps.filter((step) => step.classification === "FUNCTIONAL_ACTION").map((step) => step.content),
+    unresolvedSemantics: trace.screens.flatMap((screen) => screen.controls
+      .filter((control) => !control.headerContext && !control.associatedField && control.label)
+      .map((control) => ({ screenKey: screen.screenKey, label: control.label, role: control.role })))
+      .slice(0, 40),
+    stateTransitions: segments.flatMap((segment) => segment.exitsTo ? [{ from: segment.screenKey, to: segment.exitsTo }] : []),
+  };
+  const after = JSON.stringify(compact);
+  return {
+    context: after,
+    beforeChars: JSON.stringify({ events: trace.events, screens: trace.screens }).length,
+    afterChars: after.length,
+  };
+}
+
+function buildUserPrompt(context: string, happyPath: RecordedScenario): string {
   return [
-    "TRANSCRIPCIÓN DEL RECORRIDO:",
-    walkthrough,
+    "MODELO SEMÁNTICO COMPACTO DEL RECORRIDO REAL:",
+    context,
     "",
-    "PASOS EJECUTABLES YA DERIVADOS (solo como contexto, no los modifiques):",
+    "PASOS FUNCIONALES DETERMINISTAS YA DERIVADOS (solo como contexto, no los modifiques):",
     happyPath.testRailSteps.map((s, i) => `${i + 1}. ${s.content} -> ${s.expected}`).join("\n"),
     "",
-    "Devuelve EXCLUSIVAMENTE un JSON con esta forma:",
-    "{",
-    '  "title": "titulo corto del escenario principal",',
-    '  "description": "Como <rol> quiero <objetivo> para <beneficio>",',
-    '  "preconditions": ["..."],',
-    '  "negatives": [{ "title": "...", "description": "...", "basedOn": "texto exacto del control o mensaje", "steps": [{ "content": "...", "expected": "..." }] }]',
-    "}",
+    "Devuelve EXCLUSIVAMENTE el objeto JSON que cumple este contrato canónico:",
+    recordingAiSchemaInstruction(),
+    "Cada sourceEvidenceRefs debe apuntar a refs event-N del modelo. No copies locators ni DOM.",
   ].join("\n");
 }
 
@@ -202,6 +301,10 @@ function asStringArray(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((v): v is string => typeof v === "string" && v.trim().length > 0) : [];
 }
 
+function isTechnicalStoryDescription(value: string): boolean {
+  return /(?:pantalla\s*\d+|screen(?:key)?|fingerprint|hash|[a-f0-9]{10,})/i.test(value);
+}
+
 /**
  * Asks the model for the story and the extra negatives.
  *
@@ -219,39 +322,49 @@ export async function enrichFromTrace(
   const narrative = renderWalkthrough(trace, segments);
   if (!ai) {
     onLog?.("[recording:ai] sin proveedor de IA; se conserva el escenario determinista");
-    return { narrative, story: null, extraNegatives: [] };
+    return { narrative, story: null, extraNegatives: [], aiProposals: [], aiRejected: [], schemaValid: false, fallbackUsed: true };
   }
 
   try {
+    const compact = buildCompactSemanticAiContext(trace, segments, happyPath);
+    onLog?.(`[recording:ai-context] beforeChars=${compact.beforeChars} afterChars=${compact.afterChars} beforeTokens≈${Math.ceil(compact.beforeChars / 4)} afterTokens≈${Math.ceil(compact.afterChars / 4)}`);
+    onLog?.(`[recording:generator-audit] provider=${ai.providerType} model=${ai.model} purpose=scenario_generation promptFile=src/recording/trace-ai-enricher.ts#buildUserPrompt schemaFile=src/recording/ai-scenario-contract.ts parserFile=src/recording/ai-scenario-contract.ts skillUsed=false canonicalScenarioGeneratorUsed=false recordingGenerator=src/recording/trace-ai-enricher.ts duplicatedLogic=goal-scoped-quality-gate`);
     const response = await ai.completeJson({
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: buildUserPrompt(narrative, happyPath) },
+        { role: "user", content: buildUserPrompt(compact.context, happyPath) },
       ],
       temperature: 0.2,
       requireJson: true,
+      requireJsonSchema: true,
+      jsonSchema: {
+        name: RECORDING_AI_SCENARIO_SCHEMA_NAME,
+        schema: RECORDING_AI_SCENARIO_SCHEMA as unknown as Record<string, unknown>,
+      },
       purpose: "scenario_generation",
     });
-    const parsed = response.parsedJson ?? {};
-    const title = typeof parsed.title === "string" ? parsed.title.trim() : "";
-    const description = typeof parsed.description === "string" ? parsed.description.trim() : "";
-    const negatives = Array.isArray(parsed.negatives) ? parsed.negatives : [];
-
-    onLog?.(`[recording:ai] historia reconstruida (${response.providerName}/${response.model})`);
-
+    const validation = validateRecordingAiScenarioResponse(response.parsedJson);
+    if (!validation.valid || !validation.value) {
+      throw new Error(`ai_provider_schema_invalid: ${validation.reason ?? "invalid canonical response"}`);
+    }
+    onLog?.(`[recording:ai] canonical response accepted provider=${response.providerName} model=${response.model} scenarios=${validation.value.scenarios.length} rejected=${validation.value.rejected.length} schemaValid=true`);
     return {
       narrative,
-      story:
-        title || description
-          ? { title, description, preconditions: asStringArray(parsed.preconditions) }
-          : null,
-      extraNegatives: parseNegatives(negatives, narrative, onLog),
+      story: null,
+      extraNegatives: [],
+      aiProposals: validation.value.scenarios,
+      aiRejected: validation.value.rejected,
+      schemaValid: true,
+      fallbackUsed: false,
+      usage: response.usage,
+      contextBeforeChars: compact.beforeChars,
+      contextAfterChars: compact.afterChars,
     };
   } catch (err) {
     onLog?.(
-      `[recording:ai] la IA no pudo enriquecer el recorrido (${err instanceof Error ? err.message : String(err)}); se conserva el escenario determinista`,
+      `[recording:ai] contrato rechazado o IA no disponible (${err instanceof Error ? err.message : String(err)}); se conserva el escenario determinista fallbackUsed=true`,
     );
-    return { narrative, story: null, extraNegatives: [] };
+    return { narrative, story: null, extraNegatives: [], aiProposals: [], aiRejected: [], schemaValid: false, fallbackUsed: true };
   }
 }
 
@@ -263,7 +376,9 @@ export function applyStory(scenario: RecordedScenario, result: TraceNarrativeRes
     // Capped here too: the model's title replaces the deterministic one, and nothing else
     // downstream would notice it exceeding what TestRail accepts.
     title: capTitle(result.story.title || scenario.title),
-    description: result.story.description || scenario.description,
+    description: result.story.description && !isTechnicalStoryDescription(result.story.description)
+      ? result.story.description
+      : scenario.description,
     preconditions: result.story.preconditions.length > 0 ? result.story.preconditions : scenario.preconditions,
   };
 }

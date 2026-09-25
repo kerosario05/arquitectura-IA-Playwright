@@ -1,0 +1,118 @@
+{
+  "id": "preview-001-consulta-de-prestamo",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Consulta de prestamo",
+  "planPath": "automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-consulta-de-prestamo\\plan.json",
+  "specPath": "automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-consulta-de-prestamo\\case.spec.ts",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "kiosko",
+  "createdAt": "2026-09-15T19:28:31.603Z",
+  "updatedAt": "2026-09-15T19:28:31.603Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-15T19-26-48-146Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "passed",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-15T19-26-48-146Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "specGeneration": {
+      "mode": "ai_hybrid",
+      "provider": "codex",
+      "model": "gpt-5.6-luna",
+      "skill": {
+        "name": "playwright-spec-generation",
+        "version": "1.0.0",
+        "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+        "loaded": true
+      },
+      "invocations": 1,
+      "invocationsConsumed": 1,
+      "durationMs": 81279,
+      "usage": {
+        "inputTokens": 57137,
+        "cachedInputTokens": 45312,
+        "cacheWriteInputTokens": 0,
+        "nonCachedInputTokens": 11825,
+        "outputTokens": 1807,
+        "reasoningOutputTokens": 635,
+        "totalPhysicalTokens": 58944,
+        "durationMs": 64171,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "traceFidelity": "passed",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "passed",
+        "functionalExecution": "skipped"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specGenerationAttempts": 1,
+      "specRepairAttempts": 0,
+      "firstPassPromotion": true,
+      "failedGatesAttempt1": [],
+      "regressedGates": [],
+      "missingRequirements": [],
+      "oracleTypes": [
+        "navigation_transition"
+      ],
+      "errors": [],
+      "warnings": [],
+      "finalSpec": {
+        "origin": "ai_candidate",
+        "generatedBy": "ai",
+        "strategy": "ai_candidate",
+        "fallback": null
+      },
+      "specWritten": true,
+      "previousSpec": {
+        "existed": false,
+        "hash": null,
+        "lastModifiedAt": null
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [],
+      "availablePageObjects": [
+        "ProductListPage",
+        "OperationsMenuPage",
+        "CategoryPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false,
+      "specPath": "automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-consulta-de-prestamo\\case.spec.ts",
+      "specHash": "6deaf6f208dc993abe382f4a3d317f2ba00f7113441df7355aabdfeaf1505aa2",
+      "specSource": "generatedSpec"
+    }
+  },
+  "promotionPersisted": true,
+  "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-consulta-de-prestamo\\case.spec.ts",
+  "promotedSpecHash": "6deaf6f208dc993abe382f4a3d317f2ba00f7113441df7355aabdfeaf1505aa2"
+}

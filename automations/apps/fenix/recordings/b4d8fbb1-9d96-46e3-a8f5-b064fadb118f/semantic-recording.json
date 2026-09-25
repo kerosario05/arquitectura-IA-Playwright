@@ -1,0 +1,1795 @@
+{
+  "version": "1.0",
+  "recordingId": "b4d8fbb1-9d96-46e3-a8f5-b064fadb118f",
+  "projectSlug": "fenix",
+  "appSlug": "fenix",
+  "platform": "web",
+  "recordingGoal": {
+    "declaredGoal": "AS",
+    "normalizedGoal": "AS",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "selectorOptionInventories": [],
+  "semanticScreens": [
+    {
+      "screenIdentity": "60d370b39a8d",
+      "url": "https://qa1.santacruz.do/onlinebanking",
+      "classification": "SAME_SCREEN_MUTATION",
+      "sourceScreenKey": "60d370b39a8d"
+    },
+    {
+      "screenIdentity": "6e9c348d2f25",
+      "url": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "6e9c348d2f25"
+    },
+    {
+      "screenIdentity": "6d4ca4abf402",
+      "url": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "6d4ca4abf402"
+    }
+  ],
+  "semanticComponents": [
+    {
+      "componentId": "60d370b39a8d:control:60d370b39a8d|Empresarial|link",
+      "componentType": "link",
+      "screenIdentity": "60d370b39a8d",
+      "label": "Empresarial",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-4"
+      ]
+    },
+    {
+      "componentId": "60d370b39a8d:control:60d370b39a8d|RNC:|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "60d370b39a8d",
+      "label": "RNC:",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-7"
+      ]
+    },
+    {
+      "componentId": "60d370b39a8d:control:60d370b39a8d|Usuario:|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "60d370b39a8d",
+      "label": "Usuario:",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-9"
+      ]
+    },
+    {
+      "componentId": "60d370b39a8d:control:60d370b39a8d|Contraseña:|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "60d370b39a8d",
+      "label": "Contraseña:",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-10",
+        "obs-11"
+      ]
+    },
+    {
+      "componentId": "60d370b39a8d:control:60d370b39a8d|SMS|control",
+      "componentType": "control",
+      "screenIdentity": "60d370b39a8d",
+      "label": "SMS",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-13"
+      ]
+    },
+    {
+      "componentId": "60d370b39a8d:control:60d370b39a8d|control|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "60d370b39a8d",
+      "label": "control",
+      "needsReview": true,
+      "reviewReason": "generic_control_label_without_structural_context",
+      "observationRefs": [
+        "obs-15",
+        "obs-18"
+      ]
+    }
+  ],
+  "semanticEvents": [
+    {
+      "eventRef": "event-1",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-2",
+      "action": "observe",
+      "screenIdentity": "60d370b39a8d",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-3",
+      "action": "observe",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "link",
+      "controlAffordance": "observable_control",
+      "technicalTargetRef": "60d370b39a8d:control:60d370b39a8d|Empresarial|link",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-4",
+      "action": "activate",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "link",
+      "controlAffordance": "observable_control",
+      "technicalTargetRef": "60d370b39a8d:control:role:link|Empresarial",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-5",
+      "action": "observe",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "controlAffordance": "editable",
+      "technicalTargetRef": "60d370b39a8d:control:60d370b39a8d|RNC:|amount_or_text",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-6",
+      "action": "observe",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "controlAffordance": "editable",
+      "technicalTargetRef": "60d370b39a8d:control:60d370b39a8d|Usuario:|amount_or_text",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-7",
+      "action": "fill",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "field": "RNC:",
+      "controlAffordance": "editable",
+      "valueKey": "rnc",
+      "valueRole": "action_input",
+      "technicalTargetRef": "60d370b39a8d:control:role:textbox|RNC:",
+      "afterState": "130287287",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-8",
+      "action": "observe",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "controlAffordance": "editable",
+      "technicalTargetRef": "60d370b39a8d:control:60d370b39a8d|Contraseña:|amount_or_text",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-9",
+      "action": "fill",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "field": "Usuario:",
+      "controlAffordance": "editable",
+      "valueKey": "usuario",
+      "valueRole": "action_input",
+      "technicalTargetRef": "60d370b39a8d:control:role:textbox|Usuario:",
+      "afterState": "stmoreno1",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-10",
+      "action": "fill",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "field": "Contraseña:",
+      "controlAffordance": "editable",
+      "valueKey": "contrasena",
+      "valueRole": "secure_input",
+      "technicalTargetRef": "60d370b39a8d:control:role:textbox|Contraseña:",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-11",
+      "action": "observe",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "controlAffordance": "editable",
+      "technicalTargetRef": "60d370b39a8d:control:role:textbox|Contraseña:",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-12",
+      "action": "navigate",
+      "screenIdentity": "60d370b39a8d",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-13",
+      "action": "activate",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "control",
+      "controlAffordance": "observable_control",
+      "technicalTargetRef": "60d370b39a8d:control:60d370b39a8d|SMS|control",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-14",
+      "action": "observe",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "controlAffordance": "editable",
+      "technicalTargetRef": "60d370b39a8d:control:60d370b39a8d|control|amount_or_text",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-15",
+      "action": "fill",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "controlAffordance": "editable",
+      "valueKey": "unresolved_value_15",
+      "valueRole": "action_input",
+      "technicalTargetRef": "60d370b39a8d:control:60d370b39a8d|control|amount_or_text",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-16",
+      "action": "observe",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "60d370b39a8d:control:60d370b39a8d|control|amount_or_text",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-17",
+      "action": "navigate",
+      "screenIdentity": "60d370b39a8d",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-18",
+      "action": "click",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "60d370b39a8d:control:60d370b39a8d|control|amount_or_text",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    }
+  ],
+  "datasets": [
+    {
+      "valueKey": "rnc",
+      "semanticField": "RNC:",
+      "valueRole": "action_input",
+      "value": "130287287",
+      "rawTypedValue": "130287287",
+      "committedValue": "130287287",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "60d370b39a8d:control:role:textbox|RNC:",
+      "recordingId": "b4d8fbb1-9d96-46e3-a8f5-b064fadb118f",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "usuario",
+      "semanticField": "Usuario:",
+      "valueRole": "action_input",
+      "value": "stmoreno1",
+      "rawTypedValue": "stmoreno1",
+      "committedValue": "stmoreno1",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "60d370b39a8d:control:role:textbox|Usuario:",
+      "recordingId": "b4d8fbb1-9d96-46e3-a8f5-b064fadb118f",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "contrasena",
+      "semanticField": "Contraseña:",
+      "valueRole": "secure_input",
+      "source": "secure",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": true,
+      "generated": false,
+      "instanceIdentity": "60d370b39a8d:control:role:textbox|Contraseña:",
+      "recordingId": "b4d8fbb1-9d96-46e3-a8f5-b064fadb118f",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "unresolved_value_15",
+      "semanticField": null,
+      "valueRole": "action_input",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.4,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "60d370b39a8d:control:60d370b39a8d|control|amount_or_text",
+      "recordingId": "b4d8fbb1-9d96-46e3-a8f5-b064fadb118f",
+      "needsReview": true,
+      "reviewReason": "generic_control_label_without_structural_context"
+    }
+  ],
+  "technicalObservations": [
+    {
+      "observationId": "obs-3",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "link",
+      "label": "Empresarial",
+      "tag": "a",
+      "role": "link",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "60d370b39a8d:control:60d370b39a8d|Empresarial|link",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-4",
+      "status": "VALIDATED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "link",
+      "label": "Empresarial",
+      "tag": "a",
+      "role": "link",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "link|Empresarial",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "link|Empresarial",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a"
+            },
+            "stableDirectAttributes": {
+              "href": "#empresarial"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "login-box-parent"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#empresarial\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "60d370b39a8d:control:role:link|Empresarial",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-5",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "label": "RNC:",
+      "tag": "input",
+      "role": "textbox",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "60d370b39a8d:control:60d370b39a8d|RNC:|amount_or_text",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-6",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "label": "Usuario:",
+      "tag": "input",
+      "role": "textbox",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "60d370b39a8d:control:60d370b39a8d|Usuario:|amount_or_text",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-7",
+      "status": "VALIDATED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "label": "RNC:",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "130287287",
+      "semanticField": "RNC:",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|RNC:",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#Enterprise",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "Enterprise",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "60d370b39a8d:control:role:textbox|RNC:",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-1",
+      "inputValue": "130287287",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-8",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "label": "Contraseña:",
+      "tag": "input",
+      "role": "textbox",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "60d370b39a8d:control:60d370b39a8d|Contraseña:|amount_or_text",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-9",
+      "status": "VALIDATED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "label": "Usuario:",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "stmoreno1",
+      "semanticField": "Usuario:",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Usuario:",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#UserNameE",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "UserNameE",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "60d370b39a8d:control:role:textbox|Usuario:",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-2",
+      "inputValue": "stmoreno1",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-10",
+      "status": "VALIDATED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "label": "Contraseña:",
+      "tag": "input",
+      "role": "input",
+      "semanticField": "Contraseña:",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Contraseña:",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#PasswordE",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "PasswordE",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "60d370b39a8d:control:role:textbox|Contraseña:",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-3",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-11",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "label": "Contraseña:",
+      "tag": "input",
+      "role": "textbox",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Contraseña:",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#PasswordE",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "PasswordE",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "60d370b39a8d:control:role:textbox|Contraseña:",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-13",
+      "status": "VALIDATED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "control",
+      "label": "SMS",
+      "tag": "div",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "60d370b39a8d:control:60d370b39a8d|SMS|control",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-14",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "label": "control",
+      "tag": "input",
+      "role": "textbox",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "60d370b39a8d:control:60d370b39a8d|control|amount_or_text",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-15",
+      "status": "VALIDATED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "label": "control",
+      "tag": "input",
+      "role": "input",
+      "needsReview": true,
+      "reviewReason": "generic_control_label_without_structural_context",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "60d370b39a8d:control:60d370b39a8d|control|amount_or_text",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-4",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-16",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "button",
+      "label": "control",
+      "tag": "input",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "60d370b39a8d:control:60d370b39a8d|control|amount_or_text",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-18",
+      "status": "VALIDATED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "button",
+      "label": "control",
+      "tag": "input",
+      "role": "button",
+      "locatorCandidates": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "input"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "deterministicStructuralIdentity": false,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "IdentifyUserForm"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"input\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.4,
+      "technicalTargetRef": "60d370b39a8d:control:60d370b39a8d|control|amount_or_text",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "\n             Personal\n        ",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "\n             Personal\n        ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "\n             Empresarial\n        ",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "\n             Empresarial\n        ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "label": "RNC:",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "Enterprise",
+        "name": "Enterprise",
+        "type": "text",
+        "placeholder": "RNC"
+      },
+      "placeholder": "RNC",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "Enterprise",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "60d370b39a8d:control:3",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "label": "Usuario:",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "UserNameE",
+        "name": "UserName",
+        "type": "text",
+        "placeholder": "Usuario"
+      },
+      "placeholder": "Usuario",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "UserNameE",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "60d370b39a8d:control:4",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "label": "Contraseña:",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "PasswordE",
+        "name": "Password",
+        "type": "password",
+        "placeholder": "Contraseña"
+      },
+      "placeholder": "Contraseña",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "PasswordE",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "60d370b39a8d:control:5",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "¿Olvidó su contraseña?",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "id": "forgotPasswordLnk"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "forgotPasswordLnk",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "60d370b39a8d:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "button",
+      "label": "Iniciar sesión",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "submit"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Iniciar sesión",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "Regístrate",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Regístrate",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "Derechos y Deberes como usuarios financieros",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Derechos y Deberes como usuarios financieros",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "\n             \n        ",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "\n             \n        ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "Inicio -",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Inicio - ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "Quiénes Somos -",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Quiénes Somos - ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-13",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "Productos -",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Productos - ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:13",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-14",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "Contactos -",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Contactos -",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:14",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-15",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "Tarifas de Servicio -",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Tarifas de Servicio -",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:15",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-16",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "Pasos Reclamación",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Pasos Reclamación ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:16",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-17",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "© 2026 Banco Santa Cruz, República Dominicana",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "© 2026 Banco Santa Cruz, República Dominicana",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:17",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-18",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "Powered by Sistemas Integrados de Informática",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Powered by Sistemas Integrados de Informática",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:18",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-6e9c348d2f25-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "6e9c348d2f25",
+      "componentType": "a",
+      "label": "Cancelar",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Cancelar",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "6e9c348d2f25:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-6e9c348d2f25-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "6e9c348d2f25",
+      "componentType": "a",
+      "label": "Inicio -",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Inicio - ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "6e9c348d2f25:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-6e9c348d2f25-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "6e9c348d2f25",
+      "componentType": "a",
+      "label": "Quiénes Somos -",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Quiénes Somos - ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "6e9c348d2f25:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-6e9c348d2f25-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "6e9c348d2f25",
+      "componentType": "a",
+      "label": "Productos -",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Productos - ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "6e9c348d2f25:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-6e9c348d2f25-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "6e9c348d2f25",
+      "componentType": "a",
+      "label": "Contactos -",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Contactos -",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "6e9c348d2f25:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-6e9c348d2f25-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "6e9c348d2f25",
+      "componentType": "a",
+      "label": "Tarifas de Servicio -",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Tarifas de Servicio -",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "6e9c348d2f25:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-6e9c348d2f25-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "6e9c348d2f25",
+      "componentType": "a",
+      "label": "Pasos Reclamación",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Pasos Reclamación ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "6e9c348d2f25:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-6e9c348d2f25-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "6e9c348d2f25",
+      "componentType": "a",
+      "label": "© 2026 Banco Santa Cruz, República Dominicana",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "© 2026 Banco Santa Cruz, República Dominicana",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "6e9c348d2f25:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-6e9c348d2f25-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "6e9c348d2f25",
+      "componentType": "a",
+      "label": "Powered by Sistemas Integrados de Informática",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Powered by Sistemas Integrados de Informática",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "6e9c348d2f25:control:9",
+      "selectable": false,
+      "editable": false
+    }
+  ],
+  "editingSessions": [
+    {
+      "editingSessionId": "edit-1",
+      "controlIdentity": "60d370b39a8d|RNC:|amount_or_text",
+      "screenIdentity": "60d370b39a8d",
+      "startedAt": 13392,
+      "endedAt": 16781,
+      "rawEventRefs": [
+        "event-5",
+        "event-7"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "60d370b39a8d:60d370b39a8d|RNC:|amount_or_text",
+        "60d370b39a8d:role:textbox|RNC:"
+      ],
+      "inputValue": "130287287",
+      "finalValue": "130287287"
+    },
+    {
+      "editingSessionId": "edit-2",
+      "controlIdentity": "60d370b39a8d|Usuario:|amount_or_text",
+      "screenIdentity": "60d370b39a8d",
+      "startedAt": 16336,
+      "endedAt": 18476,
+      "rawEventRefs": [
+        "event-6",
+        "event-9"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "60d370b39a8d:60d370b39a8d|Usuario:|amount_or_text",
+        "60d370b39a8d:role:textbox|Usuario:"
+      ],
+      "inputValue": "stmoreno1",
+      "finalValue": "stmoreno1"
+    },
+    {
+      "editingSessionId": "edit-3",
+      "controlIdentity": "60d370b39a8d|Contraseña:|amount_or_text",
+      "screenIdentity": "60d370b39a8d",
+      "startedAt": 18060,
+      "endedAt": 25454,
+      "rawEventRefs": [
+        "event-8",
+        "event-10"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "60d370b39a8d:60d370b39a8d|Contraseña:|amount_or_text",
+        "60d370b39a8d:role:textbox|Contraseña:"
+      ]
+    },
+    {
+      "editingSessionId": "edit-4",
+      "controlIdentity": "60d370b39a8d|control|amount_or_text",
+      "screenIdentity": "60d370b39a8d",
+      "startedAt": 59819,
+      "endedAt": 71187,
+      "rawEventRefs": [
+        "event-14",
+        "event-15",
+        "event-16",
+        "event-17",
+        "event-18",
+        "event-19",
+        "event-20",
+        "event-22"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "60d370b39a8d:60d370b39a8d|control|amount_or_text"
+      ]
+    }
+  ],
+  "scenarioSuggestions": [],
+  "canonicalInteractions": [
+    {
+      "id": "interaction-1",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-1"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "https://qa1.santacruz.do/onlinebanking",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-4",
+      "controlIdentity": "60d370b39a8d|Empresarial|role|link|Empresarial",
+      "semanticField": "Empresarial",
+      "action": "click",
+      "valueKey": "empresarial",
+      "sourceEventRefs": [
+        "event-4"
+      ],
+      "technicalTargetRefs": [
+        "role:link|Empresarial"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "link|Empresarial",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a"
+            },
+            "stableDirectAttributes": {
+              "href": "#empresarial"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "login-box-parent"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#empresarial\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "playwrightRecorderEvidence": {
+        "kind": "role",
+        "role": "link",
+        "normalizedName": "Empresarial",
+        "targetTag": "a",
+        "scopeIdentity": {
+          "strategy": "id",
+          "value": "login-box-parent"
+        },
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true
+      },
+      "description": "Ingresar en \"Empresarial\"",
+      "screenBeforeRef": "60d370b39a8d",
+      "screenAfterRef": "60d370b39a8d",
+      "routeBefore": "https://qa1.santacruz.do/onlinebanking",
+      "stateScope": "60d370b39a8d",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-7",
+      "controlIdentity": "60d370b39a8d|RNC:|role|textbox|RNC:",
+      "semanticField": "RNC:",
+      "action": "fill",
+      "valueKey": "rnc",
+      "recordedValue": "130287287",
+      "sourceEventRefs": [
+        "event-7"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|RNC:",
+        "css:#Enterprise",
+        "id:Enterprise"
+      ],
+      "editingSessionRef": "edit-1",
+      "description": "Ingresar en \"RNC:\"",
+      "screenBeforeRef": "60d370b39a8d",
+      "screenAfterRef": "60d370b39a8d",
+      "routeBefore": "https://qa1.santacruz.do/onlinebanking",
+      "stateScope": "60d370b39a8d",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-9",
+      "controlIdentity": "60d370b39a8d|Usuario:|role|textbox|Usuario:",
+      "semanticField": "Usuario:",
+      "action": "fill",
+      "valueKey": "usuario",
+      "recordedValue": "stmoreno1",
+      "sourceEventRefs": [
+        "event-9"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Usuario:",
+        "css:#UserNameE",
+        "id:UserNameE"
+      ],
+      "editingSessionRef": "edit-2",
+      "description": "Ingresar en \"Usuario:\"",
+      "screenBeforeRef": "60d370b39a8d",
+      "screenAfterRef": "60d370b39a8d",
+      "routeBefore": "https://qa1.santacruz.do/onlinebanking",
+      "stateScope": "60d370b39a8d",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-10",
+      "controlIdentity": "60d370b39a8d|Contraseña:|role|textbox|Contraseña:",
+      "semanticField": "Contraseña:",
+      "action": "fill",
+      "valueKey": "contrasena",
+      "sourceEventRefs": [
+        "event-10"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Contraseña:",
+        "css:#PasswordE",
+        "id:PasswordE"
+      ],
+      "editingSessionRef": "edit-3",
+      "description": "Ingresar en \"Contraseña:\"",
+      "screenBeforeRef": "60d370b39a8d",
+      "screenAfterRef": "60d370b39a8d",
+      "routeBefore": "https://qa1.santacruz.do/onlinebanking",
+      "stateScope": "60d370b39a8d",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-11",
+      "controlIdentity": "60d370b39a8d|Contraseña:|role|textbox|Contraseña:",
+      "action": "press",
+      "key": "Enter",
+      "sourceEventRefs": [
+        "event-11"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Contraseña:",
+        "css:#PasswordE",
+        "id:PasswordE"
+      ],
+      "screenBeforeRef": "60d370b39a8d",
+      "screenAfterRef": "60d370b39a8d",
+      "routeBefore": "https://qa1.santacruz.do/onlinebanking",
+      "routeAfter": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+      "stateScope": "60d370b39a8d",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-13",
+      "controlIdentity": "60d370b39a8d|SMS",
+      "semanticField": "SMS",
+      "action": "click",
+      "valueKey": "sms",
+      "sourceEventRefs": [
+        "event-13"
+      ],
+      "technicalTargetRefs": [],
+      "playwrightRecorderEvidence": {
+        "kind": "text",
+        "normalizedName": "SMS",
+        "targetTag": "div",
+        "scopeIdentity": {
+          "strategy": "id",
+          "value": "IdentifyUserForm"
+        },
+        "runtimeResolutionRequired": true
+      },
+      "description": "Ingresar en \"SMS\"",
+      "screenBeforeRef": "60d370b39a8d",
+      "screenAfterRef": "60d370b39a8d",
+      "routeBefore": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+      "stateScope": "60d370b39a8d",
+      "admissionStatus": "accepted",
+      "resolutionState": "runtime_resolution_required",
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-15",
+      "controlIdentity": "60d370b39a8d|control",
+      "action": "fill",
+      "sourceEventRefs": [
+        "event-15"
+      ],
+      "technicalTargetRefs": [],
+      "editingSessionRef": "edit-4",
+      "playwrightRecorderEvidence": {
+        "kind": "segmented_input",
+        "targetTag": "input",
+        "scopeIdentity": {
+          "strategy": "id",
+          "value": "IdentifyUserForm"
+        },
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true,
+        "segmentCount": 6
+      },
+      "screenBeforeRef": "60d370b39a8d",
+      "screenAfterRef": "60d370b39a8d",
+      "routeBefore": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "stateScope": "60d370b39a8d",
+      "admissionStatus": "unresolved",
+      "admissionReason": "segmented_input_runtime_resolution_required",
+      "resolutionState": "runtime_resolution_required",
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-18",
+      "controlIdentity": "60d370b39a8d|control",
+      "action": "click",
+      "sourceEventRefs": [
+        "event-18"
+      ],
+      "technicalTargetRefs": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "input"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "deterministicStructuralIdentity": false,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "IdentifyUserForm"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"input\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "screenBeforeRef": "60d370b39a8d",
+      "screenAfterRef": "60d370b39a8d",
+      "routeBefore": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+      "routeAfter": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+      "stateScope": "60d370b39a8d",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "admissionStatus": "unresolved",
+      "admissionReason": "generic_label_without_technical_identity",
+      "resolutionState": "runtime_resolution_required",
+      "confidence": 0.7
+    }
+  ],
+  "gridMetadata": {
+    "detected": true,
+    "grids": 1,
+    "rows": 0,
+    "cells": 0,
+    "headers": [],
+    "headerRelationships": []
+  },
+  "source": "SessionTrace"
+}

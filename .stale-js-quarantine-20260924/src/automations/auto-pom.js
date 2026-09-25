@@ -1,0 +1,423 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.resolveEffectiveAutoPomStatus = resolveEffectiveAutoPomStatus;
+exports.shouldRunAutoPom = shouldRunAutoPom;
+exports.runAutoPomPipeline = runAutoPomPipeline;
+exports.validatePomSpec = validatePomSpec;
+const promises_1 = __importDefault(require("node:fs/promises"));
+const node_fs_1 = __importDefault(require("node:fs"));
+const node_path_1 = __importDefault(require("node:path"));
+const page_object_codegen_1 = require("./page-object-codegen");
+const page_object_approval_1 = require("./page-object-approval");
+const page_object_registry_1 = require("./page-object-registry");
+const spec_generator_1 = require("./spec-generator");
+function resolveEffectiveAutoPomStatus(finalPomStatus) {
+    return finalPomStatus;
+}
+function buildAutoPomMethodStub(methodName, intent) {
+    if (intent === "select_first_visible_card" || methodName === "selectFirstVisibleCard") {
+        return [
+            "  async selectFirstVisibleCard(): Promise<void> {",
+            "    await waitForListReadiness(this.page, { timeoutMs: 10000, pollMs: 500, minCards: 1 });",
+            "    const card = this.page.locator('[class*=\"card\"]:visible, article:visible').first();",
+            "    if (await card.count() === 0) throw new Error('No visible card found to select.');",
+            "    await card.click({ timeout: 10000 });",
+            "  }"
+        ].join("\n");
+    }
+    if (intent === "select_first_visible_product" || methodName === "selectFirstVisibleProduct") {
+        return [
+            "  async selectFirstVisibleProduct(): Promise<void> {",
+            "    await waitForListReadiness(this.page, { timeoutMs: 10000, pollMs: 500, minCards: 1 });",
+            "    const productCard = this.page.locator('article:visible, [class*=\"product\"]:visible, [class*=\"card\"]:visible').first();",
+            "    if (await productCard.count() === 0) throw new Error('No visible product card found to select.');",
+            "    await productCard.click({ timeout: 10000 });",
+            "  }"
+        ].join("\n");
+    }
+    if (intent === "select_first_visible_item" || methodName === "selectFirstVisibleItem") {
+        return [
+            "  async selectFirstVisibleItem(): Promise<void> {",
+            "    await waitForListReadiness(this.page, { timeoutMs: 10000, pollMs: 500, minCards: 1 });",
+            "    const item = this.page.locator('article:visible, [class*=\"item\"]:visible, [role=\"listitem\"]:visible').first();",
+            "    if (await item.count() === 0) throw new Error('No visible item found to select.');",
+            "    await item.click({ timeout: 10000 });",
+            "  }"
+        ].join("\n");
+    }
+    if (intent === "select_first_visible_row" || methodName === "selectFirstVisibleRow") {
+        return [
+            "  async selectFirstVisibleRow(): Promise<void> {",
+            "    await waitForListReadiness(this.page, { timeoutMs: 10000, pollMs: 500, minCards: 1 });",
+            "    const row = this.page.locator('tr:visible, [role=\"row\"]:visible').first();",
+            "    if (await row.count() === 0) throw new Error('No visible row found to select.');",
+            "    await row.click({ timeout: 10000 });",
+            "  }"
+        ].join("\n");
+    }
+    if (intent === "select_visible_item_by_ordinal" || methodName === "selectVisibleItemByOrdinal") {
+        return [
+            "  async selectVisibleItemByOrdinal(ordinal: 'first' | 'second' | 'third', domainTerm?: string): Promise<void> {",
+            "    await waitForListReadiness(this.page, { timeoutMs: 10000, pollMs: 500, minCards: 1 });",
+            "    const ordinalNum = ordinal === 'first' ? 0 : ordinal === 'second' ? 1 : ordinal === 'third' ? 2 : -1;",
+            "    if (ordinalNum < 0) throw new Error('Unsupported ordinal: ' + ordinal);",
+            "    let items = this.page.locator('article:visible, [role=\"listitem\"]:visible, [class*=\"product\"]:visible, [class*=\"card\"]:visible, [class*=\"item\"]:visible').filter({ hasNotText: /selecciona un producto|seleccione un producto|elige un producto|choose a product|select a product/i });",
+            "    if (domainTerm) {",
+            "      const escaped = domainTerm.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');",
+            "      items = items.filter({ hasText: new RegExp(escaped, 'i') });",
+            "    }",
+            "    const count = await items.count();",
+            "    if (count === 0) throw new Error('No visible items found for ordinal selection.');",
+            "    if (ordinalNum >= count) throw new Error(`Ordinal ${ordinal} (${ordinalNum + 1}) exceeds available items (${count}).`);",
+            "    const item = items.nth(ordinalNum);",
+            "    const actionable = item.locator('a:visible, button:visible, [role=\"button\"]:visible').first();",
+            "    if (await actionable.count() > 0) { await actionable.click({ timeout: 10000 }); return; }",
+            "    await item.click({ timeout: 10000 });",
+            "  }"
+        ].join("\n");
+    }
+    if (intent === "expect_primary_action_visible" || methodName === "expectPrimaryActionVisible") {
+        return [
+            "  async expectPrimaryActionVisible(actionName: string): Promise<void> {",
+            "    const actionKeywords = new RegExp(actionName, 'i');",
+            "    const button = this.page.getByRole('button', { name: actionKeywords }).first();",
+            "    const link = this.page.getByRole('link', { name: actionKeywords }).first();",
+            "    const locator = button.or(link);",
+            "    await locator.waitFor({ state: 'visible', timeout: 10000 });",
+            "    await expect(locator).toBeVisible();",
+            "  }"
+        ].join("\n");
+    }
+    if (intent === "expect_primary_action_enabled" || methodName === "expectPrimaryActionEnabled") {
+        return [
+            "  async expectPrimaryActionEnabled(actionName: string): Promise<void> {",
+            "    const actionKeywords = new RegExp(actionName, 'i');",
+            "    const button = this.page.getByRole('button', { name: actionKeywords }).first();",
+            "    const link = this.page.getByRole('link', { name: actionKeywords }).first();",
+            "    const locator = button.or(link);",
+            "    await locator.waitFor({ state: 'visible', timeout: 10000 });",
+            "    await expect(locator).toBeEnabled();",
+            "  }"
+        ].join("\n");
+    }
+    if (intent === "expect_primary_action_disabled" || methodName === "expectPrimaryActionDisabled") {
+        return [
+            "  async expectPrimaryActionDisabled(actionName: string): Promise<void> {",
+            "    const actionKeywords = new RegExp(actionName, 'i');",
+            "    const button = this.page.getByRole('button', { name: actionKeywords }).first();",
+            "    const link = this.page.getByRole('link', { name: actionKeywords }).first();",
+            "    const locator = button.or(link);",
+            "    await locator.waitFor({ state: 'visible', timeout: 10000 });",
+            "    await expect(locator).toBeDisabled();",
+            "  }"
+        ].join("\n");
+    }
+    return undefined;
+}
+function shouldRunAutoPom(pomStatus, policy) {
+    if (!policy.autoPom)
+        return false;
+    if (pomStatus === "promoted" || pomStatus === "inline_debug_only")
+        return false;
+    const autoPomTriggerStatuses = [
+        "needs_page_object",
+        "needs_page_method",
+        "blocked_missing_pom",
+        "page_object_candidate_created"
+    ];
+    return autoPomTriggerStatuses.includes(pomStatus);
+}
+async function runAutoPomPipeline(input) {
+    const policy = input.promotionPolicy;
+    const diagnostics = {
+        enabled: true,
+        initialPomStatus: input.initialPomStatus ?? "unknown",
+        generatedCandidateFiles: [],
+        autoApprovedPageObjects: [],
+        autoApprovedMethods: [],
+        blockedAutoApprovals: [],
+        approvalThreshold: policy.autoApproveConfidenceThreshold ?? 0.50,
+        regeneratedSpec: false,
+        validationStatus: "skipped",
+        finalPomStatus: input.initialPomStatus ?? "needs_manual_review"
+    };
+    console.log(`[auto-pom] Using appSlug=${input.appProfile.appSlug}`);
+    console.log(`[auto-pom] Enabled: true`);
+    console.log(`[auto-pom] Auto-generate candidates: ${policy.autoGeneratePageObjectCandidates !== false}`);
+    console.log(`[auto-pom] Auto-approve safe Page Objects: ${policy.autoApproveSafePageObjects !== false}`);
+    console.log(`[auto-pom] Threshold: ${diagnostics.approvalThreshold}`);
+    console.log(`[auto-pom] Running because promotion status is ${input.initialPomStatus}.`);
+    // Step 1: Generate candidate files if needed
+    if (policy.autoGeneratePageObjectCandidates !== false) {
+        console.log(`[auto-pom] Generating candidate files...`);
+        const codegenResult = await (0, page_object_codegen_1.generatePageObjectCandidateFiles)({
+            appSlug: input.appProfile.appSlug,
+            outputRoot: input.outputRoot,
+            dryRun: false,
+            overwriteCandidates: true
+        });
+        for (const file of codegenResult.files) {
+            if (file.status === "generated") {
+                diagnostics.generatedCandidateFiles.push(file.filePath);
+                console.log(`[auto-pom] Generated candidate file: ${file.filePath}`);
+            }
+        }
+        for (const err of codegenResult.errors) {
+            console.log(`[auto-pom] Codegen error: ${err}`);
+        }
+    }
+    // Step 2: Auto-approve safe candidates
+    if (policy.autoApproveSafePageObjects !== false) {
+        console.log(`[auto-pom] Auto-approving safe candidates...`);
+        const approvalResult = await (0, page_object_approval_1.autoApproveSafePageObjects)(input.appProfile.appSlug, input.outputRoot, {
+            approveAll: true,
+            overwriteActive: true,
+            dryRun: false,
+            confidenceThreshold: policy.autoApproveConfidenceThreshold ?? 0.50,
+            blockSensitive: policy.blockSensitiveAutoApproval !== false
+        });
+        for (const file of approvalResult.files) {
+            if (file.status === "approved") {
+                diagnostics.autoApprovedPageObjects.push(file.className);
+                console.log(`[auto-pom] Approved ${file.className}`);
+            }
+        }
+        diagnostics.autoApprovedMethods.push(...approvalResult.autoApprovedMethods);
+        for (const method of approvalResult.autoApprovedMethods) {
+            console.log(`[auto-pom] Approved ${method}`);
+        }
+        diagnostics.blockedAutoApprovals.push(...approvalResult.blockedAutoApprovals);
+        for (const blocked of approvalResult.blockedAutoApprovals) {
+            console.log(`[auto-pom] Blocked ${blocked}`);
+        }
+        for (const err of approvalResult.errors) {
+            console.log(`[auto-pom] Approval error: ${err}`);
+        }
+    }
+    // Step 2.5: Auto-approve safe candidate methods inside already-active Page Objects.
+    {
+        const registry = await (0, page_object_registry_1.loadPageObjectRegistry)(input.appProfile, input.outputRoot);
+        const threshold = policy.autoApproveConfidenceThreshold ?? 0.50;
+        const blockSensitive = policy.blockSensitiveAutoApproval !== false;
+        let approvedMethodCount = 0;
+        for (const po of registry.pageObjects) {
+            if (po.status !== "active")
+                continue;
+            let poApprovedMethods = 0;
+            for (const method of po.methods) {
+                if (method.status === "active" && method.available)
+                    continue;
+                const check = (0, page_object_approval_1.isMethodAutoApprovable)(method, { confidenceThreshold: threshold, blockSensitive });
+                if (!check.approvable) {
+                    diagnostics.blockedAutoApprovals.push(`${po.className}.${method.name}(): ${check.reason}`);
+                    continue;
+                }
+                method.status = "active";
+                method.available = true;
+                diagnostics.autoApprovedMethods.push(`${po.className}.${method.name}()`);
+                approvedMethodCount += 1;
+                poApprovedMethods += 1;
+            }
+            if (poApprovedMethods > 0) {
+                const baseName = po.className.replace(/Page$/, "").toLowerCase().replace(/-/g, "");
+                const candidatePath = node_path_1.default.join(input.appPaths.pagesDir, `${baseName}.page.candidate.ts`);
+                const activePath = node_path_1.default.join(input.appPaths.pagesDir, `${baseName}.page.ts`);
+                try {
+                    await promises_1.default.access(candidatePath);
+                    await promises_1.default.copyFile(candidatePath, activePath);
+                    po.filePath = activePath.replace(/\\/g, "/");
+                }
+                catch {
+                    // Candidate file may not exist. Inject known safe stubs into active file when missing.
+                    try {
+                        let source = await promises_1.default.readFile(activePath, "utf-8");
+                        let changed = false;
+                        for (const method of po.methods) {
+                            if (!(method.status === "active" && method.available))
+                                continue;
+                            const methodRegex = new RegExp(`\\b${method.name}\\s*\\(`);
+                            if (methodRegex.test(source))
+                                continue;
+                            const stub = buildAutoPomMethodStub(method.name, method.intent);
+                            if (!stub)
+                                continue;
+                            const insertAt = source.lastIndexOf("}");
+                            if (insertAt <= 0)
+                                continue;
+                            source = `${source.slice(0, insertAt).trimEnd()}\n\n${stub}\n${source.slice(insertAt)}`;
+                            changed = true;
+                        }
+                        if (changed) {
+                            await promises_1.default.writeFile(activePath, source, "utf-8");
+                            po.filePath = activePath.replace(/\\/g, "/");
+                        }
+                    }
+                    catch {
+                        // Keep registry activation only if file injection fails.
+                    }
+                }
+            }
+        }
+        if (approvedMethodCount > 0) {
+            await (0, page_object_registry_1.savePageObjectRegistry)(registry, input.appProfile, input.outputRoot);
+            console.log(`[auto-pom] Auto-approved ${approvedMethodCount} safe method(s) in active Page Objects.`);
+        }
+    }
+    // Step 3: Regenerate spec with updated registry
+    console.log(`[auto-pom] Regenerating POM spec...`);
+    const registry = await (0, page_object_registry_1.loadPageObjectRegistry)(input.appProfile, input.outputRoot);
+    const authFlowMetadata = input.plan.metadata?.authFlowRequired
+        ? {
+            alias: input.plan.metadata.authFlowAlias || "defaultClient",
+            landing: input.plan.metadata.authFlowLanding || "transactions_menu",
+            insertionAfterStepIndex: input.plan.metadata.authFlowInsertionAfterStepIndex
+        }
+        : undefined;
+    const hasAuthConsumedSteps = !authFlowMetadata && input.plan.steps.some(s => {
+        const desc = (s.description ?? "").toLowerCase();
+        return desc.startsWith("authflow handled") || desc.includes("step consumed by authflow");
+    });
+    const authFlowOptions = authFlowMetadata ?? (hasAuthConsumedSteps ? {
+        alias: "defaultClient",
+        landing: "transactions_menu"
+    } : undefined);
+    const specResult = await (0, spec_generator_1.generateSpecFromPlanWithPolicy)({
+        plan: input.plan,
+        automationId: input.automationId,
+        appProfile: input.appProfile,
+        appPaths: input.appPaths,
+        sectionSlug: input.sectionSlug,
+        scenarioId: input.scenarioId,
+        promotionPolicy: policy,
+        inlineDebugMode: input.inlineDebugMode,
+        pageObjectRegistry: registry,
+        authFlowOptions
+    });
+    diagnostics.regeneratedSpec = true;
+    // Step 4: Validate spec
+    if (policy.autoRunPomValidation !== false) {
+        console.log(`[auto-pom] Validating POM spec...`);
+        const validation = validatePomSpec(specResult.specContent, registry, input.appPaths);
+        diagnostics.validationStatus = validation.valid ? "passed" : "failed";
+        if (!validation.valid) {
+            console.log(`[auto-pom] POM validation failed: ${validation.errors.join("; ")}`);
+            diagnostics.finalPomStatus = "needs_manual_review";
+            return {
+                success: false,
+                pomStatus: resolveEffectiveAutoPomStatus(diagnostics.finalPomStatus),
+                specContent: specResult.specContent,
+                diagnostics
+            };
+        }
+        console.log(`[auto-pom] POM validation passed.`);
+    }
+    // Step 5: Determine final status
+    if (specResult.pomStatus === "promoted") {
+        diagnostics.finalPomStatus = "promoted";
+        console.log(`[auto-pom] Final POM status: promoted`);
+    }
+    else if (specResult.missingMethods.length > 0) {
+        const hasBlockedSensitive = diagnostics.blockedAutoApprovals.length > 0;
+        if (hasBlockedSensitive) {
+            diagnostics.finalPomStatus = "needs_manual_review";
+            console.log(`[auto-pom] Final POM status: needs_manual_review (sensitive methods blocked)`);
+        }
+        else {
+            diagnostics.finalPomStatus = "needs_page_method";
+            console.log(`[auto-pom] Final POM status: needs_page_method`);
+        }
+    }
+    else {
+        diagnostics.finalPomStatus = "promoted";
+        console.log(`[auto-pom] Final POM status: promoted`);
+    }
+    return {
+        success: diagnostics.finalPomStatus === "promoted",
+        pomStatus: resolveEffectiveAutoPomStatus(diagnostics.finalPomStatus),
+        specContent: specResult.specContent,
+        diagnostics
+    };
+}
+function validatePomSpec(specContent, registry, appPaths) {
+    const errors = [];
+    const importRegex = /import\s*\{\s*(\w+)\s*\}\s*from\s*['"]([^'"]+)['"]/g;
+    let match;
+    const importedClasses = [];
+    while ((match = importRegex.exec(specContent)) !== null) {
+        const className = match[1];
+        const importPath = match[2];
+        if (importPath.startsWith('@') || !importPath.startsWith('.')) {
+            continue;
+        }
+        importedClasses.push(className);
+        if (importPath.includes(".candidate")) {
+            const baseName = importPath.replace(/\.candidate(\.ts)?$/, "$1").replace(/\.ts$/, ".ts");
+            const pagesDir = node_path_1.default.dirname(appPaths.specPath ?? "").replace(/cases\/[^/]+$/, "pages");
+            const activeFileExists = node_fs_1.default.existsSync(node_path_1.default.join(pagesDir, baseName.replace(/^\.\.\//, "")));
+            const candidateFileExists = node_fs_1.default.existsSync(node_path_1.default.join(pagesDir, importPath.replace(/^\.\.\//, "")));
+            let registryStatus = "unknown";
+            if (registry) {
+                const po = registry.pageObjects.find((p) => p.className === className);
+                if (po) {
+                    registryStatus = po.status;
+                }
+            }
+            errors.push(`Invalid candidate import: className=${className} importPath=${importPath} ` +
+                `activeFileExists=${activeFileExists} candidateFileExists=${candidateFileExists} ` +
+                `registryStatus=${registryStatus} suggestedRepair=use ${baseName}`);
+        }
+        const isSupportImport = importPath.includes("/src/config/") ||
+            importPath.includes("/src/data") ||
+            importPath.includes("/src/automations/app-profile") ||
+            importPath.includes("/src/automations/runtime/");
+        if (!isSupportImport && !importPath.endsWith(".page") && !importPath.endsWith(".page.ts") && !importPath.includes(".flow")) {
+            errors.push(`Import '${className}' does not point to a .page file: ${importPath}`);
+        }
+    }
+    const methodCallRegex = /await\s+(\w+)\.(\w+)\s*\(/g;
+    const calledMethods = [];
+    while ((match = methodCallRegex.exec(specContent)) !== null) {
+        calledMethods.push({ varName: match[1], methodName: match[2] });
+    }
+    if (registry) {
+        for (const called of calledMethods) {
+            const po = registry.pageObjects.find((p) => p.className.charAt(0).toLowerCase() + p.className.slice(1) === called.varName);
+            if (po) {
+                const method = po.methods.find((m) => m.name === called.methodName);
+                if (!method) {
+                    errors.push(`Method '${called.methodName}' not found in ${po.className}`);
+                }
+                else if (method.status !== "active" || !method.available) {
+                    errors.push(`Method '${po.className}.${called.methodName}' is not active/available (status: ${method.status}, available: ${method.available})`);
+                }
+            }
+        }
+    }
+    const inlineLocatorPatterns = [
+        /page\.getByRole\s*\(/,
+        /page\.getByText\s*\(/,
+        /page\.getByLabel\s*\(/,
+        /page\.getByPlaceholder\s*\(/,
+        /page\.getByTestId\s*\(/,
+        /page\.locator\s*\(/
+    ];
+    const specLines = specContent.split("\n");
+    for (const line of specLines) {
+        const trimmed = line.trim();
+        if (trimmed.startsWith("//") || trimmed.startsWith("import"))
+            continue;
+        for (const pattern of inlineLocatorPatterns) {
+            if (pattern.test(trimmed) && !trimmed.includes("// [inline]")) {
+                errors.push(`Inline locator found in spec: ${trimmed.substring(0, 80)}...`);
+                break;
+            }
+        }
+    }
+    return {
+        valid: errors.length === 0,
+        errors
+    };
+}

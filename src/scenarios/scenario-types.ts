@@ -1,4 +1,5 @@
 import type { AiUsageMetrics } from "../ai/ai-provider.types";
+import type { CanonicalInputRequirement, CanonicalRequirement } from "./canonical-scenario";
 
 export type CatalogOptions = {
   useDiscoveredCatalog?: boolean;
@@ -123,6 +124,88 @@ export type JiraIssueSource = {
 
 export type McpScenarioStep = string;
 
+export type RecordingExecutionAction = {
+  actionType: "fill" | "select" | "click" | "check" | "uncheck" | "press" | "navigation" | "system_observation";
+  interactionId?: string;
+  /** The discrete command key a `"press"` action sends (e.g. "Enter"). Absent for every other action type. */
+  key?: string;
+  humanStep?: string;
+  semanticField?: string;
+  /**
+   * FIRST_LOSS fix: the real, certified-or-runtime-resolved field relation authority
+   * (`CanonicalInteraction.semanticField`, never re-derived from `humanStep` text) a fill/select
+   * action's owner was recorded against. Without this, target-scoped fill readiness
+   * (`waitForFillTargetReadiness`, case-discovery.ts) could never trigger for a Recording Replay
+   * action: its retry gate requires a real, non-generic `associatedField` on the parsed runtime
+   * action, but `RecordingExecutionAction` never carried one, so the condition was always false
+   * for every structured-contract-driven fill, regardless of resolution status.
+   */
+  associatedField?: string;
+  targetRef?: string;
+  technicalTargetRef?: string;
+  technicalTargetRefs?: string[];
+  technicalTargetCandidates?: Array<Record<string, unknown>>;
+  /**
+   * LAST-RESORT, EXECUTION-ONLY authority (see `SemanticRuntimeEvidence`'s own doc in
+   * `structural-owner-identity.ts`). Never a technicalTarget/certified owner; never re-derived
+   * from `humanStep`/scenario text -- transported unchanged from `CanonicalInteraction`.
+   */
+  semanticRuntimeEvidence?: import("../recording/structural-owner-identity").SemanticRuntimeEvidence;
+  playwrightRecorderEvidence?: import("../recording/structural-owner-identity").PlaywrightRecorderEvidence;
+  valueKey?: string;
+  value?: string;
+  valueRole?: "action_input" | "secure_input" | "runtime_derived_oracle";
+  runtimeValueSource?: "dataset";
+  stepIndex?: number;
+  entityScope?: string;
+  rowRelation?: "next" | "added";
+  expectedState?: string;
+  expectedRouteBefore?: string;
+  /**
+   * Recorded post-action surface authority. Emitted from the canonical recorded
+   * transition (`routeAfter`). When present, a generic DOM mutation is not a
+   * functional completion: the runtime must reach this recorded surface.
+   */
+  expectedRouteAfter?: string;
+  expectedOutcomeKind?: "route_transition" | "in_place_transition";
+  /** `CanonicalInteraction.controlIdentity` -- content-derived (screen fingerprint + field/locator
+   *  identity), never an array/interaction index. Carried through so learned route-family
+   *  authority (RecordingRouteObservation) can key observations by the same lineage the
+   *  recording itself already uses, without inventing a second identity scheme. */
+  controlIdentity?: string;
+  /**
+   * Diagnostic/state-observation ONLY (never execution/field/readiness/promotion authority). A
+   * redacted, structurally-identified related surface causally mutated by this trusted action,
+   * separate from `associatedField`. Carried so replay diagnostics can name a state-bearing surface
+   * without repurposing field-relation authority.
+   */
+  relatedStateSurfaceEvidence?: import("../recording/canonical-recording-contract").RelatedStateSurfaceEvidence;
+};
+
+/** Structured authority carried through scenario-preview for Recording replay. */
+export type RecordingExecutionContract = {
+  actions: RecordingExecutionAction[];
+  runtimeInputRequirements: Array<Record<string, unknown>>;
+  datasetBindings?: Record<string, string | null>;
+};
+
+export type NegativeScenarioOracle = {
+  kind: "negative";
+  source: "mutation_precondition_graph" | "runtime_observation";
+  expectedState: { entityCount: number; canSubmit: boolean };
+  terminalActionApplicable: boolean;
+};
+
+export type ConstraintResolution = {
+  valueKey: string;
+  constraintType: string;
+  activeValueCount: number;
+  candidateCount: number;
+  distinctCandidateCount: number;
+  resolutionSource: "allowed_values" | "runtime_dataset" | "recorded_confirmed" | "none";
+  resolved: boolean;
+};
+
 export type BranchAccessIntent = "public" | "authenticated" | "unknown";
 
 export type FunctionalBranchEvidenceSource =
@@ -231,6 +314,9 @@ export type McpScenario = {
   preconditions: string[];
   expectedResult: string;
   caseOracle?: string;
+  negativeOracle?: NegativeScenarioOracle;
+  repeatConstraintResolutions?: ConstraintResolution[];
+  runtimeExecutionBlockedByData?: boolean;
   type: string;
   database: string;
   isConverted: number;
@@ -251,6 +337,17 @@ export type McpScenario = {
   publishableToTestManagement?: boolean;
   standardExecutable?: boolean;
   publicationClassification?: "executable" | "documentation" | "blocked";
+  recordingHumanContent?: boolean;
+  recordingId?: string;
+  recordedScenarioId?: string;
+  canonicalInteractions?: Array<Record<string, unknown>>;
+  entityActionBlocks?: Array<Record<string, unknown>>;
+  runtimeInputRequirements?: Array<Record<string, unknown>>;
+  technicalKnowledgeRefs?: string[];
+  executionReadinessAudit?: Record<string, unknown>;
+  recordingExecutionContract?: RecordingExecutionContract;
+  stateSequenceValid?: boolean;
+  stateSequenceIssues?: string[];
   launchClassification?: "standard" | "adaptive" | "nonAutomatable";
   /** Explicit execution authority; business wording such as "manualmente" is not enough. */
   manualOnly?: boolean;
@@ -258,6 +355,9 @@ export type McpScenario = {
   caseId?: number;
   generationSource?: "ai" | "deterministic_seed"; // Track source for seeds vs AI
   authIntent?: "gate_observation" | "full_authentication";
+  canonicalRequirements?: CanonicalRequirement[];
+  canonicalInputRequirements?: CanonicalInputRequirement[];
+  expectedResultRequirementRefs?: string[];
   functionalBranch?: FunctionalBranchRef;
   requirementDependencies?: Array<{
     requirementId: string;

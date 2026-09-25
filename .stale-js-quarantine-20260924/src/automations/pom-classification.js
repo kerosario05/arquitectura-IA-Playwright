@@ -1,0 +1,455 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.deriveSemanticMethodIntent = deriveSemanticMethodIntent;
+exports.deriveSemanticScreenType = deriveSemanticScreenType;
+exports.deriveMethodIntentFromStep = deriveMethodIntentFromStep;
+exports.deriveMethodIntentFromStepWithContext = deriveMethodIntentFromStepWithContext;
+exports.deriveExpectedOwnerForStep = deriveExpectedOwnerForStep;
+const METHOD_INTENT_KEYWORDS = {
+    navigate: "open_home",
+    "app_base_url": "open_home",
+    iniciar: "start_session",
+    start: "start_session",
+    login: "start_session",
+    "log in": "open_login_modal",
+    "iniciar sesion": "open_login_modal",
+    "informacion de productos": "open_product_information",
+    "product information": "open_product_information",
+    tarjetas: "select_category",
+    prestamos: "select_category",
+    cuentas: "select_category",
+    categoria: "select_category",
+    category: "select_category",
+    solicitar: "click_primary_action",
+    "solicitar tarjeta": "click_primary_action",
+    apply: "click_primary_action",
+    request: "click_primary_action",
+    detalle: "expect_loaded",
+    detail: "expect_loaded",
+    validar: "expect_loaded",
+    verificar: "expect_loaded",
+    comprobar: "expect_loaded",
+    expect: "expect_loaded",
+    visible: "expect_loaded",
+    fill: "fill_form_field",
+    escribir: "fill_form_field",
+    ingresar: "fill_form_field",
+    completar: "fill_form_field",
+    producto: "select_product",
+    product: "select_product",
+    submit: "submit_form",
+    enviar: "submit_form",
+    confirmar: "confirm_action",
+    confirm: "confirm_action",
+    pay: "confirm_action",
+    pagar: "confirm_action",
+    continuar: "click_primary_action",
+    siguiente: "click_primary_action"
+};
+function normalize(value) {
+    return value
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
+}
+function getStepText(step) {
+    const target = step.target && typeof step.target === "object"
+        ? `${step.target.value ?? ""} ${step.target.name ?? ""} ${step.target.role ?? ""}`
+        : "";
+    return normalize(`${target} ${step.description ?? ""} ${step.action}`);
+}
+function isFirstVisibleItemSelection(text) {
+    return /\b(primer[ao]?\s+(producto|item|registro|card|tarjeta|fila)|primera?\s+(tarjeta|card|fila)|first\s+visible\s+(item|product|card|row))\b/i.test(text);
+}
+function deriveFirstVisibleSelectionIntent(text) {
+    if (/\b(fila|row)\b/i.test(text))
+        return "select_first_visible_row";
+    if (/\b(tarjeta|card)\b/i.test(text))
+        return "select_first_visible_card";
+    if (/\b(producto|product)\b/i.test(text))
+        return "select_first_visible_product";
+    return "select_first_visible_item";
+}
+function isDetailPrimaryAction(text) {
+    return /\b(add to cart|agregar al carrito|purchase|buy|comprar|checkout|place order|continuar|confirmar|submit|enviar|pagar)\b/i.test(text);
+}
+function isBackOrReturnTarget(text) {
+    return /\b(volver|regresar|atr|back|return|cancel)\b/i.test(text);
+}
+function isVisibleAssertion(text) {
+    const visibilityKeywords = [
+        "validar.*visible", "verificar.*visible", "se muestra", "se visualiza",
+        "aparece", "está disponible", "opción visible", "acción visible",
+        "botón visible", "se presenta", "está visible", "visible",
+        "disponible", "muestra", "visualiza", "presente"
+    ];
+    // Preserve wildcard phrases such as `validar.*visible` while converting
+    // literal dots to whitespace. Replacing the dot first produced `\\s+*`,
+    // which is an invalid regular expression and could abort promotion.
+    const combined = visibilityKeywords
+        .map(k => k.replace(/\.\*|\./g, token => token === ".*" ? "\\s+.*" : "\\s+"))
+        .join("|");
+    return new RegExp(combined, "i").test(text);
+}
+function isStateAssertion(text) {
+    const enabledKeywords = [
+        "habilitado", "activo", "permite", "puede", "disponible para click"
+    ];
+    const disabledKeywords = [
+        "deshabilitado", "inactivo", "no permite", "bloqueado", "desactivado"
+    ];
+    for (const kw of disabledKeywords) {
+        if (new RegExp(`\\b${kw}\\b`, "i").test(text)) {
+            return { enabled: false };
+        }
+    }
+    for (const kw of enabledKeywords) {
+        if (new RegExp(`\\b${kw}\\b`, "i").test(text)) {
+            return { enabled: true };
+        }
+    }
+    return { enabled: null };
+}
+function isExplicitClickAction(text, action) {
+    const clickKeywords = [
+        "clic", "click", "presionar", "pulsar", "seleccionar",
+        "ejecutar", "activar", "disparar"
+    ];
+    const actionLower = action.toLowerCase();
+    if (actionLower === "click" || actionLower === "select") {
+        for (const kw of clickKeywords) {
+            if (new RegExp(`\\b${kw}\\b`, "i").test(text)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+function isSensitiveAction(text) {
+    const sensitiveKeywords = [
+        "pagar", "transferir", "enviar dinero", "debitar",
+        "eliminar", "borrar", "cancelar producto", "cancelar cuenta",
+        "firmar", "aceptar contrato", "aceptar términos",
+        "solicitar préstamo", "solicitar crédito", "solicitar tarjeta",
+        "aprobar", "rechazar", "confirmar operación", "confirmar pago"
+    ];
+    for (const kw of sensitiveKeywords) {
+        if (new RegExp(`\\b${kw}\\b`, "i").test(text)) {
+            return true;
+        }
+    }
+    return false;
+}
+function isUsernameTarget(text) {
+    return text.includes("username") || text.includes("usuario");
+}
+function isPasswordTarget(text) {
+    return text.includes("password") || text.includes("contrasena");
+}
+function isLoginTrigger(text) {
+    return text.includes("log in") || text.includes("login") || text.includes("iniciar sesion");
+}
+function isLoggedInIndicator(text) {
+    return text.includes("welcome") || text.includes("logout") || text.includes("log out") || text.includes("cerrar sesion");
+}
+function hasPriorLoginFormEvidence(step, allSteps) {
+    const currentIndex = allSteps.indexOf(step);
+    if (currentIndex <= 0)
+        return false;
+    return allSteps.slice(0, currentIndex).some((candidate) => {
+        const text = getStepText(candidate);
+        return (candidate.action === "fill" || candidate.action.startsWith("assert"))
+            && (isUsernameTarget(text) || isPasswordTarget(text));
+    });
+}
+function deriveSemanticMethodIntent(step, screenType, allSteps = []) {
+    const target = step.target && typeof step.target === "object"
+        ? `${step.target.value ?? ""} ${step.target.name ?? ""} ${step.target.role ?? ""}`.toLowerCase().trim()
+        : "";
+    const action = step.action.toLowerCase();
+    const recoveryMeta = step.recoveryMetadata;
+    const recoveredText = recoveryMeta?.selectedCandidateText?.toLowerCase() ?? "";
+    const semanticRelation = recoveryMeta?.semanticRelation?.toLowerCase() ?? "";
+    const selectionDiagnostics = step.selectionDiagnostics;
+    const actionType = recoveryMeta?.actionType;
+    const semanticRole = recoveryMeta?.semanticRole;
+    const normalizedText = getStepText(step);
+    if ((action === "click" || action === "select") && isFirstVisibleItemSelection(normalizedText)) {
+        return deriveFirstVisibleSelectionIntent(normalizedText);
+    }
+    // Selection-like steps should NEVER be classified as click_primary_action
+    // This prevents false positives for module/category names that contain action-like words
+    if (selectionDiagnostics?.selectionLike && selectionDiagnostics?.success) {
+        if (screenType === "category" || semanticRole === "category")
+            return "select_category";
+        if (screenType === "product_list" || ["product", "card", "item", "entity"].includes(semanticRole))
+            return "select_product";
+        return "select_product";
+    }
+    if (actionType === "action_select") {
+        if (screenType === "category" || semanticRole === "category")
+            return "select_category";
+        return "select_product";
+    }
+    if (["option", "card", "item", "entity", "product", "recipient", "list_item"].includes(semanticRole)) {
+        if (semanticRole === "category")
+            return "select_category";
+        return "select_product";
+    }
+    if (selectionDiagnostics?.reason === "selection_no_transition_next_action_enabled") {
+        if (screenType === "category")
+            return "select_category";
+        return "select_product";
+    }
+    // Check for back/return navigation before select_product
+    if ((action === "click" || action === "select") && isBackOrReturnTarget(normalizedText)) {
+        return "return_to_list";
+    }
+    // Only check for detail primary actions AFTER ruling out selection-like steps
+    // Detail primary actions are specific to product detail pages, not list/module pages
+    if ((action === "click" || action === "select") && isDetailPrimaryAction(normalizedText)) {
+        // Exclude module/category headings that might contain action words
+        const moduleHeadingPatterns = [
+            /^dep.A?sitos?(a\s+plazo)?$/i,
+            /^pr.A?stamos?$/i,
+            /^cuentas?$/i,
+            /^tarjetas?$/i,
+            /^inversiones?$/i,
+            /^consulta\s+de\s+/i,
+            /^transferencias?$/i,
+            /^pago\s+de\s+/i,
+            /^mis\s+productos$/i,
+            /^productos$/i,
+            /^listado/i,
+        ];
+        const isModuleHeading = moduleHeadingPatterns.some(p => p.test(normalizedText));
+        if (!isModuleHeading) {
+            return (screenType === "form" || screenType === "confirmation") ? "submit_form" : "click_primary_action";
+        }
+    }
+    // Check for primary action visibility/state assertions (not actual clicks)
+    const isPrimaryActionTarget = isDetailPrimaryAction(normalizedText) ||
+        /solicitar|enviar|continuar|confirmar|guardar|crear|descargar|pagar|transferir/i.test(normalizedText);
+    if (isPrimaryActionTarget) {
+        if (isVisibleAssertion(normalizedText)) {
+            return "expect_primary_action_visible";
+        }
+        const stateCheck = isStateAssertion(normalizedText);
+        if (stateCheck.enabled === true) {
+            return "expect_primary_action_enabled";
+        }
+        if (stateCheck.enabled === false) {
+            return "expect_primary_action_disabled";
+        }
+        if (isExplicitClickAction(normalizedText, action)) {
+            return "click_primary_action";
+        }
+    }
+    if (action.startsWith("assert")) {
+        if (isUsernameTarget(normalizedText) || isPasswordTarget(normalizedText))
+            return "expect_login_form";
+        if (isLoggedInIndicator(normalizedText))
+            return "expect_logged_in";
+        return "expect_loaded";
+    }
+    // An observed click on the business action "Validar" is executable
+    // interaction, not an expect_loaded assertion. Keep the classification
+    // action-aware before consulting legacy keyword aliases.
+    if ((action === "click" || action === "select")
+        && isExplicitClickAction(normalizedText, action)
+        && /\b(validar|validate)\b/i.test(normalizedText)) {
+        return "click_primary_action";
+    }
+    if (action === "fill") {
+        if (isUsernameTarget(normalizedText))
+            return "fill_username";
+        if (isPasswordTarget(normalizedText))
+            return "fill_password";
+        return "fill_form_field";
+    }
+    if ((action === "click" || action === "select") && isLoginTrigger(normalizedText)) {
+        return hasPriorLoginFormEvidence(step, allSteps) ? "submit_login" : "open_login_modal";
+    }
+    const combinedText = normalize(`${target} ${action} ${recoveredText} ${semanticRelation}`);
+    for (const [keyword, intent] of Object.entries(METHOD_INTENT_KEYWORDS)) {
+        const regex = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
+        if (regex.test(combinedText)) {
+            return intent;
+        }
+    }
+    if (action === "navigate")
+        return "open_home";
+    if (action === "login")
+        return "start_session";
+    if (action.startsWith("assert"))
+        return "expect_loaded";
+    if (action === "click" || action === "select") {
+        if (screenType === "login")
+            return hasPriorLoginFormEvidence(step, allSteps) ? "submit_login" : "open_login_modal";
+        if (screenType === "category")
+            return "select_category";
+        if (screenType === "product_list")
+            return "select_product";
+        if (screenType === "home")
+            return "click_primary_action";
+        return "click_primary_action";
+    }
+    return "unknown";
+}
+function deriveSemanticScreenType(step, _allSteps) {
+    const text = getStepText(step);
+    const action = step.action.toLowerCase();
+    const recoveryMeta = step.recoveryMetadata;
+    const semanticRelation = recoveryMeta?.semanticRelation?.toLowerCase() ?? "";
+    const screenTypeKeywords = {
+        "iniciar sesion": "login",
+        home: "home",
+        inicio: "home",
+        principal: "home",
+        dashboard: "home",
+        iniciar: "home",
+        start: "home",
+        menu: "main_menu",
+        navegacion: "main_menu",
+        "informacion de productos": "product_information",
+        "product information": "product_information",
+        catalogo: "product_list",
+        listado: "product_list",
+        lista: "product_list",
+        list: "product_list",
+        "tarjeta de credito": "product_list",
+        visa: "product_list",
+        prestamo: "product_list",
+        producto: "product_list",
+        product: "product_list",
+        categoria: "category",
+        category: "category",
+        tarjetas: "category",
+        prestamos: "category",
+        cuentas: "category",
+        creditos: "category",
+        detalle: "product_detail",
+        detail: "product_detail",
+        "detalle de": "product_detail",
+        info: "product_detail",
+        seleccion: "selection",
+        selection: "selection",
+        escoger: "selection",
+        elegir: "selection",
+        formulario: "form",
+        form: "form",
+        registro: "form",
+        register: "form",
+        confirmacion: "confirmation",
+        confirmation: "confirmation",
+        exito: "confirmation",
+        success: "confirmation",
+        login: "login",
+        auth: "login",
+        otp: "otp",
+        codigo: "otp",
+        code: "otp",
+        verificacion: "otp",
+        verification: "otp"
+    };
+    for (const [keyword, screenType] of Object.entries(screenTypeKeywords)) {
+        if (text.includes(keyword))
+            return screenType;
+    }
+    if (action === "navigate" || text.includes("base_url") || text.includes("app_base"))
+        return "home";
+    if (action === "login" || action === "auth")
+        return "login";
+    if (isLoginTrigger(text) || isUsernameTarget(text) || isPasswordTarget(text))
+        return "login";
+    if (semanticRelation === "parent_category" || semanticRelation === "category")
+        return "category";
+    if (action.startsWith("assert") || action.includes("valid") || action.includes("expect"))
+        return "product_detail";
+    if (action === "click" || action === "select")
+        return "product_list";
+    if (action === "fill")
+        return "form";
+    return "unknown";
+}
+function deriveMethodIntentFromStep(step) {
+    return deriveMethodIntentFromStepWithContext(step, []);
+}
+function deriveMethodIntentFromStepWithContext(step, allSteps) {
+    const screenType = deriveSemanticScreenType(step, allSteps);
+    return deriveSemanticMethodIntent(step, screenType, allSteps);
+}
+function deriveExpectedOwnerForStep(step, allSteps = []) {
+    const intent = deriveMethodIntentFromStepWithContext(step, allSteps);
+    const target = getStepText(step);
+    if (intent === "expect_login_form" ||
+        intent === "fill_username" ||
+        intent === "fill_password" ||
+        intent === "submit_login" ||
+        intent === "expect_logged_in" ||
+        isUsernameTarget(target) ||
+        isPasswordTarget(target)) {
+        return "LoginPage";
+    }
+    if (isFirstVisibleItemSelection(target)) {
+        return "ProductListPage";
+    }
+    // Check for ordinal selection pattern in target text
+    if (/\b(primer[ao]?\s+(producto|item|registro|card|tarjeta|fila|cuenta)|primera?\s+(tarjeta|card|fila|cuenta)|first\s+visible\s+(item|product|card|row)|visible\s+(item|product|card|row))\b/i.test(target)) {
+        return "ProductListPage";
+    }
+    if (isDetailPrimaryAction(target)) {
+        if (target.includes("submit") || target.includes("enviar") || target.includes("purchase") || target.includes("place order")) {
+            return "FormPage";
+        }
+        return "ProductDetailPage";
+    }
+    // Special handling for expect_loaded assertions - use context from previous step
+    if (intent === "expect_loaded" && allSteps.length > 0) {
+        const currentStepIndex = step.index;
+        const previousStep = allSteps.find(s => s.index === currentStepIndex - 1);
+        if (previousStep) {
+            const prevIntent = deriveMethodIntentFromStepWithContext(previousStep, allSteps);
+            // If previous step was open_module, use OperationsMenuPage for module visibility assertion
+            if (prevIntent === "open_module") {
+                return "OperationsMenuPage";
+            }
+            // If previous step was select_product or selection-like, use ProductListPage
+            if (prevIntent === "select_product" ||
+                prevIntent === "select_first_visible_item" ||
+                prevIntent === "select_first_visible_card" ||
+                prevIntent === "select_visible_item_by_ordinal") {
+                return "ProductListPage";
+            }
+            // If previous step was open_product_information, use ProductDetailPage
+            if (prevIntent === "open_product_information") {
+                return "ProductDetailPage";
+            }
+        }
+    }
+    const preferredOwner = {
+        start_session: "HomePage",
+        open_home: "HomePage",
+        open_login_modal: "HomePage",
+        expect_login_form: "LoginPage",
+        fill_username: "LoginPage",
+        fill_password: "LoginPage",
+        submit_login: "LoginPage",
+        expect_logged_in: "LoginPage",
+        open_product_information: "ProductInformationPage",
+        select_category: "CategoryPage",
+        select_product: "ProductListPage",
+        select_first_visible_item: "ProductListPage",
+        select_first_visible_product: "ProductListPage",
+        select_first_visible_card: "ProductListPage",
+        select_first_visible_row: "ProductListPage",
+        select_visible_item_by_ordinal: "ProductListPage",
+        click_primary_action: "ProductDetailPage",
+        expect_loaded: "ProductDetailPage",
+        fill_form_field: "FormPage",
+        submit_form: "FormPage",
+        confirm_action: "ConfirmationPage"
+    };
+    return preferredOwner[intent] ?? "GenericPage";
+}

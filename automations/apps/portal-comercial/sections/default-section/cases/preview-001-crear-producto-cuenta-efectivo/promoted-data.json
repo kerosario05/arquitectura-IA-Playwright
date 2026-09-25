@@ -1,0 +1,28 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-09-16T18:01:40.505Z",
+  "entries": [
+    {
+      "key": "usuario",
+      "source": "unknown",
+      "fieldName": "Usuario",
+      "stepIndex": 2,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "contrasena",
+      "source": "unknown",
+      "fieldName": "Contraseña",
+      "stepIndex": 3,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

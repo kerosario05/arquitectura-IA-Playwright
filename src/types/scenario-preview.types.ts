@@ -1,4 +1,4 @@
-import type { McpScenario, McpRouteProfile, AutomatabilityClassification } from "../scenarios/scenario-types";
+import type { McpScenario, McpRouteProfile, AutomatabilityClassification, RecordingExecutionContract } from "../scenarios/scenario-types";
 
 export type VirtualCaseSource = "scenario_preview";
 
@@ -11,6 +11,7 @@ export type VirtualCase = {
   steps: string[];
   expectedResult: string;
   caseOracle?: string;
+  negativeOracle?: NonNullable<McpScenario["negativeOracle"]>;
   authIntent?: "gate_observation" | "full_authentication";
   preconditions: string[];
   appSlug: string;
@@ -33,6 +34,30 @@ export type VirtualCase = {
   sectionSlug?: string;
   sectionName?: string;
   sectionId?: string | number;
+  recordingId?: string;
+  recordedScenarioId?: string;
+  functionalBranch?: McpScenario["functionalBranch"];
+  requirementDependencies?: McpScenario["requirementDependencies"];
+  stepRequirementRefs?: McpScenario["stepRequirementRefs"];
+  stepAuthority?: McpScenario["stepAuthority"];
+  stepClaimTypes?: McpScenario["stepClaimTypes"];
+  stepClaims?: McpScenario["stepClaims"];
+  unsupportedFunctionalSteps?: McpScenario["unsupportedFunctionalSteps"];
+  missingPrerequisiteRequirementIds?: McpScenario["missingPrerequisiteRequirementIds"];
+  validation?: McpScenario["validation"];
+  repeatConstraintResolutions?: McpScenario["repeatConstraintResolutions"];
+  runtimeExecutionBlockedByData?: McpScenario["runtimeExecutionBlockedByData"];
+  canonicalRequirements?: McpScenario["canonicalRequirements"];
+  canonicalInputRequirements?: McpScenario["canonicalInputRequirements"];
+  expectedResultRequirementRefs?: McpScenario["expectedResultRequirementRefs"];
+  canonicalInteractions?: Array<Record<string, unknown>>;
+  entityActionBlocks?: Array<Record<string, unknown>>;
+  runtimeInputRequirements?: Array<Record<string, unknown>>;
+  technicalKnowledgeRefs?: string[];
+  executionReadinessAudit?: Record<string, unknown>;
+  recordingExecutionContract?: RecordingExecutionContract;
+  stateSequenceValid?: boolean;
+  stateSequenceIssues?: string[];
 };
 
 export type CatalogOptions = {
@@ -110,6 +135,17 @@ export type ScenarioPreviewRequest = {
     rerunActive?: boolean;
     headed?: boolean;
   };
+  recordingId?: string;
+  requestedScenarioIds?: string[];
+  rejectedScenarios?: ReplayAdmissionRejection[];
+  requestedRejectedCount?: number;
+  requestedRejectedScenarioIds?: string[];
+  nonRequestedRejectedCandidates?: ReplayAdmissionRejection[];
+};
+
+export type ReplayAdmissionRejection = {
+  scenarioId: string;
+  reasons: string[];
 };
 
 export type ScenarioPreviewResponse = {
@@ -141,6 +177,7 @@ export function toVirtualCase(scenario: McpScenario, index: number, sectionSlug?
     steps: scenario.steps.map(normalizeStep),
     expectedResult: scenario.expectedResult,
     authIntent: scenario.authIntent,
+    negativeOracle: scenario.negativeOracle,
     preconditions: scenario.preconditions,
     appSlug: scenario.targetAppSlug ?? scenario.appSlug,
     routeProfile: scenario.routeProfile,
@@ -157,6 +194,30 @@ export function toVirtualCase(scenario: McpScenario, index: number, sectionSlug?
     publicationClassification: scenario.publicationClassification,
     launchClassification: scenario.launchClassification,
     nonAutomatable: scenario.publicationClassification === "blocked",
+    recordingId: scenario.recordingId,
+    recordedScenarioId: scenario.recordedScenarioId,
+    functionalBranch: scenario.functionalBranch,
+    requirementDependencies: scenario.requirementDependencies,
+    stepRequirementRefs: scenario.stepRequirementRefs,
+    stepAuthority: scenario.stepAuthority,
+    stepClaimTypes: scenario.stepClaimTypes,
+    stepClaims: scenario.stepClaims,
+    unsupportedFunctionalSteps: scenario.unsupportedFunctionalSteps,
+    missingPrerequisiteRequirementIds: scenario.missingPrerequisiteRequirementIds,
+    validation: scenario.validation,
+    repeatConstraintResolutions: scenario.repeatConstraintResolutions,
+    runtimeExecutionBlockedByData: scenario.runtimeExecutionBlockedByData,
+    canonicalRequirements: scenario.canonicalRequirements,
+    canonicalInputRequirements: scenario.canonicalInputRequirements,
+    expectedResultRequirementRefs: scenario.expectedResultRequirementRefs,
+    canonicalInteractions: scenario.canonicalInteractions,
+    entityActionBlocks: scenario.entityActionBlocks,
+    runtimeInputRequirements: scenario.runtimeInputRequirements,
+    technicalKnowledgeRefs: scenario.technicalKnowledgeRefs,
+    executionReadinessAudit: scenario.executionReadinessAudit,
+    recordingExecutionContract: scenario.recordingExecutionContract,
+    stateSequenceValid: scenario.stateSequenceValid,
+    stateSequenceIssues: scenario.stateSequenceIssues,
     sectionSlug,
     sectionName,
     sectionId,

@@ -1,17 +1,20 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const test_1 = require("@playwright/test");
+const node_crypto_1 = require("node:crypto");
 const automation_reuse_1 = require("../src/automations/automation-reuse");
 function makeEntry(overrides) {
     return {
         id: overrides.id,
         title: overrides.title,
         planPath: `automations/plans/${overrides.id}.plan.json`,
-        specPath: `tests/generated/${overrides.id}.spec.ts`,
+        specPath: overrides.specPath ?? `tests/generated/${overrides.id}.spec.ts`,
         status: overrides.status ?? "active",
         source: "rule_based",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        specVerificationStatus: overrides.specVerificationStatus,
+        appSlug: overrides.appSlug,
         caseId: overrides.caseId,
         externalId: overrides.externalId,
         tags: overrides.tags
@@ -63,6 +66,28 @@ test_1.test.describe("normalizeTitle", () => {
     });
 });
 test_1.test.describe("findReusableAutomation", () => {
+    (0, test_1.test)("requires modern promoted identity and matching physical hash", () => {
+        const specPath = "automations/apps/app-a/sections/section-a/cases/c1/case.spec.ts";
+        const specText = "test('promoted', async () => {})";
+        const promotedSpecHash = (0, node_crypto_1.createHash)("sha256").update(specText, "utf8").digest("hex");
+        const entry = makeEntry({ id: "c1-modern", title: "Modern", caseId: 1, externalId: "C1", specPath, appSlug: "app-a", specVerificationStatus: "passed" });
+        entry.promotionPersisted = true;
+        entry.promotedSpecPath = specPath;
+        entry.promotedSpecHash = promotedSpecHash;
+        const physical = { specPath, specExists: true, specText, appSlug: "app-a", sectionSlug: "section-a", caseId: 1 };
+        (0, test_1.expect)((0, automation_reuse_1.validatePromotedArtifactForReuse)(entry, physical)).toEqual({ valid: true });
+        (0, test_1.expect)((0, automation_reuse_1.validatePromotedArtifactForReuse)({ ...entry, status: "active", promotionPersisted: false }, physical).valid).toBe(false);
+        (0, test_1.expect)((0, automation_reuse_1.validatePromotedArtifactForReuse)({ ...entry, promotedSpecHash: "different" }, physical).reason).toBe("promoted_spec_hash_mismatch");
+        (0, test_1.expect)((0, automation_reuse_1.validatePromotedArtifactForReuse)({ ...entry, specVerificationStatus: "failed" }, physical).reason).toBe("verification_not_passed");
+        (0, test_1.expect)((0, automation_reuse_1.validatePromotedArtifactForReuse)({ ...entry, promotedSpecHash: undefined }, physical).reason).toBe("promoted_spec_hash_missing");
+        const legacyEntry = { ...entry };
+        delete legacyEntry.promotionPersisted;
+        delete legacyEntry.promotedSpecPath;
+        delete legacyEntry.promotedSpecHash;
+        (0, test_1.expect)((0, automation_reuse_1.validatePromotedArtifactForReuse)(legacyEntry, physical).reason).toBe("promotion_not_persisted");
+        (0, test_1.expect)((0, automation_reuse_1.findReusableAutomation)(99, "Modern", [entry], new Map([[entry.id, physical]])).entry.id).toBe(entry.id);
+        (0, test_1.expect)((0, automation_reuse_1.findReusableAutomation)(99, "Modern", [{ ...entry, promotedSpecHash: "different" }], new Map([[entry.id, physical]]))).toBeUndefined();
+    });
     (0, test_1.test)("finds automation by same functionalCode", () => {
         const automations = [
             makeEntry({ id: "c37616-c37372-acceso", title: "C37372 - Acceso al modulo Informacion de productos", caseId: 37616 }),

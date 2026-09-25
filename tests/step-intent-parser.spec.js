@@ -185,6 +185,57 @@ const step_intent_parser_1 = require("../src/discovery/step-intent-parser");
     (0, test_1.expect)(intents[0].type).toBe("action_fill");
     (0, test_1.expect)(intents[0].actionTarget).toBe("12345");
 });
+(0, test_1.test)("fill reconoce un placeholder con modificador secreto de forma genérica", () => {
+    const intents = (0, step_intent_parser_1.parseStepIntent)('Ingresar el valor secreto [secret.key] en el campo "Campo secreto".');
+    (0, test_1.expect)(intents).toHaveLength(1);
+    (0, test_1.expect)(intents[0].type).toBe("action_fill");
+    (0, test_1.expect)(intents[0].actionTarget).toBe("Campo secreto");
+    (0, test_1.expect)(intents[0].valueKey).toBe("secret.key");
+});
+(0, test_1.test)("fill normal y secreto conservan claves namespaced y click sigue siendo click", () => {
+    const normal = (0, step_intent_parser_1.parseStepIntent)('Ingresar el valor [user.id] en el campo "Usuario".');
+    const secret = (0, step_intent_parser_1.parseStepIntent)('Ingresar el valor secreto [credentials.secret] en el campo "Clave".');
+    const click = (0, step_intent_parser_1.parseStepIntent)('Hacer clic en "Continuar".');
+    (0, test_1.expect)(normal[0]).toMatchObject({ type: "action_fill", valueKey: "user.id" });
+    (0, test_1.expect)(secret[0]).toMatchObject({ type: "action_fill", valueKey: "credentials.secret" });
+    (0, test_1.expect)(click[0]).toMatchObject({ type: "action_click", actionTarget: "Continuar" });
+});
+(0, test_1.test)("preserva el binding estructural de selector y valor en una acción compuesta", () => {
+    const intents = (0, step_intent_parser_1.parseStepIntent)('En la primera línea de registro, hacer clic en el selector "Currency" del campo "Compensation" y seleccionar el valor [row.currency].');
+    const selection = intents.find((intent) => intent.type === "action_select");
+    (0, test_1.expect)(selection).toMatchObject({
+        actionTarget: "Currency",
+        selectionField: "Currency",
+        associatedField: "Compensation",
+        valueKey: "row.currency",
+        valueSource: "test_data"
+    });
+});
+(0, test_1.test)("preserva el binding del editor de monto en una acción compuesta", () => {
+    const intents = (0, step_intent_parser_1.parseStepIntent)('En la primera línea de registro, hacer clic en el campo de monto asociado a "Compensation" e ingresar el valor [row.amount].');
+    const fill = intents.find((intent) => intent.type === "action_fill");
+    (0, test_1.expect)(fill).toMatchObject({
+        actionTarget: "monto",
+        associatedField: "Compensation",
+        valueKey: "row.amount",
+        valueSource: "test_data"
+    });
+});
+(0, test_1.test)("mantiene los bindings semánticos de los pasos fresh de selección y monto", () => {
+    const currency = (0, step_intent_parser_1.parseStepIntent)('En la primera línea de colaborador, hacer clic en el selector "Moneda" del campo "Ingresos" y seleccionar el valor [employee_1.currency].').find((intent) => intent.type === "action_select");
+    const income = (0, step_intent_parser_1.parseStepIntent)('En la primera línea de colaborador, hacer clic en el campo de monto asociado a "Ingresos" e ingresar el valor [employee_1.income].').find((intent) => intent.type === "action_fill");
+    (0, test_1.expect)(currency).toMatchObject({
+        actionTarget: "Moneda",
+        selectionField: "Moneda",
+        associatedField: "Ingresos",
+        valueKey: "employee_1.currency"
+    });
+    (0, test_1.expect)(income).toMatchObject({
+        actionTarget: "monto",
+        associatedField: "Ingresos",
+        valueKey: "employee_1.income"
+    });
+});
 (0, test_1.test)("parse 'Clic en Iniciar' without quotes as action_click", () => {
     const intents = (0, step_intent_parser_1.parseStepIntent)("Clic en Iniciar.");
     (0, test_1.expect)(intents.length).toBe(1);

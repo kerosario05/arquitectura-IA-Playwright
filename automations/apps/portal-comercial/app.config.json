@@ -1,8 +1,24 @@
 {
-  "name": "portal comercial",
-  "baseUrl": "https://srvqacgowb01.local.bsc.com:5000/login",
-  "loginMode": "manual",
+  "appProfile": {
+    "appSlug": "portal-comercial",
+    "source": "default",
+    "name": "bsc",
+    "baseUrl": "https://srvqacgowb01.local.bsc.com:5000/",
+    "baseUrlHash": "1a1301246d13",
+    "createdAt": "2026-09-22T22:08:29.902Z",
+    "updatedAt": "2026-09-22T22:08:29.903Z",
+    "ignoreHTTPSErrors": true
+  },
+  "baseUrl": "https://srvqacgowb01.local.bsc.com:5000/",
+  "loginMode": "password",
   "testData": {},
   "testDataAliases": {},
-  "missingInputBehavior": "fail"
+  "testDataRefs": {},
+  "username": "adminr",
+  "password": "admin123",
+  "usernameRef": "APP_USERNAME",
+  "passwordRef": "APP_PASSWORD",
+  "missingInputBehavior": "auto_generate",
+  "ignoreHTTPSErrors": true,
+  "updatedAt": "2026-09-22T22:08:29.903Z"
 }

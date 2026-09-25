@@ -1,0 +1,129 @@
+{
+  "id": "preview-001-segunta-prueba",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Segunta Prueba",
+  "planPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-segunta-prueba\\plan.json",
+  "specPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-segunta-prueba\\case.spec.ts",
+  "appSlug": "portal-comercial",
+  "appConfigPath": "automations\\apps\\portal-comercial\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "portal-comercial",
+  "createdAt": "2026-09-20T14:02:53.343Z",
+  "updatedAt": "2026-09-20T14:02:53.343Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-20T14-00-03-754Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "passed",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-20T14-00-03-754Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "specGeneration": {
+      "mode": "deterministic",
+      "provider": null,
+      "model": null,
+      "skill": {
+        "name": null,
+        "version": null,
+        "hash": null,
+        "loaded": false
+      },
+      "invocations": 0,
+      "invocationsConsumed": 0,
+      "durationMs": 125362,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "skipped",
+        "structure": "passed",
+        "traceFidelity": "skipped",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "passed",
+        "functionalExecution": "passed"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specGenerationAttempts": 0,
+      "specRepairAttempts": 0,
+      "firstPassPromotion": true,
+      "failedGatesAttempt1": [],
+      "regressedGates": [],
+      "missingRequirements": [],
+      "oracleTypes": [
+        "navigation_transition"
+      ],
+      "errors": [],
+      "warnings": [
+        "step_index_not_explicit_in_spec:8"
+      ],
+      "finalSpec": {
+        "origin": "deterministic_compiler",
+        "generatedBy": "core",
+        "strategy": "deterministic_compiler",
+        "fallback": null
+      },
+      "runtimeGate": {
+        "decision": "promote",
+        "promotionStatus": "promoted",
+        "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+      },
+      "specWritten": true,
+      "previousSpec": {
+        "existed": false,
+        "hash": null,
+        "lastModifiedAt": null
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [],
+      "availablePageObjects": [
+        "ProductListPage",
+        "OperationsMenuPage",
+        "LoginPage",
+        "FormPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false,
+      "specPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-segunta-prueba\\case.spec.ts",
+      "specHash": "3669eb4762e7dc2878552abc9b60b8fcc995e5c0617bc48faa0dbd9d0cf0564d",
+      "specSource": "generatedSpec"
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-segunta-prueba\\plan.json",
+    "previousStatus": "spec_failed"
+  },
+  "promotionPersisted": true,
+  "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-segunta-prueba\\case.spec.ts",
+  "promotedSpecHash": "3669eb4762e7dc2878552abc9b60b8fcc995e5c0617bc48faa0dbd9d0cf0564d"
+}

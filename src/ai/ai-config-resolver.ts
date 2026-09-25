@@ -1,4 +1,4 @@
-import { AiProviderError, type AiProviderConfig } from "./ai-provider.types";
+import { AiProviderError, type AiProviderConfig, type CodexReasoningEffort } from "./ai-provider.types";
 
 export type AiPurpose = "scenario_generation" | "scenario_data_semantic_enrichment" | "canonical_scenario_semantic_normalization" | "repair" | "spec_generation" | "general";
 
@@ -20,6 +20,21 @@ function parseExtraArgs(argsString?: string): string[] {
   if (!argsString?.trim()) return [];
   const args = argsString.trim().split(/\s+/);
   return args.filter(arg => arg !== "exec");
+}
+
+const CODEX_REASONING_EFFORTS = new Set<CodexReasoningEffort>(["low", "medium", "high"]);
+
+function resolveSpecReasoningEffort(value: string | undefined, provider: string): CodexReasoningEffort | undefined {
+  if (provider !== "codex_cli" && provider !== "codex") return undefined;
+  const normalized = value?.trim().toLowerCase();
+  if (!normalized) return undefined;
+  if (!CODEX_REASONING_EFFORTS.has(normalized as CodexReasoningEffort)) {
+    throw new AiProviderError(
+      "ai_provider_config_missing",
+      `Invalid AI_SPEC_REASONING_EFFORT "${value}". Expected one of: ${[...CODEX_REASONING_EFFORTS].join(", ")}.`
+    );
+  }
+  return normalized as CodexReasoningEffort;
 }
 
 /**
@@ -79,6 +94,9 @@ export function resolveAiConfig(purpose: AiPurpose): AiProviderConfig {
   }
 
   const providerLower = provider.toLowerCase();
+  const reasoningEffort = purpose === "spec_generation"
+    ? resolveSpecReasoningEffort(env.AI_SPEC_REASONING_EFFORT, providerLower)
+    : undefined;
 
   if (providerLower === "disabled") {
     throw new AiProviderError(
@@ -103,8 +121,6 @@ export function resolveAiConfig(purpose: AiPurpose): AiProviderConfig {
   } else if (purpose === "repair") {
     model = env.AI_REPAIR_MODEL?.trim();
     modelSource = "AI_REPAIR_MODEL";
-  } else if (purpose === "canonical_scenario_semantic_normalization") {
-    timeoutMs = parsePositiveInt(env.AI_CANONICAL_SEMANTIC_TIMEOUT_MS, parsePositiveInt(env.AI_TIMEOUT_MS, 30000));
   } else if (purpose === "spec_generation") {
     model = env.AI_SPEC_MODEL?.trim();
     modelSource = "AI_SPEC_MODEL";
@@ -171,7 +187,7 @@ export function resolveAiConfig(purpose: AiPurpose): AiProviderConfig {
       providerName,
       baseUrl: "",
       apiKey: "",
-      model,
+      model: model ?? "",
       timeoutMs,
       maxAttempts,
       purpose,
@@ -179,6 +195,7 @@ export function resolveAiConfig(purpose: AiPurpose): AiProviderConfig {
       extraArgs,
       requireJson,
       requireJsonSchema,
+      reasoningEffort,
       allowStdoutJsonFallback: parseBool(env.AI_ALLOW_STDOUT_JSON_FALLBACK, false)
     };
   }
@@ -193,7 +210,7 @@ export function resolveAiConfig(purpose: AiPurpose): AiProviderConfig {
       providerName,
       baseUrl: "",
       apiKey: "",
-      model,
+      model: model ?? "",
       timeoutMs,
       maxAttempts,
       purpose,
@@ -214,7 +231,7 @@ export function resolveAiConfig(purpose: AiPurpose): AiProviderConfig {
       providerName,
       baseUrl: "",
       apiKey: "",
-      model,
+      model: model ?? "",
       timeoutMs,
       maxAttempts,
       purpose,
@@ -222,6 +239,7 @@ export function resolveAiConfig(purpose: AiPurpose): AiProviderConfig {
       extraArgs,
       requireJson,
       requireJsonSchema,
+      reasoningEffort,
       allowStdoutJsonFallback: parseBool(env.AI_ALLOW_STDOUT_JSON_FALLBACK, false)
     };
   }
@@ -250,7 +268,7 @@ export function resolveAiConfig(purpose: AiPurpose): AiProviderConfig {
       providerName,
       baseUrl,
       apiKey,
-      model,
+      model: model ?? "",
       timeoutMs,
       maxAttempts,
       purpose,

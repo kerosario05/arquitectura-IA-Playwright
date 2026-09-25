@@ -127,10 +127,10 @@ function isAuthConsumedStep(
     return isAuthConsumedKeyword(target);
   }
 
-  if (isAuthConsumedKeyword(target)) {
-    return true;
-  }
-
+  // Once the auth boundary is completed, pending actions are business-surface
+  // candidates by default. Only the explicit continuation variants remain
+  // auth-consumed while the transition window is still open; broad credential
+  // keyword matching would consume later fields such as business email inputs.
   if (authGateState.authConsumedOpen && isAuthContinueVariant(target)) {
     return true;
   }

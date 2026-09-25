@@ -1,0 +1,30 @@
+{
+  "scenarioId": "PREVIEW-001",
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../../src/automations/runtime/promoted-spec-runtime';\n\nprocess.env.APP_SLUG = 'kiosko';\nprocess.env.SECTION_SLUG = 'default-section';\nprocess.env.SCENARIO_ID = 'PREVIEW-001';\nprocess.env.SCENARIO_TITLE = 'Tarjeta';\n\ntest('PREVIEW-001 - Tarjeta', async ({ page }) => {\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 1,\n      target: 'Explora nuestros productos',\n      actionIntent: 'Presionar Explora nuestros productos',\n      expectedEffect: 'Abrir la sección de productos',\n      action: async () => {\n        await page.getByLabel('Explora nuestros productos').click();\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 2,\n      target: 'Tarjetas',\n      actionIntent: 'Presionar Tarjetas',\n      expectedEffect: 'Abrir la categoría Tarjetas',\n      action: async () => {\n        await page.getByRole('button', { name: 'Tarjetas', exact: true }).click();\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 3,\n      target: 'Tarjeta de CrÃ©dito',\n      actionIntent: 'Presionar Tarjeta de CrÃ©dito',\n      expectedEffect: 'Abrir la categoría Tarjeta de CrÃ©dito',\n      action: async () => {\n        await page.getByRole('button', { name: 'Tarjeta de CrÃ©dito', exact: true }).click();\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 4,\n      target: 'Tarjeta CrÃ©dito Visa ClÃ¡sica Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Pagos en lÃ­nea con disponibilidad inmediata.',\n      actionIntent: 'Presionar la tarjeta de crédito Visa Clásica',\n      expectedEffect: 'Abrir el detalle de la tarjeta seleccionada',\n      action: async () => {\n        await page.getByAltText('Tarjeta CrÃ©dito Visa ClÃ¡sica', { exact: true }).click();\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 5,\n      target: 'Finalizar sesiÃ³n',\n      actionIntent: 'Presionar Finalizar sesiÃ³n',\n      expectedEffect: 'Cargar la pantalla inicial',\n      action: async () => {\n        await page.getByRole('button', { name: 'Finalizar sesiÃ³n', exact: true }).click();\n      }\n    });\n\n    await promotedRuntime.waitForPromotedUiStable(5, 'Finalizar sesiÃ³n');\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 5,\n      target: 'Finalizar sesiÃ³n',\n      polarity: 'positive',\n      expectedUrl: 'https://172.27.4.50/',\n      assertion: async () => {\n        await expect(page).toHaveURL('https://172.27.4.50/');\n      }\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});\n",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "La aplicaciÃ³n carga su pantalla inicial",
+      "implementation": "await expect(page).toHaveURL('https://172.27.4.50/');"
+    }
+  ],
+  "usedPageObjects": [],
+  "declaredIdentifiers": [
+    "page",
+    "promotedRuntime"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OperationsMenuPage = void 0;
 const test_1 = require("@playwright/test");
-const promoted_spec_helpers_1 = require("../../../browser/promoted-spec-helpers");
+const promoted_spec_helpers_1 = require("../../src/browser/promoted-spec-helpers");
 class OperationsMenuPage {
     page;
     constructor(page) {

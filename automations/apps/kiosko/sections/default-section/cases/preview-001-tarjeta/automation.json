@@ -1,0 +1,126 @@
+{
+  "id": "preview-001-tarjeta",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Tarjeta",
+  "planPath": "automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-tarjeta\\plan.json",
+  "specPath": "automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-tarjeta\\case.spec.ts",
+  "appSlug": "kiosko",
+  "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
+  "status": "active",
+  "source": "discovery",
+  "appProfile": "kiosko",
+  "createdAt": "2026-09-16T11:58:42.346Z",
+  "updatedAt": "2026-09-16T11:58:42.346Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-16T11-55-42-979Z\\discovered-plans.pending.json",
+  "pomStatus": "promoted",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "passed",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-16T11-55-42-979Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "specGeneration": {
+      "mode": "ai_hybrid",
+      "provider": "codex",
+      "model": "gpt-5.6-luna",
+      "skill": {
+        "name": "playwright-spec-generation",
+        "version": "1.0.0",
+        "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+        "loaded": true
+      },
+      "invocations": 1,
+      "invocationsConsumed": 1,
+      "durationMs": 142491,
+      "usage": {
+        "inputTokens": 101434,
+        "cachedInputTokens": 79872,
+        "cacheWriteInputTokens": 0,
+        "nonCachedInputTokens": 21562,
+        "outputTokens": 4174,
+        "reasoningOutputTokens": 919,
+        "totalPhysicalTokens": 105608,
+        "durationMs": 107852,
+        "credits": null
+      },
+      "validation": {
+        "schema": "passed",
+        "structure": "passed",
+        "traceFidelity": "passed",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "passed",
+        "functionalExecution": "passed"
+      },
+      "promotionAllowed": true,
+      "specsRequested": 1,
+      "specsValidated": 1,
+      "specsRejected": 0,
+      "specGenerationAttempts": 1,
+      "specRepairAttempts": 0,
+      "firstPassPromotion": true,
+      "failedGatesAttempt1": [],
+      "regressedGates": [],
+      "missingRequirements": [],
+      "oracleTypes": [
+        "navigation_transition"
+      ],
+      "errors": [],
+      "warnings": [],
+      "finalSpec": {
+        "origin": "ai_candidate",
+        "generatedBy": "ai",
+        "strategy": "ai_candidate",
+        "fallback": null
+      },
+      "runtimeGate": {
+        "decision": "promote",
+        "promotionStatus": "promoted",
+        "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+      },
+      "specWritten": true,
+      "previousSpec": {
+        "existed": true,
+        "hash": "0659fcb7af59ec5b029f52b1153665eeea0c314c393353aaf2fcd39045b63444",
+        "lastModifiedAt": "2026-09-16T11:53:14.886Z"
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "promoted",
+      "blockers": [],
+      "availablePageObjects": [
+        "ProductListPage",
+        "OperationsMenuPage",
+        "CategoryPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false,
+      "specPath": "automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-tarjeta\\case.spec.ts",
+      "specHash": "5f6095bdc7c3084fd5518201080cb4daaf2588fdbcd1676d6f225d3f63366201",
+      "specSource": "generatedSpec"
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-tarjeta\\plan.json",
+    "previousStatus": "active"
+  },
+  "promotionPersisted": true,
+  "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-tarjeta\\case.spec.ts",
+  "promotedSpecHash": "5f6095bdc7c3084fd5518201080cb4daaf2588fdbcd1676d6f225d3f63366201"
+}

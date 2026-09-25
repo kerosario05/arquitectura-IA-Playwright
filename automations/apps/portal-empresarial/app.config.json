@@ -1,0 +1,9 @@
+{
+  "name": "portal empresarial",
+  "baseUrl": "https://172.27.4.31/login",
+  "loginMode": "no_login",
+  "testData": {},
+  "testDataAliases": {},
+  "missingInputBehavior": "fail",
+  "ignoreHTTPSErrors": true
+}

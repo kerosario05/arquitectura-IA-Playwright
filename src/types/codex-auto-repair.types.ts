@@ -34,6 +34,13 @@ export type CodexCliUsage = {
 export type CodexCliRunnerResult = {
   exitCode: number;
   stdout: string;
+  /**
+   * The untruncated JSONL transport log as originally written by the Codex CLI
+   * process, before `stdout` is replaced with just the last agent_message text.
+   * Needed to detect turn.failed/error protocol events on non-zero exits — the
+   * replaced `stdout` never contains them.
+   */
+  rawStdout?: string;
   stderr: string;
   timedOut: boolean;
   signal?: string;

@@ -1,0 +1,205 @@
+{
+  "version": "1.0",
+  "appSlug": "portal-comercial",
+  "pageObjects": [
+    {
+      "id": "po_framework_productlistpage",
+      "className": "ProductListPage",
+      "filePath": "automations/apps/portal-comercial/pages/productlist.page.ts",
+      "screenSignature": "screen:portal-comercial-product_list",
+      "methods": [
+        {
+          "name": "selectProduct",
+          "intent": "select_product",
+          "parameters": [
+            "productName"
+          ],
+          "available": true,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": "preview-001-segunta-prueba-step-5"
+        },
+        {
+          "name": "selectFirstVisibleCard",
+          "intent": "select_first_visible_card",
+          "parameters": [],
+          "available": true,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        },
+        {
+          "name": "executeAction",
+          "intent": "unknown",
+          "parameters": [],
+          "available": false,
+          "source": "preview-001-segunta-prueba-missing-unknown",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 1,
+      "status": "active",
+      "sourcePlanIds": [],
+      "caseIds": [],
+      "createdAt": "2026-09-16T18:01:40.473Z",
+      "updatedAt": "2026-09-18T17:46:30.371Z"
+    },
+    {
+      "id": "po_framework_operationsmenupage",
+      "className": "OperationsMenuPage",
+      "filePath": "automations/apps/portal-comercial/pages/operationsmenu.page.ts",
+      "screenSignature": "screen:portal-comercial-operations_menu",
+      "methods": [
+        {
+          "name": "openModule",
+          "intent": "open_module",
+          "parameters": [
+            "moduleName"
+          ],
+          "available": false,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        },
+        {
+          "name": "expectModuleVisible",
+          "intent": "expect_loaded",
+          "parameters": [
+            "moduleName"
+          ],
+          "available": false,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        }
+      ],
+      "confidence": 1,
+      "status": "active",
+      "sourcePlanIds": [],
+      "caseIds": [],
+      "createdAt": "2026-09-16T18:01:40.473Z",
+      "updatedAt": "2026-09-16T18:01:40.473Z"
+    },
+    {
+      "id": "po_1789581700572_zoza9w",
+      "className": "LoginPage",
+      "filePath": "automations/apps/portal-comercial/pages/login.page.ts",
+      "screenSignature": "screen:portal-comercial-login",
+      "methods": [
+        {
+          "name": "fillUsername",
+          "intent": "fill_username",
+          "parameters": [
+            "value"
+          ],
+          "available": true,
+          "source": "candidate,preview-001-crear-producto-cuenta-efectivo-step-2,preview-001-crear-producto-cuenta-efectivo-missing-fill_username,preview-001-segunta-prueba-step-2",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        },
+        {
+          "name": "fillPassword",
+          "intent": "fill_password",
+          "parameters": [
+            "value"
+          ],
+          "available": true,
+          "source": "candidate,preview-001-crear-producto-cuenta-efectivo-step-3,preview-001-crear-producto-cuenta-efectivo-missing-fill_password,preview-001-segunta-prueba-step-3",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        },
+        {
+          "name": "submitLogin",
+          "intent": "submit_login",
+          "parameters": [],
+          "available": true,
+          "source": "candidate,preview-001-crear-producto-cuenta-efectivo-step-4,preview-001-crear-producto-cuenta-efectivo-missing-submit_login",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        },
+        {
+          "name": "executeAction",
+          "intent": "unknown",
+          "parameters": [],
+          "available": false,
+          "source": "preview-001-segunta-prueba-step-4",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "active",
+      "sourcePlanIds": [
+        "preview-001-crear-producto-cuenta-efectivo"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-09-16T18:01:40.572Z",
+      "updatedAt": "2026-09-18T17:46:30.370Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-09-16T18:01:40.600Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/portal-comercial/pages/login.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-09-16T18:01:40.623Z",
+        "approvedFrom": "automations/apps/portal-comercial/pages/login.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
+    },
+    {
+      "id": "po_1789753590370_idb0y4",
+      "className": "FormPage",
+      "filePath": "automations/apps/portal-comercial/pages/form.page.ts",
+      "screenSignature": "screen:portal-comercial-form",
+      "methods": [
+        {
+          "name": "fillField",
+          "intent": "fill_form_field",
+          "parameters": [
+            "fieldName",
+            "value"
+          ],
+          "available": true,
+          "source": "candidate,preview-001-segunta-prueba-step-6,preview-001-segunta-prueba-missing-fill_form_field",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "active",
+      "sourcePlanIds": [
+        "preview-001-segunta-prueba"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-09-18T17:46:30.370Z",
+      "updatedAt": "2026-09-18T17:46:30.370Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-09-18T17:46:30.383Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/portal-comercial/pages/form.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-09-18T17:46:30.395Z",
+        "approvedFrom": "automations/apps/portal-comercial/pages/form.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
+    }
+  ],
+  "componentCandidates": [],
+  "updatedAt": "2026-09-22T23:31:53.724Z"
+}

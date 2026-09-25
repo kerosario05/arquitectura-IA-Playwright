@@ -2,6 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const test_1 = require("@playwright/test");
 const job_store_1 = require("../src/server/jobs/job-store");
+const launch_orchestrator_1 = require("../src/server/jobs/launch-orchestrator");
+const runs_1 = require("../src/server/routes/runs");
 const discovery_batch_runner_1 = require("../src/server/jobs/discovery-batch-runner");
 // Helper to simulate the route handler validation logic
 function validateDiscoveryBatchRequest(body) {
@@ -72,6 +74,61 @@ function validateDiscoveryBatchRequest(body) {
 (0, test_1.test)("discovery-batch route: accepts single caseId", () => {
     const result = validateDiscoveryBatchRequest({ caseIds: [100] });
     (0, test_1.expect)(result.ok).toBe(true);
+});
+(0, test_1.test)("rediscovery provenance: preserves false, true, and undefined without coercion", () => {
+    const cases = [
+        { value: false, expected: { explicit: false, source: "none" } },
+        { value: true, expected: { explicit: true, source: "user_request" } },
+        { value: undefined, expected: { explicit: false, source: "none" } },
+    ];
+    for (const entry of cases) {
+        const intent = (0, discovery_batch_runner_1.resolveRediscoveryIntent)({ forceRediscovery: entry.value, rerunActive: false });
+        const line = (0, discovery_batch_runner_1.buildRediscoveryProvenanceLine)({ boundary: "intent_input", value: entry.value });
+        (0, test_1.expect)(line).toContain(`value=${entry.value === undefined ? "undefined" : entry.value}`);
+        (0, test_1.expect)(line).toContain(`type=${entry.value === undefined ? "undefined" : "boolean"}`);
+        (0, test_1.expect)(intent.explicit).toBe(entry.expected.explicit);
+        (0, test_1.expect)(intent.source).toBe(entry.expected.source);
+    }
+});
+(0, test_1.test)("rediscovery provenance: marks an absent producer property without inventing a value", () => {
+    const line = (0, discovery_batch_runner_1.buildRediscoveryProvenanceLine)({
+        boundary: "pre_job_store",
+        sourceEndpoint: "/api/runs/launch-execution",
+        jobType: "discovery-batch",
+        correlationField: "launchId",
+        correlationValue: "launch-test",
+        valueSource: "absent",
+    });
+    (0, test_1.expect)(line).toContain("propertyPresent=false");
+    (0, test_1.expect)(line).toContain("value=undefined");
+    (0, test_1.expect)(line).toContain("type=undefined");
+    (0, test_1.expect)(line).toContain("valueSource=absent");
+    (0, test_1.expect)(line).toContain("launchId=launch-test");
+});
+(0, test_1.test)("rediscovery create handoff: correlates pre-create and stored snapshots", () => {
+    const cases = [
+        { value: undefined, present: false },
+        { value: false, present: true },
+        { value: true, present: true },
+    ];
+    for (const entry of cases) {
+        const line = (0, launch_orchestrator_1.buildRediscoveryCreateHandoffLine)({
+            launchId: "launch-test",
+            jobId: "job-test",
+            prePresent: entry.present,
+            preValue: entry.value,
+            storedPresent: entry.present,
+            storedValue: entry.value,
+        });
+        (0, test_1.expect)(line).toContain("boundary=create_handoff producer=launch_execution");
+        (0, test_1.expect)(line).toContain("launchId=launch-test jobId=job-test");
+        (0, test_1.expect)(line).toContain(`prePresent=${entry.present} preValue=${entry.value === undefined ? "undefined" : entry.value} preType=${entry.value === undefined ? "undefined" : "boolean"}`);
+        (0, test_1.expect)(line).toContain(`storedPresent=${entry.present} storedValue=${entry.value === undefined ? "undefined" : entry.value} storedType=${entry.value === undefined ? "undefined" : "boolean"}`);
+    }
+});
+(0, test_1.test)("job_store provenance: distinguishes direct and rerun sourceJobId", () => {
+    (0, test_1.expect)((0, runs_1.resolveJobStoreSourceJobId)({ forceRediscovery: true })).toBe("none");
+    (0, test_1.expect)((0, runs_1.resolveJobStoreSourceJobId)({ forceRediscovery: true, sourceJobId: "previous-job" })).toBe("previous-job");
 });
 // ── Job store tests ──
 (0, test_1.test)("jobStore: creates discovery-batch job with correct type", () => {
@@ -154,6 +211,26 @@ function buildDiscoveryBatchArgs(params) {
     });
     (0, test_1.expect)(args).toContain("--app");
     (0, test_1.expect)(args).toContain("kiosko");
+});
+(0, test_1.test)("runner: serializes structured routeProfile for discovery preview", () => {
+    const routeProfile = {
+        name: "kiosko",
+        entry: [{ businessLabel: "home", visibleLabel: "Home" }],
+        aliases: {},
+        intermediates: {},
+        domainTerms: { home: ["Home"] },
+        visibleControls: ["Home"],
+        representativeFixture: {},
+        notes: [],
+    };
+    const args = (0, discovery_batch_runner_1.buildDiscoveryPreviewArgs)({
+        previewPath: "preview.json",
+        appSlug: "kiosko",
+        routeProfile,
+    });
+    const profileIndex = args.indexOf("--route-profile-json");
+    (0, test_1.expect)(profileIndex).toBeGreaterThanOrEqual(0);
+    (0, test_1.expect)(JSON.parse(args[profileIndex + 1])).toEqual(routeProfile);
 });
 (0, test_1.test)("runner: does not include --app when appSlug is not provided", () => {
     const { args } = buildDiscoveryBatchArgs({

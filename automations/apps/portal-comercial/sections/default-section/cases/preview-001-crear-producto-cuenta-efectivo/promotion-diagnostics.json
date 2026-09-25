@@ -1,0 +1,33 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "spec_generation_validation_failed",
+  "blockers": [
+    "missing_method:step=1 target=\"Usuario\" derivedIntent=\"fill_username\" expectedOwner=\"LoginPage\" availableMethods=[]",
+    "missing_method:step=2 target=\"Contraseña\" derivedIntent=\"fill_password\" expectedOwner=\"LoginPage\" availableMethods=[]",
+    "missing_method:step=3 target=\"Iniciar sesión\" derivedIntent=\"submit_login\" expectedOwner=\"LoginPage\" availableMethods=[]",
+    "spec_generation_validation_failed"
+  ],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [
+    "step=1 target=\"Usuario\" derivedIntent=\"fill_username\" expectedOwner=\"LoginPage\" availableMethods=[]",
+    "step=2 target=\"Contraseña\" derivedIntent=\"fill_password\" expectedOwner=\"LoginPage\" availableMethods=[]",
+    "step=3 target=\"Iniciar sesión\" derivedIntent=\"submit_login\" expectedOwner=\"LoginPage\" availableMethods=[]"
+  ],
+  "autoPomAttempted": true,
+  "autoPomCreatedMethods": [
+    "LoginPage.fillUsername()",
+    "LoginPage.fillPassword()",
+    "LoginPage.submitLogin()"
+  ],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-crear-producto-cuenta-efectivo\\case.spec.ts",
+  "specHash": "5e15f94766b430187a2e875439986acf83cc25d3a3bb1735912b2687ca6736be",
+  "specSource": "ai_candidate"
+}

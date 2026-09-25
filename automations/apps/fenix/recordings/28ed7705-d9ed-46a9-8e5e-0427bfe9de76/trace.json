@@ -1,0 +1,504 @@
+{
+  "recordingId": "28ed7705-d9ed-46a9-8e5e-0427bfe9de76",
+  "projectSlug": "fenix",
+  "appSlug": "fenix",
+  "platform": "web",
+  "baseUrl": "https://qa1.santacruz.do/onlinebanking",
+  "label": "fresh-otp-physical-verification",
+  "recordingGoal": {
+    "declaredGoal": "Reach the verification screen and record the six-box token entry",
+    "normalizedGoal": "Reach the verification screen and record the six-box token entry",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-09-24T22:42:08.950Z",
+  "status": "derived",
+  "events": [
+    {
+      "t": 2016,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://qa1.santacruz.do/onlinebanking",
+      "seq": 0
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "60d370b39a8d",
+      "url": "https://qa1.santacruz.do/onlinebanking",
+      "seq": 1
+    },
+    {
+      "t": 57853,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "a27ed165c47d0cf6f7738045f89a6d706ef3524eec0782fd1bcd6888da5d7a86",
+      "url": "https://qa1.santacruz.do/onlinebanking",
+      "target": {
+        "label": "Usuario:",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Usuario:",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#UserNameP",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "UserNameP",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": false
+      },
+      "value": "adminr",
+      "valueSource": "user",
+      "seq": 2
+    },
+    {
+      "t": 88567,
+      "kind": "navigate",
+      "screenKey": "60d370b39a8d",
+      "url": "https://qa1.santacruz.do/onlinebanking",
+      "seq": 3
+    },
+    {
+      "t": 115037,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "a27ed165c47d0cf6f7738045f89a6d706ef3524eec0782fd1bcd6888da5d7a86",
+      "url": "https://qa1.santacruz.do/onlinebanking",
+      "target": {
+        "label": "Usuario:",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Usuario:",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#UserNameP",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "UserNameP",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": false
+      },
+      "value": "adminr",
+      "valueSource": "user",
+      "seq": 4
+    },
+    {
+      "t": 146223,
+      "interactionId": "pointer-1",
+      "kind": "note",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "a27ed165c47d0cf6f7738045f89a6d706ef3524eec0782fd1bcd6888da5d7a86",
+      "url": "https://qa1.santacruz.do/onlinebanking",
+      "target": {
+        "label": "Iniciar sesión",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Iniciar sesión",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "LoginForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Iniciar sesión\"",
+      "observationType": "pointer",
+      "seq": 5
+    },
+    {
+      "t": 146383,
+      "kind": "fill",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "a27ed165c47d0cf6f7738045f89a6d706ef3524eec0782fd1bcd6888da5d7a86",
+      "url": "https://qa1.santacruz.do/onlinebanking",
+      "target": {
+        "label": "Contraseña:",
+        "role": "input",
+        "tag": "input",
+        "inputType": "password",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Contraseña:",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#PasswordP",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "PasswordP",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": true
+      },
+      "redactedKey": "contrasena:",
+      "valueSource": "user",
+      "seq": 6
+    },
+    {
+      "t": 146452,
+      "interactionId": "pointer-1",
+      "kind": "tap",
+      "screenKey": "60d370b39a8d",
+      "fingerprint": "a27ed165c47d0cf6f7738045f89a6d706ef3524eec0782fd1bcd6888da5d7a86",
+      "url": "https://qa1.santacruz.do/onlinebanking",
+      "target": {
+        "label": "Iniciar sesión",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Iniciar sesión",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Iniciar sesión",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "LoginForm"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Iniciar sesión",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "LoginForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 7
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "60d370b39a8d",
+      "title": "60d370b39a8d",
+      "fingerprint": "a27ed165c47d0cf6f7738045f89a6d706ef3524eec0782fd1bcd6888da5d7a86",
+      "url": "https://qa1.santacruz.do/onlinebanking",
+      "firstSeenAt": 3415,
+      "controls": [
+        {
+          "label": "\n             Personal\n        ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n             Personal\n        ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n             Empresarial\n        ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n             Empresarial\n        ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Usuario:",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Usuario",
+          "attributes": {
+            "id": "UserNameP",
+            "name": "UserName",
+            "type": "text",
+            "placeholder": "Usuario"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "UserNameP",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Contraseña:",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Contraseña",
+          "attributes": {
+            "id": "PasswordP",
+            "name": "Password",
+            "type": "password",
+            "placeholder": "Contraseña"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "PasswordP",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "¿Olvidó su contraseña?",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "forgotPasswordLnk"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "forgotPasswordLnk",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Iniciar sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "submit"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Iniciar sesión",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Regístrate",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Regístrate",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Derechos y Deberes como usuarios financieros",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Derechos y Deberes como usuarios financieros",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "\n             \n        ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "\n             \n        ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio -",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Inicio - ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Quiénes Somos -",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Quiénes Somos - ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Productos -",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Productos - ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Contactos -",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Contactos -",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Tarifas de Servicio -",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Tarifas de Servicio -",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Pasos Reclamación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Pasos Reclamación ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "© 2026 Banco Santa Cruz, República Dominicana",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "© 2026 Banco Santa Cruz, República Dominicana",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Powered by Sistemas Integrados de Informática",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Powered by Sistemas Integrados de Informática",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    }
+  ],
+  "endedAt": "2026-09-24T22:45:48.428Z",
+  "durationMs": 219478,
+  "narrative": "Recorrido grabado en aplicación web: fenix\nEtiqueta del recorrido: fresh-otp-physical-verification\n\nPantalla 1: inicio\n\nPantalla 2: 60d370b39a8d\n  - El usuario ingresó \"adminr\" en \"Usuario:\"\n  - (Observación técnica (pointer) sobre \"Iniciar sesión\")\n  - El usuario ingresó un valor sensible en \"Contraseña:\" (contrasena:)\n  - El usuario presionó \"Iniciar sesión\""
+}

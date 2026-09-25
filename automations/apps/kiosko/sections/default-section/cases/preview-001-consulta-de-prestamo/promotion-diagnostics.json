@@ -1,0 +1,21 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage",
+    "CategoryPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-consulta-de-prestamo\\case.spec.ts",
+  "specHash": "6deaf6f208dc993abe382f4a3d317f2ba00f7113441df7355aabdfeaf1505aa2",
+  "specSource": "generatedSpec"
+}

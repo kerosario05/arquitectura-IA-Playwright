@@ -1,5 +1,5 @@
 import assert from "node:assert";
-import { buildWebLocators, isSensitiveField } from "./web-session-recorder";
+import { buildWebLocators, isSensitiveField, preserveCapturedTechnicalTargetLocators } from "./web-session-recorder";
 
 function test(label: string, fn: () => void): void {
   try {
@@ -17,6 +17,28 @@ function describe(name: string, fn: () => void): void {
 }
 
 describe("buildWebLocators", () => {
+  test("keeps a structural candidate for an unlabeled editable compound child", () => {
+    const locators = buildWebLocators({
+      kind: "input",
+      label: "",
+      compoundRole: "amount_or_text",
+      gridRef: "grid:runtime",
+      rowRef: "row:runtime",
+      cellRef: "cell:runtime",
+      headerRef: "header:measure",
+      technicalTargetCandidates: [{
+        targetType: "editable",
+        semanticRole: "amount_or_text",
+        locatorCandidates: [{ strategy: "structural", value: "grid=grid:runtime|row=row:runtime|cell=cell:runtime|header=header:measure|role=amount_or_text", confidence: 0.72 }],
+        interactionEvidence: ["input"],
+        confidence: 0.9,
+        validatedByInteraction: true,
+      }],
+    } as never);
+    assert.equal(locators.some((locator) => locator.strategy === "structural"), true);
+    assert.equal(locators.some((locator) => /nth|first|coordinate/i.test(locator.value)), false);
+  });
+
   test("keeps the strongest identity when the page says it is unique", () => {
     const locators = buildWebLocators({
       kind: "click",
@@ -82,5 +104,35 @@ describe("isSensitiveField", () => {
 
   test("an ordinary field is not", () => {
     assert.strictEqual(isSensitiveField({ kind: "input", label: "Usuario" } as never), false);
+  });
+});
+
+describe("preserveCapturedTechnicalTargetLocators", () => {
+  const target = {
+    targetType: "display" as const,
+    semanticRole: "display" as never,
+    locatorCandidates: [],
+    structuralContext: { headerRef: "header:control" },
+    stableAttributes: {},
+    interactionEvidence: ["click"],
+    confidence: 0.45,
+    validatedByInteraction: true,
+  };
+  const captured = [{ strategy: "role", value: "button|control", confidence: 0.85 }];
+
+  test("transports captured locator identity into the sole technical target", () => {
+    const [hydrated] = preserveCapturedTechnicalTargetLocators([target], captured) ?? [];
+    assert.deepEqual(hydrated?.locatorCandidates, captured);
+  });
+
+  test("does not overwrite an existing technical locator candidate", () => {
+    const existing = { ...target, locatorCandidates: [{ strategy: "data-testid", value: "control", confidence: 0.98 }] };
+    const [preserved] = preserveCapturedTechnicalTargetLocators([existing], captured) ?? [];
+    assert.deepEqual(preserved?.locatorCandidates, existing.locatorCandidates);
+  });
+
+  test("does not attach one locator identity to multiple technical targets", () => {
+    const result = preserveCapturedTechnicalTargetLocators([target, { ...target }], captured);
+    assert.deepEqual(result?.map((candidate) => candidate.locatorCandidates), [[], []]);
   });
 });

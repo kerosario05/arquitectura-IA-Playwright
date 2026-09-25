@@ -5,7 +5,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const test_1 = require("@playwright/test");
 const promoted_spec_runtime_1 = require("../src/automations/runtime/promoted-spec-runtime");
+const promoted_spec_helpers_1 = require("../src/browser/promoted-spec-helpers");
 const node_path_1 = __importDefault(require("node:path"));
+const promoted_field_target_contract_1 = require("../src/automations/runtime/promoted-field-target-contract");
+(0, test_1.test)("diagnostic visible-element scan is bounded when an element text read stalls", async () => {
+    const timeoutCalls = [];
+    const slowElement = {
+        textContent: async ({ timeout }) => {
+            timeoutCalls.push(timeout);
+            await new Promise((_, reject) => setTimeout(() => reject(new Error("simulated stall")), timeout + 10));
+        }
+    };
+    const fakePage = {
+        locator: () => ({ all: async () => Array.from({ length: 20 }, () => slowElement) })
+    };
+    const startedAt = Date.now();
+    const texts = await (0, promoted_spec_helpers_1.scanVisibleElements)(fakePage, "button:visible");
+    const elapsedMs = Date.now() - startedAt;
+    (0, test_1.expect)(texts).toEqual([]);
+    (0, test_1.expect)(timeoutCalls.length).toBeGreaterThan(0);
+    (0, test_1.expect)(elapsedMs).toBeLessThan(2500);
+});
 (0, test_1.test)("click exitoso sin retry", async ({ page }) => {
     await page.setContent(`<button id="go" onclick="window.__clicked=true">Go</button>`);
     const runtime = (0, promoted_spec_runtime_1.createPromotedSpecRuntime)(page, { enabled: false, retryEnabled: true });
@@ -332,6 +352,28 @@ const node_path_1 = __importDefault(require("node:path"));
     const value = await page.locator("#email").inputValue();
     (0, test_1.expect)(value).toBe("test@example.com");
 });
+(0, test_1.test)("fillPromotedField commits a focused dynamic editor before the next action", async ({ page }) => {
+    await page.setContent(`
+    <label for="amount">Amount</label>
+    <input id="amount" />
+    <button id="validate" disabled>Validate</button>
+    <script>
+      const input = document.getElementById("amount");
+      const button = document.getElementById("validate");
+      input.addEventListener("blur", () => { button.disabled = false; window.__blurCommitted = true; });
+    </script>
+  `);
+    const runtime = (0, promoted_spec_runtime_1.createPromotedSpecRuntime)(page, { enabled: false });
+    await runtime.fillPromotedField({
+        stepIndex: 16,
+        field: "Amount",
+        value: "60000",
+        fill: async () => { await page.locator("#amount").fill("60000"); },
+    });
+    await (0, test_1.expect)(page.locator("#amount")).toHaveValue("60000");
+    await (0, test_1.expect)(page.locator("#validate")).toBeEnabled();
+    (0, test_1.expect)(await page.evaluate(() => window.__blurCommitted === true)).toBe(true);
+});
 (0, test_1.test)("return_to_list recovers from home reset using replay metadata", async ({ page }) => {
     const runtime = (0, promoted_spec_runtime_1.createPromotedSpecRuntime)(page, { enabled: false, retryEnabled: false });
     await page.setContent(`<h1>¡Hola!</h1><button>Iniciar</button>`);
@@ -359,4 +401,75 @@ const node_path_1 = __importDefault(require("node:path"));
         }
     });
     await (0, test_1.expect)(page.getByRole("heading", { name: /consulta de balance/i })).toBeVisible();
+});
+(0, test_1.test)("repeat transition accepts a SPA route change as the observed outcome", async ({ page }) => {
+    await page.setContent(`<main><button id="module" onclick="history.pushState({}, '', '#module')">Module</button></main>`);
+    const runtime = (0, promoted_spec_runtime_1.createPromotedSpecRuntime)(page, { enabled: true, stabilityTimeoutMs: 900, retryEnabled: false });
+    await runtime.clickPromotedTarget({
+        stepIndex: 41,
+        target: "Module",
+        actionIntent: "open_module",
+        expectedEffect: "navigation",
+        action: async () => { await page.locator("#module").click({ noWaitAfter: true }); },
+    });
+    (0, test_1.expect)(page.url()).toContain("#module");
+});
+(0, test_1.test)("repeat transition accepts an in-place business-surface change", async ({ page }) => {
+    await page.setContent(`
+    <main id="surface" data-state="before">
+      <button id="module" onclick="document.getElementById('surface').dataset.state='after'; document.getElementById('surface').insertAdjacentHTML('beforeend', '<h1>Destination</h1>')">Module</button>
+    </main>
+  `);
+    const runtime = (0, promoted_spec_runtime_1.createPromotedSpecRuntime)(page, { enabled: true, stabilityTimeoutMs: 900, retryEnabled: false });
+    await runtime.clickPromotedTarget({
+        stepIndex: 41,
+        target: "Module",
+        actionIntent: "open_module",
+        expectedEffect: "ui_change",
+        action: async () => { await page.locator("#module").click({ noWaitAfter: true }); },
+    });
+    await (0, test_1.expect)(page.getByRole("heading", { name: "Destination" })).toBeVisible();
+});
+(0, test_1.test)("repeat transition re-resolves a detached target at most once", async () => {
+    let firstAttempts = 0;
+    let freshResolutions = 0;
+    let freshClicks = 0;
+    const result = await (0, promoted_spec_runtime_1.clickPromotedLocatorWithBoundedReresolution)({ locator: { click: async () => { firstAttempts += 1; throw new Error("element is detached"); } } }, async () => {
+        freshResolutions += 1;
+        return { locator: { click: async () => { freshClicks += 1; } } };
+    }, 100);
+    (0, test_1.expect)(firstAttempts).toBe(1);
+    (0, test_1.expect)(freshResolutions).toBe(1);
+    (0, test_1.expect)(freshClicks).toBe(1);
+    (0, test_1.expect)(result.reResolved).toBe(true);
+});
+(0, test_1.test)("Primary y Repeat conservan la misma semántica estructural de transición", () => {
+    const previous = {
+        appSlug: process.env.APP_SLUG,
+        sectionSlug: process.env.SECTION_SLUG,
+        scenarioId: process.env.SCENARIO_ID,
+        recordingId: process.env.RECORDING_ID,
+    };
+    try {
+        process.env.APP_SLUG = "portalempresarial";
+        process.env.SECTION_SLUG = "default-section";
+        process.env.RECORDING_ID = "f6f29217-b81c-4f5d-8067-0e399f726d5b";
+        process.env.SCENARIO_ID = "PREVIEW-001";
+        const primary = (0, promoted_field_target_contract_1.resolvePromotedFieldIdentityFromPersistedContract)(6, "Gestión de Nóminas");
+        process.env.SCENARIO_ID = "PREVIEW-002";
+        const repeat = (0, promoted_field_target_contract_1.resolvePromotedFieldIdentityFromPersistedContract)(6, "Gestión de Nóminas");
+        (0, test_1.expect)(primary?.technicalTargetRefs).toEqual(repeat?.technicalTargetRefs);
+        (0, test_1.expect)(primary?.controlIdentity).toBe(repeat?.controlIdentity);
+        (0, test_1.expect)(primary?.expectedOutcomeKind).toBe("route_transition");
+        (0, test_1.expect)(repeat?.expectedOutcomeKind).toBe("route_transition");
+        (0, test_1.expect)(primary?.expectedRouteAfter).toBe(repeat?.expectedRouteAfter);
+    }
+    finally {
+        for (const [key, value] of Object.entries(previous)) {
+            if (value === undefined)
+                delete process.env[key];
+            else
+                process.env[key] = value;
+        }
+    }
 });

@@ -287,7 +287,7 @@ export function maskResolution(resolution: AuthInputResolution): Record<string, 
   const masked: Record<string, string> = {};
 
   if (resolution.data.identificationNumber) {
-    masked.identificationNumber = maskValue(resolution.data.identificationNumber);
+    masked.identificationNumber = "******";
   }
   if (resolution.data.otp) {
     masked.otp = "******";
@@ -296,7 +296,7 @@ export function maskResolution(resolution: AuthInputResolution): Record<string, 
     masked.password = "******";
   }
   if (resolution.data.username) {
-    masked.username = maskValue(resolution.data.username, 2);
+    masked.username = "******";
   }
   if (resolution.data.pin) {
     masked.pin = "****";
@@ -313,6 +313,7 @@ export function logAuthResolution(resolution: AuthInputResolution): void {
   console.log(`[auth-input-resolver] Resolution sources:`);
   for (const [key, source] of Object.entries(resolution.sources)) {
     const value = masked[key] || "(not resolved)";
-    console.log(`[auth-input-resolver]   ${key}: from ${source} = ${value}`);
+    const sensitive = ["username", "password", "otp", "pin", "token", "identificationNumber"].includes(key);
+    console.log(`[auth-input-resolver]   ${key}: from ${source} value=${value} sensitive=${sensitive}`);
   }
 }

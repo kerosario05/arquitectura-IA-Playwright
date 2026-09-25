@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-login",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Login",
+  "source": "discovery",
+  "appSlug": "fenix",
+  "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+  "createdAt": "2026-09-23T14:54:40.223Z"
+}

@@ -99,7 +99,7 @@ export function escapeDoubleQuotes(s: string): string {
 export function buildCommandArgs(input: CodexCliRunnerInput): { command: string; args: string[] } {
   const hasJsonFlag = input.extraArgs.some(arg => arg === "--json");
   const extraArgs = hasJsonFlag ? [...input.extraArgs] : [...input.extraArgs, "--json"];
-  const contextIsolationArgs = input.purpose === "spec_generation"
+  const contextIsolationArgs = input.purpose === "spec_generation" || input.purpose === "scenario_generation"
     ? ["-c", "project_doc_max_bytes=0"]
     : [];
   // codex.cmd / codex -> "exec" "<prompt>"
@@ -338,8 +338,8 @@ function logUsageLine(usage: CodexCliUsage, usageUnavailable: boolean): void {
 export async function runCodexCli(input: CodexCliRunnerInput): Promise<CodexCliRunnerResult> {
   lastRunnerInput = { ...input };
   const resolved = resolveSpawnCommand(input);
-  if (input.purpose === "spec_generation") {
-    console.log("[codex-context-policy] purpose=spec_generation projectDocMaxBytes=0");
+  if (input.purpose === "spec_generation" || input.purpose === "scenario_generation") {
+    console.log(`[codex-context-policy] purpose=${input.purpose} projectDocMaxBytes=0`);
   }
   const cwd = input.cwd;
   const timeoutMs = input.timeoutMs;
@@ -362,7 +362,7 @@ export async function runCodexCli(input: CodexCliRunnerInput): Promise<CodexCliR
     if (stderrLogPath) console.log(`[codex-cli] stderrLog: ${stderrLogPath}`);
   }
 
-  return await new Promise((resolve) => {
+  return await new Promise<CodexCliRunnerResult>((resolve) => {
     const spawnOptions: SpawnOptionsWithoutStdio = {
       cwd,
       env: buildSafeEnv()
@@ -487,6 +487,7 @@ export async function runCodexCli(input: CodexCliRunnerInput): Promise<CodexCliR
     return {
       ...rawResult,
       stdout,
+      rawStdout: rawResult.stdout,
       usage: usageUnavailable ? undefined : usage
     };
   });

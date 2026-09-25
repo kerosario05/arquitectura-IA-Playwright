@@ -12,6 +12,7 @@ import { persistRuntimeSnapshot, persistRuntimeRoute } from "../knowledge/runtim
 import { ensureSupportingCheckbox, ensureSupportingMultiselect, resolveSupportingDate, selectSupportingAutocomplete, selectSupportingCombobox, selectSupportingOption, selectSupportingRadio } from "./runtime-field-capability";
 import { resolveSupportingAutofill, type ResolvableObservedControl } from "./supporting-autofill";
 import type { RuntimeInputRequirement } from "../testrail/testrail-runtime-transformer";
+import { AsyncOperationProgressLease } from "./async-operation-progress-lease";
 
 /**
  * Classify scenario evidence kind from its steps — no hardcoded HUs or entities.
@@ -63,7 +64,13 @@ export type ScreenProgressProbe = boolean | {
   progressed?: boolean;
   signal?: string;
   pendingCount?: number;
+  requestFailed?: boolean;
   lastProgressAt?: number;
+};
+
+export type ScreenCompletionProbeResult = {
+  completed: boolean;
+  signal?: string;
 };
 
 export type ScreenStabilityResult = {
@@ -72,72 +79,127 @@ export type ScreenStabilityResult = {
   signals: string[];
   progressSignals: string[];
   relevantPendingRequests: number;
+  activeAsyncOperation: boolean;
+  stallThresholdReached: boolean;
   lastProgressAgeMs: number;
+  idleDeadlineMs: number;
+  hardSafetyDeadlineMs: number;
   absoluteDeadlineMs: number;
-  waitState: "stalled" | "active_pending" | "completed" | "failed";
+  waitState: "stalled" | "active_pending" | "active_async_operation" | "completed" | "failed";
   terminationReason: "stable" | "stalled" | "absolute_deadline_reached" | "request_failed" | "page_closed" | "context_closed";
   reason?: "loading_timeout";
 };
 
 /**
- * Wait for a stable screen without treating a single request event as ongoing
- * progress. Progress is revision-based: each new network lifecycle event (or
- * an explicit probe revision) may extend the bounded deadline, while a quiet
- * pending request is classified as stalled.
+ * Wait for a stable screen while preserving the original bounded absolute
+ * deadline. A request observed by the action watcher is an active operation
+ * for the whole action window, even when it emits no new lifecycle event for
+ * longer than the stall threshold. Unrelated resource types are excluded by
+ * the watcher/probe and cannot prolong this wait.
  */
 export async function waitForStableInteractiveScreen(
   page: Page,
   options?: {
     progressProbe?: () => ScreenProgressProbe;
+    completionProbe?: () => Promise<ScreenCompletionProbeResult>;
     waitForPendingTransport?: boolean;
     absoluteDeadlineMs?: number;
   },
 ): Promise<ScreenStabilityResult> {
   const start = Date.now();
-  const timeout = Number(process.env.LOADING_STABILITY_TIMEOUT_MS) || 8000;
-  const configuredProgressBudget = Number(process.env.LOADING_STABILITY_PROGRESS_BUDGET_MS ?? 4000);
-  const extendedProgressBudgetMs = Number.isFinite(configuredProgressBudget) && configuredProgressBudget > 0 ? configuredProgressBudget : 4000;
-  const configuredAbsoluteDeadline = options?.absoluteDeadlineMs ?? Number(process.env.LOADING_STABILITY_ABSOLUTE_DEADLINE_MS ?? 30000);
-  const absoluteDeadlineDurationMs = Number.isFinite(configuredAbsoluteDeadline) && configuredAbsoluteDeadline > 0
-    ? Math.max(timeout, configuredAbsoluteDeadline)
-    : Math.max(timeout, 30000);
-  const absoluteDeadlineAt = start + absoluteDeadlineDurationMs;
-  const pollMs = Math.min(250, Math.max(10, Math.floor(extendedProgressBudgetMs / 4)));
+  console.log(
+    `[async-wait-provenance] implementationId=completion-probe-authoritative-v1 ` +
+    `completionProbeProvided=${Boolean(options?.completionProbe)}`,
+  );
+  const idleWindowMs = Number(process.env.LOADING_STABILITY_TIMEOUT_MS) || 8000;
+  const hardSafetyCapEnv = process.env.ASYNC_OPERATION_HARD_SAFETY_CAP_MS
+    ?? process.env.LOADING_STABILITY_HARD_SAFETY_CAP_MS
+    ?? process.env.LOADING_STABILITY_ABSOLUTE_DEADLINE_MS;
+  const configuredHardSafetyCap = options?.absoluteDeadlineMs
+    ?? (hardSafetyCapEnv === undefined ? 120000 : Number(hardSafetyCapEnv));
+  const hardSafetyCapMs = Number.isFinite(configuredHardSafetyCap) && configuredHardSafetyCap > 0
+    ? Math.max(idleWindowMs, configuredHardSafetyCap)
+    : Math.max(idleWindowMs, 120000);
+  const absoluteDeadlineAt = start + hardSafetyCapMs;
+  const progressLease = new AsyncOperationProgressLease({
+    startedAt: start,
+    idleWindowMs,
+    hardSafetyCapMs,
+  });
+  const pollMs = Math.min(250, Math.max(10, Math.floor(idleWindowMs / 4)));
   const signals: string[] = [];
   const progressSignals: string[] = [];
   let loadingObserved = false;
+  let loadingCurrentlyDetected = false;
   let clearPolls = 0;
-  let deadline = start + timeout;
   let pageClosed = false;
   let contextClosed = false;
   let requestFailed = false;
   const pendingRelevantRequests = new Set<object>();
-  let lastProgressAt = start;
   let probePendingCount = 0;
   let probeActive = false;
   let lastProbeProgressAt = start;
-  const relevantResourceTypes = new Set(["document", "xhr", "fetch", "eventsource", "websocket"]);
+  // websocket/eventsource are long-lived by nature — a persistent connection that never
+  // "finishes" must never count as a pending request that blocks readiness or masks stability.
+  const relevantResourceTypes = new Set(["document", "xhr", "fetch"]);
   const isRelevant = (request: any) => relevantResourceTypes.has(String(request.resourceType?.() ?? "other"));
   const noteProgress = (signal: string) => {
-    lastProgressAt = Date.now();
+    progressLease.recordMeaningfulProgress();
     if (!progressSignals.includes(signal)) progressSignals.push(signal);
   };
   const onRequest = (request: any) => {
-    if (isRelevant(request)) pendingRelevantRequests.add(request as object);
-    noteProgress("request_started");
+    if (isRelevant(request)) {
+      pendingRelevantRequests.add(request as object);
+      noteProgress("request_started");
+    }
   };
   const onResponse = (response: any) => {
-    pendingRelevantRequests.delete(response.request?.() as object);
-    noteProgress("response_received");
+    const request = response.request?.();
+    if (isRelevant(request)) {
+      pendingRelevantRequests.delete(request as object);
+      noteProgress("response_received");
+    }
   };
   const onRequestFinished = (request: any) => {
-    pendingRelevantRequests.delete(request as object);
-    noteProgress("request_finished");
+    if (isRelevant(request)) {
+      pendingRelevantRequests.delete(request as object);
+      noteProgress("request_finished");
+    }
   };
   const onRequestFailed = (request: any) => {
+    if (!isRelevant(request)) return;
     pendingRelevantRequests.delete(request as object);
-    requestFailed = true;
-    noteProgress("request_failed");
+    // FIRST_LOSS fix: a request the browser itself cancelled BECAUSE the page is navigating away
+    // (Playwright reports this as `requestfailed` with an abort/cancel errorText, e.g.
+    // `net::ERR_ABORTED`) is not an application failure -- it is the ordinary side effect of the
+    // very transition this wait may exist to confirm (a login form's Enter/submit navigating to
+    // the next screen). Physical evidence: a press-caused navigation's own in-flight ancillary
+    // request was cancelled by that same navigation, and the wait (no `completionProbe`, as every
+    // post-press/post-click stabilization call has none) treated it as unconditionally terminal,
+    // aborting well before the new screen ever loaded. Detected generically from the browser's own
+    // cancellation vocabulary -- never from resourceType, URL, or any app-specific text -- so a
+    // genuine transport/server failure (a different errorText) keeps its existing terminal
+    // behavior below, for every caller, with or without a completionProbe.
+    const errorText = String(request.failure?.()?.errorText ?? "");
+    const cancelledByNavigation = /aborted|cancell?ed/i.test(errorText);
+    noteProgress(cancelledByNavigation ? "request_cancelled_by_navigation" : "request_failed");
+    if (cancelledByNavigation) return;
+    // FIRST_LOSS fix: a `completionProbe` is COMPLETION AUTHORITY (established for the generic
+    // idle-screen branch two tickets ago) -- an unrelated ancillary request (xhr/fetch, never
+    // the top-level document) failing anywhere on the page must never immediately abort a wait
+    // whose own target-scoped probe is still legitimately polling toward success. Physical
+    // evidence: a background list-loading request failed mid-page-load while the real fill
+    // target was already correctly identified but still disabled -- the wait terminated with
+    // `terminationReason: "request_failed"` well before the target could ever become enabled,
+    // even though that failure had nothing to do with the target itself. A DOCUMENT-load
+    // failure is always terminal regardless (the page itself may now be broken), and ANY
+    // relevant-type failure remains terminal when no `completionProbe` exists at all --
+    // preserving the exact pre-existing behavior for every other caller of this shared wait
+    // (post-click/post-navigate/post-press stabilization, none of which pass a completionProbe).
+    const resourceType = String(request.resourceType?.() ?? "other");
+    if (resourceType === "document" || !options?.completionProbe) {
+      requestFailed = true;
+    }
   };
   const onPageClose = () => { pageClosed = true; };
   const onContextClose = () => { contextClosed = true; };
@@ -165,17 +227,17 @@ export async function waitForStableInteractiveScreen(
   }
   try { (page.context?.() as any)?.on?.("close", onContextClose); } catch { /* best effort */ }
 
-  const readProgressProbe = (): { active: boolean; progressed: boolean } => {
+  const readProgressProbe = (): { active: boolean; progressed: boolean; requestFailed: boolean } => {
     const raw = options?.progressProbe?.();
     if (typeof raw === "boolean") {
       probeActive = raw;
       probePendingCount = raw ? Math.max(1, probePendingCount) : 0;
-      return { active: raw, progressed: false };
+      return { active: raw, progressed: false, requestFailed: false };
     }
     if (!raw) {
       probeActive = false;
       probePendingCount = 0;
-      return { active: false, progressed: false };
+      return { active: false, progressed: false, requestFailed: false };
     }
     probeActive = raw.active === true || (raw.pendingCount ?? 0) > 0;
     probePendingCount = Math.max(0, Number(raw.pendingCount ?? 0));
@@ -188,14 +250,55 @@ export async function waitForStableInteractiveScreen(
       noteProgress(raw.signal || "probe_progress");
     }
     if (raw.signal && !progressSignals.includes(raw.signal)) progressSignals.push(raw.signal);
-    return { active: probeActive, progressed };
+    return { active: probeActive, progressed, requestFailed: raw.requestFailed === true };
   };
 
   // Loading text patterns (lowercase for matching)
   const LOADING_TEXTS = /cargando|procesando|consultando|buscando|generando|espere|por favor espere|redirigiendo|loading|please wait/i;
+  let lastLoggedAsyncState: string | undefined;
+  const logAsyncState = (state: string, relevantPendingCount: number, loadingSignal: boolean) => {
+    if (lastLoggedAsyncState === state) return;
+    lastLoggedAsyncState = state;
+    const now = Date.now();
+    console.log(
+      `[async-wait] state=${state} elapsedMs=${now - start} ` +
+      `idleBudgetRemainingMs=${Math.max(0, progressLease.idleDeadline - now)} ` +
+      `hardBudgetRemainingMs=${Math.max(0, progressLease.hardSafetyDeadline - now)} ` +
+      `relevantPendingRequests=${relevantPendingCount} loadingSignal=${loadingSignal} ` +
+      `lastMeaningfulProgressAgeMs=${Math.max(0, now - progressLease.lastMeaningfulProgressAt)}`
+    );
+  };
 
-  while (Date.now() < deadline) {
+  while (Date.now() < absoluteDeadlineAt) {
     let loadingDetected = false;
+    let lastCompletionProbeSatisfied: boolean | undefined;
+
+    if (pageClosed || contextClosed) break;
+
+    if (options?.completionProbe) {
+      const completion = await options.completionProbe().catch(() => ({ completed: false } as ScreenCompletionProbeResult));
+      lastCompletionProbeSatisfied = completion.completed === true;
+      if (completion.completed) {
+        if (completion.signal && !signals.includes(completion.signal)) signals.push(completion.signal);
+        const waited = Date.now() - start;
+        cleanup();
+        return {
+          stable: true,
+          waitedMs: waited,
+          signals,
+          progressSignals,
+          relevantPendingRequests: Math.max(pendingRelevantRequests.size, probePendingCount),
+          activeAsyncOperation: false,
+          stallThresholdReached: Date.now() - start >= idleWindowMs,
+          lastProgressAgeMs: Math.max(0, Date.now() - progressLease.lastMeaningfulProgressAt),
+          idleDeadlineMs: progressLease.idleDeadline,
+          hardSafetyDeadlineMs: progressLease.hardSafetyDeadline,
+          absoluteDeadlineMs: absoluteDeadlineAt,
+          waitState: "completed",
+          terminationReason: "stable",
+        };
+      }
+    }
 
     try {
       // 1. aria-busy on body or main containers
@@ -225,18 +328,71 @@ export async function waitForStableInteractiveScreen(
       break;
     }
 
+    // A continuously visible loading indicator (spinner/aria-busy/loading text/disabled
+    // overlay) IS itself evidence the operation is progressing, even when no tracked network
+    // request is in flight (a WebSocket-driven or already-prefetched load, for example). Idle
+    // timeout must never fire while this positive signal is still present — only network
+    // signals renewed the idle deadline before, so a purely DOM-driven load silently ran out
+    // the idle budget after ~idleWindowMs even with the full hard safety budget still available.
+    if (loadingDetected) noteProgress("dom_loading_signal");
+
     // SPA route transitions can have no visible spinner while their fetch or
     // dynamically imported route chunk is still pending. Treat that pending
     // transport as a readiness signal so the next scan does not run against
     // the previous screen. The probe remains bounded by the existing wait
     // budget and is agnostic to the application or route.
     const probeState = readProgressProbe();
+    if (probeState.requestFailed) requestFailed = true;
+    const relevantPendingCount = Math.max(pendingRelevantRequests.size, probePendingCount);
+    if (requestFailed) {
+      logAsyncState("request_failed", relevantPendingCount, loadingDetected);
+      break;
+    }
     if (!loadingDetected && options?.waitForPendingTransport === true && probeState.active) {
       loadingDetected = true;
       if (!signals.includes("network_pending")) signals.push("network_pending");
     }
 
-    if (!loadingDetected) {
+    if (!loadingDetected && relevantPendingCount > 0) {
+      loadingDetected = true;
+      if (!signals.includes("network_pending")) signals.push("network_pending");
+    }
+    loadingCurrentlyDetected = loadingDetected;
+
+    if (loadingDetected && relevantPendingCount === 0 && Date.now() >= progressLease.idleDeadline) {
+      logAsyncState("idle", relevantPendingCount, true);
+      break;
+    }
+    if (loadingDetected || relevantPendingCount > 0) {
+      logAsyncState("active", relevantPendingCount, loadingDetected);
+    }
+
+    if (!loadingDetected && relevantPendingCount === 0) {
+      // FIRST_LOSS fix: COMPLETION PROBE AUTHORITY. When a `completionProbe` is supplied, an
+      // idle/loading-free screen is never itself success on its own -- only `completion.completed
+      // === true` (checked at the top of every loop iteration, above) may return `stable: true`.
+      // Physical evidence (a recorded fill target still disabled while unrelated app data kept
+      // loading) showed this generic "nothing is loading" branch returning `terminationReason:
+      // "stable"` even though the SAME iteration's `completionProbe()` had just returned
+      // `completed: false` -- `screenStable=true` was silently treated as if it meant
+      // `targetReady=true`. Idle time spent here is charged against the SAME idle budget any
+      // other stall already uses (renewed by real network progress exactly as before), so a
+      // target that will never become ready still fails closed well before the hard safety cap,
+      // never waiting indefinitely.
+      if (options?.completionProbe) {
+        const idleDeadlineReached = Date.now() >= progressLease.idleDeadline;
+        console.log(
+          `[async-wait] completionProbeProvided=true completionProbeSatisfied=${lastCompletionProbeSatisfied === true} ` +
+          `screenStable=true loadingSignal=${loadingDetected} relevantPendingRequests=${relevantPendingCount} ` +
+          `terminationReason=${idleDeadlineReached ? "stalled" : "polling"}`
+        );
+        if (idleDeadlineReached) {
+          logAsyncState("idle_probe_unsatisfied", relevantPendingCount, false);
+          break;
+        }
+        await page.waitForTimeout(pollMs);
+        continue;
+      }
       // Extra stability: wait one more poll cycle to confirm DOM settled
       if (loadingObserved && clearPolls === 0) {
       clearPolls = 1;
@@ -246,13 +402,18 @@ export async function waitForStableInteractiveScreen(
       await page.waitForTimeout(pollMs);
       const waited = Date.now() - start;
       cleanup();
+      logAsyncState("success", 0, false);
       return {
         stable: true,
         waitedMs: waited,
         signals,
         progressSignals,
         relevantPendingRequests: Math.max(pendingRelevantRequests.size, probePendingCount),
-        lastProgressAgeMs: Math.max(0, Date.now() - lastProgressAt),
+        activeAsyncOperation: false,
+        stallThresholdReached: Date.now() - start >= idleWindowMs,
+        lastProgressAgeMs: Math.max(0, Date.now() - progressLease.lastMeaningfulProgressAt),
+        idleDeadlineMs: progressLease.idleDeadline,
+        hardSafetyDeadlineMs: progressLease.hardSafetyDeadline,
         absoluteDeadlineMs: absoluteDeadlineAt,
         waitState: "completed",
         terminationReason: "stable",
@@ -261,46 +422,49 @@ export async function waitForStableInteractiveScreen(
 
     loadingObserved = true;
     clearPolls = 0;
-    const tryProgressExtension = () => {
-      const now = Date.now();
-      if (now - start < timeout || now >= absoluteDeadlineAt) return;
-      const pendingRelevantRequest = pendingRelevantRequests.size > 0 || probeActive;
-      const progressAge = now - lastProgressAt;
-      const hasRecentProgress = progressAge <= extendedProgressBudgetMs;
-      if (loadingDetected && pendingRelevantRequest && hasRecentProgress && !requestFailed && !pageClosed && !contextClosed) {
-        const candidateDeadline = Math.min(absoluteDeadlineAt, now + extendedProgressBudgetMs);
-        if (candidateDeadline <= deadline) return;
-        deadline = candidateDeadline;
-        if (!signals.includes("progress_extension")) signals.push("progress_extension");
-        console.log(`[screen-stability] adaptive-extension baseTimeoutMs=${timeout} progressBudgetMs=${extendedProgressBudgetMs} absoluteDeadlineMs=${absoluteDeadlineAt}`);
-      }
-    };
-    tryProgressExtension();
     await page.waitForTimeout(pollMs);
-    tryProgressExtension();
   }
 
   const waited = Date.now() - start;
   cleanup();
-  const activePending = pendingRelevantRequests.size > 0 || probeActive;
+  const now = Date.now();
+  const relevantPendingCount = Math.max(pendingRelevantRequests.size, probePendingCount);
+  const activePending = relevantPendingCount > 0 || probeActive;
+  const activeAsyncOperation = !requestFailed && !pageClosed && !contextClosed && (
+    activePending || (loadingCurrentlyDetected && now < progressLease.idleDeadline)
+  );
+  const idleStallReached = !activePending && loadingCurrentlyDetected && now >= progressLease.idleDeadline;
   const terminationReason = pageClosed
     ? "page_closed"
     : contextClosed
       ? "context_closed"
       : requestFailed
         ? "request_failed"
-        : Date.now() >= absoluteDeadlineAt && activePending
+        : now >= absoluteDeadlineAt && activeAsyncOperation
           ? "absolute_deadline_reached"
           : "stalled";
+  if (terminationReason === "request_failed") logAsyncState("request_failed", relevantPendingCount, loadingCurrentlyDetected);
+  else if (terminationReason === "page_closed") logAsyncState("page_closed", relevantPendingCount, loadingCurrentlyDetected);
+  else if (terminationReason === "context_closed") logAsyncState("context_closed", relevantPendingCount, loadingCurrentlyDetected);
+  else if (terminationReason === "absolute_deadline_reached") logAsyncState("hard_timeout", relevantPendingCount, loadingCurrentlyDetected);
+  else if (idleStallReached) logAsyncState("idle", relevantPendingCount, loadingCurrentlyDetected);
   return {
     stable: false,
     waitedMs: waited,
     signals,
     progressSignals,
-    relevantPendingRequests: Math.max(pendingRelevantRequests.size, probePendingCount),
-    lastProgressAgeMs: Math.max(0, Date.now() - lastProgressAt),
+    relevantPendingRequests: relevantPendingCount,
+    activeAsyncOperation,
+    stallThresholdReached: waited >= idleWindowMs,
+    lastProgressAgeMs: Math.max(0, Date.now() - progressLease.lastMeaningfulProgressAt),
+    idleDeadlineMs: progressLease.idleDeadline,
+    hardSafetyDeadlineMs: progressLease.hardSafetyDeadline,
     absoluteDeadlineMs: absoluteDeadlineAt,
-    waitState: activePending && terminationReason === "absolute_deadline_reached" ? "active_pending" : terminationReason === "request_failed" ? "failed" : "stalled",
+    waitState: terminationReason === "request_failed" || terminationReason === "page_closed" || terminationReason === "context_closed"
+      ? "failed"
+      : activeAsyncOperation && terminationReason === "absolute_deadline_reached"
+        ? "active_async_operation"
+        : "stalled",
     terminationReason,
     reason: "loading_timeout",
   };

@@ -495,9 +495,9 @@ mobileRouter.post("/runs/launch-execution", async (req, res, next) => {
       routeLearningScenarios,
       hasApp: hasResolvableApp(body as { apkPath?: string; appPackage?: string; appSlug?: string }),
       autoEnabled: body.autoRouteLearning !== false,
-      busyJob: findDeviceBusyJob(jobStore.list()),
+      busyJob: findDeviceBusyJob(jobStore.list({ includeInternal: true })),
       recentWalk: findRecentRouteLearningJob(
-        jobStore.list(),
+        jobStore.list({ includeInternal: true }),
         (body.appSlug ?? "").trim(),
         learningFlowId,
         Date.now(),
@@ -608,7 +608,7 @@ mobileRouter.post("/runs/execute", (req, res) => {
   // Refuse while a walk holds the emulator. Without this the run starts, fights the walk for the
   // Appium session lock and dies inside session creation as `mobile_session_state_unknown` —
   // which reads as an infrastructure fault and says nothing about the walk that caused it.
-  const activeWalk = findActiveRouteLearningJob(jobStore.list());
+  const activeWalk = findActiveRouteLearningJob(jobStore.list({ includeInternal: true }));
   if (activeWalk) {
     console.log(`[runs:execute] rejected reason=route_learning_in_progress jobId=${activeWalk.id}`);
     res.status(409).json({

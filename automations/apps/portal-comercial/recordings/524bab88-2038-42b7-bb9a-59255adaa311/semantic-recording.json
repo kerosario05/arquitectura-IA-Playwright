@@ -1,0 +1,3030 @@
+{
+  "version": "1.0",
+  "recordingId": "524bab88-2038-42b7-bb9a-59255adaa311",
+  "projectSlug": "portal-comercial",
+  "appSlug": "portal-comercial",
+  "platform": "web",
+  "recordingGoal": {
+    "declaredGoal": "Certificado de Deposito",
+    "normalizedGoal": "Certificado de Deposito",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "selectorOptionInventories": [],
+  "semanticScreens": [
+    {
+      "screenIdentity": "fbf08c6ecee9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "classification": "SAME_SCREEN_MUTATION",
+      "sourceScreenKey": "fbf08c6ecee9"
+    },
+    {
+      "screenIdentity": "9b3ed654dc84",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "9b3ed654dc84"
+    },
+    {
+      "screenIdentity": "f6d0130096ee",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10259/edit",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "f6d0130096ee"
+    }
+  ],
+  "semanticComponents": [
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Usuario|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "Usuario",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-6"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Contraseña|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "Contraseña",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-7",
+        "obs-8"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Solicitud multiproducto|link",
+      "componentType": "link",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "Solicitud multiproducto",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-12"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Número de identificación|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "Número de identificación",
+      "associatedField": "Número de identificación",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label",
+      "observationRefs": [
+        "obs-13"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Número de identificación|button",
+      "componentType": "button",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "control",
+      "associatedField": "Número de identificación",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-14"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Depurar|button",
+      "componentType": "button",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "Depurar",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-15"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Continuar|button",
+      "componentType": "button",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "Continuar",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-17"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Categoría de producto|combobox",
+      "componentType": "select/combobox",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "control",
+      "associatedField": "Categoría de producto",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-18"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Certificados de Deposito|option",
+      "componentType": "option",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "Certificados de Deposito",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-19"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Categoría de producto|selection",
+      "componentType": "select/combobox",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "Categoría de producto",
+      "associatedField": "Categoría de producto",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label",
+      "observationRefs": [
+        "obs-20"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Producto|combobox",
+      "componentType": "select/combobox",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "control",
+      "associatedField": "Producto",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-21"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|300 - Depósito a plazo Financiero Personal Capitalizable DOP|option",
+      "componentType": "option",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-22"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Producto|selection",
+      "componentType": "select/combobox",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "Producto",
+      "associatedField": "Producto",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label",
+      "observationRefs": [
+        "obs-23"
+      ]
+    }
+  ],
+  "semanticEvents": [
+    {
+      "eventRef": "event-1",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-2",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-3",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-4",
+      "action": "navigate",
+      "screenIdentity": "fbf08c6ecee9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-5",
+      "action": "observe",
+      "screenIdentity": "fbf08c6ecee9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-6",
+      "action": "fill",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "field": "Usuario",
+      "controlAffordance": "editable",
+      "valueKey": "usuario",
+      "valueRole": "action_input",
+      "technicalTargetRef": "fbf08c6ecee9:control:role:textbox|Usuario",
+      "afterState": "radames",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-7",
+      "action": "fill",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "field": "Contraseña",
+      "controlAffordance": "editable",
+      "valueKey": "contrasena",
+      "valueRole": "secure_input",
+      "technicalTargetRef": "fbf08c6ecee9:control:role:textbox|Contraseña",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-8",
+      "action": "observe",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "controlAffordance": "editable",
+      "technicalTargetRef": "fbf08c6ecee9:control:role:textbox|Contraseña",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-9",
+      "action": "navigate",
+      "screenIdentity": "fbf08c6ecee9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-10",
+      "action": "navigate",
+      "screenIdentity": "fbf08c6ecee9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-11",
+      "action": "navigate",
+      "screenIdentity": "fbf08c6ecee9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-12",
+      "action": "activate",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "link",
+      "controlAffordance": "observable_control",
+      "technicalTargetRef": "fbf08c6ecee9:control:role:link|Solicitud multiproducto",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-13",
+      "action": "fill",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "field": "Número de identificación",
+      "associatedField": "Número de identificación",
+      "controlAffordance": "editable",
+      "valueKey": "numero_de_identificacion",
+      "valueRole": "action_input",
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Número de identificación|amount_or_text",
+      "afterState": "056-0154046-0",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-14",
+      "action": "click",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "button",
+      "associatedField": "Número de identificación",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Número de identificación|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-15",
+      "action": "click",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "fbf08c6ecee9:control:role:button|Depurar",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-16",
+      "action": "navigate",
+      "screenIdentity": "fbf08c6ecee9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-17",
+      "action": "click",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "fbf08c6ecee9:control:role:button|Continuar",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-18",
+      "action": "activate",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "select/combobox",
+      "associatedField": "Categoría de producto",
+      "controlAffordance": "selectable",
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Categoría de producto|combobox",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-19",
+      "action": "activate",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "option",
+      "controlAffordance": "selectable",
+      "technicalTargetRef": "fbf08c6ecee9:control:role:option|Certificados de Deposito",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-20",
+      "action": "select",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "select/combobox",
+      "field": "Categoría de producto",
+      "associatedField": "Categoría de producto",
+      "controlAffordance": "selectable",
+      "valueKey": "categoria_de_producto_seleccion",
+      "technicalTargetRef": "fbf08c6ecee9:selection:fbf08c6ecee9|Categoría de producto|selection",
+      "afterState": "Certificados de Deposito",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-21",
+      "action": "activate",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "select/combobox",
+      "associatedField": "Producto",
+      "controlAffordance": "selectable",
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Producto|combobox",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-22",
+      "action": "activate",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "option",
+      "controlAffordance": "selectable",
+      "technicalTargetRef": "fbf08c6ecee9:control:role:option|300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-23",
+      "action": "select",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "select/combobox",
+      "field": "Producto",
+      "associatedField": "Producto",
+      "controlAffordance": "selectable",
+      "valueKey": "producto_seleccion",
+      "technicalTargetRef": "fbf08c6ecee9:selection:fbf08c6ecee9|Producto|selection",
+      "afterState": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    }
+  ],
+  "datasets": [
+    {
+      "valueKey": "usuario",
+      "semanticField": "Usuario",
+      "valueRole": "action_input",
+      "value": "radames",
+      "rawTypedValue": "radames",
+      "committedValue": "radames",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "fbf08c6ecee9:control:role:textbox|Usuario",
+      "recordingId": "524bab88-2038-42b7-bb9a-59255adaa311",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "contrasena",
+      "semanticField": "Contraseña",
+      "valueRole": "secure_input",
+      "source": "secure",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": true,
+      "generated": false,
+      "instanceIdentity": "fbf08c6ecee9:control:role:textbox|Contraseña",
+      "recordingId": "524bab88-2038-42b7-bb9a-59255adaa311",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "numero_de_identificacion",
+      "semanticField": "Número de identificación",
+      "valueRole": "action_input",
+      "value": "056-0154046-0",
+      "rawTypedValue": "056-0154046-0",
+      "committedValue": "056-0154046-0",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "fbf08c6ecee9:control:fbf08c6ecee9|Número de identificación|amount_or_text",
+      "recordingId": "524bab88-2038-42b7-bb9a-59255adaa311",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label"
+    },
+    {
+      "valueKey": "categoria_de_producto_seleccion",
+      "semanticField": "Categoría de producto",
+      "valueRole": "action_input",
+      "value": "Certificados de Deposito",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "fbf08c6ecee9:selection:fbf08c6ecee9|Categoría de producto|selection",
+      "recordingId": "524bab88-2038-42b7-bb9a-59255adaa311",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label"
+    },
+    {
+      "valueKey": "producto_seleccion",
+      "semanticField": "Producto",
+      "valueRole": "action_input",
+      "value": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "fbf08c6ecee9:selection:fbf08c6ecee9|Producto|selection",
+      "recordingId": "524bab88-2038-42b7-bb9a-59255adaa311",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label"
+    }
+  ],
+  "technicalObservations": [
+    {
+      "observationId": "obs-6",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "label": "Usuario",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "radames",
+      "semanticField": "Usuario",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Usuario",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#username",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "username",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "fbf08c6ecee9:control:role:textbox|Usuario",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-1",
+      "inputValue": "radames",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-7",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "label": "Contraseña",
+      "tag": "input",
+      "role": "input",
+      "semanticField": "Contraseña",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Contraseña",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#password",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "password",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "fbf08c6ecee9:control:role:textbox|Contraseña",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-2",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-8",
+      "status": "OBSERVED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "label": "Contraseña",
+      "tag": "input",
+      "role": "textbox",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Contraseña",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#password",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "password",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "fbf08c6ecee9:control:role:textbox|Contraseña",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-12",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "link",
+      "label": "Solicitud multiproducto",
+      "tag": "a",
+      "role": "link",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "link|Solicitud multiproducto",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "link|Solicitud multiproducto",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a"
+            },
+            "stableDirectAttributes": {
+              "href": "/requests/create/multiproduct"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "fbf08c6ecee9:control:role:link|Solicitud multiproducto",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-13",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "label": "control",
+      "tag": "input",
+      "role": "input",
+      "associatedField": "Número de identificación",
+      "afterValue": "056-0154046-0",
+      "semanticField": "Número de identificación",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Número de identificación|amount_or_text",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-3",
+      "inputValue": "056-0154046-0",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-14",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "button",
+      "label": "control",
+      "tag": "button",
+      "role": "button",
+      "associatedField": "Número de identificación",
+      "semanticField": "Número de identificación",
+      "locatorCandidates": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 2
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.4,
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Número de identificación|button",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-15",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "button",
+      "label": "Depurar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Depurar",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Depurar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Depurar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "fbf08c6ecee9:control:role:button|Depurar",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-17",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "button",
+      "label": "Continuar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Continuar",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Continuar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Continuar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "fbf08c6ecee9:control:role:button|Continuar",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-18",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "select/combobox",
+      "label": "control",
+      "tag": "span",
+      "role": "combobox",
+      "associatedField": "Categoría de producto",
+      "semanticField": "Categoría de producto",
+      "locatorCandidates": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "span",
+              "role": "combobox"
+            },
+            "stableDirectAttributes": {
+              "role": "combobox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.4,
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Categoría de producto|combobox",
+      "validatedByInteraction": true,
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-19",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "option",
+      "label": "Certificados de Deposito",
+      "tag": "li",
+      "role": "option",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "option|Certificados de Deposito",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#pv_id_118_1",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "pv_id_118_1",
+          "confidence": 0.8
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#pv_id_118_1",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Certificados de Deposito",
+              "id": "pv_id_118_1",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "fbf08c6ecee9:control:role:option|Certificados de Deposito",
+      "validatedByInteraction": true,
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-20",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "select/combobox",
+      "label": "Certificados de Deposito",
+      "role": "option",
+      "associatedField": "Categoría de producto",
+      "afterValue": "Certificados de Deposito",
+      "compoundRole": "selection",
+      "semanticField": "Categoría de producto",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "fbf08c6ecee9:selection:fbf08c6ecee9|Categoría de producto|selection",
+      "validatedByInteraction": true,
+      "selectorControlId": "fbf08c6ecee9|Categoría de producto|selection",
+      "optionSurfaceId": "fbf08c6ecee9|fbf08c6ecee9|Categoría de producto|selection|option-surface",
+      "selectedOptionObserved": "Certificados de Deposito",
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-21",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "select/combobox",
+      "label": "control",
+      "tag": "span",
+      "role": "combobox",
+      "associatedField": "Producto",
+      "semanticField": "Producto",
+      "locatorCandidates": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "span",
+              "role": "combobox"
+            },
+            "stableDirectAttributes": {
+              "role": "combobox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.4,
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Producto|combobox",
+      "validatedByInteraction": true,
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-22",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "option",
+      "label": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+      "tag": "li",
+      "role": "option",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "option|300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#pv_id_119_0",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "pv_id_119_0",
+          "confidence": 0.8
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#pv_id_119_0",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+              "id": "pv_id_119_0",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "fbf08c6ecee9:control:role:option|300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+      "validatedByInteraction": true,
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-23",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "select/combobox",
+      "label": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+      "role": "option",
+      "associatedField": "Producto",
+      "afterValue": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+      "compoundRole": "selection",
+      "semanticField": "Producto",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "fbf08c6ecee9:selection:fbf08c6ecee9|Producto|selection",
+      "validatedByInteraction": true,
+      "selectorControlId": "fbf08c6ecee9|Producto|selection",
+      "optionSurfaceId": "fbf08c6ecee9|fbf08c6ecee9|Producto|selection|option-surface",
+      "selectedOptionObserved": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "screen-fbf08c6ecee9-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "label": "Usuario",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "username",
+        "placeholder": "Ingresa tu usuario"
+      },
+      "placeholder": "Ingresa tu usuario",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "username",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "fbf08c6ecee9:control:1",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-fbf08c6ecee9-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "label": "Contraseña",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "password",
+        "type": "password",
+        "placeholder": "Ingresa tu contraseña"
+      },
+      "placeholder": "Ingresa tu contraseña",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "password",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "fbf08c6ecee9:control:2",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-fbf08c6ecee9-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "label": "Recordarme",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "remember-me",
+        "type": "checkbox"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "remember-me",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "fbf08c6ecee9:control:3",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-fbf08c6ecee9-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "button",
+      "label": "Iniciar sesión",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "submit",
+        "aria-label": "Iniciar sesión"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Iniciar sesión",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "fbf08c6ecee9:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "a",
+      "label": "Portal Comercial",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": " Portal Comercial ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9b3ed654dc84:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "button",
+      "label": "Configuración",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Configuración",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9b3ed654dc84:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "button",
+      "label": "Sesión",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Sesión",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9b3ed654dc84:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "menuitem",
+      "label": "Inicio",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_0_0",
+        "aria-label": "Inicio",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_0_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9b3ed654dc84:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "a",
+      "label": "Inicio",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Inicio",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9b3ed654dc84:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "menuitem",
+      "label": "Información",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_0_1",
+        "aria-label": "Información",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_0_1",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9b3ed654dc84:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "a",
+      "label": "Información",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Información",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9b3ed654dc84:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "menuitem",
+      "label": "Campañas",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_1_0",
+        "aria-label": "Campañas",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_1_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9b3ed654dc84:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "a",
+      "label": "Campañas",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Campañas",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9b3ed654dc84:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "menuitem",
+      "label": "Solicitud multiproducto",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_1_1",
+        "aria-label": "Solicitud multiproducto",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_1_1",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9b3ed654dc84:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "a",
+      "label": "Solicitud multiproducto",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Solicitud multiproducto",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9b3ed654dc84:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "menuitem",
+      "label": "Solicitudes en curso",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_1_2",
+        "aria-label": "Solicitudes en curso",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_1_2",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9b3ed654dc84:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-13",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "a",
+      "label": "Solicitudes en curso",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Solicitudes en curso",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9b3ed654dc84:control:13",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-14",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "menuitem",
+      "label": "Usuarios",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_2_0",
+        "aria-label": "Usuarios",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_2_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9b3ed654dc84:control:14",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-15",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "a",
+      "label": "Usuarios",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Usuarios",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9b3ed654dc84:control:15",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-16",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "menuitem",
+      "label": "Roles",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_2_1",
+        "aria-label": "Roles",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_2_1",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9b3ed654dc84:control:16",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-17",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "a",
+      "label": "Roles",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Roles",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9b3ed654dc84:control:17",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-18",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "menuitem",
+      "label": "Permisos",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_2_2",
+        "aria-label": "Permisos",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_2_2",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9b3ed654dc84:control:18",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-19",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "a",
+      "label": "Permisos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Permisos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9b3ed654dc84:control:19",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-20",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "menuitem",
+      "label": "Auditorías",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_3_0",
+        "aria-label": "Auditorías",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_3_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9b3ed654dc84:control:20",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f6d0130096ee-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "f6d0130096ee",
+      "componentType": "a",
+      "label": "Portal Comercial",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": " Portal Comercial ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "f6d0130096ee:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f6d0130096ee-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "f6d0130096ee",
+      "componentType": "button",
+      "label": "Configuración",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Configuración",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "f6d0130096ee:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f6d0130096ee-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "f6d0130096ee",
+      "componentType": "button",
+      "label": "Sesión",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Sesión",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "f6d0130096ee:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f6d0130096ee-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "f6d0130096ee",
+      "componentType": "menuitem",
+      "label": "Inicio",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_0_0",
+        "aria-label": "Inicio",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_0_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "f6d0130096ee:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f6d0130096ee-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "f6d0130096ee",
+      "componentType": "a",
+      "label": "Inicio",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Inicio",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "f6d0130096ee:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f6d0130096ee-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "f6d0130096ee",
+      "componentType": "menuitem",
+      "label": "Información",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_0_1",
+        "aria-label": "Información",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_0_1",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "f6d0130096ee:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f6d0130096ee-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "f6d0130096ee",
+      "componentType": "a",
+      "label": "Información",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Información",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "f6d0130096ee:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f6d0130096ee-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "f6d0130096ee",
+      "componentType": "menuitem",
+      "label": "Campañas",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_1_0",
+        "aria-label": "Campañas",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_1_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "f6d0130096ee:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f6d0130096ee-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "f6d0130096ee",
+      "componentType": "a",
+      "label": "Campañas",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Campañas",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "f6d0130096ee:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f6d0130096ee-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "f6d0130096ee",
+      "componentType": "menuitem",
+      "label": "Solicitud multiproducto",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_1_1",
+        "aria-label": "Solicitud multiproducto",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_1_1",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "f6d0130096ee:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f6d0130096ee-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "f6d0130096ee",
+      "componentType": "a",
+      "label": "Solicitud multiproducto",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Solicitud multiproducto",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "f6d0130096ee:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f6d0130096ee-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "f6d0130096ee",
+      "componentType": "menuitem",
+      "label": "Solicitudes en curso",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_1_2",
+        "aria-label": "Solicitudes en curso",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_1_2",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "f6d0130096ee:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f6d0130096ee-control-13",
+      "status": "OBSERVED",
+      "screenIdentity": "f6d0130096ee",
+      "componentType": "a",
+      "label": "Solicitudes en curso",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Solicitudes en curso",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "f6d0130096ee:control:13",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f6d0130096ee-control-14",
+      "status": "OBSERVED",
+      "screenIdentity": "f6d0130096ee",
+      "componentType": "menuitem",
+      "label": "Usuarios",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_2_0",
+        "aria-label": "Usuarios",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_2_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "f6d0130096ee:control:14",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f6d0130096ee-control-15",
+      "status": "OBSERVED",
+      "screenIdentity": "f6d0130096ee",
+      "componentType": "a",
+      "label": "Usuarios",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Usuarios",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "f6d0130096ee:control:15",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f6d0130096ee-control-16",
+      "status": "OBSERVED",
+      "screenIdentity": "f6d0130096ee",
+      "componentType": "menuitem",
+      "label": "Roles",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_2_1",
+        "aria-label": "Roles",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_2_1",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "f6d0130096ee:control:16",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f6d0130096ee-control-17",
+      "status": "OBSERVED",
+      "screenIdentity": "f6d0130096ee",
+      "componentType": "a",
+      "label": "Roles",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Roles",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "f6d0130096ee:control:17",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f6d0130096ee-control-18",
+      "status": "OBSERVED",
+      "screenIdentity": "f6d0130096ee",
+      "componentType": "menuitem",
+      "label": "Permisos",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_2_2",
+        "aria-label": "Permisos",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_2_2",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "f6d0130096ee:control:18",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f6d0130096ee-control-19",
+      "status": "OBSERVED",
+      "screenIdentity": "f6d0130096ee",
+      "componentType": "a",
+      "label": "Permisos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Permisos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "f6d0130096ee:control:19",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f6d0130096ee-control-20",
+      "status": "OBSERVED",
+      "screenIdentity": "f6d0130096ee",
+      "componentType": "menuitem",
+      "label": "Auditorías",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_3_0",
+        "aria-label": "Auditorías",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_3_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "f6d0130096ee:control:20",
+      "selectable": false,
+      "editable": false
+    }
+  ],
+  "editingSessions": [
+    {
+      "editingSessionId": "edit-1",
+      "controlIdentity": "fbf08c6ecee9|Usuario|amount_or_text",
+      "screenIdentity": "fbf08c6ecee9",
+      "startedAt": 5082,
+      "endedAt": 5082,
+      "rawEventRefs": [
+        "event-6"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "fbf08c6ecee9:role:textbox|Usuario"
+      ],
+      "inputValue": "radames",
+      "finalValue": "radames"
+    },
+    {
+      "editingSessionId": "edit-2",
+      "controlIdentity": "fbf08c6ecee9|Contraseña|amount_or_text",
+      "screenIdentity": "fbf08c6ecee9",
+      "startedAt": 9169,
+      "endedAt": 9169,
+      "rawEventRefs": [
+        "event-7"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "fbf08c6ecee9:role:textbox|Contraseña"
+      ]
+    },
+    {
+      "editingSessionId": "edit-3",
+      "controlIdentity": "fbf08c6ecee9|Número de identificación|amount_or_text",
+      "screenIdentity": "fbf08c6ecee9",
+      "startedAt": 23329,
+      "endedAt": 23329,
+      "rawEventRefs": [
+        "event-13"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "fbf08c6ecee9:fbf08c6ecee9|Número de identificación|amount_or_text"
+      ],
+      "inputValue": "056-0154046-0",
+      "semanticField": "Número de identificación",
+      "finalValue": "056-0154046-0"
+    },
+    {
+      "editingSessionId": "edit-4",
+      "controlIdentity": "fbf08c6ecee9|Categoría de producto|selection",
+      "screenIdentity": "fbf08c6ecee9",
+      "startedAt": 83808,
+      "endedAt": 83808,
+      "rawEventRefs": [
+        "event-20"
+      ],
+      "intermediateValues": [],
+      "commitReason": "change",
+      "technicalTargetRefs": [
+        "fbf08c6ecee9:fbf08c6ecee9|Categoría de producto|selection"
+      ],
+      "compoundRole": "selection",
+      "semanticField": "Categoría de producto",
+      "finalValue": "Certificados de Deposito"
+    },
+    {
+      "editingSessionId": "edit-5",
+      "controlIdentity": "fbf08c6ecee9|Producto|selection",
+      "screenIdentity": "fbf08c6ecee9",
+      "startedAt": 88181,
+      "endedAt": 88181,
+      "rawEventRefs": [
+        "event-23"
+      ],
+      "intermediateValues": [],
+      "commitReason": "change",
+      "technicalTargetRefs": [
+        "fbf08c6ecee9:fbf08c6ecee9|Producto|selection"
+      ],
+      "compoundRole": "selection",
+      "semanticField": "Producto",
+      "finalValue": "300 - Depósito a plazo Financiero Personal Capitalizable DOP"
+    }
+  ],
+  "scenarioSuggestions": [],
+  "canonicalInteractions": [
+    {
+      "id": "interaction-1",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-1"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-2",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-2"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-3",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-3"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-4",
+      "controlIdentity": "fbf08c6ecee9",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-4"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "fbf08c6ecee9",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-6",
+      "controlIdentity": "fbf08c6ecee9|Usuario|role|textbox|Usuario",
+      "semanticField": "Usuario",
+      "action": "fill",
+      "valueKey": "usuario",
+      "recordedValue": "radames",
+      "sourceEventRefs": [
+        "event-6"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Usuario",
+        "css:#username",
+        "id:username"
+      ],
+      "editingSessionRef": "edit-1",
+      "description": "Ingresar en \"Usuario\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-7",
+      "controlIdentity": "fbf08c6ecee9|Contraseña|role|textbox|Contraseña",
+      "semanticField": "Contraseña",
+      "action": "fill",
+      "valueKey": "contrasena",
+      "sourceEventRefs": [
+        "event-7"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Contraseña",
+        "css:#password",
+        "id:password"
+      ],
+      "editingSessionRef": "edit-2",
+      "description": "Ingresar en \"Contraseña\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-8",
+      "controlIdentity": "fbf08c6ecee9|Contraseña|role|textbox|Contraseña",
+      "action": "press",
+      "key": "Enter",
+      "sourceEventRefs": [
+        "event-8"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Contraseña",
+        "css:#password",
+        "id:password"
+      ],
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/",
+      "stateScope": "fbf08c6ecee9",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-10",
+      "controlIdentity": "fbf08c6ecee9",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-10"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/",
+      "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "stateScope": "fbf08c6ecee9",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-11",
+      "controlIdentity": "fbf08c6ecee9",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-11"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "stateScope": "fbf08c6ecee9",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-12",
+      "controlIdentity": "fbf08c6ecee9|Solicitud multiproducto|role|link|Solicitud multiproducto",
+      "semanticField": "Solicitud multiproducto",
+      "action": "click",
+      "valueKey": "solicitud_multiproducto",
+      "sourceEventRefs": [
+        "event-12"
+      ],
+      "technicalTargetRefs": [
+        "role:link|Solicitud multiproducto"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "link|Solicitud multiproducto",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a"
+            },
+            "stableDirectAttributes": {
+              "href": "/requests/create/multiproduct"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Solicitud multiproducto\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-13",
+      "controlIdentity": "fbf08c6ecee9|Número de identificación",
+      "semanticField": "Número de identificación",
+      "action": "fill",
+      "valueKey": "numero_de_identificacion",
+      "recordedValue": "056-0154046-0",
+      "sourceEventRefs": [
+        "event-13"
+      ],
+      "technicalTargetRefs": [],
+      "editingSessionRef": "edit-3",
+      "description": "Ingresar en \"Número de identificación\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "runtime_resolution_required",
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-14",
+      "controlIdentity": "fbf08c6ecee9|Número de identificación",
+      "semanticField": "Número de identificación",
+      "action": "click",
+      "valueKey": "numero_de_identificacion",
+      "recordedValue": "056-0154046-0",
+      "sourceEventRefs": [
+        "event-14"
+      ],
+      "technicalTargetRefs": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 2
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Número de identificación\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "runtime_resolution_required",
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-15",
+      "controlIdentity": "fbf08c6ecee9|Depurar|role|button|Depurar",
+      "semanticField": "Depurar",
+      "action": "click",
+      "valueKey": "depurar",
+      "sourceEventRefs": [
+        "event-15"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Depurar"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Depurar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Depurar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Depurar\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/requests/10259/edit",
+      "stateScope": "fbf08c6ecee9",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-17",
+      "controlIdentity": "fbf08c6ecee9|Continuar|role|button|Continuar",
+      "semanticField": "Continuar",
+      "action": "click",
+      "valueKey": "continuar",
+      "sourceEventRefs": [
+        "event-17"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Continuar"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Continuar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Continuar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Continuar\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10259/edit",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-18",
+      "controlIdentity": "fbf08c6ecee9|Categoría de producto",
+      "semanticField": "Categoría de producto",
+      "action": "click",
+      "valueKey": "categoria_de_producto",
+      "sourceEventRefs": [
+        "event-18"
+      ],
+      "technicalTargetRefs": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "span",
+              "role": "combobox"
+            },
+            "stableDirectAttributes": {
+              "role": "combobox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Categoría de producto\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10259/edit",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "runtime_resolution_required",
+      "technicalOnly": true,
+      "executionAuthority": true,
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-19",
+      "controlIdentity": "fbf08c6ecee9|Certificados de Deposito|role|option|Certificados de Deposito",
+      "semanticField": "Categoría de producto",
+      "action": "click",
+      "valueKey": "certificados_de_deposito",
+      "sourceEventRefs": [
+        "event-19"
+      ],
+      "technicalTargetRefs": [
+        "role:option|Certificados de Deposito",
+        "css:#pv_id_118_1",
+        "id:pv_id_118_1"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#pv_id_118_1",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Certificados de Deposito",
+              "id": "pv_id_118_1",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Certificados de Deposito\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10259/edit",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "technicalOnly": true,
+      "executionAuthority": true,
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-20",
+      "controlIdentity": "fbf08c6ecee9|Categoría de producto",
+      "semanticField": "Categoría de producto",
+      "action": "select",
+      "valueKey": "categoria_de_producto_seleccion",
+      "recordedValue": "Certificados de Deposito",
+      "sourceEventRefs": [
+        "event-20"
+      ],
+      "technicalTargetRefs": [],
+      "selectorControlId": "fbf08c6ecee9|||Categoría de producto",
+      "optionSurfaceId": "fbf08c6ecee9|fbf08c6ecee9|||Categoría de producto|option-surface",
+      "description": "Seleccionar en \"Categoría de producto\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10259/edit",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "executionAuthority": false,
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-21",
+      "controlIdentity": "fbf08c6ecee9|Producto",
+      "semanticField": "Producto",
+      "action": "click",
+      "valueKey": "producto",
+      "sourceEventRefs": [
+        "event-21"
+      ],
+      "technicalTargetRefs": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "span",
+              "role": "combobox"
+            },
+            "stableDirectAttributes": {
+              "role": "combobox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Producto\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10259/edit",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "runtime_resolution_required",
+      "technicalOnly": true,
+      "executionAuthority": true,
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-22",
+      "controlIdentity": "fbf08c6ecee9|300 - Depósito a plazo Financiero Personal Capitalizable DOP|role|option|300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+      "semanticField": "Producto",
+      "action": "click",
+      "valueKey": "300_deposito_a_plazo_financiero_personal_capitalizable_dop",
+      "sourceEventRefs": [
+        "event-22"
+      ],
+      "technicalTargetRefs": [
+        "role:option|300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+        "css:#pv_id_119_0",
+        "id:pv_id_119_0"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#pv_id_119_0",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+              "id": "pv_id_119_0",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"300 - Depósito a plazo Financiero Personal Capitalizable DOP\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10259/edit",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "technicalOnly": true,
+      "executionAuthority": true,
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-23",
+      "controlIdentity": "fbf08c6ecee9|Producto",
+      "semanticField": "Producto",
+      "action": "select",
+      "valueKey": "producto_seleccion",
+      "recordedValue": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+      "sourceEventRefs": [
+        "event-23"
+      ],
+      "technicalTargetRefs": [],
+      "selectorControlId": "fbf08c6ecee9|||Producto",
+      "optionSurfaceId": "fbf08c6ecee9|fbf08c6ecee9|||Producto|option-surface",
+      "description": "Seleccionar en \"Producto\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10259/edit",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "executionAuthority": false,
+      "confidence": 0.7
+    }
+  ],
+  "gridMetadata": {
+    "detected": true,
+    "grids": 3,
+    "rows": 0,
+    "cells": 0,
+    "headers": [],
+    "headerRelationships": []
+  },
+  "source": "SessionTrace"
+}

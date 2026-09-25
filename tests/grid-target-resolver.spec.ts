@@ -110,6 +110,80 @@ test("resolves a selection through its declared associated grid field", async ({
   await expect(page.locator('[data-cell="income-1"]')).toHaveText("DOP");
 });
 
+test("uses the runtime option value in the structural table fallback", async ({ page }) => {
+  await page.setContent(`
+    <table>
+      <thead><tr><th>Colaborador</th><th>Ingresos</th></tr></thead>
+      <tbody><tr><td>employee</td><td data-cell="income-fallback"><button type="button" style="position:fixed;left:10px;top:10px">Moneda</button></td></tr></tbody>
+    </table>
+    <script>
+      const cell = document.querySelector('[data-cell="income-fallback"]');
+      const trigger = cell.querySelector('button');
+      trigger.addEventListener('click', () => {
+        const list = document.createElement('div');
+        list.setAttribute('role', 'listbox');
+        list.innerHTML = '<button role="option">DOP</button><button role="option">USD</button>';
+        document.body.appendChild(list);
+        list.querySelector('[role="option"]').addEventListener('click', (event) => {
+          trigger.textContent = event.currentTarget.textContent;
+          list.remove();
+        });
+      });
+    </script>
+  `);
+
+  const result = await resolveActionTarget(page, { elements: [] } as any, "Ingresos", {
+    actionType: "action_select",
+    selectionField: "Ingresos",
+    selectionValue: "DOP",
+    rowScope: 1,
+    associatedField: "Ingresos",
+  });
+
+  expect(result.status).toBe("resolved");
+  expect(result.selectionApplied).toBe(true);
+  expect(result.locatorStrategy).toMatch(/selection_option/);
+  await expect(page.locator('[data-cell="income-fallback"] button')).toHaveText("DOP");
+});
+
+test("maps a header-inclusive structural row reference to the owned data row", async ({ page }) => {
+  await page.setContent(`
+    <table>
+      <thead><tr><th>Colaborador</th><th>Ingresos</th></tr></thead>
+      <tbody><tr><td>employee</td><td>
+        <button type="button" id="income-trigger">Moneda</button>
+      </td></tr></tbody>
+    </table>
+    <script>
+      const trigger = document.getElementById('income-trigger');
+      trigger.addEventListener('click', () => {
+        const surface = document.createElement('div');
+        surface.setAttribute('role', 'listbox');
+        surface.innerHTML = '<button role="option">ALT</button>';
+        document.body.appendChild(surface);
+        surface.querySelector('[role="option"]').addEventListener('click', (event) => {
+          trigger.textContent = event.currentTarget.textContent;
+          surface.remove();
+        });
+      });
+    </script>
+  `);
+
+  const result = await resolveActionTarget(page, { elements: [] } as any, "Ingresos", {
+    actionType: "action_select",
+    selectionField: "Ingresos",
+    selectionValue: "ALT",
+    rowScope: 2,
+    rowRef: "row:2",
+    entityScope: "entity_1",
+    associatedField: "Ingresos",
+  });
+
+  expect(result.status).toBe("resolved");
+  expect(result.selectionApplied).toBe(true);
+  await expect(page.locator("#income-trigger")).toHaveText("ALT");
+});
+
 test("prefers the selection control in a compound row cell over global controls and amount editors", async ({ page }) => {
   await page.setContent(`
     <label>Global currency <select><option>DOP</option></select></label>

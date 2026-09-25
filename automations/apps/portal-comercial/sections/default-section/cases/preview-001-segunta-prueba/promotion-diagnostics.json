@@ -1,0 +1,22 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage",
+    "LoginPage",
+    "FormPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-segunta-prueba\\case.spec.ts",
+  "specHash": "3669eb4762e7dc2878552abc9b60b8fcc995e5c0617bc48faa0dbd9d0cf0564d",
+  "specSource": "generatedSpec"
+}

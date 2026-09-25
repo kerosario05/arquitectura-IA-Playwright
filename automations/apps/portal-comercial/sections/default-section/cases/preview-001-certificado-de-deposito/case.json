@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-certificado-de-deposito",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Certificado de Deposito",
+  "source": "discovery",
+  "appSlug": "portal-comercial",
+  "appConfigPath": "automations\\apps\\portal-comercial\\app.config.json",
+  "createdAt": "2026-09-22T22:08:29.886Z"
+}

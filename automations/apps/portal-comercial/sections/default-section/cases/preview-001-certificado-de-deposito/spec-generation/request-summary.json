@@ -1,0 +1,878 @@
+{
+  "appSlug": "portal-comercial",
+  "sectionSlug": "default-section",
+  "scenarioId": "PREVIEW-001",
+  "scenarioTitle": "Certificado de Deposito",
+  "stepCount": 15,
+  "sourceExpectedResultPresent": true,
+  "requiredAssertionCount": 1,
+  "observableOracles": [
+    {
+      "id": "expected-01",
+      "requirement": "La aplicación carga su pantalla inicial",
+      "type": "navigation_transition",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 15,
+      "polarity": "positive",
+      "target": "Aceptar",
+      "evidence": [
+        "transition_observed:true",
+        "click_target:Aceptar",
+        "action_type:Presionar \"Aceptar\"",
+        "after_url:https://srvqacgowb01.local.bsc.com:5000/requests/10264/edit",
+        "assertion_polarity:positive"
+      ],
+      "details": {
+        "transitionObserved": true,
+        "clickTarget": "Aceptar",
+        "resolvedTarget": null,
+        "postClickUiChange": null,
+        "sourceActionStepIndex": 15,
+        "expectedUrl": "https://srvqacgowb01.local.bsc.com:5000/requests/10264/edit"
+      }
+    }
+  ],
+  "oracleTypes": [
+    "navigation_transition"
+  ],
+  "availablePageObjectCount": 4,
+  "mode": "deterministic",
+  "functionalExecutionEnabled": true,
+  "provider": null,
+  "model": null,
+  "skill": {
+    "name": null,
+    "version": null,
+    "hash": null,
+    "loaded": false
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "PREVIEW-001",
+    "title": "Certificado de Deposito",
+    "appSlug": "portal-comercial",
+    "sectionSlug": "default-section",
+    "auth": {
+      "gateDetected": true,
+      "required": false,
+      "stage": "identification_input",
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    },
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Ingresar [usuario] en \"Usuario\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Usuario"
+        },
+        "valueKey": "usuario",
+        "technicalTargetRef": "role:textbox|Usuario",
+        "technicalTargetRefs": [
+          "role:textbox|Usuario",
+          "css:#username",
+          "id:username"
+        ],
+        "controlIdentity": "fbf08c6ecee9|Usuario|role|textbox|Usuario",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Usuario",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Ingresar [contrasena] en \"Contraseña\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Contraseña"
+        },
+        "valueKey": "contrasena",
+        "technicalTargetRef": "role:textbox|Contraseña",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#password",
+          "id:password"
+        ],
+        "controlIdentity": "fbf08c6ecee9|Contraseña|role|textbox|Contraseña",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Contraseña",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Presionar \"Enter\" en \"Contraseña\"",
+        "operation": "press",
+        "target": {
+          "strategy": "text",
+          "value": "Contraseña",
+          "exact": false
+        },
+        "value": "Enter",
+        "technicalTargetRef": "role:textbox|Contraseña",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#password",
+          "id:password"
+        ],
+        "controlIdentity": "fbf08c6ecee9|Contraseña|role|textbox|Contraseña",
+        "recordingActionType": "press",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Contraseña",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "pressPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Presionar \"Solicitud multiproducto\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Solicitud multiproducto"
+        },
+        "valueKey": "solicitud_multiproducto",
+        "associatedField": "Solicitud multiproducto",
+        "technicalTargetRef": "role:link|Solicitud multiproducto",
+        "technicalTargetRefs": [
+          "role:link|Solicitud multiproducto"
+        ],
+        "controlIdentity": "fbf08c6ecee9|Solicitud multiproducto|role|link|Solicitud multiproducto",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[href=\"/requests/create/multiproduct\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a"
+            },
+            "stableDirectAttributes": {
+              "href": "/requests/create/multiproduct"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 4,
+        "scenarioStepIndex": 5,
+        "originalText": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Número de identificación"
+        },
+        "valueKey": "numero_de_identificacion",
+        "controlIdentity": "fbf08c6ecee9|Número de identificación",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[data-pc-name=\"inputmask\"][data-pc-section=\"root\"]",
+              "confidence": 0.95
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "input",
+              "role": "textbox"
+            },
+            "stableDirectAttributes": {
+              "data-pc-name": "inputmask",
+              "data-pc-section": "root"
+            },
+            "stableDescendants": [],
+            "semanticShape": []
+          },
+          "confidence": 0.95,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 5,
+        "scenarioStepIndex": 6,
+        "originalText": "Presionar \"Número de identificación\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Número de identificación"
+        },
+        "valueKey": "numero_de_identificacion",
+        "associatedField": "Número de identificación",
+        "controlIdentity": "fbf08c6ecee9|Número de identificación",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 2
+          },
+          "confidence": 0.85,
+          "certificationTier": 4
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 6,
+        "scenarioStepIndex": 7,
+        "originalText": "Presionar \"Depurar\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Depurar"
+        },
+        "valueKey": "depurar",
+        "associatedField": "Depurar",
+        "technicalTargetRef": "role:button|Depurar",
+        "technicalTargetRefs": [
+          "role:button|Depurar"
+        ],
+        "controlIdentity": "fbf08c6ecee9|Depurar|role|button|Depurar",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Depurar\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Depurar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 7,
+        "scenarioStepIndex": 8,
+        "originalText": "Presionar \"Continuar\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Continuar"
+        },
+        "valueKey": "continuar",
+        "associatedField": "Continuar",
+        "technicalTargetRef": "role:button|Continuar",
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ],
+        "controlIdentity": "fbf08c6ecee9|Continuar|role|button|Continuar",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Continuar\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Continuar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 8,
+        "scenarioStepIndex": 9,
+        "originalText": "Presionar \"Categoría de producto\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Categoría de producto"
+        },
+        "valueKey": "categoria_de_producto",
+        "associatedField": "Categoría de producto",
+        "controlIdentity": "fbf08c6ecee9|Categoría de producto",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[role=\"combobox\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "span",
+              "role": "combobox"
+            },
+            "stableDirectAttributes": {
+              "role": "combobox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 9,
+        "scenarioStepIndex": 10,
+        "originalText": "Presionar \"Categoría de producto\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Categoría de producto"
+        },
+        "valueKey": "certificados_de_deposito",
+        "associatedField": "Categoría de producto",
+        "technicalTargetRef": "role:option|Certificados de Deposito",
+        "technicalTargetRefs": [
+          "role:option|Certificados de Deposito",
+          "css:#pv_id_121_1",
+          "id:pv_id_121_1"
+        ],
+        "controlIdentity": "fbf08c6ecee9|Certificados de Deposito|role|option|Certificados de Deposito",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Certificados de Deposito\"][id=\"pv_id_121_1\"][role=\"option\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Certificados de Deposito",
+              "id": "pv_id_121_1",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 10,
+        "scenarioStepIndex": 11,
+        "originalText": "Presionar \"Producto\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Producto"
+        },
+        "valueKey": "producto",
+        "associatedField": "Producto",
+        "controlIdentity": "fbf08c6ecee9|Producto",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[role=\"combobox\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "span",
+              "role": "combobox"
+            },
+            "stableDirectAttributes": {
+              "role": "combobox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 11,
+        "scenarioStepIndex": 12,
+        "originalText": "Presionar \"Producto\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Producto"
+        },
+        "valueKey": "300_deposito_a_plazo_financiero_personal_capitalizable_dop",
+        "associatedField": "Producto",
+        "technicalTargetRef": "role:option|300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+        "technicalTargetRefs": [
+          "role:option|300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+          "css:#pv_id_122_0",
+          "id:pv_id_122_0"
+        ],
+        "controlIdentity": "fbf08c6ecee9|300 - Depósito a plazo Financiero Personal Capitalizable DOP|role|option|300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"300 - Depósito a plazo Financiero Personal Capitalizable DOP\"][id=\"pv_id_122_0\"][role=\"option\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+              "id": "pv_id_122_0",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 12,
+        "scenarioStepIndex": 13,
+        "originalText": "Ingresar [monto] en \"Monto\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Monto"
+        },
+        "valueKey": "monto",
+        "controlIdentity": "fbf08c6ecee9|Monto",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "div|[data-pc-name=\"input\"][data-pc-extend=\"inputtext\"][data-pc-section=\"root\"]",
+              "confidence": 0.55
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "role": "spinbutton",
+                "stableAttributes": {
+                  "data-pc-name": "input",
+                  "data-pc-extend": "inputtext",
+                  "data-pc-section": "root"
+                }
+              }
+            ]
+          },
+          "confidence": 0.55,
+          "certificationTier": 3
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 13,
+        "scenarioStepIndex": 14,
+        "originalText": "Ingresar [plazo] en \"Plazo\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Plazo"
+        },
+        "valueKey": "plazo",
+        "controlIdentity": "fbf08c6ecee9|Plazo",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "div|[data-pc-name=\"input\"][data-pc-extend=\"inputtext\"][data-pc-section=\"root\"]",
+              "confidence": 0.55
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "role": "spinbutton",
+                "stableAttributes": {
+                  "data-pc-name": "input",
+                  "data-pc-extend": "inputtext",
+                  "data-pc-section": "root"
+                }
+              }
+            ]
+          },
+          "confidence": 0.55,
+          "certificationTier": 3
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 14,
+        "scenarioStepIndex": 15,
+        "originalText": "Presionar \"Aceptar\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Aceptar"
+        },
+        "valueKey": "aceptar",
+        "associatedField": "Aceptar",
+        "technicalTargetRef": "role:button|Aceptar",
+        "technicalTargetRefs": [
+          "role:button|Aceptar"
+        ],
+        "controlIdentity": "fbf08c6ecee9|Aceptar|role|button|Aceptar",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Aceptar\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Aceptar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "aside"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "oracle": {
+          "type": "navigation_transition",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "url_state",
+          "mechanism": {
+            "source": "url_state",
+            "method": "expectPromotedVisible",
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "navigation_transition",
+              "urlPattern": "https://srvqacgowb01.local.bsc.com:5000/requests/10264/edit"
+            }
+          },
+          "sourceActionStepIndex": 15,
+          "requirement": "La aplicación carga su pantalla inicial"
+        },
+        "sourceActionStepIndex": 15,
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 15,
+      "representedScenarioSteps": 15,
+      "missingScenarioSteps": []
+    }
+  },
+  "executionContractChars": 16103,
+  "promptChars": null,
+  "specGenerationAttempts": 0,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "promotionAllowed": false,
+  "failedGatesAttempt1": [
+    "functionalExecution"
+  ],
+  "finalSpec": {
+    "origin": "deterministic_compiler",
+    "generatedBy": "core",
+    "strategy": "deterministic_compiler",
+    "fallback": null
+  }
+}

@@ -82,6 +82,8 @@ Thumbs.db
 # APK binaries (mobile projects)
 *.apk
 
+docs/ai/.obsidian/
+
 
 
 # ============================================

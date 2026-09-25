@@ -275,6 +275,15 @@ export function deriveSemanticMethodIntent(
     return "expect_loaded";
   }
 
+  // An observed click on the business action "Validar" is executable
+  // interaction, not an expect_loaded assertion. Keep the classification
+  // action-aware before consulting legacy keyword aliases.
+  if ((action === "click" || action === "select")
+    && isExplicitClickAction(normalizedText, action)
+    && /\b(validar|validate)\b/i.test(normalizedText)) {
+    return "click_primary_action";
+  }
+
   if (action === "fill") {
     if (isUsernameTarget(normalizedText)) return "fill_username";
     if (isPasswordTarget(normalizedText)) return "fill_password";

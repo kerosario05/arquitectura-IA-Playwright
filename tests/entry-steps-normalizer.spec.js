@@ -21,6 +21,33 @@ function makeScenario(steps) {
         mcpExecutable: true,
     };
 }
+const entryBranch = {
+    branchId: "branch-a",
+    sourceLabel: "A",
+    actionIntent: "select_option",
+    expectedDestination: "B",
+    accessIntent: "public",
+    evidenceSource: "user_story",
+    prerequisiteRequirementIds: ["prerequisite:1"],
+};
+(0, test_1.test)("entry authority: assertion-only scenario rejects routeProfile entry", () => {
+    const scenario = makeScenario(['1. Validar que se muestre "X".']);
+    (0, test_1.expect)((0, scenario_preview_service_1.isEntryStepInsertionAuthorized)(scenario, [entryBranch])).toBe(false);
+});
+(0, test_1.test)("entry authority: snapshot/inferred entry does not authorize without refs", () => {
+    const scenario = makeScenario(['1. Validar que se muestre "X".']);
+    (0, test_1.expect)((0, scenario_preview_service_1.isEntryStepInsertionAuthorized)(scenario, [])).toBe(false);
+});
+(0, test_1.test)("entry authority: canonical prerequisite action authorizes trusted implementation", () => {
+    const scenario = makeScenario(['1. Validar que se muestre "X".']);
+    scenario.stepRequirementRefs = [{ stepIndex: 0, requirementId: "prerequisite:1", facet: "action" }];
+    (0, test_1.expect)((0, scenario_preview_service_1.isEntryStepInsertionAuthorized)(scenario, [entryBranch])).toBe(true);
+});
+(0, test_1.test)("entry canonicalization preserves assertions-before-existing-action order", () => {
+    const result = (0, scenario_preview_service_1.applyCanonicalRoutePrefix)(['1. Validar que se muestre "X".', '2. Clic en "A".'], [], [{ action: "click", target: "A", when: "before_first_functional_step" }]);
+    (0, test_1.expect)(result.steps).toEqual(['1. Validar que se muestre "X".', '2. Clic en "A".']);
+    (0, test_1.expect)(result.changed).toBe(false);
+});
 // ── Entry step insertion ──────────────────────────────────────────
 (0, test_1.test)("insertEntrySteps: prepends all entry steps when none present", () => {
     const scenario = makeScenario([

@@ -1,0 +1,5471 @@
+{
+  "version": "1.0",
+  "recordingId": "a1282e09-65a1-45cc-b4e0-62832a5a7985",
+  "projectSlug": "portal-comercial",
+  "appSlug": "portal-comercial",
+  "platform": "web",
+  "recordingGoal": {
+    "declaredGoal": "Creacion Cuenta Efectivo",
+    "normalizedGoal": "Creacion Cuenta Efectivo",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "selectorOptionInventories": [],
+  "semanticScreens": [
+    {
+      "screenIdentity": "fbf08c6ecee9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "classification": "DYNAMIC_COMPONENT_STATE",
+      "sourceScreenKey": "fbf08c6ecee9"
+    },
+    {
+      "screenIdentity": "9b3ed654dc84",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "9b3ed654dc84"
+    },
+    {
+      "screenIdentity": "95c889362791",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "classification": "SAME_SCREEN_MUTATION",
+      "sourceScreenKey": "95c889362791"
+    }
+  ],
+  "semanticComponents": [
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Usuario|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "Usuario",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-6"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Contraseña|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "Contraseña",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-7",
+        "obs-8"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Solicitud multiproducto|link",
+      "componentType": "link",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "Solicitud multiproducto",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-10"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Número de identificación|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "Número de identificación",
+      "associatedField": "Número de identificación",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label",
+      "observationRefs": [
+        "obs-13"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Número de identificación|button",
+      "componentType": "button",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "control",
+      "associatedField": "Número de identificación",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-14"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Depurar|button",
+      "componentType": "button",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "Depurar",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-15"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Continuar|button",
+      "componentType": "button",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "Continuar",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-17"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Categoría de producto|combobox",
+      "componentType": "select/combobox",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "control",
+      "associatedField": "Categoría de producto",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-18"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Cuentas de Efectivo|option",
+      "componentType": "option",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "Cuentas de Efectivo",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-19"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Categoría de producto|selection",
+      "componentType": "select/combobox",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "Categoría de producto",
+      "associatedField": "Categoría de producto",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label",
+      "observationRefs": [
+        "obs-20"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Producto|combobox",
+      "componentType": "select/combobox",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "control",
+      "associatedField": "Producto",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-21"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|201 - Cuentas de Ahorros sin Libreta DOP|option",
+      "componentType": "option",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "201 - Cuentas de Ahorros sin Libreta DOP",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-22"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Producto|selection",
+      "componentType": "select/combobox",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "Producto",
+      "associatedField": "Producto",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label",
+      "observationRefs": [
+        "obs-23"
+      ]
+    },
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|Tasa|button",
+      "componentType": "button",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "control",
+      "associatedField": "Tasa",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-24"
+      ]
+    },
+    {
+      "componentId": "95c889362791:control:95c889362791|Aceptar|button",
+      "componentType": "button",
+      "screenIdentity": "95c889362791",
+      "label": "Aceptar",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-26",
+        "obs-39"
+      ]
+    },
+    {
+      "componentId": "95c889362791:control:95c889362791|Continuar|button",
+      "componentType": "button",
+      "screenIdentity": "95c889362791",
+      "label": "Continuar",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-27",
+        "obs-35"
+      ]
+    },
+    {
+      "componentId": "95c889362791:control:95c889362791|Propósito|combobox",
+      "componentType": "select/combobox",
+      "screenIdentity": "95c889362791",
+      "label": "control",
+      "associatedField": "Propósito",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-28"
+      ]
+    },
+    {
+      "componentId": "95c889362791:control:95c889362791|Ahorros Personales|option",
+      "componentType": "option",
+      "screenIdentity": "95c889362791",
+      "label": "Ahorros Personales",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-29"
+      ]
+    },
+    {
+      "componentId": "95c889362791:control:95c889362791|Propósito|selection",
+      "componentType": "select/combobox",
+      "screenIdentity": "95c889362791",
+      "label": "Propósito",
+      "associatedField": "Propósito",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label",
+      "observationRefs": [
+        "obs-30"
+      ]
+    },
+    {
+      "componentId": "95c889362791:control:95c889362791|Instrumento|combobox",
+      "componentType": "select/combobox",
+      "screenIdentity": "95c889362791",
+      "label": "control",
+      "associatedField": "Instrumento",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-31"
+      ]
+    },
+    {
+      "componentId": "95c889362791:control:95c889362791|Efectivo|option",
+      "componentType": "option",
+      "screenIdentity": "95c889362791",
+      "label": "Efectivo",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-32"
+      ]
+    },
+    {
+      "componentId": "95c889362791:control:95c889362791|Instrumento|selection",
+      "componentType": "select/combobox",
+      "screenIdentity": "95c889362791",
+      "label": "Instrumento",
+      "associatedField": "Instrumento",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label",
+      "observationRefs": [
+        "obs-33"
+      ]
+    },
+    {
+      "componentId": "95c889362791:control:95c889362791|Crear cuenta|button",
+      "componentType": "button",
+      "screenIdentity": "95c889362791",
+      "label": "Crear cuenta",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-34"
+      ]
+    },
+    {
+      "componentId": "95c889362791:control:95c889362791|Finalizar|button",
+      "componentType": "button",
+      "screenIdentity": "95c889362791",
+      "label": "Finalizar",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-36"
+      ]
+    },
+    {
+      "componentId": "95c889362791:control:95c889362791|Cerrar|button",
+      "componentType": "button",
+      "screenIdentity": "95c889362791",
+      "label": "Cerrar",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-37"
+      ]
+    },
+    {
+      "componentId": "95c889362791:control:95c889362791|Cancelar|button",
+      "componentType": "button",
+      "screenIdentity": "95c889362791",
+      "label": "Cancelar",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-38"
+      ]
+    }
+  ],
+  "semanticEvents": [
+    {
+      "eventRef": "event-1",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-2",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-3",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-4",
+      "action": "navigate",
+      "screenIdentity": "fbf08c6ecee9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-5",
+      "action": "observe",
+      "screenIdentity": "fbf08c6ecee9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-6",
+      "action": "fill",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "field": "Usuario",
+      "controlAffordance": "editable",
+      "valueKey": "usuario",
+      "valueRole": "action_input",
+      "technicalTargetRef": "fbf08c6ecee9:control:role:textbox|Usuario",
+      "afterState": "radames",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-7",
+      "action": "fill",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "field": "Contraseña",
+      "controlAffordance": "editable",
+      "valueKey": "contrasena",
+      "valueRole": "secure_input",
+      "technicalTargetRef": "fbf08c6ecee9:control:role:textbox|Contraseña",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-8",
+      "action": "observe",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "controlAffordance": "editable",
+      "technicalTargetRef": "fbf08c6ecee9:control:role:textbox|Contraseña",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-9",
+      "action": "navigate",
+      "screenIdentity": "fbf08c6ecee9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-10",
+      "action": "activate",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "link",
+      "controlAffordance": "observable_control",
+      "technicalTargetRef": "fbf08c6ecee9:control:role:link|Solicitud multiproducto",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-11",
+      "action": "navigate",
+      "screenIdentity": "fbf08c6ecee9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-12",
+      "action": "navigate",
+      "screenIdentity": "fbf08c6ecee9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-13",
+      "action": "fill",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "field": "Número de identificación",
+      "associatedField": "Número de identificación",
+      "controlAffordance": "editable",
+      "valueKey": "numero_de_identificacion",
+      "valueRole": "action_input",
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Número de identificación|amount_or_text",
+      "afterState": "056-0154046-0",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-14",
+      "action": "click",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "button",
+      "associatedField": "Número de identificación",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Número de identificación|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-15",
+      "action": "click",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "fbf08c6ecee9:control:role:button|Depurar",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-16",
+      "action": "navigate",
+      "screenIdentity": "fbf08c6ecee9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-17",
+      "action": "click",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "fbf08c6ecee9:control:role:button|Continuar",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-18",
+      "action": "activate",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "select/combobox",
+      "associatedField": "Categoría de producto",
+      "controlAffordance": "selectable",
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Categoría de producto|combobox",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-19",
+      "action": "activate",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "option",
+      "controlAffordance": "selectable",
+      "technicalTargetRef": "fbf08c6ecee9:control:role:option|Cuentas de Efectivo",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-20",
+      "action": "select",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "select/combobox",
+      "field": "Categoría de producto",
+      "associatedField": "Categoría de producto",
+      "controlAffordance": "selectable",
+      "valueKey": "categoria_de_producto_seleccion",
+      "technicalTargetRef": "fbf08c6ecee9:selection:fbf08c6ecee9|Categoría de producto|selection",
+      "afterState": "Cuentas de Efectivo",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-21",
+      "action": "activate",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "select/combobox",
+      "associatedField": "Producto",
+      "controlAffordance": "selectable",
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Producto|combobox",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-22",
+      "action": "activate",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "option",
+      "controlAffordance": "selectable",
+      "technicalTargetRef": "fbf08c6ecee9:control:role:option|201 - Cuentas de Ahorros sin Libreta DOP",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-23",
+      "action": "select",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "select/combobox",
+      "field": "Producto",
+      "associatedField": "Producto",
+      "controlAffordance": "selectable",
+      "valueKey": "producto_seleccion",
+      "technicalTargetRef": "fbf08c6ecee9:selection:fbf08c6ecee9|Producto|selection",
+      "afterState": "201 - Cuentas de Ahorros sin Libreta DOP",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-24",
+      "action": "click",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "button",
+      "associatedField": "Tasa",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Tasa|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-25",
+      "action": "observe",
+      "screenIdentity": "fbf08c6ecee9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "SCREEN_TECHNICAL_TRANSITION"
+    },
+    {
+      "eventRef": "event-26",
+      "action": "click",
+      "screenIdentity": "95c889362791",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "95c889362791:control:role:button|Aceptar",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-27",
+      "action": "click",
+      "screenIdentity": "95c889362791",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "95c889362791:control:role:button|Continuar",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-28",
+      "action": "activate",
+      "screenIdentity": "95c889362791",
+      "componentType": "select/combobox",
+      "associatedField": "Propósito",
+      "controlAffordance": "selectable",
+      "technicalTargetRef": "95c889362791:control:95c889362791|Propósito|combobox",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-29",
+      "action": "activate",
+      "screenIdentity": "95c889362791",
+      "componentType": "option",
+      "controlAffordance": "selectable",
+      "technicalTargetRef": "95c889362791:control:role:option|Ahorros Personales",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-30",
+      "action": "select",
+      "screenIdentity": "95c889362791",
+      "componentType": "select/combobox",
+      "field": "Propósito",
+      "associatedField": "Propósito",
+      "controlAffordance": "selectable",
+      "valueKey": "proposito_seleccion",
+      "technicalTargetRef": "95c889362791:selection:95c889362791|Propósito|selection",
+      "afterState": "Ahorros Personales",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-31",
+      "action": "activate",
+      "screenIdentity": "95c889362791",
+      "componentType": "select/combobox",
+      "associatedField": "Instrumento",
+      "controlAffordance": "selectable",
+      "technicalTargetRef": "95c889362791:control:95c889362791|Instrumento|combobox",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-32",
+      "action": "activate",
+      "screenIdentity": "95c889362791",
+      "componentType": "option",
+      "controlAffordance": "selectable",
+      "technicalTargetRef": "95c889362791:control:role:option|Efectivo",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-33",
+      "action": "select",
+      "screenIdentity": "95c889362791",
+      "componentType": "select/combobox",
+      "field": "Instrumento",
+      "associatedField": "Instrumento",
+      "controlAffordance": "selectable",
+      "valueKey": "instrumento_seleccion",
+      "technicalTargetRef": "95c889362791:selection:95c889362791|Instrumento|selection",
+      "afterState": "Efectivo",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-34",
+      "action": "click",
+      "screenIdentity": "95c889362791",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "95c889362791:control:role:button|Crear cuenta",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-35",
+      "action": "click",
+      "screenIdentity": "95c889362791",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "95c889362791:control:role:button|Continuar",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-36",
+      "action": "click",
+      "screenIdentity": "95c889362791",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "95c889362791:control:role:button|Finalizar",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-37",
+      "action": "click",
+      "screenIdentity": "95c889362791",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "95c889362791:control:role:button|Cerrar",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-38",
+      "action": "click",
+      "screenIdentity": "95c889362791",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "95c889362791:control:role:button|Cancelar",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-39",
+      "action": "click",
+      "screenIdentity": "95c889362791",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "95c889362791:control:role:button|Aceptar",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    }
+  ],
+  "datasets": [
+    {
+      "valueKey": "usuario",
+      "semanticField": "Usuario",
+      "valueRole": "action_input",
+      "value": "radames",
+      "rawTypedValue": "radames",
+      "committedValue": "radames",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "fbf08c6ecee9:control:role:textbox|Usuario",
+      "recordingId": "a1282e09-65a1-45cc-b4e0-62832a5a7985",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "contrasena",
+      "semanticField": "Contraseña",
+      "valueRole": "secure_input",
+      "source": "secure",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": true,
+      "generated": false,
+      "instanceIdentity": "fbf08c6ecee9:control:role:textbox|Contraseña",
+      "recordingId": "a1282e09-65a1-45cc-b4e0-62832a5a7985",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "numero_de_identificacion",
+      "semanticField": "Número de identificación",
+      "valueRole": "action_input",
+      "value": "056-0154046-0",
+      "rawTypedValue": "056-0154046-0",
+      "committedValue": "056-0154046-0",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "fbf08c6ecee9:control:fbf08c6ecee9|Número de identificación|amount_or_text",
+      "recordingId": "a1282e09-65a1-45cc-b4e0-62832a5a7985",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label"
+    },
+    {
+      "valueKey": "categoria_de_producto_seleccion",
+      "semanticField": "Categoría de producto",
+      "valueRole": "action_input",
+      "value": "Cuentas de Efectivo",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "fbf08c6ecee9:selection:fbf08c6ecee9|Categoría de producto|selection",
+      "recordingId": "a1282e09-65a1-45cc-b4e0-62832a5a7985",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label"
+    },
+    {
+      "valueKey": "producto_seleccion",
+      "semanticField": "Producto",
+      "valueRole": "action_input",
+      "value": "201 - Cuentas de Ahorros sin Libreta DOP",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "fbf08c6ecee9:selection:fbf08c6ecee9|Producto|selection",
+      "recordingId": "a1282e09-65a1-45cc-b4e0-62832a5a7985",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label"
+    },
+    {
+      "valueKey": "proposito_seleccion",
+      "semanticField": "Propósito",
+      "valueRole": "action_input",
+      "value": "Ahorros Personales",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "95c889362791:selection:95c889362791|Propósito|selection",
+      "recordingId": "a1282e09-65a1-45cc-b4e0-62832a5a7985",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label"
+    },
+    {
+      "valueKey": "instrumento_seleccion",
+      "semanticField": "Instrumento",
+      "valueRole": "action_input",
+      "value": "Efectivo",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "95c889362791:selection:95c889362791|Instrumento|selection",
+      "recordingId": "a1282e09-65a1-45cc-b4e0-62832a5a7985",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label"
+    }
+  ],
+  "technicalObservations": [
+    {
+      "observationId": "obs-6",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "label": "Usuario",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "radames",
+      "semanticField": "Usuario",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Usuario",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#username",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "username",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "fbf08c6ecee9:control:role:textbox|Usuario",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-1",
+      "inputValue": "radames",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-7",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "label": "Contraseña",
+      "tag": "input",
+      "role": "input",
+      "semanticField": "Contraseña",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Contraseña",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#password",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "password",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "fbf08c6ecee9:control:role:textbox|Contraseña",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-2",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-8",
+      "status": "OBSERVED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "label": "Contraseña",
+      "tag": "input",
+      "role": "textbox",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Contraseña",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#password",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "password",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "fbf08c6ecee9:control:role:textbox|Contraseña",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-10",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "link",
+      "label": "Solicitud multiproducto",
+      "tag": "a",
+      "role": "link",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "link|Solicitud multiproducto",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "link|Solicitud multiproducto",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a"
+            },
+            "stableDirectAttributes": {
+              "href": "/requests/create/multiproduct"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "fbf08c6ecee9:control:role:link|Solicitud multiproducto",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-13",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "label": "control",
+      "tag": "input",
+      "role": "input",
+      "associatedField": "Número de identificación",
+      "afterValue": "056-0154046-0",
+      "semanticField": "Número de identificación",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Número de identificación|amount_or_text",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-3",
+      "inputValue": "056-0154046-0",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-14",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "button",
+      "label": "control",
+      "tag": "button",
+      "role": "button",
+      "associatedField": "Número de identificación",
+      "semanticField": "Número de identificación",
+      "locatorCandidates": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 4
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.4,
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Número de identificación|button",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-15",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "button",
+      "label": "Depurar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Depurar",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Depurar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Depurar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "fbf08c6ecee9:control:role:button|Depurar",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-17",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "button",
+      "label": "Continuar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Continuar",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Continuar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Continuar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "fbf08c6ecee9:control:role:button|Continuar",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-18",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "select/combobox",
+      "label": "control",
+      "tag": "span",
+      "role": "combobox",
+      "associatedField": "Categoría de producto",
+      "semanticField": "Categoría de producto",
+      "locatorCandidates": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "span",
+              "role": "combobox"
+            },
+            "stableDirectAttributes": {
+              "role": "combobox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 2
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.4,
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Categoría de producto|combobox",
+      "validatedByInteraction": true,
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-19",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "option",
+      "label": "Cuentas de Efectivo",
+      "tag": "li",
+      "role": "option",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "option|Cuentas de Efectivo",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#pv_id_113_0",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "pv_id_113_0",
+          "confidence": 0.8
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#pv_id_113_0",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Cuentas de Efectivo",
+              "id": "pv_id_113_0",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "fbf08c6ecee9:control:role:option|Cuentas de Efectivo",
+      "validatedByInteraction": true,
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-20",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "select/combobox",
+      "label": "Cuentas de Efectivo",
+      "role": "option",
+      "associatedField": "Categoría de producto",
+      "afterValue": "Cuentas de Efectivo",
+      "compoundRole": "selection",
+      "semanticField": "Categoría de producto",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "fbf08c6ecee9:selection:fbf08c6ecee9|Categoría de producto|selection",
+      "validatedByInteraction": true,
+      "selectorControlId": "fbf08c6ecee9|Categoría de producto|selection",
+      "optionSurfaceId": "fbf08c6ecee9|fbf08c6ecee9|Categoría de producto|selection|option-surface",
+      "selectedOptionObserved": "Cuentas de Efectivo",
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-21",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "select/combobox",
+      "label": "control",
+      "tag": "span",
+      "role": "combobox",
+      "associatedField": "Producto",
+      "semanticField": "Producto",
+      "locatorCandidates": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "span",
+              "role": "combobox"
+            },
+            "stableDirectAttributes": {
+              "role": "combobox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.4,
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Producto|combobox",
+      "validatedByInteraction": true,
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-22",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "option",
+      "label": "201 - Cuentas de Ahorros sin Libreta DOP",
+      "tag": "li",
+      "role": "option",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "option|201 - Cuentas de Ahorros sin Libreta DOP",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#pv_id_114_3",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "pv_id_114_3",
+          "confidence": 0.8
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#pv_id_114_3",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "201 - Cuentas de Ahorros sin Libreta DOP",
+              "id": "pv_id_114_3",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "fbf08c6ecee9:control:role:option|201 - Cuentas de Ahorros sin Libreta DOP",
+      "validatedByInteraction": true,
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-23",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "select/combobox",
+      "label": "201 - Cuentas de Ahorros sin Libreta DOP",
+      "role": "option",
+      "associatedField": "Producto",
+      "afterValue": "201 - Cuentas de Ahorros sin Libreta DOP",
+      "compoundRole": "selection",
+      "semanticField": "Producto",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "fbf08c6ecee9:selection:fbf08c6ecee9|Producto|selection",
+      "validatedByInteraction": true,
+      "selectorControlId": "fbf08c6ecee9|Producto|selection",
+      "optionSurfaceId": "fbf08c6ecee9|fbf08c6ecee9|Producto|selection|option-surface",
+      "selectedOptionObserved": "201 - Cuentas de Ahorros sin Libreta DOP",
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-24",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "button",
+      "label": "control",
+      "tag": "button",
+      "role": "button",
+      "associatedField": "Tasa",
+      "semanticField": "Tasa",
+      "locatorCandidates": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": false,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.4,
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|Tasa|button",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-26",
+      "status": "VALIDATED",
+      "screenIdentity": "95c889362791",
+      "componentType": "button",
+      "label": "Aceptar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Aceptar",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Aceptar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Aceptar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "aside"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "95c889362791:control:role:button|Aceptar",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-27",
+      "status": "VALIDATED",
+      "screenIdentity": "95c889362791",
+      "componentType": "button",
+      "label": "Continuar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Continuar",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Continuar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Continuar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "95c889362791:control:role:button|Continuar",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-28",
+      "status": "VALIDATED",
+      "screenIdentity": "95c889362791",
+      "componentType": "select/combobox",
+      "label": "control",
+      "tag": "span",
+      "role": "combobox",
+      "associatedField": "Propósito",
+      "semanticField": "Propósito",
+      "locatorCandidates": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "span",
+              "role": "combobox"
+            },
+            "stableDirectAttributes": {
+              "role": "combobox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.4,
+      "technicalTargetRef": "95c889362791:control:95c889362791|Propósito|combobox",
+      "validatedByInteraction": true,
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-29",
+      "status": "VALIDATED",
+      "screenIdentity": "95c889362791",
+      "componentType": "option",
+      "label": "Ahorros Personales",
+      "tag": "li",
+      "role": "option",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "option|Ahorros Personales",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#pv_id_121_1",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "pv_id_121_1",
+          "confidence": 0.8
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#pv_id_121_1",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Ahorros Personales",
+              "id": "pv_id_121_1",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "95c889362791:control:role:option|Ahorros Personales",
+      "validatedByInteraction": true,
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-30",
+      "status": "VALIDATED",
+      "screenIdentity": "95c889362791",
+      "componentType": "select/combobox",
+      "label": "Ahorros Personales",
+      "role": "option",
+      "associatedField": "Propósito",
+      "afterValue": "Ahorros Personales",
+      "compoundRole": "selection",
+      "semanticField": "Propósito",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "95c889362791:selection:95c889362791|Propósito|selection",
+      "validatedByInteraction": true,
+      "selectorControlId": "95c889362791|Propósito|selection",
+      "optionSurfaceId": "95c889362791|95c889362791|Propósito|selection|option-surface",
+      "selectedOptionObserved": "Ahorros Personales",
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-31",
+      "status": "VALIDATED",
+      "screenIdentity": "95c889362791",
+      "componentType": "select/combobox",
+      "label": "control",
+      "tag": "span",
+      "role": "combobox",
+      "associatedField": "Instrumento",
+      "semanticField": "Instrumento",
+      "locatorCandidates": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "span",
+              "role": "combobox"
+            },
+            "stableDirectAttributes": {
+              "role": "combobox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.4,
+      "technicalTargetRef": "95c889362791:control:95c889362791|Instrumento|combobox",
+      "validatedByInteraction": true,
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-32",
+      "status": "VALIDATED",
+      "screenIdentity": "95c889362791",
+      "componentType": "option",
+      "label": "Efectivo",
+      "tag": "li",
+      "role": "option",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "option|Efectivo",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#pv_id_122_1",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "pv_id_122_1",
+          "confidence": 0.8
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#pv_id_122_1",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Efectivo",
+              "id": "pv_id_122_1",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "95c889362791:control:role:option|Efectivo",
+      "validatedByInteraction": true,
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-33",
+      "status": "VALIDATED",
+      "screenIdentity": "95c889362791",
+      "componentType": "select/combobox",
+      "label": "Efectivo",
+      "role": "option",
+      "associatedField": "Instrumento",
+      "afterValue": "Efectivo",
+      "compoundRole": "selection",
+      "semanticField": "Instrumento",
+      "needsReview": false,
+      "reviewReason": "explicit_associated_label",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "95c889362791:selection:95c889362791|Instrumento|selection",
+      "validatedByInteraction": true,
+      "selectorControlId": "95c889362791|Instrumento|selection",
+      "optionSurfaceId": "95c889362791|95c889362791|Instrumento|selection|option-surface",
+      "selectedOptionObserved": "Efectivo",
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-34",
+      "status": "VALIDATED",
+      "screenIdentity": "95c889362791",
+      "componentType": "button",
+      "label": "Crear cuenta",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Crear cuenta",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Crear cuenta",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Crear cuenta"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "95c889362791:control:role:button|Crear cuenta",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-35",
+      "status": "VALIDATED",
+      "screenIdentity": "95c889362791",
+      "componentType": "button",
+      "label": "Continuar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Continuar",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Continuar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Continuar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "95c889362791:control:role:button|Continuar",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-36",
+      "status": "VALIDATED",
+      "screenIdentity": "95c889362791",
+      "componentType": "button",
+      "label": "Finalizar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Finalizar",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Finalizar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Finalizar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "95c889362791:control:role:button|Finalizar",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-37",
+      "status": "VALIDATED",
+      "screenIdentity": "95c889362791",
+      "componentType": "button",
+      "label": "Cerrar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Cerrar",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Cerrar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Cerrar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "95c889362791:control:role:button|Cerrar",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-38",
+      "status": "VALIDATED",
+      "screenIdentity": "95c889362791",
+      "componentType": "button",
+      "label": "Cancelar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Cancelar",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Cancelar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Cancelar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "95c889362791:control:role:button|Cancelar",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-39",
+      "status": "VALIDATED",
+      "screenIdentity": "95c889362791",
+      "componentType": "button",
+      "label": "Aceptar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Aceptar",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Aceptar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Aceptar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "95c889362791:control:role:button|Aceptar",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-fbf08c6ecee9-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "label": "Usuario",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "username",
+        "placeholder": "Ingresa tu usuario"
+      },
+      "placeholder": "Ingresa tu usuario",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "username",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "fbf08c6ecee9:control:1",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-fbf08c6ecee9-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "label": "Contraseña",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "password",
+        "type": "password",
+        "placeholder": "Ingresa tu contraseña"
+      },
+      "placeholder": "Ingresa tu contraseña",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "password",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "fbf08c6ecee9:control:2",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-fbf08c6ecee9-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "label": "Recordarme",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "remember-me",
+        "type": "checkbox"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "remember-me",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "fbf08c6ecee9:control:3",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-fbf08c6ecee9-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "button",
+      "label": "Iniciar sesión",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "submit",
+        "aria-label": "Iniciar sesión"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Iniciar sesión",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "fbf08c6ecee9:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "a",
+      "label": "Portal Comercial",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": " Portal Comercial ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9b3ed654dc84:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "button",
+      "label": "Configuración",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Configuración",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9b3ed654dc84:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "button",
+      "label": "Sesión",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Sesión",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9b3ed654dc84:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "menuitem",
+      "label": "Inicio",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_0_0",
+        "aria-label": "Inicio",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_0_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9b3ed654dc84:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "a",
+      "label": "Inicio",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Inicio",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9b3ed654dc84:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "menuitem",
+      "label": "Información",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_0_1",
+        "aria-label": "Información",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_0_1",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9b3ed654dc84:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "a",
+      "label": "Información",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Información",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9b3ed654dc84:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "menuitem",
+      "label": "Campañas",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_1_0",
+        "aria-label": "Campañas",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_1_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9b3ed654dc84:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "a",
+      "label": "Campañas",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Campañas",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9b3ed654dc84:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "menuitem",
+      "label": "Solicitud multiproducto",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_1_1",
+        "aria-label": "Solicitud multiproducto",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_1_1",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9b3ed654dc84:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "a",
+      "label": "Solicitud multiproducto",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Solicitud multiproducto",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9b3ed654dc84:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "menuitem",
+      "label": "Solicitudes en curso",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_1_2",
+        "aria-label": "Solicitudes en curso",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_1_2",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9b3ed654dc84:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-13",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "a",
+      "label": "Solicitudes en curso",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Solicitudes en curso",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9b3ed654dc84:control:13",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-14",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "menuitem",
+      "label": "Usuarios",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_2_0",
+        "aria-label": "Usuarios",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_2_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9b3ed654dc84:control:14",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-15",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "a",
+      "label": "Usuarios",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Usuarios",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9b3ed654dc84:control:15",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-16",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "menuitem",
+      "label": "Roles",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_2_1",
+        "aria-label": "Roles",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_2_1",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9b3ed654dc84:control:16",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-17",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "a",
+      "label": "Roles",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Roles",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9b3ed654dc84:control:17",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-18",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "menuitem",
+      "label": "Permisos",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_2_2",
+        "aria-label": "Permisos",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_2_2",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9b3ed654dc84:control:18",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-19",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "a",
+      "label": "Permisos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Permisos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9b3ed654dc84:control:19",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9b3ed654dc84-control-20",
+      "status": "OBSERVED",
+      "screenIdentity": "9b3ed654dc84",
+      "componentType": "menuitem",
+      "label": "Auditorías",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_3_0",
+        "aria-label": "Auditorías",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_3_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9b3ed654dc84:control:20",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-95c889362791-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "95c889362791",
+      "componentType": "a",
+      "label": "Portal Comercial",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": " Portal Comercial ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "95c889362791:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-95c889362791-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "95c889362791",
+      "componentType": "button",
+      "label": "Configuración",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Configuración",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "95c889362791:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-95c889362791-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "95c889362791",
+      "componentType": "button",
+      "label": "Sesión",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Sesión",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "95c889362791:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-95c889362791-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "95c889362791",
+      "componentType": "menuitem",
+      "label": "Inicio",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_0_0",
+        "aria-label": "Inicio",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_0_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "95c889362791:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-95c889362791-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "95c889362791",
+      "componentType": "a",
+      "label": "Inicio",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Inicio",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "95c889362791:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-95c889362791-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "95c889362791",
+      "componentType": "menuitem",
+      "label": "Información",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_0_1",
+        "aria-label": "Información",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_0_1",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "95c889362791:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-95c889362791-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "95c889362791",
+      "componentType": "a",
+      "label": "Información",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Información",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "95c889362791:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-95c889362791-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "95c889362791",
+      "componentType": "menuitem",
+      "label": "Campañas",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_1_0",
+        "aria-label": "Campañas",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_1_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "95c889362791:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-95c889362791-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "95c889362791",
+      "componentType": "a",
+      "label": "Campañas",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Campañas",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "95c889362791:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-95c889362791-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "95c889362791",
+      "componentType": "menuitem",
+      "label": "Solicitud multiproducto",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_1_1",
+        "aria-label": "Solicitud multiproducto",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_1_1",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "95c889362791:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-95c889362791-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "95c889362791",
+      "componentType": "a",
+      "label": "Solicitud multiproducto",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Solicitud multiproducto",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "95c889362791:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-95c889362791-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "95c889362791",
+      "componentType": "menuitem",
+      "label": "Solicitudes en curso",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_1_2",
+        "aria-label": "Solicitudes en curso",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_1_2",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "95c889362791:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-95c889362791-control-13",
+      "status": "OBSERVED",
+      "screenIdentity": "95c889362791",
+      "componentType": "a",
+      "label": "Solicitudes en curso",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Solicitudes en curso",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "95c889362791:control:13",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-95c889362791-control-14",
+      "status": "OBSERVED",
+      "screenIdentity": "95c889362791",
+      "componentType": "menuitem",
+      "label": "Usuarios",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_2_0",
+        "aria-label": "Usuarios",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_2_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "95c889362791:control:14",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-95c889362791-control-15",
+      "status": "OBSERVED",
+      "screenIdentity": "95c889362791",
+      "componentType": "a",
+      "label": "Usuarios",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Usuarios",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "95c889362791:control:15",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-95c889362791-control-16",
+      "status": "OBSERVED",
+      "screenIdentity": "95c889362791",
+      "componentType": "menuitem",
+      "label": "Roles",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_2_1",
+        "aria-label": "Roles",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_2_1",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "95c889362791:control:16",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-95c889362791-control-17",
+      "status": "OBSERVED",
+      "screenIdentity": "95c889362791",
+      "componentType": "a",
+      "label": "Roles",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Roles",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "95c889362791:control:17",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-95c889362791-control-18",
+      "status": "OBSERVED",
+      "screenIdentity": "95c889362791",
+      "componentType": "menuitem",
+      "label": "Permisos",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_2_2",
+        "aria-label": "Permisos",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_2_2",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "95c889362791:control:18",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-95c889362791-control-19",
+      "status": "OBSERVED",
+      "screenIdentity": "95c889362791",
+      "componentType": "a",
+      "label": "Permisos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Permisos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "95c889362791:control:19",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-95c889362791-control-20",
+      "status": "OBSERVED",
+      "screenIdentity": "95c889362791",
+      "componentType": "menuitem",
+      "label": "Auditorías",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_3_3_0",
+        "aria-label": "Auditorías",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_3_3_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "95c889362791:control:20",
+      "selectable": false,
+      "editable": false
+    }
+  ],
+  "editingSessions": [
+    {
+      "editingSessionId": "edit-1",
+      "controlIdentity": "fbf08c6ecee9|Usuario|amount_or_text",
+      "screenIdentity": "fbf08c6ecee9",
+      "startedAt": 51701,
+      "endedAt": 51701,
+      "rawEventRefs": [
+        "event-6"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "fbf08c6ecee9:role:textbox|Usuario"
+      ],
+      "inputValue": "radames",
+      "finalValue": "radames"
+    },
+    {
+      "editingSessionId": "edit-2",
+      "controlIdentity": "fbf08c6ecee9|Contraseña|amount_or_text",
+      "screenIdentity": "fbf08c6ecee9",
+      "startedAt": 55315,
+      "endedAt": 55315,
+      "rawEventRefs": [
+        "event-7"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "fbf08c6ecee9:role:textbox|Contraseña"
+      ]
+    },
+    {
+      "editingSessionId": "edit-3",
+      "controlIdentity": "fbf08c6ecee9|Número de identificación|amount_or_text",
+      "screenIdentity": "fbf08c6ecee9",
+      "startedAt": 70994,
+      "endedAt": 70994,
+      "rawEventRefs": [
+        "event-13"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "fbf08c6ecee9:fbf08c6ecee9|Número de identificación|amount_or_text"
+      ],
+      "inputValue": "056-0154046-0",
+      "semanticField": "Número de identificación",
+      "finalValue": "056-0154046-0"
+    },
+    {
+      "editingSessionId": "edit-4",
+      "controlIdentity": "fbf08c6ecee9|Categoría de producto|selection",
+      "screenIdentity": "fbf08c6ecee9",
+      "startedAt": 118516,
+      "endedAt": 118516,
+      "rawEventRefs": [
+        "event-20"
+      ],
+      "intermediateValues": [],
+      "commitReason": "change",
+      "technicalTargetRefs": [
+        "fbf08c6ecee9:fbf08c6ecee9|Categoría de producto|selection"
+      ],
+      "compoundRole": "selection",
+      "semanticField": "Categoría de producto",
+      "finalValue": "Cuentas de Efectivo"
+    },
+    {
+      "editingSessionId": "edit-5",
+      "controlIdentity": "fbf08c6ecee9|Producto|selection",
+      "screenIdentity": "fbf08c6ecee9",
+      "startedAt": 123048,
+      "endedAt": 123048,
+      "rawEventRefs": [
+        "event-23"
+      ],
+      "intermediateValues": [],
+      "commitReason": "change",
+      "technicalTargetRefs": [
+        "fbf08c6ecee9:fbf08c6ecee9|Producto|selection"
+      ],
+      "compoundRole": "selection",
+      "semanticField": "Producto",
+      "finalValue": "201 - Cuentas de Ahorros sin Libreta DOP"
+    },
+    {
+      "editingSessionId": "edit-6",
+      "controlIdentity": "95c889362791|Propósito|selection",
+      "screenIdentity": "95c889362791",
+      "startedAt": 148026,
+      "endedAt": 148026,
+      "rawEventRefs": [
+        "event-30"
+      ],
+      "intermediateValues": [],
+      "commitReason": "change",
+      "technicalTargetRefs": [
+        "95c889362791:95c889362791|Propósito|selection"
+      ],
+      "compoundRole": "selection",
+      "semanticField": "Propósito",
+      "finalValue": "Ahorros Personales"
+    },
+    {
+      "editingSessionId": "edit-7",
+      "controlIdentity": "95c889362791|Instrumento|selection",
+      "screenIdentity": "95c889362791",
+      "startedAt": 152834,
+      "endedAt": 152834,
+      "rawEventRefs": [
+        "event-33"
+      ],
+      "intermediateValues": [],
+      "commitReason": "change",
+      "technicalTargetRefs": [
+        "95c889362791:95c889362791|Instrumento|selection"
+      ],
+      "compoundRole": "selection",
+      "semanticField": "Instrumento",
+      "finalValue": "Efectivo"
+    }
+  ],
+  "scenarioSuggestions": [
+    {
+      "suggestionId": "REC-A1282E09-01-MUT-field_omission",
+      "title": "Creacion cuenta efectivo: comprobar la omisión de un dato",
+      "provenance": "DERIVED_VALIDATION",
+      "confidence": 0.95,
+      "needsReview": true,
+      "rationale": "Derivado de evidencia observada y separado del recorrido principal.",
+      "goalRelevanceScore": 0.55,
+      "goalRelevanceReasons": [
+        "shared_semantic_tokens:3",
+        "candidate_has_observed_data",
+        "shared_entity_without_operation_evidence"
+      ],
+      "sourceEventRefs": [
+        "event-1",
+        "event-2",
+        "event-3",
+        "event-4",
+        "event-5",
+        "event-6",
+        "event-7",
+        "event-8",
+        "event-9",
+        "event-10",
+        "event-11",
+        "event-12",
+        "event-13",
+        "event-14",
+        "event-15",
+        "event-16",
+        "event-17",
+        "event-18",
+        "event-19",
+        "event-20",
+        "event-21",
+        "event-22",
+        "event-23",
+        "event-24",
+        "event-25",
+        "event-26",
+        "event-27",
+        "event-28",
+        "event-29",
+        "event-30",
+        "event-31",
+        "event-32",
+        "event-33",
+        "event-34",
+        "event-35",
+        "event-36",
+        "event-37",
+        "event-38",
+        "event-39"
+      ],
+      "steps": [
+        "Abrir la aplicación configurada del proyecto",
+        "Ingresar [contrasena] en \"Contraseña\"",
+        "Presionar \"Enter\" en \"Contraseña\"",
+        "Presionar \"Solicitud multiproducto\"",
+        "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "Presionar botón asociado a \"Número de identificación\"",
+        "Presionar \"Depurar\"",
+        "Presionar \"Continuar\"",
+        "Seleccionar [categoria_de_producto_seleccion] en \"Categoría de producto\"",
+        "Seleccionar [producto_seleccion] en \"Producto\"",
+        "Presionar botón asociado a \"Tasa\"",
+        "Presionar \"Aceptar\"",
+        "Presionar \"Continuar\"",
+        "Seleccionar [proposito_seleccion] en \"Propósito\"",
+        "Seleccionar [instrumento_seleccion] en \"Instrumento\"",
+        "Presionar \"Crear cuenta\"",
+        "Presionar \"Continuar\"",
+        "Presionar \"Finalizar\"",
+        "Presionar \"Cerrar\"",
+        "Presionar \"Cancelar\"",
+        "Presionar \"Aceptar\""
+      ],
+      "expectedResultCandidate": "",
+      "oracleAuthority": "review_required",
+      "dataRequirements": [
+        "usuario",
+        "contrasena",
+        "numero_de_identificacion",
+        "categoria_de_producto_seleccion",
+        "producto_seleccion",
+        "proposito_seleccion",
+        "instrumento_seleccion"
+      ],
+      "technicalObservationRefs": [
+        "obs-6",
+        "obs-7",
+        "obs-8",
+        "obs-10",
+        "obs-13",
+        "obs-14",
+        "obs-15",
+        "obs-17",
+        "obs-18",
+        "obs-19",
+        "obs-20",
+        "obs-21",
+        "obs-22",
+        "obs-23",
+        "obs-24",
+        "obs-26",
+        "obs-27",
+        "obs-28",
+        "obs-29",
+        "obs-30",
+        "obs-31",
+        "obs-32",
+        "obs-33",
+        "obs-34",
+        "obs-35",
+        "obs-36",
+        "obs-37",
+        "obs-38",
+        "obs-39",
+        "screen-fbf08c6ecee9-control-1",
+        "screen-fbf08c6ecee9-control-2",
+        "screen-fbf08c6ecee9-control-3",
+        "screen-fbf08c6ecee9-control-4",
+        "screen-9b3ed654dc84-control-1",
+        "screen-9b3ed654dc84-control-2",
+        "screen-9b3ed654dc84-control-3",
+        "screen-9b3ed654dc84-control-4",
+        "screen-9b3ed654dc84-control-5",
+        "screen-9b3ed654dc84-control-6",
+        "screen-9b3ed654dc84-control-7",
+        "screen-9b3ed654dc84-control-8",
+        "screen-9b3ed654dc84-control-9",
+        "screen-9b3ed654dc84-control-10",
+        "screen-9b3ed654dc84-control-11",
+        "screen-9b3ed654dc84-control-12",
+        "screen-9b3ed654dc84-control-13",
+        "screen-9b3ed654dc84-control-14",
+        "screen-9b3ed654dc84-control-15",
+        "screen-9b3ed654dc84-control-16",
+        "screen-9b3ed654dc84-control-17",
+        "screen-9b3ed654dc84-control-18",
+        "screen-9b3ed654dc84-control-19",
+        "screen-9b3ed654dc84-control-20",
+        "screen-95c889362791-control-1",
+        "screen-95c889362791-control-2",
+        "screen-95c889362791-control-3",
+        "screen-95c889362791-control-4",
+        "screen-95c889362791-control-5",
+        "screen-95c889362791-control-6",
+        "screen-95c889362791-control-7",
+        "screen-95c889362791-control-8",
+        "screen-95c889362791-control-9",
+        "screen-95c889362791-control-10",
+        "screen-95c889362791-control-11",
+        "screen-95c889362791-control-12",
+        "screen-95c889362791-control-13",
+        "screen-95c889362791-control-14",
+        "screen-95c889362791-control-15",
+        "screen-95c889362791-control-16",
+        "screen-95c889362791-control-17",
+        "screen-95c889362791-control-18",
+        "screen-95c889362791-control-19",
+        "screen-95c889362791-control-20"
+      ],
+      "scenarioSpecificSteps": [
+        "Abrir la aplicación configurada del proyecto",
+        "Ingresar [contrasena] en \"Contraseña\"",
+        "Presionar \"Enter\" en \"Contraseña\"",
+        "Presionar \"Solicitud multiproducto\"",
+        "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "Presionar botón asociado a \"Número de identificación\"",
+        "Presionar \"Depurar\"",
+        "Presionar \"Continuar\"",
+        "Seleccionar [categoria_de_producto_seleccion] en \"Categoría de producto\"",
+        "Seleccionar [producto_seleccion] en \"Producto\"",
+        "Presionar botón asociado a \"Tasa\"",
+        "Presionar \"Aceptar\"",
+        "Presionar \"Continuar\"",
+        "Seleccionar [proposito_seleccion] en \"Propósito\"",
+        "Seleccionar [instrumento_seleccion] en \"Instrumento\"",
+        "Presionar \"Crear cuenta\"",
+        "Presionar \"Continuar\"",
+        "Presionar \"Finalizar\"",
+        "Presionar \"Cerrar\"",
+        "Presionar \"Cancelar\"",
+        "Presionar \"Aceptar\""
+      ],
+      "fullStepsAvailable": true,
+      "entityScopes": [],
+      "runtimeInputRequirements": [
+        {
+          "valueKey": "usuario",
+          "semanticField": "Usuario",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "radames",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 1,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "recorded_confirmed",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 2,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "numero_de_identificacion",
+          "semanticField": "Número de identificación",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "056-0154046-0",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 5,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "056-0154046-0",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "categoria_de_producto_seleccion",
+          "semanticField": "Categoría de producto",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "Cuentas de Efectivo",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 9,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "Cuentas de Efectivo",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "producto_seleccion",
+          "semanticField": "Producto",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "201 - Cuentas de Ahorros sin Libreta DOP",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 10,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "201 - Cuentas de Ahorros sin Libreta DOP",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "proposito_seleccion",
+          "semanticField": "Propósito",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "Ahorros Personales",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 14,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "Ahorros Personales",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "instrumento_seleccion",
+          "semanticField": "Instrumento",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "Efectivo",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 15,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "Efectivo",
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "readiness": {
+        "functionalReadiness": true,
+        "dataReadiness": false,
+        "technicalReadiness": false,
+        "oracleReadiness": false,
+        "reviewReadiness": false,
+        "publicationContentReadiness": true,
+        "executionReadiness": false,
+        "publicationReadiness": false,
+        "missingInputs": [
+          {
+            "valueKey": "contrasena",
+            "semanticField": "Contraseña",
+            "valueRole": "secure_input",
+            "required": true,
+            "value": null,
+            "source": "unresolved",
+            "resolved": false,
+            "sensitive": true,
+            "stepIndex": 2,
+            "readOnly": false,
+            "computed": false,
+            "systemGenerated": false,
+            "masked": true,
+            "editable": true,
+            "authority": "unresolved",
+            "authorityValue": null,
+            "datasetAuthorityMismatch": false
+          }
+        ],
+        "datasetAuthorityMismatches": [],
+        "dataReadinessReasons": [
+          "missing_runtime_input:contrasena",
+          "RUNTIME_DATA_REQUIRED"
+        ]
+      },
+      "mutationType": "FIELD_OMISSION"
+    }
+  ],
+  "canonicalInteractions": [
+    {
+      "id": "interaction-1",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-1"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-2",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-2"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-3",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-3"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-4",
+      "controlIdentity": "fbf08c6ecee9",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-4"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "fbf08c6ecee9",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-6",
+      "controlIdentity": "fbf08c6ecee9|Usuario|role|textbox|Usuario",
+      "semanticField": "Usuario",
+      "action": "fill",
+      "valueKey": "usuario",
+      "recordedValue": "radames",
+      "sourceEventRefs": [
+        "event-6"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Usuario",
+        "css:#username",
+        "id:username"
+      ],
+      "editingSessionRef": "edit-1",
+      "description": "Ingresar en \"Usuario\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-7",
+      "controlIdentity": "fbf08c6ecee9|Contraseña|role|textbox|Contraseña",
+      "semanticField": "Contraseña",
+      "action": "fill",
+      "valueKey": "contrasena",
+      "sourceEventRefs": [
+        "event-7"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Contraseña",
+        "css:#password",
+        "id:password"
+      ],
+      "editingSessionRef": "edit-2",
+      "description": "Ingresar en \"Contraseña\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-8",
+      "controlIdentity": "fbf08c6ecee9|Contraseña|role|textbox|Contraseña",
+      "action": "press",
+      "key": "Enter",
+      "sourceEventRefs": [
+        "event-8"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Contraseña",
+        "css:#password",
+        "id:password"
+      ],
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/",
+      "stateScope": "fbf08c6ecee9",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-10",
+      "controlIdentity": "fbf08c6ecee9|Solicitud multiproducto|role|link|Solicitud multiproducto",
+      "semanticField": "Solicitud multiproducto",
+      "action": "click",
+      "valueKey": "solicitud_multiproducto",
+      "sourceEventRefs": [
+        "event-10"
+      ],
+      "technicalTargetRefs": [
+        "role:link|Solicitud multiproducto"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "link|Solicitud multiproducto",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a"
+            },
+            "stableDirectAttributes": {
+              "href": "/requests/create/multiproduct"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Solicitud multiproducto\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-11",
+      "controlIdentity": "fbf08c6ecee9",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-11"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/",
+      "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "stateScope": "fbf08c6ecee9",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-12",
+      "controlIdentity": "fbf08c6ecee9",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-12"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "stateScope": "fbf08c6ecee9",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-13",
+      "controlIdentity": "fbf08c6ecee9|Número de identificación",
+      "semanticField": "Número de identificación",
+      "action": "fill",
+      "valueKey": "numero_de_identificacion",
+      "recordedValue": "056-0154046-0",
+      "sourceEventRefs": [
+        "event-13"
+      ],
+      "technicalTargetRefs": [],
+      "editingSessionRef": "edit-3",
+      "description": "Ingresar en \"Número de identificación\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "runtime_resolution_required",
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-14",
+      "controlIdentity": "fbf08c6ecee9|Número de identificación",
+      "semanticField": "Número de identificación",
+      "action": "click",
+      "valueKey": "numero_de_identificacion",
+      "recordedValue": "056-0154046-0",
+      "sourceEventRefs": [
+        "event-14"
+      ],
+      "technicalTargetRefs": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 4
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Número de identificación\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "runtime_resolution_required",
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-15",
+      "controlIdentity": "fbf08c6ecee9|Depurar|role|button|Depurar",
+      "semanticField": "Depurar",
+      "action": "click",
+      "valueKey": "depurar",
+      "sourceEventRefs": [
+        "event-15"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Depurar"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Depurar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Depurar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Depurar\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "stateScope": "fbf08c6ecee9",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-17",
+      "controlIdentity": "fbf08c6ecee9|Continuar|role|button|Continuar",
+      "semanticField": "Continuar",
+      "action": "click",
+      "valueKey": "continuar",
+      "sourceEventRefs": [
+        "event-17"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Continuar"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Continuar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Continuar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Continuar\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-18",
+      "controlIdentity": "fbf08c6ecee9|Categoría de producto",
+      "semanticField": "Categoría de producto",
+      "action": "click",
+      "valueKey": "categoria_de_producto",
+      "sourceEventRefs": [
+        "event-18"
+      ],
+      "technicalTargetRefs": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "span",
+              "role": "combobox"
+            },
+            "stableDirectAttributes": {
+              "role": "combobox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 2
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Categoría de producto\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "runtime_resolution_required",
+      "technicalOnly": true,
+      "executionAuthority": true,
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-19",
+      "controlIdentity": "fbf08c6ecee9|Cuentas de Efectivo|role|option|Cuentas de Efectivo",
+      "semanticField": "Cuentas de Efectivo",
+      "action": "click",
+      "valueKey": "cuentas_de_efectivo",
+      "sourceEventRefs": [
+        "event-19"
+      ],
+      "technicalTargetRefs": [
+        "role:option|Cuentas de Efectivo",
+        "css:#pv_id_113_0",
+        "id:pv_id_113_0"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#pv_id_113_0",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Cuentas de Efectivo",
+              "id": "pv_id_113_0",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Cuentas de Efectivo\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "technicalOnly": true,
+      "executionAuthority": true,
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-20",
+      "controlIdentity": "fbf08c6ecee9|Categoría de producto",
+      "semanticField": "Categoría de producto",
+      "action": "select",
+      "valueKey": "categoria_de_producto_seleccion",
+      "recordedValue": "Cuentas de Efectivo",
+      "sourceEventRefs": [
+        "event-20"
+      ],
+      "technicalTargetRefs": [],
+      "selectorControlId": "fbf08c6ecee9|||Categoría de producto",
+      "optionSurfaceId": "fbf08c6ecee9|fbf08c6ecee9|||Categoría de producto|option-surface",
+      "description": "Seleccionar en \"Categoría de producto\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "executionAuthority": false,
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-21",
+      "controlIdentity": "fbf08c6ecee9|Producto",
+      "semanticField": "Producto",
+      "action": "click",
+      "valueKey": "producto",
+      "sourceEventRefs": [
+        "event-21"
+      ],
+      "technicalTargetRefs": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "span",
+              "role": "combobox"
+            },
+            "stableDirectAttributes": {
+              "role": "combobox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Producto\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "runtime_resolution_required",
+      "technicalOnly": true,
+      "executionAuthority": true,
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-22",
+      "controlIdentity": "fbf08c6ecee9|201 - Cuentas de Ahorros sin Libreta DOP|role|option|201 - Cuentas de Ahorros sin Libreta DOP",
+      "semanticField": "201 - Cuentas de Ahorros sin Libreta DOP",
+      "action": "click",
+      "valueKey": "201_cuentas_de_ahorros_sin_libreta_dop",
+      "sourceEventRefs": [
+        "event-22"
+      ],
+      "technicalTargetRefs": [
+        "role:option|201 - Cuentas de Ahorros sin Libreta DOP",
+        "css:#pv_id_114_3",
+        "id:pv_id_114_3"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#pv_id_114_3",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "201 - Cuentas de Ahorros sin Libreta DOP",
+              "id": "pv_id_114_3",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"201 - Cuentas de Ahorros sin Libreta DOP\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "technicalOnly": true,
+      "executionAuthority": true,
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-23",
+      "controlIdentity": "fbf08c6ecee9|Producto",
+      "semanticField": "Producto",
+      "action": "select",
+      "valueKey": "producto_seleccion",
+      "recordedValue": "201 - Cuentas de Ahorros sin Libreta DOP",
+      "sourceEventRefs": [
+        "event-23"
+      ],
+      "technicalTargetRefs": [],
+      "selectorControlId": "fbf08c6ecee9|||Producto",
+      "optionSurfaceId": "fbf08c6ecee9|fbf08c6ecee9|||Producto|option-surface",
+      "description": "Seleccionar en \"Producto\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "executionAuthority": false,
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-24",
+      "controlIdentity": "fbf08c6ecee9|Tasa",
+      "semanticField": "Tasa",
+      "action": "click",
+      "valueKey": "tasa",
+      "sourceEventRefs": [
+        "event-24"
+      ],
+      "technicalTargetRefs": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": false,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Tasa\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "95c889362791",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "stateScope": "fbf08c6ecee9",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "admissionStatus": "accepted",
+      "resolutionState": "runtime_resolution_required",
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-26",
+      "controlIdentity": "95c889362791|Aceptar|role|button|Aceptar",
+      "semanticField": "Aceptar",
+      "action": "click",
+      "valueKey": "aceptar",
+      "sourceEventRefs": [
+        "event-26"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Aceptar"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Aceptar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Aceptar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "aside"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Aceptar\"",
+      "screenBeforeRef": "95c889362791",
+      "screenAfterRef": "95c889362791",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "stateScope": "95c889362791",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-27",
+      "controlIdentity": "95c889362791|Continuar|role|button|Continuar",
+      "semanticField": "Continuar",
+      "action": "click",
+      "valueKey": "continuar",
+      "sourceEventRefs": [
+        "event-27"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Continuar"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Continuar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Continuar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Continuar\"",
+      "screenBeforeRef": "95c889362791",
+      "screenAfterRef": "95c889362791",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "stateScope": "95c889362791",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-28",
+      "controlIdentity": "95c889362791|Propósito",
+      "semanticField": "Propósito",
+      "action": "click",
+      "valueKey": "proposito",
+      "sourceEventRefs": [
+        "event-28"
+      ],
+      "technicalTargetRefs": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "span",
+              "role": "combobox"
+            },
+            "stableDirectAttributes": {
+              "role": "combobox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Propósito\"",
+      "screenBeforeRef": "95c889362791",
+      "screenAfterRef": "95c889362791",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "stateScope": "95c889362791",
+      "admissionStatus": "accepted",
+      "resolutionState": "runtime_resolution_required",
+      "technicalOnly": true,
+      "executionAuthority": true,
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-29",
+      "controlIdentity": "95c889362791|Ahorros Personales|role|option|Ahorros Personales",
+      "semanticField": "Ahorros Personales",
+      "action": "click",
+      "valueKey": "ahorros_personales",
+      "sourceEventRefs": [
+        "event-29"
+      ],
+      "technicalTargetRefs": [
+        "role:option|Ahorros Personales",
+        "css:#pv_id_121_1",
+        "id:pv_id_121_1"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#pv_id_121_1",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Ahorros Personales",
+              "id": "pv_id_121_1",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Ahorros Personales\"",
+      "screenBeforeRef": "95c889362791",
+      "screenAfterRef": "95c889362791",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "stateScope": "95c889362791",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "technicalOnly": true,
+      "executionAuthority": true,
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-30",
+      "controlIdentity": "95c889362791|Propósito",
+      "semanticField": "Propósito",
+      "action": "select",
+      "valueKey": "proposito_seleccion",
+      "recordedValue": "Ahorros Personales",
+      "sourceEventRefs": [
+        "event-30"
+      ],
+      "technicalTargetRefs": [],
+      "selectorControlId": "95c889362791|||Propósito",
+      "optionSurfaceId": "95c889362791|95c889362791|||Propósito|option-surface",
+      "description": "Seleccionar en \"Propósito\"",
+      "screenBeforeRef": "95c889362791",
+      "screenAfterRef": "95c889362791",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "stateScope": "95c889362791",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "executionAuthority": false,
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-31",
+      "controlIdentity": "95c889362791|Instrumento",
+      "semanticField": "Instrumento",
+      "action": "click",
+      "valueKey": "instrumento",
+      "sourceEventRefs": [
+        "event-31"
+      ],
+      "technicalTargetRefs": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "span",
+              "role": "combobox"
+            },
+            "stableDirectAttributes": {
+              "role": "combobox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Instrumento\"",
+      "screenBeforeRef": "95c889362791",
+      "screenAfterRef": "95c889362791",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "stateScope": "95c889362791",
+      "admissionStatus": "accepted",
+      "resolutionState": "runtime_resolution_required",
+      "technicalOnly": true,
+      "executionAuthority": true,
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-32",
+      "controlIdentity": "95c889362791|Efectivo|role|option|Efectivo",
+      "semanticField": "Efectivo",
+      "action": "click",
+      "valueKey": "efectivo",
+      "sourceEventRefs": [
+        "event-32"
+      ],
+      "technicalTargetRefs": [
+        "role:option|Efectivo",
+        "css:#pv_id_122_1",
+        "id:pv_id_122_1"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "#pv_id_122_1",
+              "confidence": 0.8
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Efectivo",
+              "id": "pv_id_122_1",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Efectivo\"",
+      "screenBeforeRef": "95c889362791",
+      "screenAfterRef": "95c889362791",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "stateScope": "95c889362791",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "technicalOnly": true,
+      "executionAuthority": true,
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-33",
+      "controlIdentity": "95c889362791|Instrumento",
+      "semanticField": "Instrumento",
+      "action": "select",
+      "valueKey": "instrumento_seleccion",
+      "recordedValue": "Efectivo",
+      "sourceEventRefs": [
+        "event-33"
+      ],
+      "technicalTargetRefs": [],
+      "selectorControlId": "95c889362791|||Instrumento",
+      "optionSurfaceId": "95c889362791|95c889362791|||Instrumento|option-surface",
+      "description": "Seleccionar en \"Instrumento\"",
+      "screenBeforeRef": "95c889362791",
+      "screenAfterRef": "95c889362791",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "stateScope": "95c889362791",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "executionAuthority": false,
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-34",
+      "controlIdentity": "95c889362791|Crear cuenta|role|button|Crear cuenta",
+      "semanticField": "Crear cuenta",
+      "action": "click",
+      "valueKey": "crear_cuenta",
+      "sourceEventRefs": [
+        "event-34"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Crear cuenta"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Crear cuenta",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Crear cuenta"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Crear cuenta\"",
+      "screenBeforeRef": "95c889362791",
+      "screenAfterRef": "95c889362791",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "stateScope": "95c889362791",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-35",
+      "controlIdentity": "95c889362791|Continuar|role|button|Continuar",
+      "semanticField": "Continuar",
+      "action": "click",
+      "valueKey": "continuar",
+      "sourceEventRefs": [
+        "event-35"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Continuar"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Continuar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Continuar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Continuar\"",
+      "screenBeforeRef": "95c889362791",
+      "screenAfterRef": "95c889362791",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "stateScope": "95c889362791",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-36",
+      "controlIdentity": "95c889362791|Finalizar|role|button|Finalizar",
+      "semanticField": "Finalizar",
+      "action": "click",
+      "valueKey": "finalizar",
+      "sourceEventRefs": [
+        "event-36"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Finalizar"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Finalizar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Finalizar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Finalizar\"",
+      "screenBeforeRef": "95c889362791",
+      "screenAfterRef": "95c889362791",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "stateScope": "95c889362791",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-37",
+      "controlIdentity": "95c889362791|Cerrar|role|button|Cerrar",
+      "semanticField": "Cerrar",
+      "action": "click",
+      "valueKey": "cerrar",
+      "sourceEventRefs": [
+        "event-37"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Cerrar"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Cerrar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Cerrar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Cerrar\"",
+      "screenBeforeRef": "95c889362791",
+      "screenAfterRef": "95c889362791",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "stateScope": "95c889362791",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-38",
+      "controlIdentity": "95c889362791|Cancelar|role|button|Cancelar",
+      "semanticField": "Cancelar",
+      "action": "click",
+      "valueKey": "cancelar",
+      "sourceEventRefs": [
+        "event-38"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Cancelar"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Cancelar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Cancelar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Cancelar\"",
+      "screenBeforeRef": "95c889362791",
+      "screenAfterRef": "95c889362791",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "stateScope": "95c889362791",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-39",
+      "controlIdentity": "95c889362791|Aceptar|role|button|Aceptar",
+      "semanticField": "Aceptar",
+      "action": "click",
+      "valueKey": "aceptar",
+      "sourceEventRefs": [
+        "event-39"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Aceptar"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Aceptar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Aceptar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Aceptar\"",
+      "screenBeforeRef": "95c889362791",
+      "screenAfterRef": "95c889362791",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+      "stateScope": "95c889362791",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    }
+  ],
+  "gridMetadata": {
+    "detected": true,
+    "grids": 3,
+    "rows": 0,
+    "cells": 0,
+    "headers": [],
+    "headerRelationships": []
+  },
+  "source": "SessionTrace",
+  "mutationOpportunities": [
+    {
+      "opportunityId": "REC-A1282E09-01:field_omission",
+      "title": "Creacion cuenta efectivo: comprobar la omisión de un dato",
+      "mutationType": "FIELD_OMISSION",
+      "basePrimaryScenarioId": "REC-A1282E09-01",
+      "operations": [
+        {
+          "type": "remove_action",
+          "interactionId": "interaction-6"
+        }
+      ],
+      "evidenceRefs": [
+        "event-1",
+        "event-2",
+        "event-3",
+        "event-4",
+        "event-5",
+        "event-6",
+        "event-7",
+        "event-8",
+        "event-9",
+        "event-10",
+        "event-11",
+        "event-12",
+        "event-13",
+        "event-14",
+        "event-15",
+        "event-16",
+        "event-17",
+        "event-18",
+        "event-19",
+        "event-20",
+        "event-21",
+        "event-22",
+        "event-23",
+        "event-24",
+        "event-25",
+        "event-26",
+        "event-27",
+        "event-28",
+        "event-29",
+        "event-30",
+        "event-31",
+        "event-32",
+        "event-33",
+        "event-34",
+        "event-35",
+        "event-36",
+        "event-37",
+        "event-38",
+        "event-39"
+      ],
+      "rationale": "Existen varios inputs observados; se propone una omisión agrupada sin inventar el resultado.",
+      "oracleAuthority": "MISSING",
+      "confidence": 0.5,
+      "needsReview": true
+    }
+  ],
+  "suggestionDiagnostics": {
+    "opportunitiesDetected": 1,
+    "candidatesGenerated": 7,
+    "acceptedForDisplay": 1,
+    "rejectedBecause": [
+      "goal_relevance_gate"
+    ]
+  },
+  "derivation": {
+    "version": 1,
+    "generatedAt": "2026-09-20T23:43:36.021Z",
+    "executed": true,
+    "primaryCount": 1,
+    "suggestionCount": 1,
+    "opportunitiesDetected": 1,
+    "candidatesGenerated": 7,
+    "rejectedBecause": [
+      "goal_relevance_gate"
+    ]
+  },
+  "primaryScenario": {
+    "scenarioId": "REC-A1282E09-01",
+    "title": "Creacion Cuenta Efectivo",
+    "provenance": "OBSERVED",
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7",
+      "event-8",
+      "event-9",
+      "event-10",
+      "event-11",
+      "event-12",
+      "event-13",
+      "event-14",
+      "event-15",
+      "event-16",
+      "event-17",
+      "event-18",
+      "event-19",
+      "event-20",
+      "event-21",
+      "event-22",
+      "event-23",
+      "event-24",
+      "event-25",
+      "event-26",
+      "event-27",
+      "event-28",
+      "event-29",
+      "event-30",
+      "event-31",
+      "event-32",
+      "event-33",
+      "event-34",
+      "event-35",
+      "event-36",
+      "event-37",
+      "event-38",
+      "event-39"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "needsReview": true
+  },
+  "aiGeneration": {
+    "providerSuccess": true,
+    "schemaValidation": true,
+    "fallbackUsed": false,
+    "provider": "codex_cli",
+    "model": "gpt-5.6-luna",
+    "inputTokens": 66206,
+    "cachedTokens": 51456,
+    "nonCachedTokens": 14750,
+    "outputTokens": 1136,
+    "totalTokens": 67342,
+    "contextBeforeChars": 34295,
+    "contextAfterChars": 10424,
+    "candidates": [],
+    "providerRejected": [
+      {
+        "reason": "No se propone una variante de campo obligatorio vacío o con formato inválido porque no hay constraints ni evidencia de validación para los campos usados en el recorrido.",
+        "sourceEvidenceRefs": [
+          "event-6",
+          "event-7",
+          "event-13",
+          "event-18",
+          "event-21",
+          "event-28",
+          "event-31"
+        ]
+      },
+      {
+        "reason": "No se propone una variante de código de validación incorrecto, expirado o reenviado porque el recorrido no usa ningún código de validación.",
+        "sourceEvidenceRefs": []
+      },
+      {
+        "reason": "No se propone una variante de cancelación o retorno a mitad del flujo porque las acciones observadas de cierre, cancelación y aceptación aparecen al final del recorrido y no evidencian una salida intermedia del objetivo.",
+        "sourceEvidenceRefs": [
+          "event-34",
+          "event-35",
+          "event-36",
+          "event-37",
+          "event-38",
+          "event-39"
+        ]
+      },
+      {
+        "reason": "No se propone una variante de reintentos o bloqueo porque no hay evidencia de un control de reintento ni de intentos fallidos.",
+        "sourceEvidenceRefs": [
+          "event-6",
+          "event-7",
+          "event-13"
+        ]
+      },
+      {
+        "reason": "No se propone una variante de sesión expirada o interrumpida porque la transcripción no muestra expiración, interrupción ni un control relacionado con esa condición.",
+        "sourceEvidenceRefs": [
+          "event-1",
+          "event-2",
+          "event-3",
+          "event-4"
+        ]
+      },
+      {
+        "reason": "No se propone una variante para un control deshabilitado porque no se observó ningún control deshabilitado.",
+        "sourceEvidenceRefs": [
+          "event-17",
+          "event-24",
+          "event-34"
+        ]
+      }
+    ]
+  }
+}

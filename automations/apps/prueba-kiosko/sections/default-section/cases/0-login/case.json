@@ -1,0 +1,9 @@
+{
+  "id": "0-login",
+  "caseId": 0,
+  "title": "Login",
+  "source": "discovery",
+  "appSlug": "prueba-kiosko",
+  "appConfigPath": "automations\\apps\\prueba-kiosko\\app.config.json",
+  "createdAt": "2026-09-25T12:45:03.406Z"
+}

@@ -152,6 +152,138 @@ function buildAutoPomMethodStub(methodName: string, intent: string): string | un
   return undefined;
 }
 
+/**
+ * FIRST_LOSS fix (jobId cb26fb19-d676-4d19-b19d-70613cd9a009): a method was flagged
+ * `status="active" available=true` by POLICY (confidence/sensitivity/intent) BEFORE any physical
+ * verification that it exists in the real, active Page Object source. When the candidate file
+ * was absent and stub injection had no known template for the method's intent
+ * (`buildAutoPomMethodStub` returns undefined for anything outside its small allowlist), the
+ * registry activation was kept anyway. The result: a structurally valid-looking, "active"/
+ * "available" registry entry (ProductListPage.executeAction, intent=unknown) whose method never
+ * existed at runtime, silently accepted as executable authority by spec generation.
+ *
+ * Fixed generically, for any app/POM/method/intent: policy approval only PROPOSES activation; a
+ * method is only actually marked active/available AFTER re-reading the resulting file and
+ * confirming its name is really present as a real function/method definition. A proposal that
+ * fails verification is left at its pre-existing state (never invented as a new status) and
+ * reported as blocked, exactly like a policy-level rejection.
+ */
+const methodNamePattern = (name: string) => new RegExp(`\\b(?:async\\s+)?${name}\\s*\\(`);
+
+/**
+ * Core reconciliation step, extracted so it can run standalone -- independent of whether new
+ * method proposal/approval (Auto-POM) is needed at all. Re-verifies every method already marked
+ * `status="active" available=true` against the real, active Page Object source file and demotes
+ * (`available=false`) any that do not verify. `status` is left as-is (mirrors the original
+ * FIRST_LOSS fix, jobId cb26fb19-d676-4d19-b19d-70613cd9a009): every consumer that selects
+ * implementation authority (findMethodBySemanticIntent and friends) already filters on
+ * `available`, so demoting it here is sufficient. Never proposes, generates, or approves new
+ * methods -- callers that also need that must still go through autoApproveMethodsInActivePageObjects
+ * or runAutoPomPipeline.
+ */
+export async function reconcileActivePageObjectMethods(
+  registry: PageObjectRegistry,
+  pagesDir: string,
+): Promise<{ reconciledMethods: string[] }> {
+  const reconciledMethods: string[] = [];
+  for (const po of registry.pageObjects) {
+    if (po.status !== "active") continue;
+    const existingActiveMethods = po.methods.filter((m) => m.status === "active" && m.available);
+    if (existingActiveMethods.length === 0) continue;
+    const baseName = po.className.replace(/Page$/, "").toLowerCase().replace(/-/g, "");
+    const activePath = path.join(pagesDir, `${baseName}.page.ts`);
+    const currentSource = await fs.readFile(activePath, "utf-8").catch(() => undefined);
+    for (const m of existingActiveMethods) {
+      if (currentSource !== undefined && methodNamePattern(m.name).test(currentSource)) continue;
+      m.available = false;
+      reconciledMethods.push(`${po.className}.${m.name}()`);
+    }
+  }
+  return { reconciledMethods };
+}
+
+export async function autoApproveMethodsInActivePageObjects(
+  registry: PageObjectRegistry,
+  pagesDir: string,
+  options: { confidenceThreshold: number; blockSensitive: boolean },
+): Promise<{ approvedMethodCount: number; autoApprovedMethods: string[]; blockedAutoApprovals: string[]; reconciledMethods: string[] }> {
+  const autoApprovedMethods: string[] = [];
+  const blockedAutoApprovals: string[] = [];
+  let approvedMethodCount = 0;
+
+  // FIRST_LOSS fix (jobId cb26fb19-d676-4d19-b19d-70613cd9a009, reconciliation pass): the
+  // proposal-verification loop below only ever ran for methods NOT already
+  // `status="active" available=true` -- an entry corrupted before this fix existed (or by any
+  // future gap) skipped verification forever, remaining executable authority to every consumer.
+  // Reused here as the shared core (see reconcileActivePageObjectMethods) so this flow and any
+  // other caller apply the exact same verification, never a second parser/duplicate check.
+  const { reconciledMethods } = await reconcileActivePageObjectMethods(registry, pagesDir);
+  blockedAutoApprovals.push(
+    ...reconciledMethods.map((label) => `${label}: method_not_present_in_source_reconciliation`)
+  );
+
+  for (const po of registry.pageObjects) {
+    if (po.status !== "active") continue;
+
+    const proposedMethods: typeof po.methods = [];
+    for (const method of po.methods) {
+      if (method.status === "active" && method.available) continue;
+      const check = isMethodAutoApprovable(method, options);
+      if (!check.approvable) {
+        blockedAutoApprovals.push(`${po.className}.${method.name}(): ${check.reason}`);
+        continue;
+      }
+      proposedMethods.push(method);
+    }
+    if (proposedMethods.length === 0) continue;
+
+    const baseName = po.className.replace(/Page$/, "").toLowerCase().replace(/-/g, "");
+    const candidatePath = path.join(pagesDir, `${baseName}.page.candidate.ts`);
+    const activePath = path.join(pagesDir, `${baseName}.page.ts`);
+    try {
+      await fs.access(candidatePath);
+      await fs.copyFile(candidatePath, activePath);
+      po.filePath = activePath.replace(/\\/g, "/");
+    } catch {
+      // Candidate file may not exist. Inject known safe stubs into active file when missing.
+      try {
+        let source = await fs.readFile(activePath, "utf-8");
+        let changed = false;
+        for (const method of proposedMethods) {
+          if (methodNamePattern(method.name).test(source)) continue;
+          const stub = buildAutoPomMethodStub(method.name, method.intent);
+          if (!stub) continue;
+          const insertAt = source.lastIndexOf("}");
+          if (insertAt <= 0) continue;
+          source = `${source.slice(0, insertAt).trimEnd()}\n\n${stub}\n${source.slice(insertAt)}`;
+          changed = true;
+        }
+        if (changed) {
+          await fs.writeFile(activePath, source, "utf-8");
+          po.filePath = activePath.replace(/\\/g, "/");
+        }
+      } catch {
+        // File sync failed entirely -- fall through to per-method verification below, which
+        // will correctly find none of the proposed methods present and block all of them.
+      }
+    }
+
+    const finalSource = await fs.readFile(activePath, "utf-8").catch(() => "");
+    for (const method of proposedMethods) {
+      if (!methodNamePattern(method.name).test(finalSource)) {
+        blockedAutoApprovals.push(`${po.className}.${method.name}(): method_not_present_in_source_after_sync`);
+        continue;
+      }
+      method.status = "active";
+      method.available = true;
+      autoApprovedMethods.push(`${po.className}.${method.name}()`);
+      approvedMethodCount += 1;
+    }
+  }
+
+  return { approvedMethodCount, autoApprovedMethods, blockedAutoApprovals, reconciledMethods };
+}
+
 export function shouldRunAutoPom(
   pomStatus: POMPromotionStatus | undefined,
   policy: PromotionPolicy
@@ -247,65 +379,25 @@ export async function runAutoPomPipeline(input: AutoPomInput): Promise<AutoPomRe
   // Step 2.5: Auto-approve safe candidate methods inside already-active Page Objects.
   {
     const registry = await loadPageObjectRegistry(input.appProfile, input.outputRoot);
-    const threshold = policy.autoApproveConfidenceThreshold ?? 0.50;
-    const blockSensitive = policy.blockSensitiveAutoApproval !== false;
-    let approvedMethodCount = 0;
+    const { approvedMethodCount, autoApprovedMethods, blockedAutoApprovals, reconciledMethods } = await autoApproveMethodsInActivePageObjects(
+      registry,
+      input.appPaths.pagesDir,
+      {
+        confidenceThreshold: policy.autoApproveConfidenceThreshold ?? 0.50,
+        blockSensitive: policy.blockSensitiveAutoApproval !== false,
+      },
+    );
+    diagnostics.autoApprovedMethods.push(...autoApprovedMethods);
+    diagnostics.blockedAutoApprovals.push(...blockedAutoApprovals);
 
-    for (const po of registry.pageObjects) {
-      if (po.status !== "active") continue;
-      let poApprovedMethods = 0;
-      for (const method of po.methods) {
-        if (method.status === "active" && method.available) continue;
-        const check = isMethodAutoApprovable(method, { confidenceThreshold: threshold, blockSensitive });
-        if (!check.approvable) {
-          diagnostics.blockedAutoApprovals.push(`${po.className}.${method.name}(): ${check.reason}`);
-          continue;
-        }
-        method.status = "active";
-        method.available = true;
-        diagnostics.autoApprovedMethods.push(`${po.className}.${method.name}()`);
-        approvedMethodCount += 1;
-        poApprovedMethods += 1;
-      }
-
-      if (poApprovedMethods > 0) {
-        const baseName = po.className.replace(/Page$/, "").toLowerCase().replace(/-/g, "");
-        const candidatePath = path.join(input.appPaths.pagesDir, `${baseName}.page.candidate.ts`);
-        const activePath = path.join(input.appPaths.pagesDir, `${baseName}.page.ts`);
-        try {
-          await fs.access(candidatePath);
-          await fs.copyFile(candidatePath, activePath);
-          po.filePath = activePath.replace(/\\/g, "/");
-        } catch {
-          // Candidate file may not exist. Inject known safe stubs into active file when missing.
-          try {
-            let source = await fs.readFile(activePath, "utf-8");
-            let changed = false;
-            for (const method of po.methods) {
-              if (!(method.status === "active" && method.available)) continue;
-              const methodRegex = new RegExp(`\\b${method.name}\\s*\\(`);
-              if (methodRegex.test(source)) continue;
-              const stub = buildAutoPomMethodStub(method.name, method.intent);
-              if (!stub) continue;
-              const insertAt = source.lastIndexOf("}");
-              if (insertAt <= 0) continue;
-              source = `${source.slice(0, insertAt).trimEnd()}\n\n${stub}\n${source.slice(insertAt)}`;
-              changed = true;
-            }
-            if (changed) {
-              await fs.writeFile(activePath, source, "utf-8");
-              po.filePath = activePath.replace(/\\/g, "/");
-            }
-          } catch {
-            // Keep registry activation only if file injection fails.
-          }
-        }
-      }
+    if (reconciledMethods.length > 0) {
+      console.log(`[auto-pom] Reconciled ${reconciledMethods.length} preexisting active/available method(s) not present in source: ${reconciledMethods.join(", ")}`);
     }
-
-    if (approvedMethodCount > 0) {
+    if (approvedMethodCount > 0 || reconciledMethods.length > 0) {
       await savePageObjectRegistry(registry, input.appProfile, input.outputRoot);
-      console.log(`[auto-pom] Auto-approved ${approvedMethodCount} safe method(s) in active Page Objects.`);
+      if (approvedMethodCount > 0) {
+        console.log(`[auto-pom] Auto-approved ${approvedMethodCount} safe method(s) in active Page Objects.`);
+      }
     }
   }
 

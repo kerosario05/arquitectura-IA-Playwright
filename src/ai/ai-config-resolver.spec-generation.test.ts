@@ -80,4 +80,34 @@ test("resolveSpecGenerationAiConfig", async (t) => {
       assert.strictEqual(cfg.requireJsonSchema, true);
     });
   });
+
+  await t.test("resolves the spec-only Codex reasoning effort", () => {
+    withEnv({
+      AI_ENABLED: "true",
+      AI_SPEC_PROVIDER: "codex_cli",
+      AI_SPEC_MODEL: "gpt-5.6-luna",
+      AI_SPEC_REASONING_EFFORT: "medium",
+      AI_SPEC_TIMEOUT_MS: "360000",
+      CODEX_CLI_COMMAND: "codex"
+    }, () => {
+      const cfg = resolveSpecGenerationAiConfig();
+      assert.strictEqual(cfg.reasoningEffort, "medium");
+      assert.strictEqual(cfg.timeoutMs, 360000);
+    });
+  });
+
+  await t.test("accepts low effort and preserves the default when absent", () => {
+    withEnv({ AI_ENABLED: "true", AI_SPEC_PROVIDER: "codex_cli", AI_SPEC_MODEL: "model-a", AI_SPEC_REASONING_EFFORT: "low" }, () => {
+      assert.strictEqual(resolveSpecGenerationAiConfig().reasoningEffort, "low");
+    });
+    withEnv({ AI_ENABLED: "true", AI_SPEC_PROVIDER: "codex_cli", AI_SPEC_MODEL: "model-a", AI_SPEC_REASONING_EFFORT: undefined }, () => {
+      assert.strictEqual(resolveSpecGenerationAiConfig().reasoningEffort, undefined);
+    });
+  });
+
+  await t.test("rejects an unsupported effort without silently changing it", () => {
+    withEnv({ AI_ENABLED: "true", AI_SPEC_PROVIDER: "codex_cli", AI_SPEC_MODEL: "model-a", AI_SPEC_REASONING_EFFORT: "turbo" }, () => {
+      assert.throws(() => resolveSpecGenerationAiConfig(), { code: "ai_provider_config_missing" });
+    });
+  });
 });

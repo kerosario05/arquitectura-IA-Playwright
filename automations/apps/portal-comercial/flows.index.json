@@ -1,0 +1,114 @@
+{
+  "version": "1.0",
+  "appSlug": "portal-comercial",
+  "flows": [
+    {
+      "id": "flow_1789581700575_65oo5x",
+      "name": "Crear Producto Cuenta Efectivo",
+      "filePath": "flows\\crear-producto-cuenta-efectivo.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "ProductListPage",
+          "methodName": "open"
+        },
+        {
+          "action": "fill",
+          "target": "Usuario",
+          "pageObjectId": "LoginPage",
+          "methodName": "fillUsername"
+        },
+        {
+          "action": "fill",
+          "target": "Contraseña",
+          "pageObjectId": "LoginPage",
+          "methodName": "fillPassword"
+        },
+        {
+          "action": "click",
+          "target": "Iniciar sesión",
+          "pageObjectId": "LoginPage",
+          "methodName": "submitLogin"
+        }
+      ],
+      "requiredDataKeys": [
+        "usuario",
+        "contrasena"
+      ],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-09-16T18:01:40.575Z",
+      "updatedAt": "2026-09-16T18:01:40.575Z"
+    },
+    {
+      "id": "flow_1789753590371_5mv9te",
+      "name": "Segunta Prueba",
+      "filePath": "flows\\segunta-prueba.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "fill",
+          "target": "Usuario",
+          "pageObjectId": "LoginPage",
+          "methodName": "fillUsername"
+        },
+        {
+          "action": "fill",
+          "target": "Contraseña",
+          "pageObjectId": "LoginPage",
+          "methodName": "fillPassword"
+        },
+        {
+          "action": "press",
+          "target": "role:textbox|Contraseña",
+          "pageObjectId": "LoginPage",
+          "methodName": "executeAction"
+        },
+        {
+          "action": "click",
+          "target": "Solicitud multiproducto",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "fill",
+          "target": "Número de identificación",
+          "pageObjectId": "FormPage",
+          "methodName": "fillField"
+        },
+        {
+          "action": "click",
+          "target": "Número de identificación",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "Depurar",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        }
+      ],
+      "requiredDataKeys": [
+        "usuario",
+        "contrasena",
+        "numero_de_identificacion"
+      ],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-09-18T17:46:30.371Z",
+      "updatedAt": "2026-09-18T17:46:30.371Z"
+    }
+  ],
+  "updatedAt": "2026-09-18T17:46:30.375Z"
+}

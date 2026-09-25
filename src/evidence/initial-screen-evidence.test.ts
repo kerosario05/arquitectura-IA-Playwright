@@ -66,6 +66,36 @@ test("T8 readiness success with screenshot failure does not reuse step screensho
   }
 });
 
+test("T15 alreadyReady trusts the shared readiness authority instead of re-deriving via the independent DOM poll", async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "initial-evidence-already-ready-"));
+  try {
+    const recorder = await createRecorder(root, "ALREADY-READY");
+    // The page's own DOM poll would report not-ready (evaluate resolves false), but the
+    // caller has already proven readiness upstream via the shared waitForPageReady
+    // primitive (promoted-spec-runtime.ts's ensureInitialNavigation) immediately before this
+    // call, so captureInitialScreen must trust that instead of independently timing out.
+    const ready = await recorder.captureInitialScreen(mockPage({ ready: false }), "promoted_reuse", 20, { alreadyReady: true });
+    assert.equal(ready, true);
+    const record = await recorder.finish();
+    assert.equal(record.initialScreenEvidence?.status, "ready");
+    assert.equal(record.initialScreenEvidence?.captured, true);
+  } finally {
+    await fs.rm(root, { recursive: true, force: true });
+  }
+});
+
+test("T16 alreadyReady still reports failure for a page that closed before evidence capture", async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "initial-evidence-already-ready-closed-"));
+  try {
+    const recorder = await createRecorder(root, "ALREADY-READY-CLOSED");
+    const closedPage = { ...mockPage({ ready: false }), isClosed: () => true };
+    const ready = await recorder.captureInitialScreen(closedPage, "promoted_reuse", 20, { alreadyReady: true });
+    assert.equal(ready, false);
+  } finally {
+    await fs.rm(root, { recursive: true, force: true });
+  }
+});
+
 test("T9-T13 readiness failure captures diagnostics and leaves steps unstarted", async () => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "initial-evidence-load-failure-"));
   try {

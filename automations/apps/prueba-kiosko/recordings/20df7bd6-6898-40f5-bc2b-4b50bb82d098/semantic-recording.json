@@ -1,0 +1,3976 @@
+{
+  "version": "1.0",
+  "recordingId": "20df7bd6-6898-40f5-bc2b-4b50bb82d098",
+  "projectSlug": "prueba-kiosko",
+  "appSlug": "prueba-kiosko",
+  "platform": "web",
+  "recordingGoal": {
+    "declaredGoal": "Generar Turno",
+    "normalizedGoal": "Generar Turno",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "selectorOptionInventories": [],
+  "semanticScreens": [
+    {
+      "screenIdentity": "9f12e61beacd",
+      "title": "¡Hola!",
+      "url": "https://172.27.4.50/",
+      "classification": "SAME_SCREEN_MUTATION",
+      "sourceScreenKey": "9f12e61beacd"
+    },
+    {
+      "screenIdentity": "962b4393ca35",
+      "title": "Conoce nuestros productos",
+      "url": "https://172.27.4.50/product-catalog",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "962b4393ca35"
+    },
+    {
+      "screenIdentity": "3cf76be5e38a",
+      "title": "Selecciona un producto",
+      "url": "https://172.27.4.50/product-subcategory",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "3cf76be5e38a"
+    },
+    {
+      "screenIdentity": "ed2f7440b633",
+      "title": "Selecciona un producto",
+      "url": "https://172.27.4.50/product-subcategory",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "ed2f7440b633"
+    },
+    {
+      "screenIdentity": "7b8c48c18d5b",
+      "title": "Más detalles del producto",
+      "url": "https://172.27.4.50/product-extended",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "7b8c48c18d5b"
+    },
+    {
+      "screenIdentity": "f0e39dba7a91",
+      "title": "Más detalles del producto",
+      "url": "https://172.27.4.50/product-extended",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "f0e39dba7a91"
+    },
+    {
+      "screenIdentity": "d36b9b70befb",
+      "title": "Más detalles del producto",
+      "url": "https://172.27.4.50/product-extended",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "d36b9b70befb"
+    },
+    {
+      "screenIdentity": "a55a1c9d0381",
+      "title": "Más detalles del producto",
+      "url": "https://172.27.4.50/product-extended",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "a55a1c9d0381"
+    },
+    {
+      "screenIdentity": "b48ffbb94eee",
+      "title": "Más detalles del producto",
+      "url": "https://172.27.4.50/product-extended",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "b48ffbb94eee"
+    }
+  ],
+  "semanticComponents": [
+    {
+      "componentId": "9f12e61beacd:control:9f12e61beacd|Explora nuestros productos|button",
+      "componentType": "button",
+      "screenIdentity": "9f12e61beacd",
+      "label": "Explora nuestros productos",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-6"
+      ]
+    },
+    {
+      "componentId": "9f12e61beacd:control:9f12e61beacd|Tarjetas|button",
+      "componentType": "button",
+      "screenIdentity": "9f12e61beacd",
+      "label": "Tarjetas",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-9"
+      ]
+    },
+    {
+      "componentId": "9f12e61beacd:control:9f12e61beacd|Tarjeta de Crédito|button",
+      "componentType": "button",
+      "screenIdentity": "9f12e61beacd",
+      "label": "Tarjeta de Crédito",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-12"
+      ]
+    },
+    {
+      "componentId": "9f12e61beacd:control:9f12e61beacd|Tarjeta Crédito Visa Clásica|control",
+      "componentType": "control",
+      "screenIdentity": "9f12e61beacd",
+      "label": "Tarjeta Crédito Visa Clásica",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-14"
+      ]
+    },
+    {
+      "componentId": "9f12e61beacd:control:9f12e61beacd|Solicitar|button",
+      "componentType": "button",
+      "screenIdentity": "9f12e61beacd",
+      "label": "Solicitar",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-17"
+      ]
+    },
+    {
+      "componentId": "9f12e61beacd:control:9f12e61beacd|Generar Turno|button",
+      "componentType": "button",
+      "screenIdentity": "9f12e61beacd",
+      "label": "Generar Turno",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-19",
+        "obs-43"
+      ]
+    },
+    {
+      "componentId": "9f12e61beacd:control:9f12e61beacd|4|button",
+      "componentType": "button",
+      "screenIdentity": "9f12e61beacd",
+      "label": "4",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-21",
+        "obs-29"
+      ]
+    },
+    {
+      "componentId": "9f12e61beacd:control:9f12e61beacd|0|button",
+      "componentType": "button",
+      "screenIdentity": "9f12e61beacd",
+      "label": "0",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-23"
+      ]
+    },
+    {
+      "componentId": "9f12e61beacd:control:9f12e61beacd|2|button",
+      "componentType": "button",
+      "screenIdentity": "9f12e61beacd",
+      "label": "2",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-25",
+        "obs-27"
+      ]
+    },
+    {
+      "componentId": "9f12e61beacd:control:9f12e61beacd|6|button",
+      "componentType": "button",
+      "screenIdentity": "9f12e61beacd",
+      "label": "6",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-31"
+      ]
+    },
+    {
+      "componentId": "9f12e61beacd:control:9f12e61beacd|7|button",
+      "componentType": "button",
+      "screenIdentity": "9f12e61beacd",
+      "label": "7",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-33"
+      ]
+    },
+    {
+      "componentId": "9f12e61beacd:control:9f12e61beacd|9|button",
+      "componentType": "button",
+      "screenIdentity": "9f12e61beacd",
+      "label": "9",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-35"
+      ]
+    },
+    {
+      "componentId": "9f12e61beacd:control:9f12e61beacd|5|button",
+      "componentType": "button",
+      "screenIdentity": "9f12e61beacd",
+      "label": "5",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-37",
+        "obs-39"
+      ]
+    },
+    {
+      "componentId": "9f12e61beacd:control:9f12e61beacd|1|button",
+      "componentType": "button",
+      "screenIdentity": "9f12e61beacd",
+      "label": "1",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-41"
+      ]
+    }
+  ],
+  "semanticEvents": [
+    {
+      "eventRef": "event-1",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-2",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-3",
+      "action": "observe",
+      "screenIdentity": "9f12e61beacd",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-4",
+      "action": "observe",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|Explora nuestros productos|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-5",
+      "action": "navigate",
+      "screenIdentity": "9f12e61beacd",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-6",
+      "action": "click",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:role:button|Explora nuestros productos",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-7",
+      "action": "observe",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|Tarjetas|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-8",
+      "action": "navigate",
+      "screenIdentity": "9f12e61beacd",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-9",
+      "action": "click",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:role:button|Tarjetas",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-10",
+      "action": "observe",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|Tarjeta de Crédito|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-11",
+      "action": "navigate",
+      "screenIdentity": "9f12e61beacd",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-12",
+      "action": "click",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:role:button|Tarjeta de Crédito",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-13",
+      "action": "observe",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "control",
+      "controlAffordance": "observable_control",
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|Tarjeta Crédito Visa Clásica|control",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-14",
+      "action": "activate",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "control",
+      "controlAffordance": "observable_control",
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|Tarjeta Crédito Visa Clásica|control",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-15",
+      "action": "navigate",
+      "screenIdentity": "9f12e61beacd",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-16",
+      "action": "observe",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|Solicitar|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-17",
+      "action": "click",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:role:button|Solicitar",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-18",
+      "action": "observe",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|Generar Turno|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-19",
+      "action": "click",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|Generar Turno|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-20",
+      "action": "observe",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|4|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-21",
+      "action": "click",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:role:button|4",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-22",
+      "action": "observe",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|0|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-23",
+      "action": "click",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:role:button|0",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-24",
+      "action": "observe",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|2|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-25",
+      "action": "click",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:role:button|2",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-26",
+      "action": "observe",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|2|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-27",
+      "action": "click",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:role:button|2",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-28",
+      "action": "observe",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|4|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-29",
+      "action": "click",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:role:button|4",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-30",
+      "action": "observe",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|6|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-31",
+      "action": "click",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:role:button|6",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-32",
+      "action": "observe",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|7|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-33",
+      "action": "click",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:role:button|7",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-34",
+      "action": "observe",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|9|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-35",
+      "action": "click",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:role:button|9",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-36",
+      "action": "observe",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|5|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-37",
+      "action": "click",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:role:button|5",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-38",
+      "action": "observe",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|5|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-39",
+      "action": "click",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:role:button|5",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-40",
+      "action": "observe",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|1|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-41",
+      "action": "click",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:role:button|1",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-42",
+      "action": "observe",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|Generar Turno|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-43",
+      "action": "click",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9f12e61beacd:control:role:button|Generar Turno",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    }
+  ],
+  "datasets": [],
+  "technicalObservations": [
+    {
+      "observationId": "obs-4",
+      "status": "OBSERVED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "Explora nuestros productos",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|Explora nuestros productos|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-6",
+      "status": "VALIDATED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "Explora nuestros productos",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Explora nuestros productos",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Explora nuestros productos",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Explora nuestros productos"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "div"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"circle\",1],[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9f12e61beacd:control:role:button|Explora nuestros productos",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-7",
+      "status": "OBSERVED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "Tarjetas",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|Tarjetas|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-9",
+      "status": "VALIDATED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "Tarjetas",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Tarjetas",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Tarjetas",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "div"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "topologyTieBreakUnique": true,
+            "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"line\",1],[\"path\",1],[\"rect\",1],[\"svg\",2]]}",
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9f12e61beacd:control:role:button|Tarjetas",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-10",
+      "status": "OBSERVED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "Tarjeta de Crédito",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|Tarjeta de Crédito|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-12",
+      "status": "VALIDATED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "Tarjeta de Crédito",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Tarjeta de Crédito",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Tarjeta de Crédito",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "div"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"line\",1],[\"path\",1],[\"rect\",1],[\"svg\",2]]}",
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9f12e61beacd:control:role:button|Tarjeta de Crédito",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-13",
+      "status": "OBSERVED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "control",
+      "label": "Tarjeta Crédito Visa Clásica",
+      "tag": "div",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|Tarjeta Crédito Visa Clásica|control",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-14",
+      "status": "VALIDATED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "control",
+      "label": "Tarjeta Crédito Visa Clásica",
+      "tag": "div",
+      "locatorCandidates": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "div"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "img",
+                "stableAttributes": {
+                  "alt": "Tarjeta Crédito Visa Clásica",
+                  "src": "/assets/images/tarjetas-de-credito-visa-clasica.png"
+                }
+              }
+            ],
+            "semanticShape": [
+              "div",
+              "h3"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"div\",3],[\"h3\",1]],\"descendantEntries\":[[\"div\",11],[\"h3\",1],[\"img\",1],[\"path\",4],[\"span\",4],[\"svg\",4]]}",
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner",
+            "v2_framework_actionable_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.4,
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|Tarjeta Crédito Visa Clásica|control",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-16",
+      "status": "OBSERVED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "Solicitar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|Solicitar|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-17",
+      "status": "VALIDATED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "Solicitar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Solicitar",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Solicitar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 3
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9f12e61beacd:control:role:button|Solicitar",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-18",
+      "status": "OBSERVED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "Generar Turno",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|Generar Turno|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-19",
+      "status": "VALIDATED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "Generar Turno",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "div",
+              "h3",
+              "p"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "topologyTieBreakUnique": true,
+            "topologySignature": "{\"childEntries\":[[\"div\",1],[\"h3\",1],[\"p\",1]],\"descendantEntries\":[[\"div\",2],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.4,
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|Generar Turno|button",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-20",
+      "status": "OBSERVED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "4",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|4|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-21",
+      "status": "VALIDATED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "4",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|4",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|4",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9f12e61beacd:control:role:button|4",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-22",
+      "status": "OBSERVED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "0",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|0|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-23",
+      "status": "VALIDATED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "0",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|0",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|0",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9f12e61beacd:control:role:button|0",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-24",
+      "status": "OBSERVED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "2",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|2|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-25",
+      "status": "VALIDATED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "2",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|2",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|2",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9f12e61beacd:control:role:button|2",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-26",
+      "status": "OBSERVED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "2",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|2|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-27",
+      "status": "VALIDATED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "2",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|2",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|2",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9f12e61beacd:control:role:button|2",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-28",
+      "status": "OBSERVED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "4",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|4|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-29",
+      "status": "VALIDATED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "4",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|4",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|4",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9f12e61beacd:control:role:button|4",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-30",
+      "status": "OBSERVED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "6",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|6|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-31",
+      "status": "VALIDATED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "6",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|6",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|6",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9f12e61beacd:control:role:button|6",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-32",
+      "status": "OBSERVED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "7",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|7|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-33",
+      "status": "VALIDATED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "7",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|7",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|7",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9f12e61beacd:control:role:button|7",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-34",
+      "status": "OBSERVED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "9",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|9|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-35",
+      "status": "VALIDATED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "9",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|9",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|9",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9f12e61beacd:control:role:button|9",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-36",
+      "status": "OBSERVED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "5",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|5|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-37",
+      "status": "VALIDATED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "5",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|5",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|5",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9f12e61beacd:control:role:button|5",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-38",
+      "status": "OBSERVED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "5",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|5|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-39",
+      "status": "VALIDATED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "5",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|5",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|5",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9f12e61beacd:control:role:button|5",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-40",
+      "status": "OBSERVED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "1",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|1|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-41",
+      "status": "VALIDATED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "1",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|1",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|1",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9f12e61beacd:control:role:button|1",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-42",
+      "status": "OBSERVED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "Generar Turno",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9f12e61beacd:control:9f12e61beacd|Generar Turno|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-43",
+      "status": "VALIDATED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "Generar Turno",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Generar Turno",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Generar Turno",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 5
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9f12e61beacd:control:role:button|Generar Turno",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9f12e61beacd-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "Estados de cuenta",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Estados de cuenta"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Estados de cuenta",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9f12e61beacd:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9f12e61beacd-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "Consulta de balance",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Consulta de balance"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Consulta de balance",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9f12e61beacd:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9f12e61beacd-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "Cartas y certificaciones",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Cartas y certificaciones"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Cartas y certificaciones",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9f12e61beacd:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9f12e61beacd-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "Canje de Puntos",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Canje de Puntos"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Canje de Puntos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9f12e61beacd:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9f12e61beacd-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "9f12e61beacd",
+      "componentType": "button",
+      "label": "Explora nuestros productos",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Explora nuestros productos"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Explora nuestros productos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9f12e61beacd:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-962b4393ca35-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "962b4393ca35",
+      "componentType": "button",
+      "label": "Tarjetas",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Tarjetas    ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "962b4393ca35:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-962b4393ca35-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "962b4393ca35",
+      "componentType": "button",
+      "label": "Cuentas",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Cuentas    ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "962b4393ca35:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-962b4393ca35-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "962b4393ca35",
+      "componentType": "button",
+      "label": "Préstamos",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Préstamos    ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "962b4393ca35:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-962b4393ca35-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "962b4393ca35",
+      "componentType": "button",
+      "label": "Depósitos a plazo",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Depósitos\na plazo    ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "962b4393ca35:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-962b4393ca35-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "962b4393ca35",
+      "componentType": "button",
+      "label": "Salir",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Salir ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "962b4393ca35:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-3cf76be5e38a-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "3cf76be5e38a",
+      "componentType": "button",
+      "label": "Tarjeta de Crédito",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Tarjeta de\nCrédito    ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "3cf76be5e38a:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-3cf76be5e38a-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "3cf76be5e38a",
+      "componentType": "button",
+      "label": "Volver",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Volver ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "3cf76be5e38a:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-ed2f7440b633-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "ed2f7440b633",
+      "componentType": "button",
+      "label": "Volver",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Volver ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "ed2f7440b633:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f0e39dba7a91-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "f0e39dba7a91",
+      "componentType": "button",
+      "label": "Finalizar sesión",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Finalizar sesión ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "f0e39dba7a91:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f0e39dba7a91-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "f0e39dba7a91",
+      "componentType": "button",
+      "label": "Volver",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Volver ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "f0e39dba7a91:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f0e39dba7a91-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "f0e39dba7a91",
+      "componentType": "button",
+      "label": "Solicitar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Solicitar ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "f0e39dba7a91:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f0e39dba7a91-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "f0e39dba7a91",
+      "componentType": "button",
+      "label": "Generar Turno",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Generar Turno Atiéndete con un representante de nuestro banco",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "f0e39dba7a91:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f0e39dba7a91-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "f0e39dba7a91",
+      "componentType": "button",
+      "label": "Solicitud Digital",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Solicitud Digital Continúa tu solicitud desde nuestra plataforma digital",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "f0e39dba7a91:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-f0e39dba7a91-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "f0e39dba7a91",
+      "componentType": "button",
+      "label": "Cancelar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Cancelar ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "f0e39dba7a91:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-d36b9b70befb-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "d36b9b70befb",
+      "componentType": "button",
+      "label": "Finalizar sesión",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Finalizar sesión ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "d36b9b70befb:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-d36b9b70befb-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "d36b9b70befb",
+      "componentType": "button",
+      "label": "Volver",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Volver ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "d36b9b70befb:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-d36b9b70befb-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "d36b9b70befb",
+      "componentType": "button",
+      "label": "Solicitar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Solicitar ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "d36b9b70befb:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-d36b9b70befb-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "d36b9b70befb",
+      "componentType": "button",
+      "label": "← Borrar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "← Borrar",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "d36b9b70befb:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-d36b9b70befb-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "d36b9b70befb",
+      "componentType": "button",
+      "label": "Espacio",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Espacio",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "d36b9b70befb:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-d36b9b70befb-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "d36b9b70befb",
+      "componentType": "button",
+      "label": "Limpiar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Limpiar",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "d36b9b70befb:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-d36b9b70befb-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "d36b9b70befb",
+      "componentType": "button",
+      "label": "Atrás",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Atrás ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "d36b9b70befb:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-d36b9b70befb-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "d36b9b70befb",
+      "componentType": "button",
+      "label": "Generar Turno",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Generar Turno",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "d36b9b70befb:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a55a1c9d0381-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "a55a1c9d0381",
+      "componentType": "button",
+      "label": "Finalizar sesión",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Finalizar sesión ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a55a1c9d0381:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a55a1c9d0381-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "a55a1c9d0381",
+      "componentType": "button",
+      "label": "Volver",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Volver ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a55a1c9d0381:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a55a1c9d0381-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "a55a1c9d0381",
+      "componentType": "button",
+      "label": "Solicitar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Solicitar ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a55a1c9d0381:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a55a1c9d0381-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "a55a1c9d0381",
+      "componentType": "button",
+      "label": "← Borrar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "← Borrar",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a55a1c9d0381:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a55a1c9d0381-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "a55a1c9d0381",
+      "componentType": "button",
+      "label": "Espacio",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Espacio",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a55a1c9d0381:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a55a1c9d0381-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "a55a1c9d0381",
+      "componentType": "button",
+      "label": "Limpiar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Limpiar",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a55a1c9d0381:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a55a1c9d0381-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "a55a1c9d0381",
+      "componentType": "button",
+      "label": "Atrás",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Atrás ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a55a1c9d0381:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-a55a1c9d0381-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "a55a1c9d0381",
+      "componentType": "button",
+      "label": "Generar Turno",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Generar Turno ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "a55a1c9d0381:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-b48ffbb94eee-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "b48ffbb94eee",
+      "componentType": "button",
+      "label": "Finalizar sesión",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Finalizar sesión ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "b48ffbb94eee:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-b48ffbb94eee-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "b48ffbb94eee",
+      "componentType": "button",
+      "label": "Volver",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Volver ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "b48ffbb94eee:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-b48ffbb94eee-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "b48ffbb94eee",
+      "componentType": "button",
+      "label": "Solicitar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Solicitar ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "b48ffbb94eee:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-b48ffbb94eee-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "b48ffbb94eee",
+      "componentType": "button",
+      "label": "← Borrar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "← Borrar",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "b48ffbb94eee:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-b48ffbb94eee-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "b48ffbb94eee",
+      "componentType": "button",
+      "label": "Espacio",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Espacio",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "b48ffbb94eee:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-b48ffbb94eee-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "b48ffbb94eee",
+      "componentType": "button",
+      "label": "Limpiar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Limpiar",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "b48ffbb94eee:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-b48ffbb94eee-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "b48ffbb94eee",
+      "componentType": "button",
+      "label": "Atrás",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Atrás",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "b48ffbb94eee:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-b48ffbb94eee-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "b48ffbb94eee",
+      "componentType": "button",
+      "label": "Generando turno...",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Generando turno...",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "b48ffbb94eee:control:8",
+      "selectable": false,
+      "editable": false
+    }
+  ],
+  "editingSessions": [],
+  "scenarioSuggestions": [],
+  "canonicalInteractions": [
+    {
+      "id": "interaction-1",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-1"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "https://172.27.4.50/",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-2",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-2"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "https://172.27.4.50/",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-6",
+      "controlIdentity": "9f12e61beacd|Explora nuestros productos|role|button|Explora nuestros productos",
+      "semanticField": "Explora nuestros productos",
+      "action": "click",
+      "valueKey": "explora_nuestros_productos",
+      "sourceEventRefs": [
+        "event-6"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Explora nuestros productos"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Explora nuestros productos",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Explora nuestros productos"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "div"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"circle\",1],[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Explora nuestros productos\"",
+      "screenBeforeRef": "9f12e61beacd",
+      "screenAfterRef": "9f12e61beacd",
+      "routeBefore": "https://172.27.4.50/",
+      "routeAfter": "https://172.27.4.50/product-catalog",
+      "stateScope": "9f12e61beacd",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-9",
+      "controlIdentity": "9f12e61beacd|Tarjetas|role|button|Tarjetas",
+      "semanticField": "Tarjetas",
+      "action": "click",
+      "valueKey": "tarjetas",
+      "sourceEventRefs": [
+        "event-9"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Tarjetas"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Tarjetas",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "div"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "topologyTieBreakUnique": true,
+            "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"line\",1],[\"path\",1],[\"rect\",1],[\"svg\",2]]}",
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Tarjetas\"",
+      "screenBeforeRef": "9f12e61beacd",
+      "screenAfterRef": "9f12e61beacd",
+      "routeBefore": "https://172.27.4.50/product-catalog",
+      "routeAfter": "https://172.27.4.50/product-subcategory?category=cards",
+      "stateScope": "9f12e61beacd",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-12",
+      "controlIdentity": "9f12e61beacd|Tarjeta de Crédito|role|button|Tarjeta de Crédito",
+      "semanticField": "Tarjeta de Crédito",
+      "action": "click",
+      "valueKey": "tarjeta_de_credito",
+      "sourceEventRefs": [
+        "event-12"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Tarjeta de Crédito"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Tarjeta de Crédito",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "div"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"line\",1],[\"path\",1],[\"rect\",1],[\"svg\",2]]}",
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Tarjeta de Crédito\"",
+      "screenBeforeRef": "9f12e61beacd",
+      "screenAfterRef": "9f12e61beacd",
+      "routeBefore": "https://172.27.4.50/product-subcategory?category=cards",
+      "routeAfter": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+      "stateScope": "9f12e61beacd",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-14",
+      "controlIdentity": "9f12e61beacd|Tarjeta Crédito Visa Clásica",
+      "semanticField": "Tarjeta Crédito Visa Clásica",
+      "action": "click",
+      "valueKey": "tarjeta_credito_visa_clasica",
+      "sourceEventRefs": [
+        "event-14"
+      ],
+      "technicalTargetRefs": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "div"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "img",
+                "stableAttributes": {
+                  "alt": "Tarjeta Crédito Visa Clásica",
+                  "src": "/assets/images/tarjetas-de-credito-visa-clasica.png"
+                }
+              }
+            ],
+            "semanticShape": [
+              "div",
+              "h3"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"div\",3],[\"h3\",1]],\"descendantEntries\":[[\"div\",11],[\"h3\",1],[\"img\",1],[\"path\",4],[\"span\",4],[\"svg\",4]]}",
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner",
+            "v2_framework_actionable_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Tarjeta Crédito Visa Clásica\"",
+      "screenBeforeRef": "9f12e61beacd",
+      "screenAfterRef": "9f12e61beacd",
+      "routeBefore": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+      "routeAfter": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "stateScope": "9f12e61beacd",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "admissionStatus": "accepted",
+      "resolutionState": "runtime_resolution_required",
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-17",
+      "controlIdentity": "9f12e61beacd|Solicitar|role|button|Solicitar",
+      "semanticField": "Solicitar",
+      "action": "click",
+      "valueKey": "solicitar",
+      "sourceEventRefs": [
+        "event-17"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Solicitar"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Solicitar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 3
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Solicitar\"",
+      "screenBeforeRef": "9f12e61beacd",
+      "screenAfterRef": "9f12e61beacd",
+      "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "stateScope": "9f12e61beacd",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-19",
+      "controlIdentity": "9f12e61beacd|Generar Turno",
+      "semanticField": "Generar Turno",
+      "action": "click",
+      "valueKey": "generar_turno",
+      "sourceEventRefs": [
+        "event-19"
+      ],
+      "technicalTargetRefs": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "div",
+              "h3",
+              "p"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "topologyTieBreakUnique": true,
+            "topologySignature": "{\"childEntries\":[[\"div\",1],[\"h3\",1],[\"p\",1]],\"descendantEntries\":[[\"div\",2],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+            "structuralIdentityMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Generar Turno\"",
+      "screenBeforeRef": "9f12e61beacd",
+      "screenAfterRef": "9f12e61beacd",
+      "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "stateScope": "9f12e61beacd",
+      "admissionStatus": "accepted",
+      "resolutionState": "runtime_resolution_required",
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-21",
+      "controlIdentity": "9f12e61beacd|4|role|button|4",
+      "semanticField": "4",
+      "action": "click",
+      "valueKey": "4",
+      "sourceEventRefs": [
+        "event-21"
+      ],
+      "technicalTargetRefs": [
+        "role:button|4"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|4",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"4\"",
+      "screenBeforeRef": "9f12e61beacd",
+      "screenAfterRef": "9f12e61beacd",
+      "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "stateScope": "9f12e61beacd",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-23",
+      "controlIdentity": "9f12e61beacd|0|role|button|0",
+      "semanticField": "0",
+      "action": "click",
+      "valueKey": "0",
+      "sourceEventRefs": [
+        "event-23"
+      ],
+      "technicalTargetRefs": [
+        "role:button|0"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|0",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"0\"",
+      "screenBeforeRef": "9f12e61beacd",
+      "screenAfterRef": "9f12e61beacd",
+      "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "stateScope": "9f12e61beacd",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-25",
+      "controlIdentity": "9f12e61beacd|2|role|button|2",
+      "semanticField": "2",
+      "action": "click",
+      "valueKey": "2",
+      "sourceEventRefs": [
+        "event-25"
+      ],
+      "technicalTargetRefs": [
+        "role:button|2"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|2",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"2\"",
+      "screenBeforeRef": "9f12e61beacd",
+      "screenAfterRef": "9f12e61beacd",
+      "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "stateScope": "9f12e61beacd",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-27",
+      "controlIdentity": "9f12e61beacd|2|role|button|2",
+      "semanticField": "2",
+      "action": "click",
+      "valueKey": "2",
+      "sourceEventRefs": [
+        "event-27"
+      ],
+      "technicalTargetRefs": [
+        "role:button|2"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|2",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"2\"",
+      "screenBeforeRef": "9f12e61beacd",
+      "screenAfterRef": "9f12e61beacd",
+      "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "stateScope": "9f12e61beacd",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-29",
+      "controlIdentity": "9f12e61beacd|4|role|button|4",
+      "semanticField": "4",
+      "action": "click",
+      "valueKey": "4",
+      "sourceEventRefs": [
+        "event-29"
+      ],
+      "technicalTargetRefs": [
+        "role:button|4"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|4",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"4\"",
+      "screenBeforeRef": "9f12e61beacd",
+      "screenAfterRef": "9f12e61beacd",
+      "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "stateScope": "9f12e61beacd",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-31",
+      "controlIdentity": "9f12e61beacd|6|role|button|6",
+      "semanticField": "6",
+      "action": "click",
+      "valueKey": "6",
+      "sourceEventRefs": [
+        "event-31"
+      ],
+      "technicalTargetRefs": [
+        "role:button|6"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|6",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"6\"",
+      "screenBeforeRef": "9f12e61beacd",
+      "screenAfterRef": "9f12e61beacd",
+      "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "stateScope": "9f12e61beacd",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-33",
+      "controlIdentity": "9f12e61beacd|7|role|button|7",
+      "semanticField": "7",
+      "action": "click",
+      "valueKey": "7",
+      "sourceEventRefs": [
+        "event-33"
+      ],
+      "technicalTargetRefs": [
+        "role:button|7"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|7",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"7\"",
+      "screenBeforeRef": "9f12e61beacd",
+      "screenAfterRef": "9f12e61beacd",
+      "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "stateScope": "9f12e61beacd",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-35",
+      "controlIdentity": "9f12e61beacd|9|role|button|9",
+      "semanticField": "9",
+      "action": "click",
+      "valueKey": "9",
+      "sourceEventRefs": [
+        "event-35"
+      ],
+      "technicalTargetRefs": [
+        "role:button|9"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|9",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"9\"",
+      "screenBeforeRef": "9f12e61beacd",
+      "screenAfterRef": "9f12e61beacd",
+      "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "stateScope": "9f12e61beacd",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-37",
+      "controlIdentity": "9f12e61beacd|5|role|button|5",
+      "semanticField": "5",
+      "action": "click",
+      "valueKey": "5",
+      "sourceEventRefs": [
+        "event-37"
+      ],
+      "technicalTargetRefs": [
+        "role:button|5"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|5",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"5\"",
+      "screenBeforeRef": "9f12e61beacd",
+      "screenAfterRef": "9f12e61beacd",
+      "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "stateScope": "9f12e61beacd",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-39",
+      "controlIdentity": "9f12e61beacd|5|role|button|5",
+      "semanticField": "5",
+      "action": "click",
+      "valueKey": "5",
+      "sourceEventRefs": [
+        "event-39"
+      ],
+      "technicalTargetRefs": [
+        "role:button|5"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|5",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"5\"",
+      "screenBeforeRef": "9f12e61beacd",
+      "screenAfterRef": "9f12e61beacd",
+      "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "stateScope": "9f12e61beacd",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-41",
+      "controlIdentity": "9f12e61beacd|1|role|button|1",
+      "semanticField": "1",
+      "action": "click",
+      "valueKey": "1",
+      "sourceEventRefs": [
+        "event-41"
+      ],
+      "technicalTargetRefs": [
+        "role:button|1"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|1",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 43
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"1\"",
+      "screenBeforeRef": "9f12e61beacd",
+      "screenAfterRef": "9f12e61beacd",
+      "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "stateScope": "9f12e61beacd",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-43",
+      "controlIdentity": "9f12e61beacd|Generar Turno|role|button|Generar Turno",
+      "semanticField": "Generar Turno",
+      "action": "click",
+      "valueKey": "generar_turno",
+      "sourceEventRefs": [
+        "event-43"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Generar Turno"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Generar Turno",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 5
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Generar Turno\"",
+      "screenBeforeRef": "9f12e61beacd",
+      "screenAfterRef": "9f12e61beacd",
+      "routeBefore": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+      "stateScope": "9f12e61beacd",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    }
+  ],
+  "gridMetadata": {
+    "detected": false,
+    "grids": 0,
+    "rows": 0,
+    "cells": 0,
+    "headers": [],
+    "headerRelationships": []
+  },
+  "source": "SessionTrace"
+}

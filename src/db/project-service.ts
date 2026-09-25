@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 import type { DbConnection as Connection } from "./db-connection";
-import { withTransaction } from "./sql-connection";
+import { resolveDriverName, withTransaction } from "./sql-connection";
 import { createProject, type Project } from "./project-repository";
 import {
   readProjectConfigurationOnConnection,
@@ -447,58 +447,110 @@ export type DeleteProjectResult = {
   warning?: string;
 };
 
-export function buildProjectDeleteStatements(projectId: string): string[] {
-  return [
-    "DELETE FROM dbo.ProjectConfigurationHistory WHERE projectId = ?",
-    "DELETE FROM dbo.ProjectJiraConfiguration WHERE projectId = ?",
-    "DELETE FROM dbo.ProjectTestRailConfiguration WHERE projectId = ?",
-    "DELETE FROM dbo.ProjectOtpConfiguration WHERE projectId = ?",
-    "DELETE FROM dbo.ProjectKnowledge WHERE projectId = ?",
-    "DELETE FROM dbo.WebProjectConfiguration WHERE projectId = ?",
-    "DELETE FROM dbo.MobileProjectConfiguration WHERE projectId = ?",
-    "DELETE FROM dbo.ProjectCaseInputRequirement WHERE projectId = ?",
-    "DELETE FROM dbo.ProjectCaseRuntimeValue WHERE projectId = ?",
-    "DELETE FROM dbo.ProjectGenerationConfig WHERE projectId = ?",
-    "DELETE FROM dbo.Projects WHERE id = ?",
-  ];
+const PROJECT_DELETE_TABLE_ORDER = [
+  "ProjectConfigurationHistory",
+  "ProjectJiraConfiguration",
+  "ProjectTestRailConfiguration",
+  "ProjectOtpConfiguration",
+  "ProjectKnowledge",
+  "WebProjectConfiguration",
+  "MobileProjectConfiguration",
+  "ProjectCaseInputRequirement",
+  "ProjectCaseRuntimeValue",
+  "ProjectGenerationConfig",
+  "Projects",
+] as const;
+
+const OPTIONAL_PROJECT_DELETE_TABLES = new Set<string>([
+  "ProjectCaseInputRequirement",
+  "ProjectCaseRuntimeValue",
+  "ProjectGenerationConfig",
+]);
+
+const REQUIRED_PROJECT_DELETE_TABLES = PROJECT_DELETE_TABLE_ORDER.filter(
+  (table) => !OPTIONAL_PROJECT_DELETE_TABLES.has(table),
+);
+
+export function buildProjectDeleteStatements(projectId: string, availableTables?: Iterable<string>): string[] {
+  const available = availableTables ? new Set(availableTables) : undefined;
+  return PROJECT_DELETE_TABLE_ORDER
+    .filter((table) => !available || !OPTIONAL_PROJECT_DELETE_TABLES.has(table) || available.has(table))
+    .map((table) => `DELETE FROM dbo.${table} WHERE ${table === "Projects" ? "id" : "projectId"} = ?`);
 }
 
-export async function deleteProject(slug: string): Promise<DeleteProjectResult> {
+/**
+ * Returns the project-delete tables visible to the active driver. The three
+ * additive tables are deliberately optional: they exist in some SQL Server
+ * installations but are not part of the authoritative SQLite schema.
+ */
+export async function listExistingProjectDeleteTables(conn: Connection): Promise<Set<string>> {
+  const tableNames = PROJECT_DELETE_TABLE_ORDER.map((table) => `'${table}'`).join(", ");
+  const rows = resolveDriverName() === "sqlite"
+    ? await conn.query<Record<string, unknown>>(
+        `SELECT name FROM sqlite_master WHERE type = 'table' AND name IN (${tableNames})`,
+      )
+    : await conn.query<Record<string, unknown>>(
+        `SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME IN (${tableNames})`,
+      );
+  return new Set(rows.map((row) => String(row.name ?? row.TABLE_NAME ?? row.tableName ?? "")).filter(Boolean));
+}
+
+export type ProjectDeleteDependencies = {
+  withTransaction?: typeof withTransaction;
+  listExistingTables?: typeof listExistingProjectDeleteTables;
+  removeArtifacts?: (slug: string) => string[];
+};
+
+export async function deleteProject(slug: string, dependencies: ProjectDeleteDependencies = {}): Promise<DeleteProjectResult> {
   if (!slug?.trim()) throw new Error("slug is required");
 
-  await withTransaction(async (conn) => {
+  const runTransaction = dependencies.withTransaction ?? withTransaction;
+  const listTables = dependencies.listExistingTables ?? listExistingProjectDeleteTables;
+  const removeArtifacts = dependencies.removeArtifacts ?? removeProjectArtifacts;
+
+  await runTransaction(async (conn) => {
     const rows = await conn.query<ProjectRow>(
       "SELECT id, slug FROM dbo.Projects WHERE slug = ?", [slug]
     );
     if (rows.length === 0) throw new Error(`project not found: ${slug}`);
     const projectId = rows[0].id;
 
-    for (const statement of buildProjectDeleteStatements(projectId)) {
+    const availableTables = await listTables(conn);
+    const missingRequiredTables = REQUIRED_PROJECT_DELETE_TABLES.filter((table) => !availableTables.has(table));
+    if (missingRequiredTables.length > 0) {
+      throw new Error(`project delete schema incomplete; missing required table(s): ${missingRequiredTables.join(", ")}`);
+    }
+
+    for (const statement of buildProjectDeleteStatements(projectId, availableTables)) {
       await conn.query(statement, [projectId]);
     }
   });
 
-  const warning = removeRuntimeDirectory(slug);
-  // legacy cleanup for previous data/projects convention (if any orphan remains)
-  try {
-    const legacyRoot = path.resolve(process.cwd(), "data", "projects", slug);
-    if (fs.existsSync(legacyRoot)) fs.rmSync(legacyRoot, { recursive: true, force: true });
-  } catch {}
-  return { projectDeleted: true, ...(warning ? { warning } : {}) };
+  const warnings = removeArtifacts(slug);
+  return { projectDeleted: true, ...(warnings.length > 0 ? { warning: warnings.join(",") } : {}) };
 }
 
-function removeRuntimeDirectory(slug: string): string | undefined {
-  const appsRoot = path.resolve(process.cwd(), "automations", "apps");
-  const target = path.resolve(appsRoot, slug);
-  if (!target.startsWith(appsRoot + path.sep)) {
-    return "runtime_directory_cleanup_failed";
-  }
-  try {
-    if (fs.existsSync(target)) {
-      fs.rmSync(target, { recursive: true, force: true });
+export type ProjectArtifactRoot = { root: string; warning: string };
+
+export function removeProjectArtifacts(
+  slug: string,
+  roots: ProjectArtifactRoot[] = [
+    { root: path.resolve(process.cwd(), "automations", "apps"), warning: "runtime_directory_cleanup_failed" },
+    { root: path.resolve(process.cwd(), "data", "projects"), warning: "legacy_project_directory_cleanup_failed" },
+  ],
+): string[] {
+  const warnings: string[] = [];
+  for (const { root, warning } of roots) {
+    const target = path.resolve(root, slug);
+    if (target === root || !target.startsWith(root + path.sep)) {
+      warnings.push(warning);
+      continue;
     }
-    return undefined;
-  } catch {
-    return "runtime_directory_cleanup_failed";
+    try {
+      if (fs.existsSync(target)) fs.rmSync(target, { recursive: true, force: true });
+    } catch {
+      warnings.push(warning);
+    }
   }
+  return warnings;
 }

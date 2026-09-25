@@ -1,7 +1,9 @@
 import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
-import { randomUUID } from "crypto";
+import { randomUUID, createHash } from "crypto";
+import { loadScenarios, saveScenarios } from "../../recording/recording-store";
+import { verifyPromotedSpec } from "../../automations/promote-plan";
 import { jobStore, type JobSummary, type JobStatus } from "./job-store";
 import type { PublishedCaseEntry } from "./launch-orchestrator";
 import { type ScenarioPreviewRequest, type VirtualCase } from "../../types/scenario-preview.types";
@@ -40,7 +42,7 @@ import {
   applyFinalCanonicalization,
 } from "../../automations/scenario-normalizer";
 import { normalizeSectionSlug, resolveSectionProfileSync } from "../../automations/app-profile";
-import type { McpRouteProfile } from "../../scenarios/scenario-types";
+import type { McpRouteProfile, McpScenario } from "../../scenarios/scenario-types";
 import {
   buildTestRailRunName,
   reportScenarioPreviewResultsToTestRail,
@@ -79,18 +81,19 @@ type CaseOutcomeEntry = {
   rawError?: string;
 };
 
-async function consolidateRunEvidence(
+/** Non-undefined only when evidence was actually consolidated onto disk for this run. */
+export async function consolidateRunEvidence(
   jobId: string,
   appSlug: string,
   sectionSlug: string | undefined,
   sectionName: string | undefined,
   caseOutcomeMap?: Map<string, CaseOutcomeEntry>,
-): Promise<void> {
+): Promise<{ docxPath?: string; evidenceJsonPath?: string } | undefined> {
   try {
     const evidenceConfig = loadEvidenceConfig();
     if (!evidenceConfig.enabled || !evidenceConfig.docxEnabled) {
       console.log(`[evidence:run] skipped jobId=${jobId} reason=evidence_disabled`);
-      return;
+      return undefined;
     }
 
     console.log(`[evidence:run] starting consolidation jobId=${jobId} appSlug=${appSlug} sectionSlug=${sectionSlug || "default-section"}`);
@@ -176,10 +179,12 @@ async function consolidateRunEvidence(
       console.log(`[evidence:run] runDir does not exist: ${runDir}`);
     }
 
-    await runRecorder.finish();
+    const record = await runRecorder.finish();
     console.log(`[evidence:run] consolidated jobId=${jobId} appSlug=${appSlug} sectionSlug=${sectionSlugNormalized}`);
+    return { docxPath: record.docxPath, evidenceJsonPath: record.evidenceJsonPath };
   } catch (err: any) {
     console.log(`[evidence:run] consolidation failed jobId=${jobId}: ${err.message}`);
+    return undefined;
   }
 }
 
@@ -194,6 +199,26 @@ function hasNonDefaultRouteProfile(routeProfile: McpRouteProfile | null): boolea
   const hasEntry = (routeProfile.entry ?? []).length > 0;
   const hasVisibleControls = (routeProfile.visibleControls ?? []).length > 0;
   return hasDomainTerms || hasEntry || hasVisibleControls;
+}
+
+function hasRuntimeAppConfiguration(appConfig: Record<string, unknown> | null): boolean {
+  return typeof appConfig?.baseUrl === "string" && appConfig.baseUrl.trim().length > 0;
+}
+
+function isRecordingReplayRequest(params: ScenarioPreviewParams, scenarios: readonly McpScenario[]): boolean {
+  return Boolean(params.recordingId?.trim()) || scenarios.some((scenario) =>
+    scenario.automationType === "recorded_session" || Boolean(scenario.recordingId),
+  );
+}
+
+function hasRecordingExecutionContract(scenario: McpScenario): boolean {
+  return Boolean(
+    scenario.recordingId &&
+    scenario.recordedScenarioId &&
+    Array.isArray(scenario.canonicalInteractions) &&
+    Array.isArray(scenario.runtimeInputRequirements) &&
+    Array.isArray(scenario.technicalKnowledgeRefs),
+  );
 }
 
 const ROOT = path.resolve(__dirname, "..", "..", "..");
@@ -216,7 +241,7 @@ type ScenarioPreviewSummaryPatch = Partial<JobSummary> & {
   promotionStatus?: string;
   promotionReason?: string;
 };
-type ScenarioPreviewResultsFile = {
+export type ScenarioPreviewResultsFile = {
   ok?: boolean;
   total?: number;
   passed?: number;
@@ -255,6 +280,259 @@ function getCaseCountFromResults(results: ScenarioPreviewResultsFile): number {
   if (Array.isArray(results.results)) return results.results.length;
   if (Array.isArray(results.cases)) return results.cases.length;
   return 0;
+}
+
+type PromotedCaseResultEntry = {
+  recordingId?: string;
+  recordedScenarioId?: string;
+  specWritten?: boolean;
+  promotionAllowed?: boolean;
+  specPath?: string;
+};
+
+/**
+ * Closes the reuse-before-regenerate loop for Recording scenarios.
+ *
+ * `discovery:preview` promotes specs the same way regardless of where the scenario came
+ * from — this is the one place that then looks back at a just-finished batch and, for any
+ * case that both came from a Recording (`recordingId` + `recordedScenarioId` on the result,
+ * carried through from the original `VirtualCase`) and was actually promoted
+ * (`specWritten` + `promotionAllowed`), writes the physical spec's identity onto that exact
+ * `RecordedScenario.promotedSpec`. Without this, a second "Ejecutar Automatización" for the
+ * same scenario would resolve `promotedSpec` as still missing and regenerate for no reason,
+ * even though the spec that was just promoted is sitting right there on disk.
+ *
+ * Never touches the promotion/generation pipeline itself — it only reads the results the
+ * pipeline already wrote and updates the Recording-side mapping.
+ */
+export function writeBackPromotedSpecsToRecordingScenarios(jobId: string, appSlug: string, results: ScenarioPreviewResultsFile): void {
+  const entries = (results.cases ?? results.results ?? []) as PromotedCaseResultEntry[];
+  const promoted = entries.filter((entry): entry is Required<Pick<PromotedCaseResultEntry, "recordingId" | "recordedScenarioId" | "specPath">> & PromotedCaseResultEntry =>
+    Boolean(entry.recordingId?.trim())
+    && Boolean(entry.recordedScenarioId?.trim())
+    && entry.specWritten === true
+    && entry.promotionAllowed === true
+    && Boolean(entry.specPath?.trim()));
+  if (promoted.length === 0) return;
+
+  const byRecordingId = new Map<string, PromotedCaseResultEntry[]>();
+  for (const entry of promoted) {
+    const list = byRecordingId.get(entry.recordingId!) ?? [];
+    list.push(entry);
+    byRecordingId.set(entry.recordingId!, list);
+  }
+
+  for (const [recordingId, recordingEntries] of byRecordingId) {
+    try {
+      const scenarios = loadScenarios(appSlug, recordingId);
+      if (scenarios.length === 0) continue;
+      let changed = false;
+      const updated = scenarios.map((scenario) => {
+        const entry = recordingEntries.find((e) => e.recordedScenarioId === scenario.scenarioId);
+        if (!entry) return scenario;
+        const specPath = path.resolve(entry.specPath!);
+        let specText: string;
+        try {
+          specText = fs.readFileSync(specPath, "utf-8");
+        } catch {
+          jobStore.appendLog(jobId, `[promoted-spec-writeback] scenario=${scenario.scenarioId} skipped reason=spec_file_unreadable path=${specPath}`);
+          return scenario;
+        }
+        const specHash = createHash("sha256").update(specText, "utf8").digest("hex");
+        const caseDir = path.dirname(specPath);
+        const automationId = path.basename(caseDir);
+        const sectionSlug = path.basename(path.dirname(path.dirname(caseDir)));
+        changed = true;
+        jobStore.appendLog(jobId, `[promoted-spec-writeback] scenario=${scenario.scenarioId} automationId=${automationId} specPath=${specPath}`);
+        return {
+          ...scenario,
+          promotedSpec: { appSlug, specPath, specHash, automationId, sectionSlug, generatedAt: new Date().toISOString() },
+        };
+      });
+      if (changed) saveScenarios(appSlug, recordingId, updated);
+    } catch (err) {
+      jobStore.appendLog(jobId, `[promoted-spec-writeback] recording=${recordingId} failed: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+}
+
+export type ReuseExistingPromotedSpecScenario = {
+  scenarioId: string;
+  caseId: number;
+  specPath: string;
+  title: string;
+  /** This scenario's own current "Datos de este escenario" values -- see rerun-runner.ts's
+   * PromotedSpecReuseEntry.runtimeValues doc comment for provenance. */
+  runtimeValues?: Record<string, string>;
+};
+
+/**
+ * Executes the `reuse_existing` decision as a real background job instead of blocking the
+ * `/execute` request.
+ *
+ * This intentionally does not touch `startScenarioPreviewRun` or spawn `discovery:preview` —
+ * a scenario that already resolved to `reuse_existing` has nothing to discover, generate, or
+ * re-derive. It runs the one promoted spec file that already exists on disk, headless
+ * (structured, not inherited from ambient config — see `verifyPromotedSpec`'s `headless`
+ * option), and reports progress through the same `jobStore` + `case_started`/`case_finished`
+ * log contract the SSE stream and `LiveExecution` screen already understand for every other
+ * job type.
+ */
+export async function startReuseExistingPromotedSpecRun(
+  jobId: string,
+  // Injectable so tests can prove pass/fail/headless behavior without spawning real
+  // Playwright — production callers always get the real verifyPromotedSpec.
+  verify: typeof verifyPromotedSpec = verifyPromotedSpec,
+): Promise<void> {
+  const job = jobStore.get(jobId);
+  if (!job) return;
+  const scenarios = (job.params.scenarios as ReuseExistingPromotedSpecScenario[] | undefined) ?? [];
+  const total = scenarios.length;
+  const appSlug = (job.params.appSlug as string | undefined) ?? "default";
+  const sectionSlug = job.params.sectionSlug as string | undefined;
+  const sectionName = job.params.sectionName as string | undefined;
+  // Mixed-rerun orchestration only: same contract as startScenarioPreviewRun's executionContext
+  // above. Absent (the default, every existing caller), behavior is unchanged.
+  const executionContext = job.params.executionContext as { evidenceRunId?: string; suppressEvidenceConsolidation?: boolean } | undefined;
+  const evidenceRunId = executionContext?.evidenceRunId ?? jobId;
+  const caseOutcomeMap = new Map<string, CaseOutcomeEntry>();
+
+  jobStore.update(jobId, {
+    status: "running",
+    startedAt: new Date().toISOString(),
+    summary: {
+      totalStories: total,
+      synced: 0,
+      passed: 0,
+      failed: 0,
+      completed: 0,
+      requested: total,
+      executed: 0,
+      scenarioCount: total,
+    },
+  });
+  jobStore.appendLog(
+    jobId,
+    `[reuse-existing] starting jobId=${jobId} scenarios=${total} headless=true routeDiscoveryInvoked=false mcpDiscoveryInvoked=false aiInvoked=false specGenerationInvoked=false recordingReplayInvoked=false autoPomInvoked=false autoPromoteInvoked=false publishToTestRailInvoked=false`,
+  );
+
+  let passed = 0;
+  let failed = 0;
+  for (let index = 0; index < scenarios.length; index++) {
+    const scenario = scenarios[index];
+    jobStore.update(jobId, {
+      currentCase: scenario.title,
+      currentCaseId: scenario.scenarioId,
+      currentCaseTitle: scenario.title,
+    });
+    jobStore.appendLog(jobId, JSON.stringify({ type: "case_started", caseId: scenario.scenarioId, title: scenario.title, index: index + 1, total }));
+    jobStore.appendLog(jobId, `[reuse-existing] scenario=${scenario.scenarioId} caseId=${scenario.caseId} specPath=${scenario.specPath} publishInvoked=false generationInvoked=false`);
+
+    const verification = await verify(scenario.specPath, undefined, {
+      headless: true,
+      executionSource: "qalab",
+      scenarioId: scenario.scenarioId,
+      // Canonical lineage only (jobId + the scenario's own scenarioId/title) — never derived
+      // from title text or array position — so this run's evidence lands under a path THIS
+      // consolidation pass can actually find, instead of an unaddressable runId=undefined.
+      evidenceContext: {
+        runId: evidenceRunId,
+        scenarioId: scenario.scenarioId,
+        scenarioTitle: scenario.title,
+        appSlug,
+        sectionSlug: sectionSlug ?? "default-section",
+      },
+      // FIRST_LOSS fix: EVIDENCE_APP_SLUG above is pathing metadata only -- it never reached
+      // APP_SLUG/APP_PROFILE/APP_BASE_URL, so the spawned Playwright process inherited whatever
+      // app the parent server process happened to be configured for (e.g. Kiosko) instead of
+      // THIS scenario's own app. appContext is the real execution scoping, resolved through the
+      // same authority functional execution already uses (resolveVerifyPromotedSpecAppExecEnv).
+      appContext: {
+        appSlug,
+        caseId: scenario.caseId,
+        // FIRST_LOSS fix: reconstructing runtime values from the app's own global/default
+        // testData ignored this scenario's own "Datos de este escenario" edits (persisted via
+        // PUT /recordings/:recordingId/scenario-value -> runtimeDataset.resolvedValues). Passed
+        // through verbatim so it takes precedence over the app-global fallback, never the other
+        // way around.
+        scenarioRuntimeValues: scenario.runtimeValues,
+      },
+      // FIRST_LOSS fix: verifyPromotedSpec's child stdout/stderr was fully buffered -- the
+      // existing Live Log/SSE channel (jobStore.appendLog, already streamed by runs.ts's
+      // subscribe/onLog) never saw a single line until the whole process exited. Reusing that
+      // SAME sink live, per line, as the child emits it -- never a second bus/pipeline. stderr
+      // lines are tagged distinctly since this channel is flat text with no separate field.
+      onOutput: (event) => {
+        jobStore.appendLog(
+          jobId,
+          event.stream === "stderr" ? `[promoted-child:stderr] ${event.line}` : `[promoted-child] ${event.line}`,
+        );
+      },
+    });
+    const status: "passed" | "failed" = verification.status === "passed" ? "passed" : "failed";
+    if (status === "passed") passed += 1;
+    else failed += 1;
+    // Functional result is fixed above, before evidence is ever touched — consolidation below
+    // can only annotate/report this outcome, never alter it.
+    caseOutcomeMap.set(scenario.scenarioId, { status });
+    jobStore.appendLog(jobId, `[promoted-spec-reuse] phase=execution_complete scenarioId=${scenario.scenarioId} status=${status}`);
+
+    jobStore.appendLog(jobId, JSON.stringify({
+      type: "case_finished",
+      caseId: scenario.scenarioId,
+      title: scenario.title,
+      status,
+      discoveryStatus: status,
+      error: verification.error,
+    }));
+    jobStore.update(jobId, {
+      summary: mergeScenarioPreviewSummary(jobStore.get(jobId)?.summary, {
+        completed: index + 1,
+        executed: index + 1,
+        passed,
+        failed,
+        scenarioCount: total,
+        totalStories: total,
+      }),
+    });
+  }
+
+  const finalStatus: JobStatus = failed === 0 ? "done" : passed > 0 ? "completed_with_failures" : "failed";
+
+  // Reuses the existing consolidation pipeline (no new generator): scans ONLY this run's own
+  // runs/<evidenceRunId>/scenarios evidence, never the original promotion run's historical
+  // evidence. A functional failure above is never overwritten by this — status/pass/fail counts
+  // are already fixed; consolidation can only report on them, and its own failure never
+  // fabricates a document that doesn't exist on disk. Skipped entirely when a mixed-rerun
+  // orchestrator owns consolidation for the parent run this subset belongs to.
+  const consolidation = executionContext?.suppressEvidenceConsolidation
+    ? undefined
+    : await consolidateRunEvidence(evidenceRunId, appSlug, sectionSlug, sectionName, caseOutcomeMap);
+  // Only claim a document exists if the DOCX was actually written to disk — a consolidation
+  // pass with zero scenario evidence.json files (or one that threw) never fabricates one.
+  const evidenceDir = consolidation?.docxPath && fs.existsSync(consolidation.docxPath)
+    ? path.dirname(consolidation.docxPath)
+    : undefined;
+
+  const priorSummary = jobStore.get(jobId)?.summary;
+  jobStore.update(jobId, {
+    status: finalStatus,
+    completedAt: new Date().toISOString(),
+    summary: {
+      totalStories: priorSummary?.totalStories ?? total,
+      synced: priorSummary?.synced ?? 0,
+      passed: priorSummary?.passed ?? passed,
+      failed: priorSummary?.failed ?? failed,
+      completed: priorSummary?.completed ?? total,
+      ...priorSummary,
+      evidenceDir,
+    },
+  });
+  jobStore.appendLog(
+    jobId,
+    `[reuse-existing] finished jobId=${jobId} passed=${passed} failed=${failed} status=${finalStatus} `
+    + `evidenceRunConsolidated=${Boolean(consolidation)} evidenceDir=${evidenceDir ?? "none"}`,
+  );
 }
 
 function ensureArtifactDir(jobId: string): string {
@@ -454,10 +732,12 @@ function isTestRailSectionDerivedSlug(candidate: string, sectionName?: string | 
   return false;
 }
 
-function isExecutableAppSlug(candidate: string, routeProfile: McpRouteProfile | null): boolean {
+function isExecutableAppSlug(candidate: string, routeProfile: McpRouteProfile | null, recordingReplay = false): boolean {
   if (!candidate) return false;
   if (isTechnicalSlug(candidate) || isTechnicalAppName(candidate)) return false;
-  if (!loadAppConfigSync(candidate)) return false;
+  const appConfig = loadAppConfigSync(candidate);
+  if (!appConfig) return false;
+  if (recordingReplay) return hasRuntimeAppConfiguration(appConfig);
   if (!hasNonDefaultRouteProfile(routeProfile)) return false;
   return true;
 }
@@ -598,6 +878,10 @@ export function shouldReportFailedBeforeFirstCase(input: {
   if (input.hasResultsSummary) return false;
   if (input.sawResultsLine) return false;
   return true;
+}
+
+function sanitizePreviewStepsForLog(steps: string[]): string[] {
+  return steps.map((step) => step.replace(/^(\s*Ingresar\s+)"[^"]*"(\s+en\s+)/i, '$1"[REDACTED]"$2'));
 }
 
 function validatePreviewArtifacts(
@@ -746,6 +1030,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   const validScenarios = p.scenarios.filter(
     (s) => s.mcpExecutable === true && s.validation?.valid !== false
   );
+  const recordingReplay = isRecordingReplayRequest(p, validScenarios);
 
   if (validScenarios.length === 0) {
     recordQaLabDiagnosticPhase(diagnosticManifestPath, "completed", "failed", { reason: "no_valid_scenarios" });
@@ -775,6 +1060,12 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
 
   // ── Extract launch metadata for TestRail result sync (Fase 2) ──
   const pRecord = p as Record<string, unknown>;
+  // Mixed-rerun orchestration only: when this run is a subordinate subset the orchestrator
+  // drives, its evidence must land under the PARENT's own runId (so the orchestrator's single
+  // consolidation pass finds it) and it must never consolidate/finalize on its own — the
+  // orchestrator owns that. Absent (the default, every existing caller), behavior is unchanged.
+  const executionContext = pRecord.executionContext as { evidenceRunId?: string; suppressEvidenceConsolidation?: boolean } | undefined;
+  const evidenceRunId = executionContext?.evidenceRunId ?? jobId;
   const launchId = (pRecord.launchId as string) || undefined;
   const testRunId = pRecord.testRunId ? Number(pRecord.testRunId) : undefined;
   const jiraKey = (pRecord.jiraKey as string) || undefined;
@@ -794,7 +1085,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   }
 
   // Log what we received from manifest
-  console.log(`[launch-sync] manifest publishedCases count=${publishedCases.length}`);
+  console.log(`[launch-sync] manifest publishedCases count=${publishedCases.length} required=${!recordingReplay}`);
   for (const pc of publishedCases) {
     console.log(`[launch-sync] received publishedCase execution=${pc.executionScenarioId ?? "MISSING"} launch=${pc.launchScenarioId ?? "—"} testrailCustom=${pc.testrailCustomScenarioId ?? "MISSING"} caseId=${pc.caseId}`);
   }
@@ -836,7 +1127,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
       console.log(`[launch-sync] map testrailCustom=${pc.testrailCustomScenarioId ?? "—"} execution=${pc.executionScenarioId ?? "—"} launch=${pc.launchScenarioId ?? "—"} -> caseId=${pc.caseId}`);
     }
   } else {
-    console.log(`[launch-sync] disabled reason="missing_launch_metadata"`);
+    console.log(`[launch-sync] disabled reason="${recordingReplay ? "not_required_for_recording_replay" : "missing_launch_metadata"}"`);
   }
 
   // ── FASE 1: Resolve effective appSlug with inference chain ──
@@ -893,7 +1184,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   jobStore.appendLog(jobId, `[run:scenario-preview] resolved appSlug=${appSlug} routeProfile=${routeProfile?.name ?? "none"} domainTerms=${Object.keys(routeProfile?.domainTerms ?? {}).length} entrySteps=${(routeProfile?.entry ?? []).length}`);
 
   // ── FASE 2: Block technical slugs without valid routeProfile ──
-  if (!hasNonDefaultRouteProfile(routeProfile)) {
+  if (!hasNonDefaultRouteProfile(routeProfile) && !recordingReplay) {
     const appConfigPath = `automations/apps/${appSlug}/app.config.json`;
     const errorMessage = `Resolved targetAppSlug="${appSlug}" has no valid routeProfile. ` +
       `Cannot execute scenario-preview without routeProfile with domainTerms and entry steps. ` +
@@ -935,6 +1226,44 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
     return;
   }
 
+  if (recordingReplay && !hasRuntimeAppConfiguration(appConfig)) {
+    const errorMessage = `Recording replay requires a configured runtime app with baseUrl; appSlug="${appSlug}" has no usable runtime configuration.`;
+    jobStore.appendLog(jobId, `[run:scenario-preview] ${errorMessage}`);
+    jobStore.update(jobId, {
+      status: "failed",
+      completedAt: new Date().toISOString(),
+      errorMessage,
+      summary: { totalStories: validScenarios.length, synced: 0, passed: 0, failed: 0, errorMessage },
+    });
+    return;
+  }
+
+  const recordingExecutionContractPresent = validScenarios.every(hasRecordingExecutionContract);
+  jobStore.appendLog(jobId, `[run:scenario-preview] recordingReplay=${recordingReplay} routeProfileRequired=${!recordingReplay} recordingExecutionContractPresent=${recordingExecutionContractPresent}`);
+
+  // FIRST_LOSS fix: `recordingReplay=true` with no usable `RecordingExecutionContract` must never
+  // silently fall through to `parseScenarioStepsForDiscovery`'s legacy text-parsing branch --
+  // that branch re-derives actions from human-readable step TEXT (`scenario.steps`), which is
+  // display-only prose (real values were never meant to be, and per this session's own fix are
+  // now never, materialized into it for sensitive fields) with no structured target/valueKey
+  // authority. Confirmed via a real "Reejecutar escenarios" run: the reconstructed McpScenario
+  // lost every recording-authority field (recordingId/recordedScenarioId/canonicalInteractions/
+  // runtimeInputRequirements/technicalKnowledgeRefs/recordingExecutionContract itself), the
+  // runtime fell back to text parsing, and RECORDED FILL VALUES were misread as fill TARGETS,
+  // immediately failing with `target_not_found`. A recording-originated scenario without its
+  // structured contract must fail explicitly and immediately instead.
+  if (recordingReplay && !recordingExecutionContractPresent) {
+    const errorMessage = `Recording replay requires a RecordingExecutionContract; ${validScenarios.length} scenario(s) for appSlug="${appSlug}" are missing one.`;
+    jobStore.appendLog(jobId, `[run:scenario-preview] failed reason=recording_execution_contract_missing appSlug=${appSlug}`);
+    jobStore.update(jobId, {
+      status: "failed",
+      completedAt: new Date().toISOString(),
+      errorMessage,
+      summary: { totalStories: validScenarios.length, synced: 0, passed: 0, failed: 0, errorMessage },
+    });
+    return;
+  }
+
   // ── FASE 2b: Resolve entrySteps from routeProfile, appConfig, or snapshot learning ──
   let entrySteps: EntryStepConfig[] = [];
 
@@ -962,7 +1291,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   }
 
   // Priority 3: snapshot-based learning via Playwright if no explicit entrySteps
-  if (entrySteps.length === 0) {
+  if (!recordingReplay && entrySteps.length === 0) {
     const firstSteps = validScenarios
       .filter((s) => s.steps && s.steps.length > 0)
       .map((s) => s.steps![0])
@@ -1115,6 +1444,10 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   // Guard: filter unsupported click targets not backed by routeProfile/snapshot
   // but PRESERVE clicks that are part of required entry steps navigation
   for (const [caseIndex, vc] of normalizedCases.entries()) {
+    if (recordingReplay) {
+      jobStore.appendLog(jobId, `[scenario-guard] scenario=${vc.displayId} skipped=0 skippedReason=recording_structured_contract_preserved`);
+      continue;
+    }
     const authorizedEntrySteps = entryAuthorityByIndex(caseIndex) ? entrySteps : [];
     const entryStepsTargets = new Set(
       authorizedEntrySteps.filter((es) => es.action === "click").map((es) => es.target.toLowerCase()),
@@ -1178,6 +1511,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   // POST-GUARDS: Enforce scenario steps as authoritative (FINAL AUTHORITY PASS)
   // Restore only explicit clicks that were actually removed during normalization.
   for (const vc of normalizedCases) {
+    if (recordingReplay) continue;
     const originalSteps = originalScenarioSteps.get(vc.displayId) || [];
     const authorityResult = enforceExplicitScenarioClickAuthority(vc.steps, originalSteps);
 
@@ -1212,6 +1546,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   // Guard: convert unsupported short/generic click targets that appear right before ordinal selection
   const preOrdinalConvertedTargets = new Map<string, Set<string>>();
   for (const [caseIndex, vc] of normalizedCases.entries()) {
+    if (recordingReplay) continue;
     const authorizedEntrySteps = entryAuthorityByIndex(caseIndex) ? entrySteps : [];
     const result = convertUnsupportedPreOrdinalClicks(vc.steps, routeProfile, authorizedEntrySteps);
     const converted = new Set<string>();
@@ -1230,6 +1565,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   // This runs AFTER all guards to catch re-conversions. Only restore when the step was
   // actually a converted click (action), never a genuine assertion.
   for (const [caseIndex, vc] of normalizedCases.entries()) {
+    if (recordingReplay) continue;
     const entryStepsTargets = new Set(
       (entryAuthorityByIndex(caseIndex) ? entrySteps : [])
         .filter((es) => es.action === "click")
@@ -1255,6 +1591,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
 
   // Guard: ensure detail scenarios have an item selection step before detail assertions
   for (const [caseIndex, vc] of normalizedCases.entries()) {
+    if (recordingReplay) continue;
     // Skip list-only scenarios — they should not get ordinal selection
     const isListOnly =
       /^visualiz(?:aci[oó]n|ar)\s+(?:\w+\s+)*listado/i.test(vc.title) ||
@@ -1285,32 +1622,33 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   // ── FINAL CANONICALIZATION (post-guards) ──
   // Ensure all steps use canonical labels before saving and validation.
   // This catches any steps inserted or modified by guards that may have non-canonical labels.
-  jobStore.appendLog(jobId, `[scenario-preview] applying final canonicalization to ${normalizedCases.length} cases`);
-  const finalCanonResult = applyFinalCanonicalization(normalizedCases, routeProfile, appConfig);
-
-  // Replace normalizedCases with canonicalized versions
-  normalizedCases.length = 0;
-  normalizedCases.push(...finalCanonResult.cases);
-
-  // Log canonicalization diagnostics
-  if (finalCanonResult.totalCanonicalized > 0) {
-    jobStore.appendLog(
-      jobId,
-      `[final-canonicalization] canonicalized ${finalCanonResult.totalCanonicalized} fields across ${finalCanonResult.diagnostics.length} changes`,
-    );
+  if (!recordingReplay) {
+    jobStore.appendLog(jobId, `[scenario-preview] applying final canonicalization to ${normalizedCases.length} cases`);
+    const finalCanonResult = applyFinalCanonicalization(normalizedCases, routeProfile, appConfig);
+    normalizedCases.length = 0;
+    normalizedCases.push(...finalCanonResult.cases);
+    if (finalCanonResult.totalCanonicalized > 0) {
+      jobStore.appendLog(
+        jobId,
+        `[final-canonicalization] canonicalized ${finalCanonResult.totalCanonicalized} fields across ${finalCanonResult.diagnostics.length} changes`,
+      );
+    }
+    for (const diag of finalCanonResult.diagnostics) {
+      const fieldLabel = diag.field === "step" ? `step[${diag.stepIndex}]` : diag.field;
+      jobStore.appendLog(
+        jobId,
+        `[final-canonicalization] scenario=${diag.scenarioId} field=${fieldLabel} source=${diag.matchedSource} original="${diag.originalText}" canonical="${diag.canonicalText}"`,
+      );
+    }
+  } else {
+    jobStore.appendLog(jobId, `[scenario-preview] final canonicalization skipped reason=recording_structured_contract_authority`);
   }
 
-  for (const diag of finalCanonResult.diagnostics) {
-    const fieldLabel = diag.field === "step" ? `step[${diag.stepIndex}]` : diag.field;
-    jobStore.appendLog(
-      jobId,
-      `[final-canonicalization] scenario=${diag.scenarioId} field=${fieldLabel} source=${diag.matchedSource} original="${diag.originalText}" canonical="${diag.canonicalText}"`,
-    );
-  }
-
-  // Log final steps for verification
+  // Log final steps for verification. FIRST_LEAK fix: this used to log `vc.steps` raw, one log
+  // call before the SAME sanitizer was already applied at `beforeValidate` further down --
+  // redact here too, before this first serializable log, not after.
   for (const vc of normalizedCases) {
-    const firstSteps = vc.steps.slice(0, 3);
+    const firstSteps = sanitizePreviewStepsForLog(vc.steps.slice(0, 3));
     jobStore.appendLog(jobId, `[scenario-preview] finalSteps scenario=${vc.displayId} firstSteps=${JSON.stringify(firstSteps)}`);
   }
 
@@ -1376,6 +1714,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   let hasNavigationBlockage = false;
 
   for (const [caseIndex, vc] of normalizedCases.entries()) {
+    if (recordingReplay) continue;
     const sourceScenario = normalizedScenarios[caseIndex];
     const navigationAuthorized = isEntryStepInsertionAuthorized(sourceScenario, normalizedScenarios
       .map((candidate) => candidate.functionalBranch)
@@ -1510,12 +1849,12 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
 
   const previewCases = JSON.parse(fs.readFileSync(previewPath, "utf-8")) as VirtualCase[];
   for (const vc of previewCases) {
-    jobStore.appendLog(jobId, `[scenario-preview-runner] beforeValidate scenario=${vc.displayId} steps=${JSON.stringify(vc.steps)}`);
+    jobStore.appendLog(jobId, `[scenario-preview-runner] beforeValidate scenario=${vc.displayId} steps=${JSON.stringify(sanitizePreviewStepsForLog(vc.steps))}`);
   }
 
   for (const casePath of generatedCasePaths) {
     const generatedCase = JSON.parse(fs.readFileSync(casePath, "utf-8")) as VirtualCase;
-    jobStore.appendLog(jobId, `[scenario-preview-runner] beforeValidate generatedCase=${generatedCase.displayId} steps=${JSON.stringify(generatedCase.steps)}`);
+    jobStore.appendLog(jobId, `[scenario-preview-runner] beforeValidate generatedCase=${generatedCase.displayId} steps=${JSON.stringify(sanitizePreviewStepsForLog(generatedCase.steps))}`);
   }
 
   const artifactValidation = validatePreviewArtifacts(previewCases, routeProfile, appConfig);
@@ -1746,6 +2085,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   }
 
   const opts = p.options ?? {};
+  const headed = opts.headed === true || process.env.QA_LAB_DISCOVERY_HEADED?.trim().toLowerCase() === "true";
   const isWin = process.platform === "win32";
   const cmd = isWin ? "npm.cmd" : "npm";
 
@@ -1763,7 +2103,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   if (opts.autoPromote !== false) args.push("--auto-promote");
   if (opts.autoPom !== false) args.push("--auto-pom");
   if (opts.rerunActive !== false) args.push("--rerun-active");
-  if (opts.headed) args.push("--headed");
+  if (headed) args.push("--headed");
 
   console.log(`[run:scenario-preview] scenarios=${normalizedCases.length} appSlug=${appSlug}`);
   console.log(`[run:scenario-preview] command=${cmd} args=${args.join(" ")}`);
@@ -1844,10 +2184,10 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
     cwd: ROOT,
     env: {
       ...process.env,
-      EVIDENCE_RUN_ID: jobId,
+      EVIDENCE_RUN_ID: evidenceRunId,
       AUTOMATION_SOURCE: "qalab",
-      AUTOMATION_HEADLESS: opts.headed ? "false" : "true",
-      HEADLESS: opts.headed ? "false" : "true",
+      AUTOMATION_HEADLESS: headed ? "false" : "true",
+      HEADLESS: headed ? "false" : "true",
       AI_SPEC_REPAIR_MAX_ATTEMPTS: process.env.AI_SPEC_REPAIR_MAX_ATTEMPTS ?? "1",
     } as NodeJS.ProcessEnv,
     stdio: ["ignore", "pipe", "pipe"],
@@ -2229,6 +2569,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
         jobStore.update(jobId, {
           summary: mergeScenarioPreviewSummary(existingSummary, resultsSummaryPatch),
         });
+        writeBackPromotedSpecsToRecordingScenarios(jobId, appSlug, results);
       } catch {
         // ignore parse errors
       }
@@ -2609,8 +2950,11 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
       // non-fatal; best-effort persistence
     }
 
-    // Consolidate run evidence into single DOCX
-    await consolidateRunEvidence(jobId, appSlug, sectionSlug, p.sectionName, caseOutcomeMap);
+    // Consolidate run evidence into single DOCX — skipped when a mixed-rerun orchestrator owns
+    // consolidation for the parent run this subset belongs to.
+    if (!executionContext?.suppressEvidenceConsolidation) {
+      await consolidateRunEvidence(evidenceRunId, appSlug, sectionSlug, p.sectionName, caseOutcomeMap);
+    }
     recordQaLabDiagnosticPhase(diagnosticManifestPath, "completed", finalStatus, {
       resultPath: finalResultsPath,
       evidenceDir: artifactDir,
@@ -2685,6 +3029,7 @@ function resolveEffectiveAppSlug(
   params: ScenarioPreviewParams,
   validScenarios: ScenarioPreviewParams["scenarios"],
 ): ResolvedApp {
+  const recordingReplay = isRecordingReplayRequest(params, validScenarios);
   const inference = inferTargetAppSlugFromScenarios(params, validScenarios);
   const sectionSlug = inference.sectionSlug ?? (params.sectionName ? normalizeSectionSlug(params.sectionName) : undefined);
   const requestAppSlug = normalizeMaybeSlug(params.appSlug);
@@ -2726,11 +3071,13 @@ function resolveEffectiveAppSlug(
         console.log(`[scenario-preview] routeProfile inferred from scenarios: "${rp.name}" entry=${rp.entry.length} controls=${rp.visibleControls.length}`);
       }
     }
-    if (isExecutableAppSlug(slug, rp)) {
+    const appIdentityValid = isExecutableAppSlug(slug, rp, recordingReplay);
+    console.log(`[scenario-preview] appIdentity candidate=${slug} valid=${appIdentityValid} runtimeConfig=${hasRuntimeAppConfiguration(ac)} routeProfileAvailable=${hasNonDefaultRouteProfile(rp)} recordingReplay=${recordingReplay} recordingExecutionContractPresent=${validScenarios.every(hasRecordingExecutionContract)}`);
+    if (appIdentityValid) {
       return { appSlug: slug, appConfig: ac, routeProfile: rp, inference };
     }
     return null;
-  };
+      };
 
   for (const candidate of candidates) {
     const found = tryLoad(candidate);

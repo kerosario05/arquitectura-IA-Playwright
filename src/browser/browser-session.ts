@@ -29,6 +29,19 @@ export type RuntimeBrowserSession = {
   close: () => Promise<void>;
 };
 
+/**
+ * Resolve the effective BrowserContext options used by the runtime. A persistent
+ * profile must never let a stale Service Worker from a previous run (or a
+ * different app sharing the profile) intercept navigation. Block service workers
+ * unless the caller explicitly overrides the policy.
+ */
+export function buildRuntimeContextOptions(contextOptions?: BrowserContextOptions): BrowserContextOptions {
+  return {
+    ...contextOptions,
+    serviceWorkers: contextOptions?.serviceWorkers ?? "block",
+  };
+}
+
 async function resolveSessionPage(
   context: BrowserContext,
   targetUrl: string,
@@ -73,7 +86,7 @@ export async function launchRuntimeBrowserSession(
   if (options.profilePath) {
     const context = await options.browserType.launchPersistentContext(options.profilePath, {
       ...launchOptions,
-      ...options.contextOptions,
+      ...buildRuntimeContextOptions(options.contextOptions),
     });
     const page = await resolveSessionPage(
       context,
@@ -91,7 +104,7 @@ export async function launchRuntimeBrowserSession(
   }
 
   const browser = await options.browserType.launch(launchOptions);
-  const context = await browser.newContext(options.contextOptions);
+  const context = await browser.newContext(buildRuntimeContextOptions(options.contextOptions));
   const page = await resolveSessionPage(
     context,
     options.targetUrl,

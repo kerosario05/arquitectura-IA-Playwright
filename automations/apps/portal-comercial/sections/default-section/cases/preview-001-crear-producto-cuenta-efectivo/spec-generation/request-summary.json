@@ -1,0 +1,241 @@
+{
+  "appSlug": "portal-comercial",
+  "sectionSlug": "default-section",
+  "scenarioId": "PREVIEW-001",
+  "scenarioTitle": "Crear Producto Cuenta Efectivo",
+  "stepCount": 3,
+  "sourceExpectedResultPresent": true,
+  "requiredAssertionCount": 1,
+  "observableOracles": [
+    {
+      "id": "expected-01",
+      "requirement": "La aplicación carga su pantalla inicial",
+      "type": "navigation_transition",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 3,
+      "polarity": "positive",
+      "target": "Iniciar sesión",
+      "evidence": [
+        "transition_observed:true",
+        "click_target:Iniciar sesión",
+        "action_type:Presionar \"Iniciar sesión\"",
+        "after_url:https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "assertion_polarity:positive"
+      ],
+      "details": {
+        "transitionObserved": true,
+        "clickTarget": "Iniciar sesión",
+        "resolvedTarget": null,
+        "postClickUiChange": null,
+        "sourceActionStepIndex": 3,
+        "expectedUrl": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct"
+      }
+    }
+  ],
+  "oracleTypes": [
+    "navigation_transition"
+  ],
+  "availablePageObjectCount": 2,
+  "mode": "ai_hybrid",
+  "functionalExecutionEnabled": true,
+  "provider": "codex",
+  "model": "gpt-5.6-luna",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "PREVIEW-001",
+    "title": "Crear Producto Cuenta Efectivo",
+    "appSlug": "portal-comercial",
+    "sectionSlug": "default-section",
+    "auth": {
+      "gateDetected": true,
+      "required": true,
+      "stage": "credentials",
+      "insertionAfterStepIndex": 3,
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    },
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Ingresar [usuario] en \"Usuario\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Usuario"
+        },
+        "valueKey": "usuario",
+        "technicalTargetRef": "role:input|Usuario",
+        "technicalTargetRefs": [
+          "role:input|Usuario",
+          "css:#username",
+          "structural:grid=grid:main|header=header:Usuario|role=amount_or_text"
+        ],
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[id=\"username\"]",
+              "confidence": 0.9
+            }
+          ],
+          "structuralContext": {
+            "stableDirectAttributes": {
+              "id": "username"
+            }
+          },
+          "confidence": 0.9,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Ingresar [contrasena] en \"Contraseña\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Contraseña"
+        },
+        "valueKey": "contrasena",
+        "technicalTargetRef": "role:input|Contraseña",
+        "technicalTargetRefs": [
+          "role:input|Contraseña",
+          "css:#password",
+          "structural:grid=grid:main|header=header:Contraseña|role=amount_or_text"
+        ],
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[id=\"password\"]",
+              "confidence": 0.9
+            }
+          ],
+          "structuralContext": {
+            "stableDirectAttributes": {
+              "id": "password"
+            }
+          },
+          "confidence": 0.9,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Presionar \"Iniciar sesión\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Iniciar sesión"
+        },
+        "valueKey": "iniciar_sesion",
+        "technicalTargetRef": "aria-label:Iniciar sesión",
+        "technicalTargetRefs": [
+          "aria-label:Iniciar sesión",
+          "role:button|Iniciar sesión",
+          "text:Iniciar sesión"
+        ],
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Iniciar sesión\"]",
+              "confidence": 0.9
+            }
+          ],
+          "structuralContext": {
+            "stableDirectAttributes": {
+              "aria-label": "Iniciar sesión"
+            }
+          },
+          "confidence": 0.9,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "oracle": {
+          "type": "navigation_transition",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "url_state",
+          "mechanism": {
+            "source": "url_state",
+            "method": "expectPromotedVisible",
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "navigation_transition",
+              "urlPattern": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct"
+            }
+          },
+          "sourceActionStepIndex": 3,
+          "requirement": "La aplicación carga su pantalla inicial"
+        },
+        "sourceActionStepIndex": 3,
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 3,
+      "representedScenarioSteps": 3,
+      "missingScenarioSteps": []
+    }
+  },
+  "executionContractChars": 3463,
+  "promptChars": 29264,
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "promotionAllowed": false,
+  "failedGatesAttempt1": [],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

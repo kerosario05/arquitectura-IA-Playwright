@@ -17,6 +17,7 @@ import {
   upsertAutomationIndexEntry
 } from "./automation-index";
 import { generateSpecFromPlan, generateSpecFromPlanWithPolicy } from "./spec-generator";
+import { sanitizeText, CANDIDATE_NAVIGATION_HEADROOM_MS } from "./spec-generation-hybrid";
 import {
   deriveAppProfile,
   serializeRuntimeConfigForPromotion,
@@ -49,13 +50,16 @@ import type { PageObjectEntry, PageObjectRegistry } from "../types/page-object.t
 import {
   shouldRunAutoPom,
   runAutoPomPipeline,
+  reconcileActivePageObjectMethods,
   type AutoPomDiagnostics
 } from "./auto-pom";
-import { buildDataContext } from "../data/data-context";
+import { buildDataContext, type DataContextEntry } from "../data/data-context";
 import { buildPromotedDataManifest, savePromotedDataManifestSync } from "../data/promoted-data";
 import { validatePromotedSpecRuntimeContract } from "./runtime/promoted-runtime-contract";
-import { rewritePromotedRuntimeImport, runHybridSpecGeneration, validatePromotedSpecInternalImports, type SpecGenerationDiagnostics, type SpecGenerationSourceScenario } from "./spec-generation-hybrid";
+import { materializePromotedRuntimeEnv } from "./runtime/promoted-spec-runtime";
+import { getSectionSlug, rewritePromotedAuthFlowHelperImport, rewritePromotedRuntimeImport, runHybridSpecGeneration, validatePromotedSpecInternalImports, type SpecGenerationDiagnostics, type SpecGenerationSourceScenario } from "./spec-generation-hybrid";
 import { buildSpecExecutionContract } from "./spec-execution-contract";
+import { compileDeterministicSpec } from "./spec-compiler/deterministic-spec-compiler";
 import {
   buildPromotedArtifactIdentity,
   isEligibleForDeterministicRevalidation,
@@ -91,6 +95,25 @@ interface PromoteInput {
   executionSource?: string;
   skipExistingSpecAdmission?: boolean;
   persistAppConfig?: boolean;
+  /**
+   * Opt-in only (default false): when the freshly-built SpecExecutionContract has
+   * full authority for every required action (compileDeterministicSpec returns
+   * zero unsupportedCapabilities and one binding per required action), generate
+   * the spec via the deterministic compiler instead of AI, and fail closed
+   * (never fall back to AI) if that authority is insufficient. Default-off so
+   * existing production behavior for operations/flows the deterministic
+   * compiler does not yet cover (select, multi-step POM flows, etc.) is
+   * unaffected until explicitly requested.
+   */
+  useDeterministicSpecCompiler?: boolean;
+  /**
+   * Scenario-scoped runtime data authority already resolved by the caller (e.g. Discovery's own
+   * resolveDataKey, which may include CURRENT_QA_EDIT-sourced overrides) -- never re-resolved
+   * here. Structured, with source/lineage preserved, matching case-discovery-workflow.ts's own
+   * options.runtimeEntries shape exactly (same DataContextEntry[] type). Takes precedence over
+   * static/configured data when building runtimeInputValues for functionalExecution.
+   */
+  runtimeEntries?: DataContextEntry[];
 }
 
 export async function materializePromotionContext(input: {
@@ -343,6 +366,17 @@ function ensurePromotedSpecNavigation(specContent: string, plan: ExecutionPlan):
   return specContent.replace(/(\n\s*try\s*\{\n)/, `$1${navigation}`);
 }
 
+function ensurePromotedSpecStrategyMarker(
+  specContent: string,
+  selectedStrategy: "pom" | "inline" | undefined,
+): string {
+  if (selectedStrategy !== "pom") return specContent;
+  if (!specContent.includes("createPromotedSpecRuntime(") || /PROMOTED_SPEC_STRATEGY\s*=/.test(specContent)) {
+    return specContent;
+  }
+  return `export const PROMOTED_SPEC_STRATEGY = "pom_runtime";\n${specContent}`;
+}
+
 async function ensureDirectories(paths: {
   caseDir?: string;
   caseEvidenceDir?: string;
@@ -357,25 +391,363 @@ async function ensureDirectories(paths: {
   await fs.mkdir(paths.specsDir, { recursive: true });
 }
 
-async function verifyPromotedSpec(
+export type VerifyPromotedSpecOptions = {
+  /**
+   * When set, this is authoritative over `playwright.config.ts`'s own `HEADLESS`-env-var
+   * default (which defaults to headed — convenient for manual CLI/dev use, wrong for any
+   * execution QA Lab starts). Passing `true` forces the spawned Playwright process's
+   * `HEADLESS` env var regardless of what the parent process inherited, so a browser window
+   * can never appear from a product-initiated run. Leaving it unset preserves the previous
+   * CLI behavior (`--verify-promoted-spec` during `discovery:case`/`discovery:preview`),
+   * which intentionally follows the ambient config.
+   */
+  headless?: boolean;
+  /** Structured provenance for the launch log — never inferred from context. */
+  executionSource?: string;
+  scenarioId?: string;
+  /**
+   * When set, the spawned Playwright process's runtime evidence recorder (promoted-spec-runtime.ts's
+   * `initEvidence`) is scoped to THIS run/scenario instead of whatever stale values happened to
+   * already sit in the parent process's env. Without this, a reused promoted spec's evidence lands
+   * under an unaddressable `runId=undefined` path that no consolidation pass can ever find it under.
+   */
+  evidenceContext?: {
+    runId: string;
+    scenarioId: string;
+    scenarioTitle: string;
+    appSlug: string;
+    sectionSlug: string;
+  };
+  /**
+   * The selected scenario's own app/runtime execution context -- required for `verifyPromotedSpec`
+   * to launch the spawned Playwright process scoped to the RIGHT app, instead of inheriting
+   * whatever APP_SLUG/APP_PROFILE/APP_BASE_URL happened to already sit in the parent (server)
+   * process's env. Reuses the SAME authority `npm run test:promoted` and functional execution
+   * already use (resolvePromotedExecutionEnv / preparePromotedRuntimeInputs in cli/test-promoted.ts)
+   * -- never a second, independent app-config/baseUrl resolution. `EVIDENCE_APP_SLUG` (above) is
+   * evidence-pathing metadata only and never substitutes for this.
+   */
+  appContext?: {
+    appSlug: string;
+    /** Enables PROMOTED_* runtime-input resolution for this case, when the spec requires any. */
+    caseId?: number;
+    contextPath?: string;
+    /**
+     * The selected scenario's OWN current runtime data ("Datos de este escenario" --
+     * RecordedScenario.runtimeDataset.resolvedValues, the same CURRENT_QA_EDIT-class authority
+     * promoteExecutionPlan's own `runtimeEntries` already takes precedence over static/app-global
+     * data with). When present, ALWAYS wins over this app's global/default testData for any key
+     * it supplies; the app-global data remains only as a fallback for keys the scenario doesn't
+     * carry -- never the reverse.
+     */
+    scenarioRuntimeValues?: Record<string, string>;
+  };
+  /**
+   * Live sink for the spawned child's stdout/stderr, called per completed line AS the process
+   * emits it -- never buffered until exit. Reuses whatever Live Log/SSE channel the caller
+   * already has (e.g. jobStore.appendLog); `verifyPromotedSpec` never talks to that channel
+   * directly, keeping this module decoupled from server internals. Every line passed here is
+   * already redacted (see redactVerifyPromotedSpecOutput) -- never raw child output.
+   */
+  onOutput?: (event: VerifyPromotedSpecLiveLine) => void;
+};
+
+/**
+ * Resolves the FULL app/runtime execution env for a promoted spec's child Playwright process,
+ * reusing the same resolvers `npm run test:promoted` (src/cli/test-promoted.ts) already uses --
+ * never a second, independent app-config/baseUrl resolution path. `appContext` is required for
+ * scoping: when omitted, the ambient `baseEnv` is returned unchanged (legacy behavior for callers
+ * that don't scope a specific app, e.g. the bare `--verify-promoted-spec` CLI flag). When
+ * `appContext` IS provided but carries no usable `appSlug`, this fails closed (throws) rather
+ * than silently falling back to whatever project the parent process happened to be configured
+ * for. `deps` is injectable so this is testable without touching real app.config files, a
+ * database, or spawning a process.
+ */
+export type ResolveVerifyPromotedSpecAppExecEnvDeps = {
+  resolvePromotedExecutionEnv: typeof import("../cli/test-promoted").resolvePromotedExecutionEnv;
+  resolvePromotedRuntimeInputKeys: typeof import("../cli/test-promoted").resolvePromotedRuntimeInputKeys;
+  preparePromotedRuntimeInputs: typeof import("../cli/test-promoted").preparePromotedRuntimeInputs;
+  readSpecSource: (specPath: string) => Promise<string>;
+  /**
+   * Resolves this app's own key->value runtime data (username/password/testData, with
+   * testDataAliases expanded) -- the SAME authority `buildDataContext` + `buildRuntimeInputValues`
+   * already provide during promotion (spec-generation-hybrid.ts's functional execution,
+   * launchContext.runtimeInputValues), sourced here from the SAME materialized app config
+   * `resolvePromotedExecutionEnv` above already loads (loadPromotedAppConfigSync) -- never a
+   * second, independent data-resolution path. Generic: returns whatever keys this app's own
+   * config/aliases define, never a hardcoded business key.
+   */
+  resolvePromotedScenarioRuntimeValues: (appSlug: string) => Record<string, string>;
+};
+
+function defaultResolvePromotedScenarioRuntimeValues(appSlug: string): Record<string, string> {
+  const projectConfig = loadPromotedAppConfigSync({ appSlug });
+  if (!projectConfig) return {};
+  const minimalConfig = {
+    app: {
+      username: projectConfig.username,
+      password: projectConfig.password,
+      extraLoginFields: {},
+      testData: projectConfig.testData ?? {},
+      testDataAliases: projectConfig.testDataAliases ?? {},
+    },
+  } as unknown as FullConfig;
+  const dataContext = buildDataContext(minimalConfig);
+  return buildRuntimeInputValues(dataContext.entries, undefined);
+}
+
+async function defaultResolveVerifyPromotedSpecAppExecEnvDeps(): Promise<ResolveVerifyPromotedSpecAppExecEnvDeps> {
+  const testPromoted = await import("../cli/test-promoted");
+  return {
+    resolvePromotedExecutionEnv: testPromoted.resolvePromotedExecutionEnv,
+    resolvePromotedRuntimeInputKeys: testPromoted.resolvePromotedRuntimeInputKeys,
+    preparePromotedRuntimeInputs: testPromoted.preparePromotedRuntimeInputs,
+    readSpecSource: (p) => fs.readFile(p, "utf8"),
+    resolvePromotedScenarioRuntimeValues: defaultResolvePromotedScenarioRuntimeValues,
+  };
+}
+
+/**
+ * A compiled promoted spec reads its runtime data as `process.env['PROMOTED_<KEY>']`
+ * (deterministic-spec-compiler.ts's own emission shape, materializePromotedRuntimeEnv's naming
+ * convention) -- generic scan, never a hardcoded business key name.
+ */
+function resolveRequiredPromotedEnvKeysFromSource(specSource: string): string[] {
+  const matches = specSource.matchAll(/process\.env\[(?:'|")PROMOTED_([A-Z0-9_]+)(?:'|")\]/g);
+  return Array.from(new Set(Array.from(matches, (m) => `PROMOTED_${m[1]}`)));
+}
+
+export async function resolveVerifyPromotedSpecAppExecEnv(
+  baseEnv: NodeJS.ProcessEnv,
+  appContext: VerifyPromotedSpecOptions["appContext"],
   specPath: string,
-  timeoutMs: number = 90000
+  deps?: ResolveVerifyPromotedSpecAppExecEnvDeps,
+): Promise<NodeJS.ProcessEnv> {
+  if (!appContext) return baseEnv;
+  const appSlug = appContext.appSlug?.trim();
+  if (!appSlug) {
+    throw new Error(
+      "[promoted-runtime-config] appContext.appSlug is required and must not be empty -- refusing to silently fall back to the ambient/default project env",
+    );
+  }
+  const resolvedDeps = deps ?? await defaultResolveVerifyPromotedSpecAppExecEnvDeps();
+  const scopedBaseEnv: NodeJS.ProcessEnv = { ...baseEnv, APP_SLUG: appSlug, APP_PROFILE: appSlug };
+  let execEnv = await resolvedDeps.resolvePromotedExecutionEnv(scopedBaseEnv, appSlug);
+  if (typeof appContext.caseId === "number") {
+    const specSource = await resolvedDeps.readSpecSource(specPath).catch(() => "");
+    const requiredKeys = resolvedDeps.resolvePromotedRuntimeInputKeys(specSource);
+    const runtimeInputs = await resolvedDeps.preparePromotedRuntimeInputs({
+      contextPath: appContext.contextPath,
+      caseId: appContext.caseId,
+      baseEnv: execEnv,
+      requiredKeys,
+    });
+    if (!runtimeInputs.ok) {
+      throw new Error(
+        `[promoted-runtime-config] missing required runtime input "${runtimeInputs.missingKey}" for appSlug=${appSlug} caseId=${appContext.caseId}`,
+      );
+    }
+    execEnv = runtimeInputs.env;
+  }
+
+  // FIRST_LOSS fix (jobId dd76f6cc-76fd-4370-9a7d-c7eee2557bad): the deterministic-compiled
+  // spec's own PROMOTED_<KEY> env reads were never populated for reuse-existing -- neither
+  // resolvePromotedRuntimeInputKeys (which only recognizes the fixed 3-key auth.* map and
+  // requirePromotedData(dataContext, ...) calls, not this naming convention) nor
+  // preparePromotedRuntimeInputs (which only ever writes those same 3 fixed env names) can
+  // produce it. Scenario-scoped values (SAME app-config authority resolvePromotedExecutionEnv
+  // above already loaded) win over any stale value the parent process/spec's own generic env
+  // already carried, materialized via the SAME PROMOTED_<KEY> convention the compiler/runtime
+  // already share (materializePromotedRuntimeEnv) -- never a second protocol.
+  // Precedence (matching promoteExecutionPlan's own runtimeEntries-over-static-data rule):
+  // this scenario's OWN current "Datos de este escenario" values ALWAYS win; the app's
+  // global/default testData is used only as a fallback for keys the scenario doesn't supply.
+  const appGlobalRuntimeValues = resolvedDeps.resolvePromotedScenarioRuntimeValues(appSlug);
+  const effectiveRuntimeValues = { ...appGlobalRuntimeValues, ...(appContext.scenarioRuntimeValues ?? {}) };
+  execEnv = { ...execEnv, ...materializePromotedRuntimeEnv(effectiveRuntimeValues) };
+
+  const specSourceForRequiredKeys = await resolvedDeps.readSpecSource(specPath).catch(() => "");
+  const requiredPromotedEnvKeys = resolveRequiredPromotedEnvKeysFromSource(specSourceForRequiredKeys);
+  const stillMissing = requiredPromotedEnvKeys.filter((envName) => !execEnv[envName] || !execEnv[envName]!.trim());
+  if (stillMissing.length > 0) {
+    throw new Error(
+      `[promoted-runtime-config] missing required runtime value(s) for appSlug=${appSlug}: ${stillMissing.join(", ")} `
+      + `(present in the compiled spec but not resolvable from this app's own runtime data authority)`,
+    );
+  }
+
+  return execEnv;
+}
+
+/**
+ * Builds the child process env for `verifyPromotedSpec`'s spawned Playwright run. Pulled out as
+ * a pure function so the exact env produced for a given set of options is hermetically testable
+ * without spawning a process — and so it's obvious this never writes to `process.env` itself: it
+ * only ever returns `process.env` unmodified, or a fresh copy carrying the extra keys.
+ */
+export function buildVerifyPromotedSpecExecEnv(options: VerifyPromotedSpecOptions): NodeJS.ProcessEnv {
+  if (options.headless === undefined && !options.evidenceContext) return process.env;
+  const execEnv: NodeJS.ProcessEnv = { ...process.env };
+  if (options.headless !== undefined) {
+    execEnv.HEADLESS = String(options.headless);
+  }
+  if (options.evidenceContext) {
+    const { runId, scenarioId, scenarioTitle, appSlug, sectionSlug } = options.evidenceContext;
+    execEnv.EVIDENCE_RUN_ID = runId;
+    execEnv.SCENARIO_ID = scenarioId;
+    execEnv.SCENARIO_TITLE = scenarioTitle;
+    execEnv.EVIDENCE_APP_SLUG = appSlug;
+    execEnv.EVIDENCE_SECTION_SLUG = sectionSlug;
+  }
+  return execEnv;
+}
+
+/** One completed line of a spawned promoted-spec child's stdout/stderr, emitted live -- before
+ * the process exits, not buffered until close. */
+export type VerifyPromotedSpecLiveLine = { stream: "stdout" | "stderr"; line: string };
+
+export type VerifyPromotedSpecExecAsync = (
+  cmd: string,
+  options: { timeout: number; cwd: string; env: NodeJS.ProcessEnv; onLine?: (event: VerifyPromotedSpecLiveLine) => void },
+) => Promise<{ stdout: string; stderr: string }>;
+
+/** Accumulates chunks and emits only complete lines, buffering any trailing partial line across
+ * `data` events; `flush()` emits whatever partial line remains once the stream closes. */
+function createLineEmitter(onLine: (line: string) => void) {
+  let carry = "";
+  return {
+    push(chunk: string): void {
+      carry += chunk;
+      const lines = carry.split(/\r?\n/);
+      carry = lines.pop() ?? "";
+      for (const line of lines) onLine(line);
+    },
+    flush(): void {
+      if (carry.length > 0) {
+        onLine(carry);
+        carry = "";
+      }
+    },
+  };
+}
+
+/**
+ * The single spawn -> stream -> collect -> timeout/exit -> result/error path for
+ * `verifyPromotedSpec`'s child Playwright process. Streams `onLine` events AS the child emits
+ * them (never waits for exit), while still accumulating the full stdout/stderr so the final
+ * pass/fail diagnostic (below) loses nothing -- same command string, same env/cwd/timeout, same
+ * exit-code/signal-driven resolve-vs-reject semantics the previous buffered `exec`-based launcher
+ * had, so callers observe an identical result shape either way.
+ */
+export async function defaultVerifyPromotedSpecExecAsync(
+  cmd: string,
+  options: { timeout: number; cwd: string; env: NodeJS.ProcessEnv; onLine?: (event: VerifyPromotedSpecLiveLine) => void },
+): Promise<{ stdout: string; stderr: string }> {
+  const { spawn } = await import("node:child_process");
+  return new Promise((resolve, reject) => {
+    const child = spawn(cmd, { shell: true, cwd: options.cwd, env: options.env });
+    let stdout = "";
+    let stderr = "";
+    const stdoutEmitter = createLineEmitter((line) => options.onLine?.({ stream: "stdout", line }));
+    const stderrEmitter = createLineEmitter((line) => options.onLine?.({ stream: "stderr", line }));
+    // Single settlement authority: only `close` (or `error`, for a spawn-level failure) ever
+    // resolves/rejects this promise. The watchdog below only ever calls `child.kill()` -- it
+    // never settles the promise itself -- so a timeout can only ever influence the OUTCOME
+    // `close` later observes (a non-zero code / kill signal), never race it.
+    let settled = false;
+    let timedOut = false;
+
+    const timer = setTimeout(() => {
+      timedOut = true;
+      child.kill();
+    }, options.timeout);
+
+    child.stdout?.on("data", (chunk: Buffer) => {
+      const text = chunk.toString();
+      stdout += text;
+      stdoutEmitter.push(text);
+    });
+    child.stderr?.on("data", (chunk: Buffer) => {
+      const text = chunk.toString();
+      stderr += text;
+      stderrEmitter.push(text);
+    });
+
+    child.on("error", (err) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      stdoutEmitter.flush();
+      stderrEmitter.flush();
+      reject(Object.assign(err, { stdout, stderr, timedOut }));
+    });
+    child.on("close", (code, signal) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      stdoutEmitter.flush();
+      stderrEmitter.flush();
+      if (code === 0 && !timedOut) {
+        resolve({ stdout, stderr });
+      } else if (timedOut) {
+        // A real watchdog expiry, distinguished from every other non-zero-exit cause -- never
+        // reported as a generic "Command failed", per invariant.
+        reject(Object.assign(
+          new Error(`Promoted spec verification timed out after ${options.timeout}ms: ${cmd}`),
+          { stdout, stderr, code: code ?? undefined, signal: signal ?? undefined, timedOut: true },
+        ));
+      } else {
+        reject(Object.assign(new Error(`Command failed: ${cmd}`), { stdout, stderr, code: code ?? undefined, signal: signal ?? undefined, timedOut: false }));
+      }
+    });
+  });
+}
+
+export async function verifyPromotedSpec(
+  specPath: string,
+  timeoutMs: number = 90000,
+  options: VerifyPromotedSpecOptions = {},
+  // Injectable so this is hermetically testable without spawning a real process or touching a
+  // real Playwright installation -- production callers always get the real spawned exec.
+  execAsync: VerifyPromotedSpecExecAsync = defaultVerifyPromotedSpecExecAsync,
 ): Promise<{
   status: "passed" | "failed" | "skipped";
   error?: string;
   tracePath?: string;
   screenshotPath?: string;
 }> {
+  // Hoisted so the catch block below can redact using the SAME env this run actually launched
+  // with, even though the failure happened after it was built inside the try block.
+  let execEnv: NodeJS.ProcessEnv = process.env;
   try {
-    const { exec } = await import("node:child_process");
-    const { promisify } = await import("node:util");
-    const execAsync = promisify(exec);
-
     const specPathNormalized = specPath.replace(/\\/g, "/");
     const cmd = `npx playwright test "${specPathNormalized}" --config=playwright.config.ts --timeout=${timeoutMs}`;
     console.log(`[promote-plan] Verifying promoted spec: ${cmd}`);
+    if (options.headless !== undefined) {
+      console.log(`[promoted-runtime-launch] executionSource=${options.executionSource ?? "unknown"} headless=${options.headless} specPath=${specPathNormalized} scenarioId=${options.scenarioId ?? "unknown"}`);
+    }
 
-    const { stdout, stderr } = await execAsync(cmd, { timeout: timeoutMs + 30000, cwd: process.cwd() });
+    const baseExecEnv = buildVerifyPromotedSpecExecEnv(options);
+    execEnv = await resolveVerifyPromotedSpecAppExecEnv(baseExecEnv, options.appContext, specPathNormalized);
+    if (options.appContext) {
+      console.log(`[promoted-runtime-config] reuseAppContext appSlug=${options.appContext.appSlug} appSlugResolved=${execEnv.APP_SLUG} appProfileResolved=${execEnv.APP_PROFILE} baseUrlResolved=${execEnv.APP_BASE_URL ?? "none"}`);
+    }
+    const { stdout, stderr } = await execAsync(cmd, {
+      // FIRST_LOSS fix (jobId 243c3a7e-19e5-4b50-9eb6-120d3cfa1486): `timeoutMs` here is
+      // Playwright's own PER-TEST `--timeout`, never the total process budget -- startup,
+      // evidence capture, and teardown add real overhead on top of it (physically observed: a
+      // spec that itself completed and printed "1 passed" still took 2.1m wall-clock, exceeding
+      // the previous hardcoded `+30000` external watchdog and getting killed mid-teardown).
+      // Reuses the SAME lifecycle-headroom authority spec-generation-hybrid.ts's own functional
+      // execution already documents for this exact class of overhead
+      // (CANDIDATE_NAVIGATION_HEADROOM_MS) instead of a second arbitrary number.
+      timeout: timeoutMs + CANDIDATE_NAVIGATION_HEADROOM_MS,
+      cwd: process.cwd(),
+      env: execEnv,
+      onLine: options.onOutput
+        ? (event) => options.onOutput!({ stream: event.stream, line: redactVerifyPromotedSpecOutput(event.line, execEnv) })
+        : undefined,
+    });
 
     if (stderr && !stderr.includes("passed")) {
       console.warn(`[promote-plan] Spec verification warnings: ${stderr}`);
@@ -384,7 +756,29 @@ async function verifyPromotedSpec(
     console.log(`[promote-plan] Spec verification passed`);
     return { status: "passed" };
   } catch (error: any) {
-    const errorMsg = error.message || error.stderr || String(error);
+    // FIRST_LOSS fix (jobId db4842b6-ed3a-440b-9aa1-49d4f423fbca): execAsync's rejection here
+    // carries the SAME rich `stdout`/`stderr`/`code`/`signal` node:child_process always attaches
+    // to an ExecException -- only `error.message` ("Command failed: ...") was ever read, so the
+    // real Playwright failure (first step, runtime error) was silently discarded before it could
+    // reach any log a reuse-existing job's caller could see. Purely diagnostic: does not change
+    // what caused the spec to fail, only makes the existing failure observable.
+    const diagnosticStdout = redactVerifyPromotedSpecOutput(typeof error.stdout === "string" ? error.stdout : "", execEnv);
+    const diagnosticStderr = redactVerifyPromotedSpecOutput(typeof error.stderr === "string" ? error.stderr : "", execEnv);
+    const exitCode = typeof error.code === "number" ? error.code : undefined;
+    const signal = typeof error.signal === "string" ? error.signal : undefined;
+    const timedOut = error.timedOut === true;
+    console.error(
+      `[promote-plan] Spec verification failed diagnostics exitCode=${exitCode ?? "none"} signal=${signal ?? "none"} timedOut=${timedOut} `
+      + `stdoutLength=${diagnosticStdout.length} stderrLength=${diagnosticStderr.length}`
+    );
+    if (diagnosticStdout) console.error(`[promote-plan] child stdout:\n${diagnosticStdout}`);
+    if (diagnosticStderr) console.error(`[promote-plan] child stderr:\n${diagnosticStderr}`);
+
+    const baseMessage = typeof error.message === "string" && error.message ? error.message : String(error);
+    const errorMsg = redactVerifyPromotedSpecOutput(
+      [baseMessage, diagnosticStdout, diagnosticStderr].filter(Boolean).join("\n"),
+      execEnv,
+    ) || baseMessage;
     console.error(`[promote-plan] Spec verification failed: ${errorMsg}`);
 
     const traceMatch = errorMsg.match(/(.*trace\.zip)/);
@@ -397,6 +791,29 @@ async function verifyPromotedSpec(
       screenshotPath: screenshotMatch ? screenshotMatch[1] : undefined
     };
   }
+}
+
+/**
+ * Redacts a spawned Playwright process's stdout/stderr before it ever reaches a log: first a
+ * value-based scrub of the SPECIFIC env values this run's child could have echoed back
+ * (APP_USERNAME/APP_PASSWORD/any PROMOTED_* runtime input -- exactly what `execEnv` carries,
+ * never a guess), then the same pattern-based `sanitizeText` CORE already uses for generated
+ * spec content (api_key/password/secret/token/otp literals, Bearer/Basic auth headers) -- never
+ * a second, parallel redaction scheme.
+ */
+function redactVerifyPromotedSpecOutput(text: string, execEnv: NodeJS.ProcessEnv): string {
+  if (!text) return text;
+  let redacted = text;
+  const sensitiveKeys = Object.keys(execEnv).filter(
+    (key) => key === "APP_USERNAME" || key === "APP_PASSWORD" || key.startsWith("PROMOTED_"),
+  );
+  for (const key of sensitiveKeys) {
+    const value = execEnv[key];
+    if (typeof value === "string" && value.trim().length >= 3) {
+      redacted = redacted.split(value).join("[REDACTED]");
+    }
+  }
+  return sanitizeText(redacted);
 }
 
 function deriveScreenSignatureFromPlan(plan: ExecutionPlan): string {
@@ -891,6 +1308,31 @@ async function registerPOMCandidatesForBlockedPromotion(
   return { pomCandidatesRegistered: candidatesRegistered };
 }
 
+/**
+ * Pure precedence merge for already-resolved runtime input authority. Never resolves data
+ * itself -- both inputs are already-resolved entries. Scenario-scoped runtimeEntries (which may
+ * carry CURRENT_QA_EDIT-sourced overrides from the caller's own resolver, e.g. Discovery) win
+ * over static/configured dataContextEntries for the same key -- the same precedence Discovery's
+ * own resolveDataKey already gives runtimeEntries over configured data.
+ */
+export function buildRuntimeInputValues(
+  dataContextEntries: DataContextEntry[],
+  runtimeEntries: DataContextEntry[] | undefined,
+): Record<string, string> {
+  return {
+    ...Object.fromEntries(
+      dataContextEntries
+        .filter((entry) => entry.value.trim().length > 0)
+        .map((entry) => [entry.key, entry.value])
+    ),
+    ...Object.fromEntries(
+      (runtimeEntries ?? [])
+        .filter((entry) => typeof entry.value === "string" && entry.value.trim().length > 0)
+        .map((entry) => [entry.key, entry.value])
+    ),
+  };
+}
+
 export async function promoteExecutionPlan(
   input: PromoteInput,
   allowDraft = false,
@@ -939,9 +1381,13 @@ export async function promoteExecutionPlan(
   }
   console.log(`[promote] Using appSlug=${appProfile.appSlug}`);
   
-  // Determine sectionSlug from input
-  const sectionSlug = input.sectionSlug || undefined;
-  if (sectionSlug) {
+  // Determine sectionSlug from input. Normalized once, here, upstream of every consumer in this
+  // scope (buildAppAutomationPaths, ensureAppStructure, and -- critically -- the deterministic
+  // branch's buildSpecExecutionContract call below) so they all observe the same value instead of
+  // each applying their own default independently. Reuses the existing, already-established
+  // default policy (spec-generation-hybrid.ts's getSectionSlug) rather than inventing a second one.
+  const sectionSlug = getSectionSlug(input.sectionSlug);
+  if (input.sectionSlug?.trim()) {
     console.log(`[promote] Using sectionSlug=${sectionSlug}`);
   }
 
@@ -1026,9 +1472,16 @@ export async function promoteExecutionPlan(
     );
   }
 
+  // Already-resolved runtime input authority the promotion pipeline holds -- computed once,
+  // reused as-is by the functionalExecution child env below. Never re-resolved downstream; never
+  // logged (see materializePromotedRuntimeEnv). input.runtimeEntries (scenario-scoped, may carry
+  // CURRENT_QA_EDIT-sourced overrides from the caller's own resolver, e.g. Discovery) takes
+  // precedence over static/configured dataContext entries for the same key -- same precedence
+  // Discovery's own resolveDataKey already gives runtimeEntries over configured data.
+  const runtimeForData = input.fullConfig ?? envConfig;
+  const dataContext = buildDataContext(runtimeForData);
+  const runtimeInputValues = buildRuntimeInputValues(dataContext.entries, input.runtimeEntries);
   if (appPaths.caseDir) {
-    const runtimeForData = input.fullConfig ?? envConfig;
-    const dataContext = buildDataContext(runtimeForData);
     const promotedDataManifest = buildPromotedDataManifest(plan, dataContext);
     savePromotedDataManifestSync(path.join(appPaths.caseDir, "promoted-data.json"), promotedDataManifest);
   }
@@ -1100,6 +1553,10 @@ export async function promoteExecutionPlan(
   let generatedSpecContent = "";
   let registryForSpecValidation: PageObjectRegistry | undefined;
   let specGenerationDiagnostics: SpecGenerationDiagnostics | undefined;
+  // Generation-metadata signal, not scenario authority (never added to SpecExecutionContract):
+  // set only after the deterministic branch below has already fail-closed-verified
+  // unsupportedCapabilities=0 and compiledActionBindings=requiredActionSteps.
+  let candidateAuthority: "deterministic_compiler" | undefined;
 
   if (promotionPolicy && promotionPolicy.specMode === "page-object") {
     const registry = await loadPageObjectRegistry(appProfile, input.outputRoot).catch(() => undefined);
@@ -1126,18 +1583,91 @@ export async function promoteExecutionPlan(
       landing: "transactions_menu"
     } : undefined);
 
-    const specResult = await generateSpecFromPlanWithPolicy({
-      plan,
-      automationId,
-      appProfile,
-      appPaths,
-      sectionSlug,
-      scenarioId: plan.scenario.externalId,
-      promotionPolicy,
-      inlineDebugMode,
-      pageObjectRegistry: registry,
-      authFlowOptions
-    });
+    let specResult: Awaited<ReturnType<typeof generateSpecFromPlanWithPolicy>>;
+
+    if (input.useDeterministicSpecCompiler === true) {
+      // SpecExecutionContract -> compileDeterministicSpec -> candidate source, inserted directly
+      // into the existing production entrypoint (no parallel pipeline). aiInvoked=false on this
+      // branch: when the contract lacks full authority for every required action, this fails
+      // closed rather than falling back to AI generation.
+      // Import paths are computed from the REAL materialization target this
+      // pipeline already owns -- never re-derived from appSlug/sectionSlug/
+      // scenarioId. Fail closed (no silently-wrong imports) if that target
+      // path isn't known yet.
+      if (!appPaths.specPath) {
+        throw new Error(
+          `DETERMINISTIC_SPEC_GENERATION_FAILED_CLOSED: scenarioId=${plan.scenario.externalId} ` +
+          `failedGate=deterministic_missing_target_spec_path fallbackReason=no_ai_fallback_permitted`
+        );
+      }
+      // This flow never needs Auto-POM to propose/approve new methods (specResult.pomStatus is
+      // always "promoted" below, which is exactly what skips that), but buildSpecExecutionContract
+      // still queries this SAME registry for existing page_object-kind implementation authority.
+      // Re-verify already-active/available methods against real source BEFORE that lookup, so a
+      // stale entry (active=true/available=true but the method no longer exists in the real Page
+      // Object file) can never be selected as implementation authority -- reusing the same core
+      // reconciliation Auto-POM itself already applies, never a second parser/verification.
+      if (registry) {
+        const { reconciledMethods } = await reconcileActivePageObjectMethods(registry, appPaths.pagesDir);
+        if (reconciledMethods.length > 0) {
+          console.log(`[deterministic-registry-reconciliation] demoted=${JSON.stringify(reconciledMethods)}`);
+          await savePageObjectRegistry(registry, appProfile, input.outputRoot);
+        }
+      }
+      const deterministicContract = buildSpecExecutionContract(plan, authoritativeSourceScenario, {
+        appSlug: appProfile.appSlug,
+        sectionSlug,
+        pageObjectRegistry: registry,
+      });
+      const deterministicResult = compileDeterministicSpec(deterministicContract, { targetSpecPath: appPaths.specPath });
+      const requiredActionSteps = deterministicContract.steps.filter(
+        (s) => s.required !== false && ["fill", "press", "click"].includes(s.operation),
+      ).length;
+      const compiledActionBindings = deterministicResult.bindings.filter((b) => b.runtimeMethod !== "expectPromotedVisible").length;
+      const failedGate = deterministicResult.unsupportedCapabilities.length > 0
+        ? "deterministic_unsupported_capabilities"
+        : compiledActionBindings !== requiredActionSteps
+          ? "deterministic_action_binding_mismatch"
+          : undefined;
+      console.log(
+        `[deterministic-spec-generation] scenarioId=${plan.scenario.externalId} finalSpecOrigin=deterministic_compiler ` +
+        `requiredActions=${requiredActionSteps} compiledActionBindings=${compiledActionBindings} ` +
+        `unsupportedCapabilities=${deterministicResult.unsupportedCapabilities.length} aiInvoked=false failedGate=${failedGate ?? "none"}`
+      );
+      if (failedGate) {
+        throw new Error(
+          `DETERMINISTIC_SPEC_GENERATION_FAILED_CLOSED: scenarioId=${plan.scenario.externalId} ` +
+          `failedGate=${failedGate} fallbackReason=no_ai_fallback_permitted ` +
+          `unsupportedCapabilities=${JSON.stringify(deterministicResult.unsupportedCapabilities)} ` +
+          `requiredActions=${requiredActionSteps} compiledActionBindings=${compiledActionBindings}`
+        );
+      }
+      specResult = {
+        specContent: deterministicResult.source,
+        selectedStrategy: "pom",
+        fallbackUsed: false,
+        pomStatus: "promoted",
+        usedPageObjects: [],
+        missingPageObjects: [],
+        missingMethods: [],
+        generatedCandidates: 0,
+        validationErrors: [],
+      };
+      candidateAuthority = "deterministic_compiler";
+    } else {
+      specResult = await generateSpecFromPlanWithPolicy({
+        plan,
+        automationId,
+        appProfile,
+        appPaths,
+        sectionSlug,
+        scenarioId: plan.scenario.externalId,
+        promotionPolicy,
+        inlineDebugMode,
+        pageObjectRegistry: registry,
+        authFlowOptions
+      });
+    }
     generatedSpecContent = specResult.specContent;
     pomStatus = specResult.pomStatus;
 
@@ -1260,6 +1790,16 @@ export async function promoteExecutionPlan(
         strategyDiagnostics.reason = autoPomResult.diagnostics.finalPomStatus;
         strategyDiagnostics.fallbackUsed = strategyDiagnostics.selectedStrategy !== "pom";
       }
+
+      // FIRST_LOSS fix: Auto-POM persists its own approvals to disk (savePageObjectRegistry,
+      // inside runAutoPomPipeline) and even reloads its own local copy to regenerate the spec --
+      // but `registryForSpecValidation` here is the snapshot taken BEFORE this pipeline ran, and
+      // was never refreshed. `runHybridSpecGeneration` below then validates the AI candidate's
+      // Page Object imports against that stale authority and rejects an object Auto-POM
+      // legitimately approved moments earlier, in this SAME job. Reload from the same
+      // authoritative persisted source Auto-POM itself just wrote to -- no parallel registry, no
+      // symbol-name allowlist.
+      registryForSpecValidation = await loadPageObjectRegistry(appProfile, input.outputRoot).catch(() => registryForSpecValidation);
     }
   } else {
     const specContent = generateSpecFromPlan(plan, automationId, appProfile, appPaths, {
@@ -1287,6 +1827,7 @@ export async function promoteExecutionPlan(
   const specGenerationResult = await runHybridSpecGeneration({
     plan,
     deterministicDraft: generatedSpecContent,
+    candidateAuthority,
     appProfile,
     appPaths,
     sectionSlug,
@@ -1294,6 +1835,7 @@ export async function promoteExecutionPlan(
     promotionPolicy,
     pageObjectRegistry: registryForSpecValidation,
     sourceScenario: authoritativeSourceScenario,
+    runtimeInputValues,
     headed: input.headed,
     executionSource: input.executionSource,
   });
@@ -1322,9 +1864,20 @@ export async function promoteExecutionPlan(
     );
   }
   specGenerationDiagnostics = specGenerationResult.diagnostics;
+  // DIAGNOSE-only instrumentation (this ticket): proves whether runHybridSpecGeneration's own
+  // returned specContent already diverged from the deterministic draft passed into it, or
+  // whether the divergence happens later in this function. No behavior change.
+  console.log(
+    `[deterministic-draft-tracking] draftSameAsHybridOutput=${generatedSpecContent === specGenerationResult.specContent} ` +
+    `draftContainsPOM=${generatedSpecContent.includes("DeterministicPromotedPage")} ` +
+    `hybridOutputContainsPOM=${specGenerationResult.specContent.includes("DeterministicPromotedPage")} ` +
+    `hybridOutputContainsInlineExecutor=${specGenerationResult.specContent.includes("inline_executor")}`
+  );
   generatedSpecContent = specGenerationResult.specContent;
   generatedSpecContent = rewritePromotedRuntimeImport(generatedSpecContent, appPaths.specPath);
+  generatedSpecContent = rewritePromotedAuthFlowHelperImport(generatedSpecContent, appPaths.specPath, appProfile.appSlug);
   generatedSpecContent = ensurePromotedSpecNavigation(generatedSpecContent, plan);
+  generatedSpecContent = ensurePromotedSpecStrategyMarker(generatedSpecContent, strategyDiagnostics?.selectedStrategy);
   const promotedImportValidation = await validatePromotedSpecInternalImports(generatedSpecContent, appPaths.specPath);
   console.log(`[promoted-spec-imports] specPath=${appPaths.specPath} internalImports=${promotedImportValidation.internalImports} resolved=${promotedImportValidation.resolved} unresolved=${promotedImportValidation.unresolved.length}`);
 

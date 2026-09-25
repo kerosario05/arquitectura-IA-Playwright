@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-fuck",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "fuck",
+  "source": "discovery",
+  "appSlug": "fenix",
+  "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+  "createdAt": "2026-09-24T20:15:05.283Z"
+}

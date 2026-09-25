@@ -17,14 +17,28 @@ function describe(_name: string, fn: () => void): void {
 }
 
 describe("deleteProject cleanup order", () => {
-  test("ProjectCaseInputRequirement is deleted before dbo.Projects in the same statement batch", () => {
-    const statements = buildProjectDeleteStatements("project-1");
+  test("optional tables are retained when the capability is present", () => {
+    const statements = buildProjectDeleteStatements("project-1", [
+      "ProjectConfigurationHistory", "ProjectJiraConfiguration", "ProjectTestRailConfiguration",
+      "ProjectOtpConfiguration", "ProjectKnowledge", "WebProjectConfiguration", "MobileProjectConfiguration",
+      "ProjectCaseInputRequirement", "ProjectCaseRuntimeValue", "ProjectGenerationConfig", "Projects",
+    ]);
     const caseIdx = statements.findIndex((s) => s.includes("ProjectCaseInputRequirement"));
     const projectsIdx = statements.findIndex((s) => s.trim().startsWith("DELETE FROM dbo.Projects"));
 
     assert.ok(caseIdx >= 0, "missing DELETE for dbo.ProjectCaseInputRequirement");
     assert.ok(projectsIdx >= 0, "missing DELETE for dbo.Projects");
     assert.ok(caseIdx < projectsIdx, "ProjectCaseInputRequirement must be cleaned before deleting dbo.Projects");
+  });
+
+  test("optional tables absent from the active schema are omitted", () => {
+    const statements = buildProjectDeleteStatements("project-1", [
+      "ProjectConfigurationHistory", "ProjectJiraConfiguration", "ProjectTestRailConfiguration",
+      "ProjectOtpConfiguration", "ProjectKnowledge", "WebProjectConfiguration", "MobileProjectConfiguration", "Projects",
+    ]);
+    assert.equal(statements.some((s) => /ProjectCaseInputRequirement|ProjectCaseRuntimeValue|ProjectGenerationConfig/.test(s)), false);
+    assert.ok(statements.some((s) => s.includes("ProjectKnowledge")));
+    assert.ok(statements.some((s) => s.includes("dbo.Projects")));
   });
 
   test("existing child-table deletes are preserved unchanged", () => {

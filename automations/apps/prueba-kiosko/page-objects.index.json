@@ -1,0 +1,82 @@
+{
+  "version": "1.0",
+  "appSlug": "prueba-kiosko",
+  "pageObjects": [
+    {
+      "id": "po_framework_productlistpage",
+      "className": "ProductListPage",
+      "filePath": "automations/apps/prueba-kiosko/pages/productlist.page.ts",
+      "screenSignature": "screen:prueba-kiosko-product_list",
+      "methods": [
+        {
+          "name": "selectProduct",
+          "intent": "select_product",
+          "parameters": [
+            "productName"
+          ],
+          "available": true,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        },
+        {
+          "name": "selectFirstVisibleCard",
+          "intent": "select_first_visible_card",
+          "parameters": [],
+          "available": true,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        }
+      ],
+      "confidence": 1,
+      "status": "active",
+      "sourcePlanIds": [],
+      "caseIds": [],
+      "createdAt": "2026-09-22T15:16:14.590Z",
+      "updatedAt": "2026-09-22T15:16:14.590Z"
+    },
+    {
+      "id": "po_framework_operationsmenupage",
+      "className": "OperationsMenuPage",
+      "filePath": "automations/apps/prueba-kiosko/pages/operationsmenu.page.ts",
+      "screenSignature": "screen:prueba-kiosko-operations_menu",
+      "methods": [
+        {
+          "name": "openModule",
+          "intent": "open_module",
+          "parameters": [
+            "moduleName"
+          ],
+          "available": false,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        },
+        {
+          "name": "expectModuleVisible",
+          "intent": "expect_loaded",
+          "parameters": [
+            "moduleName"
+          ],
+          "available": false,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        }
+      ],
+      "confidence": 1,
+      "status": "active",
+      "sourcePlanIds": [],
+      "caseIds": [],
+      "createdAt": "2026-09-22T15:16:14.590Z",
+      "updatedAt": "2026-09-22T15:16:14.590Z"
+    }
+  ],
+  "componentCandidates": [],
+  "updatedAt": "2026-09-25T12:49:05.359Z"
+}

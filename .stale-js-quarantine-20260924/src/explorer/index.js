@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.buildCandidateLocators = exports.extractDataHintsFromElementText = exports.sanitizeSnapshotText = exports.isPotentiallySensitiveText = exports.sanitizeVisibleText = exports.writePageSnapshot = exports.scanCurrentPage = void 0;
+var page_scanner_1 = require("./page-scanner");
+Object.defineProperty(exports, "scanCurrentPage", { enumerable: true, get: function () { return page_scanner_1.scanCurrentPage; } });
+var snapshot_writer_1 = require("./snapshot-writer");
+Object.defineProperty(exports, "writePageSnapshot", { enumerable: true, get: function () { return snapshot_writer_1.writePageSnapshot; } });
+var snapshot_sanitizer_1 = require("./snapshot-sanitizer");
+Object.defineProperty(exports, "sanitizeVisibleText", { enumerable: true, get: function () { return snapshot_sanitizer_1.sanitizeVisibleText; } });
+Object.defineProperty(exports, "isPotentiallySensitiveText", { enumerable: true, get: function () { return snapshot_sanitizer_1.isPotentiallySensitiveText; } });
+Object.defineProperty(exports, "sanitizeSnapshotText", { enumerable: true, get: function () { return snapshot_sanitizer_1.sanitizeSnapshotText; } });
+var data_hint_extractor_1 = require("./data-hint-extractor");
+Object.defineProperty(exports, "extractDataHintsFromElementText", { enumerable: true, get: function () { return data_hint_extractor_1.extractDataHintsFromElementText; } });
+var locator_candidate_builder_1 = require("./locator-candidate-builder");
+Object.defineProperty(exports, "buildCandidateLocators", { enumerable: true, get: function () { return locator_candidate_builder_1.buildCandidateLocators; } });

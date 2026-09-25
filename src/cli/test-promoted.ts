@@ -12,10 +12,12 @@ import {
 import type { DataContextEntry } from "../data/data-context";
 import type { PromotedAutomationIndexEntry } from "../types/automation-promotion.types";
 import { loadPromotedAppConfigSync } from "../automations/app-profile";
+import { resolveRuntimeWebBaseUrl } from "./runtime-web-config";
 import {
   applyPromotedBrowserMode,
   resolvePromotedBrowserMode,
 } from "./test-promoted-browser-mode";
+import { MAX_SCENARIO_ATTEMPTS, shouldRetryScenario } from "../discovery/pre-business-retry-policy";
 
 function printUsage(): void {
   console.log(`
@@ -288,10 +290,42 @@ export function buildPromotedExecutionEnv(
   return buildPromotedExecutionEnvWithConfig(baseEnv, appSlug, projectConfig);
 }
 
+/** Resolve the promoted runner's URL through the same SQL-first authority as discovery. */
+export async function resolvePromotedExecutionEnv(
+  baseEnv: NodeJS.ProcessEnv,
+  appSlug: string | undefined,
+): Promise<NodeJS.ProcessEnv> {
+  if (!appSlug) return buildPromotedExecutionEnv(baseEnv, appSlug);
+
+  const resolution = await resolveRuntimeWebBaseUrl(appSlug);
+  let materializedConfig: ReturnType<typeof loadPromotedAppConfigSync> | undefined;
+  try {
+    materializedConfig = loadPromotedAppConfigSync({ appSlug });
+  } catch {
+    materializedConfig = undefined;
+  }
+  const materializedUrl = validUrl(materializedConfig?.baseUrl);
+  console.log(
+    `[promoted-runtime-config] selectedProject=${appSlug}`
+    + ` sqlConfiguredUrl=${resolution.source === "project_sql" ? resolution.configured ?? "none" : "unavailable"}`
+    + ` materializedConfiguredUrl=${materializedUrl ?? "none"}`
+    + ` effectivePlaywrightUrl=${resolution.effective}`
+    + ` authority=${resolution.source}`,
+  );
+
+  const runtimeConfig = {
+    ...(materializedConfig ?? {}),
+    baseUrl: resolution.effective,
+    ...(resolution.ignoreHTTPSErrors === undefined ? {} : { ignoreHTTPSErrors: resolution.ignoreHTTPSErrors }),
+  } as ReturnType<typeof loadPromotedAppConfigSync>;
+  return buildPromotedExecutionEnvWithConfig(baseEnv, appSlug, runtimeConfig, resolution.source);
+}
+
 export function buildPromotedExecutionEnvWithConfig(
   baseEnv: NodeJS.ProcessEnv,
   appSlug: string | undefined,
   projectConfig: ReturnType<typeof loadPromotedAppConfigSync>,
+  sourceOverride?: "project_sql" | "project_config" | "app_config" | "legacy_env",
 ): NodeJS.ProcessEnv {
   const projectConfiguredUrl = validUrl(projectConfig?.baseUrl);
   const legacyUrl = validUrl(baseEnv.APP_BASE_URL);
@@ -299,7 +333,7 @@ export function buildPromotedExecutionEnvWithConfig(
   if (!effectiveUrl) {
     throw new Error(`[promoted-runtime-config] missing valid project baseUrl and APP_BASE_URL fallback appSlug=${appSlug ?? "unknown"}`);
   }
-  const source = projectConfiguredUrl ? "project_config" : "legacy_env";
+  const source = sourceOverride ?? (projectConfiguredUrl ? "project_config" : "legacy_env");
   console.log(`[promoted-runtime-config] appSlug=${appSlug ?? "unknown"} baseUrlSource=${source} projectScoped=${Boolean(projectConfiguredUrl)}`);
   const { APP_IGNORE_HTTPS_ERRORS: _legacyTlsValue, ...envWithoutTls } = baseEnv;
   return {
@@ -324,6 +358,87 @@ function buildTestPath(options: { app?: string; section?: string; caseId?: strin
 
   // Default: all promoted specs
   return 'automations/apps';
+}
+
+type PromotedRuntimeAttemptOutput = {
+  attempt?: number;
+  loginResponseObserved?: boolean;
+  loginStatus?: number;
+  loginRequestFinished?: boolean;
+  requestPending?: boolean;
+  businessSurfaceReached?: boolean;
+  failureClassification?: string;
+  authRejected?: boolean;
+  applicationError?: boolean;
+  functionalBusinessExecutionStarted?: boolean;
+  oracleEvaluationStarted?: boolean;
+};
+
+function readPromotedRuntimeAttempt(lines: string[]): PromotedRuntimeAttemptOutput | undefined {
+  for (let index = lines.length - 1; index >= 0; index -= 1) {
+    const match = lines[index]?.match(/^\[promoted-runtime-attempt\]\s+(\{.*\})\s*$/);
+    if (!match) continue;
+    try {
+      const parsed = JSON.parse(match[1]) as PromotedRuntimeAttemptOutput;
+      return parsed && typeof parsed === "object" ? parsed : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+  return undefined;
+}
+
+function isRetryEligiblePromotedAttempt(
+  attempt: number,
+  diagnostics: PromotedRuntimeAttemptOutput | undefined,
+): boolean {
+  if (!diagnostics) return false;
+  return shouldRetryScenario({
+    attempt,
+    businessSurfaceReached: diagnostics.businessSurfaceReached === true,
+    failureClassification: diagnostics.failureClassification,
+    authRejected: diagnostics.authRejected === true,
+    applicationError: diagnostics.applicationError === true,
+    functionalBusinessExecutionStarted: diagnostics.functionalBusinessExecutionStarted === true,
+    oracleEvaluationStarted: diagnostics.oracleEvaluationStarted === true,
+  });
+}
+
+async function runPromotedPlaywrightChild(
+  spawnCommand: string,
+  spawnArgs: string[],
+  env: NodeJS.ProcessEnv,
+): Promise<{ code: number; lines: string[] }> {
+  const lines: string[] = [];
+  return await new Promise((resolve, reject) => {
+    const child = spawn(spawnCommand, spawnArgs, {
+      stdio: ["ignore", "pipe", "pipe"],
+      env,
+      shell: false,
+    });
+    const attach = (stream: NodeJS.ReadableStream | null | undefined): void => {
+      if (!stream) return;
+      let pending = "";
+      stream.on("data", (chunk: Buffer) => {
+        pending += chunk.toString();
+        const parts = pending.split(/\r?\n/);
+        pending = parts.pop() ?? "";
+        for (const part of parts) {
+          if (part.trim()) lines.push(part);
+          process.stdout.write(`${part}\n`);
+        }
+      });
+      stream.on("end", () => {
+        if (!pending.trim()) return;
+        lines.push(pending);
+        process.stdout.write(`${pending}\n`);
+      });
+    };
+    attach(child.stdout);
+    attach(child.stderr);
+    child.on("error", reject);
+    child.on("close", (code) => resolve({ code: code ?? 1, lines }));
+  });
 }
 
 async function resolvePromotedSpecPath(options: { app?: string; section?: string; caseId: string }): Promise<string | null> {
@@ -436,7 +551,7 @@ async function main(): Promise<void> {
     ...(resolvedAppSlug ? { EVIDENCE_APP_SLUG: resolvedAppSlug } : {}),
     ...(resolvedSectionSlug ? { EVIDENCE_SECTION_SLUG: resolvedSectionSlug } : {}),
   };
-  const projectScopedPlaywrightEnv = buildPromotedExecutionEnv(basePlaywrightEnv, resolvedAppSlug);
+  const projectScopedPlaywrightEnv = await resolvePromotedExecutionEnv(basePlaywrightEnv, resolvedAppSlug);
   let promotedRuntimeEnv = projectScopedPlaywrightEnv;
   if (options.caseId && testPath) {
     const specSource = await fs.readFile(path.resolve(process.cwd(), testPath), "utf8");
@@ -473,21 +588,36 @@ async function main(): Promise<void> {
   console.log(`[test:promoted] browserMode=${browserMode.mode} source=${browserMode.source}`);
   console.log(`[test:promoted] Executing: playwright test ${finalPlaywrightArgs.join(" ")}\n`);
   const spawnArgs = [playwrightCliPath, "test", ...finalPlaywrightArgs];
-  
-  const child = spawn(spawnCommand, spawnArgs, {
-    stdio: "inherit",
-    env: playwrightEnv,
-    shell: false // Critical: prevents any shell interpretation of special chars
-  });
-
-  child.on("close", (code) => {
-    process.exit(code ?? 1);
-  });
-
-  child.on("error", (err) => {
-    console.error("[test:promoted] Failed to start Playwright:", err);
-    process.exit(1);
-  });
+  const retryScope = Boolean(options.caseId || options.grep);
+  let attempt = 1;
+  while (true) {
+    const attemptEnv: NodeJS.ProcessEnv = {
+      ...playwrightEnv,
+      PROMOTED_RUNTIME_ATTEMPT: String(attempt),
+    };
+    console.log(`[pre-business-retry] scenarioScope=${retryScope} attempt=${attempt}/${MAX_SCENARIO_ATTEMPTS} freshBrowserContextPage=${attempt > 1}`);
+    let result: { code: number; lines: string[] };
+    try {
+      result = await runPromotedPlaywrightChild(spawnCommand, spawnArgs, attemptEnv);
+    } catch (err) {
+      console.error("[test:promoted] Failed to start Playwright:", err);
+      process.exitCode = 1;
+      return;
+    }
+    const diagnostics = readPromotedRuntimeAttempt(result.lines);
+    const retryEligible = retryScope && result.code !== 0 && isRetryEligiblePromotedAttempt(attempt, diagnostics);
+    console.log(
+      `[pre-business-retry] attempt=${attempt} `
+      + `failureClassification=${diagnostics?.failureClassification ?? "unavailable"} `
+      + `businessSurfaceReached=${diagnostics?.businessSurfaceReached ?? "unavailable"} `
+      + `retryEligible=${retryEligible} retryTriggered=${retryEligible && attempt < MAX_SCENARIO_ATTEMPTS}`,
+    );
+    if (!retryEligible || attempt >= MAX_SCENARIO_ATTEMPTS) {
+      process.exitCode = result.code;
+      return;
+    }
+    attempt += 1;
+  }
 }
 
 if (process.argv[1]?.replace(/\\/g, "/").endsWith("test-promoted.ts")) {

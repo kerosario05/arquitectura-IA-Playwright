@@ -68,6 +68,15 @@ test("does not invent a mutation when before and after are equal", () => {
   assert.equal(diff.navigationMutation, false);
 });
 
+test("detects a same-surface control value mutation without exposing the value", () => {
+  const before = snapshot({ controls: [{ ...snapshot().controls[0], valueFingerprint: "3:100" }] });
+  const after = snapshot({ controls: [{ ...before.controls[0], valueFingerprint: "4:200" }] });
+  const diff = diffAssertionObservation(before, after);
+  assert.deepEqual(diff.changedPaths, ["controls"]);
+  assert.equal(diff.changed, true);
+  assert.equal(JSON.stringify(after).includes("4022"), false);
+});
+
 test("observation artifact keeps requirement lineage and excludes sensitive values", async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "assertion-observation-"));
   try {
@@ -99,3 +108,20 @@ test("classifies network activity conservatively from safe transport metadata", 
   assert.equal(classifyNetworkActivity([{ method: "GET", resourceType: "document", state: "completed", status: 200 }], "/form", "/next"), "navigation");
   assert.equal(classifyNetworkActivity([{ method: "POST", resourceType: "websocket", state: "pending" }]), "unknown");
 });
+
+test("detects a newly appeared modal control (e.g. a dialog button) as a controls mutation", () => {
+  const before = snapshot();
+  const after = snapshot({
+    controls: [
+      ...before.controls,
+      {
+        identity: "button|name=Generar", tagName: "button", ariaInvalid: "false", ariaDescribedBy: "",
+        disabled: false, required: false, focused: false, validationNodeIds: [], valueFingerprint: "0:2166136261",
+      },
+    ],
+  });
+  const diff = diffAssertionObservation(before, after);
+  assert.deepEqual(diff.changedPaths, ["controls"]);
+  assert.equal(diff.changed, true);
+});
+

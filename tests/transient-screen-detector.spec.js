@@ -99,6 +99,17 @@ function makeSnapshot(elements, url) {
     (0, test_1.expect)(result.transient).toBe(true);
     (0, test_1.expect)(result.reason).toBe("data_loading");
 });
+(0, test_1.test)("detectTransientScreen keeps a loaded screen with empty subsections stable", () => {
+    const snapshot = makeSnapshot([
+        { text: "No hay resultados", tagName: "p" },
+        { text: "Anterior", tagName: "button" },
+        { text: "Siguiente", tagName: "button" },
+        { text: "Descargar lista", tagName: "button" }
+    ], "https://example.com/payroll/manualCreationTable");
+    const result = (0, transient_screen_detector_1.detectTransientScreen)(snapshot);
+    (0, test_1.expect)(result.transient).toBe(false);
+    (0, test_1.expect)(result.evidence).toContain("actionable_empty_state_detected");
+});
 (0, test_1.test)("detectTransientScreen considers 'Cargando productos' as transient", () => {
     const snapshot = makeSnapshot([
         { text: "Cargando productos...", tagName: "p" }

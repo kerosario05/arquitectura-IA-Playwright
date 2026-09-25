@@ -1,0 +1,431 @@
+{
+  "version": "1.0",
+  "updatedAt": "2026-09-22T22:08:29.919Z",
+  "automations": [
+    {
+      "id": "preview-001-crear-producto-cuenta-efectivo",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "Crear Producto Cuenta Efectivo",
+      "planPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-crear-producto-cuenta-efectivo\\plan.json",
+      "specPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-crear-producto-cuenta-efectivo\\case.spec.ts",
+      "appSlug": "portal-comercial",
+      "appConfigPath": "automations\\apps\\portal-comercial\\app.config.json",
+      "status": "spec_failed",
+      "source": "discovery",
+      "appProfile": "portal-comercial",
+      "createdAt": "2026-09-16T18:05:28.662Z",
+      "updatedAt": "2026-09-16T18:05:28.663Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-16T18-01-10-907Z\\discovered-plans.pending.json",
+      "pomStatus": "needs_manual_review",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "failed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-16T18-01-10-907Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [
+            "LoginPage"
+          ],
+          "generatedMethods": [
+            "LoginPage.fillUsername()",
+            "LoginPage.fillPassword()",
+            "LoginPage.submitLogin()"
+          ],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0,
+          "autoPom": {
+            "enabled": true,
+            "initialPomStatus": "needs_page_method",
+            "generatedCandidateFiles": [
+              "automations\\apps\\portal-comercial\\pages\\login.page.candidate.ts"
+            ],
+            "autoApprovedPageObjects": [
+              "LoginPage"
+            ],
+            "autoApprovedMethods": [
+              "LoginPage.fillUsername()",
+              "LoginPage.fillPassword()",
+              "LoginPage.submitLogin()"
+            ],
+            "blockedAutoApprovals": [],
+            "approvalThreshold": 0.5,
+            "regeneratedSpec": true,
+            "validationStatus": "passed",
+            "finalPomStatus": "promoted"
+          }
+        },
+        "specGeneration": {
+          "mode": "ai_hybrid",
+          "provider": "codex",
+          "model": "gpt-5.6-luna",
+          "skill": {
+            "name": "playwright-spec-generation",
+            "version": "1.0.0",
+            "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+            "loaded": true
+          },
+          "invocations": 1,
+          "invocationsConsumed": 1,
+          "durationMs": 227935,
+          "usage": {
+            "inputTokens": 164368,
+            "cachedInputTokens": 129280,
+            "cacheWriteInputTokens": 0,
+            "nonCachedInputTokens": 35088,
+            "outputTokens": 5804,
+            "reasoningOutputTokens": 1880,
+            "totalPhysicalTokens": 170172,
+            "durationMs": 170226,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "traceFidelity": "passed",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "skipped"
+          },
+          "promotionAllowed": false,
+          "specsRequested": 1,
+          "specsValidated": 0,
+          "specsRejected": 1,
+          "specGenerationAttempts": 1,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": false,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "navigation_transition"
+          ],
+          "errors": [],
+          "warnings": [
+            "functional_execution_infrastructure_failed:runner_no_tests_found",
+            "runtime_gate:deferred:runtime_unavailable_promotion_deferred: candidate runtime did not execute, so no required step was proven to pass — promotion is neither allowed nor denied until it does."
+          ],
+          "finalSpec": {
+            "origin": "ai_candidate",
+            "generatedBy": "ai",
+            "strategy": "ai_candidate",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "defer",
+            "promotionStatus": "deferred",
+            "reason": "runtime_unavailable_promotion_deferred: candidate runtime did not execute, so no required step was proven to pass — promotion is neither allowed nor denied until it does."
+          },
+          "specWritten": false,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "spec_generation_validation_failed",
+          "blockers": [
+            "missing_method:step=1 target=\"Usuario\" derivedIntent=\"fill_username\" expectedOwner=\"LoginPage\" availableMethods=[]",
+            "missing_method:step=2 target=\"Contraseña\" derivedIntent=\"fill_password\" expectedOwner=\"LoginPage\" availableMethods=[]",
+            "missing_method:step=3 target=\"Iniciar sesión\" derivedIntent=\"submit_login\" expectedOwner=\"LoginPage\" availableMethods=[]",
+            "spec_generation_validation_failed"
+          ],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [
+            "step=1 target=\"Usuario\" derivedIntent=\"fill_username\" expectedOwner=\"LoginPage\" availableMethods=[]",
+            "step=2 target=\"Contraseña\" derivedIntent=\"fill_password\" expectedOwner=\"LoginPage\" availableMethods=[]",
+            "step=3 target=\"Iniciar sesión\" derivedIntent=\"submit_login\" expectedOwner=\"LoginPage\" availableMethods=[]"
+          ],
+          "autoPomAttempted": true,
+          "autoPomCreatedMethods": [
+            "LoginPage.fillUsername()",
+            "LoginPage.fillPassword()",
+            "LoginPage.submitLogin()"
+          ],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-crear-producto-cuenta-efectivo\\case.spec.ts",
+          "specHash": "5e15f94766b430187a2e875439986acf83cc25d3a3bb1735912b2687ca6736be",
+          "specSource": "ai_candidate"
+        }
+      }
+    },
+    {
+      "id": "preview-001-segunta-prueba",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "Segunta Prueba",
+      "planPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-segunta-prueba\\plan.json",
+      "specPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-segunta-prueba\\case.spec.ts",
+      "appSlug": "portal-comercial",
+      "appConfigPath": "automations\\apps\\portal-comercial\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "portal-comercial",
+      "createdAt": "2026-09-18T17:49:22.427Z",
+      "updatedAt": "2026-09-20T14:02:53.344Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-20T14-00-03-754Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-20T14-00-03-754Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 125362,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "navigation_transition"
+          ],
+          "errors": [],
+          "warnings": [
+            "step_index_not_explicit_in_spec:8"
+          ],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage",
+            "LoginPage",
+            "FormPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-segunta-prueba\\case.spec.ts",
+          "specHash": "3669eb4762e7dc2878552abc9b60b8fcc995e5c0617bc48faa0dbd9d0cf0564d",
+          "specSource": "generatedSpec"
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-segunta-prueba\\plan.json",
+        "previousStatus": "spec_failed"
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-segunta-prueba\\case.spec.ts",
+      "promotedSpecHash": "3669eb4762e7dc2878552abc9b60b8fcc995e5c0617bc48faa0dbd9d0cf0564d"
+    },
+    {
+      "id": "preview-001-certificado-de-deposito",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "Certificado de Deposito",
+      "planPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-certificado-de-deposito\\plan.json",
+      "specPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-certificado-de-deposito\\case.spec.ts",
+      "appSlug": "portal-comercial",
+      "appConfigPath": "automations\\apps\\portal-comercial\\app.config.json",
+      "status": "spec_failed",
+      "source": "discovery",
+      "appProfile": "portal-comercial",
+      "createdAt": "2026-09-22T22:02:15.436Z",
+      "updatedAt": "2026-09-22T22:08:29.918Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-22T22-06-38-332Z\\discovered-plans.pending.json",
+      "pomStatus": "needs_manual_review",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "failed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-22T22-06-38-332Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 26147,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "failed"
+          },
+          "promotionAllowed": false,
+          "specsRequested": 1,
+          "specsValidated": 0,
+          "specsRejected": 1,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": false,
+          "failedGatesAttempt1": [
+            "functionalExecution"
+          ],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "navigation_transition"
+          ],
+          "errors": [
+            "functional_execution_failed:exitCode=1",
+            "functional_execution_error:Error: wrong_screen_before_contextual_action: Cannot execute 'fill_form_field' on target \"role:textbox|Usuario\" because current screen does not match required context. currentUrl=\"https://srvqacgowb01.local.bsc.com:5000/login\" visibleButtons=[Iniciar sesión] visibleHeadings=[] stepIndex=1 actionIntent=\"fill_form_field\" screenSignals={isOnHomeScreen:false, isOnLoginScreen:true, isOnMenuScreen:false, isOnAuthGate:true} suggestedFix=\"Ensure navigation/module/auth steps precede this action in the spec\""
+          ],
+          "warnings": [
+            "step_index_not_explicit_in_spec:16",
+            "functional_execution_screenshots=0",
+            "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 1)."
+          ],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "block",
+            "promotionStatus": "blocked",
+            "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 1)."
+          },
+          "specWritten": false,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "spec_generation_validation_failed",
+          "blockers": [
+            "spec_generation_validation_failed"
+          ],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage",
+            "LoginPage",
+            "FormPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-certificado-de-deposito\\case.spec.ts",
+          "specHash": "f90a0e1f9640b518a5a5f3488d89b4c3e05bb291ae48f0ad74d2c376855de8ad",
+          "specSource": "ai_candidate"
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-certificado-de-deposito\\plan.json",
+        "previousStatus": "spec_failed"
+      }
+    }
+  ]
+}

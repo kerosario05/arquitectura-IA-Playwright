@@ -1,0 +1,5503 @@
+[
+  {
+    "scenarioId": "REC-A1282E09-01",
+    "title": "Creacion Cuenta Efectivo",
+    "description": "Recorrido observado para completar \"Creacion Cuenta Efectivo\". Se registraron 29 acciones funcionales.",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://srvqacgowb01.local.bsc.com:5000/",
+        "description": "Navegar a https://srvqacgowb01.local.bsc.com:5000/"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Usuario"
+        },
+        "valueKey": "usuario",
+        "description": "Ingresar [usuario] en \"Usuario\"",
+        "interactionId": "interaction-6"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Contraseña"
+        },
+        "valueKey": "contrasena",
+        "description": "Ingresar [contrasena] en \"Contraseña\"",
+        "interactionId": "interaction-7"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "link|Solicitud multiproducto"
+        },
+        "description": "Presionar \"Solicitud multiproducto\"",
+        "interactionId": "interaction-10"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Depurar"
+        },
+        "description": "Presionar \"Depurar\"",
+        "interactionId": "interaction-15"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Continuar"
+        },
+        "description": "Presionar \"Continuar\"",
+        "interactionId": "interaction-17"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Aceptar"
+        },
+        "description": "Presionar \"Aceptar\"",
+        "interactionId": "interaction-26"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Continuar"
+        },
+        "description": "Presionar \"Continuar\"",
+        "interactionId": "interaction-27"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Crear cuenta"
+        },
+        "description": "Presionar \"Crear cuenta\"",
+        "interactionId": "interaction-34"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Continuar"
+        },
+        "description": "Presionar \"Continuar\"",
+        "interactionId": "interaction-35"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Finalizar"
+        },
+        "description": "Presionar \"Finalizar\"",
+        "interactionId": "interaction-36"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Cerrar"
+        },
+        "description": "Presionar \"Cerrar\"",
+        "interactionId": "interaction-37"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Cancelar"
+        },
+        "description": "Presionar \"Cancelar\"",
+        "interactionId": "interaction-38"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Aceptar"
+        },
+        "description": "Presionar \"Aceptar\"",
+        "interactionId": "interaction-39"
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Ingresar [usuario] en \"Usuario\"",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "stepTemplate": "Ingresar [usuario] en \"Usuario\"",
+        "renderedStep": "Ingresar \"radames\" en \"Usuario\"",
+        "valueKey": "usuario",
+        "interactionId": "interaction-6",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 2
+      },
+      {
+        "content": "Ingresar [contrasena] en \"Contraseña\"",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "stepTemplate": "Ingresar [contrasena] en \"Contraseña\"",
+        "renderedStep": "Ingresar \"Masteryi15.\" en \"Contraseña\"",
+        "valueKey": "contrasena",
+        "interactionId": "interaction-7",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 3
+      },
+      {
+        "content": "Presionar \"Enter\" en \"Contraseña\"",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "renderedStep": "Presionar \"Enter\" en \"Contraseña\"",
+        "interactionId": "interaction-8",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 4
+      },
+      {
+        "content": "Presionar \"Solicitud multiproducto\"",
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "renderedStep": "Presionar \"Solicitud multiproducto\"",
+        "interactionId": "interaction-10",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 5
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"056-0154046-0\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "interactionId": "interaction-13",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 6
+      },
+      {
+        "content": "Presionar botón asociado a \"Número de identificación\"",
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "renderedStep": "Presionar botón asociado a \"Número de identificación\"",
+        "interactionId": "interaction-14",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 7
+      },
+      {
+        "content": "Presionar \"Depurar\"",
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "renderedStep": "Presionar \"Depurar\"",
+        "interactionId": "interaction-15",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 8
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "renderedStep": "Presionar \"Continuar\"",
+        "interactionId": "interaction-17",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 9
+      },
+      {
+        "content": "Seleccionar [categoria_de_producto_seleccion] en \"Categoría de producto\"",
+        "stepTemplate": "Seleccionar [categoria_de_producto_seleccion] en \"Categoría de producto\"",
+        "renderedStep": "Seleccionar \"Certificados de Deposito\" en \"Categoría de producto\"",
+        "valueKey": "categoria_de_producto_seleccion",
+        "interactionId": "interaction-20",
+        "sourceEventRefs": [
+          "event-20"
+        ],
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 10
+      },
+      {
+        "content": "Seleccionar [producto_seleccion] en \"Producto\"",
+        "stepTemplate": "Seleccionar [producto_seleccion] en \"Producto\"",
+        "renderedStep": "Seleccionar \"300 - Depósito a plazo Financiero Personal Capitalizable DOP\" en \"Producto\"",
+        "valueKey": "producto_seleccion",
+        "interactionId": "interaction-23",
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 11
+      },
+      {
+        "content": "Presionar botón asociado a \"Tasa\"",
+        "sourceEventRefs": [
+          "event-24"
+        ],
+        "renderedStep": "Presionar botón asociado a \"Tasa\"",
+        "interactionId": "interaction-24",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 12
+      },
+      {
+        "content": "Presionar \"Aceptar\"",
+        "sourceEventRefs": [
+          "event-26"
+        ],
+        "renderedStep": "Presionar \"Aceptar\"",
+        "interactionId": "interaction-26",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 13
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "sourceEventRefs": [
+          "event-27"
+        ],
+        "renderedStep": "Presionar \"Continuar\"",
+        "interactionId": "interaction-27",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 14
+      },
+      {
+        "content": "Seleccionar [proposito_seleccion] en \"Propósito\"",
+        "stepTemplate": "Seleccionar [proposito_seleccion] en \"Propósito\"",
+        "renderedStep": "Seleccionar \"Ahorros Personales\" en \"Propósito\"",
+        "valueKey": "proposito_seleccion",
+        "interactionId": "interaction-30",
+        "sourceEventRefs": [
+          "event-30"
+        ],
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 15
+      },
+      {
+        "content": "Seleccionar [instrumento_seleccion] en \"Instrumento\"",
+        "stepTemplate": "Seleccionar [instrumento_seleccion] en \"Instrumento\"",
+        "renderedStep": "Seleccionar \"Efectivo\" en \"Instrumento\"",
+        "valueKey": "instrumento_seleccion",
+        "interactionId": "interaction-33",
+        "sourceEventRefs": [
+          "event-33"
+        ],
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 16
+      },
+      {
+        "content": "Presionar \"Crear cuenta\"",
+        "sourceEventRefs": [
+          "event-34"
+        ],
+        "renderedStep": "Presionar \"Crear cuenta\"",
+        "interactionId": "interaction-34",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 17
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "sourceEventRefs": [
+          "event-35"
+        ],
+        "renderedStep": "Presionar \"Continuar\"",
+        "interactionId": "interaction-35",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 18
+      },
+      {
+        "content": "Presionar \"Finalizar\"",
+        "sourceEventRefs": [
+          "event-36"
+        ],
+        "renderedStep": "Presionar \"Finalizar\"",
+        "interactionId": "interaction-36",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 19
+      },
+      {
+        "content": "Presionar \"Cerrar\"",
+        "sourceEventRefs": [
+          "event-37"
+        ],
+        "renderedStep": "Presionar \"Cerrar\"",
+        "interactionId": "interaction-37",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 20
+      },
+      {
+        "content": "Presionar \"Cancelar\"",
+        "sourceEventRefs": [
+          "event-38"
+        ],
+        "renderedStep": "Presionar \"Cancelar\"",
+        "interactionId": "interaction-38",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 21
+      },
+      {
+        "content": "Presionar \"Aceptar\"",
+        "sourceEventRefs": [
+          "event-39"
+        ],
+        "renderedStep": "Presionar \"Aceptar\"",
+        "interactionId": "interaction-39",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 22
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "usuario",
+        "label": "Usuario",
+        "stepIndex": 1,
+        "technicalTargetRefs": [
+          "role:textbox|Usuario",
+          "css:#username",
+          "id:username"
+        ],
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "exampleValue": "radames",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Usuario",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "contrasena",
+        "label": "Contraseña",
+        "stepIndex": 2,
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#password",
+          "id:password"
+        ],
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "secure",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Contraseña",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "numero_de_identificacion",
+        "label": "Número de identificación",
+        "stepIndex": 5,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "exampleValue": "056-0154046-0",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Número de identificación",
+        "needsReview": false,
+        "reviewReason": "explicit_associated_label"
+      },
+      {
+        "key": "categoria_de_producto_seleccion",
+        "label": "Categoría de producto",
+        "stepIndex": 9,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-20"
+        ],
+        "exampleValue": "Cuentas de Efectivo",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED"
+      },
+      {
+        "key": "producto_seleccion",
+        "label": "Producto",
+        "stepIndex": 10,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "exampleValue": "201 - Cuentas de Ahorros sin Libreta DOP",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED"
+      },
+      {
+        "key": "proposito_seleccion",
+        "label": "Propósito",
+        "stepIndex": 14,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-30"
+        ],
+        "exampleValue": "Ahorros Personales",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED"
+      },
+      {
+        "key": "instrumento_seleccion",
+        "label": "Instrumento",
+        "stepIndex": 15,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-33"
+        ],
+        "exampleValue": "Efectivo",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED"
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Ingresar [usuario] en \"Usuario\"",
+        "strategy": "role",
+        "value": "textbox|Usuario"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Ingresar [contrasena] en \"Contraseña\"",
+        "strategy": "role",
+        "value": "textbox|Contraseña"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Solicitud multiproducto\"",
+        "strategy": "role",
+        "value": "link|Solicitud multiproducto"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Presionar \"Depurar\"",
+        "strategy": "role",
+        "value": "button|Depurar"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "role",
+        "value": "button|Continuar"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Presionar \"Aceptar\"",
+        "strategy": "role",
+        "value": "button|Aceptar"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "role",
+        "value": "button|Continuar"
+      },
+      {
+        "stepIndex": 8,
+        "description": "Presionar \"Crear cuenta\"",
+        "strategy": "role",
+        "value": "button|Crear cuenta"
+      },
+      {
+        "stepIndex": 9,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "role",
+        "value": "button|Continuar"
+      },
+      {
+        "stepIndex": 10,
+        "description": "Presionar \"Finalizar\"",
+        "strategy": "role",
+        "value": "button|Finalizar"
+      },
+      {
+        "stepIndex": 11,
+        "description": "Presionar \"Cerrar\"",
+        "strategy": "role",
+        "value": "button|Cerrar"
+      },
+      {
+        "stepIndex": 12,
+        "description": "Presionar \"Cancelar\"",
+        "strategy": "role",
+        "value": "button|Cancelar"
+      },
+      {
+        "stepIndex": 13,
+        "description": "Presionar \"Aceptar\"",
+        "strategy": "role",
+        "value": "button|Aceptar"
+      }
+    ],
+    "sourceRecordingId": "a1282e09-65a1-45cc-b4e0-62832a5a7985",
+    "hasUncertainSteps": true,
+    "primary": true,
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7",
+      "event-8",
+      "event-9",
+      "event-10",
+      "event-11",
+      "event-12",
+      "event-13",
+      "event-14",
+      "event-15",
+      "event-16",
+      "event-17",
+      "event-18",
+      "event-19",
+      "event-20",
+      "event-21",
+      "event-22",
+      "event-23",
+      "event-24",
+      "event-25",
+      "event-26",
+      "event-27",
+      "event-28",
+      "event-29",
+      "event-30",
+      "event-31",
+      "event-32",
+      "event-33",
+      "event-34",
+      "event-35",
+      "event-36",
+      "event-37",
+      "event-38",
+      "event-39"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "functionalReadiness": true,
+    "technicalReadiness": false,
+    "expectedResultCandidate": "La aplicación carga su pantalla inicial",
+    "oracleAuthority": "observed_only",
+    "confidence": 0.95,
+    "scenarioStepCount": 22,
+    "functionalActionCount": 21,
+    "nonUserSetupSteps": 1,
+    "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
+    "scenarioGoal": "Creacion Cuenta Efectivo",
+    "stateSequenceValid": true,
+    "stateSequenceIssues": [],
+    "postGoalObservations": [],
+    "goalContract": {
+      "nonGeneric": true,
+      "goalCoherent": true,
+      "mutationIntentExpressed": true
+    },
+    "replayEligible": true,
+    "canonicalInteractions": [
+      {
+        "id": "interaction-1",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-1"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-2",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-2"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-3",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-3"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-4",
+        "controlIdentity": "fbf08c6ecee9",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-4"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "stateScope": "fbf08c6ecee9",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-6",
+        "controlIdentity": "fbf08c6ecee9|Usuario|role|textbox|Usuario",
+        "semanticField": "Usuario",
+        "action": "fill",
+        "valueKey": "usuario",
+        "recordedValue": "radames",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Usuario",
+          "css:#username",
+          "id:username"
+        ],
+        "editingSessionRef": "edit-1",
+        "description": "Ingresar en \"Usuario\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-7",
+        "controlIdentity": "fbf08c6ecee9|Contraseña|role|textbox|Contraseña",
+        "semanticField": "Contraseña",
+        "action": "fill",
+        "valueKey": "contrasena",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#password",
+          "id:password"
+        ],
+        "editingSessionRef": "edit-2",
+        "description": "Ingresar en \"Contraseña\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-8",
+        "controlIdentity": "fbf08c6ecee9|Contraseña|role|textbox|Contraseña",
+        "action": "press",
+        "key": "Enter",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#password",
+          "id:password"
+        ],
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/",
+        "stateScope": "fbf08c6ecee9",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-10",
+        "controlIdentity": "fbf08c6ecee9|Solicitud multiproducto|role|link|Solicitud multiproducto",
+        "semanticField": "Solicitud multiproducto",
+        "action": "click",
+        "valueKey": "solicitud_multiproducto",
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "technicalTargetRefs": [
+          "role:link|Solicitud multiproducto"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Solicitud multiproducto",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "/requests/create/multiproduct"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Solicitud multiproducto\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-11",
+        "controlIdentity": "fbf08c6ecee9",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/",
+        "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-12",
+        "controlIdentity": "fbf08c6ecee9",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-12"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-13",
+        "controlIdentity": "fbf08c6ecee9|Número de identificación",
+        "semanticField": "Número de identificación",
+        "action": "fill",
+        "valueKey": "numero_de_identificacion",
+        "recordedValue": "056-0154046-0",
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "technicalTargetRefs": [],
+        "editingSessionRef": "edit-3",
+        "description": "Ingresar en \"Número de identificación\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-14",
+        "controlIdentity": "fbf08c6ecee9|Número de identificación",
+        "semanticField": "Número de identificación",
+        "action": "click",
+        "valueKey": "numero_de_identificacion",
+        "recordedValue": "056-0154046-0",
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 4
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Número de identificación\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-15",
+        "controlIdentity": "fbf08c6ecee9|Depurar|role|button|Depurar",
+        "semanticField": "Depurar",
+        "action": "click",
+        "valueKey": "depurar",
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Depurar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Depurar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Depurar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Depurar\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-17",
+        "controlIdentity": "fbf08c6ecee9|Continuar|role|button|Continuar",
+        "semanticField": "Continuar",
+        "action": "click",
+        "valueKey": "continuar",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Continuar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Continuar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Continuar\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-18",
+        "controlIdentity": "fbf08c6ecee9|Categoría de producto",
+        "semanticField": "Categoría de producto",
+        "action": "click",
+        "valueKey": "categoria_de_producto",
+        "sourceEventRefs": [
+          "event-18"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "span",
+                "role": "combobox"
+              },
+              "stableDirectAttributes": {
+                "role": "combobox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 2
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Categoría de producto\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "technicalOnly": true,
+        "executionAuthority": true,
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-19",
+        "controlIdentity": "fbf08c6ecee9|Cuentas de Efectivo|role|option|Cuentas de Efectivo",
+        "semanticField": "Categoría de producto",
+        "action": "click",
+        "valueKey": "cuentas_de_efectivo",
+        "sourceEventRefs": [
+          "event-19"
+        ],
+        "technicalTargetRefs": [
+          "role:option|Cuentas de Efectivo",
+          "css:#pv_id_113_0",
+          "id:pv_id_113_0"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#pv_id_113_0",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Cuentas de Efectivo",
+                "id": "pv_id_113_0",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Cuentas de Efectivo\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "technicalOnly": true,
+        "executionAuthority": true,
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-20",
+        "controlIdentity": "fbf08c6ecee9|Categoría de producto",
+        "semanticField": "Categoría de producto",
+        "action": "select",
+        "valueKey": "categoria_de_producto_seleccion",
+        "recordedValue": "Cuentas de Efectivo",
+        "sourceEventRefs": [
+          "event-20"
+        ],
+        "technicalTargetRefs": [],
+        "selectorControlId": "fbf08c6ecee9|||Categoría de producto",
+        "optionSurfaceId": "fbf08c6ecee9|fbf08c6ecee9|||Categoría de producto|option-surface",
+        "description": "Seleccionar en \"Categoría de producto\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "executionAuthority": false,
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-21",
+        "controlIdentity": "fbf08c6ecee9|Producto",
+        "semanticField": "Producto",
+        "action": "click",
+        "valueKey": "producto",
+        "sourceEventRefs": [
+          "event-21"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "span",
+                "role": "combobox"
+              },
+              "stableDirectAttributes": {
+                "role": "combobox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Producto\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "technicalOnly": true,
+        "executionAuthority": true,
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-22",
+        "controlIdentity": "fbf08c6ecee9|201 - Cuentas de Ahorros sin Libreta DOP|role|option|201 - Cuentas de Ahorros sin Libreta DOP",
+        "semanticField": "Producto",
+        "action": "click",
+        "valueKey": "201_cuentas_de_ahorros_sin_libreta_dop",
+        "sourceEventRefs": [
+          "event-22"
+        ],
+        "technicalTargetRefs": [
+          "role:option|201 - Cuentas de Ahorros sin Libreta DOP",
+          "css:#pv_id_114_3",
+          "id:pv_id_114_3"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#pv_id_114_3",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "201 - Cuentas de Ahorros sin Libreta DOP",
+                "id": "pv_id_114_3",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"201 - Cuentas de Ahorros sin Libreta DOP\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "technicalOnly": true,
+        "executionAuthority": true,
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-23",
+        "controlIdentity": "fbf08c6ecee9|Producto",
+        "semanticField": "Producto",
+        "action": "select",
+        "valueKey": "producto_seleccion",
+        "recordedValue": "201 - Cuentas de Ahorros sin Libreta DOP",
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "technicalTargetRefs": [],
+        "selectorControlId": "fbf08c6ecee9|||Producto",
+        "optionSurfaceId": "fbf08c6ecee9|fbf08c6ecee9|||Producto|option-surface",
+        "description": "Seleccionar en \"Producto\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "executionAuthority": false,
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-24",
+        "controlIdentity": "fbf08c6ecee9|Tasa",
+        "semanticField": "Tasa",
+        "action": "click",
+        "valueKey": "tasa",
+        "sourceEventRefs": [
+          "event-24"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Tasa\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-26",
+        "controlIdentity": "95c889362791|Aceptar|role|button|Aceptar",
+        "semanticField": "Aceptar",
+        "action": "click",
+        "valueKey": "aceptar",
+        "sourceEventRefs": [
+          "event-26"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Aceptar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Aceptar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Aceptar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "aside"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Aceptar\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-27",
+        "controlIdentity": "95c889362791|Continuar|role|button|Continuar",
+        "semanticField": "Continuar",
+        "action": "click",
+        "valueKey": "continuar",
+        "sourceEventRefs": [
+          "event-27"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Continuar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Continuar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Continuar\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-28",
+        "controlIdentity": "95c889362791|Propósito",
+        "semanticField": "Propósito",
+        "action": "click",
+        "valueKey": "proposito",
+        "sourceEventRefs": [
+          "event-28"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "span",
+                "role": "combobox"
+              },
+              "stableDirectAttributes": {
+                "role": "combobox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Propósito\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "technicalOnly": true,
+        "executionAuthority": true,
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-29",
+        "controlIdentity": "95c889362791|Ahorros Personales|role|option|Ahorros Personales",
+        "semanticField": "Propósito",
+        "action": "click",
+        "valueKey": "ahorros_personales",
+        "sourceEventRefs": [
+          "event-29"
+        ],
+        "technicalTargetRefs": [
+          "role:option|Ahorros Personales",
+          "css:#pv_id_121_1",
+          "id:pv_id_121_1"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#pv_id_121_1",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Ahorros Personales",
+                "id": "pv_id_121_1",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Ahorros Personales\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "technicalOnly": true,
+        "executionAuthority": true,
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-30",
+        "controlIdentity": "95c889362791|Propósito",
+        "semanticField": "Propósito",
+        "action": "select",
+        "valueKey": "proposito_seleccion",
+        "recordedValue": "Ahorros Personales",
+        "sourceEventRefs": [
+          "event-30"
+        ],
+        "technicalTargetRefs": [],
+        "selectorControlId": "95c889362791|||Propósito",
+        "optionSurfaceId": "95c889362791|95c889362791|||Propósito|option-surface",
+        "description": "Seleccionar en \"Propósito\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "executionAuthority": false,
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-31",
+        "controlIdentity": "95c889362791|Instrumento",
+        "semanticField": "Instrumento",
+        "action": "click",
+        "valueKey": "instrumento",
+        "sourceEventRefs": [
+          "event-31"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "span",
+                "role": "combobox"
+              },
+              "stableDirectAttributes": {
+                "role": "combobox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Instrumento\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "technicalOnly": true,
+        "executionAuthority": true,
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-32",
+        "controlIdentity": "95c889362791|Efectivo|role|option|Efectivo",
+        "semanticField": "Instrumento",
+        "action": "click",
+        "valueKey": "efectivo",
+        "sourceEventRefs": [
+          "event-32"
+        ],
+        "technicalTargetRefs": [
+          "role:option|Efectivo",
+          "css:#pv_id_122_1",
+          "id:pv_id_122_1"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#pv_id_122_1",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Efectivo",
+                "id": "pv_id_122_1",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Efectivo\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "technicalOnly": true,
+        "executionAuthority": true,
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-33",
+        "controlIdentity": "95c889362791|Instrumento",
+        "semanticField": "Instrumento",
+        "action": "select",
+        "valueKey": "instrumento_seleccion",
+        "recordedValue": "Efectivo",
+        "sourceEventRefs": [
+          "event-33"
+        ],
+        "technicalTargetRefs": [],
+        "selectorControlId": "95c889362791|||Instrumento",
+        "optionSurfaceId": "95c889362791|95c889362791|||Instrumento|option-surface",
+        "description": "Seleccionar en \"Instrumento\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "executionAuthority": false,
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-34",
+        "controlIdentity": "95c889362791|Crear cuenta|role|button|Crear cuenta",
+        "semanticField": "Crear cuenta",
+        "action": "click",
+        "valueKey": "crear_cuenta",
+        "sourceEventRefs": [
+          "event-34"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Crear cuenta"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Crear cuenta",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Crear cuenta"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Crear cuenta\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-35",
+        "controlIdentity": "95c889362791|Continuar|role|button|Continuar",
+        "semanticField": "Continuar",
+        "action": "click",
+        "valueKey": "continuar",
+        "sourceEventRefs": [
+          "event-35"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Continuar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Continuar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Continuar\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-36",
+        "controlIdentity": "95c889362791|Finalizar|role|button|Finalizar",
+        "semanticField": "Finalizar",
+        "action": "click",
+        "valueKey": "finalizar",
+        "sourceEventRefs": [
+          "event-36"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Finalizar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Finalizar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Finalizar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Finalizar\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-37",
+        "controlIdentity": "95c889362791|Cerrar|role|button|Cerrar",
+        "semanticField": "Cerrar",
+        "action": "click",
+        "valueKey": "cerrar",
+        "sourceEventRefs": [
+          "event-37"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Cerrar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Cerrar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Cerrar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Cerrar\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-38",
+        "controlIdentity": "95c889362791|Cancelar|role|button|Cancelar",
+        "semanticField": "Cancelar",
+        "action": "click",
+        "valueKey": "cancelar",
+        "sourceEventRefs": [
+          "event-38"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Cancelar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Cancelar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Cancelar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Cancelar\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-39",
+        "controlIdentity": "95c889362791|Aceptar|role|button|Aceptar",
+        "semanticField": "Aceptar",
+        "action": "click",
+        "valueKey": "aceptar",
+        "sourceEventRefs": [
+          "event-39"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Aceptar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Aceptar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Aceptar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Aceptar\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      }
+    ],
+    "entityActionBlocks": [],
+    "readiness": {
+      "functionalReadiness": true,
+      "dataReadiness": true,
+      "technicalReadiness": false,
+      "oracleReadiness": true,
+      "reviewReadiness": true,
+      "publicationContentReadiness": true,
+      "executionReadiness": false,
+      "publicationReadiness": true,
+      "missingInputs": [],
+      "datasetAuthorityMismatches": [],
+      "dataReadinessReasons": []
+    },
+    "technicalKnowledgeRefs": [
+      "obs-6",
+      "obs-7",
+      "obs-8",
+      "obs-10",
+      "obs-13",
+      "obs-14",
+      "obs-15",
+      "obs-17",
+      "obs-18",
+      "obs-19",
+      "obs-21",
+      "obs-22",
+      "obs-24",
+      "obs-26",
+      "obs-27",
+      "obs-28",
+      "obs-29",
+      "obs-31",
+      "obs-32",
+      "obs-34",
+      "obs-35",
+      "obs-36",
+      "obs-37",
+      "obs-38",
+      "obs-39"
+    ],
+    "runtimeInputRequirements": [
+      {
+        "valueKey": "usuario",
+        "semanticField": "Usuario",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "radames",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 1,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "radames",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "contrasena",
+        "semanticField": "Contraseña",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": "Masteryi15.",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": true,
+        "stepIndex": 2,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "Masteryi15.",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "numero_de_identificacion",
+        "semanticField": "Número de identificación",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "056-0154046-0",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 5,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "056-0154046-0",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "categoria_de_producto_seleccion",
+        "semanticField": "Categoría de producto",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "Certificados de Deposito",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 9,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "Certificados de Deposito",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "producto_seleccion",
+        "semanticField": "Producto",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 10,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "proposito_seleccion",
+        "semanticField": "Propósito",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "Ahorros Personales",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 14,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "Ahorros Personales",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "instrumento_seleccion",
+        "semanticField": "Instrumento",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "Efectivo",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 15,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "Efectivo",
+        "datasetAuthorityMismatch": false
+      }
+    ],
+    "runtimeDataset": {
+      "scenarioId": "REC-A1282E09-01",
+      "requirements": [
+        {
+          "valueKey": "usuario",
+          "semanticField": "Usuario",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "radames",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 1,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "radames",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": "Masteryi15.",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": true,
+          "stepIndex": 2,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "Masteryi15.",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "numero_de_identificacion",
+          "semanticField": "Número de identificación",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "056-0154046-0",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 5,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "056-0154046-0",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "categoria_de_producto_seleccion",
+          "semanticField": "Categoría de producto",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "Certificados de Deposito",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 9,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "Certificados de Deposito",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "producto_seleccion",
+          "semanticField": "Producto",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 10,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "proposito_seleccion",
+          "semanticField": "Propósito",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "Ahorros Personales",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 14,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "Ahorros Personales",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "instrumento_seleccion",
+          "semanticField": "Instrumento",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "Efectivo",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 15,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "Efectivo",
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "resolvedValues": {
+        "usuario": "radames",
+        "contrasena": "Masteryi15.",
+        "numero_de_identificacion": "056-0154046-0",
+        "categoria_de_producto_seleccion": "Certificados de Deposito",
+        "producto_seleccion": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+        "proposito_seleccion": "Ahorros Personales",
+        "instrumento_seleccion": "Efectivo"
+      },
+      "missingValues": []
+    },
+    "mutationOpportunities": [
+      {
+        "opportunityId": "REC-A1282E09-01:field_omission",
+        "title": "Creacion cuenta efectivo: comprobar la omisión de un dato",
+        "mutationType": "FIELD_OMISSION",
+        "basePrimaryScenarioId": "REC-A1282E09-01",
+        "operations": [
+          {
+            "type": "remove_action",
+            "interactionId": "interaction-6"
+          }
+        ],
+        "evidenceRefs": [
+          "event-1",
+          "event-2",
+          "event-3",
+          "event-4",
+          "event-5",
+          "event-6",
+          "event-7",
+          "event-8",
+          "event-9",
+          "event-10",
+          "event-11",
+          "event-12",
+          "event-13",
+          "event-14",
+          "event-15",
+          "event-16",
+          "event-17",
+          "event-18",
+          "event-19",
+          "event-20",
+          "event-21",
+          "event-22",
+          "event-23",
+          "event-24",
+          "event-25",
+          "event-26",
+          "event-27",
+          "event-28",
+          "event-29",
+          "event-30",
+          "event-31",
+          "event-32",
+          "event-33",
+          "event-34",
+          "event-35",
+          "event-36",
+          "event-37",
+          "event-38",
+          "event-39"
+        ],
+        "rationale": "Existen varios inputs observados; se propone una omisión agrupada sin inventar el resultado.",
+        "oracleAuthority": "MISSING",
+        "confidence": 0.5,
+        "needsReview": true
+      }
+    ]
+  },
+  {
+    "scenarioId": "REC-A1282E09-01-MUT-field_omission",
+    "title": "Creacion cuenta efectivo: comprobar la omisión de un dato",
+    "description": "Existen varios inputs observados; se propone una omisión agrupada sin inventar el resultado.",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://srvqacgowb01.local.bsc.com:5000/",
+        "description": "Navegar a https://srvqacgowb01.local.bsc.com:5000/"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Contraseña"
+        },
+        "valueKey": "contrasena",
+        "description": "Ingresar [contrasena] en \"Contraseña\"",
+        "interactionId": "interaction-7"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "link|Solicitud multiproducto"
+        },
+        "description": "Presionar \"Solicitud multiproducto\"",
+        "interactionId": "interaction-10"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Depurar"
+        },
+        "description": "Presionar \"Depurar\"",
+        "interactionId": "interaction-15"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Continuar"
+        },
+        "description": "Presionar \"Continuar\"",
+        "interactionId": "interaction-17"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Aceptar"
+        },
+        "description": "Presionar \"Aceptar\"",
+        "interactionId": "interaction-26"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Continuar"
+        },
+        "description": "Presionar \"Continuar\"",
+        "interactionId": "interaction-27"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Crear cuenta"
+        },
+        "description": "Presionar \"Crear cuenta\"",
+        "interactionId": "interaction-34"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Continuar"
+        },
+        "description": "Presionar \"Continuar\"",
+        "interactionId": "interaction-35"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Finalizar"
+        },
+        "description": "Presionar \"Finalizar\"",
+        "interactionId": "interaction-36"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Cerrar"
+        },
+        "description": "Presionar \"Cerrar\"",
+        "interactionId": "interaction-37"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Cancelar"
+        },
+        "description": "Presionar \"Cancelar\"",
+        "interactionId": "interaction-38"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Aceptar"
+        },
+        "description": "Presionar \"Aceptar\"",
+        "interactionId": "interaction-39"
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Ingresar [contrasena] en \"Contraseña\"",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "stepTemplate": "Ingresar [contrasena] en \"Contraseña\"",
+        "renderedStep": "Ingresar \"sdfsdf\" en \"Contraseña\"",
+        "valueKey": "contrasena",
+        "interactionId": "interaction-7",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 2
+      },
+      {
+        "content": "Presionar \"Enter\" en \"Contraseña\"",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "renderedStep": "Presionar \"Enter\" en \"Contraseña\"",
+        "interactionId": "interaction-8",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 3
+      },
+      {
+        "content": "Presionar \"Solicitud multiproducto\"",
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "renderedStep": "Presionar \"Solicitud multiproducto\"",
+        "interactionId": "interaction-10",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 4
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"056-0154046-0\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "interactionId": "interaction-13",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 5
+      },
+      {
+        "content": "Presionar botón asociado a \"Número de identificación\"",
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "renderedStep": "Presionar botón asociado a \"Número de identificación\"",
+        "interactionId": "interaction-14",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 6
+      },
+      {
+        "content": "Presionar \"Depurar\"",
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "renderedStep": "Presionar \"Depurar\"",
+        "interactionId": "interaction-15",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 7
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "renderedStep": "Presionar \"Continuar\"",
+        "interactionId": "interaction-17",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 8
+      },
+      {
+        "content": "Seleccionar [categoria_de_producto_seleccion] en \"Categoría de producto\"",
+        "stepTemplate": "Seleccionar [categoria_de_producto_seleccion] en \"Categoría de producto\"",
+        "renderedStep": "Seleccionar \"Cuentas de Efectivo\" en \"Categoría de producto\"",
+        "valueKey": "categoria_de_producto_seleccion",
+        "interactionId": "interaction-20",
+        "sourceEventRefs": [
+          "event-20"
+        ],
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 9
+      },
+      {
+        "content": "Seleccionar [producto_seleccion] en \"Producto\"",
+        "stepTemplate": "Seleccionar [producto_seleccion] en \"Producto\"",
+        "renderedStep": "Seleccionar \"201 - Cuentas de Ahorros sin Libreta DOP\" en \"Producto\"",
+        "valueKey": "producto_seleccion",
+        "interactionId": "interaction-23",
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 10
+      },
+      {
+        "content": "Presionar botón asociado a \"Tasa\"",
+        "sourceEventRefs": [
+          "event-24"
+        ],
+        "renderedStep": "Presionar botón asociado a \"Tasa\"",
+        "interactionId": "interaction-24",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 11
+      },
+      {
+        "content": "Presionar \"Aceptar\"",
+        "sourceEventRefs": [
+          "event-26"
+        ],
+        "renderedStep": "Presionar \"Aceptar\"",
+        "interactionId": "interaction-26",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 12
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "sourceEventRefs": [
+          "event-27"
+        ],
+        "renderedStep": "Presionar \"Continuar\"",
+        "interactionId": "interaction-27",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 13
+      },
+      {
+        "content": "Seleccionar [proposito_seleccion] en \"Propósito\"",
+        "stepTemplate": "Seleccionar [proposito_seleccion] en \"Propósito\"",
+        "renderedStep": "Seleccionar \"Ahorros Personales\" en \"Propósito\"",
+        "valueKey": "proposito_seleccion",
+        "interactionId": "interaction-30",
+        "sourceEventRefs": [
+          "event-30"
+        ],
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 14
+      },
+      {
+        "content": "Seleccionar [instrumento_seleccion] en \"Instrumento\"",
+        "stepTemplate": "Seleccionar [instrumento_seleccion] en \"Instrumento\"",
+        "renderedStep": "Seleccionar \"Efectivo\" en \"Instrumento\"",
+        "valueKey": "instrumento_seleccion",
+        "interactionId": "interaction-33",
+        "sourceEventRefs": [
+          "event-33"
+        ],
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 15
+      },
+      {
+        "content": "Presionar \"Crear cuenta\"",
+        "sourceEventRefs": [
+          "event-34"
+        ],
+        "renderedStep": "Presionar \"Crear cuenta\"",
+        "interactionId": "interaction-34",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 16
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "sourceEventRefs": [
+          "event-35"
+        ],
+        "renderedStep": "Presionar \"Continuar\"",
+        "interactionId": "interaction-35",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 17
+      },
+      {
+        "content": "Presionar \"Finalizar\"",
+        "sourceEventRefs": [
+          "event-36"
+        ],
+        "renderedStep": "Presionar \"Finalizar\"",
+        "interactionId": "interaction-36",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 18
+      },
+      {
+        "content": "Presionar \"Cerrar\"",
+        "sourceEventRefs": [
+          "event-37"
+        ],
+        "renderedStep": "Presionar \"Cerrar\"",
+        "interactionId": "interaction-37",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 19
+      },
+      {
+        "content": "Presionar \"Cancelar\"",
+        "sourceEventRefs": [
+          "event-38"
+        ],
+        "renderedStep": "Presionar \"Cancelar\"",
+        "interactionId": "interaction-38",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 20
+      },
+      {
+        "content": "Presionar \"Aceptar\"",
+        "sourceEventRefs": [
+          "event-39"
+        ],
+        "renderedStep": "Presionar \"Aceptar\"",
+        "interactionId": "interaction-39",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 21
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "usuario",
+        "label": "Usuario",
+        "stepIndex": 1,
+        "technicalTargetRefs": [
+          "role:textbox|Usuario",
+          "css:#username",
+          "id:username"
+        ],
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "exampleValue": "radames",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Usuario",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "contrasena",
+        "label": "Contraseña",
+        "stepIndex": 2,
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#password",
+          "id:password"
+        ],
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "secure",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Contraseña",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "numero_de_identificacion",
+        "label": "Número de identificación",
+        "stepIndex": 5,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "exampleValue": "056-0154046-0",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Número de identificación",
+        "needsReview": false,
+        "reviewReason": "explicit_associated_label"
+      },
+      {
+        "key": "categoria_de_producto_seleccion",
+        "label": "Categoría de producto",
+        "stepIndex": 9,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-20"
+        ],
+        "exampleValue": "Cuentas de Efectivo",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED"
+      },
+      {
+        "key": "producto_seleccion",
+        "label": "Producto",
+        "stepIndex": 10,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "exampleValue": "201 - Cuentas de Ahorros sin Libreta DOP",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED"
+      },
+      {
+        "key": "proposito_seleccion",
+        "label": "Propósito",
+        "stepIndex": 14,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-30"
+        ],
+        "exampleValue": "Ahorros Personales",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED"
+      },
+      {
+        "key": "instrumento_seleccion",
+        "label": "Instrumento",
+        "stepIndex": 15,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-33"
+        ],
+        "exampleValue": "Efectivo",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED"
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Ingresar [contrasena] en \"Contraseña\"",
+        "strategy": "role",
+        "value": "textbox|Contraseña"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Presionar \"Solicitud multiproducto\"",
+        "strategy": "role",
+        "value": "link|Solicitud multiproducto"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Depurar\"",
+        "strategy": "role",
+        "value": "button|Depurar"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "role",
+        "value": "button|Continuar"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"Aceptar\"",
+        "strategy": "role",
+        "value": "button|Aceptar"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "role",
+        "value": "button|Continuar"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Presionar \"Crear cuenta\"",
+        "strategy": "role",
+        "value": "button|Crear cuenta"
+      },
+      {
+        "stepIndex": 8,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "role",
+        "value": "button|Continuar"
+      },
+      {
+        "stepIndex": 9,
+        "description": "Presionar \"Finalizar\"",
+        "strategy": "role",
+        "value": "button|Finalizar"
+      },
+      {
+        "stepIndex": 10,
+        "description": "Presionar \"Cerrar\"",
+        "strategy": "role",
+        "value": "button|Cerrar"
+      },
+      {
+        "stepIndex": 11,
+        "description": "Presionar \"Cancelar\"",
+        "strategy": "role",
+        "value": "button|Cancelar"
+      },
+      {
+        "stepIndex": 12,
+        "description": "Presionar \"Aceptar\"",
+        "strategy": "role",
+        "value": "button|Aceptar"
+      }
+    ],
+    "sourceRecordingId": "a1282e09-65a1-45cc-b4e0-62832a5a7985",
+    "hasUncertainSteps": true,
+    "primary": false,
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7",
+      "event-8",
+      "event-9",
+      "event-10",
+      "event-11",
+      "event-12",
+      "event-13",
+      "event-14",
+      "event-15",
+      "event-16",
+      "event-17",
+      "event-18",
+      "event-19",
+      "event-20",
+      "event-21",
+      "event-22",
+      "event-23",
+      "event-24",
+      "event-25",
+      "event-26",
+      "event-27",
+      "event-28",
+      "event-29",
+      "event-30",
+      "event-31",
+      "event-32",
+      "event-33",
+      "event-34",
+      "event-35",
+      "event-36",
+      "event-37",
+      "event-38",
+      "event-39"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": true,
+    "functionalReadiness": true,
+    "technicalReadiness": false,
+    "oracleAuthority": "review_required",
+    "confidence": 0.95,
+    "scenarioStepCount": 21,
+    "functionalActionCount": 20,
+    "nonUserSetupSteps": 1,
+    "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
+    "scenarioGoal": "Creacion Cuenta Efectivo",
+    "stateSequenceValid": true,
+    "stateSequenceIssues": [],
+    "postGoalObservations": [],
+    "goalContract": {
+      "nonGeneric": true,
+      "goalCoherent": true,
+      "mutationIntentExpressed": true
+    },
+    "replayEligible": true,
+    "canonicalInteractions": [
+      {
+        "id": "interaction-1",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-1"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-2",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-2"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-3",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-3"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-4",
+        "controlIdentity": "fbf08c6ecee9",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-4"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "stateScope": "fbf08c6ecee9",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-7",
+        "controlIdentity": "fbf08c6ecee9|Contraseña|role|textbox|Contraseña",
+        "semanticField": "Contraseña",
+        "action": "fill",
+        "valueKey": "contrasena",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#password",
+          "id:password"
+        ],
+        "editingSessionRef": "edit-2",
+        "description": "Ingresar en \"Contraseña\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-8",
+        "controlIdentity": "fbf08c6ecee9|Contraseña|role|textbox|Contraseña",
+        "action": "press",
+        "key": "Enter",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#password",
+          "id:password"
+        ],
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/",
+        "stateScope": "fbf08c6ecee9",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-10",
+        "controlIdentity": "fbf08c6ecee9|Solicitud multiproducto|role|link|Solicitud multiproducto",
+        "semanticField": "Solicitud multiproducto",
+        "action": "click",
+        "valueKey": "solicitud_multiproducto",
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "technicalTargetRefs": [
+          "role:link|Solicitud multiproducto"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Solicitud multiproducto",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "/requests/create/multiproduct"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Solicitud multiproducto\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-11",
+        "controlIdentity": "fbf08c6ecee9",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/",
+        "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-12",
+        "controlIdentity": "fbf08c6ecee9",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-12"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-13",
+        "controlIdentity": "fbf08c6ecee9|Número de identificación",
+        "semanticField": "Número de identificación",
+        "action": "fill",
+        "valueKey": "numero_de_identificacion",
+        "recordedValue": "056-0154046-0",
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "technicalTargetRefs": [],
+        "editingSessionRef": "edit-3",
+        "description": "Ingresar en \"Número de identificación\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-14",
+        "controlIdentity": "fbf08c6ecee9|Número de identificación",
+        "semanticField": "Número de identificación",
+        "action": "click",
+        "valueKey": "numero_de_identificacion",
+        "recordedValue": "056-0154046-0",
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 4
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Número de identificación\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-15",
+        "controlIdentity": "fbf08c6ecee9|Depurar|role|button|Depurar",
+        "semanticField": "Depurar",
+        "action": "click",
+        "valueKey": "depurar",
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Depurar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Depurar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Depurar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Depurar\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-17",
+        "controlIdentity": "fbf08c6ecee9|Continuar|role|button|Continuar",
+        "semanticField": "Continuar",
+        "action": "click",
+        "valueKey": "continuar",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Continuar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Continuar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Continuar\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-18",
+        "controlIdentity": "fbf08c6ecee9|Categoría de producto",
+        "semanticField": "Categoría de producto",
+        "action": "click",
+        "valueKey": "categoria_de_producto",
+        "sourceEventRefs": [
+          "event-18"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "span",
+                "role": "combobox"
+              },
+              "stableDirectAttributes": {
+                "role": "combobox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 2
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Categoría de producto\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "technicalOnly": true,
+        "executionAuthority": true,
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-19",
+        "controlIdentity": "fbf08c6ecee9|Cuentas de Efectivo|role|option|Cuentas de Efectivo",
+        "semanticField": "Categoría de producto",
+        "action": "click",
+        "valueKey": "cuentas_de_efectivo",
+        "sourceEventRefs": [
+          "event-19"
+        ],
+        "technicalTargetRefs": [
+          "role:option|Cuentas de Efectivo",
+          "css:#pv_id_113_0",
+          "id:pv_id_113_0"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#pv_id_113_0",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Cuentas de Efectivo",
+                "id": "pv_id_113_0",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Cuentas de Efectivo\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "technicalOnly": true,
+        "executionAuthority": true,
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-20",
+        "controlIdentity": "fbf08c6ecee9|Categoría de producto",
+        "semanticField": "Categoría de producto",
+        "action": "select",
+        "valueKey": "categoria_de_producto_seleccion",
+        "recordedValue": "Cuentas de Efectivo",
+        "sourceEventRefs": [
+          "event-20"
+        ],
+        "technicalTargetRefs": [],
+        "selectorControlId": "fbf08c6ecee9|||Categoría de producto",
+        "optionSurfaceId": "fbf08c6ecee9|fbf08c6ecee9|||Categoría de producto|option-surface",
+        "description": "Seleccionar en \"Categoría de producto\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "executionAuthority": false,
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-21",
+        "controlIdentity": "fbf08c6ecee9|Producto",
+        "semanticField": "Producto",
+        "action": "click",
+        "valueKey": "producto",
+        "sourceEventRefs": [
+          "event-21"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "span",
+                "role": "combobox"
+              },
+              "stableDirectAttributes": {
+                "role": "combobox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Producto\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "technicalOnly": true,
+        "executionAuthority": true,
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-22",
+        "controlIdentity": "fbf08c6ecee9|201 - Cuentas de Ahorros sin Libreta DOP|role|option|201 - Cuentas de Ahorros sin Libreta DOP",
+        "semanticField": "Producto",
+        "action": "click",
+        "valueKey": "201_cuentas_de_ahorros_sin_libreta_dop",
+        "sourceEventRefs": [
+          "event-22"
+        ],
+        "technicalTargetRefs": [
+          "role:option|201 - Cuentas de Ahorros sin Libreta DOP",
+          "css:#pv_id_114_3",
+          "id:pv_id_114_3"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#pv_id_114_3",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "201 - Cuentas de Ahorros sin Libreta DOP",
+                "id": "pv_id_114_3",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"201 - Cuentas de Ahorros sin Libreta DOP\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "technicalOnly": true,
+        "executionAuthority": true,
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-23",
+        "controlIdentity": "fbf08c6ecee9|Producto",
+        "semanticField": "Producto",
+        "action": "select",
+        "valueKey": "producto_seleccion",
+        "recordedValue": "201 - Cuentas de Ahorros sin Libreta DOP",
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "technicalTargetRefs": [],
+        "selectorControlId": "fbf08c6ecee9|||Producto",
+        "optionSurfaceId": "fbf08c6ecee9|fbf08c6ecee9|||Producto|option-surface",
+        "description": "Seleccionar en \"Producto\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "executionAuthority": false,
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-24",
+        "controlIdentity": "fbf08c6ecee9|Tasa",
+        "semanticField": "Tasa",
+        "action": "click",
+        "valueKey": "tasa",
+        "sourceEventRefs": [
+          "event-24"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Tasa\"",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-26",
+        "controlIdentity": "95c889362791|Aceptar|role|button|Aceptar",
+        "semanticField": "Aceptar",
+        "action": "click",
+        "valueKey": "aceptar",
+        "sourceEventRefs": [
+          "event-26"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Aceptar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Aceptar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Aceptar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "aside"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Aceptar\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-27",
+        "controlIdentity": "95c889362791|Continuar|role|button|Continuar",
+        "semanticField": "Continuar",
+        "action": "click",
+        "valueKey": "continuar",
+        "sourceEventRefs": [
+          "event-27"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Continuar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Continuar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Continuar\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-28",
+        "controlIdentity": "95c889362791|Propósito",
+        "semanticField": "Propósito",
+        "action": "click",
+        "valueKey": "proposito",
+        "sourceEventRefs": [
+          "event-28"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "span",
+                "role": "combobox"
+              },
+              "stableDirectAttributes": {
+                "role": "combobox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Propósito\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "technicalOnly": true,
+        "executionAuthority": true,
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-29",
+        "controlIdentity": "95c889362791|Ahorros Personales|role|option|Ahorros Personales",
+        "semanticField": "Propósito",
+        "action": "click",
+        "valueKey": "ahorros_personales",
+        "sourceEventRefs": [
+          "event-29"
+        ],
+        "technicalTargetRefs": [
+          "role:option|Ahorros Personales",
+          "css:#pv_id_121_1",
+          "id:pv_id_121_1"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#pv_id_121_1",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Ahorros Personales",
+                "id": "pv_id_121_1",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Ahorros Personales\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "technicalOnly": true,
+        "executionAuthority": true,
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-30",
+        "controlIdentity": "95c889362791|Propósito",
+        "semanticField": "Propósito",
+        "action": "select",
+        "valueKey": "proposito_seleccion",
+        "recordedValue": "Ahorros Personales",
+        "sourceEventRefs": [
+          "event-30"
+        ],
+        "technicalTargetRefs": [],
+        "selectorControlId": "95c889362791|||Propósito",
+        "optionSurfaceId": "95c889362791|95c889362791|||Propósito|option-surface",
+        "description": "Seleccionar en \"Propósito\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "executionAuthority": false,
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-31",
+        "controlIdentity": "95c889362791|Instrumento",
+        "semanticField": "Instrumento",
+        "action": "click",
+        "valueKey": "instrumento",
+        "sourceEventRefs": [
+          "event-31"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "span",
+                "role": "combobox"
+              },
+              "stableDirectAttributes": {
+                "role": "combobox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Instrumento\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "technicalOnly": true,
+        "executionAuthority": true,
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-32",
+        "controlIdentity": "95c889362791|Efectivo|role|option|Efectivo",
+        "semanticField": "Instrumento",
+        "action": "click",
+        "valueKey": "efectivo",
+        "sourceEventRefs": [
+          "event-32"
+        ],
+        "technicalTargetRefs": [
+          "role:option|Efectivo",
+          "css:#pv_id_122_1",
+          "id:pv_id_122_1"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#pv_id_122_1",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Efectivo",
+                "id": "pv_id_122_1",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Efectivo\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "technicalOnly": true,
+        "executionAuthority": true,
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-33",
+        "controlIdentity": "95c889362791|Instrumento",
+        "semanticField": "Instrumento",
+        "action": "select",
+        "valueKey": "instrumento_seleccion",
+        "recordedValue": "Efectivo",
+        "sourceEventRefs": [
+          "event-33"
+        ],
+        "technicalTargetRefs": [],
+        "selectorControlId": "95c889362791|||Instrumento",
+        "optionSurfaceId": "95c889362791|95c889362791|||Instrumento|option-surface",
+        "description": "Seleccionar en \"Instrumento\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "executionAuthority": false,
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-34",
+        "controlIdentity": "95c889362791|Crear cuenta|role|button|Crear cuenta",
+        "semanticField": "Crear cuenta",
+        "action": "click",
+        "valueKey": "crear_cuenta",
+        "sourceEventRefs": [
+          "event-34"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Crear cuenta"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Crear cuenta",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Crear cuenta"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Crear cuenta\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-35",
+        "controlIdentity": "95c889362791|Continuar|role|button|Continuar",
+        "semanticField": "Continuar",
+        "action": "click",
+        "valueKey": "continuar",
+        "sourceEventRefs": [
+          "event-35"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Continuar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Continuar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Continuar\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-36",
+        "controlIdentity": "95c889362791|Finalizar|role|button|Finalizar",
+        "semanticField": "Finalizar",
+        "action": "click",
+        "valueKey": "finalizar",
+        "sourceEventRefs": [
+          "event-36"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Finalizar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Finalizar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Finalizar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Finalizar\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-37",
+        "controlIdentity": "95c889362791|Cerrar|role|button|Cerrar",
+        "semanticField": "Cerrar",
+        "action": "click",
+        "valueKey": "cerrar",
+        "sourceEventRefs": [
+          "event-37"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Cerrar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Cerrar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Cerrar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Cerrar\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-38",
+        "controlIdentity": "95c889362791|Cancelar|role|button|Cancelar",
+        "semanticField": "Cancelar",
+        "action": "click",
+        "valueKey": "cancelar",
+        "sourceEventRefs": [
+          "event-38"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Cancelar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Cancelar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Cancelar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Cancelar\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-39",
+        "controlIdentity": "95c889362791|Aceptar|role|button|Aceptar",
+        "semanticField": "Aceptar",
+        "action": "click",
+        "valueKey": "aceptar",
+        "sourceEventRefs": [
+          "event-39"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Aceptar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Aceptar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Aceptar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Aceptar\"",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      }
+    ],
+    "entityActionBlocks": [],
+    "readiness": {
+      "functionalReadiness": true,
+      "dataReadiness": true,
+      "technicalReadiness": false,
+      "oracleReadiness": false,
+      "reviewReadiness": false,
+      "publicationContentReadiness": true,
+      "executionReadiness": false,
+      "publicationReadiness": true,
+      "missingInputs": [],
+      "datasetAuthorityMismatches": [],
+      "dataReadinessReasons": []
+    },
+    "technicalKnowledgeRefs": [
+      "obs-6",
+      "obs-7",
+      "obs-8",
+      "obs-10",
+      "obs-13",
+      "obs-14",
+      "obs-15",
+      "obs-17",
+      "obs-18",
+      "obs-19",
+      "obs-21",
+      "obs-22",
+      "obs-24",
+      "obs-26",
+      "obs-27",
+      "obs-28",
+      "obs-29",
+      "obs-31",
+      "obs-32",
+      "obs-34",
+      "obs-35",
+      "obs-36",
+      "obs-37",
+      "obs-38",
+      "obs-39"
+    ],
+    "runtimeInputRequirements": [
+      {
+        "valueKey": "usuario",
+        "semanticField": "Usuario",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "radames",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 1,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "recorded_confirmed",
+        "authorityValue": null,
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "contrasena",
+        "semanticField": "Contraseña",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": "sdfsdf",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": true,
+        "stepIndex": 2,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "sdfsdf",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "numero_de_identificacion",
+        "semanticField": "Número de identificación",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "056-0154046-0",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 5,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "056-0154046-0",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "categoria_de_producto_seleccion",
+        "semanticField": "Categoría de producto",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "Cuentas de Efectivo",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 9,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "Cuentas de Efectivo",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "producto_seleccion",
+        "semanticField": "Producto",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "201 - Cuentas de Ahorros sin Libreta DOP",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 10,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "201 - Cuentas de Ahorros sin Libreta DOP",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "proposito_seleccion",
+        "semanticField": "Propósito",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "Ahorros Personales",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 14,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "Ahorros Personales",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "instrumento_seleccion",
+        "semanticField": "Instrumento",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "Efectivo",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 15,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "Efectivo",
+        "datasetAuthorityMismatch": false
+      }
+    ],
+    "runtimeDataset": {
+      "scenarioId": "REC-A1282E09-01-MUT-field_omission",
+      "requirements": [
+        {
+          "valueKey": "usuario",
+          "semanticField": "Usuario",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "radames",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 1,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "recorded_confirmed",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": "sdfsdf",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": true,
+          "stepIndex": 2,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "sdfsdf",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "numero_de_identificacion",
+          "semanticField": "Número de identificación",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "056-0154046-0",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 5,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "056-0154046-0",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "categoria_de_producto_seleccion",
+          "semanticField": "Categoría de producto",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "Cuentas de Efectivo",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 9,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "Cuentas de Efectivo",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "producto_seleccion",
+          "semanticField": "Producto",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "201 - Cuentas de Ahorros sin Libreta DOP",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 10,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "201 - Cuentas de Ahorros sin Libreta DOP",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "proposito_seleccion",
+          "semanticField": "Propósito",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "Ahorros Personales",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 14,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "Ahorros Personales",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "instrumento_seleccion",
+          "semanticField": "Instrumento",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "Efectivo",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 15,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "Efectivo",
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "resolvedValues": {
+        "usuario": "radames",
+        "contrasena": "sdfsdf",
+        "numero_de_identificacion": "056-0154046-0",
+        "categoria_de_producto_seleccion": "Cuentas de Efectivo",
+        "producto_seleccion": "201 - Cuentas de Ahorros sin Libreta DOP",
+        "proposito_seleccion": "Ahorros Personales",
+        "instrumento_seleccion": "Efectivo"
+      },
+      "missingValues": []
+    },
+    "mutationOpportunities": [
+      {
+        "opportunityId": "REC-A1282E09-01:field_omission",
+        "title": "Creacion cuenta efectivo: comprobar la omisión de un dato",
+        "mutationType": "FIELD_OMISSION",
+        "basePrimaryScenarioId": "REC-A1282E09-01",
+        "operations": [
+          {
+            "type": "remove_action",
+            "interactionId": "interaction-6"
+          }
+        ],
+        "evidenceRefs": [
+          "event-1",
+          "event-2",
+          "event-3",
+          "event-4",
+          "event-5",
+          "event-6",
+          "event-7",
+          "event-8",
+          "event-9",
+          "event-10",
+          "event-11",
+          "event-12",
+          "event-13",
+          "event-14",
+          "event-15",
+          "event-16",
+          "event-17",
+          "event-18",
+          "event-19",
+          "event-20",
+          "event-21",
+          "event-22",
+          "event-23",
+          "event-24",
+          "event-25",
+          "event-26",
+          "event-27",
+          "event-28",
+          "event-29",
+          "event-30",
+          "event-31",
+          "event-32",
+          "event-33",
+          "event-34",
+          "event-35",
+          "event-36",
+          "event-37",
+          "event-38",
+          "event-39"
+        ],
+        "rationale": "Existen varios inputs observados; se propone una omisión agrupada sin inventar el resultado.",
+        "oracleAuthority": "MISSING",
+        "confidence": 0.5,
+        "needsReview": true
+      }
+    ],
+    "runtimeExecutionBlockedByData": false,
+    "mutation": {
+      "opportunityId": "REC-A1282E09-01:field_omission",
+      "title": "Creacion cuenta efectivo: comprobar la omisión de un dato",
+      "mutationType": "FIELD_OMISSION",
+      "basePrimaryScenarioId": "REC-A1282E09-01",
+      "operations": [
+        {
+          "type": "remove_action",
+          "interactionId": "interaction-6"
+        }
+      ],
+      "evidenceRefs": [
+        "event-1",
+        "event-2",
+        "event-3",
+        "event-4",
+        "event-5",
+        "event-6",
+        "event-7",
+        "event-8",
+        "event-9",
+        "event-10",
+        "event-11",
+        "event-12",
+        "event-13",
+        "event-14",
+        "event-15",
+        "event-16",
+        "event-17",
+        "event-18",
+        "event-19",
+        "event-20",
+        "event-21",
+        "event-22",
+        "event-23",
+        "event-24",
+        "event-25",
+        "event-26",
+        "event-27",
+        "event-28",
+        "event-29",
+        "event-30",
+        "event-31",
+        "event-32",
+        "event-33",
+        "event-34",
+        "event-35",
+        "event-36",
+        "event-37",
+        "event-38",
+        "event-39"
+      ],
+      "rationale": "Existen varios inputs observados; se propone una omisión agrupada sin inventar el resultado.",
+      "oracleAuthority": "MISSING",
+      "confidence": 0.5,
+      "needsReview": true
+    },
+    "reviewStatus": "PENDING",
+    "suggestionCategory": "DERIVED_VALIDATION",
+    "scenarioSpecificSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Ingresar [contrasena] en \"Contraseña\"",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "stepTemplate": "Ingresar [contrasena] en \"Contraseña\"",
+        "renderedStep": "Ingresar el valor seguro asociado a \"Contraseña\"",
+        "valueKey": "contrasena",
+        "interactionId": "interaction-7",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 2
+      },
+      {
+        "content": "Presionar \"Enter\" en \"Contraseña\"",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "renderedStep": "Presionar \"Enter\" en \"Contraseña\"",
+        "interactionId": "interaction-8",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 3
+      },
+      {
+        "content": "Presionar \"Solicitud multiproducto\"",
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "renderedStep": "Presionar \"Solicitud multiproducto\"",
+        "interactionId": "interaction-10",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 4
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"056-0154046-0\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "interactionId": "interaction-13",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 5
+      },
+      {
+        "content": "Presionar botón asociado a \"Número de identificación\"",
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "renderedStep": "Presionar botón asociado a \"Número de identificación\"",
+        "interactionId": "interaction-14",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 6
+      },
+      {
+        "content": "Presionar \"Depurar\"",
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "renderedStep": "Presionar \"Depurar\"",
+        "interactionId": "interaction-15",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+        "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 7
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "renderedStep": "Presionar \"Continuar\"",
+        "interactionId": "interaction-17",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 8
+      },
+      {
+        "content": "Seleccionar [categoria_de_producto_seleccion] en \"Categoría de producto\"",
+        "stepTemplate": "Seleccionar [categoria_de_producto_seleccion] en \"Categoría de producto\"",
+        "renderedStep": "Seleccionar \"Cuentas de Efectivo\" en \"Categoría de producto\"",
+        "valueKey": "categoria_de_producto_seleccion",
+        "interactionId": "interaction-20",
+        "sourceEventRefs": [
+          "event-20"
+        ],
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 9
+      },
+      {
+        "content": "Seleccionar [producto_seleccion] en \"Producto\"",
+        "stepTemplate": "Seleccionar [producto_seleccion] en \"Producto\"",
+        "renderedStep": "Seleccionar \"201 - Cuentas de Ahorros sin Libreta DOP\" en \"Producto\"",
+        "valueKey": "producto_seleccion",
+        "interactionId": "interaction-23",
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "fbf08c6ecee9",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 10
+      },
+      {
+        "content": "Presionar botón asociado a \"Tasa\"",
+        "sourceEventRefs": [
+          "event-24"
+        ],
+        "renderedStep": "Presionar botón asociado a \"Tasa\"",
+        "interactionId": "interaction-24",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "fbf08c6ecee9",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "fbf08c6ecee9",
+        "stepNumber": 11
+      },
+      {
+        "content": "Presionar \"Aceptar\"",
+        "sourceEventRefs": [
+          "event-26"
+        ],
+        "renderedStep": "Presionar \"Aceptar\"",
+        "interactionId": "interaction-26",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 12
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "sourceEventRefs": [
+          "event-27"
+        ],
+        "renderedStep": "Presionar \"Continuar\"",
+        "interactionId": "interaction-27",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 13
+      },
+      {
+        "content": "Seleccionar [proposito_seleccion] en \"Propósito\"",
+        "stepTemplate": "Seleccionar [proposito_seleccion] en \"Propósito\"",
+        "renderedStep": "Seleccionar \"Ahorros Personales\" en \"Propósito\"",
+        "valueKey": "proposito_seleccion",
+        "interactionId": "interaction-30",
+        "sourceEventRefs": [
+          "event-30"
+        ],
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 14
+      },
+      {
+        "content": "Seleccionar [instrumento_seleccion] en \"Instrumento\"",
+        "stepTemplate": "Seleccionar [instrumento_seleccion] en \"Instrumento\"",
+        "renderedStep": "Seleccionar \"Efectivo\" en \"Instrumento\"",
+        "valueKey": "instrumento_seleccion",
+        "interactionId": "interaction-33",
+        "sourceEventRefs": [
+          "event-33"
+        ],
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 15
+      },
+      {
+        "content": "Presionar \"Crear cuenta\"",
+        "sourceEventRefs": [
+          "event-34"
+        ],
+        "renderedStep": "Presionar \"Crear cuenta\"",
+        "interactionId": "interaction-34",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 16
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "sourceEventRefs": [
+          "event-35"
+        ],
+        "renderedStep": "Presionar \"Continuar\"",
+        "interactionId": "interaction-35",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 17
+      },
+      {
+        "content": "Presionar \"Finalizar\"",
+        "sourceEventRefs": [
+          "event-36"
+        ],
+        "renderedStep": "Presionar \"Finalizar\"",
+        "interactionId": "interaction-36",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 18
+      },
+      {
+        "content": "Presionar \"Cerrar\"",
+        "sourceEventRefs": [
+          "event-37"
+        ],
+        "renderedStep": "Presionar \"Cerrar\"",
+        "interactionId": "interaction-37",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 19
+      },
+      {
+        "content": "Presionar \"Cancelar\"",
+        "sourceEventRefs": [
+          "event-38"
+        ],
+        "renderedStep": "Presionar \"Cancelar\"",
+        "interactionId": "interaction-38",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 20
+      },
+      {
+        "content": "Presionar \"Aceptar\"",
+        "sourceEventRefs": [
+          "event-39"
+        ],
+        "renderedStep": "Presionar \"Aceptar\"",
+        "interactionId": "interaction-39",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "95c889362791",
+        "screenAfterRef": "95c889362791",
+        "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/requests/10207/edit",
+        "stateScope": "95c889362791",
+        "stepNumber": 21
+      }
+    ],
+    "mutationDiagnostics": {
+      "materializedSemanticSignature": "{\"interactions\":[\"navigation|inicio||||\",\"navigation|inicio||||\",\"navigation|inicio||||\",\"navigation|fbf08c6ecee9||||\",\"fill|fbf08c6ecee9|Contraseña|role|textbox|Contraseña||contrasena||Ingresar en \\\"Contraseña\\\"\",\"press|fbf08c6ecee9|Contraseña|role|textbox|Contraseña||||\",\"click|fbf08c6ecee9|Solicitud multiproducto|role|link|Solicitud multiproducto||solicitud_multiproducto||Ingresar en \\\"Solicitud multiproducto\\\"\",\"navigation|fbf08c6ecee9||||\",\"navigation|fbf08c6ecee9||||\",\"fill|fbf08c6ecee9|Número de identificación||numero_de_identificacion|056-0154046-0|Ingresar en \\\"Número de identificación\\\"\",\"click|fbf08c6ecee9|Número de identificación||numero_de_identificacion|056-0154046-0|Ingresar en \\\"Número de identificación\\\"\",\"click|fbf08c6ecee9|Depurar|role|button|Depurar||depurar||Ingresar en \\\"Depurar\\\"\",\"click|fbf08c6ecee9|Continuar|role|button|Continuar||continuar||Ingresar en \\\"Continuar\\\"\",\"click|fbf08c6ecee9|Categoría de producto||categoria_de_producto||Ingresar en \\\"Categoría de producto\\\"\",\"click|fbf08c6ecee9|Cuentas de Efectivo|role|option|Cuentas de Efectivo||cuentas_de_efectivo||Ingresar en \\\"Cuentas de Efectivo\\\"\",\"select|fbf08c6ecee9|Categoría de producto||categoria_de_producto_seleccion|Cuentas de Efectivo|Seleccionar en \\\"Categoría de producto\\\"\",\"click|fbf08c6ecee9|Producto||producto||Ingresar en \\\"Producto\\\"\",\"click|fbf08c6ecee9|201 - Cuentas de Ahorros sin Libreta DOP|role|option|201 - Cuentas de Ahorros sin Libreta DOP||201_cuentas_de_ahorros_sin_libreta_dop||Ingresar en \\\"201 - Cuentas de Ahorros sin Libreta DOP\\\"\",\"select|fbf08c6ecee9|Producto||producto_seleccion|201 - Cuentas de Ahorros sin Libreta DOP|Seleccionar en \\\"Producto\\\"\",\"click|fbf08c6ecee9|Tasa||tasa||Ingresar en \\\"Tasa\\\"\",\"click|95c889362791|Aceptar|role|button|Aceptar||aceptar||Ingresar en \\\"Aceptar\\\"\",\"click|95c889362791|Continuar|role|button|Continuar||continuar||Ingresar en \\\"Continuar\\\"\",\"click|95c889362791|Propósito||proposito||Ingresar en \\\"Propósito\\\"\",\"click|95c889362791|Ahorros Personales|role|option|Ahorros Personales||ahorros_personales||Ingresar en \\\"Ahorros Personales\\\"\",\"select|95c889362791|Propósito||proposito_seleccion|Ahorros Personales|Seleccionar en \\\"Propósito\\\"\",\"click|95c889362791|Instrumento||instrumento||Ingresar en \\\"Instrumento\\\"\",\"click|95c889362791|Efectivo|role|option|Efectivo||efectivo||Ingresar en \\\"Efectivo\\\"\",\"select|95c889362791|Instrumento||instrumento_seleccion|Efectivo|Seleccionar en \\\"Instrumento\\\"\",\"click|95c889362791|Crear cuenta|role|button|Crear cuenta||crear_cuenta||Ingresar en \\\"Crear cuenta\\\"\",\"click|95c889362791|Continuar|role|button|Continuar||continuar||Ingresar en \\\"Continuar\\\"\",\"click|95c889362791|Finalizar|role|button|Finalizar||finalizar||Ingresar en \\\"Finalizar\\\"\",\"click|95c889362791|Cerrar|role|button|Cerrar||cerrar||Ingresar en \\\"Cerrar\\\"\",\"click|95c889362791|Cancelar|role|button|Cancelar||cancelar||Ingresar en \\\"Cancelar\\\"\",\"click|95c889362791|Aceptar|role|button|Aceptar||aceptar||Ingresar en \\\"Aceptar\\\"\"],\"steps\":[\"|||FUNCTIONAL_ACTION|Abrir la aplicación configurada del proyecto\",\"interaction-7||contrasena|FUNCTIONAL_ACTION|Ingresar [contrasena] en \\\"Contraseña\\\"\",\"interaction-8|||FUNCTIONAL_ACTION|Presionar \\\"Enter\\\" en \\\"Contraseña\\\"\",\"interaction-10|||FUNCTIONAL_ACTION|Presionar \\\"Solicitud multiproducto\\\"\",\"interaction-13||numero_de_identificacion|FUNCTIONAL_ACTION|Ingresar [numero_de_identificacion] en \\\"Número de identificación\\\"\",\"interaction-14|||FUNCTIONAL_ACTION|Presionar botón asociado a \\\"Número de identificación\\\"\",\"interaction-15|||FUNCTIONAL_ACTION|Presionar \\\"Depurar\\\"\",\"interaction-17|||FUNCTIONAL_ACTION|Presionar \\\"Continuar\\\"\",\"interaction-20||categoria_de_producto_seleccion|FUNCTIONAL_ACTION|Seleccionar [categoria_de_producto_seleccion] en \\\"Categoría de producto\\\"\",\"interaction-23||producto_seleccion|FUNCTIONAL_ACTION|Seleccionar [producto_seleccion] en \\\"Producto\\\"\",\"interaction-24|||FUNCTIONAL_ACTION|Presionar botón asociado a \\\"Tasa\\\"\",\"interaction-26|||FUNCTIONAL_ACTION|Presionar \\\"Aceptar\\\"\",\"interaction-27|||FUNCTIONAL_ACTION|Presionar \\\"Continuar\\\"\",\"interaction-30||proposito_seleccion|FUNCTIONAL_ACTION|Seleccionar [proposito_seleccion] en \\\"Propósito\\\"\",\"interaction-33||instrumento_seleccion|FUNCTIONAL_ACTION|Seleccionar [instrumento_seleccion] en \\\"Instrumento\\\"\",\"interaction-34|||FUNCTIONAL_ACTION|Presionar \\\"Crear cuenta\\\"\",\"interaction-35|||FUNCTIONAL_ACTION|Presionar \\\"Continuar\\\"\",\"interaction-36|||FUNCTIONAL_ACTION|Presionar \\\"Finalizar\\\"\",\"interaction-37|||FUNCTIONAL_ACTION|Presionar \\\"Cerrar\\\"\",\"interaction-38|||FUNCTIONAL_ACTION|Presionar \\\"Cancelar\\\"\",\"interaction-39|||FUNCTIONAL_ACTION|Presionar \\\"Aceptar\\\"\"],\"values\":[\"categoria_de_producto_seleccion\",\"contrasena\",\"instrumento_seleccion\",\"numero_de_identificacion\",\"producto_seleccion\",\"proposito_seleccion\",\"usuario\"]}",
+      "primarySemanticSignature": "{\"interactions\":[\"navigation|inicio||||\",\"navigation|inicio||||\",\"navigation|inicio||||\",\"navigation|fbf08c6ecee9||||\",\"fill|fbf08c6ecee9|Usuario|role|textbox|Usuario||usuario|radames|Ingresar en \\\"Usuario\\\"\",\"fill|fbf08c6ecee9|Contraseña|role|textbox|Contraseña||contrasena||Ingresar en \\\"Contraseña\\\"\",\"press|fbf08c6ecee9|Contraseña|role|textbox|Contraseña||||\",\"click|fbf08c6ecee9|Solicitud multiproducto|role|link|Solicitud multiproducto||solicitud_multiproducto||Ingresar en \\\"Solicitud multiproducto\\\"\",\"navigation|fbf08c6ecee9||||\",\"navigation|fbf08c6ecee9||||\",\"fill|fbf08c6ecee9|Número de identificación||numero_de_identificacion|056-0154046-0|Ingresar en \\\"Número de identificación\\\"\",\"click|fbf08c6ecee9|Número de identificación||numero_de_identificacion|056-0154046-0|Ingresar en \\\"Número de identificación\\\"\",\"click|fbf08c6ecee9|Depurar|role|button|Depurar||depurar||Ingresar en \\\"Depurar\\\"\",\"click|fbf08c6ecee9|Continuar|role|button|Continuar||continuar||Ingresar en \\\"Continuar\\\"\",\"click|fbf08c6ecee9|Categoría de producto||categoria_de_producto||Ingresar en \\\"Categoría de producto\\\"\",\"click|fbf08c6ecee9|Cuentas de Efectivo|role|option|Cuentas de Efectivo||cuentas_de_efectivo||Ingresar en \\\"Cuentas de Efectivo\\\"\",\"select|fbf08c6ecee9|Categoría de producto||categoria_de_producto_seleccion|Cuentas de Efectivo|Seleccionar en \\\"Categoría de producto\\\"\",\"click|fbf08c6ecee9|Producto||producto||Ingresar en \\\"Producto\\\"\",\"click|fbf08c6ecee9|201 - Cuentas de Ahorros sin Libreta DOP|role|option|201 - Cuentas de Ahorros sin Libreta DOP||201_cuentas_de_ahorros_sin_libreta_dop||Ingresar en \\\"201 - Cuentas de Ahorros sin Libreta DOP\\\"\",\"select|fbf08c6ecee9|Producto||producto_seleccion|201 - Cuentas de Ahorros sin Libreta DOP|Seleccionar en \\\"Producto\\\"\",\"click|fbf08c6ecee9|Tasa||tasa||Ingresar en \\\"Tasa\\\"\",\"click|95c889362791|Aceptar|role|button|Aceptar||aceptar||Ingresar en \\\"Aceptar\\\"\",\"click|95c889362791|Continuar|role|button|Continuar||continuar||Ingresar en \\\"Continuar\\\"\",\"click|95c889362791|Propósito||proposito||Ingresar en \\\"Propósito\\\"\",\"click|95c889362791|Ahorros Personales|role|option|Ahorros Personales||ahorros_personales||Ingresar en \\\"Ahorros Personales\\\"\",\"select|95c889362791|Propósito||proposito_seleccion|Ahorros Personales|Seleccionar en \\\"Propósito\\\"\",\"click|95c889362791|Instrumento||instrumento||Ingresar en \\\"Instrumento\\\"\",\"click|95c889362791|Efectivo|role|option|Efectivo||efectivo||Ingresar en \\\"Efectivo\\\"\",\"select|95c889362791|Instrumento||instrumento_seleccion|Efectivo|Seleccionar en \\\"Instrumento\\\"\",\"click|95c889362791|Crear cuenta|role|button|Crear cuenta||crear_cuenta||Ingresar en \\\"Crear cuenta\\\"\",\"click|95c889362791|Continuar|role|button|Continuar||continuar||Ingresar en \\\"Continuar\\\"\",\"click|95c889362791|Finalizar|role|button|Finalizar||finalizar||Ingresar en \\\"Finalizar\\\"\",\"click|95c889362791|Cerrar|role|button|Cerrar||cerrar||Ingresar en \\\"Cerrar\\\"\",\"click|95c889362791|Cancelar|role|button|Cancelar||cancelar||Ingresar en \\\"Cancelar\\\"\",\"click|95c889362791|Aceptar|role|button|Aceptar||aceptar||Ingresar en \\\"Aceptar\\\"\"],\"steps\":[\"|||FUNCTIONAL_ACTION|Abrir la aplicación configurada del proyecto\",\"interaction-6||usuario|FUNCTIONAL_ACTION|Ingresar [usuario] en \\\"Usuario\\\"\",\"interaction-7||contrasena|FUNCTIONAL_ACTION|Ingresar [contrasena] en \\\"Contraseña\\\"\",\"interaction-8|||FUNCTIONAL_ACTION|Presionar \\\"Enter\\\" en \\\"Contraseña\\\"\",\"interaction-10|||FUNCTIONAL_ACTION|Presionar \\\"Solicitud multiproducto\\\"\",\"interaction-13||numero_de_identificacion|FUNCTIONAL_ACTION|Ingresar [numero_de_identificacion] en \\\"Número de identificación\\\"\",\"interaction-14|||FUNCTIONAL_ACTION|Presionar botón asociado a \\\"Número de identificación\\\"\",\"interaction-15|||FUNCTIONAL_ACTION|Presionar \\\"Depurar\\\"\",\"interaction-17|||FUNCTIONAL_ACTION|Presionar \\\"Continuar\\\"\",\"interaction-20||categoria_de_producto_seleccion|FUNCTIONAL_ACTION|Seleccionar [categoria_de_producto_seleccion] en \\\"Categoría de producto\\\"\",\"interaction-23||producto_seleccion|FUNCTIONAL_ACTION|Seleccionar [producto_seleccion] en \\\"Producto\\\"\",\"interaction-24|||FUNCTIONAL_ACTION|Presionar botón asociado a \\\"Tasa\\\"\",\"interaction-26|||FUNCTIONAL_ACTION|Presionar \\\"Aceptar\\\"\",\"interaction-27|||FUNCTIONAL_ACTION|Presionar \\\"Continuar\\\"\",\"interaction-30||proposito_seleccion|FUNCTIONAL_ACTION|Seleccionar [proposito_seleccion] en \\\"Propósito\\\"\",\"interaction-33||instrumento_seleccion|FUNCTIONAL_ACTION|Seleccionar [instrumento_seleccion] en \\\"Instrumento\\\"\",\"interaction-34|||FUNCTIONAL_ACTION|Presionar \\\"Crear cuenta\\\"\",\"interaction-35|||FUNCTIONAL_ACTION|Presionar \\\"Continuar\\\"\",\"interaction-36|||FUNCTIONAL_ACTION|Presionar \\\"Finalizar\\\"\",\"interaction-37|||FUNCTIONAL_ACTION|Presionar \\\"Cerrar\\\"\",\"interaction-38|||FUNCTIONAL_ACTION|Presionar \\\"Cancelar\\\"\",\"interaction-39|||FUNCTIONAL_ACTION|Presionar \\\"Aceptar\\\"\"],\"values\":[\"categoria_de_producto_seleccion\",\"contrasena\",\"instrumento_seleccion\",\"numero_de_identificacion\",\"producto_seleccion\",\"proposito_seleccion\",\"usuario\"]}",
+      "stepsAdded": 0,
+      "stepsRemoved": 1,
+      "stepsReplaced": 0,
+      "entityScopesAdded": [],
+      "valueKeysAdded": [],
+      "valueKeysRemoved": [],
+      "mutationPreconditionValidity": {
+        "status": "valid",
+        "checkedValueKeys": [],
+        "invalidValueKeys": [],
+        "reasons": []
+      }
+    },
+    "mutationPreconditionValidity": {
+      "status": "valid",
+      "checkedValueKeys": [],
+      "invalidValueKeys": [],
+      "reasons": []
+    },
+    "goalRelevanceScore": 0.55,
+    "goalRelevanceReasons": [
+      "shared_semantic_tokens:3",
+      "candidate_has_observed_data",
+      "shared_entity_without_operation_evidence"
+    ],
+    "rationale": "Derivado de evidencia observada y separado del recorrido principal."
+  }
+]

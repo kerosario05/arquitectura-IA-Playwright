@@ -1,0 +1,1400 @@
+{
+  "recordingId": "524bab88-2038-42b7-bb9a-59255adaa311",
+  "projectSlug": "portal-comercial",
+  "appSlug": "portal-comercial",
+  "platform": "web",
+  "baseUrl": "https://srvqacgowb01.local.bsc.com:5000/",
+  "label": "Certificado de Deposito",
+  "recordingGoal": {
+    "declaredGoal": "Certificado de Deposito",
+    "normalizedGoal": "Certificado de Deposito",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-09-22T20:09:36.826Z",
+  "status": "stopped",
+  "events": [
+    {
+      "t": 1940,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 0
+    },
+    {
+      "t": 3002,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 1
+    },
+    {
+      "t": 3018,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 2
+    },
+    {
+      "t": 3052,
+      "kind": "navigate",
+      "screenKey": "fbf08c6ecee9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 3
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "fbf08c6ecee9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/",
+      "framePath": ".artifacts\\tmp\\recordings\\524bab88-2038-42b7-bb9a-59255adaa311\\0003-launch.png",
+      "seq": 4
+    },
+    {
+      "t": 5082,
+      "kind": "fill",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "77080fb3ce69141cbca23d05b1cebb6be9b05d61fbd10f1e39f7ce07031141a4",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Usuario",
+        "role": "input",
+        "tag": "input",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Usuario",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#username",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "username",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": false
+      },
+      "value": "radames",
+      "valueSource": "user",
+      "framePath": ".artifacts\\tmp\\recordings\\524bab88-2038-42b7-bb9a-59255adaa311\\0005-input.png",
+      "seq": 5
+    },
+    {
+      "t": 9169,
+      "kind": "fill",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "77080fb3ce69141cbca23d05b1cebb6be9b05d61fbd10f1e39f7ce07031141a4",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "input",
+        "tag": "input",
+        "inputType": "password",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Contraseña",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#password",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "password",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": true
+      },
+      "redactedKey": "contrasena",
+      "valueSource": "user",
+      "framePath": ".artifacts\\tmp\\recordings\\524bab88-2038-42b7-bb9a-59255adaa311\\0006-input.png",
+      "seq": 6
+    },
+    {
+      "t": 9254,
+      "kind": "press",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "77080fb3ce69141cbca23d05b1cebb6be9b05d61fbd10f1e39f7ce07031141a4",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "textbox",
+        "tag": "input",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Contraseña",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#password",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "password",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "note": "Enter",
+      "framePath": ".artifacts\\tmp\\recordings\\524bab88-2038-42b7-bb9a-59255adaa311\\0007-press.png",
+      "seq": 7
+    },
+    {
+      "t": 9615,
+      "kind": "navigate",
+      "screenKey": "fbf08c6ecee9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/",
+      "seq": 8
+    },
+    {
+      "t": 10849,
+      "kind": "navigate",
+      "screenKey": "fbf08c6ecee9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/",
+      "seq": 9
+    },
+    {
+      "t": 10854,
+      "kind": "navigate",
+      "screenKey": "fbf08c6ecee9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "seq": 10
+    },
+    {
+      "t": 11064,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "77080fb3ce69141cbca23d05b1cebb6be9b05d61fbd10f1e39f7ce07031141a4",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "target": {
+        "label": "Solicitud multiproducto",
+        "role": "link",
+        "tag": "a",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "link|Solicitud multiproducto",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Solicitud multiproducto",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "/requests/create/multiproduct"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "framePath": ".artifacts\\tmp\\recordings\\524bab88-2038-42b7-bb9a-59255adaa311\\0009-click.png",
+      "seq": 11
+    },
+    {
+      "t": 23329,
+      "kind": "fill",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "tag": "input",
+        "associatedField": "Número de identificación",
+        "locators": [],
+        "sensitive": false
+      },
+      "value": "056-0154046-0",
+      "valueSource": "user",
+      "framePath": ".artifacts\\tmp\\recordings\\524bab88-2038-42b7-bb9a-59255adaa311\\0012-input.png",
+      "seq": 12
+    },
+    {
+      "t": 23405,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "target": {
+        "label": "control",
+        "role": "button",
+        "tag": "button",
+        "associatedField": "Número de identificación",
+        "locators": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 2
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "framePath": ".artifacts\\tmp\\recordings\\524bab88-2038-42b7-bb9a-59255adaa311\\0013-click.png",
+      "seq": 13
+    },
+    {
+      "t": 38717,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "target": {
+        "label": "Depurar",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Depurar",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Depurar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Depurar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "framePath": ".artifacts\\tmp\\recordings\\524bab88-2038-42b7-bb9a-59255adaa311\\0014-click.png",
+      "seq": 14
+    },
+    {
+      "t": 45025,
+      "kind": "navigate",
+      "screenKey": "fbf08c6ecee9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10259/edit",
+      "seq": 15
+    },
+    {
+      "t": 53806,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10259/edit",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Continuar",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Continuar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Continuar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "framePath": ".artifacts\\tmp\\recordings\\524bab88-2038-42b7-bb9a-59255adaa311\\0016-click.png",
+      "seq": 16
+    },
+    {
+      "t": 81451,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10259/edit",
+      "target": {
+        "label": "control",
+        "role": "combobox",
+        "tag": "span",
+        "associatedField": "Categoría de producto",
+        "locators": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "span",
+                "role": "combobox"
+              },
+              "stableDirectAttributes": {
+                "role": "combobox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "coveredByFunctionalSelection": true
+      },
+      "framePath": ".artifacts\\tmp\\recordings\\524bab88-2038-42b7-bb9a-59255adaa311\\0017-click.png",
+      "seq": 17
+    },
+    {
+      "t": 83672,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10259/edit",
+      "target": {
+        "label": "Certificados de Deposito",
+        "role": "option",
+        "tag": "li",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "option|Certificados de Deposito",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#pv_id_118_1",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "pv_id_118_1",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#pv_id_118_1",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Certificados de Deposito",
+                "id": "pv_id_118_1",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "coveredByFunctionalSelection": true
+      },
+      "framePath": ".artifacts\\tmp\\recordings\\524bab88-2038-42b7-bb9a-59255adaa311\\0018-click.png",
+      "seq": 18
+    },
+    {
+      "t": 83808,
+      "kind": "tap",
+      "observationType": "pointer",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10259/edit",
+      "target": {
+        "label": "Certificados de Deposito",
+        "role": "option",
+        "interactionType": "select",
+        "afterValue": "Certificados de Deposito",
+        "compoundRole": "selection",
+        "associatedField": "Categoría de producto",
+        "locators": [],
+        "sourceTechnicalEventSeqs": [
+          17,
+          18
+        ]
+      },
+      "seq": 19
+    },
+    {
+      "t": 85070,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10259/edit",
+      "target": {
+        "label": "control",
+        "role": "combobox",
+        "tag": "span",
+        "associatedField": "Producto",
+        "locators": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "span",
+                "role": "combobox"
+              },
+              "stableDirectAttributes": {
+                "role": "combobox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "coveredByFunctionalSelection": true
+      },
+      "framePath": ".artifacts\\tmp\\recordings\\524bab88-2038-42b7-bb9a-59255adaa311\\0020-click.png",
+      "seq": 20
+    },
+    {
+      "t": 88048,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10259/edit",
+      "target": {
+        "label": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+        "role": "option",
+        "tag": "li",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "option|300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#pv_id_119_0",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "pv_id_119_0",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#pv_id_119_0",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+                "id": "pv_id_119_0",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "coveredByFunctionalSelection": true
+      },
+      "framePath": ".artifacts\\tmp\\recordings\\524bab88-2038-42b7-bb9a-59255adaa311\\0021-click.png",
+      "seq": 21
+    },
+    {
+      "t": 88181,
+      "kind": "tap",
+      "observationType": "pointer",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10259/edit",
+      "target": {
+        "label": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+        "role": "option",
+        "interactionType": "select",
+        "afterValue": "300 - Depósito a plazo Financiero Personal Capitalizable DOP",
+        "compoundRole": "selection",
+        "associatedField": "Producto",
+        "locators": [],
+        "sourceTechnicalEventSeqs": [
+          20,
+          21
+        ]
+      },
+      "seq": 22
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "fbf08c6ecee9",
+      "title": "fbf08c6ecee9",
+      "fingerprint": "77080fb3ce69141cbca23d05b1cebb6be9b05d61fbd10f1e39f7ce07031141a4",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "firstSeenAt": 3044,
+      "controls": [
+        {
+          "label": "Usuario",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingresa tu usuario",
+          "attributes": {
+            "id": "username",
+            "placeholder": "Ingresa tu usuario"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "username",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Contraseña",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingresa tu contraseña",
+          "attributes": {
+            "id": "password",
+            "type": "password",
+            "placeholder": "Ingresa tu contraseña"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "password",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Recordarme",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "id": "remember-me",
+            "type": "checkbox"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "remember-me",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Iniciar sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "submit",
+            "aria-label": "Iniciar sesión"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Iniciar sesión",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 1,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "9b3ed654dc84",
+      "title": "9b3ed654dc84",
+      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "firstSeenAt": 11171,
+      "controls": [
+        {
+          "label": "Portal Comercial",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Portal Comercial ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuración",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Configuración",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Sesión",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_3_0_0",
+            "aria-label": "Inicio",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_0_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Información",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_3_0_1",
+            "aria-label": "Información",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_0_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Información",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Información",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Campañas",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_3_1_0",
+            "aria-label": "Campañas",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_1_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Campañas",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Campañas",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Solicitud multiproducto",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_3_1_1",
+            "aria-label": "Solicitud multiproducto",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_1_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Solicitud multiproducto",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Solicitud multiproducto",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Solicitudes en curso",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_3_1_2",
+            "aria-label": "Solicitudes en curso",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_1_2",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Solicitudes en curso",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Solicitudes en curso",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Usuarios",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_3_2_0",
+            "aria-label": "Usuarios",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_2_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Usuarios",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Usuarios",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Roles",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_3_2_1",
+            "aria-label": "Roles",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_2_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Roles",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Roles",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Permisos",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_3_2_2",
+            "aria-label": "Permisos",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_2_2",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Permisos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Permisos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Auditorías",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_3_3_0",
+            "aria-label": "Auditorías",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_3_0",
+              "confidence": 0.9
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 2,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "f6d0130096ee",
+      "title": "f6d0130096ee",
+      "fingerprint": "172c19ee52523a2df88f3979594c911bdc7b72ed091ae2c36513cd81bcf9de08",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/10259/edit",
+      "firstSeenAt": 53943,
+      "controls": [
+        {
+          "label": "Portal Comercial",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Portal Comercial ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuración",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Configuración",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Sesión",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_3_0_0",
+            "aria-label": "Inicio",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_0_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Información",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_3_0_1",
+            "aria-label": "Información",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_0_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Información",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Información",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Campañas",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_3_1_0",
+            "aria-label": "Campañas",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_1_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Campañas",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Campañas",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Solicitud multiproducto",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_3_1_1",
+            "aria-label": "Solicitud multiproducto",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_1_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Solicitud multiproducto",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Solicitud multiproducto",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Solicitudes en curso",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_3_1_2",
+            "aria-label": "Solicitudes en curso",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_1_2",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Solicitudes en curso",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Solicitudes en curso",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Usuarios",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_3_2_0",
+            "aria-label": "Usuarios",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_2_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Usuarios",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Usuarios",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Roles",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_3_2_1",
+            "aria-label": "Roles",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_2_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Roles",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Roles",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Permisos",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_3_2_2",
+            "aria-label": "Permisos",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_2_2",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Permisos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Permisos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Auditorías",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_3_3_0",
+            "aria-label": "Auditorías",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_3_0",
+              "confidence": 0.9
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    }
+  ],
+  "endedAt": "2026-09-22T20:11:39.417Z",
+  "durationMs": 122591
+}

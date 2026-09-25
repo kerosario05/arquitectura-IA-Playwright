@@ -24,14 +24,23 @@ const CORS_ORIGIN = process.env.API_CORS_ORIGIN || "*";
 const API_KEY = process.env.API_KEY || "";
 
 const app = express();
+const JSON_LIMIT = process.env.RECORDING_JSON_LIMIT ?? "2mb";
 
 app.use(cors({ origin: CORS_ORIGIN }));
 app.use(express.json({
-  limit: "50mb",
+  limit: JSON_LIMIT,
   verify: (req, res, buf) => {
     captureRawJsonBody(req, res, buf);
   },
 }));
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (err?.type === "entity.too.large" || err?.status === 413) {
+    console.warn(`[recording-transport] 413 method=${req.method} path=${req.path} contentType=${req.headers["content-type"] ?? ""} contentLength=${req.headers["content-length"] ?? "unknown"} configuredJsonLimit=${JSON_LIMIT}`);
+    res.status(413).json({ ok: false, errorCode: "PAYLOAD_TOO_LARGE", message: "No se pudo guardar la actualización de Recording porque la solicitud excedió el límite permitido." });
+    return;
+  }
+  next(err);
+});
 app.use(mobileUtf8JsonReconciler());
 
 // Ensure UTF-8 encoding for all JSON responses
@@ -100,8 +109,11 @@ const server = app.listen(PORT, HOST, () => {
   console.log(`  GET  /api/recordings?projectSlug=...`);
   console.log(`  GET  /api/recordings/:recordingId`);
   console.log(`  POST /api/recordings/:recordingId/stop`);
+  console.log(`  POST /api/recordings/:recordingId/control`);
   console.log(`  POST /api/recordings/:recordingId/derive`);
   console.log(`  GET  /api/recordings/:recordingId/scenarios`);
+  console.log(`  PUT  /api/recordings/:recordingId/scenario-value`);
+  console.log(`  POST /api/recordings/:recordingId/execute`);
   console.log(`  POST /api/recordings/:recordingId/testrail`);
   console.log(`  POST /api/runs/scenario-preview`);
   console.log(`  POST /api/runs/discovery-batch`);

@@ -1,0 +1,362 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.classifyPostSubmitActionRole = classifyPostSubmitActionRole;
+exports.cleanExpectedResult = cleanExpectedResult;
+exports.extractDataHintsFromText = extractDataHintsFromText;
+exports.normalizeTestRailCase = normalizeTestRailCase;
+exports.normalizeTestRailCases = normalizeTestRailCases;
+const step_intent_parser_1 = require("../discovery/step-intent-parser");
+const hintDictionary = [
+    "cedula",
+    "cédula",
+    "documento",
+    "identificacion",
+    "identificación",
+    "codigo",
+    "código",
+    "otp",
+    "pin",
+    "token",
+    "telefono",
+    "teléfono",
+    "celular",
+    "monto",
+    "importe",
+    "amount",
+    "valor",
+    "cuenta",
+    "account",
+    "prestamo",
+    "préstamo",
+    "loan",
+    "cliente",
+    "customer",
+    "email",
+    "correo",
+    "usuario",
+    "user",
+    "password",
+    "contraseña",
+    "clave"
+];
+function stripHtml(text) {
+    let processed = text;
+    // Convert list items to separate lines BEFORE stripping tags
+    // </li><li> or </li>\n<li> should become line breaks
+    processed = processed.replace(/<\/li>\s*<li>/gi, "\n");
+    processed = processed.replace(/<\/li>/gi, "\n");
+    processed = processed.replace(/<li\s*>/gi, "");
+    // Convert other block elements to line breaks
+    processed = processed.replace(/<br\s*\/?\s*>/gi, "\n");
+    processed = processed.replace(/<\/p>/gi, "\n");
+    processed = processed.replace(/<p[^>]*>/gi, "\n");
+    processed = processed.replace(/<\/div>/gi, "\n");
+    processed = processed.replace(/<div[^>]*>/gi, "\n");
+    // Now strip remaining HTML tags
+    processed = processed.replace(/<[^>]+>/g, "");
+    // Decode HTML entities
+    processed = processed.replace(/&nbsp;/gi, " ");
+    processed = processed.replace(/&quot;/gi, "\"");
+    processed = processed.replace(/&amp;/gi, "&");
+    processed = processed.replace(/&lt;/gi, "<");
+    processed = processed.replace(/&gt;/gi, ">");
+    processed = processed.replace(/&#39;/gi, "'");
+    processed = processed.replace(/&apos;/gi, "'");
+    // Normalize line endings
+    processed = processed.replace(/\r\n/g, "\n");
+    processed = processed.replace(/\r/g, "\n");
+    processed = processed.replace(/\n{3,}/g, "\n\n");
+    return processed.trim();
+}
+/**
+ * Repair concatenated steps by splitting before MCP action verbs
+ * This handles cases where HTML cleanup resulted in:
+ * "Clic en "A".Clic en "B".Validar que se muestre "C"."
+ */
+function repairConcatenatedSteps(text) {
+    let repaired = text;
+    let verbsDetected = 0;
+    // Action verb patterns that typically start a new step
+    // Keep the period in the output
+    const actionVerbPatterns = [
+        { pattern: /\.(Clic\s+en)/gi, replacement: ".$1" },
+        { pattern: /\.(Click\s+on)/gi, replacement: ".$1" },
+        { pattern: /\.(Hacer\s+clic\s+en)/gi, replacement: ".$1" },
+        { pattern: /\.(Presionar)/gi, replacement: ".$1" },
+        { pattern: /\.(Seleccionar)/gi, replacement: ".$1" },
+        { pattern: /\.(Validar\s+que)/gi, replacement: ".$1" },
+        { pattern: /\.(Verificar\s+que)/gi, replacement: ".$1" },
+        { pattern: /\.(Comprobar\s+que)/gi, replacement: ".$1" },
+        { pattern: /\.(Esperar\s+que)/gi, replacement: ".$1" },
+        { pattern: /\.(Esperar)/gi, replacement: ".$1" },
+        { pattern: /\.(Navegar\s+a)/gi, replacement: ".$1" },
+        { pattern: /\.(Ir\s+a)/gi, replacement: ".$1" },
+        { pattern: /\.(Abrir)/gi, replacement: ".$1" },
+        { pattern: /\.(Ingresar)/gi, replacement: ".$1" },
+        { pattern: /\.(Completar)/gi, replacement: ".$1" }
+    ];
+    for (const { pattern, replacement } of actionVerbPatterns) {
+        const matches = repaired.match(pattern);
+        if (matches) {
+            verbsDetected += matches.length;
+            repaired = repaired.replace(pattern, replacement);
+        }
+    }
+    // Also handle cases without period: "..."Clic en" (quote followed by verb)
+    const quoteVerbPatterns = [
+        { pattern: /(")(Clic\s+en)/gi, replacement: "$1\n$2" },
+        { pattern: /(")(Validar\s+que)/gi, replacement: "$1\n$2" },
+        { pattern: /(")(Seleccionar)/gi, replacement: "$1\n$2" }
+    ];
+    for (const { pattern, replacement } of quoteVerbPatterns) {
+        const matches = repaired.match(pattern);
+        if (matches) {
+            verbsDetected += matches.length;
+            repaired = repaired.replace(pattern, replacement);
+        }
+    }
+    const wasRepaired = verbsDetected > 0;
+    return { repaired, wasRepaired, verbsDetected };
+}
+function cleanText(value) {
+    if (!value) {
+        return undefined;
+    }
+    const cleaned = stripHtml(value).trim();
+    return cleaned || undefined;
+}
+function classifyPostSubmitActionRole(intents) {
+    const actionIndexes = intents
+        .map((intent, index) => ({ intent, index }))
+        .filter(({ intent }) => intent.type === "action_click");
+    if (actionIndexes.length !== 1)
+        return undefined;
+    const [{ intent: action, index: actionIndex }] = actionIndexes;
+    const hasAuthWaitBeforeAction = intents
+        .slice(0, actionIndex)
+        .some((intent) => intent.type === "assertion" && /^(?:esperar|wait\s+for)\b/i.test(intent.originalText.trim()));
+    const hasOnlyAuthOutcomeAssertionsAfterAction = intents
+        .slice(actionIndex + 1)
+        .length > 0 && intents
+        .slice(actionIndex + 1)
+        .every((intent) => intent.type === "assertion");
+    return action && hasAuthWaitBeforeAction && hasOnlyAuthOutcomeAssertionsAfterAction
+        ? "auth_auxiliary"
+        : undefined;
+}
+function inferExplicitAuthenticationFlow(steps) {
+    const intents = steps.flatMap((step) => (0, step_intent_parser_1.parseStepIntent)(step.action));
+    const fills = intents.filter((intent) => intent.type === "action_fill" && Boolean(intent.valueKey));
+    const submitIndex = intents.findIndex((intent) => intent.type === "action_submit" ||
+        (intent.type === "action_click" && /\b(?:continuar|submit|sign\s*in|log\s*in|ingresar)\b/i.test(intent.actionTarget ?? "")));
+    if (fills.length < 2 || submitIndex < 0)
+        return false;
+    const hasAuthenticationOutcome = intents.some((intent, index) => index > submitIndex && intent.type === "assertion");
+    const postSubmitIntents = intents.slice(submitIndex + 1);
+    const hasPostSubmitAction = postSubmitIntents.some((intent) => ["navigation_path", "action_click", "action_fill", "action_select", "action_submit"].includes(intent.type));
+    const postSubmitRole = classifyPostSubmitActionRole(postSubmitIntents);
+    return hasAuthenticationOutcome && (!hasPostSubmitAction || postSubmitRole === "auth_auxiliary");
+}
+function resolveTestRailAuthIntent(rawCase, steps) {
+    const explicit = rawCase.authIntent;
+    if (explicit === "gate_observation" || explicit === "full_authentication")
+        return explicit;
+    return inferExplicitAuthenticationFlow(steps) ? "full_authentication" : undefined;
+}
+/**
+ * Clean and format expected result text for readability
+ * Preserves list structure and repairs concatenated items
+ */
+function cleanExpectedResult(value) {
+    if (!value) {
+        return undefined;
+    }
+    let processed = stripHtml(value);
+    // Repair concatenated expected result items
+    const repairResult = repairConcatenatedSteps(processed);
+    processed = repairResult.repaired;
+    // Add newlines after periods followed by capital letters (sentence boundaries)
+    processed = processed.replace(/\.([A-Z])/g, ".\n$1");
+    if (repairResult.wasRepaired) {
+        console.log(`[testcase-parser] repairedExpectedResult=true count=${repairResult.verbsDetected}`);
+    }
+    processed = processed.trim();
+    return processed || undefined;
+}
+function splitIntoSteps(customSteps) {
+    const normalized = cleanText(customSteps);
+    if (!normalized) {
+        return [];
+    }
+    // Detect if HTML lists were present
+    const hasHtmlLists = /<ol|<ul|<li/i.test(customSteps);
+    const hasLineBreaks = /\n/.test(normalized);
+    // Repair concatenated steps
+    const repairResult = repairConcatenatedSteps(normalized);
+    let textToSplit = repairResult.repaired;
+    if (repairResult.wasRepaired) {
+        console.log(`[testcase-parser] repairedConcatenatedSteps=true count=${repairResult.verbsDetected} originalLength=${normalized.length}`);
+    }
+    // Split by newline (added by repair function)
+    textToSplit = textToSplit.replace(/\.\s*(Clic\s+en|Click\s+on|Validar\s+que|Verificar\s+que|Esperar|Seleccionar|Presionar|Navegar|Ingresar|Completar)/gi, ".\n$1");
+    // First split by numbered list patterns
+    let parts = textToSplit
+        .split(/\n\s*(?:\d+[\.)])\s*/g)
+        .map((item) => item.trim())
+        .filter(Boolean);
+    // If no numbered lists found, split by bullet points
+    if (parts.length === 1 && !hasHtmlLists) {
+        parts = textToSplit
+            .split(/\n\s*(?:-|\*)\s*/g)
+            .map((item) => item.trim())
+            .filter(Boolean);
+    }
+    // If still single part, split by newlines
+    if (parts.length === 1) {
+        parts = textToSplit
+            .split(/\r?\n/)
+            .map((item) => item.trim())
+            .filter(Boolean);
+    }
+    const expandedParts = [];
+    for (const part of parts) {
+        // Strip leading step numbers from the action text
+        const cleanedPart = part.replace(/^\d+[\.)]\s*/, "").trim();
+        const lines = cleanedPart.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+        if (lines.length > 1) {
+            const actionPatterns = [
+                /^clic\s+en\s+['"]/i,
+                /^click\s+on\s+['"]/i,
+                /^hacer\s+clic\s+en\s+['"]/i,
+                /^presionar\s+['"]/i,
+                /^seleccionar\s+['"]/i,
+                /^abrir\s+/i,
+                /^ingresar\s+/i,
+                /^validar\s+/i,
+                /^verificar\s+/i,
+                /^comprobar\s+/i,
+                /^esperar\s+/i,
+                /^navegar\s+/i,
+                /^ir\s+a\s+/i
+            ];
+            const looksLikeMultipleActions = lines.some((line) => actionPatterns.some((p) => p.test(line)));
+            if (looksLikeMultipleActions) {
+                expandedParts.push(...lines);
+            }
+            else {
+                expandedParts.push(cleanedPart);
+            }
+        }
+        else {
+            expandedParts.push(cleanedPart);
+        }
+    }
+    const actions = expandedParts.length > 0 ? expandedParts : [normalized];
+    const parsedActions = [];
+    for (const rawAction of actions) {
+        const lines = rawAction.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+        const expectedLines = lines
+            .filter((line) => /^esperado\s*:/i.test(line))
+            .map((line) => line.replace(/^esperado\s*:\s*/i, "").trim())
+            .filter(Boolean);
+        const actionLines = lines.filter((line) => !/^esperado\s*:/i.test(line));
+        const action = actionLines.join("\n").trim();
+        if (!action && expectedLines.length > 0 && parsedActions.length > 0) {
+            parsedActions[parsedActions.length - 1].expected = expectedLines.join("\n");
+            continue;
+        }
+        if (action) {
+            parsedActions.push({
+                action,
+                ...(expectedLines.length > 0 ? { expected: expectedLines.join("\n") } : {}),
+            });
+        }
+    }
+    const parsed = parsedActions.length > 0 ? parsedActions : [{ action: normalized }];
+    // Diagnostic logging
+    console.log(`[testcase-parser] parsedSteps=${parsed.length} source=testrail`);
+    console.log(`[testcase-parser] htmlListDetected=${hasHtmlLists} lineBreaksPreserved=${hasLineBreaks || repairResult.wasRepaired}`);
+    if (parsed.length === 1 && repairResult.verbsDetected > 1) {
+        console.log(`[testcase-parser] suspiciousConcatenatedSteps=true verbsDetected=${repairResult.verbsDetected} originalLength=${normalized.length}`);
+    }
+    return parsed.map((step, index) => {
+        return {
+            index: index + 1,
+            action: step.action,
+            expected: step.expected,
+            dataHints: extractDataHintsFromText(`${step.action}\n${step.expected ?? ""}`)
+        };
+    });
+}
+function extractDataHintsFromText(text) {
+    const normalized = text
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+    const unique = new Set();
+    for (const hint of hintDictionary) {
+        const normalizedHint = hint
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+        if (normalized.includes(normalizedHint)) {
+            unique.add(normalizedHint);
+        }
+    }
+    return Array.from(unique);
+}
+function normalizeTestRailCase(rawCase) {
+    const title = cleanText(rawCase.title) ?? `Case ${rawCase.id}`;
+    const preconditions = cleanText(rawCase.custom_preconds);
+    const references = cleanText(rawCase.refs);
+    let steps = [];
+    if (Array.isArray(rawCase.custom_steps_separated) && rawCase.custom_steps_separated.length > 0) {
+        steps = rawCase.custom_steps_separated.map((step, index) => {
+            const action = cleanText(step.content) ?? `Step ${index + 1}`;
+            const expected = cleanExpectedResult(step.expected);
+            const info = cleanText(step.additional_info);
+            const hintSource = `${action}\n${expected ?? ""}\n${info ?? ""}\n${preconditions ?? ""}`;
+            return {
+                index: index + 1,
+                action,
+                expected,
+                dataHints: extractDataHintsFromText(hintSource)
+            };
+        });
+    }
+    else if (rawCase.custom_steps) {
+        steps = splitIntoSteps(rawCase.custom_steps).map((step) => ({
+            ...step,
+            dataHints: extractDataHintsFromText(`${step.action}\n${step.expected ?? ""}\n${cleanText(rawCase.custom_preconds) ?? ""}`)
+        }));
+    }
+    if (steps.length === 0) {
+        steps = [
+            {
+                index: 1,
+                action: title,
+                expected: undefined,
+                dataHints: extractDataHintsFromText(`${title}\n${preconditions ?? ""}`)
+            }
+        ];
+    }
+    const authIntent = resolveTestRailAuthIntent(rawCase, steps);
+    const normalized = {
+        source: "testrail",
+        externalId: `C${rawCase.id}`,
+        caseId: rawCase.id,
+        title,
+        preconditions,
+        references,
+        steps,
+        raw: rawCase,
+        sectionId: rawCase.section_id,
+        sectionName: undefined,
+        authIntent,
+        ...(authIntent === "full_authentication" ? { type: "authentication_test" } : {})
+    };
+    return normalized;
+}
+function normalizeTestRailCases(rawCases) {
+    return rawCases.map((rawCase) => normalizeTestRailCase(rawCase));
+}

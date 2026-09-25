@@ -1,0 +1,69 @@
+{
+  "mode": "deterministic",
+  "provider": null,
+  "model": null,
+  "skill": {
+    "name": null,
+    "version": null,
+    "hash": null,
+    "loaded": false
+  },
+  "invocations": 0,
+  "invocationsConsumed": 0,
+  "durationMs": 60538,
+  "usage": {
+    "inputTokens": null,
+    "cachedInputTokens": null,
+    "cacheWriteInputTokens": null,
+    "nonCachedInputTokens": null,
+    "outputTokens": null,
+    "reasoningOutputTokens": null,
+    "totalPhysicalTokens": null,
+    "durationMs": null,
+    "credits": null
+  },
+  "validation": {
+    "schema": "skipped",
+    "structure": "passed",
+    "traceFidelity": "skipped",
+    "typescript": "passed",
+    "playwrightDiscovery": "passed",
+    "semanticCoverage": "passed",
+    "functionalExecution": "failed"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "specGenerationAttempts": 0,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [
+    "functionalExecution"
+  ],
+  "regressedGates": [],
+  "missingRequirements": [],
+  "oracleTypes": [
+    "navigation_transition"
+  ],
+  "errors": [
+    "functional_execution_failed:exitCode=1",
+    "functional_execution_error:Error: Promoted fill failed at step 7 field=\"Campo pendiente de identificar\" value=\"123456\". fillPath=failed nativeFillAttempted=false nativeFillSucceeded=false callbackAttempted=true callbackSucceeded=false diagnostics={\"currentUrl\":\"https://qa1.santacruz.do/onlinebanking/IdentifyUser\",\"actionIntent\":\"fill\",\"target\":\"Campo pendiente de identificar\",\"stepIndex\":7,\"timeoutMs\":15000,\"activeContainer\":\"form#IdentifyUserForm\",\"retryAttempted\":false,\"previousActiveContainer\":\"form#IdentifyUserForm\",\"refreshedActiveContainer\":\"form#IdentifyUserForm\",\"matchingFieldFound\":false,\"fallbackUsed\":\"none\",\"searchedContainers\":20,\"discardedReason\":\"stale_or_not_matching_field\",\"matchedLocatorStrategy\":\"unknown\",\"valueKey\":\"unresolved_value_15\",\"technicalTargetRefs\":[],\"fieldCandidateCount\":11,\"fillPath\":\"failed\",\"nativeFillAttempted\":false,\"nativeFillSucceeded\":false,\"callbackAttempted\":true,\"callbackSucceeded\":false,\"callbackError\":\"Fill callback failed: fill action timed out after 15000ms\",\"verificationAttempted\":false,\"verificationSucceeded\":false,\"screenshotPath\":\"[REDACTED]\"}"
+  ],
+  "warnings": [
+    "step_index_not_explicit_in_spec:9",
+    "functional_execution_screenshots=1",
+    "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 7)."
+  ],
+  "finalSpec": {
+    "origin": "deterministic_compiler",
+    "generatedBy": "core",
+    "strategy": "deterministic_compiler",
+    "fallback": null
+  },
+  "runtimeGate": {
+    "decision": "block",
+    "promotionStatus": "blocked",
+    "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 7)."
+  }
+}

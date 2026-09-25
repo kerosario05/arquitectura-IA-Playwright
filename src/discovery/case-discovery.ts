@@ -6,6 +6,7 @@ import { scanCurrentPage } from "../explorer/page-scanner";
 import { buildTechnicalScreenKey } from "../explorer/page-scanner";
 import { buildProposedObjects } from "./proposed-object-builder";
 import { waitForPageReady } from "../browser/page-readiness";
+import { PAGE_LOADING_STATE_PREDICATE } from "../browser/loading-state-detector";
 import {
   resolveActionTarget,
   resolveAssociatedActionTarget,
@@ -15,6 +16,9 @@ import {
   compareGridCollection,
   shouldInvokeAiAssistedDiscovery,
   resolveFillTarget,
+  classifyRecordedSurfaceCompatibility,
+  releaseAcceptedScopeMarker,
+  attemptSegmentedInputFill,
   type ActiveContainerContext
 } from "./target-resolver";
 import {
@@ -64,7 +68,8 @@ import {
 import type {
   CaseDiscoveryResult,
   DiscoveryStepResult,
-  DiscoveredObject
+  DiscoveredObject,
+  AuthenticationOutcome
 } from "../types/discovery.types";
 import type { TestScenario, TestScenarioStep } from "../types/testrail.types";
 import type { ExecutionPlan, ExecutionPlanStep, RequiredDataRef, LocatorStrategy, InputIntent } from "../types/execution-plan.types";
@@ -87,6 +92,7 @@ import {
   type AuthGateState
 } from "./auth-step-classifier";
 import { waitForStablePageState, type PageStabilityOptions } from "./page-stability-detector";
+import { isGenericUnresolvedLabel } from "../recording/trace-normalizer";
 import { parseProductConditionTarget, matchesProductCondition, type ProductCondition } from "./product-condition-parser";
 import { detectTransientScreen } from "./transient-screen-detector";
 import { evaluateEarlyCompletionPolicy, type EarlyCompletionPolicyResult } from "./early-completion-policy";
@@ -96,6 +102,7 @@ import { type AutoGenerateConfig } from "../data/auto-test-data-generator";
 import {
   captureAssertionObservationSnapshot,
   diffAssertionObservation,
+  diffStateCandidates,
   classifyNetworkActivity,
   writeAssertionObservationArtifact,
   type AssertionObservationArtifact,
@@ -108,11 +115,204 @@ import {
 } from "./controlled-advance-probe";
 import type { AssertionPolarity } from "../scenarios/canonical-scenario";
 import { extractTestRailInputRequirements } from "../testrail/testrail-input-requirements-adapter";
-import { isAuthTransientNoResponse, resolveAuthTransientRetryMax } from "./auth-transient-retry";
 import { isPendingOracleAuthority } from "./oracle-authority";
+import { resolvePostActionSynchronization } from "./post-action-synchronization";
+import { deduplicateActionTargetsBySource } from "./action-target-equivalence";
+import { verifySelectionState, hasCausalSelectionTransition, type InteractiveState } from "./selection-state-verification";
+import { resolveClickRetryPolicy } from "./click-retry-policy";
+import { shouldReapplyAuthFields } from "./auth-reapply-policy";
+import { createHash } from "node:crypto";
+import { deriveRouteAuthority, type LearnedRouteAuthority } from "../db/recording-route-observation-repository";
+import {
+  isRouteObservationEligible,
+  seedCaptureObservation,
+  recordReplayObservationAndReevaluate,
+} from "./recording-route-observation-wiring";
+
+async function readInteractiveState(locator: Locator | undefined): Promise<InteractiveState | undefined> {
+  if (!locator) return undefined;
+  // A state probe is optional evidence for stateful controls. Keep it bounded
+  // so a stale locator cannot delay the next action beyond a small technical
+  // probe window.
+  return boundedLocatorEvaluate(locator, (element) => {
+    const candidate = element as HTMLInputElement & HTMLOptionElement;
+    return {
+      ...(typeof candidate.checked === "boolean" ? { checked: candidate.checked } : {}),
+      ariaChecked: candidate.getAttribute("aria-checked"),
+      ...(typeof candidate.selected === "boolean" ? { selected: candidate.selected } : {}),
+      ariaPressed: candidate.getAttribute("aria-pressed"),
+      ...(typeof candidate.value === "string" ? { value: candidate.value } : {}),
+    };
+  });
+}
+
+type ScopedMutationDiagnostic = {
+  authority: "owner" | "insufficient";
+  observerInstalled: boolean;
+  records: number;
+  attributes: number;
+  characterData: number;
+  childList: number;
+  inputEvent: number;
+  changeEvent: number;
+  beforeInputEvent: number;
+  ownerKind: string;
+  before: Record<string, string>;
+  after: Record<string, string>;
+  related?: {
+    authority: "accepted_field_scope";
+    records: number;
+    attributes: number;
+    characterData: number;
+    childList: number;
+    ownerKind: string;
+    before: Record<string, string>;
+    after: Record<string, string>;
+  };
+};
+
+type ScopedMutationDiagnosticInstall = { installed: boolean; reason: string };
+
+async function beginScopedMutationDiagnostic(
+  locator: Locator | undefined,
+  acceptedScopeRuntimeMarker?: string,
+): Promise<ScopedMutationDiagnosticInstall> {
+  if (!locator) return { installed: false, reason: "locator_absent" };
+  return locator.evaluate((element, marker) => {
+    const win = window as Window & { __qaScopedMutationDiagnostic?: any };
+    // Browser callbacks are serialized by Playwright. Keep all inner functions as
+    // anonymous array elements: tsx/esbuild otherwise emits its Node-side __name
+    // helper into this source, which does not exist in the page execution realm.
+    const browserFns: [
+      (value: unknown) => string,
+      (node: Element, hashValue: (value: unknown) => string) => Record<string, string>,
+      (counts: { records: number; attributes: number; characterData: number; childList: number }, records: MutationRecord[]) => void,
+    ] = [
+      (value: unknown) => {
+        const text = String(value ?? "");
+        let hash = 2166136261;
+        for (let i = 0; i < text.length; i++) hash = Math.imul(hash ^ text.charCodeAt(i), 16777619);
+        return `${text.length}:${hash >>> 0}`;
+      },
+      (node: Element, hashValue: (value: unknown) => string) => {
+        const html = node as HTMLInputElement;
+        return {
+          value: hashValue("value" in html ? html.value : ""),
+          checked: String((html as any).checked ?? ""),
+          selectedIndex: String((html as any).selectedIndex ?? ""),
+          ariaValueNow: hashValue(node.getAttribute("aria-valuenow")),
+          ariaValueText: hashValue(node.getAttribute("aria-valuetext")),
+          ariaChecked: String(node.getAttribute("aria-checked") ?? ""),
+          ariaSelected: String(node.getAttribute("aria-selected") ?? ""),
+          ariaExpanded: String(node.getAttribute("aria-expanded") ?? ""),
+          ariaPressed: String(node.getAttribute("aria-pressed") ?? ""),
+          contenteditable: String(node.getAttribute("contenteditable") ?? ""),
+        };
+      },
+      (counts: { records: number; attributes: number; characterData: number; childList: number }, records: MutationRecord[]) => {
+        for (const record of records) {
+          counts.records++;
+          if (record.type === "attributes") counts.attributes++;
+          if (record.type === "characterData") counts.characterData++;
+          if (record.type === "childList") counts.childList++;
+        }
+      },
+    ];
+    const fingerprint = browserFns[0];
+    const readState = browserFns[1];
+    const target = element;
+    const relatedTarget = marker
+      ? Array.from(document.querySelectorAll('[data-codex-accepted-field-scope]'))
+        .find((candidate) => candidate.getAttribute('data-codex-accepted-field-scope') === marker) as Element | undefined
+      : target.closest('[data-codex-accepted-field-scope]');
+    try { win.__qaScopedMutationDiagnostic?.observer?.disconnect(); } catch { /* diagnostic cleanup only */ }
+    try { win.__qaScopedMutationDiagnostic?.relatedObserver?.disconnect(); } catch { /* diagnostic cleanup only */ }
+    const counts = { records: 0, attributes: 0, characterData: 0, childList: 0 };
+    const relatedCounts = { records: 0, attributes: 0, characterData: 0, childList: 0 };
+    const events = { inputEvent: 0, changeEvent: 0, beforeInputEvent: 0 };
+    const eventHandlers = [
+      () => { events.inputEvent++; },
+      () => { events.changeEvent++; },
+      () => { events.beforeInputEvent++; },
+    ];
+    const onInput = eventHandlers[0];
+    const onChange = eventHandlers[1];
+    const onBeforeInput = eventHandlers[2];
+    target.addEventListener("input", onInput);
+    target.addEventListener("change", onChange);
+    target.addEventListener("beforeinput", onBeforeInput);
+    const observer = new MutationObserver(browserFns[2].bind(null, counts));
+    observer.observe(target, { attributes: true, characterData: true, childList: true, subtree: true });
+    const relatedObserver = relatedTarget && relatedTarget !== target
+      ? new MutationObserver(browserFns[2].bind(null, relatedCounts))
+      : undefined;
+    if (relatedObserver && relatedTarget) {
+      relatedObserver.observe(relatedTarget, { attributes: true, characterData: true, childList: true, subtree: true });
+    }
+    win.__qaScopedMutationDiagnostic = {
+      authority: "owner", observer, relatedObserver, counts, events, target,
+      ownerKind: `${target.tagName.toLowerCase()}|${target.getAttribute("role") ?? ""}`,
+      before: readState(target, fingerprint), readState, fingerprint,
+      related: relatedTarget && relatedTarget !== target
+        ? {
+            authority: "accepted_field_scope",
+            target: relatedTarget,
+            counts: relatedCounts,
+            ownerKind: `${relatedTarget.tagName.toLowerCase()}|${relatedTarget.getAttribute("role") ?? ""}`,
+            before: readState(relatedTarget, fingerprint),
+          }
+        : undefined,
+    };
+    return true;
+  }).then(() => ({ installed: true, reason: "installed" })).catch((error: unknown) => ({
+    installed: false,
+    reason: error instanceof Error ? error.constructor.name : "evaluate_failed",
+  }));
+}
+
+async function readScopedMutationDiagnostic(page: Page | undefined): Promise<ScopedMutationDiagnostic | undefined> {
+  if (!page) return undefined;
+  // Do not re-resolve the pre-click locator here. The click may have detached or
+  // rematerialized its node; the watcher state lives on the page and can be read
+  // immediately without invoking Playwright's locator timeout.
+  return page.evaluate(() => {
+    const win = window as Window & { __qaScopedMutationDiagnostic?: any };
+    const state = win.__qaScopedMutationDiagnostic;
+    if (!state) return { authority: "insufficient", observerInstalled: false, records: 0, attributes: 0, characterData: 0, childList: 0, inputEvent: 0, changeEvent: 0, beforeInputEvent: 0, ownerKind: "", before: {}, after: {} };
+    return {
+      authority: state.authority, observerInstalled: true, ...state.counts, ...state.events,
+      ownerKind: state.ownerKind, before: state.before, after: state.readState(state.target, state.fingerprint),
+      related: state.related
+        ? { authority: state.related.authority, ...state.related.counts, ownerKind: state.related.ownerKind, before: state.related.before, after: state.readState(state.related.target, state.fingerprint) }
+        : undefined,
+    };
+  }).catch(() => undefined);
+}
+
+function recordingInteractionKind(actionTarget: ActionTargetItem): string | undefined {
+  if (actionTarget.recordingActionType) return actionTarget.recordingActionType;
+  if (actionTarget.actionType === "action_select") return "select";
+  const action = actionTarget.action.toLowerCase();
+  if (/\b(?:uncheck|desmarcar|quitar selección)\b/.test(action)) return "uncheck";
+  if (/\b(?:check|marcar|seleccionar|radio|toggle)\b/.test(action)) return "check";
+  return undefined;
+}
+
+/**
+ * A prior-surface locator is safe to probe only when the observed surface did
+ * not change while the action completed. This keeps optional state evidence
+ * from becoming a pre-dispatch wait for the next structured action.
+ */
+export function isActionSurfaceStableForStateProbe(
+  beforeUrl: string,
+  afterUrl: string,
+  observedUrl: string,
+): boolean {
+  return beforeUrl === afterUrl && afterUrl === observedUrl;
+}
 
 async function captureRuntimeFieldIdentity(locator: Locator): Promise<string | undefined> {
-  return locator.evaluate(function identifyRuntimeField(element) {
+  return boundedLocatorEvaluate(locator, function identifyRuntimeField(element) {
     const tag = element.tagName.toLowerCase();
     const id = element.getAttribute("id");
     const testId = element.getAttribute("data-testid");
@@ -128,11 +328,11 @@ async function captureRuntimeFieldIdentity(locator: Locator): Promise<string | u
       type ? `type=${type}` : "",
     ].filter(Boolean).join("|");
     return identity || undefined;
-  }).catch(() => undefined);
+  });
 }
 
 async function captureRuntimeControlIdentity(locator: Locator): Promise<ControlIdentity | undefined> {
-  const metadata = await locator.evaluate(function identifyRuntimeControl(element) {
+  const metadata = await boundedLocatorEvaluate(locator, function identifyRuntimeControl(element) {
     return {
       tagName: element.tagName,
       inputType: element.getAttribute("type") ?? undefined,
@@ -141,8 +341,28 @@ async function captureRuntimeControlIdentity(locator: Locator): Promise<ControlI
       id: element.getAttribute("id") ?? undefined,
       ariaControls: element.getAttribute("aria-controls") ?? undefined,
     };
-  }).catch(() => undefined);
+  });
   return metadata ? (buildRuntimeControlIdentity(metadata) ?? undefined) : undefined;
+}
+
+const RUNTIME_IDENTITY_EVALUATION_TIMEOUT_MS = 250;
+
+async function boundedLocatorEvaluate<T>(
+  locator: Locator,
+  pageFunction: (element: HTMLElement) => T,
+): Promise<T | undefined> {
+  let timer: ReturnType<typeof setTimeout> | number | undefined;
+  const timeout = new Promise<undefined>((resolve) => {
+    timer = setTimeout(resolve, RUNTIME_IDENTITY_EVALUATION_TIMEOUT_MS);
+  });
+  try {
+    return await Promise.race([
+      locator.evaluate(pageFunction).catch(() => undefined),
+      timeout,
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
 }
 
 export type SafeNetworkEvent = {
@@ -182,6 +402,21 @@ export const safePathname = (rawUrl: string, baseUrl?: string): string => {
   }
 };
 
+/**
+ * A recorded post-action surface is execution authority. The observed surface must be
+ * structurally compatible with the recorded destination before the action can complete.
+ * When no recorded destination exists the action is not constrained (same-route flows).
+ */
+export function recordedPostActionSurfaceReached(
+  currentUrl: string,
+  expectedRouteAfter: string | undefined,
+  learnedRouteAuthority?: import("../db/recording-route-observation-repository").LearnedRouteAuthority,
+): boolean {
+  if (!expectedRouteAfter?.trim()) return true;
+  const compatibility = classifyRecordedSurfaceCompatibility(currentUrl, expectedRouteAfter, learnedRouteAuthority);
+  return !compatibility.hardIncompatibility && !compatibility.routeMismatch;
+}
+
 export type InitialNavigationErrorInfo = {
   errorType: string;
   errorCode?: string;
@@ -206,6 +441,205 @@ const statusCategory = (status: number): SafeNetworkEvent["statusCategory"] => {
   return undefined;
 };
 
+/**
+ * Detects whether the auth gate actually changed across an action boundary.
+ *
+ * A gate that was never present cannot "change". Treating a false→true
+ * detection (an auth-shaped detector firing on a business page that asks for
+ * identification data) as a gate change turns a non-auth SPA transition into a
+ * false `auth_gate_changed` readiness signal, which short-circuits the bounded
+ * post-action wait and leaves the next target resolver on a stale surface.
+ */
+export function detectAuthGateChange(
+  before: AuthGateDetection | undefined,
+  after: AuthGateDetection | undefined,
+): boolean {
+  if (!before?.detected || !after) return false;
+  return after.detected !== before.detected
+    || after.gateType !== before.gateType
+    || after.stage !== before.stage;
+}
+
+/**
+ * Whether a known next action's structured owner requires the PREVIOUS action's completion to
+ * wait on it via the generic cross-action peek (`resolveActionTarget`). A next action of kind
+ * "fill" with a real, non-generic `associatedField` already has its own authoritative readiness
+ * wait (`waitForFillTargetReadiness`, run when ITS OWN turn comes) -- the previous action must
+ * never duplicate that wait via a second, weaker resolver racing the fill's own real one.
+ * Field-scoped click/select owners with no such self-readiness (e.g. a "Categoría de producto"
+ * combobox owner) are unaffected: this only excludes the one action kind that already handles its
+ * own readiness, decided purely by action-kind/associatedField capability, never by target text.
+ */
+export function crossActionOwnerReadinessRequired(
+  nextActionTarget: Pick<ActionTargetItem, "associatedField" | "recordingActionType"> | undefined,
+): boolean {
+  if (!nextActionTarget?.associatedField?.trim()) return false;
+  const hasOwnReadiness = nextActionTarget.recordingActionType === "fill"
+    && !isGenericUnresolvedLabel(nextActionTarget.associatedField);
+  return !hasOwnReadiness;
+}
+
+/**
+ * Lifecycle rule for `currentSurfaceRouteAuthority`: ANY causal route transition invalidates
+ * whatever authority described the PREVIOUS surface first -- it must never be inherited across an
+ * unrelated navigation, even when the new transition has no derivable authority of its own. Only
+ * that same transition's own lineage may then replace it. When no route transition occurred,
+ * the previous authority is untouched (same-surface actions never reach this decision at all).
+ */
+export function nextSurfaceRouteAuthority(
+  routeChanged: boolean,
+  eligible: boolean,
+  derivedAuthority: import("../db/recording-route-observation-repository").LearnedRouteAuthority | null,
+  previous: import("../db/recording-route-observation-repository").LearnedRouteAuthority | null,
+): import("../db/recording-route-observation-repository").LearnedRouteAuthority | null {
+  if (!routeChanged) return previous;
+  return eligible ? (derivedAuthority ?? null) : null;
+}
+
+/**
+ * Whether the current observation has actually moved onto a new surface.
+ *
+ * A URL change is the strongest signal, but a pure client-side route that keeps
+ * the same pathname still yields a different structural screen key once the new
+ * DOM materializes. A stale observation must never satisfy this check.
+ */
+export function isNewSurfaceObserved(
+  beforeUrl: string,
+  beforeScreenKey: string | undefined,
+  afterUrl: string,
+  afterScreenKey: string | undefined,
+): boolean {
+  if (afterUrl !== beforeUrl) return true;
+  return Boolean(afterScreenKey) && afterScreenKey !== beforeScreenKey;
+}
+
+/** Classifies the authentication boundary from safe, status/path-only runtime evidence. */
+export function classifyAuthenticationOutcome(input: {
+  beforeAuthDetected: boolean;
+  afterAuthDetected: boolean;
+  events: SafeNetworkEvent[];
+  afterPath: string;
+  loadingObserved: boolean;
+  errorSurfaceObserved: boolean;
+  businessCandidateObserved?: boolean;
+  nextRecordedBusinessTargetVisible?: boolean;
+}): AuthenticationOutcome {
+  const authEvents = input.events.filter((event) =>
+    event.resourceType === "fetch"
+    || event.resourceType === "xhr"
+    || event.resourceType === "document"
+  );
+  const authRequestObserved = authEvents.length > 0;
+  const authResponseObserved = authEvents.some((event) =>
+    event.status !== undefined || event.state === "completed" || event.state === "failed"
+  );
+  const statusEvents = authEvents.filter((event) => event.status !== undefined);
+  const authSubmissionEvent = statusEvents.find((event) => !["GET", "HEAD", "OPTIONS"].includes(event.method.toUpperCase()))
+    ?? statusEvents[0];
+  const authSubmissionStatus = authSubmissionEvent?.status;
+  const redirectStatuses = [...new Set(authEvents.flatMap((event) => [
+    ...(event.status !== undefined && event.status >= 300 && event.status < 400 ? [event.status] : []),
+    ...(event.redirectChain ?? []).filter((hop) => hop.status >= 300 && hop.status < 400).map((hop) => hop.status),
+  ]))];
+  const redirectChain = [...new Set(authEvents.flatMap((event) => [
+    ...(event.redirectChain ?? []).flatMap((hop) => [hop.targetPath, hop.followupPath]),
+    event.redirectTargetPathSafe,
+    event.path,
+  ].filter((value): value is string => Boolean(value && value.trim()))))];
+  const has5xx = authEvents.some((event) => event.statusCategory === "5xx" || (event.status !== undefined && event.status >= 500));
+  const has4xx = authEvents.some((event) => event.statusCategory === "4xx" || (event.status !== undefined && event.status >= 400 && event.status < 500));
+  // FIRST_LOSS fix: `authEvents` is any fetch/xhr/document request observed in this action's
+  // network window -- it is NOT filtered by whether the request is actually part of the
+  // authentication exchange. An unrelated post-auth business request that happens to 4xx/5xx in
+  // the same window is not auth evidence merely because it was observed here. `afterAuthDetected`
+  // (a real DOM scan for the auth-gate shape, already computed by the caller) is the causality
+  // proof required: a genuine auth rejection/infra failure leaves the user observably on/back-on
+  // the auth surface, whereas reaching an ordinary business route with an unrelated 4xx does not.
+  // Never used to hide a real auth failure: any true rejection still fails the DOM's own scan.
+  const authRelatedHttpFailure = input.afterAuthDetected && (has4xx || has5xx);
+  const errorSurfaceObserved = input.errorSurfaceObserved || authRelatedHttpFailure;
+  const successfulFollowup = authEvents.find((event) =>
+    event.path === input.afterPath
+    && event.state === "completed"
+    && event.status !== undefined
+    && event.status >= 200
+    && event.status < 400
+  );
+  const redirectReachedAfterPath = authEvents.some((event) =>
+    event.redirectTargetPathSafe === input.afterPath
+    || (event.redirectChain ?? []).some((hop) =>
+      (hop.targetPath === input.afterPath || hop.followupPath === input.afterPath)
+      && (hop.followupStatus === undefined || (hop.followupStatus >= 200 && hop.followupStatus < 400))
+    )
+  );
+  const submissionPath = authSubmissionEvent?.path;
+  const routeProgressed = Boolean(input.afterPath)
+    && input.afterPath !== submissionPath
+    && (redirectReachedAfterPath || Boolean(successfulFollowup));
+  const structuredBusinessEvidence = Boolean(input.businessCandidateObserved || input.nextRecordedBusinessTargetVisible);
+  const businessSurfaceReached = !errorSurfaceObserved
+    && authResponseObserved
+    && (!input.afterAuthDetected || routeProgressed || structuredBusinessEvidence);
+  const postLoginUrlClass = businessSurfaceReached
+    ? "business_surface"
+    : input.afterAuthDetected || errorSurfaceObserved
+      ? "auth_surface"
+      : "unknown";
+  const classification: AuthenticationOutcome["classification"] = has5xx && input.afterAuthDetected
+    ? "AUTH_INFRASTRUCTURE_FAILURE"
+    : has4xx && input.afterAuthDetected
+      ? "AUTH_REJECTED"
+      : !authResponseObserved && (input.loadingObserved || authEvents.some((event) => event.state === "pending"))
+        ? "AUTH_TIMEOUT_WITH_PROGRESS"
+        : businessSurfaceReached
+          ? "BUSINESS_SURFACE_REACHED"
+          : input.afterAuthDetected && !errorSurfaceObserved
+            ? "POST_AUTH_NAVIGATION_FAILURE"
+            : authResponseObserved && !input.afterAuthDetected && !errorSurfaceObserved
+              ? "AUTH_SUCCESS"
+              : "POST_AUTH_NAVIGATION_FAILURE";
+
+  return {
+    classification,
+    authRequestObserved,
+    authResponseObserved,
+    ...(authSubmissionStatus !== undefined ? { authSubmissionStatus, authHttpStatus: authSubmissionStatus } : {}),
+    ...(redirectStatuses.length > 0 ? { redirectStatuses } : {}),
+    ...(successfulFollowup?.status !== undefined ? { followupNavigationStatus: successfulFollowup.status } : {}),
+    redirectChain,
+    postLoginUrlClass,
+    postLoginSurface: input.afterPath || "unknown",
+    loadingObserved: input.loadingObserved,
+    errorSurfaceObserved,
+    businessSurfaceReached,
+    businessCandidateObserved: structuredBusinessEvidence || routeProgressed,
+    nextRecordedBusinessTargetVisible: Boolean(input.nextRecordedBusinessTargetVisible),
+    authSurfaceStillVisible: input.afterAuthDetected,
+  };
+}
+
+export function shouldClassifyAuthenticationBoundary(input: {
+  authDetectedBeforeAction: boolean;
+  authenticationBoundaryCompleted: boolean;
+  relevantNetworkObserved: boolean;
+  unstableSurface: boolean;
+  authErrorSurfaceObserved: boolean;
+  // FIRST_LOSS fix (jobId c64971bc-0ee9-4d1f-8a45-c6546409fe26): a heuristic auth-gate detector
+  // can fire on a surface that the authoritative structured recording contract already owns as a
+  // business-flow action (the same `structuredActionOwnsSurface`/`recording_structured_contract_
+  // authority` ownership signal `tryAuthGateRecovery` already uses to suppress heuristic input
+  // injection). Reusing that same signal here: when the current action is structurally owned by
+  // the recording contract (not an explicit auth step), it is never eligible for authentication-
+  // boundary classification, regardless of what the heuristic detector saw. Optional and additive
+  // -- omitted (undefined/false) preserves every existing call site's behavior exactly.
+  structuredActionOwnsSurface?: boolean;
+}): boolean {
+  return input.authDetectedBeforeAction
+    && !input.authenticationBoundaryCompleted
+    && !input.structuredActionOwnsSurface
+    && (input.relevantNetworkObserved || input.unstableSurface || input.authErrorSurfaceObserved);
+}
+
 const failureCategory = (message: string): SafeNetworkEvent["failureCategory"] => {
   const normalized = message.toLowerCase();
   if (/timeout|timed out/.test(normalized)) return "timeout";
@@ -227,11 +661,48 @@ export type NetworkObservationWindow = {
     progressed: boolean;
     signal?: string;
     pendingCount: number;
+    responseObserved: boolean;
+    requestFailed: boolean;
     lastProgressAt: number;
   };
 };
 
 /** Observes one action window only; request data, headers and query strings are never retained. */
+/**
+ * Opt-in, generic, no-value response-shape fingerprint for step-scoped fetch/xhr responses.
+ * Never logs actual field values -- only status/contentType/byteLength/hash/jsonKind/key names --
+ * so it is safe to compare two runs' response *shapes* without exposing PII/credentials. Disabled
+ * unless NETWORK_RESPONSE_SHAPE_DIAGNOSTIC_MS is set; best-effort and never affects the watcher's
+ * state, timing, or completion semantics (fire-and-forget, never awaited by the caller).
+ */
+async function logResponseShapeDiagnostic(response: any, requestId: string, method: string, path: string): Promise<void> {
+  try {
+    const status = Number(response.status?.() ?? 0);
+    const headers = response.headers?.() ?? {};
+    const contentType = String(headers["content-type"] ?? "").split(";")[0].trim();
+    const buffer = await response.body();
+    const byteLength = buffer.length;
+    const hash = createHash("sha256").update(buffer).digest("hex").slice(0, 16);
+    let jsonKind = "non_json";
+    let topLevelKeys: string[] | undefined;
+    if (contentType.includes("json")) {
+      try {
+        const parsed = JSON.parse(buffer.toString("utf-8"));
+        if (Array.isArray(parsed)) { jsonKind = "array"; topLevelKeys = [`length:${parsed.length}`]; }
+        else if (parsed === null) jsonKind = "null";
+        else if (typeof parsed === "object") { jsonKind = "object"; topLevelKeys = Object.keys(parsed).sort(); }
+        else jsonKind = typeof parsed;
+      } catch {
+        jsonKind = "json_parse_failed";
+      }
+    }
+    console.log(`[response-shape-diagnostic] ${JSON.stringify({ requestId, method, path, status, contentType, byteLength, hash, jsonKind, topLevelKeys })}`);
+  } catch {
+    // Best-effort diagnostic only; a body read failure (e.g. streamed/aborted response) never
+    // affects functional execution.
+  }
+}
+
 export function startNetworkObservation(page: Page, stepIndex: number, maxEvents = 100, options?: { diagnosticMs?: number }): NetworkObservationWindow {
   const startedAt = new Map<object, number>();
   const events = new Map<object, SafeNetworkEvent>();
@@ -345,6 +816,9 @@ export function startNetworkObservation(page: Page, stepIndex: number, maxEvents
   const redirectHops: Array<SafeRedirectHop & { source: object; followup?: object }> = [];
   const envDiagnosticMs = Number(process.env.NETWORK_OBSERVATION_DIAGNOSTIC_MS ?? 0);
   const diagnosticMs = options?.diagnosticMs ?? (Number.isFinite(envDiagnosticMs) && envDiagnosticMs > 0 ? envDiagnosticMs : 0);
+  const relevantResourceTypes = new Set(["document", "xhr", "fetch", "eventsource", "websocket"]);
+  const isRelevantEvent = (event: SafeNetworkEvent) => relevantResourceTypes.has(event.resourceType);
+  const responseShapeDiagnosticEnabled = process.env.NETWORK_RESPONSE_SHAPE_DIAGNOSTIC === "true";
   const snapshot = () => Array.from(events.values());
   const hasPending = () => snapshot().some((event) => event.state === "pending");
   const finish = (reason?: "diagnostic_timeout") => {
@@ -431,6 +905,9 @@ export function startNetworkObservation(page: Page, stepIndex: number, maxEvents
     event.state = "completed";
     event.status = Number(response.status?.() ?? 0);
     event.statusCategory = statusCategory(event.status);
+    if (responseShapeDiagnosticEnabled && (event.resourceType === "fetch" || event.resourceType === "xhr")) {
+      void logResponseShapeDiagnostic(response, event.requestId ?? "unknown", event.method, event.path);
+    }
     if (event.statusCategory === "3xx") {
       try {
         const location = String(response.headers?.()?.location ?? "").trim();
@@ -489,10 +966,21 @@ export function startNetworkObservation(page: Page, stepIndex: number, maxEvents
       const progressed = progressRevision > progressRevisionRead;
       progressRevisionRead = progressRevision;
       return {
-        active: hasPending(),
+        active: snapshot().some((event) => event.state === "pending" && isRelevantEvent(event)),
         progressed,
         signal: lastProgressSignal,
-        pendingCount: snapshot().filter((event) => event.state === "pending").length,
+        pendingCount: snapshot().filter((event) => event.state === "pending" && isRelevantEvent(event)).length,
+        responseObserved: snapshot().some((event) => event.state === "completed" && isRelevantEvent(event)),
+        // ponytail: reuses the exact non-terminal-failure test already used a few hundred lines
+        // down (relevantNetworkSettled's failed branch) instead of a new classifier -- a
+        // subrequest (never the document) that already got a real 2xx response before the
+        // browser fired its own `requestfailed` (observed: POST .../ConsultarCasosBizagiSQL,
+        // 204 then browser_error) is not a real failure. `waitForStableInteractiveScreen`
+        // (execution-plan-executor.ts) already treats any `progressProbe().requestFailed` as
+        // terminal regardless of completionProbe, so this must not be reported true for it.
+        requestFailed: snapshot().some((event) => event.state === "failed" && isRelevantEvent(event)
+          && !(event.resourceType !== "document" && event.failureCategory === "browser_error"
+            && event.status !== undefined && event.status >= 200 && event.status < 300)),
         lastProgressAt,
       };
     },
@@ -526,6 +1014,81 @@ export type RuntimeFillObservation = {
   mutation?: ReturnType<typeof diffAssertionObservation>;
 };
 
+async function readCommittedEditableValue(locator: Locator, verificationLocator?: Locator): Promise<string> {
+  const structuralValue = verificationLocator
+    ? await verificationLocator.innerText().catch(() => "")
+    : "";
+  if (structuralValue.trim().length > 0) return structuralValue;
+  const value = await locator.evaluate((element) => {
+    if ("value" in element) return String((element as HTMLInputElement).value ?? "");
+    return (element.textContent ?? "").trim();
+  }).catch(() => "");
+  if (value.trim().length > 0) return value;
+  return verificationLocator?.innerText().catch(() => "") ?? "";
+}
+
+function runtimeValuesMatch(expected: string, actual: string): boolean {
+  const normalize = (value: string) => value.trim().toLowerCase().replace(/\s+/g, "");
+  const expectedNormalized = normalize(expected);
+  const actualNormalized = normalize(actual);
+  if (expectedNormalized === actualNormalized) return true;
+  const isoDate = expectedNormalized.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const localizedDate = actualNormalized.match(/^(\d{2})[\/-](\d{2})[\/-](\d{4})$/);
+  if (isoDate && localizedDate
+    && isoDate[1] === localizedDate[3]
+    && isoDate[2] === localizedDate[2]
+    && isoDate[3] === localizedDate[1]) return true;
+  const expectedDigits = expectedNormalized.replace(/\D/g, "");
+  const actualDigits = actualNormalized.replace(/\D/g, "");
+  return expectedDigits.length > 0 && expectedDigits === actualDigits;
+}
+
+const RUNTIME_FILL_BLUR_TIMEOUT_MS = 250;
+
+async function bestEffortRuntimeFillBlur(locator: Locator): Promise<void> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const boundedFallback = new Promise<void>((resolve) => {
+    timer = setTimeout(resolve, RUNTIME_FILL_BLUR_TIMEOUT_MS);
+  });
+  try {
+    await Promise.race([
+      locator.blur({ timeout: RUNTIME_FILL_BLUR_TIMEOUT_MS }).catch(() => undefined),
+      boundedFallback,
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+async function commitAndVerifyRuntimeFill(locator: Locator, value: string, verificationLocator?: Locator): Promise<string> {
+  await locator.fill(value);
+  // Blur is a best-effort commit signal. A grid editor may rematerialize
+  // immediately after fill, so it has a short local budget and cannot extend
+  // the scenario indefinitely if the editor detaches or ignores the timeout.
+  await bestEffortRuntimeFillBlur(locator);
+  await locator.page().waitForTimeout(100).catch(() => undefined);
+  let actual = await readCommittedEditableValue(locator, verificationLocator);
+  if (!runtimeValuesMatch(value, actual)) {
+    // Some rematerialized editors drop a programmatic fill during their first
+    // blur. Re-enter through the same resolved editor, then verify the commit.
+    const rematerializedEditor = verificationLocator
+      ? verificationLocator.locator("input, textarea, select, [contenteditable='true'], [role='textbox'], [role='combobox']").last()
+      : locator;
+    const editor = await rematerializedEditor.count().catch(() => 0) > 0 ? rematerializedEditor : locator;
+    await (verificationLocator ?? locator).click().catch(() => undefined);
+    await editor.click().catch(() => undefined);
+    await editor.press("ControlOrMeta+A").catch(() => undefined);
+    await editor.pressSequentially(value).catch(() => undefined);
+    await bestEffortRuntimeFillBlur(editor);
+    await locator.page().waitForTimeout(100).catch(() => undefined);
+    actual = await readCommittedEditableValue(locator, verificationLocator);
+  }
+  if (!runtimeValuesMatch(value, actual)) {
+    throw new Error(`runtime_fill_value_mismatch expected=${value.length} actual=${actual.length}`);
+  }
+  return actual;
+}
+
 /**
  * Commits a row-scoped fill and observes the resulting runtime transition.
  * The primitive is intentionally independent of any application label or URL:
@@ -536,19 +1099,19 @@ export async function fillAndObserveRuntimeInput(input: {
   page: Page;
   locator: Locator;
   value: string;
+  verificationLocator?: Locator;
   stepIndex: number;
   observe?: boolean;
   waitMs?: number;
 }): Promise<RuntimeFillObservation> {
   if (!input.observe) {
-    await input.locator.fill(input.value);
+    await commitAndVerifyRuntimeFill(input.locator, input.value, input.verificationLocator);
     return { networkEvents: [], committedBy: "blur" };
   }
 
   const before = await captureAssertionObservationSnapshot(input.page).catch(() => undefined);
   const observation = startNetworkObservation(input.page, input.stepIndex, 100, { diagnosticMs: input.waitMs ?? 1500 });
-  await input.locator.fill(input.value);
-  await input.locator.blur().catch(() => undefined);
+  await commitAndVerifyRuntimeFill(input.locator, input.value, input.verificationLocator);
   await input.page.waitForTimeout(input.waitMs ?? 1500);
   const networkEvents = await observation.stop({ passiveTail: false });
   const after = await captureAssertionObservationSnapshot(input.page).catch(() => undefined);
@@ -1389,9 +1952,12 @@ export function extractAssertionTargets(expectedText: string): string[] {
 export type ExecutableStep = {
   stepIndex: number;
   originalText: string;
-  type: "assertion" | "action_fill" | "action_click" | "action_select" | "optional_action" | "navigation_segment" | "skip";
+  type: "assertion" | "action_fill" | "action_click" | "action_select" | "action_press" | "optional_action" | "navigation_segment" | "skip";
+  recordingActionType?: "fill" | "select" | "click" | "check" | "uncheck" | "press" | "navigation" | "system_observation";
   target?: string;
   value?: string;
+  /** The discrete command key a `"press"` action sends (e.g. "Enter"). Absent for every other action type. */
+  key?: string;
   valueKey?: string;
   valueSource?: FillValueSource;
   isOptional?: boolean;
@@ -1407,6 +1973,13 @@ export type ExecutableStep = {
   controlIdentity?: ControlIdentity;
   canonicalAssertion?: import("../scenarios/canonical-scenario").CanonicalAssertion;
   conditionalAction?: import("../scenarios/canonical-scenario").CanonicalConditionalAction;
+  technicalTargetCandidates?: Array<Record<string, unknown>>;
+  technicalTargetRefs?: string[];
+  expectedRouteBefore?: string;
+  expectedRouteAfter?: string;
+  expectedOutcomeKind?: "route_transition" | "in_place_transition";
+  /** Structured source-interaction lineage (RecordingExecutionAction.interactionId). */
+  sourceInteractionId?: string;
 };
 
 export function projectScenarioInputMetadata(step: {
@@ -1424,6 +1997,36 @@ export function isFillActionTarget(target: Pick<ActionTargetItem, "actionType" |
   return target.actionType === "action_fill" &&
     Boolean(target.valueKey) &&
     (target.valueSource === "unknown" || target.valueSource === "test_data");
+}
+
+/** Structural mirror of the fields both `resolveFillTarget`/`resolveActionTarget` results already carry. */
+export type PressTargetResolution = {
+  status: string;
+  locator?: { press(key: string): Promise<void> } | null;
+};
+
+/**
+ * Pure decision + invocation for an `action_press` target, extracted specifically so it is
+ * testable WITHOUT a live Playwright page: given an already-resolved target and the recorded
+ * key, decides whether to press it and does so via the resolved locator's OWN `.press()` --
+ * never `page.keyboard.press()`, never `.click()` (the resolved locator here is never even
+ * required to expose a `.click()` method). Never throws: a `locator.press()` error is caught and
+ * reported as a failure result, exactly like every other fail-closed reason here, never a
+ * silently-passed step and never converted into a click.
+ */
+export async function executePressActionTarget(
+  key: string | undefined,
+  resolution: PressTargetResolution,
+): Promise<{ ok: true } | { ok: false; reason: string }> {
+  if (!key?.trim()) return { ok: false, reason: "press_missing_key" };
+  if (resolution.status !== "resolved") return { ok: false, reason: `press_resolution_failed:${resolution.status}` };
+  if (!resolution.locator) return { ok: false, reason: "press_resolution_invalid" };
+  try {
+    await resolution.locator.press(key);
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, reason: `press_failed:${err instanceof Error ? err.message : String(err)}` };
+  }
 }
 
 /** Product-card escalation requires positive card/detail evidence. */
@@ -1476,6 +2079,122 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
   const scenarioRequirementRefs = (scenario as TestScenario & {
     stepRequirementRefs?: Array<{ stepIndex: number; requirementId: string }>;
   }).stepRequirementRefs ?? [];
+
+  const recordingContract = scenario.recordingExecutionContract;
+  if (recordingContract?.actions?.length) {
+    console.log(`[recording-replay] structuredContractReceived=true structuredActionReceived=${recordingContract.actions.length} legacyParserInvoked=false`);
+    const contractActionIndexes = recordingContract.actions
+      .filter((action) => action.actionType !== "navigation" && action.actionType !== "system_observation")
+      .map((action) => action.stepIndex);
+    const contractIndexesAreMonotonic = contractActionIndexes.every((index, position) =>
+      Number.isInteger(index) && index === position + 1
+    );
+    if (!contractIndexesAreMonotonic) {
+      console.log(`[recording-replay] structuredStepIndexRepair=true reason=contract_indices_not_unique_monotonic authority=contract_action_order`);
+    }
+    let executableActionOrder = 0;
+    for (const structuredAction of recordingContract.actions) {
+      if (["navigation", "system_observation"].includes(structuredAction.actionType)) continue;
+      // FIRST_LOSS fix: "press" used to fall through to the "action_click" default -- silently
+      // converting a recorded keyboard press into a click intent for Recording Replay. Never
+      // conflated with click now: it gets its own, distinct tag, carrying the pressed key
+      // through separately (never inside `value`, which stays exclusively a fill/select value).
+      const actionType = structuredAction.actionType === "fill"
+        ? "action_fill"
+        : structuredAction.actionType === "select"
+          ? "action_select"
+          : structuredAction.actionType === "press"
+            ? "action_press"
+            : "action_click";
+      const stepIndex = contractIndexesAreMonotonic
+        ? structuredAction.stepIndex!
+        : executableActionOrder + 1;
+      // FIRST_LOSS fix (jobId 4e55bced-f9d1-4814-b244-8ed481496152): `semanticField` is a
+      // structural FIELD-RELATION label (what owns this action -- correctly the OWNER field for a
+      // transient selection option, see `reconcileOptionOwnerLineage`), never a substitute for the
+      // action's own execution identity. Putting it first here meant an option whose semanticField
+      // now (correctly) differs from its own identity had its `target` silently replaced by the
+      // OWNER's name -- even though a real, more precise technical identity (`technicalTargetRef`,
+      // e.g. `role:option|Cuentas de Efectivo`) already existed for it. A role-strategy ref already
+      // carries the option's own recorded accessible name after the `|` -- reusing that (existing
+      // structured identity, never re-derived from human step text/position) keeps `target`
+      // pointing at the option while `associatedField` (set separately, below) still correctly
+      // names the owner. Actions with no such ref (a fill, or an owner click with no technical
+      // identity of its own) are completely unaffected -- they still fall through to
+      // `semanticField` exactly as before.
+      const technicalTargetRef = structuredAction.technicalTargetRef?.trim();
+      const roleTargetOwnName = technicalTargetRef?.startsWith("role:")
+        ? technicalTargetRef.slice("role:".length).split("|").slice(1).join("|").trim() || undefined
+        : undefined;
+      const target = roleTargetOwnName
+        || structuredAction.semanticField?.trim()
+        || technicalTargetRef
+        || structuredAction.targetRef?.trim()
+        || actionType;
+      const valueSource = structuredAction.runtimeValueSource === "dataset" ? "test_data" as const : "unknown" as const;
+      const item: ActionTargetItem = {
+        index: stepIndex,
+        action: structuredAction.humanStep ?? structuredAction.actionType,
+        target,
+        actionType,
+        recordingActionType: structuredAction.actionType,
+        ...(structuredAction.valueKey ? { valueKey: structuredAction.valueKey } : {}),
+        ...(structuredAction.key ? { key: structuredAction.key } : {}),
+        valueSource,
+        ...(structuredAction.actionType === "select" && structuredAction.semanticField
+          ? { selectionField: structuredAction.semanticField }
+          : {}),
+        ...(structuredAction.entityScope ? { entityScope: structuredAction.entityScope } : {}),
+        ...(structuredAction.rowRelation ? { rowRelation: structuredAction.rowRelation } : {}),
+        // FIRST_LOSS fix: `RecordingExecutionAction.associatedField` (the real field-relation
+        // authority carried from `CanonicalInteraction.semanticField`, never re-derived from
+        // step text) was never copied onto the parsed runtime action here -- the target-scoped
+        // fill readiness retry gate below reads exactly this property, so it was always
+        // undefined for every Recording Replay fill/select, regardless of resolution status.
+        ...(structuredAction.associatedField ? { associatedField: structuredAction.associatedField } : {}),
+        ...(structuredAction.technicalTargetCandidates ? { technicalTargetCandidates: structuredAction.technicalTargetCandidates as any } : {}),
+        ...(structuredAction.technicalTargetRefs ? { technicalTargetRefs: structuredAction.technicalTargetRefs } : {}),
+        // FIRST_LOSS fix (recordingId=1f9415f3-...): `RecordingExecutionAction.playwrightRecorderEvidence`/
+        // `semanticRuntimeEvidence` (LAST-RESORT, EXECUTION-ONLY authority, transported unchanged from
+        // `CanonicalInteraction`) were never copied onto the parsed runtime action here, unlike every
+        // sibling technical-authority field above -- so a click with no technicalTargetRefs but valid
+        // recorder runtime evidence always fell straight to the global contextual resolver instead.
+        ...(structuredAction.semanticRuntimeEvidence ? { semanticRuntimeEvidence: structuredAction.semanticRuntimeEvidence } : {}),
+        ...(structuredAction.playwrightRecorderEvidence ? { playwrightRecorderEvidence: structuredAction.playwrightRecorderEvidence } : {}),
+        ...(structuredAction.expectedRouteBefore ? { expectedRouteBefore: structuredAction.expectedRouteBefore } : {}),
+        ...(structuredAction.expectedRouteAfter ? { expectedRouteAfter: structuredAction.expectedRouteAfter } : {}),
+        ...(structuredAction.expectedOutcomeKind ? { expectedOutcomeKind: structuredAction.expectedOutcomeKind } : {}),
+        ...(structuredAction.controlIdentity ? { recordedControlIdentity: structuredAction.controlIdentity } : {}),
+        ...(structuredAction.interactionId ? { sourceInteractionId: structuredAction.interactionId } : {}),
+      } as ActionTargetItem;
+      actionTargets.push(item);
+      orderedSteps.push({
+        stepIndex,
+        originalText: structuredAction.humanStep ?? structuredAction.actionType,
+        type: actionType,
+        recordingActionType: structuredAction.actionType,
+        target,
+        ...(structuredAction.valueKey ? { valueKey: structuredAction.valueKey } : {}),
+        ...(structuredAction.key ? { key: structuredAction.key } : {}),
+        valueSource,
+        source: "action",
+        ...(structuredAction.actionType === "select" && structuredAction.semanticField
+          ? { selectionField: structuredAction.semanticField }
+          : {}),
+        ...(structuredAction.entityScope ? { entityScope: structuredAction.entityScope } : {}),
+        ...(structuredAction.rowRelation ? { rowRelation: structuredAction.rowRelation } : {}),
+        ...(structuredAction.associatedField ? { associatedField: structuredAction.associatedField } : {}),
+        ...(structuredAction.technicalTargetCandidates ? { technicalTargetCandidates: structuredAction.technicalTargetCandidates as any } : {}),
+        ...(structuredAction.technicalTargetRefs ? { technicalTargetRefs: structuredAction.technicalTargetRefs } : {}),
+        ...(structuredAction.expectedRouteBefore ? { expectedRouteBefore: structuredAction.expectedRouteBefore } : {}),
+        ...(structuredAction.expectedRouteAfter ? { expectedRouteAfter: structuredAction.expectedRouteAfter } : {}),
+        ...(structuredAction.expectedOutcomeKind ? { expectedOutcomeKind: structuredAction.expectedOutcomeKind } : {}),
+        ...(structuredAction.interactionId ? { sourceInteractionId: structuredAction.interactionId } : {}),
+      } as ExecutableStep);
+      executableActionOrder += 1;
+    }
+    return { actionTargets, assertionTargets, skippedActions, setupIntents, orderedSteps };
+  }
 
   for (const step of scenario.steps) {
     const requiredContext = (step as any).requiredContext ?? (step as any).requirement?.requiredContext;
@@ -2206,6 +2925,69 @@ async function scanAndCollectObjects(
   };
 }
 
+/**
+ * FIRST_LOSS fix: SCREEN STABLE != NEXT REQUIRED TARGET READY. `waitForStablePageState` (used
+ * unconditionally before every fill resolution) only observes page-wide loading signals -- once
+ * it returns, `resolveFillTarget` was called exactly once against a single snapshot. For a
+ * `runtime_resolution_required` field (real structural/associatedField evidence, no technical
+ * locator yet -- see `structuralRuntimeEligible` in canonical-recording-contract.ts), the target
+ * app can keep the recorded field's REAL input disabled/absent for seconds after the page itself
+ * looks settled, while dependent lists/config are still loading. A single-shot resolution then
+ * failed with `fill_target_not_editable`, and the resolver's own text-scan fallback surfaced the
+ * field's `<span>`/label as `nonEditableMatch` -- never usable as an actual fill target.
+ *
+ * This reuses the SAME shared adaptive wait (`waitForStableInteractiveScreen`, already used for
+ * post-click/post-navigate/post-press stabilization) via its existing `completionProbe` hook:
+ * each poll re-snapshots the live DOM and re-resolves the SAME fill target through the SAME
+ * `resolveFillTarget`, so a target that later becomes visible/enabled/editable is picked up by
+ * a fresh resolution (never a stale locator, never the span). The idle/hard-deadline budget is
+ * the existing one -- no new timeout system, no fixed sleep. When the target never becomes
+ * resolvable, the last real resolution (still `not_found`/`fill_target_not_editable`) is
+ * returned unchanged, so the existing fail-closed handling reports the same explicit reason.
+ *
+ * Scoped to fields that carry real recorded evidence (`associatedField`, non-generic) so this
+ * never engages for an ordinary AI/heuristic-discovered target with no such evidence -- an
+ * already-resolved target never pays for this wait (the probe's first check is immediate).
+ */
+async function waitForFillTargetReadiness(
+  page: Page,
+  target: string,
+  activeContainer: ActiveContainerContext | undefined,
+  fillContext: {
+    rowScope?: number;
+    rowRelation?: "next" | "added";
+    entityScope?: string;
+    associatedField?: string;
+    recordedTechnicalTargets?: unknown;
+    recordedTechnicalTargetRefs?: string[];
+  },
+): Promise<{ resolution: FillTargetResolutionResult; snapshot: PageSnapshot }> {
+  let latestResolution: FillTargetResolutionResult | undefined;
+  let latestSnapshot: PageSnapshot | undefined;
+  let attempt = 0;
+  const { waitForStableInteractiveScreen } = await import("../runner/execution-plan-executor");
+  const readiness = await waitForStableInteractiveScreen(page, {
+    completionProbe: async () => {
+      attempt += 1;
+      const snapshot = await scanCurrentPage(page);
+      latestSnapshot = snapshot;
+      const resolution = await resolveFillTarget(page, snapshot, target, activeContainer, fillContext as any);
+      latestResolution = resolution;
+      const targetReady = resolution.status === "resolved";
+      // No dataset value ever logged here -- only ids/status booleans.
+      console.log(`[fill-target-readiness] phase=poll attempt=${attempt} resolutionStatus=${resolution.status} targetReady=${targetReady}`);
+      return targetReady
+        ? { completed: true, signal: "fill_target_enabled" }
+        : { completed: false };
+    },
+  });
+  console.log(
+    `[fill-target-readiness] phase=result targetReady=${readiness.stable} resolutionStatus=${latestResolution?.status ?? "unknown"} ` +
+    `terminationReason=${readiness.terminationReason} waitedMs=${readiness.waitedMs}`
+  );
+  return { resolution: latestResolution!, snapshot: latestSnapshot! };
+}
+
 export type CaseDiscoveryOptions = {
   page: Page;
   scenario: TestScenario;
@@ -2222,6 +3004,8 @@ export type CaseDiscoveryOptions = {
     config?: Partial<AiAssistedDiscoveryConfig>;
   };
   env?: Record<string, unknown>;
+  /** Disable all context-pack AI repair fallbacks for contract-driven replays. */
+  disableAiRepair?: boolean;
   missingInputBehavior?: MissingInputBehavior;
   /** Optional evidence recorder for per-step screenshots */
   evidenceRecorder?: import("../evidence/evidence-recorder").EvidenceRecorder;
@@ -2243,6 +3027,8 @@ export type CaseDiscoveryOptions = {
   scenarioSuggestedData?: Record<string, string>;
   /** Reconcile workflow evidence before the first final blocking/status calculation. */
   beforeFinalStatusCalculation?: (steps: DiscoveryStepResult[]) => number | Promise<number>;
+  /** This run's job id. Used as `sourceExecutionId` for replay-kind RecordingRouteObservation rows. */
+  runId?: string;
 };
 
 function resolveControlledAdvanceAssertions(
@@ -2422,7 +3208,8 @@ function buildFailureResult(
   failedAtStep: number,
   failedTarget: string,
   failedReason: string,
-  allDiscoveredObjects: DiscoveredObject[]
+  allDiscoveredObjects: DiscoveredObject[],
+  authenticationOutcome?: AuthenticationOutcome,
 ): CaseDiscoveryResult {
   const requiredData = buildCandidateRequiredData(scenario, planSteps);
   const partialPlan: ExecutionPlan = {
@@ -2455,7 +3242,8 @@ function buildFailureResult(
     evidenceDir,
     failedAtStep,
     failedTarget,
-    failedReason
+    failedReason,
+    ...(authenticationOutcome ? { authenticationOutcome } : {})
   };
 }
 
@@ -2693,6 +3481,36 @@ async function tryAuthGateRecovery(
         confidence: detection.confidence,
         requiredInputs: detection.requiredInputs,
         delegated: true,
+      },
+    };
+  }
+
+  // During a structured recording replay, the canonical action contract owns
+  // the surface being exercised. A heuristic secondary auth detector must not
+  // inject identification/OTP inputs into an unrelated in-flow screen unless
+  // the scenario explicitly declares auth intent.
+  const recordingContractPresent = Boolean(options.scenario.recordingExecutionContract?.actions?.length);
+  const explicitAuthIntent = Boolean(options.scenario.authIntent);
+  if (recordingContractPresent && !explicitAuthIntent) {
+    console.log(
+      `[auth-gate-ownership] authGateDetected=true gateType=${detection.gateType} ` +
+      `actionRequired=false structuredActionOwnsSurface=true authInjectionAttempted=false ` +
+      `suppressedHeuristicInputs=${detection.requiredInputs.join(",") || "none"} ` +
+      `reason=recording_structured_contract_authority`
+    );
+    return {
+      recovered: false,
+      diagnostics: {
+        detected: true,
+        gateType: detection.gateType,
+        stage: detection.stage,
+        confidence: detection.confidence,
+        requiredInputs: detection.requiredInputs,
+        authGateActionRequired: false,
+        structuredActionOwnsSurface: true,
+        authInjectionAttempted: false,
+        suppressed: true,
+        suppressedReason: "recording_structured_contract_authority",
       },
     };
   }
@@ -3230,6 +4048,18 @@ export function loadProjectAuthProfile(appSlug: string): { profile: any | null; 
 
 export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<CaseDiscoveryResult> {
   const { page, scenario, evidenceDir, pendingObjectsPath, pendingPlansPath, appBaseUrl, testData, loginAction } = options;
+  // Learned route-family authority lineage: (recordingId, controlIdentity, actionKind).
+  // Both recordingId and runId already reach here through existing transport (scenario.recordingId
+  // from the recording's own scenario JSON; runId forwarded from CaseDiscoveryWorkflowOptions.runId,
+  // itself EVIDENCE_RUN_ID/jobId from scenario-preview-runner.ts) -- no new plumbing required.
+  const routeObservationRecordingId = scenario.recordingId?.trim() || undefined;
+  const routeObservationRunId = options.runId?.trim() || undefined;
+  const routeObservationInteractions = (scenario.recordingExecutionContract?.actions ?? [])
+    .map((a) => ({ controlIdentity: a.controlIdentity, action: a.actionType }));
+  // Learned route-family authority for whichever dynamic surface the flow is currently on --
+  // set by the action that actually produced the transition (see finalPath assignment below),
+  // reused by every subsequent action's target resolution while still on that same surface.
+  let currentSurfaceRouteAuthority: LearnedRouteAuthority | null = null;
   const aiConfig: AiAssistedDiscoveryConfig = {
     ...DEFAULT_AI_ASSISTED_DISCOVERY_CONFIG,
     ...options.aiAssistedDiscovery?.config
@@ -3286,8 +4116,11 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       evidenceStepIndex++;
     }
     try {
+      const evidenceStartedAt = performance.now();
+      console.log(`[critical-path] phase=evidence_start step=${evidenceStepIndex} monotonicMs=${Math.round(evidenceStartedAt)}`);
       const target = text.match(/"([^"]+)"/)?.[1];
       await evidenceRec.captureStep(page, evidenceStepIndex, text, { target, status, errorMessage: error });
+      console.log(`[critical-path] phase=evidence_end step=${evidenceStepIndex} durationMs=${Math.round(performance.now() - evidenceStartedAt)}`);
       console.log(`[evidence] step ${evidenceStepIndex}: "${text.substring(0, 60)}" status=${status}`);
     } catch {
       // evidence errors are non-fatal
@@ -3646,36 +4479,17 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     console.log(`[login-plan] login step suppressed for business flow (setup handles auth)`);
   }
 
-  // Task 1: Deduplicat action targets equivalents - normalize generic text
-  function normalizeTarget(target: string): string {
-    return target
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-  }
-
-  const deduplicatedActionTargets: ActionTargetItem[] = [];
-  for (let i = 0; i < parsed.actionTargets.length; i++) {
-    const current = parsed.actionTargets[i];
-    const next = parsed.actionTargets[i + 1];
-
-    // If next target is equivalent and no functional steps between them, skip
-    if (next && normalizeTarget(current.target) === normalizeTarget(next.target)) {
-      console.log(
-        `[scenario-normalizer] duplicateActionTargetRemoved scenario=${(scenario as any).displayId || "unknown"} ` +
-        `target="${current.target}" reason=consecutive_equivalent_action`
-      );
-      // Skip current, keep next - next iteration will handle it
-      continue;
-    }
-
-    deduplicatedActionTargets.push(current);
-  }
-
-  // Replace parsed.actionTargets with deduplicated version
-  parsed.actionTargets = deduplicatedActionTargets;
+  // Deduplicate ONLY two pipeline projections of the SAME source interaction (shared structured
+  // source-interaction lineage). A shared label, operation, locator, surface or timing NEVER
+  // removes an action -- two independent user interactions on the same control (keypad "2" twice,
+  // increment twice, repeated submit) carry different source-interaction lineage and must keep
+  // their multiplicity. Missing lineage is never a match (fail-safe: preserve).
+  parsed.actionTargets = deduplicateActionTargetsBySource(parsed.actionTargets, (removed) => {
+    console.log(
+      `[scenario-normalizer] duplicateActionTargetRemoved scenario=${(scenario as any).displayId || "unknown"} ` +
+      `target="${removed.target}" reason=same_source_interaction_projection sourceInteractionId="${removed.sourceInteractionId}"`
+    );
+  });
 
   parsed.actionTargets.forEach((target, order) => {
     actionOrderIndexByTarget.set(target, order);
@@ -4130,12 +4944,34 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
   let currentSnapshot = initialScan.snapshot;
   const reapplyResolvedRuntimeAuthFields = async (): Promise<void> => {
-    for (const field of runtimeAuthFieldValues.values()) {
+    const freshSnapshot = await scanCurrentPage(page).catch(() => undefined);
+    const authDetection = freshSnapshot ? detectAuthGate(freshSnapshot) : undefined;
+    const authAlreadySatisfied = Boolean(authGateState?.completed || authGateCompletedAfterStepIndex !== undefined);
+    const authFieldsPresent = Boolean(authDetection?.detected && (authDetection.requiredInputs?.length ?? 0) > 0);
+    const authSurfacePresent = authFieldsPresent && !authAlreadySatisfied;
+    const authGateActive = authSurfacePresent;
+    const rematerializationRelevant = runtimeAuthFieldValues.size > 0 && authFieldsPresent;
+    const policyAllowsReapply = shouldReapplyAuthFields({
+      authGateActive,
+      authSurfacePresent,
+      authAlreadySatisfied,
+      rematerializationRelevant,
+    });
+
+    if (!policyAllowsReapply) {
+      console.log(`[auth-reapply] skipped=true reason=auth_not_applicable_on_current_surface`);
+      return;
+    }
+
+    for (const [valueKey, field] of runtimeAuthFieldValues.entries()) {
       try {
-        const resolution = await resolveFillTarget(page, currentSnapshot, field.target, activeContainer);
-        if (resolution.status === "resolved" && resolution.locator) {
-          await resolution.locator.fill(field.value);
-        }
+        const resolution = await resolveFillTarget(page, freshSnapshot ?? currentSnapshot, field.target, activeContainer);
+        if (resolution.status !== "resolved" || !resolution.locator) continue;
+
+        const visible = await resolution.locator.isVisible().catch(() => false);
+        if (!visible) continue;
+
+        await resolution.locator.fill(field.value);
       } catch {
         // A field may no longer belong to the current screen after a submit.
       }
@@ -4704,7 +5540,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     }
 
     if (loginForm.userField) {
-      console.log(`[discovery:case] Login: filling user field with "${value1}"`);
+      console.log(`[discovery:case] Login: filling user field value=****** sensitive=true`);
       try {
         await loginForm.userField.locator.fill(value1);
       } catch (err) {
@@ -5626,7 +6462,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             }
 
             // AI Repair for assertions: attempt assertion_resolution after local recovery fails
-            if (assertionResult.status === "needs_assertion_resolution" && envTrue("AI_REPAIR_ENABLED", false) && envTrue("AI_REPAIR_USE_CONTEXT_PACK", true)) {
+            if (assertionResult.status === "needs_assertion_resolution" && !options.disableAiRepair && envTrue("AI_REPAIR_ENABLED", false) && envTrue("AI_REPAIR_USE_CONTEXT_PACK", true)) {
             const aiAssertionStartTime = Date.now();
             console.log(`[ai-repair:assertion] enabled provider=${process.env.AI_PROVIDER ?? "unknown"} model=${process.env.AI_MODEL ?? "unknown"}`);
             console.log(`[ai-repair:assertion] failure=assertion_not_satisfied target="${assertionResult.assertionText}"`);
@@ -6195,11 +7031,104 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         currentSnapshot = scan.snapshot;
       }
 
-      const resolution = await resolveFillTarget(page, currentSnapshot, normalizedActionTarget.target, activeContainer, {
+      // FIRST_LOSS fix (jobId 6d871693-...): a segmented input (N-box OTP/token) has no real page
+      // text of its own to text-match against -- its target string is a bare internal identity
+      // hash -- so the generic resolver's weak text-scan fallback below previously mismatched an
+      // unrelated non-editable element. Handled here directly via the same scope-then-segments
+      // algorithm already proven for promoted-spec execution, bypassing the generic resolver
+      // entirely for this evidence shape.
+      if (normalizedActionTarget.playwrightRecorderEvidence?.kind === "segmented_input") {
+        const segmentedResult = await attemptSegmentedInputFill(page, normalizedActionTarget.playwrightRecorderEvidence, fillValue);
+        if (segmentedResult.ok) {
+          console.log(`[discovery:case] Segmented input filled: target=${normalizedActionTarget.target} segmentCount=${segmentedResult.segmentCount}`);
+          const postFillScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+          currentSnapshot = postFillScan.snapshot;
+          allDiscoveredObjects.push(...postFillScan.objects);
+          executedStepIndices.add(actionTarget.index);
+          steps.push({
+            index: actionTarget.index,
+            action: actionTarget.action,
+            status: "found",
+            targetText: normalizedActionTarget.target,
+            snapshotUrl: postFillScan.url,
+            snapshotTitle: postFillScan.title,
+            elementsFound: postFillScan.elementsCount,
+            evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`)
+          });
+          planSteps.push({
+            index: planSteps.length + 1,
+            action: "fill",
+            description: actionTarget.action,
+            target: { strategy: "text", value: normalizedActionTarget.target, exact: false },
+            valueKey: normalizedActionTarget.valueKey
+          });
+          continue;
+        }
+        const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+        currentSnapshot = scan.snapshot;
+        const errorMsg = `Segmented input fill failed: target="${normalizedActionTarget.target}" reason="${segmentedResult.reason}".`;
+        steps.push({
+          index: actionTarget.index,
+          action: actionTarget.action,
+          status: "fill_target_not_editable",
+          targetText: normalizedActionTarget.target,
+          snapshotUrl: scan.url,
+          snapshotTitle: scan.title,
+          elementsFound: scan.elementsCount,
+          error: errorMsg,
+          evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`)
+        });
+        failedAtStep = actionTarget.index;
+        failedTarget = normalizedActionTarget.target;
+        failedReason = "fill_target_not_editable";
+        await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
+        await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
+          scenario, steps, allDiscoveredObjects, planSteps,
+          pendingObjectsPath, pendingPlansPath, evidenceDir,
+          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+        ).candidatePlan ?? {}, null, 2), "utf-8");
+        return buildFailureResult(
+          scenario, steps, allDiscoveredObjects, planSteps,
+          pendingObjectsPath, pendingPlansPath, evidenceDir,
+          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+        );
+      }
+
+      let resolution = await resolveFillTarget(page, currentSnapshot, normalizedActionTarget.target, activeContainer, {
         rowScope: normalizedActionTarget.rowScope,
+        rowRelation: normalizedActionTarget.rowRelation,
         entityScope: normalizedActionTarget.entityScope,
         associatedField: normalizedActionTarget.associatedField,
+        recordedTechnicalTargets: normalizedActionTarget.technicalTargetCandidates as any,
+        recordedTechnicalTargetRefs: normalizedActionTarget.technicalTargetRefs,
       });
+
+      // FIRST_LOSS fix: a real recorded field relation (associatedField, non-generic) whose
+      // single-shot resolution came back not_found/not_editable may simply not be ready YET --
+      // target-scoped readiness (see waitForFillTargetReadiness above), never a span fallback.
+      {
+        const statusEligible = resolution.status === "not_found" || resolution.status === "not_editable" || resolution.status === "fill_target_not_editable";
+        const associatedFieldPresent = Boolean(normalizedActionTarget.associatedField);
+        const eligible = statusEligible && associatedFieldPresent && !isGenericUnresolvedLabel(normalizedActionTarget.associatedField);
+        // No dataset value ever logged here -- only ids/status booleans.
+        console.log(`[fill-target-readiness] phase=eligibility actionIndex=${actionTarget.index} initialStatus=${resolution.status} associatedFieldPresent=${associatedFieldPresent} eligible=${eligible}`);
+      }
+      if (
+        (resolution.status === "not_found" || resolution.status === "not_editable" || resolution.status === "fill_target_not_editable") &&
+        normalizedActionTarget.associatedField &&
+        !isGenericUnresolvedLabel(normalizedActionTarget.associatedField)
+      ) {
+        const readiness = await waitForFillTargetReadiness(page, normalizedActionTarget.target, activeContainer, {
+          rowScope: normalizedActionTarget.rowScope,
+          rowRelation: normalizedActionTarget.rowRelation,
+          entityScope: normalizedActionTarget.entityScope,
+          associatedField: normalizedActionTarget.associatedField,
+          recordedTechnicalTargets: normalizedActionTarget.technicalTargetCandidates as any,
+          recordedTechnicalTargetRefs: normalizedActionTarget.technicalTargetRefs,
+        });
+        resolution = readiness.resolution;
+        currentSnapshot = readiness.snapshot;
+      }
 
       if (resolution.status === "not_found") {
         if (actionTarget.isOptional) {
@@ -6267,8 +7196,11 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
           const retryResolution = await resolveFillTarget(page, currentSnapshot, actionTarget.target, activeContainer, {
             rowScope: actionTarget.rowScope,
+            rowRelation: actionTarget.rowRelation,
             entityScope: actionTarget.entityScope,
             associatedField: actionTarget.associatedField,
+            recordedTechnicalTargets: actionTarget.technicalTargetCandidates as any,
+            recordedTechnicalTargetRefs: actionTarget.technicalTargetRefs,
           });
           if (retryResolution.status === "resolved" && retryResolution.locator) {
             console.log(`[discovery:case] Filling target after auth recovery: ${actionTarget.target}`);
@@ -6548,6 +7480,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         const runtimeFillObservation = await fillAndObserveRuntimeInput({
           page,
           locator: resolution.locator,
+          verificationLocator: resolution.verificationLocator,
           value: fillValue,
           stepIndex: actionTarget.index,
           observe: observeRuntimeFill,
@@ -6644,7 +7577,15 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         relationContext: actionTarget.relationContext,
         controlIdentity: normalizedActionTarget.valueKey
           ? runtimeFieldControlIdentities.get(normalizedActionTarget.valueKey)
-          : undefined
+          : undefined,
+        // FIRST_LOSS fix (jobId a74b4f6a-99d1-4bed-bcc7-9de038612b3f): the field-scoped fallback
+        // (resolveFillTarget) already physically reconfirmed a real CertifiedTechnicalTarget for
+        // this fill -- carried here unchanged (never reconstructed from locatorStrategy/text/the
+        // live Locator) using the SAME field name buildPromotionSourceScenario already knows how
+        // to merge (see case-discovery-workflow.ts, mirroring its existing assertionImportance
+        // discoveryStepByIndex pattern), so a Discovery-sourced fill this live-resolved is no
+        // longer forced to fall back to a Tier-5 display-text materialization.
+        ...(resolution.certifiedTechnicalTarget ? { technicalTargetCandidates: [resolution.certifiedTechnicalTarget] } : {}),
       });
 
       planSteps.push({
@@ -6654,6 +7595,160 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         target: { strategy: "text", value: actionTarget.target, exact: false },
         valueKey: actionTarget.valueKey
       });
+
+      continue;
+    }
+
+    // FIRST_LOSS fix: `action_press` used to fall straight through to the shared click/select
+    // code below (no branch of its own existed) -- resolved via the SAME resolveActionTarget
+    // used for click, but executed via `executePressActionTarget` (a pure, testable seam) so it
+    // can never reach click/native-click/JS-click fallback, and `continue`s before that code
+    // could ever run.
+    if (actionTarget.actionType === "action_press") {
+      console.log(`[discovery:case] Resolving press target: ${actionTarget.target}`);
+      const pressResolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target, {
+        semanticRole: actionTarget.semanticRole,
+        relationContext: actionTarget.relationContext,
+        recordingActionType: "press",
+        rowScope: actionTarget.rowScope,
+        rowRelation: actionTarget.rowRelation,
+        entityScope: actionTarget.entityScope,
+        associatedField: actionTarget.associatedField,
+        activeContainer,
+        routeProfile,
+        // FIRST_LOSS fix: this branch never forwarded the recorded technical target evidence
+        // click/fill already do -- resolveActionTargetCore's recorded-target authority (checked
+        // FIRST, before ordinal/alias/contextual fallbacks) was therefore never even attempted
+        // for press, even when the SAME owner had just been resolved this way for a preceding
+        // fill. The display target string (actionTarget.target, e.g. "role:textbox|Campo") was
+        // never meant to substitute for this -- it never did; this was a genuine omission.
+        recordedTechnicalTargets: actionTarget.technicalTargetCandidates as any,
+        recordedTechnicalTargetRefs: actionTarget.technicalTargetRefs,
+      });
+      const pressResult = await executePressActionTarget(actionTarget.key, pressResolution);
+      if (!pressResult.ok) {
+        const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+        currentSnapshot = scan.snapshot;
+
+        steps.push({
+          index: actionTarget.index,
+          action: actionTarget.action,
+          status: "not_found",
+          targetText: actionTarget.target,
+          snapshotUrl: scan.url,
+          snapshotTitle: scan.title,
+          elementsFound: scan.elementsCount,
+          error: pressResult.reason,
+          evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`)
+        });
+
+        failedAtStep = actionTarget.index;
+        failedTarget = actionTarget.target;
+        failedReason = pressResult.reason;
+
+        await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
+        await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
+          scenario, steps, allDiscoveredObjects, planSteps,
+          pendingObjectsPath, pendingPlansPath, evidenceDir,
+          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+        ).candidatePlan ?? {}, null, 2), "utf-8");
+
+        return buildFailureResult(
+          scenario, steps, allDiscoveredObjects, planSteps,
+          pendingObjectsPath, pendingPlansPath, evidenceDir,
+          failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+        );
+      }
+
+      const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+      currentSnapshot = scan.snapshot;
+      allDiscoveredObjects.push(...scan.objects);
+      executedStepIndices.add(actionTarget.index);
+
+      steps.push({
+        index: actionTarget.index,
+        action: actionTarget.action,
+        status: "found",
+        targetText: actionTarget.target,
+        snapshotUrl: scan.url,
+        snapshotTitle: scan.title,
+        elementsFound: scan.elementsCount,
+        evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`)
+      });
+
+      planSteps.push({
+        index: planSteps.length + 1,
+        action: "press",
+        description: actionTarget.action,
+        target: { strategy: "text", value: actionTarget.target, exact: false },
+        value: actionTarget.key
+      });
+
+      // FIRST_LOSS fix: this branch `continue`d straight to the next action, bypassing the
+      // SAME universal/adaptive post-action stabilization click already reaches
+      // (`waitForStableInteractiveScreen`, also used unconditionally elsewhere in
+      // execution-plan-executor.ts) -- a press-caused transition (e.g. Enter submitting a
+      // login form) could still be in flight (POST /api/auth/login pending) when the next
+      // action's target resolution ran against a stale pre-transition snapshot, producing a
+      // false `recorded_target_wrong_expected_surface`/`not_found` for a target that would
+      // have resolved fine once the page actually settled. Reused, never duplicated: no new
+      // wait system, no fixed sleep, no login-specific special case -- the exact same
+      // multiproject, signal-driven function (network/DOM/loading-indicator based, ~8s idle
+      // window, ~120s hard deadline, both env-overridable) click already relies on. The
+      // snapshot is re-scanned afterward so the NEXT action resolves against the
+      // POST-stabilization surface, not the one captured immediately after `.press()`.
+      {
+        const { waitForStableInteractiveScreen } = await import("../runner/execution-plan-executor");
+        const pressStability = await waitForStableInteractiveScreen(page);
+        console.log(
+          `[screen-stability] phase=after_press target="${actionTarget.target}" key="${actionTarget.key}" ` +
+          `stable=${pressStability.stable} signals=${pressStability.signals.join(",") || "none"} ` +
+          `waitedMs=${pressStability.waitedMs} terminationReason=${pressStability.terminationReason}`
+        );
+        // FIRST_LOSS fix (recordingId=1f9415f3-...): a press-caused transition (e.g. Enter
+        // submitting a login form) that never reached a stable surface -- terminated by a real
+        // request failure, never merely a slow-but-progressing load -- previously fell through
+        // to `continue` unconditionally, so the NEXT action's target resolution ran against a
+        // surface that was never confirmed complete, producing a downstream `ambiguous_target`
+        // that had nothing to do with the actual target. Fail closed here instead, exactly like
+        // the sibling `!pressResult.ok` branch above -- same generic, multiproject failure
+        // reporting, no new status/reason vocabulary, no app-specific exception.
+        if (!pressStability.stable && pressStability.terminationReason === "request_failed") {
+          const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+          currentSnapshot = scan.snapshot;
+
+          steps.push({
+            index: actionTarget.index,
+            action: actionTarget.action,
+            status: "not_found",
+            targetText: actionTarget.target,
+            snapshotUrl: scan.url,
+            snapshotTitle: scan.title,
+            elementsFound: scan.elementsCount,
+            error: "navigation_failed",
+            evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`)
+          });
+
+          failedAtStep = actionTarget.index;
+          failedTarget = actionTarget.target;
+          failedReason = "navigation_failed";
+
+          await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
+          await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
+            scenario, steps, allDiscoveredObjects, planSteps,
+            pendingObjectsPath, pendingPlansPath, evidenceDir,
+            failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+          ).candidatePlan ?? {}, null, 2), "utf-8");
+
+          return buildFailureResult(
+            scenario, steps, allDiscoveredObjects, planSteps,
+            pendingObjectsPath, pendingPlansPath, evidenceDir,
+            failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+          );
+        }
+        const resettledScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+        currentSnapshot = resettledScan.snapshot;
+      }
 
       continue;
     }
@@ -6669,11 +7764,40 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         currentSnapshot = scan.snapshot;
       }
 
-      const resolution = await resolveFillTarget(page, currentSnapshot, actionTarget.target, activeContainer, {
+      let resolution = await resolveFillTarget(page, currentSnapshot, actionTarget.target, activeContainer, {
         rowScope: actionTarget.rowScope,
+        rowRelation: actionTarget.rowRelation,
         entityScope: actionTarget.entityScope,
         associatedField: actionTarget.associatedField,
+        recordedTechnicalTargets: actionTarget.technicalTargetCandidates as any,
+        recordedTechnicalTargetRefs: actionTarget.technicalTargetRefs,
       });
+
+      // FIRST_LOSS fix: see waitForFillTargetReadiness above -- a real recorded field relation
+      // (associatedField, non-generic) deserves target-scoped readiness before failing closed.
+      {
+        const statusEligible = resolution.status === "not_found" || resolution.status === "not_editable" || resolution.status === "fill_target_not_editable";
+        const associatedFieldPresent = Boolean(actionTarget.associatedField);
+        const eligible = statusEligible && associatedFieldPresent && !isGenericUnresolvedLabel(actionTarget.associatedField);
+        // No dataset value ever logged here -- only ids/status booleans.
+        console.log(`[fill-target-readiness] phase=eligibility actionIndex=${actionTarget.index} initialStatus=${resolution.status} associatedFieldPresent=${associatedFieldPresent} eligible=${eligible}`);
+      }
+      if (
+        (resolution.status === "not_found" || resolution.status === "not_editable" || resolution.status === "fill_target_not_editable") &&
+        actionTarget.associatedField &&
+        !isGenericUnresolvedLabel(actionTarget.associatedField)
+      ) {
+        const readiness = await waitForFillTargetReadiness(page, actionTarget.target, activeContainer, {
+          rowScope: actionTarget.rowScope,
+          rowRelation: actionTarget.rowRelation,
+          entityScope: actionTarget.entityScope,
+          associatedField: actionTarget.associatedField,
+          recordedTechnicalTargets: actionTarget.technicalTargetCandidates as any,
+          recordedTechnicalTargetRefs: actionTarget.technicalTargetRefs,
+        });
+        resolution = readiness.resolution;
+        currentSnapshot = readiness.snapshot;
+      }
 
       if (resolution.status === "not_found") {
         if (actionTarget.isOptional) {
@@ -6894,6 +8018,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         const runtimeFillObservation = await fillAndObserveRuntimeInput({
           page,
           locator: resolution.locator,
+          verificationLocator: resolution.verificationLocator,
           value: actionTarget.value,
           stepIndex: actionTarget.index,
           observe: observeLiteralRuntimeFill,
@@ -7276,12 +8401,17 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       );
     }
 
+    const resolutionStartedAt = performance.now();
+    console.log(`[critical-path] step=${actionTarget.index} phase=resolver_start monotonicMs=${Math.round(resolutionStartedAt)}`);
     let resolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target, {
       semanticRole: actionTarget.semanticRole,
       relationContext: actionTarget.relationContext,
       selectionField: actionTarget.selectionField,
       selectionValue,
+      actionType: actionTarget.actionType,
+      recordingActionType: actionTarget.recordingActionType,
       rowScope: actionTarget.rowScope,
+      rowRelation: actionTarget.rowRelation,
       entityScope: actionTarget.entityScope,
       associatedField: actionTarget.associatedField,
       activeContainer,
@@ -7290,8 +8420,19 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       nextTarget,
       previousTarget,
       routeHistory,
+      recordedTechnicalTargets: actionTarget.technicalTargetCandidates as any,
+      recordedTechnicalTargetRefs: actionTarget.technicalTargetRefs,
+      // FIRST_LOSS fix (recordingId=1f9415f3-...): last-resort, execution-only recorder authority
+      // (never a certified technical target) -- passed through unchanged so a click with no
+      // technicalTargetRefs but valid recorder evidence can resolve scoped to it before falling
+      // through to the global contextual resolver.
+      semanticRuntimeEvidence: actionTarget.semanticRuntimeEvidence,
+      playwrightRecorderEvidence: actionTarget.playwrightRecorderEvidence,
+      expectedRouteBefore: actionTarget.expectedRouteBefore,
+      learnedRouteAuthority: currentSurfaceRouteAuthority ?? undefined,
       expectedTarget: detailTarget && finalProductClickStepIndex === actionTarget.index ? detailTarget : undefined,
     });
+    console.log(`[critical-path] step=${actionTarget.index} phase=resolver_end durationMs=${Math.round(performance.now() - resolutionStartedAt)} status=${resolution.status}`);
     if (shouldUsePostResumeSnapshot && postResumeCandidates.length > 0) {
       const preferredCandidate = postResumeCandidates[0] as any;
       console.log(`[menu-resolver] candidate target="${actionTarget.target}" strategy="${preferredCandidate.strategy}"`);
@@ -7734,7 +8875,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
               elementsFound: postClickScan.elementsCount,
               evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
               semanticRole: actionTarget.semanticRole,
-              relationContext: actionTarget.relationContext
+              relationContext: actionTarget.relationContext,
+              // FIRST_LOSS fix: the field-relation hint (associatedField) that already drives this
+              // step's own resolveActionTarget call above was never persisted onto the step record,
+              // so it never survived into buildPromotionSourceScenario/SpecExecutionContract for a
+              // runtime_resolution_required click to retry with later. Transported verbatim only --
+              // never a certification, never upgrades resolutionState.
+              ...(actionTarget.associatedField ? { associatedField: actionTarget.associatedField } : {}),
             });
 
             planSteps.push({
@@ -7762,7 +8909,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         }
 
         // AI repair orchestration (phase 1): target_not_found only, after all local resolvers fail.
-        if (envTrue("AI_REPAIR_ENABLED", false) && envTrue("AI_REPAIR_USE_CONTEXT_PACK", true)) {
+        if (!options.disableAiRepair && envTrue("AI_REPAIR_ENABLED", false) && envTrue("AI_REPAIR_USE_CONTEXT_PACK", true)) {
           const aiCandidates = currentSnapshot.elements.map((el) => ({
             candidateId: el.id,
             role: el.role,
@@ -8239,7 +9386,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           : `Ambiguous target: ${resolution.matchReason} (${resolution.candidates?.length ?? 0} matches).`;
 
         // AI Repair for selection: attempt selection_resolution after local resolvers fail due to ambiguity
-        if (envTrue("AI_REPAIR_ENABLED", false) && envTrue("AI_REPAIR_USE_CONTEXT_PACK", true)) {
+        if (!options.disableAiRepair && envTrue("AI_REPAIR_ENABLED", false) && envTrue("AI_REPAIR_USE_CONTEXT_PACK", true)) {
           const aiSelectionStartTime = Date.now();
           console.log(`[ai-repair:selection] enabled provider=${process.env.AI_PROVIDER ?? "unknown"} model=${process.env.AI_MODEL ?? "unknown"}`);
           console.log(`[ai-repair:selection] failure=ambiguous_selection target="${actionTarget.target}"`);
@@ -8863,6 +10010,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     console.log(`[discovery:case] Clicking target: ${actionTarget.target} (strategy: ${resolution.locatorStrategy}, confidence: ${resolution.confidence.toFixed(2)})`);
 
     const beforeState = await capturePageState(page);
+    const stateActionKind = recordingInteractionKind(actionTarget);
+    const interactiveStateBefore = stateActionKind
+      ? await readInteractiveState(resolution.locator ?? finalLocator)
+      : undefined;
     const pendingAssertion = parsed.assertionTargets
       .filter((candidate) => candidate.index > actionTarget.index)
       .sort((a, b) => a.index - b.index)[0];
@@ -9331,9 +10482,271 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
     const actionNetworkObservation = startNetworkObservation(page, actionTarget.index);
     const authDetectionBeforeClick = detectAuthGate(currentSnapshot);
-    const authSubmitAction = authDetectionBeforeClick.detected
-      && authDetectionBeforeClick.gateType === "classic_login"
-      && authDetectionBeforeClick.continueButtonPresent;
+    const beforeActionObservation = await captureAssertionObservationSnapshot(page as any).catch(() => undefined);
+    let scopedMutationObserverInstalled = false;
+    let scopedMutationObserverInstallReason = "not_attempted";
+    const criticalPathStartedAt = performance.now();
+    const markCriticalPath = (phase: string) => console.log(`[critical-path] step=${actionTarget.index} phase=${phase} elapsedMs=${Math.round(performance.now() - criticalPathStartedAt)}`);
+    const actionSyncStartedAt = Date.now();
+    const preClickUrl = page.url();
+    const preClickPathname = safePathname(page.url());
+    console.log(`[post-action-sync] phase=before actionIndex=${actionTarget.index} technicalTargetResolved=true urlBefore=${safePathname(page.url())} authGateBefore=${authDetectionBeforeClick.detected} watcherInstalledBeforeClick=true`);
+    const orderedItemPosition = orderedItems.indexOf(orderedItem);
+    const nextExecutableItem = orderedItems.slice(orderedItemPosition + 1).find((item: any) => item.type === "action" || item.type === "navigation");
+    const nextTargetText = nextExecutableItem
+      ? String(nextExecutableItem.actionTarget?.target ?? nextExecutableItem.navTarget?.target ?? nextExecutableItem.executableStep?.target ?? "").trim()
+      : "";
+    // Scoped to Recording Replay only: a structured next-action target is real authority there
+    // (the recording's own ordered actions), not an inferred/generic lookahead that should gate
+    // every discovery mode's dom_validation_mutation completion.
+    const nextTargetKnown = Boolean(scenario.recordingExecutionContract?.actions?.length) && Boolean(nextTargetText);
+    // The next canonical action's own ActionTargetItem, already built the same way every action's
+    // resolution options are -- reused here read-only, never re-derived.
+    const nextActionTarget = (nextExecutableItem as any)?.actionTarget as ActionTargetItem | undefined;
+    const nextTargetRequiresRuntimeResolution = nextTargetKnown && crossActionOwnerReadinessRequired(nextActionTarget);
+    // FIRST_LOSS fix: `nextTargetAvailable` was a level check on the POST-click snapshot only --
+    // a next target already visible before the click (same static form, unrelated to this
+    // action) could satisfy it without this action having caused anything. `next_target_visible`
+    // completion now requires an actual false->true transition; the other branches that read
+    // `nextTargetAvailable` (auth_gate_changed) are unaffected by this baseline.
+    const isTargetTextVisible = (elements: any[] | undefined, targetText: string) =>
+      Boolean(targetText && elements?.some((element: any) => {
+        const text = String(element.text ?? element.label ?? element.name ?? element.ariaLabel ?? "").trim();
+        return text.length > 0 && (normalizeText(text) === normalizeText(targetText)
+          || normalizeText(text).includes(normalizeText(targetText)));
+      }));
+    const nextTargetVisibleBefore = isTargetTextVisible(currentSnapshot?.elements, nextTargetText);
+    let postActionSyncSignal: string | undefined;
+    let postActionNextTargetVisible = false;
+    let nextTargetVisibleLogged = false;
+    let domMutationDiagnosticLogged = false;
+    let stateDiagnosticLogged = false;
+    let scopedMutationDiagnosticLogged = false;
+    let postActionProbeIteration = 0;
+    let nextTargetFirstObservableLogged = false;
+    // The recorded post-action surface is authority only when the action actually started
+    // from the recorded pre-surface. A recording whose navigation event is ordered before
+    // its tap can shift a step's recorded transition; in that case the runtime is not on
+    // the recorded pre-surface and the authority must not be enforced (it would reject a
+    // legitimate transition). This is a structural surface check, never app/route specific.
+    const recordedPreActionExpected = actionTarget.expectedRouteBefore?.trim();
+    const recordedSurfaceAuthorityApplies = Boolean(actionTarget.expectedRouteAfter?.trim())
+      && (!recordedPreActionExpected || recordedPostActionSurfaceReached(preClickUrl, recordedPreActionExpected));
+    const recordedPostActionExpected = recordedSurfaceAuthorityApplies
+      ? actionTarget.expectedRouteAfter?.trim()
+      : undefined;
+
+    // Learned route-family authority for THIS action's lineage. Eligibility requires the
+    // (controlIdentity, actionKind) pair to be unique within the recording's own action list --
+    // a repeated control (e.g. two identical confirmation dialogs) must never be disambiguated
+    // here, so authority is simply never read/written for it. `recordingActionType` is only ever
+    // set from a structured Recording contract action, so this is also the recording-replay gate;
+    // and only executionAuthority:true canonical interactions ever become an actionTarget at all
+    // (filtered upstream in canonical-recording-contract.ts), so that gate is enforced by
+    // construction here, not re-checked.
+    const routeObservationControlIdentity = actionTarget.recordedControlIdentity?.trim();
+    const routeObservationActionKind = actionTarget.recordingActionType;
+    const routeObservationEligible = isRouteObservationEligible({
+      recordingId: routeObservationRecordingId,
+      controlIdentity: routeObservationControlIdentity,
+      actionKind: routeObservationActionKind,
+      interactions: routeObservationInteractions,
+    });
+    let routeObservationAuthority: LearnedRouteAuthority | null = null;
+    let routeObservationReplayWritten = false;
+    if (routeObservationEligible && recordedPostActionExpected) {
+      const identity = {
+        recordingId: routeObservationRecordingId!,
+        controlIdentity: routeObservationControlIdentity!,
+        actionKind: routeObservationActionKind!,
+      };
+      routeObservationAuthority = await deriveRouteAuthority(
+        identity.recordingId, identity.controlIdentity, identity.actionKind,
+      ).catch(() => null);
+      await seedCaptureObservation(identity, recordedPostActionExpected, preClickUrl);
+    }
+    const isRecordedPostActionReached = (): boolean =>
+      recordedPostActionSurfaceReached(page.url(), recordedPostActionExpected, routeObservationAuthority ?? undefined);
+    const postActionCompletionProbe = async (): Promise<{ completed: boolean; signal?: string }> => {
+      const iteration = ++postActionProbeIteration;
+      const iterationStart = performance.now();
+      const progress = actionNetworkObservation.getProgressState();
+      const snapshotStart = performance.now();
+      const afterActionObservation = await captureAssertionObservationSnapshot(page as any).catch(() => undefined);
+      const snapshotMs = performance.now() - snapshotStart;
+      const observationDiff = beforeActionObservation && afterActionObservation
+        ? diffAssertionObservation(beforeActionObservation, afterActionObservation, progress.responseObserved)
+        : undefined;
+      // TEMPORARY DIAGNOSTIC (this ticket only): `domMutation` passed to
+      // resolvePostActionSynchronization is the flat `changed` boolean, which cannot tell a
+      // focus-only mutation apart from a real validation/form change. Log the already-computed,
+      // more precise sub-fields once per action so a physical run can show which one fired --
+      // no behavior/control-flow change.
+      if (observationDiff?.changed && !domMutationDiagnosticLogged) {
+        domMutationDiagnosticLogged = true;
+        console.log(`[dom-mutation-diagnostic] actionIndex=${actionTarget.index} changedPaths=${observationDiff.changedPaths.join(",")} validationMutation=${observationDiff.validationMutation} accessibilityMutation=${observationDiff.accessibilityMutation} formStateChanged=${observationDiff.formStateChanged} navigationMutation=${observationDiff.navigationMutation}`);
+      }
+      // DIAGNOSTIC ONLY (this ticket): when the tracked control/validation/forms diff is EMPTY but a
+      // same-surface action nevertheless changed something, name the node kind and the exact
+      // property channel that changed via the redacted state-candidate fingerprints -- never a
+      // value, never a completion signal. Purely observational: it changes no control flow.
+      if (!observationDiff?.changed && !stateDiagnosticLogged) {
+        const stateMutations = diffStateCandidates(beforeActionObservation, afterActionObservation);
+        stateDiagnosticLogged = true;
+        const beforeCount = beforeActionObservation?.stateCandidates?.length ?? 0;
+        const afterCount = afterActionObservation?.stateCandidates?.length ?? 0;
+        const diagnosticReason = stateMutations.length > 0
+          ? "mutation_detected"
+          : beforeCount === 0 && afterCount === 0
+            ? "no_state_candidates"
+            : "candidates_unchanged";
+        console.log(`[state-diagnostic] actionIndex=${actionTarget.index} stateCandidatesBefore=${beforeCount} stateCandidatesAfter=${afterCount} stateMutations=${stateMutations.length} diagnosticLogEligible=${stateMutations.length > 0} diagnosticReason=${diagnosticReason}`);
+        for (const mutation of stateMutations.slice(0, 6)) {
+          console.log(`[state-diagnostic] actionIndex=${actionTarget.index} tag=${mutation.tag} role=${mutation.role ?? ""} inputType=${mutation.inputType ?? ""} contentEditable=${mutation.contentEditable} changedProperties=${mutation.changedProperties.join(",")} fingerprintBefore=${mutation.fingerprintBefore} fingerprintAfter=${mutation.fingerprintAfter}`);
+        }
+      }
+      if (!scopedMutationDiagnosticLogged) {
+        scopedMutationDiagnosticLogged = true;
+        const scopedDiagnosticStart = performance.now();
+        const scopedDiagnosticUrlBefore = safePathname(page.url());
+        const scoped = scopedMutationObserverInstalled
+          ? await readScopedMutationDiagnostic(page)
+          : { authority: "insufficient" as const, observerInstalled: false, records: 0, attributes: 0, characterData: 0, childList: 0, inputEvent: 0, changeEvent: 0, beforeInputEvent: 0, ownerKind: "", before: {}, after: {} };
+        console.log(`[post-action-probe-gap] actionIndex=${actionTarget.index} iteration=${iteration} segment=readScopedMutationDiagnostic startMs=${Math.round(scopedDiagnosticStart)} durationMs=${Math.round(performance.now() - scopedDiagnosticStart)} urlBefore=${scopedDiagnosticUrlBefore} urlAfter=${safePathname(page.url())}`);
+        const propertyMutations = scoped
+          ? Object.keys(scoped.after).filter((key) => scoped.before[key] !== scoped.after[key])
+          : [];
+        const reason = !scoped || scoped.authority === "insufficient"
+          ? "region_authority_insufficient"
+          : propertyMutations.length > 0 && scoped.records === 0
+            ? "property_only_mutation"
+            : propertyMutations.length > 0 || scoped.records > 0
+              ? "mutation_detected"
+              : "no_dom_or_property_mutation";
+        const relatedPropertyMutations = scoped?.related
+          ? Object.keys(scoped.related.after).filter((key) => scoped.related!.before[key] !== scoped.related!.after[key])
+          : [];
+        console.log(`[stateful-click-diagnostic] actionIndex=${actionTarget.index} clickedOwnerKind=${scoped?.ownerKind ?? ""} relationshipAuthority=${scoped?.authority ?? "insufficient"} observerScope=${scoped?.related ? "owner+accepted_field_scope" : "owner"} observerInstalledBeforeClick=${scopedMutationObserverInstalled} observerInstallReason=${scopedMutationObserverInstallReason} beforeFingerprint=${Object.values(scoped?.before ?? {}).join(",")} afterFingerprint=${Object.values(scoped?.after ?? {}).join(",")} changedProperties=${propertyMutations.join(",")} attributeMutations=${scoped?.attributes ?? 0} characterDataMutations=${scoped?.characterData ?? 0} childListMutations=${scoped?.childList ?? 0} inputEventObserved=${(scoped?.inputEvent ?? 0) > 0} changeEventObserved=${(scoped?.changeEvent ?? 0) > 0} beforeInputEventObserved=${(scoped?.beforeInputEvent ?? 0) > 0} mutationCandidateCount=${scoped?.records ?? 0} relatedMutationCount=${scoped?.related?.records ?? 0} relatedPropertyMutations=${relatedPropertyMutations.join(",")} relatedAuthority=${scoped?.related?.authority ?? "insufficient"} unrelatedMutationCount=0 causalCandidateFound=${propertyMutations.length > 0 || relatedPropertyMutations.length > 0} causalCandidateKind=${propertyMutations.length > 0 ? "owner_property" : relatedPropertyMutations.length > 0 ? "accepted_field_scope_property" : "none"} diagnosticOnly=true`);
+        console.log(`[state-mutation-diagnostic] actionIndex=${actionTarget.index} relatedRegionAuthority=${scoped?.authority ?? "insufficient"} observerInstalledBeforeClick=${scopedMutationObserverInstalled} observerRecords=${scoped?.records ?? 0} attributeMutations=${scoped?.attributes ?? 0} characterDataMutations=${scoped?.characterData ?? 0} childListMutations=${scoped?.childList ?? 0} propertyCandidatesBefore=${scoped ? Object.keys(scoped.before).length : 0} propertyCandidatesAfter=${scoped ? Object.keys(scoped.after).length : 0} propertyMutations=${propertyMutations.length} changedNodeKind=owner changedProperty=${propertyMutations.join(",")} relationToClickedOwner=owner diagnosticReason=${reason}`);
+      }
+      const scanStart = performance.now();
+      const afterSnapshot = await scanCurrentPage(page).catch(() => undefined);
+      const scanCurrentPageMs = performance.now() - scanStart;
+      const afterAuth = afterSnapshot ? detectAuthGate(afterSnapshot) : undefined;
+      const authChanged = detectAuthGateChange(authDetectionBeforeClick, afterAuth);
+      const visibleStart = performance.now();
+      const nextTargetVisible = isTargetTextVisible(afterSnapshot?.elements, nextTargetText);
+      const nextTargetVisibleCheckMs = performance.now() - visibleStart;
+      const nextTargetBecameVisible = !nextTargetVisibleBefore && nextTargetVisible;
+      if (nextTargetVisible && !nextTargetVisibleLogged) {
+        nextTargetVisibleLogged = true;
+        markCriticalPath("next_target_visible");
+      }
+      postActionNextTargetVisible = postActionNextTargetVisible || nextTargetVisible;
+      // Reuses the SAME shared resolver every structured action already goes through -- never a
+      // new selector pipeline. A label being visible is not the same as the owner being
+      // resolvable: only `status === "resolved"` counts as ready (ambiguous/not_found/
+      // locator_resolution_failed all correctly stay not-ready and never guess a best candidate).
+      const resolverStart = performance.now();
+      let resolverStatus = "not_run";
+      const nextTargetResolution = nextTargetRequiresRuntimeResolution && nextActionTarget && afterSnapshot
+        ? await resolveActionTarget(page, afterSnapshot, nextActionTarget.target, {
+            semanticRole: nextActionTarget.semanticRole,
+            associatedField: nextActionTarget.associatedField,
+            actionType: nextActionTarget.actionType as "action_click" | "action_select" | "action_fill" | undefined,
+            recordingActionType: nextActionTarget.recordingActionType,
+            recordedTechnicalTargets: nextActionTarget.technicalTargetCandidates as any,
+            recordedTechnicalTargetRefs: nextActionTarget.technicalTargetRefs,
+            expectedRouteBefore: nextActionTarget.expectedRouteBefore,
+            learnedRouteAuthority: currentSurfaceRouteAuthority ?? undefined,
+            routeProfile,
+          }).catch(() => undefined)
+        : undefined;
+      resolverStatus = nextTargetResolution?.status ?? resolverStatus;
+      const nextTargetReady = resolverStatus === "resolved";
+      const resolveNextTargetMs = performance.now() - resolverStart;
+      const nextTargetReadyCheckMs = 0;
+      if ((nextTargetVisible || nextTargetReady) && !nextTargetFirstObservableLogged) {
+        nextTargetFirstObservableLogged = true;
+        console.log(`[next-target-first-observable] actionIndex=${actionTarget.index} iteration=${iteration} elapsedSinceClickMs=${Math.round(performance.now() - criticalPathStartedAt)} url=${safePathname(page.url())} visible=${nextTargetVisible} ready=${nextTargetReady}`);
+      }
+      console.log(`[post-action-probe-timing] actionIndex=${actionTarget.index} iteration=${iteration} url=${safePathname(page.url())} iterationStartMs=${Math.round(iterationStart)} snapshotMs=${Math.round(snapshotMs)} scanCurrentPageMs=${Math.round(scanCurrentPageMs)} resolveNextTargetMs=${Math.round(resolveNextTargetMs)} nextTargetVisibleCheckMs=${Math.round(nextTargetVisibleCheckMs)} nextTargetReadyCheckMs=${nextTargetReadyCheckMs} nextTargetVisible=${nextTargetVisible} nextTargetReady=${nextTargetReady} resolverStatus=${resolverStatus} iterationTotalMs=${Math.round(performance.now() - iterationStart)}`);
+      const applicationErrorVisible = Boolean(afterSnapshot?.elements.some((element: any) => {
+        if (element.visible === false) return false;
+        const role = String(element.role ?? "").toLowerCase();
+        const text = String(element.text ?? element.label ?? element.name ?? "");
+        return (role === "alert" || role === "status") && /error|invalid|incorrect|failed|fall[oó]|inv[aá]lid/i.test(text);
+      }));
+      // FIRST_LOSS fix: a same-surface, structured selection/toggle action (recordingActionType
+      // select|check|uncheck|radio|toggle -- never inferred from target text) with no network
+      // request, no route change, and no DOM signal the shared observers track otherwise has no
+      // completion signal at all. Re-reads the SAME already-resolved technical target
+      // (`readInteractiveState`, the exact primitive `stateActionKind`/`interactiveStateBefore`
+      // already established pre-click for post-hoc diagnostics) -- never a new resolver -- and
+      // requires a strict causal transition (`hasCausalSelectionTransition`), never "already
+      // selected" alone.
+      const targetSelectionStateChanged = stateActionKind
+        && isActionSurfaceStableForStateProbe(preClickUrl, page.url(), afterSnapshot?.url ?? page.url())
+        ? hasCausalSelectionTransition(interactiveStateBefore, await readInteractiveState(resolution.locator ?? finalLocator))
+        : false;
+      const routeChangedNow = safePathname(page.url()) !== preClickPathname;
+      // OBSERVATION TIMING: write only once this action has already produced its own causal
+      // route transition (watcher armed before the click, technical target resolved, structured
+      // execution authority -- all already established above) and no application error is
+      // visible. Reuses this exact probe tick's own signals; never a new watcher. Re-deriving
+      // authority right after the write and re-evaluating `isRecordedPostActionReached()` below
+      // (fed straight into this same `resolvePostActionSynchronization` call) lets a 3rd sample
+      // landing THIS run unblock THIS action's recorded-surface check in this same invocation --
+      // never dependent on a later poll tick, job, or 4th sample.
+      if (routeObservationEligible && !routeObservationReplayWritten) {
+        const observationResult = await recordReplayObservationAndReevaluate(
+          {
+            eligible: routeObservationEligible,
+            runId: routeObservationRunId,
+            recordedPostActionExpected,
+            routeChanged: routeChangedNow,
+            applicationErrorVisible,
+            alreadyWritten: routeObservationReplayWritten,
+          },
+          {
+            recordingId: routeObservationRecordingId!,
+            controlIdentity: routeObservationControlIdentity!,
+            actionKind: routeObservationActionKind!,
+          },
+          page.url(),
+        );
+        if (observationResult.written) {
+          routeObservationReplayWritten = true;
+          routeObservationAuthority = observationResult.authority;
+        }
+      }
+      const synchronization = resolvePostActionSynchronization({
+        actionNetworkObserved: progress.responseObserved || progress.pendingCount > 0,
+        actionNetworkResponse: progress.responseObserved,
+        applicationError: applicationErrorVisible,
+        authGateChanged: authChanged,
+        domMutation: observationDiff?.changed,
+        loadingSettled: !progress.active,
+        navigationMutation: observationDiff?.navigationMutation,
+        nextTargetAvailable: nextTargetVisible,
+        nextTargetBecameVisible,
+        nextTargetKnown,
+        nextTargetRequiresRuntimeResolution,
+        nextTargetReady,
+        targetSelectionStateChanged,
+        screenFingerprintChanged: observationDiff?.navigationMutation || observationDiff?.validationMutation,
+        structuredStateMutation: observationDiff?.stateMutation === true,
+        routeChanged: routeChangedNow,
+        recordedPostActionSurfaceRequired: Boolean(recordedPostActionExpected),
+        recordedPostActionSurfaceReached: isRecordedPostActionReached(),
+      });
+      const signal = synchronization.signal;
+      if (!synchronization.completed || !signal) return { completed: false };
+      postActionSyncSignal = signal;
+      markCriticalPath("post_action_sync_returned");
+      console.log(`[post-action-sync] phase=after signal=${signal} networkResponse=${progress.responseObserved} pending=${progress.pendingCount} authChanged=${authChanged} nextTargetVisible=${nextTargetVisible} domChanged=${observationDiff?.changed ?? false} applicationError=${applicationErrorVisible}`);
+      return { completed: true, signal };
+    };
     const rowCreationAction = /\b(?:add|añadir|agregar|insertar|nuevo|nueva|another|otro|otra)\b/i.test(actionTarget.action)
       && /\b(?:row|fila|registro|linea|línea|elemento|item|emplead|entidad|another|otro|otra)\b/i.test(actionTarget.action);
     const rowCreationBefore = rowCreationAction ? await captureGridCollectionSnapshot(page) : undefined;
@@ -9345,6 +10758,11 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       console.log(`[discovery:case] Standard click skipped - product card click succeeded`);
     } else {
       // Standard click execution
+      // The field-scoped resolver may return a locator that depends on an ephemeral accepted-scope
+      // runtime marker. Release that marker only AFTER the click attempt(s) -- normal and force --
+      // never before, or the locator would resolve to 0 nodes.
+      const acceptedScopeRuntimeMarkerForClick = resolution.acceptedScopeRuntimeMarker;
+      try {
       try {
         const isRuntimeBackedSelection = actionTarget.actionType === "action_select" && Boolean(selectionValue);
         const finalTagName = isRuntimeBackedSelection
@@ -9358,7 +10776,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           });
           console.log(`[discovery:case] Runtime-backed selection applied through resolved grid editor strategy=${resolution.locatorStrategy ?? "unknown"}`);
         } else {
+          const scopedMutationInstall = await beginScopedMutationDiagnostic(finalLocator, acceptedScopeRuntimeMarkerForClick);
+          scopedMutationObserverInstalled = scopedMutationInstall.installed;
+          scopedMutationObserverInstallReason = scopedMutationInstall.reason;
+          console.log(`[stateful-click-observer-install] actionIndex=${actionTarget.index} finalLocatorPresent=${Boolean(finalLocator)} installed=${scopedMutationObserverInstalled} reason=${scopedMutationObserverInstallReason}`);
+          markCriticalPath("click_dispatch_start");
           await clickResolvedTarget(finalLocator, false);
+          markCriticalPath("click_dispatch_end");
         }
       } catch {
         try {
@@ -9397,18 +10821,35 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           scenario, steps, allDiscoveredObjects, planSteps,
           pendingObjectsPath, pendingPlansPath, evidenceDir,
           failedAtStep, failedTarget, failedReason, allDiscoveredObjects
-        );
+          );
+        }
       }
-    }
+      } finally {
+        await releaseAcceptedScopeMarker(page, acceptedScopeRuntimeMarkerForClick);
+      }
     } // End of standard click else block
 
-    await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+    const clickNavigationExpectation = resolveClickRetryPolicy({
+      recordingActionType: actionTarget.recordingActionType,
+      actionType: actionTarget.actionType,
+      locatorStrategy: resolution.locatorStrategy,
+      transitionDetected: false,
+      selectionApplied: resolution.selectionApplied,
+      observableOutcome: false,
+    }).navigationExpected;
+    // An in-place click must reach the existing post-action observer first.
+    // waitForPageReady is retained for navigation and is intentionally not a
+    // global timeout change.
+    if (clickNavigationExpectation) {
+      await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+    }
     console.log("[discovery:case] Waiting after click...");
     // Check for loading indicators post-click before proceeding
     const { waitForStableInteractiveScreen } = await import("../runner/execution-plan-executor");
-          let stability = await waitForStableInteractiveScreen(page, {
+    let stability = await waitForStableInteractiveScreen(page, {
             progressProbe: () => actionNetworkObservation.getProgressState(),
             waitForPendingTransport: true,
+            completionProbe: postActionCompletionProbe,
           });
     const actionNetworkEvents = await actionNetworkObservation.stop({
       passiveTail: !stability.stable && stability.reason === "loading_timeout"
@@ -9421,6 +10862,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       event.resourceType === "websocket"
     );
     const finalPath = safePathname(page.url());
+    currentSurfaceRouteAuthority = nextSurfaceRouteAuthority(
+      finalPath !== preClickPathname, routeObservationEligible, routeObservationAuthority, currentSurfaceRouteAuthority,
+    );
     const relevantNetworkSettled = relevantNetworkEvents.length > 0 && relevantNetworkEvents.every((event) =>
       event.state === "completed" ||
       (
@@ -9435,7 +10879,11 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     const cleanNetworkTransition = relevantNetworkSettled && relevantNetworkEvents.some((event) =>
       event.resourceType === "fetch" || event.resourceType === "xhr" || event.resourceType === "document"
     );
-    if (!stability.stable && stability.reason === "loading_timeout" && cleanNetworkTransition) {
+    // The recorded post-action surface is a functional postcondition, not a decorative
+    // loading state. A settled network transition must not mask an un-reached recorded
+    // destination, so it cannot force readiness while the recorded surface is pending.
+    const recordedPostActionPending = Boolean(recordedPostActionExpected) && !isRecordedPostActionReached();
+    if (!stability.stable && stability.reason === "loading_timeout" && cleanNetworkTransition && !recordedPostActionPending) {
       // Some applications keep a decorative loading class mounted after all
       // navigation/data requests have completed. Static assets are not part of
       // the readiness boundary, and a browser-reported 2xx on the final route
@@ -9445,61 +10893,11 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       stability = { ...stability, stable: true, reason: undefined, waitState: "completed", terminationReason: "stable" };
     }
 
-    // A classic login submit can transiently leave its request pending without
-    // producing a response or browser failure. Retry only that generic state,
-    // once at most, while the auth surface is still present and no protected
-    // surface or terminal auth error has appeared.
-    let authTransientRetryUsed = false;
-    const authRetryMax = resolveAuthTransientRetryMax(process.env.AUTH_TRANSIENT_RETRY_MAX);
-    const authSnapshotAfterFirstAttempt = await scanCurrentPage(page);
-    const authDetectionAfterFirstAttempt = detectAuthGate(authSnapshotAfterFirstAttempt);
-    const authTerminalErrorVisible = authSnapshotAfterFirstAttempt.elements.some((element: any) => {
-      if (element.visible === false) return false;
-      const role = String(element.role ?? "").toLowerCase();
-      const text = String(element.text ?? element.label ?? element.name ?? "");
-      return (role === "alert" || role === "status") && /invalid|incorrect|error|failed|fall[oó]|incorrecta|inv[aá]lida/i.test(text);
-    });
-    const protectedSurfaceDetected = !authDetectionAfterFirstAttempt.detected
-      && authSnapshotAfterFirstAttempt.elements.some((element: any) => element.visible !== false && /button|link|menuitem/i.test(String(element.role ?? "")));
-    const responseObserved = actionNetworkEvents.some((event) => event.state !== "pending");
-    const requestFailed = actionNetworkEvents.some((event) => event.state === "failed");
-    const transientAuth = authSubmitAction && isAuthTransientNoResponse({
-      submitClicked: true,
-      requestObserved: actionNetworkEvents.length > 0,
-      responseObserved,
-      requestFailed,
-      authSurfacePresent: authDetectionAfterFirstAttempt.detected,
-      protectedSurfaceDetected,
-      terminalErrorVisible: authTerminalErrorVisible,
-      absoluteDeadlineReached: !stability.stable && stability.reason === "loading_timeout",
-      events: actionNetworkEvents,
-    });
-    if (!stability.stable && transientAuth && authRetryMax > 0) {
-      authTransientRetryUsed = true;
-      console.log(`[auth-transient-retry] classification=AUTH_TRANSIENT_NO_RESPONSE retry=1 max=${authRetryMax} authSurfacePresent=true protectedSurfaceDetected=false terminalErrorVisible=false`);
-      await actionNetworkObservation.waitForPassiveTail().catch(() => {});
-      const retryObservation = startNetworkObservation(page, actionTarget.index);
-      try {
-        await clickResolvedTarget(finalLocator, false);
-        console.log(`[auth-transient-retry] submitClicked=true`);
-      } catch (error) {
-        console.log(`[auth-transient-retry] submitClicked=false error="${error instanceof Error ? error.message : "unknown"}"`);
-      }
-      await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
-      const retryStability = await waitForStableInteractiveScreen(page, {
-        progressProbe: () => retryObservation.getProgressState(),
-        waitForPendingTransport: true,
-      });
-      const retryEvents = await retryObservation.stop({
-        passiveTail: !retryStability.stable && retryStability.reason === "loading_timeout",
-      });
-      console.log(`[auth-transient-retry] result=${retryStability.stable ? "settled" : "AUTH_TRANSIENT_NO_RESPONSE"} requestObserved=${retryEvents.length > 0} responseObserved=${retryEvents.some((event) => event.state !== "pending")} requestFailed=${retryEvents.some((event) => event.state === "failed")}`);
-      if (retryStability.stable) {
-        stability = retryStability;
-        actionNetworkEvents.splice(0, actionNetworkEvents.length, ...retryEvents);
-      }
-    }
     console.log(`[network-observation:events] stepIndex=${actionTarget.index} events=${JSON.stringify(actionNetworkEvents)}`);
+    const pendingAtTimeout = relevantNetworkEvents.filter((event) => event.state === "pending");
+    if (!stability.stable || pendingAtTimeout.length > 0) {
+      console.log(`[post-action-sync] phase=outcome actionIndex=${actionTarget.index} durationMs=${Date.now() - actionSyncStartedAt} urlAfter=${safePathname(page.url())} networkResponse=${actionNetworkEvents.some((event) => event.state === "completed")} requestFailed=${actionNetworkEvents.some((event) => event.state === "failed")} requestStillPendingAtTimeout=${pendingAtTimeout.length > 0} domTransition=${postActionSyncSignal === "dom_navigation_mutation" || postActionSyncSignal === "dom_validation_mutation"} nextTargetSignal=${postActionSyncSignal === "next_target_visible"} signal=${postActionSyncSignal ?? "none"}`);
+    }
     console.log(
       `[screen-stability] phase=after_click target="${actionTarget.target}" ` +
       `stable=${stability.stable} signals=${stability.signals.join(",") || "none"} ` +
@@ -9508,16 +10906,155 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       `lastProgressAgeMs=${stability.lastProgressAgeMs} absoluteDeadlineMs=${stability.absoluteDeadlineMs} ` +
       `terminationReason=${stability.terminationReason}`
     );
+    markCriticalPath("screen_stability_returned");
+    const afterAuthSnapshot = authDetectionBeforeClick.detected
+      ? await scanCurrentPage(page).catch(() => undefined)
+      : undefined;
+    const afterAuthDetection = afterAuthSnapshot ? detectAuthGate(afterAuthSnapshot) : undefined;
+    const authErrorSurfaceObserved = Boolean(afterAuthSnapshot?.elements.some((element: any) => {
+      if (element.visible === false) return false;
+      const role = String(element.role ?? "").toLowerCase();
+      const text = String(element.text ?? element.label ?? element.name ?? "");
+      return (role === "alert" || role === "status") && /error|invalid|incorrect|failed|fall[oó]|inv[aá]lid/i.test(text);
+    }));
+    // Same ownership rule `tryAuthGateRecovery` already applies (recording_structured_contract_
+    // authority): when a structured recording contract is present and the scenario has no
+    // explicit auth intent, the contract's own action owns whatever surface it targets -- a
+    // heuristic auth-gate detector firing on that surface (e.g. a business form that happens to
+    // resemble an identification/OTP shape) is never authoritative over it.
+    const structuredActionOwnsSurface = Boolean(options.scenario.recordingExecutionContract?.actions?.length)
+      && !options.scenario.authIntent
+      && authDetectionBeforeClick.gateType !== "classic_login";
+    const authBoundaryAttempted = shouldClassifyAuthenticationBoundary({
+      authDetectedBeforeAction: authDetectionBeforeClick.detected,
+      authenticationBoundaryCompleted: Boolean(authGateState?.completed || authGateCompletedAfterStepIndex !== undefined),
+      relevantNetworkObserved: relevantNetworkEvents.length > 0,
+      unstableSurface: !stability.stable,
+      authErrorSurfaceObserved,
+      structuredActionOwnsSurface,
+    });
+    const authenticationOutcome = authBoundaryAttempted
+      ? classifyAuthenticationOutcome({
+          beforeAuthDetected: authDetectionBeforeClick.detected,
+          afterAuthDetected: Boolean(afterAuthDetection?.detected),
+          events: relevantNetworkEvents,
+          afterPath: finalPath,
+          loadingObserved: !stability.stable
+            || stability.signals.some((signal) => /spinner|loading|pending/i.test(signal))
+            || pendingAtTimeout.length > 0,
+          errorSurfaceObserved: authErrorSurfaceObserved,
+          businessCandidateObserved: finalPath !== safePathname(actionTarget.expectedRouteBefore ?? "")
+            && (postActionNextTargetVisible || postActionSyncSignal === "next_target_visible"),
+          nextRecordedBusinessTargetVisible: postActionNextTargetVisible,
+        })
+      : undefined;
+    if (authenticationOutcome) {
+      console.log(
+        `[auth-outcome] classification=${authenticationOutcome.classification} ` +
+        `authRequestObserved=${authenticationOutcome.authRequestObserved} ` +
+        `authResponseObserved=${authenticationOutcome.authResponseObserved} ` +
+        `authHttpStatus=${authenticationOutcome.authHttpStatus ?? "none"} ` +
+        `postLoginSurface=${authenticationOutcome.postLoginSurface} ` +
+        `errorSurfaceObserved=${authenticationOutcome.errorSurfaceObserved} ` +
+        `businessSurfaceReached=${authenticationOutcome.businessSurfaceReached} ` +
+        `redirectChain=${JSON.stringify(authenticationOutcome.redirectChain)} ` +
+        `loadingObserved=${authenticationOutcome.loadingObserved}`
+      );
+      if (authenticationOutcome.businessSurfaceReached && authGateCompletedAfterStepIndex === undefined) {
+        authGateCompletedAfterStepIndex = actionTarget.index;
+        console.log(`[auth-outcome] boundaryCompleted=true completedAfterStepIndex=${actionTarget.index}`);
+      }
+    }
+    const authFailure = authenticationOutcome && (
+      authenticationOutcome.classification === "AUTH_INFRASTRUCTURE_FAILURE"
+      || authenticationOutcome.classification === "AUTH_REJECTED"
+      || authenticationOutcome.classification === "AUTH_TIMEOUT_WITH_PROGRESS"
+      || authenticationOutcome.classification === "POST_AUTH_NAVIGATION_FAILURE"
+    ) ? authenticationOutcome : undefined;
+    if (authFailure) {
+      failedAtStep = actionTarget.index;
+      failedTarget = actionTarget.target;
+      failedReason = authFailure.classification.toLowerCase();
+      const authStep = {
+        index: actionTarget.index,
+        action: actionTarget.action,
+        status: "found" as const,
+        targetText: actionTarget.target,
+        snapshotUrl: afterAuthSnapshot?.url ?? finalPath,
+        snapshotTitle: afterAuthSnapshot?.title,
+        elementsFound: afterAuthSnapshot?.elements.length,
+        actionExecutionStatus: "executed" as const,
+        postActionOutcomeStatus: authFailure.classification === "AUTH_TIMEOUT_WITH_PROGRESS"
+          ? "auth_timeout" as const
+          : authFailure.classification === "POST_AUTH_NAVIGATION_FAILURE"
+            ? "navigation_failure" as const
+            : "auth_failure" as const,
+        authenticationOutcome: authFailure,
+        error: `Authentication boundary failed after action: ${authFailure.classification}`,
+        evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+      } satisfies DiscoveryStepResult;
+      steps.push(authStep);
+      await captureEvStep(actionTarget.action, "failed", authFailure.classification);
+      console.log(`[discovery:case] Authentication boundary classified; dependent business actions blocked reason=${failedReason}`);
+      await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
+      await writeFile(pendingPlansPath, JSON.stringify(buildFailureResult(
+        scenario, steps, allDiscoveredObjects, planSteps,
+        pendingObjectsPath, pendingPlansPath, evidenceDir,
+        failedAtStep, failedTarget, failedReason, allDiscoveredObjects,
+        authFailure
+      ).candidatePlan ?? {}, null, 2), "utf-8");
+      return buildFailureResult(
+        scenario, steps, allDiscoveredObjects, planSteps,
+        pendingObjectsPath, pendingPlansPath, evidenceDir,
+        failedAtStep, failedTarget, failedReason, allDiscoveredObjects,
+        authFailure
+      );
+    }
+    if (postActionSyncSignal === "application_error") {
+      failedAtStep = actionTarget.index;
+      failedTarget = actionTarget.target;
+      failedReason = "application_error_visible";
+      console.log(`[discovery:case] Application error observed after action; stopping reason=${failedReason}`);
+      await captureEvStep(actionTarget.action, "failed", failedReason);
+      return buildFailureResult(
+        scenario, steps, allDiscoveredObjects, planSteps,
+        pendingObjectsPath, pendingPlansPath, evidenceDir,
+        failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+      );
+    }
+    if (recordedPostActionPending) {
+      // The recording proves this action must reach a specific post-action surface.
+      // A DOM mutation / 2xx on an intermediate surface -- or an auth-gate flip -- is
+      // progress, not the recorded functional outcome. Never declare PASS on the wrong
+      // surface: classify the unmet recorded postcondition instead of continuing to the
+      // next step. (`resolvePostActionSynchronization` already never returns a completion
+      // signal while the recorded surface is unreached, so `postActionSyncSignal` cannot
+      // be "auth_gate_changed" here; this check no longer needs to special-case it.)
+      failedAtStep = actionTarget.index;
+      failedTarget = actionTarget.target;
+      failedReason = "RECORDED_POSTCONDITION_NOT_REACHED";
+      console.log(
+        `[discovery:case] Recorded post-action surface not reached; stopping reason=${failedReason} ` +
+        `expected=${safePathname(recordedPostActionExpected!)} actual=${finalPath} signal=${postActionSyncSignal ?? "none"}`
+      );
+      await captureEvStep(actionTarget.action, "failed", failedReason);
+      return buildFailureResult(
+        scenario, steps, allDiscoveredObjects, planSteps,
+        pendingObjectsPath, pendingPlansPath, evidenceDir,
+        failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+      );
+    }
     if (!stability.stable) {
       failedAtStep = actionTarget.index;
       failedTarget = actionTarget.target;
-      failedReason = authTransientRetryUsed
-        ? "auth_transient_no_response_retry_exhausted"
+      failedReason = pendingAtTimeout.length > 0
+        ? "POST_ACTION_TRANSITION_TIMEOUT"
         : stability.reason ?? "loading_timeout";
       console.log(`[discovery:case] Loading state did not settle; stopping before next action reason=${failedReason}`);
-      if (failedReason === "loading_timeout" && actionNetworkEvents.some((event) => event.state === "pending")) {
+      if (failedReason === "loading_timeout" && relevantNetworkEvents.some((event) => event.state === "pending")) {
         await actionNetworkObservation.waitForPassiveTail();
       }
+      await captureEvStep(actionTarget.action, "failed", failedReason);
       return buildFailureResult(
         scenario, steps, allDiscoveredObjects, planSteps,
         pendingObjectsPath, pendingPlansPath, evidenceDir,
@@ -9623,11 +11160,72 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     }
 
     // Post-click semantic verification for selection-like targets
+    markCriticalPath("semantic_verification_start");
     // SKIP for ordinal_selection since tokens like "primera", "visible", "listado" are instructions, not UI text
     const isSelectionLike = isSelectionLikeTargetNew(actionTarget.target);
     
+    markCriticalPath("post_click_scan_start");
     const postClickScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
     currentSnapshot = postClickScan.snapshot;
+    markCriticalPath("post_click_scan_end");
+    // A stateful interaction can be verified only while its original surface
+    // still owns the control. After a route/SPA surface transition, the
+    // recorded locator is stale by definition; probing it would make
+    // Locator.evaluate wait for the old element and block next-target dispatch.
+    const actionSurfaceChanged = !isActionSurfaceStableForStateProbe(
+      preClickUrl,
+      page.url(),
+      postClickScan.snapshot.url,
+    );
+    if (stateActionKind && actionSurfaceChanged) {
+      console.log(
+        `[selection-state] skipped action=${stateActionKind} target="${actionTarget.target}" ` +
+        `reason=surface_changed before=${preClickPathname} after=${safePathname(page.url())}`
+      );
+    }
+    const interactiveStateAfter = stateActionKind && !actionSurfaceChanged
+      ? await readInteractiveState(resolution.locator ?? finalLocator)
+      : undefined;
+    const selectionStateVerification = verifySelectionState(stateActionKind, interactiveStateBefore, interactiveStateAfter);
+    const stateVerificationAccepted = selectionStateVerification.observed && selectionStateVerification.matches;
+    if (selectionStateVerification.observed) {
+      console.log(
+        `[selection-state] action=${stateActionKind} target="${actionTarget.target}" ` +
+        `before=${selectionStateVerification.expected === "selected" ? "unknown" : "captured"} ` +
+        `after=${selectionStateVerification.actual ?? "unknown"} observed=true matches=${selectionStateVerification.matches} ` +
+        `reason=${selectionStateVerification.reason}`
+      );
+    }
+    if (selectionStateVerification.observed && !selectionStateVerification.matches) {
+      const stateFailureReason = "selection_state_mismatch";
+      await captureEvStep(actionTarget.action, "failed", `${stateFailureReason}: expected=${selectionStateVerification.expected ?? "state"} actual=${selectionStateVerification.actual ?? "unknown"}`);
+      steps.push({
+        index: actionTarget.index,
+        action: actionTarget.action,
+        status: "not_found",
+        targetText: actionTarget.target,
+        snapshotUrl: postClickScan.url,
+        snapshotTitle: postClickScan.title,
+        elementsFound: postClickScan.elementsCount,
+        error: `${stateFailureReason}: expected=${selectionStateVerification.expected ?? "state"} actual=${selectionStateVerification.actual ?? "unknown"}`,
+        evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+        selectionStateDiagnostics: {
+          actionKind: stateActionKind,
+          before: interactiveStateBefore,
+          after: interactiveStateAfter,
+          verification: selectionStateVerification,
+        },
+      } as any);
+      failedAtStep = actionTarget.index;
+      failedTarget = actionTarget.target;
+      failedReason = stateFailureReason;
+      await writeFile(pendingObjectsPath, JSON.stringify(allDiscoveredObjects, null, 2), "utf-8");
+      return buildFailureResult(
+        scenario, steps, allDiscoveredObjects, planSteps,
+        pendingObjectsPath, pendingPlansPath, evidenceDir,
+        failedAtStep, failedTarget, failedReason, allDiscoveredObjects
+      );
+    }
 
     // Capture evidence after click completes and page stabilizes
     // Skip generic screenshot when detail screenshot will capture the same state
@@ -9666,13 +11264,14 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       }
     }
     
+    let semanticMatchForLog: { matchedTokens: string[] } = { matchedTokens: stateVerificationAccepted ? [selectionStateVerification.reason] : [] };
     if (aliasTransitionSkip) {
       console.log(`[discovery:case] postClickSemanticVerificationSkipped=true skipReason="alias_navigation_transition"`);
     } else if (isSelectionLike && wasOrdinalSelection) {
       // For ordinal_selection, skip instructive token verification
       console.log(`[discovery:case] Ordinal selection post-click verification skipped (instructive tokens)`);
       console.log(`[discovery:case] postClickSemanticVerificationSkipped=true skipReason="ordinal_selection_instruction_tokens"`);
-    } else if (isSelectionLike) {
+    } else if (isSelectionLike && !stateVerificationAccepted) {
       // Normal selection-like: perform semantic verification
       console.log(`[discovery:case] Performing post-click semantic verification for selection-like target: ${actionTarget.target}`);
       
@@ -9691,6 +11290,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         postClickScan.title,
         effectiveTarget,
       );
+      semanticMatchForLog = semanticMatch;
       
       if (!semanticMatch.matches) {
         console.log(`[discovery:case] Post-click semantic MISMATCH detected!`);
@@ -10049,7 +11649,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         }
       }
       
-      console.log(`[discovery:case] Post-click semantic verification PASSED. Matched tokens: ${semanticMatch.matchedTokens.join(", ")}`);
+      console.log(`[discovery:case] Post-click semantic verification PASSED. Matched tokens: ${semanticMatchForLog.matchedTokens.join(", ") || "state_verified"}`);
     }
 
     const afterState = await capturePageState(page);
@@ -10113,9 +11713,39 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       transitionDetected && beforeStructuralFingerprint && afterStructuralFingerprint
     );
 
-    console.log(`[discovery:case] Transition detected: ${transitionDetected ? "yes" : "no"}`);
+    const initialPostClickUiResult = await detectPostClickUiChange({
+      page,
+      target: actionTarget.target,
+      actionText: actionTarget.action,
+      beforeSnapshot: currentSnapshot,
+      afterSnapshot: afterTransitionSnapshot,
+      nextTargets: parsed.actionTargets.filter(a => a.index > actionTarget.index).slice(0, 5).map(a => a.target),
+      expectedAssertions: parsed.assertionTargets.filter(a => a.index >= actionTarget.index).map(a => a.target)
+    });
+    const initialObservableOutcome = initialPostClickUiResult.success
+      || Boolean(postActionSyncSignal)
+      || Boolean(resolution.selectionApplied);
+    const clickRetryPolicy = resolveClickRetryPolicy({
+      recordingActionType: actionTarget.recordingActionType,
+      actionType: actionTarget.actionType,
+      locatorStrategy: resolution.locatorStrategy,
+      transitionDetected,
+      selectionApplied: resolution.selectionApplied,
+      observableOutcome: initialObservableOutcome,
+    });
 
-    if (!transitionDetected) {
+    markCriticalPath("semantic_verification_end");
+    console.log(`[discovery:case] Transition detected: ${transitionDetected ? "yes" : "no"}`);
+    console.log(
+      `[click-outcome] targetType=${actionTarget.recordingActionType ?? actionTarget.actionType ?? "click"} ` +
+      `navigationExpected=${clickRetryPolicy.navigationExpected} ` +
+      `transitionDetected=${transitionDetected} ` +
+      `initialObservableOutcome=${initialObservableOutcome} ` +
+      `postClickReason=${initialPostClickUiResult.reason ?? "none"} ` +
+      `postActionSignal=${postActionSyncSignal ?? "none"}`
+    );
+
+    if (clickRetryPolicy.retryRequired) {
       console.log(`[discovery:case] Retrying with force click...`);
       try {
         await clickResolvedTarget(finalLocator, true);
@@ -10289,9 +11919,16 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           const retryResolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target, {
             semanticRole: actionTarget.semanticRole,
             relationContext: actionTarget.relationContext,
+            rowRelation: actionTarget.rowRelation,
+            rowScope: actionTarget.rowScope,
+            entityScope: actionTarget.entityScope,
+            associatedField: actionTarget.associatedField,
             activeContainer,
             routeProfile,
-            actionText: actionTarget.action
+            actionText: actionTarget.action,
+            recordedTechnicalTargets: actionTarget.technicalTargetCandidates as any,
+            recordedTechnicalTargetRefs: actionTarget.technicalTargetRefs,
+            expectedRouteBefore: actionTarget.expectedRouteBefore,
           });
           if (retryResolution.status === "resolved" && retryResolution.locator) {
             console.log(`[discovery:case] Target found after stability retry: ${actionTarget.target}`);
@@ -10373,9 +12010,16 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           const retryResolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target, {
             semanticRole: actionTarget.semanticRole,
             relationContext: actionTarget.relationContext,
+            rowRelation: actionTarget.rowRelation,
+            rowScope: actionTarget.rowScope,
+            entityScope: actionTarget.entityScope,
+            associatedField: actionTarget.associatedField,
             activeContainer,
             routeProfile,
-            actionText: actionTarget.action
+            actionText: actionTarget.action,
+            recordedTechnicalTargets: actionTarget.technicalTargetCandidates as any,
+            recordedTechnicalTargetRefs: actionTarget.technicalTargetRefs,
+            expectedRouteBefore: actionTarget.expectedRouteBefore,
           });
             if (retryResolution.status === "resolved" && retryResolution.locator) {
               await clickResolvedTarget(retryResolution.locator, false);
@@ -10626,19 +12270,41 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     }
 
     // Wait for server-side loading states to complete (e.g., "Generando...")
-    if (transitionDetected) {
+    // A synchronized next target is already an authoritative post-action
+    // readiness signal. Waiting for a broad page-wide loading heuristic here
+    // can hold a SPA on the destination long enough for its own lifecycle to
+    // revert the route. Keep the loading wait for transitions without a usable
+    // next target, where it still protects server-side workflows.
+    if (transitionDetected && !postActionNextTargetVisible) {
       try {
-        const loadingDone = await page.waitForFunction(() => {
-          const bodyText = document.body.textContent || "";
-          const loadingPatterns = ["generando", "cargando", "procesando", "loading", "preparando"];
-          return !loadingPatterns.some(p => bodyText.toLowerCase().includes(p));
-        }, { timeout: 30000 });
+        const loadingDone = await page.waitForFunction(PAGE_LOADING_STATE_PREDICATE, { timeout: 30000 });
         if (loadingDone) {
           console.log("[discovery:case] Loading state completed, re-scanning...");
           await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
-          const postLoadScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+          // Invalidate the pre-click observation and re-observe the current page.
+          // A SPA route change can outlive the navigation signal, so re-scan until
+          // the surface identity actually moves off the pre-click surface (or the
+          // idle budget expires), never handing the next target resolver a stale DOM.
+          const beforeUrl = beforeState.url;
+          const beforeScreenKey = currentSnapshot?.technicalScreenKey;
+          const reobserveDeadline = Date.now() + 8000;
+          let postLoadScan: Awaited<ReturnType<typeof scanAndCollectObjects>> | undefined;
+          let surfaceChanged = false;
+          while (Date.now() < reobserveDeadline) {
+            postLoadScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+            surfaceChanged = isNewSurfaceObserved(
+              beforeUrl,
+              beforeScreenKey,
+              postLoadScan.snapshot.url,
+              postLoadScan.snapshot.technicalScreenKey,
+            );
+            if (surfaceChanged) break;
+            await page.waitForTimeout(250);
+          }
+          if (!postLoadScan) postLoadScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
           currentSnapshot = postLoadScan.snapshot;
           allDiscoveredObjects.push(...postLoadScan.objects);
+          console.log(`[recording-replay] reobservePerformed=true surfaceChanged=${surfaceChanged} pathAfter=${safePathname(page.url())} surfaceKeyAfter=${currentSnapshot.technicalScreenKey ?? "none"}`);
           // Extra stability check: ensure no spinners/skeleton remain
           const postLoadStability = await waitForStableInteractiveScreen(page);
           if (postLoadStability.signals.length > 0) {
@@ -10648,6 +12314,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       } catch {
         console.log("[discovery:case] Loading state wait timed out, continuing with current snapshot.");
       }
+    } else if (transitionDetected && postActionNextTargetVisible) {
+      console.log("[discovery:case] Loading state wait skipped: synchronized next target already visible.");
     }
 
     if (authGateState?.completed) {
@@ -10672,6 +12340,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       relationContext: actionTarget.relationContext,
       controlIdentity: currentSnapshot.elements.find((element) => element.id === resolution.candidateId)?.controlIdentity,
       locatorStrategy: resolution.locatorStrategy,
+      // FIRST_LOSS fix (job d84277e1-d0f1-4eb3-885c-e7f9c7b7d6e4): this is the standard-click
+      // success persistence path -- it never copied actionTarget.associatedField, so a
+      // field-scoped-fallback click that physically PASSED during Discovery (tier=3, recorded)
+      // had no way to retry with the same hint once promoted. Transported verbatim only -- never
+      // a certification, never changes resolutionState/Tier.
+      ...(actionTarget.associatedField ? { associatedField: actionTarget.associatedField } : {}),
       ...(rowCreationDiagnostics ? { rowMutationDiagnostics: rowCreationDiagnostics } : {}),
       recoveryMetadata: (resolution.locatorStrategy === "ordinal_selection" || 
                         resolution.locatorStrategy === "contextual_intermediate_already_satisfied"
@@ -10754,7 +12428,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           : undefined
       });
 
-    if (await evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder, evidenceStepIndex)) {
+    markCriticalPath("early_completion_start");
+    const earlyCompletionTriggered = await evaluateAndApplyEarlyCompletionAfterAction(actionTarget.index, actionTarget.target, currentActionOrder, evidenceStepIndex);
+    markCriticalPath("early_completion_end");
+    if (earlyCompletionTriggered) {
       break;
     }
   }

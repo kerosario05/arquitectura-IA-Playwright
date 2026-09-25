@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-login",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Login",
+  "source": "discovery",
+  "appSlug": "prueba-kiosko",
+  "appConfigPath": "automations\\apps\\prueba-kiosko\\app.config.json",
+  "createdAt": "2026-09-25T11:34:45.415Z"
+}

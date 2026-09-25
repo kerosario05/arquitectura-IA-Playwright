@@ -34,7 +34,12 @@ export class OpenAICompatibleProvider implements AiProvider {
       model: this.model,
       messages: request.messages,
       temperature: request.temperature ?? 0,
-      response_format: { type: "json_object" }
+      response_format: request.jsonSchema && request.requireJsonSchema !== false
+        ? {
+            type: "json_schema",
+            json_schema: { name: request.jsonSchema.name, strict: true, schema: request.jsonSchema.schema },
+          }
+        : { type: "json_object" },
     };
 
     try {
@@ -75,7 +80,15 @@ export class OpenAICompatibleProvider implements AiProvider {
         rawText,
         model: this.model,
         providerName: this.providerName,
-        durationMs
+        durationMs,
+        usage: parsedResponse?.usage
+          ? {
+              inputTokens: parsedResponse.usage.prompt_tokens,
+              outputTokens: parsedResponse.usage.completion_tokens,
+              totalPhysicalTokens: parsedResponse.usage.total_tokens,
+              cachedInputTokens: parsedResponse.usage.prompt_tokens_details?.cached_tokens,
+            }
+          : undefined,
       };
 
       if (this.requireJson || request.requireJson) {

@@ -1,0 +1,467 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-001",
+    "caseId": 0,
+    "title": "Crear Producto Cuenta Efectivo"
+  },
+  "requiredData": [
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "contrasena",
+      "required": true,
+      "resolved": true
+    }
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "fill",
+      "description": "Ingresar [usuario] en \"Usuario\"",
+      "target": {
+        "strategy": "text",
+        "value": "Usuario",
+        "exact": false
+      },
+      "valueKey": "usuario"
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "Ingresar [contrasena] en \"Contraseña\"",
+      "target": {
+        "strategy": "text",
+        "value": "Contraseña",
+        "exact": false
+      },
+      "valueKey": "contrasena"
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Presionar \"Iniciar sesión\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Iniciar sesión",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner"
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-09-16T18:01:40.320Z",
+  "metadata": {
+    "authFlowRequired": true,
+    "authFlowInsertionAfterStepIndex": 3,
+    "authFlowAlias": "defaultClient",
+    "authFlowLanding": "transactions_menu",
+    "authGateDetectedDuringDiscovery": true,
+    "authGateStage": "credentials"
+  },
+  "sourceScenario": {
+    "title": "Crear Producto Cuenta Efectivo",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Ingresar [usuario] en \"Usuario\"",
+        "description": "Ingresar [usuario] en \"Usuario\"",
+        "valueKey": "usuario",
+        "technicalTargetRef": "role:input|Usuario",
+        "technicalTargetRefs": [
+          "role:input|Usuario",
+          "css:#username",
+          "structural:grid=grid:main|header=header:Usuario|role=amount_or_text"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "editable",
+            "semanticRole": "amount_or_text",
+            "locatorCandidates": [
+              {
+                "strategy": "structural",
+                "value": "grid=grid:main|header=header:Usuario|role=amount_or_text",
+                "confidence": 0.72
+              }
+            ],
+            "structuralContext": {
+              "gridRef": "grid:main",
+              "headerRef": "header:Usuario",
+              "containerRef": "container:form",
+              "owner": {
+                "tag": "input"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "stableDirectAttributes": {
+                "id": "username"
+              },
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 0
+            },
+            "stableAttributes": {
+              "id": "username"
+            },
+            "interactionEvidence": [
+              "input",
+              "username"
+            ],
+            "lifecycleRef": "username:amount_or_text",
+            "confidence": 0.9,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "action": "Ingresar [contrasena] en \"Contraseña\"",
+        "description": "Ingresar [contrasena] en \"Contraseña\"",
+        "valueKey": "contrasena",
+        "technicalTargetRef": "role:input|Contraseña",
+        "technicalTargetRefs": [
+          "role:input|Contraseña",
+          "css:#password",
+          "structural:grid=grid:main|header=header:Contraseña|role=amount_or_text"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "editable",
+            "semanticRole": "amount_or_text",
+            "locatorCandidates": [
+              {
+                "strategy": "structural",
+                "value": "grid=grid:main|header=header:Contraseña|role=amount_or_text",
+                "confidence": 0.72
+              }
+            ],
+            "structuralContext": {
+              "gridRef": "grid:main",
+              "headerRef": "header:Contraseña",
+              "containerRef": "container:form",
+              "owner": {
+                "tag": "input"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "stableDirectAttributes": {
+                "id": "password"
+              },
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 0
+            },
+            "stableAttributes": {
+              "id": "password",
+              "type": "password"
+            },
+            "interactionEvidence": [
+              "input",
+              "password"
+            ],
+            "lifecycleRef": "password:amount_or_text",
+            "confidence": 0.9,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "action": "Presionar \"Iniciar sesión\"",
+        "description": "Presionar \"Iniciar sesión\"",
+        "valueKey": "iniciar_sesion",
+        "polarity": "positive",
+        "technicalTargetRef": "aria-label:Iniciar sesión",
+        "technicalTargetRefs": [
+          "aria-label:Iniciar sesión",
+          "role:button|Iniciar sesión",
+          "text:Iniciar sesión"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "display",
+            "semanticRole": "display",
+            "locatorCandidates": [
+              {
+                "strategy": "aria-label",
+                "value": "Iniciar sesión",
+                "confidence": 0.9
+              }
+            ],
+            "structuralContext": {
+              "gridRef": "grid:main",
+              "containerRef": "container:form",
+              "owner": {
+                "tag": "button"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "stableDirectAttributes": {
+                "aria-label": "Iniciar sesión"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "stableAttributes": {
+              "type": "submit",
+              "aria-label": "Iniciar sesión"
+            },
+            "interactionEvidence": [
+              "click",
+              "grid:main|Iniciar sesión"
+            ],
+            "lifecycleRef": "grid:main|Iniciar sesión:display",
+            "confidence": 0.9,
+            "validatedByInteraction": true
+          }
+        ]
+      }
+    ],
+    "expectedResult": "La aplicación carga su pantalla inicial",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "observedAssertions": [],
+    "observableOracles": [
+      {
+        "id": "expected-01",
+        "requirement": "La aplicación carga su pantalla inicial",
+        "type": "navigation_transition",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 3,
+        "target": "Iniciar sesión",
+        "polarity": "positive",
+        "evidence": [
+          "transition_observed:true",
+          "click_target:Iniciar sesión",
+          "action_type:Presionar \"Iniciar sesión\"",
+          "after_url:https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+          "assertion_polarity:positive"
+        ],
+        "details": {
+          "transitionObserved": true,
+          "clickTarget": "Iniciar sesión",
+          "resolvedTarget": null,
+          "postClickUiChange": null,
+          "sourceActionStepIndex": 3,
+          "expectedUrl": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct"
+        }
+      }
+    ],
+    "stepStatuses": [
+      {
+        "index": 1,
+        "status": "found"
+      },
+      {
+        "index": 2,
+        "status": "found"
+      },
+      {
+        "index": 3,
+        "status": "found"
+      }
+    ],
+    "auth": {
+      "required": true,
+      "gateDetected": true,
+      "insertionAfterStepIndex": 3,
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    }
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "PREVIEW-001",
+    "title": "Crear Producto Cuenta Efectivo",
+    "appSlug": "portal-comercial",
+    "sectionSlug": "default-section",
+    "auth": {
+      "gateDetected": true,
+      "required": true,
+      "stage": "credentials",
+      "insertionAfterStepIndex": 3,
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    },
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Ingresar [usuario] en \"Usuario\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Usuario"
+        },
+        "valueKey": "usuario",
+        "technicalTargetRef": "role:input|Usuario",
+        "technicalTargetRefs": [
+          "role:input|Usuario",
+          "css:#username",
+          "structural:grid=grid:main|header=header:Usuario|role=amount_or_text"
+        ],
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[id=\"username\"]",
+              "confidence": 0.9
+            }
+          ],
+          "structuralContext": {
+            "stableDirectAttributes": {
+              "id": "username"
+            }
+          },
+          "confidence": 0.9,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Ingresar [contrasena] en \"Contraseña\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Contraseña"
+        },
+        "valueKey": "contrasena",
+        "technicalTargetRef": "role:input|Contraseña",
+        "technicalTargetRefs": [
+          "role:input|Contraseña",
+          "css:#password",
+          "structural:grid=grid:main|header=header:Contraseña|role=amount_or_text"
+        ],
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[id=\"password\"]",
+              "confidence": 0.9
+            }
+          ],
+          "structuralContext": {
+            "stableDirectAttributes": {
+              "id": "password"
+            }
+          },
+          "confidence": 0.9,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Presionar \"Iniciar sesión\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Iniciar sesión"
+        },
+        "valueKey": "iniciar_sesion",
+        "technicalTargetRef": "aria-label:Iniciar sesión",
+        "technicalTargetRefs": [
+          "aria-label:Iniciar sesión",
+          "role:button|Iniciar sesión",
+          "text:Iniciar sesión"
+        ],
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Iniciar sesión\"]",
+              "confidence": 0.9
+            }
+          ],
+          "structuralContext": {
+            "stableDirectAttributes": {
+              "aria-label": "Iniciar sesión"
+            }
+          },
+          "confidence": 0.9,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "oracle": {
+          "type": "navigation_transition",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "url_state",
+          "mechanism": {
+            "source": "url_state",
+            "method": "expectPromotedVisible",
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "navigation_transition",
+              "urlPattern": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct"
+            }
+          },
+          "sourceActionStepIndex": 3,
+          "requirement": "La aplicación carga su pantalla inicial"
+        },
+        "sourceActionStepIndex": 3,
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 3,
+      "representedScenarioSteps": 3,
+      "missingScenarioSteps": []
+    }
+  }
+}

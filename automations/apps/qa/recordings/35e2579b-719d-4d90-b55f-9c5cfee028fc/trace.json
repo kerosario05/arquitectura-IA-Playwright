@@ -1,0 +1,148 @@
+{
+  "recordingId": "35e2579b-719d-4d90-b55f-9c5cfee028fc",
+  "projectSlug": "qa",
+  "appSlug": "qa",
+  "platform": "web",
+  "baseUrl": "https://172.27.4.50/",
+  "label": "Registro Cliente",
+  "recordingGoal": {
+    "declaredGoal": "Registro Cliente",
+    "normalizedGoal": "Registro Cliente",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-09-22T01:59:29.625Z",
+  "status": "stopped",
+  "events": [
+    {
+      "t": 10496,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://172.27.4.50/",
+      "seq": 0
+    },
+    {
+      "t": 10929,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://172.27.4.50/",
+      "seq": 1
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "9f12e61beacd",
+      "url": "https://172.27.4.50/",
+      "framePath": ".artifacts\\tmp\\recordings\\35e2579b-719d-4d90-b55f-9c5cfee028fc\\0002-launch.png",
+      "seq": 2
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "9f12e61beacd",
+      "title": "¡Hola!",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "firstSeenAt": 10953,
+      "controls": [
+        {
+          "label": "Estados de cuenta",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Estados de cuenta"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Estados de cuenta",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Consulta de balance",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Consulta de balance"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Consulta de balance",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cartas y certificaciones",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Cartas y certificaciones"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cartas y certificaciones",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Canje de Puntos",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Canje de Puntos"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Canje de Puntos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Explora nuestros productos",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Explora nuestros productos"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Explora nuestros productos",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "¡Hola!",
+        "Estados de cuenta",
+        "Consulta de balance"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    }
+  ],
+  "endedAt": "2026-09-22T02:00:01.668Z",
+  "durationMs": 32043
+}

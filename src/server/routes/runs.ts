@@ -9,7 +9,8 @@ import {
   resolveDiscoveryBatchIssueKeyMetadata,
   startDiscoveryBatchRun,
 } from "../jobs/discovery-batch-runner";
-import { startScenarioPreviewRun } from "../jobs/scenario-preview-runner";
+import { startScenarioPreviewRun, startReuseExistingPromotedSpecRun, type ReuseExistingPromotedSpecScenario } from "../jobs/scenario-preview-runner";
+import { startMixedRerun } from "../jobs/mixed-rerun-orchestrator";
 import { startMobileLaunchExecutionJob } from "../jobs/mobile-launch-execution-runner";
 import { prepareRerun } from "../jobs/rerun-runner";
 import { launchExecution, type LaunchScenario } from "../jobs/launch-orchestrator";
@@ -669,7 +670,7 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
   const memoryJobMiss = !previous;
 
   // 2. Prepare rerun from canonical artifacts by job type.
-  const prepared = prepareRerun(jobId, mode, previous?.type);
+  const prepared = await prepareRerun(jobId, mode, previous?.type);
   if (!prepared.ok) {
     // No in-memory job and no persisted source artifacts → explicit source-not-found error.
     if (memoryJobMiss && (prepared.error === "missing_preview_scenarios" || prepared.error === "missing_mobile_rerun_manifest")) {
@@ -717,6 +718,112 @@ runsRouter.post("/:jobId/rerun", async (req, res) => {
     checklistUrl = `/checklist/${list.urlSlug}`;
   } else {
     console.log(`[runs:rerun] warning missing_issue_key sourceJobId=${jobId}`);
+  }
+
+  // A rerun whose EVERY selected scenario already has a fresh, canonically-matched promoted
+  // spec needs no discovery, no AI, and no TestRail publish — it is the exact `reuse_existing`
+  // decision recordings.ts's own /execute handler already dispatches via
+  // startReuseExistingPromotedSpecRun. A MIXED batch (some reusable, some not) is NOT split
+  // here — see promotedSpecReuse's own doc comment for why a partial-reuse job isn't attempted
+  // — it falls through to the existing, safe scenario-preview fallback below unchanged.
+  if (prepared.jobType === "scenario-preview") {
+    for (const entry of prepared.promotedSpecReuse) {
+      console.log(
+        `[promoted-spec-rerun] scenarioId=${entry.scenarioId} specPath=${entry.specPath ?? "none"} `
+        + `state=${entry.specState} decision=${entry.reuse ? "reuse" : "regenerate"}`
+      );
+    }
+    if (!prepared.allReusable && prepared.promotedSpecReuse.some((e) => e.reuse)) {
+      console.log(`[promoted-spec-rerun] classification=MIXED_RERUN dispatch=mixed_rerun_orchestrator`);
+      const reuseEntries = prepared.promotedSpecReuse.filter((e) => e.reuse);
+      const reuseIds = new Set(reuseEntries.map((e) => e.scenarioId));
+      const reuseScenarios: ReuseExistingPromotedSpecScenario[] = reuseEntries.map((entry) => ({
+        scenarioId: entry.scenarioId,
+        caseId: entry.caseId ?? 0,
+        specPath: entry.specPath!,
+        title: entry.title ?? entry.scenarioId,
+        runtimeValues: entry.runtimeValues,
+      }));
+      const fallbackScenarios = prepared.scenarios.filter((s) => !s.scenarioId || !reuseIds.has(s.scenarioId));
+
+      const parentJob = jobStore.create("scenario-preview", {
+        appSlug: prepared.appSlug,
+        recordingId: prepared.recordingId,
+        sourceJobId: jobId,
+        rerunMode: mode,
+        rerun: true,
+        executionMode: "mixed_rerun",
+        sectionName: prepared.sectionName,
+        sectionSlug: prepared.sectionSlug,
+      });
+      jobStore.appendLog(
+        parentJob.id,
+        `[runs:rerun] sourceJobId=${jobId} mode=${mode} selected=${prepared.selectedCount} total=${prepared.totalCount} `
+        + `dispatch=mixed_rerun reuseCount=${reuseScenarios.length} fallbackCount=${fallbackScenarios.length}`,
+      );
+      setImmediate(() => startMixedRerun({
+        parentJobId: parentJob.id,
+        appSlug: prepared.appSlug,
+        targetAppSlug: prepared.targetAppSlug,
+        targetAppName: prepared.targetAppName,
+        sectionName: prepared.sectionName,
+        sectionSlug: prepared.sectionSlug,
+        options: prepared.options,
+        sourceJobId: jobId,
+        rerunMode: mode,
+        reuseScenarios,
+        fallbackScenarios,
+      }));
+      res.json({
+        ok: true,
+        jobId: parentJob.id,
+        status: parentJob.status,
+        mode: "rerun",
+        rerunMode: mode,
+        scenarioCount: prepared.selectedCount,
+        totalOriginal: prepared.totalCount,
+        memoryJob: !!previous,
+        artifactFallback: memoryJobMiss,
+        dispatch: "mixed_rerun",
+      });
+      return;
+    }
+    if (prepared.allReusable) {
+      const reuseJobScenarios: ReuseExistingPromotedSpecScenario[] = prepared.promotedSpecReuse.map((entry) => ({
+        scenarioId: entry.scenarioId,
+        caseId: entry.caseId ?? 0,
+        specPath: entry.specPath!,
+        title: entry.title ?? entry.scenarioId,
+        runtimeValues: entry.runtimeValues,
+      }));
+      const reuseJob = jobStore.create("scenario-preview", {
+        appSlug: prepared.appSlug,
+        recordingId: prepared.recordingId,
+        sourceJobId: jobId,
+        rerunMode: mode,
+        rerun: true,
+        scenarios: reuseJobScenarios,
+        executionMode: "reuse_existing_promoted_spec",
+      });
+      jobStore.appendLog(reuseJob.id, `[runs:rerun] sourceJobId=${jobId} mode=${mode} selected=${prepared.selectedCount} total=${prepared.totalCount} dispatch=reuse_existing_promoted_spec`);
+      for (const s of reuseJobScenarios) {
+        console.log(`[promoted-spec-rerun] phase=execution_start scenarioId=${s.scenarioId} specPath=${s.specPath}`);
+      }
+      setImmediate(() => startReuseExistingPromotedSpecRun(reuseJob.id));
+      res.json({
+        ok: true,
+        jobId: reuseJob.id,
+        status: reuseJob.status,
+        mode: "rerun",
+        rerunMode: mode,
+        scenarioCount: prepared.selectedCount,
+        totalOriginal: prepared.totalCount,
+        memoryJob: !!previous,
+        artifactFallback: memoryJobMiss,
+        dispatch: "reuse_existing_promoted_spec",
+      });
+      return;
+    }
   }
 
   // 4. Build new job payload

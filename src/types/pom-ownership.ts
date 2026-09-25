@@ -291,3 +291,14 @@ export function isContextDependentIntent(intent: SemanticMethodIntent): boolean 
 export function getContextProducedByIntent(intent: SemanticMethodIntent): string | undefined {
   return CONTEXT_PRODUCING_INTENTS[intent];
 }
+
+// Single CORE authority for operation -> promoted-runtime action-wrapper method. Lives in this
+// dependency-free leaf module (not spec-execution-contract.ts or spec-generation-hybrid.ts
+// directly) so both can import it without recreating the circular dependency those two modules
+// already avoid deliberately (see spec-execution-contract.ts's own header comment).
+export const ACTION_RUNTIME_METHOD_BY_OPERATION: Partial<Record<string, string>> = {
+  click: "clickPromotedTarget",
+  fill: "fillPromotedField",
+  select: "selectPromotedItem",
+  press: "pressPromotedTarget",
+};

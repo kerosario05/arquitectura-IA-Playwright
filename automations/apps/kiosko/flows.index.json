@@ -1,6 +1,57 @@
 {
   "version": "1.0",
   "appSlug": "kiosko",
-  "flows": [],
-  "updatedAt": "2026-08-31T12:24:58.351Z"
+  "flows": [
+    {
+      "id": "flow_1789489310170_ma3vp0",
+      "name": "Kiosko2",
+      "filePath": "flows\\kiosko2.flow.ts",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "",
+          "pageObjectId": "HomePage",
+          "methodName": "open"
+        },
+        {
+          "action": "click",
+          "target": "Explora nuestros productos",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "Tarjetas",
+          "pageObjectId": "CategoryPage",
+          "methodName": "selectCategory"
+        },
+        {
+          "action": "click",
+          "target": "Tarjeta de Crédito",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "Tarjeta Crédito Visa Gold Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Mayor plazo para pagar: 26 días después de la fe",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        },
+        {
+          "action": "click",
+          "target": "Finalizar sesión",
+          "pageObjectId": "ProductListPage",
+          "methodName": "selectProduct"
+        }
+      ],
+      "requiredDataKeys": [],
+      "sensitiveActions": [],
+      "reusableAcrossCases": false,
+      "confidence": 0.5,
+      "status": "candidate",
+      "createdAt": "2026-09-15T16:21:50.170Z",
+      "updatedAt": "2026-09-15T16:21:50.170Z"
+    }
+  ],
+  "updatedAt": "2026-09-15T16:21:50.174Z"
 }

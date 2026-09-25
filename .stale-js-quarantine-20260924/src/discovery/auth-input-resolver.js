@@ -1,0 +1,266 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.maskValue = maskValue;
+exports.resolveAuthInputs = resolveAuthInputs;
+exports.validateRequiredInputs = validateRequiredInputs;
+exports.maskResolution = maskResolution;
+exports.logAuthResolution = logAuthResolution;
+function normalizeRuntimeKey(value) {
+    return value
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
+}
+function resolveRuntimeEntry(entries, keys) {
+    if (!Array.isArray(entries))
+        return undefined;
+    const byKey = new Map(entries
+        .filter((entry) => entry && typeof entry.key === "string" && typeof entry.value === "string" && entry.value.trim())
+        .map((entry) => [normalizeRuntimeKey(entry.key), entry]));
+    for (const key of keys) {
+        const entry = byKey.get(normalizeRuntimeKey(key));
+        if (entry) {
+            return {
+                value: entry.value.trim(),
+                source: entry.source === "user_provided_qa_credentials" ? "user_provided_qa_credentials" : "runtime_context",
+            };
+        }
+    }
+    return undefined;
+}
+function maskValue(value, visibleChars = 4) {
+    if (!value)
+        return "";
+    if (value.length <= visibleChars)
+        return "****";
+    return "*".repeat(value.length - visibleChars) + value.slice(-visibleChars);
+}
+function resolveFromTestData(testData, aliases, alias, key) {
+    const resolvedAlias = resolveAlias(aliases, alias);
+    const clients = testData.clients;
+    if (clients && typeof clients === "object") {
+        const client = clients[resolvedAlias];
+        if (client && typeof client === "object" && client[key]) {
+            return String(client[key]);
+        }
+    }
+    const auth = testData.auth;
+    if (auth && typeof auth === "object") {
+        const authEntry = auth[resolvedAlias];
+        if (authEntry && typeof authEntry === "object" && authEntry[key]) {
+            return String(authEntry[key]);
+        }
+    }
+    const defaults = testData.defaults;
+    if (defaults && typeof defaults === "object") {
+        const defaultAlias = defaults.client || resolvedAlias;
+        const defaultClient = testData.clients?.[defaultAlias];
+        if (defaultClient && typeof defaultClient === "object" && defaultClient[key]) {
+            return String(defaultClient[key]);
+        }
+    }
+    return undefined;
+}
+function resolveAlias(aliases, alias) {
+    const aliasValue = aliases[alias];
+    if (typeof aliasValue === "string") {
+        return aliasValue;
+    }
+    if (Array.isArray(aliasValue) && aliasValue.length > 0) {
+        return String(aliasValue[0]);
+    }
+    return alias;
+}
+function resolveAuthInputs(config) {
+    const { env, missingInputBehavior, alias = "defaultClient", runtimeEntries } = config;
+    const result = {
+        success: true,
+        data: {},
+        sources: {},
+        errors: []
+    };
+    const testData = (env.APP_TEST_DATA_JSON && typeof env.APP_TEST_DATA_JSON === "object")
+        ? env.APP_TEST_DATA_JSON
+        : {};
+    const testDataAliases = (env.APP_TEST_DATA_ALIASES_JSON && typeof env.APP_TEST_DATA_ALIASES_JSON === "object")
+        ? env.APP_TEST_DATA_ALIASES_JSON
+        : {};
+    const resolvedAlias = resolveAlias(testDataAliases, alias);
+    const runtimeIdentificationNumber = resolveRuntimeEntry(runtimeEntries, [
+        "auth.company_identifier",
+        "auth.identification_number",
+        "identificationNumber",
+        "Identity_Provider",
+    ]);
+    const runtimeIdentificationType = resolveRuntimeEntry(runtimeEntries, ["auth.identification_type", "identificationType"]);
+    const runtimeOtp = resolveRuntimeEntry(runtimeEntries, ["auth.otp", "otp", "OTP_SECRET"]);
+    const runtimeUsername = resolveRuntimeEntry(runtimeEntries, ["auth.username", "username", "APP_USERNAME"]);
+    const runtimePassword = resolveRuntimeEntry(runtimeEntries, ["auth.password", "password", "APP_PASSWORD"]);
+    // identificationNumber
+    const idFromTestData = resolveFromTestData(testData, testDataAliases, alias, "identificationNumber");
+    if (runtimeIdentificationNumber) {
+        result.data.identificationNumber = runtimeIdentificationNumber.value;
+        result.sources.identificationNumber = runtimeIdentificationNumber.source;
+    }
+    else if (idFromTestData) {
+        result.data.identificationNumber = idFromTestData;
+        result.sources.identificationNumber = `APP_TEST_DATA_JSON.clients[${resolvedAlias}]`;
+    }
+    else if (typeof env.Identity_Provider === "string" && env.Identity_Provider) {
+        result.data.identificationNumber = env.Identity_Provider;
+        result.sources.identificationNumber = "Identity_Provider";
+    }
+    // identificationType
+    const typeFromTestData = resolveFromTestData(testData, testDataAliases, alias, "identificationType");
+    if (runtimeIdentificationType) {
+        result.data.identificationType = runtimeIdentificationType.value;
+        result.sources.identificationType = runtimeIdentificationType.source;
+    }
+    else if (typeFromTestData) {
+        result.data.identificationType = typeFromTestData;
+        result.sources.identificationType = `APP_TEST_DATA_JSON.clients[${resolvedAlias}]`;
+    }
+    else {
+        result.data.identificationType = "cedula";
+        result.sources.identificationType = "default";
+    }
+    // otp
+    const otpFromTestData = resolveFromTestData(testData, testDataAliases, alias, "otp");
+    if (runtimeOtp) {
+        result.data.otp = runtimeOtp.value;
+        result.sources.otp = runtimeOtp.source;
+    }
+    else if (otpFromTestData) {
+        result.data.otp = otpFromTestData;
+        result.sources.otp = `APP_TEST_DATA_JSON.clients[${resolvedAlias}]`;
+    }
+    else if (typeof env.OTP_SECRET === "string" && env.OTP_SECRET) {
+        result.data.otp = env.OTP_SECRET;
+        result.sources.otp = "OTP_SECRET";
+    }
+    // username
+    const userFromTestData = resolveFromTestData(testData, testDataAliases, alias, "username");
+    if (runtimeUsername) {
+        result.data.username = runtimeUsername.value;
+        result.sources.username = runtimeUsername.source;
+    }
+    else if (userFromTestData) {
+        result.data.username = userFromTestData;
+        result.sources.username = `APP_TEST_DATA_JSON.auth[${resolvedAlias}]`;
+    }
+    else if (typeof env.APP_USERNAME === "string" && env.APP_USERNAME) {
+        result.data.username = env.APP_USERNAME;
+        result.sources.username = "APP_USERNAME";
+    }
+    // password
+    const passFromTestData = resolveFromTestData(testData, testDataAliases, alias, "password");
+    if (runtimePassword) {
+        result.data.password = runtimePassword.value;
+        result.sources.password = runtimePassword.source;
+    }
+    else if (passFromTestData) {
+        result.data.password = passFromTestData;
+        result.sources.password = `APP_TEST_DATA_JSON.auth[${resolvedAlias}]`;
+    }
+    else if (typeof env.APP_PASSWORD === "string" && env.APP_PASSWORD) {
+        result.data.password = env.APP_PASSWORD;
+        result.sources.password = "APP_PASSWORD";
+    }
+    // expectedPhoneLast4
+    const phoneFromTestData = resolveFromTestData(testData, testDataAliases, alias, "expectedPhoneLast4");
+    if (phoneFromTestData) {
+        result.data.expectedPhoneLast4 = phoneFromTestData;
+        result.sources.expectedPhoneLast4 = `APP_TEST_DATA_JSON.clients[${resolvedAlias}]`;
+    }
+    // extra fields
+    if (env.APP_EXTRA_LOGIN_FIELDS_JSON && typeof env.APP_EXTRA_LOGIN_FIELDS_JSON === "object") {
+        result.data.extraFields = env.APP_EXTRA_LOGIN_FIELDS_JSON;
+        result.sources.extraFields = "APP_EXTRA_LOGIN_FIELDS_JSON";
+    }
+    // pin
+    const pinFromTestData = resolveFromTestData(testData, testDataAliases, alias, "pin");
+    if (pinFromTestData) {
+        result.data.pin = pinFromTestData;
+        result.sources.pin = `APP_TEST_DATA_JSON.clients[${resolvedAlias}]`;
+    }
+    // token
+    const tokenFromTestData = resolveFromTestData(testData, testDataAliases, alias, "token");
+    if (tokenFromTestData) {
+        result.data.token = tokenFromTestData;
+        result.sources.token = `APP_TEST_DATA_JSON.clients[${resolvedAlias}]`;
+    }
+    return result;
+}
+function validateRequiredInputs(resolution, requiredInputs, missingInputBehavior) {
+    const errors = [];
+    for (const input of requiredInputs) {
+        switch (input) {
+            case "identificationNumber":
+                if (!resolution.data.identificationNumber) {
+                    errors.push("Missing required input: identificationNumber. Set APP_TEST_DATA_JSON.clients[alias].identificationNumber or Identity_Provider.");
+                }
+                break;
+            case "otp":
+                if (!resolution.data.otp) {
+                    errors.push("Missing required input: otp. Set APP_TEST_DATA_JSON.clients[alias].otp or OTP_SECRET.");
+                }
+                break;
+            case "username":
+                if (!resolution.data.username) {
+                    errors.push("Missing required input: username. Set APP_TEST_DATA_JSON.auth[alias].username or APP_USERNAME.");
+                }
+                break;
+            case "password":
+                if (!resolution.data.password) {
+                    errors.push("Missing required input: password. Set APP_TEST_DATA_JSON.auth[alias].password or APP_PASSWORD.");
+                }
+                break;
+            case "pin":
+                if (!resolution.data.pin) {
+                    errors.push("Missing required input: pin. Set APP_TEST_DATA_JSON.clients[alias].pin.");
+                }
+                break;
+            case "token":
+                if (!resolution.data.token) {
+                    errors.push("Missing required input: token. Set APP_TEST_DATA_JSON.clients[alias].token.");
+                }
+                break;
+        }
+    }
+    if (errors.length > 0 && missingInputBehavior === "fail") {
+        return { valid: false, errors };
+    }
+    return { valid: errors.length === 0, errors };
+}
+function maskResolution(resolution) {
+    const masked = {};
+    if (resolution.data.identificationNumber) {
+        masked.identificationNumber = "******";
+    }
+    if (resolution.data.otp) {
+        masked.otp = "******";
+    }
+    if (resolution.data.password) {
+        masked.password = "******";
+    }
+    if (resolution.data.username) {
+        masked.username = "******";
+    }
+    if (resolution.data.pin) {
+        masked.pin = "****";
+    }
+    if (resolution.data.token) {
+        masked.token = "******";
+    }
+    return masked;
+}
+function logAuthResolution(resolution) {
+    const masked = maskResolution(resolution);
+    console.log(`[auth-input-resolver] Resolution sources:`);
+    for (const [key, source] of Object.entries(resolution.sources)) {
+        const value = masked[key] || "(not resolved)";
+        const sensitive = ["username", "password", "otp", "pin", "token", "identificationNumber"].includes(key);
+        console.log(`[auth-input-resolver]   ${key}: from ${source} value=${value} sensitive=${sensitive}`);
+    }
+}

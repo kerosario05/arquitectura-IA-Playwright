@@ -56,6 +56,7 @@ export class CodexCliProvider {
   private readonly command: string;
   private readonly extraArgs: string[];
   private readonly timeoutMs: number;
+  private readonly reasoningEffort?: AiProviderConfig["reasoningEffort"];
 
   constructor(config: AiProviderConfig) {
     this.providerName = config.providerName;
@@ -63,22 +64,24 @@ export class CodexCliProvider {
     this.command = config.command ?? "codex";
     this.extraArgs = config.extraArgs ?? [];
     this.timeoutMs = config.timeoutMs;
+    this.reasoningEffort = config.reasoningEffort;
   }
 
-  private buildFinalExtraArgs(): string[] {
+  private buildFinalExtraArgs(purpose: string): string[] {
     const hasModelFlag = this.extraArgs.some((arg, i) => {
       return arg === "--model" || arg === "-m" || (i > 0 && (this.extraArgs[i - 1] === "--model" || this.extraArgs[i - 1] === "-m"));
     });
 
-    if (hasModelFlag) {
-      return [...this.extraArgs];
+    let args = hasModelFlag ? [...this.extraArgs] : this.model ? ["--model", this.model, ...this.extraArgs] : [...this.extraArgs];
+    if (purpose !== "spec_generation" || !this.reasoningEffort) return args;
+    const reasoningPrefix = "model_reasoning_effort=";
+    const existing = args.find((arg) => arg.startsWith(reasoningPrefix));
+    const expected = `${reasoningPrefix}${this.reasoningEffort}`;
+    if (existing && existing !== expected) {
+      throw new AiProviderError("ai_provider_config_missing", `Conflicting Codex reasoning effort: ${existing}`);
     }
-
-    if (this.model) {
-      return ["--model", this.model, ...this.extraArgs];
-    }
-
-    return [...this.extraArgs];
+    if (!existing) args = [...args, "-c", expected];
+    return args;
   }
 
   async completeJson(request: AiCompletionRequest): Promise<AiCompletionResponse> {
@@ -94,16 +97,25 @@ export class CodexCliProvider {
     const stdoutLogPath = path.join(tempDir, "codex-stdout.log");
     const stderrLogPath = path.join(tempDir, "codex-stderr.log");
     let processExitedNonZero = false;
+    // Set whenever completeJson is about to throw a diagnostic error (missing
+    // output, invalid shape, timeout, ...). exitCode alone is not a reliable
+    // signal: Codex can exit 0 while never actually writing the result file,
+    // and the tempDir (prompt, any partial output, per-run logs) must survive
+    // long enough to be inspected instead of being deleted by cleanupTempDir.
+    let preserveTempDirForDiagnostics = false;
     let processResult: Awaited<ReturnType<typeof runCodexCli>> | null = null;
 
     try {
       const systemMessage = request.messages.find(m => m.role === "system")?.content ?? "";
       const userMessage = request.messages.find(m => m.role === "user")?.content ?? "";
 
-      await this.writeInputFiles(tempDir, outputPath, promptPath, systemMessage, userMessage, purpose);
+      await this.writeInputFiles(tempDir, outputPath, promptPath, systemMessage, userMessage, purpose, request.jsonSchema);
 
       const shortPrompt = `Read and follow the instructions in "${promptPath}". Write the output file exactly as instructed.`;
-      const finalExtraArgs = this.buildFinalExtraArgs();
+      const finalExtraArgs = this.buildFinalExtraArgs(purpose);
+      if (purpose === "spec_generation") {
+        console.log(`[ai-spec] provider=${this.providerName} model=${this.model} reasoningEffort=${this.reasoningEffort ?? "default"} timeoutMs=${this.timeoutMs}`);
+      }
 
       const runnerInput: CodexCliRunnerInput = {
         command: this.command,
@@ -130,6 +142,7 @@ export class CodexCliProvider {
       }
 
       if (result.timedOut) {
+        preserveTempDirForDiagnostics = true;
         throw new AiProviderError("ai_provider_timeout", `AI provider timed out after ${this.timeoutMs}ms`, {
           provider: this.providerName,
           timeoutMs: this.timeoutMs,
@@ -151,11 +164,15 @@ export class CodexCliProvider {
 
       if (!extractionResult.success) {
         processExitedNonZero = result.exitCode !== 0 || processExitedNonZero;
+        preserveTempDirForDiagnostics = true;
 
         // If the CLI exited non-zero and emitted a protocol error/turn.failed event,
         // propagate the real technical error instead of treating stdout as a result.
+        // Use rawStdout (the untruncated JSONL transport log) because `stdout` has
+        // already been replaced with just the last agent_message text by the runner,
+        // which never contains the turn.failed/error event.
         const technicalFailure = result.exitCode !== 0
-          ? this.extractCodexFailureMessage(result.stdout)
+          ? this.extractCodexFailureMessage(result.rawStdout ?? result.stdout)
           : undefined;
         if (technicalFailure) {
           await this.saveDebugArtifacts(tempDir, result, purpose, extractionResult.attempts);
@@ -263,6 +280,7 @@ export class CodexCliProvider {
         const shapeValidation = validateScenarioShape(extractionResult.parsed);
         if (!shapeValidation.valid) {
           processExitedNonZero = result.exitCode !== 0 || processExitedNonZero;
+          preserveTempDirForDiagnostics = true;
 
           await this.saveDebugArtifacts(tempDir, result, purpose, extractionResult.attempts);
 
@@ -285,6 +303,7 @@ export class CodexCliProvider {
         const specShapeValidation = validateSpecOutputShape(extractionResult.parsed);
         if (!specShapeValidation.valid) {
           processExitedNonZero = result.exitCode !== 0 || processExitedNonZero;
+          preserveTempDirForDiagnostics = true;
 
           await this.saveDebugArtifacts(tempDir, result, purpose, extractionResult.attempts);
 
@@ -343,7 +362,7 @@ export class CodexCliProvider {
       }
       throw error;
     } finally {
-      if (!processExitedNonZero) {
+      if (!processExitedNonZero && !preserveTempDirForDiagnostics) {
         await this.cleanupTempDir(tempDir);
       }
     }
@@ -452,7 +471,8 @@ export class CodexCliProvider {
     promptPath: string,
     systemMessage: string,
     userMessage: string,
-    purpose: string
+    purpose: string,
+    jsonSchema?: AiCompletionRequest["jsonSchema"]
   ): Promise<void> {
     // Only repair tasks use the repair decision schema.
     if (isRepairPurpose(purpose)) {
@@ -461,7 +481,7 @@ export class CodexCliProvider {
     }
 
     const fileOutputPrompt = !isRepairPurpose(purpose)
-      ? this.buildGenericFileOutputPrompt(outputPath, promptPath, systemMessage, userMessage)
+      ? this.buildGenericFileOutputPrompt(outputPath, promptPath, systemMessage, userMessage, jsonSchema)
       : this.buildRepairFileOutputPrompt(outputPath, promptPath, systemMessage, userMessage);
 
     await fs.writeFile(promptPath, fileOutputPrompt, "utf-8");
@@ -524,7 +544,13 @@ export class CodexCliProvider {
     return lines.join("\n");
   }
 
-  private buildGenericFileOutputPrompt(outputPath: string, promptPath: string, systemMessage: string, userMessage: string): string {
+  private buildGenericFileOutputPrompt(
+    outputPath: string,
+    promptPath: string,
+    systemMessage: string,
+    userMessage: string,
+    jsonSchema?: AiCompletionRequest["jsonSchema"],
+  ): string {
     const lines: string[] = [
       "TASK: Write exactly ONE file at the absolute path below with valid JSON.",
       "",
@@ -540,6 +566,16 @@ export class CodexCliProvider {
       "- The JSON file must be parseable with JSON.parse()",
       ""
     ];
+
+    if (jsonSchema) {
+      lines.push(
+        `- The JSON file MUST conform exactly to the structured schema named ${jsonSchema.name}`,
+        "- Do not add, remove, or rename fields from that schema",
+        "STRUCTURED OUTPUT SCHEMA:",
+        JSON.stringify(jsonSchema.schema, null, 2),
+        "",
+      );
+    }
 
     if (systemMessage) {
       lines.push("SYSTEM CONTEXT:", systemMessage, "");

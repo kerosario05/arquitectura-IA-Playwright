@@ -8,10 +8,12 @@ import { resolveAndroidSdk } from "../../mobile/android-sdk";
 import { getProjectConfigurationBySlug } from "../../db/project-reader";
 import { AndroidSessionRecorder } from "../../recording/mobile/android-session-recorder";
 import { WebSessionRecorder } from "../../recording/web/web-session-recorder";
+import { RecordingControlError, type RecordingControlAction } from "../../recording/recording-control";
 import {
   discardFrames,
   ensureFramesDir,
   loadScenarios,
+  loadSemanticRecording,
   loadTrace,
   saveScenarios,
   saveTrace,
@@ -25,11 +27,19 @@ import {
   buildHappyPathScenario,
   buildSegmentScenarios,
   capTitle,
+  evaluateRecordingSuggestionQuality,
   filterGoalScopedSuggestions,
+  materializeObservedPrimaryScenario,
+  materializeRecordingSuggestion,
   type RecordedScenario,
 } from "../../recording/trace-to-scenario";
+import {
+  detectMutationOpportunities,
+  enrichRecordedScenarioContract,
+  materializeScenarioMutation,
+} from "../../recording/canonical-recording-contract";
 import { applyStory, enrichFromTrace } from "../../recording/trace-ai-enricher";
-import { createGeneralAiProvider } from "../../ai/ai-provider-factory";
+import { createScenarioAiProvider } from "../../ai/ai-provider-factory";
 import type { RecordedEvent, RecordingDataPolicy, RecordingPlatform, RecordingSummary, SessionTrace } from "../../recording/session-trace.types";
 import {
   attachScenarioSuggestions,
@@ -56,6 +66,8 @@ const execFileAsync = promisify(execFile);
  * saved.
  */
 
+export type CaptureAuthority = "legacy" | "v2";
+
 export type StartRecordingParams = {
   /** Project whose configuration decides WHICH app is recorded. */
   projectSlug: string;
@@ -68,7 +80,26 @@ export type StartRecordingParams = {
   headless?: boolean;
   /** Extra field labels to redact beyond the built-in list. */
   sensitiveLabels?: string[];
+  /**
+   * API-INTERNAL ONLY -- CaptureEngine V2 is the WEB recorder, not a client-selectable feature,
+   * and the public `POST /api/recordings/start` route never reads/forwards a request-supplied
+   * value into this field. `undefined` (the normal case) resolves to `"v2"` for a WEB recording;
+   * `"legacy"` remains reachable only for internal callers (tests/regression/rollback). Has no
+   * effect on Android recordings, which have no V2 concept.
+   */
+  captureAuthority?: CaptureAuthority;
 };
+
+/**
+ * Strict allowlist -- the only two values `WebSessionRecorder.captureAuthority` accepts.
+ * `undefined` (the field absent from the request) means "use the default", not a third value;
+ * anything else is a caller error, never silently coerced.
+ */
+export function parseCaptureAuthorityParam(value: unknown): CaptureAuthority | undefined {
+  if (value === undefined) return undefined;
+  if (value === "legacy" || value === "v2") return value;
+  throw new RecordingError("INVALID_CAPTURE_AUTHORITY", 'captureAuthority debe ser "legacy" o "v2"');
+}
 
 type LiveSemanticProjection = {
   source: { events: RecordedEvent[]; screens: SessionTrace["screens"] };
@@ -98,6 +129,19 @@ export function activeRecordingFor(projectSlug: string): ActiveRecording | undef
 
 export function getActiveRecording(recordingId: string): ActiveRecording | undefined {
   return active.get(recordingId);
+}
+
+export async function executeRecordingAction(recordingId: string, action: RecordingControlAction): Promise<{ recordingId: string; executed: true; action: RecordingControlAction["kind"] }> {
+  const entry = active.get(recordingId);
+  if (!entry) throw new RecordingError("RECORDING_NOT_ACTIVE", `No hay una grabación activa con id ${recordingId}`);
+  if (!(entry.recorder instanceof WebSessionRecorder)) throw new RecordingError("CONTROL_UNSUPPORTED", "El control externo solo está disponible para recordings WEB");
+  try {
+    const result = await entry.recorder.executeControlAction(action);
+    return { recordingId, ...result };
+  } catch (error) {
+    const code = error instanceof RecordingControlError ? error.code : error instanceof Error && error.message === "PAGE_CLOSED" ? "PAGE_CLOSED" : error instanceof Error && error.message === "RECORDING_STOPPED" ? "RECORDING_STOPPED" : "CONTROL_ACTION_FAILED";
+    throw new RecordingError(code, error instanceof Error ? error.message : String(error));
+  }
 }
 
 export class RecordingError extends Error {
@@ -191,6 +235,12 @@ export async function startRecording(params: StartRecordingParams): Promise<{
   jobId: string;
   summary: RecordingSummary;
 }> {
+  // A label identifies the recording in the list; it is not the scenario goal.
+  // Recording derivation must never silently promote a generic label to goal authority.
+  const requestedGoal = params.recordingGoal?.trim();
+  if (!requestedGoal) {
+    throw new RecordingError("MISSING_RECORDING_GOAL", "Define el objetivo de la grabación antes de iniciar");
+  }
   const target = await resolveRecordingTarget(params.projectSlug);
   const platform = params.platform ?? target.platform;
 
@@ -203,6 +253,14 @@ export async function startRecording(params: StartRecordingParams): Promise<{
   }
 
   const recordingId = randomUUID();
+  // CaptureEngine V2 is the WEB recorder now -- not a selectable feature. `params.captureAuthority`
+  // is API-INTERNAL only (the public route never reads/forwards a client-supplied value; see
+  // recordings.ts), kept solely as a technical override for tests/regression/rollback. Android
+  // has no V2 concept at all, so its default stays whatever was explicitly requested (normally
+  // undefined) rather than being given a meaningless "v2".
+  const requestedCaptureAuthority = parseCaptureAuthorityParam(params.captureAuthority);
+  const captureAuthority = platform === "web" ? requestedCaptureAuthority ?? "v2" : requestedCaptureAuthority;
+
   const job = jobStore.create("session-recording", {
     recordingId,
     projectSlug: params.projectSlug,
@@ -210,6 +268,7 @@ export async function startRecording(params: StartRecordingParams): Promise<{
   });
   const onLog = (line: string) => jobStore.appendLog(job.id, line);
   jobStore.update(job.id, { status: "running", startedAt: new Date().toISOString() });
+  if (captureAuthority) onLog(`[recording-capture] authority=${captureAuthority}`);
 
   const trace: SessionTrace = {
     recordingId,
@@ -219,13 +278,15 @@ export async function startRecording(params: StartRecordingParams): Promise<{
     appPackage: target.appPackage,
     baseUrl: target.baseUrl,
     label: params.label,
-    recordingGoal: normalizeRecordingGoal(params.recordingGoal ?? params.label),
+    recordingGoal: normalizeRecordingGoal(params.recordingGoal, "USER_DECLARED"),
     recordingDataPolicy: normalizeRecordingDataPolicy(params.recordingDataPolicy),
+    captureAuthority,
     startedAt: new Date().toISOString(),
     status: "starting",
     events: [],
     screens: [],
   };
+  onLog(`[recording:goal-lineage] backendRequestGoal=${JSON.stringify(params.recordingGoal)} jobGoal=${JSON.stringify(trace.recordingGoal?.declaredGoal)} traceGoal=${JSON.stringify(trace.recordingGoal?.normalizedGoal)}`);
 
   const framesDir = ensureFramesDir(recordingId);
 
@@ -252,7 +313,7 @@ export async function startRecording(params: StartRecordingParams): Promise<{
         deviceId,
         appPackage: target.appPackage,
         framesDir,
-        persistQaCredentials: trace.recordingDataPolicy?.persistQaCredentials === true,
+        persistQaCredentials: true,
         sensitiveLabels: params.sensitiveLabels,
         onEvent: (event) => {
           trace.events.push(event);
@@ -271,7 +332,8 @@ export async function startRecording(params: StartRecordingParams): Promise<{
         baseUrl: target.baseUrl!,
         ignoreHTTPSErrors: target.ignoreHTTPSErrors,
         framesDir,
-        persistQaCredentials: trace.recordingDataPolicy?.persistQaCredentials === true,
+        captureAuthority,
+        persistQaCredentials: true,
         sensitiveLabels: params.sensitiveLabels,
         onEvent: (event) => {
           trace.events.push(event);
@@ -299,6 +361,7 @@ export async function startRecording(params: StartRecordingParams): Promise<{
 
     trace.status = "recording";
     saveTrace(trace);
+    onLog(`[recording:goal-lineage] persistedGoal=${JSON.stringify(loadTrace(trace.appSlug, trace.recordingId)?.recordingGoal?.declaredGoal)}`);
     active.set(recordingId, { recordingId, jobId: job.id, trace, recorder });
     onLog(`[recording] grabación ${recordingId} iniciada sobre ${target.appSlug} (${platform})`);
 
@@ -405,6 +468,22 @@ export async function stopRecording(recordingId: string): Promise<RecordingSumma
   entry.trace.durationMs = endedAt.getTime() - new Date(entry.trace.startedAt).getTime();
   entry.trace.status = "stopped";
   saveTrace(entry.trace);
+
+  // Stopping is the authoritative raw-recording boundary.  The deterministic semantic base
+  // does not require AI and is persisted now so a stopped recording never has a trace without
+  // its semantic authority.  Scenario suggestions remain the separate derive operation.
+  const stoppedSemantic = buildSemanticRecordingModel(entry.trace, normalizeEvents(events));
+  saveSemanticRecording(stoppedSemantic);
+  const observedPrimary = materializeObservedPrimaryScenario(entry.trace, normalizeEvents(events));
+  if (observedPrimary) {
+    // STOP owns the observed primary. This is the only scenario written by the deterministic
+    // lane; deriveScenarios may later merge optional suggestions without cloning this identity.
+    saveScenarios(entry.trace.appSlug, recordingId, [observedPrimary]);
+    onLog(`[recording:lifecycle] state=PRIMARY_MATERIALIZED scenarioId=${observedPrimary.scenarioId} aiScenarioGenerationInvoked=false`);
+  } else {
+    onLog(`[recording:lifecycle] state=PRIMARY_NOT_MATERIALIZED reason=insufficient_observed_authority aiScenarioGenerationInvoked=false`);
+  }
+  onLog(`[recording:lifecycle] state=TRACE_READY semanticBase=SEMANTIC_READY recordingId=${recordingId}`);
   active.delete(recordingId);
 
   const stats = summarizeTrace(normalizeEvents(events), entry.trace);
@@ -413,7 +492,7 @@ export async function stopRecording(recordingId: string): Promise<RecordingSumma
   );
   jobStore.update(entry.jobId, { status: "done", completedAt: endedAt.toISOString() });
 
-  return toSummary(entry.trace);
+  return toSummary(entry.trace, observedPrimary ? 1 : 0);
 }
 
 export type DeriveResult = {
@@ -421,6 +500,16 @@ export type DeriveResult = {
   scenarios: RecordedScenario[];
   narrative: string;
   semanticModel: SemanticRecordingModel;
+  derivation: {
+    version: number;
+    generatedAt: string;
+    executed: true;
+    primaryCount: number;
+    suggestionCount: number;
+    opportunitiesDetected?: number;
+    candidatesGenerated?: number;
+    rejectedBecause?: string[];
+  };
 };
 
 /**
@@ -436,12 +525,16 @@ export async function deriveScenarios(
   recordingId: string,
   options: { title?: string } = {},
 ): Promise<DeriveResult> {
+  console.info("[recording-materialization]", { recordingId, appSlug, phase: "derive_start" });
   const trace = loadTrace(appSlug, recordingId);
   if (!trace) {
     throw new RecordingError("RECORDING_NOT_FOUND", `No se encontró la grabación ${recordingId}`);
   }
   if (trace.status === "recording" || trace.status === "starting") {
     throw new RecordingError("RECORDING_IN_PROGRESS", "Detén la grabación antes de generar escenarios");
+  }
+  if (!(trace.recordingGoal?.declaredGoal?.trim() || trace.recordingGoal?.normalizedGoal?.trim())) {
+    throw new RecordingError("MISSING_RECORDING_GOAL", "No se puede generar escenarios sin un objetivo de grabación declarado");
   }
 
   const entryJobId = active.get(recordingId)?.jobId;
@@ -457,15 +550,52 @@ export async function deriveScenarios(
 
     let ai;
     try {
-      ai = await createGeneralAiProvider();
+      // Recording proposals share the canonical scenario-generation purpose/configuration.
+      // This preserves purpose-specific provider/model overrides instead of silently using
+      // the generic AI lane.
+      ai = await createScenarioAiProvider();
     } catch {
       ai = undefined;
     }
 
     const enrichment = await enrichFromTrace(trace, segments, happyPath, ai, onLog);
-    const enrichedHappyPath = applyStory(happyPath, enrichment);
+    onLog(`[recording:goal-lineage] deriveGoal=${JSON.stringify(trace.recordingGoal?.declaredGoal)} scenarioGoal=${JSON.stringify(trace.recordingGoal?.declaredGoal ?? trace.recordingGoal?.normalizedGoal)}`);
+    const enrichedHappyPath = {
+      ...applyStory(happyPath, enrichment),
+      // The declared goal is the authority for the observed primary. AI enrichment can
+      // improve prose, but may not turn the primary into another case.
+      ...(trace.recordingGoal?.declaredGoal?.trim()
+        ? { title: capTitle(trace.recordingGoal.declaredGoal.trim()) }
+        : {}),
+    };
 
-    const negatives = buildGateNegatives(trace, segments, enrichedHappyPath);
+    // Build the semantic model before suggestions so deterministic mutation materialization
+    // can use the observed component/option/repeat evidence. The primary remains observed and
+    // immutable; only derived scenarios are produced from it.
+    const baseSemantic = buildSemanticRecordingModel(trace, events);
+    const canonicalPrimary = enrichRecordedScenarioContract(
+      enrichedHappyPath,
+      baseSemantic.canonicalInteractions ?? [],
+      baseSemantic.technicalObservations.map((observation) => observation.observationId),
+      baseSemantic,
+    );
+    const mutationOpportunities = detectMutationOpportunities(canonicalPrimary, baseSemantic);
+    const mutationRejectedReasons: string[] = [];
+    const mutationScenarios = mutationOpportunities.map((opportunity) => {
+      const materializerInput = {
+        primaryScenarioId: opportunity.basePrimaryScenarioId,
+        mutationType: opportunity.mutationType,
+        operationTypes: opportunity.operations.map((operation) => operation.type),
+        entityScopes: opportunity.operations.flatMap((operation) => operation.type === "clone_entity" ? [operation.sourceEntityScope, operation.targetEntityScope] : operation.type === "remove_entity" ? [operation.entityScope] : []),
+      };
+      const materialized = materializeScenarioMutation(canonicalPrimary, opportunity);
+      const diagnostics = materialized.mutationDiagnostics;
+      onLog(`[recording:mutation-audit] proposalMutationType=${opportunity.mutationType} parsedOperations=${JSON.stringify(materializerInput.operationTypes)} materializerInput=${JSON.stringify(materializerInput)} materializerOutputStepCount=${materialized.testRailSteps.length} materializerOutputEntityScopes=${JSON.stringify(materialized.entityActionBlocks?.map((block) => block.entityScope) ?? [])}`);
+      if (diagnostics?.rejectionReason) mutationRejectedReasons.push(diagnostics.rejectionReason);
+      return materialized;
+    }).filter((scenario) => !scenario.mutationDiagnostics?.rejectionReason);
+
+    const negatives = buildGateNegatives(trace, segments, canonicalPrimary);
     const aiNegatives: RecordedScenario[] = enrichment.extraNegatives.map((n, index) => ({
       scenarioId: `${enrichedHappyPath.scenarioId}-AI-${index + 1}`,
       title: capTitle(n.title),
@@ -484,29 +614,105 @@ export async function deriveScenarios(
       hasUncertainSteps: false,
       suggestionCategory: "AI_PROPOSED",
     }));
+    const aiCandidateEvaluations = enrichment.aiProposals.map((proposal) => {
+      const quality = evaluateRecordingSuggestionQuality(
+        trace.recordingGoal?.declaredGoal ?? trace.recordingGoal?.normalizedGoal ?? trace.label,
+        trace,
+        canonicalPrimary,
+        proposal,
+      );
+      return { proposal, quality, scenario: materializeRecordingSuggestion(canonicalPrimary, proposal, quality) };
+    });
+    const aiProposals = aiCandidateEvaluations
+      .filter(({ quality }) => quality.finalDecision === "accepted")
+      .map(({ scenario }) => scenario);
 
     // Ordered as a reviewer reads them: what was walked end to end, then its blocks, then
     // everything the recording only justifies.
     // Segments remain derivation evidence only. A recording goal has one observed primary;
     // top-level suggestions are filtered and deduplicated separately.
-    const segmentScenarios = buildSegmentScenarios(trace, events, segments, enrichedHappyPath);
-    const alternatives = buildAlternativePathScenarios(trace, events, enrichedHappyPath);
+    const segmentScenarios = buildSegmentScenarios(trace, events, segments, canonicalPrimary);
+    const alternatives = buildAlternativePathScenarios(trace, events, canonicalPrimary);
     const scoped = filterGoalScopedSuggestions(
       trace.recordingGoal?.normalizedGoal ?? trace.label,
-      [...negatives, ...aiNegatives, ...alternatives],
+      [...negatives, ...aiNegatives, ...aiProposals, ...alternatives, ...mutationScenarios],
+      0.6,
+      canonicalPrimary,
     );
-    const scenarios = [enrichedHappyPath, ...scoped.suggestions];
-    const baseSemantic = buildSemanticRecordingModel(trace, events);
+    const scenarios = [canonicalPrimary, ...scoped.suggestions];
+    // TEMPORARY DIAGNOSTIC (this ticket only): no dataset value/secret is logged -- only ids and
+    // counts, to distinguish "derive never produced scenarios" from "derive produced scenarios
+    // that were later lost between save and load" when a historical recording is later found
+    // with scenarios=[].
+    console.info("[recording-materialization]", { recordingId, appSlug, phase: "derive_generated", scenarioCount: scenarios.length, scenarioIds: scenarios.map((s) => s.scenarioId) });
+    const previousSemantic = loadSemanticRecording(appSlug, recordingId);
+    const derivation = {
+      version: (previousSemantic?.derivation?.version ?? 0) + 1,
+      generatedAt: new Date().toISOString(),
+      executed: true as const,
+      primaryCount: 1,
+      suggestionCount: scoped.suggestions.length,
+      opportunitiesDetected: mutationOpportunities.length,
+      candidatesGenerated: enrichment.aiProposals.length + negatives.length + alternatives.length + mutationScenarios.length,
+      rejectedBecause: [
+        ...(scoped.irrelevantCandidatesRejected > 0 ? ["goal_relevance_gate"] : []),
+        ...(scoped.duplicatesRemoved > 0 ? ["duplicate_suggestion"] : []),
+        ...scoped.rejectedBecause,
+        ...mutationRejectedReasons,
+        ...aiCandidateEvaluations.flatMap(({ quality }) => quality.rejectionReason ? [quality.rejectionReason] : []),
+      ],
+    };
     const semantic = attachScenarioSuggestions({
       ...baseSemantic,
+      mutationOpportunities,
+      suggestionDiagnostics: {
+        opportunitiesDetected: mutationOpportunities.length,
+        candidatesGenerated: enrichment.aiProposals.length + negatives.length + alternatives.length + mutationScenarios.length,
+        acceptedForDisplay: scoped.suggestions.length,
+        rejectedBecause: [
+          ...(scoped.irrelevantCandidatesRejected > 0 ? ["goal_relevance_gate"] : []),
+          ...(scoped.duplicatesRemoved > 0 ? ["duplicate_suggestion"] : []),
+          ...scoped.rejectedBecause,
+          ...mutationRejectedReasons,
+          ...aiCandidateEvaluations.flatMap(({ quality }) => quality.rejectionReason ? [quality.rejectionReason] : []),
+        ],
+      },
+      derivation,
       primaryScenario: {
-        scenarioId: enrichedHappyPath.scenarioId,
-        title: enrichedHappyPath.title,
+        scenarioId: canonicalPrimary.scenarioId,
+        title: canonicalPrimary.title,
         provenance: "OBSERVED" as const,
-        sourceEventRefs: enrichedHappyPath.sourceEventRefs ?? [],
+        sourceEventRefs: canonicalPrimary.sourceEventRefs ?? [],
         traceBacked: true as const,
         containsUnexecutedActions: false as const,
-        needsReview: enrichedHappyPath.hasUncertainSteps,
+        needsReview: canonicalPrimary.hasUncertainSteps,
+      },
+      aiGeneration: {
+        providerSuccess: enrichment.schemaValid && !enrichment.fallbackUsed,
+        schemaValidation: enrichment.schemaValid,
+        fallbackUsed: enrichment.fallbackUsed,
+        provider: enrichment.usage?.provider,
+        model: enrichment.usage?.model,
+        inputTokens: enrichment.usage?.inputTokens,
+        cachedTokens: enrichment.usage?.cachedInputTokens,
+        nonCachedTokens: enrichment.usage?.nonCachedInputTokens,
+        outputTokens: enrichment.usage?.outputTokens,
+        totalTokens: enrichment.usage?.totalPhysicalTokens,
+        contextBeforeChars: enrichment.contextBeforeChars,
+        contextAfterChars: enrichment.contextAfterChars,
+        candidates: aiCandidateEvaluations.map(({ proposal, quality }) => ({
+          title: proposal.title,
+          type: proposal.type,
+          rationale: proposal.rationale,
+          sourceEvidenceRefs: proposal.sourceEvidenceRefs,
+          expectedResultCandidate: proposal.expectedResultCandidate,
+          oracleAuthority: proposal.oracleAuthority,
+          goalRelated: proposal.goalRelated,
+          needsReview: proposal.needsReview,
+          finalDecision: quality.finalDecision,
+          rejectionReason: quality.rejectionReason,
+        })),
+        providerRejected: enrichment.aiRejected,
       },
     }, scoped.suggestions.map((scenario) => ({
       suggestionId: scenario.scenarioId,
@@ -525,14 +731,31 @@ export async function deriveScenarios(
       oracleAuthority: scenario.oracleAuthority ?? "review_required",
       dataRequirements: scenario.requiredData.map((data) => data.key),
       technicalObservationRefs: baseSemantic.technicalObservations.map((observation) => observation.observationId),
+      sharedSetupRef: scenario.sharedSetupRef,
+      scenarioSpecificSteps: scenario.scenarioSpecificSteps?.map((step) => step.content),
+      quality: scenario.quality,
+      fullStepsAvailable: true,
+      entityScopes: scenario.entityActionBlocks?.map((block) => block.entityScope) ?? [],
+      runtimeInputRequirements: scenario.runtimeInputRequirements,
+      readiness: scenario.readiness,
+      mutationType: scenario.mutation?.mutationType,
     })));
+    // FIRST_LOSS fix (recordingId=5416582a-...): scenarios used to persist AFTER the semantic
+    // model. `GET /:recordingId/scenarios` reports `semanticReady`/`scenariosReady` from two
+    // INDEPENDENT reads (loadSemanticRecording + readRecordingScenarios) -- a request landing in
+    // the window between these two saves observed `semanticReady=true, scenarioCount=0`
+    // (recording-store.ts returns 0 when the scenarios file doesn't exist yet), which is exactly
+    // the "appears then hides" flicker the frontend showed. Saving scenarios FIRST closes that
+    // window: no reader can ever observe the semantic model as ready before its scenarios exist.
+    console.info("[recording-materialization]", { recordingId, appSlug, phase: "save_start", scenarioCount: scenarios.length });
+    saveScenarios(appSlug, recordingId, scenarios);
+    console.info("[recording-materialization]", { recordingId, appSlug, phase: "save_done", scenarioCount: scenarios.length });
     saveSemanticRecording(semantic);
     onLog(
       `[recording] escenarios: 1 principal observado, ${scoped.suggestions.length} sugerencias relevantes; ` +
         `segmentos internos=${segmentScenarios.length}, candidatos_rechazados=${scoped.irrelevantCandidatesRejected}, ` +
         `duplicados_eliminados=${scoped.duplicatesRemoved}`,
     );
-    saveScenarios(appSlug, recordingId, scenarios);
 
     const derived: SessionTrace = {
       ...discardFrames(trace),
@@ -542,7 +765,7 @@ export async function deriveScenarios(
     saveTrace(derived);
 
     onLog(`[recording] ${scenarios.length} escenarios generados desde la grabación ${recordingId}`);
-    return { summary: toSummary(derived, scenarios.length), scenarios, narrative: enrichment.narrative, semanticModel: semantic };
+    return { summary: toSummary(derived, scenarios.length), scenarios, narrative: enrichment.narrative, semanticModel: semantic, derivation };
   } finally {
     // Even on failure the frames go: they only ever existed to feed this call.
     const current = loadTrace(appSlug, recordingId);

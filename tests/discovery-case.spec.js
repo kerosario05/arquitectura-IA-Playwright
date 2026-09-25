@@ -1260,6 +1260,13 @@ function makeScenario(overrides) {
     (0, test_1.expect)(result.signalValue).toBe("Shopping cart");
 });
 // --- Early Completion Tests ---
+(0, test_1.test)("early completion distingue pre-acción y post-acción del trigger", () => {
+    (0, test_1.expect)((0, case_discovery_1.shouldDeferAssertionEvaluation)({ assertionIndex: 5, currentStepIndex: 3, triggerStepIndex: 4, triggerExecuted: false })).toBe(true);
+    (0, test_1.expect)((0, case_discovery_1.shouldDeferAssertionEvaluation)({ assertionIndex: 5, currentStepIndex: 4, triggerStepIndex: 4, triggerExecuted: false })).toBe(true);
+    (0, test_1.expect)((0, case_discovery_1.shouldDeferAssertionEvaluation)({ assertionIndex: 5, currentStepIndex: 4, triggerStepIndex: 4, triggerExecuted: true })).toBe(false);
+    (0, test_1.expect)((0, case_discovery_1.shouldDeferAssertionEvaluation)({ assertionIndex: 2, currentStepIndex: 3, triggerStepIndex: 4, triggerExecuted: false })).toBe(false);
+    (0, test_1.expect)((0, case_discovery_1.shouldDeferAssertionEvaluation)({ assertionIndex: 5, currentStepIndex: 3 })).toBe(false);
+});
 (0, test_1.test)("evaluateEarlyCompletion returns satisfied=true when mandatory assertions are satisfied", () => {
     const snapshot = makeAssertionSnapshot([
         makeSnapshotElement({ type: "text", text: "Expected Result", visible: true })
@@ -1661,4 +1668,267 @@ function makeScenario(overrides) {
     (0, test_1.expect)(rootCauses.length).toBe(15);
     (0, test_1.expect)(rootCauses).toContain("context_not_reached");
     (0, test_1.expect)(rootCauses).toContain("precondition_unresolved");
+});
+function makeContextualPendingAssertionStep(targetText, overrides) {
+    const step = {
+        index: 2,
+        action: `Assert: ${targetText}`,
+        status: "needs_assertion_resolution",
+        targetText,
+        assertionClassification: "semantic_descriptor",
+        assertionImportance: "contextual",
+        error: "assertion_context_not_reached",
+        ...overrides
+    };
+    step.pendingDiscovery = true;
+    return step;
+}
+(0, test_1.test)("contextual assertion pending with confirmed destination resolves as discovered_passed", () => {
+    const steps = [
+        {
+            index: 1,
+            action: "Clic en 'Información de productos'",
+            status: "found",
+            targetText: "Información de productos",
+            recoveryMetadata: { transitionDetected: true }
+        },
+        makeContextualPendingAssertionStep("módulo de información")
+    ];
+    const contract = (0, case_discovery_1.buildDiscoveryAssertionContract)({ steps, earlyCompletionSatisfied: false });
+    const resolved = (0, case_discovery_1.resolveDiscoveryStatusFromAssertionContract)({
+        initialStatus: "discovered_partial",
+        unresolvedBlockingFailuresCount: 0,
+        pendingDiscoveryCount: 1,
+        someFound: true,
+        contract
+    });
+    (0, test_1.expect)(contract.pendingBlockingActions).toHaveLength(0);
+    (0, test_1.expect)(contract.pendingCriticalAssertions).toHaveLength(0);
+    (0, test_1.expect)(contract.destinationConfirmed).toBe(true);
+    (0, test_1.expect)(resolved.status).toBe("discovered_passed");
+    (0, test_1.expect)(resolved.shouldSkipFullDiscovery).toBe(true);
+});
+(0, test_1.test)("auth gate detected satisfies contextual authentication assertion by equivalent evidence", () => {
+    const steps = [
+        {
+            index: 1,
+            action: "Clic en 'Transacciones y servicios'",
+            status: "found",
+            targetText: "Transacciones y servicios",
+            authGateDiagnostics: { detected: true, stage: "identification" }
+        },
+        makeContextualPendingAssertionStep("Autenticación", {
+            authGateDiagnostics: { detected: true, stage: "identification" }
+        })
+    ];
+    const contract = (0, case_discovery_1.buildDiscoveryAssertionContract)({ steps, earlyCompletionSatisfied: false });
+    const authEvidence = contract.satisfiedByEquivalentEvidence.find((item) => item.assertion === "Autenticación");
+    (0, test_1.expect)(contract.destinationConfirmed).toBe(true);
+    (0, test_1.expect)(authEvidence?.evidence).toBe("auth_gate_detected");
+    (0, test_1.expect)(contract.unresolvedContextualAssertions).toHaveLength(0);
+});
+(0, test_1.test)("contextual flow assertion with auth gate remains non-blocking and allows discovered_passed", () => {
+    const steps = [
+        {
+            index: 1,
+            action: "Clic en 'Transacciones y servicios'",
+            status: "found",
+            targetText: "Transacciones y servicios",
+            authGateDiagnostics: { detected: true, stage: "identification" }
+        },
+        makeContextualPendingAssertionStep("flujo de autenticación", {
+            authGateDiagnostics: { detected: true, stage: "identification" }
+        })
+    ];
+    const contract = (0, case_discovery_1.buildDiscoveryAssertionContract)({ steps, earlyCompletionSatisfied: false });
+    const resolved = (0, case_discovery_1.resolveDiscoveryStatusFromAssertionContract)({
+        initialStatus: "discovered_partial",
+        unresolvedBlockingFailuresCount: 0,
+        pendingDiscoveryCount: 1,
+        someFound: true,
+        contract
+    });
+    (0, test_1.expect)(resolved.status).toBe("discovered_passed");
+    (0, test_1.expect)(resolved.shouldExecuteFunctionalGate).toBe(true);
+});
+(0, test_1.test)("contextual assertion without destination confirmation stays discovered_partial", () => {
+    const steps = [
+        makeContextualPendingAssertionStep("módulo de información")
+    ];
+    const contract = (0, case_discovery_1.buildDiscoveryAssertionContract)({ steps, earlyCompletionSatisfied: false });
+    const resolved = (0, case_discovery_1.resolveDiscoveryStatusFromAssertionContract)({
+        initialStatus: "discovered_partial",
+        unresolvedBlockingFailuresCount: 0,
+        pendingDiscoveryCount: 1,
+        someFound: true,
+        contract
+    });
+    (0, test_1.expect)(contract.destinationConfirmed).toBe(false);
+    (0, test_1.expect)(resolved.status).toBe("discovered_partial");
+    (0, test_1.expect)(resolved.shouldSkipFullDiscovery).toBe(false);
+});
+(0, test_1.test)("someFound alone does not confirm destination for contextual pending assertions", () => {
+    const steps = [
+        {
+            index: 1,
+            action: "Clic en 'Información de productos'",
+            status: "found",
+            targetText: "Información de productos",
+        },
+        makeContextualPendingAssertionStep("módulo de información")
+    ];
+    const contract = (0, case_discovery_1.buildDiscoveryAssertionContract)({ steps, earlyCompletionSatisfied: false });
+    const resolved = (0, case_discovery_1.resolveDiscoveryStatusFromAssertionContract)({
+        initialStatus: "discovered_partial",
+        unresolvedBlockingFailuresCount: 0,
+        pendingDiscoveryCount: 1,
+        someFound: true,
+        contract
+    });
+    (0, test_1.expect)(contract.destinationConfirmed).toBe(false);
+    (0, test_1.expect)(resolved.status).toBe("discovered_partial");
+});
+(0, test_1.test)("missing executable action remains blocking and keeps discovered_partial", () => {
+    const steps = [
+        {
+            index: 1,
+            action: "Clic en 'Información de productos'",
+            status: "not_found",
+            targetText: "Información de productos",
+            error: "target_not_found"
+        }
+    ];
+    const contract = (0, case_discovery_1.buildDiscoveryAssertionContract)({ steps, earlyCompletionSatisfied: false });
+    const resolved = (0, case_discovery_1.resolveDiscoveryStatusFromAssertionContract)({
+        initialStatus: "discovered_partial",
+        unresolvedBlockingFailuresCount: 1,
+        pendingDiscoveryCount: 0,
+        someFound: false,
+        failedReason: "target_not_found",
+        contract
+    });
+    (0, test_1.expect)(contract.pendingBlockingActions).toContain("Información de productos");
+    (0, test_1.expect)(resolved.status).toBe("discovered_partial");
+});
+(0, test_1.test)("critical assertion pending remains blocking and keeps discovered_partial", () => {
+    const steps = [
+        {
+            index: 2,
+            action: "Assert: total del carrito",
+            status: "needs_assertion_resolution",
+            targetText: "total del carrito",
+            assertionClassification: "literal_observable",
+            assertionImportance: "blocking",
+            error: "assertion_not_found"
+        }
+    ];
+    const contract = (0, case_discovery_1.buildDiscoveryAssertionContract)({ steps, earlyCompletionSatisfied: false });
+    const resolved = (0, case_discovery_1.resolveDiscoveryStatusFromAssertionContract)({
+        initialStatus: "discovered_partial",
+        unresolvedBlockingFailuresCount: 1,
+        pendingDiscoveryCount: 0,
+        someFound: true,
+        failedReason: "assertion_not_found_unrecovered",
+        contract
+    });
+    (0, test_1.expect)(contract.pendingCriticalAssertions).toContain("total del carrito");
+    (0, test_1.expect)(resolved.status).toBe("discovered_partial");
+});
+(0, test_1.test)("hard blocking reasons never promote to discovered_passed", () => {
+    const steps = [
+        {
+            index: 1,
+            action: "Clic en 'Información de productos'",
+            status: "found",
+            targetText: "Información de productos",
+            recoveryMetadata: { transitionDetected: true }
+        },
+        makeContextualPendingAssertionStep("módulo de información")
+    ];
+    const contract = (0, case_discovery_1.buildDiscoveryAssertionContract)({ steps, earlyCompletionSatisfied: false });
+    for (const failedReason of ["target_not_found", "wrong_screen", "missing_intermediate_step_to_final_target"]) {
+        const resolved = (0, case_discovery_1.resolveDiscoveryStatusFromAssertionContract)({
+            initialStatus: "discovered_partial",
+            unresolvedBlockingFailuresCount: 0,
+            pendingDiscoveryCount: 1,
+            someFound: true,
+            failedReason,
+            contract
+        });
+        (0, test_1.expect)(resolved.status).toBe("discovered_partial");
+        (0, test_1.expect)(resolved.decisionReason).toBe("hard_blocking_reason");
+    }
+});
+(0, test_1.test)("missing intermediate step remains blocked even with contextual evidence", () => {
+    const steps = [
+        {
+            index: 1,
+            action: "Clic en 'Transacciones y servicios'",
+            status: "found",
+            targetText: "Transacciones y servicios",
+            recoveryMetadata: { transitionDetected: true }
+        },
+        makeContextualPendingAssertionStep("flujo de autenticación")
+    ];
+    const contract = (0, case_discovery_1.buildDiscoveryAssertionContract)({ steps, earlyCompletionSatisfied: false });
+    const resolved = (0, case_discovery_1.resolveDiscoveryStatusFromAssertionContract)({
+        initialStatus: "discovered_partial",
+        unresolvedBlockingFailuresCount: 0,
+        pendingDiscoveryCount: 1,
+        someFound: true,
+        failedReason: "missing_intermediate_step_to_final_target",
+        contract
+    });
+    (0, test_1.expect)(resolved.status).toBe("discovered_partial");
+    (0, test_1.expect)(resolved.decisionReason).toBe("hard_blocking_reason");
+});
+(0, test_1.test)("auth gate detected does not satisfy assertions that require completed authentication", () => {
+    const steps = [
+        {
+            index: 1,
+            action: "Clic en 'Transacciones y servicios'",
+            status: "found",
+            targetText: "Transacciones y servicios",
+            authGateDiagnostics: { detected: true, stage: "identification_input" }
+        },
+        makeContextualPendingAssertionStep("usuario autenticado correctamente", {
+            authGateDiagnostics: { detected: true, stage: "identification_input" }
+        })
+    ];
+    const contract = (0, case_discovery_1.buildDiscoveryAssertionContract)({ steps, earlyCompletionSatisfied: false });
+    const resolved = (0, case_discovery_1.resolveDiscoveryStatusFromAssertionContract)({
+        initialStatus: "discovered_partial",
+        unresolvedBlockingFailuresCount: 0,
+        pendingDiscoveryCount: 1,
+        someFound: true,
+        contract
+    });
+    (0, test_1.expect)(contract.satisfiedByEquivalentEvidence).toHaveLength(0);
+    (0, test_1.expect)(contract.pendingCriticalAssertions).toContain("usuario autenticado correctamente");
+    (0, test_1.expect)(resolved.status).toBe("discovered_partial");
+    (0, test_1.expect)(resolved.shouldSkipFullDiscovery).toBe(false);
+});
+(0, test_1.test)("contextual-only pending path skips full discovery and enables functional gate", () => {
+    const steps = [
+        {
+            index: 1,
+            action: "Clic en 'Transacciones y servicios'",
+            status: "found",
+            targetText: "Transacciones y servicios",
+            recoveryMetadata: { transitionDetected: true }
+        },
+        makeContextualPendingAssertionStep("flujo de autenticación")
+    ];
+    const contract = (0, case_discovery_1.buildDiscoveryAssertionContract)({ steps, earlyCompletionSatisfied: false });
+    const resolved = (0, case_discovery_1.resolveDiscoveryStatusFromAssertionContract)({
+        initialStatus: "discovered_partial",
+        unresolvedBlockingFailuresCount: 0,
+        pendingDiscoveryCount: 1,
+        someFound: true,
+        contract
+    });
+    (0, test_1.expect)(resolved.status).toBe("discovered_passed");
+    (0, test_1.expect)(resolved.shouldSkipFullDiscovery).toBe(true);
+    (0, test_1.expect)(resolved.shouldExecuteFunctionalGate).toBe(true);
+    (0, test_1.expect)(resolved.decisionReason).toBe("only_contextual_assertions_pending");
 });

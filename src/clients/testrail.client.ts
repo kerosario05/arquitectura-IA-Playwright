@@ -10,13 +10,18 @@ import type {
   TestRailSuite,
   UpdateCaseInput
 } from "../types/testrail.types";
+import { describeTestRailRecordingPayload, validateTestRailRecordingPayload } from "../recording/testrail-recording-payload";
+import { serializeTestRailSteps } from "../testrail/testrail-step-serializer";
 
 /**
  * Fields that are set explicitly by addCase/updateCase and must never be overwritten
  * by a caller-supplied `customFields` bag.
  */
 const TESTRAIL_SEND_CUSTOM_REFS = process.env.TESTRAIL_SEND_CUSTOM_REFS?.toLowerCase() !== "false";
-const TESTRAIL_SEND_CUSTOM_STEPS_SEPARATED = process.env.TESTRAIL_SEND_CUSTOM_STEPS_SEPARATED?.toLowerCase() !== "false";
+// The configured destination exposes the legacy text field (`custom_steps`).
+// Structured steps are opt-in because sending an unavailable custom field can make
+// TestRail commit the case and still return a 500 from its post-processing hook.
+const TESTRAIL_SEND_CUSTOM_STEPS_SEPARATED = process.env.TESTRAIL_SEND_CUSTOM_STEPS_SEPARATED?.toLowerCase() === "true";
 const TESTRAIL_SEND_CUSTOM_STEPS_TEXT = process.env.TESTRAIL_SEND_CUSTOM_STEPS_TEXT?.toLowerCase() !== "false";
 const TESTRAIL_SEND_CUSTOM_EXPECTED = process.env.TESTRAIL_SEND_CUSTOM_EXPECTED?.toLowerCase() !== "false";
 const TESTRAIL_SEND_CUSTOM_CASE_ORACLE = process.env.TESTRAIL_SEND_CUSTOM_CASE_ORACLE?.toLowerCase() !== "false";
@@ -48,7 +53,17 @@ function buildCustomPreconds(value: string | undefined | null): string {
 type ApiErrorPayload = {
   error?: string;
   message?: string;
+  id?: string;
+  error_id?: string;
+  errorId?: string;
 };
+
+export class TestRailApiError extends Error {
+  constructor(message: string, public readonly status: number, public readonly errorId?: string) {
+    super(message);
+    this.name = "TestRailApiError";
+  }
+}
 
 type CasesPagePayload = {
   cases?: RawTestRailCase[];
@@ -314,6 +329,9 @@ export class TestRailClient {
     console.log(`[testrail-debug] addCase invoked sectionId=${sectionId} title="${input.title?.substring(0, 50)}..." compatibilityMode=${isCompat} preservePayload=${isPreserve}`);
 
     const body: Record<string, unknown> = { title: input.title };
+    if (input.templateId !== undefined) body.template_id = input.templateId;
+    if (input.typeId !== undefined) body.type_id = input.typeId;
+    if (input.priorityId !== undefined) body.priority_id = input.priorityId;
     const refsField = process.env.TESTRAIL_REFS_FIELD || "both";
     const refsDisabled = refsField === "none";
 
@@ -325,8 +343,12 @@ export class TestRailClient {
       if (input.customExpected) body.custom_expected = input.customExpected;
       if (input.customCaseOracle) body.custom_case_oracle = input.customCaseOracle;
       if (input.stepsSeparated?.length) {
-        body.custom_steps_separated = input.stepsSeparated.map((s) => ({ content: s.content, expected: s.expected ?? "" }));
-        body.custom_steps = input.stepsSeparated.map((s, i) => `${i + 1}. ${s.content}`).join("\n");
+        if (TESTRAIL_SEND_CUSTOM_STEPS_TEXT) {
+          body.custom_steps = serializeTestRailSteps(input.stepsSeparated);
+        }
+        if (TESTRAIL_SEND_CUSTOM_STEPS_SEPARATED) {
+          body.custom_steps_separated = input.stepsSeparated.map((s) => ({ content: s.content, expected: s.expected ?? "" }));
+        }
       }
       // Also copy over any raw string fields that were passed (e.g. custom_steps from smoke)
       for (const [k, v] of Object.entries(input as any)) {
@@ -355,7 +377,7 @@ export class TestRailClient {
         body.custom_case_oracle = input.customCaseOracle;
       }
       if (TESTRAIL_COMPAT_SEND_STEPS_TEXT && input.stepsSeparated?.length) {
-        body.custom_steps = input.stepsSeparated.map((s, i) => `${i + 1}. ${s.content}`).join("\n");
+        body.custom_steps = serializeTestRailSteps(input.stepsSeparated);
       }
     } else {
       // Normal mode: send refs according to TESTRAIL_REFS_FIELD configuration
@@ -400,11 +422,8 @@ export class TestRailClient {
           expected: s.expected ?? ""
         }));
       }
-      // plain-text fallback for "Test Case (Text)" template
       if (TESTRAIL_SEND_CUSTOM_STEPS_TEXT) {
-        body.custom_steps = input.stepsSeparated
-          .map((s, i) => `${i + 1}. ${s.content}${s.expected ? `\nEsperado: ${s.expected}` : ""}`)
-          .join("\n");
+        body.custom_steps = serializeTestRailSteps(input.stepsSeparated);
       }
     }
     }
@@ -415,7 +434,11 @@ export class TestRailClient {
     const hasRootRefs = typeof rawRefs === "string";
     console.log(`[testrail-client] preservePayload=${isPreserve} hasRootRefs=${hasRootRefs} keys=${Object.keys(body).join(",")}`);
     console.log(`[testrail-debug] addCase payloadKeys=${Object.keys(body).join(",")} hasRootRefs=${hasRootRefs} hasCustomRefs=${hasCustomRefs} refsPreview="${previewRaw}"`);
-    console.log(`[testrail-debug] final add_case body=${JSON.stringify(body)}`);
+    const payloadErrors = validateTestRailRecordingPayload(body);
+    if (payloadErrors.length > 0) {
+      throw new Error(`testrail_recording_payload_invalid: ${payloadErrors.join("; ")}`);
+    }
+    console.log(`[testrail-debug] add_case payload=${JSON.stringify(describeTestRailRecordingPayload(body))}`);
 
     const isRefsString = typeof body.refs === "string";
     const isRefsEmpty = typeof body.refs === "string" && body.refs === "";
@@ -497,16 +520,14 @@ export class TestRailClient {
         }));
       }
       if (TESTRAIL_SEND_CUSTOM_STEPS_TEXT) {
-        body.custom_steps = input.stepsSeparated
-          .map((s, i) => `${i + 1}. ${s.content}${s.expected ? `\nEsperado: ${s.expected}` : ""}`)
-          .join("\n");
+        body.custom_steps = serializeTestRailSteps(input.stepsSeparated);
       }
     }
 
     const hasCustomRefs = body.hasOwnProperty("custom_refs");
     const refsPreview = hasRefs ? refsValue.replace(/[|,]/g, "").slice(0, 64) : "";
     console.log(`[testrail-debug] updateCase payloadKeys=${Object.keys(body).join(",")} hasRefs=${hasRefs} hasCustomRefs=${hasCustomRefs} refsPreview="${refsPreview}"`);
-    console.log(`[testrail-debug] final update_case body=${JSON.stringify(body)}`);
+    console.log(`[testrail-debug] update_case payloadKeys=${Object.keys(body).join(",")}`);
 
     const isRefsString = typeof body.refs === "string";
     const isRefsEmpty = typeof body.refs === "string" && body.refs === "";
@@ -597,7 +618,8 @@ export class TestRailClient {
 - endpoint: ${endpointName}`);
       const errorPayload = payload as ApiErrorPayload;
       const apiMessage = errorPayload.error || errorPayload.message || "Unknown TestRail API error";
-      throw new Error(`TestRail API error (HTTP ${response.status}) at ${endpointName}: ${apiMessage}`);
+      const errorId = errorPayload.errorId ?? errorPayload.error_id ?? errorPayload.id;
+      throw new TestRailApiError(`TestRail API error (HTTP ${response.status}) at ${endpointName}: ${apiMessage}`, response.status, errorId);
     }
 
     return payload as T;

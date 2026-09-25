@@ -1,0 +1,1248 @@
+{
+  "recordingId": "34034233-6dee-4ee9-9fc1-56b276205985",
+  "projectSlug": "kiosko",
+  "appSlug": "kiosko",
+  "platform": "web",
+  "baseUrl": "http://127.0.0.1:8088/QA_Field_Lab.html",
+  "label": "Prueba",
+  "recordingGoal": {
+    "declaredGoal": "Prueba",
+    "normalizedGoal": "Prueba",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-09-21T18:40:15.465Z",
+  "status": "stopped",
+  "events": [
+    {
+      "t": 3012,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "seq": 0
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "e5f5edc43160",
+      "url": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "framePath": ".artifacts\\tmp\\recordings\\34034233-6dee-4ee9-9fc1-56b276205985\\0001-launch.png",
+      "seq": 1
+    },
+    {
+      "t": 31147,
+      "kind": "fill",
+      "screenKey": "e5f5edc43160",
+      "fingerprint": "688f025fafcec9809dd36ee5ff0e63c4e50084acf681c2db63a1c25192b5db4b",
+      "url": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "target": {
+        "label": "Nombre de prueba",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Nombre de prueba",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#f-nombre",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "f-nombre",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": false
+      },
+      "value": "Lucia QA",
+      "valueSource": "user",
+      "framePath": ".artifacts\\tmp\\recordings\\34034233-6dee-4ee9-9fc1-56b276205985\\0002-input.png",
+      "seq": 2
+    },
+    {
+      "t": 53370,
+      "kind": "fill",
+      "screenKey": "e5f5edc43160",
+      "fingerprint": "688f025fafcec9809dd36ee5ff0e63c4e50084acf681c2db63a1c25192b5db4b",
+      "url": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "target": {
+        "label": "Correo de prueba",
+        "role": "input",
+        "tag": "input",
+        "inputType": "email",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Correo de prueba",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#f-correo",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "f-correo",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": false
+      },
+      "value": "ACOR@GMAIL.COM",
+      "valueSource": "user",
+      "framePath": ".artifacts\\tmp\\recordings\\34034233-6dee-4ee9-9fc1-56b276205985\\0003-input.png",
+      "seq": 3
+    },
+    {
+      "t": 60233,
+      "kind": "fill",
+      "screenKey": "e5f5edc43160",
+      "fingerprint": "688f025fafcec9809dd36ee5ff0e63c4e50084acf681c2db63a1c25192b5db4b",
+      "url": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "target": {
+        "label": "Contraseña ficticia",
+        "role": "input",
+        "tag": "input",
+        "inputType": "password",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Contraseña ficticia",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#f-clave",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "f-clave",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": true
+      },
+      "redactedKey": "contrasena_ficticia",
+      "valueSource": "user",
+      "framePath": ".artifacts\\tmp\\recordings\\34034233-6dee-4ee9-9fc1-56b276205985\\0004-input.png",
+      "seq": 4
+    },
+    {
+      "t": 65393,
+      "kind": "fill",
+      "screenKey": "e5f5edc43160",
+      "fingerprint": "688f025fafcec9809dd36ee5ff0e63c4e50084acf681c2db63a1c25192b5db4b",
+      "url": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "target": {
+        "label": "Notas del recorrido",
+        "role": "input",
+        "tag": "textarea",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Notas del recorrido",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#f-notas",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "f-notas",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": false
+      },
+      "value": "PRIMERA LINEA",
+      "valueSource": "user",
+      "framePath": ".artifacts\\tmp\\recordings\\34034233-6dee-4ee9-9fc1-56b276205985\\0005-input.png",
+      "seq": 5
+    },
+    {
+      "t": 65501,
+      "kind": "press",
+      "screenKey": "e5f5edc43160",
+      "fingerprint": "688f025fafcec9809dd36ee5ff0e63c4e50084acf681c2db63a1c25192b5db4b",
+      "url": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "target": {
+        "label": "Notas del recorrido",
+        "role": "textbox",
+        "tag": "textarea",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Notas del recorrido",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#f-notas",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "f-notas",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "note": "Enter",
+      "framePath": ".artifacts\\tmp\\recordings\\34034233-6dee-4ee9-9fc1-56b276205985\\0006-press.png",
+      "seq": 6
+    },
+    {
+      "t": 79283,
+      "kind": "fill",
+      "screenKey": "e5f5edc43160",
+      "fingerprint": "688f025fafcec9809dd36ee5ff0e63c4e50084acf681c2db63a1c25192b5db4b",
+      "url": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "target": {
+        "label": "Teléfono ficticio",
+        "role": "input",
+        "tag": "input",
+        "inputType": "tel",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Teléfono ficticio",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#f-telefono",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "f-telefono",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": false
+      },
+      "value": "9898980990",
+      "valueSource": "user",
+      "framePath": ".artifacts\\tmp\\recordings\\34034233-6dee-4ee9-9fc1-56b276205985\\0007-input.png",
+      "seq": 7
+    },
+    {
+      "t": 87249,
+      "kind": "fill",
+      "screenKey": "e5f5edc43160",
+      "fingerprint": "688f025fafcec9809dd36ee5ff0e63c4e50084acf681c2db63a1c25192b5db4b",
+      "url": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "target": {
+        "label": "Importe decimal",
+        "role": "input",
+        "tag": "input",
+        "inputType": "number",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Importe decimal",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#f-importe",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "f-importe",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": false
+      },
+      "value": "0.43",
+      "valueSource": "user",
+      "framePath": ".artifacts\\tmp\\recordings\\34034233-6dee-4ee9-9fc1-56b276205985\\0008-input.png",
+      "seq": 8
+    },
+    {
+      "t": 97713,
+      "kind": "fill",
+      "screenKey": "e5f5edc43160",
+      "fingerprint": "688f025fafcec9809dd36ee5ff0e63c4e50084acf681c2db63a1c25192b5db4b",
+      "url": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "target": {
+        "label": "Identificador con máscara",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Identificador con máscara",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#f-identificador",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "f-identificador",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": false
+      },
+      "value": "000-0000000-0",
+      "valueSource": "user",
+      "framePath": ".artifacts\\tmp\\recordings\\34034233-6dee-4ee9-9fc1-56b276205985\\0009-input.png",
+      "seq": 9
+    },
+    {
+      "t": 97836,
+      "kind": "tap",
+      "screenKey": "e5f5edc43160",
+      "fingerprint": "688f025fafcec9809dd36ee5ff0e63c4e50084acf681c2db63a1c25192b5db4b",
+      "url": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "target": {
+        "label": "Web",
+        "role": "option",
+        "tag": "option",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "option|Web",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "option|Web",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "option"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 19
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "framePath": ".artifacts\\tmp\\recordings\\34034233-6dee-4ee9-9fc1-56b276205985\\0010-click.png",
+      "seq": 10
+    },
+    {
+      "t": 98623,
+      "kind": "tap",
+      "screenKey": "e5f5edc43160",
+      "fingerprint": "688f025fafcec9809dd36ee5ff0e63c4e50084acf681c2db63a1c25192b5db4b",
+      "url": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "target": {
+        "label": "Mobile",
+        "role": "option",
+        "tag": "option",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "option|Mobile",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "option|Mobile",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "option"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 19
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "framePath": ".artifacts\\tmp\\recordings\\34034233-6dee-4ee9-9fc1-56b276205985\\0011-click.png",
+      "seq": 11
+    },
+    {
+      "t": 100009,
+      "kind": "tap",
+      "screenKey": "e5f5edc43160",
+      "fingerprint": "688f025fafcec9809dd36ee5ff0e63c4e50084acf681c2db63a1c25192b5db4b",
+      "url": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "target": {
+        "label": "Sucursal",
+        "role": "option",
+        "tag": "option",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "option|Sucursal",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "option|Sucursal",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "option"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 19
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "framePath": ".artifacts\\tmp\\recordings\\34034233-6dee-4ee9-9fc1-56b276205985\\0012-click.png",
+      "seq": 12
+    },
+    {
+      "t": 109181,
+      "kind": "fill",
+      "screenKey": "e5f5edc43160",
+      "fingerprint": "688f025fafcec9809dd36ee5ff0e63c4e50084acf681c2db63a1c25192b5db4b",
+      "url": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "target": {
+        "label": "Sugerencia nativa",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Sugerencia nativa",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#f-sugerencia",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "f-sugerencia",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": false
+      },
+      "value": "Santo Domingo",
+      "valueSource": "user",
+      "framePath": ".artifacts\\tmp\\recordings\\34034233-6dee-4ee9-9fc1-56b276205985\\0013-input.png",
+      "seq": 13
+    },
+    {
+      "t": 116875,
+      "kind": "fill",
+      "screenKey": "e5f5edc43160",
+      "fingerprint": "688f025fafcec9809dd36ee5ff0e63c4e50084acf681c2db63a1c25192b5db4b",
+      "url": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "target": {
+        "label": "Fecha nativa",
+        "role": "input",
+        "tag": "input",
+        "inputType": "date",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "#f-fecha_nativa",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "f-fecha_nativa",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": false
+      },
+      "value": "2026-09-21",
+      "valueSource": "user",
+      "framePath": ".artifacts\\tmp\\recordings\\34034233-6dee-4ee9-9fc1-56b276205985\\0014-input.png",
+      "seq": 14
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "e5f5edc43160",
+      "title": "Un recorrido. Todos los retos del campo.",
+      "fingerprint": "688f025fafcec9809dd36ee5ff0e63c4e50084acf681c2db63a1c25192b5db4b",
+      "url": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "firstSeenAt": 3850,
+      "controls": [
+        {
+          "label": "QA Field Lab, inicio",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "QA Field Lab, inicio"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "QA Field Lab, inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "01",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "01 Texto, formato y teclado 0/9",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "02",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "02 Listas y selecciones 0/11",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "03",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "03 Fechas y calendarios 0/8",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "04",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "04 Radios, casillas y estados 0/8",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "05",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "05 Contexto y contenido dinámico 0/9",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "06",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "06 Edición avanzada 0/8",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "07",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "07 Archivos y carpetas 0/4",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "08",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "08 Iframe y Shadow DOM 0/5",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "09",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "09 Validación y resultado 0/4",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Iniciar recorrido",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "start-run",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "start-run",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Descargar guion",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "download-guide",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "download-guide",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "↥ Archivos de prueba",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "download-fixtures",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "download-fixtures",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "{ } Ver eventos",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "show-audit",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "show-audit",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Exportar auditoría",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "export-audit",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "export-audit",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Reiniciar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reset-run",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reset-run",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Latencia simulada",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "id": "latency-enabled",
+            "type": "checkbox"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "latency-enabled",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Nombre de prueba",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Lucía QA",
+          "attributes": {
+            "id": "f-nombre",
+            "type": "text",
+            "placeholder": "Lucía QA",
+            "data-field": "nombre"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "f-nombre",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Correo de prueba",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "nombre@example.test",
+          "attributes": {
+            "id": "f-correo",
+            "type": "email",
+            "placeholder": "nombre@example.test",
+            "data-field": "correo"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "f-correo",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Contraseña ficticia",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Sólo una clave ficticia",
+          "attributes": {
+            "id": "f-clave",
+            "type": "password",
+            "placeholder": "Sólo una clave ficticia",
+            "data-field": "clave"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "f-clave",
+              "confidence": 0.9
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Un recorrido. Todos los retos del campo.",
+        "Texto, formato y teclado",
+        "Nombre de prueba"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 12,
+        "rows": 13,
+        "cells": 43,
+        "headers": [
+          "Servicio",
+          "Importe",
+          "Acción",
+          "Cantidad",
+          "Lu",
+          "Ma",
+          "Mi",
+          "Ju",
+          "Vi",
+          "Sá",
+          "Do"
+        ],
+        "headerRelationships": [
+          {
+            "header": "Acción",
+            "field": "Acción"
+          },
+          {
+            "header": "Acción",
+            "field": "Acción"
+          }
+        ]
+      },
+      "headerRelationships": [
+        {
+          "header": "Acción",
+          "field": "Acción"
+        },
+        {
+          "header": "Acción",
+          "field": "Acción"
+        }
+      ]
+    },
+    {
+      "screenKey": "e8fa4a351c18",
+      "title": "Un recorrido. Todos los retos del campo.",
+      "fingerprint": "688f025fafcec9809dd36ee5ff0e63c4e50084acf681c2db63a1c25192b5db4b",
+      "url": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "firstSeenAt": 98087,
+      "controls": [
+        {
+          "label": "QA Field Lab, inicio",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "aria-label": "QA Field Lab, inicio"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "QA Field Lab, inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "01",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "01 Texto, formato y teclado 2/9",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "02",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "02 Listas y selecciones 0/11",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "03",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "03 Fechas y calendarios 0/8",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "04",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "04 Radios, casillas y estados 0/8",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "05",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "05 Contexto y contenido dinámico 0/9",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "06",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "06 Edición avanzada 0/8",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "07",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "07 Archivos y carpetas 0/4",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "08",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "08 Iframe y Shadow DOM 0/5",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "09",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "09 Validación y resultado 0/4",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Recorrido en curso",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "start-run",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "start-run",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Descargar guion",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "download-guide",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "download-guide",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "↥ Archivos de prueba",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "download-fixtures",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "download-fixtures",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "{ } Ver eventos",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "show-audit",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "show-audit",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Exportar auditoría",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "export-audit",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "export-audit",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Reiniciar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reset-run",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reset-run",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Latencia simulada",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "id": "latency-enabled",
+            "type": "checkbox"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "latency-enabled",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Nombre de prueba",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Lucía QA",
+          "attributes": {
+            "id": "f-nombre",
+            "type": "text",
+            "placeholder": "Lucía QA",
+            "data-field": "nombre"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "f-nombre",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Correo de prueba",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "nombre@example.test",
+          "attributes": {
+            "id": "f-correo",
+            "type": "email",
+            "placeholder": "nombre@example.test",
+            "data-field": "correo"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "f-correo",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Contraseña ficticia",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Sólo una clave ficticia",
+          "attributes": {
+            "id": "f-clave",
+            "type": "password",
+            "placeholder": "Sólo una clave ficticia",
+            "data-field": "clave"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "f-clave",
+              "confidence": 0.9
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Un recorrido. Todos los retos del campo.",
+        "Texto, formato y teclado",
+        "Nombre de prueba"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 12,
+        "rows": 13,
+        "cells": 43,
+        "headers": [
+          "Servicio",
+          "Importe",
+          "Acción",
+          "Cantidad",
+          "Lu",
+          "Ma",
+          "Mi",
+          "Ju",
+          "Vi",
+          "Sá",
+          "Do"
+        ],
+        "headerRelationships": [
+          {
+            "header": "Acción",
+            "field": "Acción"
+          },
+          {
+            "header": "Acción",
+            "field": "Acción"
+          }
+        ]
+      },
+      "headerRelationships": [
+        {
+          "header": "Acción",
+          "field": "Acción"
+        },
+        {
+          "header": "Acción",
+          "field": "Acción"
+        }
+      ]
+    }
+  ],
+  "endedAt": "2026-09-21T18:42:24.415Z",
+  "durationMs": 128950
+}

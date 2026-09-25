@@ -121,7 +121,9 @@ const runs_1 = require("../src/server/routes/runs");
     const payload = (0, runs_1.buildRunStreamPayload)({
         status: "completed_with_failures",
         exitCode: 1,
-        currentCase: "PREVIEW-007",
+        currentCase: "Visualización de opciones principales tras iniciar el kiosco",
+        currentCaseId: "PREVIEW-007",
+        currentCaseTitle: "Visualización de opciones principales tras iniciar el kiosco",
         errorMessage: "7 de 8 escenarios pasaron. 1 requiere revisión.",
         summary: {
             completed: 8,
@@ -133,7 +135,9 @@ const runs_1 = require("../src/server/routes/runs");
         },
     }, true);
     (0, test_1.expect)(payload.status).toBe("completed_with_failures");
-    (0, test_1.expect)(payload.currentCase).toBe("PREVIEW-007");
+    (0, test_1.expect)(payload.currentCase).toBe("Visualización de opciones principales tras iniciar el kiosco");
+    (0, test_1.expect)(payload.currentCaseId).toBe("PREVIEW-007");
+    (0, test_1.expect)(payload.currentCaseTitle).toBe("Visualización de opciones principales tras iniciar el kiosco");
     (0, test_1.expect)(payload.summary.passed).toBe(7);
     (0, test_1.expect)(payload.summary.failed).toBe(1);
     (0, test_1.expect)(payload.summary.failureGroups.assertion_not_found_unrecovered).toBe(1);
@@ -165,4 +169,112 @@ const runs_1 = require("../src/server/routes/runs");
         sawCaseStarted: false,
         firstCaseStarted: false,
     })).toBe("technical_failure");
+});
+function countClicksOnTarget(steps, target) {
+    const targetRegex = new RegExp(`^\\d+[\\.)]?\\s*Clic en "${target}"\\.?$|^Clic en "${target}"\\.?$`, "i");
+    return steps.filter(step => targetRegex.test(step.trim())).length;
+}
+(0, test_1.test)("scenarioStepAuthority no duplica clic explícito ya presente", () => {
+    const result = (0, scenario_preview_runner_1.enforceExplicitScenarioClickAuthority)([
+        '1. Clic en "Iniciar".',
+        '2. Clic en "Información de productos".',
+        '3. Validar que se muestre "Información de productos".',
+    ], [
+        '1. Clic en "Iniciar".',
+        '2. Clic en "Información de productos".',
+    ]);
+    (0, test_1.expect)(countClicksOnTarget(result.steps, "Información de productos")).toBe(1);
+    (0, test_1.expect)(result.restoredCount).toBe(0);
+    (0, test_1.expect)(result.skippedCount).toBe(1);
+});
+(0, test_1.test)("scenarioStepAuthority restaura una vez cuando el clic explícito fue eliminado", () => {
+    const result = (0, scenario_preview_runner_1.enforceExplicitScenarioClickAuthority)([
+        '1. Clic en "Iniciar".',
+        '2. Validar que se muestre "Información de productos".',
+    ], [
+        '1. Clic en "Iniciar".',
+        '2. Clic en "Información de productos".',
+    ]);
+    (0, test_1.expect)(countClicksOnTarget(result.steps, "Información de productos")).toBe(1);
+    (0, test_1.expect)(result.restoredCount).toBe(1);
+    (0, test_1.expect)(result.skippedCount).toBe(0);
+});
+(0, test_1.test)("scenarioStepAuthority trata equivalentes operativos como el mismo clic", () => {
+    const result = (0, scenario_preview_runner_1.enforceExplicitScenarioClickAuthority)([
+        '1. Seleccionar la opción "Informacion de productos".',
+        '2. Validar que se muestre "Información de productos".',
+    ], ['1. Hacer clic en "Información de productos".']);
+    (0, test_1.expect)(result.restoredCount).toBe(0);
+    (0, test_1.expect)(result.skippedCount).toBe(1);
+});
+(0, test_1.test)("scenarioStepAuthority conserva clics de targets diferentes", () => {
+    const result = (0, scenario_preview_runner_1.enforceExplicitScenarioClickAuthority)([
+        '1. Validar que se muestre "Información de productos".',
+        '2. Clic en "Transacciones y servicios".',
+    ], [
+        '1. Clic en "Información de productos".',
+        '2. Clic en "Transacciones y servicios".',
+    ]);
+    (0, test_1.expect)(countClicksOnTarget(result.steps, "Información de productos")).toBe(1);
+    (0, test_1.expect)(countClicksOnTarget(result.steps, "Transacciones y servicios")).toBe(1);
+    (0, test_1.expect)(result.restoredCount).toBe(1);
+});
+(0, test_1.test)("scenarioStepAuthority preserva repeticiones legítimas en contexto distinto", () => {
+    const result = (0, scenario_preview_runner_1.enforceExplicitScenarioClickAuthority)([
+        '1. Clic en "Información de productos".',
+        '2. Clic en "Volver".',
+        '3. Validar que se muestre "Información de productos".',
+    ], [
+        '1. Clic en "Información de productos".',
+        '2. Clic en "Volver".',
+        '3. Clic en "Información de productos".',
+    ]);
+    (0, test_1.expect)(countClicksOnTarget(result.steps, "Información de productos")).toBe(2);
+    (0, test_1.expect)(result.restoredCount).toBe(1);
+    (0, test_1.expect)(result.skippedCount).toBe(0);
+});
+(0, test_1.test)("scenarioStepAuthority no agrega copias extra con varios clics originales iguales", () => {
+    const result = (0, scenario_preview_runner_1.enforceExplicitScenarioClickAuthority)([
+        '1. Clic en "Información de productos".',
+        '2. Clic en "Volver".',
+        '3. Clic en "Información de productos".',
+        '4. Validar que se muestre "Información de productos".',
+        '5. Validar que se muestre "Información de productos".',
+    ], [
+        '1. Clic en "Información de productos".',
+        '2. Clic en "Volver".',
+        '3. Clic en "Información de productos".',
+    ]);
+    (0, test_1.expect)(countClicksOnTarget(result.steps, "Información de productos")).toBe(2);
+    (0, test_1.expect)(result.restoredCount).toBe(0);
+    (0, test_1.expect)(result.skippedCount).toBe(2);
+});
+(0, test_1.test)("PREVIEW-003 conserva un solo clic en Información de productos", () => {
+    const result = (0, scenario_preview_runner_1.enforceExplicitScenarioClickAuthority)([
+        '1. Clic en "Iniciar".',
+        '2. Validar que se muestre "¿Qué deseas realizar hoy?".',
+        '3. Clic en "Información de productos".',
+        '4. Validar que se muestre "Información de productos".',
+    ], [
+        '1. Clic en "Iniciar".',
+        '2. Clic en "Información de productos".',
+    ]);
+    (0, test_1.expect)(countClicksOnTarget(result.steps, "Información de productos")).toBe(1);
+    (0, test_1.expect)(result.restoredCount).toBe(0);
+    (0, test_1.expect)(result.skippedCount).toBe(1);
+});
+(0, test_1.test)("PREVIEW-004 reporta solo inserciones reales en restoredCount", () => {
+    const result = (0, scenario_preview_runner_1.enforceExplicitScenarioClickAuthority)([
+        '1. Clic en "Iniciar".',
+        '2. Validar que se muestre "¿Qué deseas realizar hoy?".',
+        '3. Clic en "Transacciones y servicios".',
+        '4. Validar que se muestre "Transacciones y servicios".',
+        '5. Validar que se muestre "TRANSACCIONES Y SERVICIOS".',
+    ], [
+        '1. Clic en "Iniciar".',
+        '2. Clic en "Transacciones y servicios".',
+    ]);
+    (0, test_1.expect)(countClicksOnTarget(result.steps, "Transacciones y servicios")).toBe(1);
+    (0, test_1.expect)(result.restoredCount).toBe(0);
+    (0, test_1.expect)(result.skippedCount).toBe(2);
 });

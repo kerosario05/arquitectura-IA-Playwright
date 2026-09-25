@@ -44,6 +44,8 @@ export type JobSummary = {
   scenarioEvidenceCount?: number;
   evidenceResults?: number;
   documentError?: string;
+  /** Directory holding this run's own evidence-run.json/evidencia.docx, once consolidated. */
+  evidenceDir?: string;
 };
 
 export type Job = {
@@ -65,6 +67,13 @@ export type Job = {
   currentCaseId?: string | null;
   currentCaseTitle?: string | null;
   errorMessage?: string;
+  /**
+   * Set only on an internal child job (e.g. a mixed-rerun subset execution) that a parent job
+   * orchestrates but the parent alone should represent publicly. A job with this set is excluded
+   * from `list()` by default — see `list({ includeInternal: true })` — but remains fully
+   * addressable via `get(id)`, `subscribe(id, ...)`, and its own independent process/status/logs.
+   */
+  parentJobId?: string;
 };
 
 export type JobInternal = Job & {
@@ -75,7 +84,11 @@ export type JobInternal = Job & {
 class JobStore {
   private readonly jobs = new Map<string, JobInternal>();
 
-  create(type: "sprint" | "discovery-batch" | "scenario-preview" | "mobile-emulator-boot" | "mobile-test-run" | "mobile-launch-execution" | "mobile-route-learning" | "session-recording", params: Record<string, unknown>): Job {
+  create(
+    type: "sprint" | "discovery-batch" | "scenario-preview" | "mobile-emulator-boot" | "mobile-test-run" | "mobile-launch-execution" | "mobile-route-learning" | "session-recording",
+    params: Record<string, unknown>,
+    options?: { parentJobId?: string },
+  ): Job {
     const id = randomUUID();
     const job: JobInternal = {
       id,
@@ -84,7 +97,8 @@ class JobStore {
       params,
       createdAt: new Date().toISOString(),
       logs: [],
-      emitter: new EventEmitter()
+      emitter: new EventEmitter(),
+      parentJobId: options?.parentJobId,
     };
     job.emitter.setMaxListeners(100);
     this.jobs.set(id, job);
@@ -100,8 +114,16 @@ class JobStore {
     return this.jobs.get(id);
   }
 
-  list(): Job[] {
-    return Array.from(this.jobs.values())
+  /**
+   * Defaults to public/top-level jobs only (excludes any job with `parentJobId` set — an
+   * internal child execution a parent orchestrates). Pass `{ includeInternal: true }` for
+   * infrastructure that must see every job regardless of ownership (e.g. device-busy checks).
+   */
+  list(options?: { includeInternal?: boolean }): Job[] {
+    const jobs = options?.includeInternal
+      ? Array.from(this.jobs.values())
+      : Array.from(this.jobs.values()).filter((j) => !j.parentJobId);
+    return jobs
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
       .map((j) => this.serialize(j));
   }

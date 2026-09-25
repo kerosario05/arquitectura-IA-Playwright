@@ -8,6 +8,8 @@ import {
   ScenarioPreviewCaseMapping,
   ScenarioPreviewPublishContext,
 } from "./testrail-sync-types";
+import { describeTestRailRecordingPayload, validateTestRailRecordingPayload } from "../../recording/testrail-recording-payload";
+import { serializeTestRailSteps } from "../../testrail/testrail-step-serializer";
 
 const ROOT = path.resolve(__dirname, "..", "..", "..");
 const STORE_PATH = path.join(ROOT, ".artifacts", "testrail", "scenario-case-mappings.json");
@@ -22,6 +24,48 @@ function ensureDir(filePath: string): void {
 }
 
 const RECOVERY_TIMEOUT_MS = 30000;
+
+/**
+ * TestRail can commit an add_case and fail while running its post-processing hook.  Recording
+ * publication therefore treats a post-send 5xx as ambiguous and gives the case a bounded,
+ * adaptive reconciliation window.  These are deliberately scoped to reconciliation; they do
+ * not turn ordinary publisher calls into long retries.
+ */
+const AMBIGUOUS_RECONCILIATION_ATTEMPTS = Math.max(1, Number(process.env.TESTRAIL_AMBIGUOUS_RECONCILIATION_ATTEMPTS ?? 3));
+const AMBIGUOUS_RECONCILIATION_DEADLINE_MS = Math.max(250, Number(process.env.TESTRAIL_AMBIGUOUS_RECONCILIATION_DEADLINE_MS ?? 10000));
+const AMBIGUOUS_RECONCILIATION_INITIAL_DELAY_MS = Math.max(25, Number(process.env.TESTRAIL_AMBIGUOUS_RECONCILIATION_INITIAL_DELAY_MS ?? 150));
+
+function sectionCaseSnapshot(
+  client: TestRailClient,
+  ctx: ScenarioPreviewPublishContext,
+): Promise<RawTestRailCase[]> {
+  return client.getCases(
+    String(ctx.projectId),
+    ctx.suiteId ? String(ctx.suiteId) : undefined,
+    String(ctx.sectionId),
+  );
+}
+
+function newlyAppearedCases(
+  beforeIds: ReadonlySet<number>,
+  cases: readonly RawTestRailCase[],
+  sectionId: number,
+  title: string,
+  refs?: string,
+): RawTestRailCase[] {
+  const normalizedTitle = normalizeTitle(title);
+  const normalizedRefs = refs?.trim();
+  const delta = cases.filter((candidate) =>
+    candidate.section_id === sectionId
+    && !beforeIds.has(candidate.id)
+    && normalizeTitle(candidate.title) === normalizedTitle,
+  );
+  if (!normalizedRefs) return delta;
+  const withRefs = delta.filter((candidate) => String(candidate.refs ?? "").trim() === normalizedRefs);
+  // Refs are useful discrimination only when the API actually returns them.  Do not discard a
+  // title match merely because a compatible TestRail response omits refs.
+  return withRefs.length > 0 ? withRefs : delta;
+}
 
 async function recoverCaseCreatedAfterHttp500(params: {
   client: TestRailClient;
@@ -154,10 +198,65 @@ export function buildSafeTestRailRefs(
   storyKey?: string,
 ): string {
   const storyPrefix = sanitizeTestRailRef(storyKey ?? "");
-  const scenarioToken = sanitizeTestRailRef(scenarioId);
+  // The scenario's own canonical identity (e.g. "REC-D8DBD8F9-01", populated by
+  // toPublishableScenario for Recording-sourced scenarios), when available, is what must be
+  // matched exactly on a later execution (see verifyExistingMappingIsExactMatch) — prefer it
+  // over the caller-supplied `scenarioId` parameter, which for Recording batches is the
+  // publisher's own ephemeral, internal mapping id (e.g. "L-d8dbd8f9-001", built from
+  // launchId+index — see buildScenarioPreviewScenarioId). That internal id is a legitimate
+  // cache/dedup key inside this module, but it must never become part of the case's own
+  // authoritative remote identity: it does not identify the scenario itself.
+  const canonicalScenarioId = sanitizeTestRailRef(scenario.scenarioId ?? "");
+  const scenarioToken = canonicalScenarioId || sanitizeTestRailRef(scenarioId);
   const storyScenarioRef = storyPrefix ? `${storyPrefix}-${scenarioToken}` : "";
-  const ref = storyScenarioRef || sanitizeTestRailRef(scenario.sourceIssueKey ?? "") || scenarioToken || `PREVIEW-${scenarioId}`;
+  // sourceIssueKey (a Recording's or Jira story's grouping reference, e.g. "REC-D8DBD8F9") is
+  // parent-level metadata shared by every scenario under it — it is never, by itself, a scenario
+  // identity. When no storyKey was supplied this branch used to return sourceIssueKey bare,
+  // which collided every scenario in the same Recording/story onto the identical refs value
+  // (REC-XXXXXXXX-01, -02, -03 all publishing/reconciling as plain "REC-XXXXXXXX"). A canonical
+  // scenario identity is already a complete, recording/story-scoped identity by itself, so it is
+  // used directly rather than prefixed with sourceIssueKey again (which would just duplicate the
+  // same "REC-D8DBD8F9" prefix); sourceIssueKey is only combined with scenarioToken as a
+  // fallback when no canonical identity exists, exactly as before this fix.
+  // buildScenarioRefCandidates still tries the bare sourceIssueKey too, so a case created under
+  // the old bare-ref scheme is still found on lookup.
+  const sourceIssuePrefix = sanitizeTestRailRef(scenario.sourceIssueKey ?? "");
+  const sourceIssueScenarioRef = canonicalScenarioId
+    ? canonicalScenarioId
+    : sourceIssuePrefix ? `${sourceIssuePrefix}-${scenarioToken}` : "";
+  const ref = storyScenarioRef || sourceIssueScenarioRef || scenarioToken || `PREVIEW-${scenarioId}`;
   return ref.replace(/[,|]/g, "").slice(0, 64) || `PREVIEW-${scenarioId}`.slice(0, 64);
+}
+
+export type ExistingMappingVerification =
+  | { valid: true; case: RawTestRailCase }
+  | { valid: false; reason: "remote_not_found" | "wrong_section" | "identity_not_exact" };
+
+/**
+ * A cached local mapping (the publisher's own persisted store, keyed by the virtual scenarioId +
+ * destination) is a hint, never proof. TestRail itself must confirm the case still exists, still
+ * belongs to this exact section, AND carries this exact scenario's own ref — not just the parent
+ * Recording/story's bare grouping ref, which an older cached mapping (from before
+ * buildSafeTestRailRefs started combining sourceIssueKey with the scenario's own token) may
+ * still carry. `exactRefCandidates` must only ever contain scenario-specific refs (the freshly
+ * computed buildSafeTestRailRefs output) — never the bare recording-level ref — so a mapping
+ * built under the old, colliding ref scheme is correctly treated as stale/unverified rather than
+ * an exact match. Pure and exported for hermetic testing.
+ */
+export function verifyExistingMappingIsExactMatch(
+  remoteCase: RawTestRailCase | undefined,
+  ctx: { sectionId: number },
+  exactRefCandidates: string[],
+): ExistingMappingVerification {
+  if (!remoteCase) return { valid: false, reason: "remote_not_found" };
+  if (typeof remoteCase.section_id === "number" && remoteCase.section_id !== ctx.sectionId) {
+    return { valid: false, reason: "wrong_section" };
+  }
+  const remoteRef = (remoteCase.refs ?? "").trim();
+  if (!remoteRef || !exactRefCandidates.includes(remoteRef)) {
+    return { valid: false, reason: "identity_not_exact" };
+  }
+  return { valid: true, case: remoteCase };
 }
 
 function isLegacyPreviewPattern(id: string): boolean {
@@ -203,7 +302,7 @@ function isRefs500Error(error: unknown): boolean {
 }
 
 type RecoveryResult =
-  | { found: true; case: RawTestRailCase; strength: "cache_key_and_scenario_id" | "scenario_id_and_title" | "exact_title" }
+  | { found: true; case: RawTestRailCase; strength: "cache_key_and_scenario_id" | "scenario_id_and_title" | "exact_title" | "unique_marker" | "unique_marker_ambiguous" }
   | { found: false; reason: "no_candidates" | "search_failed" | "ambiguous"; candidateCount?: number; candidateIds?: number[] };
 
 async function recoverCaseAfterRefs500(
@@ -460,16 +559,13 @@ function toStepsSeparated(scenario: ScenarioPreviewPublishContext["scenarios"][n
   return steps;
 }
 
-function buildCustomFields(ctx: ScenarioPreviewPublishContext, scenarioId: string): Record<string, unknown> {
-  const requiredCaseFields = getConfiguredRequiredCaseFields();
-  const customFields: Record<string, unknown> = {
-    custom_source: "qa_lab_generated",
-    custom_scenario_id: scenarioId,
-    custom_app_slug: ctx.appSlug,
-    custom_sprint_id: ctx.sprintId ?? "",
-    custom_story_key: ctx.storyKey ?? "",
-    custom_cache_key: ctx.cacheKey,
-  };
+function buildCustomFields(): Record<string, unknown> {
+    const requiredCaseFields = getConfiguredRequiredCaseFields();
+  // Publication identity and Recording provenance live in the server-side mapping store.
+  // Do not synthesize custom TestRail fields: the configured template may not expose them,
+  // and TestRail can commit a case before returning a post-processing error for unknown
+  // fields. Explicitly configured fields remain available to both Jira/HU and Recording.
+  const customFields: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(requiredCaseFields)) {
     if (key === "custom_case_oracle" || key === "custom_expected") {
@@ -562,13 +658,14 @@ export function buildCustomExpected(scenario: ScenarioPreviewPublishContext["sce
     return `Resultado esperado:\n- ${validationLines.join("\n- ")}`;
   }
 
-  return "El escenario debe completarse correctamente y las validaciones definidas deben cumplirse.";
+  return "Resultado esperado por confirmar";
 }
 
 async function findExistingCaseByCacheKey(
   client: TestRailClient,
   ctx: ScenarioPreviewPublishContext,
   scenarioId: string,
+  fallbackTitle?: string,
 ): Promise<RawTestRailCase | null> {
   try {
     const sectionCases = await client.getCases(String(ctx.projectId), ctx.suiteId ? String(ctx.suiteId) : undefined, String(ctx.sectionId));
@@ -579,10 +676,84 @@ async function findExistingCaseByCacheKey(
         String(c.custom_cache_key ?? "") === cacheKey &&
         String(c.custom_scenario_id ?? "") === scenarioId,
     );
-    return match ?? null;
+    if (match) return match;
+
+    // Recording's configured TestRail template may discard provenance custom fields. On a
+    // retry after an ambiguous 5xx, an exact unique title is the remaining safe identity.
+    // Never apply this fallback to the normal Jira/HU publisher, where repeated launches may
+    // intentionally reuse a human title for distinct cases.
+    if (ctx.recordingBatch && fallbackTitle) {
+      const normalizedTitle = normalizeTitle(fallbackTitle);
+      const titleMatches = sectionCases.filter((c) =>
+        c.section_id === ctx.sectionId && normalizeTitle(c.title) === normalizedTitle,
+      );
+      if (titleMatches.length === 1) return titleMatches[0];
+    }
+    return null;
   } catch {
     return null;
   }
+}
+
+type AmbiguousReconciliation =
+  | { status: "RECONCILED_CREATED"; case: RawTestRailCase; attempts: number }
+  | { status: "AMBIGUOUS_UNRESOLVED"; attempts: number }
+  | { status: "AMBIGUOUS_DUPLICATE"; caseIds: number[]; attempts: number };
+
+function isAmbiguousAfterAddCase(error: unknown): boolean {
+  const status = (error as { status?: unknown })?.status;
+  if (typeof status === "number") return status >= 500;
+  // A transport exception after fetch() was initiated has no HTTP status. It is therefore
+  // unsafe to assume that the server did not commit the case.
+  return true;
+}
+
+async function reconcileAmbiguousRecordingCase(
+  client: TestRailClient,
+  ctx: ScenarioPreviewPublishContext,
+  scenarioId: string,
+  scenarioTitle: string,
+  beforeIds: ReadonlySet<number>,
+  refs?: string,
+): Promise<AmbiguousReconciliation> {
+  const startedAt = Date.now();
+  let attempts = 0;
+  let delayMs = AMBIGUOUS_RECONCILIATION_INITIAL_DELAY_MS;
+
+  while (attempts < AMBIGUOUS_RECONCILIATION_ATTEMPTS && Date.now() - startedAt <= AMBIGUOUS_RECONCILIATION_DEADLINE_MS) {
+    attempts += 1;
+    try {
+      const sectionCases = await sectionCaseSnapshot(client, ctx);
+      const deltaMatches = newlyAppearedCases(beforeIds, sectionCases, ctx.sectionId, scenarioTitle, refs);
+      // Internal metadata is preferred when a configured TestRail field preserves it.  The
+      // delta remains mandatory: a historical case with the same metadata is not evidence that
+      // this request created it.
+      const identityMatches = deltaMatches.filter((candidate) =>
+        String(candidate.custom_cache_key ?? "") === ctx.cacheKey
+        && String(candidate.custom_scenario_id ?? "") === scenarioId,
+      );
+      const candidates = identityMatches.length > 0 ? identityMatches : deltaMatches;
+      if (candidates.length === 1) {
+        console.log(`[testrail-publish-reconciliation] scenario=${scenarioId} attempt=${attempts} state=RECONCILED_CREATED caseId=${candidates[0].id}`);
+        return { status: "RECONCILED_CREATED", case: candidates[0], attempts };
+      }
+      if (candidates.length > 1) {
+        const caseIds = candidates.map((candidate) => candidate.id);
+        console.warn(`[testrail-publish-reconciliation] scenario=${scenarioId} attempt=${attempts} state=AMBIGUOUS_DUPLICATE caseIds=${caseIds.join(",")}`);
+        return { status: "AMBIGUOUS_DUPLICATE", caseIds, attempts };
+      }
+      console.log(`[testrail-publish-reconciliation] scenario=${scenarioId} attempt=${attempts} state=not_visible candidates=0`);
+    } catch (lookupError) {
+      console.warn(`[testrail-publish-reconciliation] scenario=${scenarioId} attempt=${attempts} lookup=failed reason=${lookupError instanceof Error ? lookupError.message.slice(0, 160) : String(lookupError).slice(0, 160)}`);
+    }
+    const remainingMs = AMBIGUOUS_RECONCILIATION_DEADLINE_MS - (Date.now() - startedAt);
+    if (attempts >= AMBIGUOUS_RECONCILIATION_ATTEMPTS || remainingMs <= 0) break;
+    const waitMs = Math.min(delayMs, remainingMs);
+    await new Promise<void>((resolve) => setTimeout(resolve, waitMs));
+    delayMs = Math.min(delayMs * 2, 2000);
+  }
+  console.warn(`[testrail-publish-reconciliation] scenario=${scenarioId} state=AMBIGUOUS_UNRESOLVED attempts=${attempts}`);
+  return { status: "AMBIGUOUS_UNRESOLVED", attempts };
 }
 
 function uniqueCaseIds(caseIds: number[]): number[] {
@@ -597,6 +768,11 @@ export async function publishScenariosToTestRail(
   created: number;
   updated: number;
   reused: number;
+  reconciledCreated: Array<{ scenarioId: string; testRailCaseId: number }>;
+  ambiguousDuplicates: Array<{ scenarioId: string; caseIds: number[] }>;
+  ambiguousUnresolved: Array<{ scenarioId: string; status?: number; errorId?: string; reason: string; attempts: number }>;
+  skipped: Array<{ scenarioId: string; testRailCaseId: number }>;
+  failed: Array<{ scenarioId: string; status?: number; errorId?: string; reason: string }>;
   caseIds: number[];
 }> {
   const store = readStore();
@@ -605,8 +781,12 @@ export async function publishScenariosToTestRail(
   let created = 0;
   let updated = 0;
   let reused = 0;
+  const reconciledCreated: Array<{ scenarioId: string; testRailCaseId: number }> = [];
+  const ambiguousDuplicates: Array<{ scenarioId: string; caseIds: number[] }> = [];
+  const ambiguousUnresolved: Array<{ scenarioId: string; status?: number; errorId?: string; reason: string; attempts: number }> = [];
+  const skipped: Array<{ scenarioId: string; testRailCaseId: number }> = [];
+  const failed: Array<{ scenarioId: string; status?: number; errorId?: string; reason: string }> = [];
   const requiredCaseFields = getConfiguredRequiredCaseFields();
-
   const idContext = {
     launchId: (ctx as any).launchId,
     cacheKey: ctx.cacheKey,
@@ -623,22 +803,76 @@ export async function publishScenariosToTestRail(
       sourceScenarioId: (scenario as any).launchScenarioId,
     });
     const key = scenarioCacheKey(scenarioId, ctx.cacheKey, ctx.projectId, ctx.suiteId, ctx.sectionId);
-    const existingMapping = store.mappings.find((m) => scenarioCacheKey(m.scenarioId, m.cacheKey, m.projectId, m.suiteId, m.sectionId) === key);
+    let existingMapping = store.mappings.find((m) => scenarioCacheKey(m.scenarioId, m.cacheKey, m.projectId, m.suiteId, m.sectionId) === key);
+
+    // A Recording batch's own cached mapping is a hint, never proof — the case it points at may
+    // since have been deleted directly in TestRail, or (for a mapping cached before
+    // buildSafeTestRailRefs started combining sourceIssueKey with the scenario's own token) it
+    // may carry only the parent Recording's bare grouping ref, which is never an exact scenario
+    // match. Confirm remotely before ever reporting "skipped_already_published" for it; a stale
+    // or unverifiable mapping is treated as not found so the normal create/reconciliation path
+    // below runs and persists a fresh, exact mapping instead.
+    if (existingMapping && ctx.recordingBatch) {
+      const exactRefs = buildSafeTestRailRefs(scenario, scenarioId, ctx.storyKey);
+      let remoteCase: RawTestRailCase | undefined;
+      let lookupFailureReason = "lookup_unavailable";
+      try {
+        remoteCase = await client.getCase(existingMapping.testRailCaseId);
+      } catch (lookupError) {
+        lookupFailureReason = lookupError instanceof Error ? lookupError.message.slice(0, 160) : String(lookupError).slice(0, 160);
+      }
+      const verification = verifyExistingMappingIsExactMatch(remoteCase, ctx, [exactRefs]);
+      if (!verification.valid) {
+        const reason = !remoteCase ? lookupFailureReason : verification.reason;
+        console.warn(
+          `[testrail-publish] stale cached mapping scenario=${scenarioId} caseId=${existingMapping.testRailCaseId} ` +
+          `reason=${reason} — treating as unmapped, proceeding through normal create/reconciliation path`
+        );
+        existingMapping = undefined;
+      }
+    }
 
     const stepsSeparated = toStepsSeparated(scenario);
-    const customFields = buildCustomFields(ctx, scenarioId);
+    const customFields = buildCustomFields();
     const preconditionsBase = sanitizeText(scenario.preconditions.join(" | "));
     const launchId = (ctx as any).launchId as string | undefined;
     const uniqueMarker = buildAutomationScenarioMarker(scenarioId, launchId);
     const preconditionsBody =
       preconditionsBase ||
       "Precondiciones:\n- Aplicación disponible.\n- Usuario o datos de prueba configurados.";
-    const preconditions = uniqueMarker
+    const preconditions = !ctx.suppressAutomationMarker && uniqueMarker
       ? `${preconditionsBody}\n${uniqueMarker}`
       : preconditionsBody;
     const customExpected = buildCustomExpected(scenario);
     const customCaseOracle = buildCustomCaseOracle(scenario, requiredCaseFields);
-        const refs = existingMapping?.testRailRef ?? buildSafeTestRailRefs(scenario, scenarioId, ctx.storyKey);
+    const refs = existingMapping?.testRailRef ?? buildSafeTestRailRefs(scenario, scenarioId, ctx.storyKey);
+    // Jira/HU and Recording deliberately share the client/template step policy. The source
+    // model is adapted before this point; it must not select a second TestRail serialization.
+    const sendsStructuredSteps = process.env.TESTRAIL_SEND_CUSTOM_STEPS_SEPARATED?.toLowerCase() === "true";
+    const sendsTextSteps = process.env.TESTRAIL_SEND_CUSTOM_STEPS_TEXT?.toLowerCase() !== "false";
+    const diagnosticPayload = {
+      title: scenario.title,
+      refs,
+      custom_preconds: preconditions,
+      custom_expected: customExpected,
+      custom_case_oracle: customCaseOracle,
+      ...customFields,
+      ...(sendsTextSteps ? { custom_steps: serializeTestRailSteps(stepsSeparated) } : {}),
+      ...(sendsStructuredSteps ? { custom_steps_separated: stepsSeparated.map((step) => ({ content: step.content, expected: step.expected ?? "" })) } : {}),
+    };
+    const payloadDiagnostic = describeTestRailRecordingPayload(diagnosticPayload);
+    const payloadValidation = validateTestRailRecordingPayload(diagnosticPayload);
+    const diagnosticPath = path.join(ROOT, ".artifacts", "testrail", "recording-add-case-payload-diagnostic.json");
+    ensureDir(diagnosticPath);
+    fs.writeFileSync(diagnosticPath, JSON.stringify({
+      sectionId: ctx.sectionId,
+      templateId: process.env.TESTRAIL_TEMPLATE_ID ? Number(process.env.TESTRAIL_TEMPLATE_ID) : undefined,
+      type_id: process.env.TESTRAIL_TYPE_ID ? Number(process.env.TESTRAIL_TYPE_ID) : undefined,
+      priority_id: process.env.TESTRAIL_PRIORITY_ID ? Number(process.env.TESTRAIL_PRIORITY_ID) : undefined,
+      ...payloadDiagnostic,
+      validationErrors: payloadValidation,
+    }, null, 2), "utf8");
+    if (payloadValidation.length > 0) throw new Error(`testrail_recording_payload_invalid: ${payloadValidation.join("; ")}`);
     const hasRefs = Boolean(refs);
     const refsType = typeof refs;
     const refsLength = typeof refs === "string" ? refs.length : 0;
@@ -649,31 +883,51 @@ export async function publishScenariosToTestRail(
     const customFieldNames = collectCustomFieldNames(customFields, Boolean(customExpected), Boolean(customCaseOracle));
     console.log(`[testrail-publish] case=${scenarioId} hasExpected=${Boolean(customExpected)} hasCaseOracle=${Boolean(customCaseOracle)} customFields=${customFieldNames.join(",")}`);
 
-    let testRailCase: RawTestRailCase;
+    let testRailCase: RawTestRailCase | undefined;
     let mappingSource: ScenarioPreviewCaseMapping["source"] = "created";
+    // Filled immediately before the actual create attempt.  A title match that predates this
+    // request is historical evidence, not reconciliation evidence.
+    let prePublishCaseIds: Set<number> = new Set();
 
     try {
       if (existingMapping) {
-        testRailCase = await client.updateCase(existingMapping.testRailCaseId, {
-          title: scenario.title,
-          refs,
-          preconditions,
-          customExpected,
-          customCaseOracle,
-          stepsSeparated,
-          customFields,
-        });
-        mappingSource = "updated";
-        updated += 1;
+        if (ctx.recordingBatch) {
+          testRailCase = {
+            id: existingMapping.testRailCaseId,
+            title: existingMapping.scenarioTitle,
+            section_id: existingMapping.sectionId,
+          } as RawTestRailCase;
+          mappingSource = "skipped_already_published";
+          skipped.push({ scenarioId, testRailCaseId: existingMapping.testRailCaseId });
+        } else {
+          testRailCase = await client.updateCase(existingMapping.testRailCaseId, {
+            title: scenario.title,
+            refs,
+            preconditions,
+            customExpected,
+            customCaseOracle,
+            stepsSeparated,
+            customFields,
+          });
+          mappingSource = "updated";
+          updated += 1;
+        }
       } else if (ctx.publishStrategy === "always_create") {
         // Dedup: before creating, check if a case with matching cache_key + scenario_id already exists from a previous 500
-        const preExisting = await findExistingCaseByCacheKey(client, ctx, scenarioId);
+        const preExisting = await findExistingCaseByCacheKey(client, ctx, scenarioId, scenario.title);
         if (preExisting) {
           testRailCase = preExisting;
           mappingSource = "reused_from_same_launch_after_previous_500";
           reused += 1;
           console.log(`[testrail-publish] reused existing case after previous 500 scenario=${scenarioId} caseId=${testRailCase.id}`);
         } else {
+          if (ctx.recordingBatch) {
+            try {
+              prePublishCaseIds = new Set((await sectionCaseSnapshot(client, ctx)).map((candidate) => candidate.id));
+            } catch (snapshotError) {
+              console.warn(`[testrail-publish-reconciliation] scenario=${scenarioId} before_snapshot=failed reason=${snapshotError instanceof Error ? snapshotError.message.slice(0, 160) : String(snapshotError).slice(0, 160)}`);
+            }
+          }
           try {
             testRailCase = await client.addCase(String(ctx.sectionId), {
               title: scenario.title,
@@ -689,6 +943,11 @@ export async function publishScenariosToTestRail(
           } catch (addErr: any) {
           const addMsg = addErr.message ?? String(addErr);
           if (isAddCaseHttp500Error(addErr)) {
+            if (ctx.recordingBatch) {
+              // Preserve the original TestRail status/error id.  The outer Recording batch
+              // handler classifies this as post-send ambiguous and performs bounded polling.
+              throw addErr;
+            }
             console.warn(`[testrail-publish-recovery] status=started scenario=${scenarioId} sectionId=${ctx.sectionId}`);
             const recovered = await recoverCaseCreatedAfterHttp500({
               client,
@@ -755,7 +1014,7 @@ export async function publishScenariosToTestRail(
             } else {
               // No candidates found — try compatibility without refs but WITH custom fields for strong key matching
               console.warn(`[testrail-publish] recovery after full addCase found no candidates; trying compatibility payload scenario=${scenarioId}`);
-              const stepsText = stepsSeparated.map((s, i) => `${i + 1}. ${s.content}`).join("\n");
+              const stepsText = serializeTestRailSteps(stepsSeparated);
               const precondsText = typeof preconditions === "string" && preconditions.trim() ? preconditions : "Precondiciones:\n- App disponible.\n- Usuario o ambiente de prueba configurado.";
               const noRefsPayload = {
                 title: scenario.title,
@@ -763,11 +1022,6 @@ export async function publishScenariosToTestRail(
                 custom_preconds: precondsText,
                 custom_expected: customExpected || "Validación funcional automatizada.",
                 custom_case_oracle: customCaseOracle || process.env.TESTRAIL_DEFAULT_CASE_ORACLE || "QA",
-                // Include custom fields for strong key matching in recovery
-                custom_scenario_id: scenarioId,
-                custom_app_slug: ctx.appSlug,
-                custom_cache_key: ctx.cacheKey,
-                custom_story_key: ctx.storyKey ?? "",
               };
               const noRefsKeys = Object.keys(noRefsPayload).join(",");
               console.log(`[testrail-publish] compatibility no-refs payload keys=${noRefsKeys}`);
@@ -792,7 +1046,7 @@ export async function publishScenariosToTestRail(
                     throw new Error(`testrail_add_case_500_recovery_ambiguous: compatibility addCase 500 produced multiple candidates. sectionId=${ctx.sectionId} scenarioId=${scenarioId} diagnostic=${JSON.stringify(diag)}`);
                   } else {
                     const diag = recoveryDiagnosticInfo(ctx, scenario.title, scenarioId, recovery2);
-                    throw new Error(`testrail_refs_hook_failure: TestRail add_case failed even without refs in minimal required payload. This points to a TestRail/Jira coverage customization or plugin issue. sectionId=${ctx.sectionId} payloadKeys=${noRefsKeys} omittedKeys=refs,custom_refs,custom_steps_separated recoveryReason=${recovery2.reason} diagnostic=${JSON.stringify(diag)}`);
+                    throw new Error(`testrail_refs_hook_failure: TestRail add_case failed even without refs in minimal required payload. This points to a TestRail/Jira coverage customization or plugin issue. sectionId=${ctx.sectionId} payloadKeys=${noRefsKeys} omittedKeys=refs,custom_refs,custom_steps_separated,unconfigured_custom_fields recoveryReason=${recovery2.reason} diagnostic=${JSON.stringify(diag)}`);
                   }
                 }
                 throw new Error(`testrail_add_case_minimal_failed: title+refs also failed: ${compatMsg}`);
@@ -851,13 +1105,13 @@ export async function publishScenariosToTestRail(
           reused += 1;
         } else {
           testRailCase = await client.addCase(String(ctx.sectionId), {
-            title: scenario.title,
+          title: scenario.title,
             refs,
             preconditions,
             customExpected,
-            customCaseOracle,
-            stepsSeparated,
-            customFields,
+          customCaseOracle,
+          stepsSeparated,
+          customFields,
           });
           mappingSource = "created";
           created += 1;
@@ -869,8 +1123,46 @@ export async function publishScenariosToTestRail(
         console.warn(`[testrail-publish] required field missing fieldName=${missingField} case=${scenarioId}`);
       }
 
+      // Recording publication is a batch: one TestRail failure must be reported for this
+      // scenario while the remaining selected scenarios continue. The legacy publisher keeps
+      // its recovery behavior below for non-Recording callers.
+      let handledRecordingBatchError = false;
+      if (ctx.recordingBatch) {
+        const errorRecord = error as { status?: unknown };
+        const status = typeof errorRecord.status === "number" ? errorRecord.status : undefined;
+        const errorText = error instanceof Error ? error.message : String(error);
+        const idMatch = errorText.match(/(?:errorId|error id|id)=([A-Za-z0-9-]+)/i);
+        if (isAmbiguousAfterAddCase(error)) {
+          const reconciliation = await reconcileAmbiguousRecordingCase(client, ctx, scenarioId, scenario.title, prePublishCaseIds, refs);
+          if (reconciliation.status === "RECONCILED_CREATED") {
+            testRailCase = reconciliation.case;
+            mappingSource = "recovered_after_add_case_500";
+            reconciledCreated.push({ scenarioId, testRailCaseId: reconciliation.case.id });
+            handledRecordingBatchError = true;
+            console.warn(`[testrail-publish] ambiguous add_case reconciled scenario=${scenarioId} caseId=${reconciliation.case.id}`);
+          } else {
+            if (reconciliation.status === "AMBIGUOUS_DUPLICATE") {
+              ambiguousDuplicates.push({ scenarioId, caseIds: reconciliation.caseIds });
+              failed.push({ scenarioId, status, errorId: idMatch?.[1], reason: `AMBIGUOUS_DUPLICATE:${reconciliation.caseIds.join(",")}` });
+            } else {
+              ambiguousUnresolved.push({ scenarioId, status, errorId: idMatch?.[1], reason: errorText.slice(0, 500), attempts: reconciliation.attempts });
+              failed.push({ scenarioId, status, errorId: idMatch?.[1], reason: `AMBIGUOUS_UNRESOLVED: ${errorText.slice(0, 500)}` });
+            }
+            console.error(`[testrail-publish] ambiguous add_case not retried scenario=${scenarioId} reconciliation=${reconciliation.status}`);
+            continue;
+          }
+        } else {
+          failed.push({ scenarioId, status, errorId: idMatch?.[1], reason: errorText.slice(0, 500) });
+          console.error(`[testrail-publish] Recording scenario failed; continuing batch scenario=${scenarioId} status=${status ?? "unknown"}`);
+          continue;
+        }
+      }
+
       // Refs 500 recovery: TestRail creates the case but crashes on refs plugin/hook
-      if (error && isRefs500Error(error) && mappingSource === "created") {
+      if (handledRecordingBatchError) {
+        // The ambiguous create was reconciled above; continue through the common mapping
+        // persistence path so a later retry sees the recovered case.
+      } else if (error && isRefs500Error(error) && mappingSource === "created") {
         const recovered = await recoverCaseAfterRefs500(client, ctx, scenario.title, scenarioId);
         if (recovered.found) {
           created += 1;
@@ -888,6 +1180,13 @@ export async function publishScenariosToTestRail(
       }
     }
 
+    // Every successful, recovered, reused, or skipped path must produce a case. Keep the
+    // batch fail-soft if a future branch accidentally exits the catch without one.
+    if (!testRailCase) {
+      failed.push({ scenarioId, reason: "TESTRAIL_CASE_NOT_MATERIALIZED" });
+      continue;
+    }
+
         const mapping: ScenarioPreviewCaseMapping = {
           scenarioId,
           scenarioTitle: scenario.title,
@@ -902,6 +1201,12 @@ export async function publishScenariosToTestRail(
     };
     mappings.push(mapping);
     caseIds.push(testRailCase.id);
+    // Make a successful case durable before the next add_case can fail.
+    const currentStore = readStore();
+    const durable = new Map<string, ScenarioPreviewCaseMapping>();
+    for (const item of currentStore.mappings) durable.set(scenarioCacheKey(item.scenarioId, item.cacheKey, item.projectId, item.suiteId, item.sectionId), item);
+    durable.set(scenarioCacheKey(mapping.scenarioId, mapping.cacheKey, mapping.projectId, mapping.suiteId, mapping.sectionId), mapping);
+    writeStore({ version: 1, mappings: Array.from(durable.values()) });
   }
 
   const existingByKey = new Map<string, ScenarioPreviewCaseMapping>();
@@ -923,7 +1228,7 @@ export async function publishScenariosToTestRail(
   const resultCaseIds = uniqueCaseIdsList.join(",");
   console.log(`[testrail-publish] output publishedCases count=${mappings.length} ids=${resultIds} caseIds=${resultCaseIds}`);
 
-  return { mappings, created, updated, reused, caseIds: uniqueCaseIdsList };
+  return { mappings, created, updated, reused, reconciledCreated, ambiguousDuplicates, ambiguousUnresolved, skipped, failed, caseIds: uniqueCaseIdsList };
 }
 
 export function readPersistedScenarioMappings(): ScenarioPreviewCaseMapping[] {

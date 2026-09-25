@@ -1,0 +1,21 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage",
+    "CategoryPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-tarjeta\\case.spec.ts",
+  "specHash": "5f6095bdc7c3084fd5518201080cb4daaf2588fdbcd1676d6f225d3f63366201",
+  "specSource": "generatedSpec"
+}

@@ -1,0 +1,10 @@
+{
+  "error": "AI provider did not write spec-generation-result.json. Check artifacts at tempDir for stdout/stderr logs.\n  1. Check stderr/stdout in debug artifacts for details\n  2. Ensure Codex CLI is properly installed and configured",
+  "code": "ai_provider_output_missing",
+  "_finalSpec": {
+    "origin": "deterministic_draft",
+    "generatedBy": "core",
+    "strategy": "deterministic_draft",
+    "fallback": null
+  }
+}

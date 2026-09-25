@@ -1,0 +1,1162 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-001",
+    "caseId": 0,
+    "title": "Prueba"
+  },
+  "requiredData": [
+    {
+      "key": "nombre_de_prueba",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "correo_de_prueba",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "contrasena_ficticia",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "notas_del_recorrido",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "telefono_ficticio",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "importe_decimal",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "identificador_con_mascara",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "sugerencia_nativa",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "fecha_nativa",
+      "required": true,
+      "resolved": true
+    }
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to http://127.0.0.1:8088/QA_Field_Lab.html",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "fill",
+      "description": "Ingresar [nombre_de_prueba] en \"Nombre de prueba\"",
+      "target": {
+        "strategy": "text",
+        "value": "Nombre de prueba",
+        "exact": false
+      },
+      "valueKey": "nombre_de_prueba"
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "Ingresar [correo_de_prueba] en \"Correo de prueba\"",
+      "target": {
+        "strategy": "text",
+        "value": "Correo de prueba",
+        "exact": false
+      },
+      "valueKey": "correo_de_prueba"
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "Ingresar [contrasena_ficticia] en \"Contraseña ficticia\"",
+      "target": {
+        "strategy": "text",
+        "value": "Contraseña ficticia",
+        "exact": false
+      },
+      "valueKey": "contrasena_ficticia"
+    },
+    {
+      "index": 5,
+      "action": "fill",
+      "description": "Ingresar [notas_del_recorrido] en \"Notas del recorrido\"",
+      "target": {
+        "strategy": "text",
+        "value": "Notas del recorrido",
+        "exact": false
+      },
+      "valueKey": "notas_del_recorrido"
+    },
+    {
+      "index": 6,
+      "action": "press",
+      "description": "Presionar \"Enter\" en \"Notas del recorrido\"",
+      "target": {
+        "strategy": "text",
+        "value": "role:textbox|Notas del recorrido",
+        "exact": false
+      },
+      "value": "Enter"
+    },
+    {
+      "index": 7,
+      "action": "fill",
+      "description": "Ingresar [telefono_ficticio] en \"Teléfono ficticio\"",
+      "target": {
+        "strategy": "text",
+        "value": "Teléfono ficticio",
+        "exact": false
+      },
+      "valueKey": "telefono_ficticio"
+    },
+    {
+      "index": 8,
+      "action": "fill",
+      "description": "Ingresar [importe_decimal] en \"Importe decimal\"",
+      "target": {
+        "strategy": "text",
+        "value": "Importe decimal",
+        "exact": false
+      },
+      "valueKey": "importe_decimal"
+    },
+    {
+      "index": 9,
+      "action": "fill",
+      "description": "Ingresar [identificador_con_mascara] en \"Identificador con máscara\"",
+      "target": {
+        "strategy": "text",
+        "value": "Identificador con máscara",
+        "exact": false
+      },
+      "valueKey": "identificador_con_mascara"
+    },
+    {
+      "index": 10,
+      "action": "click",
+      "description": "Presionar \"Web\"",
+      "target": {
+        "strategy": "recorded:role",
+        "value": "Web",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:role"
+    },
+    {
+      "index": 11,
+      "action": "click",
+      "description": "Presionar \"Mobile\"",
+      "target": {
+        "strategy": "recorded:role",
+        "value": "Mobile",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:role"
+    },
+    {
+      "index": 12,
+      "action": "click",
+      "description": "Presionar \"Sucursal\"",
+      "target": {
+        "strategy": "recorded:role",
+        "value": "Sucursal",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:role"
+    },
+    {
+      "index": 13,
+      "action": "fill",
+      "description": "Ingresar [sugerencia_nativa] en \"Sugerencia nativa\"",
+      "target": {
+        "strategy": "text",
+        "value": "Sugerencia nativa",
+        "exact": false
+      },
+      "valueKey": "sugerencia_nativa"
+    },
+    {
+      "index": 14,
+      "action": "fill",
+      "description": "Ingresar [fecha_nativa] en \"Fecha nativa\"",
+      "target": {
+        "strategy": "text",
+        "value": "Fecha nativa",
+        "exact": false
+      },
+      "valueKey": "fecha_nativa"
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-09-22T01:44:42.495Z",
+  "metadata": {
+    "authFlowRequired": false,
+    "authFlowAlias": "defaultClient",
+    "authFlowLanding": "transactions_menu",
+    "authGateDetectedDuringDiscovery": true,
+    "authGateStage": "credentials"
+  },
+  "sourceScenario": {
+    "title": "Prueba",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Ingresar [nombre_de_prueba] en \"Nombre de prueba\"",
+        "description": "Ingresar [nombre_de_prueba] en \"Nombre de prueba\"",
+        "valueKey": "nombre_de_prueba",
+        "technicalTargetRef": "role:textbox|Nombre de prueba",
+        "technicalTargetRefs": [
+          "role:textbox|Nombre de prueba",
+          "css:#f-nombre",
+          "id:f-nombre"
+        ],
+        "controlIdentity": "e5f5edc43160|Nombre de prueba|role|textbox|Nombre de prueba",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 2,
+        "action": "Ingresar [correo_de_prueba] en \"Correo de prueba\"",
+        "description": "Ingresar [correo_de_prueba] en \"Correo de prueba\"",
+        "valueKey": "correo_de_prueba",
+        "technicalTargetRef": "role:textbox|Correo de prueba",
+        "technicalTargetRefs": [
+          "role:textbox|Correo de prueba",
+          "css:#f-correo",
+          "id:f-correo"
+        ],
+        "controlIdentity": "e5f5edc43160|Correo de prueba|role|textbox|Correo de prueba",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 3,
+        "action": "Ingresar [contrasena_ficticia] en \"Contraseña ficticia\"",
+        "description": "Ingresar [contrasena_ficticia] en \"Contraseña ficticia\"",
+        "valueKey": "contrasena_ficticia",
+        "technicalTargetRef": "role:textbox|Contraseña ficticia",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña ficticia",
+          "css:#f-clave",
+          "id:f-clave"
+        ],
+        "controlIdentity": "e5f5edc43160|Contraseña ficticia|role|textbox|Contraseña ficticia",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 4,
+        "action": "Ingresar [notas_del_recorrido] en \"Notas del recorrido\"",
+        "description": "Ingresar [notas_del_recorrido] en \"Notas del recorrido\"",
+        "valueKey": "notas_del_recorrido",
+        "technicalTargetRef": "role:textbox|Notas del recorrido",
+        "technicalTargetRefs": [
+          "role:textbox|Notas del recorrido",
+          "css:#f-notas",
+          "id:f-notas"
+        ],
+        "controlIdentity": "e5f5edc43160|Notas del recorrido|role|textbox|Notas del recorrido",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 5,
+        "action": "Presionar \"Enter\" en \"Notas del recorrido\"",
+        "description": "Presionar \"Enter\" en \"Notas del recorrido\"",
+        "technicalTargetRef": "role:textbox|Notas del recorrido",
+        "technicalTargetRefs": [
+          "role:textbox|Notas del recorrido",
+          "css:#f-notas",
+          "id:f-notas"
+        ],
+        "controlIdentity": "e5f5edc43160|Notas del recorrido|role|textbox|Notas del recorrido",
+        "recordingActionType": "press"
+      },
+      {
+        "index": 6,
+        "action": "Ingresar [telefono_ficticio] en \"Teléfono ficticio\"",
+        "description": "Ingresar [telefono_ficticio] en \"Teléfono ficticio\"",
+        "valueKey": "telefono_ficticio",
+        "technicalTargetRef": "role:textbox|Teléfono ficticio",
+        "technicalTargetRefs": [
+          "role:textbox|Teléfono ficticio",
+          "css:#f-telefono",
+          "id:f-telefono"
+        ],
+        "controlIdentity": "e5f5edc43160|Teléfono ficticio|role|textbox|Teléfono ficticio",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 7,
+        "action": "Ingresar [importe_decimal] en \"Importe decimal\"",
+        "description": "Ingresar [importe_decimal] en \"Importe decimal\"",
+        "valueKey": "importe_decimal",
+        "technicalTargetRef": "role:textbox|Importe decimal",
+        "technicalTargetRefs": [
+          "role:textbox|Importe decimal",
+          "css:#f-importe",
+          "id:f-importe"
+        ],
+        "controlIdentity": "e5f5edc43160|Importe decimal|role|textbox|Importe decimal",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 8,
+        "action": "Ingresar [identificador_con_mascara] en \"Identificador con máscara\"",
+        "description": "Ingresar [identificador_con_mascara] en \"Identificador con máscara\"",
+        "valueKey": "identificador_con_mascara",
+        "technicalTargetRef": "role:textbox|Identificador con máscara",
+        "technicalTargetRefs": [
+          "role:textbox|Identificador con máscara",
+          "css:#f-identificador",
+          "id:f-identificador"
+        ],
+        "controlIdentity": "e5f5edc43160|Identificador con máscara|role|textbox|Identificador con máscara",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 9,
+        "action": "Presionar \"Web\"",
+        "description": "Presionar \"Web\"",
+        "valueKey": "web",
+        "technicalTargetRef": "role:option|Web",
+        "technicalTargetRefs": [
+          "role:option|Web"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "option|Web",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "option"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 19
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Web",
+        "controlIdentity": "e5f5edc43160|Web|role|option|Web",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 10,
+        "action": "Presionar \"Mobile\"",
+        "description": "Presionar \"Mobile\"",
+        "valueKey": "mobile",
+        "technicalTargetRef": "role:option|Mobile",
+        "technicalTargetRefs": [
+          "role:option|Mobile"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "option|Mobile",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "option"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 19
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Mobile",
+        "controlIdentity": "e5f5edc43160|Mobile|role|option|Mobile",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 11,
+        "action": "Presionar \"Sucursal\"",
+        "description": "Presionar \"Sucursal\"",
+        "valueKey": "sucursal",
+        "technicalTargetRef": "role:option|Sucursal",
+        "technicalTargetRefs": [
+          "role:option|Sucursal"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "option|Sucursal",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "option"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 19
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Sucursal",
+        "controlIdentity": "e5f5edc43160|Sucursal|role|option|Sucursal",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 12,
+        "action": "Ingresar [sugerencia_nativa] en \"Sugerencia nativa\"",
+        "description": "Ingresar [sugerencia_nativa] en \"Sugerencia nativa\"",
+        "valueKey": "sugerencia_nativa",
+        "technicalTargetRef": "role:textbox|Sugerencia nativa",
+        "technicalTargetRefs": [
+          "role:textbox|Sugerencia nativa",
+          "css:#f-sugerencia",
+          "id:f-sugerencia"
+        ],
+        "controlIdentity": "e5f5edc43160|Sugerencia nativa|role|textbox|Sugerencia nativa",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 13,
+        "action": "Ingresar [fecha_nativa] en \"Fecha nativa\"",
+        "description": "Ingresar [fecha_nativa] en \"Fecha nativa\"",
+        "valueKey": "fecha_nativa",
+        "technicalTargetRef": "css:#f-fecha_nativa",
+        "technicalTargetRefs": [
+          "css:#f-fecha_nativa",
+          "id:f-fecha_nativa"
+        ],
+        "controlIdentity": "e5f5edc43160|Fecha nativa|css|#f-fecha_nativa",
+        "recordingActionType": "fill"
+      }
+    ],
+    "expectedResult": "La aplicación carga su pantalla inicial",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "observedAssertions": [],
+    "observableOracles": [
+      {
+        "id": "expected-01",
+        "requirement": "La aplicación carga su pantalla inicial",
+        "type": "navigation_transition",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 11,
+        "target": "Sucursal",
+        "polarity": "positive",
+        "evidence": [
+          "transition_observed:true",
+          "click_target:Sucursal",
+          "action_type:Presionar \"Sucursal\"",
+          "after_url:http://127.0.0.1:8088/QA_Field_Lab.html",
+          "assertion_polarity:positive"
+        ],
+        "details": {
+          "transitionObserved": true,
+          "clickTarget": "Sucursal",
+          "resolvedTarget": null,
+          "postClickUiChange": null,
+          "sourceActionStepIndex": 11,
+          "expectedUrl": "http://127.0.0.1:8088/QA_Field_Lab.html"
+        }
+      }
+    ],
+    "stepStatuses": [
+      {
+        "index": 1,
+        "status": "found"
+      },
+      {
+        "index": 2,
+        "status": "found"
+      },
+      {
+        "index": 3,
+        "status": "found"
+      },
+      {
+        "index": 4,
+        "status": "found"
+      },
+      {
+        "index": 5,
+        "status": "found"
+      },
+      {
+        "index": 6,
+        "status": "found"
+      },
+      {
+        "index": 7,
+        "status": "found"
+      },
+      {
+        "index": 8,
+        "status": "found"
+      },
+      {
+        "index": 9,
+        "status": "found"
+      },
+      {
+        "index": 10,
+        "status": "found"
+      },
+      {
+        "index": 11,
+        "status": "found"
+      },
+      {
+        "index": 12,
+        "status": "found"
+      },
+      {
+        "index": 13,
+        "status": "found"
+      }
+    ],
+    "auth": {
+      "gateDetected": true,
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    }
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "PREVIEW-001",
+    "title": "Prueba",
+    "appSlug": "kiosko",
+    "sectionSlug": "default-section",
+    "auth": {
+      "gateDetected": true,
+      "required": false,
+      "stage": "credentials",
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    },
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Ingresar [nombre_de_prueba] en \"Nombre de prueba\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Nombre de prueba"
+        },
+        "valueKey": "nombre_de_prueba",
+        "technicalTargetRef": "role:textbox|Nombre de prueba",
+        "technicalTargetRefs": [
+          "role:textbox|Nombre de prueba",
+          "css:#f-nombre",
+          "id:f-nombre"
+        ],
+        "controlIdentity": "e5f5edc43160|Nombre de prueba|role|textbox|Nombre de prueba",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Nombre de prueba",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Ingresar [correo_de_prueba] en \"Correo de prueba\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Correo de prueba"
+        },
+        "valueKey": "correo_de_prueba",
+        "technicalTargetRef": "role:textbox|Correo de prueba",
+        "technicalTargetRefs": [
+          "role:textbox|Correo de prueba",
+          "css:#f-correo",
+          "id:f-correo"
+        ],
+        "controlIdentity": "e5f5edc43160|Correo de prueba|role|textbox|Correo de prueba",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Correo de prueba",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Ingresar [contrasena_ficticia] en \"Contraseña ficticia\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Contraseña ficticia"
+        },
+        "valueKey": "contrasena_ficticia",
+        "technicalTargetRef": "role:textbox|Contraseña ficticia",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña ficticia",
+          "css:#f-clave",
+          "id:f-clave"
+        ],
+        "controlIdentity": "e5f5edc43160|Contraseña ficticia|role|textbox|Contraseña ficticia",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Contraseña ficticia",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Ingresar [notas_del_recorrido] en \"Notas del recorrido\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Notas del recorrido"
+        },
+        "valueKey": "notas_del_recorrido",
+        "technicalTargetRef": "role:textbox|Notas del recorrido",
+        "technicalTargetRefs": [
+          "role:textbox|Notas del recorrido",
+          "css:#f-notas",
+          "id:f-notas"
+        ],
+        "controlIdentity": "e5f5edc43160|Notas del recorrido|role|textbox|Notas del recorrido",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Notas del recorrido",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 4,
+        "scenarioStepIndex": 5,
+        "originalText": "Presionar \"Enter\" en \"Notas del recorrido\"",
+        "operation": "press",
+        "target": {
+          "strategy": "text",
+          "value": "role:textbox|Notas del recorrido",
+          "exact": false
+        },
+        "value": "Enter",
+        "technicalTargetRef": "role:textbox|Notas del recorrido",
+        "technicalTargetRefs": [
+          "role:textbox|Notas del recorrido",
+          "css:#f-notas",
+          "id:f-notas"
+        ],
+        "controlIdentity": "e5f5edc43160|Notas del recorrido|role|textbox|Notas del recorrido",
+        "recordingActionType": "press",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "role:textbox|Notas del recorrido",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "pressPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 5,
+        "scenarioStepIndex": 6,
+        "originalText": "Ingresar [telefono_ficticio] en \"Teléfono ficticio\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Teléfono ficticio"
+        },
+        "valueKey": "telefono_ficticio",
+        "technicalTargetRef": "role:textbox|Teléfono ficticio",
+        "technicalTargetRefs": [
+          "role:textbox|Teléfono ficticio",
+          "css:#f-telefono",
+          "id:f-telefono"
+        ],
+        "controlIdentity": "e5f5edc43160|Teléfono ficticio|role|textbox|Teléfono ficticio",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Teléfono ficticio",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 6,
+        "scenarioStepIndex": 7,
+        "originalText": "Ingresar [importe_decimal] en \"Importe decimal\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Importe decimal"
+        },
+        "valueKey": "importe_decimal",
+        "technicalTargetRef": "role:textbox|Importe decimal",
+        "technicalTargetRefs": [
+          "role:textbox|Importe decimal",
+          "css:#f-importe",
+          "id:f-importe"
+        ],
+        "controlIdentity": "e5f5edc43160|Importe decimal|role|textbox|Importe decimal",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Importe decimal",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 7,
+        "scenarioStepIndex": 8,
+        "originalText": "Ingresar [identificador_con_mascara] en \"Identificador con máscara\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Identificador con máscara"
+        },
+        "valueKey": "identificador_con_mascara",
+        "technicalTargetRef": "role:textbox|Identificador con máscara",
+        "technicalTargetRefs": [
+          "role:textbox|Identificador con máscara",
+          "css:#f-identificador",
+          "id:f-identificador"
+        ],
+        "controlIdentity": "e5f5edc43160|Identificador con máscara|role|textbox|Identificador con máscara",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Identificador con máscara",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 8,
+        "scenarioStepIndex": 9,
+        "originalText": "Presionar \"Web\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Web"
+        },
+        "valueKey": "web",
+        "associatedField": "Web",
+        "technicalTargetRef": "role:option|Web",
+        "technicalTargetRefs": [
+          "role:option|Web"
+        ],
+        "controlIdentity": "e5f5edc43160|Web|role|option|Web",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "option|Web",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 9,
+        "scenarioStepIndex": 10,
+        "originalText": "Presionar \"Mobile\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Mobile"
+        },
+        "valueKey": "mobile",
+        "associatedField": "Mobile",
+        "technicalTargetRef": "role:option|Mobile",
+        "technicalTargetRefs": [
+          "role:option|Mobile"
+        ],
+        "controlIdentity": "e5f5edc43160|Mobile|role|option|Mobile",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "option|Mobile",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 10,
+        "scenarioStepIndex": 11,
+        "originalText": "Presionar \"Sucursal\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Sucursal"
+        },
+        "valueKey": "sucursal",
+        "associatedField": "Sucursal",
+        "technicalTargetRef": "role:option|Sucursal",
+        "technicalTargetRefs": [
+          "role:option|Sucursal"
+        ],
+        "controlIdentity": "e5f5edc43160|Sucursal|role|option|Sucursal",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "option|Sucursal",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "oracle": {
+          "type": "navigation_transition",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "url_state",
+          "mechanism": {
+            "source": "url_state",
+            "method": "expectPromotedVisible",
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "navigation_transition",
+              "urlPattern": "http://127.0.0.1:8088/QA_Field_Lab.html"
+            }
+          },
+          "sourceActionStepIndex": 11,
+          "requirement": "La aplicación carga su pantalla inicial"
+        },
+        "sourceActionStepIndex": 11,
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      },
+      {
+        "contractStepIndex": 11,
+        "scenarioStepIndex": 12,
+        "originalText": "Ingresar [sugerencia_nativa] en \"Sugerencia nativa\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Sugerencia nativa"
+        },
+        "valueKey": "sugerencia_nativa",
+        "technicalTargetRef": "role:textbox|Sugerencia nativa",
+        "technicalTargetRefs": [
+          "role:textbox|Sugerencia nativa",
+          "css:#f-sugerencia",
+          "id:f-sugerencia"
+        ],
+        "controlIdentity": "e5f5edc43160|Sugerencia nativa|role|textbox|Sugerencia nativa",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Sugerencia nativa",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 12,
+        "scenarioStepIndex": 13,
+        "originalText": "Ingresar [fecha_nativa] en \"Fecha nativa\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Fecha nativa"
+        },
+        "valueKey": "fecha_nativa",
+        "technicalTargetRef": "css:#f-fecha_nativa",
+        "technicalTargetRefs": [
+          "css:#f-fecha_nativa",
+          "id:f-fecha_nativa"
+        ],
+        "controlIdentity": "e5f5edc43160|Fecha nativa|css|#f-fecha_nativa",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Fecha nativa",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 13,
+      "representedScenarioSteps": 13,
+      "missingScenarioSteps": []
+    }
+  }
+}

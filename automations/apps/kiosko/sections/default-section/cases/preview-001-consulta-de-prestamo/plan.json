@@ -1,0 +1,247 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-001",
+    "caseId": 0,
+    "title": "Consulta de prestamo"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "description": "Presionar \"Explora nuestros productos\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Explora nuestros productos",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Presionar \"Préstamos\"",
+      "target": {
+        "strategy": "recorded:role",
+        "value": "Préstamos",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:role"
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Presionar \"Préstamo Personal\"",
+      "target": {
+        "strategy": "recorded:role",
+        "value": "Préstamo Personal",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:role"
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Presionar \"Finalizar sesión\"",
+      "target": {
+        "strategy": "recorded:role",
+        "value": "Finalizar sesión",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:role"
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-09-15T19:27:10.189Z",
+  "sourceScenario": {
+    "title": "Consulta de prestamo",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Presionar \"Explora nuestros productos\"",
+        "description": "Presionar \"Explora nuestros productos\"",
+        "valueKey": "explora_nuestros_productos",
+        "polarity": "positive"
+      },
+      {
+        "index": 2,
+        "action": "Presionar \"Préstamos\"",
+        "description": "Presionar \"Préstamos\"",
+        "valueKey": "prestamos",
+        "polarity": "positive"
+      },
+      {
+        "index": 3,
+        "action": "Presionar \"Préstamo Personal\"",
+        "description": "Presionar \"Préstamo Personal\"",
+        "valueKey": "prestamo_personal",
+        "polarity": "positive"
+      },
+      {
+        "index": 4,
+        "action": "Presionar \"Finalizar sesión\"",
+        "description": "Presionar \"Finalizar sesión\"",
+        "valueKey": "finalizar_sesion",
+        "polarity": "positive"
+      }
+    ],
+    "expectedResult": "La aplicación carga su pantalla inicial",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "observedAssertions": [],
+    "observableOracles": [
+      {
+        "id": "expected-01",
+        "requirement": "La aplicación carga su pantalla inicial",
+        "type": "navigation_transition",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 4,
+        "target": "Finalizar sesión",
+        "polarity": "positive",
+        "evidence": [
+          "transition_observed:true",
+          "click_target:Finalizar sesión",
+          "action_type:Presionar \"Finalizar sesión\"",
+          "after_url:https://172.27.4.50/",
+          "assertion_polarity:positive"
+        ],
+        "details": {
+          "transitionObserved": true,
+          "clickTarget": "Finalizar sesión",
+          "resolvedTarget": null,
+          "postClickUiChange": null,
+          "sourceActionStepIndex": 4,
+          "expectedUrl": "https://172.27.4.50/"
+        }
+      }
+    ],
+    "stepStatuses": [
+      {
+        "index": 1,
+        "status": "found"
+      },
+      {
+        "index": 2,
+        "status": "found"
+      },
+      {
+        "index": 3,
+        "status": "found"
+      },
+      {
+        "index": 4,
+        "status": "found"
+      }
+    ],
+    "auth": {}
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "PREVIEW-001",
+    "title": "Consulta de prestamo",
+    "appSlug": "kiosko",
+    "sectionSlug": "default-section",
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Presionar \"Explora nuestros productos\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Explora nuestros productos"
+        },
+        "valueKey": "explora_nuestros_productos",
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Presionar \"Préstamos\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Préstamos"
+        },
+        "valueKey": "prestamos",
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Presionar \"Préstamo Personal\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Préstamo Personal"
+        },
+        "valueKey": "prestamo_personal",
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "navigation_transition",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "url_state",
+          "mechanism": {
+            "source": "url_state",
+            "method": "expectPromotedVisible",
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "navigation_transition",
+              "urlPattern": "https://172.27.4.50/"
+            }
+          },
+          "sourceActionStepIndex": 4,
+          "requirement": "La aplicación carga su pantalla inicial"
+        },
+        "sourceActionStepIndex": 4,
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Presionar \"Finalizar sesión\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Finalizar sesión"
+        },
+        "valueKey": "finalizar_sesion",
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 4,
+      "representedScenarioSteps": 4,
+      "missingScenarioSteps": []
+    }
+  }
+}

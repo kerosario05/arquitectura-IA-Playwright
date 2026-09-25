@@ -126,19 +126,26 @@ test_1.test.describe('test:promoted CLI Wrapper', () => {
         (0, test_1.expect)(content).toContain('cli.js');
         (0, test_1.expect)(content).toContain('spawnArgs');
     });
+    (0, test_1.test)('CLI wrapper propagates canonical evidence identity env vars to Playwright child', () => {
+        const cliPath = path.join(__dirname, '../src/cli/test-promoted.ts');
+        const content = fs.readFileSync(cliPath, 'utf-8');
+        (0, test_1.expect)(content).toContain('EVIDENCE_APP_SLUG');
+        (0, test_1.expect)(content).toContain('EVIDENCE_SECTION_SLUG');
+        (0, test_1.expect)(content).toContain('env: playwrightEnv');
+    });
 });
-test_1.test.describe('CLI Grep Pattern Handling', () => {
+test_1.test.describe('CLI Exact Spec Handling', () => {
     (0, test_1.test)('grep pattern with pipes is preserved as single argument', () => {
         const cliPath = path.join(__dirname, '../src/cli/test-promoted.ts');
         const content = fs.readFileSync(cliPath, 'utf-8');
         // Verify grep is pushed as single argument with --grep= prefix
         (0, test_1.expect)(content).toMatch(/playwrightArgs\.push\(`--grep=/);
     });
-    (0, test_1.test)('--case-id generates grep pattern correctly', () => {
+    (0, test_1.test)('--case-id resolves the persisted promoted spec instead of using grep', () => {
         const cliPath = path.join(__dirname, '../src/cli/test-promoted.ts');
         const content = fs.readFileSync(cliPath, 'utf-8');
-        // Verify case-id generates grep with C prefix
-        (0, test_1.expect)(content).toMatch(/--grep=C\$\{options\.caseId\}/);
+        (0, test_1.expect)(content).toContain('resolvePromotedSpecPath(options)');
+        (0, test_1.expect)(content).not.toMatch(/--grep=C\$\{options\.caseId\}/);
     });
 });
 test_1.test.describe('package.json test:promoted script', () => {

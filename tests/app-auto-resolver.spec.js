@@ -93,25 +93,24 @@ const node_path_1 = __importDefault(require("node:path"));
     (0, test_1.expect)(result.source).toBe("explicit");
     (0, test_1.expect)(result.confidence).toBe("high");
 });
-(0, test_1.test)("resolveAppForPreview: testrail_section when no explicit", () => {
+(0, test_1.test)("resolveAppForPreview: TestRail section does not establish app identity", () => {
     const result = (0, app_auto_resolver_1.resolveAppForPreview)({
         testrailSectionName: "Detalle_KIOSKO",
-        requestAppSlug: "arquitectura-automatizacion",
     });
-    (0, test_1.expect)(result.appSlug).toBe("kiosko");
-    (0, test_1.expect)(result.source).toBe("testrail_section");
-    (0, test_1.expect)(result.confidence).toBe("high");
+    (0, test_1.expect)(result.appSlug).toBe("");
+    (0, test_1.expect)(result.source).toBe("fallback");
+    (0, test_1.expect)(result.confidence).toBe("low");
 });
 (0, test_1.test)("resolveAppForPreview: fallback to request appSlug", () => {
     const result = (0, app_auto_resolver_1.resolveAppForPreview)({
         requestAppSlug: "arquitectura-automatizacion",
     });
     (0, test_1.expect)(result.appSlug).toBe("arquitectura-automatizacion");
-    (0, test_1.expect)(result.source).toBe("fallback");
+    (0, test_1.expect)(result.source).toBe("request");
 });
-(0, test_1.test)("resolveAppForPreview: last fallback is default", () => {
+(0, test_1.test)("resolveAppForPreview: unresolved when no authority exists", () => {
     const result = (0, app_auto_resolver_1.resolveAppForPreview)({});
-    (0, test_1.expect)(result.appSlug).toBe("default");
+    (0, test_1.expect)(result.appSlug).toBe("");
     (0, test_1.expect)(result.source).toBe("fallback");
 });
 // ── detectKioskoInfoProductos ─────────────────────────────────────

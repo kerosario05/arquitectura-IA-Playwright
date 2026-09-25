@@ -1,0 +1,20 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-fuck\\case.spec.ts",
+  "specHash": "0f6d90c6926468f1b7edf2457a0d842d3b9c1b98f14786012700925f10eee884",
+  "specSource": "generatedSpec"
+}

@@ -6,6 +6,8 @@ import { reportScenarioPreviewResultsToTestRail } from "../src/server/services/t
 import { TestRailClient } from "../src/clients/testrail.client";
 import type { TestRailClient as TestRailClientType } from "../src/clients/testrail.client";
 import type { McpScenario } from "../src/scenarios/scenario-types";
+import { toPublishableScenario } from "../src/recording/scenario-to-testrail";
+import type { RecordedScenario } from "../src/recording/trace-to-scenario";
 
 const STORE_PATH = path.resolve(process.cwd(), ".artifacts", "testrail", "scenario-case-mappings.json");
 
@@ -178,6 +180,64 @@ test("buildSafeTestRailRefs devuelve un ref simple y unico por escenario", () =>
   expect(refs.includes(",")).toBe(false);
   expect(refs.includes("|")).toBe(false);
   expect(refs.includes("cacheKey")).toBe(false);
+});
+
+test("Recording adapta al mismo contrato de entrada que Jira/HU para el publisher compartido", async () => {
+  const recorded = {
+    scenarioId: "REC-ADAPTER-001",
+    title: "Crear registro desde evidencia observada",
+    description: "Flujo observado",
+    preconditions: ["Usuario autenticado"],
+    kind: "happy_path",
+    provenance: "observed",
+    mobileSteps: [],
+    webSteps: [],
+    testRailSteps: [
+      { content: "Abrir la pantalla", expected: "La pantalla queda disponible" },
+      { content: "Guardar el registro", expected: "Resultado esperado por confirmar" },
+    ],
+    requiredData: [],
+    stepTargets: [],
+    sourceRecordingId: "fixture-recording",
+    hasUncertainSteps: false,
+  } as unknown as RecordedScenario;
+  const recordingInput = toPublishableScenario(recorded, "shared-app", "fixture-recording");
+  const jiraInput = makeScenario({
+    title: recordingInput.title,
+    preconditions: recordingInput.preconditions,
+    expectedResult: recordingInput.expectedResult,
+    appSlug: recordingInput.appSlug,
+  });
+  const recordingClient = makeClient() as any;
+  const jiraClient = makeClient() as any;
+  const baseContext = {
+    projectId: 56,
+    suiteId: 1731,
+    sectionId: 4903,
+    appSlug: "shared-app",
+    publishStrategy: "always_create" as const,
+  };
+
+  await testrailPublisher.publishScenariosToTestRail(recordingClient, {
+    ...baseContext,
+    scenarios: [recordingInput],
+    cacheKey: "recording-contract-equivalence",
+  });
+  await testrailPublisher.publishScenariosToTestRail(jiraClient, {
+    ...baseContext,
+    scenarios: [jiraInput],
+    cacheKey: "jira-contract-equivalence",
+  });
+
+  const shapeOf = (input: Record<string, unknown>) => ({
+    keys: Object.keys(input).sort(),
+    types: Object.fromEntries(Object.entries(input).map(([key, value]) => [key, Array.isArray(value) ? "array" : typeof value])),
+    stepShape: Array.isArray(input.stepsSeparated)
+      ? (input.stepsSeparated as Array<Record<string, unknown>>).map((step) => Object.keys(step).sort())
+      : [],
+  });
+  expect(shapeOf(recordingClient.__captured.addCaseInputs[0])).toEqual(shapeOf(jiraClient.__captured.addCaseInputs[0]));
+  expect(recordingClient.__captured.addCaseInputs[0].customFields).toEqual({});
 });
 
 test("publishScenariosToTestRail incluye custom_expected y custom_case_oracle en addCase", async () => {
@@ -494,6 +554,40 @@ test("addCase: final body contiene refs y custom_refs no vacíos", async () => {
   }
 });
 
+test("shared addCase follows the configured template step contract", async () => {
+  const originalFetch = globalThis.fetch;
+  const originalSeparated = process.env.TESTRAIL_SEND_CUSTOM_STEPS_SEPARATED;
+  const originalText = process.env.TESTRAIL_SEND_CUSTOM_STEPS_TEXT;
+  let capturedBody: Record<string, unknown> = {};
+  globalThis.fetch = (async (_input: RequestInfo | URL, init?: RequestInit) => {
+    capturedBody = JSON.parse(init?.body as string ?? "{}") as Record<string, unknown>;
+    return new Response(JSON.stringify({ id: 1001, title: "Shared contract" }), { status: 200 });
+  }) as typeof fetch;
+
+  try {
+    process.env.TESTRAIL_SEND_CUSTOM_STEPS_SEPARATED = "true";
+    process.env.TESTRAIL_SEND_CUSTOM_STEPS_TEXT = "true";
+    const { TestRailClientCtor } = loadFreshTestRailModules();
+    const client = new TestRailClientCtor({ url: "https://testrail.local", email: "user@example.com", apiKey: "secret" });
+    await client.addCase("4903", {
+      title: "Shared contract",
+      refs: "AA-81-SHARED-CONTRACT",
+      stepsSeparated: [{ content: "Abrir", expected: "Disponible" }, { content: "Guardar", expected: "Confirmar" }],
+    });
+
+    expect(typeof capturedBody.custom_steps).toBe("string");
+    expect(capturedBody.custom_steps).toBe("<ol>\n<li>1. Abrir<br />Esperado: Disponible</li>\n<li>2. Guardar<br />Esperado: Confirmar</li>\n</ol>\n");
+    expect(Array.isArray(capturedBody.custom_steps_separated)).toBe(true);
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (originalSeparated === undefined) delete process.env.TESTRAIL_SEND_CUSTOM_STEPS_SEPARATED;
+    else process.env.TESTRAIL_SEND_CUSTOM_STEPS_SEPARATED = originalSeparated;
+    if (originalText === undefined) delete process.env.TESTRAIL_SEND_CUSTOM_STEPS_TEXT;
+    else process.env.TESTRAIL_SEND_CUSTOM_STEPS_TEXT = originalText;
+    clearTestRailModuleCache();
+  }
+});
+
 test("updateCase: final body contiene refs y custom_refs no vacíos", async () => {
   const originalFetch = globalThis.fetch;
   let capturedBody: Record<string, unknown> = {};
@@ -780,6 +874,7 @@ test("updateCase: customFields.custom_preconds no sobrescribe body.custom_precon
 
 function makeAddCaseRecoveryClient(options?: {
   existingInSection?: Array<{ id: number; title: string; section_id: number; custom_scenario_id?: string; custom_preconds?: string }>;
+  getCasesSequence?: Array<Array<{ id: number; title: string; section_id: number; custom_scenario_id?: string; custom_preconds?: string }>>;
   returnOnFirstGetCases?: boolean;
   addCaseResult?: { id: number; title: string };
   addCaseErrorMessage?: string;
@@ -792,12 +887,17 @@ function makeAddCaseRecoveryClient(options?: {
     getCasesCalls: 0,
   };
   let getCasesReturned = false;
+  const getCasesSequence = [...(options?.getCasesSequence ?? [])];
   return {
     async getCasesByRefs(_projectId: string, _refs: string) {
       return [];
     },
     async getCases(_projectId: string, _suiteId: string | undefined, _sectionId: string | undefined) {
       captured.getCasesCalls++;
+      if (getCasesSequence.length > 0) {
+        getCasesReturned = true;
+        return getCasesSequence.shift()!.map((c) => ({ ...c }));
+      }
       // First call(s) during reuse search return empty so addCase is attempted
       if (!returnOnFirstGetCases && !getCasesReturned) {
         getCasesReturned = true;
@@ -891,6 +991,50 @@ test("publishScenariosToTestRail recupera caso ya creado cuando addCase devuelve
   expect(result.created).toBe(1);
   expect(result.mappings[0].testRailCaseId).toBe(3801);
   expect(result.mappings[0].source).toBe("recovered_after_add_case_500");
+  expect(client.__captured.addCaseInputs.length).toBe(1);
+});
+
+test("Recording reconcilia un 500 con el título exacto cuando el template no conserva metadata interna", async () => {
+  const client = makeAddCaseRecoveryClient({
+    existingInSection: [{ id: 3810, title: "Caso observado", section_id: 4903, custom_preconds: "Precondiciones humanas" }],
+    getCasesSequence: [
+      [],
+      [],
+      [],
+      [{ id: 3810, title: "Caso observado", section_id: 4903, custom_preconds: "Precondiciones humanas" }],
+    ],
+  });
+
+  const result = await testrailPublisher.publishScenariosToTestRail(client, {
+    projectId: 56,
+    suiteId: 1731,
+    sectionId: 4903,
+    appSlug: "kiosko",
+    cacheKey: "recording-title-reconciliation",
+    recordingBatch: true,
+    scenarios: [makeScenario({ title: "Caso observado" })],
+    publishStrategy: "always_create",
+  });
+
+  expect(client.__captured.addCaseInputs.length).toBe(1);
+  expect(result.reconciledCreated).toEqual([{ scenarioId: "PREVIEW-001", testRailCaseId: 3810 }]);
+  expect(result.caseIds).toEqual([3810]);
+  expect(result.failed).toEqual([]);
+  expect(testrailPublisher.readPersistedScenarioMappings().some((m) => m.testRailCaseId === 3810)).toBe(true);
+
+  const retry = await testrailPublisher.publishScenariosToTestRail(client, {
+    projectId: 56,
+    suiteId: 1731,
+    sectionId: 4903,
+    appSlug: "kiosko",
+    cacheKey: "recording-title-reconciliation-retry",
+    recordingBatch: true,
+    scenarios: [makeScenario({ title: "Caso observado" })],
+    publishStrategy: "always_create",
+  });
+  expect(retry.caseIds).toEqual([3810]);
+  expect(retry.created).toBe(0);
+  expect(retry.reused).toBe(1);
   expect(client.__captured.addCaseInputs.length).toBe(1);
 });
 

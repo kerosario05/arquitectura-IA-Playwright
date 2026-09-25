@@ -3,6 +3,7 @@ export type StepIntentType =
   | "action_click"
   | "action_select"
   | "action_fill"
+  | "action_press"
   | "action_submit"
   | "assertion"
   | "precondition_context"
@@ -58,6 +59,9 @@ export type ParsedStepIntent = {
   relationContext?: string;
   canonicalAssertion?: CanonicalAssertion;
   conditionalAction?: ConditionalAction;
+  technicalTargetCandidates?: Array<Record<string, unknown>>;
+  technicalTargetRefs?: string[];
+  expectedRouteBefore?: string;
 };
 
 export type StepSetIntent = {
@@ -84,12 +88,37 @@ export type ActionTargetItem = {
   associatedEntity?: string;
   selectionField?: string;
   actionType?: StepIntentType;
+  recordingActionType?: "fill" | "select" | "click" | "check" | "uncheck" | "press" | "navigation" | "system_observation";
+  /** The discrete command key a `"press"` action sends (e.g. "Enter"). Absent for every other action type. */
+  key?: string;
   semanticRole?: "product" | "card" | "option" | "category" | "item" | "section" | "first_visible_item" | "unknown";
   relationContext?: string;
   inputIntent?: import("../types/execution-plan.types").InputIntent;
   requirementRefs?: string[];
   controlIdentity?: import("../types/control-identity").ControlIdentity;
   conditionalAction?: ConditionalAction;
+  technicalTargetCandidates?: Array<Record<string, unknown>>;
+  technicalTargetRefs?: string[];
+  /**
+   * LAST-RESORT, EXECUTION-ONLY authority (see `SemanticRuntimeEvidence`'s own doc in
+   * `structural-owner-identity.ts`). Passed through unchanged from `RecordingExecutionAction`;
+   * never derived from `target`/step text.
+   */
+  semanticRuntimeEvidence?: import("../recording/structural-owner-identity").SemanticRuntimeEvidence;
+  playwrightRecorderEvidence?: import("../recording/structural-owner-identity").PlaywrightRecorderEvidence;
+  expectedRouteBefore?: string;
+  expectedRouteAfter?: string;
+  expectedOutcomeKind?: "route_transition" | "in_place_transition";
+  /** `CanonicalInteraction.controlIdentity` (content-derived string) carried through for learned
+   *  route-family authority lookups -- distinct from the `controlIdentity` field above, which is
+   *  an unrelated runtime DOM fingerprint used for live target matching. */
+  recordedControlIdentity?: string;
+  /**
+   * Structured SOURCE-INTERACTION lineage (e.g. `RecordingExecutionAction.interactionId`). Lets the
+   * scenario normalizer distinguish two independent actions on the same control from two pipeline
+   * projections of the SAME source event. Absent for legacy/scenario-step sources.
+   */
+  sourceInteractionId?: string;
 };
 
 export type FillValueSource = "literal" | "test_data" | "unknown";

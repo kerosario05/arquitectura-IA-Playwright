@@ -87,6 +87,19 @@ test("irrelevant controls are rejected while relevant alternatives remain candid
   assert.ok((result.suggestions[0].goalRelevanceScore ?? 0) >= 0.35);
 });
 
+test("shared entity text does not rescue an unrelated navigation alternative", () => {
+  const base = buildHappyPathScenario(trace(), []);
+  const unrelatedNavigation = {
+    ...base,
+    title: "Alternativa observada: Registro Digital Nuevos Colaboradores",
+    description: "Abrir una navegación independiente del flujo actual.",
+    testRailSteps: [{ content: "Seleccionar Registro Digital Nuevos Colaboradores", expected: "Se abre otra funcionalidad" }],
+  };
+  const result = filterGoalScopedSuggestions("Agregar varios colaboradores", [unrelatedNavigation]);
+  assert.equal(result.suggestions.length, 0);
+  assert.equal(result.irrelevantCandidatesRejected, 1);
+});
+
 test("semantic identity deduplicates wording variants", () => {
   const base = buildHappyPathScenario(trace(), []);
   const one = { ...base, title: "Tipo de cliente", testRailSteps: [{ content: "Elegir tipo de cliente", expected: "ok" }] };
@@ -105,11 +118,16 @@ test("partial traces remain usable and application changes are derived outputs",
   assert.deepEqual(model.datasets.find((item) => item.valueRole === "runtime_derived_oracle")?.dependsOn, ["nombre_cliente"]);
 });
 
-test("QA credential persistence is project-scoped and opt-in", () => {
+test("QA credential persistence is always enabled by the recording contract", () => {
   assert.deepEqual(normalizeRecordingDataPolicy(), {
     persistRecordedValues: true,
-    persistQaCredentials: false,
-    includeQaCredentialsInTestRail: false,
+    persistQaCredentials: true,
+    includeQaCredentialsInTestRail: true,
+  });
+  assert.deepEqual(normalizeRecordingDataPolicy({ persistQaCredentials: false, includeQaCredentialsInTestRail: false }), {
+    persistRecordedValues: true,
+    persistQaCredentials: true,
+    includeQaCredentialsInTestRail: true,
   });
   assert.deepEqual(normalizeRecordingDataPolicy({ persistQaCredentials: true, includeQaCredentialsInTestRail: true }), {
     persistRecordedValues: true,
@@ -118,7 +136,12 @@ test("QA credential persistence is project-scoped and opt-in", () => {
   });
 });
 
-test("TestRail preview keeps the primary first and applies credential policy", () => {
+test("TestRail preview keeps the primary first, and dataRequirements never carries a sensitive field's literal value regardless of policy", () => {
+  // FIRST_LEAK fix: `dataRequirements` used to embed a sensitive field's real `exampleValue`
+  // (`key=value`) whenever `includeQaCredentialsInTestRail` was set -- but that flag is
+  // hardcoded to `true` by `normalizeRecordingDataPolicy`'s own invariant, so this leaked
+  // unconditionally. TestRail is never a secret store: only the key is ever published now, for
+  // every policy value, with zero exception.
   const primary = buildHappyPathScenario(trace({ recordingGoal: normalizeRecordingGoal("Crear cliente") }), []);
   primary.requiredData.push({ key: "auth_password", label: "Password", stepIndex: 1, sensitive: true, exampleValue: "fixture-only" });
   const referenceOnly = toPublishableScenario(primary, "app-test", "recording-goal-test", normalizeRecordingDataPolicy());
@@ -127,7 +150,9 @@ test("TestRail preview keeps the primary first and applies credential policy", (
     includeQaCredentialsInTestRail: true,
   }));
   assert.equal(referenceOnly.dataRequirements, "auth_password");
-  assert.equal(allowed.dataRequirements, "auth_password=fixture-only");
+  assert.equal(allowed.dataRequirements, "auth_password");
+  assert.ok(!referenceOnly.dataRequirements.includes("fixture-only"));
+  assert.ok(!allowed.dataRequirements.includes("fixture-only"));
   assert.equal(primary.primary, true);
 });
 
@@ -145,10 +170,15 @@ test("human preview uses rendered values while the execution template stays key-
   assert.equal(scenario.webSteps[1]?.value, undefined);
   assert.equal(scenario.webSteps[1]?.valueKey, "identificador");
   assert.match(preview.steps[1], /ABC123/);
-  assert.match(preview.steps[1], /Esperado:/);
+  assert.ok(!preview.steps[1].includes("Esperado:"));
 });
 
-test("TestRail uses rendered values only when the credential policy allows it", () => {
+test("FIRST_LEAK fix: TestRail NEVER receives a sensitive field's real recorded value, under any recordingDataPolicy -- DISPLAY VALUE != EXECUTION VALUE", () => {
+  // This test used to assert the OPPOSITE (`protectedPreview.steps.some(...includes(secret))`
+  // === true) under the name "TestRail uses rendered values under the invariant credential
+  // policy" -- that was the exact behavior this ticket exists to remove. `persistQaCredentials`
+  // governs whether the RUNTIME dataset may retain the real secret for execution; it must never
+  // also control whether TestRail (a presentation/artifact channel) receives it.
   const baseEvent = fillEvent();
   const event = {
     ...baseEvent,
@@ -161,7 +191,11 @@ test("TestRail uses rendered values only when the credential policy allows it", 
   });
   const protectedScenario = buildHappyPathScenario(protectedTrace, protectedTrace.events);
   const protectedPreview = toPublishableScenario(protectedScenario, "app-test", "recording-goal-test", protectedTrace.recordingDataPolicy);
-  assert.ok(protectedPreview.steps.every((step) => !step.includes("fixture-secret")));
+  assert.ok(!protectedPreview.steps.some((step) => step.includes("fixture-secret")));
+  // A sensitive step publishes its generic, key-based template (never the concrete secret, and
+  // never even `renderedStep`'s safe-but-fill-shaped wording -- the SAME neutral form every
+  // other execution template already uses).
+  assert.ok(protectedPreview.steps.some((step) => step.includes('Ingresar [contrasena] en "Contraseña"')));
 
   const allowedTrace = trace({
     events: [event],
@@ -169,7 +203,8 @@ test("TestRail uses rendered values only when the credential policy allows it", 
   });
   const allowedScenario = buildHappyPathScenario(allowedTrace, allowedTrace.events);
   const allowedPreview = toPublishableScenario(allowedScenario, "app-test", "recording-goal-test", allowedTrace.recordingDataPolicy);
-  assert.ok(allowedPreview.steps.some((step) => step.includes("fixture-secret")));
+  assert.ok(!allowedPreview.steps.some((step) => step.includes("fixture-secret")));
+  assert.ok(allowedPreview.steps.some((step) => step.includes('Ingresar [contrasena] en "Contraseña"')));
 });
 
 test("selection values are materialized without replacing the runtime target", () => {

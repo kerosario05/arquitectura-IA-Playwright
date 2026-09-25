@@ -1,6 +1,7 @@
 import path from "node:path";
 
-export function resolveQaBrowserProfilePath(rawValue?: string, cwd = process.cwd()): string {
+export function resolveQaBrowserProfilePath(rawValue?: string, cwd = process.cwd()): string | undefined {
   const configured = rawValue?.trim();
-  return path.resolve(cwd, configured || ".artifacts/browser/qa-profile");
+  if (!configured) return undefined;
+  return path.resolve(cwd, configured);
 }

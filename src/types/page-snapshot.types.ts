@@ -49,6 +49,12 @@ export type SnapshotElement = {
   className?: string;
   domId?: string;
   controlIdentity?: ControlIdentity;
+  actionability?: "NATIVE_ACTIONABLE" | "SEMANTIC_ACTIONABLE" | "FRAMEWORK_ACTIONABLE" | "NON_ACTIONABLE";
+  tabIndex?: number;
+  cursor?: string;
+  pointerEvents?: string;
+  actionOwner?: boolean;
+  structuralOwnerIdentity?: StructuralOwnerIdentity;
 };
 
 export type PageSnapshot = {
@@ -71,3 +77,4 @@ export type PageSnapshot = {
   };
 };
 import type { ControlIdentity } from "./control-identity";
+import type { StructuralOwnerIdentity } from "../recording/structural-owner-identity";

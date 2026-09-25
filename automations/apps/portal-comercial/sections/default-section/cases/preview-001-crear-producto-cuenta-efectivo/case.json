@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-crear-producto-cuenta-efectivo",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Crear Producto Cuenta Efectivo",
+  "source": "discovery",
+  "appSlug": "portal-comercial",
+  "appConfigPath": "automations\\apps\\portal-comercial\\app.config.json",
+  "createdAt": "2026-09-16T18:05:28.609Z"
+}

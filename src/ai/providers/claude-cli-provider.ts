@@ -38,10 +38,15 @@ export class ClaudeCliProvider {
     this.timeoutMs = config.timeoutMs;
   }
 
-  private buildPromptContent(systemMessage: string, userMessage: string): string {
+  private buildPromptContent(
+    systemMessage: string,
+    userMessage: string,
+    jsonSchema?: AiCompletionRequest["jsonSchema"],
+  ): string {
     const parts: string[] = [];
     if (systemMessage) parts.push("SYSTEM:\n" + systemMessage);
     if (userMessage) parts.push("USER:\n" + userMessage);
+    if (jsonSchema) parts.push(`STRUCTURED OUTPUT SCHEMA (${jsonSchema.name}):\n${JSON.stringify(jsonSchema.schema, null, 2)}`);
     parts.push("OUTPUT: Respond with ONLY valid JSON. No explanations, no markdown fences, no tool calls.");
     return parts.join("\n\n");
   }
@@ -110,7 +115,7 @@ export class ClaudeCliProvider {
     try {
       const systemMessage = request.messages.find(m => m.role === "system")?.content ?? "";
       const userMessage = request.messages.find(m => m.role === "user")?.content ?? "";
-      const fullPrompt = this.buildPromptContent(systemMessage, userMessage);
+      const fullPrompt = this.buildPromptContent(systemMessage, userMessage, request.jsonSchema);
 
       if (purpose === "scenario_generation") {
         console.log(`[claude-cli] purpose=scenario_generation promptChars=${fullPrompt.length}`);

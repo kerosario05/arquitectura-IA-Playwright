@@ -1,0 +1,44 @@
+{
+  "scenarioId": "PREVIEW-001",
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../../src/automations/runtime/promoted-spec-runtime';\nimport { ProductListPage } from '../../../../pages/productlist.page';\nimport { CategoryPage } from '../../../../pages/category.page';\n\nprocess.env.APP_SLUG = \"kiosko\";\nprocess.env.SECTION_SLUG = \"default-section\";\nprocess.env.SCENARIO_ID = \"PREVIEW-001\";\nprocess.env.SCENARIO_TITLE = \"Consulta prestamo\";\n\ntest(\"PREVIEW-001 - Consulta prestamo\", async ({ page }) => {\n  const promotedRuntime = createPromotedSpecRuntime(page);\n  const productListPage = new ProductListPage(page);\n  const categoryPage = new CategoryPage(page);\n\n  try {\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 1,\n      target: \"Explora nuestros productos\",\n      actionIntent: \"click\",\n      expectedEffect: \"abrir productos\",\n      action: async () => {\n        await productListPage.clickPrimaryAction(\"Explora nuestros productos\");\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 2,\n      target: \"PrÃ©stamos\",\n      actionIntent: \"click\",\n      expectedEffect: \"abrir categorÃ­a de prÃ©stamos\",\n      action: async () => {\n        await categoryPage.selectCategory(\"PrÃ©stamos\");\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 3,\n      target: \"PrÃ©stamo Personal\",\n      actionIntent: \"click\",\n      expectedEffect: \"cargar pantalla inicial\",\n      action: async () => {\n        await productListPage.selectProduct(\"PrÃ©stamo Personal\");\n      }\n    });\n    await promotedRuntime.waitForPromotedUiStable(3, \"PrÃ©stamo Personal\");\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 3,\n      target: \"PrÃ©stamo Personal\",\n      polarity: \"positive\",\n      expectedUrl: \"https://172.27.4.50/\",\n      assertion: async () => {\n        await expect(page).toHaveURL(\"https://172.27.4.50/\");\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 4,\n      target: \"Finalizar sesiÃ³n\",\n      actionIntent: \"click\",\n      expectedEffect: \"finalizar sesiÃ³n\",\n      action: async () => {\n        await productListPage.clickPrimaryAction(\"Finalizar sesiÃ³n\");\n      }\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});\n",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "La aplicaciÃ³n carga su pantalla inicial",
+      "implementation": "await expect(page).toHaveURL(\"https://172.27.4.50/\");"
+    }
+  ],
+  "usedPageObjects": [
+    {
+      "className": "ProductListPage",
+      "methods": [
+        "clickPrimaryAction",
+        "selectProduct"
+      ]
+    },
+    {
+      "className": "CategoryPage",
+      "methods": [
+        "selectCategory"
+      ]
+    }
+  ],
+  "declaredIdentifiers": [
+    "promotedRuntime",
+    "productListPage",
+    "categoryPage"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

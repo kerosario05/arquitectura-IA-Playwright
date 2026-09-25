@@ -440,7 +440,7 @@ function buildLastSelectionReplayParam(
   return `async () => { ${replayBody} }`;
 }
 
-function buildPortablePathFromSpec(specPath: string, absoluteTargetPath: string): string {
+export function buildPortablePathFromSpec(specPath: string, absoluteTargetPath: string): string {
   return path.relative(path.dirname(specPath), absoluteTargetPath).replace(/\\/g, "/");
 }
 

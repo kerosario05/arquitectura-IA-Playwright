@@ -418,13 +418,14 @@ function withEnv(values, fn) {
             ],
             requireJson: true
         })).rejects.toThrow(ai_provider_types_1.AiProviderError);
+        // Shared extractor now returns output_missing when all extraction strategies fail
         await (0, test_1.expect)(provider.completeJson({
             messages: [
                 { role: "system", content: "Return JSON only" },
                 { role: "user", content: "Test" }
             ],
             requireJson: true
-        })).rejects.toThrow(/invalid json/i);
+        })).rejects.toThrow(/did not write/i);
     }
     finally {
         (0, codex_cli_runner_1.__setSpawnForTesting)(undefined);
@@ -477,7 +478,7 @@ function withEnv(values, fn) {
         });
         (0, test_1.expect)(result.parsedJson?.decision).toBe("repaired_plan");
         (0, test_1.expect)(result.parsedJson?.candidateId).toBe("nav-products");
-        (0, test_1.expect)(result.diagnostics?.warning).toBe("codex_exited_non_zero_but_output_valid");
+        (0, test_1.expect)(result.diagnostics?.warning).toBe("ai_provider_exited_non_zero_but_output_valid");
         (0, test_1.expect)(result.diagnostics?.exitCode).toBe(1);
         (0, test_1.expect)(result.diagnostics?.stderr).toContain("non-fatal issue");
     }
@@ -568,13 +569,14 @@ function withEnv(values, fn) {
             ],
             requireJson: true
         })).rejects.toThrow(ai_provider_types_1.AiProviderError);
+        // Shared extractor now returns output_missing when all extraction strategies fail
         await (0, test_1.expect)(provider.completeJson({
             messages: [
                 { role: "system", content: "Return JSON only" },
                 { role: "user", content: "Test" }
             ],
             requireJson: true
-        })).rejects.toThrow(/invalid json/i);
+        })).rejects.toThrow(/did not write/i);
     }
     finally {
         (0, codex_cli_runner_1.__setSpawnForTesting)(undefined);
@@ -852,7 +854,7 @@ function withEnv(values, fn) {
         (0, codex_cli_runner_1.__setSpawnForTesting)(undefined);
     }
 });
-(0, test_1.test)("CodexCliProvider stdout fallback pasa cuando repair-decision.json falta y fallback habilitado", async () => {
+(0, test_1.test)("CodexCliProvider extrae JSON de stdout cuando archivo falta", async () => {
     (0, codex_cli_runner_1.__setSpawnForTesting)(((command, args, options) => {
         const child = new node_events_1.EventEmitter();
         child.stdout = new node_events_1.EventEmitter();
@@ -876,8 +878,7 @@ function withEnv(values, fn) {
             extraArgs: [],
             timeoutMs: 30000,
             requireJson: true,
-            requireJsonSchema: false,
-            allowStdoutJsonFallback: true
+            requireJsonSchema: false
         });
         const result = await provider.completeJson({
             messages: [
@@ -886,15 +887,15 @@ function withEnv(values, fn) {
             ],
             requireJson: true
         });
+        // Shared extractor automatically tries stdout when file is missing
         (0, test_1.expect)(result.parsedJson?.decision).toBe("no_safe_action");
         (0, test_1.expect)(result.parsedJson?.reason).toBe("connection test");
-        (0, test_1.expect)(result.diagnostics?.warning).toBe("codex_stdout_fallback_used");
     }
     finally {
         (0, codex_cli_runner_1.__setSpawnForTesting)(undefined);
     }
 });
-(0, test_1.test)("CodexCliProvider stdout fallback valida decision/reason", async () => {
+(0, test_1.test)("CodexCliProvider extrae JSON de stdout con campos completos", async () => {
     (0, codex_cli_runner_1.__setSpawnForTesting)(((command, args, options) => {
         const child = new node_events_1.EventEmitter();
         child.stdout = new node_events_1.EventEmitter();
@@ -918,8 +919,7 @@ function withEnv(values, fn) {
             extraArgs: [],
             timeoutMs: 30000,
             requireJson: true,
-            requireJsonSchema: false,
-            allowStdoutJsonFallback: true
+            requireJsonSchema: false
         });
         const result = await provider.completeJson({
             messages: [
@@ -928,11 +928,11 @@ function withEnv(values, fn) {
             ],
             requireJson: true
         });
+        // Shared extractor automatically handles stdout JSON
         (0, test_1.expect)(result.parsedJson?.decision).toBe("repaired_plan");
         (0, test_1.expect)(result.parsedJson?.reason).toBe("Found safe candidate");
         (0, test_1.expect)(result.parsedJson?.candidateId).toBe("el-1");
         (0, test_1.expect)(result.parsedJson?.confidence).toBe(0.9);
-        (0, test_1.expect)(result.diagnostics?.warning).toBe("codex_stdout_fallback_used");
     }
     finally {
         (0, codex_cli_runner_1.__setSpawnForTesting)(undefined);
@@ -984,14 +984,14 @@ function withEnv(values, fn) {
         (0, codex_cli_runner_1.__setSpawnForTesting)(undefined);
     }
 });
-(0, test_1.test)("CodexCliProvider sin fallback falla cuando repair-decision.json falta (AI Repair real)", async () => {
+(0, test_1.test)("CodexCliProvider falla cuando repair-decision.json falta y stdout inválido", async () => {
     (0, codex_cli_runner_1.__setSpawnForTesting)(((command, args, options) => {
         const child = new node_events_1.EventEmitter();
         child.stdout = new node_events_1.EventEmitter();
         child.stderr = new node_events_1.EventEmitter();
         child.kill = () => { };
         setTimeout(() => {
-            child.stdout.emit("data", Buffer.from('{"decision":"no_safe_action","reason":"stdout response"}'));
+            child.stdout.emit("data", Buffer.from("This is not valid JSON"));
             child.emit("close", 0, null);
         }, 10);
         return child;
@@ -1008,9 +1008,9 @@ function withEnv(values, fn) {
             extraArgs: [],
             timeoutMs: 30000,
             requireJson: true,
-            requireJsonSchema: false,
-            allowStdoutJsonFallback: false
+            requireJsonSchema: false
         });
+        // Even with automatic stdout extraction, if stdout is not valid JSON, it fails
         await (0, test_1.expect)(provider.completeJson({
             messages: [
                 { role: "system", content: "Return JSON only" },
@@ -1030,7 +1030,7 @@ function withEnv(values, fn) {
         (0, codex_cli_runner_1.__setSpawnForTesting)(undefined);
     }
 });
-(0, test_1.test)("CodexCliProvider stdout fallback extrae JSON de texto mixto", async () => {
+(0, test_1.test)("CodexCliProvider extrae JSON de texto mixto en stdout", async () => {
     (0, codex_cli_runner_1.__setSpawnForTesting)(((command, args, options) => {
         const child = new node_events_1.EventEmitter();
         child.stdout = new node_events_1.EventEmitter();
@@ -1054,8 +1054,7 @@ function withEnv(values, fn) {
             extraArgs: [],
             timeoutMs: 30000,
             requireJson: true,
-            requireJsonSchema: false,
-            allowStdoutJsonFallback: true
+            requireJsonSchema: false
         });
         const result = await provider.completeJson({
             messages: [
@@ -1064,9 +1063,9 @@ function withEnv(values, fn) {
             ],
             requireJson: true
         });
+        // Shared extractor uses embedded_json strategy to extract from mixed text
         (0, test_1.expect)(result.parsedJson?.decision).toBe("no_safe_action");
         (0, test_1.expect)(result.parsedJson?.reason).toBe("connection test");
-        (0, test_1.expect)(result.diagnostics?.warning).toBe("codex_stdout_fallback_used");
     }
     finally {
         (0, codex_cli_runner_1.__setSpawnForTesting)(undefined);

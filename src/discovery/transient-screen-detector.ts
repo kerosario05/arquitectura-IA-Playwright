@@ -258,6 +258,24 @@ function hasDisabledZeroButton(texts: string[]): boolean {
   );
 }
 
+function hasStableEmptyState(
+  snapshot: PageSnapshot,
+  zeroProductMatches: string[],
+  loadingMatches: string[],
+  dataLoadingMatches: string[],
+  redirectMatches: string[],
+  successMatches: string[],
+  urlMatches: string[],
+): boolean {
+  return zeroProductMatches.length > 0
+    && loadingMatches.length === 0
+    && dataLoadingMatches.length === 0
+    && redirectMatches.length === 0
+    && successMatches.length === 0
+    && urlMatches.length === 0
+    && hasActionableElements(snapshot);
+}
+
 export function detectTransientScreen(snapshot: PageSnapshot): TransientScreenDetection {
   const texts = extractVisibleTexts(snapshot);
   const url = (snapshot as any).url || "";
@@ -288,6 +306,10 @@ export function detectTransientScreen(snapshot: PageSnapshot): TransientScreenDe
 
   if (hasFunctionalLanding(texts) && hasActionableElements(snapshot) && !loadingMatches.length && !dataLoadingMatches.length && !zeroProductMatches.length) {
     return { transient: false, reason: null, evidence: [], confidence: 0 };
+  }
+
+  if (hasStableEmptyState(snapshot, zeroProductMatches, loadingMatches, dataLoadingMatches, redirectMatches, successMatches, urlMatches)) {
+    return { transient: false, reason: null, evidence: ["actionable_empty_state_detected"], confidence: 0 };
   }
 
   if (urlMatches.length > 0) {

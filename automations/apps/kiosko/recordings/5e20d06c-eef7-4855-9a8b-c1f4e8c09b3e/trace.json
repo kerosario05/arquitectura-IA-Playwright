@@ -1,0 +1,33 @@
+{
+  "recordingId": "5e20d06c-eef7-4855-9a8b-c1f4e8c09b3e",
+  "projectSlug": "kiosko",
+  "appSlug": "kiosko",
+  "platform": "web",
+  "baseUrl": "http://127.0.0.1:8088/QA_Field_Lab.html",
+  "label": "AS",
+  "recordingGoal": {
+    "declaredGoal": "AS",
+    "normalizedGoal": "AS",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-09-24T22:30:00.032Z",
+  "status": "failed",
+  "events": [
+    {
+      "t": 3788,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "chrome-error://chromewebdata/",
+      "seq": 0
+    }
+  ],
+  "screens": [],
+  "errorMessage": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8088/QA_Field_Lab.html\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:8088/QA_Field_Lab.html\", waiting until \"domcontentloaded\"\u001b[22m\n"
+}

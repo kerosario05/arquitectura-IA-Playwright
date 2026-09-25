@@ -1,0 +1,61 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-09-22T23:31:53.751Z",
+  "entries": [
+    {
+      "key": "usuario",
+      "source": "unknown",
+      "fieldName": "Usuario",
+      "stepIndex": 2,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "contrasena",
+      "source": "unknown",
+      "fieldName": "Contraseña",
+      "stepIndex": 3,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "numero_de_identificacion",
+      "source": "unknown",
+      "fieldName": "Número de identificación",
+      "stepIndex": 6,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "monto",
+      "source": "unknown",
+      "fieldName": "Monto",
+      "stepIndex": 14,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "plazo",
+      "source": "unknown",
+      "fieldName": "Plazo",
+      "stepIndex": 15,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

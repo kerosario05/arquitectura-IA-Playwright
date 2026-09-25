@@ -75,6 +75,25 @@ export type RuntimeEvidenceTrace = {
   }>;
 };
 
+export type AuthenticationOutcome = {
+  classification: "AUTH_SUCCESS" | "AUTH_REJECTED" | "AUTH_INFRASTRUCTURE_FAILURE" | "AUTH_TIMEOUT_WITH_PROGRESS" | "POST_AUTH_NAVIGATION_FAILURE" | "BUSINESS_SURFACE_REACHED";
+  authRequestObserved: boolean;
+  authResponseObserved: boolean;
+  authSubmissionStatus?: number;
+  authHttpStatus?: number;
+  redirectStatuses?: number[];
+  followupNavigationStatus?: number;
+  redirectChain: string[];
+  postLoginUrlClass: "auth_surface" | "business_surface" | "unknown";
+  postLoginSurface: string;
+  loadingObserved: boolean;
+  errorSurfaceObserved: boolean;
+  businessSurfaceReached: boolean;
+  businessCandidateObserved?: boolean;
+  nextRecordedBusinessTargetVisible?: boolean;
+  authSurfaceStillVisible?: boolean;
+};
+
 export type PendingAssertionForensics = {
   assertion: string;
   normalizedAssertion: string;
@@ -212,6 +231,9 @@ export type DiscoveryStepResult = {
   snapshotTitle?: string;
   elementsFound?: number;
   error?: string;
+  actionExecutionStatus?: "executed" | "not_executed";
+  postActionOutcomeStatus?: "success" | "auth_failure" | "auth_timeout" | "navigation_failure" | "application_error";
+  authenticationOutcome?: AuthenticationOutcome;
   evidencePath?: string;
   resolutionDiagnosis?: unknown[];
   attemptedLocators?: string[];
@@ -414,6 +436,7 @@ export type CaseDiscoveryResult = {
   failedAtStep?: number;
   failedTarget?: string;
   failedReason?: string;
+  authenticationOutcome?: AuthenticationOutcome;
   aiRepairSummary?: AiRepairCaseSummary;
   partialDiagnostics?: {
     partialReason: "pending_local_assertions" | "pending_context_deferred_assertions" | "pending_synthetic_expected";

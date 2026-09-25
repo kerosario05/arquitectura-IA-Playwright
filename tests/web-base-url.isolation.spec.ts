@@ -1,7 +1,8 @@
 import { test, expect } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
-import { resolveWebBaseUrl } from "../src/cli/discovery-preview";
+import { resolveRuntimeWebBaseUrl, resolveWebBaseUrl } from "../src/cli/discovery-preview";
+import { getProjectConfigurationBySlug } from "../src/db/project-reader";
 
 const TEST_APP_SLUG = "project-a-test-isolation";
 const TEST_APP_DIR = path.join(process.cwd(), "automations", "apps", TEST_APP_SLUG);
@@ -43,6 +44,17 @@ test.describe("web:base-url isolation", () => {
     expect(result.fallbackUsed).toBe(false);
     expect(result.effective).not.toBe("https://default.example/");
     expect(result.effective).not.toContain("default.example");
+  });
+
+  test("runtime preview prefers the active project configuration over a stale app config", async () => {
+    const project = await getProjectConfigurationBySlug("portalempresarial");
+    test.skip(!project?.web?.baseUrl, "active project has no SQL web configuration");
+
+    const result = await resolveRuntimeWebBaseUrl("portalempresarial");
+
+    expect(result.source).toBe("project_sql");
+    expect(result.fallbackUsed).toBe(false);
+    expect(result.effective).toBe(project!.web!.baseUrl);
   });
 
   test("FAIL CLOSED: appSlug con config sin baseUrl debe fallar, no fallback silencioso", () => {

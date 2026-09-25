@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductListPage = void 0;
-const promoted_spec_helpers_1 = require("../../../browser/promoted-spec-helpers");
+const promoted_spec_helpers_1 = require("../../src/browser/promoted-spec-helpers");
 class ProductListPage {
     page;
     constructor(page) {
@@ -68,7 +68,7 @@ class ProductListPage {
                         const role = current.getAttribute('role');
                         const hasOnClick = !!current.onclick || current.getAttribute('onclick');
                         const hasClickableClass = clickableClassPatterns.some(pattern => {
-                            const className = current.className || '';
+                            const className = (current && current.className) || '';
                             return typeof className === 'string' && className.includes(pattern);
                         });
                         if (clickableTags.includes(tagName) || clickableRoles.includes(role || '') || hasOnClick || hasClickableClass) {
@@ -105,7 +105,7 @@ class ProductListPage {
                             const role = current.getAttribute('role');
                             const hasOnClick = !!current.onclick || current.getAttribute('onclick');
                             const hasClickableClass = clickableClassPatterns.some(pattern => {
-                                const className = current.className || '';
+                                const className = (current && current.className) || '';
                                 return typeof className === 'string' && className.includes(pattern);
                             });
                             if (clickableTags.includes(tagName) || clickableRoles.includes(role || '') || hasOnClick || hasClickableClass) {
@@ -437,7 +437,7 @@ class ProductListPage {
             const isClickable = (el) => {
                 const tagName = el.tagName.toLowerCase();
                 const role = el.getAttribute('role');
-                const hasOnClick = !!el.onclick || el.getAttribute('onclick');
+                const hasOnClick = !!(el.onclick || el.getAttribute('onclick'));
                 const hasClickableClass = clickableClassPatterns.some(pattern => {
                     const className = el.className || '';
                     return typeof className === 'string' && className.includes(pattern);

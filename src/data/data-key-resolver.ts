@@ -30,9 +30,39 @@ function isSensitiveKey(key: string): boolean {
   return SENSITIVE_KEYS.some(s => normalized.includes(s));
 }
 
-function maskValue(value: string): string {
-  if (value.length <= 4) return "***";
-  return "***" + value.slice(-3);
+/**
+ * Generic credential ROLE (never a specific app/project key spelling): a Recording's own
+ * valueKey is derived from the recorded field's semantic label (e.g. "contrasena",
+ * "entity_1.password"), which never matches the CLI/TestRail-canonicalized spellings below --
+ * this maps BOTH onto the same small set of roles the project's already-established secure
+ * runtime source (`auth.*` in APP_TEST_DATA_JSON, `QA_RUNTIME_*`/`APP_*` env vars -- see
+ * `secure-runtime-runner.ts`) uses. Matched by substring, same vocabulary style as
+ * `isSensitiveKey`, never by exact key text.
+ */
+const CREDENTIAL_ROLE_SOURCES: Record<string, { testDataKey: string; envVar: string }> = {
+  password: { testDataKey: "auth.password", envVar: "APP_PASSWORD" },
+  username: { testDataKey: "auth.username", envVar: "APP_USERNAME" },
+  company_identifier: { testDataKey: "auth.company_identifier", envVar: "APP_COMPANY_IDENTIFIER" },
+};
+
+const CREDENTIAL_ROLE_PATTERNS: Record<string, string[]> = {
+  password: ["password", "contrasena", "clave", "pin"],
+  username: ["username", "usuario"],
+  company_identifier: ["company_identifier", "identification_number"],
+};
+
+export function detectCredentialRole(key: string): keyof typeof CREDENTIAL_ROLE_SOURCES | undefined {
+  const normalized = normalizeKey(key);
+  for (const [role, patterns] of Object.entries(CREDENTIAL_ROLE_PATTERNS)) {
+    if (patterns.some((pattern) => normalized.includes(pattern))) return role as keyof typeof CREDENTIAL_ROLE_SOURCES;
+  }
+  return undefined;
+}
+
+// Never reveals any character of the real value -- a masked log line's job is to prove a
+// resolution happened, not to help a reader guess the secret from its trailing characters.
+function maskValue(_value: string): string {
+  return "***";
 }
 
 function normalizeKey(key: string): string {
@@ -159,34 +189,37 @@ export function resolveDataKey(
     }
   }
   
-  // Priority 3: Standard credential mappings
-  const credentialMappings: Record<string, string[]> = {
-    "usuario_valido": ["APP_USERNAME", "APP_USERNAME"],
-    "username_valido": ["APP_USERNAME", "APP_USERNAME"],
-    "user_valido": ["APP_USERNAME", "APP_USERNAME"],
-    "contrasena_valida": ["APP_PASSWORD", "APP_PASSWORD"],
-    "contraseña_valida": ["APP_PASSWORD", "APP_PASSWORD"],
-    "password_valido": ["APP_PASSWORD", "APP_PASSWORD"],
-    "clave_valida": ["APP_PASSWORD", "APP_PASSWORD"]
-  };
-  
-  for (const [pattern, envVars] of Object.entries(credentialMappings)) {
-    if (normalizeKey(key) === normalizeKey(pattern)) {
-      for (const envVar of envVars) {
-        const value = env[envVar];
-        if (value) {
-          return {
-            status: "resolved",
-            key,
-            value,
-            source: envVar,
-            masked: true
-          };
-        }
-      }
+  // Priority 3: Generic credential ROLE resolution (username/password/company identifier).
+  // Recording's own valueKey is derived from the recorded field's semantic label and never
+  // matches a fixed list of literal spellings -- matched by role/substring instead (see
+  // `detectCredentialRole`), against the SAME project-configured secure source
+  // (`auth.*` in APP_TEST_DATA_JSON) and env vars `secure-runtime-runner.ts` already uses for
+  // the TestRail-discovery path. No second credential system, no per-app/key hardcode.
+  const credentialRole = detectCredentialRole(key);
+  if (credentialRole) {
+    const roleSource = CREDENTIAL_ROLE_SOURCES[credentialRole];
+    const fromTestData = testData ? testData[roleSource.testDataKey] : undefined;
+    if (fromTestData !== undefined && fromTestData !== null && String(fromTestData).trim() !== "") {
+      return {
+        status: "resolved",
+        key,
+        value: String(fromTestData).trim(),
+        source: `APP_TEST_DATA_JSON (${roleSource.testDataKey})`,
+        masked: true
+      };
+    }
+    const fromEnv = env[roleSource.envVar];
+    if (fromEnv) {
+      return {
+        status: "resolved",
+        key,
+        value: fromEnv,
+        source: roleSource.envVar,
+        masked: true
+      };
     }
   }
-  
+
   // Priority 4: Direct env var lookup by normalized key
   const possibleEnvVars = [
     `APP_${normalizedKey.toUpperCase()}`,

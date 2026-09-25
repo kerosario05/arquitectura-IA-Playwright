@@ -1,0 +1,996 @@
+{
+  "version": "1.0",
+  "recordingId": "28ed7705-d9ed-46a9-8e5e-0427bfe9de76",
+  "projectSlug": "fenix",
+  "appSlug": "fenix",
+  "platform": "web",
+  "recordingGoal": {
+    "declaredGoal": "Reach the verification screen and record the six-box token entry",
+    "normalizedGoal": "Reach the verification screen and record the six-box token entry",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "selectorOptionInventories": [],
+  "semanticScreens": [
+    {
+      "screenIdentity": "60d370b39a8d",
+      "url": "https://qa1.santacruz.do/onlinebanking",
+      "classification": "SAME_SCREEN_MUTATION",
+      "sourceScreenKey": "60d370b39a8d"
+    }
+  ],
+  "semanticComponents": [
+    {
+      "componentId": "60d370b39a8d:control:60d370b39a8d|Usuario:|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "60d370b39a8d",
+      "label": "Usuario:",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-3"
+      ]
+    },
+    {
+      "componentId": "60d370b39a8d:control:60d370b39a8d|Contraseña:|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "60d370b39a8d",
+      "label": "Contraseña:",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-6"
+      ]
+    },
+    {
+      "componentId": "60d370b39a8d:control:60d370b39a8d|Iniciar sesión|button",
+      "componentType": "button",
+      "screenIdentity": "60d370b39a8d",
+      "label": "Iniciar sesión",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-7"
+      ]
+    }
+  ],
+  "semanticEvents": [
+    {
+      "eventRef": "event-1",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-2",
+      "action": "observe",
+      "screenIdentity": "60d370b39a8d",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-3",
+      "action": "fill",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "field": "Usuario:",
+      "controlAffordance": "editable",
+      "valueKey": "usuario",
+      "valueRole": "action_input",
+      "technicalTargetRef": "60d370b39a8d:control:role:textbox|Usuario:",
+      "afterState": "adminr",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-4",
+      "action": "navigate",
+      "screenIdentity": "60d370b39a8d",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-5",
+      "action": "observe",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "60d370b39a8d:control:60d370b39a8d|Iniciar sesión|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-6",
+      "action": "fill",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "field": "Contraseña:",
+      "controlAffordance": "editable",
+      "valueKey": "contrasena",
+      "valueRole": "secure_input",
+      "technicalTargetRef": "60d370b39a8d:control:role:textbox|Contraseña:",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-7",
+      "action": "click",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "60d370b39a8d:control:role:button|Iniciar sesión",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    }
+  ],
+  "datasets": [
+    {
+      "valueKey": "usuario",
+      "semanticField": "Usuario:",
+      "valueRole": "action_input",
+      "value": "adminr",
+      "rawTypedValue": "adminr",
+      "committedValue": "adminr",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "60d370b39a8d:control:role:textbox|Usuario:",
+      "recordingId": "28ed7705-d9ed-46a9-8e5e-0427bfe9de76",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "contrasena",
+      "semanticField": "Contraseña:",
+      "valueRole": "secure_input",
+      "source": "secure",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": true,
+      "generated": false,
+      "instanceIdentity": "60d370b39a8d:control:role:textbox|Contraseña:",
+      "recordingId": "28ed7705-d9ed-46a9-8e5e-0427bfe9de76",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    }
+  ],
+  "technicalObservations": [
+    {
+      "observationId": "obs-3",
+      "status": "VALIDATED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "label": "Usuario:",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "adminr",
+      "semanticField": "Usuario:",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Usuario:",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#UserNameP",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "UserNameP",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "60d370b39a8d:control:role:textbox|Usuario:",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-1",
+      "inputValue": "adminr",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-5",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "button",
+      "label": "Iniciar sesión",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "60d370b39a8d:control:60d370b39a8d|Iniciar sesión|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-6",
+      "status": "VALIDATED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "label": "Contraseña:",
+      "tag": "input",
+      "role": "input",
+      "semanticField": "Contraseña:",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Contraseña:",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#PasswordP",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "PasswordP",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "60d370b39a8d:control:role:textbox|Contraseña:",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-2",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-7",
+      "status": "VALIDATED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "button",
+      "label": "Iniciar sesión",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Iniciar sesión",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Iniciar sesión",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "deterministicStructuralIdentity": false,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "LoginForm"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "60d370b39a8d:control:role:button|Iniciar sesión",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "\n             Personal\n        ",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "\n             Personal\n        ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "\n             Empresarial\n        ",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "\n             Empresarial\n        ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "label": "Usuario:",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "UserNameP",
+        "name": "UserName",
+        "type": "text",
+        "placeholder": "Usuario"
+      },
+      "placeholder": "Usuario",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "UserNameP",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "60d370b39a8d:control:3",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "textbox",
+      "label": "Contraseña:",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "PasswordP",
+        "name": "Password",
+        "type": "password",
+        "placeholder": "Contraseña"
+      },
+      "placeholder": "Contraseña",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "PasswordP",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "60d370b39a8d:control:4",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "¿Olvidó su contraseña?",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "id": "forgotPasswordLnk"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "forgotPasswordLnk",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "60d370b39a8d:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "button",
+      "label": "Iniciar sesión",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "submit"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Iniciar sesión",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "Regístrate",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Regístrate",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "Derechos y Deberes como usuarios financieros",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Derechos y Deberes como usuarios financieros",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "\n             \n        ",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "\n             \n        ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "Inicio -",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Inicio - ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "Quiénes Somos -",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Quiénes Somos - ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "Productos -",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Productos - ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-13",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "Contactos -",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Contactos -",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:13",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-14",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "Tarifas de Servicio -",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Tarifas de Servicio -",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:14",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-15",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "Pasos Reclamación",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Pasos Reclamación ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:15",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-16",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "© 2026 Banco Santa Cruz, República Dominicana",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "© 2026 Banco Santa Cruz, República Dominicana",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:16",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-60d370b39a8d-control-17",
+      "status": "OBSERVED",
+      "screenIdentity": "60d370b39a8d",
+      "componentType": "a",
+      "label": "Powered by Sistemas Integrados de Informática",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Powered by Sistemas Integrados de Informática",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "60d370b39a8d:control:17",
+      "selectable": false,
+      "editable": false
+    }
+  ],
+  "editingSessions": [
+    {
+      "editingSessionId": "edit-1",
+      "controlIdentity": "60d370b39a8d|Usuario:|amount_or_text",
+      "screenIdentity": "60d370b39a8d",
+      "startedAt": 57853,
+      "endedAt": 115037,
+      "rawEventRefs": [
+        "event-3",
+        "event-5"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "60d370b39a8d:role:textbox|Usuario:"
+      ],
+      "inputValue": "adminr",
+      "finalValue": "adminr"
+    },
+    {
+      "editingSessionId": "edit-2",
+      "controlIdentity": "60d370b39a8d|Contraseña:|amount_or_text",
+      "screenIdentity": "60d370b39a8d",
+      "startedAt": 146383,
+      "endedAt": 146383,
+      "rawEventRefs": [
+        "event-7"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "60d370b39a8d:role:textbox|Contraseña:"
+      ]
+    }
+  ],
+  "scenarioSuggestions": [],
+  "canonicalInteractions": [
+    {
+      "id": "interaction-1",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-1"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "https://qa1.santacruz.do/onlinebanking",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-3",
+      "controlIdentity": "60d370b39a8d|Usuario:|role|textbox|Usuario:",
+      "semanticField": "Usuario:",
+      "action": "fill",
+      "valueKey": "usuario",
+      "recordedValue": "adminr",
+      "sourceEventRefs": [
+        "event-3"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Usuario:",
+        "css:#UserNameP",
+        "id:UserNameP"
+      ],
+      "editingSessionRef": "edit-1",
+      "description": "Ingresar en \"Usuario:\"",
+      "screenBeforeRef": "60d370b39a8d",
+      "screenAfterRef": "60d370b39a8d",
+      "routeBefore": "https://qa1.santacruz.do/onlinebanking",
+      "stateScope": "60d370b39a8d",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-4",
+      "controlIdentity": "60d370b39a8d",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-4"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "60d370b39a8d",
+      "screenAfterRef": "60d370b39a8d",
+      "routeBefore": "https://qa1.santacruz.do/onlinebanking",
+      "stateScope": "60d370b39a8d",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-6",
+      "controlIdentity": "60d370b39a8d|Contraseña:|role|textbox|Contraseña:",
+      "semanticField": "Contraseña:",
+      "action": "fill",
+      "valueKey": "contrasena",
+      "sourceEventRefs": [
+        "event-6"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Contraseña:",
+        "css:#PasswordP",
+        "id:PasswordP"
+      ],
+      "editingSessionRef": "edit-2",
+      "description": "Ingresar en \"Contraseña:\"",
+      "screenBeforeRef": "60d370b39a8d",
+      "screenAfterRef": "60d370b39a8d",
+      "routeBefore": "https://qa1.santacruz.do/onlinebanking",
+      "stateScope": "60d370b39a8d",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-7",
+      "controlIdentity": "60d370b39a8d|Iniciar sesión|role|button|Iniciar sesión",
+      "semanticField": "Iniciar sesión",
+      "action": "click",
+      "valueKey": "iniciar_sesion",
+      "sourceEventRefs": [
+        "event-7"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Iniciar sesión"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Iniciar sesión",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "deterministicStructuralIdentity": false,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "LoginForm"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "playwrightRecorderEvidence": {
+        "kind": "role",
+        "role": "button",
+        "normalizedName": "Iniciar sesión",
+        "targetTag": "button",
+        "scopeIdentity": {
+          "strategy": "id",
+          "value": "LoginForm"
+        },
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true
+      },
+      "description": "Ingresar en \"Iniciar sesión\"",
+      "screenBeforeRef": "60d370b39a8d",
+      "screenAfterRef": "60d370b39a8d",
+      "routeBefore": "https://qa1.santacruz.do/onlinebanking",
+      "stateScope": "60d370b39a8d",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    }
+  ],
+  "gridMetadata": {
+    "detected": false,
+    "grids": 0,
+    "rows": 0,
+    "cells": 0,
+    "headers": [],
+    "headerRelationships": []
+  },
+  "source": "SessionTrace",
+  "mutationOpportunities": [],
+  "suggestionDiagnostics": {
+    "opportunitiesDetected": 0,
+    "candidatesGenerated": 3,
+    "acceptedForDisplay": 0,
+    "rejectedBecause": [
+      "goal_relevance_gate"
+    ]
+  },
+  "derivation": {
+    "version": 1,
+    "generatedAt": "2026-09-24T22:46:21.266Z",
+    "executed": true,
+    "primaryCount": 1,
+    "suggestionCount": 0,
+    "opportunitiesDetected": 0,
+    "candidatesGenerated": 3,
+    "rejectedBecause": [
+      "goal_relevance_gate"
+    ]
+  },
+  "primaryScenario": {
+    "scenarioId": "REC-28ED7705-01",
+    "title": "Reach the verification screen and record the six-box token entry",
+    "provenance": "OBSERVED",
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "needsReview": false
+  },
+  "aiGeneration": {
+    "providerSuccess": true,
+    "schemaValidation": true,
+    "fallbackUsed": false,
+    "provider": "codex_cli",
+    "model": "gpt-5.6-luna",
+    "inputTokens": 61123,
+    "cachedTokens": 49408,
+    "nonCachedTokens": 11715,
+    "outputTokens": 768,
+    "totalTokens": 61891,
+    "contextBeforeChars": 7563,
+    "contextAfterChars": 3048,
+    "candidates": [],
+    "providerRejected": [
+      {
+        "reason": "No se proponen variantes adicionales porque la transcripción solo evidencia el ingreso de usuario y contraseña y la acción de iniciar sesión; no contiene restricciones, validaciones explícitas, OTP, cancelación, reintentos, expiración de sesión ni un control deshabilitado que sustente una variante.",
+        "sourceEvidenceRefs": [
+          "event-5",
+          "event-7",
+          "event-8"
+        ]
+      }
+    ]
+  }
+}

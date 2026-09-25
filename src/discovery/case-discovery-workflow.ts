@@ -26,12 +26,14 @@ import type { FullConfig } from "../types/env.types";
 import type { CaseDiscoveryResult, RuntimeEvidenceTrace, PendingAssertionForensics, AutoRepairDecisionDiagnostics, BatchCaseRootCause, DiscoveryStepResult } from "../types/discovery.types";
 import type { AppProfile, SectionProfile } from "../automations/app-profile";
 import { resolveSectionProfile } from "../automations/app-profile";
+import { installNavigationCausalityObserver, summarizeNavigationCausality } from "./navigation-causality-observer";
 import type { TestScenario } from "../types/testrail.types";
 import type { AssertionPolarity, CanonicalRequirement } from "../scenarios/canonical-scenario";
 import { canonicalizeTestRailCase, extractCanonicalInputRequirements } from "../testrail/testrail-canonical-adapter";
 import { transformTestRailCaseForRuntime } from "../testrail/testrail-runtime-transformer";
 import { launchRuntimeBrowserSession } from "../browser/browser-session";
 import { buildControlledAdvanceProbeOracles, type CanonicalAssertionIntent } from "./controlled-advance-probe";
+import { getProjectConfigurationBySlug } from "../db/project-reader";
 
 export type CaseDiscoveryWorkflowOptions = {
   caseId?: number;
@@ -450,6 +452,7 @@ function buildExpectedObservableOracles(
   scenarioSteps?: Array<{ index: number; action: string; expected?: string; polarity?: AssertionPolarity; requirementRefs?: string[]; canonicalAssertion?: import("../scenarios/canonical-scenario").CanonicalAssertion; conditionalAction?: import("../scenarios/canonical-scenario").CanonicalConditionalAction }>,
   canonicalRequirements?: CanonicalRequirement[],
   expectedResultRequirementRefs?: string[],
+  recordingOutcomePolarity?: AssertionPolarity,
 ): SpecGenerationObservableOracle[] {
   const transitionEvidence = caseResult.runtimeEvidenceTrace?.clickActions
     ?.filter((click) => click.success && (click.transitionDetected === true || Boolean(click.postClickUiChange)))
@@ -589,7 +592,7 @@ function buildExpectedObservableOracles(
       polarity = resolveObservableOraclePolarity(
         navigationAssertion?.requirementRefs,
         canonicalRequirements,
-      ) ?? resolveScenarioAssertionPolarity(requirement, assertionIndex);
+      ) ?? resolveScenarioAssertionPolarity(requirement, assertionIndex) ?? recordingOutcomePolarity;
       target = causalTransition.resolvedTarget ?? causalTransition.target;
       evidence.push(
         `transition_observed:${causalTransition.transitionDetected === true}`,
@@ -787,6 +790,8 @@ export function buildPromotionSourceScenario(
 ): SpecGenerationSourceScenario {
   const canonicalRequirements = (scenario as TestScenario & { canonicalRequirements?: CanonicalRequirement[] }).canonicalRequirements;
   const expectedResultRequirementRefs = (scenario as TestScenario & { expectedResultRequirementRefs?: string[] }).expectedResultRequirementRefs;
+  const recordingExecutionContract = (scenario as TestScenario & { recordingExecutionContract?: import("../scenarios/scenario-types").RecordingExecutionContract }).recordingExecutionContract;
+  const recordingNegativeOracle = (scenario as TestScenario & { negativeOracle?: import("../scenarios/scenario-types").NegativeScenarioOracle }).negativeOracle;
   const rawExpected = typeof scenario.raw?.custom_expected === "string" ? scenario.raw.custom_expected : "";
   const stepExpected = scenario.steps
     .map((step) => step.expected?.trim())
@@ -823,6 +828,14 @@ export function buildPromotionSourceScenario(
   const transitionEvidence = caseResult.runtimeEvidenceTrace?.clickActions
     ?.filter((click) => click.success && (click.transitionDetected === true || Boolean(click.postClickUiChange)))
     ?? [];
+  // Recording replay carries an observed successful transition as structured
+  // runtime authority. Use it only as the positive polarity fallback for the
+  // recording's own expected outcome; generic scenarios remain fail-closed.
+  const recordingOutcomePolarity: AssertionPolarity | undefined = recordingExecutionContract
+    && !recordingNegativeOracle
+    && transitionEvidence.length > 0
+    ? "positive"
+    : undefined;
   const resolveScenarioStepPolarity = (stepIndex: number, _requirement: string): AssertionPolarity | undefined => {
     const scenarioStep = scenario.steps.find((candidate) => candidate.index === stepIndex);
     const declaredPolarity = (scenarioStep as (typeof scenarioStep & { polarity?: AssertionPolarity }) | undefined)?.polarity;
@@ -883,7 +896,7 @@ export function buildPromotionSourceScenario(
           source: "discovery" as const,
           stepIndex: step.index,
           target: causalTransition.resolvedTarget ?? causalTransition.target,
-          polarity: resolveScenarioStepPolarity(step.index, requirement),
+      polarity: resolveScenarioStepPolarity(step.index, requirement),
           evidence: [
             `transition_observed:${causalTransition.transitionDetected === true}`,
             `click_target:${causalTransition.target}`,
@@ -927,7 +940,34 @@ export function buildPromotionSourceScenario(
       : undefined,
       canonicalAssertion: step.canonicalAssertion,
       conditionalAction: (step as typeof step & { conditionalAction?: import("../scenarios/canonical-scenario").CanonicalConditionalAction }).conditionalAction,
-    assertionImportance: discoveryStepByIndex.get(step.index)?.assertionImportance
+    assertionImportance: discoveryStepByIndex.get(step.index)?.assertionImportance,
+    // Recording technical authority (owner/stableDescendants/semanticShape) must survive into
+    // the persisted SpecGenerationSourceScenario — this is the exact field that
+    // spec-execution-contract.ts's shared materializer prefers over any Discovery PlanTarget
+    // text fallback. Previously dropped here, forcing every step through the weaker Discovery
+    // path regardless of recordingReplay=true.
+    technicalTargetRef: (step as typeof step & { technicalTargetRef?: string }).technicalTargetRef,
+    technicalTargetRefs: (step as typeof step & { technicalTargetRefs?: string[] }).technicalTargetRefs,
+    // Recording-sourced authority (above) wins when present; otherwise, a field-scoped certified
+    // target Discovery's own live execution already physically reconfirmed for this step
+    // (case-discovery.ts's fill success path) is the same-shaped fallback -- mirrors the
+    // existing discoveryStepByIndex.get(step.index)?.assertionImportance merge pattern just
+    // below, never a new field/schema.
+    technicalTargetCandidates: (step as typeof step & { technicalTargetCandidates?: Array<Record<string, unknown>> }).technicalTargetCandidates
+      ?? (discoveryStepByIndex.get(step.index) as { technicalTargetCandidates?: Array<Record<string, unknown>> } | undefined)?.technicalTargetCandidates,
+    // Same fallback shape as technicalTargetCandidates above, for the plain field-relation hint
+    // (associatedField) Discovery's own live click resolution already used -- never a
+    // certification, just a hint transported so a runtime_resolution_required click can retry
+    // with it later.
+    associatedField: step.associatedField
+      ?? (discoveryStepByIndex.get(step.index) as { associatedField?: string } | undefined)?.associatedField,
+    // FIRST_LOSS fix (this ticket): the SAME lineage `deterministic-spec-compiler.ts` needs to
+    // recognize a selection-like recorded click (`isSelectionLikeRecordedRole` +
+    // `hasUniqueControlLineage`) was already present on `step` (TestScenarioStep -- see
+    // testrail.types.ts) but never copied across here, unlike every sibling technical-authority
+    // field above. Never re-derived, never positional -- verbatim transport only.
+    controlIdentity: step.controlIdentity,
+    recordingActionType: step.recordingActionType,
   }));
   const canonicalRequirementById = new Map((canonicalRequirements ?? []).map((requirement) => [requirement.requirementId, requirement]));
   const seenControlledAdvanceAssertions = new Set<string>();
@@ -971,6 +1011,7 @@ export function buildPromotionSourceScenario(
       scenarioSteps,
       canonicalRequirements,
       expectedResultRequirementRefs,
+      recordingOutcomePolarity,
     ),
     ...satisfiedReconciledOracles,
   ];
@@ -1005,7 +1046,31 @@ export function buildPromotionSourceScenario(
       action: step.action,
       description: step.action,
       expected: step.expected?.trim() || undefined,
+      valueKey: (step as typeof step & { valueKey?: string }).valueKey,
       polarity: (step as typeof step & { polarity?: AssertionPolarity }).polarity,
+      // Recording technical authority (owner/stableDescendants/semanticShape) must survive into
+      // this persisted SpecGenerationSourceScenario — this is the actual object
+      // spec-execution-contract.ts's shared materializer consumes. Previously dropped here
+      // (this return statement rebuilds `steps` independently of the `scenarioSteps` variable
+      // above), forcing every step through the weaker Discovery PlanTarget path regardless of
+      // recordingReplay=true. See case-discovery-workflow.technical-target-propagation.test.ts.
+      technicalTargetRef: (step as typeof step & { technicalTargetRef?: string }).technicalTargetRef,
+      technicalTargetRefs: (step as typeof step & { technicalTargetRefs?: string[] }).technicalTargetRefs,
+      // Same fallback merge as scenarioSteps above -- a field-scoped certified target Discovery's
+      // own live fill execution already physically reconfirmed, when no Recording-sourced
+      // authority already exists for this step.
+      technicalTargetCandidates: (step as typeof step & { technicalTargetCandidates?: Array<Record<string, unknown>> }).technicalTargetCandidates
+        ?? (discoveryStepByIndex.get(step.index) as { technicalTargetCandidates?: Array<Record<string, unknown>> } | undefined)?.technicalTargetCandidates,
+      associatedField: step.associatedField
+        ?? (discoveryStepByIndex.get(step.index) as { associatedField?: string } | undefined)?.associatedField,
+      // FIRST_LOSS fix (this ticket): same as `scenarioSteps` above -- this is the actual
+      // persisted `SpecGenerationSourceScenario` `deterministic-spec-compiler.ts`'s
+      // `isSelectionLikeRecordedRole`/`hasUniqueControlLineage` lineage check reads through
+      // `SpecExecutionContractStep`. Was present on `step` (TestScenarioStep) but dropped here,
+      // independently of the `scenarioSteps` variable above (this return statement rebuilds
+      // `steps` on its own). Verbatim transport only, never re-derived, never positional.
+      controlIdentity: step.controlIdentity,
+      recordingActionType: step.recordingActionType,
     requirementRefs: Array.isArray(step.requirementRefs) && step.requirementRefs.length > 0
       ? [...step.requirementRefs]
       : undefined,
@@ -1014,6 +1079,7 @@ export function buildPromotionSourceScenario(
       assertionImportance: discoveryStepByIndex.get(step.index)?.assertionImportance
     })),
     expectedResult: expectedResult || undefined,
+    negativeOracle: recordingNegativeOracle,
     preconditions: dedupeLower([
       ...splitMultilineValue(scenario.preconditions),
       ...splitMultilineValue(typeof scenario.raw?.custom_preconds === "string" ? scenario.raw.custom_preconds : undefined)
@@ -2066,21 +2132,28 @@ export async function runCaseDiscoveryWorkflow(
   try {
     const { loadPromotedAppConfigSync: loadCfg } = await import("../automations/app-profile");
     const cfg: any = loadCfg({ appSlug: workflowAppSlug });
+    const projectConfig = await getProjectConfigurationBySlug(workflowAppSlug);
+    const projectBaseUrl = projectConfig?.web?.baseUrl?.trim();
+    const hasProjectWebConfig = Boolean(projectConfig?.web);
+    const configSource = projectBaseUrl ? "project_sql" : "app_config";
     activeConfig = {
       ...activeConfig,
       app: {
         ...activeConfig.app,
-        ignoreHTTPSErrors: cfg?.ignoreHTTPSErrors === true,
+        ignoreHTTPSErrors: projectConfig?.web
+          ? projectConfig.web.ignoreHTTPSErrors === true
+          : cfg?.ignoreHTTPSErrors === true,
       } as typeof activeConfig.app,
     };
-    const configured: string | undefined = typeof cfg?.baseUrl === "string" ? cfg.baseUrl.trim() : undefined;
+    const configured: string | undefined = projectBaseUrl
+      ?? (!hasProjectWebConfig && typeof cfg?.baseUrl === "string" ? cfg.baseUrl.trim() : undefined);
     const requested: string | undefined = activeConfig.app.baseUrl?.trim();
     if (configured) {
       if (requested !== configured) {
-        console.log(`[web:base-url] appSlug=${workflowAppSlug} source=app_config configured=${configured} effective=${configured} fallbackUsed=false (corrected from ${requested ?? "undefined"})`);
+        console.log(`[web:base-url] appSlug=${workflowAppSlug} source=${configSource} configured=${configured} effective=${configured} fallbackUsed=false (corrected from ${requested ?? "undefined"})`);
         activeConfig = { ...activeConfig, app: { ...activeConfig.app, baseUrl: configured, appProfile: workflowAppSlug } };
       } else {
-        console.log(`[web:base-url] appSlug=${workflowAppSlug} source=app_config configured=${configured} effective=${configured} fallbackUsed=false`);
+        console.log(`[web:base-url] appSlug=${workflowAppSlug} source=${configSource} configured=${configured} effective=${configured} fallbackUsed=false`);
       }
     } else {
       // No baseUrl in app_config → fail closed (never fallback to default/other app)
@@ -2230,6 +2303,9 @@ export async function runCaseDiscoveryWorkflow(
     });
     const context = session.context;
     const page = session.page;
+    // Diagnostic-only observer: installed before the first application navigation and
+    // preserves history semantics while recording causality evidence.
+    const navigationCausality = await installNavigationCausalityObserver(page);
     console.log(`[initial-navigation] phase=target_page_selected targetOrigin=${new URL(activeConfig.app.baseUrl).origin}`);
     page.setDefaultTimeout(activeConfig.execution.defaultTimeoutMs);
 
@@ -2297,6 +2373,7 @@ export async function runCaseDiscoveryWorkflow(
       caseResult = await runCaseDiscovery({
         page,
         scenario,
+        runId: options.runId,
         evidenceDir,
         pendingObjectsPath,
         pendingPlansPath,
@@ -2311,12 +2388,16 @@ export async function runCaseDiscoveryWorkflow(
             provider: aiExplorerProvider
           }),
           config: {
-            enabled: activeConfig.integrations.ai?.discoveryEnabled ?? false,
+            enabled: options.autoRepair === false ? false : (activeConfig.integrations.ai?.discoveryEnabled ?? false),
             confidenceThreshold: activeConfig.integrations.ai?.discoveryConfidenceThreshold ?? 0.85,
             requireApprovalThreshold: activeConfig.integrations.ai?.discoveryRequireApprovalThreshold ?? 0.7,
             maxAttempts: activeConfig.integrations.ai?.discoveryMaxAttempts ?? 3,
-            routeCompletion: activeConfig.integrations.ai?.routeCompletion,
-            routeProfileLearning: activeConfig.integrations.ai?.routeProfileLearning
+            routeCompletion: options.autoRepair === false
+              ? { ...(activeConfig.integrations.ai?.routeCompletion ?? {}), enabled: false }
+              : activeConfig.integrations.ai?.routeCompletion,
+            routeProfileLearning: options.autoRepair === false
+              ? { ...(activeConfig.integrations.ai?.routeProfileLearning ?? {}), enabled: false }
+              : activeConfig.integrations.ai?.routeProfileLearning
           }
         },
         env: {
@@ -2340,12 +2421,19 @@ export async function runCaseDiscoveryWorkflow(
         loginMode: activeConfig.app.loginMode,
         evidenceRecorder: evidenceRecorder || undefined,
         executionMode: options.executionMode,
+        disableAiRepair: options.autoRepair === false,
         adaptiveContext: options.adaptiveContext,
         runtimeEntries: options.runtimeEntries,
         scenarioDataOverrides: toScenarioDataOverrides(options.runtimeEntries),
         beforeFinalStatusCalculation: (steps) => reconcileWorkflowAssertionsBeforeFinalStatus(scenario, steps),
       });
     } finally {
+      const navigationEvents = await navigationCausality.read().catch(() => []);
+      const navigationSummary = summarizeNavigationCausality(navigationEvents);
+      console.log(`[navigation-causality] events=${navigationEvents.length} historyPushStateCount=${navigationSummary.historyPushStateCount} historyReplaceStateCount=${navigationSummary.historyReplaceStateCount} popstateCount=${navigationSummary.popstateCount} timeline=${JSON.stringify(navigationEvents.map((event) => ({ timestamp: event.timestamp, eventType: event.eventType, urlBefore: event.urlBefore, urlAfter: event.urlAfter, method: event.method, resourceType: event.resourceType, status: event.status, initiator: event.initiator, stack: event.stack })))}`);
+      if (navigationSummary.firstApiResponse) {
+        console.log(`[navigation-causality] firstApi200At=${navigationSummary.firstApiResponse.timestamp} firstEventAfterApi200=${JSON.stringify(navigationSummary.firstEventAfterApiResponse ?? null)}`);
+      }
       // Finalize evidence recording (always runs, even on failure)
       try {
         const { finalizeDiscoveryEvidence } = await import("../evidence/discovery-evidence");
@@ -2379,8 +2467,8 @@ export async function runCaseDiscoveryWorkflow(
 
     const agentCfg = resolveAgentAutoRepairConfig(activeConfig);
 
-    if (options.autoRepair === true) {
-      agentCfg.enabled = true;
+    if (options.autoRepair !== undefined) {
+      agentCfg.enabled = options.autoRepair;
     }
     if (options.repairTimeoutMs !== undefined) {
       agentCfg.timeoutMs = options.repairTimeoutMs;
@@ -2847,7 +2935,13 @@ export async function runCaseDiscoveryWorkflow(
           inlineDebugMode: options.inlineDebugSpec ?? false,
           verifySpec: options.verifyPromotedSpec ?? false,
           specVerificationTimeoutMs: options.promotedSpecTimeoutMs,
-          appProfileObject: options.appProfile,
+          // options.appProfile is captured before the fail-closed project_sql/app_config
+          // baseUrl resolution above (activeConfig.app.baseUrl) runs, so passing it through
+          // unmodified would silently reintroduce a missing/stale baseUrl into promotion
+          // (promoteExecutionPlan prefers appProfileObject over fullConfig when both are set).
+          appProfileObject: options.appProfile
+            ? { ...options.appProfile, baseUrl: activeConfig.app.baseUrl }
+            : options.appProfile,
           sectionSlug: sectionProfile?.sectionSlug,
           sectionId: sectionProfile?.sectionId,
           sectionName: sectionProfile?.sectionName,
@@ -2855,6 +2949,8 @@ export async function runCaseDiscoveryWorkflow(
           sourceScenario,
           headed: options.headed,
           executionSource: browserLaunchSource,
+          useDeterministicSpecCompiler: true,
+          runtimeEntries: options.runtimeEntries,
         },
         false,
         {

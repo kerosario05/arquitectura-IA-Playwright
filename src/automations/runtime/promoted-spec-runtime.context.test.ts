@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { doesVisibleFieldSignalMatch, evaluatePromotedAssertionState, findBestActiveContainerForField, resolvePromotedFieldLocator, resolvePromotedFieldTarget } from "./promoted-spec-runtime";
+import { contextualFieldSignalTarget, doesVisibleFieldSignalMatch, evaluatePromotedAssertionState, findBestActiveContainerForField, isLoginScreenContext, resolvePromotedFieldLocator, resolvePromotedFieldTarget, validateScreenContextForAction } from "./promoted-spec-runtime";
 
 const normalize = (value: string) => value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
@@ -69,6 +69,158 @@ test("fill context matches equivalent mojibake field labels", () => {
 
 test("fill context remains fail-closed for a different field", () => {
   assert.equal(doesVisibleFieldSignalMatch(["Nombre de usuario"], "ContraseÃ±a"), false);
+});
+
+test("fill context compares a role technical target by its semantic label without changing target authority", () => {
+  const technicalTargetRef = "role:textbox|Usuario";
+  assert.equal(contextualFieldSignalTarget(technicalTargetRef), "Usuario");
+  assert.equal(contextualFieldSignalTarget("role:textbox|Contraseña"), "Contraseña");
+  assert.equal(doesVisibleFieldSignalMatch(["Usuario"], contextualFieldSignalTarget(technicalTargetRef)), true);
+  assert.equal(doesVisibleFieldSignalMatch(["Ingresa tu usuario", "username", "Usuario"], contextualFieldSignalTarget(technicalTargetRef)), true);
+  assert.equal(doesVisibleFieldSignalMatch(["Otro campo"], contextualFieldSignalTarget(technicalTargetRef)), false);
+  assert.equal(resolvePromotedFieldTarget({ field: technicalTargetRef }), technicalTargetRef);
+});
+
+test("fill context remains fail-closed when a role technical target label is not visible", () => {
+  assert.equal(doesVisibleFieldSignalMatch(["Contraseña"], contextualFieldSignalTarget("role:textbox|Usuario")), false);
+});
+
+test("fill context preserves a plain field target", () => {
+  assert.equal(contextualFieldSignalTarget("Usuario"), "Usuario");
+  assert.equal(doesVisibleFieldSignalMatch(["Usuario"], contextualFieldSignalTarget("Usuario")), true);
+  assert.equal(doesVisibleFieldSignalMatch(["Contraseña"], contextualFieldSignalTarget("Usuario")), false);
+});
+
+function fakePageForScreenContext(
+  signals: Array<{ id?: string; placeholder?: string }>,
+  currentUrl = "/functional",
+  visibleButtons: string[] = [],
+): any {
+  const locator = (selector: string) => {
+    if (selector === "input:visible, textarea:visible, select:visible") {
+      return {
+        evaluateAll: async (callback: (elements: any[]) => string[]) => {
+          const previousDocument = (globalThis as any).document;
+          const previousCss = (globalThis as any).CSS;
+          (globalThis as any).document = { querySelector: () => null };
+          (globalThis as any).CSS = { escape: (value: string) => value };
+          try {
+            return callback(signals.map((signal) => ({
+              id: signal.id ?? "",
+              getAttribute: (name: string) => name === "id" ? signal.id ?? null : name === "placeholder" ? signal.placeholder ?? null : null,
+              closest: () => null,
+            })));
+          } finally {
+            (globalThis as any).document = previousDocument;
+            (globalThis as any).CSS = previousCss;
+          }
+        },
+      };
+    }
+    if (selector === "button:visible, [role='button']:visible") {
+      return {
+        all: async () => visibleButtons.map((text) => ({ textContent: async () => text })),
+      };
+    }
+    return {
+      all: async () => [],
+      filter() { return this; },
+      count: async () => 0,
+    };
+  };
+  return {
+    context: () => ({}),
+    isClosed: () => false,
+    url: () => currentUrl,
+    title: async () => "",
+    evaluate: async () => [],
+    locator,
+  };
+}
+
+test("functional screen permits a visible contextual field", async () => {
+  await assert.doesNotReject(() => validateScreenContextForAction(
+    fakePageForScreenContext(
+      [{ id: "username", placeholder: "Ingresa tu usuario" }],
+      "/functional",
+      ["Iniciar"],
+    ),
+    { target: "role:textbox|Usuario", actionIntent: "fill_form_field", stepIndex: 1 },
+  ));
+});
+
+test("auth gate blocks a contextual fill even when a coincidental field is visible", async () => {
+  await assert.rejects(
+    validateScreenContextForAction(
+      fakePageForScreenContext(
+        [{ id: "username", placeholder: "Ingresa tu usuario" }],
+        "/login",
+        ["Iniciar"],
+      ),
+      { target: "role:textbox|Usuario", actionIntent: "fill_form_field", stepIndex: 1 },
+    ),
+    /wrong_screen_before_contextual_action/,
+  );
+});
+
+test("screen context remains fail-closed when visible fields omit the semantic target", async () => {
+  await assert.rejects(
+    validateScreenContextForAction(
+      fakePageForScreenContext([{ id: "password", placeholder: "Ingrese su clave" }], "/login"),
+      { target: "role:textbox|Usuario", actionIntent: "fill_form_field", stepIndex: 1 },
+    ),
+    /wrong_screen_before_contextual_action/,
+  );
+});
+
+test("auth credential fill is allowed on the login/auth-gate screen when the step carries structured auth-gate authority", async () => {
+  await assert.doesNotReject(() => validateScreenContextForAction(
+    fakePageForScreenContext([{ id: "username", placeholder: "Ingresa tu usuario" }], "/login", ["Iniciar sesión"]),
+    { target: "role:textbox|Usuario", actionIntent: "fill_form_field", stepIndex: 1, authGateExpected: true },
+  ));
+});
+
+test("auth password fill is allowed on the login/auth-gate screen with the same structured authority", async () => {
+  await assert.doesNotReject(() => validateScreenContextForAction(
+    fakePageForScreenContext([{ id: "password", placeholder: "Ingresa tu contraseña" }], "/login", ["Iniciar sesión"]),
+    { target: "role:textbox|Contraseña", actionIntent: "fill_form_field", stepIndex: 2, authGateExpected: true },
+  ));
+});
+
+test("auth-gate authority never authorizes a business field that is not present on the login screen", async () => {
+  await assert.rejects(
+    validateScreenContextForAction(
+      fakePageForScreenContext([{ id: "username", placeholder: "Ingresa tu usuario" }], "/login", ["Iniciar sesión"]),
+      { target: "role:textbox|Monto", actionIntent: "fill_form_field", stepIndex: 13, authGateExpected: true },
+    ),
+    /wrong_screen_before_contextual_action/,
+  );
+});
+
+test("a business fill without auth-gate authority stays fail-closed on the login screen even if a coincidental field is visible", async () => {
+  await assert.rejects(
+    validateScreenContextForAction(
+      fakePageForScreenContext([{ id: "username", placeholder: "Ingresa tu usuario" }], "/login", ["Iniciar sesión"]),
+      { target: "role:textbox|Usuario", actionIntent: "fill_form_field", stepIndex: 1 },
+    ),
+    /wrong_screen_before_contextual_action/,
+  );
+});
+
+test("auth-gate authority does not authorize an auth field executed from an unrelated (home) screen", async () => {
+  await assert.rejects(
+    validateScreenContextForAction(
+      fakePageForScreenContext([{ id: "monto", placeholder: "Monto" }], "/", []),
+      { target: "role:textbox|Usuario", actionIntent: "fill_form_field", stepIndex: 1, authGateExpected: true },
+    ),
+    /wrong_screen_before_contextual_action/,
+  );
+});
+
+test("login classification requires independent auth-gate evidence, not a login-labelled control alone", () => {
+  assert.equal(isLoginScreenContext(["Iniciar"], true), true);
+  assert.equal(isLoginScreenContext(["Iniciar"], false), false);
+  assert.equal(isLoginScreenContext(["Iniciar", "Continuar"], true), false);
 });
 
 function fakePageForContainer(container: any): any {

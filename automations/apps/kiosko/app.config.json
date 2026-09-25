@@ -1,105 +1,24 @@
 {
-  "appSlug": "kiosko",
-  "name": "kiosko",
-  "baseUrl": "https://172.27.4.50",
-  "source": {
-    "type": "request",
-    "sectionName": null
+  "appProfile": {
+    "appSlug": "kiosko",
+    "source": "default",
+    "name": "0",
+    "baseUrl": "http://127.0.0.1:8088/QA_Field_Lab.html",
+    "baseUrlHash": "10a04850f834",
+    "createdAt": "2026-09-22T01:46:10.155Z",
+    "updatedAt": "2026-09-22T01:46:10.156Z",
+    "ignoreHTTPSErrors": false
   },
-  "routeProfile": {
-    "name": "informacion_productos",
-    "entry": [
-      {
-        "businessLabel": "iniciar",
-        "visibleLabel": "Iniciar"
-      },
-      {
-        "businessLabel": "informacion_productos",
-        "visibleLabel": "Información de productos"
-      }
-    ],
-    "aliases": {
-      "tarjetas_credito": [
-        "Tarjetas de crédito",
-        "Tarjetas"
-      ],
-      "depositos_plazo": [
-        "Depósitos a Plazo",
-        "Depósitos a plazo"
-      ],
-      "cuentas_efectivo": [
-        "Cuentas de Efectivo",
-        "Cuentas"
-      ],
-      "prestamos": [
-        "Préstamos"
-      ],
-      "volver": "Volver",
-      "solicitar": "Solicitar",
-      "finalizar_sesion": "Finalizar sesión"
-    },
-    "domainTerms": {
-      "producto": [
-        "producto",
-        "tarjeta de crédito",
-        "depósito a plazo",
-        "cuenta de efectivo",
-        "préstamo"
-      ],
-      "categoria": [
-        "categoría",
-        "subcategoría"
-      ]
-    },
-    "visibleControls": [
-      "Iniciar",
-      "Información de productos",
-      "Tarjetas de crédito",
-      "Depósitos a Plazo",
-      "Cuentas de Efectivo",
-      "Préstamos",
-      "Volver",
-      "Solicitar",
-      "Finalizar sesión"
-    ],
-    "intermediate": {
-      "informacion_productos": [
-        "Iniciar",
-        "Información de productos"
-      ]
-    },
-    "representativeFixture": {},
-    "notes": [
-      "RouteProfile inicial inferido para KIOSKO / Información de productos."
-    ],
-    "fieldProvenance": {
-      "entry": "declared_hint",
-      "aliases": "declared_hint",
-      "intermediates": "declared_hint",
-      "domainTerms": "declared_hint",
-      "visibleControls": "declared_hint",
-      "entrySteps": "declared_hint",
-      "targetPaths": "declared_hint"
-    },
-    "entrySteps": [
-      {
-        "action": "click",
-        "target": "Iniciar",
-        "when": "before_first_functional_step"
-      },
-      {
-        "action": "click",
-        "target": "Información de productos",
-        "when": "before_first_functional_step"
-      }
-    ],
-    "updatedAt": "2026-09-03T01:18:53.600Z"
-  },
-  "createdAt": "2026-08-31T12:24:58.353Z",
-  "updatedAt": "2026-09-03T01:26:18.079Z",
-  "lastUsedSource": {
-    "type": "request",
-    "sectionName": null,
-    "updatedAt": "2026-09-03T01:26:18.077Z"
-  }
+  "baseUrl": "http://127.0.0.1:8088/QA_Field_Lab.html",
+  "loginMode": "password",
+  "testData": {},
+  "testDataAliases": {},
+  "testDataRefs": {},
+  "username": "adminr",
+  "password": "admin123",
+  "usernameRef": "APP_USERNAME",
+  "passwordRef": "APP_PASSWORD",
+  "missingInputBehavior": "auto_generate",
+  "ignoreHTTPSErrors": false,
+  "updatedAt": "2026-09-22T01:46:10.156Z"
 }

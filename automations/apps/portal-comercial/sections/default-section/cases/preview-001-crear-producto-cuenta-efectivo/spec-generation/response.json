@@ -1,0 +1,31 @@
+{
+  "scenarioId": "PREVIEW-001",
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../../src/automations/runtime/promoted-spec-runtime';\nimport { AuthFlow } from '../../../../flows/auth.flow';\n\nprocess.env.APP_SLUG = 'portal-comercial';\nprocess.env.SECTION_SLUG = 'default-section';\nprocess.env.SCENARIO_ID = 'PREVIEW-001';\nprocess.env.SCENARIO_TITLE = 'Crear Producto Cuenta Efectivo';\n\ntest('PREVIEW-001 - Crear Producto Cuenta Efectivo', async ({ page }) => {\n  const promotedRuntime = createPromotedSpecRuntime(page);\n  const authFlow = new AuthFlow(page);\n  const username = process.env[['APP', 'USERNAME'].join('_')] ?? '';\n  const password = process.env[['APP', 'PASSWORD'].join('_')] ?? '';\n\n  try {\n    await promotedRuntime.fillPromotedField({\n      stepIndex: 1,\n      target: 'Usuario',\n      value: username,\n      action: async () => {\n        await page.locator('[id=\"username\"]').fill(username);\n      }\n    });\n\n    await promotedRuntime.fillPromotedField({\n      stepIndex: 2,\n      target: 'ContraseÃ±a',\n      value: password,\n      action: async () => {\n        await page.locator('[id=\"password\"]').fill(password);\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 3,\n      target: 'Iniciar sesiÃ³n',\n      actionIntent: 'Presionar el control de inicio de sesiÃ³n',\n      expectedEffect: 'La aplicaciÃ³n carga su pantalla inicial',\n      action: async () => {\n        await page.locator('[aria-label=\"Iniciar sesiÃ³n\"]').click();\n      }\n    });\n\n    await promotedRuntime.waitForPromotedUiStable(3, 'Iniciar sesiÃ³n');\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 3,\n      target: 'Iniciar sesiÃ³n',\n      polarity: 'positive',\n      expectedUrl: 'https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct',\n      assertion: async () => {\n        await expect(page).toHaveURL('https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct');\n      }\n    });\n\n    await authFlow.ensureAuthenticated();\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});\n",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "La aplicaciÃ³n carga su pantalla inicial",
+      "implementation": "await expect(page).toHaveURL('https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct');"
+    }
+  ],
+  "usedPageObjects": [],
+  "declaredIdentifiers": [
+    "page",
+    "promotedRuntime",
+    "authFlow",
+    "username",
+    "password"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

@@ -13,7 +13,7 @@ function cleanupDir(dirPath: string): void {
   }
 }
 
-test("rerun preview continues loading preview-scenarios.json", () => {
+test("rerun preview continues loading preview-scenarios.json", async () => {
   const sourceJobId = `preview-rerun-${Date.now()}`;
   const artifactDir = path.join(PREVIEW_DIR, sourceJobId);
   fs.mkdirSync(artifactDir, { recursive: true });
@@ -33,7 +33,7 @@ test("rerun preview continues loading preview-scenarios.json", () => {
     "utf-8",
   );
   try {
-    const prepared = prepareRerun(sourceJobId, "all", "scenario-preview");
+    const prepared = await prepareRerun(sourceJobId, "all", "scenario-preview");
     expect(prepared.ok).toBe(true);
     if (!prepared.ok) return;
     expect(prepared.jobType).toBe("scenario-preview");
@@ -44,7 +44,7 @@ test("rerun preview continues loading preview-scenarios.json", () => {
   }
 });
 
-test("rerun mobile loads original scenarios and data overrides from mobile manifest", () => {
+test("rerun mobile loads original scenarios and data overrides from mobile manifest", async () => {
   const sourceJobId = `mobile-rerun-${Date.now()}`;
   const mojibakeSelector = "Â¿AÃºn no tienes usuario o cuenta?";
   persistMobileExecutionManifest(sourceJobId, {
@@ -106,7 +106,7 @@ test("rerun mobile loads original scenarios and data overrides from mobile manif
     { scenarioId: "MOBILE-AA-1-002", status: "passed" },
   ]);
 
-  const preparedAll = prepareRerun(sourceJobId, "all", "mobile-launch-execution");
+  const preparedAll = await prepareRerun(sourceJobId, "all", "mobile-launch-execution");
   expect(preparedAll.ok).toBe(true);
   if (!preparedAll.ok) return;
   expect(preparedAll.jobType).toBe("mobile-launch-execution");
@@ -117,7 +117,7 @@ test("rerun mobile loads original scenarios and data overrides from mobile manif
   expect(preparedAll.mobileParams.scenarios[0]?.steps[1]?.actionRole).toBe("select_option");
   expect(preparedAll.mobileParams.scenarios[0]?.steps[1]?.requiredNextTarget?.value).toBe("com.example:id/document");
 
-  const preparedFailed = prepareRerun(sourceJobId, "failed_only", "mobile-launch-execution");
+  const preparedFailed = await prepareRerun(sourceJobId, "failed_only", "mobile-launch-execution");
   expect(preparedFailed.ok).toBe(true);
   if (!preparedFailed.ok) return;
   expect(preparedFailed.jobType).toBe("mobile-launch-execution");
@@ -128,15 +128,15 @@ test("rerun mobile loads original scenarios and data overrides from mobile manif
   cleanupDir(path.join(ROOT, ".artifacts", "mobile-launch-runs", sourceJobId));
 });
 
-test("missing mobile manifest returns explicit mobile rerun error", () => {
+test("missing mobile manifest returns explicit mobile rerun error", async () => {
   const sourceJobId = `mobile-missing-${Date.now()}`;
-  const prepared = prepareRerun(sourceJobId, "all", "mobile-launch-execution");
+  const prepared = await prepareRerun(sourceJobId, "all", "mobile-launch-execution");
   expect(prepared.ok).toBe(false);
   if (prepared.ok) return;
   expect(prepared.error).toBe("missing_mobile_rerun_manifest");
 });
 
-test("mobile rerun enriches missing select requiredData from route profile even with mojibake target", () => {
+test("mobile rerun enriches missing select requiredData from route profile even with mojibake target", async () => {
   const sourceJobId = `mobile-rerun-enrich-${Date.now()}`;
   persistMobileExecutionManifest(sourceJobId, {
     launchId: "launch-enrich-1",
@@ -160,7 +160,7 @@ test("mobile rerun enriches missing select requiredData from route profile even 
       "MOBILE-AA-94-001": { 0: "Cédula de identidad", 1: "402-12345678-9" },
     },
   });
-  const prepared = prepareRerun(sourceJobId, "all", "mobile-launch-execution");
+  const prepared = await prepareRerun(sourceJobId, "all", "mobile-launch-execution");
   expect(prepared.ok).toBe(true);
   if (!prepared.ok) return;
   const scenario = prepared.mobileParams.scenarios[0];

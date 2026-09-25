@@ -1,0 +1,635 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-001",
+    "caseId": 0,
+    "title": "Tarjeta"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "description": "Presionar \"Explora nuestros productos\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Explora nuestros productos",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Presionar \"Tarjetas\"",
+      "target": {
+        "strategy": "recorded:role",
+        "value": "Tarjetas",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:role"
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Presionar \"Tarjeta de Crédito\"",
+      "target": {
+        "strategy": "recorded:role",
+        "value": "Tarjeta de Crédito",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:role"
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Presionar \"Tarjeta Crédito Visa Clásica Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Pagos en línea con disponibilidad inmediata.\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Tarjeta Crédito Visa Clásica Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Pagos en línea con disponibilidad inmediata.",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner"
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar \"Finalizar sesión\"",
+      "target": {
+        "strategy": "recorded:role",
+        "value": "Finalizar sesión",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:role"
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-09-16T11:56:06.454Z",
+  "sourceScenario": {
+    "title": "Tarjeta",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Presionar \"Explora nuestros productos\"",
+        "description": "Presionar \"Explora nuestros productos\"",
+        "valueKey": "explora_nuestros_productos",
+        "polarity": "positive",
+        "technicalTargetRef": "aria-label:Explora nuestros productos",
+        "technicalTargetRefs": [
+          "aria-label:Explora nuestros productos",
+          "role:button|Explora nuestros productos",
+          "text:Explora nuestros productos Conoce los beneficios de los productos BSC"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "display",
+            "semanticRole": "display",
+            "locatorCandidates": [
+              {
+                "strategy": "aria-label",
+                "value": "Explora nuestros productos",
+                "confidence": 0.9
+              }
+            ],
+            "structuralContext": {
+              "headerRef": "header:Explora nuestros productos",
+              "owner": {
+                "tag": "button"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "stableDirectAttributes": {
+                "aria-label": "Explora nuestros productos"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "stableAttributes": {
+              "aria-label": "Explora nuestros productos"
+            },
+            "interactionEvidence": [
+              "click",
+              "Explora nuestros productos"
+            ],
+            "lifecycleRef": "Explora nuestros productos:display",
+            "confidence": 0.9,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "action": "Presionar \"Tarjetas\"",
+        "description": "Presionar \"Tarjetas\"",
+        "valueKey": "tarjetas",
+        "polarity": "positive",
+        "technicalTargetRef": "role:button|Tarjetas",
+        "technicalTargetRefs": [
+          "role:button|Tarjetas",
+          "text:Tarjetas"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "display",
+            "semanticRole": "display",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Tarjetas",
+                "confidence": 0.85
+              },
+              {
+                "strategy": "text",
+                "value": "Tarjetas",
+                "confidence": 0.7
+              }
+            ],
+            "structuralContext": {
+              "headerRef": "header:Tarjetas",
+              "owner": {
+                "tag": "button"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "stableDirectAttributes": {},
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 4,
+              "identityAmbiguous": true
+            },
+            "stableAttributes": {},
+            "interactionEvidence": [
+              "click",
+              "Tarjetas"
+            ],
+            "lifecycleRef": "Tarjetas:display",
+            "confidence": 0.45,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "action": "Presionar \"Tarjeta de Crédito\"",
+        "description": "Presionar \"Tarjeta de Crédito\"",
+        "valueKey": "tarjeta_de_credito",
+        "polarity": "positive",
+        "technicalTargetRef": "role:button|Tarjeta de Crédito",
+        "technicalTargetRefs": [
+          "role:button|Tarjeta de Crédito",
+          "text:Tarjeta de Crédito"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "display",
+            "semanticRole": "display",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Tarjeta de Crédito",
+                "confidence": 0.85
+              },
+              {
+                "strategy": "text",
+                "value": "Tarjeta de Crédito",
+                "confidence": 0.7
+              }
+            ],
+            "structuralContext": {
+              "headerRef": "header:Tarjeta de Crédito",
+              "owner": {
+                "tag": "button"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "stableDirectAttributes": {},
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 1
+            },
+            "stableAttributes": {},
+            "interactionEvidence": [
+              "click",
+              "Tarjeta de Crédito"
+            ],
+            "lifecycleRef": "Tarjeta de Crédito:display",
+            "confidence": 0.45,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      {
+        "index": 4,
+        "action": "Presionar \"Tarjeta Crédito Visa Clásica Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Pagos en línea con disponibilidad inmediata.\"",
+        "description": "Presionar \"Tarjeta Crédito Visa Clásica Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Pagos en línea con disponibilidad inmediata.\"",
+        "valueKey": "tarjeta_credito_visa_clasica_programa_puntos_santa_cruz_por_cada_rd_100_o_ud_3_00_generas_un_1_punto_santa_cruz_pagos_en_linea_con_disponibilidad_inmediata",
+        "polarity": "positive",
+        "technicalTargetRef": "role:div|Tarjeta Crédito Visa Clásica Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Pagos en línea con disponibilidad inmediata. ",
+        "technicalTargetRefs": [
+          "role:div|Tarjeta Crédito Visa Clásica Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Pagos en línea con disponibilidad inmediata. "
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "display",
+            "semanticRole": "display",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "div|Tarjeta Crédito Visa Clásica Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Pagos en línea con disponibilidad inmediata. ",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "headerRef": "header:Tarjeta Crédito Visa Clásica Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Pun",
+              "owner": {
+                "tag": "div"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "img",
+                  "stableAttributes": {
+                    "alt": "Tarjeta Crédito Visa Clásica",
+                    "src": "/assets/images/tarjetas-de-credito-visa-clasica.png"
+                  }
+                }
+              ],
+              "semanticShape": [
+                "div",
+                "h3"
+              ],
+              "stableDirectAttributes": {},
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1
+            },
+            "stableAttributes": {},
+            "interactionEvidence": [
+              "click",
+              "Tarjeta Crédito Visa Clásica Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Pagos en línea con disponibilidad inmediata. "
+            ],
+            "lifecycleRef": "Tarjeta Crédito Visa Clásica Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Pagos en línea con disponibilidad inmediata. :display",
+            "confidence": 0.45,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "action": "Presionar \"Finalizar sesión\"",
+        "description": "Presionar \"Finalizar sesión\"",
+        "valueKey": "finalizar_sesion",
+        "polarity": "positive",
+        "technicalTargetRef": "role:button|Finalizar sesión",
+        "technicalTargetRefs": [
+          "role:button|Finalizar sesión",
+          "text:Finalizar sesión"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "display",
+            "semanticRole": "display",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Finalizar sesión",
+                "confidence": 0.85
+              },
+              {
+                "strategy": "text",
+                "value": "Finalizar sesión",
+                "confidence": 0.7
+              }
+            ],
+            "structuralContext": {
+              "headerRef": "header:Finalizar sesión",
+              "owner": {
+                "tag": "button"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "stableDirectAttributes": {},
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 3,
+              "identityAmbiguous": true
+            },
+            "stableAttributes": {},
+            "interactionEvidence": [
+              "click",
+              "Finalizar sesión"
+            ],
+            "lifecycleRef": "Finalizar sesión:display",
+            "confidence": 0.45,
+            "validatedByInteraction": true
+          }
+        ]
+      }
+    ],
+    "expectedResult": "La aplicación carga su pantalla inicial",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "observedAssertions": [],
+    "observableOracles": [
+      {
+        "id": "expected-01",
+        "requirement": "La aplicación carga su pantalla inicial",
+        "type": "navigation_transition",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 5,
+        "target": "Finalizar sesión",
+        "polarity": "positive",
+        "evidence": [
+          "transition_observed:true",
+          "click_target:Finalizar sesión",
+          "action_type:Presionar \"Finalizar sesión\"",
+          "after_url:https://172.27.4.50/",
+          "assertion_polarity:positive"
+        ],
+        "details": {
+          "transitionObserved": true,
+          "clickTarget": "Finalizar sesión",
+          "resolvedTarget": null,
+          "postClickUiChange": null,
+          "sourceActionStepIndex": 5,
+          "expectedUrl": "https://172.27.4.50/"
+        }
+      }
+    ],
+    "stepStatuses": [
+      {
+        "index": 1,
+        "status": "found"
+      },
+      {
+        "index": 2,
+        "status": "found"
+      },
+      {
+        "index": 3,
+        "status": "found"
+      },
+      {
+        "index": 4,
+        "status": "found"
+      },
+      {
+        "index": 5,
+        "status": "found"
+      }
+    ],
+    "auth": {}
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "PREVIEW-001",
+    "title": "Tarjeta",
+    "appSlug": "kiosko",
+    "sectionSlug": "default-section",
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Presionar \"Explora nuestros productos\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Explora nuestros productos"
+        },
+        "valueKey": "explora_nuestros_productos",
+        "technicalTargetRef": "aria-label:Explora nuestros productos",
+        "technicalTargetRefs": [
+          "aria-label:Explora nuestros productos",
+          "role:button|Explora nuestros productos",
+          "text:Explora nuestros productos Conoce los beneficios de los productos BSC"
+        ],
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Explora nuestros productos\"]",
+              "confidence": 0.9
+            }
+          ],
+          "structuralContext": {
+            "stableDirectAttributes": {
+              "aria-label": "Explora nuestros productos"
+            }
+          },
+          "confidence": 0.9,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Presionar \"Tarjetas\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Tarjetas"
+        },
+        "valueKey": "tarjetas",
+        "technicalTargetRef": "role:button|Tarjetas",
+        "technicalTargetRefs": [
+          "role:button|Tarjetas",
+          "text:Tarjetas"
+        ],
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Tarjetas",
+              "confidence": 0.45
+            }
+          ],
+          "confidence": 0.45,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Presionar \"Tarjeta de Crédito\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Tarjeta de Crédito"
+        },
+        "valueKey": "tarjeta_de_credito",
+        "technicalTargetRef": "role:button|Tarjeta de Crédito",
+        "technicalTargetRefs": [
+          "role:button|Tarjeta de Crédito",
+          "text:Tarjeta de Crédito"
+        ],
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Tarjeta de Crédito",
+              "confidence": 0.45
+            }
+          ],
+          "confidence": 0.45,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Presionar \"Tarjeta Crédito Visa Clásica Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Pagos en línea con disponibilidad inmediata.\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Tarjeta Crédito Visa Clásica Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Pagos en línea con disponibilidad inmediata."
+        },
+        "valueKey": "tarjeta_credito_visa_clasica_programa_puntos_santa_cruz_por_cada_rd_100_o_ud_3_00_generas_un_1_punto_santa_cruz_pagos_en_linea_con_disponibilidad_inmediata",
+        "technicalTargetRef": "role:div|Tarjeta Crédito Visa Clásica Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Pagos en línea con disponibilidad inmediata. ",
+        "technicalTargetRefs": [
+          "role:div|Tarjeta Crédito Visa Clásica Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Pagos en línea con disponibilidad inmediata. "
+        ],
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "div|[alt=\"Tarjeta Crédito Visa Clásica\"][src=\"/assets/images/tarjetas-de-credito-visa-clasica.png\"]",
+              "confidence": 0.45
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "img",
+                "stableAttributes": {
+                  "alt": "Tarjeta Crédito Visa Clásica",
+                  "src": "/assets/images/tarjetas-de-credito-visa-clasica.png"
+                }
+              }
+            ],
+            "semanticShape": [
+              "div",
+              "h3"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.45,
+          "certificationTier": 3
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 4,
+        "scenarioStepIndex": 5,
+        "originalText": "Presionar \"Finalizar sesión\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Finalizar sesión"
+        },
+        "valueKey": "finalizar_sesion",
+        "technicalTargetRef": "role:button|Finalizar sesión",
+        "technicalTargetRefs": [
+          "role:button|Finalizar sesión",
+          "text:Finalizar sesión"
+        ],
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Finalizar sesión",
+              "confidence": 0.45
+            }
+          ],
+          "confidence": 0.45,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "navigation_transition",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "url_state",
+          "mechanism": {
+            "source": "url_state",
+            "method": "expectPromotedVisible",
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "navigation_transition",
+              "urlPattern": "https://172.27.4.50/"
+            }
+          },
+          "sourceActionStepIndex": 5,
+          "requirement": "La aplicación carga su pantalla inicial"
+        },
+        "sourceActionStepIndex": 5,
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 5,
+      "representedScenarioSteps": 5,
+      "missingScenarioSteps": []
+    }
+  }
+}

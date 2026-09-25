@@ -1,0 +1,24 @@
+{
+  "appProfile": {
+    "appSlug": "fenix",
+    "source": "default",
+    "name": "santacruz",
+    "baseUrl": "https://qa1.santacruz.do/onlinebanking",
+    "baseUrlHash": "2a7bf6928b41",
+    "createdAt": "2026-09-25T00:00:23.115Z",
+    "updatedAt": "2026-09-25T00:00:23.116Z",
+    "ignoreHTTPSErrors": true
+  },
+  "baseUrl": "https://qa1.santacruz.do/onlinebanking",
+  "loginMode": "password",
+  "testData": {},
+  "testDataAliases": {},
+  "testDataRefs": {},
+  "username": "adminr",
+  "password": "admin123",
+  "usernameRef": "APP_USERNAME",
+  "passwordRef": "APP_PASSWORD",
+  "missingInputBehavior": "auto_generate",
+  "ignoreHTTPSErrors": true,
+  "updatedAt": "2026-09-25T00:00:23.116Z"
+}

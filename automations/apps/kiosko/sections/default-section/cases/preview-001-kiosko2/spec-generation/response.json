@@ -1,0 +1,29 @@
+{
+  "scenarioId": "PREVIEW-001",
+  "specContent": "import { test, expect } from '@playwright/test';\nimport { createPromotedSpecRuntime } from '../../../../../../../../src/automations/runtime/promoted-spec-runtime';\n\nprocess.env.APP_SLUG = \"kiosko\";\nprocess.env.SECTION_SLUG = \"default-section\";\nprocess.env.SCENARIO_ID = \"PREVIEW-001\";\nprocess.env.SCENARIO_TITLE = \"Kiosko2\";\n\ntest('Kiosko2', async ({ page }) => {\n  const promotedRuntime = createPromotedSpecRuntime(page);\n\n  try {\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 1,\n      target: \"Explora nuestros productos\",\n      actionIntent: \"Presionar \\\"Explora nuestros productos\\\"\",\n      expectedEffect: \"Continuar al catálogo de productos\",\n      action: async () => {\n        await page.getByText(\"Explora nuestros productos\", { exact: true }).click();\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 2,\n      target: \"Tarjetas\",\n      actionIntent: \"Presionar \\\"Tarjetas\\\"\",\n      expectedEffect: \"Abrir la categoría Tarjetas\",\n      action: async () => {\n        await page.getByText(\"Tarjetas\", { exact: true }).click();\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 3,\n      target: \"Tarjeta de CrÃ©dito\",\n      actionIntent: \"Presionar \\\"Tarjeta de CrÃ©dito\\\"\",\n      expectedEffect: \"Mostrar las tarjetas de crédito\",\n      action: async () => {\n        await page.getByText(\"Tarjeta de CrÃ©dito\", { exact: true }).click();\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 4,\n      target: \"Tarjeta CrÃ©dito Visa Gold Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Mayor plazo para pagar: 26 dÃ­as despuÃ©s de la fe\",\n      actionIntent: \"Presionar \\\"Tarjeta CrÃ©dito Visa Gold Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Mayor plazo para pagar: 26 dÃ­as despuÃ©s de la fe\\\"\",\n      expectedEffect: \"La aplicación carga su pantalla inicial\",\n      action: async () => {\n        await page.getByText(\"Tarjeta CrÃ©dito Visa Gold Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Mayor plazo para pagar: 26 dÃ­as despuÃ©s de la fe\", { exact: true }).click();\n      }\n    });\n\n    await promotedRuntime.waitForPromotedUiStable(4, \"Tarjeta CrÃ©dito Visa Gold Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Mayor plazo para pagar: 26 dÃ­as despuÃ©s de la fe\");\n    await promotedRuntime.expectPromotedVisible({\n      stepIndex: 4,\n      target: \"Tarjeta CrÃ©dito Visa Gold Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Mayor plazo para pagar: 26 dÃ­as despuÃ©s de la fe\",\n      polarity: \"positive\",\n      expectedUrl: \"https://172.27.4.50/\",\n      assertion: async () => {\n        await expect(page).toHaveURL(\"https://172.27.4.50/\");\n      }\n    });\n\n    await promotedRuntime.clickPromotedTarget({\n      stepIndex: 5,\n      target: \"Finalizar sesiÃ³n\",\n      actionIntent: \"Presionar \\\"Finalizar sesiÃ³n\\\"\",\n      expectedEffect: \"Finalizar la sesión\",\n      action: async () => {\n        await page.getByText(\"Finalizar sesiÃ³n\", { exact: true }).click();\n      }\n    });\n  } finally {\n    await promotedRuntime.finishEvidence();\n  }\n});\n",
+  "coveredStepIndexes": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "coveredAssertions": [
+    {
+      "requirement": "La aplicaciÃ³n carga su pantalla inicial",
+      "implementation": "await expect(page).toHaveURL(\"https://172.27.4.50/\");"
+    }
+  ],
+  "usedPageObjects": [],
+  "declaredIdentifiers": [
+    "promotedRuntime"
+  ],
+  "unresolvedRequirements": [],
+  "warnings": [],
+  "_finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

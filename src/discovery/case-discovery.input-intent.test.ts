@@ -88,3 +88,151 @@ test("selects fill dispatch for unknown placeholder source without forcing runti
   assert.equal(isFillActionTarget({ actionType: "action_fill", valueKey: "namespace.key", valueSource: "unknown" }), true);
   assert.equal(isFillActionTarget({ actionType: "action_click", valueKey: "namespace.key", valueSource: "unknown" }), false);
 });
+
+test("recording replay consumes structured action authority instead of rendered human text", () => {
+  const parsed = parseScenarioStepsForDiscovery({
+    ...scenario({ action: 'Ingresar "123456" en "Campo"' }),
+    recordingExecutionContract: {
+      actions: [{
+        actionType: "fill",
+        humanStep: 'Ingresar "123456" en "Campo"',
+        semanticField: "Campo",
+        targetRef: "field-a",
+        technicalTargetRef: "css:#field-a",
+        technicalTargetRefs: ["css:#field-a"],
+        technicalTargetCandidates: [{
+          strategy: "css",
+          value: "#field-a",
+          source: "recorded_dom",
+          confidence: 0.99,
+        }],
+        valueKey: "input.a",
+        valueRole: "action_input",
+        runtimeValueSource: "dataset",
+        stepIndex: 0,
+      }],
+      runtimeInputRequirements: [{
+        valueKey: "input.a",
+        value: "123456",
+        source: "RECORDED_CONFIRMED",
+        sensitive: false,
+        valueRole: "action_input",
+      }],
+      datasetBindings: { "input.a": "123456" },
+    },
+  });
+
+  assert.equal(parsed.actionTargets.length, 1);
+  assert.equal(parsed.actionTargets[0]?.target, "Campo");
+  assert.equal(parsed.actionTargets[0]?.valueKey, "input.a");
+  assert.equal(parsed.actionTargets[0]?.valueSource, "test_data");
+  assert.equal(parsed.orderedSteps[0]?.target, "Campo");
+  assert.equal(parsed.orderedSteps[0]?.valueKey, "input.a");
+  assert.equal(parsed.orderedSteps[0]?.technicalTargetCandidates?.[0]?.value, "#field-a");
+});
+
+/**
+ * FIRST_LOSS: `parseScenarioStepsForDiscovery`'s recording-action tagging ternary had no branch
+ * for `"press"` -- it fell through to the same default used for a real click ("action_click"),
+ * so a recorded keyboard press (Enter/Escape/...) silently became a click intent for Recording
+ * Replay, with its `key` dropped entirely. Fixed with its own `"action_press"` tag and a
+ * dedicated `key` field, carried through both `actionTargets` and `orderedSteps`, never
+ * conflated with a fill/select `value`/`valueKey`.
+ */
+test("recording replay never converts a press action into a click -- its own action_press tag, key preserved", () => {
+  const parsed = parseScenarioStepsForDiscovery({
+    ...scenario(),
+    recordingExecutionContract: {
+      actions: [{
+        actionType: "press",
+        key: "Enter",
+        humanStep: undefined,
+        targetRef: "password-field",
+        technicalTargetRef: "css:#password",
+        technicalTargetRefs: ["css:#password"],
+        stepIndex: 1,
+      }],
+      runtimeInputRequirements: [],
+    },
+  });
+
+  assert.equal(parsed.actionTargets.length, 1);
+  assert.equal(parsed.actionTargets[0]?.actionType, "action_press");
+  assert.equal(parsed.actionTargets[0]?.recordingActionType, "press");
+  assert.equal(parsed.actionTargets[0]?.key, "Enter");
+  assert.notEqual(parsed.actionTargets[0]?.actionType, "action_click");
+
+  assert.equal(parsed.orderedSteps[0]?.type, "action_press");
+  assert.equal(parsed.orderedSteps[0]?.recordingActionType, "press");
+  assert.equal(parsed.orderedSteps[0]?.key, "Enter");
+});
+
+test("recording replay: fill/click/select order and tagging are unaffected by press support", () => {
+  const parsed = parseScenarioStepsForDiscovery({
+    ...scenario(),
+    recordingExecutionContract: {
+      actions: [
+        { actionType: "fill", humanStep: "Ingresar", targetRef: "Usuario", valueKey: "username", stepIndex: 1 },
+        { actionType: "fill", humanStep: "Ingresar", targetRef: "Contraseña", valueKey: "password", stepIndex: 2 },
+        { actionType: "press", key: "Enter", targetRef: "Contraseña", stepIndex: 3 },
+      ],
+      runtimeInputRequirements: [],
+    },
+  });
+  assert.deepEqual(parsed.actionTargets.map((item) => item.actionType), ["action_fill", "action_fill", "action_press"]);
+  assert.deepEqual(parsed.actionTargets.map((item) => item.recordingActionType), ["fill", "fill", "press"]);
+});
+
+test("recording replay: an ordinary click is never mistagged as press, and vice versa (no app/value hardcode)", () => {
+  const parsed = parseScenarioStepsForDiscovery({
+    ...scenario(),
+    recordingExecutionContract: {
+      actions: [
+        { actionType: "click", humanStep: "Presionar", targetRef: "Cualquier Botón", stepIndex: 1 },
+        { actionType: "press", key: "Escape", targetRef: "Cualquier Campo", stepIndex: 2 },
+      ],
+      runtimeInputRequirements: [],
+    },
+  });
+  assert.deepEqual(parsed.actionTargets.map((item) => item.actionType), ["action_click", "action_press"]);
+  assert.equal(parsed.actionTargets[0]?.key, undefined);
+  assert.equal(parsed.actionTargets[1]?.key, "Escape");
+});
+
+test("recording replay repairs legacy duplicate indices without dropping compound actions", () => {
+  const parsed = parseScenarioStepsForDiscovery({
+    ...scenario(),
+    recordingExecutionContract: {
+      actions: [
+        { actionType: "select", humanStep: "Seleccionar", targetRef: "Ingresos", valueKey: "currency", stepIndex: 8 },
+        { actionType: "fill", humanStep: "Ingresar", targetRef: "Ingresos", valueKey: "amount", stepIndex: 8 },
+        { actionType: "check", humanStep: "Marcar", targetRef: "row", valueKey: "row.selected", stepIndex: 9 },
+      ],
+      runtimeInputRequirements: [],
+    },
+  });
+  assert.deepEqual(parsed.actionTargets.map((item) => item.index), [1, 2, 3]);
+  assert.deepEqual(parsed.actionTargets.map((item) => item.recordingActionType), ["select", "fill", "check"]);
+  assert.equal(parsed.actionTargets.length, 3);
+});
+
+test("recording replay preserves the semantic field as the selection authority", () => {
+  const parsed = parseScenarioStepsForDiscovery({
+    ...scenario(),
+    recordingExecutionContract: {
+      actions: [{
+        actionType: "select",
+        humanStep: 'Seleccionar "cédula" en "Tipo de ID"',
+        semanticField: "Tipo de ID",
+        targetRef: "cell:Tipo de ID",
+        valueKey: "entity_1.tipo_de_id_seleccion",
+        runtimeValueSource: "dataset",
+        stepIndex: 1,
+      }],
+      runtimeInputRequirements: [],
+    },
+  });
+
+  assert.equal(parsed.actionTargets[0]?.selectionField, "Tipo de ID");
+  assert.equal(parsed.orderedSteps[0]?.selectionField, "Tipo de ID");
+});

@@ -1,0 +1,1535 @@
+[
+  {
+    "scenarioId": "REC-34034233-01",
+    "title": "Prueba",
+    "description": "Recorrido observado para completar \"Prueba\". Se registraron 13 acciones funcionales.",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "description": "Navegar a http://127.0.0.1:8088/QA_Field_Lab.html"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Nombre de prueba"
+        },
+        "valueKey": "nombre_de_prueba",
+        "description": "Ingresar [nombre_de_prueba] en \"Nombre de prueba\"",
+        "interactionId": "interaction-3"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Correo de prueba"
+        },
+        "valueKey": "correo_de_prueba",
+        "description": "Ingresar [correo_de_prueba] en \"Correo de prueba\"",
+        "interactionId": "interaction-4"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Contraseña ficticia"
+        },
+        "valueKey": "contrasena_ficticia",
+        "description": "Ingresar [contrasena_ficticia] en \"Contraseña ficticia\"",
+        "interactionId": "interaction-5"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Notas del recorrido"
+        },
+        "valueKey": "notas_del_recorrido",
+        "description": "Ingresar [notas_del_recorrido] en \"Notas del recorrido\"",
+        "interactionId": "interaction-6"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Teléfono ficticio"
+        },
+        "valueKey": "telefono_ficticio",
+        "description": "Ingresar [telefono_ficticio] en \"Teléfono ficticio\"",
+        "interactionId": "interaction-8"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Importe decimal"
+        },
+        "valueKey": "importe_decimal",
+        "description": "Ingresar [importe_decimal] en \"Importe decimal\"",
+        "interactionId": "interaction-9"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Identificador con máscara"
+        },
+        "valueKey": "identificador_con_mascara",
+        "description": "Ingresar [identificador_con_mascara] en \"Identificador con máscara\"",
+        "interactionId": "interaction-10"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "option|Web"
+        },
+        "description": "Presionar \"Web\"",
+        "interactionId": "interaction-11"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "option|Mobile"
+        },
+        "description": "Presionar \"Mobile\"",
+        "interactionId": "interaction-12"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "option|Sucursal"
+        },
+        "description": "Presionar \"Sucursal\"",
+        "interactionId": "interaction-13"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Sugerencia nativa"
+        },
+        "valueKey": "sugerencia_nativa",
+        "description": "Ingresar [sugerencia_nativa] en \"Sugerencia nativa\"",
+        "interactionId": "interaction-14"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "css",
+          "value": "#f-fecha_nativa"
+        },
+        "valueKey": "fecha_nativa",
+        "description": "Ingresar [fecha_nativa] en \"Fecha nativa\"",
+        "interactionId": "interaction-15"
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Ingresar [nombre_de_prueba] en \"Nombre de prueba\"",
+        "sourceEventRefs": [
+          "event-3"
+        ],
+        "stepTemplate": "Ingresar [nombre_de_prueba] en \"Nombre de prueba\"",
+        "renderedStep": "Ingresar \"Roque Burgos\" en \"Nombre de prueba\"",
+        "valueKey": "nombre_de_prueba",
+        "interactionId": "interaction-3",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "stepNumber": 2
+      },
+      {
+        "content": "Ingresar [correo_de_prueba] en \"Correo de prueba\"",
+        "sourceEventRefs": [
+          "event-4"
+        ],
+        "stepTemplate": "Ingresar [correo_de_prueba] en \"Correo de prueba\"",
+        "renderedStep": "Ingresar \"calidad@GMAIL.COM\" en \"Correo de prueba\"",
+        "valueKey": "correo_de_prueba",
+        "interactionId": "interaction-4",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "stepNumber": 3
+      },
+      {
+        "content": "Ingresar [contrasena_ficticia] en \"Contraseña ficticia\"",
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "stepTemplate": "Ingresar [contrasena_ficticia] en \"Contraseña ficticia\"",
+        "renderedStep": "Ingresar \"QWEQWEQE\" en \"Contraseña ficticia\"",
+        "valueKey": "contrasena_ficticia",
+        "interactionId": "interaction-5",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "stepNumber": 4
+      },
+      {
+        "content": "Ingresar [notas_del_recorrido] en \"Notas del recorrido\"",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "stepTemplate": "Ingresar [notas_del_recorrido] en \"Notas del recorrido\"",
+        "renderedStep": "Ingresar \"PRIMERA LINEA\" en \"Notas del recorrido\"",
+        "valueKey": "notas_del_recorrido",
+        "interactionId": "interaction-6",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "stepNumber": 5
+      },
+      {
+        "content": "Presionar \"Enter\" en \"Notas del recorrido\"",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "renderedStep": "Presionar \"Enter\" en \"Notas del recorrido\"",
+        "interactionId": "interaction-7",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "stepNumber": 6
+      },
+      {
+        "content": "Ingresar [telefono_ficticio] en \"Teléfono ficticio\"",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "stepTemplate": "Ingresar [telefono_ficticio] en \"Teléfono ficticio\"",
+        "renderedStep": "Ingresar \"8292460396\" en \"Teléfono ficticio\"",
+        "valueKey": "telefono_ficticio",
+        "interactionId": "interaction-8",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "stepNumber": 7
+      },
+      {
+        "content": "Ingresar [importe_decimal] en \"Importe decimal\"",
+        "sourceEventRefs": [
+          "event-9"
+        ],
+        "stepTemplate": "Ingresar [importe_decimal] en \"Importe decimal\"",
+        "renderedStep": "Ingresar \"0.43\" en \"Importe decimal\"",
+        "valueKey": "importe_decimal",
+        "interactionId": "interaction-9",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "stepNumber": 8
+      },
+      {
+        "content": "Ingresar [identificador_con_mascara] en \"Identificador con máscara\"",
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "stepTemplate": "Ingresar [identificador_con_mascara] en \"Identificador con máscara\"",
+        "renderedStep": "Ingresar \"402-2467955-1\" en \"Identificador con máscara\"",
+        "valueKey": "identificador_con_mascara",
+        "interactionId": "interaction-10",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "stepNumber": 9
+      },
+      {
+        "content": "Presionar \"Web\"",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "renderedStep": "Presionar \"Web\"",
+        "interactionId": "interaction-11",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "stepNumber": 10
+      },
+      {
+        "content": "Presionar \"Mobile\"",
+        "sourceEventRefs": [
+          "event-12"
+        ],
+        "renderedStep": "Presionar \"Mobile\"",
+        "interactionId": "interaction-12",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "stepNumber": 11
+      },
+      {
+        "content": "Presionar \"Sucursal\"",
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "renderedStep": "Presionar \"Sucursal\"",
+        "interactionId": "interaction-13",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "stepNumber": 12
+      },
+      {
+        "content": "Ingresar [sugerencia_nativa] en \"Sugerencia nativa\"",
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "stepTemplate": "Ingresar [sugerencia_nativa] en \"Sugerencia nativa\"",
+        "renderedStep": "Ingresar \"Santo Domingo\" en \"Sugerencia nativa\"",
+        "valueKey": "sugerencia_nativa",
+        "interactionId": "interaction-14",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "stepNumber": 13
+      },
+      {
+        "content": "Ingresar [fecha_nativa] en \"Fecha nativa\"",
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "stepTemplate": "Ingresar [fecha_nativa] en \"Fecha nativa\"",
+        "renderedStep": "Ingresar \"2026-08-16\" en \"Fecha nativa\"",
+        "valueKey": "fecha_nativa",
+        "interactionId": "interaction-15",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "stepNumber": 14
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "nombre_de_prueba",
+        "label": "Nombre de prueba",
+        "stepIndex": 1,
+        "technicalTargetRefs": [
+          "role:textbox|Nombre de prueba",
+          "css:#f-nombre",
+          "id:f-nombre"
+        ],
+        "sourceEventRefs": [
+          "event-3"
+        ],
+        "exampleValue": "Lucia QA",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Nombre de prueba",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "correo_de_prueba",
+        "label": "Correo de prueba",
+        "stepIndex": 2,
+        "technicalTargetRefs": [
+          "role:textbox|Correo de prueba",
+          "css:#f-correo",
+          "id:f-correo"
+        ],
+        "sourceEventRefs": [
+          "event-4"
+        ],
+        "exampleValue": "ACOR@GMAIL.COM",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Correo de prueba",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "contrasena_ficticia",
+        "label": "Contraseña ficticia",
+        "stepIndex": 3,
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña ficticia",
+          "css:#f-clave",
+          "id:f-clave"
+        ],
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "secure",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Contraseña ficticia",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "notas_del_recorrido",
+        "label": "Notas del recorrido",
+        "stepIndex": 4,
+        "technicalTargetRefs": [
+          "role:textbox|Notas del recorrido",
+          "css:#f-notas",
+          "id:f-notas"
+        ],
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "exampleValue": "PRIMERA LINEA",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Notas del recorrido",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "telefono_ficticio",
+        "label": "Teléfono ficticio",
+        "stepIndex": 5,
+        "technicalTargetRefs": [
+          "role:textbox|Teléfono ficticio",
+          "css:#f-telefono",
+          "id:f-telefono"
+        ],
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "exampleValue": "9898980990",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Teléfono ficticio",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "importe_decimal",
+        "label": "Importe decimal",
+        "stepIndex": 6,
+        "technicalTargetRefs": [
+          "role:textbox|Importe decimal",
+          "css:#f-importe",
+          "id:f-importe"
+        ],
+        "sourceEventRefs": [
+          "event-9"
+        ],
+        "exampleValue": "0.43",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Importe decimal",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "identificador_con_mascara",
+        "label": "Identificador con máscara",
+        "stepIndex": 7,
+        "technicalTargetRefs": [
+          "role:textbox|Identificador con máscara",
+          "css:#f-identificador",
+          "id:f-identificador"
+        ],
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "exampleValue": "000-0000000-0",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Identificador con máscara",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "sugerencia_nativa",
+        "label": "Sugerencia nativa",
+        "stepIndex": 11,
+        "technicalTargetRefs": [
+          "role:textbox|Sugerencia nativa",
+          "css:#f-sugerencia",
+          "id:f-sugerencia"
+        ],
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "exampleValue": "Santo Domingo",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Sugerencia nativa",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "fecha_nativa",
+        "label": "Fecha nativa",
+        "stepIndex": 12,
+        "technicalTargetRefs": [
+          "css:#f-fecha_nativa",
+          "id:f-fecha_nativa"
+        ],
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "exampleValue": "2026-09-21",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Fecha nativa",
+        "needsReview": false,
+        "reviewReason": "stable_business_label",
+        "formatHint": "date"
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Ingresar [nombre_de_prueba] en \"Nombre de prueba\"",
+        "strategy": "role",
+        "value": "textbox|Nombre de prueba"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Ingresar [correo_de_prueba] en \"Correo de prueba\"",
+        "strategy": "role",
+        "value": "textbox|Correo de prueba"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Ingresar [contrasena_ficticia] en \"Contraseña ficticia\"",
+        "strategy": "role",
+        "value": "textbox|Contraseña ficticia"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Ingresar [notas_del_recorrido] en \"Notas del recorrido\"",
+        "strategy": "role",
+        "value": "textbox|Notas del recorrido"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Ingresar [telefono_ficticio] en \"Teléfono ficticio\"",
+        "strategy": "role",
+        "value": "textbox|Teléfono ficticio"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Ingresar [importe_decimal] en \"Importe decimal\"",
+        "strategy": "role",
+        "value": "textbox|Importe decimal"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Ingresar [identificador_con_mascara] en \"Identificador con máscara\"",
+        "strategy": "role",
+        "value": "textbox|Identificador con máscara"
+      },
+      {
+        "stepIndex": 8,
+        "description": "Presionar \"Web\"",
+        "strategy": "role",
+        "value": "option|Web"
+      },
+      {
+        "stepIndex": 9,
+        "description": "Presionar \"Mobile\"",
+        "strategy": "role",
+        "value": "option|Mobile"
+      },
+      {
+        "stepIndex": 10,
+        "description": "Presionar \"Sucursal\"",
+        "strategy": "role",
+        "value": "option|Sucursal"
+      },
+      {
+        "stepIndex": 11,
+        "description": "Ingresar [sugerencia_nativa] en \"Sugerencia nativa\"",
+        "strategy": "role",
+        "value": "textbox|Sugerencia nativa"
+      },
+      {
+        "stepIndex": 12,
+        "description": "Ingresar [fecha_nativa] en \"Fecha nativa\"",
+        "strategy": "css",
+        "value": "#f-fecha_nativa"
+      }
+    ],
+    "sourceRecordingId": "34034233-6dee-4ee9-9fc1-56b276205985",
+    "hasUncertainSteps": false,
+    "primary": true,
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7",
+      "event-8",
+      "event-9",
+      "event-10",
+      "event-11",
+      "event-12",
+      "event-13",
+      "event-14",
+      "event-15"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "functionalReadiness": true,
+    "technicalReadiness": true,
+    "expectedResultCandidate": "La aplicación carga su pantalla inicial",
+    "oracleAuthority": "observed_only",
+    "confidence": 0.95,
+    "scenarioStepCount": 14,
+    "functionalActionCount": 13,
+    "nonUserSetupSteps": 1,
+    "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
+    "scenarioGoal": "Prueba",
+    "stateSequenceValid": true,
+    "stateSequenceIssues": [],
+    "postGoalObservations": [],
+    "goalContract": {
+      "nonGeneric": true,
+      "goalCoherent": true,
+      "mutationIntentExpressed": true
+    },
+    "replayEligible": true,
+    "canonicalInteractions": [
+      {
+        "id": "interaction-1",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-1"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-3",
+        "controlIdentity": "e5f5edc43160|Nombre de prueba|role|textbox|Nombre de prueba",
+        "semanticField": "Nombre de prueba",
+        "action": "fill",
+        "valueKey": "nombre_de_prueba",
+        "recordedValue": "Lucia QA",
+        "sourceEventRefs": [
+          "event-3"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Nombre de prueba",
+          "css:#f-nombre",
+          "id:f-nombre"
+        ],
+        "editingSessionRef": "edit-1",
+        "description": "Ingresar en \"Nombre de prueba\"",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-4",
+        "controlIdentity": "e5f5edc43160|Correo de prueba|role|textbox|Correo de prueba",
+        "semanticField": "Correo de prueba",
+        "action": "fill",
+        "valueKey": "correo_de_prueba",
+        "recordedValue": "ACOR@GMAIL.COM",
+        "sourceEventRefs": [
+          "event-4"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Correo de prueba",
+          "css:#f-correo",
+          "id:f-correo"
+        ],
+        "editingSessionRef": "edit-2",
+        "description": "Ingresar en \"Correo de prueba\"",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-5",
+        "controlIdentity": "e5f5edc43160|Contraseña ficticia|role|textbox|Contraseña ficticia",
+        "semanticField": "Contraseña ficticia",
+        "action": "fill",
+        "valueKey": "contrasena_ficticia",
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña ficticia",
+          "css:#f-clave",
+          "id:f-clave"
+        ],
+        "editingSessionRef": "edit-3",
+        "description": "Ingresar en \"Contraseña ficticia\"",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-6",
+        "controlIdentity": "e5f5edc43160|Notas del recorrido|role|textbox|Notas del recorrido",
+        "semanticField": "Notas del recorrido",
+        "action": "fill",
+        "valueKey": "notas_del_recorrido",
+        "recordedValue": "PRIMERA LINEA",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Notas del recorrido",
+          "css:#f-notas",
+          "id:f-notas"
+        ],
+        "editingSessionRef": "edit-4",
+        "description": "Ingresar en \"Notas del recorrido\"",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-7",
+        "controlIdentity": "e5f5edc43160|Notas del recorrido|role|textbox|Notas del recorrido",
+        "action": "press",
+        "key": "Enter",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Notas del recorrido",
+          "css:#f-notas",
+          "id:f-notas"
+        ],
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-8",
+        "controlIdentity": "e5f5edc43160|Teléfono ficticio|role|textbox|Teléfono ficticio",
+        "semanticField": "Teléfono ficticio",
+        "action": "fill",
+        "valueKey": "telefono_ficticio",
+        "recordedValue": "9898980990",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Teléfono ficticio",
+          "css:#f-telefono",
+          "id:f-telefono"
+        ],
+        "editingSessionRef": "edit-5",
+        "description": "Ingresar en \"Teléfono ficticio\"",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-9",
+        "controlIdentity": "e5f5edc43160|Importe decimal|role|textbox|Importe decimal",
+        "semanticField": "Importe decimal",
+        "action": "fill",
+        "valueKey": "importe_decimal",
+        "recordedValue": "0.43",
+        "sourceEventRefs": [
+          "event-9"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Importe decimal",
+          "css:#f-importe",
+          "id:f-importe"
+        ],
+        "editingSessionRef": "edit-6",
+        "description": "Ingresar en \"Importe decimal\"",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-10",
+        "controlIdentity": "e5f5edc43160|Identificador con máscara|role|textbox|Identificador con máscara",
+        "semanticField": "Identificador con máscara",
+        "action": "fill",
+        "valueKey": "identificador_con_mascara",
+        "recordedValue": "000-0000000-0",
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Identificador con máscara",
+          "css:#f-identificador",
+          "id:f-identificador"
+        ],
+        "editingSessionRef": "edit-7",
+        "description": "Ingresar en \"Identificador con máscara\"",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-11",
+        "controlIdentity": "e5f5edc43160|Web|role|option|Web",
+        "semanticField": "Web",
+        "action": "click",
+        "valueKey": "web",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "technicalTargetRefs": [
+          "role:option|Web"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "option|Web",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "option"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 19
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Web\"",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-12",
+        "controlIdentity": "e5f5edc43160|Mobile|role|option|Mobile",
+        "semanticField": "Mobile",
+        "action": "click",
+        "valueKey": "mobile",
+        "sourceEventRefs": [
+          "event-12"
+        ],
+        "technicalTargetRefs": [
+          "role:option|Mobile"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "option|Mobile",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "option"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 19
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Mobile\"",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-13",
+        "controlIdentity": "e5f5edc43160|Sucursal|role|option|Sucursal",
+        "semanticField": "Sucursal",
+        "action": "click",
+        "valueKey": "sucursal",
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "technicalTargetRefs": [
+          "role:option|Sucursal"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "option|Sucursal",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "option"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 19
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Sucursal\"",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-14",
+        "controlIdentity": "e5f5edc43160|Sugerencia nativa|role|textbox|Sugerencia nativa",
+        "semanticField": "Sugerencia nativa",
+        "action": "fill",
+        "valueKey": "sugerencia_nativa",
+        "recordedValue": "Santo Domingo",
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Sugerencia nativa",
+          "css:#f-sugerencia",
+          "id:f-sugerencia"
+        ],
+        "editingSessionRef": "edit-8",
+        "description": "Ingresar en \"Sugerencia nativa\"",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-15",
+        "controlIdentity": "e5f5edc43160|Fecha nativa|css|#f-fecha_nativa",
+        "semanticField": "Fecha nativa",
+        "action": "fill",
+        "valueKey": "fecha_nativa",
+        "recordedValue": "2026-09-21",
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "technicalTargetRefs": [
+          "css:#f-fecha_nativa",
+          "id:f-fecha_nativa"
+        ],
+        "editingSessionRef": "edit-9",
+        "description": "Ingresar en \"Fecha nativa\"",
+        "screenBeforeRef": "e5f5edc43160",
+        "screenAfterRef": "e5f5edc43160",
+        "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+        "stateScope": "e5f5edc43160",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.8
+      }
+    ],
+    "entityActionBlocks": [],
+    "readiness": {
+      "functionalReadiness": true,
+      "dataReadiness": true,
+      "technicalReadiness": true,
+      "oracleReadiness": true,
+      "reviewReadiness": true,
+      "publicationContentReadiness": true,
+      "executionReadiness": true,
+      "publicationReadiness": true,
+      "missingInputs": [],
+      "datasetAuthorityMismatches": [],
+      "dataReadinessReasons": []
+    },
+    "technicalKnowledgeRefs": [],
+    "runtimeInputRequirements": [
+      {
+        "valueKey": "nombre_de_prueba",
+        "semanticField": "Nombre de prueba",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "Roque Burgos",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 1,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "Roque Burgos",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "correo_de_prueba",
+        "semanticField": "Correo de prueba",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "calidad@GMAIL.COM",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 2,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "calidad@GMAIL.COM",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "contrasena_ficticia",
+        "semanticField": "Contraseña ficticia",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": "QWEQWEQE",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": true,
+        "stepIndex": 3,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "QWEQWEQE",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "notas_del_recorrido",
+        "semanticField": "Notas del recorrido",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "PRIMERA LINEA",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 4,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "PRIMERA LINEA",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "telefono_ficticio",
+        "semanticField": "Teléfono ficticio",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "8292460396",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 5,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "8292460396",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "importe_decimal",
+        "semanticField": "Importe decimal",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "0.43",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 6,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "0.43",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "identificador_con_mascara",
+        "semanticField": "Identificador con máscara",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "402-2467955-1",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 7,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "402-2467955-1",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "sugerencia_nativa",
+        "semanticField": "Sugerencia nativa",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "Santo Domingo",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 11,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "Santo Domingo",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "fecha_nativa",
+        "semanticField": "Fecha nativa",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "2026-08-16",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 12,
+        "controlType": "date",
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "2026-08-16",
+        "datasetAuthorityMismatch": false
+      }
+    ],
+    "runtimeDataset": {
+      "scenarioId": "REC-34034233-01",
+      "requirements": [
+        {
+          "valueKey": "nombre_de_prueba",
+          "semanticField": "Nombre de prueba",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "Roque Burgos",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 1,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "Roque Burgos",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "correo_de_prueba",
+          "semanticField": "Correo de prueba",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "calidad@GMAIL.COM",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 2,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "calidad@GMAIL.COM",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "contrasena_ficticia",
+          "semanticField": "Contraseña ficticia",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": "QWEQWEQE",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": true,
+          "stepIndex": 3,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "QWEQWEQE",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "notas_del_recorrido",
+          "semanticField": "Notas del recorrido",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "PRIMERA LINEA",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 4,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "PRIMERA LINEA",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "telefono_ficticio",
+          "semanticField": "Teléfono ficticio",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "8292460396",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 5,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "8292460396",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "importe_decimal",
+          "semanticField": "Importe decimal",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "0.43",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 6,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "0.43",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "identificador_con_mascara",
+          "semanticField": "Identificador con máscara",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "402-2467955-1",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 7,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "402-2467955-1",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "sugerencia_nativa",
+          "semanticField": "Sugerencia nativa",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "Santo Domingo",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 11,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "Santo Domingo",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "fecha_nativa",
+          "semanticField": "Fecha nativa",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "2026-08-16",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 12,
+          "controlType": "date",
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "2026-08-16",
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "resolvedValues": {
+        "nombre_de_prueba": "Roque Burgos",
+        "correo_de_prueba": "calidad@GMAIL.COM",
+        "contrasena_ficticia": "QWEQWEQE",
+        "notas_del_recorrido": "PRIMERA LINEA",
+        "telefono_ficticio": "8292460396",
+        "importe_decimal": "0.43",
+        "identificador_con_mascara": "402-2467955-1",
+        "sugerencia_nativa": "Santo Domingo",
+        "fecha_nativa": "2026-08-16"
+      },
+      "missingValues": []
+    },
+    "mutationOpportunities": [
+      {
+        "opportunityId": "REC-34034233-01:field_omission",
+        "title": "Prueba: comprobar la omisión de un dato",
+        "mutationType": "FIELD_OMISSION",
+        "basePrimaryScenarioId": "REC-34034233-01",
+        "operations": [
+          {
+            "type": "remove_action",
+            "interactionId": "interaction-3"
+          }
+        ],
+        "evidenceRefs": [
+          "event-1",
+          "event-2",
+          "event-3",
+          "event-4",
+          "event-5",
+          "event-6",
+          "event-7",
+          "event-8",
+          "event-9",
+          "event-10",
+          "event-11",
+          "event-12",
+          "event-13",
+          "event-14",
+          "event-15"
+        ],
+        "rationale": "Existen varios inputs observados; se propone una omisión agrupada sin inventar el resultado.",
+        "oracleAuthority": "MISSING",
+        "confidence": 0.5,
+        "needsReview": true
+      }
+    ],
+    "promotedSpec": {
+      "appSlug": "kiosko",
+      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\kiosko\\sections\\default-section\\cases\\preview-001-prueba\\case.spec.ts",
+      "specHash": "272ada265eb19a5aa93314e84529c6c60e3f632e0b860e21fcd2ba84ddcc8f9c",
+      "automationId": "preview-001-prueba",
+      "sectionSlug": "default-section",
+      "generatedAt": "2026-09-22T01:46:27.549Z"
+    },
+    "testRailCaseId": 47066,
+    "testRailDestination": {
+      "projectId": "56",
+      "suiteId": "1731",
+      "sectionId": "4755"
+    }
+  }
+]

@@ -684,3 +684,165 @@ function makeVirtualCase(overrides = {}) {
     (0, test_1.expect)(normalized.expectedResult).toContain("Tarjetas de crédito");
     (0, test_1.expect)(normalized.expectedResult).toContain("Préstamos");
 });
+// ── applyFinalCanonicalization tests ──
+(0, test_1.test)("applyFinalCanonicalization: canonicalizes steps inserted by guards", () => {
+    const rp = makeRouteProfile({
+        visibleControls: [
+            "Iniciar",
+            "Información de productos",
+            "Tarjetas de crédito",
+            "Depósitos a Plazo",
+            "Préstamos",
+            "Cuentas de Efectivo",
+        ],
+        aliases: {
+            cuentas_efectivo: "Cuentas de Efectivo",
+            tarjetas_credito: ["Tarjetas de crédito", "Tarjetas"],
+        },
+    });
+    const vc = makeVirtualCase({
+        displayId: "PREVIEW-001",
+        title: "Test scenario",
+        steps: [
+            'Clic en "Iniciar".',
+            'Clic en "Informacion de productos".',
+            // Simulating a guard-inserted step with non-canonical label
+            'Clic en "Cuentas de efectivo".',
+            'Validar que se muestre "Tarjetas de credito".',
+        ],
+        expectedResult: "Se muestran las tarjetas de credito",
+    });
+    const { applyFinalCanonicalization } = require("../src/automations/scenario-normalizer");
+    const result = applyFinalCanonicalization([vc], rp, null);
+    (0, test_1.expect)(result.totalCanonicalized).toBeGreaterThan(0);
+    (0, test_1.expect)(result.cases[0].steps.some((s) => s.includes("Cuentas de Efectivo"))).toBe(true);
+    (0, test_1.expect)(result.cases[0].steps.some((s) => s.includes("Cuentas de efectivo"))).toBe(false);
+    (0, test_1.expect)(result.cases[0].steps.some((s) => s.includes("Tarjetas de crédito"))).toBe(true);
+    (0, test_1.expect)(result.cases[0].steps.some((s) => s.includes("Tarjetas de credito"))).toBe(false);
+    (0, test_1.expect)(result.cases[0].expectedResult).toContain("Tarjetas de crédito");
+});
+(0, test_1.test)("applyFinalCanonicalization: provides diagnostics for all changes", () => {
+    const rp = makeRouteProfile({
+        visibleControls: ["Iniciar", "Información de productos", "Préstamos"],
+        aliases: { prestamos: "Préstamos" },
+    });
+    const vc = makeVirtualCase({
+        displayId: "PREVIEW-002",
+        title: "Visualizar prestamos",
+        steps: [
+            'Clic en "Iniciar".',
+            'Clic en "Informacion de productos".',
+            'Validar que se muestre "Prestamos".',
+        ],
+        expectedResult: "Se muestran los prestamos disponibles",
+    });
+    const { applyFinalCanonicalization } = require("../src/automations/scenario-normalizer");
+    const result = applyFinalCanonicalization([vc], rp, null);
+    (0, test_1.expect)(result.diagnostics.length).toBeGreaterThan(0);
+    // Check that diagnostics have proper structure
+    for (const diag of result.diagnostics) {
+        (0, test_1.expect)(diag.scenarioId).toBe("PREVIEW-002");
+        (0, test_1.expect)(diag.field).toBeDefined();
+        (0, test_1.expect)(diag.originalText).toBeDefined();
+        (0, test_1.expect)(diag.canonicalText).toBeDefined();
+        (0, test_1.expect)(diag.matchedSource).toBeDefined();
+        (0, test_1.expect)(diag.phase).toBe("final");
+        // Verify canonical text is different from original
+        (0, test_1.expect)(diag.canonicalText).not.toBe(diag.originalText);
+    }
+});
+(0, test_1.test)("applyFinalCanonicalization: handles labels without canonical equivalent", () => {
+    const rp = makeRouteProfile({
+        visibleControls: ["Iniciar", "Finalizar sesión"],
+    });
+    const vc = makeVirtualCase({
+        displayId: "PREVIEW-003",
+        title: "Test scenario",
+        steps: [
+            'Clic en "Iniciar".',
+            // Label not in routeProfile - should not be changed
+            'Clic en "Custom Label".',
+            'Validar que se muestre "Another Unknown Label".',
+        ],
+        expectedResult: "Custom result text",
+    });
+    const { applyFinalCanonicalization } = require("../src/automations/scenario-normalizer");
+    const result = applyFinalCanonicalization([vc], rp, null);
+    // Labels without canonical equivalent should remain unchanged
+    (0, test_1.expect)(result.cases[0].steps[1]).toBe('Clic en "Custom Label".');
+    (0, test_1.expect)(result.cases[0].steps[2]).toBe('Validar que se muestre "Another Unknown Label".');
+    (0, test_1.expect)(result.cases[0].expectedResult).toBe("Custom result text");
+});
+(0, test_1.test)("applyFinalCanonicalization: multi-app isolation - app A canonicalization doesn't affect app B", () => {
+    const rpA = makeRouteProfile({
+        name: "app_a_profile",
+        visibleControls: ["Iniciar", "Módulo A", "Préstamos A"],
+        aliases: { prestamos: "Préstamos A" },
+    });
+    const rpB = makeRouteProfile({
+        name: "app_b_profile",
+        visibleControls: ["Iniciar", "Módulo B", "Préstamos B"],
+        aliases: { prestamos: "Préstamos B" },
+    });
+    const vcA = makeVirtualCase({
+        displayId: "APP-A-001",
+        appSlug: "app-a",
+        steps: ['Clic en "Iniciar".', 'Validar que se muestre "Prestamos A".'],
+    });
+    const vcB = makeVirtualCase({
+        displayId: "APP-B-001",
+        appSlug: "app-b",
+        steps: ['Clic en "Iniciar".', 'Validar que se muestre "Prestamos B".'],
+    });
+    const { applyFinalCanonicalization } = require("../src/automations/scenario-normalizer");
+    // Canonicalize with app A profile
+    const resultA = applyFinalCanonicalization([vcA], rpA, null);
+    (0, test_1.expect)(resultA.cases[0].steps.some((s) => s.includes("Préstamos A"))).toBe(true);
+    (0, test_1.expect)(resultA.cases[0].steps.some((s) => s.includes("Préstamos B"))).toBe(false);
+    // Canonicalize with app B profile
+    const resultB = applyFinalCanonicalization([vcB], rpB, null);
+    (0, test_1.expect)(resultB.cases[0].steps.some((s) => s.includes("Préstamos B"))).toBe(true);
+    (0, test_1.expect)(resultB.cases[0].steps.some((s) => s.includes("Préstamos A"))).toBe(false);
+});
+(0, test_1.test)("applyFinalCanonicalization: handles title, preconditions, and expectedResult", () => {
+    const rp = makeRouteProfile({
+        visibleControls: ["Información de productos", "Tarjetas de crédito"],
+        aliases: { tarjetas: "Tarjetas de crédito" },
+    });
+    const vc = makeVirtualCase({
+        displayId: "PREVIEW-004",
+        title: "Visualizar informacion de tarjetas de credito",
+        steps: ['Clic en "Iniciar".'],
+        expectedResult: "Se muestran las tarjetas de credito correctamente",
+        preconditions: ["El usuario tiene acceso a informacion de productos"],
+    });
+    const { applyFinalCanonicalization } = require("../src/automations/scenario-normalizer");
+    const result = applyFinalCanonicalization([vc], rp, null);
+    (0, test_1.expect)(result.cases[0].title).toContain("Información de productos");
+    (0, test_1.expect)(result.cases[0].title).toContain("Tarjetas de crédito");
+    (0, test_1.expect)(result.cases[0].expectedResult).toContain("Tarjetas de crédito");
+    (0, test_1.expect)(result.cases[0].preconditions[0]).toContain("Información de productos");
+});
+(0, test_1.test)("applyFinalCanonicalization: empty cases returns empty result", () => {
+    const rp = makeRouteProfile();
+    const { applyFinalCanonicalization } = require("../src/automations/scenario-normalizer");
+    const result = applyFinalCanonicalization([], rp, null);
+    (0, test_1.expect)(result.cases).toEqual([]);
+    (0, test_1.expect)(result.diagnostics).toEqual([]);
+    (0, test_1.expect)(result.totalCanonicalized).toBe(0);
+});
+(0, test_1.test)("applyFinalCanonicalization: null routeProfile - no canonicalization", () => {
+    const vc = makeVirtualCase({
+        displayId: "PREVIEW-005",
+        title: "Test scenario",
+        steps: ['Clic en "Iniciar".', 'Validar "Prestamos".'],
+        expectedResult: "Se muestran prestamos",
+    });
+    const { applyFinalCanonicalization } = require("../src/automations/scenario-normalizer");
+    const result = applyFinalCanonicalization([vc], null, null);
+    // Without routeProfile, no canonicalization should happen
+    (0, test_1.expect)(result.totalCanonicalized).toBe(0);
+    (0, test_1.expect)(result.diagnostics).toEqual([]);
+    (0, test_1.expect)(result.cases[0].title).toBe(vc.title);
+    (0, test_1.expect)(result.cases[0].steps).toEqual(vc.steps);
+});

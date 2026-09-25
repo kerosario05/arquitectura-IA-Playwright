@@ -18,7 +18,7 @@
           "status": "active",
           "sensitive": false,
           "confidence": 1,
-          "source": ""
+          "source": "preview-001-kiosko2-step-2"
         },
         {
           "name": "selectFirstVisibleCard",
@@ -29,14 +29,26 @@
           "sensitive": false,
           "confidence": 1,
           "source": ""
+        },
+        {
+          "name": "clickPrimaryAction",
+          "intent": "click_primary_action",
+          "parameters": [
+            "actionName"
+          ],
+          "available": false,
+          "source": "preview-001-kiosko2-missing-click_primary_action",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
         }
       ],
       "confidence": 1,
       "status": "active",
       "sourcePlanIds": [],
       "caseIds": [],
-      "createdAt": "2026-08-31T18:31:10.488Z",
-      "updatedAt": "2026-08-31T18:31:10.488Z"
+      "createdAt": "2026-09-15T16:21:50.103Z",
+      "updatedAt": "2026-09-15T16:21:50.170Z"
     },
     {
       "id": "po_framework_operationsmenupage",
@@ -50,7 +62,7 @@
           "parameters": [
             "moduleName"
           ],
-          "available": true,
+          "available": false,
           "status": "active",
           "sensitive": false,
           "confidence": 1,
@@ -62,7 +74,7 @@
           "parameters": [
             "moduleName"
           ],
-          "available": true,
+          "available": false,
           "status": "active",
           "sensitive": false,
           "confidence": 1,
@@ -73,10 +85,50 @@
       "status": "active",
       "sourcePlanIds": [],
       "caseIds": [],
-      "createdAt": "2026-08-31T18:31:10.488Z",
-      "updatedAt": "2026-08-31T18:31:10.488Z"
+      "createdAt": "2026-09-15T16:21:50.103Z",
+      "updatedAt": "2026-09-15T16:21:50.103Z"
+    },
+    {
+      "id": "po_1789489310169_3hmmsp",
+      "className": "CategoryPage",
+      "filePath": "automations/apps/kiosko/pages/category.page.ts",
+      "screenSignature": "screen:kiosko-category",
+      "methods": [
+        {
+          "name": "selectCategory",
+          "intent": "select_category",
+          "parameters": [
+            "categoryName"
+          ],
+          "available": true,
+          "source": "candidate,preview-001-kiosko2-step-3,preview-001-kiosko2-missing-select_category",
+          "sensitive": false,
+          "confidence": 0.5,
+          "status": "active"
+        }
+      ],
+      "confidence": 0.5,
+      "status": "active",
+      "sourcePlanIds": [
+        "preview-001-kiosko2"
+      ],
+      "caseIds": [],
+      "createdAt": "2026-09-15T16:21:50.169Z",
+      "updatedAt": "2026-09-15T16:21:50.169Z",
+      "codegenMetadata": {
+        "generatedAt": "2026-09-15T16:21:50.183Z",
+        "generatedBy": "page-object-codegen",
+        "candidateFilePath": "automations/apps/kiosko/pages/category.page.candidate.ts"
+      },
+      "approvalMetadata": {
+        "approvedAt": "2026-09-15T16:21:50.195Z",
+        "approvedFrom": "automations/apps/kiosko/pages/category.page.candidate.ts",
+        "approvedBy": "auto-pom",
+        "autoApproved": true,
+        "blockedMethods": []
+      }
     }
   ],
   "componentCandidates": [],
-  "updatedAt": "2026-08-31T18:37:28.421Z"
+  "updatedAt": "2026-09-22T01:44:42.572Z"
 }

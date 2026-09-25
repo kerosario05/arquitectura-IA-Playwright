@@ -1,0 +1,225 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.resolveDataKey = resolveDataKey;
+exports.formatDataKeyForLog = formatDataKeyForLog;
+const auto_test_data_generator_1 = require("./auto-test-data-generator");
+const SENSITIVE_KEYS = [
+    "password", "contrasena", "contraseña", "clave", "pin", "token", "otp", "secret",
+    "document", "documento", "cedula", "cédula", "identificacion", "identificación",
+    "username", "usuario", "company_identifier", "identification_number", "identity_provider",
+];
+function isSensitiveKey(key) {
+    const normalized = key.toLowerCase();
+    return SENSITIVE_KEYS.some(s => normalized.includes(s));
+}
+function maskValue(value) {
+    if (value.length <= 4)
+        return "***";
+    return "***" + value.slice(-3);
+}
+function normalizeKey(key) {
+    return key
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9_]/g, "_")
+        .trim();
+}
+function normalizeRuntimeSource(entry) {
+    if (entry.source !== "manual_runtime")
+        return entry.source ?? "runtime_context";
+    const normalizedKey = normalizeKey(entry.key);
+    return normalizedKey.startsWith("auth_")
+        || ["username", "password", "otp", "pin", "token", "identity_provider", "app_username", "app_password", "otp_secret"].includes(normalizedKey)
+        ? "user_provided_qa_credentials"
+        : "explicit_runtime_input";
+}
+function resolveDataKey(key, options) {
+    const { testData, testDataAliases, env = {}, missingInputBehavior = "fail", autoGenerateConfig, field, context, overrides, suggestedData, runtimeEntries } = options;
+    const normalizedKey = normalizeKey(key);
+    // Explicit case-scoped runtime entries are authoritative and retain their
+    // provenance through resolution; configured data maps remain lower priority.
+    if (Array.isArray(runtimeEntries)) {
+        const runtimeEntry = runtimeEntries.find((entry) => entry && typeof entry.key === "string" && normalizeKey(entry.key) === normalizedKey
+            && typeof entry.value === "string" && entry.value.trim() !== "");
+        if (runtimeEntry) {
+            return {
+                status: "resolved",
+                key,
+                value: runtimeEntry.value.trim(),
+                source: normalizeRuntimeSource(runtimeEntry),
+                masked: isSensitiveKey(key),
+                ...(runtimeEntry.generated !== undefined ? { generated: runtimeEntry.generated } : {}),
+                ...(runtimeEntry.verified !== undefined ? { verified: runtimeEntry.verified } : {}),
+                ...(runtimeEntry.provenance ? { provenance: runtimeEntry.provenance } : {}),
+                ...(runtimeEntry.valueRole ? { valueRole: runtimeEntry.valueRole } : {}),
+                ...(runtimeEntry.oracleSource ? { oracleSource: runtimeEntry.oracleSource } : {}),
+            };
+        }
+    }
+    // Priority 1: dataOverrides > suggestedValue/default — generic per key, no hardcode
+    if (overrides && typeof overrides === "object") {
+        const normOverrides = new Map();
+        for (const [k, v] of Object.entries(overrides)) {
+            if (v === undefined || v === null)
+                continue;
+            const vs = String(v).trim();
+            if (!vs)
+                continue;
+            normOverrides.set(normalizeKey(k), vs);
+            // also keep original case key for direct match
+            normOverrides.set(k, vs);
+        }
+        const hit = normOverrides.get(normalizedKey) ?? overrides[key] ?? overrides[normalizedKey];
+        if (hit !== undefined && String(hit).trim() !== "") {
+            return { status: "resolved", key, value: String(hit).trim(), source: "dataOverrides", masked: isSensitiveKey(key) };
+        }
+    }
+    if (suggestedData && typeof suggestedData === "object") {
+        const normSug = new Map();
+        for (const [k, v] of Object.entries(suggestedData)) {
+            if (v === undefined || v === null)
+                continue;
+            const vs = String(v).trim();
+            if (!vs)
+                continue;
+            normSug.set(normalizeKey(k), vs);
+        }
+        const hit = normSug.get(normalizedKey);
+        if (hit !== undefined && hit !== "") {
+            return { status: "resolved", key, value: String(hit), source: "suggestedValue", masked: isSensitiveKey(key) };
+        }
+    }
+    // Priority 1: Direct lookup in APP_TEST_DATA_JSON
+    if (testData && key in testData) {
+        const value = testData[key];
+        if (value !== undefined && value !== null) {
+            return {
+                status: "resolved",
+                key,
+                value: String(value),
+                source: "APP_TEST_DATA_JSON",
+                masked: isSensitiveKey(key)
+            };
+        }
+    }
+    // Priority 2: Resolve through aliases
+    if (testDataAliases && key in testDataAliases) {
+        const aliases = testDataAliases[key];
+        const aliasList = Array.isArray(aliases) ? aliases : [aliases];
+        for (const alias of aliasList) {
+            if (testData && alias in testData) {
+                const value = testData[alias];
+                if (value !== undefined && value !== null) {
+                    return {
+                        status: "resolved",
+                        key,
+                        value: String(value),
+                        source: `APP_TEST_DATA_JSON (alias: ${alias})`,
+                        masked: isSensitiveKey(key)
+                    };
+                }
+            }
+        }
+    }
+    // Priority 3: Standard credential mappings
+    const credentialMappings = {
+        "usuario_valido": ["APP_USERNAME", "APP_USERNAME"],
+        "username_valido": ["APP_USERNAME", "APP_USERNAME"],
+        "user_valido": ["APP_USERNAME", "APP_USERNAME"],
+        "contrasena_valida": ["APP_PASSWORD", "APP_PASSWORD"],
+        "contraseña_valida": ["APP_PASSWORD", "APP_PASSWORD"],
+        "password_valido": ["APP_PASSWORD", "APP_PASSWORD"],
+        "clave_valida": ["APP_PASSWORD", "APP_PASSWORD"]
+    };
+    for (const [pattern, envVars] of Object.entries(credentialMappings)) {
+        if (normalizeKey(key) === normalizeKey(pattern)) {
+            for (const envVar of envVars) {
+                const value = env[envVar];
+                if (value) {
+                    return {
+                        status: "resolved",
+                        key,
+                        value,
+                        source: envVar,
+                        masked: true
+                    };
+                }
+            }
+        }
+    }
+    // Priority 4: Direct env var lookup by normalized key
+    const possibleEnvVars = [
+        `APP_${normalizedKey.toUpperCase()}`,
+        normalizedKey.toUpperCase(),
+        key.toUpperCase()
+    ];
+    for (const envVar of possibleEnvVars) {
+        const value = env[envVar];
+        if (value) {
+            return {
+                status: "resolved",
+                key,
+                value,
+                source: envVar,
+                masked: isSensitiveKey(key)
+            };
+        }
+    }
+    // Priority 5: Auto-generate if enabled and data is missing
+    if (autoGenerateConfig?.enabled && missingInputBehavior === "auto_generate") {
+        const autoResult = (0, auto_test_data_generator_1.autoGenerateTestData)(key, field, context, autoGenerateConfig);
+        if (autoResult.generated && autoResult.value) {
+            return {
+                status: "auto_generated",
+                key,
+                value: autoResult.value,
+                source: "auto_generated",
+                masked: autoResult.sensitive,
+                autoGenerated: true,
+                generatedType: autoResult.type
+            };
+        }
+        if (autoResult.sensitive && !autoResult.generated) {
+            return {
+                status: "missing_sensitive",
+                key,
+                error: `Sensitive data key "${key}" cannot be auto-generated. Reason: ${autoResult.reason || "policy_restriction"}`,
+                masked: true
+            };
+        }
+    }
+    // Priority 6: Handle missing based on behavior
+    if (missingInputBehavior === "skip") {
+        return {
+            status: "skipped",
+            key,
+            error: `Data key "${key}" not found, skipped due to missingInputBehavior=skip`
+        };
+    }
+    // Check if this is a sensitive key that's missing
+    if (isSensitiveKey(key)) {
+        return {
+            status: "missing_sensitive",
+            key,
+            error: `Missing sensitive test data value for key "${key}". Set APP_TEST_DATA_JSON.${key} or APP_${key.toUpperCase()}`
+        };
+    }
+    return {
+        status: "missing",
+        key,
+        error: `Missing test data value for key "${key}". Set APP_TEST_DATA_JSON.${key} or APP_${key.toUpperCase()}`
+    };
+}
+function formatDataKeyForLog(resolution) {
+    if (resolution.status !== "resolved" && resolution.status !== "auto_generated") {
+        return `[data-resolver] key="${resolution.key}" status="${resolution.status}" ${resolution.error ? `error="${resolution.error}"` : ""}`;
+    }
+    const valueDisplay = resolution.masked || resolution.source === "dataOverrides"
+        ? maskValue(resolution.value)
+        : resolution.value;
+    const sourceInfo = resolution.autoGenerated
+        ? `source="${resolution.source}" type="${resolution.generatedType || "unknown"}"`
+        : `source="${resolution.source}"`;
+    return `[data-resolver] key="${resolution.key}" ${sourceInfo} value="${valueDisplay}"`;
+}

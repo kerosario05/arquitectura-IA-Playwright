@@ -20,6 +20,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const test_1 = require("@playwright/test");
 const route_profile_learning_1 = require("../src/discovery/route-profile-learning");
+const route_profile_deriver_1 = require("../src/knowledge/route-profile-deriver");
 const DEFAULT_CONFIG = {
     enabled: true,
     autoApproveThreshold: 0.90,
@@ -56,6 +57,66 @@ const DISABLED_CONFIG = {
         (0, test_1.expect)(result.suggestion.appSlug).toBe("test-app");
         (0, test_1.expect)(result.suggestion.confidence).toBeGreaterThan(0.5);
     }
+});
+(0, test_1.test)("carries runtime transition evidence without fallback", () => {
+    const base = {
+        from: "source",
+        to: "destination",
+        beforeUrl: "https://example.com/source",
+        afterUrl: "https://example.com/destination",
+        clickable: true,
+        visible: true,
+        transitionDetected: true
+    };
+    const result = (0, route_profile_learning_1.observeRouteTransition)({
+        ...base,
+        transitionValidated: true,
+        beforeTechnicalScreenKey: "tech-A",
+        afterTechnicalScreenKey: "tech-B"
+    }, "test-app", DEFAULT_CONFIG);
+    (0, test_1.expect)(result.suggestion?.evidence).toMatchObject({
+        transitionValidated: true,
+        beforeTechnicalScreenKey: "tech-A",
+        afterTechnicalScreenKey: "tech-B"
+    });
+    const falseResult = (0, route_profile_learning_1.observeRouteTransition)({ ...base, transitionValidated: false }, "test-app", DEFAULT_CONFIG);
+    (0, test_1.expect)(falseResult.suggestion?.evidence?.transitionValidated).toBe(false);
+    const absentResult = (0, route_profile_learning_1.observeRouteTransition)(base, "test-app", DEFAULT_CONFIG);
+    (0, test_1.expect)(absentResult.suggestion?.evidence?.beforeTechnicalScreenKey).toBeUndefined();
+    (0, test_1.expect)(absentResult.suggestion?.evidence?.afterTechnicalScreenKey).toBeUndefined();
+});
+(0, test_1.test)("derives functional routes only from validated trusted semantic transitions", () => {
+    const snapshot = {
+        knowledgeKind: "route_menu_snapshot",
+        screenKey: "screen-entry",
+        clickTargets: ["destination"],
+        businessLabels: ["destination"],
+    };
+    const destinationSnapshot = {
+        knowledgeKind: "route_menu_snapshot",
+        screenKey: "screen-destination",
+        clickTargets: ["leaf"],
+        businessLabels: ["leaf"],
+    };
+    const transition = {
+        knowledgeKind: "route_transition",
+        sourceScreenKey: "screen-entry",
+        destinationScreenKey: "screen-destination",
+        actionBusinessLabel: "destination",
+        validationStatus: "validated",
+        trustedForReuse: true,
+    };
+    const profile = (0, route_profile_deriver_1.deriveRouteProfileFromKnowledge)([snapshot, destinationSnapshot, transition]);
+    (0, test_1.expect)(profile?.targetPaths.destination).toBeDefined();
+    (0, test_1.expect)((0, route_profile_deriver_1.deriveRouteProfileFromKnowledge)([snapshot, destinationSnapshot, { ...transition, validationStatus: "pending" }])?.targetPaths.leaf).toBeUndefined();
+    (0, test_1.expect)((0, route_profile_deriver_1.deriveRouteProfileFromKnowledge)([snapshot, destinationSnapshot, { ...transition, trustedForReuse: false }])?.targetPaths.leaf).toBeUndefined();
+    (0, test_1.expect)((0, route_profile_deriver_1.deriveRouteProfileFromKnowledge)([snapshot, destinationSnapshot, {
+            knowledgeKind: "route_transition",
+            validationStatus: "validated",
+            trustedForReuse: true,
+            sourceTechnicalScreenKey: "tech-A",
+            destinationTechnicalScreenKey: "tech-B",
+        }])?.targetPaths.leaf).toBeUndefined();
 });
 (0, test_1.test)("learns intermediate_step from Route Completion with retrySucceeded", () => {
     const result = (0, route_profile_learning_1.observeRouteCompletionSuccess)({

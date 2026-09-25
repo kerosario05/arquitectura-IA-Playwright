@@ -12,6 +12,7 @@ import { inferAppFromTestRailSection } from "../src/automations/app-auto-resolve
 import { normalizeEntrySteps, buildCanonicalEntrySteps, normalizeForComparison } from "../src/automations/scenario-normalizer";
 import type { McpRouteProfile } from "../src/scenarios/scenario-types";
 import { resolveEffectiveAutoPomStatus } from "../src/automations/auto-pom";
+import { buildSpecExecutionContract } from "../src/automations/spec-execution-contract";
 
 const TECHNICAL_SLUGS = new Set(["tests", "test", "default", "unknown", "undefined", "null"]);
 
@@ -112,6 +113,142 @@ test("virtualCaseToTestScenario uses payload routeProfile before the virtual cas
   expect((scenario as any).routeProfile).toBe(routeProfile);
 });
 
+test("virtualCaseToTestScenario preserves the recording execution contract", () => {
+  const scenario = virtualCaseToTestScenario({
+    id: "preview-recording-001",
+    displayId: "PREVIEW-RECORDING-001",
+    title: "Recording contract",
+    sourceIssueKey: "REC-TEST",
+    steps: ['Ingresar "123456" en "Campo"'],
+    expectedResult: "Se completa",
+    preconditions: [],
+    appSlug: "app-a",
+    dataRequirements: "",
+    mcpExecutable: true,
+    source: "scenario_preview",
+    type: "Functional",
+    automationType: "ui_with_auth_gate",
+    setupStrategy: "auth_gate",
+    recordingExecutionContract: {
+      actions: [{
+        actionType: "fill",
+        humanStep: 'Ingresar "123456" en "Campo"',
+        targetRef: "field-a",
+        valueKey: "input.a",
+        runtimeValueSource: "dataset",
+      }],
+      runtimeInputRequirements: [{ valueKey: "input.a", value: "123456", valueRole: "action_input" }],
+    },
+  } as any);
+
+  expect(scenario.recordingExecutionContract?.actions).toHaveLength(1);
+  expect(scenario.recordingExecutionContract?.actions[0]?.targetRef).toBe("field-a");
+  expect(scenario.recordingExecutionContract?.actions[0]?.valueKey).toBe("input.a");
+  expect(scenario.steps[0]?.action).toBe('Ingresar [input.a] en "Campo"');
+});
+
+test("virtualCaseToTestScenario preserves canonical and mutation authority alongside recording targets", () => {
+  const scenario = virtualCaseToTestScenario({
+    id: "preview-repeat-001",
+    displayId: "PREVIEW-REPEAT-001",
+    title: "Repeat entity",
+    sourceIssueKey: "REC-TEST",
+    steps: ["Ingresar [entity_2.colaborador] en \"Colaborador\""],
+    expectedResult: "Se registra la segunda entidad",
+    preconditions: [],
+    appSlug: "app-a",
+    routeProfile: "",
+    dataRequirements: "entity_2.colaborador",
+    mcpExecutable: true,
+    source: "scenario_preview",
+    type: "Functional",
+    automationType: "recorded_session",
+    setupStrategy: "recorded_walkthrough",
+    stepRequirementRefs: [{ stepIndex: 0, requirementId: "REQ-REPEAT", facet: "action" }],
+    canonicalRequirements: [{
+      requirementId: "REQ-REPEAT",
+      kind: "action",
+      description: "La segunda entidad usa un colaborador distinto",
+      polarity: "positive",
+      polaritySource: "canonical",
+      polarityResolvedAt: "canonical_adapter",
+      origin: { originRef: "recording:repeat" },
+    }],
+    repeatConstraintResolutions: [{
+      valueKey: "entity_2.colaborador",
+      constraintType: "uniqueWithinCollection",
+      activeValueCount: 1,
+      candidateCount: 1,
+      distinctCandidateCount: 1,
+      resolutionSource: "recorded_confirmed",
+      resolved: true,
+    }],
+    recordingExecutionContract: {
+      actions: [{
+        actionType: "fill",
+        stepIndex: 1,
+        semanticField: "Colaborador",
+        targetRef: "grid:table|entity_2|Colaborador",
+        technicalTargetRef: "role:input|Indicar...",
+        valueKey: "entity_2.colaborador",
+        runtimeValueSource: "dataset",
+      }],
+      runtimeInputRequirements: [{
+        valueKey: "entity_2.colaborador",
+        valueRole: "action_input",
+        constraints: [{ type: "uniqueWithinCollection", uniqueWithinCollection: true }],
+      }],
+    },
+  } as any);
+
+  expect(scenario.canonicalRequirements?.[0]?.requirementId).toBe("REQ-REPEAT");
+  expect(scenario.stepRequirementRefs?.[0]?.requirementId).toBe("REQ-REPEAT");
+  expect(scenario.steps[0]?.valueKey).toBe("entity_2.colaborador");
+  expect(scenario.steps[0]?.technicalTargetRef).toBe("role:input|Indicar...");
+  expect(scenario.repeatConstraintResolutions?.[0]?.constraintType).toBe("uniqueWithinCollection");
+  expect(scenario.recordingExecutionContract?.runtimeInputRequirements[0]?.valueKey).toBe("entity_2.colaborador");
+});
+
+test("spec execution contract preserves dataset valueKey after leading navigation enrichment", () => {
+  const contract = buildSpecExecutionContract({
+    version: "1.0",
+    source: "discovery_generated",
+    status: "validated",
+    scenario: { source: "manual", title: "Repeat entity" },
+    requiredData: [],
+    createdAt: new Date(0).toISOString(),
+    steps: [
+      { index: 0, action: "navigate", target: "APP_BASE_URL", description: "Abrir la aplicación" },
+      {
+        index: 1,
+        action: "fill",
+        target: { strategy: "text", value: "Colaborador" },
+        value: "[entity_2.colaborador]",
+        valueKey: "entity_2.colaborador",
+        description: 'Ingresar [entity_2.colaborador] en "Colaborador"',
+      },
+    ],
+  } as any, {
+    title: "Repeat entity",
+    steps: [{
+      index: 0,
+      action: "fill",
+      valueKey: "entity_2.colaborador",
+      description: 'Ingresar [entity_2.colaborador] en "Colaborador"',
+      entityScope: "entity_2",
+      technicalTargetRef: "role:input|Indicar...",
+    }],
+  } as any);
+
+  expect(contract.diagnostics.missingScenarioSteps).toHaveLength(0);
+  expect(contract.steps).toHaveLength(1);
+  expect(contract.steps[0]?.valueKey).toBe("entity_2.colaborador");
+  expect(contract.steps[0]?.implementation).toEqual({
+    kind: "runtime",
+    runtimeMethod: "fillPromotedField",
+  });
+});
+
 test("autoPromote no considera discovered_partial como exito final si no hay spec promovido", () => {
   const completion = resolvePreviewCompletion({
     caseResult: { status: "discovered_partial" },
@@ -121,6 +258,20 @@ test("autoPromote no considera discovered_partial como exito final si no hay spe
   expect(completion.eventStatus).toBe("failed");
   expect(completion.automationReady).toBe(false);
   expect(completion.specGenerationStatus).toBe("failed");
+});
+
+test("recording replay expone spec eligibility sin afirmar que la spec ya fue generada", () => {
+  const completion = resolvePreviewCompletion({
+    caseResult: { status: "discovered_passed" },
+    promotionStatus: "not_promoted",
+  }, false, true);
+
+  expect(completion.eventStatus).toBe("passed");
+  expect(completion.automationReady).toBe(true);
+  expect(completion.specEligible).toBe(true);
+  expect(completion.specGenerationInvoked).toBe(false);
+  expect(completion.specGenerationStatus).toBe("deferred");
+  expect(completion.specEligibilityReason).toBe("recording_spec_generation_deferred_until_explicit_product_action");
 });
 
 test("autoPromote no considera discovered_passed como exito final si spec generation falla", () => {

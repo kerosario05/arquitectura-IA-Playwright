@@ -29,14 +29,18 @@ function buildSpecGenerationRequest(): AiCompletionRequest {
   };
 }
 
-function buildProvider(): CodexCliProvider {
-  return new CodexCliProvider({
+function buildProviderConfig(): any {
+  return {
     providerName: "codex-test",
     model: "mock-model",
     timeoutMs: 5000,
     command: "codex",
     extraArgs: [],
-  });
+  };
+}
+
+function buildProvider(): CodexCliProvider {
+  return new CodexCliProvider(buildProviderConfig());
 }
 
 function buildJsonRequest(): AiCompletionRequest {
@@ -90,6 +94,22 @@ function baseRunnerResult(): CodexCliRunnerResult {
 }
 
 test("CodexCliProvider usage bridge", async (t) => {
+  await t.test("adds the configured reasoning effort only to spec generation", async () => {
+    const provider = new CodexCliProvider({ ...buildProviderConfig(), purpose: "spec_generation", reasoningEffort: "medium" });
+    let receivedInput: CodexCliRunnerInput | undefined;
+    __setRunCodexCliForTesting(async (input) => {
+      receivedInput = input;
+      await writeSpecGenerationFile(input.cwd);
+      return baseRunnerResult();
+    });
+    try {
+      await provider.completeJson(buildSpecGenerationRequest());
+      assert.deepEqual(receivedInput?.extraArgs.slice(-2), ["-c", "model_reasoning_effort=medium"]);
+    } finally {
+      __setRunCodexCliForTesting(runCodexCli);
+    }
+  });
+
   await t.test("passes taskType=generation when purpose is scenario_generation", async () => {
     const provider = buildProvider();
     let receivedInput: CodexCliRunnerInput | undefined;
@@ -335,6 +355,39 @@ test("C9 fails with ai_provider_output_missing when neither file nor parseable s
   }
 });
 
+test("C9b preserves the tempDir for post-mortem inspection when exitCode=0 but no result is found", async () => {
+  // Regression: the tempDir used to be deleted in the `finally` block whenever
+  // exitCode was 0, even when completeJson was about to throw
+  // ai_provider_output_missing — destroying the only evidence (prompt.txt,
+  // per-run logs, any partial output) needed to diagnose why Codex never
+  // wrote the result file.
+  const provider = buildProvider();
+  let capturedCwd = "";
+
+  __setRunCodexCliForTesting(async (input) => {
+    capturedCwd = input.cwd;
+    return {
+      ...baseRunnerResult(),
+      stdout: "Wrote [spec-generation-result.json](some-path) but I did not include JSON.",
+    };
+  });
+
+  try {
+    await assert.rejects(provider.completeJson(buildSpecGenerationRequest()), (err: any) => {
+      assert.strictEqual(err.code, "ai_provider_output_missing");
+      return true;
+    });
+    assert.ok(capturedCwd, "expected runner to receive a tempDir cwd");
+    const tempDirStillExists = await fs.access(capturedCwd).then(() => true).catch(() => false);
+    assert.strictEqual(tempDirStillExists, true, `expected tempDir ${capturedCwd} to be preserved for diagnostics`);
+    const promptStillExists = await fs.access(path.join(capturedCwd, "prompt.txt")).then(() => true).catch(() => false);
+    assert.strictEqual(promptStillExists, true, "expected prompt.txt to survive alongside the tempDir");
+  } finally {
+    await fs.rm(capturedCwd, { recursive: true, force: true }).catch(() => {});
+    __setRunCodexCliForTesting(runCodexCli);
+  }
+});
+
 test("C10 fails closed with ai_provider_invalid_json when output JSON has an invalid spec shape", async () => {
   const provider = buildProvider();
 
@@ -408,6 +461,69 @@ test("Codex JSONL transport envelopes are never returned as assistant JSON", asy
   try {
     await assert.rejects(provider.completeJson(buildJsonRequest()), (err: any) => {
       assert.strictEqual(err.code, "ai_provider_execution_failed");
+      return true;
+    });
+  } finally {
+    __setRunCodexCliForTesting(runCodexCli);
+  }
+});
+
+test("C13 exitCode=1 with truncated stdout still classifies via rawStdout as ai_provider_execution_failed, not output_missing", async () => {
+  // Regression: codex-cli-runner.ts replaces `stdout` with only the last
+  // agent_message text (e.g. "Voy a leer prompt.txt..."), discarding the raw
+  // JSONL transport log. If extractCodexFailureMessage only looked at the
+  // truncated `stdout`, a real turn.failed/error (e.g. "Selected model is at
+  // capacity") would be silently lost and misclassified as
+  // ai_provider_output_missing instead of the more specific
+  // ai_provider_execution_failed.
+  const provider = buildProvider();
+  let capturedCwd = "";
+  const rawJsonl = [
+    JSON.stringify({ type: "thread.started", thread_id: "t1" }),
+    JSON.stringify({ type: "turn.started" }),
+    JSON.stringify({ item: { id: "item_0", type: "agent_message", text: "Voy a leer prompt.txt..." }, type: "item.completed" }),
+    JSON.stringify({ type: "error", message: "Selected model is at capacity. Please try a different model." }),
+    JSON.stringify({ type: "turn.failed", error: { message: "Selected model is at capacity. Please try a different model." } }),
+  ].join("\n");
+
+  __setRunCodexCliForTesting(async (input) => {
+    capturedCwd = input.cwd;
+    return {
+      ...baseRunnerResult(),
+      exitCode: 1,
+      stdout: "Voy a leer prompt.txt...", // truncated, as the real runner returns
+      rawStdout: rawJsonl, // untruncated JSONL, as the real runner now also returns
+    };
+  });
+
+  try {
+    await assert.rejects(provider.completeJson(buildSpecGenerationRequest()), (err: any) => {
+      assert.strictEqual(err.code, "ai_provider_execution_failed");
+      assert.match(err.message, /Selected model is at capacity/);
+      return true;
+    });
+    const tempDirStillExists = await fs.access(capturedCwd).then(() => true).catch(() => false);
+    assert.strictEqual(tempDirStillExists, true, "expected tempDir to be preserved for diagnostics on exitCode=1 process failure");
+  } finally {
+    await fs.rm(capturedCwd, { recursive: true, force: true }).catch(() => {});
+    __setRunCodexCliForTesting(runCodexCli);
+  }
+});
+
+test("C14 exitCode=1 without rawStdout falls back to stdout for classification (backward compatible)", async () => {
+  const provider = buildProvider();
+  __setRunCodexCliForTesting(async () => ({
+    ...baseRunnerResult(),
+    exitCode: 1,
+    stdout: [
+      JSON.stringify({ type: "turn.failed", error: { message: "provider failure without rawStdout" } }),
+    ].join("\n"),
+  }));
+
+  try {
+    await assert.rejects(provider.completeJson(buildSpecGenerationRequest()), (err: any) => {
+      assert.strictEqual(err.code, "ai_provider_execution_failed");
+      assert.match(err.message, /provider failure without rawStdout/);
       return true;
     });
   } finally {

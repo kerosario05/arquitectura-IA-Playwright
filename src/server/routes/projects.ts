@@ -76,6 +76,7 @@ function publicAggregate(cfg: ProjectConfiguration) {
         baseUrl: cfg.web.baseUrl,
         loginMode: cfg.web.loginMode,
         username: cfg.web.username,
+        ignoreHTTPSErrors: cfg.web.ignoreHTTPSErrors === true,
         testDataJson: cfg.web.testDataJson,
         testDataAliasesJson: cfg.web.testDataAliasesJson,
         missingInputBehavior: cfg.web.missingInputBehavior,
@@ -461,6 +462,7 @@ projectsRouter.post("/web", async (req, res, next) => {
       loginMode: b.loginMode,
       username: b.username,
       passwordSecretRef: b.passwordSecretRef,
+      ignoreHTTPSErrors: b.ignoreHTTPSErrors,
     });
     res.status(201).json({ project: publicProject(project) });
   } catch (err: any) {

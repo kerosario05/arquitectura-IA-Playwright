@@ -55,8 +55,10 @@ class FillObservationPage extends FakePage {
   async waitForTimeout(_ms: number): Promise<void> {}
   createLocator(): any {
     let activeRequest: any;
+    let currentValue = "";
     return {
       fill: async (_value: string) => {
+        currentValue = _value;
         this.revision += 1;
         activeRequest = request("https://example.test/api/lookup", "GET", "xhr");
         this.emit("request", activeRequest);
@@ -64,6 +66,37 @@ class FillObservationPage extends FakePage {
       blur: async () => {
         this.emit("response", response(activeRequest, 200));
       },
+      evaluate: async () => currentValue,
+      page: () => this,
+    };
+  }
+}
+
+class BoundedBlurPage extends FakePage {
+  value = "";
+  async waitForTimeout(_ms: number): Promise<void> {}
+  createLocator(): any {
+    return {
+      fill: async (value: string) => { this.value = value; },
+      blur: async (options?: { timeout?: number }) => {
+        assert.equal(options?.timeout, 250);
+      },
+      evaluate: async () => this.value,
+      page: () => this,
+    };
+  }
+}
+
+class HangingBlurPage extends BoundedBlurPage {
+  createLocator(): any {
+    return {
+      fill: async (value: string) => { this.value = value; },
+      blur: async (options?: { timeout?: number }) => {
+        assert.equal(options?.timeout, 250);
+        await new Promise<void>(() => undefined);
+      },
+      evaluate: async () => this.value,
+      page: () => this,
     };
   }
 }
@@ -116,6 +149,34 @@ test("commits a row-scoped fill by blur and observes the resulting lookup", asyn
   assert.equal(result.networkEvents[0].status, 200);
   assert.equal(result.mutation?.changed, true);
   assert.equal(result.mutation?.networkActivityDetected, true);
+});
+
+test("bounds a best-effort grid blur below the global action timeout", async () => {
+  const page = new BoundedBlurPage();
+  const result = await fillAndObserveRuntimeInput({
+    page: page as any,
+    locator: page.createLocator(),
+    value: "runtime-only",
+    stepIndex: 22,
+    observe: false,
+  });
+
+  assert.equal(result.committedBy, "blur");
+});
+
+test("continues when a grid blur never settles", async () => {
+  const page = new HangingBlurPage();
+  const startedAt = Date.now();
+  const result = await fillAndObserveRuntimeInput({
+    page: page as any,
+    locator: page.createLocator(),
+    value: "runtime-only",
+    stepIndex: 23,
+    observe: false,
+  });
+
+  assert.equal(result.committedBy, "blur");
+  assert.ok(Date.now() - startedAt < 1000);
 });
 
 test("classifies 500, pending, and failed requests safely", async () => {
@@ -254,11 +315,9 @@ test("bounded passive tail observes terminal lifecycle before cleanup and expire
   }
 });
 
-test("adaptive wait tolerates a progressing request after the base deadline", async () => {
+test("keeps a correlated pending request alive past the stall threshold until response", async () => {
   const previousTimeout = process.env.LOADING_STABILITY_TIMEOUT_MS;
-  const previousBudget = process.env.LOADING_STABILITY_PROGRESS_BUDGET_MS;
   process.env.LOADING_STABILITY_TIMEOUT_MS = "20";
-  process.env.LOADING_STABILITY_PROGRESS_BUDGET_MS = "80";
   try {
     const page = new StableFakePage();
     const requestUnderTest = request("https://host.example/auth", "POST", "fetch");
@@ -270,64 +329,188 @@ test("adaptive wait tolerates a progressing request after the base deadline", as
       page.emit("requestfinished", requestUnderTest);
     }, 30);
     const result = await waitForStableInteractiveScreen(page as any, {
-      progressProbe: () => observation.getProgressState()
+      progressProbe: () => observation.getProgressState(),
+      waitForPendingTransport: true,
+      absoluteDeadlineMs: 100,
     });
     assert.equal(result.stable, true);
-    assert.ok(result.signals.includes("progress_extension"));
     assert.equal(result.waitState, "completed");
+    assert.ok(result.waitedMs >= 20);
     await observation.stop();
   } finally {
     if (previousTimeout === undefined) delete process.env.LOADING_STABILITY_TIMEOUT_MS;
     else process.env.LOADING_STABILITY_TIMEOUT_MS = previousTimeout;
-    if (previousBudget === undefined) delete process.env.LOADING_STABILITY_PROGRESS_BUDGET_MS;
-    else process.env.LOADING_STABILITY_PROGRESS_BUDGET_MS = previousBudget;
   }
 });
 
-test("pending request without new progress is classified as stalled", async () => {
+async function waitForResponseBeforeHardCap(delayMs: number, absoluteDeadlineMs = 120) {
+  const page = new StableFakePage();
+  const observation = startNetworkObservation(page as any, 23);
+  const requestUnderTest = request("https://host.example/async", "POST", "fetch");
+  page.emit("request", requestUnderTest);
+  setTimeout(() => {
+    page.loading = false;
+    page.emit("response", response(requestUnderTest, 200));
+    page.emit("requestfinished", requestUnderTest);
+  }, delayMs);
+  const result = await waitForStableInteractiveScreen(page as any, {
+    progressProbe: () => observation.getProgressState(),
+    waitForPendingTransport: true,
+    absoluteDeadlineMs,
+  });
+  await observation.stop({ passiveTail: false });
+  return result;
+}
+
+test("fast response completes without consuming the hard cap", async () => {
   const previousTimeout = process.env.LOADING_STABILITY_TIMEOUT_MS;
-  const previousBudget = process.env.LOADING_STABILITY_PROGRESS_BUDGET_MS;
+  process.env.LOADING_STABILITY_TIMEOUT_MS = "8";
+  try {
+    const result = await waitForResponseBeforeHardCap(2);
+    assert.equal(result.stable, true);
+    assert.ok(result.waitedMs < 120);
+  } finally {
+    if (previousTimeout === undefined) delete process.env.LOADING_STABILITY_TIMEOUT_MS;
+    else process.env.LOADING_STABILITY_TIMEOUT_MS = previousTimeout;
+  }
+});
+
+test("12 second equivalent response survives the idle window", async () => {
+  const previousTimeout = process.env.LOADING_STABILITY_TIMEOUT_MS;
+  process.env.LOADING_STABILITY_TIMEOUT_MS = "8";
+  try {
+    const result = await waitForResponseBeforeHardCap(12, 60);
+    assert.equal(result.stable, true);
+    assert.ok(result.waitedMs >= 8);
+  } finally {
+    if (previousTimeout === undefined) delete process.env.LOADING_STABILITY_TIMEOUT_MS;
+    else process.env.LOADING_STABILITY_TIMEOUT_MS = previousTimeout;
+  }
+});
+
+test("47 second equivalent response survives beyond the former 30 second boundary", async () => {
+  const previousTimeout = process.env.LOADING_STABILITY_TIMEOUT_MS;
+  process.env.LOADING_STABILITY_TIMEOUT_MS = "8";
+  try {
+    const result = await waitForResponseBeforeHardCap(47, 120);
+    assert.equal(result.stable, true);
+    assert.ok(result.waitedMs > 30);
+  } finally {
+    if (previousTimeout === undefined) delete process.env.LOADING_STABILITY_TIMEOUT_MS;
+    else process.env.LOADING_STABILITY_TIMEOUT_MS = previousTimeout;
+  }
+});
+
+test("a valid response after the former absolute boundary still completes before hard cap", async () => {
+  const previousTimeout = process.env.LOADING_STABILITY_TIMEOUT_MS;
+  process.env.LOADING_STABILITY_TIMEOUT_MS = "8";
+  try {
+    const result = await waitForResponseBeforeHardCap(35, 100);
+    assert.equal(result.stable, true);
+    assert.ok(result.waitedMs > 30);
+  } finally {
+    if (previousTimeout === undefined) delete process.env.LOADING_STABILITY_TIMEOUT_MS;
+    else process.env.LOADING_STABILITY_TIMEOUT_MS = previousTimeout;
+  }
+});
+
+test("pending request without new progress remains active until absolute deadline", async () => {
+  const previousTimeout = process.env.LOADING_STABILITY_TIMEOUT_MS;
   try {
     process.env.LOADING_STABILITY_TIMEOUT_MS = "20";
-    process.env.LOADING_STABILITY_PROGRESS_BUDGET_MS = "20";
     const result = await waitForStableInteractiveScreen(new StableFakePage() as any, {
       waitForPendingTransport: true,
       progressProbe: () => ({ active: true, pendingCount: 1, lastProgressAt: 0 }),
       absoluteDeadlineMs: 50,
     });
     assert.equal(result.stable, false);
-    assert.equal(result.waitState, "stalled");
-    assert.equal(result.terminationReason, "stalled");
+    assert.equal(result.waitState, "active_async_operation");
+    assert.equal(result.terminationReason, "absolute_deadline_reached");
     assert.equal(result.relevantPendingRequests, 1);
-    assert.ok(result.lastProgressAgeMs >= 20);
+    assert.equal(result.activeAsyncOperation, true);
+    assert.equal(result.stallThresholdReached, true);
+    assert.ok(result.waitedMs >= 50);
   } finally {
     if (previousTimeout === undefined) delete process.env.LOADING_STABILITY_TIMEOUT_MS;
     else process.env.LOADING_STABILITY_TIMEOUT_MS = previousTimeout;
-    if (previousBudget === undefined) delete process.env.LOADING_STABILITY_PROGRESS_BUDGET_MS;
-    else process.env.LOADING_STABILITY_PROGRESS_BUDGET_MS = previousBudget;
   }
 });
 
-test("adaptive wait still times out a hang and ignores a spinner without a request", async () => {
+test("stale loading signal without a request reaches idle stall", async () => {
   const previousTimeout = process.env.LOADING_STABILITY_TIMEOUT_MS;
-  const previousBudget = process.env.LOADING_STABILITY_PROGRESS_BUDGET_MS;
   process.env.LOADING_STABILITY_TIMEOUT_MS = "20";
-  process.env.LOADING_STABILITY_PROGRESS_BUDGET_MS = "20";
   try {
-    const hung = await waitForStableInteractiveScreen(new StableFakePage() as any);
+    const hung = await waitForStableInteractiveScreen(new StableFakePage() as any, { absoluteDeadlineMs: 50 });
     assert.equal(hung.stable, false);
-    assert.equal(hung.reason, "loading_timeout");
+    assert.equal(hung.terminationReason, "stalled");
+    assert.equal(hung.waitState, "stalled");
+    assert.equal(hung.activeAsyncOperation, false);
 
     const spinnerOnly = new StableFakePage();
-    const result = await waitForStableInteractiveScreen(spinnerOnly as any);
+    const result = await waitForStableInteractiveScreen(spinnerOnly as any, { absoluteDeadlineMs: 50 });
     assert.equal(result.stable, false);
-    assert.equal(result.reason, "loading_timeout");
+    assert.equal(result.terminationReason, "stalled");
   } finally {
     if (previousTimeout === undefined) delete process.env.LOADING_STABILITY_TIMEOUT_MS;
     else process.env.LOADING_STABILITY_TIMEOUT_MS = previousTimeout;
-    if (previousBudget === undefined) delete process.env.LOADING_STABILITY_PROGRESS_BUDGET_MS;
-    else process.env.LOADING_STABILITY_PROGRESS_BUDGET_MS = previousBudget;
   }
+});
+
+test("request failure terminates the active wait immediately", async () => {
+  const page = new StableFakePage();
+  const observation = startNetworkObservation(page as any, 20);
+  const requestUnderTest = request("https://host.example/login", "POST", "fetch");
+  page.emit("request", requestUnderTest);
+  setTimeout(() => page.emit("requestfailed", requestUnderTest), 10);
+
+  const result = await waitForStableInteractiveScreen(page as any, {
+    progressProbe: () => observation.getProgressState(),
+    waitForPendingTransport: true,
+    absoluteDeadlineMs: 100,
+  });
+
+  assert.equal(result.stable, false);
+  assert.equal(result.waitState, "failed");
+  assert.equal(result.terminationReason, "request_failed");
+  assert.ok(result.waitedMs < 100);
+  await observation.stop();
+});
+
+test("page close terminates the active wait immediately", async () => {
+  const page = new StableFakePage();
+  const observation = startNetworkObservation(page as any, 21);
+  page.emit("request", request("https://host.example/route", "POST", "fetch"));
+  setTimeout(() => page.emit("close", undefined), 10);
+
+  const result = await waitForStableInteractiveScreen(page as any, {
+    progressProbe: () => observation.getProgressState(),
+    waitForPendingTransport: true,
+    absoluteDeadlineMs: 100,
+  });
+
+  assert.equal(result.stable, false);
+  assert.equal(result.waitState, "failed");
+  assert.equal(result.terminationReason, "page_closed");
+  assert.ok(result.waitedMs < 100);
+  await observation.stop();
+});
+
+test("unrelated background requests do not become relevant pending transport", async () => {
+  const page = new StableFakePage();
+  page.loading = false;
+  const observation = startNetworkObservation(page as any, 22);
+  page.emit("request", request("https://host.example/image.png", "GET", "image"));
+
+  const result = await waitForStableInteractiveScreen(page as any, {
+    progressProbe: () => observation.getProgressState(),
+    waitForPendingTransport: true,
+    absoluteDeadlineMs: 100,
+  });
+
+  assert.equal(result.stable, true);
+  assert.equal(result.relevantPendingRequests, 0);
+  assert.equal(result.activeAsyncOperation, false);
+  await observation.stop();
 });
 
 test("diagnostic observation captures redirect pathname and follow-up request", async () => {
@@ -423,4 +606,66 @@ test("diagnostic observation preserves ordered multi-hop redirects", async () =>
     [303, "/final", "/final", 200],
   ]);
   assert.equal(event.chainCompleted, true);
+});
+
+// FIRST_LOSS (jobId 38eaaeb6-f39e-44d2-96d8-9089b6196eaa): a subrequest (fetch/xhr, never the
+// document) that already received a real 2xx response before the browser also fired its own
+// `requestfailed` event (observed: POST .../ConsultarCasosBizagiSQL, response 204, then
+// failureCategory=browser_error) made `getProgressState().requestFailed` true unconditionally,
+// which `waitForStableInteractiveScreen` treats as terminal regardless of an authoritative
+// completionProbe -- aborting a wait ~188ms before the recorded route transition actually
+// completed. Reuses the exact non-terminal-failure test case-discovery.ts already applies a few
+// hundred lines downstream (relevantNetworkSettled), now also applied to `requestFailed` itself.
+const browserErrorFailure = (req: any) => ({ ...req, failure: () => ({ errorText: "net::ERR_FAILED" }) });
+
+test("getProgressState: a subrequest failing AFTER a real 2xx response is not reported as requestFailed", async () => {
+  const page = new FakePage();
+  const observation = startNetworkObservation(page as any, 1);
+  const req = browserErrorFailure(request("https://host.example/api/ConsultarCasosBizagiSQL", "POST", "fetch"));
+  page.emit("request", req);
+  page.emit("response", response(req, 204));
+  page.emit("requestfailed", req);
+
+  const state = observation.getProgressState();
+  assert.equal(state.requestFailed, false);
+  const [event] = await observation.stop();
+  assert.equal(event.failureCategory, "browser_error");
+  assert.equal(event.status, 204);
+});
+
+test("getProgressState: a document request failing after a 2xx response is still reported as requestFailed", async () => {
+  const page = new FakePage();
+  const observation = startNetworkObservation(page as any, 1);
+  const req = browserErrorFailure(request("https://host.example/page", "GET", "document"));
+  page.emit("request", req);
+  page.emit("response", response(req, 200));
+  page.emit("requestfailed", req);
+
+  assert.equal(observation.getProgressState().requestFailed, true);
+});
+
+test("getProgressState: a genuine connection failure with no prior response is still reported as requestFailed", async () => {
+  const page = new FakePage();
+  const observation = startNetworkObservation(page as any, 1);
+  const req = request("https://host.example/api/lookup", "POST", "fetch");
+  page.emit("request", req);
+  page.emit("requestfailed", req);
+
+  assert.equal(observation.getProgressState().requestFailed, true);
+});
+
+test("getProgressState: one non-terminal subrequest failure never masks another still-pending relevant request", async () => {
+  const page = new FakePage();
+  const observation = startNetworkObservation(page as any, 1);
+  const failed = browserErrorFailure(request("https://host.example/api/ConsultarCasosBizagiSQL", "POST", "fetch"));
+  const pending = request("https://host.example/api/ValidarPersona/Cliente", "POST", "fetch");
+  page.emit("request", failed);
+  page.emit("response", response(failed, 204));
+  page.emit("requestfailed", failed);
+  page.emit("request", pending);
+
+  const state = observation.getProgressState();
+  assert.equal(state.requestFailed, false);
+  assert.equal(state.active, true);
+  assert.equal(state.pendingCount, 1);
 });

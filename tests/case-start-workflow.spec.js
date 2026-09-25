@@ -1,6 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const test_1 = require("@playwright/test");
+const data_context_1 = require("../src/data/data-context");
+const plan_value_resolver_1 = require("../src/runner/plan-value-resolver");
+const case_start_workflow_1 = require("../src/cases/case-start-workflow");
 (0, test_1.test)("CaseStartWorkflowInput requires caseId and projectId", () => {
     const input = {
         caseId: 37616,
@@ -12,6 +15,30 @@ const test_1 = require("@playwright/test");
     (0, test_1.expect)(input.continueOnFailure).toBeUndefined();
     (0, test_1.expect)(input.reportToTestRail).toBeUndefined();
     (0, test_1.expect)(input.dryRun).toBeUndefined();
+});
+(0, test_1.test)("runtime entries take precedence without mutating the base DataContext", () => {
+    const config = {
+        app: {
+            username: "base-user",
+            password: undefined,
+            extraLoginFields: {},
+            testData: { "auth.username": "base-user" },
+            testDataAliases: {},
+        },
+    };
+    const base = (0, data_context_1.buildDataContext)(config);
+    const originalEntries = base.entries.map((entry) => ({ ...entry }));
+    const composed = (0, case_start_workflow_1.composeRuntimeDataContext)(base, [{
+            key: "auth.username",
+            value: "olivam",
+            source: "test_data",
+            sensitive: false,
+        }]);
+    (0, test_1.expect)((0, plan_value_resolver_1.resolveStepValue)({
+        step: { index: 1, action: "fill", target: "username", valueKey: "auth.username" },
+        dataContext: composed,
+    })).toBe("olivam");
+    (0, test_1.expect)(base.entries).toEqual(originalEntries);
 });
 (0, test_1.test)("CaseStartWorkflowInput accepts optional flags", () => {
     const input = {

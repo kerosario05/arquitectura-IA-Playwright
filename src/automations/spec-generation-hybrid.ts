@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
@@ -11,7 +11,7 @@ import type { AiProvider, AiCompletionResponse, AiUsageMetrics } from "../ai/ai-
 import { AiProviderError } from "../ai/ai-provider.types";
 import { createSpecGenerationAiProvider } from "../ai/ai-provider-factory";
 import { resolveSpecGenerationAiConfig } from "../ai/ai-config-resolver";
-import { PROMOTED_SPEC_RUNTIME_PUBLIC_METHODS } from "./runtime/promoted-spec-runtime";
+import { PROMOTED_SPEC_RUNTIME_PUBLIC_METHODS, materializePromotedRuntimeEnv } from "./runtime/promoted-spec-runtime";
 import { loadSpecGenerationSkill, type LoadedSpecGenerationSkill, type SpecGenerationSkillState } from "./spec-generation-skill-loader";
 import {
   buildSpecExecutionContract,
@@ -19,9 +19,13 @@ import {
   computeTraceFidelity,
   computeExecutionContractMetrics,
   extractAuthFlowAggregateBindings,
-  type SpecExecutionContract
+  type SpecExecutionContract,
+  type SpecExecutionContractStep,
+  type SpecStepOperation
 } from "./spec-execution-contract";
+import { ACTION_RUNTIME_METHOD_BY_OPERATION } from "../types/pom-ownership";
 import { decodeJsStringLiteralBody, normalizeSemanticText, semanticallyEqualText } from "./semantic-text-normalization";
+import { evaluateSpecRuntimeGate, type SpecRuntimeGateResult } from "./spec-runtime-gate";
 import type { AssertionPolarity, CanonicalRequirement } from "../scenarios/canonical-scenario";
 
 export function rewritePromotedRuntimeImport(specContent: string, specFilePath: string): string {
@@ -45,6 +49,28 @@ export function rewritePromotedRuntimeImport(specContent: string, specFilePath: 
         .replace(/\.(ts|tsx|js)$/i, "");
       return `${prefix}${relativeImportPath}${suffix}`;
     },
+  );
+}
+
+export function rewritePromotedAuthFlowHelperImport(
+  specContent: string,
+  specFilePath: string,
+  appSlug: string,
+): string {
+  const helperModulePath = path.resolve(
+    process.cwd(),
+    "automations/apps",
+    appSlug,
+    "flows/auth.flow.helpers",
+  );
+  const relativeImportPath = path.relative(path.dirname(specFilePath), helperModulePath)
+    .replace(/\\/g, "/");
+  const importPath = relativeImportPath.startsWith(".")
+    ? relativeImportPath
+    : `./${relativeImportPath}`;
+  return specContent.replace(
+    /import\s+\{\s*resolvePromotedSpecAuthDataFromEnv\s*\}\s+from\s+['"][^'"]+['"];?/,
+    `import { resolvePromotedSpecAuthDataFromEnv } from '${importPath}';`,
   );
 }
 
@@ -113,6 +139,14 @@ export type SpecGenerationDiagnostics = {
     semanticCoverage: ValidationStatus;
     functionalExecution: ValidationStatus;
   };
+  runtimeGate?: {
+    decision: "promote" | "block" | "defer";
+    promotionStatus: "promoted" | "blocked" | "deferred";
+    reason: string;
+  };
+  /** Set when a pre-AI structural gate (not the AI candidate's own validation) rejected the
+   *  contract before generation was ever attempted, e.g. "technical_target_not_materializable". */
+  failedGate?: string;
   promotionAllowed: boolean;
   specsRequested: number;
   specsValidated: number;
@@ -133,9 +167,9 @@ export type SpecGenerationDiagnostics = {
   errors: string[];
   warnings: string[];
   finalSpec: {
-    origin: "ai_candidate" | "deterministic_draft" | "gate_start_only_canonical_fallback";
+    origin: "ai_candidate" | "deterministic_draft" | "deterministic_compiler" | "gate_start_only_canonical_fallback";
     generatedBy: "ai" | "core";
-    strategy: "ai_candidate" | "deterministic_draft" | "gate_start_only_canonical_fallback";
+    strategy: "ai_candidate" | "deterministic_draft" | "deterministic_compiler" | "gate_start_only_canonical_fallback";
     fallback: null | {
       applied: boolean;
       reason: string;
@@ -182,9 +216,16 @@ type FunctionalExecutionResult = CommandResult & {
   authGateDetected: boolean | null;
 };
 
-type PlaywrightLaunchContext = {
+export type PlaywrightLaunchContext = {
   source: string;
   headless: boolean | null;
+  appBaseUrl?: string;
+  appSlug?: string;
+  // Already-resolved runtime input values (valueKey -> value), never re-resolved here. Threaded
+  // through to the functionalExecution child so the deterministic candidate's
+  // process.env['PROMOTED_<KEY>'] reads (and the legacy resolvePromotedRuntimeValue fallback)
+  // find the same authority the parent promotion process already holds.
+  runtimeInputValues?: Record<string, string>;
 };
 
 type HybridDeps = {
@@ -205,10 +246,14 @@ export type SpecGenerationScenarioStep = {
   action: string;
   description?: string;
   expected?: string;
+  valueKey?: string;
   requirementRefs?: string[];
   polarity?: AssertionPolarity;
   assertionImportance?: "blocking" | "contextual" | "optional";
   canonicalAssertion?: import("../scenarios/canonical-scenario").CanonicalAssertion;
+  technicalTargetRef?: string;
+  technicalTargetRefs?: string[];
+  technicalTargetCandidates?: Array<Record<string, unknown>>;
 };
 
 export type SpecGenerationSourceScenarioAuth = {
@@ -268,6 +313,7 @@ export type SpecGenerationSourceScenario = {
   steps?: SpecGenerationScenarioStep[];
   expectedResult?: string;
   preconditions?: string[];
+  negativeOracle?: import("../scenarios/scenario-types").NegativeScenarioOracle;
   observedAssertions?: string[];
   auth?: SpecGenerationSourceScenarioAuth;
   observableOracles?: SpecGenerationObservableOracle[];
@@ -323,6 +369,13 @@ type SpecGenerationRepairContext = {
 export type HybridSpecGenerationInput = {
   plan: ExecutionPlan;
   deterministicDraft: string;
+  // Structured generation-metadata signal (never scenario authority, never added to
+  // SpecExecutionContract): set only by the promote-plan.ts deterministic branch, and only
+  // after it has already fail-closed-verified unsupportedCapabilities=0 and
+  // compiledActionBindings=requiredActionSteps. When present, deterministicDraft IS the
+  // authoritative candidate for this run -- initial AI spec generation and AI repair are both
+  // skipped, and every existing validation gate still runs unmodified against it.
+  candidateAuthority?: "deterministic_compiler";
   appProfile: AppProfile;
   appPaths: AppAutomationPaths;
   sectionSlug?: string;
@@ -335,6 +388,10 @@ export type HybridSpecGenerationInput = {
   headed?: boolean;
   executionSource?: string;
   repairContext?: SpecGenerationRepairContext;
+  // Already-resolved runtime input values (valueKey -> value) the promotion pipeline already
+  // holds (e.g. from its own DataContext). Never re-resolved here -- forwarded unchanged to the
+  // functionalExecution child's env via PlaywrightLaunchContext.runtimeInputValues.
+  runtimeInputValues?: Record<string, string>;
 };
 
 export type HybridSpecGenerationResult = {
@@ -472,7 +529,7 @@ const SENSITIVE_LITERAL_RULES: Array<{
   }
 ] as const;
 
-function sanitizeText(value: string): string {
+export function sanitizeText(value: string): string {
   let sanitized = value;
   for (const rule of SENSITIVE_LITERAL_RULES) {
     sanitized = sanitized.replace(rule.pattern, (...args) => rule.replace(args[0], args[1], args[2]));
@@ -510,7 +567,10 @@ function parseRepairMaxAttempts(): number {
   return Math.floor(parsed);
 }
 
-function getFailedSpecValidationNames(validation: SpecGenerationDiagnostics["validation"]): string[] {
+/** Exported for direct hermetic testing of the repair-trigger distinction: only a real
+ *  functionalExecution="failed" counts as a repairable defect — "skipped" (deferred, not
+ *  proven) never does. */
+export function getFailedSpecValidationNames(validation: SpecGenerationDiagnostics["validation"]): string[] {
   const failed: string[] = [];
   if (validation.structure === "failed") failed.push("structuralValidation");
   if (validation.traceFidelity === "failed") failed.push("traceFidelityValidation");
@@ -522,6 +582,22 @@ function getFailedSpecValidationNames(validation: SpecGenerationDiagnostics["val
 }
 
 const SPEC_VALIDATION_GATES = ["structuralValidation", "traceFidelityValidation", "semanticCoverage", "typescriptValidation", "playwrightDiscovery", "functionalExecution"] as const;
+
+/**
+ * The STATIC gates that must already be GREEN before a candidate is admitted to
+ * functionalExecution (a real browser/Playwright child process). Reuses `getFailedSpecValidationNames`
+ * -- the same CORE aggregator repair already consults -- rather than a second, independently
+ * maintained gate list. `playwrightDiscovery` is deliberately excluded: the caller already has a
+ * freshly-computed `discoveryOk` boolean in the same admission condition, and checking both would
+ * be redundant/potentially contradictory. `functionalExecution` is excluded because it has not run
+ * yet at the point this is called (it would still read its harmless "skipped" default, but
+ * excluding it explicitly means this helper never depends on that coincidence).
+ */
+export function getPreRuntimeBlockingFailures(validation: SpecGenerationDiagnostics["validation"]): string[] {
+  return getFailedSpecValidationNames(validation).filter(
+    (gate) => gate !== "playwrightDiscovery" && gate !== "functionalExecution"
+  );
+}
 
 const SPEC_VALIDATION_KEY_BY_GATE: Record<string, keyof SpecGenerationDiagnostics["validation"]> = {
   structuralValidation: "structure",
@@ -537,7 +613,7 @@ function getPassedGatesAttempt1(diagnostics: SpecGenerationDiagnostics): string[
   return SPEC_VALIDATION_GATES.filter((gate) => !failed.has(gate));
 }
 
-function buildSpecRepairConstraints(
+export function buildSpecRepairConstraints(
   diagnostics: SpecGenerationDiagnostics,
   repairContext: SpecGenerationRepairContext,
   specInputMode: "execution_contract" | "legacy" = "legacy",
@@ -576,6 +652,47 @@ function buildSpecRepairConstraints(
     constraints.push(failure.instruction);
     constraints.push(`The previous candidate used technical evidence metadata as a runtime UI target: "${failure.failedTarget}"${failure.stepIndex !== undefined ? ` at stepIndex=${failure.stepIndex}` : ""}. This is never allowed. Implement oracleTypes=${failure.oracleTypes.join(",") || "unknown"} only through the allowed backed implementation descriptor in ORACLE_IMPLEMENTATIONS, or return it in unresolvedRequirements. Never assert a technical evidence metadata string.`);
   }
+  // FIRST_LOSS fix (jobId 92755fda-677f-44c7-881e-00c802214534): a prior repair, told its outer
+  // runtime wrapper for a step was wrong (page_object_method_semantic_mismatch), fixed it
+  // ADDITIVELY -- adding a new, correct pressPromotedTarget call while leaving the old, incorrect
+  // clickPromotedTarget call in place for the SAME scenarioStepIndex. That produced a NEW error
+  // (runtime_step_binding_ambiguous, two outer wrappers). Derives one short, generic,
+  // replacement-based directive per affected scenarioStepIndex from exactErrors -- never
+  // hardcoding a stepIndex/appSlug/POM class/method/target/business text. One directive per step,
+  // even when multiple of these errors affect the same step.
+  const wrapperReplacementErrorPrefixes = EXECUTION_CONTRACT_SEMANTIC_COVERAGE_ERROR_PREFIXES.filter(
+    (prefix) => prefix !== "missing_contract_semantic_coverage:"
+  );
+  const wrapperReplacementErrors = repairContext.exactErrors.filter((error) =>
+    wrapperReplacementErrorPrefixes.some((prefix) => error.startsWith(prefix))
+  );
+  if (wrapperReplacementErrors.length > 0) {
+    const stepIndexesNeedingReplacement = new Set<number>();
+    const stepIndexesNeedingAmbiguityCleanup = new Set<number>();
+    for (const error of wrapperReplacementErrors) {
+      const stepMatch = error.match(/step=(\d+)/);
+      if (!stepMatch) continue;
+      const stepIndex = Number(stepMatch[1]);
+      stepIndexesNeedingReplacement.add(stepIndex);
+      if (error.startsWith("runtime_step_binding_ambiguous:")) {
+        stepIndexesNeedingAmbiguityCleanup.add(stepIndex);
+      }
+    }
+    if (stepIndexesNeedingReplacement.size > 0) {
+      constraints.push(
+        `For each of these scenarioStepIndex values, edit the EXISTING outer action runtime call in place: ${[...stepIndexesNeedingReplacement].sort((a, b) => a - b).join(", ")}. ` +
+        "After the repair, exactly one outer action runtime wrapper (e.g. clickPromotedTarget/fillPromotedField/selectPromotedItem/pressPromotedTarget) may remain per scenarioStepIndex. " +
+        "Never append a second outer wrapper for the same scenarioStepIndex to fix a wrong-method error -- replace it. " +
+        "If an existing Page Object method call is required, keep or move that exact call inside the ONE correct outer wrapper's own implementation -- never keep a leftover wrapper only to preserve it."
+      );
+    }
+    if (stepIndexesNeedingAmbiguityCleanup.size > 0) {
+      constraints.push(
+        `These scenarioStepIndex values now have MORE THAN ONE outer action runtime call: ${[...stepIndexesNeedingAmbiguityCleanup].sort((a, b) => a - b).join(", ")}. ` +
+        "Remove every conflicting outer wrapper for that scenarioStepIndex and keep exactly the one whose method matches that step's contractual operation."
+      );
+    }
+  }
   return constraints;
 }
 
@@ -593,7 +710,23 @@ function parseStepIndexesFromErrors(errors: string[]): number[] {
   return [...indexes].sort((a, b) => a - b);
 }
 
-function buildSpecRepairContext(input: {
+// FIRST_LOSS fix (jobId e90a8550-a3a2-4d61-b0b2-4df82088c5d1): execution-contract mode's
+// semanticCoverage gate (structuralValidation's operation<->runtimeMethod check, plus the
+// pre-existing page_object/contract-coverage checks) produces real, exact error strings in
+// diagnostics.errors -- but neither buildSpecRepairContext's execution-contract prioritization
+// nor summarizeRepairGateError's semanticCoverage lookup recognized this vocabulary, so repair
+// always received "no_exact_error_available" even though the real defect was sitting right there.
+// Single shared allowlist, consumed by BOTH functions below, so they can never drift apart into
+// two independently-maintained lists.
+const EXECUTION_CONTRACT_SEMANTIC_COVERAGE_ERROR_PREFIXES = [
+  "runtime_method_operation_mismatch:",
+  "runtime_step_binding_unresolved:",
+  "runtime_step_binding_ambiguous:",
+  "page_object_method_semantic_mismatch:",
+  "missing_contract_semantic_coverage:",
+];
+
+export function buildSpecRepairContext(input: {
   diagnostics: SpecGenerationDiagnostics;
   previousCandidate: string;
   observableOracles: SpecGenerationObservableOracle[];
@@ -611,8 +744,25 @@ function buildSpecRepairContext(input: {
     "extraneous_business_step:",
     "unauthorized_runtime_implementation:"
   ];
+  // A genuine runtime candidate defect (e.g. a real "Promoted click failed at step N ...") is
+  // never a trace-fidelity mismatch, so it was previously invisible to execution_contract mode's
+  // repair context entirely — summarizeRepairGateError's functionalExecution/playwrightDiscovery
+  // lookups always found nothing and reported "no_exact_error_available", even though the exact
+  // error (failureClass, exactRuntimeError, currentUrl — see clickPromotedTarget) was sitting
+  // right there in diagnostics.errors. Mirrored from the legacy branch below.
+  const functionalAndDiscoveryErrorPrefixes = [
+    "functional_execution_error:",
+    "functional_execution_no_evidence_steps:",
+    "functional_execution_failed:",
+    "playwright_discovery_error:",
+    "playwright_discovery_failed:",
+  ];
   const prioritizedErrors = isExecutionContract
-    ? input.diagnostics.errors.filter((error) => traceFidelityErrorPrefixes.some((prefix) => error.startsWith(prefix)))
+    ? input.diagnostics.errors.filter((error) =>
+        traceFidelityErrorPrefixes.some((prefix) => error.startsWith(prefix))
+        || functionalAndDiscoveryErrorPrefixes.some((prefix) => error.startsWith(prefix))
+        || EXECUTION_CONTRACT_SEMANTIC_COVERAGE_ERROR_PREFIXES.some((prefix) => error.startsWith(prefix))
+      )
     : [
         ...input.diagnostics.errors.filter((error) =>
           error.startsWith("missing_assertion_oracle_context:")
@@ -742,7 +892,7 @@ export function buildSemanticCoverageDiagnostics(input: {
   return { missingRequirements: missing, coveredRequirements, oracleCoverage, candidateCoverage };
 }
 
-function summarizeRepairGateError(failedGate: string, exactErrors: string[]): string {
+export function summarizeRepairGateError(failedGate: string, exactErrors: string[]): string {
   const byGate = (() => {
     if (failedGate === "semanticCoverage") {
       return exactErrors.find((error) =>
@@ -753,14 +903,19 @@ function summarizeRepairGateError(failedGate: string, exactErrors: string[]): st
         || error.startsWith("unresolved_requirement:")
         || error.startsWith("assertion_implementation_not_found:")
         || error.startsWith("expected_result_not_propagated")
+        || EXECUTION_CONTRACT_SEMANTIC_COVERAGE_ERROR_PREFIXES.some((prefix) => error.startsWith(prefix))
       );
     }
     if (failedGate === "functionalExecution") {
-      return exactErrors.find((error) =>
-        error.startsWith("functional_execution_error:")
-        || error.startsWith("functional_execution_no_evidence_steps:")
-        || error.startsWith("functional_execution_failed:")
-      );
+      // `functional_execution_failed:exitCode=N` is always pushed before the more informative
+      // `functional_execution_error:<exact line>` (see the functionalExecution evaluation
+      // above), so a single OR-predicate .find() always returned the bare exit code first,
+      // hiding the actual runtime error (e.g. "Promoted click failed at step 4 ...") from this
+      // summary even once it was present in exactErrors. Try the most informative prefix first,
+      // explicitly, rather than "whichever comes first in the array".
+      return exactErrors.find((error) => error.startsWith("functional_execution_error:"))
+        ?? exactErrors.find((error) => error.startsWith("functional_execution_no_evidence_steps:"))
+        ?? exactErrors.find((error) => error.startsWith("functional_execution_failed:"));
     }
     if (failedGate === "playwrightDiscovery") {
       return exactErrors.find((error) =>
@@ -830,6 +985,19 @@ function finalizeSpecAttemptMetrics(
 function bool(value: string | undefined, fallback: boolean): boolean {
   if (!value) return fallback;
   return value.trim().toLowerCase() === "true";
+}
+
+/** Whitespace-insensitive code-identity comparison — see the REPAIR_NO_CHANGE check below. */
+export function normalizeWhitespace(value: string): string {
+  return value.replace(/\s+/g, " ").trim();
+}
+
+/**
+ * True when an AI repair produced the same candidate it was asked to fix (whitespace aside) —
+ * see the REPAIR_NO_CHANGE check where this is used, in runHybridSpecGenerationInternal.
+ */
+export function isRepairNoChange(repairedSpecContent: string, previousSpecContent: string): boolean {
+  return normalizeWhitespace(repairedSpecContent) === normalizeWhitespace(previousSpecContent);
 }
 
 const MAX_MOJIBAKE_ITERATIONS = 3;
@@ -930,6 +1098,33 @@ export function normalizeMojibakeUtf8(value: string): string {
 
 function normalizeText(value: string): string {
   return normalizeMojibakeUtf8(value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim();
+}
+
+/**
+ * normalizeMojibakeUtf8 requires its ENTIRE input to decode as one coherent UTF-8 byte stream \u2014
+ * correct for a single business-text literal, but an AI-generated candidate can mix
+ * ALREADY-CORRECT Unicode (one mention of a word) with genuinely mojibake-corrupted Unicode
+ * (another mention of the SAME word, generated inconsistently by the AI) within the same file.
+ * Job 0d61e648-45cd-41b1-8bd3-c93b27a84a34, scenarioStepIndex=4 proved this exactly: the AI's own
+ * parsed response (response.json's specContent) already contained "Cr\u00c3\u00a9dito" (double-UTF8
+ * mojibake) in one target/locator string, right alongside an already-correct "cr\u00e9dito"
+ * elsewhere in the very same response \u2014 confirmed by direct codepoint inspection, not visual
+ * reading. Reinterpreting the WHOLE FILE's codepoints as one Latin-1 byte stream then fails to
+ * decode as valid UTF-8 (the already-correct multi-byte character breaks byte alignment for
+ * everything after it), so normalizeMojibakeUtf8(wholeFile) silently returned the file completely
+ * unchanged \u2014 this is exactly what produced the historical
+ * "[spec-candidate] rawChanged=false" despite genuine, provable mojibake in the file.
+ *
+ * Normalizing per whitespace-delimited token instead isolates each occurrence: an
+ * already-correct word elsewhere in the file can no longer poison the decode attempt for a
+ * genuinely corrupted word, and a pure-ASCII token (every TypeScript keyword, bracket, quote,
+ * operator) always round-trips to itself unchanged \u2014 decodeSingleMojibakeLevel only ever accepts
+ * a strict, valid UTF-8 decode, so this can never introduce or guess U+FFFD, and it never touches
+ * whitespace/structure, only the character values of tokens that actually contain non-ASCII
+ * bytes.
+ */
+export function normalizeMojibakeInSourceText(source: string): string {
+  return source.replace(/\S+/g, (token) => normalizeMojibakeUtf8(token));
 }
 
 function readAssignedStringLiteral(content: string, variable: string): string | undefined {
@@ -1122,6 +1317,7 @@ function buildSpecGenerationUserPrompt(input: {
 const PROMOTED_SPEC_RUNTIME_API_DESCRIPTOR: Record<string, { signature: string; returns: string }> = {
   clickPromotedTarget: { signature: "clickPromotedTarget({ stepIndex: number, target: string, actionIntent: string, expectedEffect: string, action: () => Promise<void> })", returns: "Promise<void>" },
   fillPromotedField: { signature: "fillPromotedField({ stepIndex: number, target: string, value: string, action: () => Promise<void> })", returns: "Promise<void>" },
+  pressPromotedTarget: { signature: "pressPromotedTarget({ stepIndex: number, target: string, key: string })", returns: "Promise<void>" },
   selectPromotedItem: { signature: "selectPromotedItem({ stepIndex: number, target: string, action: () => Promise<void> })", returns: "Promise<void>" },
   expectPromotedVisible: { signature: "expectPromotedVisible({ stepIndex: number, target: string, polarity: AssertionPolarity, expectedUrl?: string, assertion: () => Promise<void> })", returns: "Promise<void>" },
   waitForPromotedUiStable: { signature: "waitForPromotedUiStable(stepIndex: number, target: string)", returns: "Promise<void>" },
@@ -1131,6 +1327,14 @@ const PROMOTED_SPEC_RUNTIME_API_DESCRIPTOR: Record<string, { signature: string; 
   getDebugState: { signature: "getDebugState()", returns: "Promise<{ activeContainer?: string; lastDialogMessage?: string; discardReason?: string }>" },
   finishEvidence: { signature: "finishEvidence()", returns: "Promise<void>" }
 };
+
+// The action-taking runtime methods a required, non-assertion contract step's `operation` binds
+// to -- distinct from assertion/lifecycle calls (expectPromotedVisible, waitForPromotedUiStable,
+// safeReplayContext, etc.), which legitimately share the same scenarioStepIndex as their source
+// action step and must never be counted toward that step's ACTION binding. Derived from the
+// single CORE authority (ACTION_RUNTIME_METHOD_BY_OPERATION, spec-execution-contract.ts) --
+// never a second, independently-maintained table.
+const ACTION_RUNTIME_METHODS = new Set(Object.values(ACTION_RUNTIME_METHOD_BY_OPERATION));
 
 function buildContractStepBindings(contract: SpecExecutionContract): { block: string; steps: number; chars: number } {
   const lines: string[] = [];
@@ -1142,6 +1346,12 @@ function buildContractStepBindings(contract: SpecExecutionContract): { block: st
     lines.push(`operation=${step.operation}`);
     const runtimeTarget = step.target?.value ?? step.target?.name ?? step.target?.role;
     if (runtimeTarget) lines.push(`runtimeTarget=${runtimeTarget}`);
+    if (step.valueKey) lines.push(`valueKey=${step.valueKey}`);
+    if (step.entityScope) lines.push(`entityScope=${step.entityScope}`);
+    if (step.rowRelation) lines.push(`rowRelation=${step.rowRelation}`);
+    if (step.selectionField) lines.push(`selectionField=${step.selectionField}`);
+    if (step.technicalTargetRef) lines.push(`technicalTargetRef=${step.technicalTargetRef}`);
+    if (step.technicalTargetRefs?.length) lines.push(`technicalTargetRefs=${step.technicalTargetRefs.join(" || ")}`);
     if (step.resolvedExecutionTarget) lines.push(`resolvedExecutionTarget=${step.resolvedExecutionTarget}`);
     if (step.implementation) {
       lines.push(`implementationKind=${step.implementation.kind}`);
@@ -1165,6 +1375,7 @@ function buildContractStepBindings(contract: SpecExecutionContract): { block: st
   lines.push("B) For operation=select with resolvedExecutionTarget: runtime wrapper target stays runtimeTarget; the action callback MUST use resolvedExecutionTarget as a literal argument of an executable call. Do not use selectFirstVisible*, selectByOrdinal* or generic equivalents. If the resolved target cannot be implemented with existing APIs, add the step to unresolvedRequirements; do not invent methods.");
   lines.push("C) For oracleType=navigation_transition: runtime wrapper target stays runtimeTarget; expectedUrl is used ONLY inside the assertion/oracle. expectedUrl MUST NEVER become the runtime wrapper target.");
   lines.push("D) For implementationKind=page_object: the step's action callback MUST invoke the contractual implementationOwner.implementationMethod. Do not substitute another page-object method even if the runtime wrapper target is correct.");
+  lines.push("E) Never use .first(), .last() or .nth(N) to disambiguate a locator for a required functional action. DOM-position fallbacks are forbidden; use a semantic locator (role, text, label, testid) that uniquely identifies the target instead.");
   const block = lines.join("\n");
   return { block, steps, chars: block.length };
 }
@@ -1227,7 +1438,7 @@ export function materializeAuthFlowAggregateBinding(
   return `${specContent.slice(0, match.index)}authFlow.ensureAuthenticated({ contractBinding: ${serialized}, ${body} });${specContent.slice(match.index + match[0].length)}`;
 }
 
-function buildSpecGenerationUserPromptFromContract(input: {
+export function buildSpecGenerationUserPromptFromContract(input: {
   skill: LoadedSpecGenerationSkill | undefined;
   appSlug: string;
   sectionSlug: string;
@@ -1337,7 +1548,7 @@ function getScenarioId(plan: ExecutionPlan, preferred?: string): string {
   return `C${plan.scenario.caseId ?? ""}`;
 }
 
-function getSectionSlug(preferred: string | undefined): string {
+export function getSectionSlug(preferred: string | undefined): string {
   return preferred?.trim() || "default-section";
 }
 
@@ -2160,10 +2371,15 @@ function parseSpecGenerationResponse(
 
 function extractDeclaredIdentifiersFromSpec(specContent: string): string[] {
   const ids = new Set<string>();
-  const regex = /\b(?:const|let|var)\s+([A-Za-z_]\w*)\b/g;
-  let match: RegExpExecArray | null;
-  while ((match = regex.exec(specContent)) !== null) {
-    ids.add(match[1]);
+  const declarationRegexes = [
+    /\b(?:const|let|var)\s+([A-Za-z_]\w*)\b/g,
+    /\b(?:async\s+)?function\s+([A-Za-z_]\w*)\s*\(/g,
+  ];
+  for (const regex of declarationRegexes) {
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(specContent)) !== null) {
+      ids.add(match[1]);
+    }
   }
   return [...ids];
 }
@@ -2184,6 +2400,7 @@ function parseImports(specContent: string): ParsedImport[] {
       .split(",")
       .map((item) => item.trim())
       .filter(Boolean)
+      .map((item) => item.replace(/^type\s+/, "").trim())
       .map((item) => item.replace(/\s+as\s+\w+$/, "").trim())
       .filter(Boolean);
     if (symbols.length === 0) continue;
@@ -2235,6 +2452,128 @@ function extractRuntimeStepCalls(specContent: string): RuntimeStepCall[] {
     });
   }
   return calls;
+}
+
+/**
+ * Recognizes the deterministic-spec-compiler's POM wrapper (e.g. `class
+ * DeterministicPromotedPage { fill(options) { return this.runtime.fillPromotedField(options); }
+ * ... }`) as an EQUIVALENT, verified representation of a direct
+ * `promotedRuntime.<method>({ stepIndex, ... })` outer wrapper call --
+ * without weakening `runtime_step_binding_unresolved` / `_ambiguous` /
+ * `runtime_method_operation_mismatch` below, which stay completely unchanged
+ * and keep operating on the SAME `RuntimeStepCall[]` shape.
+ *
+ * For each `<instance>.<pomMethod>({ stepIndex: N, ... })` call, the emitted
+ * runtime method is never assumed from the POM method's NAME -- it is read
+ * from that exact method's own body (`this.runtime.<runtimeMethod>(`), so a
+ * tampered/incorrect internal forward (e.g. a `click` method that actually
+ * calls `fillPromotedField`) is attributed as its REAL forwarded method and
+ * still fails the existing operation<->runtimeMethod check below, never
+ * silently trusted because the outer method name happened to read "click".
+ */
+function extractPomClassRuntimeForwards(specContent: string): Map<string, Map<string, string>> {
+  const classBindings = new Map<string, Map<string, string>>();
+  const classRegex = /class\s+([A-Za-z_]\w*)\s*\{([\s\S]*?)\n\}/g;
+  let classMatch: RegExpExecArray | null;
+  while ((classMatch = classRegex.exec(specContent)) !== null) {
+    const [, className, classBody] = classMatch;
+    const methodMap = new Map<string, string>();
+    const methodRegex = /\b([A-Za-z_]\w*)\s*\([^)]*\)\s*\{([^}]*)\}/g;
+    let methodMatch: RegExpExecArray | null;
+    while ((methodMatch = methodRegex.exec(classBody)) !== null) {
+      const [, methodName, methodBody] = methodMatch;
+      if (methodName === "constructor") continue;
+      const forwardMatch = methodBody.match(/this\.runtime\.([A-Za-z_]\w*)\s*\(/);
+      if (forwardMatch) methodMap.set(methodName, forwardMatch[1]);
+    }
+    if (methodMap.size > 0) classBindings.set(className, methodMap);
+  }
+  return classBindings;
+}
+
+function extractPomWrapperStepCalls(specContent: string): RuntimeStepCall[] {
+  const calls: RuntimeStepCall[] = [];
+  const classBindings = extractPomClassRuntimeForwards(specContent);
+  for (const [className, methodMap] of classBindings) {
+    const instanceNames = extractConstructedInstanceNames(specContent, className);
+    for (const instanceName of instanceNames) {
+      for (const [pomMethod, runtimeMethod] of methodMap) {
+        const regex = new RegExp(
+          `\\b${escapeRegex(instanceName)}\\.${escapeRegex(pomMethod)}\\s*\\(\\s*\\{[\\s\\S]*?stepIndex\\s*:\\s*(\\d+)\\b[\\s\\S]*?\\}\\s*\\)`,
+          "gm",
+        );
+        let match: RegExpExecArray | null;
+        while ((match = regex.exec(specContent)) !== null) {
+          calls.push({ method: runtimeMethod, stepIndex: Number(match[1]), position: match.index });
+        }
+      }
+    }
+  }
+  return calls;
+}
+
+/**
+ * Byte ranges of every `previousStepReplays: [ ... ]` array literal in the candidate (the
+ * deterministic compiler's transported recovery callbacks -- see `PreviousStepReplay` in
+ * deterministic-spec-compiler.ts). Bracket-depth walk that skips over quoted string content
+ * (single/double/backtick, with backslash-escaping) so a target string containing `[`/`]`
+ * (e.g. `'css:[href="#x"]'`) never desynchronizes the depth count. Read-only text scan: never
+ * mutates the candidate, never touches `previousStepReplays` generation itself.
+ */
+function findPreviousStepReplaysArrayRanges(specContent: string): Array<{ start: number; end: number }> {
+  const ranges: Array<{ start: number; end: number }> = [];
+  const marker = "previousStepReplays";
+  let searchFrom = 0;
+  while (searchFrom < specContent.length) {
+    const markerIndex = specContent.indexOf(marker, searchFrom);
+    if (markerIndex < 0) break;
+    const afterMarker = markerIndex + marker.length;
+    const bracketStart = specContent.indexOf("[", afterMarker);
+    // Only a marker immediately followed by `:` (optional whitespace) then `[` is the array
+    // literal itself -- anything else (e.g. a comment mentioning the field) is left alone.
+    if (bracketStart < 0 || !/^\s*:\s*$/.test(specContent.slice(afterMarker, bracketStart))) {
+      searchFrom = afterMarker;
+      continue;
+    }
+    let depth = 0;
+    let quote: string | null = null;
+    let end = -1;
+    for (let index = bracketStart; index < specContent.length; index++) {
+      const ch = specContent[index];
+      if (quote) {
+        if (ch === "\\") { index++; continue; }
+        if (ch === quote) quote = null;
+        continue;
+      }
+      if (ch === "'" || ch === '"' || ch === "`") { quote = ch; continue; }
+      if (ch === "[") depth++;
+      else if (ch === "]") {
+        depth--;
+        if (depth === 0) { end = index; break; }
+      }
+    }
+    if (end < 0) { searchFrom = afterMarker; continue; }
+    ranges.push({ start: bracketStart, end });
+    searchFrom = end + 1;
+  }
+  return ranges;
+}
+
+/**
+ * FIRST_LOSS fix: `extractRuntimeStepCalls`/`extractPomWrapperStepCalls` match ANY
+ * `<instance>.<method>({ stepIndex: N, ... })` text occurrence, including one nested inside a
+ * `previousStepReplays[].replay` recovery callback -- a session-reset recovery replay of a PRIOR
+ * step's own action, never a second outer wrapper for that step. Without this filter, a required
+ * step whose own recorded action is later reused verbatim inside a LATER step's replay array
+ * (exactly what the deterministic compiler now does, see deterministic-spec-compiler.ts) was
+ * miscounted as `runtime_step_binding_ambiguous`. A genuine second TOP-LEVEL wrapper for the same
+ * stepIndex (never inside a `previousStepReplays` array) is completely unaffected and still
+ * counts, so the ambiguous-binding gate stays fail-closed for a real duplicate.
+ */
+function excludeReplayCallbackStepCalls(specContent: string, calls: RuntimeStepCall[]): RuntimeStepCall[] {
+  const ranges = findPreviousStepReplaysArrayRanges(specContent);
+  if (ranges.length === 0) return calls;
+  return calls.filter((call) => !ranges.some((range) => call.position >= range.start && call.position <= range.end));
 }
 
 const TECHNICAL_EVIDENCE_KEYS = [
@@ -2813,6 +3152,104 @@ async function validateImportContracts(input: {
   return errors;
 }
 
+function normalizeGateOnlyCredentialBindings(
+  specContent: string,
+  candidateSpecPath: string,
+  appSlug: string,
+  authFlowContext: AuthFlowRuntimeContext | undefined,
+): string {
+  if (authFlowContext?.authOutcomeMode !== "gate_start_only") return specContent;
+  if (!/\bAPP_USERNAME\b|\bAPP_PASSWORD\b|fillUsername\s*\(|fillPassword\s*\(|submitLogin\s*\(/.test(specContent)) {
+    return specContent;
+  }
+
+  const helperPath = path.resolve(
+    process.cwd(),
+    "automations/apps",
+    appSlug,
+    "flows",
+    "auth.flow.helpers.ts",
+  );
+  const importPath = toRelativeImportPath(candidateSpecPath, helperPath.replace(/\.ts$/i, ""));
+  let next = ensureNamedImport(specContent, "resolvePromotedSpecAuthDataFromEnv", importPath);
+  const formPagePath = path.resolve(
+    process.cwd(),
+    "automations/apps",
+    appSlug,
+    "pages",
+    "form.page.ts",
+  );
+  const formPageImportPath = toRelativeImportPath(candidateSpecPath, formPagePath.replace(/\.ts$/i, ""));
+  next = ensureNamedImport(next, "FormPage", formPageImportPath);
+  if (!/const\s+__promotedAuthData\s*=/.test(next)) {
+    const firstTest = next.search(/\btest\s*\(/);
+    const declaration = `\nconst __promotedAuthData = resolvePromotedSpecAuthDataFromEnv({ alias: 'defaultClient' });\n`;
+    next = firstTest >= 0 ? `${next.slice(0, firstTest)}${declaration}${next.slice(firstTest)}` : `${declaration}${next}`;
+  }
+  if (!/const\s+formPage\s*=\s*new\s+FormPage\(page\)/.test(next)) {
+    const firstTest = next.search(/\btest\s*\(/);
+    const declaration = `\nconst formPage = new FormPage(page);\n`;
+    const callbackStart = firstTest >= 0 ? next.indexOf("=>", firstTest) : -1;
+    const bodyStart = callbackStart >= 0 ? next.indexOf("{", callbackStart) : -1;
+    next = bodyStart >= 0 ? `${next.slice(0, bodyStart + 1)}${declaration}${next.slice(bodyStart + 1)}` : next;
+  }
+  next = next
+    .replace(/process\.env\.APP_USERNAME/g, "String((__promotedAuthData as any).clients?.defaultClient?.username ?? '')")
+    .replace(/process\.env\.APP_PASSWORD/g, "String((__promotedAuthData as any).clients?.defaultClient?.password ?? '')")
+    .replace(/requiredEnv\(\s*['"]APP_USERNAME['"]\s*\)/g, "String((__promotedAuthData as any).clients?.defaultClient?.username ?? '')")
+    .replace(/requiredEnv\(\s*['"]APP_PASSWORD['"]\s*\)/g, "String((__promotedAuthData as any).clients?.defaultClient?.password ?? '')")
+    .replace(/requireScenarioValue\(\s*['"]APP_USERNAME['"]\s*\)/g, "String((__promotedAuthData as any).clients?.defaultClient?.username ?? '')")
+    .replace(/requireScenarioValue\(\s*['"]APP_PASSWORD['"]\s*\)/g, "String((__promotedAuthData as any).clients?.defaultClient?.password ?? '')")
+    .replace(/await\s+loginPage\.fillUsername\(([^\n]+)\);/g, "await formPage.fillField('Nombre de usuario*', $1);")
+    .replace(/await\s+loginPage\.fillPassword\(([^\n]+)\);/g, "await formPage.fillField('Contraseña*', $1);");
+  next = next
+    .replace(/import\s+\{\s*LoginPage\s*\}\s+from\s+['"][^'"]+pages\/login\.page['"];\r?\n/g, "")
+    .replace(/\s*const\s+loginPage\s*=\s*new\s+LoginPage\(page\);\r?\n/g, "\n");
+  return next;
+}
+
+function materializeBackedNavigationAssertions(
+  specContent: string,
+  response: SpecGenerationResponse,
+  observableOracles: SpecGenerationObservableOracle[],
+): { specContent: string; response: SpecGenerationResponse } {
+  const backedNavigation = observableOracles.filter((oracle) =>
+    oracle.backed
+    && (oracle.type === "navigation_transition" || oracle.type === "url_state")
+    && typeof oracle.stepIndex === "number"
+    && (typeof oracle.details?.expectedUrl === "string" || typeof oracle.target === "string")
+  );
+  if (backedNavigation.length === 0) return { specContent, response };
+
+  let next = ensurePlaywrightExpectImport(specContent);
+  const addedAssertions = [...response.coveredAssertions];
+  for (const oracle of backedNavigation) {
+    const stepIndex = oracle.stepIndex!;
+    if (extractRuntimeStepCalls(next).some((call) => call.method === "expectPromotedVisible" && call.stepIndex === stepIndex)) continue;
+    const expectedUrl = typeof oracle.details?.expectedUrl === "string" && oracle.details.expectedUrl.trim()
+      ? oracle.details.expectedUrl.trim()
+      : undefined;
+    if (!expectedUrl) continue;
+    const assertionImplementation = `await expect(page).toHaveURL(${JSON.stringify(expectedUrl)});`;
+    const block = [
+      "    await promotedRuntime.expectPromotedVisible({",
+      `      stepIndex: ${stepIndex},`,
+      `      target: ${JSON.stringify(oracle.target ?? oracle.requirement)},`,
+      `      polarity: ${JSON.stringify(oracle.polarity ?? "positive")},`,
+      `      expectedUrl: ${JSON.stringify(expectedUrl)},`,
+      "      assertion: async () => {",
+      `        ${assertionImplementation}`,
+      "      },",
+      "    });",
+    ].join("\n");
+    const insertionPoint = next.lastIndexOf("} finally");
+    if (insertionPoint < 0) continue;
+    next = `${next.slice(0, insertionPoint)}${block}\n\n${next.slice(insertionPoint)}`;
+    addedAssertions.push({ requirement: oracle.requirement, implementation: assertionImplementation });
+  }
+  return { specContent: next, response: { ...response, coveredAssertions: addedAssertions } };
+}
+
 function isValidAuthAggregateBinding(
   specContent: string,
   expected: AuthFlowRuntimeContext["aggregateBinding"]
@@ -2853,22 +3290,87 @@ export function structuralValidation(input: {
   const warnings: string[] = [];
   const content = input.specContent;
   const contentWithoutImports = content.replace(/^\s*import\s+.+$/gm, "");
-  const runtimeStepCalls = extractRuntimeStepCalls(content);
+  const runtimeStepCalls = excludeReplayCallbackStepCalls(
+    content,
+    [...extractRuntimeStepCalls(content), ...extractPomWrapperStepCalls(content)],
+  );
   const runtimeMethodCalls = extractPromotedRuntimeMethodCalls(content);
   const runtimeAllowlist = new Set(input.promotedRuntimeMethodsAllowlist);
+  // Diagnostic instrumentation only (jobId bf4f597b-0db2-4c2d-be67-5c8b99367b36): proves, for the
+  // NEXT physical run, exactly which physical module/process is executing this function -- no
+  // validation/behavior change. A stale compiled spec-generation-hybrid.js sits beside this .ts
+  // file (this is not itself proof of the bug; it must be demonstrated per-run).
+  if (input.executionContract) {
+    const requiredActionSteps = input.executionContract.steps.filter(
+      (step) => step.required !== false && !step.operation.startsWith("assert")
+    ).length;
+    console.log(
+      `[structural-validation-authority] module=${__filename} gateVersion=operation-runtime-all-kinds-v1 ` +
+      `pid=${process.pid} candidate=${JSON.stringify(input.expectedScenarioId)}`
+    );
+    console.log(`[structural-validation-authority] phase=entered requiredActionSteps=${requiredActionSteps}`);
+  }
   if (input.executionContract) {
     for (const contractStep of input.executionContract.steps) {
       const implementation = contractStep.implementation;
-      if (implementation?.kind !== "page_object") continue;
-      const instanceNames = extractConstructedInstanceNames(input.specContent, implementation.owner);
-      const invoked = instanceNames.some((instanceName) =>
-        extractMethodCallArgumentCounts(input.specContent, instanceName, implementation.method).length > 0
-      );
-      if (!invoked) {
-        semanticErrors.push(
-          `page_object_method_semantic_mismatch:step=${contractStep.scenarioStepIndex}`
-          + `:expected=${implementation.owner}.${implementation.method}`
+
+      // Existing POM binding check: validates the OWNER/METHOD a page_object-kind implementation
+      // declares is actually invoked somewhere in the candidate. Kept completely separate from
+      // (and no longer exclusive with) the operation<->runtimeMethod gate below -- a nested
+      // page-object call is a real, valid implementation detail, but it never substitutes for the
+      // step's own OUTER runtime wrapper.
+      if (implementation?.kind === "page_object") {
+        const instanceNames = extractConstructedInstanceNames(input.specContent, implementation.owner);
+        const invoked = instanceNames.some((instanceName) =>
+          extractMethodCallArgumentCounts(input.specContent, instanceName, implementation.method).length > 0
         );
+        if (!invoked) {
+          semanticErrors.push(
+            `page_object_method_semantic_mismatch:step=${contractStep.scenarioStepIndex}`
+            + `:expected=${implementation.owner}.${implementation.method}`
+          );
+        }
+      }
+
+      // FIRST_LOSS fix (jobId 28ccb2d3-f553-4e51-ac6a-90031aa5f696, extending jobId
+      // cc5b0661-5393-4ebd-8eab-6516554d8072 / 979d5435-c4e6-458c-b743-435d80e58fd1 /
+      // 210649bd-ee18-4259-9ed7-b5af2f90d873): this gate previously ran ONLY when
+      // `implementation?.kind === "runtime"` (or was undefined) -- a "page_object" kind took the
+      // branch above instead and was NEVER subjected to this check at all, so a required press
+      // step whose OUTER wrapper was `clickPromotedTarget` (with the correct page-object method
+      // merely nested inside its callback) passed clean. `implementation.kind` must never be the
+      // condition for whether this gate applies: a required, non-assertion action step ALWAYS
+      // has one contractual operation, and that operation ALWAYS implies exactly one expected
+      // OUTER runtime wrapper via the single CORE authority (ACTION_RUNTIME_METHOD_BY_OPERATION,
+      // spec-execution-contract.ts) -- independent of whatever else its own implementation
+      // descriptor happens to also require. `runtimeStepCalls` is filtered to ACTION-shaped
+      // wrappers only: an oracle call (expectPromotedVisible) or lifecycle helper legitimately
+      // shares the same scenarioStepIndex as its source action step and must never inflate this
+      // into a false "ambiguous" binding, and a nested page-object call is not itself an outer
+      // wrapper so it never counts here either.
+      if (contractStep.required !== false && !contractStep.operation.startsWith("assert")) {
+        const expectedRuntimeMethod = ACTION_RUNTIME_METHOD_BY_OPERATION[contractStep.operation];
+        if (expectedRuntimeMethod) {
+          const matchingCalls = runtimeStepCalls.filter((call) =>
+            call.stepIndex === contractStep.scenarioStepIndex && ACTION_RUNTIME_METHODS.has(call.method)
+          );
+          if (matchingCalls.length === 0) {
+            semanticErrors.push(
+              `runtime_step_binding_unresolved:step=${contractStep.scenarioStepIndex}`
+              + `:operation=${contractStep.operation}:expected=${expectedRuntimeMethod}`
+            );
+          } else if (matchingCalls.length > 1) {
+            semanticErrors.push(
+              `runtime_step_binding_ambiguous:step=${contractStep.scenarioStepIndex}`
+              + `:operation=${contractStep.operation}:matchCount=${matchingCalls.length}`
+            );
+          } else if (matchingCalls[0].method !== expectedRuntimeMethod) {
+            semanticErrors.push(
+              `runtime_method_operation_mismatch:step=${contractStep.scenarioStepIndex}`
+              + `:operation=${contractStep.operation}:expected=${expectedRuntimeMethod}:actual=${matchingCalls[0].method}`
+            );
+          }
+        }
       }
     }
   }
@@ -2889,6 +3391,26 @@ export function structuralValidation(input: {
     }
   }
   errors.push(...validateExpectPromotedVisibleContracts(content));
+
+  if (input.mode === "ai_hybrid") {
+    // DOM-position functional fallbacks are forbidden project-wide: an
+    // AI-generated locator that only disambiguates by position
+    // (.first()/.last()/.nth(N)) is not a stable, semantic target and must
+    // fail before any physical runtime invocation, not just contribute to a
+    // later "failed" verdict. Detected textually (not stripped) so the
+    // offending code stays visible in errors. Scoped to ai_hybrid candidates
+    // only, matching the technical-target gate below: deterministic
+    // framework-generated auth-gate click steps intentionally use
+    // .first() and are not AI candidate output.
+    const positionalLocatorPattern = /\.(first|last|nth)\s*\(/g;
+    let positionalMatch: RegExpExecArray | null;
+    while ((positionalMatch = positionalLocatorPattern.exec(content)) !== null) {
+      const method = positionalMatch[1];
+      const lineNumber = content.slice(0, positionalMatch.index).split(/\r?\n/).length;
+      errors.push(`positional_locator_forbidden:method=${method}:line=${lineNumber}`);
+      console.log(`[spec-positional-locator-gate] status=failed method=${method} line=${lineNumber} reason=dom_position_functional_fallback_forbidden`);
+    }
+  }
 
   if (!input.skipTechnicalTargetGate && input.mode === "ai_hybrid") {
     for (const targetCall of extractRuntimeTargetCalls(content)) {
@@ -3175,37 +3697,84 @@ function parseEnvBoolean(value: string | undefined): boolean | null {
   return null;
 }
 
-function resolvePlaywrightLaunchContext(input: HybridSpecGenerationInput): PlaywrightLaunchContext {
+export function resolvePlaywrightLaunchContext(input: HybridSpecGenerationInput): PlaywrightLaunchContext {
+  const appBaseUrl = input.appProfile?.baseUrl?.trim() || undefined;
+  const appSlug = input.appProfile?.appSlug;
+  const runtimeInputValues = input.runtimeInputValues;
   if (input.headed === true) {
-    return { source: input.executionSource ?? "explicit_headed", headless: false };
+    return { source: input.executionSource ?? "explicit_headed", headless: false, appBaseUrl, appSlug, runtimeInputValues };
   }
   if (input.headed === false) {
-    return { source: input.executionSource ?? "explicit_headless_default", headless: true };
+    return { source: input.executionSource ?? "explicit_headless_default", headless: true, appBaseUrl, appSlug, runtimeInputValues };
   }
   const automationHeadless = parseEnvBoolean(process.env.AUTOMATION_HEADLESS);
   if (automationHeadless !== null) {
     return {
       source: process.env.AUTOMATION_SOURCE?.trim() || input.executionSource || "automation_env",
       headless: automationHeadless,
+      appBaseUrl,
+      appSlug,
+      runtimeInputValues,
     };
   }
   const envHeadless = parseEnvBoolean(process.env.HEADLESS);
   return {
     source: input.executionSource ?? "inherited_env",
     headless: envHeadless,
+    appBaseUrl,
+    appSlug,
+    runtimeInputValues,
   };
 }
 
-function buildPlaywrightCommandEnv(launchContext?: PlaywrightLaunchContext): NodeJS.ProcessEnv | undefined {
-  if (!launchContext || launchContext.headless === null) return undefined;
-  const envPatch: NodeJS.ProcessEnv = { HEADLESS: launchContext.headless ? "true" : "false" };
-  if (launchContext.headless) {
-    envPatch.PWDEBUG = "";
-  }
-  return envPatch;
+/**
+ * A candidate's one-off functional-execution run pays for a cold browser launch on top of the
+ * same business-step work the steady-state promoted contract already budgets
+ * DEFAULT_TIMEOUT_MS for (see the other three playwright.config.*.ts files, which all default
+ * to DEFAULT_TIMEOUT_MS/30000 and are otherwise unaffected by this — this timeout is deliberately
+ * scoped to playwright.config.apps.candidate.ts alone). Job da808bb9-5856-4432-bde3-f4bb3e8525c6
+ * proved a candidate can pass every required step and its final oracle, evidenced end-to-end,
+ * and still be killed by the outer test watchdog with no single stalled operation anywhere — the
+ * cumulative wall clock (cold launch + business steps) simply exceeded a budget sized only for
+ * the steady-state case. The headroom below matches ensureInitialNavigation's own goto timeout
+ * ceiling (promoted-spec-runtime.ts) — the one real, already-trusted ceiling for that phase —
+ * rather than an unrelated arbitrary number. Pure and exported for hermetic testing; the config
+ * file itself only calls this.
+ */
+export const CANDIDATE_NAVIGATION_HEADROOM_MS = 60000;
+
+export function resolveCandidateFunctionalExecutionTimeoutMs(env: NodeJS.ProcessEnv): number {
+  const explicit = env.CANDIDATE_FUNCTIONAL_EXECUTION_TIMEOUT_MS;
+  if (explicit !== undefined) return Number(explicit);
+  const businessBudgetMs = Number(env.DEFAULT_TIMEOUT_MS ?? 30000);
+  return businessBudgetMs + CANDIDATE_NAVIGATION_HEADROOM_MS;
 }
 
-async function runNodeCommand(command: string, args: string[], envPatch?: NodeJS.ProcessEnv): Promise<CommandResult> {
+export function buildPlaywrightCommandEnv(launchContext?: PlaywrightLaunchContext): NodeJS.ProcessEnv | undefined {
+  const envPatch: NodeJS.ProcessEnv = {};
+  if (launchContext && launchContext.headless !== null) {
+    envPatch.HEADLESS = launchContext.headless ? "true" : "false";
+    if (launchContext.headless) {
+      envPatch.PWDEBUG = "";
+    }
+  }
+  if (launchContext?.appBaseUrl) {
+    envPatch.APP_BASE_URL = launchContext.appBaseUrl;
+  }
+  if (launchContext?.appSlug) {
+    envPatch.APP_SLUG = launchContext.appSlug;
+  }
+  // Already-resolved runtime input authority (valueKey -> value), never re-resolved here --
+  // reuses the same PROMOTED_<KEY> / PROMOTED_RUNTIME_DATA_OVERRIDES_JSON convention
+  // resolvePromotedRuntimeValue and the deterministic compiler's generated
+  // process.env['PROMOTED_<KEY>'] reads already share (materializePromotedRuntimeEnv).
+  if (launchContext?.runtimeInputValues) {
+    Object.assign(envPatch, materializePromotedRuntimeEnv(launchContext.runtimeInputValues));
+  }
+  return Object.keys(envPatch).length > 0 ? envPatch : undefined;
+}
+
+export async function runNodeCommand(command: string, args: string[], envPatch?: NodeJS.ProcessEnv): Promise<CommandResult> {
   try {
     const env = envPatch ? { ...process.env, ...envPatch } : process.env;
     const { stdout, stderr } = await execFileAsync(command, args, { cwd: process.cwd(), windowsHide: true, env });
@@ -3385,31 +3954,20 @@ export async function defaultRunTypeScriptValidation(specPath: string): Promise<
       `.spec-validation-${process.pid}-${Date.now()}.ts`
     );
     await fs.writeFile(validationPath, buildTypeValidationSource(specContent), "utf-8");
-    const compilerOptions: import("typescript").CompilerOptions = {
-      module: ts.ModuleKind.ESNext,
-      target: ts.ScriptTarget.ES2022,
-      strict: true,
-      noEmit: true,
-      skipLibCheck: true,
-      lib: ["lib.es2022.d.ts", "lib.dom.d.ts"],
-      types: ["node"]
-    };
     try {
-      const host = ts.createCompilerHost(compilerOptions, true);
-      const program = ts.createProgram([validationPath], compilerOptions, host);
-      const diagnostics = ts.getPreEmitDiagnostics(program).filter((diag) => diag.category === ts.DiagnosticCategory.Error);
-      if (diagnostics.length === 0) {
-        return { ok: true, stdout: "", stderr: "", exitCode: 0 };
-      }
-      const stderr = diagnostics
-        .map((diag) => {
-          const message = ts.flattenDiagnosticMessageText(diag.messageText, "\n");
-          if (!diag.file || typeof diag.start !== "number") return message;
-          const position = diag.file.getLineAndCharacterOfPosition(diag.start);
-          return `${diag.file.fileName}(${position.line + 1},${position.character + 1}): ${message}`;
-        })
-        .join("\n");
-      return { ok: false, stdout: "", stderr, exitCode: 2 };
+      const tscPath = path.resolve(process.cwd(), "node_modules", "typescript", "bin", "tsc");
+      return await runNodeCommand(process.execPath, [
+        tscPath,
+        "--noEmit",
+        "--module", "ESNext",
+        "--target", "ES2022",
+        "--moduleResolution", "node",
+        "--lib", "ES2022,DOM",
+        "--types", "node",
+        "--strict",
+        "--skipLibCheck",
+        validationPath,
+      ]);
     } finally {
       await fs.rm(validationPath, { force: true }).catch(() => undefined);
     }
@@ -3423,21 +3981,27 @@ export async function defaultRunTypeScriptValidation(specPath: string): Promise<
   }
 }
 
-export async function defaultRunPlaywrightDiscovery(
-  specPath: string,
-  launchContext?: PlaywrightLaunchContext,
-): Promise<CommandResult> {
-  const cliPath = path.resolve(process.cwd(), "node_modules", "@playwright", "test", "cli.js");
+/**
+ * Candidate files are stored one directory below the physical case
+ * (`cases/<case>/spec-generation/candidate.spec.ts`) so the promoted-apps config can exclude
+ * them. Their generated imports are a mix of candidate-relative and physical-spec-relative
+ * paths. Prepares a temporary copy in the physical case directory with each relative import
+ * rebased to that copy's location, preserving the exact candidate source semantics regardless
+ * of which convention the AI-generated candidate happened to use.
+ *
+ * Shared by BOTH `defaultRunPlaywrightDiscovery` and `defaultRunFunctionalExecution`: the two
+ * must use the exact same effective collection input, or a candidate proven Playwright-
+ * discoverable through this rebased copy can still fail to even be collected by functional
+ * execution if it instead runs the raw, un-rebased original from its real, one-level-deeper
+ * location (job 851ec7ba-bebf-4e6f-a1bb-7f80a65758ff: `runner_no_tests_found` despite
+ * `playwrightDiscovery=passed`, because only discovery applied this rebase).
+ */
+export async function prepareCandidateValidationCopy(specPath: string): Promise<{ validationPath: string; sourcePath: string; cleanup: () => Promise<void> }> {
   const sourcePath = path.resolve(specPath);
   const sourceDir = path.dirname(sourcePath);
   const isCandidate = path.basename(sourceDir).toLowerCase() === "spec-generation";
   let validationPath = sourcePath;
 
-  // Candidate files are stored one directory below the physical case so the
-  // promoted-apps config can exclude them. Their generated imports are a mix
-  // of candidate-relative and physical-spec-relative paths. Validate a
-  // temporary copy in the physical case directory and rebase each relative
-  // import to the copy, preserving the exact candidate source semantics.
   if (isCandidate) {
     const physicalCaseDir = path.dirname(sourceDir);
     const candidateText = await fs.readFile(sourcePath, "utf8");
@@ -3457,6 +4021,21 @@ export async function defaultRunPlaywrightDiscovery(
     await fs.writeFile(validationPath, rebased, "utf8");
   }
 
+  return {
+    validationPath,
+    sourcePath,
+    cleanup: async () => {
+      if (validationPath !== sourcePath) await fs.rm(validationPath, { force: true }).catch(() => undefined);
+    },
+  };
+}
+
+export async function defaultRunPlaywrightDiscovery(
+  specPath: string,
+  launchContext?: PlaywrightLaunchContext,
+): Promise<CommandResult> {
+  const cliPath = path.resolve(process.cwd(), "node_modules", "@playwright", "test", "cli.js");
+  const { validationPath, cleanup } = await prepareCandidateValidationCopy(specPath);
   try {
     return await runNodeCommand(
       process.execPath,
@@ -3464,7 +4043,7 @@ export async function defaultRunPlaywrightDiscovery(
       buildPlaywrightCommandEnv(launchContext),
     );
   } finally {
-    if (validationPath !== sourcePath) await fs.rm(validationPath, { force: true }).catch(() => undefined);
+    await cleanup();
   }
 }
 
@@ -3486,30 +4065,302 @@ async function defaultRunFunctionalExecution(
   launchContext?: PlaywrightLaunchContext,
 ): Promise<FunctionalExecutionResult> {
   const cliPath = path.resolve(process.cwd(), "node_modules", "@playwright", "test", "cli.js");
-  const normalizedSpecPath = specPath.replace(/\\/g, "/");
-  const commandResult = await runNodeCommand(process.execPath, [
-    cliPath,
-    "test",
-    normalizedSpecPath,
-    "--config",
-    "playwright.config.apps.ts",
-    "--workers",
-    "1"
-  ], buildPlaywrightCommandEnv(launchContext));
-  const combinedOutput = `${commandResult.stdout}\n${commandResult.stderr}`;
-  const parsed = parseFunctionalExecutionOutput(combinedOutput);
-  return {
-    ...commandResult,
-    evidenceSteps: parsed.evidenceSteps,
-    screenshots: parsed.screenshots,
-    authGateDetected: parsed.authGateDetected
-  };
+  // FIRST_LOSS fix (job 851ec7ba-bebf-4e6f-a1bb-7f80a65758ff): running the raw candidate.spec.ts
+  // directly from its real spec-generation/ location resolved zero tests even though the exact
+  // same file was just proven discoverable by playwrightDiscovery -- because discovery never
+  // validates that raw file either. It rebases the candidate's mixed candidate-relative/physical-
+  // relative imports into a temporary copy first (`prepareCandidateValidationCopy`); functional
+  // execution ran the un-rebased original instead, so Playwright's own module resolution for the
+  // file's imports (not the test-collection pattern) failed and no test was ever collected. Using
+  // the SAME rebased copy discovery already trusts gives both stages identical collection input.
+  const { validationPath, cleanup } = await prepareCandidateValidationCopy(specPath);
+  const normalizedSpecPath = validationPath.replace(/\\/g, "/");
+  try {
+    const commandResult = await runNodeCommand(process.execPath, [
+      cliPath,
+      "test",
+      normalizedSpecPath,
+      "--config",
+      // playwright.config.apps.ts's testMatch only accepts literal "case.spec.ts"/"spec.ts"
+      // filenames (by design, to keep the promoted runtime from ever traversing into
+      // spec-generation/ drafts). This config is identical to playwright.config.apps.ts except
+      // it also matches the exact literal candidate path AND the temporary rebased-copy naming
+      // convention `prepareCandidateValidationCopy` uses (the same one playwright.config.ts
+      // already trusts for playwrightDiscovery).
+      "playwright.config.apps.candidate.ts",
+      "--workers",
+      "1"
+    ], buildPlaywrightCommandEnv(launchContext));
+    const combinedOutput = `${commandResult.stdout}\n${commandResult.stderr}`;
+    const parsed = parseFunctionalExecutionOutput(combinedOutput);
+    return {
+      ...commandResult,
+      evidenceSteps: parsed.evidenceSteps,
+      screenshots: parsed.screenshots,
+      authGateDetected: parsed.authGateDetected
+    };
+  } finally {
+    await cleanup();
+  }
 }
 
 function countDiscoveredTests(output: string): number | undefined {
   const totalMatch = output.match(/Total:\s+(\d+)\s+test/i);
   if (totalMatch) return Number(totalMatch[1]);
   return undefined;
+}
+
+/**
+ * "No tests found" means the runner never located/started the candidate — it is a
+ * runner/discovery infrastructure failure, not a candidate semantic/business-step failure.
+ * "initial_readiness_failure" means the runtime page started but never reached a state where
+ * the first business step could run (no navigation/readiness ever completed) — the browser and
+ * runner both started, but zero required business steps executed. In both cases no functional
+ * step ever ran, so neither must ever be reported as a required-step failure (which would both
+ * misrepresent the evidence and, via getFailedSpecValidationNames, trigger AI repair for a
+ * defect the candidate does not actually have — repairing candidate business logic can never
+ * fix a page that never became ready). Pure and exported for hermetic testing independent of
+ * the fixture-heavy generation pipeline.
+ */
+export function isFunctionalExecutionInfrastructureFailure(ok: boolean, combinedOutput: string): boolean {
+  return !ok && /no tests found|initial_readiness_failure/i.test(combinedOutput);
+}
+
+/**
+ * Distinguishes the two infrastructure-failure shapes so classification/logging can report
+ * whether the runtime/browser ever started (initial_readiness_failure) or never even located
+ * the candidate (no tests found).
+ */
+export function isInitialReadinessInfrastructureFailure(combinedOutput: string): boolean {
+  return /initial_readiness_failure/i.test(combinedOutput);
+}
+
+/**
+ * The functional-execution child process's stdout/stderr is captured in-memory
+ * (defaultRunFunctionalExecution) purely to classify pass/fail — it was never surfaced to the
+ * parent's own log, so a PRE_BUSINESS_INITIAL_READINESS classification carried no diagnostic
+ * trail of what the child actually saw (its own [promoted-initial-navigation] phase=runtime
+ * line, [initial-navigation]/[initial-readiness] phase markers, etc.). Re-emit only the
+ * structured promoted-runtime telemetry lines — never the full Playwright noise — so the two
+ * process's records stay distinguishable (phase=launch_context vs phase=runtime) without
+ * dumping the entire child output.
+ */
+const CHILD_RUNTIME_TELEMETRY_PREFIXES = [
+  "[promoted-initial-navigation]",
+  "[initial-navigation]",
+  "[initial-readiness]",
+  "[evidence:initial]",
+  "[promoted-step]",
+  "[promoted-runtime-lifecycle]",
+  "[screen-context-field-signals]",
+  "[async-wait]",
+  "[async-wait-provenance]",
+  "[promoted-press-wait]",
+  "[promoted-fill-state]",
+  "[promoted-press-dispatch]",
+  "[selection-runtime]",
+  // FIRST_LOSS fix (recordingId=1f9415f3-...): this allowlist is the ONLY channel that re-emits
+  // the child Playwright process's own stdout into the parent `discovery:preview` log -- a line
+  // NOT matching one of these prefixes is silently dropped from `combinedFunctionalOutput`'s
+  // re-emission (see the `for (const line of childRuntimeTelemetry) console.log(line);` call
+  // site), even though the child genuinely printed it. Physical evidence across several rounds
+  // showed `[promoted-step]` lines (already allowlisted) appear reliably while newer
+  // `PromotedSpecRuntime` diagnostic prefixes -- added for exactly this kind of boundary
+  // debugging -- never did, despite being unconditional, synchronous statements immediately
+  // adjacent to already-visible lines. This was never a runtime hang: it was this allowlist.
+  "[runtime:module-loaded]",
+  "[runtime:boundary]",
+  "[runtime:diagnostic]",
+  "[runtime:session_reset]",
+  "[runtime:replay]",
+  "[runtime-sequence]",
+  "[TRACE-",
+];
+
+export function extractChildRuntimeTelemetry(combinedOutput: string): string[] {
+  return combinedOutput
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => CHILD_RUNTIME_TELEMETRY_PREFIXES.some((prefix) => line.startsWith(prefix)));
+}
+
+/**
+ * PRE_BUSINESS_INITIAL_READINESS was a single generic label for every way the promoted runtime
+ * can fail before Step 1 starts (see ensureInitialNavigation/ensureInitialEvidence in
+ * promoted-spec-runtime.ts). Split it by the actual thrown reason so a real navigation problem
+ * (wrong/unreachable APP_BASE_URL) is never confused with a shared-readiness timeout or an
+ * initial-evidence-capture problem — each has a different fix.
+ */
+export function classifyPreBusinessFailure(combinedOutput: string): "PRE_BUSINESS_NAVIGATION_FAILED" | "PRE_BUSINESS_SHARED_READINESS_FAILED" | "PRE_BUSINESS_INITIAL_EVIDENCE_FAILED" {
+  const readinessReasonMatch = combinedOutput.match(/\[promoted-initial-navigation\][^\r\n]*\breadinessReason=(\S+)/);
+  const readinessReason = readinessReasonMatch?.[1];
+  if (readinessReason === "app_base_url_missing" || readinessReason === "navigation_failed") {
+    return "PRE_BUSINESS_NAVIGATION_FAILED";
+  }
+  if (readinessReason === "readiness_error") {
+    return "PRE_BUSINESS_SHARED_READINESS_FAILED";
+  }
+  return "PRE_BUSINESS_INITIAL_EVIDENCE_FAILED";
+}
+
+/**
+ * Prefixes of PromotedSpecRuntime's own routine, always-printed diagnostic/telemetry lines --
+ * NEVER a failure on their own, even when they happen to contain a generic word like "locator"
+ * or "failed=false" (e.g. `[promoted-press-dispatch] ... dispatchMethod=locator.press
+ * dispatchStarted=true`, a normal SUCCESS line). FIRST_LOSS fix (jobId
+ * 287dbaab-c566-41af-87c0-609cf4e42535): a generic keyword scan previously had no notion of
+ * "telemetry vs. real exception" beyond `[promoted-step]`, so an ordinary passing dispatch line
+ * for an earlier, already-succeeded step got selected as "the error". Excluded from both the
+ * structured-failure search space and the generic fallback scan below.
+ */
+const PROMOTED_SUCCESS_TELEMETRY_PREFIXES = [
+  "[promoted-step]",
+  "[promoted-fill-state]",
+  "[promoted-press-dispatch]",
+  "[promoted-press-wait]",
+  "[promoted-press-resolution]",
+  "[promoted-press-trace]",
+  "[promoted-click-structural]",
+  "[promoted-runtime-lifecycle]",
+  "[promoted-initial-navigation]",
+  "[recording-replay]",
+  "[runtime:",
+  "[async-wait]",
+];
+
+function isPromotedSuccessTelemetryLine(line: string): boolean {
+  return PROMOTED_SUCCESS_TELEMETRY_PREFIXES.some((prefix) => line.includes(prefix));
+}
+
+export type PromotedOperation = "click" | "fill" | "press" | "assertion";
+
+export type PromotedFunctionalFailure = {
+  errorLine: string;
+  stepIndex: number;
+  operation: PromotedOperation;
+};
+
+/**
+ * Single shared authority for extracting a real promoted-runtime failure (error text,
+ * stepIndex, AND operation, all from the SAME matched line) from functional execution's
+ * combined stdout+stderr. Every required-action method PromotedSpecRuntime exposes
+ * (clickPromotedTarget, fillPromotedField, pressPromotedTarget, expectPromotedVisible) throws a
+ * structured `Promoted <operation> failed at step <N> ...` message on failure -- this is the
+ * SAME text regardless of which of the four operations failed, so a single pattern recognizes
+ * all of them (the prior extraction only recognized click/assertion, silently missing fill/press
+ * and falling through to a generic keyword scan that could match unrelated success telemetry).
+ * `error text` and `stepIndex` MUST come from this one function, never computed independently,
+ * so they can never disagree with each other.
+ */
+export function extractPromotedFunctionalFailure(combinedOutput: string): PromotedFunctionalFailure | undefined {
+  const structuredPattern = /(?:Error:\s*)?Promoted (click|fill|press|assertion) failed at step (\d+)\b/;
+  for (const rawLine of combinedOutput.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || isPromotedSuccessTelemetryLine(line)) continue;
+    const match = line.match(structuredPattern);
+    if (match) {
+      return { errorLine: line, operation: match[1] as PromotedOperation, stepIndex: Number(match[2]) };
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Every throw site inside PromotedSpecRuntime's required-action methods (clickPromotedTarget,
+ * fillPromotedField, pressPromotedTarget, expectPromotedVisible, and their session-reset/
+ * detail-reentry recovery paths) already embeds the real `stepIndex` it was acting on in its
+ * error message — preferably via the shared structured extraction above (covers all four
+ * promoted operations); or, for click/assertion specifically, the dedicated
+ * `[promoted-step] ... phase=failed` telemetry line; or (for the less common recovery-path
+ * throws) a bare `stepIndex=<n>` fragment in the thrown message text. Extracting it here is
+ * strictly additive: it only ever replaces a fabricated step index with a real one, never
+ * invents one where none exists in the child's output.
+ */
+export function extractFailedPromotedStepIndex(combinedOutput: string): number | undefined {
+  const structured = extractPromotedFunctionalFailure(combinedOutput);
+  if (structured) return structured.stepIndex;
+  const telemetryMatch = combinedOutput.match(/\[promoted-step\]\s+stepIndex=(\d+)\s+phase=failed/);
+  if (telemetryMatch) return Number(telemetryMatch[1]);
+  // A `stepIndex=` fragment inside any routine promoted telemetry line (success or otherwise)
+  // must never be mistaken for a failure — only look for the bare fragment outside of ALL known
+  // routine telemetry line shapes (this is where the recovery-path throws like
+  // session_reset_unrecoverable embed their real stepIndex).
+  const nonTelemetryOutput = combinedOutput
+    .split(/\r?\n/)
+    .filter((line) => !isPromotedSuccessTelemetryLine(line))
+    .join("\n");
+  const messageMatch = nonTelemetryOutput.match(/\bstepIndex=(\d+)\b/);
+  if (messageMatch) return Number(messageMatch[1]);
+  return undefined;
+}
+
+/**
+ * A bare "Test timeout of Nms exceeded" is Playwright's own outer watchdog firing — it carries
+ * no per-step attribution at all (contrast with a real candidate defect, which throws a
+ * structured "Promoted click/assertion failed at step N ..." error well before the outer
+ * timeout, or a [promoted-step] phase=failed line). When the outer timeout fires with no such
+ * attribution anywhere in the child's output, every required step that DID run may well have
+ * genuinely passed (the whole-test wall clock — cold browser launch + navigation + business
+ * steps — simply exceeded the configured budget) — there is no proof any specific required step
+ * failed, so it must never be reported as one (see spec-runtime-gate.ts's "no fake step 0"
+ * invariant).
+ */
+export function isUnresolvedRuntimeTimeout(combinedOutput: string): boolean {
+  return /Test timeout of \d+ms exceeded/i.test(combinedOutput) && extractFailedPromotedStepIndex(combinedOutput) === undefined;
+}
+
+const TARGET_REQUIRING_OPERATIONS = new Set<SpecStepOperation>(["click", "fill", "select", "check"]);
+
+/**
+ * Pre-AI technical executability gate: any REQUIRED interactive step (click/fill/select/check)
+ * whose execution contract carries no certifiedTechnicalTarget (see technical-target-materializer.ts)
+ * is not executable and must never reach AI generation — spending an AI invocation on a contract
+ * we already know cannot be located is pure waste, and worse, it can silently promote a spec
+ * built on a fragile display-label locator. Pure and exported for hermetic testing.
+ */
+export function findUncertifiedRequiredTargetSteps(executionContract: SpecExecutionContract): SpecExecutionContractStep[] {
+  return executionContract.steps.filter(
+    (step) => step.required && TARGET_REQUIRING_OPERATIONS.has(step.operation) && !step.certifiedTechnicalTarget
+  );
+}
+
+/**
+ * Pure runtime-promotion-gate wiring decision, extracted so it is unit-testable independently
+ * of the rest of the (large, fixture-heavy) spec-generation pipeline.
+ *
+ * Promotion for a NEW candidate always requires real runtime proof — the gate is ALWAYS
+ * consulted, never bypassed:
+ *   - functionalExecutionEnabled=false            -> availability=unavailable -> deferred
+ *   - functionalExecutionEnabled=true, status="skipped" (runtime proof never produced,
+ *     e.g. an earlier gate short-circuited before functional execution ran)
+ *                                                  -> availability=unavailable -> deferred
+ *   - functionalExecutionEnabled=true, status="passed"/"failed" (a real runtime run happened)
+ *                                                  -> availability=available -> promote/block
+ * "Disabled" and "skipped" are never treated as an implicit pass — only a real runtime pass
+ * can authorize promotion. This does NOT change the AI_SPEC_FUNCTIONAL_EXECUTION_ENABLED
+ * default (still false); it changes what "false" means for promotion: no proof, no promotion.
+ */
+export function computeRuntimeGateDecision(
+  functionalExecutionEnabled: boolean,
+  functionalExecutionStatus: ValidationStatus,
+  previousPromotedSpecPath?: string,
+  /**
+   * The real scenarioStepIndex a candidate defect was attributed to (see
+   * extractFailedPromotedStepIndex), when one is known. Only meaningful when
+   * functionalExecutionStatus === "failed" — a genuine whole-test timeout with no per-step
+   * attribution must be classified upstream as "skipped" (RUNTIME_TIMEOUT_UNRESOLVED), never
+   * routed here as "failed", so this parameter is never asked to invent an index either.
+   * Defaults to 0 only for legacy callers that never had a real index to give it.
+   */
+  failedStepIndex = 0,
+): { runtimeGatePassed: boolean; runtimeGateResult: SpecRuntimeGateResult } {
+  const runtimeProofObtained = functionalExecutionEnabled && functionalExecutionStatus !== "skipped";
+  const runtimeGateResult = evaluateSpecRuntimeGate({
+    availability: runtimeProofObtained ? "available" : "unavailable",
+    steps: [{ stepIndex: failedStepIndex, required: true, status: functionalExecutionStatus === "passed" ? "passed" : "failed" }],
+    previousPromotedSpecPath,
+  });
+  return { runtimeGatePassed: runtimeGateResult.decision === "promote", runtimeGateResult };
 }
 
 async function runHybridSpecGenerationInternal(
@@ -3659,23 +4510,49 @@ async function runHybridSpecGenerationInternal(
     errors: [],
     warnings: [],
     finalSpec: {
-      origin: "deterministic_draft",
+      origin: input.candidateAuthority === "deterministic_compiler" ? "deterministic_compiler" : "deterministic_draft",
       generatedBy: "core",
-      strategy: "deterministic_draft",
+      strategy: input.candidateAuthority === "deterministic_compiler" ? "deterministic_compiler" : "deterministic_draft",
       fallback: null
     }
   };
 
-  const aiEnabled = bool(process.env.AI_SPEC_GENERATION_ENABLED, false);
+  const aiEnabled = bool(process.env.AI_SPEC_GENERATION_ENABLED, false)
+    && input.candidateAuthority !== "deterministic_compiler";
+  if (input.candidateAuthority === "deterministic_compiler") {
+    console.log(
+      `[deterministic-candidate-authority] initialAiGenerationSkipped=true aiRepairEligible=false ` +
+      `reason=candidateAuthority=deterministic_compiler`
+    );
+  }
   const batchPerIssue = bool(process.env.AI_SPEC_BATCH_PER_ISSUE, true);
   const allowDeterministicFallback = bool(process.env.AI_SPEC_ALLOW_DETERMINISTIC_FALLBACK, false);
   const requireJson = bool(process.env.AI_SPEC_REQUIRE_JSON, true);
   const requireJsonSchema = bool(process.env.AI_SPEC_REQUIRE_JSON_SCHEMA, true);
   const functionalExecutionEnabled = bool(process.env.AI_SPEC_FUNCTIONAL_EXECUTION_ENABLED, false);
+  const functionalExecutionRawEnv = process.env.AI_SPEC_FUNCTIONAL_EXECUTION_ENABLED;
+  const functionalExecutionConfigReason = functionalExecutionRawEnv === undefined
+    ? "env_unset_defaults_to_disabled"
+    : functionalExecutionEnabled
+      ? "env_explicitly_enabled"
+      : "env_explicitly_disabled";
+  console.log(`[spec-functional-execution-config] raw=${functionalExecutionRawEnv ?? "unset"} resolved=${functionalExecutionEnabled} reason=${functionalExecutionConfigReason}`);
   console.log(`[spec-generation-policy] functionalExecution=${functionalExecutionEnabled ? "enabled" : "deferred"}`);
 
-  const contractValid = contractValidation.valid && unresolvedRequiredRequirements.length === 0;
-  console.log(`[spec-contract] contractValid=${contractValid} requirements=${requiredRequirements.length} requiredAssertions=${requiredAssertions.length} unresolvedRequired=${unresolvedRequiredRequirements.length}`);
+  // Pre-AI technical executability gate: a required interactive step (click/fill/select/check)
+  // with no certifiedTechnicalTarget is not an executable target — do not spend an AI invocation
+  // generating a candidate for a step we already know cannot be located. This is distinct from
+  // the runtime promotion gate (which judges a generated candidate's runtime proof); this one
+  // judges the CONTRACT itself, before generation is ever attempted.
+  const uncertifiedRequiredTargetSteps = findUncertifiedRequiredTargetSteps(executionContract);
+  for (const step of uncertifiedRequiredTargetSteps) {
+    console.log(`[pre-ai-gate] failedGate=technical_target_not_materializable scenarioStepIndex=${step.scenarioStepIndex} operation=${step.operation} target="${(step.target?.value ?? "").slice(0, 80)}"`);
+  }
+
+  const contractValid = contractValidation.valid
+    && unresolvedRequiredRequirements.length === 0
+    && uncertifiedRequiredTargetSteps.length === 0;
+  console.log(`[spec-contract] contractValid=${contractValid} requirements=${requiredRequirements.length} requiredAssertions=${requiredAssertions.length} unresolvedRequired=${unresolvedRequiredRequirements.length} uncertifiedRequiredTargets=${uncertifiedRequiredTargetSteps.length}`);
   if (!contractValid) {
     for (const requirement of unresolvedRequiredRequirements) {
       console.log(`[promotion-oracle-gate] requirement="${requirement.text.slice(0, 120)}" oracleType=${requirement.oracleType ?? "unresolved"} source=${requirement.source} backed=false`);
@@ -3684,8 +4561,14 @@ async function runHybridSpecGenerationInternal(
       ...contractValidation.errors,
       ...unresolvedRequiredRequirements.map((requirement) =>
         `promotion_oracle_gate:unresolved_required_requirement:${requirement.text}:oracleType=${requirement.oracleType ?? "unresolved"}:source=${requirement.source}`
+      ),
+      ...uncertifiedRequiredTargetSteps.map((step) =>
+        `technical_target_not_materializable:scenarioStepIndex=${step.scenarioStepIndex}:operation=${step.operation}`
       )
     );
+    if (uncertifiedRequiredTargetSteps.length > 0) {
+      diagnostics.failedGate = "technical_target_not_materializable";
+    }
     diagnostics.warnings.push(`promotion_oracle_gate:contract_invalid:unresolved_required_requirements=${unresolvedRequiredRequirements.length}`);
     if (sourceScenario.sourceExpectedResultPresent && requiredAssertions.length === 0) {
       diagnostics.errors.push("expected_result_not_propagated");
@@ -3733,6 +4616,9 @@ async function runHybridSpecGenerationInternal(
   }
 
   const playwrightLaunchContext = resolvePlaywrightLaunchContext(input);
+  console.log(
+    `[promoted-initial-navigation] appSlug=${playwrightLaunchContext.appSlug ?? "unknown"} rawAppBaseUrl=${playwrightLaunchContext.appBaseUrl ?? "missing"} resolvedUrlSource=appProfile.baseUrl currentUrlBefore=n/a navigationRequired=n/a gotoInvoked=n/a currentUrlAfter=n/a readinessReady=n/a readinessReason=launch_context_resolved`
+  );
   let providerForRepair: AiProvider | undefined = input.provider;
   console.log(`[browser-launch] source=${playwrightLaunchContext.source} headless=${playwrightLaunchContext.headless === null ? "inherited" : String(playwrightLaunchContext.headless)}`);
 
@@ -3784,6 +4670,8 @@ async function runHybridSpecGenerationInternal(
       console.log(`[spec-generation-input] mode=${inputMode} scenario=${executionContract.scenarioId} steps=${executionContract.steps.length}`);
       const baseConstraints = [
         ...(input.constraints ?? []),
+        "The response is invalid if specContent implements only a prefix of the contract. Emit the complete ordered contract in one candidate, including every click, fill, select and state-control step; do not stop after authentication fields.",
+        "Do not use unresolvedRequirements as a substitute for an available promoted-runtime descriptor. Every contract step with implementation.kind=runtime must have its exact promotedRuntime method call in specContent.",
         "All executable scenario steps must be implemented in specContent.",
         "coveredStepIndexes must include every executable step index exactly once.",
         "Do not omit login/navigation/action steps present in scenarioSteps.",
@@ -4017,7 +4905,10 @@ async function runHybridSpecGenerationInternal(
   }
 
   const rawCandidate = candidate.specContent;
-  const effectiveCandidate = normalizeMojibakeUtf8(rawCandidate);
+  // Per-token (not whole-file) normalization — see normalizeMojibakeInSourceText's own doc
+  // comment for why the whole-file form silently no-ops when the file mixes already-correct and
+  // genuinely mojibake-corrupted Unicode, which is exactly what an AI response can produce.
+  const effectiveCandidate = normalizeMojibakeInSourceText(rawCandidate);
   console.log(`[spec-candidate] rawChanged=${rawCandidate !== effectiveCandidate} effectiveChars=${effectiveCandidate.length}`);
   let expectRepairApplied = false;
   let executableSpecContent = repairMissingExpectImport(effectiveCandidate);
@@ -4031,6 +4922,24 @@ async function runHybridSpecGenerationInternal(
     authFlowContext?.aggregateBinding
   );
   executableSpecContent = materializePromotedOracleDescriptors(executableSpecContent, promotedOracleImplementations);
+  executableSpecContent = normalizeGateOnlyCredentialBindings(
+    executableSpecContent,
+    input.appPaths.specPath,
+    input.appProfile.appSlug,
+    authFlowContext ?? undefined,
+  );
+  const materializedAssertions = materializeBackedNavigationAssertions(
+    executableSpecContent,
+    candidate,
+    sourceScenario.observableOracles,
+  );
+  executableSpecContent = materializedAssertions.specContent;
+  candidate = materializedAssertions.response;
+  const declaredIdentifiersInSpec = new Set(extractDeclaredIdentifiersFromSpec(executableSpecContent));
+  candidate = {
+    ...candidate,
+    declaredIdentifiers: candidate.declaredIdentifiers.filter((identifier) => declaredIdentifiersInSpec.has(identifier)),
+  };
   await fs.writeFile(candidateSpecPath, executableSpecContent, "utf-8");
 
   let lastSemanticCoverageDiag: ReturnType<typeof buildSemanticCoverageDiagnostics> | undefined;
@@ -4044,7 +4953,9 @@ async function runHybridSpecGenerationInternal(
     errors: string[];
     warnings: string[];
     passed: boolean;
+    runtimeGate: SpecGenerationDiagnostics["runtimeGate"];
   }> => {
+    let functionalExecutionFailedStepIndex: number | undefined;
     const validation: SpecGenerationDiagnostics["validation"] = {
       schema: diagnostics.validation.schema,
       structure: "skipped",
@@ -4152,12 +5063,17 @@ async function runHybridSpecGenerationInternal(
 
     const expectVisibleContractErrors = errors.filter((error) => error.startsWith("expect_promoted_visible_"));
     if (expectVisibleContractErrors.length > 0) {
-      return { validation, errors, warnings, passed: false };
+      return { validation, errors, warnings, passed: false, runtimeGate: undefined };
     }
     const technicalTargetErrors = errors.filter((error) => error.startsWith("technical_metadata_used_as_runtime_target:"));
     if (technicalTargetErrors.length > 0) {
       console.log(`[spec-runtime-target-gate] status=failed errors=${technicalTargetErrors.length} shortCircuitBeforeFunctionalExecution=true`);
-      return { validation, errors, warnings, passed: false };
+      return { validation, errors, warnings, passed: false, runtimeGate: undefined };
+    }
+    const positionalLocatorErrors = errors.filter((error) => error.startsWith("positional_locator_forbidden:"));
+    if (positionalLocatorErrors.length > 0) {
+      console.log(`[spec-positional-locator-gate] status=failed errors=${positionalLocatorErrors.length} shortCircuitBeforeFunctionalExecution=true`);
+      return { validation, errors, warnings, passed: false, runtimeGate: undefined };
     }
 
     const validationPath = candidateSpecPath;
@@ -4203,35 +5119,99 @@ async function runHybridSpecGenerationInternal(
           console.log(`[playwright-discovery] status=failed error="${discoveryErrorLine ?? `discovered=${discovered ?? "unknown"}`}"`);
           }
 
-          if (functionalExecutionEnabled && discoveryOk) {
+          // FIRST_LOSS fix (jobId d56e3c6f-7e18-4517-9967-97f7fbd26d2e): this guard only checked
+          // functionalExecutionEnabled and discoveryOk -- a candidate already proven statically
+          // invalid (e.g. semanticCoverage=failed on a runtime_method_operation_mismatch) still
+          // spawned a real browser/Playwright child process. A fully static-GREEN candidate is
+          // completely unaffected -- this list is empty and functionalExecution runs exactly as
+          // before.
+          const preRuntimeBlockingFailures = getPreRuntimeBlockingFailures(validation);
+          if (functionalExecutionEnabled && discoveryOk && preRuntimeBlockingFailures.length > 0) {
+            console.log(`[functional-execution-skip] reason=pre_runtime_validation_failed failedGates=${JSON.stringify(preRuntimeBlockingFailures)}`);
+          }
+          if (functionalExecutionEnabled && discoveryOk && preRuntimeBlockingFailures.length === 0) {
           const functionalRunner = deps?.runFunctionalExecution ?? defaultRunFunctionalExecution;
           const functionalResult = await functionalRunner(validationPath, playwrightLaunchContext);
+          const combinedFunctionalOutput = `${functionalResult.stdout}\n${functionalResult.stderr}`;
+          const childRuntimeTelemetry = extractChildRuntimeTelemetry(combinedFunctionalOutput);
+          for (const line of childRuntimeTelemetry) console.log(line);
           const hasEvidenceSteps = typeof functionalResult.evidenceSteps === "number" && functionalResult.evidenceSteps > 0;
           const functionalOk = functionalResult.ok && hasEvidenceSteps;
+          if (isFunctionalExecutionInfrastructureFailure(functionalResult.ok, combinedFunctionalOutput)) {
+            // Runtime never started (no tests found) OR runtime started but never reached
+            // business execution (initial_readiness_failure): either way no required step
+            // actually ran, so this must not be reported as a "failed" functional step (that
+            // would fabricate a business-step failure and, via getFailedSpecValidationNames,
+            // spend an AI repair attempt on a candidate that has no proven defect). Report as
+            // "skipped" — same as functionalExecutionEnabled=false — which
+            // computeRuntimeGateDecision already treats as no-proof-obtained (defer, never
+            // promote).
+            validation.functionalExecution = "skipped";
+            if (isInitialReadinessInfrastructureFailure(combinedFunctionalOutput)) {
+              const preBusinessClassification = classifyPreBusinessFailure(combinedFunctionalOutput);
+              warnings.push(`functional_execution_infrastructure_failed:initial_readiness_failure:${preBusinessClassification}`);
+              console.log(
+                `[functional-execution] classification=${preBusinessClassification} runtimeStarted=true ` +
+                `businessExecutionStarted=false requiredPassed=0 requiredFailed=0 promotionAllowed=false ` +
+                `exitCode=${functionalResult.exitCode}`
+              );
+            } else {
+              warnings.push("functional_execution_infrastructure_failed:runner_no_tests_found");
+              console.log(`[functional-execution] classification=runner_no_tests_found runtimeStarted=false exitCode=${functionalResult.exitCode}`);
+            }
+          } else if (!functionalResult.ok && isUnresolvedRuntimeTimeout(combinedFunctionalOutput)) {
+            // The outer Playwright test-level timeout fired with no [promoted-step]
+            // phase=failed line and no "Promoted click/assertion failed at step N" error
+            // anywhere in the child's output — every required step that ran may well have
+            // genuinely passed (see isUnresolvedRuntimeTimeout). Fabricating a "step 0 failed"
+            // here would both misrepresent the evidence and spend an AI repair attempt (via
+            // getFailedSpecValidationNames) on a candidate with no proven defect, so this is
+            // reported as "skipped" — same no-proof-obtained handling as the infrastructure
+            // failures above — never "failed".
+            validation.functionalExecution = "skipped";
+            warnings.push("functional_execution_infrastructure_failed:runtime_timeout_unresolved");
+            console.log(
+              `[functional-execution] classification=RUNTIME_TIMEOUT_UNRESOLVED runtimeStarted=true ` +
+              `businessExecutionStarted=true requiredPassed=${functionalResult.evidenceSteps ?? 0} requiredFailed=0 ` +
+              `promotionAllowed=false exitCode=${functionalResult.exitCode}`
+            );
+          } else {
           validation.functionalExecution = functionalOk ? "passed" : "failed";
           if (!functionalResult.ok) {
             errors.push(`functional_execution_failed:exitCode=${functionalResult.exitCode}`);
-            const combinedLines = `${functionalResult.stdout}\n${functionalResult.stderr}`
+            const combinedLines = combinedFunctionalOutput
               .split(/\r?\n/)
               .map((line) => line.trim())
               .filter((line) => line.length > 0);
+            // Prefer PromotedSpecRuntime's own structured failure (carries the real
+            // scenarioStepIndex, operation and exact message — see clickPromotedTarget/
+            // fillPromotedField/pressPromotedTarget/expectPromotedVisible) over whatever line a
+            // generic error/failed/timeout keyword scan happens to hit first, which can be an
+            // earlier, less informative diagnostic line (e.g. [runtime:click-callback-failure])
+            // instead of the final thrown error — or, worse, a routine SUCCESS telemetry line
+            // for an earlier, already-passed step (see extractPromotedFunctionalFailure's own
+            // doc comment; jobId 287dbaab-c566-41af-87c0-609cf4e42535). errorLine and stepIndex
+            // are taken from the SAME structured match so they can never disagree.
+            const structuredPromotedFailure = extractPromotedFunctionalFailure(combinedFunctionalOutput);
             const functionalErrorLine =
-              combinedLines.find((line) => /\b(error|failed|timeout|expect|assert|locator|timed out)\b/i.test(line))
+              structuredPromotedFailure?.errorLine
+              ?? combinedLines.find((line) => !isPromotedSuccessTelemetryLine(line) && /\b(error|failed|timeout|expect|assert|locator|timed out)\b/i.test(line))
               ?? combinedLines[0];
-            const combined = `${functionalResult.stdout}\n${functionalResult.stderr}`;
-            const testFileMatch = combined.match(/([A-Za-z0-9_\\/.-]+\.spec\.ts(?::\d+:\d+)?)/);
-            const failedStepMatch = combined.match(/^\s*\d+\)\s+([^\r\n]+)/m);
-            const timeout = /\btimed out\b|\btimeout\b/i.test(combined);
+            const testFileMatch = combinedFunctionalOutput.match(/([A-Za-z0-9_\\/.-]+\.spec\.ts(?::\d+:\d+)?)/);
+            const failedStepMatch = combinedFunctionalOutput.match(/^\s*\d+\)\s+([^\r\n]+)/m);
+            const timeout = /\btimed out\b|\btimeout\b/i.test(combinedFunctionalOutput);
+            functionalExecutionFailedStepIndex = structuredPromotedFailure?.stepIndex ?? extractFailedPromotedStepIndex(combinedFunctionalOutput);
             if (functionalErrorLine) {
               errors.push(`functional_execution_error:${functionalErrorLine}`);
             }
-            console.log(`[functional-execution] exitCode=${functionalResult.exitCode} error="${functionalErrorLine ?? ""}" file="${testFileMatch?.[1] ?? ""}" line="${failedStepMatch?.[1] ?? ""}" timeout=${timeout}`);
+            console.log(`[functional-execution] exitCode=${functionalResult.exitCode} error="${functionalErrorLine ?? ""}" file="${testFileMatch?.[1] ?? ""}" line="${failedStepMatch?.[1] ?? ""}" timeout=${timeout} failedStepIndex=${functionalExecutionFailedStepIndex ?? "unknown"} operation="${structuredPromotedFailure?.operation ?? ""}"`);
           }
           if (functionalResult.ok && !hasEvidenceSteps) {
             errors.push(`functional_execution_no_evidence_steps:steps=${functionalResult.evidenceSteps ?? "null"}`);
           }
           if (!functionalOk) {
             warnings.push(`functional_execution_screenshots=${functionalResult.screenshots ?? "null"}`);
+          }
           }
           } else {
             validation.functionalExecution = "skipped";
@@ -4242,15 +5222,45 @@ async function runHybridSpecGenerationInternal(
         validation.functionalExecution = "skipped";
       }
 
+    // Runtime promotion policy: a NEW candidate is ALWAYS run through the runtime gate — it is
+    // never bypassed. functionalExecutionEnabled=false and functionalExecution="skipped" both
+    // mean "no real runtime proof was obtained" (availability=unavailable), which the gate
+    // always defers rather than silently treating as a pass. Only a real runtime pass
+    // (functionalExecutionEnabled=true AND functionalExecution="passed") can promote. This does
+    // NOT flip AI_SPEC_FUNCTIONAL_EXECUTION_ENABLED's default — it changes what "disabled" means
+    // for promotion outcome: no proof, no promotion. See spec-runtime-gate.ts.
+    const { runtimeGatePassed, runtimeGateResult } = computeRuntimeGateDecision(
+      functionalExecutionEnabled,
+      validation.functionalExecution,
+      undefined,
+      functionalExecutionFailedStepIndex,
+    );
+    console.log(
+      `[promotion-runtime-gate] functionalExecutionEnabled=${functionalExecutionEnabled} runtimeStatus=${validation.functionalExecution} `
+      + `requiredPassed=${runtimeGateResult.decision === "promote" ? 1 : 0} requiredFailed=${runtimeGateResult.failedSteps.length} `
+      + `promotionAllowed=${runtimeGateResult.promotionAllowed} promotionStatus=${runtimeGateResult.promotionStatus} reason=${runtimeGateResult.reason}`
+    );
+    if (runtimeGateResult.decision !== "promote") {
+      warnings.push(`runtime_gate:${runtimeGateResult.promotionStatus}:${runtimeGateResult.reason}`);
+    }
+
     const passed = validation.structure === "passed"
       && validation.traceFidelity !== "failed"
       && validation.semanticCoverage === "passed"
       && validation.typescript === "passed"
       && validation.playwrightDiscovery === "passed"
-      && (!functionalExecutionEnabled || validation.functionalExecution === "passed")
+      && runtimeGatePassed
       && (validation.schema === "passed" || validation.schema === "skipped");
 
-    return { validation, errors, warnings, passed };
+    return {
+      validation,
+      errors,
+      warnings,
+      passed,
+      runtimeGate: runtimeGateResult
+        ? { decision: runtimeGateResult.decision, promotionStatus: runtimeGateResult.promotionStatus, reason: runtimeGateResult.reason }
+        : undefined,
+    };
   };
 
   let evaluation = await evaluateSpecCandidate(executableSpecContent, candidate);
@@ -4263,6 +5273,7 @@ async function runHybridSpecGenerationInternal(
   diagnostics.validation.typescript = evaluation.validation.typescript;
   diagnostics.validation.playwrightDiscovery = evaluation.validation.playwrightDiscovery;
   diagnostics.validation.functionalExecution = evaluation.validation.functionalExecution;
+  diagnostics.runtimeGate = evaluation.runtimeGate;
   console.log(`[spec-generation] structuralValidation=${diagnostics.validation.structure}`);
   console.log(`[spec-generation] traceFidelity=${diagnostics.validation.traceFidelity}`);
   console.log(`[spec-generation] semanticCoverage=${diagnostics.validation.semanticCoverage}`);
@@ -4272,17 +5283,35 @@ async function runHybridSpecGenerationInternal(
 
   diagnostics.missingRequirements = lastSemanticCoverageDiag?.missingRequirements ?? [];
 
-  if (!passed && shouldAttemptSpecRepair(diagnostics, repairState, specInputMode)) {
+  const candidateRepairContext = !passed && shouldAttemptSpecRepair(diagnostics, repairState, specInputMode)
+    ? buildSpecRepairContext({
+        diagnostics,
+        previousCandidate: executableSpecContent,
+        observableOracles: sourceScenario.observableOracles,
+        missingRequirements: diagnostics.missingRequirements,
+        specInputMode,
+        executionContract,
+      })
+    : undefined;
+  // A genuine candidate runtime defect (functionalExecution="failed") is only actionable if the
+  // exact underlying error actually reached this repair context — repairing "blind" wastes an AI
+  // invocation on a candidate the AI can't meaningfully diagnose (and, before the
+  // prioritizedErrors fix above, always produced an identical, unchanged candidate). If
+  // functionalExecution is the ONLY failed gate and its exact error is unavailable, skip repair
+  // entirely rather than guess.
+  const functionalExecutionOnlyWithNoExactError = Boolean(
+    candidateRepairContext
+    && candidateRepairContext.failedGates.length === 1
+    && candidateRepairContext.failedGates[0] === "functionalExecution"
+    && summarizeRepairGateError("functionalExecution", candidateRepairContext.exactErrors) === "no_exact_error_available",
+  );
+  if (functionalExecutionOnlyWithNoExactError) {
+    console.log(`[spec-repair] skipped=true reason=functional_execution_no_exact_error`);
+  }
+  if (candidateRepairContext && !functionalExecutionOnlyWithNoExactError) {
+    const repairContext = candidateRepairContext;
     const nextAttempt = repairState.attempt + 1;
     finalizeSpecAttemptMetrics(diagnostics, repairState, false);
-    const repairContext = buildSpecRepairContext({
-      diagnostics,
-      previousCandidate: executableSpecContent,
-      observableOracles: sourceScenario.observableOracles,
-      missingRequirements: diagnostics.missingRequirements,
-      specInputMode,
-      executionContract,
-    });
     for (const failedGate of repairContext.failedGates) {
       console.log(`[spec-repair] failedGate=${failedGate} error=${summarizeRepairGateError(failedGate, repairContext.exactErrors)}`);
     }
@@ -4312,6 +5341,20 @@ async function runHybridSpecGenerationInternal(
       repaired.promotionAllowed = false;
       repaired.diagnostics.promotionAllowed = false;
       console.log(`[spec-repair] regressedGates=["${regressed.join('","')}"]`);
+    }
+    // An AI repair that produces the same candidate it was asked to fix (whitespace aside) has
+    // not actually repaired anything — the identical failed candidate would otherwise be run
+    // through functional execution a second time as if it were a genuine attempt, spending
+    // budget without ever having a chance to pass. execution_contract mode already caps repair
+    // to one attempt (see maxAttempts above), so this can only ever surface once per candidate;
+    // it exists to classify/report that outcome honestly rather than leave it looking like an
+    // ordinary (if unlucky) repair.
+    if (isRepairNoChange(repaired.specContent, executableSpecContent)) {
+      repaired.diagnostics.errors.push("repair_no_change:repaired_candidate_identical_to_previous");
+      repaired.diagnostics.warnings.push("REPAIR_NO_CHANGE");
+      repaired.promotionAllowed = false;
+      repaired.diagnostics.promotionAllowed = false;
+      console.log(`[spec-repair] classification=REPAIR_NO_CHANGE reason=repaired_candidate_identical_to_previous`);
     }
     mergeRepairDiagnostics(diagnostics, repaired.diagnostics, nextAttempt);
     console.log(`[ai-repair:summary] invocations=${repaired.diagnostics.invocationsConsumed} promotionAllowed=${repaired.promotionAllowed}`);
@@ -4377,6 +5420,7 @@ async function runHybridSpecGenerationInternal(
       diagnostics.validation.typescript = fallbackEvaluation.validation.typescript;
       diagnostics.validation.playwrightDiscovery = fallbackEvaluation.validation.playwrightDiscovery;
       diagnostics.validation.functionalExecution = fallbackEvaluation.validation.functionalExecution;
+      diagnostics.runtimeGate = fallbackEvaluation.runtimeGate;
       diagnostics.finalSpec = {
         origin: "gate_start_only_canonical_fallback",
         generatedBy: "core",
@@ -4403,9 +5447,9 @@ async function runHybridSpecGenerationInternal(
       };
     } else {
       diagnostics.finalSpec = {
-        origin: "deterministic_draft",
+        origin: input.candidateAuthority === "deterministic_compiler" ? "deterministic_compiler" : "deterministic_draft",
         generatedBy: "core",
-        strategy: "deterministic_draft",
+        strategy: input.candidateAuthority === "deterministic_compiler" ? "deterministic_compiler" : "deterministic_draft",
         fallback: null
       };
     }

@@ -3,12 +3,15 @@ import fs from "node:fs/promises";
 import { config, requireTestRailConfig } from "../config/env";
 import { TestRailClient } from "../clients/testrail.client";
 import { runCaseDiscoveryWorkflow } from "../discovery/case-discovery-workflow";
-import { resolveAppProfile, ensureAppStructure, loadPromotedAppConfigSync } from "../automations/app-profile";
+import { resolveAppProfile, ensureAppStructure } from "../automations/app-profile";
+import { resolveWebBaseUrl, resolveRuntimeWebBaseUrl } from "./runtime-web-config";
+export { resolveWebBaseUrl, resolveRuntimeWebBaseUrl } from "./runtime-web-config";
 import type { McpRouteProfile } from "../scenarios/scenario-types";
 import type { VirtualCase } from "../types/scenario-preview.types";
 import type { TestScenario } from "../types/testrail.types";
 import { RunEvidenceRecorder } from "../evidence/run-evidence-recorder";
 import { loadEvidenceConfig } from "../evidence/evidence-types";
+import { MAX_SCENARIO_ATTEMPTS, shouldRetryScenario } from "../discovery/pre-business-retry-policy";
 
 export type PreviewCliArgs = {
   input: string;
@@ -84,6 +87,20 @@ type PreviewCaseResult = PreviewResult["cases"][number] & {
   conditionalAssertion?: boolean;
   conditionalRisk?: string;
   reviewNeededReason?: string;
+  scenarioAttempts?: ScenarioAttemptDiagnostics;
+};
+
+type ScenarioAttemptDiagnostics = {
+  attemptCount: number;
+  retryUsed: boolean;
+  retryReason?: string;
+  previousAttemptFailure?: string;
+  attempt1Failure?: string;
+  attempt2Failure?: string;
+  businessSurfaceReached?: boolean;
+  authStatus?: number;
+  postLoginSurface?: string;
+  finalStatus?: "passed" | "failed";
 };
 
 type PreviewCompletion = {
@@ -91,7 +108,10 @@ type PreviewCompletion = {
   automationReady: boolean;
   promotionAllowed: boolean;
   specWritten: boolean;
-  specGenerationStatus: "passed" | "failed" | "not_applicable";
+  specGenerationStatus: "passed" | "failed" | "not_applicable" | "deferred";
+  specEligible: boolean;
+  specGenerationInvoked: boolean;
+  specEligibilityReason: string;
   finalSpecOrigin: string | null;
   fallbackUsed: boolean;
   aiInvoked: boolean;
@@ -133,6 +153,7 @@ export function resolvePreviewCompletion(
     } | undefined;
   },
   autoPromote: boolean,
+  recordingReplay = false,
 ): PreviewCompletion {
   const discoveryStatus = workflowResult.caseResult?.status ?? "";
   const discoveryPassed =
@@ -152,6 +173,13 @@ export function resolvePreviewCompletion(
   const oracleTypes = specGeneration?.oracleTypes ?? [];
   const provider = specGeneration?.provider ?? null;
   const model = specGeneration?.model ?? null;
+  const specEligible = recordingReplay && discoveryPassed;
+  const specGenerationInvoked = aiInvoked || Boolean(specGeneration);
+  const specEligibilityReason = specEligible
+    ? "recording_spec_generation_deferred_until_explicit_product_action"
+    : recordingReplay
+      ? "functional_discovery_not_passed"
+      : "not_recording_replay";
   const failedSpecGate = Object.entries(specGeneration?.validation ?? {})
     .find(([, status]) => status === "failed")?.[0];
   const automationReady = autoPromote
@@ -178,7 +206,10 @@ export function resolvePreviewCompletion(
     specWritten,
     specGenerationStatus: autoPromote
       ? (automationReady ? "passed" : "failed")
-      : "not_applicable",
+      : (specEligible ? "deferred" : "not_applicable"),
+    specEligible,
+    specGenerationInvoked,
+    specEligibilityReason,
     finalSpecOrigin,
     fallbackUsed,
     aiInvoked,
@@ -203,7 +234,9 @@ export function resolvePreviewCompletion(
                 : !specWritten
                   ? "spec_not_written"
                   : "promoted_spec_path_missing"
-      : discoveryStatus === "discovered_partial"
+      : specEligible
+        ? specEligibilityReason
+        : discoveryStatus === "discovered_partial"
         ? "observable_assertion_requires_discovery"
         : discoveryPassed
           ? "all_targets_validated"
@@ -560,6 +593,44 @@ export function virtualCaseToTestScenario(vc: VirtualCase, routeProfile?: McpRou
     : 0;
   const sectionName = vc.sectionName || undefined;
   const sectionSlug = vc.sectionSlug || undefined;
+  const recordingActions = (vc.recordingExecutionContract?.actions ?? [])
+    .filter((action) => action && typeof action.actionType === "string")
+    .map((action, order) => ({
+      action,
+      stepIndex: Number.isInteger(action.stepIndex) ? action.stepIndex as number : order + 1,
+    }))
+    .sort((a, b) => a.stepIndex - b.stepIndex);
+  const transitionInteractionIds = new Set(
+    (vc.canonicalInteractions ?? [])
+      .filter((interaction) => interaction?.transitionObserved === true && interaction?.causedTransition === true)
+      .map((interaction) => typeof interaction.id === "string" ? interaction.id : undefined)
+      .filter((id): id is string => Boolean(id)),
+  );
+  const buildStructuredActionText = (action: (typeof recordingActions)[number]["action"]): string => {
+    const semanticField = typeof action.semanticField === "string" && action.semanticField.trim()
+      ? action.semanticField.trim()
+      : action.humanStep?.match(/\ben\s+["“”]([^"“”]+)["“”]/i)?.[1]?.trim();
+    const field = semanticField ? ` en "${semanticField}"` : "";
+    const valueKey = typeof action.valueKey === "string" && action.valueKey.trim()
+      ? `[${action.valueKey.trim()}]`
+      : "[runtime_value]";
+    switch (action.actionType) {
+      case "fill": return `Ingresar ${valueKey}${field}`;
+      case "select": return `Seleccionar ${valueKey}${field}`;
+      case "click": return semanticField
+        ? `Presionar "${semanticField}"`
+        : action.humanStep?.trim() || "click";
+      case "check": return semanticField ? `check "${semanticField}"` : "check";
+      case "uncheck": return "uncheck";
+      default: return action.humanStep?.trim() || action.actionType;
+    }
+  };
+  const refsByStep = new Map<number, string[]>();
+  for (const ref of vc.stepRequirementRefs ?? []) {
+    const refs = refsByStep.get(ref.stepIndex) ?? [];
+    refs.push(ref.requirementId);
+    refsByStep.set(ref.stepIndex, refs);
+  }
   return {
     source: embeddedCaseId > 0 ? "testrail" : "jira",
     externalId: embeddedCaseId > 0 ? `C${embeddedCaseId}` : vc.displayId,
@@ -567,7 +638,36 @@ export function virtualCaseToTestScenario(vc: VirtualCase, routeProfile?: McpRou
     title: vc.title,
     preconditions: vc.preconditions.join("\n"),
     authIntent: vc.authIntent,
-    steps: vc.steps.map((step, index) => ({
+    negativeOracle: vc.negativeOracle,
+    steps: recordingActions.length > 0 ? recordingActions.map(({ action: contractAction, stepIndex }) => {
+      const requirementRefs = refsByStep.get(stepIndex) ?? refsByStep.get(stepIndex - 1);
+      const canonicalPolarities = (requirementRefs ?? [])
+        .map((requirementId) => vc.canonicalRequirements?.find((requirement) => requirement.requirementId === requirementId)?.polarity)
+        .filter((polarity): polarity is "positive" | "negative" => Boolean(polarity));
+      const polarity = canonicalPolarities.length > 0 && new Set(canonicalPolarities).size === 1
+        ? canonicalPolarities[0]
+        : (!vc.negativeOracle && transitionInteractionIds.has(contractAction.interactionId ?? "")
+          ? "positive"
+          : undefined);
+      return {
+      index: stepIndex,
+      action: buildStructuredActionText(contractAction),
+      description: buildStructuredActionText(contractAction),
+      expected: "",
+      dataHints: [],
+      ...(requirementRefs && requirementRefs.length > 0 ? { requirementRefs: [...requirementRefs] } : {}),
+      ...(polarity ? { polarity } : {}),
+      ...(contractAction?.valueKey ? { valueKey: contractAction.valueKey } : {}),
+      ...(contractAction?.entityScope ? { entityScope: contractAction.entityScope } : {}),
+      ...(contractAction?.rowRelation ? { rowRelation: contractAction.rowRelation } : {}),
+      ...(contractAction?.semanticField && contractAction.actionType === "select" ? { selectionField: contractAction.semanticField } : {}),
+      ...(contractAction?.technicalTargetRef ? { technicalTargetRef: contractAction.technicalTargetRef } : {}),
+      ...(contractAction?.technicalTargetRefs ? { technicalTargetRefs: [...contractAction.technicalTargetRefs] } : {}),
+      ...(contractAction?.technicalTargetCandidates?.length ? { technicalTargetCandidates: [...contractAction.technicalTargetCandidates] } : {}),
+      ...(contractAction?.controlIdentity ? { controlIdentity: contractAction.controlIdentity } : {}),
+      ...(contractAction?.actionType ? { recordingActionType: contractAction.actionType } : {}),
+      };
+    }) : vc.steps.map((step, index) => ({
       index,
       action: step,
       expected: "",
@@ -577,28 +677,72 @@ export function virtualCaseToTestScenario(vc: VirtualCase, routeProfile?: McpRou
     sectionSlug,
     sectionId: vc.sectionId,
     routeProfile: routeProfile ?? vc.routeProfile,
+    functionalBranch: vc.functionalBranch,
+    requirementDependencies: vc.requirementDependencies,
+    stepRequirementRefs: vc.stepRequirementRefs,
+    stepAuthority: vc.stepAuthority,
+    stepClaimTypes: vc.stepClaimTypes,
+    stepClaims: vc.stepClaims,
+    unsupportedFunctionalSteps: vc.unsupportedFunctionalSteps,
+    missingPrerequisiteRequirementIds: vc.missingPrerequisiteRequirementIds,
+    validation: vc.validation,
+    repeatConstraintResolutions: vc.repeatConstraintResolutions,
+    runtimeExecutionBlockedByData: vc.runtimeExecutionBlockedByData,
+    canonicalRequirements: vc.canonicalRequirements,
+    canonicalInputRequirements: vc.canonicalInputRequirements,
+    expectedResultRequirementRefs: vc.expectedResultRequirementRefs,
+    recordingId: vc.recordingId,
+    recordedScenarioId: vc.recordedScenarioId,
     raw: {
       custom_preconds: vc.preconditions.join("\n"),
       custom_expected: vc.expectedResult,
       custom_steps: vc.steps.join("\n"),
       custom_steps_separated: vc.steps.map((step) => ({ content: step }))
     },
+    ...(vc.recordingExecutionContract ? { recordingExecutionContract: vc.recordingExecutionContract } : {}),
   } as any;
 }
 
-export function resolveWebBaseUrl(appSlug: string): { appSlug: string; source: string; configured?: string; effective: string; fallbackUsed: boolean } {
-  const normalized = appSlug.trim();
-  const cfg: any = loadPromotedAppConfigSync({ appSlug: normalized });
-  const configured = typeof cfg?.baseUrl === "string" ? cfg.baseUrl.trim() : undefined;
-  const hasConfigured = Boolean(configured);
-  if (hasConfigured) {
-    const safe = new URL(configured);
-    console.log(`[web:base-url] appSlug=${normalized} source=app_config origin=${safe.origin} pathname=${safe.pathname} fallbackUsed=false`);
-    return { appSlug: normalized, source: "app_config", configured, effective: configured!, fallbackUsed: false };
-  }
-  const envFallback = config.app.baseUrl;
-  console.log(`[web:base-url] appSlug=${normalized} source=fallback configuredPresent=${Boolean(configured)} effectivePresent=${Boolean(envFallback)} fallbackUsed=true`);
-  throw new Error(`[web:base-url] missing baseUrl for appSlug=${normalized} source=app_config — FAIL CLOSED: create automations/apps/${normalized}/app.config.json with baseUrl. Env fallback present=${Boolean(envFallback)} not used.`);
+function getAuthenticationOutcome(workflowResult: any): any | undefined {
+  const caseResult = workflowResult?.caseResult;
+  if (caseResult?.authenticationOutcome) return caseResult.authenticationOutcome;
+  return [...(caseResult?.steps ?? [])]
+    .reverse()
+    .find((step: any) => step?.authenticationOutcome)
+    ?.authenticationOutcome;
+}
+
+function getPreBusinessFailureSignals(workflowResult: any) {
+  const caseResult = workflowResult?.caseResult ?? {};
+  const authenticationOutcome = getAuthenticationOutcome(workflowResult);
+  const failedReason = String(caseResult.failedReason ?? "");
+  const failureClassification = authenticationOutcome?.classification ?? failedReason;
+  const authStatus = authenticationOutcome?.authHttpStatus;
+  const authRejected = authenticationOutcome?.classification === "AUTH_REJECTED"
+    || authStatus === 401
+    || authStatus === 403;
+  const applicationError = failedReason === "application_error_visible"
+    || (caseResult.steps ?? []).some((step: any) => step?.postActionOutcomeStatus === "application_error");
+  const boundaryStepIndex = typeof caseResult.failedAtStep === "number" ? caseResult.failedAtStep : undefined;
+  const functionalBusinessExecutionStarted = (caseResult.steps ?? []).some((step: any) =>
+    boundaryStepIndex !== undefined
+    && step?.index > boundaryStepIndex
+    && (step?.actionExecutionStatus === "executed" || step?.postActionOutcomeStatus === "success")
+  );
+  const oracleEvaluationStarted = (caseResult.steps ?? []).some((step: any) =>
+    step?.assertionStatus !== undefined || step?.assertionClassification !== undefined
+  );
+
+  return {
+    businessSurfaceReached: authenticationOutcome?.businessSurfaceReached === true,
+    failureClassification,
+    authRejected,
+    applicationError,
+    functionalBusinessExecutionStarted,
+    oracleEvaluationStarted,
+    authStatus,
+    postLoginSurface: authenticationOutcome?.postLoginSurface,
+  };
 }
 
 async function runPreviewCase(
@@ -644,6 +788,17 @@ async function runPreviewCase(
     }
     // Per-scenario dataOverrides and suggestedData (generic, per-scenario isolated)
     const scenarioOverrides = (vc as any).dataOverrides as Record<string, string> | undefined;
+    const recordingRuntimeEntries = vc.recordingExecutionContract?.runtimeInputRequirements
+      .filter((requirement) => typeof requirement.valueKey === "string" && typeof requirement.value === "string")
+      .map((requirement) => ({
+        key: String(requirement.valueKey),
+        value: String(requirement.value),
+        source: String(requirement.source ?? "recording_dataset"),
+        sensitive: requirement.sensitive === true,
+        verified: requirement.resolved === true,
+        provenance: "recording_dataset",
+        valueRole: String(requirement.valueRole ?? "action_input"),
+      })) ?? [];
     let scenarioSuggested: Record<string, string> | undefined;
     const vcDataReq = (vc as any).dataRequirements as any;
     if (Array.isArray(vcDataReq)) {
@@ -654,29 +809,64 @@ async function runPreviewCase(
       if (Object.keys(map).length>0) scenarioSuggested = map;
     }
     if (scenarioOverrides) console.log(`[web:dataOverrides] scenario=${vc.displayId} overrides=${Object.keys(scenarioOverrides).join(",")}`);
-    workflowResult = await runCaseDiscoveryWorkflow({
-      scenario,
-      headed: args.headed,
-      executionSource,
-      outputDir,
-      autoPromote: args.autoPromote,
-      promotionDryRun: args.dryRun,
-      promotionStrict: true,
-      requirePromotionApproval: false,
-      overwrite: args.overwrite,
-      autoPom: args.autoPom,
-      testRailClient: trClient,
-      appProfile: appProfileObj,
-      config: discoveryConfig,
-      runId: evidenceRunId,
-      scenarioDataOverrides: scenarioOverrides,
-      scenarioSuggestedData: scenarioSuggested,
-    } as any);
+    const scenarioAttempts: ScenarioAttemptDiagnostics = {
+      attemptCount: 0,
+      retryUsed: false,
+    };
+    for (let attempt = 1; attempt <= MAX_SCENARIO_ATTEMPTS; attempt += 1) {
+      const attemptOutputDir = attempt === 1
+        ? outputDir
+        : path.join(outputDir, `attempt-${attempt}`);
+      scenarioAttempts.attemptCount = attempt;
+      console.log(`[scenario-attempt] scenario=${vc.displayId} scenarioAttempt=${attempt}/${MAX_SCENARIO_ATTEMPTS} outputDir=${attemptOutputDir}`);
+
+      workflowResult = await runCaseDiscoveryWorkflow({
+        scenario,
+        headed: args.headed,
+        executionSource,
+        outputDir: attemptOutputDir,
+        autoPromote: args.autoPromote,
+        promotionDryRun: args.dryRun,
+        promotionStrict: true,
+        requirePromotionApproval: false,
+        overwrite: args.overwrite,
+        autoPom: args.autoPom,
+        // Recording replay is driven by its canonical runtime contract. It must not
+        // fall through to the global AI auto-repair setting after a locator miss.
+        autoRepair: !(vc.recordingId || vc.automationType === "recorded_session"),
+        testRailClient: trClient,
+        appProfile: appProfileObj,
+        config: discoveryConfig,
+        runId: evidenceRunId,
+        scenarioDataOverrides: scenarioOverrides,
+        scenarioSuggestedData: scenarioSuggested,
+        runtimeEntries: recordingRuntimeEntries,
+      } as any);
+
+      const signals = getPreBusinessFailureSignals(workflowResult);
+      scenarioAttempts.businessSurfaceReached = signals.businessSurfaceReached;
+      scenarioAttempts.authStatus = signals.authStatus;
+      scenarioAttempts.postLoginSurface = signals.postLoginSurface;
+      if (workflowResult.caseResult?.status !== "discovered_passed" && workflowResult.caseResult?.status !== "repaired_passed") {
+        const failure = String(workflowResult.caseResult?.failedReason ?? signals.failureClassification ?? "unknown");
+        if (attempt === 1) scenarioAttempts.attempt1Failure = failure;
+        if (attempt === 2) scenarioAttempts.attempt2Failure = failure;
+      }
+
+      const retryAllowed = shouldRetryScenario({ ...signals, attempt });
+      if (!retryAllowed) break;
+
+      scenarioAttempts.retryUsed = true;
+      scenarioAttempts.retryReason = "transient_pre_business_auth_navigation";
+      scenarioAttempts.previousAttemptFailure = scenarioAttempts.attempt1Failure;
+      console.log(`[scenario-attempt] scenario=${vc.displayId} scenarioAttempt=${attempt}/${MAX_SCENARIO_ATTEMPTS} retry=true reason=${scenarioAttempts.retryReason} freshContext=true`);
+    }
 
     const discoveryStatus = workflowResult.caseResult.status;
-    const completion = resolvePreviewCompletion(workflowResult, args.autoPromote);
+    const completion = resolvePreviewCompletion(workflowResult, args.autoPromote, Boolean(vc.recordingId || vc.automationType === "recorded_session"));
     const isPassed = completion.eventStatus === "passed";
     const eventStatus = completion.eventStatus;
+    scenarioAttempts.finalStatus = isPassed ? "passed" : "failed";
 
     console.log(`[preview-status-map] discoveryStatus=${discoveryStatus} eventStatus=${eventStatus} automationReady=${completion.automationReady} reason=${completion.reason}`);
 
@@ -698,6 +888,9 @@ async function runPreviewCase(
       status: eventStatus,
       discoveryStatus,
       specGenerationStatus: completion.specGenerationStatus,
+      specEligible: completion.specEligible,
+      specGenerationInvoked: completion.specGenerationInvoked,
+      specEligibilityReason: completion.specEligibilityReason,
       automationReady: completion.automationReady,
       promotionAllowed: completion.promotionAllowed,
       specWritten: completion.specWritten,
@@ -711,6 +904,7 @@ async function runPreviewCase(
       oracleTypes: completion.oracleTypes,
       provider: completion.provider,
       model: completion.model,
+      scenarioAttempts,
       failedAtStep: cr.failedAtStep,
       failedTarget: cr.failedTarget,
       failedReason: cr.failedReason,
@@ -752,11 +946,19 @@ async function runPreviewCase(
       caseId: vc.displayId,
       displayId: vc.displayId,
       title: vc.title,
+      // Carried through so a Recording-originated promotion can be written back onto the
+      // exact RecordedScenario it came from — the display id (PREVIEW-00N) is only a
+      // per-batch position, never a durable identity across separate runs.
+      recordingId: vc.recordingId,
+      recordedScenarioId: vc.recordedScenarioId,
       status: eventStatus,
       discoveryStatus: workflowResult.caseResult.status,
       promotionStatus: workflowResult.promotionStatus,
       promotionReason: (workflowResult as any).promotionReason || (isPassed ? "" : completion.reason),
       specGenerationStatus: completion.specGenerationStatus,
+      specEligible: completion.specEligible,
+      specGenerationInvoked: completion.specGenerationInvoked,
+      specEligibilityReason: completion.specEligibilityReason,
       automationReady: completion.automationReady,
       specWritten: completion.specWritten,
       promotionAllowed: completion.promotionAllowed,
@@ -781,6 +983,7 @@ async function runPreviewCase(
       conditionalAssertion,
       conditionalRisk,
       reviewNeededReason: conditionalAssertion && conditionalRisk === "high" ? "conditional_assertion_without_data" : undefined,
+      scenarioAttempts,
       appSlug,
       routeProfileUsed: Boolean(vc.routeProfile),
       outputDir: workflowResult.outputDir,
@@ -1010,7 +1213,7 @@ async function main(): Promise<void> {
   // ── [web:base-url] Fail-closed resolution — appSlug → app_config → baseUrl must be preserved ──
   let webBase: { effective: string; source: string; fallbackUsed: boolean };
   try {
-    webBase = resolveWebBaseUrl(resolvedAppSlug);
+    webBase = await resolveRuntimeWebBaseUrl(resolvedAppSlug);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error(message);

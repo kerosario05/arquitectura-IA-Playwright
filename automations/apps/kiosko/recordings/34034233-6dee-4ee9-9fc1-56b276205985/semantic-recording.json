@@ -1,0 +1,2674 @@
+{
+  "version": "1.0",
+  "recordingId": "34034233-6dee-4ee9-9fc1-56b276205985",
+  "projectSlug": "kiosko",
+  "appSlug": "kiosko",
+  "platform": "web",
+  "recordingGoal": {
+    "declaredGoal": "Prueba",
+    "normalizedGoal": "Prueba",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "selectorOptionInventories": [],
+  "semanticScreens": [
+    {
+      "screenIdentity": "e5f5edc43160",
+      "title": "Un recorrido. Todos los retos del campo.",
+      "url": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "classification": "SAME_SCREEN_MUTATION",
+      "sourceScreenKey": "e5f5edc43160"
+    },
+    {
+      "screenIdentity": "e8fa4a351c18",
+      "title": "Un recorrido. Todos los retos del campo.",
+      "url": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "e8fa4a351c18"
+    }
+  ],
+  "semanticComponents": [
+    {
+      "componentId": "e5f5edc43160:control:e5f5edc43160|Nombre de prueba|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "e5f5edc43160",
+      "label": "Nombre de prueba",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-3"
+      ]
+    },
+    {
+      "componentId": "e5f5edc43160:control:e5f5edc43160|Correo de prueba|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "e5f5edc43160",
+      "label": "Correo de prueba",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-4"
+      ]
+    },
+    {
+      "componentId": "e5f5edc43160:control:e5f5edc43160|Contraseña ficticia|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "e5f5edc43160",
+      "label": "Contraseña ficticia",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-5"
+      ]
+    },
+    {
+      "componentId": "e5f5edc43160:control:e5f5edc43160|Notas del recorrido|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "e5f5edc43160",
+      "label": "Notas del recorrido",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-6",
+        "obs-7"
+      ]
+    },
+    {
+      "componentId": "e5f5edc43160:control:e5f5edc43160|Teléfono ficticio|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "e5f5edc43160",
+      "label": "Teléfono ficticio",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-8"
+      ]
+    },
+    {
+      "componentId": "e5f5edc43160:control:e5f5edc43160|Importe decimal|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "e5f5edc43160",
+      "label": "Importe decimal",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-9"
+      ]
+    },
+    {
+      "componentId": "e5f5edc43160:control:e5f5edc43160|Identificador con máscara|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "e5f5edc43160",
+      "label": "Identificador con máscara",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-10"
+      ]
+    },
+    {
+      "componentId": "e5f5edc43160:control:e5f5edc43160|Web|option",
+      "componentType": "option",
+      "screenIdentity": "e5f5edc43160",
+      "label": "Web",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-11"
+      ]
+    },
+    {
+      "componentId": "e5f5edc43160:control:e5f5edc43160|Mobile|option",
+      "componentType": "option",
+      "screenIdentity": "e5f5edc43160",
+      "label": "Mobile",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-12"
+      ]
+    },
+    {
+      "componentId": "e5f5edc43160:control:e5f5edc43160|Sucursal|option",
+      "componentType": "option",
+      "screenIdentity": "e5f5edc43160",
+      "label": "Sucursal",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-13"
+      ]
+    },
+    {
+      "componentId": "e5f5edc43160:control:e5f5edc43160|Sugerencia nativa|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "e5f5edc43160",
+      "label": "Sugerencia nativa",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-14"
+      ]
+    },
+    {
+      "componentId": "e5f5edc43160:control:e5f5edc43160|Fecha nativa|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "e5f5edc43160",
+      "label": "Fecha nativa",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-15"
+      ]
+    }
+  ],
+  "semanticEvents": [
+    {
+      "eventRef": "event-1",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-2",
+      "action": "observe",
+      "screenIdentity": "e5f5edc43160",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-3",
+      "action": "fill",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "field": "Nombre de prueba",
+      "controlAffordance": "editable",
+      "valueKey": "nombre_de_prueba",
+      "valueRole": "action_input",
+      "technicalTargetRef": "e5f5edc43160:control:role:textbox|Nombre de prueba",
+      "afterState": "Lucia QA",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-4",
+      "action": "fill",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "field": "Correo de prueba",
+      "controlAffordance": "editable",
+      "valueKey": "correo_de_prueba",
+      "valueRole": "action_input",
+      "technicalTargetRef": "e5f5edc43160:control:role:textbox|Correo de prueba",
+      "afterState": "ACOR@GMAIL.COM",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-5",
+      "action": "fill",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "field": "Contraseña ficticia",
+      "controlAffordance": "editable",
+      "valueKey": "contrasena_ficticia",
+      "valueRole": "secure_input",
+      "technicalTargetRef": "e5f5edc43160:control:role:textbox|Contraseña ficticia",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-6",
+      "action": "fill",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "field": "Notas del recorrido",
+      "controlAffordance": "editable",
+      "valueKey": "notas_del_recorrido",
+      "valueRole": "action_input",
+      "technicalTargetRef": "e5f5edc43160:control:role:textbox|Notas del recorrido",
+      "afterState": "PRIMERA LINEA",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-7",
+      "action": "observe",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "controlAffordance": "editable",
+      "technicalTargetRef": "e5f5edc43160:control:role:textbox|Notas del recorrido",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-8",
+      "action": "fill",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "field": "Teléfono ficticio",
+      "controlAffordance": "editable",
+      "valueKey": "telefono_ficticio",
+      "valueRole": "action_input",
+      "technicalTargetRef": "e5f5edc43160:control:role:textbox|Teléfono ficticio",
+      "afterState": "9898980990",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-9",
+      "action": "fill",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "field": "Importe decimal",
+      "controlAffordance": "editable",
+      "valueKey": "importe_decimal",
+      "valueRole": "action_input",
+      "technicalTargetRef": "e5f5edc43160:control:role:textbox|Importe decimal",
+      "afterState": "0.43",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-10",
+      "action": "fill",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "field": "Identificador con máscara",
+      "controlAffordance": "editable",
+      "valueKey": "identificador_con_mascara",
+      "valueRole": "action_input",
+      "technicalTargetRef": "e5f5edc43160:control:role:textbox|Identificador con máscara",
+      "afterState": "000-0000000-0",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-11",
+      "action": "activate",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "option",
+      "controlAffordance": "selectable",
+      "technicalTargetRef": "e5f5edc43160:control:role:option|Web",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-12",
+      "action": "activate",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "option",
+      "controlAffordance": "selectable",
+      "technicalTargetRef": "e5f5edc43160:control:role:option|Mobile",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-13",
+      "action": "activate",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "option",
+      "controlAffordance": "selectable",
+      "technicalTargetRef": "e5f5edc43160:control:role:option|Sucursal",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-14",
+      "action": "fill",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "field": "Sugerencia nativa",
+      "controlAffordance": "editable",
+      "valueKey": "sugerencia_nativa",
+      "valueRole": "action_input",
+      "technicalTargetRef": "e5f5edc43160:control:role:textbox|Sugerencia nativa",
+      "afterState": "Santo Domingo",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-15",
+      "action": "fill",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "field": "Fecha nativa",
+      "controlAffordance": "editable",
+      "valueKey": "fecha_nativa",
+      "valueRole": "action_input",
+      "technicalTargetRef": "e5f5edc43160:control:css:#f-fecha_nativa",
+      "afterState": "2026-09-21",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    }
+  ],
+  "datasets": [
+    {
+      "valueKey": "nombre_de_prueba",
+      "semanticField": "Nombre de prueba",
+      "valueRole": "action_input",
+      "value": "Lucia QA",
+      "rawTypedValue": "Lucia QA",
+      "committedValue": "Lucia QA",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "e5f5edc43160:control:role:textbox|Nombre de prueba",
+      "recordingId": "34034233-6dee-4ee9-9fc1-56b276205985",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "correo_de_prueba",
+      "semanticField": "Correo de prueba",
+      "valueRole": "action_input",
+      "value": "ACOR@GMAIL.COM",
+      "rawTypedValue": "ACOR@GMAIL.COM",
+      "committedValue": "ACOR@GMAIL.COM",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "e5f5edc43160:control:role:textbox|Correo de prueba",
+      "recordingId": "34034233-6dee-4ee9-9fc1-56b276205985",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "contrasena_ficticia",
+      "semanticField": "Contraseña ficticia",
+      "valueRole": "secure_input",
+      "source": "secure",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": true,
+      "generated": false,
+      "instanceIdentity": "e5f5edc43160:control:role:textbox|Contraseña ficticia",
+      "recordingId": "34034233-6dee-4ee9-9fc1-56b276205985",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "notas_del_recorrido",
+      "semanticField": "Notas del recorrido",
+      "valueRole": "action_input",
+      "value": "PRIMERA LINEA",
+      "rawTypedValue": "PRIMERA LINEA",
+      "committedValue": "PRIMERA LINEA",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "e5f5edc43160:control:role:textbox|Notas del recorrido",
+      "recordingId": "34034233-6dee-4ee9-9fc1-56b276205985",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "telefono_ficticio",
+      "semanticField": "Teléfono ficticio",
+      "valueRole": "action_input",
+      "value": "9898980990",
+      "rawTypedValue": "9898980990",
+      "committedValue": "9898980990",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "e5f5edc43160:control:role:textbox|Teléfono ficticio",
+      "recordingId": "34034233-6dee-4ee9-9fc1-56b276205985",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "importe_decimal",
+      "semanticField": "Importe decimal",
+      "valueRole": "action_input",
+      "value": "0.43",
+      "rawTypedValue": "0.43",
+      "committedValue": "0.43",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "e5f5edc43160:control:role:textbox|Importe decimal",
+      "recordingId": "34034233-6dee-4ee9-9fc1-56b276205985",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "identificador_con_mascara",
+      "semanticField": "Identificador con máscara",
+      "valueRole": "action_input",
+      "value": "000-0000000-0",
+      "rawTypedValue": "000-0000000-0",
+      "committedValue": "000-0000000-0",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "e5f5edc43160:control:role:textbox|Identificador con máscara",
+      "recordingId": "34034233-6dee-4ee9-9fc1-56b276205985",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "sugerencia_nativa",
+      "semanticField": "Sugerencia nativa",
+      "valueRole": "action_input",
+      "value": "Santo Domingo",
+      "rawTypedValue": "Santo Domingo",
+      "committedValue": "Santo Domingo",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "e5f5edc43160:control:role:textbox|Sugerencia nativa",
+      "recordingId": "34034233-6dee-4ee9-9fc1-56b276205985",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "fecha_nativa",
+      "semanticField": "Fecha nativa",
+      "valueRole": "action_input",
+      "value": "2026-09-21",
+      "rawTypedValue": "2026-09-21",
+      "committedValue": "2026-09-21",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "e5f5edc43160:control:css:#f-fecha_nativa",
+      "recordingId": "34034233-6dee-4ee9-9fc1-56b276205985",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "formatHint": "date"
+    }
+  ],
+  "technicalObservations": [
+    {
+      "observationId": "obs-3",
+      "status": "VALIDATED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "label": "Nombre de prueba",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "Lucia QA",
+      "semanticField": "Nombre de prueba",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Nombre de prueba",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#f-nombre",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "f-nombre",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "e5f5edc43160:control:role:textbox|Nombre de prueba",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-1",
+      "inputValue": "Lucia QA",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-4",
+      "status": "VALIDATED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "label": "Correo de prueba",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "ACOR@GMAIL.COM",
+      "semanticField": "Correo de prueba",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Correo de prueba",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#f-correo",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "f-correo",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "e5f5edc43160:control:role:textbox|Correo de prueba",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-2",
+      "inputValue": "ACOR@GMAIL.COM",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-5",
+      "status": "VALIDATED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "label": "Contraseña ficticia",
+      "tag": "input",
+      "role": "input",
+      "semanticField": "Contraseña ficticia",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Contraseña ficticia",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#f-clave",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "f-clave",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "e5f5edc43160:control:role:textbox|Contraseña ficticia",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-3",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-6",
+      "status": "VALIDATED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "label": "Notas del recorrido",
+      "tag": "textarea",
+      "role": "input",
+      "afterValue": "PRIMERA LINEA",
+      "semanticField": "Notas del recorrido",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Notas del recorrido",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#f-notas",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "f-notas",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "e5f5edc43160:control:role:textbox|Notas del recorrido",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-4",
+      "inputValue": "PRIMERA LINEA",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-7",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "label": "Notas del recorrido",
+      "tag": "textarea",
+      "role": "textbox",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Notas del recorrido",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#f-notas",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "f-notas",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "e5f5edc43160:control:role:textbox|Notas del recorrido",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-8",
+      "status": "VALIDATED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "label": "Teléfono ficticio",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "9898980990",
+      "semanticField": "Teléfono ficticio",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Teléfono ficticio",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#f-telefono",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "f-telefono",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "e5f5edc43160:control:role:textbox|Teléfono ficticio",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-5",
+      "inputValue": "9898980990",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-9",
+      "status": "VALIDATED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "label": "Importe decimal",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "0.43",
+      "semanticField": "Importe decimal",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Importe decimal",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#f-importe",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "f-importe",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "e5f5edc43160:control:role:textbox|Importe decimal",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-6",
+      "inputValue": "0.43",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-10",
+      "status": "VALIDATED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "label": "Identificador con máscara",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "000-0000000-0",
+      "semanticField": "Identificador con máscara",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Identificador con máscara",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#f-identificador",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "f-identificador",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "e5f5edc43160:control:role:textbox|Identificador con máscara",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-7",
+      "inputValue": "000-0000000-0",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-11",
+      "status": "VALIDATED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "option",
+      "label": "Web",
+      "tag": "option",
+      "role": "option",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "option|Web",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "option|Web",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "option"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 19
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "e5f5edc43160:control:role:option|Web",
+      "validatedByInteraction": true,
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-12",
+      "status": "VALIDATED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "option",
+      "label": "Mobile",
+      "tag": "option",
+      "role": "option",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "option|Mobile",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "option|Mobile",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "option"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 19
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "e5f5edc43160:control:role:option|Mobile",
+      "validatedByInteraction": true,
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-13",
+      "status": "VALIDATED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "option",
+      "label": "Sucursal",
+      "tag": "option",
+      "role": "option",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "option|Sucursal",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "option|Sucursal",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "option"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 19
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "e5f5edc43160:control:role:option|Sucursal",
+      "validatedByInteraction": true,
+      "selectable": true,
+      "editable": false
+    },
+    {
+      "observationId": "obs-14",
+      "status": "VALIDATED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "label": "Sugerencia nativa",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "Santo Domingo",
+      "semanticField": "Sugerencia nativa",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Sugerencia nativa",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#f-sugerencia",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "f-sugerencia",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "e5f5edc43160:control:role:textbox|Sugerencia nativa",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-8",
+      "inputValue": "Santo Domingo",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-15",
+      "status": "VALIDATED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "label": "Fecha nativa",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "2026-09-21",
+      "semanticField": "Fecha nativa",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "formatHint": "date",
+      "locatorCandidates": [
+        {
+          "strategy": "css",
+          "value": "#f-fecha_nativa",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "f-fecha_nativa",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.8,
+      "technicalTargetRef": "e5f5edc43160:control:css:#f-fecha_nativa",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-9",
+      "inputValue": "2026-09-21",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "a",
+      "label": "QA Field Lab, inicio",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "QA Field Lab, inicio"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "QA Field Lab, inicio",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5f5edc43160:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "a",
+      "label": "01",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "01 Texto, formato y teclado 0/9",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5f5edc43160:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "a",
+      "label": "02",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "02 Listas y selecciones 0/11",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5f5edc43160:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "a",
+      "label": "03",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "03 Fechas y calendarios 0/8",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5f5edc43160:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "a",
+      "label": "04",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "04 Radios, casillas y estados 0/8",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5f5edc43160:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "a",
+      "label": "05",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "05 Contexto y contenido dinámico 0/9",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5f5edc43160:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "a",
+      "label": "06",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "06 Edición avanzada 0/8",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5f5edc43160:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "a",
+      "label": "07",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "07 Archivos y carpetas 0/4",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5f5edc43160:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "a",
+      "label": "08",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "08 Iframe y Shadow DOM 0/5",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5f5edc43160:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "a",
+      "label": "09",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "09 Validación y resultado 0/4",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5f5edc43160:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "button",
+      "label": "Iniciar recorrido",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "start-run",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "start-run",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e5f5edc43160:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "button",
+      "label": "Descargar guion",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "download-guide",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "download-guide",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e5f5edc43160:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-13",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "button",
+      "label": "↥ Archivos de prueba",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "download-fixtures",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "download-fixtures",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e5f5edc43160:control:13",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-14",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "button",
+      "label": "{ } Ver eventos",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "show-audit",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "show-audit",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e5f5edc43160:control:14",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-15",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "button",
+      "label": "Exportar auditoría",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "export-audit",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "export-audit",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e5f5edc43160:control:15",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-16",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "button",
+      "label": "Reiniciar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "reset-run",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "reset-run",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e5f5edc43160:control:16",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-17",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "label": "Latencia simulada",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "latency-enabled",
+        "type": "checkbox"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "latency-enabled",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e5f5edc43160:control:17",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-18",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "label": "Nombre de prueba",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "f-nombre",
+        "type": "text",
+        "placeholder": "Lucía QA",
+        "data-field": "nombre"
+      },
+      "placeholder": "Lucía QA",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "f-nombre",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e5f5edc43160:control:18",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-19",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "label": "Correo de prueba",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "f-correo",
+        "type": "email",
+        "placeholder": "nombre@example.test",
+        "data-field": "correo"
+      },
+      "placeholder": "nombre@example.test",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "f-correo",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e5f5edc43160:control:19",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-20",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "label": "Contraseña ficticia",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "f-clave",
+        "type": "password",
+        "placeholder": "Sólo una clave ficticia",
+        "data-field": "clave"
+      },
+      "placeholder": "Sólo una clave ficticia",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "f-clave",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e5f5edc43160:control:20",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-e8fa4a351c18-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "e8fa4a351c18",
+      "componentType": "a",
+      "label": "QA Field Lab, inicio",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "QA Field Lab, inicio"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "QA Field Lab, inicio",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e8fa4a351c18:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e8fa4a351c18-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "e8fa4a351c18",
+      "componentType": "a",
+      "label": "01",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "01 Texto, formato y teclado 2/9",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e8fa4a351c18:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e8fa4a351c18-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "e8fa4a351c18",
+      "componentType": "a",
+      "label": "02",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "02 Listas y selecciones 0/11",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e8fa4a351c18:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e8fa4a351c18-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "e8fa4a351c18",
+      "componentType": "a",
+      "label": "03",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "03 Fechas y calendarios 0/8",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e8fa4a351c18:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e8fa4a351c18-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "e8fa4a351c18",
+      "componentType": "a",
+      "label": "04",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "04 Radios, casillas y estados 0/8",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e8fa4a351c18:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e8fa4a351c18-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "e8fa4a351c18",
+      "componentType": "a",
+      "label": "05",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "05 Contexto y contenido dinámico 0/9",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e8fa4a351c18:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e8fa4a351c18-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "e8fa4a351c18",
+      "componentType": "a",
+      "label": "06",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "06 Edición avanzada 0/8",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e8fa4a351c18:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e8fa4a351c18-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "e8fa4a351c18",
+      "componentType": "a",
+      "label": "07",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "07 Archivos y carpetas 0/4",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e8fa4a351c18:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e8fa4a351c18-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "e8fa4a351c18",
+      "componentType": "a",
+      "label": "08",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "08 Iframe y Shadow DOM 0/5",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e8fa4a351c18:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e8fa4a351c18-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "e8fa4a351c18",
+      "componentType": "a",
+      "label": "09",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "09 Validación y resultado 0/4",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e8fa4a351c18:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e8fa4a351c18-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "e8fa4a351c18",
+      "componentType": "button",
+      "label": "Recorrido en curso",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "start-run",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "start-run",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e8fa4a351c18:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e8fa4a351c18-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "e8fa4a351c18",
+      "componentType": "button",
+      "label": "Descargar guion",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "download-guide",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "download-guide",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e8fa4a351c18:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e8fa4a351c18-control-13",
+      "status": "OBSERVED",
+      "screenIdentity": "e8fa4a351c18",
+      "componentType": "button",
+      "label": "↥ Archivos de prueba",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "download-fixtures",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "download-fixtures",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e8fa4a351c18:control:13",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e8fa4a351c18-control-14",
+      "status": "OBSERVED",
+      "screenIdentity": "e8fa4a351c18",
+      "componentType": "button",
+      "label": "{ } Ver eventos",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "show-audit",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "show-audit",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e8fa4a351c18:control:14",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e8fa4a351c18-control-15",
+      "status": "OBSERVED",
+      "screenIdentity": "e8fa4a351c18",
+      "componentType": "button",
+      "label": "Exportar auditoría",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "export-audit",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "export-audit",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e8fa4a351c18:control:15",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e8fa4a351c18-control-16",
+      "status": "OBSERVED",
+      "screenIdentity": "e8fa4a351c18",
+      "componentType": "button",
+      "label": "Reiniciar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "reset-run",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "reset-run",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e8fa4a351c18:control:16",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e8fa4a351c18-control-17",
+      "status": "OBSERVED",
+      "screenIdentity": "e8fa4a351c18",
+      "componentType": "textbox",
+      "label": "Latencia simulada",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "latency-enabled",
+        "type": "checkbox"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "latency-enabled",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e8fa4a351c18:control:17",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-e8fa4a351c18-control-18",
+      "status": "OBSERVED",
+      "screenIdentity": "e8fa4a351c18",
+      "componentType": "textbox",
+      "label": "Nombre de prueba",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "f-nombre",
+        "type": "text",
+        "placeholder": "Lucía QA",
+        "data-field": "nombre"
+      },
+      "placeholder": "Lucía QA",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "f-nombre",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e8fa4a351c18:control:18",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-e8fa4a351c18-control-19",
+      "status": "OBSERVED",
+      "screenIdentity": "e8fa4a351c18",
+      "componentType": "textbox",
+      "label": "Correo de prueba",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "f-correo",
+        "type": "email",
+        "placeholder": "nombre@example.test",
+        "data-field": "correo"
+      },
+      "placeholder": "nombre@example.test",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "f-correo",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e8fa4a351c18:control:19",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-e8fa4a351c18-control-20",
+      "status": "OBSERVED",
+      "screenIdentity": "e8fa4a351c18",
+      "componentType": "textbox",
+      "label": "Contraseña ficticia",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "f-clave",
+        "type": "password",
+        "placeholder": "Sólo una clave ficticia",
+        "data-field": "clave"
+      },
+      "placeholder": "Sólo una clave ficticia",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "f-clave",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e8fa4a351c18:control:20",
+      "selectable": false,
+      "editable": true
+    }
+  ],
+  "editingSessions": [
+    {
+      "editingSessionId": "edit-1",
+      "controlIdentity": "e5f5edc43160|Nombre de prueba|amount_or_text",
+      "screenIdentity": "e5f5edc43160",
+      "startedAt": 31147,
+      "endedAt": 31147,
+      "rawEventRefs": [
+        "event-3"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "e5f5edc43160:role:textbox|Nombre de prueba"
+      ],
+      "inputValue": "Lucia QA",
+      "finalValue": "Lucia QA"
+    },
+    {
+      "editingSessionId": "edit-2",
+      "controlIdentity": "e5f5edc43160|Correo de prueba|amount_or_text",
+      "screenIdentity": "e5f5edc43160",
+      "startedAt": 53370,
+      "endedAt": 53370,
+      "rawEventRefs": [
+        "event-4"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "e5f5edc43160:role:textbox|Correo de prueba"
+      ],
+      "inputValue": "ACOR@GMAIL.COM",
+      "finalValue": "ACOR@GMAIL.COM"
+    },
+    {
+      "editingSessionId": "edit-3",
+      "controlIdentity": "e5f5edc43160|Contraseña ficticia|amount_or_text",
+      "screenIdentity": "e5f5edc43160",
+      "startedAt": 60233,
+      "endedAt": 60233,
+      "rawEventRefs": [
+        "event-5"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "e5f5edc43160:role:textbox|Contraseña ficticia"
+      ]
+    },
+    {
+      "editingSessionId": "edit-4",
+      "controlIdentity": "e5f5edc43160|Notas del recorrido|amount_or_text",
+      "screenIdentity": "e5f5edc43160",
+      "startedAt": 65393,
+      "endedAt": 65393,
+      "rawEventRefs": [
+        "event-6"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "e5f5edc43160:role:textbox|Notas del recorrido"
+      ],
+      "inputValue": "PRIMERA LINEA",
+      "finalValue": "PRIMERA LINEA"
+    },
+    {
+      "editingSessionId": "edit-5",
+      "controlIdentity": "e5f5edc43160|Teléfono ficticio|amount_or_text",
+      "screenIdentity": "e5f5edc43160",
+      "startedAt": 79283,
+      "endedAt": 79283,
+      "rawEventRefs": [
+        "event-8"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "e5f5edc43160:role:textbox|Teléfono ficticio"
+      ],
+      "inputValue": "9898980990",
+      "finalValue": "9898980990"
+    },
+    {
+      "editingSessionId": "edit-6",
+      "controlIdentity": "e5f5edc43160|Importe decimal|amount_or_text",
+      "screenIdentity": "e5f5edc43160",
+      "startedAt": 87249,
+      "endedAt": 87249,
+      "rawEventRefs": [
+        "event-9"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "e5f5edc43160:role:textbox|Importe decimal"
+      ],
+      "inputValue": "0.43",
+      "finalValue": "0.43"
+    },
+    {
+      "editingSessionId": "edit-7",
+      "controlIdentity": "e5f5edc43160|Identificador con máscara|amount_or_text",
+      "screenIdentity": "e5f5edc43160",
+      "startedAt": 97713,
+      "endedAt": 97713,
+      "rawEventRefs": [
+        "event-10"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "e5f5edc43160:role:textbox|Identificador con máscara"
+      ],
+      "inputValue": "000-0000000-0",
+      "finalValue": "000-0000000-0"
+    },
+    {
+      "editingSessionId": "edit-8",
+      "controlIdentity": "e5f5edc43160|Sugerencia nativa|amount_or_text",
+      "screenIdentity": "e5f5edc43160",
+      "startedAt": 109181,
+      "endedAt": 109181,
+      "rawEventRefs": [
+        "event-14"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "e5f5edc43160:role:textbox|Sugerencia nativa"
+      ],
+      "inputValue": "Santo Domingo",
+      "finalValue": "Santo Domingo"
+    },
+    {
+      "editingSessionId": "edit-9",
+      "controlIdentity": "e5f5edc43160|Fecha nativa|amount_or_text",
+      "screenIdentity": "e5f5edc43160",
+      "startedAt": 116875,
+      "endedAt": 116875,
+      "rawEventRefs": [
+        "event-15"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "e5f5edc43160:css:#f-fecha_nativa"
+      ],
+      "inputValue": "2026-09-21",
+      "finalValue": "2026-09-21"
+    }
+  ],
+  "scenarioSuggestions": [],
+  "canonicalInteractions": [
+    {
+      "id": "interaction-1",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-1"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-3",
+      "controlIdentity": "e5f5edc43160|Nombre de prueba|role|textbox|Nombre de prueba",
+      "semanticField": "Nombre de prueba",
+      "action": "fill",
+      "valueKey": "nombre_de_prueba",
+      "recordedValue": "Lucia QA",
+      "sourceEventRefs": [
+        "event-3"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Nombre de prueba",
+        "css:#f-nombre",
+        "id:f-nombre"
+      ],
+      "editingSessionRef": "edit-1",
+      "description": "Ingresar en \"Nombre de prueba\"",
+      "screenBeforeRef": "e5f5edc43160",
+      "screenAfterRef": "e5f5edc43160",
+      "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "stateScope": "e5f5edc43160",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-4",
+      "controlIdentity": "e5f5edc43160|Correo de prueba|role|textbox|Correo de prueba",
+      "semanticField": "Correo de prueba",
+      "action": "fill",
+      "valueKey": "correo_de_prueba",
+      "recordedValue": "ACOR@GMAIL.COM",
+      "sourceEventRefs": [
+        "event-4"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Correo de prueba",
+        "css:#f-correo",
+        "id:f-correo"
+      ],
+      "editingSessionRef": "edit-2",
+      "description": "Ingresar en \"Correo de prueba\"",
+      "screenBeforeRef": "e5f5edc43160",
+      "screenAfterRef": "e5f5edc43160",
+      "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "stateScope": "e5f5edc43160",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-5",
+      "controlIdentity": "e5f5edc43160|Contraseña ficticia|role|textbox|Contraseña ficticia",
+      "semanticField": "Contraseña ficticia",
+      "action": "fill",
+      "valueKey": "contrasena_ficticia",
+      "sourceEventRefs": [
+        "event-5"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Contraseña ficticia",
+        "css:#f-clave",
+        "id:f-clave"
+      ],
+      "editingSessionRef": "edit-3",
+      "description": "Ingresar en \"Contraseña ficticia\"",
+      "screenBeforeRef": "e5f5edc43160",
+      "screenAfterRef": "e5f5edc43160",
+      "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "stateScope": "e5f5edc43160",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-6",
+      "controlIdentity": "e5f5edc43160|Notas del recorrido|role|textbox|Notas del recorrido",
+      "semanticField": "Notas del recorrido",
+      "action": "fill",
+      "valueKey": "notas_del_recorrido",
+      "recordedValue": "PRIMERA LINEA",
+      "sourceEventRefs": [
+        "event-6"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Notas del recorrido",
+        "css:#f-notas",
+        "id:f-notas"
+      ],
+      "editingSessionRef": "edit-4",
+      "description": "Ingresar en \"Notas del recorrido\"",
+      "screenBeforeRef": "e5f5edc43160",
+      "screenAfterRef": "e5f5edc43160",
+      "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "stateScope": "e5f5edc43160",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-7",
+      "controlIdentity": "e5f5edc43160|Notas del recorrido|role|textbox|Notas del recorrido",
+      "action": "press",
+      "key": "Enter",
+      "sourceEventRefs": [
+        "event-7"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Notas del recorrido",
+        "css:#f-notas",
+        "id:f-notas"
+      ],
+      "screenBeforeRef": "e5f5edc43160",
+      "screenAfterRef": "e5f5edc43160",
+      "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "stateScope": "e5f5edc43160",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-8",
+      "controlIdentity": "e5f5edc43160|Teléfono ficticio|role|textbox|Teléfono ficticio",
+      "semanticField": "Teléfono ficticio",
+      "action": "fill",
+      "valueKey": "telefono_ficticio",
+      "recordedValue": "9898980990",
+      "sourceEventRefs": [
+        "event-8"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Teléfono ficticio",
+        "css:#f-telefono",
+        "id:f-telefono"
+      ],
+      "editingSessionRef": "edit-5",
+      "description": "Ingresar en \"Teléfono ficticio\"",
+      "screenBeforeRef": "e5f5edc43160",
+      "screenAfterRef": "e5f5edc43160",
+      "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "stateScope": "e5f5edc43160",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-9",
+      "controlIdentity": "e5f5edc43160|Importe decimal|role|textbox|Importe decimal",
+      "semanticField": "Importe decimal",
+      "action": "fill",
+      "valueKey": "importe_decimal",
+      "recordedValue": "0.43",
+      "sourceEventRefs": [
+        "event-9"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Importe decimal",
+        "css:#f-importe",
+        "id:f-importe"
+      ],
+      "editingSessionRef": "edit-6",
+      "description": "Ingresar en \"Importe decimal\"",
+      "screenBeforeRef": "e5f5edc43160",
+      "screenAfterRef": "e5f5edc43160",
+      "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "stateScope": "e5f5edc43160",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-10",
+      "controlIdentity": "e5f5edc43160|Identificador con máscara|role|textbox|Identificador con máscara",
+      "semanticField": "Identificador con máscara",
+      "action": "fill",
+      "valueKey": "identificador_con_mascara",
+      "recordedValue": "000-0000000-0",
+      "sourceEventRefs": [
+        "event-10"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Identificador con máscara",
+        "css:#f-identificador",
+        "id:f-identificador"
+      ],
+      "editingSessionRef": "edit-7",
+      "description": "Ingresar en \"Identificador con máscara\"",
+      "screenBeforeRef": "e5f5edc43160",
+      "screenAfterRef": "e5f5edc43160",
+      "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "stateScope": "e5f5edc43160",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-11",
+      "controlIdentity": "e5f5edc43160|Web|role|option|Web",
+      "semanticField": "Web",
+      "action": "click",
+      "valueKey": "web",
+      "sourceEventRefs": [
+        "event-11"
+      ],
+      "technicalTargetRefs": [
+        "role:option|Web"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "option|Web",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "option"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 19
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Web\"",
+      "screenBeforeRef": "e5f5edc43160",
+      "screenAfterRef": "e5f5edc43160",
+      "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "stateScope": "e5f5edc43160",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-12",
+      "controlIdentity": "e5f5edc43160|Mobile|role|option|Mobile",
+      "semanticField": "Mobile",
+      "action": "click",
+      "valueKey": "mobile",
+      "sourceEventRefs": [
+        "event-12"
+      ],
+      "technicalTargetRefs": [
+        "role:option|Mobile"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "option|Mobile",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "option"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 19
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Mobile\"",
+      "screenBeforeRef": "e5f5edc43160",
+      "screenAfterRef": "e5f5edc43160",
+      "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "stateScope": "e5f5edc43160",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-13",
+      "controlIdentity": "e5f5edc43160|Sucursal|role|option|Sucursal",
+      "semanticField": "Sucursal",
+      "action": "click",
+      "valueKey": "sucursal",
+      "sourceEventRefs": [
+        "event-13"
+      ],
+      "technicalTargetRefs": [
+        "role:option|Sucursal"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "option|Sucursal",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "option"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 19
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"Sucursal\"",
+      "screenBeforeRef": "e5f5edc43160",
+      "screenAfterRef": "e5f5edc43160",
+      "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "stateScope": "e5f5edc43160",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-14",
+      "controlIdentity": "e5f5edc43160|Sugerencia nativa|role|textbox|Sugerencia nativa",
+      "semanticField": "Sugerencia nativa",
+      "action": "fill",
+      "valueKey": "sugerencia_nativa",
+      "recordedValue": "Santo Domingo",
+      "sourceEventRefs": [
+        "event-14"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Sugerencia nativa",
+        "css:#f-sugerencia",
+        "id:f-sugerencia"
+      ],
+      "editingSessionRef": "edit-8",
+      "description": "Ingresar en \"Sugerencia nativa\"",
+      "screenBeforeRef": "e5f5edc43160",
+      "screenAfterRef": "e5f5edc43160",
+      "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "stateScope": "e5f5edc43160",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-15",
+      "controlIdentity": "e5f5edc43160|Fecha nativa|css|#f-fecha_nativa",
+      "semanticField": "Fecha nativa",
+      "action": "fill",
+      "valueKey": "fecha_nativa",
+      "recordedValue": "2026-09-21",
+      "sourceEventRefs": [
+        "event-15"
+      ],
+      "technicalTargetRefs": [
+        "css:#f-fecha_nativa",
+        "id:f-fecha_nativa"
+      ],
+      "editingSessionRef": "edit-9",
+      "description": "Ingresar en \"Fecha nativa\"",
+      "screenBeforeRef": "e5f5edc43160",
+      "screenAfterRef": "e5f5edc43160",
+      "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "stateScope": "e5f5edc43160",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.8
+    }
+  ],
+  "gridMetadata": {
+    "detected": true,
+    "grids": 24,
+    "rows": 26,
+    "cells": 86,
+    "headers": [
+      "Servicio",
+      "Importe",
+      "Acción",
+      "Cantidad",
+      "Lu",
+      "Ma",
+      "Mi",
+      "Ju",
+      "Vi",
+      "Sá",
+      "Do"
+    ],
+    "headerRelationships": [
+      {
+        "header": "Acción",
+        "field": "Acción"
+      }
+    ]
+  },
+  "source": "SessionTrace"
+}

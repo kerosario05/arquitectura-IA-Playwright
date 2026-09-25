@@ -31,6 +31,48 @@ function detectFillValueLiteralFieldNameAntiPattern(specContent: string): string
   return errors;
 }
 
+/**
+ * Technical executability gate.
+ *
+ * Catches, at promotion time, the exact defect class that let the Kiosko2/Step-4 spec through
+ * undetected: a candidate whose generated click/fill target is structurally incapable of
+ * resolving on a real DOM, regardless of timeout — a long `getByText(..., {exact:true})`
+ * built from a display label that spans more than one node, or a selection made by DOM
+ * position (`.first()`/`.last()`/`.nth()`) instead of a unique, structural identity. Neither
+ * failure mode is a flakiness problem a longer timeout could fix; both are promotable-looking
+ * text that was never validated against real technical identity.
+ */
+const FRAGILE_TARGET_MAX_EXACT_TEXT_LENGTH = 80;
+
+export function detectFragileTargetPatterns(specContent: string): string[] {
+  const reasons: string[] = [];
+
+  const positionalCalls = specContent.match(/\.(first|last|nth)\s*\(/g);
+  if (positionalCalls && positionalCalls.length > 0) {
+    const kinds = Array.from(new Set(positionalCalls.map((call) => call.match(/\.(first|last|nth)/)![1])));
+    reasons.push(
+      `technical_target_not_executable: positional selection detected (${kinds.join(", ")}) — ` +
+      `a promoted target must be identified structurally (technicalTargetRefs / recorded structural ` +
+      `owner / unique short accessible name), never chosen by DOM position.`
+    );
+  }
+
+  const exactTextMatches = specContent.matchAll(/get(?:ByText|ByRole)\(\s*(["'`])((?:\\.|(?!\1).)*)\1[^)]*exact:\s*true/g);
+  for (const match of exactTextMatches) {
+    const text = match[2];
+    if (text.length > FRAGILE_TARGET_MAX_EXACT_TEXT_LENGTH) {
+      reasons.push(
+        `technical_target_not_executable: exact-text target is ${text.length} characters long ` +
+        `(limit ${FRAGILE_TARGET_MAX_EXACT_TEXT_LENGTH}) — a display label this long almost always ` +
+        `concatenates more than one DOM node's text and can never exact-match a single element; ` +
+        `promote using structural/technical identity, or a short unique accessible name, instead.`
+      );
+    }
+  }
+
+  return reasons;
+}
+
 export type PromotionGateStatus = "passed" | "blocked" | "not_applicable";
 
 export type PromotionGateInput = {
@@ -57,6 +99,8 @@ export type PromotionGateResult = {
   warnings: string[];
   summary?: string;
   pomStatus?: POMPromotionStatus;
+  /** Structured, machine-readable reason for the first gate that blocked promotion. */
+  failedGate?: string;
 };
 
 const BLOCKING_FAILED_REASONS = new Set([
@@ -275,6 +319,20 @@ export function evaluatePromotionGate(input: PromotionGateInput): PromotionGateR
     }
   }
 
+  // --- Technical Executability Gate ---
+  // A required functional step's target must have an executable, deterministic resolution
+  // strategy before the candidate is allowed to promote — never a long exact-text collision
+  // or a DOM-position pick. See detectFragileTargetPatterns for the exact patterns rejected.
+  let fragileTargetDetected = false;
+  if (input.specContent) {
+    const fragileTargetReasons = detectFragileTargetPatterns(input.specContent);
+    if (fragileTargetReasons.length > 0) {
+      fragileTargetDetected = true;
+      reasons.push(...fragileTargetReasons);
+      pomStatus = pomStatus ?? "needs_manual_review";
+    }
+  }
+
   // --- AuthFlow Requirement Check ---
   // If plan metadata indicates AuthFlow is required but spec doesn't include it, block promotion
   if (plan.metadata?.authFlowRequired && input.specContent) {
@@ -364,6 +422,7 @@ export function evaluatePromotionGate(input: PromotionGateInput): PromotionGateR
     reasons,
     warnings,
     pomStatus,
+    failedGate: reasons.length > 0 && fragileTargetDetected ? "technical_target_not_executable" : undefined,
     summary: reasons.length === 0 ? "Promotion gate passed." : "Promotion gate blocked."
   };
 }

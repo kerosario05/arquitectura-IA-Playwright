@@ -10,7 +10,7 @@ export type ScenarioPreviewCaseMapping = {
   projectId: number;
   suiteId?: number;
   updatedAt: string;
-  source: "created" | "updated" | "reused" | "recovered" | "recovered_after_add_case_500" | "reused_from_same_launch_after_previous_500";
+  source: "created" | "updated" | "reused" | "recovered" | "recovered_after_add_case_500" | "reused_from_same_launch_after_previous_500" | "skipped_already_published" | "created_with_unique_title" | "recovered_after_unique_title_500";
 };
 
 export type ScenarioPreviewTestRailResult = {
@@ -35,6 +35,11 @@ export type ScenarioPreviewPublishContext = {
   scenarios: McpScenario[];
   cacheKey: string;
   publishStrategy?: "always_create" | "use_existing";
+  launchId?: string;
+  /** Recording keeps batch/reconciliation semantics without changing the shared case payload. */
+  recordingBatch?: boolean;
+  /** Traceability stays server-side; it is never appended to human preconditions. */
+  suppressAutomationMarker?: boolean;
 };
 
 export function buildScenarioPreviewScenarioId(
@@ -44,8 +49,8 @@ export function buildScenarioPreviewScenarioId(
 ): string {
   void scenario;
 
-  // Priority 1: For launch execution, generate stable unique ID from launchId + index
-  // This ID is used as custom_scenario_id in TestRail and must be globally unique
+  // Priority 1: For launch execution, generate a stable unique mapping identity from launchId + index.
+  // A TestRail custom field is optional; the server-side mapping is authoritative.
   if (context?.launchId) {
     const shortLaunchId = context.launchId.slice(0, 8); // First 8 chars of UUID
     return `L-${shortLaunchId}-${String(index + 1).padStart(3, "0")}`;

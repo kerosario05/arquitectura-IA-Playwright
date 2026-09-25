@@ -1,0 +1,2314 @@
+[
+  {
+    "scenarioId": "REC-EFFF98E2-01",
+    "title": "TR record",
+    "description": "Recorrido observado para completar \"TR record\". Se registraron 13 acciones funcionales.",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://qa1.santacruz.do/onlinebanking/",
+        "description": "Navegar a https://qa1.santacruz.do/onlinebanking/"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "link|Empresarial"
+        },
+        "description": "Presionar \"Empresarial\"",
+        "interactionId": "interaction-4"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|RNC:"
+        },
+        "valueKey": "rnc",
+        "description": "Ingresar [rnc] en \"RNC:\"",
+        "interactionId": "interaction-7"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Usuario:"
+        },
+        "valueKey": "usuario",
+        "description": "Ingresar [usuario] en \"Usuario:\"",
+        "interactionId": "interaction-9"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Contraseña:"
+        },
+        "valueKey": "contrasena",
+        "description": "Ingresar [contrasena] en \"Contraseña:\"",
+        "interactionId": "interaction-10"
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Presionar \"Empresarial\"",
+        "sourceEventRefs": [
+          "event-4"
+        ],
+        "renderedStep": "Presionar \"Empresarial\"",
+        "interactionId": "interaction-4",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/",
+        "stateScope": "e8a6102a3835",
+        "stepNumber": 2
+      },
+      {
+        "content": "Ingresar [rnc] en \"RNC:\"",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "stepTemplate": "Ingresar [rnc] en \"RNC:\"",
+        "renderedStep": "Ingresar \"130287287\" en \"RNC:\"",
+        "valueKey": "rnc",
+        "interactionId": "interaction-7",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/",
+        "stateScope": "e8a6102a3835",
+        "stepNumber": 3
+      },
+      {
+        "content": "Ingresar [usuario] en \"Usuario:\"",
+        "sourceEventRefs": [
+          "event-9"
+        ],
+        "stepTemplate": "Ingresar [usuario] en \"Usuario:\"",
+        "renderedStep": "Ingresar \"stmoreno1\" en \"Usuario:\"",
+        "valueKey": "usuario",
+        "interactionId": "interaction-9",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/",
+        "stateScope": "e8a6102a3835",
+        "stepNumber": 4
+      },
+      {
+        "content": "Ingresar [contrasena] en \"Contraseña:\"",
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "stepTemplate": "Ingresar [contrasena] en \"Contraseña:\"",
+        "renderedStep": "Ingresar el valor seguro asociado a \"Contraseña:\"",
+        "valueKey": "contrasena",
+        "interactionId": "interaction-10",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/",
+        "stateScope": "e8a6102a3835",
+        "stepNumber": 5
+      },
+      {
+        "content": "Presionar \"Enter\" en \"Contraseña:\"",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "renderedStep": "Presionar \"Enter\" en \"Contraseña:\"",
+        "interactionId": "interaction-11",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/",
+        "routeAfter": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+        "stateScope": "e8a6102a3835",
+        "stepNumber": 6
+      },
+      {
+        "content": "Presionar \"SMS\"",
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "renderedStep": "Presionar \"SMS\"",
+        "interactionId": "interaction-13",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+        "stateScope": "e8a6102a3835",
+        "stepNumber": 7
+      },
+      {
+        "content": "Ingresar dígito 1 de 6 en \"Campo pendiente de identificar\"",
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "renderedStep": "Ingresar dígito 1 de 6 en \"Campo pendiente de identificar\"",
+        "valueKey": "unresolved_value_15",
+        "interactionId": "interaction-15",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+        "stateScope": "e8a6102a3835",
+        "stepNumber": 8
+      },
+      {
+        "content": "Ingresar dígito 2 de 6 en \"Campo pendiente de identificar\"",
+        "sourceEventRefs": [
+          "event-16"
+        ],
+        "renderedStep": "Ingresar dígito 2 de 6 en \"Campo pendiente de identificar\"",
+        "valueKey": "unresolved_value_15",
+        "interactionId": "interaction-16",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "stepNumber": 9
+      },
+      {
+        "content": "Ingresar dígito 3 de 6 en \"Campo pendiente de identificar\"",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "renderedStep": "Ingresar dígito 3 de 6 en \"Campo pendiente de identificar\"",
+        "valueKey": "unresolved_value_15",
+        "interactionId": "interaction-17",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "stepNumber": 10
+      },
+      {
+        "content": "Ingresar dígito 4 de 6 en \"Campo pendiente de identificar\"",
+        "sourceEventRefs": [
+          "event-18"
+        ],
+        "renderedStep": "Ingresar dígito 4 de 6 en \"Campo pendiente de identificar\"",
+        "valueKey": "unresolved_value_15",
+        "interactionId": "interaction-18",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "stepNumber": 11
+      },
+      {
+        "content": "Ingresar dígito 5 de 6 en \"Campo pendiente de identificar\"",
+        "sourceEventRefs": [
+          "event-19"
+        ],
+        "renderedStep": "Ingresar dígito 5 de 6 en \"Campo pendiente de identificar\"",
+        "valueKey": "unresolved_value_15",
+        "interactionId": "interaction-19",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "stepNumber": 12
+      },
+      {
+        "content": "Ingresar dígito 6 de 6 en \"Campo pendiente de identificar\"",
+        "sourceEventRefs": [
+          "event-22"
+        ],
+        "renderedStep": "Ingresar dígito 6 de 6 en \"Campo pendiente de identificar\"",
+        "valueKey": "unresolved_value_15",
+        "interactionId": "interaction-22",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "stepNumber": 13
+      },
+      {
+        "content": "Presionar el control indicado",
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "renderedStep": "Presionar el control indicado",
+        "interactionId": "interaction-23",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+        "routeAfter": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "stateScope": "e8a6102a3835",
+        "stepNumber": 14
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "rnc",
+        "label": "RNC:",
+        "stepIndex": 2,
+        "technicalTargetRefs": [
+          "role:textbox|RNC:",
+          "css:#Enterprise",
+          "id:Enterprise"
+        ],
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "exampleValue": "130287287",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "RNC:",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "usuario",
+        "label": "Usuario:",
+        "stepIndex": 3,
+        "technicalTargetRefs": [
+          "role:textbox|Usuario:",
+          "css:#UserNameE",
+          "id:UserNameE"
+        ],
+        "sourceEventRefs": [
+          "event-9"
+        ],
+        "exampleValue": "stmoreno1",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Usuario:",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "contrasena",
+        "label": "Contraseña:",
+        "stepIndex": 4,
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña:",
+          "css:#PasswordE",
+          "id:PasswordE"
+        ],
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "secure",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Contraseña:",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "unresolved_value_15",
+        "label": "Campo pendiente de identificar",
+        "stepIndex": 7,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-15",
+          "event-16",
+          "event-17",
+          "event-18",
+          "event-19",
+          "event-22"
+        ],
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "secure",
+        "confidence": 0.7,
+        "needsReview": false,
+        "formatHint": "segmented_6"
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Empresarial\"",
+        "strategy": "role",
+        "value": "link|Empresarial"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Ingresar [rnc] en \"RNC:\"",
+        "strategy": "role",
+        "value": "textbox|RNC:"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Ingresar [usuario] en \"Usuario:\"",
+        "strategy": "role",
+        "value": "textbox|Usuario:"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Ingresar [contrasena] en \"Contraseña:\"",
+        "strategy": "role",
+        "value": "textbox|Contraseña:"
+      }
+    ],
+    "sourceRecordingId": "efff98e2-0098-4892-b87a-846e3e9e4a3f",
+    "hasUncertainSteps": true,
+    "primary": true,
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7",
+      "event-8",
+      "event-9",
+      "event-10",
+      "event-11",
+      "event-12",
+      "event-13",
+      "event-14",
+      "event-15",
+      "event-16",
+      "event-17",
+      "event-18",
+      "event-19",
+      "event-20",
+      "event-21",
+      "event-22",
+      "event-23"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "functionalReadiness": true,
+    "technicalReadiness": false,
+    "expectedResultCandidate": "La aplicación carga su pantalla inicial",
+    "oracleAuthority": "observed_only",
+    "confidence": 0.95,
+    "scenarioStepCount": 14,
+    "functionalActionCount": 13,
+    "nonUserSetupSteps": 1,
+    "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
+    "scenarioGoal": "TR record",
+    "stateSequenceValid": true,
+    "stateSequenceIssues": [],
+    "postGoalObservations": [],
+    "goalContract": {
+      "nonGeneric": true,
+      "goalCoherent": true,
+      "mutationIntentExpressed": true
+    },
+    "replayEligible": true,
+    "canonicalInteractions": [
+      {
+        "id": "interaction-1",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-1"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-4",
+        "controlIdentity": "e8a6102a3835|Empresarial|role|link|Empresarial",
+        "semanticField": "Empresarial",
+        "action": "click",
+        "valueKey": "empresarial",
+        "sourceEventRefs": [
+          "event-4"
+        ],
+        "technicalTargetRefs": [
+          "role:link|Empresarial"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Empresarial",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#empresarial"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "login-box-parent"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#empresarial\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Empresarial",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "login-box-parent"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Empresarial\"",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/",
+        "stateScope": "e8a6102a3835",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-7",
+        "controlIdentity": "e8a6102a3835|RNC:|role|textbox|RNC:",
+        "semanticField": "RNC:",
+        "action": "fill",
+        "valueKey": "rnc",
+        "recordedValue": "130287287",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|RNC:",
+          "css:#Enterprise",
+          "id:Enterprise"
+        ],
+        "editingSessionRef": "edit-1",
+        "description": "Ingresar en \"RNC:\"",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/",
+        "stateScope": "e8a6102a3835",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-9",
+        "controlIdentity": "e8a6102a3835|Usuario:|role|textbox|Usuario:",
+        "semanticField": "Usuario:",
+        "action": "fill",
+        "valueKey": "usuario",
+        "recordedValue": "stmoreno1",
+        "sourceEventRefs": [
+          "event-9"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Usuario:",
+          "css:#UserNameE",
+          "id:UserNameE"
+        ],
+        "editingSessionRef": "edit-2",
+        "description": "Ingresar en \"Usuario:\"",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/",
+        "stateScope": "e8a6102a3835",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-10",
+        "controlIdentity": "e8a6102a3835|Contraseña:|role|textbox|Contraseña:",
+        "semanticField": "Contraseña:",
+        "action": "fill",
+        "valueKey": "contrasena",
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña:",
+          "css:#PasswordE",
+          "id:PasswordE"
+        ],
+        "editingSessionRef": "edit-3",
+        "description": "Ingresar en \"Contraseña:\"",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/",
+        "stateScope": "e8a6102a3835",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-11",
+        "controlIdentity": "e8a6102a3835|Contraseña:|role|textbox|Contraseña:",
+        "action": "press",
+        "key": "Enter",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña:",
+          "css:#PasswordE",
+          "id:PasswordE"
+        ],
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/",
+        "routeAfter": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+        "stateScope": "e8a6102a3835",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-13",
+        "controlIdentity": "e8a6102a3835|SMS",
+        "semanticField": "SMS",
+        "action": "click",
+        "valueKey": "sms",
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "technicalTargetRefs": [],
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "SMS",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"SMS\"",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+        "stateScope": "e8a6102a3835",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-15",
+        "controlIdentity": "e8a6102a3835|control",
+        "action": "fill",
+        "sourceEventRefs": [
+          "event-15",
+          "event-16",
+          "event-17",
+          "event-18",
+          "event-19",
+          "event-22"
+        ],
+        "technicalTargetRefs": [],
+        "editingSessionRef": "edit-5",
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+        "stateScope": "e8a6102a3835",
+        "admissionStatus": "unresolved",
+        "admissionReason": "segmented_input_runtime_resolution_required",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-23",
+        "controlIdentity": "e8a6102a3835|control",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "input"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "IdentifyUserForm"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"input\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+        "routeAfter": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "stateScope": "e8a6102a3835",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "unresolved",
+        "admissionReason": "generic_label_without_technical_identity",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7
+      }
+    ],
+    "entityActionBlocks": [],
+    "readiness": {
+      "functionalReadiness": true,
+      "dataReadiness": false,
+      "technicalReadiness": false,
+      "oracleReadiness": true,
+      "reviewReadiness": true,
+      "publicationContentReadiness": true,
+      "executionReadiness": false,
+      "publicationReadiness": false,
+      "missingInputs": [
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña:",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 4,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "unresolved_value_15",
+          "semanticField": "Campo pendiente de identificar",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 7,
+          "controlType": "segmented_6",
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "datasetAuthorityMismatches": [],
+      "dataReadinessReasons": [
+        "missing_runtime_input:contrasena",
+        "missing_runtime_input:unresolved_value_15",
+        "RUNTIME_DATA_REQUIRED"
+      ]
+    },
+    "technicalKnowledgeRefs": [
+      "obs-4",
+      "obs-7",
+      "obs-9",
+      "obs-10",
+      "obs-11",
+      "obs-13",
+      "obs-15",
+      "obs-16",
+      "obs-17",
+      "obs-18",
+      "obs-19",
+      "obs-22",
+      "obs-23"
+    ],
+    "runtimeInputRequirements": [
+      {
+        "valueKey": "rnc",
+        "semanticField": "RNC:",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "130287287",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 2,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "130287287",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "usuario",
+        "semanticField": "Usuario:",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "stmoreno1",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 3,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "stmoreno1",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "contrasena",
+        "semanticField": "Contraseña:",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": null,
+        "source": "unresolved",
+        "resolved": false,
+        "sensitive": true,
+        "stepIndex": 4,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "unresolved",
+        "authorityValue": null,
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "unresolved_value_15",
+        "semanticField": "Campo pendiente de identificar",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": null,
+        "source": "unresolved",
+        "resolved": false,
+        "sensitive": true,
+        "stepIndex": 7,
+        "controlType": "segmented_6",
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "unresolved",
+        "authorityValue": null,
+        "datasetAuthorityMismatch": false
+      }
+    ],
+    "runtimeDataset": {
+      "scenarioId": "REC-EFFF98E2-01",
+      "requirements": [
+        {
+          "valueKey": "rnc",
+          "semanticField": "RNC:",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "130287287",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 2,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "130287287",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "usuario",
+          "semanticField": "Usuario:",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "stmoreno1",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 3,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "stmoreno1",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña:",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 4,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "unresolved_value_15",
+          "semanticField": "Campo pendiente de identificar",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 7,
+          "controlType": "segmented_6",
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "resolvedValues": {
+        "rnc": "130287287",
+        "usuario": "stmoreno1"
+      },
+      "missingValues": [
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña:",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 4,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "unresolved_value_15",
+          "semanticField": "Campo pendiente de identificar",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 7,
+          "controlType": "segmented_6",
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        }
+      ]
+    },
+    "mutationOpportunities": [
+      {
+        "opportunityId": "REC-EFFF98E2-01:field_omission",
+        "title": "Tr record: comprobar la omisión de un dato",
+        "mutationType": "FIELD_OMISSION",
+        "basePrimaryScenarioId": "REC-EFFF98E2-01",
+        "operations": [
+          {
+            "type": "remove_action",
+            "interactionId": "interaction-7"
+          }
+        ],
+        "evidenceRefs": [
+          "event-1",
+          "event-2",
+          "event-3",
+          "event-4",
+          "event-5",
+          "event-6",
+          "event-7",
+          "event-8",
+          "event-9",
+          "event-10",
+          "event-11",
+          "event-12",
+          "event-13",
+          "event-14",
+          "event-15",
+          "event-16",
+          "event-17",
+          "event-18",
+          "event-19",
+          "event-20",
+          "event-21",
+          "event-22",
+          "event-23"
+        ],
+        "rationale": "Existen varios inputs observados; se propone una omisión agrupada sin inventar el resultado.",
+        "oracleAuthority": "MISSING",
+        "confidence": 0.5,
+        "needsReview": true
+      }
+    ]
+  },
+  {
+    "scenarioId": "REC-EFFF98E2-01-MUT-field_omission",
+    "title": "Tr record: comprobar la omisión de un dato",
+    "description": "Existen varios inputs observados; se propone una omisión agrupada sin inventar el resultado.",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://qa1.santacruz.do/onlinebanking/",
+        "description": "Navegar a https://qa1.santacruz.do/onlinebanking/"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "link|Empresarial"
+        },
+        "description": "Presionar \"Empresarial\"",
+        "interactionId": "interaction-4"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Usuario:"
+        },
+        "valueKey": "usuario",
+        "description": "Ingresar [usuario] en \"Usuario:\"",
+        "interactionId": "interaction-9"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Contraseña:"
+        },
+        "valueKey": "contrasena",
+        "description": "Ingresar [contrasena] en \"Contraseña:\"",
+        "interactionId": "interaction-10"
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Presionar \"Empresarial\"",
+        "sourceEventRefs": [
+          "event-4"
+        ],
+        "renderedStep": "Presionar \"Empresarial\"",
+        "interactionId": "interaction-4",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/",
+        "stateScope": "e8a6102a3835",
+        "stepNumber": 2
+      },
+      {
+        "content": "Ingresar [usuario] en \"Usuario:\"",
+        "sourceEventRefs": [
+          "event-9"
+        ],
+        "stepTemplate": "Ingresar [usuario] en \"Usuario:\"",
+        "renderedStep": "Ingresar \"stmoreno1\" en \"Usuario:\"",
+        "valueKey": "usuario",
+        "interactionId": "interaction-9",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/",
+        "stateScope": "e8a6102a3835",
+        "stepNumber": 3
+      },
+      {
+        "content": "Ingresar [contrasena] en \"Contraseña:\"",
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "stepTemplate": "Ingresar [contrasena] en \"Contraseña:\"",
+        "renderedStep": "Ingresar el valor seguro asociado a \"Contraseña:\"",
+        "valueKey": "contrasena",
+        "interactionId": "interaction-10",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/",
+        "stateScope": "e8a6102a3835",
+        "stepNumber": 4
+      },
+      {
+        "content": "Presionar \"Enter\" en \"Contraseña:\"",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "renderedStep": "Presionar \"Enter\" en \"Contraseña:\"",
+        "interactionId": "interaction-11",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/",
+        "routeAfter": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+        "stateScope": "e8a6102a3835",
+        "stepNumber": 5
+      },
+      {
+        "content": "Presionar \"SMS\"",
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "renderedStep": "Presionar \"SMS\"",
+        "interactionId": "interaction-13",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+        "stateScope": "e8a6102a3835",
+        "stepNumber": 6
+      },
+      {
+        "content": "Ingresar dígito 1 de 6 en \"Campo pendiente de identificar\"",
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "renderedStep": "Ingresar dígito 1 de 6 en \"Campo pendiente de identificar\"",
+        "valueKey": "unresolved_value_15",
+        "interactionId": "interaction-15",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+        "stateScope": "e8a6102a3835",
+        "stepNumber": 7
+      },
+      {
+        "content": "Ingresar dígito 2 de 6 en \"Campo pendiente de identificar\"",
+        "sourceEventRefs": [
+          "event-16"
+        ],
+        "renderedStep": "Ingresar dígito 2 de 6 en \"Campo pendiente de identificar\"",
+        "valueKey": "unresolved_value_15",
+        "interactionId": "interaction-16",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "stepNumber": 8
+      },
+      {
+        "content": "Ingresar dígito 3 de 6 en \"Campo pendiente de identificar\"",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "renderedStep": "Ingresar dígito 3 de 6 en \"Campo pendiente de identificar\"",
+        "valueKey": "unresolved_value_15",
+        "interactionId": "interaction-17",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "stepNumber": 9
+      },
+      {
+        "content": "Ingresar dígito 4 de 6 en \"Campo pendiente de identificar\"",
+        "sourceEventRefs": [
+          "event-18"
+        ],
+        "renderedStep": "Ingresar dígito 4 de 6 en \"Campo pendiente de identificar\"",
+        "valueKey": "unresolved_value_15",
+        "interactionId": "interaction-18",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "stepNumber": 10
+      },
+      {
+        "content": "Ingresar dígito 5 de 6 en \"Campo pendiente de identificar\"",
+        "sourceEventRefs": [
+          "event-19"
+        ],
+        "renderedStep": "Ingresar dígito 5 de 6 en \"Campo pendiente de identificar\"",
+        "valueKey": "unresolved_value_15",
+        "interactionId": "interaction-19",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "stepNumber": 11
+      },
+      {
+        "content": "Ingresar dígito 6 de 6 en \"Campo pendiente de identificar\"",
+        "sourceEventRefs": [
+          "event-22"
+        ],
+        "renderedStep": "Ingresar dígito 6 de 6 en \"Campo pendiente de identificar\"",
+        "valueKey": "unresolved_value_15",
+        "interactionId": "interaction-22",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "stepNumber": 12
+      },
+      {
+        "content": "Presionar el control indicado",
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "renderedStep": "Presionar el control indicado",
+        "interactionId": "interaction-23",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+        "routeAfter": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "stateScope": "e8a6102a3835",
+        "stepNumber": 13
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "rnc",
+        "label": "RNC:",
+        "stepIndex": 2,
+        "technicalTargetRefs": [
+          "role:textbox|RNC:",
+          "css:#Enterprise",
+          "id:Enterprise"
+        ],
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "exampleValue": "130287287",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "RNC:",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "usuario",
+        "label": "Usuario:",
+        "stepIndex": 3,
+        "technicalTargetRefs": [
+          "role:textbox|Usuario:",
+          "css:#UserNameE",
+          "id:UserNameE"
+        ],
+        "sourceEventRefs": [
+          "event-9"
+        ],
+        "exampleValue": "stmoreno1",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Usuario:",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "contrasena",
+        "label": "Contraseña:",
+        "stepIndex": 4,
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña:",
+          "css:#PasswordE",
+          "id:PasswordE"
+        ],
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "secure",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Contraseña:",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "unresolved_value_15",
+        "label": "Campo pendiente de identificar",
+        "stepIndex": 7,
+        "technicalTargetRefs": [],
+        "sourceEventRefs": [
+          "event-15",
+          "event-16",
+          "event-17",
+          "event-18",
+          "event-19",
+          "event-22"
+        ],
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "secure",
+        "confidence": 0.7,
+        "needsReview": false,
+        "formatHint": "segmented_6"
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Empresarial\"",
+        "strategy": "role",
+        "value": "link|Empresarial"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Ingresar [usuario] en \"Usuario:\"",
+        "strategy": "role",
+        "value": "textbox|Usuario:"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Ingresar [contrasena] en \"Contraseña:\"",
+        "strategy": "role",
+        "value": "textbox|Contraseña:"
+      }
+    ],
+    "sourceRecordingId": "efff98e2-0098-4892-b87a-846e3e9e4a3f",
+    "hasUncertainSteps": true,
+    "primary": false,
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7",
+      "event-8",
+      "event-9",
+      "event-10",
+      "event-11",
+      "event-12",
+      "event-13",
+      "event-14",
+      "event-15",
+      "event-16",
+      "event-17",
+      "event-18",
+      "event-19",
+      "event-20",
+      "event-21",
+      "event-22",
+      "event-23"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": true,
+    "functionalReadiness": true,
+    "technicalReadiness": false,
+    "oracleAuthority": "review_required",
+    "confidence": 0.95,
+    "scenarioStepCount": 13,
+    "functionalActionCount": 12,
+    "nonUserSetupSteps": 1,
+    "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
+    "scenarioGoal": "TR record",
+    "stateSequenceValid": true,
+    "stateSequenceIssues": [],
+    "postGoalObservations": [],
+    "goalContract": {
+      "nonGeneric": true,
+      "goalCoherent": true,
+      "mutationIntentExpressed": true
+    },
+    "replayEligible": true,
+    "canonicalInteractions": [
+      {
+        "id": "interaction-1",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-1"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-4",
+        "controlIdentity": "e8a6102a3835|Empresarial|role|link|Empresarial",
+        "semanticField": "Empresarial",
+        "action": "click",
+        "valueKey": "empresarial",
+        "sourceEventRefs": [
+          "event-4"
+        ],
+        "technicalTargetRefs": [
+          "role:link|Empresarial"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Empresarial",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#empresarial"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "login-box-parent"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#empresarial\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "link",
+          "normalizedName": "Empresarial",
+          "targetTag": "a",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "login-box-parent"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Empresarial\"",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/",
+        "stateScope": "e8a6102a3835",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-9",
+        "controlIdentity": "e8a6102a3835|Usuario:|role|textbox|Usuario:",
+        "semanticField": "Usuario:",
+        "action": "fill",
+        "valueKey": "usuario",
+        "recordedValue": "stmoreno1",
+        "sourceEventRefs": [
+          "event-9"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Usuario:",
+          "css:#UserNameE",
+          "id:UserNameE"
+        ],
+        "editingSessionRef": "edit-2",
+        "description": "Ingresar en \"Usuario:\"",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/",
+        "stateScope": "e8a6102a3835",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-10",
+        "controlIdentity": "e8a6102a3835|Contraseña:|role|textbox|Contraseña:",
+        "semanticField": "Contraseña:",
+        "action": "fill",
+        "valueKey": "contrasena",
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña:",
+          "css:#PasswordE",
+          "id:PasswordE"
+        ],
+        "editingSessionRef": "edit-3",
+        "description": "Ingresar en \"Contraseña:\"",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/",
+        "stateScope": "e8a6102a3835",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-11",
+        "controlIdentity": "e8a6102a3835|Contraseña:|role|textbox|Contraseña:",
+        "action": "press",
+        "key": "Enter",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña:",
+          "css:#PasswordE",
+          "id:PasswordE"
+        ],
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/",
+        "routeAfter": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+        "stateScope": "e8a6102a3835",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-13",
+        "controlIdentity": "e8a6102a3835|SMS",
+        "semanticField": "SMS",
+        "action": "click",
+        "valueKey": "sms",
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "technicalTargetRefs": [],
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "SMS",
+          "targetTag": "div",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"SMS\"",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+        "stateScope": "e8a6102a3835",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-15",
+        "controlIdentity": "e8a6102a3835|control",
+        "action": "fill",
+        "sourceEventRefs": [
+          "event-15",
+          "event-16",
+          "event-17",
+          "event-18",
+          "event-19",
+          "event-22"
+        ],
+        "technicalTargetRefs": [],
+        "editingSessionRef": "edit-5",
+        "playwrightRecorderEvidence": {
+          "kind": "segmented_input",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "IdentifyUserForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "segmentCount": 6
+        },
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+        "stateScope": "e8a6102a3835",
+        "admissionStatus": "unresolved",
+        "admissionReason": "segmented_input_runtime_resolution_required",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-23",
+        "controlIdentity": "e8a6102a3835|control",
+        "action": "click",
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "input"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "IdentifyUserForm"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"input\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+        "routeAfter": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "stateScope": "e8a6102a3835",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "unresolved",
+        "admissionReason": "generic_label_without_technical_identity",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7
+      }
+    ],
+    "entityActionBlocks": [],
+    "readiness": {
+      "functionalReadiness": true,
+      "dataReadiness": false,
+      "technicalReadiness": false,
+      "oracleReadiness": false,
+      "reviewReadiness": false,
+      "publicationContentReadiness": true,
+      "executionReadiness": false,
+      "publicationReadiness": false,
+      "missingInputs": [
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña:",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 4,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "unresolved_value_15",
+          "semanticField": "Campo pendiente de identificar",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 7,
+          "controlType": "segmented_6",
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "datasetAuthorityMismatches": [],
+      "dataReadinessReasons": [
+        "missing_runtime_input:contrasena",
+        "missing_runtime_input:unresolved_value_15",
+        "RUNTIME_DATA_REQUIRED"
+      ]
+    },
+    "technicalKnowledgeRefs": [
+      "obs-4",
+      "obs-7",
+      "obs-9",
+      "obs-10",
+      "obs-11",
+      "obs-13",
+      "obs-15",
+      "obs-16",
+      "obs-17",
+      "obs-18",
+      "obs-19",
+      "obs-22",
+      "obs-23"
+    ],
+    "runtimeInputRequirements": [
+      {
+        "valueKey": "rnc",
+        "semanticField": "RNC:",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "130287287",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 2,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "recorded_confirmed",
+        "authorityValue": null,
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "usuario",
+        "semanticField": "Usuario:",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "stmoreno1",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 3,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "stmoreno1",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "contrasena",
+        "semanticField": "Contraseña:",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": null,
+        "source": "unresolved",
+        "resolved": false,
+        "sensitive": true,
+        "stepIndex": 4,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "unresolved",
+        "authorityValue": null,
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "unresolved_value_15",
+        "semanticField": "Campo pendiente de identificar",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": null,
+        "source": "unresolved",
+        "resolved": false,
+        "sensitive": true,
+        "stepIndex": 7,
+        "controlType": "segmented_6",
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "unresolved",
+        "authorityValue": null,
+        "datasetAuthorityMismatch": false
+      }
+    ],
+    "runtimeDataset": {
+      "scenarioId": "REC-EFFF98E2-01-MUT-field_omission",
+      "requirements": [
+        {
+          "valueKey": "rnc",
+          "semanticField": "RNC:",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "130287287",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 2,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "recorded_confirmed",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "usuario",
+          "semanticField": "Usuario:",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "stmoreno1",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 3,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "stmoreno1",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña:",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 4,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "unresolved_value_15",
+          "semanticField": "Campo pendiente de identificar",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 7,
+          "controlType": "segmented_6",
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "resolvedValues": {
+        "rnc": "130287287",
+        "usuario": "stmoreno1"
+      },
+      "missingValues": [
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña:",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 4,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "unresolved_value_15",
+          "semanticField": "Campo pendiente de identificar",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 7,
+          "controlType": "segmented_6",
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        }
+      ]
+    },
+    "mutationOpportunities": [
+      {
+        "opportunityId": "REC-EFFF98E2-01:field_omission",
+        "title": "Tr record: comprobar la omisión de un dato",
+        "mutationType": "FIELD_OMISSION",
+        "basePrimaryScenarioId": "REC-EFFF98E2-01",
+        "operations": [
+          {
+            "type": "remove_action",
+            "interactionId": "interaction-7"
+          }
+        ],
+        "evidenceRefs": [
+          "event-1",
+          "event-2",
+          "event-3",
+          "event-4",
+          "event-5",
+          "event-6",
+          "event-7",
+          "event-8",
+          "event-9",
+          "event-10",
+          "event-11",
+          "event-12",
+          "event-13",
+          "event-14",
+          "event-15",
+          "event-16",
+          "event-17",
+          "event-18",
+          "event-19",
+          "event-20",
+          "event-21",
+          "event-22",
+          "event-23"
+        ],
+        "rationale": "Existen varios inputs observados; se propone una omisión agrupada sin inventar el resultado.",
+        "oracleAuthority": "MISSING",
+        "confidence": 0.5,
+        "needsReview": true
+      }
+    ],
+    "runtimeExecutionBlockedByData": false,
+    "mutation": {
+      "opportunityId": "REC-EFFF98E2-01:field_omission",
+      "title": "Tr record: comprobar la omisión de un dato",
+      "mutationType": "FIELD_OMISSION",
+      "basePrimaryScenarioId": "REC-EFFF98E2-01",
+      "operations": [
+        {
+          "type": "remove_action",
+          "interactionId": "interaction-7"
+        }
+      ],
+      "evidenceRefs": [
+        "event-1",
+        "event-2",
+        "event-3",
+        "event-4",
+        "event-5",
+        "event-6",
+        "event-7",
+        "event-8",
+        "event-9",
+        "event-10",
+        "event-11",
+        "event-12",
+        "event-13",
+        "event-14",
+        "event-15",
+        "event-16",
+        "event-17",
+        "event-18",
+        "event-19",
+        "event-20",
+        "event-21",
+        "event-22",
+        "event-23"
+      ],
+      "rationale": "Existen varios inputs observados; se propone una omisión agrupada sin inventar el resultado.",
+      "oracleAuthority": "MISSING",
+      "confidence": 0.5,
+      "needsReview": true
+    },
+    "reviewStatus": "PENDING",
+    "suggestionCategory": "DERIVED_VALIDATION",
+    "scenarioSpecificSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Presionar \"Empresarial\"",
+        "sourceEventRefs": [
+          "event-4"
+        ],
+        "renderedStep": "Presionar \"Empresarial\"",
+        "interactionId": "interaction-4",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/",
+        "stateScope": "e8a6102a3835",
+        "stepNumber": 2
+      },
+      {
+        "content": "Ingresar [usuario] en \"Usuario:\"",
+        "sourceEventRefs": [
+          "event-9"
+        ],
+        "stepTemplate": "Ingresar [usuario] en \"Usuario:\"",
+        "renderedStep": "Ingresar \"stmoreno1\" en \"Usuario:\"",
+        "valueKey": "usuario",
+        "interactionId": "interaction-9",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/",
+        "stateScope": "e8a6102a3835",
+        "stepNumber": 3
+      },
+      {
+        "content": "Ingresar [contrasena] en \"Contraseña:\"",
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "stepTemplate": "Ingresar [contrasena] en \"Contraseña:\"",
+        "renderedStep": "Ingresar el valor seguro asociado a \"Contraseña:\"",
+        "valueKey": "contrasena",
+        "interactionId": "interaction-10",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/",
+        "stateScope": "e8a6102a3835",
+        "stepNumber": 4
+      },
+      {
+        "content": "Presionar \"Enter\" en \"Contraseña:\"",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "renderedStep": "Presionar \"Enter\" en \"Contraseña:\"",
+        "interactionId": "interaction-11",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/",
+        "routeAfter": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+        "stateScope": "e8a6102a3835",
+        "stepNumber": 5
+      },
+      {
+        "content": "Presionar \"SMS\"",
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "renderedStep": "Presionar \"SMS\"",
+        "interactionId": "interaction-13",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+        "stateScope": "e8a6102a3835",
+        "stepNumber": 6
+      },
+      {
+        "content": "Ingresar dígito 1 de 6 en \"Campo pendiente de identificar\"",
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "renderedStep": "Ingresar dígito 1 de 6 en \"Campo pendiente de identificar\"",
+        "valueKey": "unresolved_value_15",
+        "interactionId": "interaction-15",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+        "stateScope": "e8a6102a3835",
+        "stepNumber": 7
+      },
+      {
+        "content": "Ingresar dígito 2 de 6 en \"Campo pendiente de identificar\"",
+        "sourceEventRefs": [
+          "event-16"
+        ],
+        "renderedStep": "Ingresar dígito 2 de 6 en \"Campo pendiente de identificar\"",
+        "valueKey": "unresolved_value_15",
+        "interactionId": "interaction-16",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "stepNumber": 8
+      },
+      {
+        "content": "Ingresar dígito 3 de 6 en \"Campo pendiente de identificar\"",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "renderedStep": "Ingresar dígito 3 de 6 en \"Campo pendiente de identificar\"",
+        "valueKey": "unresolved_value_15",
+        "interactionId": "interaction-17",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "stepNumber": 9
+      },
+      {
+        "content": "Ingresar dígito 4 de 6 en \"Campo pendiente de identificar\"",
+        "sourceEventRefs": [
+          "event-18"
+        ],
+        "renderedStep": "Ingresar dígito 4 de 6 en \"Campo pendiente de identificar\"",
+        "valueKey": "unresolved_value_15",
+        "interactionId": "interaction-18",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "stepNumber": 10
+      },
+      {
+        "content": "Ingresar dígito 5 de 6 en \"Campo pendiente de identificar\"",
+        "sourceEventRefs": [
+          "event-19"
+        ],
+        "renderedStep": "Ingresar dígito 5 de 6 en \"Campo pendiente de identificar\"",
+        "valueKey": "unresolved_value_15",
+        "interactionId": "interaction-19",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "stepNumber": 11
+      },
+      {
+        "content": "Ingresar dígito 6 de 6 en \"Campo pendiente de identificar\"",
+        "sourceEventRefs": [
+          "event-22"
+        ],
+        "renderedStep": "Ingresar dígito 6 de 6 en \"Campo pendiente de identificar\"",
+        "valueKey": "unresolved_value_15",
+        "interactionId": "interaction-22",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "stepNumber": 12
+      },
+      {
+        "content": "Presionar el control indicado",
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "renderedStep": "Presionar el control indicado",
+        "interactionId": "interaction-23",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "e8a6102a3835",
+        "screenAfterRef": "e8a6102a3835",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+        "routeAfter": "https://qa1.santacruz.do/onlinebanking/QueryBank/Summary",
+        "stateScope": "e8a6102a3835",
+        "stepNumber": 13
+      }
+    ],
+    "mutationDiagnostics": {
+      "materializedSemanticSignature": "{\"interactions\":[\"navigation|inicio||||\",\"click|e8a6102a3835|Empresarial|role|link|Empresarial||empresarial||Ingresar en \\\"Empresarial\\\"\",\"fill|e8a6102a3835|Usuario:|role|textbox|Usuario:||usuario|stmoreno1|Ingresar en \\\"Usuario:\\\"\",\"fill|e8a6102a3835|Contraseña:|role|textbox|Contraseña:||contrasena||Ingresar en \\\"Contraseña:\\\"\",\"press|e8a6102a3835|Contraseña:|role|textbox|Contraseña:||||\",\"click|e8a6102a3835|SMS||sms||Ingresar en \\\"SMS\\\"\",\"fill|e8a6102a3835|control||||\",\"click|e8a6102a3835|control||||\"],\"steps\":[\"|||FUNCTIONAL_ACTION|Abrir la aplicación configurada del proyecto\",\"interaction-4|||FUNCTIONAL_ACTION|Presionar \\\"Empresarial\\\"\",\"interaction-9||usuario|FUNCTIONAL_ACTION|Ingresar [usuario] en \\\"Usuario:\\\"\",\"interaction-10||contrasena|FUNCTIONAL_ACTION|Ingresar [contrasena] en \\\"Contraseña:\\\"\",\"interaction-11|||FUNCTIONAL_ACTION|Presionar \\\"Enter\\\" en \\\"Contraseña:\\\"\",\"interaction-13|||FUNCTIONAL_ACTION|Presionar \\\"SMS\\\"\",\"interaction-15||unresolved_value_15|FUNCTIONAL_ACTION|Ingresar dígito 1 de 6 en \\\"Campo pendiente de identificar\\\"\",\"interaction-16||unresolved_value_15|FUNCTIONAL_ACTION|Ingresar dígito 2 de 6 en \\\"Campo pendiente de identificar\\\"\",\"interaction-17||unresolved_value_15|FUNCTIONAL_ACTION|Ingresar dígito 3 de 6 en \\\"Campo pendiente de identificar\\\"\",\"interaction-18||unresolved_value_15|FUNCTIONAL_ACTION|Ingresar dígito 4 de 6 en \\\"Campo pendiente de identificar\\\"\",\"interaction-19||unresolved_value_15|FUNCTIONAL_ACTION|Ingresar dígito 5 de 6 en \\\"Campo pendiente de identificar\\\"\",\"interaction-22||unresolved_value_15|FUNCTIONAL_ACTION|Ingresar dígito 6 de 6 en \\\"Campo pendiente de identificar\\\"\",\"interaction-23|||FUNCTIONAL_ACTION|Presionar el control indicado\"],\"values\":[\"contrasena\",\"rnc\",\"unresolved_value_15\",\"usuario\"]}",
+      "primarySemanticSignature": "{\"interactions\":[\"navigation|inicio||||\",\"click|e8a6102a3835|Empresarial|role|link|Empresarial||empresarial||Ingresar en \\\"Empresarial\\\"\",\"fill|e8a6102a3835|RNC:|role|textbox|RNC:||rnc|130287287|Ingresar en \\\"RNC:\\\"\",\"fill|e8a6102a3835|Usuario:|role|textbox|Usuario:||usuario|stmoreno1|Ingresar en \\\"Usuario:\\\"\",\"fill|e8a6102a3835|Contraseña:|role|textbox|Contraseña:||contrasena||Ingresar en \\\"Contraseña:\\\"\",\"press|e8a6102a3835|Contraseña:|role|textbox|Contraseña:||||\",\"click|e8a6102a3835|SMS||sms||Ingresar en \\\"SMS\\\"\",\"fill|e8a6102a3835|control||||\",\"click|e8a6102a3835|control||||\"],\"steps\":[\"|||FUNCTIONAL_ACTION|Abrir la aplicación configurada del proyecto\",\"interaction-4|||FUNCTIONAL_ACTION|Presionar \\\"Empresarial\\\"\",\"interaction-7||rnc|FUNCTIONAL_ACTION|Ingresar [rnc] en \\\"RNC:\\\"\",\"interaction-9||usuario|FUNCTIONAL_ACTION|Ingresar [usuario] en \\\"Usuario:\\\"\",\"interaction-10||contrasena|FUNCTIONAL_ACTION|Ingresar [contrasena] en \\\"Contraseña:\\\"\",\"interaction-11|||FUNCTIONAL_ACTION|Presionar \\\"Enter\\\" en \\\"Contraseña:\\\"\",\"interaction-13|||FUNCTIONAL_ACTION|Presionar \\\"SMS\\\"\",\"interaction-15||unresolved_value_15|FUNCTIONAL_ACTION|Ingresar dígito 1 de 6 en \\\"Campo pendiente de identificar\\\"\",\"interaction-16||unresolved_value_15|FUNCTIONAL_ACTION|Ingresar dígito 2 de 6 en \\\"Campo pendiente de identificar\\\"\",\"interaction-17||unresolved_value_15|FUNCTIONAL_ACTION|Ingresar dígito 3 de 6 en \\\"Campo pendiente de identificar\\\"\",\"interaction-18||unresolved_value_15|FUNCTIONAL_ACTION|Ingresar dígito 4 de 6 en \\\"Campo pendiente de identificar\\\"\",\"interaction-19||unresolved_value_15|FUNCTIONAL_ACTION|Ingresar dígito 5 de 6 en \\\"Campo pendiente de identificar\\\"\",\"interaction-22||unresolved_value_15|FUNCTIONAL_ACTION|Ingresar dígito 6 de 6 en \\\"Campo pendiente de identificar\\\"\",\"interaction-23|||FUNCTIONAL_ACTION|Presionar el control indicado\"],\"values\":[\"contrasena\",\"rnc\",\"unresolved_value_15\",\"usuario\"]}",
+      "stepsAdded": 0,
+      "stepsRemoved": 1,
+      "stepsReplaced": 0,
+      "entityScopesAdded": [],
+      "valueKeysAdded": [],
+      "valueKeysRemoved": [],
+      "mutationPreconditionValidity": {
+        "status": "valid",
+        "checkedValueKeys": [],
+        "invalidValueKeys": [],
+        "reasons": []
+      }
+    },
+    "mutationPreconditionValidity": {
+      "status": "valid",
+      "checkedValueKeys": [],
+      "invalidValueKeys": [],
+      "reasons": []
+    },
+    "goalRelevanceScore": 0.55,
+    "goalRelevanceReasons": [
+      "shared_semantic_tokens:1",
+      "candidate_has_observed_data",
+      "shared_entity_without_operation_evidence"
+    ],
+    "rationale": "Derivado de evidencia observada y separado del recorrido principal."
+  }
+]

@@ -1,0 +1,59 @@
+{
+  "appSlug": "kiosko",
+  "sectionSlug": "default-section",
+  "scenarioId": "PREVIEW-001",
+  "scenarioTitle": "Consulta Tarjeta",
+  "stepCount": 5,
+  "sourceExpectedResultPresent": true,
+  "requiredAssertionCount": 1,
+  "mode": "ai_hybrid",
+  "functionalExecutionEnabled": true,
+  "provider": "codex",
+  "model": "gpt-5.6-luna",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "observableOracles": [
+    {
+      "id": "expected-01",
+      "requirement": "La aplicación carga su pantalla inicial",
+      "type": "navigation_transition",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 5,
+      "polarity": "positive",
+      "target": "Finalizar sesión",
+      "evidence": [
+        "transition_observed:true",
+        "click_target:Finalizar sesión",
+        "action_type:Presionar \"Finalizar sesión\"",
+        "after_url:https://172.27.4.50/",
+        "assertion_polarity:positive"
+      ],
+      "details": {
+        "transitionObserved": true,
+        "clickTarget": "Finalizar sesión",
+        "resolvedTarget": null,
+        "postClickUiChange": null,
+        "sourceActionStepIndex": 5,
+        "expectedUrl": "https://172.27.4.50/"
+      }
+    }
+  ],
+  "oracleTypes": [
+    "navigation_transition"
+  ],
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [],
+  "finalSpec": {
+    "origin": "deterministic_draft",
+    "generatedBy": "core",
+    "strategy": "deterministic_draft",
+    "fallback": null
+  }
+}

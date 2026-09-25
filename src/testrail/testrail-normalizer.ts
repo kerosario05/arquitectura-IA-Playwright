@@ -292,21 +292,46 @@ function splitIntoSteps(customSteps: string): TestScenarioStep[] {
   }
 
   const actions = expandedParts.length > 0 ? expandedParts : [normalized];
+
+  const parsedActions: Array<{ action: string; expected?: string }> = [];
+  for (const rawAction of actions) {
+    const lines = rawAction.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+    const expectedLines = lines
+      .filter((line) => /^esperado\s*:/i.test(line))
+      .map((line) => line.replace(/^esperado\s*:\s*/i, "").trim())
+      .filter(Boolean);
+    const actionLines = lines.filter((line) => !/^esperado\s*:/i.test(line));
+    const action = actionLines.join("\n").trim();
+
+    if (!action && expectedLines.length > 0 && parsedActions.length > 0) {
+      parsedActions[parsedActions.length - 1]!.expected = expectedLines.join("\n");
+      continue;
+    }
+
+    if (action) {
+      parsedActions.push({
+        action,
+        ...(expectedLines.length > 0 ? { expected: expectedLines.join("\n") } : {}),
+      });
+    }
+  }
+
+  const parsed = parsedActions.length > 0 ? parsedActions : [{ action: normalized }];
   
   // Diagnostic logging
-  console.log(`[testcase-parser] parsedSteps=${actions.length} source=testrail`);
+  console.log(`[testcase-parser] parsedSteps=${parsed.length} source=testrail`);
   console.log(`[testcase-parser] htmlListDetected=${hasHtmlLists} lineBreaksPreserved=${hasLineBreaks || repairResult.wasRepaired}`);
   
-  if (actions.length === 1 && repairResult.verbsDetected > 1) {
+  if (parsed.length === 1 && repairResult.verbsDetected > 1) {
     console.log(`[testcase-parser] suspiciousConcatenatedSteps=true verbsDetected=${repairResult.verbsDetected} originalLength=${normalized.length}`);
   }
   
-  return actions.map((action, index) => {
+  return parsed.map((step, index) => {
     return {
       index: index + 1,
-      action,
-      expected: undefined,
-      dataHints: extractDataHintsFromText(action)
+      action: step.action,
+      expected: step.expected,
+      dataHints: extractDataHintsFromText(`${step.action}\n${step.expected ?? ""}`)
     };
   });
 }

@@ -8,8 +8,19 @@ import { AiProviderError } from "../ai/ai-provider.types";
 import type { AppAutomationPaths, AppProfile } from "./app-profile";
 import type { ExecutionPlan } from "../types/execution-plan.types";
 import type { PageObjectRegistry } from "../types/page-object.types";
+import { readFileSync } from "node:fs";
 import {
+  CANDIDATE_NAVIGATION_HEADROOM_MS,
+  classifyPreBusinessFailure,
+  computeRuntimeGateDecision,
+  extractChildRuntimeTelemetry,
+  extractFailedPromotedStepIndex,
+  getFailedSpecValidationNames,
+  isFunctionalExecutionInfrastructureFailure,
+  isInitialReadinessInfrastructureFailure,
+  isUnresolvedRuntimeTimeout,
   normalizeMojibakeUtf8,
+  resolveCandidateFunctionalExecutionTimeoutMs,
   repairMissingExpectImport,
   rewritePromotedRuntimeImport,
   runHybridSpecGeneration,
@@ -1406,6 +1417,7 @@ test("hybrid spec generation", async (t) => {
       assert.strictEqual(functionalLaunch?.source, "cli");
     });
   });
+
 
   await t.test("undeclared identifier blocks promotion", async () => {
     const appPaths = await createTmpPaths();
@@ -4795,5 +4807,356 @@ test("hybrid spec generation", async (t) => {
 
     assert.ok(rewritten.includes("const x = 1;"));
     assert.ok(rewritten.includes("createPromotedSpecRuntime"));
+  });
+});
+
+// Minimal glob matcher: only needs to support the "**" and "*" tokens used by the
+// project's own playwright.config*.ts testMatch arrays. Not a general-purpose glob library.
+function globToRegExp(pattern: string): RegExp {
+  const escaped = pattern
+    .split("**").join(" DOUBLESTAR ")
+    .replace(/[.+^${}()|[\]\\]/g, "\\$&")
+    .split("*").join("[^/]*")
+    .split(" DOUBLESTAR ").join(".*");
+  return new RegExp(`^${escaped}$`);
+}
+
+function matchesAnyTestMatch(testMatch: string[], relativePath: string): boolean {
+  return testMatch.some((pattern) => globToRegExp(pattern).test(relativePath));
+}
+
+async function readConfigTestMatch(configFileName: string): Promise<string[]> {
+  const configPath = path.resolve(process.cwd(), configFileName);
+  const source = await fs.readFile(configPath, "utf-8");
+  const match = source.match(/testMatch:\s*\[([\s\S]*?)\]/);
+  assert.ok(match, `${configFileName} must declare a testMatch array`);
+  return [...match![1].matchAll(/["']([^"']+)["']/g)].map((m) => m[1]);
+}
+
+test("functional-execution boundary fix: candidate discoverability and infra-failure classification", async (t) => {
+  const CANDIDATE_RELATIVE_PATH = "automations/apps/kiosko/sections/default-section/cases/preview-001-consultar-tarjeta/spec-generation/candidate.spec.ts";
+
+  await t.test("1. candidate.spec.ts is discoverable under the exact functional-execution runtime config", async () => {
+    const functionalTestMatch = await readConfigTestMatch("playwright.config.apps.candidate.ts");
+    assert.ok(
+      matchesAnyTestMatch(functionalTestMatch, CANDIDATE_RELATIVE_PATH),
+      "playwright.config.apps.candidate.ts's testMatch must match the pre-promotion candidate path"
+    );
+  });
+
+  await t.test("2. static discovery config and functional-execution config resolve the same candidate file authority", async () => {
+    const [discoveryTestMatch, functionalTestMatch] = await Promise.all([
+      readConfigTestMatch("playwright.config.ts"),
+      readConfigTestMatch("playwright.config.apps.candidate.ts"),
+    ]);
+    assert.ok(
+      matchesAnyTestMatch(discoveryTestMatch, CANDIDATE_RELATIVE_PATH),
+      "playwright.config.ts (used by playwrightDiscovery) must match the candidate path"
+    );
+    assert.ok(
+      matchesAnyTestMatch(functionalTestMatch, CANDIDATE_RELATIVE_PATH),
+      "playwright.config.apps.candidate.ts (used by functionalExecution) must match the same candidate path"
+    );
+    // The real promoted-runtime config must still exclude the candidate — the fix must not
+    // loosen the anti-directory-traversal guard used for actually-promoted specs.
+    const promotedTestMatch = await readConfigTestMatch("playwright.config.apps.ts");
+    assert.ok(
+      !matchesAnyTestMatch(promotedTestMatch, CANDIDATE_RELATIVE_PATH),
+      "playwright.config.apps.ts must continue to reject spec-generation/candidate.spec.ts"
+    );
+  });
+
+  await t.test("3. \"No tests found\" is classified as an infrastructure failure, not a candidate defect", () => {
+    assert.strictEqual(
+      isFunctionalExecutionInfrastructureFailure(false, "Error: No tests found\n"),
+      true
+    );
+    assert.strictEqual(
+      isFunctionalExecutionInfrastructureFailure(false, "1) case.spec.ts:12:5 assertion failed"),
+      false
+    );
+    assert.strictEqual(
+      isFunctionalExecutionInfrastructureFailure(true, "Total: 1 test in 1 file\nNo tests found in stray log line"),
+      false,
+      "ok=true must never be classified as an infrastructure failure regardless of stray output text"
+    );
+  });
+
+  await t.test("4. \"No tests found\" (skipped) yields runtimeStarted=false / no proven pass or fail / promotion blocked", () => {
+    const { runtimeGatePassed, runtimeGateResult } = computeRuntimeGateDecision(true, "skipped");
+    assert.strictEqual(runtimeGatePassed, false);
+    assert.strictEqual(runtimeGateResult.decision, "defer");
+    assert.strictEqual(runtimeGateResult.promotionAllowed, false);
+    assert.strictEqual(runtimeGateResult.promotionStatus, "deferred");
+    assert.deepStrictEqual(runtimeGateResult.failedSteps, [], "no required step is fabricated as failed");
+    assert.match(runtimeGateResult.reason, /runtime did not execute/);
+  });
+
+  await t.test("5. \"No tests found\" blocks promotion (never treated as an implicit pass)", () => {
+    const { runtimeGateResult } = computeRuntimeGateDecision(true, "skipped");
+    assert.strictEqual(runtimeGateResult.promotionAllowed, false);
+  });
+
+  await t.test("6. \"No tests found\" (skipped) does not appear in the AI-repair failed-gate list", () => {
+    const validationWithInfraFailure = {
+      schema: "passed" as const,
+      structure: "passed" as const,
+      traceFidelity: "passed" as const,
+      typescript: "passed" as const,
+      playwrightDiscovery: "passed" as const,
+      semanticCoverage: "passed" as const,
+      functionalExecution: "skipped" as const,
+    };
+    assert.deepStrictEqual(getFailedSpecValidationNames(validationWithInfraFailure), []);
+  });
+
+  await t.test("7a. a real candidate runtime failure (post-test-start) still counts as repairable", () => {
+    const validationWithRealFailure = {
+      schema: "passed" as const,
+      structure: "passed" as const,
+      traceFidelity: "passed" as const,
+      typescript: "passed" as const,
+      playwrightDiscovery: "passed" as const,
+      semanticCoverage: "passed" as const,
+      functionalExecution: "failed" as const,
+    };
+    assert.deepStrictEqual(getFailedSpecValidationNames(validationWithRealFailure), ["functionalExecution"]);
+  });
+
+  await t.test("7b. existing successful functional execution still promotes", () => {
+    const { runtimeGatePassed, runtimeGateResult } = computeRuntimeGateDecision(true, "passed");
+    assert.strictEqual(runtimeGatePassed, true);
+    assert.strictEqual(runtimeGateResult.decision, "promote");
+    assert.strictEqual(runtimeGateResult.promotionAllowed, true);
+    assert.strictEqual(runtimeGateResult.promotionStatus, "promoted");
+  });
+
+  await t.test("8. \"initial_readiness_failure\" (pre-business) is classified as an infrastructure failure, not a candidate defect", () => {
+    assert.strictEqual(
+      isFunctionalExecutionInfrastructureFailure(false, "Error: initial_readiness_failure"),
+      true
+    );
+    assert.strictEqual(
+      isInitialReadinessInfrastructureFailure("Error: initial_readiness_failure"),
+      true
+    );
+    assert.strictEqual(
+      isInitialReadinessInfrastructureFailure("Error: No tests found\n"),
+      false,
+      "the two infrastructure-failure shapes must remain distinguishable for classification/logging"
+    );
+    assert.strictEqual(
+      isFunctionalExecutionInfrastructureFailure(true, "initial_readiness_failure mentioned in a stray log line"),
+      false,
+      "ok=true must never be classified as an infrastructure failure regardless of stray output text"
+    );
+  });
+
+  await t.test("9. \"initial_readiness_failure\" (skipped) yields no proven pass/fail and blocks promotion, and never reaches AI repair", () => {
+    const { runtimeGatePassed, runtimeGateResult } = computeRuntimeGateDecision(true, "skipped");
+    assert.strictEqual(runtimeGatePassed, false);
+    assert.strictEqual(runtimeGateResult.decision, "defer");
+    assert.strictEqual(runtimeGateResult.promotionAllowed, false);
+    assert.deepStrictEqual(runtimeGateResult.failedSteps, [], "no required step is fabricated as failed");
+
+    const validationWithInitialReadinessFailure = {
+      schema: "passed" as const,
+      structure: "passed" as const,
+      traceFidelity: "passed" as const,
+      typescript: "passed" as const,
+      playwrightDiscovery: "passed" as const,
+      semanticCoverage: "passed" as const,
+      functionalExecution: "skipped" as const,
+    };
+    assert.deepStrictEqual(
+      getFailedSpecValidationNames(validationWithInitialReadinessFailure),
+      [],
+      "initial_readiness_failure must not spend an AI repair attempt"
+    );
+  });
+
+  await t.test("10. structured promoted-runtime telemetry lines are extracted from the child's captured output, not the full Playwright noise", () => {
+    const combinedOutput = [
+      "Running 1 test using 1 worker",
+      "[promoted-initial-navigation] phase=runtime appSlug=kiosko rawAppBaseUrl=present resolvedUrlSource=child_env currentUrlBefore=about:blank navigationRequired=true gotoInvoked=true currentUrlAfter=https://172.27.4.50/ readinessReady=true readinessReason=none",
+      "[initial-navigation] phase=goto_start url=https://172.27.4.50/",
+      "[initial-readiness] phase=complete ready=true durationMs=812 reason=none",
+      "[evidence:initial] scenarioId=PREVIEW-001 executionSource=promoted_reuse status=load_failed captured=true beforeStepIndex=1 reason=initial_readiness_timeout",
+      "[screen-context-field-signals] target=Usuario count=2 signals=[\"ingresa tu usuario\",\"username\"] captureError=none",
+      "[async-wait] state=active phase=post_press",
+      "[async-wait] state=success elapsedMs=2496",
+      "[async-wait-provenance] implementationId=completion-probe-authoritative-v1 completionProbeProvided=true",
+      "[promoted-press-wait] completionProbeCreated=true sharedWaitCall=true",
+      "[selection-runtime] phase=before_dispatch probeAvailable=true snapshot=\"checked=false selected=absent ariaSelected=not_observed ariaChecked=false dataState=not_observed classStateRelevant=not_observed\"",
+      "[selection-runtime] phase=after_dispatch probeAvailable=true before=\"checked=false selected=absent ariaSelected=not_observed ariaChecked=false dataState=not_observed classStateRelevant=not_observed\" snapshot=\"checked=true selected=absent ariaSelected=not_observed ariaChecked=true dataState=not_observed classStateRelevant=not_observed\" transitionDetected=true",
+      "  1) case.spec.ts:12:5 some unrelated Playwright noise line",
+      "1 failed",
+    ].join("\n");
+
+    const telemetry = extractChildRuntimeTelemetry(combinedOutput);
+    assert.deepStrictEqual(telemetry, [
+      "[promoted-initial-navigation] phase=runtime appSlug=kiosko rawAppBaseUrl=present resolvedUrlSource=child_env currentUrlBefore=about:blank navigationRequired=true gotoInvoked=true currentUrlAfter=https://172.27.4.50/ readinessReady=true readinessReason=none",
+      "[initial-navigation] phase=goto_start url=https://172.27.4.50/",
+      "[initial-readiness] phase=complete ready=true durationMs=812 reason=none",
+      "[evidence:initial] scenarioId=PREVIEW-001 executionSource=promoted_reuse status=load_failed captured=true beforeStepIndex=1 reason=initial_readiness_timeout",
+      "[screen-context-field-signals] target=Usuario count=2 signals=[\"ingresa tu usuario\",\"username\"] captureError=none",
+      "[async-wait] state=active phase=post_press",
+      "[async-wait] state=success elapsedMs=2496",
+      "[async-wait-provenance] implementationId=completion-probe-authoritative-v1 completionProbeProvided=true",
+      "[promoted-press-wait] completionProbeCreated=true sharedWaitCall=true",
+      "[selection-runtime] phase=before_dispatch probeAvailable=true snapshot=\"checked=false selected=absent ariaSelected=not_observed ariaChecked=false dataState=not_observed classStateRelevant=not_observed\"",
+      "[selection-runtime] phase=after_dispatch probeAvailable=true before=\"checked=false selected=absent ariaSelected=not_observed ariaChecked=false dataState=not_observed classStateRelevant=not_observed\" snapshot=\"checked=true selected=absent ariaSelected=not_observed ariaChecked=true dataState=not_observed classStateRelevant=not_observed\" transitionDetected=true",
+    ]);
+    assert.ok(
+      !telemetry.some((line) => line.includes("Playwright noise")),
+      "generic Playwright output must not be mistaken for structured runtime telemetry"
+    );
+  });
+
+  await t.test("11. pre-business classification distinguishes navigation vs shared-readiness vs initial-evidence causes by the child's own reported readinessReason", () => {
+    const navigationFailure = "[promoted-initial-navigation] phase=runtime appSlug=kiosko rawAppBaseUrl=missing resolvedUrlSource=none currentUrlBefore=about:blank navigationRequired=true gotoInvoked=false currentUrlAfter=about:blank readinessReady=false readinessReason=app_base_url_missing";
+    assert.strictEqual(classifyPreBusinessFailure(navigationFailure), "PRE_BUSINESS_NAVIGATION_FAILED");
+
+    const gotoFailure = "[promoted-initial-navigation] phase=runtime appSlug=kiosko rawAppBaseUrl=present resolvedUrlSource=child_env currentUrlBefore=about:blank navigationRequired=true gotoInvoked=true currentUrlAfter=about:blank readinessReady=false readinessReason=navigation_failed";
+    assert.strictEqual(classifyPreBusinessFailure(gotoFailure), "PRE_BUSINESS_NAVIGATION_FAILED");
+
+    const sharedReadinessFailure = "[promoted-initial-navigation] phase=runtime appSlug=kiosko rawAppBaseUrl=present resolvedUrlSource=child_env currentUrlBefore=about:blank navigationRequired=true gotoInvoked=true currentUrlAfter=https://172.27.4.50/ readinessReady=false readinessReason=readiness_error";
+    assert.strictEqual(classifyPreBusinessFailure(sharedReadinessFailure), "PRE_BUSINESS_SHARED_READINESS_FAILED");
+
+    const initialEvidenceFailure = "[promoted-initial-navigation] phase=runtime appSlug=kiosko rawAppBaseUrl=present resolvedUrlSource=child_env currentUrlBefore=about:blank navigationRequired=true gotoInvoked=true currentUrlAfter=https://172.27.4.50/ readinessReady=true readinessReason=none\n[evidence:initial] status=load_failed reason=initial_readiness_timeout";
+    assert.strictEqual(classifyPreBusinessFailure(initialEvidenceFailure), "PRE_BUSINESS_INITIAL_EVIDENCE_FAILED");
+  });
+
+  await t.test("12. pre-business failure classifications never fabricate a required-step failure or allow promotion/AI repair", () => {
+    for (const combinedOutput of [
+      "Error: initial_readiness_failure: APP_BASE_URL is required to navigate before first business action",
+      "Error: initial_readiness_failure: navigation_failed reason=net::ERR_CONNECTION_REFUSED",
+      "Error: initial_readiness_failure: readiness_error reason=timeout",
+      "Error: initial_readiness_failure",
+    ]) {
+      assert.strictEqual(isFunctionalExecutionInfrastructureFailure(false, combinedOutput), true);
+      const { runtimeGatePassed, runtimeGateResult } = computeRuntimeGateDecision(true, "skipped");
+      assert.strictEqual(runtimeGatePassed, false);
+      assert.strictEqual(runtimeGateResult.promotionAllowed, false);
+      assert.deepStrictEqual(runtimeGateResult.failedSteps, []);
+      assert.deepStrictEqual(
+        getFailedSpecValidationNames({
+          schema: "passed" as const,
+          structure: "passed" as const,
+          traceFidelity: "passed" as const,
+          typescript: "passed" as const,
+          playwrightDiscovery: "passed" as const,
+          semanticCoverage: "passed" as const,
+          functionalExecution: "skipped" as const,
+        }),
+        [],
+        "no pre-business classification may spend an AI repair attempt"
+      );
+    }
+  });
+
+  await t.test("13. [promoted-step] lines are surfaced as structured child telemetry alongside the initial-navigation lines", () => {
+    const combinedOutput = [
+      "Running 1 test using 1 worker",
+      "[promoted-step] stepIndex=1 phase=start currentUrl=https://172.27.4.50/",
+      "[promoted-step] stepIndex=1 phase=passed currentUrl=https://172.27.4.50/",
+      "  1) case.spec.ts:12:5 some unrelated Playwright noise line",
+      "1 failed",
+    ].join("\n");
+    const telemetry = extractChildRuntimeTelemetry(combinedOutput);
+    assert.deepStrictEqual(telemetry, [
+      "[promoted-step] stepIndex=1 phase=start currentUrl=https://172.27.4.50/",
+      "[promoted-step] stepIndex=1 phase=passed currentUrl=https://172.27.4.50/",
+    ]);
+  });
+
+  await t.test("14. extractFailedPromotedStepIndex prefers the structured [promoted-step] phase=failed line over a bare stepIndex= fragment", () => {
+    assert.strictEqual(
+      extractFailedPromotedStepIndex("[promoted-step] stepIndex=4 phase=failed failureClass=click_not_resolved currentUrl=https://172.27.4.50/"),
+      4,
+    );
+    assert.strictEqual(
+      extractFailedPromotedStepIndex("Error: session_reset_unrecoverable: ... stepIndex=2 target=\"Tarjetas\""),
+      2,
+      "recovery-path throws without a [promoted-step] line still carry a real stepIndex= fragment",
+    );
+    assert.strictEqual(
+      extractFailedPromotedStepIndex("Test timeout of 30000ms exceeded.\ncase.spec.ts:4:5"),
+      undefined,
+      "no fabricated index when nothing in the output attributes a real step",
+    );
+  });
+
+  await t.test("15. REC-D8DBD8F9-01 reproduction: a bare whole-test timeout with every business step already evidenced as passed is RUNTIME_TIMEOUT_UNRESOLVED, not a fabricated step-0 failure", () => {
+    const combinedOutput = [
+      "Running 1 test using 1 worker",
+      "[promoted-initial-navigation] phase=runtime appSlug=kiosko rawAppBaseUrl=present resolvedUrlSource=child_env currentUrlBefore=about:blank navigationRequired=true gotoInvoked=true currentUrlAfter=https://172.27.4.50/ readinessReady=true readinessReason=none",
+      "[promoted-step] stepIndex=1 phase=start currentUrl=https://172.27.4.50/",
+      "[promoted-step] stepIndex=1 phase=passed currentUrl=https://172.27.4.50/",
+      "[promoted-step] stepIndex=5 phase=passed currentUrl=https://172.27.4.50/",
+      "[evidence] scenario=PREVIEW-001 status=Exitoso perScenarioDocxGenerated=false steps=6 screenshots=5",
+      "Test timeout of 30000ms exceeded.",
+    ].join("\n");
+    assert.strictEqual(isUnresolvedRuntimeTimeout(combinedOutput), true);
+    assert.strictEqual(isFunctionalExecutionInfrastructureFailure(false, combinedOutput), false, "this is not the no-tests-found/initial-readiness infrastructure shape");
+    assert.strictEqual(extractFailedPromotedStepIndex(combinedOutput), undefined);
+  });
+
+  await t.test("16. a real per-step candidate failure is never mistaken for an unresolved runtime timeout, even if the process later also times out", () => {
+    const combinedOutput = [
+      "[promoted-step] stepIndex=1 phase=failed failureClass=click_not_resolved currentUrl=https://172.27.4.50/",
+      "Error: Promoted click failed at step 1 target=\"Explora nuestros productos\". clickPath=failed",
+      "Test timeout of 30000ms exceeded.",
+    ].join("\n");
+    assert.strictEqual(isUnresolvedRuntimeTimeout(combinedOutput), false);
+    assert.strictEqual(extractFailedPromotedStepIndex(combinedOutput), 1);
+  });
+
+  await t.test("17. RUNTIME_TIMEOUT_UNRESOLVED must never spend an AI repair attempt (routes through the same skipped/unavailable no-repair path as infrastructure failures)", () => {
+    const validation = {
+      schema: "passed" as const,
+      structure: "passed" as const,
+      traceFidelity: "passed" as const,
+      typescript: "passed" as const,
+      playwrightDiscovery: "passed" as const,
+      semanticCoverage: "passed" as const,
+      functionalExecution: "skipped" as const, // RUNTIME_TIMEOUT_UNRESOLVED is reported as "skipped", never "failed"
+    };
+    assert.deepStrictEqual(getFailedSpecValidationNames(validation), []);
+    const { runtimeGatePassed, runtimeGateResult } = computeRuntimeGateDecision(true, validation.functionalExecution);
+    assert.strictEqual(runtimeGatePassed, false);
+    assert.strictEqual(runtimeGateResult.promotionAllowed, false);
+    assert.deepStrictEqual(runtimeGateResult.failedSteps, []);
+  });
+
+  await t.test("18. resolveCandidateFunctionalExecutionTimeoutMs derives a candidate-only budget from DEFAULT_TIMEOUT_MS plus the navigation headroom, never sharing the steady-state promoted timeout", () => {
+    assert.strictEqual(
+      resolveCandidateFunctionalExecutionTimeoutMs({ DEFAULT_TIMEOUT_MS: "30000" }),
+      30000 + CANDIDATE_NAVIGATION_HEADROOM_MS,
+    );
+    assert.strictEqual(
+      resolveCandidateFunctionalExecutionTimeoutMs({}),
+      30000 + CANDIDATE_NAVIGATION_HEADROOM_MS,
+      "DEFAULT_TIMEOUT_MS itself defaults to 30000, same as the other three playwright configs",
+    );
+  });
+
+  await t.test("19. an explicit CANDIDATE_FUNCTIONAL_EXECUTION_TIMEOUT_MS override wins outright, bypassing the derived formula", () => {
+    assert.strictEqual(
+      resolveCandidateFunctionalExecutionTimeoutMs({ DEFAULT_TIMEOUT_MS: "30000", CANDIDATE_FUNCTIONAL_EXECUTION_TIMEOUT_MS: "45000" }),
+      45000,
+    );
+  });
+
+  await t.test("20. playwright.config.apps.candidate.ts's inlined timeout formula stays in sync with resolveCandidateFunctionalExecutionTimeoutMs (drift guard)", () => {
+    // The config can't import spec-generation-hybrid.ts directly (Playwright's config loader
+    // resolves that require() through plain Node module resolution, which would prefer a stale
+    // compiled .js twin over the .ts source if one exists — see promoted-runtime-module-authority
+    // .test.ts for the exact hazard this avoids), so the formula is duplicated there. This just
+    // guards against the two copies silently drifting apart.
+    const configSource = readFileSync(path.resolve(__dirname, "../../playwright.config.apps.candidate.ts"), "utf8");
+    assert.match(configSource, new RegExp(`CANDIDATE_NAVIGATION_HEADROOM_MS\\s*=\\s*${CANDIDATE_NAVIGATION_HEADROOM_MS}\\b`));
+    assert.match(configSource, /CANDIDATE_FUNCTIONAL_EXECUTION_TIMEOUT_MS/);
+    assert.match(configSource, /DEFAULT_TIMEOUT_MS\s*\?\?\s*30000/);
   });
 });

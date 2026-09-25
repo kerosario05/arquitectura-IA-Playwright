@@ -1,0 +1,239 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.parseDiscoveryCaseArgs = parseDiscoveryCaseArgs;
+const env_1 = require("../config/env");
+const case_discovery_workflow_1 = require("../discovery/case-discovery-workflow");
+const app_profile_1 = require("../automations/app-profile");
+const discovery_batch_1 = require("./discovery-batch");
+function parseDiscoveryCaseArgs(argv) {
+    const args = {
+        caseId: 0,
+        app: undefined,
+        section: undefined,
+        headed: false,
+        autoPromote: false,
+        promotionDryRun: false,
+        contextOnly: false,
+        promotionStrict: false,
+        requirePromotionApproval: false,
+        pageObjectMode: true,
+        inlineDebugSpec: false,
+        allowPageObjectCandidates: true,
+        overwrite: false,
+        autoPom: false,
+        autoPomThreshold: undefined,
+        noAutoPomValidation: false,
+        verifyPromotedSpec: false,
+        promotedSpecTimeoutMs: undefined,
+        requirePomRuntime: false
+    };
+    for (let i = 0; i < argv.length; i += 1) {
+        const token = argv[i];
+        const nextValue = argv[i + 1];
+        if (token === "--headed") {
+            args.headed = true;
+            continue;
+        }
+        if (token === "--app") {
+            if (!nextValue || nextValue.startsWith("--")) {
+                throw new Error("Missing value for --app");
+            }
+            args.app = nextValue;
+            i += 1;
+            continue;
+        }
+        if (token === "--section") {
+            if (!nextValue || nextValue.startsWith("--")) {
+                throw new Error("Missing value for --section");
+            }
+            args.section = nextValue;
+            i += 1;
+            continue;
+        }
+        if (token === "--auto-promote") {
+            args.autoPromote = true;
+            continue;
+        }
+        if (token === "--promotion-dry-run") {
+            args.promotionDryRun = true;
+            continue;
+        }
+        if (token === "--context-only") {
+            args.contextOnly = true;
+            continue;
+        }
+        if (token === "--promotion-strict") {
+            args.promotionStrict = true;
+            continue;
+        }
+        if (token === "--require-promotion-approval") {
+            args.requirePromotionApproval = true;
+            continue;
+        }
+        if (token === "--overwrite") {
+            args.overwrite = true;
+            continue;
+        }
+        if (token === "--page-object-mode") {
+            args.pageObjectMode = true;
+            continue;
+        }
+        if (token === "--inline-debug-spec") {
+            args.inlineDebugSpec = true;
+            continue;
+        }
+        if (token === "--allow-page-object-candidates") {
+            args.allowPageObjectCandidates = true;
+            continue;
+        }
+        if (token === "--no-page-object-mode") {
+            args.pageObjectMode = false;
+            continue;
+        }
+        if (token === "--no-page-object-candidates") {
+            args.allowPageObjectCandidates = false;
+            continue;
+        }
+        if (token === "--auto-pom") {
+            args.autoPom = true;
+            continue;
+        }
+        if (token === "--auto-pom-threshold") {
+            if (!nextValue || nextValue.startsWith("--")) {
+                throw new Error("Missing value for --auto-pom-threshold");
+            }
+            args.autoPomThreshold = Number(nextValue);
+            if (!Number.isFinite(args.autoPomThreshold) || args.autoPomThreshold < 0 || args.autoPomThreshold > 1) {
+                throw new Error(`Invalid --auto-pom-threshold value: ${nextValue}. Expected a number between 0 and 1.`);
+            }
+            i += 1;
+            continue;
+        }
+        if (token === "--no-auto-pom-validation") {
+            args.noAutoPomValidation = true;
+            continue;
+        }
+        if (token === "--verify-promoted-spec") {
+            args.verifyPromotedSpec = true;
+            continue;
+        }
+        if (token === "--promoted-spec-timeout-ms") {
+            if (!nextValue || nextValue.startsWith("--")) {
+                throw new Error("Missing value for --promoted-spec-timeout-ms");
+            }
+            args.promotedSpecTimeoutMs = Number(nextValue);
+            if (!Number.isFinite(args.promotedSpecTimeoutMs) || args.promotedSpecTimeoutMs <= 0) {
+                throw new Error(`Invalid --promoted-spec-timeout-ms value: ${nextValue}. Expected a positive number.`);
+            }
+            i += 1;
+            continue;
+        }
+        if (token === "--require-pom-runtime") {
+            args.requirePomRuntime = true;
+            continue;
+        }
+        if (token === "--case-id") {
+            if (!nextValue || nextValue.startsWith("--")) {
+                throw new Error("Missing value for --case-id");
+            }
+            args.caseId = Number(nextValue);
+            if (!Number.isFinite(args.caseId) || args.caseId <= 0) {
+                throw new Error(`Invalid --case-id value: ${nextValue}. Expected a positive integer.`);
+            }
+            i += 1;
+            continue;
+        }
+        if (token === "--output") {
+            if (!nextValue || nextValue.startsWith("--")) {
+                throw new Error("Missing value for --output");
+            }
+            args.output = nextValue;
+            i += 1;
+            continue;
+        }
+        throw new Error(`Unknown argument: ${token}`);
+    }
+    if (args.caseId <= 0) {
+        throw new Error("--case-id is required. Usage: npm run discovery:case -- --case-id <number>");
+    }
+    return args;
+}
+async function resolveAndEnsureApp(args) {
+    const envAppSlug = process.env.APP_SLUG;
+    const testRailProjectId = env_1.config.integrations?.testRail?.projectId;
+    const testRailBaseUrl = env_1.config.integrations?.testRail?.url;
+    const testRailEmail = env_1.config.integrations?.testRail?.email;
+    const testRailApiKey = env_1.config.integrations?.testRail?.apiKey;
+    const { profile, baseDir } = await (0, app_profile_1.resolveAppProfile)({
+        cliAppSlug: args.app,
+        envAppSlug,
+        testRailProjectId,
+        testRailBaseUrl,
+        testRailEmail,
+        testRailApiKey,
+        baseUrl: env_1.config.app.baseUrl,
+        appName: env_1.config.app.name
+    });
+    // Only create root app structure here, section structure will be created in workflow after section resolution
+    const ensured = await (0, app_profile_1.ensureAppStructure)(baseDir);
+    (0, app_profile_1.logAppProfile)(profile, baseDir, ensured.length > 0 ? ensured : undefined);
+    return profile;
+}
+async function main() {
+    const args = parseDiscoveryCaseArgs(process.argv.slice(2));
+    console.log(`[discovery:case] Starting case-driven discovery for C${args.caseId}...`);
+    console.log(`[discovery:case] Overwrite enabled: ${args.overwrite}`);
+    const appProfile = await resolveAndEnsureApp(args);
+    const runtimeContext = await (0, discovery_batch_1.loadRuntimeContextFromPath)(process.env.DISCOVERY_RUNTIME_CONTEXT);
+    // Resolve sectionProfile from CLI --section flag (if provided)
+    let sectionProfile;
+    if (args.section) {
+        const sectionResult = await (0, app_profile_1.resolveSectionProfile)({
+            cliSectionSlug: args.section
+        });
+        sectionProfile = sectionResult.sectionProfile;
+        console.log(`[section-profile] source=${sectionProfile.source} sectionSlug=${sectionProfile.sectionSlug} (from CLI --section)`);
+    }
+    const workflowOptions = {
+        caseId: args.caseId,
+        runtimeEntries: (0, discovery_batch_1.resolveRuntimeEntriesForCase)(runtimeContext, args.caseId),
+        headed: args.headed,
+        outputDir: args.output,
+        autoPromote: args.autoPromote,
+        promotionDryRun: args.promotionDryRun,
+        contextOnly: args.contextOnly,
+        promotionStrict: args.promotionStrict,
+        requirePromotionApproval: args.requirePromotionApproval,
+        pageObjectMode: args.pageObjectMode,
+        inlineDebugSpec: args.inlineDebugSpec,
+        allowPageObjectCandidates: args.allowPageObjectCandidates,
+        overwrite: args.overwrite,
+        autoPom: args.autoPom,
+        autoPomThreshold: args.autoPomThreshold,
+        noAutoPomValidation: args.noAutoPomValidation,
+        verifyPromotedSpec: args.verifyPromotedSpec,
+        promotedSpecTimeoutMs: args.promotedSpecTimeoutMs,
+        requirePomRuntime: args.requirePomRuntime,
+        config: env_1.config,
+        appProfile,
+        sectionProfile
+    };
+    const workflowResult = await (0, case_discovery_workflow_1.runCaseDiscoveryWorkflow)(workflowOptions);
+    const { caseResult } = workflowResult;
+    (0, case_discovery_workflow_1.printCaseDiscoverySummary)(caseResult, workflowResult);
+    if (caseResult.status === "exploration_failed") {
+        process.exitCode = 1;
+    }
+}
+const isMainModule = process.argv[1]?.replace(/\\/g, "/").endsWith("discovery-case.ts");
+if (isMainModule) {
+    main()
+        .then(() => {
+        process.exitCode = 0;
+    })
+        .catch((error) => {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error(`[discovery:case] ${message}`);
+        process.exitCode = 1;
+    });
+}

@@ -75,6 +75,46 @@ function extractSignificantTokens(text: string): string[] {
 }
 
 /**
+ * Whether `candidateText` is admissible as a "parent" recovery click for `detailTarget`, and if
+ * so, its score/reason. Evidence must come from a genuine whole-word prefix/stem relationship
+ * (`semantic_parent_prefix`) or from whole, word-boundary-preserved shared tokens
+ * (`token_overlap_parent`) -- never from substring/contains/startsWith matching a target token
+ * against the candidate's raw normalized string. That let an unrelated candidate like "Solicitud
+ * multiproducto" match target token "producto" purely because "multiproducto" contains it as a
+ * substring. Returns null (fail closed) when neither is satisfied.
+ */
+export function scoreParentCandidate(
+  targetTokens: readonly string[],
+  detailTarget: string,
+  candidateText: string,
+): { score: number; reason: "semantic_parent_prefix" | "token_overlap_parent" } | null {
+  const candNorm = normalizeToken(candidateText);
+  const targetNorm = normalizeToken(detailTarget);
+  const isParent = targetNorm.startsWith(candNorm) || candNorm.startsWith(targetNorm);
+  const candidateTokens = extractSignificantTokens(candidateText);
+  const tokenOverlap = targetTokens.filter(t => candidateTokens.includes(t)).length;
+  const parentScore = tokenOverlap / Math.max(targetTokens.length, 1);
+  const isGoodParent = isParent || parentScore >= 0.4;
+  if (!isGoodParent) return null;
+  return {
+    score: Math.min(1, parentScore + 0.3),
+    reason: isParent ? "semantic_parent_prefix" : "token_overlap_parent",
+  };
+}
+
+/**
+ * Selects the single highest-scoring candidate, or null (fail closed) when there is none or the
+ * top score is tied. A tie is never broken by array/insertion order -- "best available" is not a
+ * decision this function is allowed to make without distinguishing evidence.
+ */
+export function selectBestParentCandidate<T extends { score: number }>(candidates: readonly T[]): T | null {
+  if (candidates.length === 0) return null;
+  const sorted = [...candidates].sort((a, b) => b.score - a.score);
+  if (sorted.length > 1 && sorted[1].score === sorted[0].score) return null;
+  return sorted[0];
+}
+
+/**
  * Calculate token-overlap score between target tokens and candidate text.
  */
 function calculateTokenOverlapScore(
@@ -200,18 +240,11 @@ export async function recoverWithParentIntermediate(
       const isEntryLike = /^(iniciar|start|login|home|volver|atras|salir|menu|finalizar)/i.test(candNorm);
       if (isEntryLike) { rejectedElements.push({ text: primaryText, reason: "entry_or_navigation_control" }); continue; }
 
-      // Check semantic parent relationship: candidate text is prefix/stem of target
-      const targetNorm = normalizeToken(detailTarget);
-      const isParent = targetNorm.startsWith(candNorm) || candNorm.startsWith(targetNorm);
-      const tokenOverlap = targetTokens.filter(t => candNorm.includes(t) || t.includes(candNorm)).length;
-      const parentScore = tokenOverlap / Math.max(targetTokens.length, 1);
-      const isGoodParent = isParent || parentScore >= 0.4;
-
-      if (isGoodParent) {
-        const reason = isParent ? "semantic_parent_prefix" : "token_overlap_parent";
-        parentCandidates.push({ element: scanned, score: Math.min(1, parentScore + 0.3), reason });
-        console.log(`[intermediate-recovery] candidate parent="${primaryText}" target="${detailTarget}" score=${(Math.min(1, parentScore + 0.3)).toFixed(2)} reason=${reason}`);
-      } else if (tokenOverlap > 0) {
+      const scored = scoreParentCandidate(targetTokens, detailTarget, primaryText);
+      if (scored) {
+        parentCandidates.push({ element: scanned, score: scored.score, reason: scored.reason });
+        console.log(`[intermediate-recovery] candidate parent="${primaryText}" target="${detailTarget}" score=${scored.score.toFixed(2)} reason=${scored.reason}`);
+      } else if (targetTokens.some(t => extractSignificantTokens(primaryText).includes(t))) {
         console.log(`[intermediate-recovery] candidateRejected parent="${primaryText}" target="${detailTarget}" reason=semantic_mismatch`);
         rejectedElements.push({ text: primaryText, reason: "semantic_mismatch" });
       }
@@ -221,16 +254,15 @@ export async function recoverWithParentIntermediate(
   // Deduplicate by normalized text
   const seen = new Set<string>();
   const uniqueParents = parentCandidates.filter(c => { const k = normalizeToken(c.element.text); if (seen.has(k)) return false; seen.add(k); return true; });
-  uniqueParents.sort((a, b) => b.score - a.score);
 
   console.log(`[intermediate-recovery] scan total=${totalElements} visible=${visibleCount} clickable=${clickableLikeCount} parentCandidates=${uniqueParents.length}`);
 
-  if (uniqueParents.length === 0) {
-    console.log(`[intermediate-recovery] failed reason=no_parent_candidate target="${detailTarget}"`);
-    return { recovered: false, detailTargetVisible: false, urlBefore, visibleCandidatesCount: 0 };
+  const selected = selectBestParentCandidate(uniqueParents);
+  if (!selected) {
+    const reason = uniqueParents.length === 0 ? "no_parent_candidate" : "ambiguous_parent_candidates";
+    console.log(`[intermediate-recovery] failed reason=${reason} target="${detailTarget}" candidateCount=${uniqueParents.length}`);
+    return { recovered: false, detailTargetVisible: false, urlBefore, visibleCandidatesCount: uniqueParents.length };
   }
-
-  const selected = uniqueParents[0];
   console.log(`[intermediate-recovery] clicked parent="${selected.element.text}" forTarget="${detailTarget}"`);
 
   try {

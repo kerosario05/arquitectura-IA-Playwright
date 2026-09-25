@@ -1,0 +1,878 @@
+{
+  "appSlug": "prueba-kiosko",
+  "sectionSlug": "default-section",
+  "scenarioId": "C0",
+  "scenarioTitle": "Login",
+  "stepCount": 18,
+  "sourceExpectedResultPresent": true,
+  "requiredAssertionCount": 1,
+  "observableOracles": [
+    {
+      "id": "expected-01",
+      "requirement": "La aplicación carga su pantalla inicial",
+      "type": "navigation_transition",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 18,
+      "polarity": "positive",
+      "target": "Generar Turno",
+      "evidence": [
+        "transition_observed:true",
+        "click_target:Generar Turno",
+        "action_type:Presionar \"Generar Turno\"",
+        "after_url:https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+        "assertion_polarity:positive"
+      ],
+      "details": {
+        "transitionObserved": true,
+        "clickTarget": "Generar Turno",
+        "resolvedTarget": null,
+        "postClickUiChange": null,
+        "sourceActionStepIndex": 18,
+        "expectedUrl": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica"
+      }
+    }
+  ],
+  "oracleTypes": [
+    "navigation_transition"
+  ],
+  "availablePageObjectCount": 2,
+  "mode": "deterministic",
+  "functionalExecutionEnabled": true,
+  "provider": null,
+  "model": null,
+  "skill": {
+    "name": null,
+    "version": null,
+    "hash": null,
+    "loaded": false
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "C0",
+    "title": "Login",
+    "appSlug": "prueba-kiosko",
+    "sectionSlug": "default-section",
+    "auth": {
+      "gateDetected": true,
+      "required": false,
+      "stage": "identification_input",
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    },
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Presionar \"Explora nuestros productos\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Explora nuestros productos"
+        },
+        "valueKey": "explora_nuestros_productos",
+        "associatedField": "Explora nuestros productos",
+        "technicalTargetRef": "role:button|Explora nuestros productos",
+        "technicalTargetRefs": [
+          "role:button|Explora nuestros productos"
+        ],
+        "controlIdentity": "9f12e61beacd|Explora nuestros productos|role|button|Explora nuestros productos",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Explora nuestros productos\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Explora nuestros productos"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "div"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Presionar \"Tarjetas\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Tarjetas"
+        },
+        "valueKey": "tarjetas",
+        "associatedField": "Tarjetas",
+        "technicalTargetRef": "role:button|Tarjetas",
+        "technicalTargetRefs": [
+          "role:button|Tarjetas"
+        ],
+        "controlIdentity": "9f12e61beacd|Tarjetas|role|button|Tarjetas",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Tarjetas",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Presionar \"Tarjeta de Crédito\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Tarjeta de Crédito"
+        },
+        "valueKey": "tarjeta_de_credito",
+        "associatedField": "Tarjeta de Crédito",
+        "technicalTargetRef": "role:button|Tarjeta de Crédito",
+        "technicalTargetRefs": [
+          "role:button|Tarjeta de Crédito"
+        ],
+        "controlIdentity": "9f12e61beacd|Tarjeta de Crédito|role|button|Tarjeta de Crédito",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Tarjeta de Crédito",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Presionar \"Tarjeta Crédito Visa Clásica\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Tarjeta Crédito Visa Clásica"
+        },
+        "valueKey": "tarjeta_credito_visa_clasica",
+        "associatedField": "Tarjeta Crédito Visa Clásica",
+        "controlIdentity": "9f12e61beacd|Tarjeta Crédito Visa Clásica",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "div|[alt=\"Tarjeta Crédito Visa Clásica\"][src=\"/assets/images/tarjetas-de-credito-visa-clasica.png\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "img",
+                "stableAttributes": {
+                  "alt": "Tarjeta Crédito Visa Clásica",
+                  "src": "/assets/images/tarjetas-de-credito-visa-clasica.png"
+                }
+              }
+            ],
+            "semanticShape": [
+              "div",
+              "h3"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 3
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 4,
+        "scenarioStepIndex": 5,
+        "originalText": "Presionar \"Solicitar\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Solicitar"
+        },
+        "valueKey": "solicitar",
+        "associatedField": "Solicitar",
+        "technicalTargetRef": "role:button|Solicitar",
+        "technicalTargetRefs": [
+          "role:button|Solicitar"
+        ],
+        "controlIdentity": "9f12e61beacd|Solicitar|role|button|Solicitar",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Solicitar",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 5,
+        "scenarioStepIndex": 6,
+        "originalText": "Presionar \"Generar Turno\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Generar Turno"
+        },
+        "valueKey": "generar_turno",
+        "associatedField": "Generar Turno",
+        "controlIdentity": "9f12e61beacd|Generar Turno",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "semanticShape": [
+              "div",
+              "h3",
+              "p"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "topologyTieBreakUnique": true,
+            "topologySignature": "{\"childEntries\":[[\"div\",1],[\"h3\",1],[\"p\",1]],\"descendantEntries\":[[\"div\",2],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}"
+          },
+          "confidence": 0.85,
+          "certificationTier": 4
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 6,
+        "scenarioStepIndex": 7,
+        "originalText": "Presionar \"4\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "4"
+        },
+        "valueKey": "4",
+        "associatedField": "4",
+        "technicalTargetRef": "role:button|4",
+        "technicalTargetRefs": [
+          "role:button|4"
+        ],
+        "controlIdentity": "9f12e61beacd|4|role|button|4",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|4",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 7,
+        "scenarioStepIndex": 8,
+        "originalText": "Presionar \"0\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "0"
+        },
+        "valueKey": "0",
+        "associatedField": "0",
+        "technicalTargetRef": "role:button|0",
+        "technicalTargetRefs": [
+          "role:button|0"
+        ],
+        "controlIdentity": "9f12e61beacd|0|role|button|0",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|0",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 8,
+        "scenarioStepIndex": 9,
+        "originalText": "Presionar \"2\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "2"
+        },
+        "valueKey": "2",
+        "associatedField": "2",
+        "technicalTargetRef": "role:button|2",
+        "technicalTargetRefs": [
+          "role:button|2"
+        ],
+        "controlIdentity": "9f12e61beacd|2|role|button|2",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|2",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 9,
+        "scenarioStepIndex": 10,
+        "originalText": "Presionar \"2\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "2"
+        },
+        "valueKey": "2",
+        "associatedField": "2",
+        "technicalTargetRef": "role:button|2",
+        "technicalTargetRefs": [
+          "role:button|2"
+        ],
+        "controlIdentity": "9f12e61beacd|2|role|button|2",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|2",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 10,
+        "scenarioStepIndex": 11,
+        "originalText": "Presionar \"4\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "4"
+        },
+        "valueKey": "4",
+        "associatedField": "4",
+        "technicalTargetRef": "role:button|4",
+        "technicalTargetRefs": [
+          "role:button|4"
+        ],
+        "controlIdentity": "9f12e61beacd|4|role|button|4",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|4",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 11,
+        "scenarioStepIndex": 12,
+        "originalText": "Presionar \"6\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "6"
+        },
+        "valueKey": "6",
+        "associatedField": "6",
+        "technicalTargetRef": "role:button|6",
+        "technicalTargetRefs": [
+          "role:button|6"
+        ],
+        "controlIdentity": "9f12e61beacd|6|role|button|6",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|6",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 12,
+        "scenarioStepIndex": 13,
+        "originalText": "Presionar \"7\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "7"
+        },
+        "valueKey": "7",
+        "associatedField": "7",
+        "technicalTargetRef": "role:button|7",
+        "technicalTargetRefs": [
+          "role:button|7"
+        ],
+        "controlIdentity": "9f12e61beacd|7|role|button|7",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|7",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 13,
+        "scenarioStepIndex": 14,
+        "originalText": "Presionar \"9\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "9"
+        },
+        "valueKey": "9",
+        "associatedField": "9",
+        "technicalTargetRef": "role:button|9",
+        "technicalTargetRefs": [
+          "role:button|9"
+        ],
+        "controlIdentity": "9f12e61beacd|9|role|button|9",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|9",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 14,
+        "scenarioStepIndex": 15,
+        "originalText": "Presionar \"5\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "5"
+        },
+        "valueKey": "5",
+        "associatedField": "5",
+        "technicalTargetRef": "role:button|5",
+        "technicalTargetRefs": [
+          "role:button|5"
+        ],
+        "controlIdentity": "9f12e61beacd|5|role|button|5",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|5",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 15,
+        "scenarioStepIndex": 16,
+        "originalText": "Presionar \"5\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "5"
+        },
+        "valueKey": "5",
+        "associatedField": "5",
+        "technicalTargetRef": "role:button|5",
+        "technicalTargetRefs": [
+          "role:button|5"
+        ],
+        "controlIdentity": "9f12e61beacd|5|role|button|5",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|5",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 16,
+        "scenarioStepIndex": 17,
+        "originalText": "Presionar \"1\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "1"
+        },
+        "valueKey": "1",
+        "associatedField": "1",
+        "technicalTargetRef": "role:button|1",
+        "technicalTargetRefs": [
+          "role:button|1"
+        ],
+        "controlIdentity": "9f12e61beacd|1|role|button|1",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|1",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 17,
+        "scenarioStepIndex": 18,
+        "originalText": "Presionar \"Generar Turno\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Generar Turno"
+        },
+        "valueKey": "generar_turno",
+        "associatedField": "Generar Turno",
+        "technicalTargetRef": "role:button|Generar Turno",
+        "technicalTargetRefs": [
+          "role:button|Generar Turno"
+        ],
+        "controlIdentity": "9f12e61beacd|Generar Turno|role|button|Generar Turno",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Generar Turno",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "oracle": {
+          "type": "navigation_transition",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "url_state",
+          "mechanism": {
+            "source": "url_state",
+            "method": "expectPromotedVisible",
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "navigation_transition",
+              "urlPattern": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica"
+            }
+          },
+          "sourceActionStepIndex": 18,
+          "requirement": "La aplicación carga su pantalla inicial"
+        },
+        "sourceActionStepIndex": 18,
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 18,
+      "representedScenarioSteps": 18,
+      "missingScenarioSteps": []
+    }
+  },
+  "executionContractChars": 15756,
+  "promptChars": null,
+  "specGenerationAttempts": 0,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": true,
+  "promotionAllowed": true,
+  "failedGatesAttempt1": [],
+  "finalSpec": {
+    "origin": "deterministic_compiler",
+    "generatedBy": "core",
+    "strategy": "deterministic_compiler",
+    "fallback": null
+  }
+}

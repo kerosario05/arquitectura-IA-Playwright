@@ -1,5 +1,6 @@
 import assert from "node:assert";
-import { normalizeEvents, segmentTrace, summarizeTrace } from "./trace-normalizer";
+import { buildEditingSessions, normalizeEvents, segmentTrace, stableControlIdentity, summarizeTrace } from "./trace-normalizer";
+import { buildCanonicalInteractions } from "./canonical-recording-contract";
 import {
   buildAlternativePathScenarios,
   buildGateNegatives,
@@ -65,12 +66,180 @@ describe("normalizeEvents", () => {
     assert.strictEqual(out[0].value, "juan");
   });
 
+  test("retains one editing session with raw refs and intermediate values", () => {
+    const raw = [
+      ev({ seq: 0, kind: "note", t: 100, observationType: "before_input", target: { ...target("Puesto"), role: "input", associatedField: "Puesto", beforeState: { value: "" } } }),
+      ev({ seq: 1, kind: "fill", t: 120, target: { ...target("Puesto"), role: "input", associatedField: "Puesto", inputValue: "a" }, value: "a" }),
+      ev({ seq: 2, kind: "fill", t: 160, target: { ...target("Puesto"), role: "input", associatedField: "Puesto", inputValue: "analista" }, value: "analista" }),
+      ev({ seq: 3, kind: "note", t: 200, observationType: "post_action", target: { ...target("Puesto"), role: "input", associatedField: "Puesto", afterState: { value: "analista" } } }),
+    ];
+    const sessions = buildEditingSessions(raw);
+    const normalized = normalizeEvents(raw);
+    assert.strictEqual(sessions.length, 1);
+    assert.deepStrictEqual(sessions[0].intermediateValues, ["a"]);
+    assert.strictEqual(sessions[0].finalValue, "analista");
+    assert.deepStrictEqual(sessions[0].rawEventRefs, ["event-1", "event-2", "event-3", "event-4"]);
+    assert.strictEqual(normalized.filter((event) => event.kind === "fill").length, 1);
+    assert.strictEqual(normalized.find((event) => event.kind === "fill")?.value, "analista");
+  });
+
+  test("ignores live rendered row text when identifying a grid control", () => {
+    const first = ev({
+      kind: "fill",
+      t: 100,
+      target: {
+        ...target("Indicar..."),
+        role: "input",
+        associatedField: "Puesto",
+        headerContext: "Puesto",
+        gridRef: "grid:table",
+        rowRef: "row:cédula Indicar... 000-000-0000",
+        cellRef: "cell:Puesto:row:cédula Indicar... 000-000-0000:320,415,167,55",
+        bounds: { x: 396, y: 424, width: 150, height: 36 },
+      },
+      value: "a",
+    });
+    const afterRerender = ev({
+      ...first,
+      t: 200,
+      target: {
+        ...first.target!,
+        rowRef: "row:cédula YANET SORIANO RODRIGUEZ analista 000-000-0000",
+        cellRef: "cell:Puesto:row:cédula YANET SORIANO RODRIGUEZ analista 000-000-0000:320,415,167,55",
+      },
+    });
+    assert.strictEqual(stableControlIdentity(first), stableControlIdentity(afterRerender));
+  });
+
+  test("uses the deepest editor value instead of a formatted compound parent", () => {
+    const out = normalizeEvents([
+      ev({
+        kind: "fill",
+        t: 100,
+        target: {
+          ...target("control"),
+          role: "input",
+          associatedField: "Ingresos",
+          compoundRole: "amount_or_text",
+          inputValue: "1500",
+          committedValue: "1500",
+          displayValue: "DOP 1,5000",
+          afterValue: "DOP 1,5000",
+        },
+        value: "DOP 1,5000",
+      }),
+    ]);
+    assert.strictEqual(out[0].value, "1500");
+    assert.strictEqual(out[0].target?.afterValue, "1500");
+    assert.strictEqual(out[0].target?.displayValue, "DOP 1,5000");
+  });
+
+  test("promotes a dynamic option observation to one semantic selection", () => {
+    const out = normalizeEvents([
+      ev({
+        seq: 0,
+        kind: "note",
+        t: 100,
+        observationType: "post_action",
+        target: { ...target("DOP"), role: "option", compoundRole: "selection", associatedField: "Ingresos", afterValue: "DOP" },
+      }),
+      ev({
+        seq: 1,
+        kind: "tap",
+        t: 120,
+        target: { ...target("DOP"), role: "button", associatedField: "Ingresos", interactionType: "click" },
+      }),
+    ]);
+    const selection = out.find((event) => event.kind === "tap");
+    assert.strictEqual(selection?.target?.interactionType, "select");
+    assert.strictEqual(selection?.target?.compoundRole, "selection");
+    assert.strictEqual(selection?.target?.afterValue, "DOP");
+  });
+
+  test("bridges a portalized option to its structured grid trigger", () => {
+    const out = normalizeEvents([
+      ev({
+        kind: "note",
+        t: 100,
+        observationType: "pointer",
+        target: {
+          label: "Indicar...",
+          locators: [],
+          interactionType: "click",
+          associatedField: "Tipo de ID",
+          gridRef: "grid:table",
+          rowRef: "row:2",
+          cellRef: "cell:Tipo de ID:row:2",
+        },
+      }),
+      ev({
+        kind: "tap",
+        t: 120,
+        target: {
+          label: "Indicar...",
+          locators: [],
+          interactionType: "click",
+          associatedField: "Tipo de ID",
+          gridRef: "grid:table",
+          rowRef: "row:2",
+          cellRef: "cell:Tipo de ID:row:2",
+        },
+      }),
+      ev({
+        kind: "note",
+        t: 180,
+        observationType: "pointer",
+        target: {
+          label: "cédula",
+          locators: [],
+          interactionType: "select",
+          compoundRole: "selection",
+          afterValue: "cédula",
+          dynamicLifecycle: { selectedOption: "cédula", options: ["cédula"] },
+        },
+      }),
+    ]);
+    const selection = out.find((event) => event.kind === "tap" && event.target?.interactionType === "select");
+    assert.strictEqual(selection?.target?.associatedField, "Tipo de ID");
+    assert.strictEqual(selection?.target?.afterValue, "cédula");
+    const canonical = buildCanonicalInteractions(out).find((interaction) => interaction.action === "select");
+    assert.strictEqual(canonical?.semanticField, "Tipo de ID");
+    assert.strictEqual(canonical?.recordedValue, "cédula");
+  });
+
   test("keeps fills on different fields apart", () => {
     const out = normalizeEvents([
       ev({ kind: "fill", t: 100, target: target("Usuario"), value: "juan" }),
       ev({ kind: "fill", t: 200, target: target("Clave"), value: "1234" }),
     ]);
     assert.strictEqual(out.length, 2);
+    assert.deepStrictEqual(out.filter((event) => event.kind === "fill").map((event) => event.value), ["juan", "1234"]);
+  });
+
+  test("committed value closes a masked session without leaking raw intermediate text", () => {
+    const out = normalizeEvents([
+      ev({ kind: "fill", t: 100, target: { ...target("000-000-0000"), associatedField: "Teléfono", role: "input", compoundRole: "amount_or_text", rawTypedValue: "prefijo829", inputValue: "829-000", committedValue: "829-000" }, value: "829-000" }),
+    ]);
+    assert.equal(out.find((event) => event.kind === "fill")?.value, "829-000");
+  });
+
+  test("mask activation remains technical evidence and is not a scenario action", () => {
+    const out = normalizeEvents([
+      ev({ kind: "tap", t: 100, target: { ...target("000-000-0000"), role: "button", associatedField: "Teléfono", placeholder: "000-000-0000" } }),
+      ev({ kind: "note", t: 150, observationType: "post_action", target: { ...target("000-000-0000"), role: "button", associatedField: "Teléfono" } }),
+      ev({ kind: "fill", t: 200, target: { ...target("000-000-0000"), role: "input", associatedField: "Teléfono", placeholder: "000-000-0000", compoundRole: "amount_or_text", committedValue: "829-000-0000" }, value: "829-000-0000" }),
+    ]);
+    const canonical = buildCanonicalInteractions(out);
+    assert.equal(canonical.some((interaction) => interaction.action === "click" && interaction.description?.includes("000-000-0000")), false);
+    assert.equal(canonical.some((interaction) => interaction.action === "fill"), true);
+  });
+
+  test("does not project the input focus tap as a second functional action", () => {
+    const out = normalizeEvents([
+      ev({ kind: "tap", t: 100, target: target("Usuario") }),
+      ev({ kind: "fill", t: 150, target: target("Usuario"), value: "juan" }),
+    ]);
+    assert.deepStrictEqual(out.filter((event) => ["tap", "fill"].includes(event.kind)).map((event) => event.kind), ["fill"]);
   });
 
   test("drops a digitizer double-report on the same control", () => {
@@ -89,6 +258,18 @@ describe("normalizeEvents", () => {
     assert.strictEqual(out.length, 2);
   });
 
+  test("preserves the final snapshot and does not debounce a state-changing selection", () => {
+    const out = normalizeEvents([
+      ev({ kind: "fill", t: 100, target: { ...target("campo"), beforeState: { value: "" }, afterState: { value: "1" } }, value: "1" }),
+      ev({ kind: "fill", t: 180, target: { ...target("campo"), beforeState: { value: "1" }, afterState: { value: "15" } }, value: "15" }),
+      ev({ kind: "tap", t: 300, target: { ...target("USD"), interactionType: "select", afterValue: "USD", stateDelta: { ariaExpanded: true } } }),
+      ev({ kind: "tap", t: 360, target: { ...target("USD"), interactionType: "select", afterValue: "USD", stateDelta: { ariaSelected: true } } }),
+    ]);
+    assert.equal(out.length, 3);
+    assert.equal(out[0].value, "15");
+    assert.equal(out[0].target?.afterState?.value, "15");
+  });
+
   test("discards a screen_change that did not change the screen", () => {
     const out = normalizeEvents([
       ev({ kind: "screen_change", t: 500, screenKey: "login", toScreenKey: "login" }),
@@ -104,6 +285,19 @@ describe("normalizeEvents", () => {
     ]);
     assert.strictEqual(out[0].kind, "note");
     assert.match(out[0].note ?? "", /Bienvenido/);
+  });
+
+  test("preserves a physical unresolved tap with semantic display identity", () => {
+    const normalized = normalizeEvents([
+      ev({
+        kind: "tap",
+        t: 100,
+        interactionId: "pointer-sms",
+        target: { label: "SMS", locators: [] },
+      }),
+    ]);
+    assert.strictEqual(normalized[0].kind, "tap");
+    assert.strictEqual(normalized[0].interactionId, "pointer-sms");
   });
 
   test("renumbers the surviving events contiguously", () => {
@@ -196,9 +390,41 @@ describe("buildHappyPathScenario", () => {
     assert.strictEqual(scenario.title, "Registro de usuario nuevo");
   });
 
-  test("produces TestRail steps with an expectation for each action", () => {
+  test("does not add a tautological expectation to a fill action", () => {
     assert.ok(scenario.testRailSteps.length >= 4);
-    assert.ok(scenario.testRailSteps.every((s) => s.expected.trim().length > 0));
+    const fillStep = scenario.testRailSteps.find((step) => step.classification === "FUNCTIONAL_ACTION" && step.valueKey === "usuario");
+    assert.strictEqual(fillStep?.expected, "");
+    assert.ok(scenario.testRailSteps.filter((step) => step.classification === "FUNCTIONAL_ASSERTION").every((step) => step.expected.trim().length > 0));
+  });
+
+  test("preserves an unresolved physical click with semantic identity for display only", () => {
+    const webTrace: SessionTrace = { ...TRACE, platform: "web", baseUrl: "https://app.test", appPackage: undefined };
+    const priorEvent = ev({
+      seq: 0,
+      kind: "tap",
+      t: 100,
+      target: { label: "Previous", role: "button", locators: [{ strategy: "role", value: "button|Previous", confidence: 0.9 }] },
+    });
+    const smsEvent = ev({
+      seq: 1,
+      kind: "tap",
+      t: 500,
+      screenKey: "otp",
+      interactionId: "pointer-sms",
+      target: {
+        label: "aggregate screen content that is not a locator",
+        associatedField: "SMS",
+        locators: [],
+      },
+    });
+    const scenario = buildHappyPathScenario(webTrace, [priorEvent, smsEvent]);
+    const step = scenario.testRailSteps.find((candidate) => candidate.interactionId === "interaction-2");
+    assert.ok(step, "the observed physical click remains visible in the human projection");
+    assert.match(step?.content ?? "", /SMS/);
+    const smsCanonical = scenario.canonicalInteractions?.find((interaction) => interaction.id === "interaction-2");
+    assert.strictEqual(smsCanonical?.technicalTargetRefs.length, 0);
+    assert.strictEqual(scenario.technicalReadiness, false);
+    assert.strictEqual(scenario.webSteps.some((candidate) => candidate.target?.value?.includes("SMS")), false);
   });
 
   test("builds web plan steps instead of mobile ones for a web recording", () => {
@@ -275,6 +501,17 @@ describe("summarizeTrace", () => {
     assert.strictEqual(stats.transitions, 1);
     assert.strictEqual(stats.unidentified, 1);
     assert.strictEqual(stats.screens, 2);
+  });
+
+  test("does not count recorder-only editor taps as functional actions", () => {
+    const events = normalizeEvents([
+      ev({ kind: "tap", t: 100, target: target("Indicar...") }),
+      ev({ kind: "tap", t: 200, target: target("Seleccionar fila") }),
+      ev({ kind: "tap", t: 300, target: target("Validar") }),
+    ]);
+    const stats = summarizeTrace(events, TRACE);
+    assert.strictEqual(stats.actions, 1);
+    assert.strictEqual(stats.taps, 1);
   });
 });
 
@@ -470,7 +707,7 @@ describe("toPublishableScenario", () => {
 
   test("usa la última expectativa como resultado global del caso", () => {
     const last = scenario.testRailSteps[scenario.testRailSteps.length - 1].expected;
-    assert.strictEqual(publishable.expectedResult, last);
+    assert.strictEqual(publishable.expectedResult, last || "Resultado esperado por confirmar");
   });
 
   test("enlaza el caso con la grabación que lo originó", () => {

@@ -97,6 +97,34 @@ function detectUnusedRequirePromotedData(specContent: string): string[] {
   return warnings;
 }
 
+async function validatePhysicalPageObjectCalls(specPath: string, specContent: string): Promise<string[]> {
+  const errors: string[] = [];
+  const imports = [...specContent.matchAll(/import\s*\{\s*([A-Za-z_]\w*)\s*\}\s*from\s*['"]([^'"]*pages\/[^'"]+)['"]/g)];
+  for (const [, className, importPath] of imports) {
+    const instanceMatch = specContent.match(new RegExp(`const\\s+([A-Za-z_]\\w*)\\s*=\\s*new\\s+${className}\\s*\\(`));
+    if (!instanceMatch) continue;
+    const instanceName = instanceMatch[1];
+    const moduleBase = path.resolve(path.dirname(specPath), importPath);
+    let modulePath: string | undefined;
+    for (const candidate of [moduleBase, `${moduleBase}.ts`, `${moduleBase}.tsx`, `${moduleBase}.js`]) {
+      try { await fs.access(candidate); modulePath = candidate; break; } catch { /* try next extension */ }
+    }
+    if (!modulePath) {
+      errors.push(`physical_pom_module_missing:${className}:${importPath}`);
+      continue;
+    }
+    const moduleSource = await fs.readFile(modulePath, "utf-8");
+    const methodNames = new Set<string>();
+    const methodRegex = /(?:async\s+)?(?:public\s+|private\s+|protected\s+)?([A-Za-z_]\w*)\s*\(/g;
+    for (const method of moduleSource.matchAll(methodRegex)) methodNames.add(method[1]);
+    const calls = [...specContent.matchAll(new RegExp(`\\b${instanceName}\\s*\\.\\s*([A-Za-z_]\\w*)\\s*\\(`, "g"))];
+    for (const [, methodName] of calls) {
+      if (!methodNames.has(methodName)) errors.push(`physical_pom_method_missing:${className}.${methodName}`);
+    }
+  }
+  return errors;
+}
+
 export async function validatePromotedSpecRuntimeContract(
   specPath: string,
   diagnosticsPath?: string
@@ -209,6 +237,8 @@ export async function validatePromotedSpecRuntimeContract(
 
   const fillValueErrors = detectFillValueLiteralFieldNameAntiPattern(specContent);
   errors.push(...fillValueErrors);
+
+  errors.push(...await validatePhysicalPageObjectCalls(specPath, specContent));
 
   const unusedDataWarnings = detectUnusedRequirePromotedData(specContent);
   warnings.push(...unusedDataWarnings);

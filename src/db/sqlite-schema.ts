@@ -137,4 +137,27 @@ CREATE TABLE IF NOT EXISTS ProjectConfigurationHistory (
 
 CREATE INDEX IF NOT EXISTS IX_ProjectConfigurationHistory_projectId
   ON ProjectConfigurationHistory (projectId, createdAt);
+
+-- One row per independently-observed post-action route for a structured Recording action.
+-- Never a foreign key to a Recordings table -- recordings are file-persisted (recording-store.ts),
+-- not SQL, in this codebase. (recordingId, controlIdentity, actionKind) is content-derived, never
+-- positional (never an array index / seq). "Authority" (dynamic segment positions) is deliberately
+-- NOT a separate persisted table -- it is derived read-side from this table's own rows.
+CREATE TABLE IF NOT EXISTS RecordingRouteObservation (
+  id                TEXT    PRIMARY KEY COLLATE NOCASE DEFAULT (${UUID_DEFAULT_EXPR}),
+  recordingId       TEXT    NOT NULL,
+  controlIdentity   TEXT    NOT NULL,
+  actionKind        TEXT    NOT NULL,
+  origin            TEXT    NOT NULL,
+  pathname          TEXT    NOT NULL,
+  search            TEXT    NOT NULL,
+  hash              TEXT    NOT NULL,
+  sourceKind        TEXT    NOT NULL,             -- 'capture' | 'replay'
+  sourceExecutionId TEXT    NOT NULL,              -- capture: recordingId; replay: jobId
+  observedAt        TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  UNIQUE (recordingId, controlIdentity, actionKind, sourceKind, sourceExecutionId)
+);
+
+CREATE INDEX IF NOT EXISTS IX_RecordingRouteObservation_lineage
+  ON RecordingRouteObservation (recordingId, controlIdentity, actionKind, observedAt, id);
 `;

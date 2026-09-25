@@ -1,0 +1,298 @@
+{
+  "appSlug": "prueba-kiosko",
+  "sectionSlug": "default-section",
+  "scenarioId": "PREVIEW-001",
+  "scenarioTitle": "Prueba",
+  "stepCount": 4,
+  "sourceExpectedResultPresent": true,
+  "requiredAssertionCount": 1,
+  "observableOracles": [
+    {
+      "id": "expected-01",
+      "requirement": "La aplicación carga su pantalla inicial",
+      "type": "navigation_transition",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 4,
+      "polarity": "positive",
+      "target": "Tarjeta de Crédito Visa Platinum",
+      "evidence": [
+        "transition_observed:true",
+        "click_target:Tarjeta de Crédito Visa Platinum",
+        "action_type:Presionar \"Tarjeta de Crédito Visa Platinum\"",
+        "after_url:https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum",
+        "assertion_polarity:positive"
+      ],
+      "details": {
+        "transitionObserved": true,
+        "clickTarget": "Tarjeta de Crédito Visa Platinum",
+        "resolvedTarget": null,
+        "postClickUiChange": null,
+        "sourceActionStepIndex": 4,
+        "expectedUrl": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum"
+      }
+    }
+  ],
+  "oracleTypes": [
+    "navigation_transition"
+  ],
+  "availablePageObjectCount": 2,
+  "mode": "deterministic",
+  "functionalExecutionEnabled": true,
+  "provider": null,
+  "model": null,
+  "skill": {
+    "name": null,
+    "version": null,
+    "hash": null,
+    "loaded": false
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "PREVIEW-001",
+    "title": "Prueba",
+    "appSlug": "prueba-kiosko",
+    "sectionSlug": "default-section",
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Presionar \"Explora nuestros productos\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Explora nuestros productos"
+        },
+        "valueKey": "explora_nuestros_productos",
+        "associatedField": "Explora nuestros productos",
+        "technicalTargetRef": "role:button|Explora nuestros productos",
+        "technicalTargetRefs": [
+          "role:button|Explora nuestros productos"
+        ],
+        "controlIdentity": "9f12e61beacd|Explora nuestros productos|role|button|Explora nuestros productos",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Explora nuestros productos\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Explora nuestros productos"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "div"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Presionar \"Tarjetas\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Tarjetas"
+        },
+        "valueKey": "tarjetas",
+        "associatedField": "Tarjetas",
+        "technicalTargetRef": "role:button|Tarjetas",
+        "technicalTargetRefs": [
+          "role:button|Tarjetas"
+        ],
+        "controlIdentity": "9f12e61beacd|Tarjetas|role|button|Tarjetas",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Tarjetas",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Presionar \"Tarjeta de\nCrédito\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Tarjeta de\nCrédito"
+        },
+        "valueKey": "tarjeta_de_credito",
+        "associatedField": "Tarjeta de\nCrédito",
+        "technicalTargetRef": "role:button|Tarjeta de\nCrédito",
+        "technicalTargetRefs": [
+          "role:button|Tarjeta de\nCrédito"
+        ],
+        "controlIdentity": "9f12e61beacd|Tarjeta de\nCrédito|role|button|Tarjeta de\nCrédito",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Tarjeta de\nCrédito",
+              "confidence": 0.85
+            }
+          ],
+          "confidence": 0.85,
+          "certificationTier": 2
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Presionar \"Tarjeta de Crédito Visa Platinum\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Tarjeta de Crédito Visa Platinum"
+        },
+        "valueKey": "tarjeta_de_credito_visa_platinum",
+        "associatedField": "Tarjeta de Crédito Visa Platinum",
+        "controlIdentity": "9f12e61beacd|Tarjeta de Crédito Visa Platinum",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "div|[alt=\"Tarjeta de Crédito Visa Platinum\"][src=\"/assets/images/tarjetas-de-credito-visa-platinum.png\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "img",
+                "stableAttributes": {
+                  "alt": "Tarjeta de Crédito Visa Platinum",
+                  "src": "/assets/images/tarjetas-de-credito-visa-platinum.png"
+                }
+              }
+            ],
+            "semanticShape": [
+              "div",
+              "h3"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 3
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "oracle": {
+          "type": "navigation_transition",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "url_state",
+          "mechanism": {
+            "source": "url_state",
+            "method": "expectPromotedVisible",
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "navigation_transition",
+              "urlPattern": "https://172.27.4.50/product-extended?product=tarjeta-de-credito-visa-platinum"
+            }
+          },
+          "sourceActionStepIndex": 4,
+          "requirement": "La aplicación carga su pantalla inicial"
+        },
+        "sourceActionStepIndex": 4,
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 4,
+      "representedScenarioSteps": 4,
+      "missingScenarioSteps": []
+    }
+  },
+  "executionContractChars": 4949,
+  "promptChars": null,
+  "specGenerationAttempts": 0,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": true,
+  "promotionAllowed": true,
+  "failedGatesAttempt1": [],
+  "finalSpec": {
+    "origin": "deterministic_compiler",
+    "generatedBy": "core",
+    "strategy": "deterministic_compiler",
+    "fallback": null
+  }
+}

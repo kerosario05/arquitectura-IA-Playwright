@@ -1,0 +1,157 @@
+{
+  "appSlug": "kiosko",
+  "sectionSlug": "default-section",
+  "scenarioId": "PREVIEW-001",
+  "scenarioTitle": "Consulta de prestamo",
+  "stepCount": 4,
+  "sourceExpectedResultPresent": true,
+  "requiredAssertionCount": 1,
+  "observableOracles": [
+    {
+      "id": "expected-01",
+      "requirement": "La aplicación carga su pantalla inicial",
+      "type": "navigation_transition",
+      "backed": true,
+      "source": "discovery",
+      "stepIndex": 4,
+      "polarity": "positive",
+      "target": "Finalizar sesión",
+      "evidence": [
+        "transition_observed:true",
+        "click_target:Finalizar sesión",
+        "action_type:Presionar \"Finalizar sesión\"",
+        "after_url:https://172.27.4.50/",
+        "assertion_polarity:positive"
+      ],
+      "details": {
+        "transitionObserved": true,
+        "clickTarget": "Finalizar sesión",
+        "resolvedTarget": null,
+        "postClickUiChange": null,
+        "sourceActionStepIndex": 4,
+        "expectedUrl": "https://172.27.4.50/"
+      }
+    }
+  ],
+  "oracleTypes": [
+    "navigation_transition"
+  ],
+  "availablePageObjectCount": 3,
+  "mode": "ai_hybrid",
+  "functionalExecutionEnabled": false,
+  "provider": "codex",
+  "model": "gpt-5.6-luna",
+  "skill": {
+    "name": "playwright-spec-generation",
+    "version": "1.0.0",
+    "hash": "2c372a43ace8ebb2c5bcac34accf692d1958342198325b2d04a51bbf3d3bb0e3",
+    "loaded": true
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "PREVIEW-001",
+    "title": "Consulta de prestamo",
+    "appSlug": "kiosko",
+    "sectionSlug": "default-section",
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Presionar \"Explora nuestros productos\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Explora nuestros productos"
+        },
+        "valueKey": "explora_nuestros_productos",
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Presionar \"Préstamos\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Préstamos"
+        },
+        "valueKey": "prestamos",
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Presionar \"Préstamo Personal\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Préstamo Personal"
+        },
+        "valueKey": "prestamo_personal",
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "navigation_transition",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "url_state",
+          "mechanism": {
+            "source": "url_state",
+            "method": "expectPromotedVisible",
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "navigation_transition",
+              "urlPattern": "https://172.27.4.50/"
+            }
+          },
+          "sourceActionStepIndex": 4,
+          "requirement": "La aplicación carga su pantalla inicial"
+        },
+        "sourceActionStepIndex": 4,
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Presionar \"Finalizar sesión\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Finalizar sesión"
+        },
+        "valueKey": "finalizar_sesion",
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 4,
+      "representedScenarioSteps": 4,
+      "missingScenarioSteps": []
+    }
+  },
+  "executionContractChars": 1802,
+  "promptChars": 25820,
+  "specGenerationAttempts": 1,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": true,
+  "promotionAllowed": true,
+  "failedGatesAttempt1": [],
+  "finalSpec": {
+    "origin": "ai_candidate",
+    "generatedBy": "ai",
+    "strategy": "ai_candidate",
+    "fallback": null
+  }
+}

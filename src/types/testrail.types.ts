@@ -55,6 +55,7 @@ export type RawTestRailCase = {
 export type TestScenarioStep = {
   index: number;
   action: string;
+  description?: string;
   expected?: string;
   dataHints: string[];
   inputIntent?: import("./execution-plan.types").InputIntent;
@@ -68,6 +69,27 @@ export type TestScenarioStep = {
   associatedField?: string;
   selectionField?: string;
   expectedValueKey?: string;
+  valueKey?: string;
+  technicalTargetRef?: string;
+  technicalTargetRefs?: string[];
+  technicalTargetCandidates?: Array<Record<string, unknown>>;
+  /**
+   * `CanonicalInteraction.controlIdentity` -- content-derived (screen fingerprint + field/locator
+   * identity), never positional/index-based (unlike `interactionId`/`sourceEventRefs`, which are
+   * `interaction-${rawEventIndex+1}`/`event-${rawEventIndex+1}` and shift under any edit/insertion
+   * to the recording's raw event log). Carried through so a step can be correlated with its
+   * originating Recording action by real structural identity. NOT guaranteed unique alone within a
+   * scenario (a control can legitimately repeat with a different action, or -- rarely -- with the
+   * SAME action, e.g. two identical confirmation dialogs); a caller needing a durable lineage key
+   * must additionally verify uniqueness (see `isUniqueLineage`,
+   * `db/recording-route-observation-repository.ts`), never assume it.
+   */
+  controlIdentity?: string;
+  /**
+   * `RecordingExecutionAction.actionType` transported verbatim -- the recording's own structured
+   * action kind, never inferred from step/target text. Paired with `controlIdentity` above.
+   */
+  recordingActionType?: "fill" | "select" | "click" | "check" | "uncheck" | "press" | "navigation" | "system_observation";
 };
 
 export type TestScenario = {
@@ -79,9 +101,23 @@ export type TestScenario = {
   references?: string;
   steps: TestScenarioStep[];
   authIntent?: "gate_observation" | "full_authentication";
+  negativeOracle?: import("../scenarios/scenario-types").NegativeScenarioOracle;
   raw?: RawTestRailCase;
   sectionId?: number;
   sectionName?: string;
+  functionalBranch?: import("../scenarios/scenario-types").FunctionalBranchRef;
+  requirementDependencies?: Array<{ requirementId: string; prerequisiteRequirementIds?: string[] }>;
+  stepAuthority?: Array<Record<string, unknown>>;
+  stepClaimTypes?: string[];
+  unsupportedFunctionalSteps?: Array<Record<string, unknown>>;
+  missingPrerequisiteRequirementIds?: string[];
+  validation?: { valid: boolean; errors: string[]; warnings: string[] };
+  repeatConstraintResolutions?: import("../scenarios/scenario-types").ConstraintResolution[];
+  runtimeExecutionBlockedByData?: boolean;
+  /** Structured recording identity is carried separately from TestRail prose. */
+  recordingId?: string;
+  recordedScenarioId?: string;
+  recordingExecutionContract?: import("../scenarios/scenario-types").RecordingExecutionContract;
   canonicalScenarioId?: string;
   canonicalRequirements?: import("../scenarios/canonical-scenario").CanonicalRequirement[];
   canonicalInputRequirements?: import("../scenarios/canonical-scenario").CanonicalInputRequirement[];
@@ -152,6 +188,9 @@ export type CreateRunInput = {
 
 export type AddCaseInput = {
   title: string;
+  templateId?: number;
+  typeId?: number;
+  priorityId?: number;
   refs?: string;
   preconditions?: string;
   customExpected?: string;
@@ -161,6 +200,9 @@ export type AddCaseInput = {
 };
 
 export type UpdateCaseInput = {
+  templateId?: number;
+  typeId?: number;
+  priorityId?: number;
   custom_preconds?: string;
   title?: string;
   refs?: string;

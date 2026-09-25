@@ -45,9 +45,10 @@ function validateScenarioPreviewRequest(body) {
             return { ok: false, status: 400, error: "invalid_preview_scenarios", message: `El escenario "${sc.sourceIssueKey}" no tiene steps.` };
         }
     }
+    const functionalAppSlug = body.functionalAppSlug;
     const appSlug = body.appSlug;
     const targetAppSlug = body.targetAppSlug;
-    if (!appSlug && !targetAppSlug) {
+    if (!functionalAppSlug && !appSlug && !targetAppSlug) {
         return { ok: false, status: 400, error: "invalid_preview_scenarios", message: "appSlug es requerido." };
     }
     const requiresTestRailSync = body.publishToTestRail === true || body.createTestRun === true || body.reportResults === true;
@@ -132,6 +133,15 @@ function validateScenarioPreviewRequest(body) {
     const result = validateScenarioPreviewRequest({
         scenarios: [makeMcpScenario({ targetAppSlug: "kiosko" })],
         targetAppSlug: "kiosko",
+    });
+    (0, test_1.expect)(result.ok).toBe(true);
+});
+(0, test_1.test)("scenario-preview route: accepts valid scenarios with functionalAppSlug even when appSlug is technical", () => {
+    const result = validateScenarioPreviewRequest({
+        scenarios: [makeMcpScenario({ targetAppSlug: "kiosko" })],
+        appSlug: "tests",
+        targetAppSlug: "tests",
+        functionalAppSlug: "kiosko",
     });
     (0, test_1.expect)(result.ok).toBe(true);
 });

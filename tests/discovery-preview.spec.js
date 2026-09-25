@@ -5,6 +5,8 @@ const discovery_preview_1 = require("../src/cli/discovery-preview");
 const case_discovery_1 = require("../src/discovery/case-discovery");
 const app_auto_resolver_1 = require("../src/automations/app-auto-resolver");
 const scenario_normalizer_1 = require("../src/automations/scenario-normalizer");
+const auto_pom_1 = require("../src/automations/auto-pom");
+const spec_execution_contract_1 = require("../src/automations/spec-execution-contract");
 const TECHNICAL_SLUGS = new Set(["tests", "test", "default", "unknown", "undefined", "null"]);
 function isTechnicalSlug(slug) {
     return TECHNICAL_SLUGS.has(slug.trim().toLowerCase());
@@ -50,6 +52,331 @@ function makeRouteProfile(overrides = {}) {
     (0, test_1.expect)((0, case_discovery_1.resolveCaseDiscoveryAppSlug)({
         env: { APP_SLUG: "app-b" },
     })).toBe("app-b");
+});
+(0, test_1.test)("virtualCaseToTestScenario preserves explicit TestRail case identity when present", () => {
+    const scenario = (0, discovery_preview_1.virtualCaseToTestScenario)({
+        id: "preview-001",
+        displayId: "PREVIEW-001",
+        testRailCaseId: 42811,
+        title: "Caso existente",
+        sourceIssueKey: "TR-C42811",
+        steps: ["Clic en \"Información de productos\"."],
+        expectedResult: "Se muestra el detalle",
+        preconditions: [],
+        appSlug: "app-a",
+        routeProfile: "kiosko-default",
+        dataRequirements: "",
+        mcpExecutable: true,
+        source: "scenario_preview",
+        type: "Functional",
+        automationType: "ui_with_auth_gate",
+        setupStrategy: "auth_gate",
+    });
+    (0, test_1.expect)(scenario.source).toBe("testrail");
+    (0, test_1.expect)(scenario.caseId).toBe(42811);
+    (0, test_1.expect)(scenario.externalId).toBe("C42811");
+});
+(0, test_1.test)("virtualCaseToTestScenario uses payload routeProfile before the virtual case value", () => {
+    const routeProfile = makeRouteProfile({ name: "payload-profile" });
+    const scenario = (0, discovery_preview_1.virtualCaseToTestScenario)({
+        id: "preview-002",
+        displayId: "PREVIEW-002",
+        title: "Caso con perfil explícito",
+        sourceIssueKey: "TR-C42812",
+        steps: ["Clic en \"Iniciar\"."],
+        expectedResult: "Se inicia",
+        preconditions: [],
+        appSlug: "app-a",
+        routeProfile: "app-config-profile",
+        dataRequirements: "",
+        mcpExecutable: true,
+        source: "scenario_preview",
+        type: "Functional",
+        automationType: "ui_with_auth_gate",
+        setupStrategy: "auth_gate",
+    }, routeProfile);
+    (0, test_1.expect)(scenario.routeProfile).toBe(routeProfile);
+});
+(0, test_1.test)("virtualCaseToTestScenario preserves the recording execution contract", () => {
+    const scenario = (0, discovery_preview_1.virtualCaseToTestScenario)({
+        id: "preview-recording-001",
+        displayId: "PREVIEW-RECORDING-001",
+        title: "Recording contract",
+        sourceIssueKey: "REC-TEST",
+        steps: ['Ingresar "123456" en "Campo"'],
+        expectedResult: "Se completa",
+        preconditions: [],
+        appSlug: "app-a",
+        dataRequirements: "",
+        mcpExecutable: true,
+        source: "scenario_preview",
+        type: "Functional",
+        automationType: "ui_with_auth_gate",
+        setupStrategy: "auth_gate",
+        recordingExecutionContract: {
+            actions: [{
+                    actionType: "fill",
+                    humanStep: 'Ingresar "123456" en "Campo"',
+                    targetRef: "field-a",
+                    valueKey: "input.a",
+                    runtimeValueSource: "dataset",
+                }],
+            runtimeInputRequirements: [{ valueKey: "input.a", value: "123456", valueRole: "action_input" }],
+        },
+    });
+    (0, test_1.expect)(scenario.recordingExecutionContract?.actions).toHaveLength(1);
+    (0, test_1.expect)(scenario.recordingExecutionContract?.actions[0]?.targetRef).toBe("field-a");
+    (0, test_1.expect)(scenario.recordingExecutionContract?.actions[0]?.valueKey).toBe("input.a");
+    (0, test_1.expect)(scenario.steps[0]?.action).toBe('Ingresar [input.a] en "Campo"');
+});
+(0, test_1.test)("virtualCaseToTestScenario preserves canonical and mutation authority alongside recording targets", () => {
+    const scenario = (0, discovery_preview_1.virtualCaseToTestScenario)({
+        id: "preview-repeat-001",
+        displayId: "PREVIEW-REPEAT-001",
+        title: "Repeat entity",
+        sourceIssueKey: "REC-TEST",
+        steps: ["Ingresar [entity_2.colaborador] en \"Colaborador\""],
+        expectedResult: "Se registra la segunda entidad",
+        preconditions: [],
+        appSlug: "app-a",
+        routeProfile: "",
+        dataRequirements: "entity_2.colaborador",
+        mcpExecutable: true,
+        source: "scenario_preview",
+        type: "Functional",
+        automationType: "recorded_session",
+        setupStrategy: "recorded_walkthrough",
+        stepRequirementRefs: [{ stepIndex: 0, requirementId: "REQ-REPEAT", facet: "action" }],
+        canonicalRequirements: [{
+                requirementId: "REQ-REPEAT",
+                kind: "action",
+                description: "La segunda entidad usa un colaborador distinto",
+                polarity: "positive",
+                polaritySource: "canonical",
+                polarityResolvedAt: "canonical_adapter",
+                origin: { originRef: "recording:repeat" },
+            }],
+        repeatConstraintResolutions: [{
+                valueKey: "entity_2.colaborador",
+                constraintType: "uniqueWithinCollection",
+                activeValueCount: 1,
+                candidateCount: 1,
+                distinctCandidateCount: 1,
+                resolutionSource: "recorded_confirmed",
+                resolved: true,
+            }],
+        recordingExecutionContract: {
+            actions: [{
+                    actionType: "fill",
+                    stepIndex: 1,
+                    semanticField: "Colaborador",
+                    targetRef: "grid:table|entity_2|Colaborador",
+                    technicalTargetRef: "role:input|Indicar...",
+                    valueKey: "entity_2.colaborador",
+                    runtimeValueSource: "dataset",
+                }],
+            runtimeInputRequirements: [{
+                    valueKey: "entity_2.colaborador",
+                    valueRole: "action_input",
+                    constraints: [{ type: "uniqueWithinCollection", uniqueWithinCollection: true }],
+                }],
+        },
+    });
+    (0, test_1.expect)(scenario.canonicalRequirements?.[0]?.requirementId).toBe("REQ-REPEAT");
+    (0, test_1.expect)(scenario.stepRequirementRefs?.[0]?.requirementId).toBe("REQ-REPEAT");
+    (0, test_1.expect)(scenario.steps[0]?.valueKey).toBe("entity_2.colaborador");
+    (0, test_1.expect)(scenario.steps[0]?.technicalTargetRef).toBe("role:input|Indicar...");
+    (0, test_1.expect)(scenario.repeatConstraintResolutions?.[0]?.constraintType).toBe("uniqueWithinCollection");
+    (0, test_1.expect)(scenario.recordingExecutionContract?.runtimeInputRequirements[0]?.valueKey).toBe("entity_2.colaborador");
+});
+(0, test_1.test)("spec execution contract preserves dataset valueKey after leading navigation enrichment", () => {
+    const contract = (0, spec_execution_contract_1.buildSpecExecutionContract)({
+        version: "1.0",
+        source: "discovery_generated",
+        status: "validated",
+        scenario: { source: "manual", title: "Repeat entity" },
+        requiredData: [],
+        createdAt: new Date(0).toISOString(),
+        steps: [
+            { index: 0, action: "navigate", target: "APP_BASE_URL", description: "Abrir la aplicación" },
+            {
+                index: 1,
+                action: "fill",
+                target: { strategy: "text", value: "Colaborador" },
+                value: "[entity_2.colaborador]",
+                valueKey: "entity_2.colaborador",
+                description: 'Ingresar [entity_2.colaborador] en "Colaborador"',
+            },
+        ],
+    }, {
+        title: "Repeat entity",
+        steps: [{
+                index: 0,
+                action: "fill",
+                valueKey: "entity_2.colaborador",
+                description: 'Ingresar [entity_2.colaborador] en "Colaborador"',
+                entityScope: "entity_2",
+                technicalTargetRef: "role:input|Indicar...",
+            }],
+    });
+    (0, test_1.expect)(contract.diagnostics.missingScenarioSteps).toHaveLength(0);
+    (0, test_1.expect)(contract.steps).toHaveLength(1);
+    (0, test_1.expect)(contract.steps[0]?.valueKey).toBe("entity_2.colaborador");
+    (0, test_1.expect)(contract.steps[0]?.implementation).toEqual({
+        kind: "runtime",
+        runtimeMethod: "fillPromotedField",
+    });
+});
+(0, test_1.test)("autoPromote no considera discovered_partial como exito final si no hay spec promovido", () => {
+    const completion = (0, discovery_preview_1.resolvePreviewCompletion)({
+        caseResult: { status: "discovered_partial" },
+        promotionStatus: "not_applicable",
+    }, true);
+    (0, test_1.expect)(completion.eventStatus).toBe("failed");
+    (0, test_1.expect)(completion.automationReady).toBe(false);
+    (0, test_1.expect)(completion.specGenerationStatus).toBe("failed");
+});
+(0, test_1.test)("recording replay expone spec eligibility sin afirmar que la spec ya fue generada", () => {
+    const completion = (0, discovery_preview_1.resolvePreviewCompletion)({
+        caseResult: { status: "discovered_passed" },
+        promotionStatus: "not_promoted",
+    }, false, true);
+    (0, test_1.expect)(completion.eventStatus).toBe("passed");
+    (0, test_1.expect)(completion.automationReady).toBe(true);
+    (0, test_1.expect)(completion.specEligible).toBe(true);
+    (0, test_1.expect)(completion.specGenerationInvoked).toBe(false);
+    (0, test_1.expect)(completion.specGenerationStatus).toBe("deferred");
+    (0, test_1.expect)(completion.specEligibilityReason).toBe("recording_spec_generation_deferred_until_explicit_product_action");
+});
+(0, test_1.test)("autoPromote no considera discovered_passed como exito final si spec generation falla", () => {
+    const completion = (0, discovery_preview_1.resolvePreviewCompletion)({
+        caseResult: { status: "discovered_passed" },
+        promotionStatus: "spec_failed",
+        specPath: "C:\\tmp\\case.spec.ts",
+        specGeneration: {
+            provider: "copilot",
+            model: "gpt-5.4",
+            invocations: 1,
+            invocationsConsumed: 1,
+            promotionAllowed: false,
+            specWritten: false,
+            finalSpec: { origin: "ai_candidate", fallback: null },
+        },
+    }, true);
+    (0, test_1.expect)(completion.eventStatus).toBe("failed");
+    (0, test_1.expect)(completion.automationReady).toBe(false);
+    (0, test_1.expect)(completion.aiInvoked).toBe(true);
+});
+(0, test_1.test)("autoPromote requiere promotionAllowed y specWritten para automationReady", () => {
+    const completion = (0, discovery_preview_1.resolvePreviewCompletion)({
+        caseResult: { status: "discovered_passed" },
+        promotionStatus: "promoted",
+        specPath: "C:\\tmp\\case.spec.ts",
+        specGeneration: {
+            provider: "copilot",
+            model: "gpt-5.4",
+            invocations: 1,
+            invocationsConsumed: 2,
+            promotionAllowed: true,
+            specWritten: true,
+            finalSpec: { origin: "ai_candidate", fallback: null },
+        },
+    }, true);
+    (0, test_1.expect)(completion.eventStatus).toBe("passed");
+    (0, test_1.expect)(completion.automationReady).toBe(true);
+    (0, test_1.expect)(completion.aiAttempts).toBe(2);
+    (0, test_1.expect)(completion.finalSpecOrigin).toBe("ai_candidate");
+});
+(0, test_1.test)("T1 auto-POM promoted replaces the initial blocked status", () => {
+    const promotionStatus = (0, auto_pom_1.resolveEffectiveAutoPomStatus)("promoted");
+    const completion = (0, discovery_preview_1.resolvePreviewCompletion)({
+        caseResult: { status: "discovered_passed" },
+        promotionStatus,
+        specPath: "automations/apps/project/cases/case/case.spec.ts",
+        specGeneration: {
+            provider: null,
+            model: null,
+            invocations: 0,
+            invocationsConsumed: 0,
+            promotionAllowed: true,
+            specWritten: true,
+            validation: { structure: "passed", semanticCoverage: "passed" },
+            finalSpec: { origin: "deterministic", fallback: null },
+        },
+    }, true);
+    (0, test_1.expect)(promotionStatus).toBe("promoted");
+    (0, test_1.expect)(completion.specGenerationStatus).toBe("passed");
+    (0, test_1.expect)(completion.automationReady).toBe(true);
+});
+(0, test_1.test)("T2 failed auto-POM remains fail-closed", () => {
+    const promotionStatus = (0, auto_pom_1.resolveEffectiveAutoPomStatus)("needs_page_method");
+    const completion = (0, discovery_preview_1.resolvePreviewCompletion)({
+        caseResult: { status: "discovered_passed" },
+        promotionStatus,
+        specPath: "automations/apps/project/cases/case/case.spec.ts",
+        specGeneration: {
+            provider: null,
+            model: null,
+            invocations: 0,
+            invocationsConsumed: 0,
+            promotionAllowed: true,
+            specWritten: true,
+            finalSpec: { origin: "deterministic", fallback: null },
+        },
+    }, true);
+    (0, test_1.expect)(promotionStatus).not.toBe("promoted");
+    (0, test_1.expect)(completion.automationReady).toBe(false);
+});
+(0, test_1.test)("T3 a later spec gate failure overrides promoted readiness with the real reason", () => {
+    const completion = (0, discovery_preview_1.resolvePreviewCompletion)({
+        caseResult: { status: "discovered_passed" },
+        promotionStatus: "promoted",
+        specPath: "automations/apps/project/cases/case/case.spec.ts",
+        specGeneration: {
+            provider: null,
+            model: null,
+            invocations: 0,
+            invocationsConsumed: 0,
+            promotionAllowed: false,
+            specWritten: true,
+            validation: { structure: "failed" },
+            finalSpec: { origin: "deterministic", fallback: null },
+        },
+    }, true);
+    (0, test_1.expect)(completion.automationReady).toBe(false);
+    (0, test_1.expect)(completion.reason).toBe("spec_gate_failed:structure");
+});
+(0, test_1.test)("T4 promotion failure without failed targets is not classified as target_not_found", () => {
+    const failure = (0, discovery_preview_1.classifyPreviewFailure)({
+        id: "case",
+        displayId: "CASE",
+        title: "Promotion failure",
+        status: "failed",
+        promotionStatus: "spec_failed",
+        specGenerationStatus: "failed",
+        promotionReason: "spec_gate_failed:structure",
+        failedTargets: [],
+        failedAssertions: [],
+    });
+    (0, test_1.expect)(failure).toEqual({ failureType: "spec_generation_failed", phase: "spec_generation" });
+});
+(0, test_1.test)("T5 an already promoted result remains automation ready", () => {
+    const completion = (0, discovery_preview_1.resolvePreviewCompletion)({
+        caseResult: { status: "discovered_passed" },
+        promotionStatus: "promoted",
+        specPath: "automations/apps/project/cases/case/case.spec.ts",
+        specGeneration: {
+            provider: null,
+            model: null,
+            invocations: 0,
+            invocationsConsumed: 0,
+            promotionAllowed: true,
+            specWritten: true,
+            finalSpec: { origin: "existing_spec", fallback: null },
+        },
+    }, true);
+    (0, test_1.expect)(completion.eventStatus).toBe("passed");
+    (0, test_1.expect)(completion.automationReady).toBe(true);
 });
 (0, test_1.test)("failureGroups agrupa fallos por causa sin perder promotion gate", () => {
     const failureGroups = (0, discovery_preview_1.buildPreviewFailureGroups)([

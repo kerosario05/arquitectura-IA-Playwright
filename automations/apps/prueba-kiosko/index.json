@@ -1,0 +1,389 @@
+{
+  "version": "1.0",
+  "updatedAt": "2026-09-25T12:45:03.436Z",
+  "automations": [
+    {
+      "id": "preview-001-prueba",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "Prueba",
+      "planPath": "automations\\apps\\prueba-kiosko\\sections\\default-section\\cases\\preview-001-prueba\\plan.json",
+      "specPath": "automations\\apps\\prueba-kiosko\\sections\\default-section\\cases\\preview-001-prueba\\case.spec.ts",
+      "appSlug": "prueba-kiosko",
+      "appConfigPath": "automations\\apps\\prueba-kiosko\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "prueba-kiosko",
+      "createdAt": "2026-09-22T15:17:08.979Z",
+      "updatedAt": "2026-09-22T15:17:08.980Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-22T15-15-56-079Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-22T15-15-56-079Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 54298,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "navigation_transition"
+          ],
+          "errors": [],
+          "warnings": [
+            "step_index_not_explicit_in_spec:5"
+          ],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\prueba-kiosko\\sections\\default-section\\cases\\preview-001-prueba\\case.spec.ts",
+          "specHash": "5c2c47ea0cade7a93716558477f15896364d5f48d35f25e1a8f46295e8d00dd7",
+          "specSource": "generatedSpec"
+        }
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\prueba-kiosko\\sections\\default-section\\cases\\preview-001-prueba\\case.spec.ts",
+      "promotedSpecHash": "5c2c47ea0cade7a93716558477f15896364d5f48d35f25e1a8f46295e8d00dd7"
+    },
+    {
+      "id": "preview-001-login",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "Login",
+      "planPath": "automations\\apps\\prueba-kiosko\\sections\\default-section\\cases\\preview-001-login\\plan.json",
+      "specPath": "automations\\apps\\prueba-kiosko\\sections\\default-section\\cases\\preview-001-login\\case.spec.ts",
+      "appSlug": "prueba-kiosko",
+      "appConfigPath": "automations\\apps\\prueba-kiosko\\app.config.json",
+      "status": "spec_failed",
+      "source": "discovery",
+      "appProfile": "prueba-kiosko",
+      "createdAt": "2026-09-25T01:49:19.475Z",
+      "updatedAt": "2026-09-25T11:34:45.456Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-25T11-32-50-739Z\\discovered-plans.pending.json",
+      "pomStatus": "needs_manual_review",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "failed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-09-25T11-32-50-739Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 70811,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "failed"
+          },
+          "promotionAllowed": false,
+          "specsRequested": 1,
+          "specsValidated": 0,
+          "specsRejected": 1,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": false,
+          "failedGatesAttempt1": [
+            "functionalExecution"
+          ],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "navigation_transition"
+          ],
+          "errors": [
+            "functional_execution_failed:exitCode=1",
+            "functional_execution_error:Error: Promoted click failed at step 6 target=\"role:button\". failureClass=ACTION_FAILED exactRuntimeError=\"Retry failed: locator.click: Error: strict mode violation: getByRole('button') resolved to 8 elements:\\n    1) <button class=\\\"absolute left-8 top-1/2 -translate-y-1/2 p-3 hover:bg-primary/10 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 border-2 border-transparent hover:border-primary/20\\\">…</button> aka getByRole('button').first()\\n    2) <button class=\\\"inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary hover:bg-primary/90 h-10 min-h-[70px] font-semibold rounded-2xl transition-all duration-200 ease-out shadow-card hover:shadow-card-hover disabled:opacity-50 disabled:cursor-not-allowed relative overflow-h…>…</button> aka getByRole('button', { name: 'Finalizar sesión' })\\n    3) <button class=\\\"inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary hover:bg-primary/90 h-10 min-h-[70px] font-semibold rounded-2xl transition-all duration-200 ease-out shadow-card hover:shadow-card-hover disabled:opacity-50 disabled:cursor-not-allowed relative overflow-h…>…</button> aka getByRole('button', { name: 'Volver' })\\n    4) <button class=\\\"inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary hover:bg-primary/90 h-10 min-h-[70px] font-semibold rounded-2xl transition-all duration-200 ease-out shadow-card hover:shadow-card-hover disabled:opacity-50 disabled:cursor-not-allowed relative overflow-h…>…</button> aka getByRole('button', { name: 'Solicitar' })\\n    5) <button class=\\\"text-muted-foreground hover:text-foreground\\\">…</button> aka getByRole('button').nth(4)\\n    6) <button type=\\\"button\\\" class=\\\"bg-white border-3 border-primary rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow focus:outline-none focus:ring-2 focus:ring-primary text-left\\\">…</button> aka getByRole('button', { name: 'Generar Turno Atiéndete con' })\\n    7) <button type=\\\"button\\\" class=\\\"bg-white border-3 border-secondary rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow focus:outline-none focus:ring-2 focus:ring-secondary text-left\\\">…</button> aka getByRole('button', { name: 'Solicitud Digital Continúa tu' })\\n    8) <button class=\\\"inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary hover:bg-primary/90 h-10 min-h-[70px] text-lg font-semibold rounded-2xl py-5 transition-all duration-200 ease-out shadow-card hover:shadow-card-hover disabled:opacity-50 disabled:cursor-not-allowed relati…>…</button> aka getByRole('button', { name: 'Cancelar' })\\n\\nCall log:\\n\\u001b[2m  - waiting for getByRole('button')\\u001b[22m\\n\" currentUrl=https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica clickPath=failed nativeClickAttempted=true nativeClickSucceeded=false callbackAttempted=true callbackSucceeded=false retryAttempted=true diagnostics={\"currentUrl\":\"https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica\",\"actionIntent\":\"click\",\"target\":\"role:button\",\"stepIndex\":6,\"timeoutMs\":15000,\"stability\":{\"currentUrl\":\"https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica\",\"title\":\"Kiosco de Autogestión - Banco Santa Cruz\",\"visibleHeadings\":[\"Más detalles del producto\",\"Tarjeta Crédito Visa Clásica\",\"Solicita tu Producto\",\"Generar Turno\",\"Solicitud Digital\"],\"visibleButtons\":[\"Finalizar sesión\",\"Volver\",\"Solicitar\",\"Generar TurnoAtiéndete con un representante de nuestro banco\",\"Solicitud DigitalContinúa tu solicitud desde nuestra plataforma digital\",\"Cancelar\"],\"visibleTexts\":[\"Más detalles del producto\",\"Tarjeta Crédito Visa Clásica\",\"Tarjeta Crédito Visa Clásica\",\"Beneficios\",\"Doble Saldo\",\"Puntos Santa Cruz\",\"Detalles\",\"Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz.\",\"Pagos en línea con disponibilidad inmediata.\",\"Tecnología contactless y Click to Pay.\",\"Opción de elegir la fecha de corte para pagos mensuales.\",\"Seguro de vida Santa Cruz (opcional).\",\"Mayor plazo para pagar: 26 días después de la fecha de corte.\",\"10% del límite aprobado en sobregiros.\",\"Amplia red de cajeros automáticos a nivel mundial.\",\"Plan de asistencia Santa Cruz (Opcional).\",\"Requisitos:\",\"Certificación de ingresos.\",\"Si es profesional independiente, la empresa deberá tener dos (2) años de establecida.\",\"Copia de la cédula de identidad y electoral.\"],\"loadingDetected\":false,\"skeletonDetected\":false,\"listReadiness\":{\"cardsVisible\":4,\"listItemsVisible\":0,\"loadingDetected\":false,\"zeroProductsDetected\":false,\"hasEntityContainers\":true,\"visibleHeadings\":[\"Más detalles del producto\",\"Tarjeta Crédito Visa Clásica\",\"Beneficios\",\"Detalles\",\"Requisitos:\"],\"visibleButtons\":[\"Finalizar sesión\",\"Volver\",\"Solicitar\",\"Generar TurnoAtiéndete con un representante de nuestro banco\",\"Solicitud DigitalContinúa tu solicitud desde nuestra plataforma digital\",\"Cancelar\"],\"ready\":true},\"diagnosticStatus\":\"completed\"},\"retryAttempted\":true,\"clickPath\":\"failed\",\"nativeClickAttempted\":true,\"nativeClickSucceeded\":false,\"callbackAttempted\":true,\"callbackSucceeded\":false,\"callbackError\":\"Retry failed: locator.click: Error: strict mode violation: getByRole('button') resolved to 8 elements:\\n    1) <button class=\\\"absolute left-8 top-1/2 -translate-y-1/2 p-3 hover:bg-primary/10 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 border-2 border-transparent hover:border-primary/20\\\">…</button> aka getByRole('button').first()\\n    2) <button class=\\\"inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary hover:bg-primary/90 h-10 min-h-[70px] font-semibold rounded-2xl transition-all duration-200 ease-out shadow-card hover:shadow-card-hover disabled:opacity-50 disabled:cursor-not-allowed relative overflow-h…>…</button> aka getByRole('button', { name: 'Finalizar sesión' })\\n    3) <button class=\\\"inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary hover:bg-primary/90 h-10 min-h-[70px] font-semibold rounded-2xl transition-all duration-200 ease-out shadow-card hover:shadow-card-hover disabled:opacity-50 disabled:cursor-not-allowed relative overflow-h…>…</button> aka getByRole('button', { name: 'Volver' })\\n    4) <button class=\\\"inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary hover:bg-primary/90 h-10 min-h-[70px] font-semibold rounded-2xl transition-all duration-200 ease-out shadow-card hover:shadow-card-hover disabled:opacity-50 disabled:cursor-not-allowed relative overflow-h…>…</button> aka getByRole('button', { name: 'Solicitar' })\\n    5) <button class=\\\"text-muted-foreground hover:text-foreground\\\">…</button> aka getByRole('button').nth(4)\\n    6) <button type=\\\"button\\\" class=\\\"bg-white border-3 border-primary rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow focus:outline-none focus:ring-2 focus:ring-primary text-left\\\">…</button> aka getByRole('button', { name: 'Generar Turno Atiéndete con' })\\n    7) <button type=\\\"button\\\" class=\\\"bg-white border-3 border-secondary rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow focus:outline-none focus:ring-2 focus:ring-secondary text-left\\\">…</button> aka getByRole('button', { name: 'Solicitud Digital Continúa tu' })\\n    8) <button class=\\\"inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary hover:bg-primary/90 h-10 min-h-[70px] text-lg font-semibold rounded-2xl py-5 transition-all duration-200 ease-out shadow-card hover:shadow-card-hover disabled:opacity-50 disabled:cursor-not-allowed relati…>…</button> aka getByRole('button', { name: 'Cancelar' })\\n\\nCall log:\\n\\u001b[2m  - waiting for getByRole('button')\\u001b[22m\\n\",\"expectedEffect\":\"ui_change\",\"effectDetected\":false,\"fallbackUsed\":\"none\",\"matchedLocatorStrategy\":\"unknown\",\"screenshotPath\":\"C:\\\\MisProyectos\\\\arquitectura-IA-Playwright-feature-auth-gate\\\\.artifacts\\\\promoted-runtime\\\\step-006.png\"}"
+          ],
+          "warnings": [
+            "step_index_not_explicit_in_spec:19",
+            "functional_execution_screenshots=4",
+            "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 6)."
+          ],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "block",
+            "promotionStatus": "blocked",
+            "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 6)."
+          },
+          "specWritten": false,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "spec_generation_validation_failed",
+          "blockers": [
+            "spec_generation_validation_failed"
+          ],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\prueba-kiosko\\sections\\default-section\\cases\\preview-001-login\\case.spec.ts",
+          "specHash": "fe20818f8d7b87bfbe427ee9c6f73fb50492d3b206dff1a59dd78596d93682be",
+          "specSource": "ai_candidate"
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\prueba-kiosko\\sections\\default-section\\cases\\preview-001-login\\plan.json",
+        "previousStatus": "spec_failed"
+      }
+    },
+    {
+      "id": "0-login",
+      "caseId": 0,
+      "title": "Login",
+      "planPath": "automations\\apps\\prueba-kiosko\\sections\\default-section\\cases\\0-login\\plan.json",
+      "specPath": "automations\\apps\\prueba-kiosko\\sections\\default-section\\cases\\0-login\\case.spec.ts",
+      "appSlug": "prueba-kiosko",
+      "appConfigPath": "automations\\apps\\prueba-kiosko\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "prueba-kiosko",
+      "createdAt": "2026-09-25T12:30:54.930Z",
+      "updatedAt": "2026-09-25T12:45:03.436Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\undefined\\2026-09-25T12-43-28-025Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\undefined\\2026-09-25T12-43-28-025Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 61024,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "navigation_transition"
+          ],
+          "errors": [],
+          "warnings": [
+            "step_index_not_explicit_in_spec:19"
+          ],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\prueba-kiosko\\sections\\default-section\\cases\\0-login\\case.spec.ts",
+          "specHash": "2db0ab5f747dbca492d51d3dbc9d9574111d4e1e37cef36bb5ec4c505f892e04",
+          "specSource": "generatedSpec"
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\prueba-kiosko\\sections\\default-section\\cases\\0-login\\plan.json",
+        "previousStatus": "spec_failed"
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\prueba-kiosko\\sections\\default-section\\cases\\0-login\\case.spec.ts",
+      "promotedSpecHash": "2db0ab5f747dbca492d51d3dbc9d9574111d4e1e37cef36bb5ec4c505f892e04"
+    }
+  ]
+}

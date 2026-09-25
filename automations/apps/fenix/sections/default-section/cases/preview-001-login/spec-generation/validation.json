@@ -1,0 +1,69 @@
+{
+  "mode": "deterministic",
+  "provider": null,
+  "model": null,
+  "skill": {
+    "name": null,
+    "version": null,
+    "hash": null,
+    "loaded": false
+  },
+  "invocations": 0,
+  "invocationsConsumed": 0,
+  "durationMs": 50074,
+  "usage": {
+    "inputTokens": null,
+    "cachedInputTokens": null,
+    "cacheWriteInputTokens": null,
+    "nonCachedInputTokens": null,
+    "outputTokens": null,
+    "reasoningOutputTokens": null,
+    "totalPhysicalTokens": null,
+    "durationMs": null,
+    "credits": null
+  },
+  "validation": {
+    "schema": "skipped",
+    "structure": "passed",
+    "traceFidelity": "skipped",
+    "typescript": "passed",
+    "playwrightDiscovery": "passed",
+    "semanticCoverage": "passed",
+    "functionalExecution": "failed"
+  },
+  "promotionAllowed": false,
+  "specsRequested": 1,
+  "specsValidated": 0,
+  "specsRejected": 1,
+  "specGenerationAttempts": 0,
+  "specRepairAttempts": 0,
+  "firstPassPromotion": false,
+  "failedGatesAttempt1": [
+    "functionalExecution"
+  ],
+  "regressedGates": [],
+  "missingRequirements": [],
+  "oracleTypes": [
+    "navigation_transition"
+  ],
+  "errors": [
+    "functional_execution_failed:exitCode=1",
+    "functional_execution_error:Error: Post-click stability check failed. expectedEffect=ui_change reason=no_observable_post_action_outcome target=\"role:textbox|Contraseña:\" previousUrl=\"https://qa1.santacruz.do/onlinebanking/\" currentUrl=\"https://qa1.santacruz.do/onlinebanking/\""
+  ],
+  "warnings": [
+    "step_index_not_explicit_in_spec:6",
+    "functional_execution_screenshots=0",
+    "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 0)."
+  ],
+  "finalSpec": {
+    "origin": "deterministic_compiler",
+    "generatedBy": "core",
+    "strategy": "deterministic_compiler",
+    "fallback": null
+  },
+  "runtimeGate": {
+    "decision": "block",
+    "promotionStatus": "blocked",
+    "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 0)."
+  }
+}

@@ -1,0 +1,467 @@
+[
+  {
+    "scenarioId": "REC-28ED7705-01",
+    "title": "Reach the verification screen and record the six-box token entry",
+    "description": "Recorrido observado para completar \"Reach the verification screen and record the six-box token entry\". Se registraron 3 acciones funcionales.",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://qa1.santacruz.do/onlinebanking",
+        "description": "Navegar a https://qa1.santacruz.do/onlinebanking"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Usuario:"
+        },
+        "valueKey": "usuario",
+        "description": "Ingresar [usuario] en \"Usuario:\"",
+        "interactionId": "interaction-3"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Contraseña:"
+        },
+        "valueKey": "contrasena",
+        "description": "Ingresar [contrasena] en \"Contraseña:\"",
+        "interactionId": "interaction-6"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Iniciar sesión"
+        },
+        "description": "Presionar \"Iniciar sesión\"",
+        "interactionId": "interaction-7"
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Ingresar [usuario] en \"Usuario:\"",
+        "sourceEventRefs": [
+          "event-3"
+        ],
+        "stepTemplate": "Ingresar [usuario] en \"Usuario:\"",
+        "renderedStep": "Ingresar \"adminr\" en \"Usuario:\"",
+        "valueKey": "usuario",
+        "interactionId": "interaction-3",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "60d370b39a8d",
+        "screenAfterRef": "60d370b39a8d",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking",
+        "stateScope": "60d370b39a8d",
+        "stepNumber": 2
+      },
+      {
+        "content": "Ingresar [contrasena] en \"Contraseña:\"",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "stepTemplate": "Ingresar [contrasena] en \"Contraseña:\"",
+        "renderedStep": "Ingresar \"S\" en \"Contraseña:\"",
+        "valueKey": "contrasena",
+        "interactionId": "interaction-6",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "60d370b39a8d",
+        "screenAfterRef": "60d370b39a8d",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking",
+        "stateScope": "60d370b39a8d",
+        "stepNumber": 3
+      },
+      {
+        "content": "Presionar \"Iniciar sesión\"",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "renderedStep": "Presionar \"Iniciar sesión\"",
+        "interactionId": "interaction-7",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "60d370b39a8d",
+        "screenAfterRef": "60d370b39a8d",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking",
+        "stateScope": "60d370b39a8d",
+        "stepNumber": 4
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "usuario",
+        "label": "Usuario:",
+        "stepIndex": 1,
+        "technicalTargetRefs": [
+          "role:textbox|Usuario:",
+          "css:#UserNameP",
+          "id:UserNameP"
+        ],
+        "sourceEventRefs": [
+          "event-3"
+        ],
+        "exampleValue": "adminr",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Usuario:",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "contrasena",
+        "label": "Contraseña:",
+        "stepIndex": 2,
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña:",
+          "css:#PasswordP",
+          "id:PasswordP"
+        ],
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "secure",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Contraseña:",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Ingresar [usuario] en \"Usuario:\"",
+        "strategy": "role",
+        "value": "textbox|Usuario:"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Ingresar [contrasena] en \"Contraseña:\"",
+        "strategy": "role",
+        "value": "textbox|Contraseña:"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Iniciar sesión\"",
+        "strategy": "role",
+        "value": "button|Iniciar sesión"
+      }
+    ],
+    "sourceRecordingId": "28ed7705-d9ed-46a9-8e5e-0427bfe9de76",
+    "hasUncertainSteps": false,
+    "primary": true,
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "functionalReadiness": true,
+    "technicalReadiness": true,
+    "expectedResultCandidate": "La aplicación carga su pantalla inicial",
+    "oracleAuthority": "observed_only",
+    "confidence": 0.95,
+    "scenarioStepCount": 4,
+    "functionalActionCount": 3,
+    "nonUserSetupSteps": 1,
+    "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
+    "scenarioGoal": "Reach the verification screen and record the six-box token entry",
+    "stateSequenceValid": true,
+    "stateSequenceIssues": [],
+    "postGoalObservations": [],
+    "goalContract": {
+      "nonGeneric": true,
+      "goalCoherent": true,
+      "mutationIntentExpressed": true
+    },
+    "replayEligible": true,
+    "canonicalInteractions": [
+      {
+        "id": "interaction-1",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-1"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-3",
+        "controlIdentity": "60d370b39a8d|Usuario:|role|textbox|Usuario:",
+        "semanticField": "Usuario:",
+        "action": "fill",
+        "valueKey": "usuario",
+        "recordedValue": "adminr",
+        "sourceEventRefs": [
+          "event-3"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Usuario:",
+          "css:#UserNameP",
+          "id:UserNameP"
+        ],
+        "editingSessionRef": "edit-1",
+        "description": "Ingresar en \"Usuario:\"",
+        "screenBeforeRef": "60d370b39a8d",
+        "screenAfterRef": "60d370b39a8d",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking",
+        "stateScope": "60d370b39a8d",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-4",
+        "controlIdentity": "60d370b39a8d",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-4"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "60d370b39a8d",
+        "screenAfterRef": "60d370b39a8d",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking",
+        "stateScope": "60d370b39a8d",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-6",
+        "controlIdentity": "60d370b39a8d|Contraseña:|role|textbox|Contraseña:",
+        "semanticField": "Contraseña:",
+        "action": "fill",
+        "valueKey": "contrasena",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña:",
+          "css:#PasswordP",
+          "id:PasswordP"
+        ],
+        "editingSessionRef": "edit-2",
+        "description": "Ingresar en \"Contraseña:\"",
+        "screenBeforeRef": "60d370b39a8d",
+        "screenAfterRef": "60d370b39a8d",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking",
+        "stateScope": "60d370b39a8d",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-7",
+        "controlIdentity": "60d370b39a8d|Iniciar sesión|role|button|Iniciar sesión",
+        "semanticField": "Iniciar sesión",
+        "action": "click",
+        "valueKey": "iniciar_sesion",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Iniciar sesión",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "LoginForm"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Iniciar sesión",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "LoginForm"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Iniciar sesión\"",
+        "screenBeforeRef": "60d370b39a8d",
+        "screenAfterRef": "60d370b39a8d",
+        "routeBefore": "https://qa1.santacruz.do/onlinebanking",
+        "stateScope": "60d370b39a8d",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      }
+    ],
+    "entityActionBlocks": [],
+    "readiness": {
+      "functionalReadiness": true,
+      "dataReadiness": true,
+      "technicalReadiness": true,
+      "oracleReadiness": true,
+      "reviewReadiness": true,
+      "publicationContentReadiness": true,
+      "executionReadiness": true,
+      "publicationReadiness": true,
+      "missingInputs": [],
+      "datasetAuthorityMismatches": [],
+      "dataReadinessReasons": []
+    },
+    "technicalKnowledgeRefs": [
+      "obs-3",
+      "obs-6",
+      "obs-7"
+    ],
+    "runtimeInputRequirements": [
+      {
+        "valueKey": "usuario",
+        "semanticField": "Usuario:",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "adminr",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 1,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "adminr",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "contrasena",
+        "semanticField": "Contraseña:",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": "S",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": true,
+        "stepIndex": 2,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "S",
+        "datasetAuthorityMismatch": false
+      }
+    ],
+    "runtimeDataset": {
+      "scenarioId": "REC-28ED7705-01",
+      "requirements": [
+        {
+          "valueKey": "usuario",
+          "semanticField": "Usuario:",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "adminr",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 1,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "adminr",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña:",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": "S",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": true,
+          "stepIndex": 2,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "S",
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "resolvedValues": {
+        "usuario": "adminr",
+        "contrasena": "S"
+      },
+      "missingValues": []
+    },
+    "mutationOpportunities": []
+  }
+]

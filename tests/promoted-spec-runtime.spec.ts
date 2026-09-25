@@ -1,6 +1,29 @@
 import { test, expect } from "@playwright/test";
-import { createPromotedSpecRuntime } from "../src/automations/runtime/promoted-spec-runtime";
+import { clickPromotedLocatorWithBoundedReresolution, createPromotedSpecRuntime } from "../src/automations/runtime/promoted-spec-runtime";
+import { scanVisibleElements } from "../src/browser/promoted-spec-helpers";
 import path from "node:path";
+import { resolvePromotedFieldIdentityFromPersistedContract } from "../src/automations/runtime/promoted-field-target-contract";
+
+test("diagnostic visible-element scan is bounded when an element text read stalls", async () => {
+  const timeoutCalls: number[] = [];
+  const slowElement = {
+    textContent: async ({ timeout }: { timeout: number }) => {
+      timeoutCalls.push(timeout);
+      await new Promise((_, reject) => setTimeout(() => reject(new Error("simulated stall")), timeout + 10));
+    }
+  };
+  const fakePage = {
+    locator: () => ({ all: async () => Array.from({ length: 20 }, () => slowElement) })
+  } as any;
+
+  const startedAt = Date.now();
+  const texts = await scanVisibleElements(fakePage, "button:visible");
+  const elapsedMs = Date.now() - startedAt;
+
+  expect(texts).toEqual([]);
+  expect(timeoutCalls.length).toBeGreaterThan(0);
+  expect(elapsedMs).toBeLessThan(2500);
+});
 
 test("click exitoso sin retry", async ({ page }) => {
   await page.setContent(`<button id="go" onclick="window.__clicked=true">Go</button>`);
@@ -357,6 +380,31 @@ test("fillPromotedField uses options.value as source of truth", async ({ page })
   expect(value).toBe("test@example.com");
 });
 
+test("fillPromotedField commits a focused dynamic editor before the next action", async ({ page }) => {
+  await page.setContent(`
+    <label for="amount">Amount</label>
+    <input id="amount" />
+    <button id="validate" disabled>Validate</button>
+    <script>
+      const input = document.getElementById("amount");
+      const button = document.getElementById("validate");
+      input.addEventListener("blur", () => { button.disabled = false; window.__blurCommitted = true; });
+    </script>
+  `);
+  const runtime = createPromotedSpecRuntime(page, { enabled: false });
+
+  await runtime.fillPromotedField({
+    stepIndex: 16,
+    field: "Amount",
+    value: "60000",
+    fill: async () => { await page.locator("#amount").fill("60000"); },
+  });
+
+  await expect(page.locator("#amount")).toHaveValue("60000");
+  await expect(page.locator("#validate")).toBeEnabled();
+  expect(await page.evaluate(() => (window as any).__blurCommitted === true)).toBe(true);
+});
+
 test("return_to_list recovers from home reset using replay metadata", async ({ page }) => {
   const runtime = createPromotedSpecRuntime(page, { enabled: false, retryEnabled: false });
   await page.setContent(`<h1>¡Hola!</h1><button>Iniciar</button>`);
@@ -387,4 +435,86 @@ test("return_to_list recovers from home reset using replay metadata", async ({ p
   });
 
   await expect(page.getByRole("heading", { name: /consulta de balance/i })).toBeVisible();
+});
+
+test("repeat transition accepts a SPA route change as the observed outcome", async ({ page }) => {
+  await page.setContent(`<main><button id="module" onclick="history.pushState({}, '', '#module')">Module</button></main>`);
+  const runtime = createPromotedSpecRuntime(page, { enabled: true, stabilityTimeoutMs: 900, retryEnabled: false });
+
+  await runtime.clickPromotedTarget({
+    stepIndex: 41,
+    target: "Module",
+    actionIntent: "open_module",
+    expectedEffect: "navigation",
+    action: async () => { await page.locator("#module").click({ noWaitAfter: true }); },
+  });
+
+  expect(page.url()).toContain("#module");
+});
+
+test("repeat transition accepts an in-place business-surface change", async ({ page }) => {
+  await page.setContent(`
+    <main id="surface" data-state="before">
+      <button id="module" onclick="document.getElementById('surface').dataset.state='after'; document.getElementById('surface').insertAdjacentHTML('beforeend', '<h1>Destination</h1>')">Module</button>
+    </main>
+  `);
+  const runtime = createPromotedSpecRuntime(page, { enabled: true, stabilityTimeoutMs: 900, retryEnabled: false });
+
+  await runtime.clickPromotedTarget({
+    stepIndex: 41,
+    target: "Module",
+    actionIntent: "open_module",
+    expectedEffect: "ui_change",
+    action: async () => { await page.locator("#module").click({ noWaitAfter: true }); },
+  });
+
+  await expect(page.getByRole("heading", { name: "Destination" })).toBeVisible();
+});
+
+test("repeat transition re-resolves a detached target at most once", async () => {
+  let firstAttempts = 0;
+  let freshResolutions = 0;
+  let freshClicks = 0;
+  const result = await clickPromotedLocatorWithBoundedReresolution(
+    { locator: { click: async () => { firstAttempts += 1; throw new Error("element is detached"); } } },
+    async () => {
+      freshResolutions += 1;
+      return { locator: { click: async () => { freshClicks += 1; } } };
+    },
+    100,
+  );
+
+  expect(firstAttempts).toBe(1);
+  expect(freshResolutions).toBe(1);
+  expect(freshClicks).toBe(1);
+  expect(result.reResolved).toBe(true);
+});
+
+test("Primary y Repeat conservan la misma semántica estructural de transición", () => {
+  const previous = {
+    appSlug: process.env.APP_SLUG,
+    sectionSlug: process.env.SECTION_SLUG,
+    scenarioId: process.env.SCENARIO_ID,
+    recordingId: process.env.RECORDING_ID,
+  };
+  try {
+    process.env.APP_SLUG = "portalempresarial";
+    process.env.SECTION_SLUG = "default-section";
+    process.env.RECORDING_ID = "f6f29217-b81c-4f5d-8067-0e399f726d5b";
+    process.env.SCENARIO_ID = "PREVIEW-001";
+    const primary = resolvePromotedFieldIdentityFromPersistedContract(6, "Gestión de Nóminas");
+    process.env.SCENARIO_ID = "PREVIEW-002";
+    const repeat = resolvePromotedFieldIdentityFromPersistedContract(6, "Gestión de Nóminas");
+
+    expect(primary?.technicalTargetRefs).toEqual(repeat?.technicalTargetRefs);
+    expect(primary?.controlIdentity).toBe(repeat?.controlIdentity);
+    expect(primary?.expectedOutcomeKind).toBe("route_transition");
+    expect(repeat?.expectedOutcomeKind).toBe("route_transition");
+    expect(primary?.expectedRouteAfter).toBe(repeat?.expectedRouteAfter);
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
 });

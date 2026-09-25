@@ -1,0 +1,637 @@
+[
+  {
+    "scenarioId": "REC-30D05BFE-01",
+    "title": "Registro Cliente",
+    "description": "Recorrido observado para completar \"Registro Cliente\". Se registraron 4 acciones funcionales.",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://172.27.4.31/login",
+        "description": "Navegar a https://172.27.4.31/login"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|RNC de la empresa*"
+        },
+        "valueKey": "rnc_de_la_empresa",
+        "description": "Ingresar [rnc_de_la_empresa] en \"RNC de la empresa*\"",
+        "interactionId": "interaction-4"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Nombre de usuario*"
+        },
+        "valueKey": "nombre_de_usuario",
+        "description": "Ingresar [nombre_de_usuario] en \"Nombre de usuario*\"",
+        "interactionId": "interaction-5"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Contraseña*"
+        },
+        "valueKey": "contrasena",
+        "description": "Ingresar [contrasena] en \"Contraseña*\"",
+        "interactionId": "interaction-6"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Continuar"
+        },
+        "description": "Presionar \"Continuar\"",
+        "interactionId": "interaction-7"
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Ingresar [rnc_de_la_empresa] en \"RNC de la empresa*\"",
+        "sourceEventRefs": [
+          "event-4"
+        ],
+        "stepTemplate": "Ingresar [rnc_de_la_empresa] en \"RNC de la empresa*\"",
+        "renderedStep": "Ingresar \"130598983\" en \"RNC de la empresa*\"",
+        "valueKey": "rnc_de_la_empresa",
+        "interactionId": "interaction-4",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login",
+        "stateScope": "3e7b2674871e",
+        "stepNumber": 2
+      },
+      {
+        "content": "Ingresar [nombre_de_usuario] en \"Nombre de usuario*\"",
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "stepTemplate": "Ingresar [nombre_de_usuario] en \"Nombre de usuario*\"",
+        "renderedStep": "Ingresar \"olivam\" en \"Nombre de usuario*\"",
+        "valueKey": "nombre_de_usuario",
+        "interactionId": "interaction-5",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login",
+        "stateScope": "3e7b2674871e",
+        "stepNumber": 3
+      },
+      {
+        "content": "Ingresar [contrasena] en \"Contraseña*\"",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "stepTemplate": "Ingresar [contrasena] en \"Contraseña*\"",
+        "renderedStep": "Ingresar el valor seguro asociado a \"Contraseña*\"",
+        "valueKey": "contrasena",
+        "interactionId": "interaction-6",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login",
+        "stateScope": "3e7b2674871e",
+        "stepNumber": 4
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "renderedStep": "Presionar \"Continuar\"",
+        "interactionId": "interaction-7",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login",
+        "stateScope": "3e7b2674871e",
+        "stepNumber": 5
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "rnc_de_la_empresa",
+        "label": "RNC de la empresa*",
+        "stepIndex": 1,
+        "technicalTargetRefs": [
+          "role:textbox|RNC de la empresa*",
+          "css:#rnc",
+          "id:rnc"
+        ],
+        "sourceEventRefs": [
+          "event-4"
+        ],
+        "exampleValue": "130598983",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "RNC de la empresa*",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "nombre_de_usuario",
+        "label": "Nombre de usuario*",
+        "stepIndex": 2,
+        "technicalTargetRefs": [
+          "role:textbox|Nombre de usuario*",
+          "css:#email",
+          "id:email"
+        ],
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "exampleValue": "olivam",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Nombre de usuario*",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "contrasena",
+        "label": "Contraseña*",
+        "stepIndex": 3,
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña*",
+          "css:#password",
+          "id:password"
+        ],
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "secure",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Contraseña*",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Ingresar [rnc_de_la_empresa] en \"RNC de la empresa*\"",
+        "strategy": "role",
+        "value": "textbox|RNC de la empresa*"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Ingresar [nombre_de_usuario] en \"Nombre de usuario*\"",
+        "strategy": "role",
+        "value": "textbox|Nombre de usuario*"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Ingresar [contrasena] en \"Contraseña*\"",
+        "strategy": "role",
+        "value": "textbox|Contraseña*"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "role",
+        "value": "button|Continuar"
+      }
+    ],
+    "sourceRecordingId": "30d05bfe-612c-4c4d-b3ec-cf7f007d1090",
+    "hasUncertainSteps": false,
+    "primary": true,
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "functionalReadiness": true,
+    "technicalReadiness": true,
+    "expectedResultCandidate": "La aplicación carga su pantalla inicial",
+    "oracleAuthority": "observed_only",
+    "confidence": 0.95,
+    "scenarioStepCount": 5,
+    "functionalActionCount": 4,
+    "nonUserSetupSteps": 1,
+    "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
+    "scenarioGoal": "Registro Cliente",
+    "stateSequenceValid": true,
+    "stateSequenceIssues": [],
+    "postGoalObservations": [],
+    "goalContract": {
+      "nonGeneric": true,
+      "goalCoherent": true,
+      "mutationIntentExpressed": true
+    },
+    "replayEligible": true,
+    "canonicalInteractions": [
+      {
+        "id": "interaction-1",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-1"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://172.27.4.31/login",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-2",
+        "controlIdentity": "3e7b2674871e",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-2"
+        ],
+        "technicalTargetRefs": [],
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login",
+        "stateScope": "3e7b2674871e",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-4",
+        "controlIdentity": "3e7b2674871e|RNC de la empresa*|role|textbox|RNC de la empresa*",
+        "semanticField": "RNC de la empresa*",
+        "action": "fill",
+        "valueKey": "rnc_de_la_empresa",
+        "recordedValue": "130598983",
+        "sourceEventRefs": [
+          "event-4"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|RNC de la empresa*",
+          "css:#rnc",
+          "id:rnc"
+        ],
+        "editingSessionRef": "edit-1",
+        "description": "Ingresar en \"RNC de la empresa*\"",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login",
+        "stateScope": "3e7b2674871e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-5",
+        "controlIdentity": "3e7b2674871e|Nombre de usuario*|role|textbox|Nombre de usuario*",
+        "semanticField": "Nombre de usuario*",
+        "action": "fill",
+        "valueKey": "nombre_de_usuario",
+        "recordedValue": "olivam",
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Nombre de usuario*",
+          "css:#email",
+          "id:email"
+        ],
+        "editingSessionRef": "edit-2",
+        "description": "Ingresar en \"Nombre de usuario*\"",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login",
+        "stateScope": "3e7b2674871e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-6",
+        "controlIdentity": "3e7b2674871e|Contraseña*|role|textbox|Contraseña*",
+        "semanticField": "Contraseña*",
+        "action": "fill",
+        "valueKey": "contrasena",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña*",
+          "css:#password",
+          "id:password"
+        ],
+        "editingSessionRef": "edit-3",
+        "description": "Ingresar en \"Contraseña*\"",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login",
+        "stateScope": "3e7b2674871e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-7",
+        "controlIdentity": "3e7b2674871e|Continuar|role|button|Continuar",
+        "semanticField": "Continuar",
+        "action": "click",
+        "valueKey": "continuar",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Continuar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Continuar\"",
+        "screenBeforeRef": "3e7b2674871e",
+        "screenAfterRef": "3e7b2674871e",
+        "routeBefore": "https://172.27.4.31/login",
+        "stateScope": "3e7b2674871e",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      }
+    ],
+    "entityActionBlocks": [],
+    "readiness": {
+      "functionalReadiness": true,
+      "dataReadiness": false,
+      "technicalReadiness": true,
+      "oracleReadiness": true,
+      "reviewReadiness": true,
+      "publicationContentReadiness": true,
+      "executionReadiness": false,
+      "publicationReadiness": false,
+      "missingInputs": [
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña*",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 3,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "datasetAuthorityMismatches": [],
+      "dataReadinessReasons": [
+        "missing_runtime_input:contrasena",
+        "RUNTIME_DATA_REQUIRED"
+      ]
+    },
+    "technicalKnowledgeRefs": [],
+    "runtimeInputRequirements": [
+      {
+        "valueKey": "rnc_de_la_empresa",
+        "semanticField": "RNC de la empresa*",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "130598983",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 1,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "130598983",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "nombre_de_usuario",
+        "semanticField": "Nombre de usuario*",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "olivam",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 2,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "olivam",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "contrasena",
+        "semanticField": "Contraseña*",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": null,
+        "source": "unresolved",
+        "resolved": false,
+        "sensitive": true,
+        "stepIndex": 3,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "unresolved",
+        "authorityValue": null,
+        "datasetAuthorityMismatch": false
+      }
+    ],
+    "runtimeDataset": {
+      "scenarioId": "REC-30D05BFE-01",
+      "requirements": [
+        {
+          "valueKey": "rnc_de_la_empresa",
+          "semanticField": "RNC de la empresa*",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "130598983",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 1,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "130598983",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "nombre_de_usuario",
+          "semanticField": "Nombre de usuario*",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "olivam",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 2,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "olivam",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña*",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 3,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "resolvedValues": {
+        "rnc_de_la_empresa": "130598983",
+        "nombre_de_usuario": "olivam"
+      },
+      "missingValues": [
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña*",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 3,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        }
+      ]
+    },
+    "mutationOpportunities": [
+      {
+        "opportunityId": "REC-30D05BFE-01:field_omission",
+        "title": "Registro cliente: comprobar la omisión de un dato",
+        "mutationType": "FIELD_OMISSION",
+        "basePrimaryScenarioId": "REC-30D05BFE-01",
+        "operations": [
+          {
+            "type": "remove_action",
+            "interactionId": "interaction-4"
+          }
+        ],
+        "evidenceRefs": [
+          "event-1",
+          "event-2",
+          "event-3",
+          "event-4",
+          "event-5",
+          "event-6",
+          "event-7"
+        ],
+        "rationale": "Existen varios inputs observados; se propone una omisión agrupada sin inventar el resultado.",
+        "oracleAuthority": "MISSING",
+        "confidence": 0.5,
+        "needsReview": true
+      }
+    ]
+  }
+]

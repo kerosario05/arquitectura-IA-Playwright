@@ -1,5 +1,7 @@
 export type AiProviderName = "openai_compatible" | "codex_cli" | "copilot_cli" | "claude_cli" | "disabled" | "fake";
 
+export type CodexReasoningEffort = "low" | "medium" | "high";
+
 export type AiMessage = {
   role: "system" | "user" | "assistant";
   content: string;
@@ -10,6 +12,8 @@ export type AiCompletionRequest = {
   temperature?: number;
   requireJson?: boolean;
   requireJsonSchema?: boolean;
+  /** Provider-neutral structured-output contract, when the provider supports one. */
+  jsonSchema?: { name: string; schema: Record<string, unknown> };
   purpose?: string; // Purpose of the AI request (scenario_generation, spec_generation, repair, general)
 };
 
@@ -51,6 +55,7 @@ export type AiProviderErrorCode =
   | "ai_provider_timeout"
   | "ai_provider_invalid_json"
   | "ai_provider_process_error"
+  | "ai_provider_execution_failed"
   | "ai_provider_schema_invalid"
   | "ai_provider_unsupported"
   | "ai_provider_output_missing"
@@ -89,6 +94,7 @@ export type AiProviderConfig = {
   requireJsonSchema: boolean;
   maxAttempts?: number;   // Number of retry attempts (purpose-specific)
   purpose?: string;       // Purpose of the AI request (scenario_generation, spec_generation, repair, general)
+  reasoningEffort?: CodexReasoningEffort;
   // CLI provider specific (optional)
   command?: string;       // CLI command (CODEX_CLI_COMMAND, COPILOT_CLI_COMMAND)
   extraArgs?: string[];   // CLI extra args parsed

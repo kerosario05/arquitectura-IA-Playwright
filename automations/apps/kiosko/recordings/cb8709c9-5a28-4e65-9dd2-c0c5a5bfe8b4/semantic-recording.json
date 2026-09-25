@@ -1,0 +1,616 @@
+{
+  "version": "1.0",
+  "recordingId": "cb8709c9-5a28-4e65-9dd2-c0c5a5bfe8b4",
+  "projectSlug": "kiosko",
+  "appSlug": "kiosko",
+  "platform": "web",
+  "recordingGoal": {
+    "declaredGoal": "Captura de campos",
+    "normalizedGoal": "Captura de campos",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "selectorOptionInventories": [],
+  "semanticScreens": [
+    {
+      "screenIdentity": "e5f5edc43160",
+      "title": "Un recorrido. Todos los retos del campo.",
+      "url": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "classification": "SAME_SCREEN_MUTATION",
+      "sourceScreenKey": "e5f5edc43160"
+    }
+  ],
+  "semanticComponents": [],
+  "semanticEvents": [
+    {
+      "eventRef": "event-1",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-2",
+      "action": "observe",
+      "screenIdentity": "e5f5edc43160",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    }
+  ],
+  "datasets": [],
+  "technicalObservations": [
+    {
+      "observationId": "screen-e5f5edc43160-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "a",
+      "label": "QA Field Lab, inicio",
+      "tag": "a",
+      "role": "a",
+      "attributes": {
+        "aria-label": "QA Field Lab, inicio"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "QA Field Lab, inicio",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5f5edc43160:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "a",
+      "label": "01",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "01 Texto, formato y teclado 0/9",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5f5edc43160:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "a",
+      "label": "02",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "02 Listas y selecciones 0/11",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5f5edc43160:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "a",
+      "label": "03",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "03 Fechas y calendarios 0/8",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5f5edc43160:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "a",
+      "label": "04",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "04 Radios, casillas y estados 0/8",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5f5edc43160:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "a",
+      "label": "05",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "05 Contexto y contenido dinámico 0/9",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5f5edc43160:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "a",
+      "label": "06",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "06 Edición avanzada 0/8",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5f5edc43160:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "a",
+      "label": "07",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "07 Archivos y carpetas 0/4",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5f5edc43160:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "a",
+      "label": "08",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "08 Iframe y Shadow DOM 0/5",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5f5edc43160:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "a",
+      "label": "09",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "09 Validación y resultado 0/4",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "e5f5edc43160:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "button",
+      "label": "Iniciar recorrido",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "start-run",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "start-run",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e5f5edc43160:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "button",
+      "label": "Descargar guion",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "download-guide",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "download-guide",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e5f5edc43160:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-13",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "button",
+      "label": "↥ Archivos de prueba",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "download-fixtures",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "download-fixtures",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e5f5edc43160:control:13",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-14",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "button",
+      "label": "{ } Ver eventos",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "show-audit",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "show-audit",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e5f5edc43160:control:14",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-15",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "button",
+      "label": "Exportar auditoría",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "export-audit",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "export-audit",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e5f5edc43160:control:15",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-16",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "button",
+      "label": "Reiniciar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "id": "reset-run",
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "reset-run",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e5f5edc43160:control:16",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-17",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "label": "Latencia simulada",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "latency-enabled",
+        "type": "checkbox"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "latency-enabled",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e5f5edc43160:control:17",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-18",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "label": "Nombre de prueba",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "f-nombre",
+        "type": "text",
+        "placeholder": "Lucía QA",
+        "data-field": "nombre"
+      },
+      "placeholder": "Lucía QA",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "f-nombre",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e5f5edc43160:control:18",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-19",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "label": "Correo de prueba",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "f-correo",
+        "type": "email",
+        "placeholder": "nombre@example.test",
+        "data-field": "correo"
+      },
+      "placeholder": "nombre@example.test",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "f-correo",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e5f5edc43160:control:19",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-e5f5edc43160-control-20",
+      "status": "OBSERVED",
+      "screenIdentity": "e5f5edc43160",
+      "componentType": "textbox",
+      "label": "Contraseña ficticia",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "f-clave",
+        "type": "password",
+        "placeholder": "Sólo una clave ficticia",
+        "data-field": "clave"
+      },
+      "placeholder": "Sólo una clave ficticia",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "f-clave",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "e5f5edc43160:control:20",
+      "selectable": false,
+      "editable": true
+    }
+  ],
+  "editingSessions": [],
+  "scenarioSuggestions": [],
+  "canonicalInteractions": [
+    {
+      "id": "interaction-1",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-1"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "http://127.0.0.1:8088/QA_Field_Lab.html",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    }
+  ],
+  "gridMetadata": {
+    "detected": true,
+    "grids": 12,
+    "rows": 13,
+    "cells": 43,
+    "headers": [
+      "Servicio",
+      "Importe",
+      "Acción",
+      "Cantidad",
+      "Lu",
+      "Ma",
+      "Mi",
+      "Ju",
+      "Vi",
+      "Sá",
+      "Do"
+    ],
+    "headerRelationships": [
+      {
+        "header": "Acción",
+        "field": "Acción"
+      }
+    ]
+  },
+  "source": "SessionTrace"
+}

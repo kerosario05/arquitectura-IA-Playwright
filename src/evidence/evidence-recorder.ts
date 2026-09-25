@@ -46,31 +46,49 @@ export class EvidenceRecorder {
     console.log(`[evidence:scenario] started scenarioId=${this.context.scenarioId}${runIdLog} dir=${this.paths.scenarioDir}`);
   }
 
-  async captureInitialScreen(page: Page, executionSource: "full_discovery" | "promoted_reuse", timeoutMs = 10000): Promise<boolean> {
+  async captureInitialScreen(
+    page: Page,
+    executionSource: "full_discovery" | "promoted_reuse",
+    timeoutMs = 10000,
+    options?: { alreadyReady?: boolean },
+  ): Promise<boolean> {
     if (this.initialScreenEvidence) return this.initialScreenEvidence.status === "ready";
     await this.start();
     const capturedAt = new Date().toISOString();
     let ready = false;
     let reason: string | undefined;
-    try {
-      if (page.isClosed()) throw new Error("initial_load_failure");
-      await page.waitForLoadState("domcontentloaded", { timeout: timeoutMs });
-      const deadline = Date.now() + timeoutMs;
-      while (Date.now() < deadline) {
-        const usable = await page.evaluate(() => document.readyState !== "loading" && Boolean(document.body) && document.body.childNodes.length > 0).catch(() => false);
-        if (usable) { ready = true; break; }
-        await new Promise((resolve) => setTimeout(resolve, 100));
+    if (options?.alreadyReady) {
+      // Caller (promoted runtime's ensureInitialNavigation) already proved readiness via the
+      // shared waitForPageReady primitive immediately before this call. Re-running an
+      // independent DOM poll here would be a second, weaker readiness authority that can
+      // spuriously disagree with the one already proven (e.g. a transient page.evaluate
+      // failure) and mislabel a proven-ready page as initial_readiness_timeout.
+      ready = !page.isClosed();
+      if (!ready) reason = "navigation_failed";
+    } else {
+      try {
+        if (page.isClosed()) throw new Error("initial_load_failure");
+        await page.waitForLoadState("domcontentloaded", { timeout: timeoutMs });
+        const deadline = Date.now() + timeoutMs;
+        while (Date.now() < deadline) {
+          const usable = await page.evaluate(() => document.readyState !== "loading" && Boolean(document.body) && document.body.childNodes.length > 0).catch(() => false);
+          if (usable) { ready = true; break; }
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+        if (!ready) reason = "initial_readiness_timeout";
+      } catch (error) {
+        reason = error instanceof Error && error.message.includes("timeout") ? "initial_readiness_timeout" : "navigation_failed";
       }
-      if (!ready) reason = "initial_readiness_timeout";
-    } catch (error) {
-      reason = error instanceof Error && error.message.includes("timeout") ? "initial_readiness_timeout" : "navigation_failed";
     }
 
     let screenshotPath: string | null = null;
     try {
       const filename = ready ? "initial-screen.png" : "initial-load-failure.png";
       screenshotPath = path.join(this.paths.screenshotsDir, filename);
-      await page.screenshot({ path: screenshotPath, fullPage: this.config.fullPage });
+      // Evidence capture must not hold a SPA action hostage. A browser-side
+      // asset/layout stall is diagnostic, not a reason to wait until the
+      // runtime's full default timeout before resolving the next target.
+      await page.screenshot({ path: screenshotPath, fullPage: this.config.fullPage, timeout: 5000 });
     } catch {
       screenshotPath = null;
     }

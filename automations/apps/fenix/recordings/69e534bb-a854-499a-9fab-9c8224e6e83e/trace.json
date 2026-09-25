@@ -1,0 +1,25 @@
+{
+  "recordingId": "69e534bb-a854-499a-9fab-9c8224e6e83e",
+  "projectSlug": "fenix",
+  "appSlug": "fenix",
+  "platform": "web",
+  "baseUrl": "https://qa1.santacruz.do/onlinebanking/",
+  "label": "QA",
+  "recordingGoal": {
+    "declaredGoal": "QA",
+    "normalizedGoal": "QA",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-09-24T22:28:11.820Z",
+  "status": "failed",
+  "events": [],
+  "screens": [],
+  "errorMessage": "page.goto: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://qa1.santacruz.do/onlinebanking/\", waiting until \"domcontentloaded\"\u001b[22m\n"
+}

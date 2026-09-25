@@ -1,0 +1,601 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-001",
+    "caseId": 0,
+    "title": "fuck"
+  },
+  "requiredData": [
+    {
+      "key": "rnc",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "contrasena",
+      "required": true,
+      "resolved": true
+    }
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://qa1.santacruz.do/onlinebanking/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "description": "Presionar \"Empresarial\"",
+      "target": {
+        "strategy": "recorded:role",
+        "value": "Empresarial",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:role"
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "Ingresar [rnc] en \"RNC:\"",
+      "target": {
+        "strategy": "text",
+        "value": "RNC:",
+        "exact": false
+      },
+      "valueKey": "rnc"
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "Ingresar [usuario] en \"Usuario:\"",
+      "target": {
+        "strategy": "text",
+        "value": "Usuario:",
+        "exact": false
+      },
+      "valueKey": "usuario"
+    },
+    {
+      "index": 5,
+      "action": "fill",
+      "description": "Ingresar [contrasena] en \"Contraseña:\"",
+      "target": {
+        "strategy": "text",
+        "value": "Contraseña:",
+        "exact": false
+      },
+      "valueKey": "contrasena"
+    },
+    {
+      "index": 6,
+      "action": "press",
+      "description": "Presionar \"Enter\" en \"Contraseña:\"",
+      "target": {
+        "strategy": "text",
+        "value": "Contraseña:",
+        "exact": false
+      },
+      "value": "Enter"
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"SMS\"",
+      "target": {
+        "strategy": "recorded:recorder-text",
+        "value": "SMS",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:recorder-text"
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-09-24T20:13:51.844Z",
+  "metadata": {
+    "authFlowRequired": false,
+    "authFlowAlias": "defaultClient",
+    "authFlowLanding": "transactions_menu",
+    "authGateDetectedDuringDiscovery": true,
+    "authGateStage": "otp"
+  },
+  "sourceScenario": {
+    "title": "fuck",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Presionar \"Empresarial\"",
+        "description": "Presionar \"Empresarial\"",
+        "valueKey": "empresarial",
+        "technicalTargetRef": "role:link|Empresarial",
+        "technicalTargetRefs": [
+          "role:link|Empresarial"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Empresarial",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "#empresarial"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "login-box-parent"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"#empresarial\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Empresarial",
+        "controlIdentity": "e8a6102a3835|Empresarial|role|link|Empresarial",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 2,
+        "action": "Ingresar [rnc] en \"RNC:\"",
+        "description": "Ingresar [rnc] en \"RNC:\"",
+        "valueKey": "rnc",
+        "technicalTargetRef": "role:textbox|RNC:",
+        "technicalTargetRefs": [
+          "role:textbox|RNC:",
+          "css:#Enterprise",
+          "id:Enterprise"
+        ],
+        "controlIdentity": "e8a6102a3835|RNC:|role|textbox|RNC:",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 3,
+        "action": "Ingresar [usuario] en \"Usuario:\"",
+        "description": "Ingresar [usuario] en \"Usuario:\"",
+        "valueKey": "usuario",
+        "technicalTargetRef": "role:textbox|Usuario:",
+        "technicalTargetRefs": [
+          "role:textbox|Usuario:",
+          "css:#UserNameE",
+          "id:UserNameE"
+        ],
+        "controlIdentity": "e8a6102a3835|Usuario:|role|textbox|Usuario:",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 4,
+        "action": "Ingresar [contrasena] en \"Contraseña:\"",
+        "description": "Ingresar [contrasena] en \"Contraseña:\"",
+        "valueKey": "contrasena",
+        "technicalTargetRef": "role:textbox|Contraseña:",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña:",
+          "css:#PasswordE",
+          "id:PasswordE"
+        ],
+        "controlIdentity": "e8a6102a3835|Contraseña:|role|textbox|Contraseña:",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 5,
+        "action": "Presionar \"Enter\" en \"Contraseña:\"",
+        "description": "Presionar \"Enter\" en \"Contraseña:\"",
+        "polarity": "positive",
+        "technicalTargetRef": "role:textbox|Contraseña:",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña:",
+          "css:#PasswordE",
+          "id:PasswordE"
+        ],
+        "controlIdentity": "e8a6102a3835|Contraseña:|role|textbox|Contraseña:",
+        "recordingActionType": "press"
+      },
+      {
+        "index": 6,
+        "action": "Presionar \"SMS\"",
+        "description": "Presionar \"SMS\"",
+        "valueKey": "sms",
+        "associatedField": "SMS",
+        "controlIdentity": "e8a6102a3835|SMS",
+        "recordingActionType": "click"
+      }
+    ],
+    "expectedResult": "La aplicación carga su pantalla inicial",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "observedAssertions": [],
+    "observableOracles": [
+      {
+        "id": "expected-01",
+        "requirement": "La aplicación carga su pantalla inicial",
+        "type": "navigation_transition",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 6,
+        "target": "SMS",
+        "polarity": "positive",
+        "evidence": [
+          "transition_observed:true",
+          "click_target:SMS",
+          "action_type:Presionar \"SMS\"",
+          "after_url:https://qa1.santacruz.do/onlinebanking/IdentifyUser",
+          "assertion_polarity:positive"
+        ],
+        "details": {
+          "transitionObserved": true,
+          "clickTarget": "SMS",
+          "resolvedTarget": null,
+          "postClickUiChange": null,
+          "sourceActionStepIndex": 6,
+          "expectedUrl": "https://qa1.santacruz.do/onlinebanking/IdentifyUser"
+        }
+      }
+    ],
+    "stepStatuses": [
+      {
+        "index": 1,
+        "status": "found"
+      },
+      {
+        "index": 2,
+        "status": "found"
+      },
+      {
+        "index": 3,
+        "status": "found"
+      },
+      {
+        "index": 4,
+        "status": "found"
+      },
+      {
+        "index": 5,
+        "status": "found"
+      },
+      {
+        "index": 6,
+        "status": "found"
+      }
+    ],
+    "auth": {
+      "gateDetected": true,
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    }
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "PREVIEW-001",
+    "title": "fuck",
+    "appSlug": "fenix",
+    "sectionSlug": "default-section",
+    "auth": {
+      "gateDetected": true,
+      "required": false,
+      "stage": "otp",
+      "flowAlias": "defaultClient",
+      "flowLanding": "transactions_menu"
+    },
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Presionar \"Empresarial\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Empresarial"
+        },
+        "valueKey": "empresarial",
+        "associatedField": "Empresarial",
+        "technicalTargetRef": "role:link|Empresarial",
+        "technicalTargetRefs": [
+          "role:link|Empresarial"
+        ],
+        "controlIdentity": "e8a6102a3835|Empresarial|role|link|Empresarial",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[href=\"#empresarial\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a"
+            },
+            "stableDirectAttributes": {
+              "href": "#empresarial"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Ingresar [rnc] en \"RNC:\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "RNC:"
+        },
+        "valueKey": "rnc",
+        "technicalTargetRef": "role:textbox|RNC:",
+        "technicalTargetRefs": [
+          "role:textbox|RNC:",
+          "css:#Enterprise",
+          "id:Enterprise"
+        ],
+        "controlIdentity": "e8a6102a3835|RNC:|role|textbox|RNC:",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "RNC:",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Ingresar [usuario] en \"Usuario:\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Usuario:"
+        },
+        "valueKey": "usuario",
+        "technicalTargetRef": "role:textbox|Usuario:",
+        "technicalTargetRefs": [
+          "role:textbox|Usuario:",
+          "css:#UserNameE",
+          "id:UserNameE"
+        ],
+        "controlIdentity": "e8a6102a3835|Usuario:|role|textbox|Usuario:",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Usuario:",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Ingresar [contrasena] en \"Contraseña:\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "text",
+          "value": "Contraseña:"
+        },
+        "valueKey": "contrasena",
+        "technicalTargetRef": "role:textbox|Contraseña:",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña:",
+          "css:#PasswordE",
+          "id:PasswordE"
+        ],
+        "controlIdentity": "e8a6102a3835|Contraseña:|role|textbox|Contraseña:",
+        "recordingActionType": "fill",
+        "authGateExpected": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Contraseña:",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 4,
+        "scenarioStepIndex": 5,
+        "originalText": "Presionar \"Enter\" en \"Contraseña:\"",
+        "operation": "press",
+        "target": {
+          "strategy": "text",
+          "value": "Contraseña:",
+          "exact": false
+        },
+        "value": "Enter",
+        "technicalTargetRef": "role:textbox|Contraseña:",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña:",
+          "css:#PasswordE",
+          "id:PasswordE"
+        ],
+        "controlIdentity": "e8a6102a3835|Contraseña:|role|textbox|Contraseña:",
+        "recordingActionType": "press",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Contraseña:",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "pressPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 5,
+        "scenarioStepIndex": 6,
+        "originalText": "Presionar \"SMS\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "SMS"
+        },
+        "valueKey": "sms",
+        "associatedField": "SMS",
+        "controlIdentity": "e8a6102a3835|SMS",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "SMS",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "oracle": {
+          "type": "navigation_transition",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "url_state",
+          "mechanism": {
+            "source": "url_state",
+            "method": "expectPromotedVisible",
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "navigation_transition",
+              "urlPattern": "https://qa1.santacruz.do/onlinebanking/IdentifyUser"
+            }
+          },
+          "sourceActionStepIndex": 6,
+          "requirement": "La aplicación carga su pantalla inicial"
+        },
+        "sourceActionStepIndex": 6,
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 6,
+      "representedScenarioSteps": 6,
+      "missingScenarioSteps": []
+    }
+  }
+}

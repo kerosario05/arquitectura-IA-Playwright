@@ -1,0 +1,105 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-09-22T01:44:42.590Z",
+  "entries": [
+    {
+      "key": "nombre_de_prueba",
+      "source": "unknown",
+      "fieldName": "Nombre de prueba",
+      "stepIndex": 2,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "correo_de_prueba",
+      "source": "unknown",
+      "fieldName": "Correo de prueba",
+      "stepIndex": 3,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "contrasena_ficticia",
+      "source": "unknown",
+      "fieldName": "Contraseña ficticia",
+      "stepIndex": 4,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "notas_del_recorrido",
+      "source": "unknown",
+      "fieldName": "Notas del recorrido",
+      "stepIndex": 5,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "telefono_ficticio",
+      "source": "unknown",
+      "fieldName": "Teléfono ficticio",
+      "stepIndex": 7,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "importe_decimal",
+      "source": "unknown",
+      "fieldName": "Importe decimal",
+      "stepIndex": 8,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "identificador_con_mascara",
+      "source": "unknown",
+      "fieldName": "Identificador con máscara",
+      "stepIndex": 9,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "sugerencia_nativa",
+      "source": "unknown",
+      "fieldName": "Sugerencia nativa",
+      "stepIndex": 13,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "fecha_nativa",
+      "source": "unknown",
+      "fieldName": "Fecha nativa",
+      "stepIndex": 14,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

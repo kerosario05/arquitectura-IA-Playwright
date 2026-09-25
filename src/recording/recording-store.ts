@@ -4,6 +4,7 @@ import type { RecordingSummary, SessionTrace } from "./session-trace.types";
 import type { RecordedScenario } from "./trace-to-scenario";
 import type { SemanticRecordingModel } from "./semantic-recording";
 import { normalizeEvents, summarizeTrace } from "./trace-normalizer";
+import { reconcileOptionOwnerLineage } from "./canonical-recording-contract";
 
 /**
  * On-disk home of recorded sessions.
@@ -73,7 +74,12 @@ export function loadTrace(appSlug: string, recordingId: string): SessionTrace | 
 export function saveScenarios(appSlug: string, recordingId: string, scenarios: RecordedScenario[]): void {
   const dir = recordingDir(appSlug, recordingId);
   fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(scenariosPath(appSlug, recordingId), JSON.stringify(scenarios, null, 2), "utf8");
+  const file = scenariosPath(appSlug, recordingId);
+  fs.writeFileSync(file, JSON.stringify(scenarios, null, 2), "utf8");
+  // TEMPORARY DIAGNOSTIC (this ticket only): no dataset value/secret is logged -- only ids,
+  // counts and the store path, so a historical recording found with scenarios=[] can be traced
+  // back to whichever write (or lack of one) actually produced that state.
+  console.info("[recording-scenario-store]", { recordingId, appSlug, operation: "save", scenarioCount: scenarios.length, scenarioIds: scenarios.map((s) => s.scenarioId), storePathOrKey: file });
 }
 
 export function saveSemanticRecording(model: SemanticRecordingModel): void {
@@ -90,11 +96,48 @@ export function loadSemanticRecording(appSlug: string, recordingId: string): Sem
 
 export function loadScenarios(appSlug: string, recordingId: string): RecordedScenario[] {
   const file = scenariosPath(appSlug, recordingId);
-  if (!fs.existsSync(file)) return [];
+  if (!fs.existsSync(file)) {
+    // Never derived (or derive/observed-primary materialization legitimately produced nothing)
+    // is indistinguishable from "the file was deleted" at this layer -- both are simply "no
+    // file" -- but logging the distinction from a genuine parse failure below lets a real
+    // corruption (CASE B) be told apart from "never derived" (CASE A) from production logs.
+    console.info("[recording-scenario-store]", { recordingId, appSlug, operation: "load", scenarioCount: 0, scenarioIds: [], storePathOrKey: file, reason: "file_missing" });
+    return [];
+  }
   try {
     const parsed = JSON.parse(fs.readFileSync(file, "utf8"));
-    return Array.isArray(parsed) ? (parsed as RecordedScenario[]) : [];
-  } catch {
+    const rawScenarios = Array.isArray(parsed) ? (parsed as RecordedScenario[]) : [];
+    // FIRST_LOSS fix (jobId 60a1f392-ffb9-4b0b-bc91-96ad63bac82d): this file is written ONCE, the
+    // first time a recording is derived -- a scenario persisted before a canonicalization rule
+    // existed (e.g. `reconcileOptionOwnerLineage`'s option-owner-lineage correction) keeps the OLD
+    // `canonicalInteractions` lineage forever otherwise, for every future reader, not just
+    // reruns. Re-applying the CURRENT reconciliation rules here, at the single read boundary
+    // every caller of `loadScenarios` shares, needs nothing beyond what is already on disk --
+    // never re-derives from raw trace events, never touches technicalTargetRefs/recordedValue/
+    // scenario identity. Whatever later derives an McpScenario's `recordingExecutionContract`
+    // from this (now-reconciled) `canonicalInteractions` (`toSharedMcpScenario`/
+    // `enrichRecordedScenarioContract`) picks up the correction automatically -- that field is
+    // computed downstream, never stored on `RecordedScenario` itself.
+    const scenarios = rawScenarios.map((scenario) => {
+      if (!scenario.canonicalInteractions?.length) return scenario;
+      const canonicalInteractions = reconcileOptionOwnerLineage(scenario.canonicalInteractions);
+      return canonicalInteractions === scenario.canonicalInteractions ? scenario : { ...scenario, canonicalInteractions };
+    });
+    console.info("[recording-scenario-store]", {
+      recordingId,
+      appSlug,
+      operation: "load",
+      scenarioCount: scenarios.length,
+      scenarioIds: scenarios.map((s) => s.scenarioId),
+      storePathOrKey: file,
+      ...(Array.isArray(parsed) ? {} : { reason: "file_not_array" }),
+    });
+    return scenarios;
+  } catch (err) {
+    // A file that EXISTS but fails to parse is a real persistence-layer fault (truncated write,
+    // disk corruption), never a legitimate "no scenarios yet" -- surfaced distinctly so it is
+    // never silently mistaken for CASE A ("never derived").
+    console.info("[recording-scenario-store]", { recordingId, appSlug, operation: "load", scenarioCount: 0, scenarioIds: [], storePathOrKey: file, reason: "parse_error", errorMessage: err instanceof Error ? err.message : String(err) });
     return [];
   }
 }

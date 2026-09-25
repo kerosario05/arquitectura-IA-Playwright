@@ -6,8 +6,8 @@ const identification_page_1 = require("../pages/identification.page");
 const phoneconfirmation_page_1 = require("../pages/phoneconfirmation.page");
 const otp_component_1 = require("../components/otp.component");
 const operationsmenu_page_1 = require("../pages/operationsmenu.page");
-const auth_gate_detector_1 = require("../../../../src/discovery/auth-gate-detector");
-const page_scanner_1 = require("../../../../src/explorer/page-scanner");
+const auth_gate_detector_1 = require("../../src/discovery/auth-gate-detector");
+const page_scanner_1 = require("../../src/explorer/page-scanner");
 class AuthFlow {
     page;
     identificationPage;

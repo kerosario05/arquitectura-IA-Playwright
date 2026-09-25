@@ -1,0 +1,283 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-001",
+    "caseId": 0,
+    "title": "Kiosko2"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://172.27.4.50/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "description": "Presionar \"Explora nuestros productos\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Explora nuestros productos",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Presionar \"Tarjetas\"",
+      "target": {
+        "strategy": "recorded:role",
+        "value": "Tarjetas",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:role"
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Presionar \"Tarjeta de Crédito\"",
+      "target": {
+        "strategy": "recorded:role",
+        "value": "Tarjeta de Crédito",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:role"
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Presionar \"Tarjeta Crédito Visa Gold Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Mayor plazo para pagar: 26 días después de la fe\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Tarjeta Crédito Visa Gold Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Mayor plazo para pagar: 26 días después de la fe",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner"
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar \"Finalizar sesión\"",
+      "target": {
+        "strategy": "recorded:role",
+        "value": "Finalizar sesión",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:role"
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-09-15T18:00:44.146Z",
+  "sourceScenario": {
+    "title": "Kiosko2",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Presionar \"Explora nuestros productos\"",
+        "description": "Presionar \"Explora nuestros productos\"",
+        "valueKey": "explora_nuestros_productos",
+        "polarity": "positive"
+      },
+      {
+        "index": 2,
+        "action": "Presionar \"Tarjetas\"",
+        "description": "Presionar \"Tarjetas\"",
+        "valueKey": "tarjetas",
+        "polarity": "positive"
+      },
+      {
+        "index": 3,
+        "action": "Presionar \"Tarjeta de Crédito\"",
+        "description": "Presionar \"Tarjeta de Crédito\"",
+        "valueKey": "tarjeta_de_credito",
+        "polarity": "positive"
+      },
+      {
+        "index": 4,
+        "action": "Presionar \"Tarjeta Crédito Visa Gold Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Mayor plazo para pagar: 26 días después de la fe\"",
+        "description": "Presionar \"Tarjeta Crédito Visa Gold Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Mayor plazo para pagar: 26 días después de la fe\"",
+        "valueKey": "tarjeta_credito_visa_gold_programa_puntos_santa_cruz_por_cada_rd_100_o_ud_3_00_generas_un_1_punto_santa_cruz_mayor_plazo_para_pagar_26_dias_despues_de_la_fe",
+        "polarity": "positive"
+      },
+      {
+        "index": 5,
+        "action": "Presionar \"Finalizar sesión\"",
+        "description": "Presionar \"Finalizar sesión\"",
+        "valueKey": "finalizar_sesion",
+        "polarity": "positive"
+      }
+    ],
+    "expectedResult": "La aplicación carga su pantalla inicial",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "observedAssertions": [],
+    "observableOracles": [
+      {
+        "id": "expected-01",
+        "requirement": "La aplicación carga su pantalla inicial",
+        "type": "navigation_transition",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 5,
+        "target": "Finalizar sesión",
+        "polarity": "positive",
+        "evidence": [
+          "transition_observed:true",
+          "click_target:Finalizar sesión",
+          "action_type:Presionar \"Finalizar sesión\"",
+          "after_url:https://172.27.4.50/",
+          "assertion_polarity:positive"
+        ],
+        "details": {
+          "transitionObserved": true,
+          "clickTarget": "Finalizar sesión",
+          "resolvedTarget": null,
+          "postClickUiChange": null,
+          "sourceActionStepIndex": 5,
+          "expectedUrl": "https://172.27.4.50/"
+        }
+      }
+    ],
+    "stepStatuses": [
+      {
+        "index": 1,
+        "status": "found"
+      },
+      {
+        "index": 2,
+        "status": "found"
+      },
+      {
+        "index": 3,
+        "status": "found"
+      },
+      {
+        "index": 4,
+        "status": "found"
+      },
+      {
+        "index": 5,
+        "status": "found"
+      }
+    ],
+    "auth": {}
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "PREVIEW-001",
+    "title": "Kiosko2",
+    "appSlug": "kiosko",
+    "sectionSlug": "default-section",
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Presionar \"Explora nuestros productos\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Explora nuestros productos"
+        },
+        "valueKey": "explora_nuestros_productos",
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Presionar \"Tarjetas\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Tarjetas"
+        },
+        "valueKey": "tarjetas",
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Presionar \"Tarjeta de Crédito\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Tarjeta de Crédito"
+        },
+        "valueKey": "tarjeta_de_credito",
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Presionar \"Tarjeta Crédito Visa Gold Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Mayor plazo para pagar: 26 días después de la fe\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Tarjeta Crédito Visa Gold Programa Puntos Santa Cruz por cada RD$100 o UD$3.00 generas un (1) Punto Santa Cruz. Mayor plazo para pagar: 26 días después de la fe"
+        },
+        "valueKey": "tarjeta_credito_visa_gold_programa_puntos_santa_cruz_por_cada_rd_100_o_ud_3_00_generas_un_1_punto_santa_cruz_mayor_plazo_para_pagar_26_dias_despues_de_la_fe",
+        "required": true,
+        "executionStatus": "executed",
+        "oracle": {
+          "type": "navigation_transition",
+          "backed": true,
+          "polarity": "positive",
+          "implementationKind": "url_state",
+          "mechanism": {
+            "source": "url_state",
+            "method": "expectPromotedVisible",
+            "stabilization": {
+              "source": "promoted_runtime",
+              "method": "waitForPromotedUiStable"
+            },
+            "expected": {
+              "oracleKind": "navigation_transition",
+              "urlPattern": "https://172.27.4.50/"
+            }
+          },
+          "sourceActionStepIndex": 5,
+          "requirement": "La aplicación carga su pantalla inicial"
+        },
+        "sourceActionStepIndex": 5,
+        "evidenceRefs": [
+          "oracle:expected-01"
+        ]
+      },
+      {
+        "contractStepIndex": 4,
+        "scenarioStepIndex": 5,
+        "originalText": "Presionar \"Finalizar sesión\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Finalizar sesión"
+        },
+        "valueKey": "finalizar_sesion",
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 5,
+      "representedScenarioSteps": 5,
+      "missingScenarioSteps": []
+    }
+  }
+}
