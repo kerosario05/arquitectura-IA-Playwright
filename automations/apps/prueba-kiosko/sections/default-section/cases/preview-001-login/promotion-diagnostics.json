@@ -17,6 +17,6 @@
   "fallbackUsed": false,
   "requirePomRuntime": false,
   "specPath": "automations\\apps\\prueba-kiosko\\sections\\default-section\\cases\\preview-001-login\\case.spec.ts",
-  "specHash": "fe20818f8d7b87bfbe427ee9c6f73fb50492d3b206dff1a59dd78596d93682be",
+  "specHash": "3c1d7fbbc852fcb1de47097d140b9b83cb4c496ef7259ad880f63f5b6c91dc9d",
   "specSource": "ai_candidate"
 }

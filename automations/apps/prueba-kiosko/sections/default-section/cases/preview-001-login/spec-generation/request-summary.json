@@ -336,7 +336,9 @@
               "tag": "main"
             },
             "deterministicStructuralIdentity": true,
-            "structuralIdentityMatchCount": 1
+            "structuralIdentityMatchCount": 1,
+            "topologyTieBreakUnique": true,
+            "topologySignature": "{\"childEntries\":[[\"div\",1],[\"h3\",1],[\"p\",1]],\"descendantEntries\":[[\"div\",2],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}"
           },
           "confidence": 0.85,
           "certificationTier": 4
@@ -860,7 +862,7 @@
       "missingScenarioSteps": []
     }
   },
-  "executionContractChars": 15577,
+  "executionContractChars": 15765,
   "promptChars": null,
   "specGenerationAttempts": 0,
   "specRepairAttempts": 0,
