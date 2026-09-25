@@ -5195,7 +5195,12 @@ export function classifyRecordedSurfaceCompatibility(
     if (current.origin !== expected.origin) {
       return { hardIncompatibility: true, routeMismatch: true, reasons: ["wrong_application_origin"] };
     }
-    if (current.pathname === expected.pathname) {
+    // A query string can select a different SPA surface while keeping the same pathname
+    // (for example, a product category versus its subcategory). Treat that as a real
+    // surface change; otherwise replay may advance while the app has already fallen back
+    // to the previous screen. Learned route authority remains the only escape hatch for
+    // intentionally dynamic routes, and it requires the same search/hash authority too.
+    if (current.pathname === expected.pathname && current.search === expected.search && current.hash === expected.hash) {
       return { hardIncompatibility: false, routeMismatch: false, reasons: [] };
     }
     // Exact literal match failed. Only a learned route-family authority (repeated, independent

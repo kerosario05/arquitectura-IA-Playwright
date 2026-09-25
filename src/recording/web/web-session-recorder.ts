@@ -1939,11 +1939,13 @@ export class WebSessionRecorder {
   }
 
   async stop(): Promise<{ events: RecordedEvent[]; screens: RecordedScreen[] }> {
-    // Drain any V2-authority ingestion still in flight BEFORE marking the recorder stopped --
-    // onInteraction's own `if (this.stopped) return;` guard would otherwise silently swallow a
-    // technical action that was queued but hadn't reached onInteraction yet. No fixed sleep:
-    // this awaits the exact promise chain onV2TechnicalAction already serializes ingestion
-    // through, so it resolves the instant everything already queued has actually been applied.
+    // Drain any V2-authority ingestion still in flight before closing the browser. The binding
+    // callback can enqueue one final action while the first drain is resolving, so the recorder
+    // must remain open until the context close has quiesced those callbacks and the queue has
+    // been drained again. No fixed sleep: both waits use the exact promise chain that
+    // onV2TechnicalAction already serializes ingestion through.
+    await this.v2IngestionQueue.catch(() => undefined);
+    await this.context?.close().catch(() => undefined);
     await this.v2IngestionQueue.catch(() => undefined);
     this.stopped = true;
     // Shadow-only visibility: bounded counts, never field values, never connected to
@@ -1957,7 +1959,6 @@ export class WebSessionRecorder {
         `[capture-v2] summary messages=${summary.messages} actions=${summary.actions} diagnostics=${summary.diagnostics} documents=${summary.documents} edits=${edits} clicks=${clicks}`,
       );
     }
-    await this.context?.close().catch(() => undefined);
     await this.browser?.close().catch(() => undefined);
     this.context = null;
     this.browser = null;

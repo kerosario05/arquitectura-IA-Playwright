@@ -160,6 +160,15 @@ test("exactRoute. an identical static route still matches exactly", () => {
   assert.equal(compatibility.routeMismatch, false);
 });
 
+test("same pathname with a different query is a different recorded surface", () => {
+  const compatibility = classifyRecordedSurfaceCompatibility(
+    "https://app.test/product-subcategory?category=cards",
+    "https://app.test/product-subcategory?category=cards&subcategory=credit",
+  );
+  assert.equal(compatibility.hardIncompatibility, false);
+  assert.equal(compatibility.routeMismatch, true);
+});
+
 test("dynamicIdSameValue. identical ids still match (unchanged pre-existing behavior)", () => {
   const compatibility = classifyRecordedSurfaceCompatibility(
     "https://app.test/requests/10207/edit",

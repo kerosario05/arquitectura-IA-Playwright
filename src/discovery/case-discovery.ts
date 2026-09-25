@@ -8428,7 +8428,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       // through to the global contextual resolver.
       semanticRuntimeEvidence: actionTarget.semanticRuntimeEvidence,
       playwrightRecorderEvidence: actionTarget.playwrightRecorderEvidence,
-      expectedRouteBefore: actionTarget.expectedRouteBefore,
+      // A delayed recording can persist an obsolete pre-route. Keep the recorded technical
+      // identity authoritative, but do not let that stale route string reject the live surface.
+      expectedRouteBefore: actionTarget.expectedRouteBefore
+        && recordedPostActionSurfaceReached(page.url(), actionTarget.expectedRouteBefore, currentSurfaceRouteAuthority ?? undefined)
+        ? actionTarget.expectedRouteBefore
+        : undefined,
       learnedRouteAuthority: currentSurfaceRouteAuthority ?? undefined,
       expectedTarget: detailTarget && finalProductClickStepIndex === actionTarget.index ? detailTarget : undefined,
     });
@@ -10518,6 +10523,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     const nextTargetVisibleBefore = isTargetTextVisible(currentSnapshot?.elements, nextTargetText);
     let postActionSyncSignal: string | undefined;
     let postActionNextTargetVisible = false;
+    let postActionNextTargetReady = false;
     let nextTargetVisibleLogged = false;
     let domMutationDiagnosticLogged = false;
     let stateDiagnosticLogged = false;
@@ -10567,6 +10573,14 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     }
     const isRecordedPostActionReached = (): boolean =>
       recordedPostActionSurfaceReached(page.url(), recordedPostActionExpected, routeObservationAuthority ?? undefined);
+    const recordedSurfaceReconcilesWithNextTarget = (nextTargetReady: boolean): boolean =>
+      Boolean(
+        recordedPostActionExpected
+        && isRecordedPostActionReached()
+        && nextTargetReady
+        && nextActionTarget?.expectedRouteBefore
+        && recordedPostActionSurfaceReached(recordedPostActionExpected, nextActionTarget.expectedRouteBefore),
+      );
     const postActionCompletionProbe = async (): Promise<{ completed: boolean; signal?: string }> => {
       const iteration = ++postActionProbeIteration;
       const iterationStart = performance.now();
@@ -10657,13 +10671,17 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             recordingActionType: nextActionTarget.recordingActionType,
             recordedTechnicalTargets: nextActionTarget.technicalTargetCandidates as any,
             recordedTechnicalTargetRefs: nextActionTarget.technicalTargetRefs,
-            expectedRouteBefore: nextActionTarget.expectedRouteBefore,
+            expectedRouteBefore: nextActionTarget.expectedRouteBefore
+              && recordedPostActionSurfaceReached(page.url(), nextActionTarget.expectedRouteBefore, currentSurfaceRouteAuthority ?? undefined)
+              ? nextActionTarget.expectedRouteBefore
+              : undefined,
             learnedRouteAuthority: currentSurfaceRouteAuthority ?? undefined,
             routeProfile,
           }).catch(() => undefined)
         : undefined;
       resolverStatus = nextTargetResolution?.status ?? resolverStatus;
       const nextTargetReady = resolverStatus === "resolved";
+      postActionNextTargetReady = postActionNextTargetReady || nextTargetReady;
       const resolveNextTargetMs = performance.now() - resolverStart;
       const nextTargetReadyCheckMs = 0;
       if ((nextTargetVisible || nextTargetReady) && !nextTargetFirstObservableLogged) {
@@ -10737,8 +10755,14 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         screenFingerprintChanged: observationDiff?.navigationMutation || observationDiff?.validationMutation,
         structuredStateMutation: observationDiff?.stateMutation === true,
         routeChanged: routeChangedNow,
-        recordedPostActionSurfaceRequired: Boolean(recordedPostActionExpected),
-        recordedPostActionSurfaceReached: isRecordedPostActionReached(),
+        // A delayed recording can persist one action's post-route as the next action's
+        // pre-route. If the next action is already technically resolvable on the observed
+        // surface, that shared route expectation is stale evidence, not a second navigation
+        // requirement. This is structural and route-generic: no app labels, paths, or sleeps.
+        recordedPostActionSurfaceRequired: Boolean(recordedPostActionExpected)
+          && !recordedSurfaceReconcilesWithNextTarget(nextTargetReady),
+        recordedPostActionSurfaceReached: isRecordedPostActionReached()
+          || recordedSurfaceReconcilesWithNextTarget(nextTargetReady),
       });
       const signal = synchronization.signal;
       if (!synchronization.completed || !signal) return { completed: false };
@@ -10882,7 +10906,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     // The recorded post-action surface is a functional postcondition, not a decorative
     // loading state. A settled network transition must not mask an un-reached recorded
     // destination, so it cannot force readiness while the recorded surface is pending.
-    const recordedPostActionPending = Boolean(recordedPostActionExpected) && !isRecordedPostActionReached();
+    const recordedPostActionPending = Boolean(recordedPostActionExpected)
+      && !isRecordedPostActionReached()
+      && !recordedSurfaceReconcilesWithNextTarget(postActionNextTargetReady);
     if (!stability.stable && stability.reason === "loading_timeout" && cleanNetworkTransition && !recordedPostActionPending) {
       // Some applications keep a decorative loading class mounted after all
       // navigation/data requests have completed. Static assets are not part of
@@ -12275,7 +12301,14 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     // can hold a SPA on the destination long enough for its own lifecycle to
     // revert the route. Keep the loading wait for transitions without a usable
     // next target, where it still protects server-side workflows.
-    if (transitionDetected && !postActionNextTargetVisible) {
+    // A structured next-target resolver result is equivalent readiness evidence to a
+    // visible next target for this post-transition branch.  The broad loading wait below
+    // performs an extra page-wide re-observation; on SPAs that can briefly expose the
+    // destination before a late lifecycle update, that extra scan can run after the
+    // destination was ready and observe a transient fallback surface instead.  Keep the
+    // decision structural and recording-generic: it relies only on the same resolver
+    // authority already used by postActionCompletionProbe, never on app labels/routes.
+    if (transitionDetected && !postActionNextTargetVisible && !postActionNextTargetReady) {
       try {
         const loadingDone = await page.waitForFunction(PAGE_LOADING_STATE_PREDICATE, { timeout: 30000 });
         if (loadingDone) {
@@ -12314,8 +12347,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       } catch {
         console.log("[discovery:case] Loading state wait timed out, continuing with current snapshot.");
       }
-    } else if (transitionDetected && postActionNextTargetVisible) {
-      console.log("[discovery:case] Loading state wait skipped: synchronized next target already visible.");
+    } else if (transitionDetected && (postActionNextTargetVisible || postActionNextTargetReady)) {
+      console.log("[discovery:case] Loading state wait skipped: synchronized next target is visible or technically ready.");
     }
 
     if (authGateState?.completed) {

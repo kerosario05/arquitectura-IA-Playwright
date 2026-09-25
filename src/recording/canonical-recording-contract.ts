@@ -850,23 +850,25 @@ function nextPointerBoundaryT(events: readonly RecordedEvent[], fromT: number, a
 }
 
 /**
- * A route transition belongs to the action whose pointer lifecycle caused it: the last
- * navigation that fired between this action's pointerdown and the next pointerdown. When
- * no pointer anchor exists (legacy/other platforms) the forward-looking transition is used.
+ * A route transition belongs to the action whose pointer lifecycle caused it: the first
+ * navigation that fired after this action's pointerdown and before the next pointerdown.
+ * Capture delivery can lag behind the browser, so later navigations may already belong to
+ * subsequent physical actions even when their tap records have not arrived yet. Taking the
+ * first transition preserves the causal boundary without depending on app routes or timing.
+ * When no pointer anchor exists (legacy/other platforms) the forward-looking transition is used.
  */
 function causalTransition(events: readonly RecordedEvent[], index: number, excludeSeqs?: ReadonlySet<number>): { event?: RecordedEvent } {
   const anchor = actionablePointerAnchor(events, index);
   if (!anchor || !anchor.url) return transitionAfter(events, index, excludeSeqs);
   const end = nextPointerBoundaryT(events, anchor.t, anchor) ?? Number.POSITIVE_INFINITY;
-  let bound: RecordedEvent | undefined;
   for (const candidate of events) {
     if (candidate.kind !== "navigate" || !candidate.url) continue;
     if (typeof candidate.seq === "number" && excludeSeqs?.has(candidate.seq)) continue;
     if (candidate.t < anchor.t || candidate.t > end) continue;
     if (candidate.url === anchor.url) continue;
-    bound = candidate;
+    return { event: candidate };
   }
-  return bound ? { event: bound } : transitionAfter(events, index, excludeSeqs);
+  return transitionAfter(events, index, excludeSeqs);
 }
 
 function ownershipForEvent(events: readonly RecordedEvent[], index: number, excludeSeqs?: ReadonlySet<number>): InteractionStateOwnership {

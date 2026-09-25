@@ -1,0 +1,753 @@
+{
+  "version": "1.0",
+  "recordingId": "df8805b3-3b34-4d62-97ec-ed38ec84b23a",
+  "projectSlug": "portal-comercial",
+  "appSlug": "portal-comercial",
+  "platform": "web",
+  "recordingGoal": {
+    "declaredGoal": "Validar navegaci�n corta",
+    "normalizedGoal": "Validar navegaci�n corta",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "selectorOptionInventories": [],
+  "semanticScreens": [
+    {
+      "screenIdentity": "fbf08c6ecee9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "classification": "SAME_SCREEN_MUTATION",
+      "sourceScreenKey": "fbf08c6ecee9"
+    }
+  ],
+  "semanticComponents": [
+    {
+      "componentId": "fbf08c6ecee9:control:fbf08c6ecee9|UsuarioContraseñaRecordarmeIniciar sesión|control",
+      "componentType": "control",
+      "screenIdentity": "fbf08c6ecee9",
+      "label": "UsuarioContraseñaRecordarmeIniciar sesión",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-11",
+        "obs-12"
+      ]
+    }
+  ],
+  "semanticEvents": [
+    {
+      "eventRef": "event-1",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-2",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-3",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-4",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-5",
+      "action": "observe",
+      "screenIdentity": "fbf08c6ecee9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-6",
+      "action": "navigate",
+      "screenIdentity": "fbf08c6ecee9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-7",
+      "action": "navigate",
+      "screenIdentity": "fbf08c6ecee9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-8",
+      "action": "navigate",
+      "screenIdentity": "fbf08c6ecee9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-9",
+      "action": "navigate",
+      "screenIdentity": "fbf08c6ecee9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-10",
+      "action": "navigate",
+      "screenIdentity": "fbf08c6ecee9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-11",
+      "action": "activate",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "control",
+      "controlAffordance": "observable_control",
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|UsuarioContraseñaRecordarmeIniciar sesión|control",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-12",
+      "action": "activate",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "control",
+      "controlAffordance": "observable_control",
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|UsuarioContraseñaRecordarmeIniciar sesión|control",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-13",
+      "action": "navigate",
+      "screenIdentity": "fbf08c6ecee9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    }
+  ],
+  "datasets": [],
+  "technicalObservations": [
+    {
+      "observationId": "obs-11",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "control",
+      "label": "UsuarioContraseñaRecordarmeIniciar sesión",
+      "tag": "form",
+      "locatorCandidates": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "form"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "button",
+                "stableAttributes": {
+                  "aria-label": "Iniciar sesión"
+                }
+              },
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "stableAttributes": {
+                  "id": "password"
+                }
+              },
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "stableAttributes": {
+                  "id": "remember-me"
+                }
+              },
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "stableAttributes": {
+                  "id": "username"
+                }
+              }
+            ],
+            "semanticShape": [
+              "button",
+              "div"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "__nuxt"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"form\"},\"stableDirectAttributes\":{},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"password\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"remember-me\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"username\"}}],\"semanticShape\":[\"button\",\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"button\\\",1],[\\\"div\\\",3]],\\\"descendantEntries\\\":[[\\\"button\\\",1],[\\\"div\\\",5],[\\\"input\\\",3],[\\\"label\\\",3],[\\\"span\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner",
+            "v2_scoped_structural_runtime_evidence"
+          ],
+          "confidence": 0.6,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.4,
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|UsuarioContraseñaRecordarmeIniciar sesión|control",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-12",
+      "status": "VALIDATED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "control",
+      "label": "UsuarioContraseñaRecordarmeIniciar sesión",
+      "tag": "form",
+      "locatorCandidates": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "form"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "button",
+                "stableAttributes": {
+                  "aria-label": "Iniciar sesión"
+                }
+              },
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "stableAttributes": {
+                  "id": "password"
+                }
+              },
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "stableAttributes": {
+                  "id": "remember-me"
+                }
+              },
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "stableAttributes": {
+                  "id": "username"
+                }
+              }
+            ],
+            "semanticShape": [
+              "button",
+              "div"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "__nuxt"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"form\"},\"stableDirectAttributes\":{},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"password\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"remember-me\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"username\"}}],\"semanticShape\":[\"button\",\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"button\\\",1],[\\\"div\\\",3]],\\\"descendantEntries\\\":[[\\\"button\\\",1],[\\\"div\\\",5],[\\\"input\\\",3],[\\\"label\\\",3],[\\\"span\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner",
+            "v2_scoped_structural_runtime_evidence"
+          ],
+          "confidence": 0.6,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.4,
+      "technicalTargetRef": "fbf08c6ecee9:control:fbf08c6ecee9|UsuarioContraseñaRecordarmeIniciar sesión|control",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-fbf08c6ecee9-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "label": "Usuario",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "username",
+        "placeholder": "Ingresa tu usuario"
+      },
+      "placeholder": "Ingresa tu usuario",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "username",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "fbf08c6ecee9:control:1",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-fbf08c6ecee9-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "label": "Contraseña",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "password",
+        "type": "password",
+        "placeholder": "Ingresa tu contraseña"
+      },
+      "placeholder": "Ingresa tu contraseña",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "password",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "fbf08c6ecee9:control:2",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-fbf08c6ecee9-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "textbox",
+      "label": "Recordarme",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "remember-me",
+        "type": "checkbox"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "remember-me",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "fbf08c6ecee9:control:3",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-fbf08c6ecee9-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "fbf08c6ecee9",
+      "componentType": "button",
+      "label": "Iniciar sesión",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "submit",
+        "aria-label": "Iniciar sesión"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Iniciar sesión",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "fbf08c6ecee9:control:4",
+      "selectable": false,
+      "editable": false
+    }
+  ],
+  "editingSessions": [],
+  "scenarioSuggestions": [],
+  "canonicalInteractions": [
+    {
+      "id": "interaction-1",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-1"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-2",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-2"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-3",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-3"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-4",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-4"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-6",
+      "controlIdentity": "fbf08c6ecee9",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-6"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "fbf08c6ecee9",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-7",
+      "controlIdentity": "fbf08c6ecee9",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-7"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "fbf08c6ecee9",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-8",
+      "controlIdentity": "fbf08c6ecee9",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-8"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "fbf08c6ecee9",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-9",
+      "controlIdentity": "fbf08c6ecee9",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-9"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "fbf08c6ecee9",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-10",
+      "controlIdentity": "fbf08c6ecee9",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-10"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "fbf08c6ecee9",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-11",
+      "controlIdentity": "fbf08c6ecee9|UsuarioContraseñaRecordarmeIniciar sesión",
+      "semanticField": "UsuarioContraseñaRecordarmeIniciar sesión",
+      "action": "click",
+      "valueKey": "usuariocontrasenarecordarmeiniciar_sesion",
+      "sourceEventRefs": [
+        "event-11"
+      ],
+      "technicalTargetRefs": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "form"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "button",
+                "stableAttributes": {
+                  "aria-label": "Iniciar sesión"
+                }
+              },
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "stableAttributes": {
+                  "id": "password"
+                }
+              },
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "stableAttributes": {
+                  "id": "remember-me"
+                }
+              },
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "stableAttributes": {
+                  "id": "username"
+                }
+              }
+            ],
+            "semanticShape": [
+              "button",
+              "div"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "__nuxt"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"form\"},\"stableDirectAttributes\":{},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"password\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"remember-me\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"username\"}}],\"semanticShape\":[\"button\",\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"button\\\",1],[\\\"div\\\",3]],\\\"descendantEntries\\\":[[\\\"button\\\",1],[\\\"div\\\",5],[\\\"input\\\",3],[\\\"label\\\",3],[\\\"span\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner",
+            "v2_scoped_structural_runtime_evidence"
+          ],
+          "confidence": 0.6,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"UsuarioContraseñaRecordarmeIniciar sesión\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "runtime_resolution_required",
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-12",
+      "controlIdentity": "fbf08c6ecee9|UsuarioContraseñaRecordarmeIniciar sesión",
+      "semanticField": "UsuarioContraseñaRecordarmeIniciar sesión",
+      "action": "click",
+      "valueKey": "usuariocontrasenarecordarmeiniciar_sesion",
+      "sourceEventRefs": [
+        "event-12"
+      ],
+      "technicalTargetRefs": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "form"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "button",
+                "stableAttributes": {
+                  "aria-label": "Iniciar sesión"
+                }
+              },
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "stableAttributes": {
+                  "id": "password"
+                }
+              },
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "stableAttributes": {
+                  "id": "remember-me"
+                }
+              },
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "stableAttributes": {
+                  "id": "username"
+                }
+              }
+            ],
+            "semanticShape": [
+              "button",
+              "div"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "__nuxt"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"form\"},\"stableDirectAttributes\":{},\"stableDescendants\":[{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"password\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"remember-me\"}},{\"relation\":\"descendant\",\"tag\":\"input\",\"stableAttributes\":{\"id\":\"username\"}}],\"semanticShape\":[\"button\",\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"button\\\",1],[\\\"div\\\",3]],\\\"descendantEntries\\\":[[\\\"button\\\",1],[\\\"div\\\",5],[\\\"input\\\",3],[\\\"label\\\",3],[\\\"span\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner",
+            "v2_scoped_structural_runtime_evidence"
+          ],
+          "confidence": 0.6,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "description": "Ingresar en \"UsuarioContraseñaRecordarmeIniciar sesión\"",
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "fbf08c6ecee9",
+      "admissionStatus": "accepted",
+      "resolutionState": "runtime_resolution_required",
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-13",
+      "controlIdentity": "fbf08c6ecee9",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-13"
+      ],
+      "technicalTargetRefs": [],
+      "screenBeforeRef": "fbf08c6ecee9",
+      "screenAfterRef": "fbf08c6ecee9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "fbf08c6ecee9",
+      "technicalOnly": true,
+      "confidence": 0.9
+    }
+  ],
+  "gridMetadata": {
+    "detected": true,
+    "grids": 1,
+    "rows": 0,
+    "cells": 0,
+    "headers": [],
+    "headerRelationships": []
+  },
+  "source": "SessionTrace"
+}
