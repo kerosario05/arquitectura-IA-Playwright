@@ -160,6 +160,8 @@ export type RecordedScenario = {
   stepTargets: RecordedStepTarget[];
   /** Where each step came from, so a reviewer can trust or challenge it. */
   sourceRecordingId: string;
+  /** Set once the scenario has been published as a TestRail case. */
+  testRailCaseId?: number;
   /** True when at least one step rests on a fallback hit-test rather than a real locator. */
   hasUncertainSteps: boolean;
   /** Exactly one scenario per recording may be marked primary. */

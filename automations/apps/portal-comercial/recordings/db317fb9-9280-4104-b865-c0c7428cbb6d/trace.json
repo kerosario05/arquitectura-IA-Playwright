@@ -1,0 +1,669 @@
+{
+  "recordingId": "db317fb9-9280-4104-b865-c0c7428cbb6d",
+  "projectSlug": "portal-comercial",
+  "appSlug": "portal-comercial",
+  "platform": "web",
+  "baseUrl": "https://srvqacgowb01.local.bsc.com:5000/login",
+  "label": "registro 3",
+  "startedAt": "2026-09-10T15:05:54.912Z",
+  "status": "derived",
+  "events": [
+    {
+      "t": 1687,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 0
+    },
+    {
+      "t": 2806,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 1
+    },
+    {
+      "t": 2863,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 2
+    },
+    {
+      "t": 3001,
+      "kind": "navigate",
+      "screenKey": "fbf08c6ecee9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 3
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "fbf08c6ecee9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 4
+    },
+    {
+      "t": 5908,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Usuario",
+        "role": "input",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "#username",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "seq": 5
+    },
+    {
+      "t": 47368,
+      "kind": "fill",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Usuario",
+        "role": "input",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "#username",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": false
+      },
+      "value": "radames",
+      "seq": 6
+    },
+    {
+      "t": 47464,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "input",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "#password",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "seq": 7
+    },
+    {
+      "t": 49120,
+      "kind": "fill",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "input",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "#password",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": true
+      },
+      "redactedKey": "contrasena",
+      "seq": 8
+    },
+    {
+      "t": 49186,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Iniciar sesión",
+        "role": "button",
+        "locators": [
+          {
+            "strategy": "aria-label",
+            "value": "Iniciar sesión",
+            "confidence": 0.9
+          },
+          {
+            "strategy": "text",
+            "value": "Iniciar sesión",
+            "confidence": 0.7
+          }
+        ]
+      },
+      "seq": 9
+    },
+    {
+      "t": 49245,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Usuario\nContraseña\nRecordarme\nIniciar sesión",
+        "role": "form",
+        "locators": [
+          {
+            "strategy": "text",
+            "value": "Usuario\nContraseña\nRecordarme\nIniciar sesión",
+            "confidence": 0.7
+          }
+        ]
+      },
+      "seq": 10
+    },
+    {
+      "t": 49697,
+      "kind": "navigate",
+      "screenKey": "fbf08c6ecee9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/",
+      "seq": 11
+    },
+    {
+      "t": 50288,
+      "kind": "screen_change",
+      "screenKey": "fbf08c6ecee9",
+      "toScreenKey": "a5bf9e3e4c28",
+      "fingerprint": "d929653f2fcdf224bc1d3b92cf07fbc802d2ea08cf75fadb1d4ff19e92cd0446",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/",
+      "seq": 12
+    },
+    {
+      "t": 51938,
+      "kind": "tap",
+      "screenKey": "a5bf9e3e4c28",
+      "fingerprint": "d929653f2fcdf224bc1d3b92cf07fbc802d2ea08cf75fadb1d4ff19e92cd0446",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/",
+      "target": {
+        "label": "Solicitud multiproducto",
+        "role": "a",
+        "locators": [
+          {
+            "strategy": "text",
+            "value": "Solicitud multiproducto",
+            "confidence": 0.5,
+            "ambiguous": true,
+            "matchIndex": 1
+          }
+        ]
+      },
+      "seq": 13
+    },
+    {
+      "t": 52028,
+      "kind": "navigate",
+      "screenKey": "a5bf9e3e4c28",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/",
+      "seq": 14
+    },
+    {
+      "t": 52039,
+      "kind": "navigate",
+      "screenKey": "a5bf9e3e4c28",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "seq": 15
+    },
+    {
+      "t": 52892,
+      "kind": "screen_change",
+      "screenKey": "a5bf9e3e4c28",
+      "toScreenKey": "69bd2047dc83",
+      "fingerprint": "94a0ac10c3638f288b3a33998e8fa87b03ffd37fa1163f402e27371060dd85b9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "seq": 16
+    },
+    {
+      "t": 66557,
+      "kind": "tap",
+      "screenKey": "69bd2047dc83",
+      "fingerprint": "94a0ac10c3638f288b3a33998e8fa87b03ffd37fa1163f402e27371060dd85b9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "target": {
+        "label": "control",
+        "role": "input",
+        "locators": []
+      },
+      "seq": 17
+    },
+    {
+      "t": 78020,
+      "kind": "fill",
+      "screenKey": "69bd2047dc83",
+      "fingerprint": "94a0ac10c3638f288b3a33998e8fa87b03ffd37fa1163f402e27371060dd85b9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "target": {
+        "label": "campo",
+        "role": "input",
+        "locators": [],
+        "sensitive": false
+      },
+      "value": "118-0005011-1",
+      "seq": 18
+    },
+    {
+      "t": 78087,
+      "kind": "tap",
+      "screenKey": "69bd2047dc83",
+      "fingerprint": "94a0ac10c3638f288b3a33998e8fa87b03ffd37fa1163f402e27371060dd85b9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "target": {
+        "label": "control",
+        "role": "button",
+        "locators": []
+      },
+      "seq": 19
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "fbf08c6ecee9",
+      "title": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "firstSeenAt": 2973,
+      "controls": [
+        {
+          "label": "Iniciar sesión",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Iniciar sesión",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": []
+    },
+    {
+      "screenKey": "a5bf9e3e4c28",
+      "title": "a5bf9e3e4c28",
+      "fingerprint": "d929653f2fcdf224bc1d3b92cf07fbc802d2ea08cf75fadb1d4ff19e92cd0446",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/",
+      "firstSeenAt": 50288,
+      "controls": [
+        {
+          "label": "Portal Comercial",
+          "role": "a",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Portal Comercial ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuración",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Configuración",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Sesión",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Sesión",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_0_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Información",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_0_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Campañas",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_1_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Solicitud multiproducto",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_1_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Solicitudes en curso",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_1_2",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Usuarios",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_2_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Roles",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_2_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Permisos",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_2_2",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Auditorías",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_3_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Operaciones",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_3_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Errores",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_3_2",
+              "confidence": 0.9
+            }
+          ]
+        }
+      ],
+      "texts": []
+    },
+    {
+      "screenKey": "69bd2047dc83",
+      "title": "69bd2047dc83",
+      "fingerprint": "94a0ac10c3638f288b3a33998e8fa87b03ffd37fa1163f402e27371060dd85b9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "firstSeenAt": 52892,
+      "controls": [
+        {
+          "label": "Portal Comercial",
+          "role": "a",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Portal Comercial ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuración",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Configuración",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Sesión",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Sesión",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_0_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Información",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_0_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Campañas",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_1_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Solicitud multiproducto",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_1_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Solicitudes en curso",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_1_2",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Usuarios",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_2_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Roles",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_2_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Permisos",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_2_2",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Auditorías",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_3_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Operaciones",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_3_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Errores",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_3_2",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Nueva solicitud",
+          "role": "a",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Nueva solicitud",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Salir",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Salir",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cancelar",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cancelar",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Depurar",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Depurar",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": []
+    }
+  ],
+  "endedAt": "2026-09-10T15:07:20.212Z",
+  "durationMs": 85300,
+  "narrative": "Recorrido grabado en aplicación web: portal-comercial\nEtiqueta del recorrido: registro 3\n\nPantalla 1: inicio\n\nPantalla 2: fbf08c6ecee9\n  - El usuario presionó \"Usuario\"\n  - El usuario ingresó \"radames\" en \"Usuario\"\n  - El usuario presionó \"Contraseña\"\n  - El usuario ingresó un valor sensible en \"Contraseña\" (contrasena)\n  - El usuario presionó \"Iniciar sesión\"\n  - El usuario presionó \"Usuario\nContraseña\nRecordarme\nIniciar sesión\"\n  - La aplicación navegó a otra pantalla\n\nPantalla 3: a5bf9e3e4c28\n  - El usuario presionó \"Solicitud multiproducto\"\n  - La aplicación navegó a otra pantalla\n\nPantalla 4: 69bd2047dc83\n  - (Toque sin locator utilizable sobre \"control\")\n  - El usuario ingresó \"118-0005011-1\" en \"campo\"\n  - (Toque sin locator utilizable sobre \"control\")"
+}

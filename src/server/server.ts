@@ -17,6 +17,7 @@ import { usersRouter } from "./routes/users";
 import { rolesRouter, permissionsRouter } from "./routes/roles";
 import { recordingsRouter } from "./routes/recordings";
 import { sweepOrphanFrames } from "../recording/recording-store";
+import { jobStore } from "./jobs/job-store";
 import { resolveServerPort } from "./config";
 import { captureRawJsonBody, mobileUtf8JsonReconciler } from "./middleware/mobile-utf8-json";
 import { runtimeInputsRouter } from "./routes/runtime-inputs";
@@ -112,6 +113,32 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
 const sweptFrames = sweepOrphanFrames();
 if (sweptFrames > 0) console.log(`[server] limpieza: ${sweptFrames} carpetas de frames huérfanos eliminadas`);
 
+// Jobs live in SQLite, so a restart no longer loses the run list. Anything that
+// was still running belonged to the dead process and is closed out as failed.
+const JOB_RETENTION_DAYS = Number(process.env.JOB_RETENTION_DAYS ?? 30);
+jobStore
+  .hydrate({ retentionDays: Number.isFinite(JOB_RETENTION_DAYS) ? JOB_RETENTION_DAYS : 30 })
+  .then(({ restored, interrupted, pruned }) => {
+    console.log(
+      `[server] jobs      : ${restored} recuperados de SQLite` +
+        (interrupted > 0 ? `, ${interrupted} marcados como interrumpidos` : "") +
+        (pruned > 0 ? `, ${pruned} purgados por antigüedad` : ""),
+    );
+  })
+  .catch((err) => {
+    console.error(`[server] no se pudieron recuperar los jobs:`, err instanceof Error ? err.message : err);
+  });
+
+// Give the write-behind queue a chance to land before the process exits.
+for (const signal of ["SIGINT", "SIGTERM"] as const) {
+  process.once(signal, () => {
+    jobStore
+      .drain()
+      .catch(() => undefined)
+      .finally(() => process.exit(0));
+  });
+}
+
 const server = app.listen(PORT, HOST, () => {
   console.log(`\n[server] Automation Engine API → http://${HOST === "0.0.0.0" ? "localhost" : HOST}:${PORT}`);
   console.log(`[server] CORS origin : ${CORS_ORIGIN}`);
@@ -123,7 +150,23 @@ const server = app.listen(PORT, HOST, () => {
   console.log(`  POST /api/auth/logout`);
   console.log(`  GET  /api/auth/me`);
   console.log(`  POST /api/auth/change-password { currentPassword, newPassword }`);
-  console.log(`  GET  /api/users | /api/roles | /api/permissions`);
+  console.log(`  GET  /api/auth/permissions`);
+  console.log(`  GET  /api/permissions`);
+  console.log(`  GET  /api/users?enabled=&role=&q=`);
+  console.log(`  POST /api/users            { username, fullName, email?, password?, roles[], allProjects?, projects[] }`);
+  console.log(`  GET  /api/users/:id`);
+  console.log(`  PATCH /api/users/:id       { fullName?, email?, username?, enabled? }`);
+  console.log(`  DEL  /api/users/:id        (desactiva)`);
+  console.log(`  POST /api/users/:id/reset-password  { password? }`);
+  console.log(`  PUT  /api/users/:id/roles           { roles: [slug|id] }`);
+  console.log(`  PUT  /api/users/:id/projects        { allProjects?, projects[] }`);
+  console.log(`  GET  /api/users/:id/audit`);
+  console.log(`  GET  /api/roles`);
+  console.log(`  POST /api/roles            { slug, name, description?, permissions[] }`);
+  console.log(`  GET  /api/roles/:id`);
+  console.log(`  PATCH /api/roles/:id       { name?, description? }`);
+  console.log(`  PUT  /api/roles/:id/permissions  { permissions[] }`);
+  console.log(`  DEL  /api/roles/:id`);
   console.log(`  GET  /api/jira/projects`);
   console.log(`  GET  /api/jira/projects/:key/sprints`);
   console.log(`  GET  /api/jira/projects/:key/sprint/active`);

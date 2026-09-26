@@ -1,0 +1,68 @@
+{
+  "version": "1.0",
+  "source": "manual",
+  "status": "validated",
+  "scenario": {
+    "source": "manual",
+    "externalId": "REC-3CB8EE27-01",
+    "title": "Registro"
+  },
+  "requiredData": [],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "target": "APP_BASE_URL",
+      "description": "Navegar a https://172.27.4.50/"
+    },
+    {
+      "index": 2,
+      "action": "click",
+      "target": {
+        "strategy": "label",
+        "value": "Estados de cuenta"
+      },
+      "description": "Presionar \"Estados de cuenta\""
+    },
+    {
+      "index": 3,
+      "action": "assertVisible",
+      "target": {
+        "strategy": "text",
+        "value": "Identificación del cliente"
+      },
+      "description": "Verificar que se muestra \"Identificación del cliente\""
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "target": {
+        "strategy": "text",
+        "value": "Cédula de identidad dominicana"
+      },
+      "description": "Presionar \"Cédula de identidad dominicana\""
+    },
+    {
+      "index": 5,
+      "action": "assertVisible",
+      "target": {
+        "strategy": "text",
+        "value": "Identificación del cliente"
+      },
+      "description": "Verificar que se muestra \"Identificación del cliente\""
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "target": {
+        "strategy": "text",
+        "value": "Ingrese el número"
+      },
+      "description": "Presionar \"Ingrese el número\""
+    }
+  ],
+  "notes": [
+    "Plan derivado de la grabación 3cb8ee27-3758-48f8-aa57-6149f3096cf1."
+  ],
+  "createdAt": "2026-09-10T15:30:47.253Z"
+}

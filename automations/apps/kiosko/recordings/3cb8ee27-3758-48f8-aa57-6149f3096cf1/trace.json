@@ -1,0 +1,334 @@
+{
+  "recordingId": "3cb8ee27-3758-48f8-aa57-6149f3096cf1",
+  "projectSlug": "kiosko",
+  "appSlug": "kiosko",
+  "platform": "web",
+  "baseUrl": "https://172.27.4.50/",
+  "label": "Registro",
+  "startedAt": "2026-09-10T15:29:11.197Z",
+  "status": "derived",
+  "events": [
+    {
+      "t": 11693,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://172.27.4.50/",
+      "seq": 0
+    },
+    {
+      "t": 12683,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://172.27.4.50/",
+      "seq": 1
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "9f12e61beacd",
+      "url": "https://172.27.4.50/",
+      "seq": 2
+    },
+    {
+      "t": 17056,
+      "kind": "navigate",
+      "screenKey": "9f12e61beacd",
+      "url": "https://172.27.4.50/client-identification",
+      "seq": 3
+    },
+    {
+      "t": 17338,
+      "kind": "tap",
+      "screenKey": "9f12e61beacd",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/client-identification",
+      "target": {
+        "label": "Estados de cuenta",
+        "role": "button",
+        "locators": [
+          {
+            "strategy": "aria-label",
+            "value": "Estados de cuenta",
+            "confidence": 0.9
+          },
+          {
+            "strategy": "text",
+            "value": "Estados de cuenta\n\nGenera y recibe tus estados por correo",
+            "confidence": 0.7
+          }
+        ]
+      },
+      "seq": 4
+    },
+    {
+      "t": 18259,
+      "kind": "screen_change",
+      "screenKey": "9f12e61beacd",
+      "toScreenKey": "230351d46ffd",
+      "fingerprint": "3440410672fc4bd1079bfb59d2e4a9ad0654fe8388a94dbd4017fe742f25cdda",
+      "url": "https://172.27.4.50/client-identification",
+      "seq": 5
+    },
+    {
+      "t": 18836,
+      "kind": "tap",
+      "screenKey": "230351d46ffd",
+      "fingerprint": "3440410672fc4bd1079bfb59d2e4a9ad0654fe8388a94dbd4017fe742f25cdda",
+      "url": "https://172.27.4.50/client-identification",
+      "target": {
+        "label": "Cédula de identidad dominicana",
+        "role": "button",
+        "locators": [
+          {
+            "strategy": "text",
+            "value": "Cédula de identidad dominicana",
+            "confidence": 0.7
+          }
+        ]
+      },
+      "seq": 6
+    },
+    {
+      "t": 19757,
+      "kind": "screen_change",
+      "screenKey": "230351d46ffd",
+      "toScreenKey": "843cca20a918",
+      "fingerprint": "2caa201e4ba775cc34192d19d3301ef807149a1c2ee42e1aa7fb0725b8a10d76",
+      "url": "https://172.27.4.50/client-identification",
+      "seq": 7
+    },
+    {
+      "t": 21110,
+      "kind": "tap",
+      "screenKey": "843cca20a918",
+      "fingerprint": "2caa201e4ba775cc34192d19d3301ef807149a1c2ee42e1aa7fb0725b8a10d76",
+      "url": "https://172.27.4.50/client-identification",
+      "target": {
+        "label": "Ingrese el número",
+        "role": "div",
+        "locators": [
+          {
+            "strategy": "text",
+            "value": "Ingrese el número",
+            "confidence": 0.5,
+            "ambiguous": true,
+            "matchIndex": 1
+          }
+        ]
+      },
+      "seq": 8
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "9f12e61beacd",
+      "title": "¡Hola!",
+      "fingerprint": "8b6719df3cfd174ebd054fc0cc72da2c854cbc0c54d2f87456a193157eacdb8b",
+      "url": "https://172.27.4.50/",
+      "firstSeenAt": 12766,
+      "controls": [
+        {
+          "label": "Estados de cuenta",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Estados de cuenta",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Consulta de balance",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Consulta de balance",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cartas y certificaciones",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cartas y certificaciones",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Canje de Puntos",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Canje de Puntos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Explora nuestros productos",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Explora nuestros productos",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "¡Hola!",
+        "Estados de cuenta",
+        "Consulta de balance"
+      ]
+    },
+    {
+      "screenKey": "230351d46ffd",
+      "title": "Identificación del cliente",
+      "fingerprint": "3440410672fc4bd1079bfb59d2e4a9ad0654fe8388a94dbd4017fe742f25cdda",
+      "url": "https://172.27.4.50/client-identification",
+      "firstSeenAt": 18259,
+      "controls": [
+        {
+          "label": "Cédula de identidad dominicana",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cédula de identidad dominicana",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Pasaporte extranjero",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Pasaporte extranjero",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cancelar",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cancelar ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Continuar",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Continuar",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Identificación del cliente",
+        "Seleccione su tipo de identificación",
+        "Cédula de identidad dominicana"
+      ]
+    },
+    {
+      "screenKey": "843cca20a918",
+      "title": "Identificación del cliente",
+      "fingerprint": "2caa201e4ba775cc34192d19d3301ef807149a1c2ee42e1aa7fb0725b8a10d76",
+      "url": "https://172.27.4.50/client-identification",
+      "firstSeenAt": 19757,
+      "controls": [
+        {
+          "label": "Cédula de identidad dominicana",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cédula de identidad dominicana    ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Pasaporte extranjero",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Pasaporte extranjero",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "← Borrar",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "← Borrar",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Limpiar",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Limpiar",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cancelar",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cancelar ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Continuar",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Continuar",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Identificación del cliente",
+        "Seleccione su tipo de identificación",
+        "Cédula de identidad dominicana"
+      ]
+    }
+  ],
+  "endedAt": "2026-09-10T15:29:42.693Z",
+  "durationMs": 31496,
+  "narrative": "Recorrido grabado en aplicación web: kiosko\nEtiqueta del recorrido: Registro\n\nPantalla 1: inicio\n\nPantalla 2: ¡Hola!\n  - El usuario presionó \"Estados de cuenta\"\n  - La aplicación navegó a otra pantalla\n  Textos visibles: ¡Hola! | Estados de cuenta | Consulta de balance\n\nPantalla 3: Identificación del cliente\n  - El usuario presionó \"Cédula de identidad dominicana\"\n  - La aplicación navegó a otra pantalla\n  Textos visibles: Identificación del cliente | Seleccione su tipo de identificación | Cédula de identidad dominicana\n\nPantalla 4: Identificación del cliente\n  - El usuario presionó \"Ingrese el número\"\n  Textos visibles: Identificación del cliente | Seleccione su tipo de identificación | Cédula de identidad dominicana"
+}

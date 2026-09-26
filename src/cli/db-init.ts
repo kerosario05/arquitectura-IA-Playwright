@@ -25,6 +25,8 @@ const TABLES = [
   "UserProjectAccess",
   "UserSessions",
   "UserAuditLog",
+  "Jobs",
+  "JobLogs",
 ];
 
 async function main(): Promise<void> {

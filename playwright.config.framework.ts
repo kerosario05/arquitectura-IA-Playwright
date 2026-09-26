@@ -3,7 +3,9 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const headless = (process.env.HEADLESS ?? "false").toLowerCase() === "true";
+// Headless by default: a server has no desktop, and a visible window there would
+// launch into nothing. Local setups that want to watch set HEADLESS=false.
+const headless = (process.env.HEADLESS ?? "true").toLowerCase() !== "false";
 const browser = process.env.BROWSER ?? "chromium";
 
 export default defineConfig({

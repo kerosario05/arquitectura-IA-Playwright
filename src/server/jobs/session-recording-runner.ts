@@ -2,6 +2,8 @@ import { randomUUID } from "node:crypto";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { jobStore } from "./job-store";
+import { limitFor } from "./job-queue";
+import { resolveRecordingAvailability } from "../../recording/recording-availability";
 import { resolveMobileTarget, ensureMobileInfra } from "./mobile-test-runner";
 import { getStatus as getEmulatorStatus } from "../../mobile/emulator-manager";
 import { resolveAndroidSdk } from "../../mobile/android-sdk";
@@ -235,12 +237,21 @@ export async function startRecording(params: StartRecordingParams): Promise<{
   jobId: string;
   summary: RecordingSummary;
 }> {
+  // Checked before anything else: on a server this never succeeds, and the user
+  // deserves to hear why instead of watching a browser that never appears. Asking
+  // for a goal first would make a server answer "define el objetivo" to someone
+  // whose real problem is that this machine can never record at all.
+  const availability = resolveRecordingAvailability();
+  if (!availability.enabled) {
+    throw new RecordingError("RECORDING_UNAVAILABLE", availability.message ?? "La grabación no está disponible");
+  }
   // A label identifies the recording in the list; it is not the scenario goal.
   // Recording derivation must never silently promote a generic label to goal authority.
   const requestedGoal = params.recordingGoal?.trim();
   if (!requestedGoal) {
     throw new RecordingError("MISSING_RECORDING_GOAL", "Define el objetivo de la grabación antes de iniciar");
   }
+
   const target = await resolveRecordingTarget(params.projectSlug);
   const platform = params.platform ?? target.platform;
 
@@ -249,6 +260,18 @@ export async function startRecording(params: StartRecordingParams): Promise<{
     throw new RecordingError(
       "RECORDING_ALREADY_ACTIVE",
       `Ya hay una grabación activa para ${params.projectSlug} (${existing.recordingId})`,
+    );
+  }
+
+  // Recording is interactive: the person is about to drive a browser by hand.
+  // Queueing them behind someone else would leave them staring at a screen where
+  // nothing happens, so a full server says so immediately instead.
+  const recordingLimit = limitFor("recording");
+  if (active.size >= recordingLimit) {
+    throw new RecordingError(
+      "RECORDING_CAPACITY_REACHED",
+      `El servidor ya tiene ${active.size} grabaciones en curso (máximo ${recordingLimit}). ` +
+        `Espera a que termine una para empezar la tuya.`,
     );
   }
 

@@ -543,6 +543,8 @@ export async function executeExecutionPlan(input: {
     executionSeed: string | number;
     causal: boolean;
   };
+  /** Called as each step finishes, for callers that stream progress somewhere. */
+  onStepFinished?: (step: StepExecutionResult) => void;
 }): Promise<PlanExecutionResult> {
   assertValidExecutionPlan(input.plan);
 
@@ -816,6 +818,9 @@ export async function executeExecutionPlan(input: {
     }
 
     stepResults.push(result);
+    // Reported as it happens, not only in the returned array: a caller streaming progress to
+    // a screen has no other way to show a plan advancing while it is still running.
+    input.onStepFinished?.(result);
   }
 
   const endedAt = new Date();

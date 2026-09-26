@@ -1,0 +1,673 @@
+{
+  "recordingId": "b0e7f5a3-ec4b-47af-8b58-ce8fbd56f66a",
+  "projectSlug": "portal-comercial",
+  "appSlug": "portal-comercial",
+  "platform": "web",
+  "baseUrl": "https://srvqacgowb01.local.bsc.com:5000/login",
+  "label": "registro 5",
+  "startedAt": "2026-09-10T15:22:43.496Z",
+  "status": "derived",
+  "events": [
+    {
+      "t": 4236,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 0
+    },
+    {
+      "t": 4698,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 1
+    },
+    {
+      "t": 5085,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 2
+    },
+    {
+      "t": 5107,
+      "kind": "navigate",
+      "screenKey": "fbf08c6ecee9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 3
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "fbf08c6ecee9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "seq": 4
+    },
+    {
+      "t": 10492,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Usuario",
+        "role": "input",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "#username",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "seq": 5
+    },
+    {
+      "t": 35302,
+      "kind": "fill",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Usuario",
+        "role": "input",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "#username",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": false
+      },
+      "value": "radames",
+      "seq": 6
+    },
+    {
+      "t": 35395,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "input",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "#password",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "seq": 7
+    },
+    {
+      "t": 36939,
+      "kind": "fill",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "input",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "#password",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": true
+      },
+      "redactedKey": "contrasena",
+      "seq": 8
+    },
+    {
+      "t": 37093,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Iniciar sesión",
+        "role": "button",
+        "locators": [
+          {
+            "strategy": "aria-label",
+            "value": "Iniciar sesión",
+            "confidence": 0.9
+          },
+          {
+            "strategy": "text",
+            "value": "Iniciar sesión",
+            "confidence": 0.7
+          }
+        ]
+      },
+      "seq": 9
+    },
+    {
+      "t": 37187,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Usuario\nContraseña\nRecordarme\nIniciar sesión",
+        "role": "form",
+        "locators": [
+          {
+            "strategy": "text",
+            "value": "Usuario\nContraseña\nRecordarme\nIniciar sesión",
+            "confidence": 0.7
+          }
+        ]
+      },
+      "seq": 10
+    },
+    {
+      "t": 40283,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Usuario",
+        "role": "input",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "#username",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "seq": 11
+    },
+    {
+      "t": 51251,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "input",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "#password",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "seq": 12
+    },
+    {
+      "t": 51392,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "input",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "#password",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "seq": 13
+    },
+    {
+      "t": 64875,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Iniciar sesión",
+        "role": "button",
+        "locators": [
+          {
+            "strategy": "aria-label",
+            "value": "Iniciar sesión",
+            "confidence": 0.9
+          },
+          {
+            "strategy": "text",
+            "value": "Iniciar sesión",
+            "confidence": 0.7
+          }
+        ]
+      },
+      "seq": 14
+    },
+    {
+      "t": 64967,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Usuario\nContraseña\nRecordarme\nUsuario o contraseña incorrectos.\nIniciar sesión",
+        "role": "form",
+        "locators": [
+          {
+            "strategy": "text",
+            "value": "Usuario\nContraseña\nRecordarme\nUsuario o contraseña incorrectos.\nIniciar sesión",
+            "confidence": 0.7
+          }
+        ]
+      },
+      "seq": 15
+    },
+    {
+      "t": 68451,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Usuario o contraseña incorrectos.",
+        "role": "small",
+        "locators": [
+          {
+            "strategy": "text",
+            "value": "Usuario o contraseña incorrectos.",
+            "confidence": 0.7
+          }
+        ]
+      },
+      "seq": 16
+    },
+    {
+      "t": 72119,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "input",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "#password",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "seq": 17
+    },
+    {
+      "t": 94015,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Usuario",
+        "role": "input",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "#username",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "seq": 18
+    },
+    {
+      "t": 95716,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "input",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "#password",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "seq": 19
+    },
+    {
+      "t": 95888,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "input",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "#password",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "seq": 20
+    },
+    {
+      "t": 96387,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "input",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "#password",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "seq": 21
+    },
+    {
+      "t": 96734,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "input",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "#password",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "seq": 22
+    },
+    {
+      "t": 104544,
+      "kind": "fill",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Contraseña",
+        "role": "input",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "#password",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": true
+      },
+      "redactedKey": "contrasena",
+      "seq": 23
+    },
+    {
+      "t": 104654,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Iniciar sesión",
+        "role": "button",
+        "locators": [
+          {
+            "strategy": "aria-label",
+            "value": "Iniciar sesión",
+            "confidence": 0.9
+          },
+          {
+            "strategy": "text",
+            "value": "Iniciar sesión",
+            "confidence": 0.7
+          }
+        ]
+      },
+      "seq": 24
+    },
+    {
+      "t": 104799,
+      "kind": "tap",
+      "screenKey": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "target": {
+        "label": "Usuario\nContraseña\nRecordarme\nUsuario o contraseña incorrectos.\nIniciar sesión",
+        "role": "form",
+        "locators": [
+          {
+            "strategy": "text",
+            "value": "Usuario\nContraseña\nRecordarme\nUsuario o contraseña incorrectos.\nIniciar sesión",
+            "confidence": 0.7
+          }
+        ]
+      },
+      "seq": 25
+    },
+    {
+      "t": 104919,
+      "kind": "navigate",
+      "screenKey": "fbf08c6ecee9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/",
+      "seq": 26
+    },
+    {
+      "t": 105572,
+      "kind": "screen_change",
+      "screenKey": "fbf08c6ecee9",
+      "toScreenKey": "a5bf9e3e4c28",
+      "fingerprint": "d929653f2fcdf224bc1d3b92cf07fbc802d2ea08cf75fadb1d4ff19e92cd0446",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/",
+      "seq": 27
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "fbf08c6ecee9",
+      "title": "fbf08c6ecee9",
+      "fingerprint": "eab11c6a2bebb69002aa130b5d20028177f3ff1aa679850f94aaef502bbd1e8c",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "firstSeenAt": 5101,
+      "controls": [
+        {
+          "label": "Iniciar sesión",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Iniciar sesión",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": []
+    },
+    {
+      "screenKey": "a5bf9e3e4c28",
+      "title": "a5bf9e3e4c28",
+      "fingerprint": "d929653f2fcdf224bc1d3b92cf07fbc802d2ea08cf75fadb1d4ff19e92cd0446",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/",
+      "firstSeenAt": 105572,
+      "controls": [
+        {
+          "label": "Portal Comercial",
+          "role": "a",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Portal Comercial ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuración",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Configuración",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Sesión",
+          "role": "button",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Sesión",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_0_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Información",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_0_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Campañas",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_1_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Solicitud multiproducto",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_1_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Solicitudes en curso",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_1_2",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Usuarios",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_2_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Roles",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_2_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Permisos",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_2_2",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Auditorías",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_3_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Operaciones",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_3_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Errores",
+          "role": "menuitem",
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_3_3_2",
+              "confidence": 0.9
+            }
+          ]
+        }
+      ],
+      "texts": []
+    }
+  ],
+  "endedAt": "2026-09-10T15:24:34.850Z",
+  "durationMs": 111354,
+  "narrative": "Recorrido grabado en aplicación web: portal-comercial\nEtiqueta del recorrido: registro 5\n\nPantalla 1: inicio\n\nPantalla 2: fbf08c6ecee9\n  - El usuario presionó \"Usuario\"\n  - El usuario ingresó \"radames\" en \"Usuario\"\n  - El usuario presionó \"Contraseña\"\n  - El usuario ingresó un valor sensible en \"Contraseña\" (contrasena)\n  - El usuario presionó \"Iniciar sesión\"\n  - El usuario presionó \"Usuario\nContraseña\nRecordarme\nIniciar sesión\"\n  - El usuario presionó \"Usuario\"\n  - El usuario presionó \"Contraseña\"\n  - El usuario presionó \"Iniciar sesión\"\n  - El usuario presionó \"Usuario\nContraseña\nRecordarme\nUsuario o contraseña incorrectos.\nIniciar sesión\"\n  - El usuario presionó \"Usuario o contraseña incorrectos.\"\n  - El usuario presionó \"Contraseña\"\n  - El usuario presionó \"Usuario\"\n  - El usuario presionó \"Contraseña\"\n  - El usuario presionó \"Contraseña\"\n  - El usuario ingresó un valor sensible en \"Contraseña\" (contrasena)\n  - El usuario presionó \"Iniciar sesión\"\n  - El usuario presionó \"Usuario\nContraseña\nRecordarme\nUsuario o contraseña incorrectos.\nIniciar sesión\"\n  - La aplicación navegó a otra pantalla"
+}

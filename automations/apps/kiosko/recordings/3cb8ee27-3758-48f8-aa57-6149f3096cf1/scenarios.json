@@ -1,0 +1,642 @@
+[
+  {
+    "scenarioId": "REC-3CB8EE27-01",
+    "title": "Registro",
+    "description": "Recorrido observado sobre ¡Hola! → Identificación del cliente → Identificación del cliente. Se registraron 3 acciones del usuario en 3 pantallas. Escenario derivado de la grabación 3cb8ee27-3758-48f8-aa57-6149f3096cf1.",
+    "preconditions": [
+      "Acceso a https://172.27.4.50/",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://172.27.4.50/",
+        "description": "Navegar a https://172.27.4.50/"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "aria-label",
+          "value": "Estados de cuenta"
+        },
+        "description": "Presionar \"Estados de cuenta\""
+      },
+      {
+        "action": "assert",
+        "target": {
+          "strategy": "text",
+          "value": "Identificación del cliente"
+        },
+        "description": "Verificar que se muestra \"Identificación del cliente\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Cédula de identidad dominicana"
+        },
+        "description": "Presionar \"Cédula de identidad dominicana\""
+      },
+      {
+        "action": "assert",
+        "target": {
+          "strategy": "text",
+          "value": "Identificación del cliente"
+        },
+        "description": "Verificar que se muestra \"Identificación del cliente\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Ingrese el número"
+        },
+        "description": "Presionar \"Ingrese el número\""
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Navegar a https://172.27.4.50/",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"Estados de cuenta\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Identificación del cliente\"",
+        "expected": "Se muestra \"Identificación del cliente\""
+      },
+      {
+        "content": "Presionar \"Cédula de identidad dominicana\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Identificación del cliente\"",
+        "expected": "Se muestra \"Identificación del cliente\""
+      },
+      {
+        "content": "Presionar \"Ingrese el número\"",
+        "expected": "La acción se registra y la pantalla responde"
+      }
+    ],
+    "requiredData": [],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Estados de cuenta\"",
+        "strategy": "aria-label",
+        "value": "Estados de cuenta"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Cédula de identidad dominicana\"",
+        "strategy": "text",
+        "value": "Cédula de identidad dominicana"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"Ingrese el número\"",
+        "strategy": "text",
+        "value": "Ingrese el número",
+        "ambiguous": true
+      }
+    ],
+    "sourceRecordingId": "3cb8ee27-3758-48f8-aa57-6149f3096cf1",
+    "hasUncertainSteps": true
+  },
+  {
+    "scenarioId": "REC-3CB8EE27-01-SEG-1",
+    "title": "Recorrido hasta ¡Hola!",
+    "description": "Bloque del recorrido que termina en \"¡Hola!\". Cubre 3 de los 6 pasos del flujo completo.",
+    "preconditions": [
+      "Acceso a https://172.27.4.50/",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "segment",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://172.27.4.50/",
+        "description": "Navegar a https://172.27.4.50/"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "aria-label",
+          "value": "Estados de cuenta"
+        },
+        "description": "Presionar \"Estados de cuenta\""
+      },
+      {
+        "action": "assert",
+        "target": {
+          "strategy": "text",
+          "value": "Identificación del cliente"
+        },
+        "description": "Verificar que se muestra \"Identificación del cliente\""
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Navegar a https://172.27.4.50/",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"Estados de cuenta\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Identificación del cliente\"",
+        "expected": "Se muestra \"Identificación del cliente\""
+      }
+    ],
+    "requiredData": [],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Estados de cuenta\"",
+        "strategy": "aria-label",
+        "value": "Estados de cuenta"
+      }
+    ],
+    "sourceRecordingId": "3cb8ee27-3758-48f8-aa57-6149f3096cf1",
+    "hasUncertainSteps": false
+  },
+  {
+    "scenarioId": "REC-3CB8EE27-01-SEG-2",
+    "title": "Recorrido hasta Identificación del cliente",
+    "description": "Bloque del recorrido que termina en \"Identificación del cliente\". Cubre 5 de los 6 pasos del flujo completo.",
+    "preconditions": [
+      "Acceso a https://172.27.4.50/",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "segment",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://172.27.4.50/",
+        "description": "Navegar a https://172.27.4.50/"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "aria-label",
+          "value": "Estados de cuenta"
+        },
+        "description": "Presionar \"Estados de cuenta\""
+      },
+      {
+        "action": "assert",
+        "target": {
+          "strategy": "text",
+          "value": "Identificación del cliente"
+        },
+        "description": "Verificar que se muestra \"Identificación del cliente\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Cédula de identidad dominicana"
+        },
+        "description": "Presionar \"Cédula de identidad dominicana\""
+      },
+      {
+        "action": "assert",
+        "target": {
+          "strategy": "text",
+          "value": "Identificación del cliente"
+        },
+        "description": "Verificar que se muestra \"Identificación del cliente\""
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Navegar a https://172.27.4.50/",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"Estados de cuenta\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Identificación del cliente\"",
+        "expected": "Se muestra \"Identificación del cliente\""
+      },
+      {
+        "content": "Presionar \"Cédula de identidad dominicana\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Identificación del cliente\"",
+        "expected": "Se muestra \"Identificación del cliente\""
+      }
+    ],
+    "requiredData": [],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Estados de cuenta\"",
+        "strategy": "aria-label",
+        "value": "Estados de cuenta"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Cédula de identidad dominicana\"",
+        "strategy": "text",
+        "value": "Cédula de identidad dominicana"
+      }
+    ],
+    "sourceRecordingId": "3cb8ee27-3758-48f8-aa57-6149f3096cf1",
+    "hasUncertainSteps": false
+  },
+  {
+    "scenarioId": "REC-3CB8EE27-01-ALT-1",
+    "title": "Desde ¡Hola!: Consulta de balance",
+    "description": "La pantalla \"¡Hola!\" ofrece \"Consulta de balance\", que el recorrido grabado no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.",
+    "preconditions": [
+      "Acceso a https://172.27.4.50/",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://172.27.4.50/",
+        "description": "Navegar a https://172.27.4.50/"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Consulta de balance"
+        },
+        "description": "Seleccionar \"Consulta de balance\""
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Navegar a https://172.27.4.50/",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Seleccionar \"Consulta de balance\"",
+        "expected": "Por confirmar: la grabación no recorrió esta opción"
+      }
+    ],
+    "requiredData": [],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Seleccionar \"Consulta de balance\"",
+        "strategy": "text",
+        "value": "Consulta de balance"
+      }
+    ],
+    "sourceRecordingId": "3cb8ee27-3758-48f8-aa57-6149f3096cf1",
+    "hasUncertainSteps": true
+  },
+  {
+    "scenarioId": "REC-3CB8EE27-01-ALT-2",
+    "title": "Desde ¡Hola!: Cartas y certificaciones",
+    "description": "La pantalla \"¡Hola!\" ofrece \"Cartas y certificaciones\", que el recorrido grabado no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.",
+    "preconditions": [
+      "Acceso a https://172.27.4.50/",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://172.27.4.50/",
+        "description": "Navegar a https://172.27.4.50/"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Cartas y certificaciones"
+        },
+        "description": "Seleccionar \"Cartas y certificaciones\""
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Navegar a https://172.27.4.50/",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Seleccionar \"Cartas y certificaciones\"",
+        "expected": "Por confirmar: la grabación no recorrió esta opción"
+      }
+    ],
+    "requiredData": [],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Seleccionar \"Cartas y certificaciones\"",
+        "strategy": "text",
+        "value": "Cartas y certificaciones"
+      }
+    ],
+    "sourceRecordingId": "3cb8ee27-3758-48f8-aa57-6149f3096cf1",
+    "hasUncertainSteps": true
+  },
+  {
+    "scenarioId": "REC-3CB8EE27-01-ALT-3",
+    "title": "Desde ¡Hola!: Canje de Puntos",
+    "description": "La pantalla \"¡Hola!\" ofrece \"Canje de Puntos\", que el recorrido grabado no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.",
+    "preconditions": [
+      "Acceso a https://172.27.4.50/",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://172.27.4.50/",
+        "description": "Navegar a https://172.27.4.50/"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Canje de Puntos"
+        },
+        "description": "Seleccionar \"Canje de Puntos\""
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Navegar a https://172.27.4.50/",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Seleccionar \"Canje de Puntos\"",
+        "expected": "Por confirmar: la grabación no recorrió esta opción"
+      }
+    ],
+    "requiredData": [],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Seleccionar \"Canje de Puntos\"",
+        "strategy": "text",
+        "value": "Canje de Puntos"
+      }
+    ],
+    "sourceRecordingId": "3cb8ee27-3758-48f8-aa57-6149f3096cf1",
+    "hasUncertainSteps": true
+  },
+  {
+    "scenarioId": "REC-3CB8EE27-01-ALT-4",
+    "title": "Desde Identificación del cliente: Pasaporte extranjero",
+    "description": "La pantalla \"Identificación del cliente\" ofrece \"Pasaporte extranjero\", que el recorrido grabado no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.",
+    "preconditions": [
+      "Acceso a https://172.27.4.50/",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://172.27.4.50/",
+        "description": "Navegar a https://172.27.4.50/"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "aria-label",
+          "value": "Estados de cuenta"
+        },
+        "description": "Presionar \"Estados de cuenta\""
+      },
+      {
+        "action": "assert",
+        "target": {
+          "strategy": "text",
+          "value": "Identificación del cliente"
+        },
+        "description": "Verificar que se muestra \"Identificación del cliente\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Pasaporte extranjero"
+        },
+        "description": "Seleccionar \"Pasaporte extranjero\""
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Navegar a https://172.27.4.50/",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"Estados de cuenta\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Identificación del cliente\"",
+        "expected": "Se muestra \"Identificación del cliente\""
+      },
+      {
+        "content": "Seleccionar \"Pasaporte extranjero\"",
+        "expected": "Por confirmar: la grabación no recorrió esta opción"
+      }
+    ],
+    "requiredData": [],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Estados de cuenta\"",
+        "strategy": "aria-label",
+        "value": "Estados de cuenta"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Seleccionar \"Pasaporte extranjero\"",
+        "strategy": "text",
+        "value": "Pasaporte extranjero"
+      }
+    ],
+    "sourceRecordingId": "3cb8ee27-3758-48f8-aa57-6149f3096cf1",
+    "hasUncertainSteps": true
+  },
+  {
+    "scenarioId": "REC-3CB8EE27-01-ALT-5",
+    "title": "Desde Identificación del cliente: Cancelar",
+    "description": "La pantalla \"Identificación del cliente\" ofrece \"Cancelar\", que el recorrido grabado no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.",
+    "preconditions": [
+      "Acceso a https://172.27.4.50/",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://172.27.4.50/",
+        "description": "Navegar a https://172.27.4.50/"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "aria-label",
+          "value": "Estados de cuenta"
+        },
+        "description": "Presionar \"Estados de cuenta\""
+      },
+      {
+        "action": "assert",
+        "target": {
+          "strategy": "text",
+          "value": "Identificación del cliente"
+        },
+        "description": "Verificar que se muestra \"Identificación del cliente\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Cancelar "
+        },
+        "description": "Seleccionar \"Cancelar\""
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Navegar a https://172.27.4.50/",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"Estados de cuenta\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Identificación del cliente\"",
+        "expected": "Se muestra \"Identificación del cliente\""
+      },
+      {
+        "content": "Seleccionar \"Cancelar\"",
+        "expected": "Por confirmar: la grabación no recorrió esta opción"
+      }
+    ],
+    "requiredData": [],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Estados de cuenta\"",
+        "strategy": "aria-label",
+        "value": "Estados de cuenta"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Seleccionar \"Cancelar\"",
+        "strategy": "text",
+        "value": "Cancelar "
+      }
+    ],
+    "sourceRecordingId": "3cb8ee27-3758-48f8-aa57-6149f3096cf1",
+    "hasUncertainSteps": true
+  },
+  {
+    "scenarioId": "REC-3CB8EE27-01-ALT-6",
+    "title": "Desde Identificación del cliente: Continuar",
+    "description": "La pantalla \"Identificación del cliente\" ofrece \"Continuar\", que el recorrido grabado no ejercitó. El resultado esperado debe confirmarse antes de automatizar este caso.",
+    "preconditions": [
+      "Acceso a https://172.27.4.50/",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "derived",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://172.27.4.50/",
+        "description": "Navegar a https://172.27.4.50/"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "aria-label",
+          "value": "Estados de cuenta"
+        },
+        "description": "Presionar \"Estados de cuenta\""
+      },
+      {
+        "action": "assert",
+        "target": {
+          "strategy": "text",
+          "value": "Identificación del cliente"
+        },
+        "description": "Verificar que se muestra \"Identificación del cliente\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Continuar"
+        },
+        "description": "Seleccionar \"Continuar\""
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Navegar a https://172.27.4.50/",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"Estados de cuenta\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "El sistema navega a \"Identificación del cliente\"",
+        "expected": "Se muestra \"Identificación del cliente\""
+      },
+      {
+        "content": "Seleccionar \"Continuar\"",
+        "expected": "Por confirmar: la grabación no recorrió esta opción"
+      }
+    ],
+    "requiredData": [],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Estados de cuenta\"",
+        "strategy": "aria-label",
+        "value": "Estados de cuenta"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Seleccionar \"Continuar\"",
+        "strategy": "text",
+        "value": "Continuar"
+      }
+    ],
+    "sourceRecordingId": "3cb8ee27-3758-48f8-aa57-6149f3096cf1",
+    "hasUncertainSteps": true
+  }
+]

@@ -1,0 +1,380 @@
+[
+  {
+    "scenarioId": "REC-B0E7F5A3-01",
+    "title": "registro 5",
+    "description": "Recorrido observado sobre fbf08c6ecee9 → a5bf9e3e4c28. Se registraron 18 acciones del usuario en 2 pantallas. Escenario derivado de la grabación b0e7f5a3-ec4b-47af-8b58-ce8fbd56f66a.",
+    "preconditions": [
+      "Acceso a https://srvqacgowb01.local.bsc.com:5000/login",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://srvqacgowb01.local.bsc.com:5000/login",
+        "description": "Navegar a https://srvqacgowb01.local.bsc.com:5000/login"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#username"
+        },
+        "description": "Presionar \"Usuario\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "css",
+          "value": "#username"
+        },
+        "value": "radames",
+        "description": "Ingresar \"radames\" en \"Usuario\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#password"
+        },
+        "description": "Presionar \"Contraseña\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "css",
+          "value": "#password"
+        },
+        "value": "",
+        "description": "Ingresar contrasena en \"Contraseña\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "aria-label",
+          "value": "Iniciar sesión"
+        },
+        "description": "Presionar \"Iniciar sesión\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Usuario\nContraseña\nRecordarme\nIniciar sesión"
+        },
+        "description": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#username"
+        },
+        "description": "Presionar \"Usuario\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#password"
+        },
+        "description": "Presionar \"Contraseña\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "aria-label",
+          "value": "Iniciar sesión"
+        },
+        "description": "Presionar \"Iniciar sesión\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Usuario\nContraseña\nRecordarme\nUsuario o contraseña incorrectos.\nIniciar sesión"
+        },
+        "description": "Presionar \"Usuario\nContraseña\nRecordarme\nUsuario o contraseña incorrectos.\nIniciar sesión\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Usuario o contraseña incorrectos."
+        },
+        "description": "Presionar \"Usuario o contraseña incorrectos.\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#password"
+        },
+        "description": "Presionar \"Contraseña\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#username"
+        },
+        "description": "Presionar \"Usuario\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#password"
+        },
+        "description": "Presionar \"Contraseña\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "#password"
+        },
+        "description": "Presionar \"Contraseña\""
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "css",
+          "value": "#password"
+        },
+        "value": "",
+        "description": "Ingresar contrasena en \"Contraseña\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "aria-label",
+          "value": "Iniciar sesión"
+        },
+        "description": "Presionar \"Iniciar sesión\""
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Usuario\nContraseña\nRecordarme\nUsuario o contraseña incorrectos.\nIniciar sesión"
+        },
+        "description": "Presionar \"Usuario\nContraseña\nRecordarme\nUsuario o contraseña incorrectos.\nIniciar sesión\""
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Navegar a https://srvqacgowb01.local.bsc.com:5000/login",
+        "expected": "La aplicación carga su pantalla inicial"
+      },
+      {
+        "content": "Presionar \"Usuario\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar \"radames\" en \"Usuario\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "Presionar \"Contraseña\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar contrasena en \"Contraseña\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "Presionar \"Iniciar sesión\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Usuario\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Contraseña\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Iniciar sesión\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Usuario\nContraseña\nRecordarme\nUsuario o contraseña incorrectos.\nIniciar sesión\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Usuario o contraseña incorrectos.\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Contraseña\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Usuario\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Contraseña\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Contraseña\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Ingresar contrasena en \"Contraseña\"",
+        "expected": "El campo acepta el valor ingresado"
+      },
+      {
+        "content": "Presionar \"Iniciar sesión\"",
+        "expected": "La acción se registra y la pantalla responde"
+      },
+      {
+        "content": "Presionar \"Usuario\nContraseña\nRecordarme\nUsuario o contraseña incorrectos.\nIniciar sesión\"",
+        "expected": "La acción se registra y la pantalla responde"
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "usuario",
+        "label": "Usuario",
+        "stepIndex": 2,
+        "exampleValue": "radames",
+        "sensitive": false
+      },
+      {
+        "key": "contrasena",
+        "label": "Contraseña",
+        "stepIndex": 4,
+        "sensitive": true
+      },
+      {
+        "key": "contrasena",
+        "label": "Contraseña",
+        "stepIndex": 16,
+        "sensitive": true
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Usuario\"",
+        "strategy": "css",
+        "value": "#username"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Ingresar \"radames\" en \"Usuario\"",
+        "strategy": "css",
+        "value": "#username"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Contraseña\"",
+        "strategy": "css",
+        "value": "#password"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Ingresar contrasena en \"Contraseña\"",
+        "strategy": "css",
+        "value": "#password"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"Iniciar sesión\"",
+        "strategy": "aria-label",
+        "value": "Iniciar sesión"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Presionar \"Usuario\nContraseña\nRecordarme\nIniciar sesión\"",
+        "strategy": "text",
+        "value": "Usuario\nContraseña\nRecordarme\nIniciar sesión"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Presionar \"Usuario\"",
+        "strategy": "css",
+        "value": "#username"
+      },
+      {
+        "stepIndex": 8,
+        "description": "Presionar \"Contraseña\"",
+        "strategy": "css",
+        "value": "#password"
+      },
+      {
+        "stepIndex": 9,
+        "description": "Presionar \"Iniciar sesión\"",
+        "strategy": "aria-label",
+        "value": "Iniciar sesión"
+      },
+      {
+        "stepIndex": 10,
+        "description": "Presionar \"Usuario\nContraseña\nRecordarme\nUsuario o contraseña incorrectos.\nIniciar sesión\"",
+        "strategy": "text",
+        "value": "Usuario\nContraseña\nRecordarme\nUsuario o contraseña incorrectos.\nIniciar sesión"
+      },
+      {
+        "stepIndex": 11,
+        "description": "Presionar \"Usuario o contraseña incorrectos.\"",
+        "strategy": "text",
+        "value": "Usuario o contraseña incorrectos."
+      },
+      {
+        "stepIndex": 12,
+        "description": "Presionar \"Contraseña\"",
+        "strategy": "css",
+        "value": "#password"
+      },
+      {
+        "stepIndex": 13,
+        "description": "Presionar \"Usuario\"",
+        "strategy": "css",
+        "value": "#username"
+      },
+      {
+        "stepIndex": 14,
+        "description": "Presionar \"Contraseña\"",
+        "strategy": "css",
+        "value": "#password"
+      },
+      {
+        "stepIndex": 15,
+        "description": "Presionar \"Contraseña\"",
+        "strategy": "css",
+        "value": "#password"
+      },
+      {
+        "stepIndex": 16,
+        "description": "Ingresar contrasena en \"Contraseña\"",
+        "strategy": "css",
+        "value": "#password"
+      },
+      {
+        "stepIndex": 17,
+        "description": "Presionar \"Iniciar sesión\"",
+        "strategy": "aria-label",
+        "value": "Iniciar sesión"
+      },
+      {
+        "stepIndex": 18,
+        "description": "Presionar \"Usuario\nContraseña\nRecordarme\nUsuario o contraseña incorrectos.\nIniciar sesión\"",
+        "strategy": "text",
+        "value": "Usuario\nContraseña\nRecordarme\nUsuario o contraseña incorrectos.\nIniciar sesión"
+      }
+    ],
+    "sourceRecordingId": "b0e7f5a3-ec4b-47af-8b58-ce8fbd56f66a",
+    "hasUncertainSteps": false
+  }
+]
