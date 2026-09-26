@@ -4,7 +4,7 @@ import type { RecordingSummary, SessionTrace } from "./session-trace.types";
 import type { RecordedScenario } from "./trace-to-scenario";
 import type { SemanticRecordingModel } from "./semantic-recording";
 import { normalizeEvents, summarizeTrace } from "./trace-normalizer";
-import { reconcileOptionOwnerLineage } from "./canonical-recording-contract";
+import { reconcileOptionOwnerLineage, reconcileTransientRouteTransitions, validateInteractionStateSequence } from "./canonical-recording-contract";
 
 /**
  * On-disk home of recorded sessions.
@@ -120,8 +120,17 @@ export function loadScenarios(appSlug: string, recordingId: string): RecordedSce
     // computed downstream, never stored on `RecordedScenario` itself.
     const scenarios = rawScenarios.map((scenario) => {
       if (!scenario.canonicalInteractions?.length) return scenario;
-      const canonicalInteractions = reconcileOptionOwnerLineage(scenario.canonicalInteractions);
-      return canonicalInteractions === scenario.canonicalInteractions ? scenario : { ...scenario, canonicalInteractions };
+      const canonicalInteractions = reconcileTransientRouteTransitions(
+        reconcileOptionOwnerLineage(scenario.canonicalInteractions),
+      ) as typeof scenario.canonicalInteractions;
+      if (canonicalInteractions === scenario.canonicalInteractions) return scenario;
+      // `stateSequenceValid`/`stateSequenceIssues` are persisted NEXT TO the interactions and are
+      // only ever computed at derivation time (`enrichRecordedScenarioContract`), never on read.
+      // A scenario repaired here would otherwise keep the stale `false` that its now-discarded
+      // transition evidence produced, and the UI would go on refusing to replay it. Revalidating
+      // from the reconciled interactions needs nothing beyond what is already on disk.
+      const { stateSequenceValid, stateSequenceIssues } = validateInteractionStateSequence(canonicalInteractions);
+      return { ...scenario, canonicalInteractions, stateSequenceValid, stateSequenceIssues };
     });
     console.info("[recording-scenario-store]", {
       recordingId,

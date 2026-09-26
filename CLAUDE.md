@@ -211,53 +211,61 @@ For QA Lab debugging:
 - stop at earliest unresolved boundary
 - never expose secrets
 
-### QA Lab agent workflow (Claude = builder/fixer, Codex = verifier/tester)
+### QA Lab agent workflow (fixer and physical verifier are separate processes)
 
-For every QA Lab bug, before touching source: delegate PHYSICAL reproduction to Codex via
-`scripts/codex-qa-verify.ps1` — never `codex:rescue` for this. `codex:rescue` goes through
-`codex-companion.mjs --write`, which caps Codex's sandbox at `workspace-write` with no
-`--add-dir`, and physical QA Lab replay needs Playwright/tsx/esbuild to spawn child processes and
-write temp artifacts outside the repo tree — confirmed to fail there with `EPERM` (first on
-Playwright's own temp dir, then on esbuild's service-worker spawn) no matter how the prompt is
-phrased. `scripts/codex-qa-verify.ps1` calls the Codex CLI directly. `--add-dir` only ever
-extends filesystem read/write scope, never the sandbox's own process-creation restriction — with
-`-s workspace-write` plus `--add-dir` for the OS temp dir, `.artifacts/tmp`, and the Playwright
-browser install dir, `tsx`/`esbuild` spawn fine but `browserType.launch` still EPERMs spawning
-the Chromium executable itself (interactive `codex` has a human to approve that one-off
-escalation; headless `codex exec` does not, so it just fails). The user explicitly authorized
-`-s danger-full-access` for physical QA Lab runs specifically (2026-09-24) after this was
-demonstrated step by step — see the script's own header comment for the full escalation history;
-do not silently revert to `workspace-write` for this use case, and do not re-litigate it without
-new evidence. Codex stays source-read-only via the prompt guardrails and the repo change guard
-below regardless of the OS-level sandbox. `/codex:review` remains available for reviewing a
-diff, but never substitutes for a physical run.
+For every QA Lab bug, before touching source: delegate PHYSICAL reproduction to a verifier
+process via `scripts/claude-qa-verify.ps1`. It invokes the Claude Code CLI directly, in `-p`
+mode, as a fresh process with no memory of the fixing session's reasoning.
 
-Codex stays a VERIFIER ONLY over source code even when write-capable for runtime execution: the
-script's guardrail prompt hard-forbids editing/patching/refactoring source or any git write
-operation, permits only `.artifacts/**`/traces/screenshots/temp/log writes, and the script itself
-snapshots tracked repo status before and after — an unexpected tracked source change stops the
-workflow as HUMAN_GATE (files reported, never auto-reverted) instead of continuing. Historical
-evidence (docs/ai, prior artifacts/job ids) is seed/context only, never diagnostic authority —
-Codex must run a genuinely fresh job every time.
+**The verifier is Claude as of 2026-09-25** (user decision). The previous verifier,
+`scripts/codex-qa-verify.ps1`, stopped working: the Codex CLI returns `401 Unauthorized` against
+`api.openai.com` in this workspace. That script is kept for its escalation history, which is
+still the record of why a physical QA Lab run needs full process-creation rights on Windows; do
+not re-litigate that history without new evidence. None of its `--add-dir`/sandbox reasoning
+applies to the Claude CLI, which imposes no process-creation restriction here — its
+`--permission-mode bypassPermissions` exists only so it does not ask a human nobody is there to
+answer.
+
+Source-read-only is now enforced at the tool level, not just by prompt: `--disallowed-tools`
+denies `Edit`, `Write`, `NotebookEdit` and every git write verb, so the verifier *cannot* modify
+source even if it decides to try. The guardrail prompt still states the rule, and the script
+still snapshots tracked repo status before and after — an unexpected tracked source change stops
+the workflow as HUMAN_GATE (files reported, never auto-reverted). Writes are permitted only to
+`.artifacts/**`, traces, screenshots and this run's logs.
+
+Because the verifier is now the same vendor's model as the fixer, note what that costs: the
+independence is procedural (fresh process, no shared context, must produce real artifacts), not
+cross-vendor. On a boundary where that matters, pass `-Model` a different model than wrote the
+fix.
+
+Historical evidence (docs/ai, prior artifacts/job ids) is seed/context only, never diagnostic
+authority — the verifier must run a genuinely fresh job every time. `/codex:review` remains
+available for reviewing a diff, but never substitutes for a physical run.
 
 Loop:
 1. Claude identifies which physical test corresponds to the reported problem.
-2. Claude runs `scripts/codex-qa-verify.ps1` with a compact prompt (problem summary, mode,
+2. Claude runs `scripts/claude-qa-verify.ps1` with a compact prompt (problem summary, mode,
    seed job/recording id if any, relevant artifact refs, expected physical test — never the
    full conversation) and waits for it to finish before doing anything else: no parallel
    investigation of the same first-loss, no second verifier for the same boundary.
-3. Codex reports back job/run id, earliest first-loss, decisive evidence (paths/log lines, not
-   full logs), and likely files/boundary, in the script's structured output contract.
+3. The verifier reports back job/run id, earliest first-loss, decisive evidence (paths/log
+   lines, not full logs), and likely files/boundary, in the script's structured output contract.
 4. Claude applies the smallest fix for that one first-loss, respecting the discipline above
    (one first-loss per iteration, preserve GREEN boundaries, no forbidden authorities).
 5. Claude runs focal tests only (not full suites) for the touched files.
 6. If the change touches runtime/backend code, restart the QA Lab backend and wait for real
-   `/health` readiness before the next Codex delegation.
-7. Claude reruns `scripts/codex-qa-verify.ps1` for the SAME physical test with a NEW fresh run —
+   `/health` readiness before the next verifier delegation.
+7. Claude reruns `scripts/claude-qa-verify.ps1` for the SAME physical test with a NEW fresh run —
    never reuse the diagnostic run's job id as authority for the retest.
-8. PASS → done. FAIL → Codex returns the new earliest first-loss; repeat from step 4.
+8. PASS → done. FAIL → the verifier returns the new earliest first-loss; repeat from step 4.
 9. Stop at PASS, HUMAN_GATE, BLOCKED, or a reasonable iteration limit — never loop indefinitely
    on the same unresolved boundary.
 
-Codex effort: LOW by default; MEDIUM only under real ambiguity; HIGH is rejected by the script.
-Never spawn more than one Codex verifier for the same first-loss.
+Verifier effort: LOW by default; MEDIUM only under real ambiguity; HIGH is rejected by the
+script. Never spawn more than one verifier for the same first-loss.
+
+A verifier verdict is evidence, not a ruling. When it names a first-loss, check which consumer
+actually reads the field it blames before acting: a stale projection persisted on disk that every
+consumer recomputes is a data-hygiene finding, not a blocker (this happened on recording
+`58fb8166` — the persisted `readiness.executionReadiness` was false while the live evaluator, the
+replay endpoint and the panel all said executable).

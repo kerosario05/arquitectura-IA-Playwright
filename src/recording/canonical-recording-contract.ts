@@ -1593,7 +1593,7 @@ export function buildCanonicalInteractions(
     }
     deduped.push(interaction);
   }
-  return reconcileOptionOwnerLineage(deduped);
+  return reconcileTransientRouteTransitions(reconcileOptionOwnerLineage(deduped)) as CanonicalInteraction[];
 }
 
 /**
@@ -1680,6 +1680,70 @@ export function reconcileRecordingExecutionContractLineage<
     return { ...action, semanticField, associatedField: semanticField };
   });
   return { canonicalInteractions: reconciledInteractions, actions: reconciledActions };
+}
+
+/**
+ * Drops a recorded destination the recording itself goes on to contradict.
+ *
+ * `causalTransition` claims the last navigation fired inside an action's pointer window, which
+ * is right for a navigation the action caused and wrong for one the APP caused on its own — a
+ * kiosk bouncing to its attract screen mid-keypad, an inactivity reset, an SPA re-entry. Such a
+ * blip leaves no trace of its own return, so the action ends up owning a `routeAfter` that never
+ * held, and `validateInteractionStateSequence` then reports a broken chain that never happened.
+ *
+ * A destination is discarded only when the next executable action BOTH contradicts it AND starts
+ * back at this action's own `routeBefore`. Both halves are required: the return is what proves
+ * the blip was transient. A real forward navigation satisfies the first but never the second, so
+ * it keeps its destination and stays subject to the validator's own judgement.
+ *
+ * Adjacency deliberately mirrors `validateInteractionStateSequence`'s own filter — repairing a
+ * different pair than the one that gets flagged would fix nothing.
+ *
+ * The flags are dropped with the route because `ownershipForEvent` only ever sets the three of
+ * them together, under the same `changed` condition. Leaving `transitionObserved` behind without
+ * a route would read downstream as an in-place transition (`promoted-field-target-contract.ts`)
+ * that the replay would then wait for in vain.
+ */
+export function reconcileTransientRouteTransitions<T extends {
+  action: string;
+  technicalOnly?: boolean;
+  routeBefore?: string;
+  routeAfter?: string;
+  causedTransition?: boolean;
+  transitionObserved?: boolean;
+  terminalForContext?: boolean;
+}>(interactions: readonly T[]): readonly T[] {
+  if (!interactions?.length) return interactions;
+  const executableIndexes: number[] = [];
+  for (const [index, interaction] of interactions.entries()) {
+    if (interaction.action === "system_observation") continue;
+    if (interaction.technicalOnly && interaction.action !== "navigation") continue;
+    executableIndexes.push(index);
+  }
+
+  // Identity is preserved when nothing is repaired: callers skip rewriting an untouched scenario.
+  let repaired: T[] | undefined;
+  for (let position = 0; position < executableIndexes.length - 1; position += 1) {
+    const index = executableIndexes[position]!;
+    const current = interactions[index]!;
+    const next = interactions[executableIndexes[position + 1]!]!;
+    // No `routeBefore` on the next action is no evidence either way; inventing a verdict there
+    // would discard a destination the recording never actually disputed.
+    if (!current.routeAfter || !current.routeBefore || !next.routeBefore) continue;
+    // A destination the NEXT action records too is corroborated by a second, independent
+    // observation, so it is not a one-off blip whatever its `routeBefore` says. This is the
+    // legacy double-claim shape (`...pointer-fill-tap-interactionid-authority.test.ts` 8/legacy):
+    // two actions on one screen, the later one causing the navigation, both claiming it. Wrong
+    // ownership is not this function's business -- only destinations that never happened are.
+    if (next.routeAfter === current.routeAfter) continue;
+    const contradicted = next.routeBefore !== current.routeAfter;
+    const returned = next.routeBefore === current.routeBefore;
+    if (!contradicted || !returned) continue;
+    const { routeAfter: _dropped, causedTransition: _caused, transitionObserved: _observed, terminalForContext: _terminal, ...withoutTransition } = current;
+    repaired ??= [...interactions];
+    repaired[index] = withoutTransition as unknown as T;
+  }
+  return repaired ?? interactions;
 }
 
 export function validateInteractionStateSequence(interactions: readonly CanonicalInteraction[]): StateSequenceValidation {
