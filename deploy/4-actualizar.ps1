@@ -89,20 +89,41 @@ Ok "origen  : $Origen"
 # --- 2. Detener --------------------------------------------------------------------------------
 Paso 2 "Deteniendo motor y BFF"
 
+# schtasks escribe en stderr cuando la tarea no existe, que es el caso normal aqui
+# mientras las tareas programadas sigan sin registrarse. En PowerShell 5.1 redirigir
+# el stderr de un ejecutable nativo (2>$null) envuelve cada linea en un
+# NativeCommandError, y con ErrorActionPreference=Stop eso aborta el script entero.
+# Delegando en cmd, el stderr muere dentro de cmd y PowerShell solo ve el codigo de
+# salida, que es lo unico que nos interesa.
+function TareaExiste($nombre) {
+  & cmd /c "schtasks /query /tn ""$nombre"" >nul 2>nul"
+  return ($LASTEXITCODE -eq 0)
+}
+function DetenerTarea($nombre) {
+  & cmd /c "schtasks /end /tn ""$nombre"" >nul 2>nul"
+}
+
 $tareas = @("QA Lab - motor", "QA Lab - BFF")
 $detenidoPorTarea = $false
 foreach ($t in $tareas) {
-  $existe = (schtasks /query /tn $t 2>$null)
-  if ($LASTEXITCODE -eq 0) {
-    schtasks /end /tn $t 2>$null | Out-Null
+  if (TareaExiste $t) {
+    DetenerTarea $t
     Ok "tarea detenida: $t"
     $detenidoPorTarea = $true
   }
 }
 if (-not $detenidoPorTarea) {
   Aviso "No hay tareas programadas registradas; matando los procesos node por su linea de comandos."
+  # Se compara contra las rutas RESUELTAS de esta instalacion, no contra los textos
+  # "qa-engine"/"qa-lab" sueltos: cualquier carpeta de trabajo que contenga esos
+  # nombres (un repo llamado QA-lab, por ejemplo) caeria en la coincidencia y este
+  # script mataria procesos que no son suyos. Ya paso durante una prueba.
+  $raices = @($appEngine, $appLab) | ForEach-Object { $_.TrimEnd('\') }
   $procesos = Get-CimInstance Win32_Process -Filter "Name = 'node.exe'" |
-    Where-Object { $_.CommandLine -and ($_.CommandLine -like "*qa-engine*" -or $_.CommandLine -like "*qa-lab*") }
+    Where-Object {
+      $cmd = $_.CommandLine
+      $cmd -and ($raices | Where-Object { $cmd -like "*$_*" })
+    }
   if (-not $procesos) {
     Aviso "No habia ninguno corriendo."
   } else {
@@ -144,7 +165,11 @@ try {
 Paso 5 "Arrancando"
 
 if ($detenidoPorTarea) {
-  foreach ($t in $tareas) { schtasks /run /tn $t 2>$null | Out-Null; Ok "tarea lanzada: $t" }
+  # Por cmd, por el mismo motivo que en el paso 2.
+  foreach ($t in $tareas) {
+    & cmd /c "schtasks /run /tn ""$t"" >nul 2>nul"
+    if ($LASTEXITCODE -eq 0) { Ok "tarea lanzada: $t" } else { Aviso "no pude lanzar la tarea $t (codigo $LASTEXITCODE)" }
+  }
 } else {
   $logs = Join-Path $Raiz "logs"
   New-Item -ItemType Directory -Force -Path $logs | Out-Null
