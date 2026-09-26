@@ -174,16 +174,21 @@ if ($detenidoPorTarea) {
   $logs = Join-Path $Raiz "logs"
   New-Item -ItemType Directory -Force -Path $logs | Out-Null
   $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
-  Start-Process -FilePath "npx" -ArgumentList "tsx","src/server/server.ts" `
-    -WorkingDirectory $appEngine -WindowStyle Hidden `
-    -RedirectStandardOutput (Join-Path $logs "motor-$stamp.log") `
-    -RedirectStandardError  (Join-Path $logs "motor-$stamp.err.log")
-  Ok "motor lanzado (log en $logs)"
-  Start-Process -FilePath "npx" -ArgumentList "tsx","server/index.ts" `
-    -WorkingDirectory $appLab -WindowStyle Hidden `
-    -RedirectStandardOutput (Join-Path $logs "bff-$stamp.log") `
-    -RedirectStandardError  (Join-Path $logs "bff-$stamp.err.log")
-  Ok "BFF lanzado"
+
+  # Se lanza a traves de cmd.exe, no con -FilePath "npx", porque en Windows `npx` es un
+  # .cmd y no un ejecutable: Start-Process con redireccion de salida usa CreateProcess,
+  # que no sabe arrancar un batch y falla con "%1 is not a valid Win32 application".
+  # cmd.exe si es un .exe real, y ademas se encarga de la redireccion por su cuenta, asi
+  # que no hacen falta -RedirectStandard*.
+  function Lanzar($etiqueta, $carpeta, $entrada, $log) {
+    Start-Process -FilePath "$env:ComSpec" `
+      -ArgumentList "/c", "cd /d ""$carpeta"" && npx tsx $entrada > ""$log"" 2>&1" `
+      -WindowStyle Hidden
+    Ok "$etiqueta lanzado (log: $log)"
+  }
+
+  Lanzar "motor" $appEngine "src/server/server.ts" (Join-Path $logs "motor-$stamp.log")
+  Lanzar "BFF"   $appLab    "server/index.ts"      (Join-Path $logs "bff-$stamp.log")
 }
 
 # --- 6. Verificar ------------------------------------------------------------------------------
