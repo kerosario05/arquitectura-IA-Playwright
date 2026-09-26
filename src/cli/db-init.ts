@@ -18,6 +18,13 @@ const TABLES = [
   "ProjectTestRailConfiguration",
   "ProjectKnowledge",
   "ProjectConfigurationHistory",
+  "Users",
+  "Roles",
+  "RolePermissions",
+  "UserRoles",
+  "UserProjectAccess",
+  "UserSessions",
+  "UserAuditLog",
 ];
 
 async function main(): Promise<void> {
