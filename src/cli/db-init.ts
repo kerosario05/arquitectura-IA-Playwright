@@ -27,6 +27,7 @@ const TABLES = [
   "UserAuditLog",
   "Jobs",
   "JobLogs",
+  "RecordingRouteObservation",
 ];
 
 async function main(): Promise<void> {
