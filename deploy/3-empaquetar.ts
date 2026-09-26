@@ -52,6 +52,30 @@ const EXCLUDE_DIRS_ROOT = [
 // son codigo y multiplican el tamaño del paquete.
 const EXCLUDE_FILES = [".env*", "*.log", "*.png", "*.tmp", "*.bak", "*.zip", "*.7z", "*.pem", "*.key", "*.pfx"];
 
+/**
+ * Carpetas de trabajo que no son codigo y llegaron a ser el 65% del paquete
+ * (3.973 de 6.125 entradas): un Python 3.14 completo vendorizado, las
+ * compilaciones que deja el agente, la cuarentena de `.js` obsoletos y el
+ * volcado del MCP de Playwright.
+ *
+ * Se descubren en tiempo de ejecucion y no se listan a mano porque `.codex-*`
+ * crece con cada sesion de trabajo: ya hay once, y una lista fija se queda corta
+ * en silencio. Siguen excluyendose por ruta absoluta, como el resto.
+ */
+const JUNK_PATTERNS = [/^Python$/, /^\.codex-/, /^\.stale-js-quarantine/, /^\.playwright-mcp$/];
+
+function descubrirBasura(source: string): string[] {
+  let entradas: fs.Dirent[];
+  try {
+    entradas = fs.readdirSync(source, { withFileTypes: true });
+  } catch {
+    return [];
+  }
+  return entradas
+    .filter((e) => e.isDirectory() && JUNK_PATTERNS.some((p) => p.test(e.name)))
+    .map((e) => e.name);
+}
+
 function say(mark: string, text: string): void {
   console.log(`  [${mark}] ${text}`);
 }
@@ -93,7 +117,7 @@ function copyProject(source: string, destination: string, label: string): boolea
   }
   const args = [source, destination, "/E", "/NFL", "/NDL", "/NJH", "/NJS", "/NP", "/R:1", "/W:1"];
   // Ruta absoluta para cada una: así solo se excluye la del directorio raíz.
-  const excludeDirs = EXCLUDE_DIRS_ROOT.map((d) => path.join(source, d));
+  const excludeDirs = [...EXCLUDE_DIRS_ROOT, ...descubrirBasura(source)].map((d) => path.join(source, d));
   args.push("/XD", ...excludeDirs, "/XF", ...EXCLUDE_FILES);
 
   const code = run("robocopy", args);
